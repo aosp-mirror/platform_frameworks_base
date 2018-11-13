@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Try taking screenshot again"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Can\'t save screenshot due to limited storage space"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Taking screenshots isn\'t allowed by the app or your organisation"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Screen Recording"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Ongoing notification for a screen record session"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Start Recording"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Record voiceover"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Show taps"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"Stop"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Pause"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Resume"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Cancel"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Share"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"Delete"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Screen recording cancelled"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Screen recording saved, tap to view"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"Screen recording deleted"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"Error deleting screen recording"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"Failed to get permissions"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB file transfer options"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Mount as a media player (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Mount as a camera (PTP)"</string>
@@ -582,14 +598,17 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notifications"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"You won\'t see these notifications anymore"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"These notifications will be minimised"</string>
+    <string name="notification_channel_silenced" msgid="2877199534497961942">"These notifications will be shown silently"</string>
+    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"These notifications will alert you"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"You usually dismiss these notifications. \nKeep showing them?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Keep showing these notifications?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Stop notifications"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Keep showing"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimise"</string>
+    <string name="inline_silent_button_silent" msgid="4411510650503783646">"Show silently"</string>
+    <string name="inline_silent_button_alert" msgid="2967599358027208807">"Show and alert"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Keep showing notifications from this app?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"These notifications can\'t be turned off"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"via <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"This app is using the camera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"This app is using the microphone."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"This app is displaying over other apps on your screen."</string>
@@ -804,7 +823,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"App opened without being installed."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"App opened without being installed. Tap to find out more."</string>
     <string name="app_info" msgid="6856026610594615344">"App info"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Go to web"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Go to browser"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobile data"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi is off"</string>
@@ -836,4 +855,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Settings"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> is using your <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Applications are using your <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"Open app"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Cancel"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"OK"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Settings"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g> is using your <xliff:g id="TYPE">%2$s</xliff:g> for the last <xliff:g id="TIME">%3$d</xliff:g> min"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g> are using your <xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g> is using your <xliff:g id="TYPES_LIST">%2$s</xliff:g>"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"camera"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"location"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"microphone"</string>
 </resources>

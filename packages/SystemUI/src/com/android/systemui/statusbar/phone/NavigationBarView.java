@@ -38,9 +38,11 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -49,6 +51,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.inputmethod.InputMethodManager;
@@ -142,6 +145,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private NavigationBarInflaterView mNavigationInflaterView;
     private RecentsOnboarding mRecentsOnboarding;
     private NotificationPanelView mPanelView;
+
+    private QuickScrubAction mQuickScrubAction;
+    private QuickStepAction mQuickStepAction;
+    private NavigationBackAction mBackAction;
 
     /**
      * Helper that is responsible for showing the right toast when a disallowed activity operation
@@ -299,6 +306,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mButtonDispatchers.put(R.id.rotate_suggestion, rotateSuggestionButton);
         mButtonDispatchers.put(R.id.menu_container, mContextualButtonGroup);
         mDeadZone = new DeadZone(this);
+
+        mQuickScrubAction = new QuickScrubAction(this, mOverviewProxyService);
+        mQuickStepAction = new QuickStepAction(this, mOverviewProxyService);
+        mBackAction = new NavigationBackAction(this, mOverviewProxyService);
     }
 
     public BarTransitions getBarTransitions() {
@@ -313,6 +324,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mPanelView = panel;
         if (mGestureHelper instanceof QuickStepController) {
             ((QuickStepController) mGestureHelper).setComponents(this);
+            ((QuickStepController) mGestureHelper).setGestureActions(mQuickStepAction,
+                    null /* swipeDownAction*/, mBackAction, mQuickScrubAction);
         }
     }
 
@@ -756,24 +769,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mRecentsOnboarding.hide(true);
     }
 
-    /**
-     * @return the button at the given {@param x} and {@param y}.
-     */
-    ButtonDispatcher getButtonAtPosition(int x, int y) {
-        for (int i = 0; i < mButtonDispatchers.size(); i++) {
-            ButtonDispatcher button = mButtonDispatchers.valueAt(i);
-            View buttonView = button.getCurrentView();
-            if (buttonView != null) {
-                buttonView.getHitRect(mTmpRect);
-                offsetDescendantRectToMyCoords(buttonView, mTmpRect);
-                if (mTmpRect.contains(x, y)) {
-                    return button;
-                }
-            }
-        }
-        return null;
-    }
-
     @Override
     public void onFinishInflate() {
         mNavigationInflaterView = findViewById(R.id.navigation_inflater);
@@ -908,7 +903,13 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private void updateTaskSwitchHelper() {
         if (mGestureHelper == null) return;
         boolean isRtl = (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
-        mGestureHelper.setBarState(mVertical, isRtl);
+        int navBarPos = 0;
+        try {
+            navBarPos = WindowManagerGlobal.getWindowManagerService().getNavBarPosition();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to get nav bar position.", e);
+        }
+        mGestureHelper.setBarState(isRtl, navBarPos);
     }
 
     @Override
@@ -1112,6 +1113,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         mContextualButtonGroup.dump(pw);
         if (mGestureHelper != null) {
+            pw.println("Navigation Gesture Actions {");
+            pw.print("    "); pw.println("QuickScrub Enabled=" + mQuickScrubAction.isEnabled());
+            pw.print("    "); pw.println("QuickScrub Active=" + mQuickScrubAction.isActive());
+            pw.print("    "); pw.println("QuickStep Enabled=" + mQuickStepAction.isEnabled());
+            pw.print("    "); pw.println("QuickStep Active=" + mQuickStepAction.isActive());
+            pw.print("    "); pw.println("Back Gesture Enabled=" + mBackAction.isEnabled());
+            pw.print("    "); pw.println("Back Gesture Active=" + mBackAction.isActive());
+            pw.println("}");
             mGestureHelper.dump(pw);
         }
         mRecentsOnboarding.dump(pw);

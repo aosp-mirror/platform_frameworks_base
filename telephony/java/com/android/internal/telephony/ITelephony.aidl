@@ -1323,6 +1323,37 @@ interface ITelephony {
     int getSubscriptionMNOCarrierId(int subId);
 
     /**
+     * Returns fine-grained carrier id of the current subscription.
+     *
+     * <p>The precise carrier id can be used to further differentiate a carrier by different
+     * networks, by prepaid v.s.postpaid or even by 4G v.s.3G plan. Each carrier has a unique
+     * carrier id {@link #getSimCarrierId()} but can have multiple precise carrier id. e.g,
+     * {@link #getSimCarrierId()} will always return Tracfone (id 2022) for a Tracfone SIM, while
+     * {@link #getSimPreciseCarrierId()} can return Tracfone AT&T or Tracfone T-Mobile based on the
+     * current underlying network.
+     *
+     * <p>For carriers without any fine-grained carrier ids, return {@link #getSimCarrierId()}
+     *
+     * @return Returns fine-grained carrier id of the current subscription.
+     * Return {@link #UNKNOWN_CARRIER_ID} if the subscription is unavailable or the carrier cannot
+     * be identified.
+     * @hide
+     */
+    int getSubscriptionPreciseCarrierId(int subId);
+
+    /**
+     * Similar like {@link #getSimCarrierIdName()}, returns user-facing name of the
+     * precise carrier id {@link #getSimPreciseCarrierId()}
+     *
+     * <p>The returned name is unlocalized.
+     *
+     * @return user-facing name of the subscription precise carrier id. Return {@code null} if the
+     * subscription is unavailable or the carrier cannot be identified.
+     * @hide
+     */
+    String getSubscriptionPreciseCarrierName(int subId);
+
+    /**
      * Action set from carrier signalling broadcast receivers to enable/disable metered apns
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
      * @param subId the subscription ID that this action applies to.

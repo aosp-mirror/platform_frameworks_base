@@ -41,6 +41,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Build;
 import android.platform.test.annotations.Presubmit;
+import android.view.Display;
 import android.view.Gravity;
 
 import androidx.test.filters.FlakyTest;
@@ -102,6 +103,16 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     @Test
     public void testDefaultToPrimaryDisplay() {
         createNewActivityDisplay(WINDOWING_MODE_FREEFORM);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
+                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+
+        assertEquals(DEFAULT_DISPLAY, mResult.mPreferredDisplayId);
+    }
+
+    @Test
+    public void testUsesDefaultDisplayIfPreviousDisplayNotExists() {
+        mCurrent.mPreferredDisplayId = 19;
 
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
                 mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
@@ -856,30 +867,48 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testAdjustBoundsToFitDisplay_LargerThanDisplay() {
+    public void testAdjustBoundsToFitNewDisplay_LargerThanDisplay() {
         final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
                 WINDOWING_MODE_FREEFORM);
-
-        Configuration overrideConfig = new Configuration();
-        overrideConfig.setTo(mSupervisor.getOverrideConfiguration());
-        overrideConfig.setLayoutDirection(new Locale("ar"));
-        mSupervisor.onConfigurationChanged(overrideConfig);
 
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
 
-        final ActivityRecord source = createSourceActivity(freeformDisplay);
-        source.setBounds(1720, 680, 1920, 1080);
+        mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
+        mCurrent.mBounds.set(100, 200, 2120, 1380);
 
         mActivity.appInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
 
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, source, options, mCurrent, mResult));
+                mActivity, /* source */ null, options, mCurrent, mResult));
 
-        final Rect displayBounds = freeformDisplay.getBounds();
-        assertTrue("display bounds doesn't contain result. display bounds: "
-                        + displayBounds + " result: " + mResult.mBounds,
-                displayBounds.contains(mResult.mBounds));
+        assertTrue("Result bounds should start from origin, but it's " + mResult.mBounds,
+                mResult.mBounds.left == 0 && mResult.mBounds.top == 0);
+    }
+
+    @Test
+    public void testAdjustBoundsToFitNewDisplay_LargerThanDisplay_RTL() {
+        final Configuration overrideConfig = mSupervisor.getOverrideConfiguration();
+        // Egyptian Arabic is a RTL language.
+        overrideConfig.setLayoutDirection(new Locale("ar", "EG"));
+        mSupervisor.onOverrideConfigurationChanged(overrideConfig);
+
+        final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FREEFORM);
+
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchDisplayId(freeformDisplay.mDisplayId);
+
+        mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
+        mCurrent.mBounds.set(100, 200, 2120, 1380);
+
+        mActivity.appInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
+                mActivity, /* source */ null, options, mCurrent, mResult));
+
+        assertTrue("Result bounds should start from origin, but it's " + mResult.mBounds,
+                mResult.mBounds.left == -100 && mResult.mBounds.top == 0);
     }
 
     @Test
@@ -1019,6 +1048,41 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
                 mActivity, /* source */ null, options, mCurrent, mResult));
 
         assertEquals(new Rect(0, 0, 1680, 953), mResult.mBounds);
+    }
+
+    @Test
+    public void testAdjustsBoundsToFitInDisplayFullyResolvedBounds() {
+        final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FREEFORM);
+
+        mCurrent.mPreferredDisplayId = Display.INVALID_DISPLAY;
+        mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
+        mCurrent.mBounds.set(-100, -200, 200, 100);
+
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchDisplayId(freeformDisplay.mDisplayId);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
+                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+
+        assertEquals(new Rect(0, 0, 300, 300), mResult.mBounds);
+    }
+
+    @Test
+    public void testAdjustsBoundsToAvoidConflictFullyResolvedBounds() {
+        final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FREEFORM);
+
+        addFreeformTaskTo(freeformDisplay, new Rect(0, 0, 200, 100));
+
+        mCurrent.mPreferredDisplayId = freeformDisplay.mDisplayId;
+        mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
+        mCurrent.mBounds.set(0, 0, 200, 100);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
+                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+
+        assertEquals(new Rect(120, 0, 320, 100), mResult.mBounds);
     }
 
     private TestActivityDisplay createNewActivityDisplay(int windowingMode) {

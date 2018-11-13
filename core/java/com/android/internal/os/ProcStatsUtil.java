@@ -32,6 +32,8 @@ import java.io.IOException;
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
 public final class ProcStatsUtil {
 
+    private static final boolean DEBUG = false;
+
     private static final String TAG = "ProcStatsUtil";
 
     /**
@@ -141,7 +143,9 @@ public final class ProcStatsUtil {
             }
             return byteStream.toString();
         } catch (IOException e) {
-            Slog.w(TAG, "Failed to open proc file", e);
+            if (DEBUG) {
+                Slog.d(TAG, "Failed to open proc file", e);
+            }
             return null;
         } finally {
             StrictMode.setThreadPolicy(savedPolicy);

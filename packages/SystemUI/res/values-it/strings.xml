@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Riprova ad acquisire lo screenshot"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Impossibile salvare lo screenshot a causa dello spazio di archiviazione limitato"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"L\'acquisizione di screenshot non è consentita dall\'app o dall\'organizzazione"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Registrazione dello schermo"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Notifica costante per una sessione di registrazione dello schermo"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Avvia registrazione"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Registra voce fuori campo"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Mostra tocchi"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"Interrompi"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Pausa"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Riprendi"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Annulla"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Condividi"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"CANC"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Registrazione dello schermo annullata"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Registrazione dello schermo salvata. Tocca per visualizzarla."</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"Registrazione dello schermo eliminata"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"Errore durante l\'eliminazione della registrazione dello schermo"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"Impossibile ottenere le autorizzazioni"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opzioni trasferimento file USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Monta come lettore multimediale (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Monta come videocamera (PTP)"</string>
@@ -259,7 +275,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Ora lo schermo è bloccato nell\'orientamento orizzontale."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Ora lo schermo è bloccato nell\'orientamento verticale."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Vetrina di dolci"</string>
-    <string name="start_dreams" msgid="5640361424498338327">"Screensaver"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"Salvaschermo"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Tocca e tieni premuta ciascuna icona per visualizzare altre opzioni"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Non disturbare"</string>
@@ -582,14 +598,17 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notifiche"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Non vedrai più queste notifiche"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Le notifiche verranno ridotte a icona"</string>
+    <string name="notification_channel_silenced" msgid="2877199534497961942">"Queste notifiche verranno mostrate in modalità silenziosa"</string>
+    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Queste notifiche ti avviseranno"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"In genere ignori queste notifiche. \nVuoi continuare a riceverle?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Continuare a ricevere queste notifiche?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Interrompi la ricezione di notifiche"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Continua a mostrare"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Riduci a icona"</string>
+    <string name="inline_silent_button_silent" msgid="4411510650503783646">"Mostra silenziosamente"</string>
+    <string name="inline_silent_button_alert" msgid="2967599358027208807">"Mostra e avvisa"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Continuare a ricevere notifiche da questa app?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Queste notifiche non possono essere disattivate"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"tramite <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Questa app sta utilizzando la fotocamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Questa app sta utilizzando il microfono."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Questa app è visualizzata sopra altre app sullo schermo."</string>
@@ -804,7 +823,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"App aperta senza essere stata installata."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"App aperta senza essere stata installata. Tocca per avere ulteriori informazioni."</string>
     <string name="app_info" msgid="6856026610594615344">"Informazioni app"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Vai sul Web"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Vai al browser"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Dati mobili"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> - <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi disattivato"</string>
@@ -836,4 +855,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Impostazioni"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Esegui dump heap SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"L\'app <xliff:g id="APP">%1$s</xliff:g> sta usando <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Le app stanno usando <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"Apri app"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Annulla"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"OK"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Impostazioni"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"L\'app <xliff:g id="APP">%1$s</xliff:g> sta usando <xliff:g id="TYPE">%2$s</xliff:g> da <xliff:g id="TIME">%3$d</xliff:g> min"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"Le app <xliff:g id="APPS">%1$s</xliff:g> stanno usando <xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"L\'app <xliff:g id="APP">%1$s</xliff:g> sta usando <xliff:g id="TYPES_LIST">%2$s</xliff:g>"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"Fotocamera"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"luogo"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"un microfono"</string>
 </resources>

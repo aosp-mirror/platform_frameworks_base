@@ -29,6 +29,7 @@
 #include <memory>
 #include <type_traits>
 
+#include <android-base/macros.h>
 #include <androidfw/ByteBucketArray.h>
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/TypeWrappers.h>
@@ -3073,6 +3074,7 @@ struct LocaleParserState {
                }
                break;
            }
+           FALLTHROUGH_INTENDED;
        case 5:
        case 6:
        case 7:
@@ -7002,7 +7004,7 @@ status_t DynamicRefTable::lookupResourceValue(Res_value* value) const {
     switch (value->dataType) {
         case Res_value::TYPE_ATTRIBUTE:
             resolvedType = Res_value::TYPE_ATTRIBUTE;
-        // fallthrough
+            FALLTHROUGH_INTENDED;
         case Res_value::TYPE_REFERENCE:
             // Only resolve non-dynamic references and attributes if the package is loaded as a
             // library or if a shared library is attempting to retrieve its own resource
@@ -7015,7 +7017,7 @@ status_t DynamicRefTable::lookupResourceValue(Res_value* value) const {
         break;
         case Res_value::TYPE_DYNAMIC_ATTRIBUTE:
             resolvedType = Res_value::TYPE_ATTRIBUTE;
-        // fallthrough
+            FALLTHROUGH_INTENDED;
         case Res_value::TYPE_DYNAMIC_REFERENCE:
             break;
         default:

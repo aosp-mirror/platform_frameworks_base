@@ -16,13 +16,8 @@
 
 package com.android.internal.app;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
-import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.usage.UsageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -56,7 +51,6 @@ import android.service.chooser.ChooserTargetService;
 import android.service.chooser.IChooserTargetResult;
 import android.service.chooser.IChooserTargetService;
 import android.text.TextUtils;
-import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Slog;
 import android.view.LayoutInflater;
@@ -66,8 +60,6 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
@@ -76,10 +68,9 @@ import android.widget.Space;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.ResolverActivity;
-import com.android.internal.app.ResolverActivity.TargetInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+
 import com.google.android.collect.Lists;
 
 import java.io.File;
@@ -847,7 +838,7 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         @Override
-        public boolean startAsCaller(Activity activity, Bundle options, int userId) {
+        public boolean startAsCaller(ResolverActivity activity, Bundle options, int userId) {
             final Intent intent = getBaseIntentToSend();
             if (intent == null) {
                 return false;
@@ -866,8 +857,7 @@ public class ChooserActivity extends ResolverActivity {
             final boolean ignoreTargetSecurity = mSourceInfo != null
                     && mSourceInfo.getResolvedComponentName().getPackageName()
                     .equals(mChooserTarget.getComponentName().getPackageName());
-            activity.startActivityAsCaller(intent, options, ignoreTargetSecurity, userId);
-            return true;
+            return activity.startAsCallerImpl(intent, options, ignoreTargetSecurity, userId);
         }
 
         @Override

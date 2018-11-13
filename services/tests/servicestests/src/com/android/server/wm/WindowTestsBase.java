@@ -354,9 +354,14 @@ class WindowTestsBase {
 
     /** Creates a {@link DisplayContent} and adds it to the system. */
     DisplayContent createNewDisplay() {
+        return createNewDisplay(mDisplayInfo);
+    }
+
+    /** Creates a {@link DisplayContent} and adds it to the system. */
+    DisplayContent createNewDisplay(DisplayInfo displayInfo) {
         final int displayId = sNextDisplayId++;
         final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
-                mDisplayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
+                displayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
         synchronized (mWm.mGlobalLock) {
             return new DisplayContent(display, mWm, mWallpaperController,
                     mock(DisplayWindowController.class));

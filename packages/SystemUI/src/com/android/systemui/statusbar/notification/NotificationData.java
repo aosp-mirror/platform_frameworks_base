@@ -593,6 +593,20 @@ public class NotificationData {
         }
     }
 
+    /**
+     * Returns true if this notification should be displayed in the high-priority notifications
+     * section (and on the lockscreen and status bar).
+     */
+    public boolean isHighPriority(StatusBarNotification statusBarNotification) {
+        if (mRankingMap != null) {
+            getRanking(statusBarNotification.getKey(), mTmpRanking);
+            return mTmpRanking.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT
+                    || statusBarNotification.getNotification().isForegroundService()
+                    || statusBarNotification.getNotification().hasMediaSession();
+        }
+        return false;
+    }
+
     public boolean isAmbient(String key) {
         if (mRankingMap != null) {
             getRanking(key, mTmpRanking);

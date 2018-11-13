@@ -22,13 +22,10 @@ import static com.android.systemui.statusbar.phone.NotificationIconAreaControlle
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.NotificationManager;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
@@ -155,6 +152,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      * Sentinel value for no current active pointer. Used by {@link #mActivePointerId}.
      */
     private static final int INVALID_POINTER = -1;
+    static final int NUM_SECTIONS = 2;
+    /**
+     * The distance in pixels between sections when the sections are directly adjacent (no visible
+     * gap is drawn between them). In this case we don't want to round their corners.
+     */
+    private static final int DISTANCE_BETWEEN_ADJACENT_SECTIONS_PX = 1;
 
     private ExpandHelper mExpandHelper;
     private final NotificationSwipeHelper mSwipeHelper;
@@ -328,16 +331,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             return true;
         }
     };
-    private Rect mBackgroundBounds = new Rect();
-    private Rect mStartAnimationRect = new Rect();
-    private Rect mEndAnimationRect = new Rect();
-    private Rect mCurrentBounds = new Rect(-1, -1, -1, -1);
-    private boolean mAnimateNextBackgroundBottom;
+    private NotificationSection[] mSections = new NotificationSection[NUM_SECTIONS];
     private boolean mAnimateNextBackgroundTop;
-    private ObjectAnimator mBottomAnimator = null;
-    private ObjectAnimator mTopAnimator = null;
-    private ActivatableNotificationView mFirstVisibleBackgroundChild = null;
-    private ActivatableNotificationView mLastVisibleBackgroundChild = null;
+    private boolean mAnimateNextBackgroundBottom;
+    private boolean mAnimateNextSectionBoundsChange;
     private int mBgColor;
     private float mDimAmount;
     private ValueAnimator mDimAnimator;
@@ -479,6 +476,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         Resources res = getResources();
+
+        for (int i = 0; i < NUM_SECTIONS; i++) {
+            mSections[i] = new NotificationSection(this);
+        }
 
         mAmbientState = new AmbientState(context);
         mBgColor = context.getColor(R.color.notification_shade_background_color);
@@ -656,7 +657,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.DECORATOR)
     protected void onDraw(Canvas canvas) {
         if (mShouldDrawNotificationBackground
-                && (mCurrentBounds.top < mCurrentBounds.bottom || mAmbientState.isDark())) {
+                && (mSections[0].getCurrentBounds().top
+                < mSections[NUM_SECTIONS - 1].getCurrentBounds().bottom
+                || mAmbientState.isDark())) {
             drawBackground(canvas);
         }
 
@@ -674,8 +677,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private void drawBackground(Canvas canvas) {
         int lockScreenLeft = mSidePaddings;
         int lockScreenRight = getWidth() - mSidePaddings;
-        int lockScreenTop = mCurrentBounds.top;
-        int lockScreenBottom = mCurrentBounds.bottom;
+        int lockScreenTop = mSections[0].getCurrentBounds().top;
+        int lockScreenBottom = mSections[NUM_SECTIONS - 1].getCurrentBounds().bottom;
         int darkLeft = getWidth() / 2;
         int darkTop = mRegularTopPadding;
 
@@ -683,19 +686,77 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         float xProgress = mDarkXInterpolator.getInterpolation(
                 (1 - mLinearDarkAmount) * mBackgroundXFactor);
 
+        int left = (int) MathUtils.lerp(darkLeft, lockScreenLeft, xProgress);
+        int right = (int) MathUtils.lerp(darkLeft, lockScreenRight, xProgress);
+        int top = (int) MathUtils.lerp(darkTop, lockScreenTop, yProgress);
+        int bottom = (int) MathUtils.lerp(darkTop, lockScreenBottom, yProgress);
         mBackgroundAnimationRect.set(
-                (int) MathUtils.lerp(darkLeft, lockScreenLeft, xProgress),
-                (int) MathUtils.lerp(darkTop, lockScreenTop, yProgress),
-                (int) MathUtils.lerp(darkLeft, lockScreenRight, xProgress),
-                (int) MathUtils.lerp(darkTop, lockScreenBottom, yProgress));
+                left,
+                top,
+                right,
+                bottom);
 
-        if (!mAmbientState.isDark() || mFirstVisibleBackgroundChild != null) {
-            canvas.drawRoundRect(mBackgroundAnimationRect.left, mBackgroundAnimationRect.top,
-                    mBackgroundAnimationRect.right, mBackgroundAnimationRect.bottom,
-                    mCornerRadius, mCornerRadius, mBackgroundPaint);
+        int backgroundTopAnimationOffset = top - lockScreenTop;
+        // TODO(kprevas): this may not be necessary any more since we don't display the shelf in AOD
+        boolean anySectionHasVisibleChild = false;
+        for (NotificationSection section : mSections) {
+            if (section.getFirstVisibleChild() != null) {
+                anySectionHasVisibleChild = true;
+                break;
+            }
+        }
+        if (!mAmbientState.isDark() || anySectionHasVisibleChild) {
+            drawBackgroundRects(canvas, left, right, top, backgroundTopAnimationOffset);
         }
 
         updateClipping();
+    }
+
+    /**
+     * Draws round rects for each background section.
+     *
+     * We want to draw a round rect for each background section as defined by {@link #mSections}.
+     * However, if two sections are directly adjacent with no gap between them (e.g. on the
+     * lockscreen where the shelf can appear directly below the high priority section, or while
+     * scrolling the shade so that the top of the shelf is right at the bottom of the high priority
+     * section), we don't want to round the adjacent corners.
+     *
+     * Since {@link Canvas} doesn't provide a way to draw a half-rounded rect, this means that we
+     * need to coalesce the backgrounds for adjacent sections and draw them as a single round rect.
+     * This method tracks the top of each rect we need to draw, then iterates through the visible
+     * sections.  If a section is not adjacent to the previous section, we draw the previous rect
+     * behind the sections we've accumulated up to that point, then start a new rect at the top of
+     * the current section.  When we're done iterating we will always have one rect left to draw.
+     */
+    private void drawBackgroundRects(Canvas canvas, int left, int right, int top,
+            int animationYOffset) {
+        int backgroundRectTop = top;
+        int lastSectionBottom =
+                mSections[0].getCurrentBounds().bottom + animationYOffset;
+        for (NotificationSection section : mSections) {
+            if (section.getFirstVisibleChild() == null) {
+                continue;
+            }
+            int sectionTop = section.getCurrentBounds().top + animationYOffset;
+            // If sections are directly adjacent to each other, we don't want to draw them
+            // as separate roundrects, as the rounded corners right next to each other look
+            // bad.
+            if (sectionTop - lastSectionBottom > DISTANCE_BETWEEN_ADJACENT_SECTIONS_PX) {
+                canvas.drawRoundRect(left,
+                        backgroundRectTop,
+                        right,
+                        lastSectionBottom,
+                        mCornerRadius, mCornerRadius, mBackgroundPaint);
+                backgroundRectTop = sectionTop;
+            }
+            lastSectionBottom =
+                    section.getCurrentBounds().bottom + animationYOffset;
+        }
+        canvas.drawRoundRect(left,
+                backgroundRectTop,
+                right,
+                lastSectionBottom,
+                mCornerRadius, mCornerRadius, mBackgroundPaint);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -1067,7 +1128,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 translationY = height - appearStartPosition + getExpandTranslationStart();
             }
             if (isHeadsUpTransition()) {
-                stackHeight = mFirstVisibleBackgroundChild.getPinnedHeadsUpHeight();
+                stackHeight =
+                        getFirstVisibleSection().getFirstVisibleChild().getPinnedHeadsUpHeight();
                 translationY = MathUtils.lerp(mHeadsUpInset - mTopPadding, 0, appearFraction);
             } else {
                 stackHeight = (int) (height - translationY);
@@ -1134,7 +1196,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private float getAppearStartPosition() {
         if (isHeadsUpTransition()) {
-            return mHeadsUpInset + mFirstVisibleBackgroundChild.getPinnedHeadsUpHeight();
+            return mHeadsUpInset
+                    + getFirstVisibleSection().getFirstVisibleChild().getPinnedHeadsUpHeight();
         }
         return getMinExpansionHeight();
     }
@@ -1187,8 +1250,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private boolean isHeadsUpTransition() {
-        return mTrackingHeadsUp && mFirstVisibleBackgroundChild != null
-                && mAmbientState.isAboveShelf(mFirstVisibleBackgroundChild);
+        NotificationSection firstVisibleSection = getFirstVisibleSection();
+        return mTrackingHeadsUp && firstVisibleSection != null
+                && mAmbientState.isAboveShelf(firstVisibleSection.getFirstVisibleChild());
     }
 
     /**
@@ -2013,9 +2077,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
 
         updateBackgroundBounds();
-        if (!mCurrentBounds.equals(mBackgroundBounds)) {
-            boolean animate = mAnimateNextBackgroundTop || mAnimateNextBackgroundBottom
-                    || areBoundsAnimating();
+        if (didSectionBoundsChange()) {
+            boolean animate = mAnimateNextSectionBoundsChange || mAnimateNextBackgroundTop
+                    || mAnimateNextBackgroundBottom || areSectionBoundsAnimating();
             if (!isExpanded()) {
                 abortBackgroundAnimators();
                 animate = false;
@@ -2023,148 +2087,60 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             if (animate) {
                 startBackgroundAnimation();
             } else {
-                mCurrentBounds.set(mBackgroundBounds);
+                for (NotificationSection section : mSections) {
+                    section.resetCurrentBounds();
+                }
                 invalidate();
             }
         } else {
             abortBackgroundAnimators();
         }
-        mAnimateNextBackgroundBottom = false;
         mAnimateNextBackgroundTop = false;
+        mAnimateNextBackgroundBottom = false;
+        mAnimateNextSectionBoundsChange = false;
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void abortBackgroundAnimators() {
-        if (mBottomAnimator != null) {
-            mBottomAnimator.cancel();
-        }
-        if (mTopAnimator != null) {
-            mTopAnimator.cancel();
+        for (NotificationSection section : mSections) {
+            section.cancelAnimators();
         }
     }
 
+    private boolean didSectionBoundsChange() {
+        for (NotificationSection section : mSections) {
+            if (section.didBoundsChange()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    private boolean areBoundsAnimating() {
-        return mBottomAnimator != null || mTopAnimator != null;
+    private boolean areSectionBoundsAnimating() {
+        for (NotificationSection section : mSections) {
+            if (section.areBoundsAnimating()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void startBackgroundAnimation() {
-        // left and right are always instantly applied
-        mCurrentBounds.left = mBackgroundBounds.left;
-        mCurrentBounds.right = mBackgroundBounds.right;
-        startBottomAnimation();
-        startTopAnimation();
-    }
-
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    private void startTopAnimation() {
-        int previousEndValue = mEndAnimationRect.top;
-        int newEndValue = mBackgroundBounds.top;
-        ObjectAnimator previousAnimator = mTopAnimator;
-        if (previousAnimator != null && previousEndValue == newEndValue) {
-            return;
+        // TODO(kprevas): do we still need separate fields for top/bottom?
+        // or can each section manage its own animation state?
+        NotificationSection firstVisibleSection = getFirstVisibleSection();
+        NotificationSection lastVisibleSection = getLastVisibleSection();
+        for (NotificationSection section : mSections) {
+            section.startBackgroundAnimation(
+                    section == firstVisibleSection
+                            ? mAnimateNextBackgroundTop
+                            : mAnimateNextSectionBoundsChange,
+                    section == lastVisibleSection
+                            ? mAnimateNextBackgroundBottom
+                            : mAnimateNextSectionBoundsChange);
         }
-        if (!mAnimateNextBackgroundTop) {
-            // just a local update was performed
-            if (previousAnimator != null) {
-                // we need to increase all animation keyframes of the previous animator by the
-                // relative change to the end value
-                int previousStartValue = mStartAnimationRect.top;
-                PropertyValuesHolder[] values = previousAnimator.getValues();
-                values[0].setIntValues(previousStartValue, newEndValue);
-                mStartAnimationRect.top = previousStartValue;
-                mEndAnimationRect.top = newEndValue;
-                previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
-                return;
-            } else {
-                // no new animation needed, let's just apply the value
-                setBackgroundTop(newEndValue);
-                return;
-            }
-        }
-        if (previousAnimator != null) {
-            previousAnimator.cancel();
-        }
-        ObjectAnimator animator = ObjectAnimator.ofInt(this, "backgroundTop",
-                mCurrentBounds.top, newEndValue);
-        Interpolator interpolator = Interpolators.FAST_OUT_SLOW_IN;
-        animator.setInterpolator(interpolator);
-        animator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-        // remove the tag when the animation is finished
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mStartAnimationRect.top = -1;
-                mEndAnimationRect.top = -1;
-                mTopAnimator = null;
-            }
-        });
-        animator.start();
-        mStartAnimationRect.top = mCurrentBounds.top;
-        mEndAnimationRect.top = newEndValue;
-        mTopAnimator = animator;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    private void startBottomAnimation() {
-        int previousStartValue = mStartAnimationRect.bottom;
-        int previousEndValue = mEndAnimationRect.bottom;
-        int newEndValue = mBackgroundBounds.bottom;
-        ObjectAnimator previousAnimator = mBottomAnimator;
-        if (previousAnimator != null && previousEndValue == newEndValue) {
-            return;
-        }
-        if (!mAnimateNextBackgroundBottom) {
-            // just a local update was performed
-            if (previousAnimator != null) {
-                // we need to increase all animation keyframes of the previous animator by the
-                // relative change to the end value
-                PropertyValuesHolder[] values = previousAnimator.getValues();
-                values[0].setIntValues(previousStartValue, newEndValue);
-                mStartAnimationRect.bottom = previousStartValue;
-                mEndAnimationRect.bottom = newEndValue;
-                previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
-                return;
-            } else {
-                // no new animation needed, let's just apply the value
-                setBackgroundBottom(newEndValue);
-                return;
-            }
-        }
-        if (previousAnimator != null) {
-            previousAnimator.cancel();
-        }
-        ObjectAnimator animator = ObjectAnimator.ofInt(this, "backgroundBottom",
-                mCurrentBounds.bottom, newEndValue);
-        Interpolator interpolator = Interpolators.FAST_OUT_SLOW_IN;
-        animator.setInterpolator(interpolator);
-        animator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-        // remove the tag when the animation is finished
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mStartAnimationRect.bottom = -1;
-                mEndAnimationRect.bottom = -1;
-                mBottomAnimator = null;
-            }
-        });
-        animator.start();
-        mStartAnimationRect.bottom = mCurrentBounds.bottom;
-        mEndAnimationRect.bottom = newEndValue;
-        mBottomAnimator = animator;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    private void setBackgroundTop(int top) {
-        mCurrentBounds.top = top;
-        invalidate();
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setBackgroundBottom(int bottom) {
-        mCurrentBounds.bottom = bottom;
-        invalidate();
     }
 
     /**
@@ -2173,32 +2149,38 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateBackgroundBounds() {
         getLocationInWindow(mTempInt2);
-        mBackgroundBounds.left = mTempInt2[0] + mSidePaddings;
-        mBackgroundBounds.right = mTempInt2[0] + getWidth() - mSidePaddings;
+        int left = mTempInt2[0] + mSidePaddings;
+        int right = mTempInt2[0] + getWidth() - mSidePaddings;
+        for (NotificationSection section : mSections) {
+            section.getBounds().left = left;
+            section.getBounds().right = right;
+        }
 
         if (!mIsExpanded) {
-            mBackgroundBounds.top = 0;
-            mBackgroundBounds.bottom = 0;
+            for (NotificationSection section : mSections) {
+                section.getBounds().top = 0;
+                section.getBounds().bottom = 0;
+            }
             return;
         }
-        ActivatableNotificationView firstView = mFirstVisibleBackgroundChild;
+        NotificationSection firstSection = getFirstVisibleSection();
         int top = 0;
-        if (firstView != null) {
+        if (firstSection != null) {
+            ActivatableNotificationView firstView = firstSection.getFirstVisibleChild();
             // Round Y up to avoid seeing the background during animation
             int finalTranslationY = (int) Math.ceil(ViewState.getFinalTranslationY(firstView));
-            if (mAnimateNextBackgroundTop
-                    || mTopAnimator == null && mCurrentBounds.top == finalTranslationY
-                    || mTopAnimator != null && mEndAnimationRect.top == finalTranslationY) {
+            if (mAnimateNextBackgroundTop || firstSection.isTargetTop(finalTranslationY)) {
                 // we're ending up at the same location as we are now, lets just skip the animation
                 top = finalTranslationY;
             } else {
                 top = (int) Math.ceil(firstView.getTranslationY());
             }
         }
+        NotificationSection lastSection = getLastVisibleSection();
         ActivatableNotificationView lastView =
                 mShelf.hasItemsInStableShelf() && mShelf.getVisibility() != GONE
                         ? mShelf
-                        : mLastVisibleBackgroundChild;
+                        : lastSection == null ? null : lastSection.getLastVisibleChild();
         int bottom;
         if (lastView != null) {
             int finalTranslationY;
@@ -2209,9 +2191,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
             int finalHeight = ExpandableViewState.getFinalActualHeight(lastView);
             int finalBottom = finalTranslationY + finalHeight - lastView.getClipBottomAmount();
-            if (mAnimateNextBackgroundBottom
-                    || mBottomAnimator == null && mCurrentBounds.bottom == finalBottom
-                    || mBottomAnimator != null && mEndAnimationRect.bottom == finalBottom) {
+            if (mAnimateNextBackgroundBottom || lastSection.isTargetBottom(finalBottom)) {
                 // we're ending up at the same location as we are now, lets just skip the animation
                 bottom = finalBottom;
             } else {
@@ -2228,8 +2208,38 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             // otherwise the animation from the shade to the keyguard will jump as it's maxed
             top = Math.max(0, top);
         }
-        mBackgroundBounds.top = top;
-        mBackgroundBounds.bottom = Math.max(bottom, top);
+        bottom = Math.max(bottom, top);
+
+        setSectionBoundsByPriority(left, right, top, bottom, mSections[0], mSections[1]);
+    }
+
+    private void setSectionBoundsByPriority(int left, int right, int top, int bottom,
+            NotificationSection highPrioritySection, NotificationSection lowPrioritySection) {
+        if (NotificationUtils.useNewInterruptionModel(mContext)) {
+            // TODO(kprevas): can we use section boundary indices from mAmbientState instead?
+            ActivatableNotificationView lastChildAboveGap = getLastHighPriorityChild();
+            ActivatableNotificationView firstChildBelowGap = getFirstLowPriorityChild();
+            if (lastChildAboveGap != null && firstChildBelowGap != null) {
+                int gapTop =
+                        (int) Math.max(top,
+                                Math.min(lastChildAboveGap.getTranslationY()
+                                                + lastChildAboveGap.getActualHeight(),
+                                        bottom));
+                int gapBottom = (int) Math.max(top,
+                        Math.min(firstChildBelowGap.getTranslationY(), bottom));
+                highPrioritySection.getBounds().set(left, top, right, gapTop);
+                lowPrioritySection.getBounds().set(left, gapBottom, right, bottom);
+            } else if (lastChildAboveGap != null) {
+                highPrioritySection.getBounds().set(left, top, right, bottom);
+                lowPrioritySection.getBounds().set(left, bottom, right, bottom);
+            } else {
+                highPrioritySection.getBounds().set(left, top, right, top);
+                lowPrioritySection.getBounds().set(left, top, right, bottom);
+            }
+        } else {
+            highPrioritySection.getBounds().set(left, top, right, bottom);
+            lowPrioritySection.getBounds().set(left, bottom, right, bottom);
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -2243,6 +2253,25 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 if (row.isPinned()) {
                     return row;
                 }
+            }
+        }
+        return null;
+    }
+
+    private NotificationSection getFirstVisibleSection() {
+        for (NotificationSection section : mSections) {
+            if (section.getFirstVisibleChild() != null) {
+                return section;
+            }
+        }
+        return null;
+    }
+
+    private NotificationSection getLastVisibleSection() {
+        for (int i = mSections.length - 1; i >= 0; i--) {
+            NotificationSection section = mSections[i];
+            if (section.getLastVisibleChild() != null) {
+                return section;
             }
         }
         return null;
@@ -2269,6 +2298,43 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             if (child.getVisibility() != View.GONE && child instanceof ActivatableNotificationView
                     && child != mShelf) {
                 return (ActivatableNotificationView) child;
+            }
+        }
+        return null;
+    }
+
+    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
+    @Nullable
+    private ActivatableNotificationView getLastHighPriorityChild() {
+        ActivatableNotificationView lastChildBeforeGap = null;
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                if (mEntryManager.getNotificationData().isHighPriority(
+                        row.getStatusBarNotification())) {
+                    break;
+                } else {
+                    lastChildBeforeGap = row;
+                }
+            }
+        }
+        return lastChildBeforeGap;
+    }
+
+    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
+    @Nullable
+    private ActivatableNotificationView getFirstLowPriorityChild() {
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                if (!mEntryManager.getNotificationData().isHighPriority(
+                        row.getStatusBarNotification())) {
+                    return row;
+                }
             }
         }
         return null;
@@ -2391,7 +2457,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         final int firstChildMinHeight = firstChild != null ? firstChild.getCollapsedHeight()
                 : mCollapsedSize;
         int shelfHeight = 0;
-        if (mLastVisibleBackgroundChild != null && mShelf.getVisibility() != GONE) {
+        if (getLastVisibleSection() != null && mShelf.getVisibility() != GONE) {
             shelfHeight = mShelf.getIntrinsicHeight();
         }
         return mIntrinsicPadding + firstChildMinHeight + shelfHeight;
@@ -2700,21 +2766,66 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateFirstAndLastBackgroundViews() {
+        NotificationSection firstSection = getFirstVisibleSection();
+        NotificationSection lastSection = getLastVisibleSection();
+
         ActivatableNotificationView firstChild = getFirstChildWithBackground();
         ActivatableNotificationView lastChild = getLastChildWithBackground();
+        boolean sectionViewsChanged = updateFirstAndLastViewsInSectionsByPriority(
+                mSections[0], mSections[1], firstChild, lastChild);
+
         if (mAnimationsEnabled && mIsExpanded) {
-            mAnimateNextBackgroundTop = firstChild != mFirstVisibleBackgroundChild;
-            mAnimateNextBackgroundBottom = lastChild != mLastVisibleBackgroundChild;
+            mAnimateNextBackgroundTop =
+                    firstSection == null || firstChild != firstSection.getFirstVisibleChild();
+            mAnimateNextBackgroundBottom =
+                    lastSection == null || lastChild != lastSection.getLastVisibleChild();
+            mAnimateNextSectionBoundsChange = sectionViewsChanged;
         } else {
             mAnimateNextBackgroundTop = false;
             mAnimateNextBackgroundBottom = false;
+            mAnimateNextSectionBoundsChange = false;
         }
-        mFirstVisibleBackgroundChild = firstChild;
-        mLastVisibleBackgroundChild = lastChild;
         mAmbientState.setLastVisibleBackgroundChild(lastChild);
-        mRoundnessManager.setFirstAndLastBackgroundChild(mFirstVisibleBackgroundChild,
-                mLastVisibleBackgroundChild);
+        mRoundnessManager.updateRoundedChildren(mSections);
         invalidate();
+    }
+
+    /** @return {@code true} if the last view in the top section changed (so we need to animate). */
+    private boolean updateFirstAndLastViewsInSectionsByPriority(
+            final NotificationSection highPrioritySection,
+            final NotificationSection lowPrioritySection,
+            ActivatableNotificationView firstChild,
+            ActivatableNotificationView lastChild) {
+        if (NotificationUtils.useNewInterruptionModel(mContext)) {
+            ActivatableNotificationView previousLastHighPriorityChild =
+                    highPrioritySection.getLastVisibleChild();
+            ActivatableNotificationView previousFirstLowPriorityChild =
+                    lowPrioritySection.getFirstVisibleChild();
+            ActivatableNotificationView lastHighPriorityChild = getLastHighPriorityChild();
+            ActivatableNotificationView firstLowPriorityChild = getFirstLowPriorityChild();
+            if (lastHighPriorityChild != null && firstLowPriorityChild != null) {
+                highPrioritySection.setFirstVisibleChild(firstChild);
+                highPrioritySection.setLastVisibleChild(lastHighPriorityChild);
+                lowPrioritySection.setFirstVisibleChild(firstLowPriorityChild);
+                lowPrioritySection.setLastVisibleChild(lastChild);
+            } else if (lastHighPriorityChild != null) {
+                highPrioritySection.setFirstVisibleChild(firstChild);
+                highPrioritySection.setLastVisibleChild(lastChild);
+                lowPrioritySection.setFirstVisibleChild(null);
+                lowPrioritySection.setLastVisibleChild(null);
+            } else {
+                highPrioritySection.setFirstVisibleChild(null);
+                highPrioritySection.setLastVisibleChild(null);
+                lowPrioritySection.setFirstVisibleChild(firstChild);
+                lowPrioritySection.setLastVisibleChild(lastChild);
+            }
+            return lastHighPriorityChild != previousLastHighPriorityChild
+                    || firstLowPriorityChild != previousFirstLowPriorityChild;
+        } else {
+            highPrioritySection.setFirstVisibleChild(firstChild);
+            highPrioritySection.setLastVisibleChild(lastChild);
+            return false;
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -3903,9 +4014,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         ExpandableNotificationRow row = view instanceof ExpandableNotificationRow
                 ? (ExpandableNotificationRow) view
                 : null;
-        if (row != null && (row == mFirstVisibleBackgroundChild
-                || row.getNotificationParent() == mFirstVisibleBackgroundChild)) {
-            updateAlgorithmLayoutMinHeight();
+        NotificationSection firstSection = getFirstVisibleSection();
+        ActivatableNotificationView firstVisibleChild =
+                firstSection == null ? null : firstSection.getFirstVisibleChild();
+        if (row != null) {
+            if (row == firstVisibleChild
+                    || row.getNotificationParent() == firstVisibleChild) {
+                updateAlgorithmLayoutMinHeight();
+            }
         }
         if (needsAnimation) {
             requestAnimationOnViewResize(row);
@@ -3933,7 +4049,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     endPosition += row.getNotificationParent().getTranslationY();
                 }
                 int layoutEnd = mMaxLayoutHeight + (int) mStackTranslation;
-                if (row != mLastVisibleBackgroundChild && mShelf.getVisibility() != GONE) {
+                NotificationSection lastSection = getLastVisibleSection();
+                ActivatableNotificationView lastVisibleChild =
+                        lastSection == null ? null : lastSection.getLastVisibleChild();
+                if (row != lastVisibleChild && mShelf.getVisibility() != GONE) {
                     layoutEnd -= mShelf.getIntrinsicHeight() + mPaddingBetweenElements;
                 }
                 if (endPosition > layoutEnd) {
@@ -4012,6 +4131,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     boolean isDimmed() {
         return mAmbientState.isDimmed();
+    }
+
+    @VisibleForTesting
+    int getSectionBoundaryIndex(int boundaryNum) {
+        return mAmbientState.getSectionBoundaryIndex(boundaryNum);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5091,9 +5215,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 beforeSpeedBump = !mEntryManager.getNotificationData().isAmbient(
                         row.getStatusBarNotification().getKey());
             } else {
-                beforeSpeedBump = mEntryManager.getNotificationData().getImportance(
-                        row.getStatusBarNotification().getKey())
-                        >= NotificationManager.IMPORTANCE_DEFAULT;
+                beforeSpeedBump = mEntryManager.getNotificationData().isHighPriority(
+                        row.getStatusBarNotification());
             }
             if (beforeSpeedBump) {
                 speedBumpIndex = currentIndex;
@@ -5101,6 +5224,33 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         boolean noAmbient = speedBumpIndex == N;
         updateSpeedBumpIndex(speedBumpIndex, noAmbient);
+    }
+
+    /** Updates the indices of the boundaries between sections. */
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    public void updateSectionBoundaries() {
+        int gapIndex = -1;
+        if (NotificationUtils.useNewInterruptionModel(mContext)) {
+            int currentIndex = 0;
+            final int n = getChildCount();
+            for (int i = 0; i < n; i++) {
+                View view = getChildAt(i);
+                if (view.getVisibility() == View.GONE
+                        || !(view instanceof ExpandableNotificationRow)) {
+                    continue;
+                }
+                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+                if (!mEntryManager.getNotificationData().isHighPriority(
+                        row.getStatusBarNotification())) {
+                    if (currentIndex > 0) {
+                        gapIndex = currentIndex;
+                    }
+                    break;
+                }
+                currentIndex++;
+            }
+        }
+        mAmbientState.setSectionBoundaryIndex(0, gapIndex);
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)

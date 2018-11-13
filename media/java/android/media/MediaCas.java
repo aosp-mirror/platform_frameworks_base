@@ -104,7 +104,7 @@ public final class MediaCas implements AutoCloseable {
         @Override
         protected IMediaCasService create() {
             try {
-                return IMediaCasService.getService();
+                return IMediaCasService.getService(true /*wait*/);
             } catch (RemoteException e) {}
             return null;
         }

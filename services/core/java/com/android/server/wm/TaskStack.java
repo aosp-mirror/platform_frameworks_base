@@ -418,32 +418,6 @@ public class TaskStack extends WindowContainer<Task> implements
         getBounds(out);
     }
 
-    void updateDisplayInfo(Rect bounds) {
-        if (mDisplayContent == null) {
-            return;
-        }
-
-        for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; --taskNdx) {
-            mChildren.get(taskNdx).updateDisplayInfo(mDisplayContent);
-        }
-        if (bounds != null) {
-            setBounds(bounds);
-            return;
-        } else if (matchParentBounds()) {
-            setBounds(null);
-            return;
-        }
-
-        mTmpRect2.set(getRawBounds());
-        final int newRotation = mDisplayContent.getDisplayInfo().rotation;
-        final int newDensity = mDisplayContent.getDisplayInfo().logicalDensityDpi;
-        if (mRotation == newRotation && mDensity == newDensity) {
-            setBounds(mTmpRect2);
-        }
-
-        // If the rotation or density didn't match, we'll update it in onConfigurationChanged.
-    }
-
     /**
      * Updates the passed-in {@code inOutBounds} based on how it would change when this container's
      * override configuration is applied to the specified {@code parentConfig} and
@@ -820,16 +794,24 @@ public class TaskStack extends WindowContainer<Task> implements
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
-        if (mDisplayContent != null) {
+        if (mDisplayContent != null && mDisplayContent != dc) {
             throw new IllegalStateException("onDisplayChanged: Already attached");
         }
 
+        final boolean movedToNewDisplay = mDisplayContent == null;
         mDisplayContent = dc;
 
-        updateBoundsForWindowModeChange();
-        mAnimationBackgroundSurface = makeChildSurface(null).setColorLayer(true)
-            .setName("animation background stackId=" + mStackId)
-            .build();
+        if (movedToNewDisplay) {
+            updateBoundsForWindowModeChange();
+        } else {
+            updateBoundsForDisplayChanges();
+        }
+
+        if (mAnimationBackgroundSurface != null) {
+            mAnimationBackgroundSurface = makeChildSurface(null).setColorLayer(true)
+                    .setName("animation background stackId=" + mStackId)
+                    .build();
+        }
 
         super.onDisplayChanged(dc);
     }
@@ -845,8 +827,39 @@ public class TaskStack extends WindowContainer<Task> implements
             }, true);
         }
 
-        updateDisplayInfo(bounds);
+        setBoundsForWindowModeChange(bounds);
         updateSurfaceBounds();
+    }
+
+    private void setBoundsForWindowModeChange(Rect bounds) {
+        if (mDisplayContent == null) {
+            return;
+        }
+
+        if (bounds != null) {
+            setBounds(bounds);
+            return;
+        }
+
+        updateBoundsForDisplayChanges();
+    }
+
+    private void updateBoundsForDisplayChanges() {
+        // Avoid setting override bounds to bounds inherited from parent if there was no override
+        // bounds set.
+        if (matchParentBounds()) {
+            setBounds(null);
+            return;
+        }
+
+        mTmpRect2.set(getRawBounds());
+        final int newRotation = mDisplayContent.getDisplayInfo().rotation;
+        final int newDensity = mDisplayContent.getDisplayInfo().logicalDensityDpi;
+        if (mRotation == newRotation && mDensity == newDensity) {
+            setBounds(mTmpRect2);
+        }
+
+        // If the rotation or density didn't match, we'll update it in onConfigurationChanged.
     }
 
     private Rect calculateBoundsForWindowModeChange() {
@@ -1765,6 +1778,11 @@ public class TaskStack extends WindowContainer<Task> implements
     @Override
     public boolean shouldDeferStartOnMoveToFullscreen() {
         synchronized (mService.mGlobalLock) {
+            if (!isAttached()) {
+                // Unnecessary to pause the animation because the stack is detached.
+                return false;
+            }
+
             // Workaround for the recents animation -- normally we need to wait for the new activity
             // to show before starting the PiP animation, but because we start and show the home
             // activity early for the recents animation prior to the PiP animation starting, there

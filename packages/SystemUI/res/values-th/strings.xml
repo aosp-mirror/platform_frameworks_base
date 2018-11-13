@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"ลองบันทึกภาพหน้าจออีกครั้ง"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"บันทึกภาพหน้าจอไม่ได้เนื่องจากพื้นที่เก็บข้อมูลมีจำกัด"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"แอปหรือองค์กรของคุณไม่อนุญาตให้จับภาพหน้าจอ"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"การบันทึกหน้าจอ"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"เริ่มต้นการบันทึก"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"บันทึกเสียงบรรยาย"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"แสดงการแตะ"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"หยุด"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"หยุด"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"ทำต่อ"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"ยกเลิก"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"แชร์"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"ลบ"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"ยกเลิกการบันทึกหน้าจอแล้ว"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"บันทึกการบันทึกหน้าจอแล้ว แตะเพื่อดู"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"ลบการบันทึกหน้าจอแล้ว"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"เกิดข้อผิดพลาดในการลบการบันทึกหน้าจอ"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"ขอสิทธิ์ไม่สำเร็จ"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"ตัวเลือกการถ่ายโอนไฟล์ USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ต่อเชื่อมเป็นโปรแกรมเล่นสื่อ (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ต่อเชื่อมเป็นกล้องถ่ายรูป (PTP)"</string>
@@ -582,15 +598,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"การแจ้งเตือน"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"คุณจะไม่เห็นการแจ้งเตือนเหล่านี้อีก"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"การแจ้งเตือนเหล่านี้จะย่อเล็กสุด"</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"โดยปกติแล้ว คุณจะปิดการแจ้งเตือนเหล่านี้ \nต้องการให้แสดงต่อไหม"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"แสดงการแจ้งเตือนเหล่านี้ต่อไปไหม"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"ปิดการแจ้งเตือน"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"แสดงต่อไป"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ย่อเล็กสุด"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"แสดงการแจ้งเตือนจากแอปนี้ต่อไปไหม"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ปิดการแจ้งเตือนเหล่านี้ไม่ได้"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"แอปนี้กำลังใช้กล้อง"</string>
     <string name="appops_microphone" msgid="741508267659494555">"แอปนี้กำลังใช้ไมโครโฟน"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"แอปนี้กำลังแสดงทับแอปอื่นๆ ในหน้าจอ"</string>
@@ -725,8 +747,7 @@
     <item msgid="2139628951880142927">"แสดงเปอร์เซ็นต์เมื่อชาร์จ (ค่าเริ่มต้น)"</item>
     <item msgid="3327323682209964956">"อย่าแสดงไอคอนนี้"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"แสดงไอคอนการแจ้งเตือนลำดับความสำคัญต่ำ"</string>
     <string name="other" msgid="4060683095962566764">"อื่นๆ"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"เส้นแบ่งหน้าจอ"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"เต็มหน้าจอทางซ้าย"</string>
@@ -806,7 +827,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"เปิดแอปได้โดยไม่ต้องติดตั้ง"</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"เปิดแอปได้โดยไม่ต้องติดตั้ง แตะเพื่อดูข้อมูลเพิ่มเติม"</string>
     <string name="app_info" msgid="6856026610594615344">"ข้อมูลแอป"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"ไปที่เว็บ"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"ไปที่เบราว์เซอร์"</string>
     <string name="mobile_data" msgid="7094582042819250762">"เน็ตมือถือ"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ปิดอยู่"</string>
@@ -838,4 +859,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"การตั้งค่า"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"รับทราบ"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> ใช้<xliff:g id="TYPES_LIST">%2$s</xliff:g>ของคุณอยู่"</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"หลายแอปพลิเคชันใช้<xliff:g id="TYPES_LIST">%s</xliff:g>ของคุณอยู่"</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"เปิดแอป"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"ยกเลิก"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"ตกลง"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"การตั้งค่า"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g> ใช้<xliff:g id="TYPE">%2$s</xliff:g>ของคุณอยู่ในช่วง <xliff:g id="TIME">%3$d</xliff:g> นาทีที่ผ่านมา"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g> ใช้<xliff:g id="TYPE">%2$s</xliff:g>ของคุณอยู่"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g> ใช้<xliff:g id="TYPES_LIST">%2$s</xliff:g>ของคุณอยู่"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"กล้องถ่ายรูป"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"ตำแหน่ง"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"ไมโครโฟน"</string>
 </resources>

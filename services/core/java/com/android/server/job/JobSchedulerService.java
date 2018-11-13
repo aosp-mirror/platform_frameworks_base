@@ -1740,11 +1740,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     /**
      * The state of at least one job has changed. Here is where we could enforce various
      * policies on when we want to execute jobs.
-     * Right now the policy is such:
-     * If >1 of the ready jobs is idle mode we send all of them off
-     * if more than 2 network connectivity jobs are ready we send them all off.
-     * If more than 4 jobs total are ready we send them all off.
-     * TODO: It would be nice to consolidate these sort of high-level policies somewhere.
      */
     final class MaybeReadyJobQueueFunctor implements Consumer<JobStatus> {
         int chargingCount;

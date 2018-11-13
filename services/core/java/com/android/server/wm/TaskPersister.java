@@ -83,7 +83,8 @@ public class TaskPersister implements PersisterQueue.Listener {
     private final ArraySet<Integer> mTmpTaskIds = new ArraySet<>();
 
     TaskPersister(File systemDir, ActivityStackSupervisor stackSupervisor,
-            ActivityTaskManagerService service, RecentTasks recentTasks) {
+            ActivityTaskManagerService service, RecentTasks recentTasks,
+            PersisterQueue persisterQueue) {
 
         final File legacyImagesDir = new File(systemDir, IMAGES_DIRNAME);
         if (legacyImagesDir.exists()) {
@@ -103,7 +104,7 @@ public class TaskPersister implements PersisterQueue.Listener {
         mStackSupervisor = stackSupervisor;
         mService = service;
         mRecentTasks = recentTasks;
-        mPersisterQueue = new PersisterQueue();
+        mPersisterQueue = persisterQueue;
         mPersisterQueue.addListener(this);
     }
 
@@ -115,10 +116,6 @@ public class TaskPersister implements PersisterQueue.Listener {
         mRecentTasks = null;
         mPersisterQueue = new PersisterQueue();
         mPersisterQueue.addListener(this);
-    }
-
-    void onSystemReady() {
-        mPersisterQueue.startPersisting();
     }
 
     private void removeThumbnails(TaskRecord task) {
@@ -219,21 +216,12 @@ public class TaskPersister implements PersisterQueue.Listener {
     }
 
     void saveImage(Bitmap image, String filePath) {
-        synchronized (mPersisterQueue) {
-            final ImageWriteQueueItem item = mPersisterQueue.findLastItem(
-                    queueItem -> queueItem.mFilePath.equals(filePath), ImageWriteQueueItem.class);
-            if (item != null) {
-                // replace the Bitmap with the new one.
-                item.mImage = image;
-            } else {
-                mPersisterQueue.addItem(new ImageWriteQueueItem(filePath, image),
-                        /* flush */ false);
-            }
-            if (DEBUG) Slog.d(TAG, "saveImage: filePath=" + filePath + " now=" +
-                    SystemClock.uptimeMillis() + " Callers=" + Debug.getCallers(4));
+        mPersisterQueue.updateLastOrAddItem(new ImageWriteQueueItem(filePath, image),
+                /* flush */ false);
+        if (DEBUG) {
+            Slog.d(TAG, "saveImage: filePath=" + filePath + " now="
+                    + SystemClock.uptimeMillis() + " Callers=" + Debug.getCallers(4));
         }
-
-        mPersisterQueue.yieldIfQueueTooDeep();
     }
 
     Bitmap getTaskDescriptionIcon(String filePath) {
@@ -603,7 +591,8 @@ public class TaskPersister implements PersisterQueue.Listener {
         }
     }
 
-    private static class ImageWriteQueueItem implements PersisterQueue.WriteQueueItem {
+    private static class ImageWriteQueueItem implements
+            PersisterQueue.WriteQueueItem<ImageWriteQueueItem> {
         final String mFilePath;
         Bitmap mImage;
 
@@ -630,6 +619,16 @@ public class TaskPersister implements PersisterQueue.Listener {
             } finally {
                 IoUtils.closeQuietly(imageFile);
             }
+        }
+
+        @Override
+        public boolean matches(ImageWriteQueueItem item) {
+            return mFilePath.equals(item.mFilePath);
+        }
+
+        @Override
+        public void updateFrom(ImageWriteQueueItem item) {
+            mImage = item.mImage;
         }
 
         @Override

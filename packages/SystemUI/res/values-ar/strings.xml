@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"جرّب أخذ لقطة الشاشة مرة أخرى"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"يتعذر حفظ لقطة الشاشة لأن مساحة التخزين المتاحة محدودة."</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"يحظر التطبيق أو تحظر مؤسستك التقاط لقطات شاشة"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"تسجيل الشاشة"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"إشعار مستمر لجلسة تسجيل شاشة"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"بدء التسجيل"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"تسجيل التعليق الصوتي"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"عرض النقرات"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"إيقاف"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"إيقاف مؤقت"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"استئناف"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"إلغاء"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"مشاركة"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"حذف"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"تمّ إلغاء تسجيل الشاشة."</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"تمّ حفظ تسجيل الشاشة، انقر لعرضه."</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"تمّ حذف تسجيل الشاشة."</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"حدث خطأ أثناء حذف تسجيل الشاشة."</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"تعذّر الحصول على أذونات."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏خيارات نقل الملفات عبر USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"‏تثبيت كمشغل وسائط (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"‏تثبيت ككاميرا (PTP)"</string>
@@ -304,7 +320,7 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"‏تم تشغيل Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"‏لا تتوفر أي شبكة Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"جارٍ التفعيل…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"إرسال"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"الإرسال"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"جارٍ الإرسال"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"جهاز لا يحمل اسمًا"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"جاهز للإرسال"</string>
@@ -346,7 +362,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"حتى شروق الشمس"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"تفعيل الإعداد في <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"حتى <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_nfc_label" msgid="9012153754816969325">"‏الاتصال القريب المدى (NFC)"</string>
+    <string name="quick_settings_nfc_label" msgid="9012153754816969325">"‏الاتصالات قصيرة المدى (NFC)"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"تم إيقاف الاتصال القريب المدى"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"تم تفعيل الاتصال القريب المدى"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"مرّر سريعًا لأعلى لتبديل التطبيقات"</string>
@@ -594,15 +610,17 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"الإشعارات"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"لن تتلقى هذه الإشعارات بعد الآن."</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"سيتم تصغير هذه الإشعارات."</string>
+    <string name="notification_channel_silenced" msgid="2877199534497961942">"يتم عرض هذه الإشعارات بدون تنبيه صوتي"</string>
+    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"يتم عرض هذه الإشعارات مع تنبيه صوتي"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"أنت تتجاهل عادةً هذه الإشعارات. \nهل تريد الاستمرار في عرضها؟"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"هل تريد الاستمرار في تلقي هذه الإشعارات؟"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"إيقاف الإشعارات"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"الاستمرار في تلقّي الإشعارات"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"تصغير"</string>
+    <string name="inline_silent_button_silent" msgid="4411510650503783646">"عرض بدون تنبيه صوتي"</string>
+    <string name="inline_silent_button_alert" msgid="2967599358027208807">"العرض والتنبيه"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"هل تريد الاستمرار في تلقي إشعارات من هذا التطبيق؟"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"يتعذَّر إيقاف هذه الإشعارات."</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"يستخدم هذا التطبيق الكاميرا."</string>
     <string name="appops_microphone" msgid="741508267659494555">"يستخدم هذا التطبيق الميكروفون."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"يتم عرض هذا التطبيق فوق التطبيقات الأخرى على شاشتك."</string>
@@ -745,8 +763,7 @@
     <item msgid="2139628951880142927">"عرض النسبة المئوية عند الشحن (تلقائي)"</item>
     <item msgid="3327323682209964956">"عدم عرض هذا الرمز"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"إظهار رموز الإشعارات ذات الأولوية المنخفضة"</string>
     <string name="other" msgid="4060683095962566764">"غير ذلك"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"أداة تقسيم الشاشة"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"عرض النافذة اليسرى بملء الشاشة"</string>
@@ -826,7 +843,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"تمّ فتح التطبيق بدون تثبيته."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"تمّ فتح التطبيق بدون تثبيته. انقر لمعرفة مزيد من المعلومات."</string>
     <string name="app_info" msgid="6856026610594615344">"معلومات عن التطبيق"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"الانتقال إلى الويب"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"الانتقال إلى المتصفح"</string>
     <string name="mobile_data" msgid="7094582042819250762">"بيانات الجوّال"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"‏تم إيقاف شبكة Wi-Fi"</string>
@@ -858,4 +875,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"الإعدادات"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"حسنًا"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"‏تفريغ ذاكرة SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"التطبيق <xliff:g id="APP">%1$s</xliff:g> يستخدم <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"تستخدم التطبيقات <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"فتح التطبيق"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"إلغاء"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"موافق"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"الإعدادات"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"التطبيق <xliff:g id="APP">%1$s</xliff:g> يستخدم <xliff:g id="TYPE">%2$s</xliff:g> منذ <xliff:g id="TIME">%3$d</xliff:g> من الدقائق مضت."</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"التطبيقات <xliff:g id="APPS">%1$s</xliff:g> تستخدم <xliff:g id="TYPE">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"التطبيق <xliff:g id="APP">%1$s</xliff:g> يستخدم <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"الكاميرا"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"الموقع"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"الميكروفون"</string>
 </resources>

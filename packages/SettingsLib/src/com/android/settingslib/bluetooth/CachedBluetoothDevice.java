@@ -892,7 +892,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 if (batteryLevelPercentageString != null) {
                     //device is in phone call
                     if (com.android.settingslib.Utils.isAudioModeOngoingCall(mContext)) {
-                        if (mIsActiveDeviceHeadset) {
+                        if (mIsActiveDeviceHearingAid || mIsActiveDeviceHeadset) {
                             stringRes = R.string.bluetooth_active_battery_level;
                         } else {
                             stringRes = R.string.bluetooth_battery_level;
@@ -908,7 +908,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 } else {
                     //no battery information
                     if (com.android.settingslib.Utils.isAudioModeOngoingCall(mContext)) {
-                        if (mIsActiveDeviceHeadset) {
+                        if (mIsActiveDeviceHearingAid || mIsActiveDeviceHeadset) {
                             stringRes = R.string.bluetooth_active_no_battery_level;
                         }
                     } else {

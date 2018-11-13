@@ -29,8 +29,6 @@ import com.android.internal.logging.nano.MetricsProto;
  */
 public class EventLogWriter implements LogWriter {
 
-    private final MetricsLogger mMetricsLogger = new MetricsLogger();
-
     @Override
     public void visible(Context context, int source, int category) {
         final LogMaker logMaker = new LogMaker(category)
@@ -47,16 +45,6 @@ public class EventLogWriter implements LogWriter {
     @Override
     public void action(Context context, int category, Pair<Integer, Object>... taggedData) {
         action(context, category, "", taggedData);
-    }
-
-    @Override
-    public void actionWithSource(Context context, int source, int category) {
-        final LogMaker logMaker = new LogMaker(category)
-                .setType(MetricsProto.MetricsEvent.TYPE_ACTION);
-        if (source != MetricsProto.MetricsEvent.VIEW_UNKNOWN) {
-            logMaker.addTaggedData(MetricsProto.MetricsEvent.FIELD_CONTEXT, source);
-        }
-        MetricsLogger.action(logMaker);
     }
 
     @Override
@@ -83,11 +71,6 @@ public class EventLogWriter implements LogWriter {
             }
             MetricsLogger.action(logMaker);
         }
-    }
-
-    @Override
-    public void count(Context context, String name, int value) {
-        MetricsLogger.count(context, name, value);
     }
 
     @Override

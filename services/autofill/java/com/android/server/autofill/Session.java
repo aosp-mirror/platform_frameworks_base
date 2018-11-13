@@ -281,18 +281,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     return;
                 }
 
-                // Sanitize structure before it's sent to service.
-                final ComponentName componentNameFromApp = structure.getActivityComponent();
-                if (componentNameFromApp == null || !mComponentName.getPackageName()
-                        .equals(componentNameFromApp.getPackageName())) {
-                    Slog.w(TAG, "Activity " + mComponentName + " forged different component on "
-                            + "AssistStructure: " + componentNameFromApp);
-                    structure.setActivityComponent(mComponentName);
-                    mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_FORGED_COMPONENT_ATTEMPT)
-                            .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FORGED_COMPONENT_NAME,
-                                    componentNameFromApp == null ? "null"
-                                            : componentNameFromApp.flattenToShortString()));
-                }
                 // Flags used to start the session.
                 int flags = structure.getFlags();
 

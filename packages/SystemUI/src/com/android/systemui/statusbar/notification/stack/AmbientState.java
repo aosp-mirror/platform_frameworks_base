@@ -22,27 +22,32 @@ import android.view.View;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.AmbientPulseManager;
+import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.notification.NotificationData;
-import com.android.systemui.statusbar.NotificationShelf;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A global state to track all input states for the algorithm.
  */
 public class AmbientState {
-    private ArrayList<View> mDraggedViews = new ArrayList<View>();
+
+    private static final int NO_SECTION_BOUNDARY = -1;
+
+    private ArrayList<View> mDraggedViews = new ArrayList<>();
     private int mScrollY;
     private boolean mDimmed;
     private ActivatableNotificationView mActivatedChild;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
     private int mSpeedBumpIndex = -1;
+    private final List<Integer> mSectionBoundaryIndices = new ArrayList<>();
     private boolean mDark;
     private boolean mHideSensitive;
     private AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
@@ -75,6 +80,7 @@ public class AmbientState {
     private boolean mAppearing;
 
     public AmbientState(Context context) {
+        mSectionBoundaryIndices.add(NO_SECTION_BOUNDARY);
         reload(context);
     }
 
@@ -206,6 +212,27 @@ public class AmbientState {
 
     public void setSpeedBumpIndex(int shelfIndex) {
         mSpeedBumpIndex = shelfIndex;
+    }
+
+    /**
+     * Returns the index of the boundary between two sections, where the first section is at index
+     * {@code boundaryNum}.
+     */
+    public int getSectionBoundaryIndex(int boundaryNum) {
+        return mSectionBoundaryIndices.get(boundaryNum);
+    }
+
+    /** Returns true if the item at {@code index} is directly below a section boundary. */
+    public boolean beginsNewSection(int index) {
+        return mSectionBoundaryIndices.contains(index);
+    }
+
+    /**
+     * Sets the index of the boundary between the section at {@code boundaryNum} and the following
+     * section to {@code boundaryIndex}.
+     */
+    public void setSectionBoundaryIndex(int boundaryNum, int boundaryIndex) {
+        mSectionBoundaryIndices.set(boundaryNum, boundaryIndex);
     }
 
     public float getStackTranslation() {

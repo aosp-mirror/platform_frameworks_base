@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Скриншотту кайра тартып көрүңүз"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Сактагычта бош орун аз болгондуктан скриншот сакталбай жатат"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Скриншот тартууга колдонмо же ишканаңыз тыюу салган."</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Экранды жаздыруу"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Экранды жаздыруу сеансы боюнча учурдагы билдирме"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Жаздырып баштоо"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Үн коштоону жаздыруу"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Басылган жерди көрсөтүү"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"Токтотуу"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Тындыруу"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Улантуу"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Жокко чыгаруу"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Бөлүшүү"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"Ооба"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Экранды жаздыруу жокко чыгарылды"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Экранды жаздыруу сакталды, көрүү үчүн таптап коюңуз"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"Экранды жаздыруу өчүрүлдү"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"Экранды жаздырууну өчүрүүдө ката кетти"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"Уруксаттар алынбай калды"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB менен файл өткөрүү мүмкүнчүлүктөрү"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Медиа ойноткуч катары кошуу (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Камера катары кошуу (PTP)"</string>
@@ -582,15 +598,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Билдирмелер"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Мындан ары бул эскертмелер сизге көрсөтүлбөйт"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Бул эскертмелер кичирейтилет"</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Адатта мындай эскертмелерди өткөрүп жибересиз. \nАлар көрсөтүлө берсинби?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Бул эскертмелер көрсөтүлө берсинби?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Эскертмелерди токтотуу"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Көрсөтүлө берсин"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Кичирейтүү"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Бул колдонмонун эскертмелери көрсөтүлө берсинби?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Бул эскертмелерди өчүрүүгө болбойт"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Бул колдонмо камераны колдонууда."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Бул колдонмо микрофонду колдонууда."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Бул колдонмо экрандагы башка терезелердин үстүнөн көрсөтүлүүдө."</string>
@@ -725,8 +747,7 @@
     <item msgid="2139628951880142927">"Кубаттоо учурунда пайызы көрсөтүлсүн (демейки)"</item>
     <item msgid="3327323682209964956">"Бул сөлөкөт көрсөтүлбөсүн"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"Анча маанилүү эмес билдирменин сүрөтчөлөрүн көрсөтүү"</string>
     <string name="other" msgid="4060683095962566764">"Башка"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Экранды бөлгүч"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Сол жактагы экранды толук экран режимине өткөрүү"</string>
@@ -806,7 +827,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"Колдонмо орнотулбастан ачылды."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Колдонмо орнотулбастан ачылды. Толугураак маалымат алуу үчүн таптап коюңуз."</string>
     <string name="app_info" msgid="6856026610594615344">"Колдонмо тууралуу"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Интернетке өтүү"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Серепчиге өтүү"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Мобилдик Интернет"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi өчүк"</string>
@@ -838,4 +859,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Жөндөөлөр"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Түшүндүм"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> төмөнкүлөрдү колдонуп жатат: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Колдонмолор төмөнкүлөрдү пайдаланып жатышат: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"Колдн ачуу"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Жок"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"Макул"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Жөндөөлөр"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g> төмөнкүлөрдү <xliff:g id="TIME">%3$d</xliff:g> мүн. бери колдонуп жатат: <xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g> төмөнкүлөрдү колдонуп жатышат: <xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g> төмөнкүлөрдү колдонуп жатат: <xliff:g id="TYPES_LIST">%2$s</xliff:g>"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"камера"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"жайгашкан жер"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"микрофон"</string>
 </resources>

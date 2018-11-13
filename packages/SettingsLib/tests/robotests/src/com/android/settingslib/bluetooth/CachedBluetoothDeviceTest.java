@@ -234,6 +234,37 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
+    public void getConnectionSummary_testHearingAidInCall_active() {
+        // Arrange:
+        //   1. Profile:       {HEARING_AID, Connected, Active}
+        //   2. Audio Manager: In Call
+        //   3. Battery Level: Unknown
+        updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
+        mShadowAudioManager.setMode(AudioManager.MODE_IN_CALL);
+
+        // Act & Assert:
+        //   Get "Active" result without Battery Level.
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active");
+    }
+
+    @Test
+    public void getConnectionSummary_testHearingAidInCall_activeBattery10() {
+        // Arrange:
+        //   1. Profile:       {HEARING_AID, Connected, Active}
+        //   2. Audio Manager: In Call
+        //   3. Battery Level: 10
+        updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
+        mShadowAudioManager.setMode(AudioManager.MODE_IN_CALL);
+        mBatteryLevel = 10;
+
+        // Act & Assert:
+        //   Get "Active, 10% battery" result with Battery Level 10.
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, 10% battery");
+    }
+
+    @Test
     public void getConnectionSummary_testMultipleProfilesActiveDevice() {
         // Test without battery level
         // Set A2DP and HFP profiles to be connected and test connection state summary

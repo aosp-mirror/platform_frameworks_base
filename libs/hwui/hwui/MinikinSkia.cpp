@@ -84,7 +84,7 @@ void MinikinFontSkia::GetFontExtent(minikin::MinikinExtent* extent,
                                     const minikin::FontFakery& fakery) const {
     SkPaint skPaint;
     MinikinFontSkia_SetSkiaPaint(this, &skPaint, paint, fakery);
-    SkPaint::FontMetrics metrics;
+    SkFontMetrics metrics;
     skPaint.getFontMetrics(&metrics);
     extent->ascent = metrics.fAscent;
     extent->descent = metrics.fDescent;

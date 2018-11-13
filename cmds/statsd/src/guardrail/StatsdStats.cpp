@@ -47,11 +47,9 @@ const int FIELD_ID_CONFIG_STATS = 3;
 const int FIELD_ID_ATOM_STATS = 7;
 const int FIELD_ID_UIDMAP_STATS = 8;
 const int FIELD_ID_ANOMALY_ALARM_STATS = 9;
-// const int FIELD_ID_PULLED_ATOM_STATS = 10; // The proto is written in stats_log_util.cpp
-const int FIELD_ID_LOGGER_ERROR_STATS = 11;
 const int FIELD_ID_PERIODIC_ALARM_STATS = 12;
-// const int FIELD_ID_LOG_LOSS_STATS = 14;
 const int FIELD_ID_SYSTEM_SERVER_RESTART = 15;
+const int FIELD_ID_LOGGER_ERROR_STATS = 16;
 
 const int FIELD_ID_ATOM_STATS_TAG = 1;
 const int FIELD_ID_ATOM_STATS_COUNT = 2;
@@ -59,8 +57,9 @@ const int FIELD_ID_ATOM_STATS_COUNT = 2;
 const int FIELD_ID_ANOMALY_ALARMS_REGISTERED = 1;
 const int FIELD_ID_PERIODIC_ALARMS_REGISTERED = 1;
 
-const int FIELD_ID_LOGGER_STATS_TIME = 1;
-const int FIELD_ID_LOGGER_STATS_ERROR_CODE = 2;
+const int FIELD_ID_LOG_LOSS_STATS_TIME = 1;
+const int FIELD_ID_LOG_LOSS_STATS_COUNT = 2;
+const int FIELD_ID_LOG_LOSS_STATS_ERROR = 3;
 
 const int FIELD_ID_CONFIG_STATS_UID = 1;
 const int FIELD_ID_CONFIG_STATS_ID = 2;
@@ -181,12 +180,12 @@ void StatsdStats::noteConfigReset(const ConfigKey& key) {
     noteConfigResetInternalLocked(key);
 }
 
-void StatsdStats::noteLogLost(int32_t wallClockTimeSec, int32_t count) {
+void StatsdStats::noteLogLost(int32_t wallClockTimeSec, int32_t count, int32_t lastError) {
     lock_guard<std::mutex> lock(mLock);
     if (mLogLossStats.size() == kMaxLoggerErrors) {
         mLogLossStats.pop_front();
     }
-    mLogLossStats.push_back(std::make_pair(wallClockTimeSec, count));
+    mLogLossStats.emplace_back(wallClockTimeSec, count, lastError);
 }
 
 void StatsdStats::noteBroadcastSent(const ConfigKey& key) {
@@ -564,8 +563,8 @@ void StatsdStats::dumpStats(int out) const {
     }
 
     for (const auto& loss : mLogLossStats) {
-        dprintf(out, "Log loss: %lld (wall clock sec) - %d (count)\n", (long long)loss.first,
-                loss.second);
+        dprintf(out, "Log loss: %lld (wall clock sec) - %d (count) %d (last error)\n",
+                (long long)loss.mWallClockSec, loss.mCount, loss.mLastError);
     }
 }
 
@@ -720,13 +719,11 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
     proto.end(uidMapToken);
 
     for (const auto& error : mLogLossStats) {
-        // The logger error stats are not used anymore since we move away from logd.
-        // Temporarily use this field to log the log loss timestamp and count
-        // TODO(b/80538532) Add a dedicated field in stats_log for this.
         uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_LOGGER_ERROR_STATS |
                                       FIELD_COUNT_REPEATED);
-        proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOGGER_STATS_TIME, error.first);
-        proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOGGER_STATS_ERROR_CODE, error.second);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOG_LOSS_STATS_TIME, error.mWallClockSec);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOG_LOSS_STATS_COUNT, error.mCount);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOG_LOSS_STATS_ERROR, error.mLastError);
         proto.end(token);
     }
 

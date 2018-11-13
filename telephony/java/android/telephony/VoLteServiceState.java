@@ -24,9 +24,11 @@ import android.telephony.Rlog;
 
 /**
  * Contains LTE network state related information.
- *
+ * @deprecated Only contains SRVCC state, which isn't specific to LTE handovers. For SRVCC
+ * indications, use {@link PhoneStateListener#onSrvccStateChanged(int)}.
  * @hide
  */
+@Deprecated
 public final class VoLteServiceState implements Parcelable {
 
     private static final String LOG_TAG = "VoLteServiceState";

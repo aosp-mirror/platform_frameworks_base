@@ -42,6 +42,7 @@ import android.os.RemoteException;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
+
 import com.android.internal.logging.MetricsLogger;
 
 import java.io.FileDescriptor;
@@ -566,38 +567,34 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
     }
 
-    SoundTrigger.RecognitionEvent getGenericModelState(UUID modelId) {
+    int getGenericModelState(UUID modelId) {
         synchronized (mLock) {
             MetricsLogger.count(mContext, "sth_get_generic_model_state", 1);
             if (modelId == null || mModule == null) {
-                return null;
+                return STATUS_ERROR;
             }
             ModelData modelData = mModelDataMap.get(modelId);
             if (modelData == null || !modelData.isGenericModel()) {
                 Slog.w(TAG, "GetGenericModelState error: Invalid generic model id:" +
                         modelId);
-                return null;
+                return STATUS_ERROR;
             }
             if (!modelData.isModelLoaded()) {
                 Slog.i(TAG, "GetGenericModelState: Given generic model is not loaded:" + modelId);
-                return null;
+                return STATUS_ERROR;
             }
             if (!modelData.isModelStarted()) {
                 Slog.i(TAG, "GetGenericModelState: Given generic model is not started:" + modelId);
-                return null;
+                return STATUS_ERROR;
             }
 
-            SoundTrigger.RecognitionEvent ret = mModule.getModelState(modelData.getHandle());
-            if (ret == null) {
-                Slog.w(TAG, "GetGenericModelState() call failed");
-            }
-            return ret;
+            return mModule.getModelState(modelData.getHandle());
         }
     }
 
-    SoundTrigger.RecognitionEvent getKeyphraseModelState(UUID modelId) {
+    int getKeyphraseModelState(UUID modelId) {
         Slog.w(TAG, "GetKeyphraseModelState error: Not implemented");
-        return null;
+        return STATUS_ERROR;
     }
 
     //---- SoundTrigger.StatusListener methods

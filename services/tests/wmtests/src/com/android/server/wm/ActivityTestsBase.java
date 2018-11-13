@@ -144,6 +144,10 @@ class ActivityTestsBase {
         return TestActivityDisplay.create(mSupervisor, sNextDisplayId++);
     }
 
+    TestActivityDisplay createNewActivityDisplay(DisplayInfo info) {
+        return TestActivityDisplay.create(mSupervisor, sNextDisplayId++, info);
+    }
+
     /** Creates and adds a {@link TestActivityDisplay} to supervisor at the given position. */
     TestActivityDisplay addNewActivityDisplayAt(int position) {
         final TestActivityDisplay display = createNewActivityDisplay();
@@ -586,12 +590,17 @@ class ActivityTestsBase {
         private final ActivityStackSupervisor mSupervisor;
 
         static TestActivityDisplay create(ActivityStackSupervisor supervisor, int displayId) {
+            return create(supervisor, displayId, new DisplayInfo());
+        }
+
+        static TestActivityDisplay create(ActivityStackSupervisor supervisor, int displayId,
+                DisplayInfo info) {
             if (displayId == DEFAULT_DISPLAY) {
                 return new TestActivityDisplay(supervisor,
                         supervisor.mDisplayManager.getDisplay(displayId));
             }
             final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
-                    new DisplayInfo(), DEFAULT_DISPLAY_ADJUSTMENTS);
+                    info, DEFAULT_DISPLAY_ADJUSTMENTS);
             return new TestActivityDisplay(supervisor, display);
         }
 

@@ -133,12 +133,21 @@ public class SoundTriggerModule {
     public native int stopRecognition(int soundModelHandle);
 
     /**
-     * Get the current state of a {@link SoundTrigger.SoundModel}
+     * Get the current state of a {@link SoundTrigger.SoundModel}.
+     * The state will be returned asynchronously as a {@link SoundTrigger#RecognitionEvent}
+     * in the callback registered in the {@link SoundTrigger.startRecognition} method.
      * @param soundModelHandle The sound model handle indicating which model's state to return
-     * @return - {@link SoundTrigger#RecognitionEvent} in case of success
-     *         - null in case of an error or if not supported
+     * @return - {@link SoundTrigger#STATUS_OK} in case of success
+     *         - {@link SoundTrigger#STATUS_ERROR} in case of unspecified error
+     *         - {@link SoundTrigger#STATUS_PERMISSION_DENIED} if the caller does not have
+     *         system permission
+     *         - {@link SoundTrigger#STATUS_NO_INIT} if the native service cannot be reached
+     *         - {@link SoundTrigger#STATUS_BAD_VALUE} if the sound model handle is invalid
+     *         - {@link SoundTrigger#STATUS_DEAD_OBJECT} if the binder transaction to the native
+     *         service fails
+     *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence
      */
-    public native SoundTrigger.RecognitionEvent getModelState(int soundModelHandle);
+    public native int getModelState(int soundModelHandle);
 
     private class NativeEventHandlerDelegate {
         private final Handler mHandler;

@@ -61,37 +61,39 @@ import java.util.List;
  * <a href="/guide/topics/text/autofill">Autofill Framework</a> guides.
  */
 public class AssistStructure implements Parcelable {
-    static final String TAG = "AssistStructure";
+    private static final String TAG = "AssistStructure";
 
-    static final boolean DEBUG_PARCEL = false;
-    static final boolean DEBUG_PARCEL_CHILDREN = false;
-    static final boolean DEBUG_PARCEL_TREE = false;
+    private static final boolean DEBUG_PARCEL = false;
+    private static final boolean DEBUG_PARCEL_CHILDREN = false;
+    private static final boolean DEBUG_PARCEL_TREE = false;
 
-    static final int VALIDATE_WINDOW_TOKEN = 0x11111111;
-    static final int VALIDATE_VIEW_TOKEN = 0x22222222;
+    private static final int VALIDATE_WINDOW_TOKEN = 0x11111111;
+    private static final int VALIDATE_VIEW_TOKEN = 0x22222222;
 
-    boolean mHaveData;
+    private boolean mHaveData;
 
-    ComponentName mActivityComponent;
+    // The task id and component of the activity which this assist structure is for
+    private int mTaskId;
+    private ComponentName mActivityComponent;
     private boolean mIsHomeActivity;
     private int mFlags;
     private int mAutofillFlags;
 
-    final ArrayList<WindowNode> mWindowNodes = new ArrayList<>();
+    private final ArrayList<WindowNode> mWindowNodes = new ArrayList<>();
 
-    final ArrayList<ViewNodeBuilder> mPendingAsyncChildren = new ArrayList<>();
+    private final ArrayList<ViewNodeBuilder> mPendingAsyncChildren = new ArrayList<>();
 
-    SendChannel mSendChannel;
-    IBinder mReceiveChannel;
+    private SendChannel mSendChannel;
+    private IBinder mReceiveChannel;
 
-    Rect mTmpRect = new Rect();
+    private Rect mTmpRect = new Rect();
 
-    boolean mSanitizeOnWrite = false;
+    private boolean mSanitizeOnWrite = false;
     private long mAcquisitionStartTime;
     private long mAcquisitionEndTime;
 
-    static final int TRANSACTION_XFER = Binder.FIRST_CALL_TRANSACTION+1;
-    static final String DESCRIPTOR = "android.app.AssistStructure";
+    private static final int TRANSACTION_XFER = Binder.FIRST_CALL_TRANSACTION+1;
+    private static final String DESCRIPTOR = "android.app.AssistStructure";
 
     /** @hide */
     public void setAcquisitionStartTime(long acquisitionStartTime) {
@@ -197,7 +199,6 @@ public class AssistStructure implements Parcelable {
         ParcelTransferWriter(AssistStructure as, Parcel out) {
             mSanitizeOnWrite = as.mSanitizeOnWrite;
             mWriteStructure = as.waitForReady();
-            ComponentName.writeToParcel(as.mActivityComponent, out);
             out.writeInt(as.mFlags);
             out.writeInt(as.mAutofillFlags);
             out.writeLong(as.mAcquisitionStartTime);
@@ -353,7 +354,6 @@ public class AssistStructure implements Parcelable {
 
         void go() {
             fetchData();
-            mActivityComponent = ComponentName.readFromParcel(mCurParcel);
             mFlags = mCurParcel.readInt();
             mAutofillFlags = mCurParcel.readInt();
             mAcquisitionStartTime = mCurParcel.readLong();
@@ -2129,7 +2129,6 @@ public class AssistStructure implements Parcelable {
     /** @hide */
     public AssistStructure(Activity activity, boolean forAutoFill, int flags) {
         mHaveData = true;
-        mActivityComponent = activity.getComponentName();
         mFlags = flags;
         ArrayList<ViewRootImpl> views = WindowManagerGlobal.getInstance().getRootViews(
                 activity.getActivityToken());
@@ -2145,12 +2144,13 @@ public class AssistStructure implements Parcelable {
 
     public AssistStructure() {
         mHaveData = true;
-        mActivityComponent = null;
         mFlags = 0;
     }
 
     /** @hide */
     public AssistStructure(Parcel in) {
+        mTaskId = in.readInt();
+        mActivityComponent = ComponentName.readFromParcel(in);
         mIsHomeActivity = in.readInt() == 1;
         mReceiveChannel = in.readStrongBinder();
     }
@@ -2171,7 +2171,10 @@ public class AssistStructure implements Parcelable {
             Log.i(TAG, "dump(): calling ensureData() first");
             ensureData();
         }
-        Log.i(TAG, "Activity: " + mActivityComponent.flattenToShortString());
+        Log.i(TAG, "Task id: " + mTaskId);
+        Log.i(TAG, "Activity: " + (mActivityComponent != null 
+                ? mActivityComponent.flattenToShortString()
+                : null));
         Log.i(TAG, "Sanitize on write: " + mSanitizeOnWrite);
         Log.i(TAG, "Flags: " + mFlags);
         final int N = getWindowNodeCount();
@@ -2283,21 +2286,35 @@ public class AssistStructure implements Parcelable {
     }
 
     /**
-     * Return the activity this AssistStructure came from.
+     * Sets the task id is associated with the activity from which this AssistStructure was
+     * generated.
+     * @hide
      */
-    public ComponentName getActivityComponent() {
-        ensureData();
-        return mActivityComponent;
+    public void setTaskId(int taskId) {
+        mTaskId = taskId;
     }
 
     /**
-     * Called by Autofill server when app forged a different value.
-     *
+     * @return The task id for the associated activity.
+     * @hide
+     */
+    public int getTaskId() {
+        return mTaskId;
+    }
+
+    /**
+     * Sets the activity that is associated with this AssistStructure.
      * @hide
      */
     public void setActivityComponent(ComponentName componentName) {
-        ensureData();
         mActivityComponent = componentName;
+    }
+
+    /**
+     * Return the activity this AssistStructure came from.
+     */
+    public ComponentName getActivityComponent() {
+        return mActivityComponent;
     }
 
     /** @hide */
@@ -2393,6 +2410,8 @@ public class AssistStructure implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(mTaskId);
+        ComponentName.writeToParcel(mActivityComponent, out);
         out.writeInt(mIsHomeActivity ? 1 : 0);
         if (mHaveData) {
             // This object holds its data.  We want to write a send channel that the

@@ -46,22 +46,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VER
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ADD_REMOVE;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
-import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
-import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING_TO_TOP;
-import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
-import static com.android.server.wm.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
-import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+
 import static com.android.server.am.TaskRecordProto.ACTIVITIES;
 import static com.android.server.am.TaskRecordProto.ACTIVITY_TYPE;
 import static com.android.server.am.TaskRecordProto.BOUNDS;
@@ -75,6 +60,23 @@ import static com.android.server.am.TaskRecordProto.ORIG_ACTIVITY;
 import static com.android.server.am.TaskRecordProto.REAL_ACTIVITY;
 import static com.android.server.am.TaskRecordProto.RESIZE_MODE;
 import static com.android.server.am.TaskRecordProto.STACK_ID;
+import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
+import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
+import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING_TO_TOP;
+import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
+import static com.android.server.wm.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
+import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ADD_REMOVE;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+
 import static java.lang.Integer.MAX_VALUE;
 
 import android.annotation.IntDef;
@@ -87,6 +89,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.TaskInfo;
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -549,6 +552,8 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
                 }
             }
             mWindowContainerController.resize(kept, forced);
+
+            saveLaunchingStateIfNeeded();
 
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             return kept;
@@ -1820,6 +1825,29 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
             mService.mStackSupervisor.scheduleUpdateMultiWindowMode(this);
         }
         // TODO: Should also take care of Pip mode changes here.
+
+        saveLaunchingStateIfNeeded();
+    }
+
+    /**
+     * Saves launching state if necessary so that we can launch the activity to its latest state.
+     * It only saves state if this task has been shown to user and it's in fullscreen or freeform
+     * mode.
+     */
+    void saveLaunchingStateIfNeeded() {
+        if (!hasBeenVisible) {
+            // Not ever visible to user.
+            return;
+        }
+
+        final int windowingMode = getWindowingMode();
+        if (windowingMode != WindowConfiguration.WINDOWING_MODE_FULLSCREEN
+                && windowingMode != WindowConfiguration.WINDOWING_MODE_FREEFORM) {
+            return;
+        }
+
+        // Saves the new state so that we can launch the activity at the same location.
+        mService.mStackSupervisor.mLaunchParamsPersister.saveTask(this);
     }
 
     /** Clears passed config and fills it with new override values. */
@@ -1965,7 +1993,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
                 ? reuseActivitiesReport.base.intent.getComponent()
                 : null;
         info.topActivity = reuseActivitiesReport.top != null
-                ? reuseActivitiesReport.top.intent.getComponent()
+                ? reuseActivitiesReport.top.realActivity
                 : null;
         info.origActivity = origActivity;
         info.realActivity = realActivity;

@@ -906,7 +906,7 @@
     <!--  Control whether to lock day/night mode change from normal application. When it is
           true, day / night mode change is only allowed to apps with MODIFY_DAY_NIGHT_MODE
           permission. -->
-    <bool name="config_lockDayNightMode">false</bool>
+    <bool name="config_lockDayNightMode">true</bool>
 
     <!-- Control the default night mode to use when there is no other mode override set.
          One of the following values (see UiModeManager.java):
@@ -2428,7 +2428,10 @@
          Can be customized for other product types -->
     <string name="config_chooseTypeAndAccountActivity" translatable="false"
             >android/android.accounts.ChooseTypeAndAccountActivity</string>
-
+    <!-- Name of the activity that will handle requests to the system to choose an activity for
+         the purposes of resolving an intent. -->
+    <string name="config_chooserActivity" translatable="false"
+            >com.android.systemui/com.android.systemui.chooser.ChooserActivity</string>
     <!-- Component name of a custom ResolverActivity (Intent resolver) to be used instead of
          the default framework version. If left empty, then the framework version will be used.
          Example: com.google.android.myapp/.resolver.MyResolverActivity  -->

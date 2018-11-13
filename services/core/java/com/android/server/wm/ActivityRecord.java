@@ -1009,8 +1009,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         updateOverrideConfiguration();
 
         mWindowContainerController = new AppWindowContainerController(taskController, appToken,
-                this, Integer.MAX_VALUE /* add on top */, info.screenOrientation, fullscreen,
-                (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, info.configChanges,
+                realActivity, this, Integer.MAX_VALUE /* add on top */, info.screenOrientation,
+                fullscreen, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, info.configChanges,
                 task.voiceSession != null, mLaunchTaskBehind, isAlwaysFocusable(),
                 appInfo.targetSdkVersion, mRotationAnimationHint,
                 ActivityTaskManagerService.getInputDispatchingTimeoutLocked(this) * 1000000L);

@@ -41,11 +41,6 @@ public interface LogWriter {
     /**
      * Logs an user action.
      */
-    void actionWithSource(Context context, int source, int category);
-
-    /**
-     * Logs an user action.
-     */
     void action(Context context, int category, int value);
 
     /**
@@ -57,11 +52,6 @@ public interface LogWriter {
      * Logs an user action.
      */
     void action(Context context, int category, String pkg, Pair<Integer, Object>... taggedData);
-
-    /**
-     * Logs a count.
-     */
-    void count(Context context, String name, int value);
 
     /**
      * Generically log action.

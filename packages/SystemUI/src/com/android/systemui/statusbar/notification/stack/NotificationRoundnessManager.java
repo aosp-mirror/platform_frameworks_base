@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+        .NUM_SECTIONS;
+
 import android.view.View;
 
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -30,46 +33,92 @@ import java.util.HashSet;
 class NotificationRoundnessManager implements OnHeadsUpChangedListener {
 
     private boolean mExpanded;
-    private ActivatableNotificationView mFirst;
-    private ActivatableNotificationView mLast;
+    private ActivatableNotificationView[] mFirstInSectionViews;
+    private ActivatableNotificationView[] mLastInSectionViews;
+    private ActivatableNotificationView[] mTmpFirstInSectionViews;
+    private ActivatableNotificationView[] mTmpLastInSectionViews;
     private HashSet<View> mAnimatedChildren;
     private Runnable mRoundingChangedCallback;
     private ExpandableNotificationRow mTrackedHeadsUp;
     private float mAppearFraction;
 
+    NotificationRoundnessManager() {
+        mFirstInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
+        mLastInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
+        mTmpFirstInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
+        mTmpLastInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
+    }
+
     @Override
     public void onHeadsUpPinned(ExpandableNotificationRow headsUp) {
-        updateRounding(headsUp, false /* animate */);
+        updateView(headsUp, false /* animate */);
     }
 
     @Override
     public void onHeadsUpUnPinned(ExpandableNotificationRow headsUp) {
-        updateRounding(headsUp, true /* animate */);
+        updateView(headsUp, true /* animate */);
     }
 
     public void onHeadsupAnimatingAwayChanged(ExpandableNotificationRow row,
             boolean isAnimatingAway) {
-        updateRounding(row, false /* animate */);
+        updateView(row, false /* animate */);
     }
 
-    private void updateRounding(ActivatableNotificationView view, boolean animate) {
-        float topRoundness = getRoundness(view, true /* top */);
-        float bottomRoundness = getRoundness(view, false /* top */);
-        boolean firstChanged = view.setTopRoundness(topRoundness, animate);
-        boolean secondChanged = view.setBottomRoundness(bottomRoundness, animate);
-        if ((view == mFirst || view == mLast) && (firstChanged || secondChanged)) {
+    private void updateView(ActivatableNotificationView view, boolean animate) {
+        boolean changed = updateViewWithoutCallback(view, animate);
+        if (changed) {
             mRoundingChangedCallback.run();
         }
+    }
+
+    private boolean updateViewWithoutCallback(ActivatableNotificationView view,
+            boolean animate) {
+        float topRoundness = getRoundness(view, true /* top */);
+        float bottomRoundness = getRoundness(view, false /* top */);
+        boolean topChanged = view.setTopRoundness(topRoundness, animate);
+        boolean bottomChanged = view.setBottomRoundness(bottomRoundness, animate);
+        boolean firstInSection = isFirstInSection(view, false /* exclude first section */);
+        boolean lastInSection = isLastInSection(view, false /* exclude last section */);
+        view.setFirstInSection(firstInSection);
+        view.setLastInSection(lastInSection);
+        return (firstInSection || lastInSection) && (topChanged || bottomChanged);
+    }
+
+    private boolean isFirstInSection(ActivatableNotificationView view,
+            boolean includeFirstSection) {
+        int numNonEmptySections = 0;
+        for (int i = 0; i < mFirstInSectionViews.length; i++) {
+            if (view == mFirstInSectionViews[i]) {
+                return includeFirstSection || numNonEmptySections > 0;
+            }
+            if (mFirstInSectionViews[i] != null) {
+                numNonEmptySections++;
+            }
+        }
+        return false;
+    }
+
+    private boolean isLastInSection(ActivatableNotificationView view, boolean includeLastSection) {
+        int numNonEmptySections = 0;
+        for (int i = mLastInSectionViews.length - 1; i >= 0; i--) {
+            if (view == mLastInSectionViews[i]) {
+                return includeLastSection || numNonEmptySections > 0;
+            }
+            if (mLastInSectionViews[i] != null) {
+                numNonEmptySections++;
+            }
+        }
+        return false;
     }
 
     private float getRoundness(ActivatableNotificationView view, boolean top) {
         if ((view.isPinned() || view.isHeadsUpAnimatingAway()) && !mExpanded) {
             return 1.0f;
         }
-        if (view == mFirst && top) {
+        if (isFirstInSection(view, true /* include first section */) && top) {
             return 1.0f;
         }
-        if (view == mLast && !top) {
+        if (isLastInSection(view, true /* include last section */) && !top) {
             return 1.0f;
         }
         if (view == mTrackedHeadsUp && mAppearFraction <= 0.0f) {
@@ -84,34 +133,82 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
         mExpanded = expandedHeight != 0.0f;
         mAppearFraction = appearFraction;
         if (mTrackedHeadsUp != null) {
-            updateRounding(mTrackedHeadsUp, true);
+            updateView(mTrackedHeadsUp, true);
         }
     }
 
-    public void setFirstAndLastBackgroundChild(ActivatableNotificationView first,
-            ActivatableNotificationView last) {
-        boolean firstChanged = mFirst != first;
-        boolean lastChanged = mLast != last;
-        if (!firstChanged && !lastChanged) {
-            return;
+    public void updateRoundedChildren(NotificationSection[] sections) {
+        boolean anyChanged = false;
+        for (int i = 0; i < NUM_SECTIONS; i++) {
+            mTmpFirstInSectionViews[i] = mFirstInSectionViews[i];
+            mTmpLastInSectionViews[i] = mLastInSectionViews[i];
+            mFirstInSectionViews[i] = sections[i].getFirstVisibleChild();
+            mLastInSectionViews[i] = sections[i].getLastVisibleChild();
         }
-        ActivatableNotificationView oldFirst = mFirst;
-        ActivatableNotificationView oldLast = mLast;
-        mFirst = first;
-        mLast = last;
-        if (firstChanged && oldFirst != null && !oldFirst.isRemoved()) {
-            updateRounding(oldFirst, oldFirst.isShown());
+        anyChanged |= handleRemovedOldViews(sections, mTmpFirstInSectionViews, true);
+        anyChanged |= handleRemovedOldViews(sections, mTmpLastInSectionViews, false);
+        anyChanged |= handleAddedNewViews(sections, mTmpFirstInSectionViews, true);
+        anyChanged |= handleAddedNewViews(sections, mTmpLastInSectionViews, false);
+        if (anyChanged) {
+            mRoundingChangedCallback.run();
         }
-        if (lastChanged && oldLast != null && !oldLast.isRemoved()) {
-            updateRounding(oldLast, oldLast.isShown());
+    }
+
+    private boolean handleRemovedOldViews(NotificationSection[] sections,
+            ActivatableNotificationView[] oldViews, boolean first) {
+        boolean anyChanged = false;
+        for (ActivatableNotificationView oldView : oldViews) {
+            if (oldView != null) {
+                boolean isStillPresent = false;
+                boolean adjacentSectionChanged = false;
+                for (NotificationSection section : sections) {
+                    ActivatableNotificationView newView =
+                            (first ? section.getFirstVisibleChild()
+                                    : section.getLastVisibleChild());
+                    if (newView == oldView) {
+                        isStillPresent = true;
+                        if (oldView.isFirstInSection() != isFirstInSection(oldView,
+                                false /* exclude first section */)
+                                || oldView.isLastInSection() != isLastInSection(oldView,
+                                false /* exclude last section */)) {
+                            adjacentSectionChanged = true;
+                        }
+                        break;
+                    }
+                }
+                if (!isStillPresent || adjacentSectionChanged) {
+                    anyChanged = true;
+                    if (!oldView.isRemoved()) {
+                        updateViewWithoutCallback(oldView, oldView.isShown());
+                    }
+                }
+            }
         }
-        if (mFirst != null) {
-            updateRounding(mFirst, mFirst.isShown() && !mAnimatedChildren.contains(mFirst));
+        return anyChanged;
+    }
+
+    private boolean handleAddedNewViews(NotificationSection[] sections,
+            ActivatableNotificationView[] oldViews, boolean first) {
+        boolean anyChanged = false;
+        for (NotificationSection section : sections) {
+            ActivatableNotificationView newView =
+                    (first ? section.getFirstVisibleChild() : section.getLastVisibleChild());
+            if (newView != null) {
+                boolean wasAlreadyPresent = false;
+                for (ActivatableNotificationView oldView : oldViews) {
+                    if (oldView == newView) {
+                        wasAlreadyPresent = true;
+                        break;
+                    }
+                }
+                if (!wasAlreadyPresent) {
+                    anyChanged = true;
+                    updateViewWithoutCallback(newView,
+                            newView.isShown() && !mAnimatedChildren.contains(newView));
+                }
+            }
         }
-        if (mLast != null) {
-            updateRounding(mLast, mLast.isShown() && !mAnimatedChildren.contains(mLast));
-        }
-        mRoundingChangedCallback.run();
+        return anyChanged;
     }
 
     public void setAnimatedChildren(HashSet<View> animatedChildren) {

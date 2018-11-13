@@ -48,6 +48,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.util.Slog;
 import android.view.Gravity;
+import android.view.View;
 
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
@@ -198,13 +199,13 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                     || displayId == currentParams.mPreferredDisplayId)) {
             if (currentParams.hasWindowingMode()) {
                 launchMode = currentParams.mWindowingMode;
-                fullyResolvedCurrentParam = (launchMode != WINDOWING_MODE_FREEFORM);
+                fullyResolvedCurrentParam = launchMode != WINDOWING_MODE_FREEFORM;
                 if (DEBUG) {
                     appendLog("inherit-" + WindowConfiguration.windowingModeToString(launchMode));
                 }
             }
 
-            if (!currentParams.mBounds.isEmpty()) {
+            if (launchMode == WINDOWING_MODE_FREEFORM && !currentParams.mBounds.isEmpty()) {
                 outParams.mBounds.set(currentParams.mBounds);
                 fullyResolvedCurrentParam = true;
                 if (DEBUG) appendLog("inherit-bounds=" + outParams.mBounds);
@@ -250,11 +251,20 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // for all other windowing modes that's not freeform mode. One can read comments in
         // relevant methods to further understand this step.
         //
-        // We skip making adjustments if the params are fully resolved from previous results and
-        // trust that they are valid.
-        if (!fullyResolvedCurrentParam) {
-            final int resolvedMode = (launchMode != WINDOWING_MODE_UNDEFINED) ? launchMode
-                    : display.getWindowingMode();
+        // We skip making adjustments if the params are fully resolved from previous results.
+        final int resolvedMode = (launchMode != WINDOWING_MODE_UNDEFINED) ? launchMode
+                : display.getWindowingMode();
+        if (fullyResolvedCurrentParam) {
+            if (resolvedMode == WINDOWING_MODE_FREEFORM) {
+                // Make sure bounds are in the display if it's possibly in a different display.
+                if (currentParams.mPreferredDisplayId != displayId) {
+                    adjustBoundsToFitInDisplay(display, outParams.mBounds);
+                }
+                // Even though we want to keep original bounds, we still don't want it to stomp on
+                // an existing task.
+                adjustBoundsToAvoidConflict(display, outParams.mBounds);
+            }
+        } else {
             if (source != null && source.inFreeformWindowingMode()
                     && resolvedMode == WINDOWING_MODE_FREEFORM
                     && outParams.mBounds.isEmpty()
@@ -291,13 +301,12 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         if (displayId != INVALID_DISPLAY && mSupervisor.getActivityDisplay(displayId) == null) {
-            displayId = INVALID_DISPLAY;
+            displayId = currentParams.mPreferredDisplayId;
         }
         displayId = (displayId == INVALID_DISPLAY) ? currentParams.mPreferredDisplayId : displayId;
 
-        displayId = (displayId == INVALID_DISPLAY) ? DEFAULT_DISPLAY : displayId;
-
-        return displayId;
+        return (displayId != INVALID_DISPLAY && mSupervisor.getActivityDisplay(displayId) != null)
+                ? displayId : DEFAULT_DISPLAY;
     }
 
     private boolean canApplyFreeformWindowPolicy(@NonNull ActivityDisplay display, int launchMode) {
@@ -596,7 +605,12 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         if (displayBounds.width() < inOutBounds.width()
                 || displayBounds.height() < inOutBounds.height()) {
             // There is no way for us to fit the bounds in the display without changing width
-            // or height. Don't even try it.
+            // or height. Just move the start to align with the display.
+            final int layoutDirection = mSupervisor.getConfiguration().getLayoutDirection();
+            final int left = layoutDirection == View.LAYOUT_DIRECTION_RTL
+                    ? displayBounds.width() - inOutBounds.width()
+                    : 0;
+            inOutBounds.offsetTo(left, 0 /* newTop */);
             return;
         }
 

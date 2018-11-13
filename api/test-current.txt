@@ -1591,7 +1591,7 @@ package android.view {
 
   public class KeyEvent extends android.view.InputEvent implements android.os.Parcelable {
     method public static java.lang.String actionToString(int);
-    field public static final int LAST_KEYCODE = 285; // 0x11d
+    field public static final int LAST_KEYCODE = 288; // 0x120
   }
 
   public final class KeyboardShortcutGroup implements android.os.Parcelable {
@@ -1634,6 +1634,12 @@ package android.view {
   public final class ViewTreeObserver {
     method public void registerFrameCommitCallback(java.lang.Runnable);
     method public boolean unregisterFrameCommitCallback(java.lang.Runnable);
+  }
+
+  public abstract interface WindowManager implements android.view.ViewManager {
+    method public abstract void setShouldShowIme(int, boolean);
+    method public abstract void setShouldShowWithInsecureKeyguard(int, boolean);
+    method public abstract void setShouldShowSystemDecors(int, boolean);
   }
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {

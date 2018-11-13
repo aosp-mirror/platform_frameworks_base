@@ -44,7 +44,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS = new HashMap<>();
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
-        DEFAULT_FLAGS.put("settings_dynamic_homepage", "false");
+        DEFAULT_FLAGS.put("settings_dynamic_homepage", "true");
         DEFAULT_FLAGS.put("settings_mobile_network_v2", "true");
         DEFAULT_FLAGS.put("settings_data_usage_v2", "false");
         DEFAULT_FLAGS.put("settings_seamless_transfer", "false");

@@ -263,6 +263,16 @@ public class ButtonDispatcher {
         }
     }
 
+    public void setTranslation(int x, int y, int z) {
+        final int N = mViews.size();
+        for (int i = 0; i < N; i++) {
+            final View view = mViews.get(i);
+            view.setTranslationX(x);
+            view.setTranslationY(y);
+            view.setTranslationZ(z);
+        }
+    }
+
     public ArrayList<View> getViews() {
         return mViews;
     }
@@ -275,6 +285,11 @@ public class ButtonDispatcher {
         mCurrentView = currentView.findViewById(mId);
         if (mImageDrawable != null) {
             mImageDrawable.setCallback(mCurrentView);
+        }
+        if (mCurrentView != null) {
+            mCurrentView.setTranslationX(0);
+            mCurrentView.setTranslationY(0);
+            mCurrentView.setTranslationZ(0);
         }
     }
 

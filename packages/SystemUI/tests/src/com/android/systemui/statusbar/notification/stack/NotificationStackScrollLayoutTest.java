@@ -13,6 +13,8 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -23,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
@@ -36,6 +39,7 @@ import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
@@ -67,6 +71,7 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarTest.TestableNotificationEntryManager;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -102,6 +107,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private IDreamManager mDreamManager;
     private PowerManager mPowerManager;
     private TestableNotificationEntryManager mEntryManager;
+    private int mOriginalInterruptionModelSetting;
 
     @Before
     @UiThreadTest
@@ -147,6 +153,17 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         doNothing().when(mGroupManager).collapseAllGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
         doNothing().when(notificationShelf).setAnimationsEnabled(anyBoolean());
+
+        mOriginalInterruptionModelSetting = Settings.Secure.getInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
+    }
+
+    @After
+    public void tearDown() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, mOriginalInterruptionModelSetting);
     }
 
     @Test
@@ -315,6 +332,64 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         // move footer to end
         verify(mStackScroller).changeViewPosition(any(FooterView.class), eq(-1 /* end */));
+    }
+
+    @Test
+    public void testUpdateGapIndex_allHighPriority() {
+        when(mStackScroller.getChildCount()).thenReturn(3);
+        for (int i = 0; i < 3; i++) {
+            ExpandableNotificationRow row = mock(ExpandableNotificationRow.class,
+                    RETURNS_DEEP_STUBS);
+            String key = Integer.toString(i);
+            when(row.getStatusBarNotification().getKey()).thenReturn(key);
+            when(mNotificationData.isHighPriority(row.getStatusBarNotification())).thenReturn(true);
+            when(mStackScroller.getChildAt(i)).thenReturn(row);
+        }
+
+        mStackScroller.updateSectionBoundaries();
+        assertEquals(-1, mStackScroller.getSectionBoundaryIndex(0));
+    }
+
+    @Test
+    public void testUpdateGapIndex_allLowPriority() {
+        when(mStackScroller.getChildCount()).thenReturn(3);
+        for (int i = 0; i < 3; i++) {
+            ExpandableNotificationRow row = mock(ExpandableNotificationRow.class,
+                    RETURNS_DEEP_STUBS);
+            String key = Integer.toString(i);
+            when(row.getStatusBarNotification().getKey()).thenReturn(key);
+            when(mNotificationData.isHighPriority(row.getStatusBarNotification()))
+                    .thenReturn(false);
+            when(mStackScroller.getChildAt(i)).thenReturn(row);
+        }
+
+        mStackScroller.updateSectionBoundaries();
+        assertEquals(-1, mStackScroller.getSectionBoundaryIndex(0));
+    }
+
+    @Test
+    public void testUpdateGapIndex_gapExists() {
+        when(mStackScroller.getChildCount()).thenReturn(6);
+        for (int i = 0; i < 6; i++) {
+            ExpandableNotificationRow row = mock(ExpandableNotificationRow.class,
+                    RETURNS_DEEP_STUBS);
+            String key = Integer.toString(i);
+            when(row.getStatusBarNotification().getKey()).thenReturn(key);
+            when(mNotificationData.isHighPriority(row.getStatusBarNotification()))
+                    .thenReturn(i < 3);
+            when(mStackScroller.getChildAt(i)).thenReturn(row);
+        }
+
+        mStackScroller.updateSectionBoundaries();
+        assertEquals(3, mStackScroller.getSectionBoundaryIndex(0));
+    }
+
+    @Test
+    public void testUpdateGapIndex_empty() {
+        when(mStackScroller.getChildCount()).thenReturn(0);
+
+        mStackScroller.updateSectionBoundaries();
+        assertEquals(-1, mStackScroller.getSectionBoundaryIndex(0));
     }
 
     @Test

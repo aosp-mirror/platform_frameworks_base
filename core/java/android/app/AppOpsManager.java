@@ -2323,7 +2323,7 @@ public class AppOpsManager {
          */
         private static long sum(@NonNull long[] counts, int start, int end) {
             long totalCount = 0;
-            for (int i = start; i <= end; i++) {
+            for (int i = start; i < end; i++) {
                 totalCount += counts[i];
             }
             return totalCount;

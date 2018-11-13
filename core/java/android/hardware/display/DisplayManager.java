@@ -263,6 +263,7 @@ public final class DisplayManager {
      * @see KeyguardManager#isDeviceLocked()
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use IWindowManager#shouldShowWithInsecureKeyguard
     // TODO: Update name and documentation and un-hide the flag. Don't change the value before that.
     public static final int VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 5;
 
@@ -295,6 +296,7 @@ public final class DisplayManager {
      * @see #createVirtualDisplay
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use WindowManager#REMOVE_CONTENT_MODE_DESTROY
     public static final int VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL = 1 << 8;
 
     /**
@@ -304,6 +306,7 @@ public final class DisplayManager {
      * @see #createVirtualDisplay
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
     public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 9;
 
     /** @hide */

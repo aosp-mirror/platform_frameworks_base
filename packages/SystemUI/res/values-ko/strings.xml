@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"스크린샷을 다시 찍어 보세요."</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"저장용량이 부족하여 스크린샷을 저장할 수 없습니다"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"앱이나 조직에서 스크린샷 촬영을 허용하지 않습니다."</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"화면 녹화"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"화면 녹화 세션에 관한 지속적인 알림"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"녹화 시작"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"음성 해설 녹음"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"탭한 항목 표시"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"중지"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"일시중지"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"재개"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"취소"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"공유"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"삭제"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"화면 녹화가 취소되었습니다."</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"화면 녹화본이 저장되었습니다. 확인하려면 탭하세요."</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"화면 녹화가 삭제되었습니다."</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"화면 녹화는 삭제하는 중에 오류가 발생했습니다."</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"권한을 확보하지 못했습니다."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 파일 전송 옵션"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"미디어 플레이어로 마운트(MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"카메라로 마운트(PTP)"</string>
@@ -582,15 +598,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"알림"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"더 이상 다음의 알림을 받지 않습니다"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"다음 알림이 최소화됩니다."</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"보통 이 알림을 닫았습니다. \n알림을 계속 표시하시겠습니까?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"이 알림을 계속 표시하시겠습니까?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"알림 중지"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"계속 표시하기"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"최소화"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"이 앱의 알림을 계속 표시하시겠습니까?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"이 알림은 끌 수 없습니다"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"앱이 카메라를 사용 중입니다."</string>
     <string name="appops_microphone" msgid="741508267659494555">"앱이 마이크를 사용 중입니다."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"앱이 화면의 다른 앱 위에 표시되고 있습니다."</string>
@@ -725,8 +747,7 @@
     <item msgid="2139628951880142927">"충전할 때 퍼센트 표시(기본값)"</item>
     <item msgid="3327323682209964956">"이 아이콘 표시 안함"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"우선순위가 낮은 알림 아이콘 표시"</string>
     <string name="other" msgid="4060683095962566764">"기타"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"화면 분할기"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"왼쪽 화면 전체화면"</string>
@@ -806,7 +827,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"설치 없이 앱이 실행되었습니다."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"설치 없이 앱이 실행되었습니다. 탭하여 자세히 알아보세요."</string>
     <string name="app_info" msgid="6856026610594615344">"앱 정보"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"웹으로 이동"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"브라우저로 이동"</string>
     <string name="mobile_data" msgid="7094582042819250762">"모바일 데이터"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g>, <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi가 사용 중지됨"</string>
@@ -838,4 +859,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"설정"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"확인"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="TYPES_LIST">%2$s</xliff:g>을(를) 사용 중입니다."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"애플리케이션이 <xliff:g id="TYPES_LIST">%s</xliff:g>을(를) 사용 중입니다."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"앱 열기"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"취소"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"확인"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"설정"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g>이(가) 지난 <xliff:g id="TIME">%3$d</xliff:g>분 동안 <xliff:g id="TYPE">%2$s</xliff:g>을(를) 사용 중입니다."</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g>이(가) <xliff:g id="TYPE">%2$s</xliff:g>을(를) 사용 중입니다."</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="TYPES_LIST">%2$s</xliff:g>을(를) 사용 중입니다."</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"카메라"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"위치"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"마이크"</string>
 </resources>

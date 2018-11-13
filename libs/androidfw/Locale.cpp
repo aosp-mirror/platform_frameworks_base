@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "android-base/macros.h"
 #include "androidfw/Locale.h"
 #include "androidfw/Util.h"
 
@@ -162,6 +163,7 @@ bool LocaleValue::InitFromBcp47TagImpl(const StringPiece& bcp47tag, const char s
           set_script(subtags[1].c_str());
           break;
         }
+        FALLTHROUGH_INTENDED;
       case 5:
       case 6:
       case 7:

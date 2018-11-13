@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager.TaskSnapshot;
+import android.content.ComponentName;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.GraphicBuffer;
@@ -60,7 +61,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
             int windowFlags, Rect taskBounds) {
         final GraphicBuffer buffer = GraphicBuffer.create(width, height, PixelFormat.RGBA_8888,
                 GraphicBuffer.USAGE_SW_READ_RARELY | GraphicBuffer.USAGE_SW_WRITE_NEVER);
-        final TaskSnapshot snapshot = new TaskSnapshot(buffer,
+        final TaskSnapshot snapshot = new TaskSnapshot(new ComponentName("", ""), buffer,
                 ORIENTATION_PORTRAIT, contentInsets, false, 1.0f, true /* isRealSnapshot */,
                 WINDOWING_MODE_FULLSCREEN, 0 /* systemUiVisibility */, false /* isTranslucent */);
         mSurface = new TaskSnapshotSurface(mWm, new Window(), new Surface(), snapshot, "Test",

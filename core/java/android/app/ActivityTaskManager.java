@@ -110,6 +110,32 @@ public class ActivityTaskManager {
     public static final int RESIZE_MODE_USER_FORCED =
             RESIZE_MODE_PRESERVE_WINDOW | RESIZE_MODE_FORCED;
 
+    /**
+     * Extra included on intents that are delegating the call to
+     * ActivityManager#startActivityAsCaller to another app.  This token is necessary for that call
+     * to succeed.  Type is IBinder.
+     * @hide
+     */
+    public static final String EXTRA_PERMISSION_TOKEN = "android.app.extra.PERMISSION_TOKEN";
+
+    /**
+     * Extra included on intents that contain an EXTRA_INTENT, with options that the contained
+     * intent may want to be started with.  Type is Bundle.
+     * TODO: remove once the ChooserActivity moves to systemui
+     * @hide
+     */
+    public static final String EXTRA_OPTIONS = "android.app.extra.OPTIONS";
+
+    /**
+     * Extra included on intents that contain an EXTRA_INTENT, use this boolean value for the
+     * parameter of the same name when starting the contained intent.
+     * TODO: remove once the ChooserActivity moves to systemui
+     * @hide
+     */
+    public static final String EXTRA_IGNORE_TARGET_SECURITY =
+            "android.app.extra.EXTRA_IGNORE_TARGET_SECURITY";
+
+
     private static int sMaxRecentTasks = -1;
 
     ActivityTaskManager(Context context, Handler handler) {

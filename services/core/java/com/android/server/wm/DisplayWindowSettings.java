@@ -16,6 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.REMOVE_CONTENT_MODE_DESTROY;
+import static android.view.WindowManager.REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
+import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
+
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_AUTO;
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_DISABLED;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -52,8 +56,8 @@ import java.util.HashMap;
 /**
  * Current persistent settings about a display
  */
-class DisplaySettings {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplaySettings" : TAG_WM;
+class DisplayWindowSettings {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayWindowSettings" : TAG_WM;
 
     private final WindowManagerService mService;
     private final AtomicFile mFile;
@@ -72,9 +76,13 @@ class DisplaySettings {
         private int mForcedHeight;
         private int mForcedDensity;
         private int mForcedScalingMode = FORCE_SCALING_MODE_AUTO;
+        private int mRemoveContentMode = REMOVE_CONTENT_MODE_UNDEFINED;
+        private boolean mShouldShowWithInsecureKeyguard = false;
+        private boolean mShouldShowSystemDecors = false;
+        private boolean mShouldShowIme = false;
 
-        private Entry(String _name) {
-            mName = _name;
+        private Entry(String name) {
+            mName = name;
         }
 
         /** @return {@code true} if all values are default. */
@@ -85,16 +93,20 @@ class DisplaySettings {
                     && mUserRotationMode == WindowManagerPolicy.USER_ROTATION_FREE
                     && mUserRotation == Surface.ROTATION_0
                     && mForcedWidth == 0 && mForcedHeight == 0 && mForcedDensity == 0
-                    && mForcedScalingMode == FORCE_SCALING_MODE_AUTO;
+                    && mForcedScalingMode == FORCE_SCALING_MODE_AUTO
+                    && mRemoveContentMode == REMOVE_CONTENT_MODE_UNDEFINED
+                    && !mShouldShowWithInsecureKeyguard
+                    && !mShouldShowSystemDecors
+                    && !mShouldShowIme;
         }
     }
 
-    DisplaySettings(WindowManagerService service) {
+    DisplayWindowSettings(WindowManagerService service) {
         this(service, new File(Environment.getDataDirectory(), "system"));
     }
 
     @VisibleForTesting
-    DisplaySettings(WindowManagerService service, File folder) {
+    DisplayWindowSettings(WindowManagerService service, File folder) {
         mService = service;
         mFile = new AtomicFile(new File(folder, "display_settings.xml"), "wm-displays");
         readSettings();
@@ -195,6 +207,114 @@ class DisplaySettings {
         return windowingMode;
     }
 
+    int getWindowingModeLocked(DisplayContent dc) {
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final Entry entry = getEntry(displayInfo);
+        return getWindowingModeLocked(entry, dc.getDisplayId());
+    }
+
+    void setWindowingModeLocked(DisplayContent dc, int mode) {
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final Entry entry = getOrCreateEntry(displayInfo);
+        entry.mWindowingMode = mode;
+        dc.setWindowingMode(mode);
+        writeSettingsIfNeeded(entry, displayInfo);
+    }
+
+    int getRemoveContentModeLocked(DisplayContent dc) {
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final Entry entry = getEntry(displayInfo);
+        if (entry == null || entry.mRemoveContentMode == REMOVE_CONTENT_MODE_UNDEFINED) {
+            if (dc.isPrivate()) {
+                // For private displays by default content is destroyed on removal.
+                return REMOVE_CONTENT_MODE_DESTROY;
+            }
+            // For other displays by default content is moved to primary on removal.
+            return REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
+        }
+        return entry.mRemoveContentMode;
+    }
+
+    void setRemoveContentModeLocked(DisplayContent dc, int mode) {
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final Entry entry = getOrCreateEntry(displayInfo);
+        entry.mRemoveContentMode = mode;
+        writeSettingsIfNeeded(entry, displayInfo);
+    }
+
+    boolean shouldShowWithInsecureKeyguardLocked(DisplayContent dc) {
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final Entry entry = getEntry(displayInfo);
+        if (entry == null) {
+            return false;
+        }
+        return entry.mShouldShowWithInsecureKeyguard;
+    }
+
+    void setShouldShowWithInsecureKeyguardLocked(DisplayContent dc, boolean shouldShow) {
+        if (!dc.isPrivate() && shouldShow) {
+            Slog.e(TAG, "Public display can't be allowed to show content when locked");
+            return;
+        }
+
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final Entry entry = getOrCreateEntry(displayInfo);
+        entry.mShouldShowWithInsecureKeyguard = shouldShow;
+        writeSettingsIfNeeded(entry, displayInfo);
+    }
+
+    boolean shouldShowSystemDecorsLocked(DisplayContent dc) {
+        if (dc.getDisplayId() == Display.DEFAULT_DISPLAY) {
+            // For default display should show system decors.
+            return true;
+        }
+
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final Entry entry = getEntry(displayInfo);
+        if (entry == null) {
+            return false;
+        }
+        return entry.mShouldShowSystemDecors;
+    }
+
+    void setShouldShowSystemDecorsLocked(DisplayContent dc, boolean shouldShow) {
+        if (dc.getDisplayId() == Display.DEFAULT_DISPLAY && !shouldShow) {
+            Slog.e(TAG, "Default display should show system decors");
+            return;
+        }
+
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final Entry entry = getOrCreateEntry(displayInfo);
+        entry.mShouldShowSystemDecors = shouldShow;
+        writeSettingsIfNeeded(entry, displayInfo);
+    }
+
+    boolean shouldShowImeLocked(DisplayContent dc) {
+        if (dc.getDisplayId() == Display.DEFAULT_DISPLAY) {
+            // For default display should shows IME.
+            return true;
+        }
+
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final Entry entry = getEntry(displayInfo);
+        if (entry == null) {
+            return false;
+        }
+        return entry.mShouldShowIme;
+    }
+
+    void setShouldShowImeLocked(DisplayContent dc, boolean shouldShow) {
+        if (dc.getDisplayId() == Display.DEFAULT_DISPLAY && !shouldShow) {
+            Slog.e(TAG, "Default display should show IME");
+            return;
+        }
+
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final Entry entry = getOrCreateEntry(displayInfo);
+        entry.mShouldShowIme = shouldShow;
+        writeSettingsIfNeeded(entry, displayInfo);
+    }
+
     void applySettingsToDisplayLocked(DisplayContent dc) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final Entry entry = getEntry(displayInfo);
@@ -292,8 +412,21 @@ class DisplaySettings {
 
     private int getIntAttribute(XmlPullParser parser, String name, int defaultValue) {
         try {
-            String str = parser.getAttributeValue(null, name);
+            final String str = parser.getAttributeValue(null, name);
             return str != null ? Integer.parseInt(str) : defaultValue;
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    private boolean getBooleanAttribute(XmlPullParser parser, String name) {
+        return getBooleanAttribute(parser, name, false /* defaultValue */);
+    }
+
+    private boolean getBooleanAttribute(XmlPullParser parser, String name, boolean defaultValue) {
+        try {
+            final String str = parser.getAttributeValue(null, name);
+            return str != null ? Boolean.parseBoolean(str) : defaultValue;
         } catch (NumberFormatException e) {
             return defaultValue;
         }
@@ -319,6 +452,12 @@ class DisplaySettings {
             entry.mForcedDensity = getIntAttribute(parser, "forcedDensity");
             entry.mForcedScalingMode = getIntAttribute(parser, "forcedScalingMode",
                     FORCE_SCALING_MODE_AUTO);
+            entry.mRemoveContentMode = getIntAttribute(parser, "removeContentMode",
+                    REMOVE_CONTENT_MODE_UNDEFINED);
+            entry.mShouldShowWithInsecureKeyguard = getBooleanAttribute(parser,
+                    "shouldShowWithInsecureKeyguard");
+            entry.mShouldShowSystemDecors = getBooleanAttribute(parser, "shouldShowSystemDecors");
+            entry.mShouldShowIme = getBooleanAttribute(parser, "shouldShowIme");
             mEntries.put(name, entry);
         }
         XmlUtils.skipCurrentTag(parser);
@@ -386,6 +525,21 @@ class DisplaySettings {
                 if (entry.mForcedScalingMode != FORCE_SCALING_MODE_AUTO) {
                     out.attribute(null, "forcedScalingMode",
                             Integer.toString(entry.mForcedScalingMode));
+                }
+                if (entry.mRemoveContentMode != REMOVE_CONTENT_MODE_UNDEFINED) {
+                    out.attribute(null, "removeContentMode",
+                            Integer.toString(entry.mRemoveContentMode));
+                }
+                if (entry.mShouldShowWithInsecureKeyguard) {
+                    out.attribute(null, "shouldShowWithInsecureKeyguard",
+                            Boolean.toString(entry.mShouldShowWithInsecureKeyguard));
+                }
+                if (entry.mShouldShowSystemDecors) {
+                    out.attribute(null, "shouldShowSystemDecors",
+                            Boolean.toString(entry.mShouldShowSystemDecors));
+                }
+                if (entry.mShouldShowIme) {
+                    out.attribute(null, "shouldShowIme", Boolean.toString(entry.mShouldShowIme));
                 }
                 out.endTag(null, "display");
             }

@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Mēģiniet izveidot jaunu ekrānuzņēmumu."</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Nevar saglabāt ekrānuzņēmumu, jo krātuvē nepietiek vietas."</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Lietotne vai jūsu organizācija neatļauj veikt ekrānuzņēmumus."</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Notiek ekrāna ierakstīšana"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Aktīvs paziņojums par ekrāna ierakstīšanas sesiju"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Sākt ierakstīšanu"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Ierakstīt balsi"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Rādīt pieskārienus"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"Pārtraukt"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Apturēt"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Atsākt"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Atcelt"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Kopīgot"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"Dzēst"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Ekrāna ierakstīšana ir atcelta."</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Ekrāna ieraksts ir saglabāts. Pieskarieties, lai to skatītu."</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"Ekrāna ieraksts ir izdzēsts."</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"Dzēšot ekrāna ierakstu, radās kļūda."</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"Neizdevās iegūt atļaujas."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB failu pārsūtīšanas opcijas"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Pievienot kā multivides atskaņotāju (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Pievienot kā kameru (PTP)"</string>
@@ -585,15 +601,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Paziņojumi"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Jūs vairs neredzēsiet šos paziņojumus."</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Šie paziņojumi tiks minimizēti"</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Parasti jūs noraidāt šādus paziņojumus. \nVai turpināt tos rādīt?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Vai turpināt rādīt šos paziņojumus?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Apturēt paziņojumu rādīšanu"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Turpināt rādīt"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimizēt"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Vai turpināt rādīt paziņojumus no šīs lietotnes?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Šos paziņojumus nevar izslēgt."</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Šajā lietotnē tiek izmantota kamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Šajā lietotnē tiek izmantots mikrofons."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Šī lietotne tiek rādīta ekrānā pāri citām lietotnēm."</string>
@@ -730,8 +752,7 @@
     <item msgid="2139628951880142927">"Rādīt procentuālo vērtību uzlādes laikā (noklusējums)"</item>
     <item msgid="3327323682209964956">"Nerādīt šo ikonu"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"Rādīt zemas prioritātes paziņojumu ikonas"</string>
     <string name="other" msgid="4060683095962566764">"Citi"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Ekrāna sadalītājs"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Kreisā daļa pa visu ekrānu"</string>
@@ -811,7 +832,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"Lai atvērtu šo lietotni, tā nav jāinstalē."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Lai atvērtu šo lietotni, tā nav jāinstalē. Pieskarieties, lai uzzinātu vairāk."</string>
     <string name="app_info" msgid="6856026610594615344">"Lietotnes informācija"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Pāriet uz tīmekli"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Atvērt pārlūku"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobilie dati"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ir izslēgts"</string>
@@ -843,4 +864,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Iestatījumi"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Labi"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"Lietotne <xliff:g id="APP">%1$s</xliff:g> izmanto funkcijas <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Lietojumprogrammas izmanto šādas funkcijas: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"Atvērt lietotni"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Atcelt"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"Labi"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Iestatījumi"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"Lietotne <xliff:g id="APP">%1$s</xliff:g> pēdējās <xliff:g id="TIME">%3$d</xliff:g> min izmanto funkciju <xliff:g id="TYPE">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"Lietotnes <xliff:g id="APPS">%1$s</xliff:g> izmanto funkciju <xliff:g id="TYPE">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"Lietotne <xliff:g id="APP">%1$s</xliff:g> izmanto funkcijas <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"kamera"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"atrašanās vieta"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"mikrofons"</string>
 </resources>

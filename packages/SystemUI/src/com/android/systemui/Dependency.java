@@ -44,14 +44,15 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginInitializerImpl;
-import com.android.systemui.recents.OverviewProxyService;
-import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.power.PowerNotificationWarnings;
 import com.android.systemui.power.PowerUI;
+import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManagerImpl;
+import com.android.systemui.statusbar.DisplayNavigationBarController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
@@ -361,6 +362,9 @@ public class Dependency extends SystemUI {
 
         mProviders.put(AppOpsController.class, () ->
                 new AppOpsControllerImpl(mContext, getDependency(BG_LOOPER)));
+
+        mProviders.put(DisplayNavigationBarController.class, () ->
+                new DisplayNavigationBarController(mContext, getDependency(MAIN_HANDLER)));
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);

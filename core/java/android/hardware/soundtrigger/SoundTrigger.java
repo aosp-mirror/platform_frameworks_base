@@ -611,6 +611,13 @@ public class SoundTrigger {
      * @hide
      */
     public static final int RECOGNITION_STATUS_FAILURE = 2;
+    /**
+     * Recognition event was triggered by a getModelState request, not by the
+     * DSP.
+     *
+     * @hide
+     */
+    public static final int RECOGNITION_STATUS_GET_STATE_RESPONSE = 3;
 
     /**
      *  A RecognitionEvent is provided by the

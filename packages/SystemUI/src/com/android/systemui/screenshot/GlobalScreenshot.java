@@ -18,6 +18,7 @@ package com.android.systemui.screenshot;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+
 import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ACTION_INTENT;
 import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_CANCEL_NOTIFICATION;
 import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_DISALLOW_ENTER_PIP;
@@ -35,6 +36,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -66,7 +69,6 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,6 +76,7 @@ import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.Toast;
+
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
@@ -81,6 +84,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.NotificationChannels;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -290,6 +294,12 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("image/png");
             sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            // Include URI in ClipData also, so that grantPermission picks it up.
+            // We don't use setData here because some apps interpret this as "to:".
+            ClipData clipdata = new ClipData(new ClipDescription("content",
+                    new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}),
+                    new ClipData.Item(uri));
+            sharingIntent.setClipData(clipdata);
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
             sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
@@ -298,7 +308,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
             Intent sharingChooserIntent = Intent.createChooser(sharingIntent, null,
                     chooserAction.getIntentSender())
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
             // Create a share action for the notification
             PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, 0,

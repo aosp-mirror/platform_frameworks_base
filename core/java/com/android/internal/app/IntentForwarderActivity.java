@@ -21,7 +21,6 @@ import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
@@ -38,7 +37,9 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
 import android.widget.Toast;
+
 import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -106,7 +107,7 @@ public class IntentForwarderActivity extends Activity  {
             final ResolveInfo ri = mInjector.resolveActivityAsUser(newIntent, MATCH_DEFAULT_ONLY,
                     targetUserId);
             try {
-                startActivityAsCaller(newIntent, null, false, targetUserId);
+                startActivityAsCaller(newIntent, null, null, false, targetUserId);
             } catch (RuntimeException e) {
                 int launchedFromUid = -1;
                 String launchedFromPackage = "?";

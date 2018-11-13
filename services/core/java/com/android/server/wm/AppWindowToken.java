@@ -81,6 +81,7 @@ import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 
 import android.annotation.CallSuper;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.graphics.GraphicBuffer;
 import android.graphics.Point;
@@ -130,7 +131,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     // Non-null only for application tokens.
     final IApplicationToken appToken;
-
+    final ComponentName mActivityComponent;
     final boolean mVoiceInteraction;
 
     /** @see WindowContainer#fillsParent() */
@@ -272,12 +273,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     /** Whether this token needs to create mAnimationBoundsLayer for cropping animations. */
     boolean mNeedsAnimationBoundsLayer;
 
-    AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
-            DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
-            boolean showForAllUsers, int targetSdk, int orientation, int rotationAnimationHint,
-            int configChanges, boolean launchTaskBehind, boolean alwaysFocusable,
+    AppWindowToken(WindowManagerService service, IApplicationToken token,
+            ComponentName activityComponent, boolean voiceInteraction, DisplayContent dc,
+            long inputDispatchingTimeoutNanos, boolean fullscreen, boolean showForAllUsers,
+            int targetSdk, int orientation, int rotationAnimationHint, int configChanges,
+            boolean launchTaskBehind, boolean alwaysFocusable,
             AppWindowContainerController controller) {
-        this(service, token, voiceInteraction, dc, fullscreen);
+        this(service, token, activityComponent, voiceInteraction, dc, fullscreen);
         setController(controller);
         mInputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
         mShowForAllUsers = showForAllUsers;
@@ -293,11 +295,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         hiddenRequested = true;
     }
 
-    AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
-            DisplayContent dc, boolean fillsParent) {
+    AppWindowToken(WindowManagerService service, IApplicationToken token,
+            ComponentName activityComponent, boolean voiceInteraction, DisplayContent dc,
+            boolean fillsParent) {
         super(service, token != null ? token.asBinder() : null, TYPE_APPLICATION, true, dc,
                 false /* ownerCanManageAppTokens */);
         appToken = token;
+        mActivityComponent = activityComponent;
         mVoiceInteraction = voiceInteraction;
         mFillsParent = fillsParent;
         mInputApplicationHandle = new InputApplicationHandle(this);
@@ -2155,6 +2159,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (appToken != null) {
             pw.println(prefix + "app=true mVoiceInteraction=" + mVoiceInteraction);
         }
+        pw.println(prefix + "component=" + mActivityComponent.flattenToShortString());
         pw.print(prefix); pw.print("task="); pw.println(getTask());
         pw.print(prefix); pw.print(" mFillsParent="); pw.print(mFillsParent);
                 pw.print(" mOrientation="); pw.println(mOrientation);
