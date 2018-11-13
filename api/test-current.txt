@@ -710,6 +710,7 @@ package android.os {
 
   public class Environment {
     method public static java.io.File buildPath(java.io.File, java.lang.String...);
+    method public static java.io.File getProductDirectory();
     method public static java.io.File getStorageDirectory();
   }
 
