@@ -211,12 +211,19 @@ public abstract class ImsFeature {
      * Contains the capabilities defined and supported by an ImsFeature in the form of a bit mask.
      * @hide
      */
+    @SystemApi  // SystemApi only because it was leaked through type usage in a previous release.
     public static class Capabilities {
         protected int mCapabilities = 0;
 
+        /**
+         * @hide
+         */
         public Capabilities() {
         }
 
+        /**
+         * @hide
+         */
         protected Capabilities(int capabilities) {
             mCapabilities = capabilities;
         }
@@ -224,6 +231,7 @@ public abstract class ImsFeature {
         /**
          * @param capabilities Capabilities to be added to the configuration in the form of a
          *     bit mask.
+         * @hide
          */
         public void addCapabilities(int capabilities) {
             mCapabilities |= capabilities;
@@ -232,6 +240,7 @@ public abstract class ImsFeature {
         /**
          * @param capabilities Capabilities to be removed to the configuration in the form of a
          *     bit mask.
+         * @hide
          */
         public void removeCapabilities(int capabilities) {
             mCapabilities &= ~capabilities;
@@ -239,6 +248,7 @@ public abstract class ImsFeature {
 
         /**
          * @return true if all of the capabilities specified are capable.
+         * @hide
          */
         public boolean isCapable(int capabilities) {
             return (mCapabilities & capabilities) == capabilities;
@@ -246,6 +256,7 @@ public abstract class ImsFeature {
 
         /**
          * @return a deep copy of the Capabilites.
+         * @hide
          */
         public Capabilities copy() {
             return new Capabilities(mCapabilities);
@@ -253,6 +264,7 @@ public abstract class ImsFeature {
 
         /**
          * @return a bitmask containing the capability flags directly.
+         * @hide
          */
         public int getMask() {
             return mCapabilities;

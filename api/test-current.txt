@@ -800,6 +800,11 @@ package android.security.keystore {
     field public static final int ID_TYPE_SERIAL = 1; // 0x1
   }
 
+  public class DeviceIdAttestationException extends java.lang.Exception {
+    ctor public DeviceIdAttestationException(java.lang.String);
+    ctor public DeviceIdAttestationException(java.lang.String, java.lang.Throwable);
+  }
+
   public static final class KeyGenParameterSpec.Builder {
     method public android.security.keystore.KeyGenParameterSpec.Builder setUniqueIdIncluded(boolean);
   }
