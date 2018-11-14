@@ -700,7 +700,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     // return true if there is a next data source, false otherwise.
     // This function should be always called on |mHandlerThread|.
     private boolean prepareNextDataSource() {
-        if (Looper.myLooper() != mHandlerThread.getLooper()) {
+        HandlerThread handlerThread = mHandlerThread;
+        if (handlerThread != null && Looper.myLooper() != handlerThread.getLooper()) {
             Log.e(TAG, "prepareNextDataSource: called on wrong looper");
         }
 
@@ -736,7 +737,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     // This function should be always called on |mHandlerThread|.
     private void playNextDataSource() {
-        if (Looper.myLooper() != mHandlerThread.getLooper()) {
+        HandlerThread handlerThread = mHandlerThread;
+        if (handlerThread != null && Looper.myLooper() != handlerThread.getLooper()) {
             Log.e(TAG, "playNextDataSource: called on wrong looper");
         }
 
