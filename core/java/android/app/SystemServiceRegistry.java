@@ -23,6 +23,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.job.IJobScheduler;
 import android.app.job.JobScheduler;
+import android.app.prediction.AppPredictionManager;
 import android.app.role.RoleManager;
 import android.app.slice.SliceManager;
 import android.app.timedetector.TimeDetector;
@@ -1094,6 +1095,15 @@ final class SystemServiceRegistry {
                 }
                 return null;
             }});
+
+        registerService(Context.APP_PREDICTION_SERVICE, AppPredictionManager.class,
+                new CachedServiceFetcher<AppPredictionManager>() {
+            @Override
+            public AppPredictionManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                return new AppPredictionManager(ctx);
+            }
+        });
 
         registerService(Context.VR_SERVICE, VrManager.class, new CachedServiceFetcher<VrManager>() {
             @Override

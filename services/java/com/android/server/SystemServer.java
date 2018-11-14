@@ -260,6 +260,8 @@ public final class SystemServer {
             "com.android.server.accessibility.AccessibilityManagerService$Lifecycle";
     private static final String ADB_SERVICE_CLASS =
             "com.android.server.adb.AdbService$Lifecycle";
+    private static final String APP_PREDICTION_MANAGER_SERVICE_CLASS =
+            "com.android.server.appprediction.AppPredictionManagerService";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -1152,6 +1154,11 @@ public final class SystemServer {
             }
 
             startContentCaptureService(context);
+
+            // App prediction manager service
+            traceBeginAndSlog("StartAppPredictionService");
+            mSystemServiceManager.startService(APP_PREDICTION_MANAGER_SERVICE_CLASS);
+            traceEnd();
 
             // NOTE: ClipboardService indirectly depends on IntelligenceService
             traceBeginAndSlog("StartClipboardService");

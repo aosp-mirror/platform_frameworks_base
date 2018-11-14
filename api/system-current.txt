@@ -86,6 +86,7 @@ package android {
     field public static final java.lang.String MANAGE_ACCESSIBILITY = "android.permission.MANAGE_ACCESSIBILITY";
     field public static final java.lang.String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final java.lang.String MANAGE_APP_OPS_RESTRICTIONS = "android.permission.MANAGE_APP_OPS_RESTRICTIONS";
+    field public static final java.lang.String MANAGE_APP_PREDICTIONS = "android.permission.MANAGE_APP_PREDICTIONS";
     field public static final java.lang.String MANAGE_APP_TOKENS = "android.permission.MANAGE_APP_TOKENS";
     field public static final java.lang.String MANAGE_AUTO_FILL = "android.permission.MANAGE_AUTO_FILL";
     field public static final java.lang.String MANAGE_CARRIER_OEM_UNLOCK_STATE = "android.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE";
@@ -856,6 +857,87 @@ package android.app.job {
 
 }
 
+package android.app.prediction {
+
+  public final class AppPredictionContext implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public java.lang.String getPackageName();
+    method public int getPredictedTargetCount();
+    method public java.lang.String getUiSurface();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppPredictionContext> CREATOR;
+  }
+
+  public static final class AppPredictionContext.Builder {
+    method public android.app.prediction.AppPredictionContext build();
+    method public android.app.prediction.AppPredictionContext.Builder setExtras(android.os.Bundle);
+    method public android.app.prediction.AppPredictionContext.Builder setPredictedTargetCount(int);
+    method public android.app.prediction.AppPredictionContext.Builder setUiSurface(java.lang.String);
+  }
+
+  public final class AppPredictionManager {
+    method public android.app.prediction.AppPredictor createAppPredictionSession(android.app.prediction.AppPredictionContext);
+  }
+
+  public final class AppPredictionSessionId implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppPredictionSessionId> CREATOR;
+  }
+
+  public final class AppPredictor {
+    method public void destroy();
+    method public void notifyAppTargetEvent(android.app.prediction.AppTargetEvent);
+    method public void notifyLocationShown(java.lang.String, java.util.List<android.app.prediction.AppTargetId>);
+    method public void registerPredictionUpdates(java.util.concurrent.Executor, android.app.prediction.AppPredictor.Callback);
+    method public void requestPredictionUpdate();
+    method public void sortTargets(java.util.List<android.app.prediction.AppTarget>, java.util.concurrent.Executor, java.util.function.Consumer<java.util.List<android.app.prediction.AppTarget>>);
+    method public void unregisterPredictionUpdates(android.app.prediction.AppPredictor.Callback);
+  }
+
+  public static abstract interface AppPredictor.Callback {
+    method public abstract void onTargetsAvailable(java.util.List<android.app.prediction.AppTarget>);
+  }
+
+  public final class AppTarget implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getClassName();
+    method public android.app.prediction.AppTargetId getId();
+    method public java.lang.String getPackageName();
+    method public int getRank();
+    method public android.content.pm.ShortcutInfo getShortcutInfo();
+    method public android.os.UserHandle getUser();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppTarget> CREATOR;
+  }
+
+  public final class AppTargetEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAction();
+    method public java.lang.String getLaunchLocation();
+    method public android.app.prediction.AppTarget getTarget();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ACTION_DISMISS = 2; // 0x2
+    field public static final int ACTION_LAUNCH = 1; // 0x1
+    field public static final int ACTION_PIN = 3; // 0x3
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppTargetEvent> CREATOR;
+  }
+
+  public static final class AppTargetEvent.Builder {
+    ctor public AppTargetEvent.Builder(android.app.prediction.AppTarget, int);
+    method public android.app.prediction.AppTargetEvent build();
+    method public android.app.prediction.AppTargetEvent.Builder setLaunchLocation(java.lang.String);
+  }
+
+  public final class AppTargetId implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppTargetId> CREATOR;
+  }
+
+}
+
 package android.app.role {
 
   public abstract interface OnRoleHoldersChangedListener {
@@ -1042,6 +1124,7 @@ package android.content {
     method public abstract void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String, android.os.Bundle);
     method public abstract void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.os.Bundle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void startActivityAsUser(android.content.Intent, android.os.UserHandle);
+    field public static final java.lang.String APP_PREDICTION_SERVICE = "app_prediction";
     field public static final java.lang.String BACKUP_SERVICE = "backup";
     field public static final java.lang.String CONTEXTHUB_SERVICE = "contexthub";
     field public static final java.lang.String EUICC_CARD_SERVICE = "euicc_card";
@@ -5142,6 +5225,24 @@ package android.security.keystore.recovery {
     method public android.security.keystore.recovery.WrappedApplicationKey build();
     method public android.security.keystore.recovery.WrappedApplicationKey.Builder setAlias(java.lang.String);
     method public android.security.keystore.recovery.WrappedApplicationKey.Builder setEncryptedKeyMaterial(byte[]);
+  }
+
+}
+
+package android.service.appprediction {
+
+  public abstract class AppPredictionService extends android.app.Service {
+    ctor public AppPredictionService();
+    method public abstract void onAppTargetEvent(android.app.prediction.AppPredictionSessionId, android.app.prediction.AppTargetEvent);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public void onCreatePredictionSession(android.app.prediction.AppPredictionContext, android.app.prediction.AppPredictionSessionId);
+    method public void onDestroyPredictionSession(android.app.prediction.AppPredictionSessionId);
+    method public abstract void onLocationShown(android.app.prediction.AppPredictionSessionId, java.lang.String, java.util.List<android.app.prediction.AppTargetId>);
+    method public abstract void onRequestPredictionUpdate(android.app.prediction.AppPredictionSessionId);
+    method public abstract void onSortAppTargets(android.app.prediction.AppPredictionSessionId, java.util.List<android.app.prediction.AppTarget>, android.os.CancellationSignal, java.util.function.Consumer<java.util.List<android.app.prediction.AppTarget>>);
+    method public void onStartPredictionUpdates();
+    method public void onStopPredictionUpdates();
+    method public final void updatePredictions(android.app.prediction.AppPredictionSessionId, java.util.List<android.app.prediction.AppTarget>);
   }
 
 }
