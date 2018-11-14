@@ -77,11 +77,17 @@ public final class WindowInsets {
         CONSUMED = new WindowInsets((Insets) null, null, null, false, false, null);
     }
 
-    /** @hide */
+    /**
+     * Construct a new WindowInsets from individual insets.
+     *
+     * A {@code null} inset indicates that the respective inset is consumed.
+     *
+     * @hide
+     */
     public WindowInsets(Rect systemWindowInsets, Rect windowDecorInsets, Rect stableInsets,
             boolean isRound, boolean alwaysConsumeNavBar, DisplayCutout displayCutout) {
-        this(Insets.of(systemWindowInsets), Insets.of(windowDecorInsets), Insets.of(stableInsets),
-                isRound, alwaysConsumeNavBar, displayCutout);
+        this(insetsOrNull(systemWindowInsets), insetsOrNull(windowDecorInsets),
+                insetsOrNull(stableInsets), isRound, alwaysConsumeNavBar, displayCutout);
     }
 
     private WindowInsets(Insets systemWindowInsets, Insets windowDecorInsets,
@@ -671,6 +677,10 @@ public final class WindowInsets {
             return insets;
         }
         return Insets.of(newLeft, newTop, newRight, newBottom);
+    }
+
+    private static Insets insetsOrNull(Rect insets) {
+        return insets != null ? Insets.of(insets) : null;
     }
 
     /**
