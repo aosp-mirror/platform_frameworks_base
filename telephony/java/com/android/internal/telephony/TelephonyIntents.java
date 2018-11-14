@@ -480,9 +480,9 @@ public class TelephonyIntents {
     public static final String EXTRA_PCO_VALUE_KEY = "pcoValue";
     public static final String EXTRA_DEFAULT_NETWORK_AVAILABLE_KEY = "defaultNetworkAvailable";
 
-   /**
+    /**
      * Broadcast action to trigger CI OMA-DM Session.
-    */
+     */
     public static final String ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE =
             "com.android.omadm.service.CONFIGURATION_UPDATE";
 
@@ -491,4 +491,14 @@ public class TelephonyIntents {
      */
     public static final String ACTION_CARRIER_CERTIFICATE_DOWNLOAD =
             "com.android.internal.telephony.ACTION_CARRIER_CERTIFICATE_DOWNLOAD";
+
+    /**
+     * Broadcast action to indicate an error related to Line1Number has been detected.
+     *
+     * Requires the READ_PRIVILEGED_PHONE_STATE permission.
+     *
+     * @hide
+     */
+    public static final String ACTION_LINE1_NUMBER_ERROR_DETECTED =
+            "com.android.internal.telephony.ACTION_LINE1_NUMBER_ERROR_DETECTED";
 }
