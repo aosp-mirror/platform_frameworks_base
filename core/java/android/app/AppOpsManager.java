@@ -1625,9 +1625,6 @@ public class AppOpsManager {
             case AppOpsManager.OP_READ_CALL_LOG:
             case AppOpsManager.OP_WRITE_CALL_LOG:
             case AppOpsManager.OP_PROCESS_OUTGOING_CALLS: {
-                if (sSmsAndCallLogRestrictionEnabled.get() < 0) {
-                    startWatchingSmsRestrictionEnabled();
-                }
                 if (sSmsAndCallLogRestrictionEnabled.get() == 1) {
                     return AppOpsManager.MODE_DEFAULT;
                 }
@@ -1640,26 +1637,24 @@ public class AppOpsManager {
     private static final AtomicInteger sSmsAndCallLogRestrictionEnabled = new AtomicInteger(-1);
 
     // STOPSHIP b/118520006: Hardcode the default values once the feature is stable.
-    private static void startWatchingSmsRestrictionEnabled() {
+    static {
         final Context context = ActivityThread.currentApplication();
-        if (context == null) {
-            // Should never happen
-            return;
+        if (context != null) {
+            sSmsAndCallLogRestrictionEnabled.set(ActivityThread.currentActivityThread()
+                        .getIntCoreSetting(Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0));
+
+            final Uri uri =
+                    Settings.Global.getUriFor(Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED);
+            context.getContentResolver().registerContentObserver(uri, false, new ContentObserver(
+                    context.getMainThreadHandler()) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    sSmsAndCallLogRestrictionEnabled.set(Settings.Global.getInt(
+                            context.getContentResolver(),
+                            Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0));
+                }
+            });
         }
-
-        sSmsAndCallLogRestrictionEnabled.set(ActivityThread.currentActivityThread()
-                    .getIntCoreSetting(Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0));
-
-        final Uri uri = Settings.Global.getUriFor(Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED);
-        context.getContentResolver().registerContentObserver(uri, false, new ContentObserver(
-                context.getMainThreadHandler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                sSmsAndCallLogRestrictionEnabled.set(Settings.Global.getInt(
-                        context.getContentResolver(),
-                        Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0));
-            }
-        });
     }
 
     /**
