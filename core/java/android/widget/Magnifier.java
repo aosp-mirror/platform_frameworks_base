@@ -93,6 +93,8 @@ public final class Magnifier {
     private final int mDefaultHorizontalSourceToMagnifierOffset;
     // The vertical offset between the source and window coords when #show(float, float) is used.
     private final int mDefaultVerticalSourceToMagnifierOffset;
+    // Whether the magnifier will be clamped inside the main surface and not overlap system insets.
+    private final boolean mForcePositionWithinWindowSystemInsetsBounds;
     // The parent surface for the magnifier surface.
     private SurfaceInfo mParentSurface;
     // The surface where the content will be copied from.
@@ -141,6 +143,8 @@ public final class Magnifier {
                 params.mHorizontalDefaultSourceToMagnifierOffset;
         mDefaultVerticalSourceToMagnifierOffset =
                 params.mVerticalDefaultSourceToMagnifierOffset;
+        mForcePositionWithinWindowSystemInsetsBounds =
+                params.mForcePositionWithinWindowSystemInsetsBounds;
         // The view's surface coordinates will not be updated until the magnifier is first shown.
         mViewCoordinatesInSurface = new int[2];
     }
@@ -379,6 +383,17 @@ public final class Magnifier {
     }
 
     /**
+     * Returns whether the magnifier position will be adjusted such that the magnifier will be
+     * fully within the bounds of the main application window, by also avoiding any overlap with
+     * system insets (such as the one corresponding to the status bar).
+     * @return whether the magnifier position will be adjusted
+     * @see Magnifier.Builder#setForcePositionWithinWindowSystemInsetsBounds(boolean)
+     */
+    public boolean isForcePositionWithinWindowSystemInsetsBounds() {
+        return mForcePositionWithinWindowSystemInsetsBounds;
+    }
+
+    /**
      * Returns the top left coordinates of the magnifier, relative to the surface of the
      * main application window. They will be determined by the coordinates of the last
      * {@link #show(float, float)} or {@link #show(float, float, float, float)} call, adjusted
@@ -567,6 +582,11 @@ public final class Magnifier {
      * @return the current window coordinates, after they are clamped inside the parent surface
      */
     private Point getCurrentClampedWindowCoordinates() {
+        if (!mForcePositionWithinWindowSystemInsetsBounds) {
+            // No position adjustment should be done, so return the raw coordinates.
+            return new Point(mWindowCoords);
+        }
+
         final Rect windowBounds;
         if (mParentSurface.mIsMainWindowSurface) {
             final Insets systemInsets = mView.getRootWindowInsets().getSystemWindowInsets();
@@ -891,6 +911,7 @@ public final class Magnifier {
         private @FloatRange(from = 0f) float mCornerRadius;
         private int mHorizontalDefaultSourceToMagnifierOffset;
         private int mVerticalDefaultSourceToMagnifierOffset;
+        private boolean mForcePositionWithinWindowSystemInsetsBounds;
 
         /**
          * Construct a new builder for {@link Magnifier} objects.
@@ -915,6 +936,7 @@ public final class Magnifier {
             mVerticalDefaultSourceToMagnifierOffset =
                     a.getDimensionPixelSize(R.styleable.Magnifier_magnifierVerticalOffset, 0);
             a.recycle();
+            mForcePositionWithinWindowSystemInsetsBounds = true;
         }
 
         /**
@@ -996,6 +1018,28 @@ public final class Magnifier {
                 @Px int verticalOffset) {
             mHorizontalDefaultSourceToMagnifierOffset = horizontalOffset;
             mVerticalDefaultSourceToMagnifierOffset = verticalOffset;
+            return this;
+        }
+
+        /**
+         * Defines the behavior of the magnifier when it is requested to position outside the
+         * surface of the main application window. The default value is {@code true}, which means
+         * that the position will be adjusted such that the magnifier will be fully within the
+         * bounds of the main application window, by also avoiding any overlap with system insets
+         * (such as the one corresponding to the status bar). If you require a custom behavior, this
+         * flag should be set to {@code false}, meaning that the magnifier will be able to cross the
+         * main application surface boundaries (and also overlap the system insets). This should be
+         * handled with care, when passing coordinates to {@link #show(float, float)}; note that:
+         * <ul>
+         *   <li>in a multiwindow context, if the magnifier crosses the boundary between the two
+         *   windows, it will not be able to show over the window of the other application</li>
+         *   <li>if the magnifier overlaps the status bar, there is no guarantee about which one
+         *   will be displayed on top. This should be handled with care.</li>
+         * </ul>
+         * @param force whether the magnifier position will be adjusted
+         */
+        public Builder setForcePositionWithinWindowSystemInsetsBounds(boolean force) {
+            mForcePositionWithinWindowSystemInsetsBounds = force;
             return this;
         }
 
