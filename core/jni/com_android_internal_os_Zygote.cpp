@@ -25,6 +25,8 @@
 
 #define LOG_TAG "Zygote"
 
+#include <async_safe/log.h>
+
 // sys/mount.h has to come before linux/fs.h due to redefinition of MS_RDONLY, MS_BIND, etc
 #include <sys/mount.h>
 #include <linux/fs.h>
@@ -296,27 +298,23 @@ static void SigChldHandler(int /*signal_number*/) {
   int saved_errno = errno;
 
   while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
-     // Log process-death status that we care about.  In general it is
-     // not safe to call LOG(...) from a signal handler because of
-     // possible reentrancy.  However, we know a priori that the
-     // current implementation of LOG() is safe to call from a SIGCHLD
-     // handler in the zygote process.  If the LOG() implementation
-     // changes its locking strategy or its use of syscalls within the
-     // lazy-init critical section, its use here may become unsafe.
+     // Log process-death status that we care about.
     if (WIFEXITED(status)) {
-      ALOGI("Process %d exited cleanly (%d)", pid, WEXITSTATUS(status));
+      async_safe_format_log(ANDROID_LOG_INFO, LOG_TAG,
+                            "Process %d exited cleanly (%d)", pid, WEXITSTATUS(status));
     } else if (WIFSIGNALED(status)) {
-      ALOGI("Process %d exited due to signal (%d)", pid, WTERMSIG(status));
-      if (WCOREDUMP(status)) {
-        ALOGI("Process %d dumped core.", pid);
-      }
+      async_safe_format_log(ANDROID_LOG_INFO, LOG_TAG,
+                            "Process %d exited due to signal %d (%s)%s", pid,
+                            WTERMSIG(status), strsignal(WTERMSIG(status)),
+                            WCOREDUMP(status) ? "; core dumped" : "");
     }
 
     // If the just-crashed process is the system_server, bring down zygote
     // so that it is restarted by init and system server will be restarted
     // from there.
     if (pid == gSystemServerPid) {
-      ALOGE("Exit zygote because system server (%d) has terminated", pid);
+      async_safe_format_log(ANDROID_LOG_ERROR, LOG_TAG,
+                            "Exit zygote because system server (pid %d) has terminated", pid);
       kill(getpid(), SIGKILL);
     }
 
@@ -329,14 +327,17 @@ static void SigChldHandler(int /*signal_number*/) {
   // Note that we shouldn't consider ECHILD an error because
   // the secondary zygote might have no children left to wait for.
   if (pid < 0 && errno != ECHILD) {
-    ALOGW("Zygote SIGCHLD error in waitpid: %s", strerror(errno));
+    async_safe_format_log(ANDROID_LOG_WARN, LOG_TAG,
+                          "Zygote SIGCHLD error in waitpid: %s", strerror(errno));
   }
 
   if (blastulas_removed > 0) {
     if (write(gBlastulaPoolEventFD, &blastulas_removed, sizeof(blastulas_removed)) == -1) {
       // If this write fails something went terribly wrong.  We will now kill
       // the zygote and let the system bring it back up.
-      ALOGE("Zygote failed to write to blastula pool event FD: %s", strerror(errno));
+      async_safe_format_log(ANDROID_LOG_ERROR, LOG_TAG,
+                            "Zygote failed to write to blastula pool event FD: %s",
+                            strerror(errno));
       kill(getpid(), SIGKILL);
     }
   }
