@@ -21,16 +21,18 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
-import android.os.Message;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IPhoneStateListener;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * A listener class for monitoring changes in specific telephony states
@@ -320,7 +322,12 @@ public class PhoneStateListener {
     @UnsupportedAppUsage
     protected Integer mSubId;
 
-    private final Handler mHandler;
+    /**
+     * @hide
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @UnsupportedAppUsage
+    public final IPhoneStateListener callback;
 
     /**
      * Create a PhoneStateListener for the Phone with the default subscription.
@@ -358,95 +365,27 @@ public class PhoneStateListener {
      */
     @UnsupportedAppUsage
     public PhoneStateListener(Integer subId, Looper looper) {
-        if (DBG) log("ctor: subId=" + subId + " looper=" + looper);
+        this(subId, new HandlerExecutor(new Handler(looper)));
+    }
+
+    /**
+     * Create a PhoneStateListener for the Phone using the specified Executor
+     *
+     * <p>Create a PhoneStateListener with a specified Executor for handling necessary callbacks.
+     * The Executor must not be null.
+     *
+     * @param executor a non-null Executor that will execute callbacks for the PhoneStateListener.
+     */
+    public PhoneStateListener(@NonNull Executor executor) {
+        this(null, executor);
+    }
+
+    private PhoneStateListener(Integer subId, Executor e) {
+        if (e == null) {
+            throw new IllegalArgumentException("PhoneStateListener Executor must be non-null");
+        }
         mSubId = subId;
-        mHandler = new Handler(looper) {
-            public void handleMessage(Message msg) {
-                if (DBG) {
-                    log("mSubId=" + mSubId + " what=0x" + Integer.toHexString(msg.what)
-                            + " msg=" + msg);
-                }
-                switch (msg.what) {
-                    case LISTEN_SERVICE_STATE:
-                        PhoneStateListener.this.onServiceStateChanged((ServiceState)msg.obj);
-                        break;
-                    case LISTEN_SIGNAL_STRENGTH:
-                        PhoneStateListener.this.onSignalStrengthChanged(msg.arg1);
-                        break;
-                    case LISTEN_MESSAGE_WAITING_INDICATOR:
-                        PhoneStateListener.this.onMessageWaitingIndicatorChanged(msg.arg1 != 0);
-                        break;
-                    case LISTEN_CALL_FORWARDING_INDICATOR:
-                        PhoneStateListener.this.onCallForwardingIndicatorChanged(msg.arg1 != 0);
-                        break;
-                    case LISTEN_CELL_LOCATION:
-                        PhoneStateListener.this.onCellLocationChanged((CellLocation)msg.obj);
-                        break;
-                    case LISTEN_CALL_STATE:
-                        PhoneStateListener.this.onCallStateChanged(msg.arg1, (String)msg.obj);
-                        break;
-                    case LISTEN_DATA_CONNECTION_STATE:
-                        PhoneStateListener.this.onDataConnectionStateChanged(msg.arg1, msg.arg2);
-                        PhoneStateListener.this.onDataConnectionStateChanged(msg.arg1);
-                        break;
-                    case LISTEN_DATA_ACTIVITY:
-                        PhoneStateListener.this.onDataActivity(msg.arg1);
-                        break;
-                    case LISTEN_SIGNAL_STRENGTHS:
-                        PhoneStateListener.this.onSignalStrengthsChanged((SignalStrength)msg.obj);
-                        break;
-                    case LISTEN_OTASP_CHANGED:
-                        PhoneStateListener.this.onOtaspChanged(msg.arg1);
-                        break;
-                    case LISTEN_CELL_INFO:
-                        PhoneStateListener.this.onCellInfoChanged((List<CellInfo>)msg.obj);
-                        break;
-                    case LISTEN_PRECISE_CALL_STATE:
-                        PhoneStateListener.this.onPreciseCallStateChanged((PreciseCallState)msg.obj);
-                        break;
-                    case LISTEN_PRECISE_DATA_CONNECTION_STATE:
-                        PhoneStateListener.this.onPreciseDataConnectionStateChanged(
-                                (PreciseDataConnectionState)msg.obj);
-                        break;
-                    case LISTEN_DATA_CONNECTION_REAL_TIME_INFO:
-                        PhoneStateListener.this.onDataConnectionRealTimeInfoChanged(
-                                (DataConnectionRealTimeInfo)msg.obj);
-                        break;
-                    case LISTEN_SRVCC_STATE_CHANGED:
-                        PhoneStateListener.this.onSrvccStateChanged((int) msg.obj);
-                        break;
-                    case LISTEN_VOICE_ACTIVATION_STATE:
-                        PhoneStateListener.this.onVoiceActivationStateChanged((int)msg.obj);
-                        break;
-                    case LISTEN_DATA_ACTIVATION_STATE:
-                        PhoneStateListener.this.onDataActivationStateChanged((int)msg.obj);
-                        break;
-                    case LISTEN_USER_MOBILE_DATA_STATE:
-                        PhoneStateListener.this.onUserMobileDataStateChanged((boolean)msg.obj);
-                        break;
-                    case LISTEN_OEM_HOOK_RAW_EVENT:
-                        PhoneStateListener.this.onOemHookRawEvent((byte[])msg.obj);
-                        break;
-                    case LISTEN_CARRIER_NETWORK_CHANGE:
-                        PhoneStateListener.this.onCarrierNetworkChange((boolean)msg.obj);
-                        break;
-                    case LISTEN_PHYSICAL_CHANNEL_CONFIGURATION:
-                        PhoneStateListener.this.onPhysicalChannelConfigurationChanged(
-                                (List<PhysicalChannelConfig>)msg.obj);
-                        break;
-                    case LISTEN_PHONE_CAPABILITY_CHANGE:
-                        PhoneStateListener.this.onPhoneCapabilityChanged(
-                                (PhoneCapability) msg.obj);
-                        break;
-                    case LISTEN_PREFERRED_DATA_SUBID_CHANGE:
-                        PhoneStateListener.this.onPreferredDataSubIdChanged((int) msg.obj);
-                        break;
-                    case LISTEN_RADIO_POWER_STATE_CHANGED:
-                        PhoneStateListener.this.onRadioPowerStateChanged((int) msg.obj);
-                        break;
-                }
-            }
-        };
+        callback = new IPhoneStateListenerStub(this, e);
     }
 
     /**
@@ -735,125 +674,215 @@ public class PhoneStateListener {
      */
     private static class IPhoneStateListenerStub extends IPhoneStateListener.Stub {
         private WeakReference<PhoneStateListener> mPhoneStateListenerWeakRef;
+        private Executor mExecutor;
 
-        public IPhoneStateListenerStub(PhoneStateListener phoneStateListener) {
+        IPhoneStateListenerStub(PhoneStateListener phoneStateListener, Executor executor) {
             mPhoneStateListenerWeakRef = new WeakReference<PhoneStateListener>(phoneStateListener);
-        }
-
-        private void send(int what, int arg1, int arg2, Object obj) {
-            PhoneStateListener listener = mPhoneStateListenerWeakRef.get();
-            if (listener != null) {
-                Message.obtain(listener.mHandler, what, arg1, arg2, obj).sendToTarget();
-            }
+            mExecutor = executor;
         }
 
         public void onServiceStateChanged(ServiceState serviceState) {
-            send(LISTEN_SERVICE_STATE, 0, 0, serviceState);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onServiceStateChanged(serviceState)));
         }
 
         public void onSignalStrengthChanged(int asu) {
-            send(LISTEN_SIGNAL_STRENGTH, asu, 0, null);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onSignalStrengthChanged(asu)));
         }
 
         public void onMessageWaitingIndicatorChanged(boolean mwi) {
-            send(LISTEN_MESSAGE_WAITING_INDICATOR, mwi ? 1 : 0, 0, null);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onMessageWaitingIndicatorChanged(mwi)));
         }
 
         public void onCallForwardingIndicatorChanged(boolean cfi) {
-            send(LISTEN_CALL_FORWARDING_INDICATOR, cfi ? 1 : 0, 0, null);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onCallForwardingIndicatorChanged(cfi)));
         }
 
         public void onCellLocationChanged(Bundle bundle) {
             CellLocation location = CellLocation.newFromBundle(bundle);
-            send(LISTEN_CELL_LOCATION, 0, 0, location);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onCellLocationChanged(location)));
         }
 
         public void onCallStateChanged(int state, String incomingNumber) {
-            send(LISTEN_CALL_STATE, state, 0, incomingNumber);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onCallStateChanged(state, incomingNumber)));
         }
 
         public void onDataConnectionStateChanged(int state, int networkType) {
-            send(LISTEN_DATA_CONNECTION_STATE, state, networkType, null);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onDataConnectionStateChanged(state, networkType)));
         }
 
         public void onDataActivity(int direction) {
-            send(LISTEN_DATA_ACTIVITY, direction, 0, null);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onDataActivity(direction)));
         }
 
         public void onSignalStrengthsChanged(SignalStrength signalStrength) {
-            send(LISTEN_SIGNAL_STRENGTHS, 0, 0, signalStrength);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onSignalStrengthsChanged(signalStrength)));
         }
 
         public void onOtaspChanged(int otaspMode) {
-            send(LISTEN_OTASP_CHANGED, otaspMode, 0, null);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onOtaspChanged(otaspMode)));
         }
 
         public void onCellInfoChanged(List<CellInfo> cellInfo) {
-            send(LISTEN_CELL_INFO, 0, 0, cellInfo);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onCellInfoChanged(cellInfo)));
         }
 
         public void onPreciseCallStateChanged(PreciseCallState callState) {
-            send(LISTEN_PRECISE_CALL_STATE, 0, 0, callState);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onPreciseCallStateChanged(callState)));
         }
 
         public void onPreciseDataConnectionStateChanged(
                 PreciseDataConnectionState dataConnectionState) {
-            send(LISTEN_PRECISE_DATA_CONNECTION_STATE, 0, 0, dataConnectionState);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onPreciseDataConnectionStateChanged(dataConnectionState)));
         }
 
-        public void onDataConnectionRealTimeInfoChanged(
-                DataConnectionRealTimeInfo dcRtInfo) {
-            send(LISTEN_DATA_CONNECTION_REAL_TIME_INFO, 0, 0, dcRtInfo);
+        public void onDataConnectionRealTimeInfoChanged(DataConnectionRealTimeInfo dcRtInfo) {
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onDataConnectionRealTimeInfoChanged(dcRtInfo)));
         }
 
         public void onSrvccStateChanged(int state) {
-            send(LISTEN_SRVCC_STATE_CHANGED, 0, 0, state);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onSrvccStateChanged(state)));
         }
 
         public void onVoiceActivationStateChanged(int activationState) {
-            send(LISTEN_VOICE_ACTIVATION_STATE, 0, 0, activationState);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onVoiceActivationStateChanged(activationState)));
         }
 
         public void onDataActivationStateChanged(int activationState) {
-            send(LISTEN_DATA_ACTIVATION_STATE, 0, 0, activationState);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onDataActivationStateChanged(activationState)));
         }
 
         public void onUserMobileDataStateChanged(boolean enabled) {
-            send(LISTEN_USER_MOBILE_DATA_STATE, 0, 0, enabled);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onUserMobileDataStateChanged(enabled)));
         }
 
         public void onOemHookRawEvent(byte[] rawData) {
-            send(LISTEN_OEM_HOOK_RAW_EVENT, 0, 0, rawData);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onOemHookRawEvent(rawData)));
         }
 
         public void onCarrierNetworkChange(boolean active) {
-            send(LISTEN_CARRIER_NETWORK_CHANGE, 0, 0, active);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onCarrierNetworkChange(active)));
         }
 
         public void onPhysicalChannelConfigurationChanged(List<PhysicalChannelConfig> configs) {
-            send(LISTEN_PHYSICAL_CHANNEL_CONFIGURATION, 0, 0, configs);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onPhysicalChannelConfigurationChanged(configs)));
         }
 
         public void onPhoneCapabilityChanged(PhoneCapability capability) {
-            send(LISTEN_PHONE_CAPABILITY_CHANGE, 0, 0, capability);
-        }
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
 
-        public void onPreferredDataSubIdChanged(int subId) {
-            send(LISTEN_PREFERRED_DATA_SUBID_CHANGE, 0, 0, subId);
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onPhoneCapabilityChanged(capability)));
         }
 
         public void onRadioPowerStateChanged(@TelephonyManager.RadioPowerState int state) {
-            send(LISTEN_RADIO_POWER_STATE_CHANGED, 0, 0, state);
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onRadioPowerStateChanged(state)));
         }
 
+        public void onPreferredDataSubIdChanged(int subId) {
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onPreferredDataSubIdChanged(subId)));
+        }
     }
 
-    /**
-     * @hide
-     */
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    @UnsupportedAppUsage
-    public final IPhoneStateListener callback = new IPhoneStateListenerStub(this);
 
     private void log(String s) {
         Rlog.d(LOG_TAG, s);
