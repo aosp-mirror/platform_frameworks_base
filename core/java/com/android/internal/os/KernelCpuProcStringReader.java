@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -59,6 +60,7 @@ public class KernelCpuProcStringReader {
     private static final String PROC_UID_FREQ_TIME = "/proc/uid_time_in_state";
     private static final String PROC_UID_ACTIVE_TIME = "/proc/uid_concurrent_active_time";
     private static final String PROC_UID_CLUSTER_TIME = "/proc/uid_concurrent_policy_time";
+    private static final String PROC_UID_USER_SYS_TIME = "/proc/uid_cputime/show_uid_stat";
 
     private static final KernelCpuProcStringReader FREQ_TIME_READER =
             new KernelCpuProcStringReader(PROC_UID_FREQ_TIME);
@@ -66,17 +68,23 @@ public class KernelCpuProcStringReader {
             new KernelCpuProcStringReader(PROC_UID_ACTIVE_TIME);
     private static final KernelCpuProcStringReader CLUSTER_TIME_READER =
             new KernelCpuProcStringReader(PROC_UID_CLUSTER_TIME);
+    private static final KernelCpuProcStringReader USER_SYS_TIME_READER =
+            new KernelCpuProcStringReader(PROC_UID_USER_SYS_TIME);
 
-    public static KernelCpuProcStringReader getFreqTimeReaderInstance() {
+    static KernelCpuProcStringReader getFreqTimeReaderInstance() {
         return FREQ_TIME_READER;
     }
 
-    public static KernelCpuProcStringReader getActiveTimeReaderInstance() {
+    static KernelCpuProcStringReader getActiveTimeReaderInstance() {
         return ACTIVE_TIME_READER;
     }
 
-    public static KernelCpuProcStringReader getClusterTimeReaderInstance() {
+    static KernelCpuProcStringReader getClusterTimeReaderInstance() {
         return CLUSTER_TIME_READER;
+    }
+
+    static KernelCpuProcStringReader getUserSysTimeReaderInstance() {
+        return USER_SYS_TIME_READER;
     }
 
     private int mErrors = 0;
@@ -164,12 +172,12 @@ public class KernelCpuProcStringReader {
             // ReentrantReadWriteLock allows lock downgrading.
             mReadLock.lock();
             return new ProcFileIterator(total);
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException | NoSuchFileException e) {
             mErrors++;
             Slog.w(TAG, "File not found. It's normal if not implemented: " + mFile);
         } catch (IOException e) {
             mErrors++;
-            Slog.e(TAG, "Error reading: " + mFile, e);
+            Slog.e(TAG, "Error reading " + mFile, e);
         } finally {
             StrictMode.setThreadPolicyMask(oldMask);
             mWriteLock.unlock();
@@ -193,6 +201,11 @@ public class KernelCpuProcStringReader {
             mSize = size;
         }
 
+        /** @return Whether there are more lines in the iterator. */
+        public boolean hasNextLine() {
+            return mPos < mSize;
+        }
+
         /**
          * Fetches the next line. Note that all subsequent return values share the same char[]
          * under the hood.
@@ -214,44 +227,6 @@ public class KernelCpuProcStringReader {
             return CharBuffer.wrap(mBuf, start, i - start);
         }
 
-        /**
-         * Fetches the next line, converts all numbers into long, and puts into the given long[].
-         * To avoid GC, caller should try to use the same array for all calls. All non-numeric
-         * chars are treated as delimiters. All numbers are non-negative.
-         *
-         * @param array An array to store the parsed numbers.
-         * @return The number of elements written to the given array. -1 if there is no more line.
-         */
-        public int nextLineAsArray(long[] array) {
-            CharBuffer buf = nextLine();
-            if (buf == null) {
-                return -1;
-            }
-            int count = 0;
-            long num = -1;
-            char c;
-
-            while (buf.remaining() > 0 && count < array.length) {
-                c = buf.get();
-                if (num < 0) {
-                    if (isNumber(c)) {
-                        num = c - '0';
-                    }
-                } else {
-                    if (isNumber(c)) {
-                        num = num * 10 + c - '0';
-                    } else {
-                        array[count++] = num;
-                        num = -1;
-                    }
-                }
-            }
-            if (num >= 0) {
-                array[count++] = num;
-            }
-            return count;
-        }
-
         /** Total size of the proc file in chars. */
         public int size() {
             return mSize;
@@ -262,8 +237,63 @@ public class KernelCpuProcStringReader {
             mReadLock.unlock();
         }
 
-        private boolean isNumber(char c) {
-            return c >= '0' && c <= '9';
+
+    }
+
+    /**
+     * Converts all numbers in the CharBuffer into longs, and puts into the given long[].
+     *
+     * Space and colon are treated as delimiters. All other chars are not allowed. All numbers
+     * are non-negative. To avoid GC, caller should try to use the same array for all calls.
+     *
+     * This method also resets the given buffer to the original position before return so that
+     * it can be read again.
+     *
+     * @param buf   The char buffer to be converted.
+     * @param array An array to store the parsed numbers.
+     * @return The number of elements written to the given array. -1 if buf is null, -2 if buf
+     * contains invalid char, -3 if any number overflows.
+     */
+    public static int asLongs(CharBuffer buf, long[] array) {
+        if (buf == null) {
+            return -1;
         }
+        final int initialPos = buf.position();
+        int count = 0;
+        long num = -1;
+        char c;
+
+        while (buf.remaining() > 0 && count < array.length) {
+            c = buf.get();
+            if (!(isNumber(c) || c == ' ' || c == ':')) {
+                buf.position(initialPos);
+                return -2;
+            }
+            if (num < 0) {
+                if (isNumber(c)) {
+                    num = c - '0';
+                }
+            } else {
+                if (isNumber(c)) {
+                    num = num * 10 + c - '0';
+                    if (num < 0) {
+                        buf.position(initialPos);
+                        return -3;
+                    }
+                } else {
+                    array[count++] = num;
+                    num = -1;
+                }
+            }
+        }
+        if (num >= 0) {
+            array[count++] = num;
+        }
+        buf.position(initialPos);
+        return count;
+    }
+
+    private static boolean isNumber(char c) {
+        return c >= '0' && c <= '9';
     }
 }
