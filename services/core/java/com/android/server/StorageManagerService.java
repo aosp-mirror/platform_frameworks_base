@@ -2602,24 +2602,35 @@ class StorageManagerService extends IStorageManager.Stub
     class AppFuseMountScope extends AppFuseBridge.MountScope {
         boolean opened = false;
 
-        public AppFuseMountScope(int uid, int pid, int mountId) {
-            super(uid, pid, mountId);
+        public AppFuseMountScope(int uid, int mountId) {
+            super(uid, mountId);
         }
 
         @Override
         public ParcelFileDescriptor open() throws NativeDaemonConnectorException {
             try {
                 return new ParcelFileDescriptor(
-                        mVold.mountAppFuse(uid, Process.myPid(), mountId));
+                        mVold.mountAppFuse(uid, mountId));
             } catch (Exception e) {
                 throw new NativeDaemonConnectorException("Failed to mount", e);
             }
         }
 
         @Override
+        public ParcelFileDescriptor openFile(int mountId, int fileId, int flags)
+                throws NativeDaemonConnectorException {
+            try {
+                return new ParcelFileDescriptor(
+                        mVold.openAppFuseFile(uid, mountId, fileId, flags));
+            } catch (Exception e) {
+                throw new NativeDaemonConnectorException("Failed to open", e);
+            }
+        }
+
+        @Override
         public void close() throws Exception {
             if (opened) {
-                mVold.unmountAppFuse(uid, Process.myPid(), mountId);
+                mVold.unmountAppFuse(uid, mountId);
                 opened = false;
             }
         }
@@ -2629,7 +2640,6 @@ class StorageManagerService extends IStorageManager.Stub
     public @Nullable AppFuseMount mountProxyFileDescriptorBridge() {
         Slog.v(TAG, "mountProxyFileDescriptorBridge");
         final int uid = Binder.getCallingUid();
-        final int pid = Binder.getCallingPid();
 
         while (true) {
             synchronized (mAppFuseLock) {
@@ -2643,7 +2653,7 @@ class StorageManagerService extends IStorageManager.Stub
                     final int name = mNextAppFuseName++;
                     try {
                         return new AppFuseMount(
-                            name, mAppFuseBridge.addBridge(new AppFuseMountScope(uid, pid, name)));
+                            name, mAppFuseBridge.addBridge(new AppFuseMountScope(uid, name)));
                     } catch (FuseUnavailableMountException e) {
                         if (newlyCreated) {
                             // If newly created bridge fails, it's a real error.
@@ -2664,14 +2674,13 @@ class StorageManagerService extends IStorageManager.Stub
     public @Nullable ParcelFileDescriptor openProxyFileDescriptor(
             int mountId, int fileId, int mode) {
         Slog.v(TAG, "mountProxyFileDescriptor");
-        final int pid = Binder.getCallingPid();
         try {
             synchronized (mAppFuseLock) {
                 if (mAppFuseBridge == null) {
                     Slog.e(TAG, "FuseBridge has not been created");
                     return null;
                 }
-                return mAppFuseBridge.openFile(pid, mountId, fileId, mode);
+                return mAppFuseBridge.openFile(mountId, fileId, mode);
             }
         } catch (FuseUnavailableMountException | InterruptedException error) {
             Slog.v(TAG, "The mount point has already been invalid", error);
