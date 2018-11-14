@@ -24,20 +24,20 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
+import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
+
 import java.util.ArrayList;
 
 public class DemoStatusIcons extends StatusIconContainer implements DemoMode, DarkReceiver {

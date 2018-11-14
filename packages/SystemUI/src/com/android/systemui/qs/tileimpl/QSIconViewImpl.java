@@ -34,8 +34,8 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
-
 import com.android.systemui.qs.AlphaControlledSignalTileView.AlphaControlledSlashImageView;
+
 import java.util.Objects;
 
 public class QSIconViewImpl extends QSIconView {

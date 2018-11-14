@@ -23,13 +23,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
-import androidx.core.view.ViewCompat;
-import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerView.ItemDecoration;
-import androidx.recyclerview.widget.RecyclerView.State;
-import androidx.recyclerview.widget.RecyclerView.ViewHolder;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,6 +31,14 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+
+import androidx.core.view.ViewCompat;
+import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.ItemDecoration;
+import androidx.recyclerview.widget.RecyclerView.State;
+import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;

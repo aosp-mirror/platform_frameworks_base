@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
+
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.shared.system.WindowManagerWrapper;

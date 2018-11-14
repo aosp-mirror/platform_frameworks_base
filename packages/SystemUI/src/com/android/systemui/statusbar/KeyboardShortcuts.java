@@ -62,11 +62,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import com.android.internal.app.AssistUtils;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;

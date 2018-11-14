@@ -14,6 +14,10 @@
 
 package com.android.systemui;
 
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_NONE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -32,10 +36,6 @@ import android.widget.LinearLayout;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.leak.RotationUtils;
-
-import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
-import static com.android.systemui.util.leak.RotationUtils.ROTATION_NONE;
-import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
 
 public class HardwareUiLayout extends LinearLayout implements Tunable {
 

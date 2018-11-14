@@ -35,6 +35,7 @@ import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
+
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.pip.BasePipManager;
@@ -42,6 +43,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+
 import java.io.PrintWriter;
 
 /**

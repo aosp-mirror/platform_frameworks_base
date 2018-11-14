@@ -34,7 +34,6 @@ import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.os.RemoteException;
-
 import android.util.FloatProperty;
 import android.util.Log;
 import android.view.MotionEvent;

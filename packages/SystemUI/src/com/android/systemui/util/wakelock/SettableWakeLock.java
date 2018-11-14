@@ -16,9 +16,6 @@
 
 package com.android.systemui.util.wakelock;
 
-import android.os.Handler;
-import android.os.PowerManager;
-
 import com.android.internal.util.Preconditions;
 
 public class SettableWakeLock {

@@ -20,7 +20,6 @@ import android.service.quicksettings.Tile;
 import android.widget.ImageView;
 
 import com.android.settingslib.graph.SignalDrawable;
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.Icon;
 import com.android.systemui.plugins.qs.QSTile.State;

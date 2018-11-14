@@ -34,8 +34,8 @@ import android.content.ServiceConnection;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -65,16 +65,16 @@ import androidx.car.widget.ListItemProvider.ListProvider;
 import androidx.car.widget.PagedListView;
 import androidx.car.widget.SeekbarListItem;
 
-import java.util.Iterator;
+import com.android.systemui.R;
+import com.android.systemui.plugins.VolumeDialog;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
-import com.android.systemui.R;
-import com.android.systemui.plugins.VolumeDialog;
 
 /**
  * Car version of the volume dialog.

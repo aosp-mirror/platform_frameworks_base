@@ -16,7 +16,8 @@
 
 package com.android.systemui.stackdivider;
 
-import static com.android.systemui.stackdivider.ForcedResizableInfoActivity.EXTRA_FORCED_RESIZEABLE_REASON;
+import static com.android.systemui.stackdivider.ForcedResizableInfoActivity
+        .EXTRA_FORCED_RESIZEABLE_REASON;
 
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -25,6 +26,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.widget.Toast;
+
 import com.android.systemui.R;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;

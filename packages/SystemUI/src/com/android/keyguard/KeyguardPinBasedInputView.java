@@ -23,8 +23,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 /**
  * A Pin based Keyguard input view
  */

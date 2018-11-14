@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -25,9 +24,9 @@ import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.util.Log;

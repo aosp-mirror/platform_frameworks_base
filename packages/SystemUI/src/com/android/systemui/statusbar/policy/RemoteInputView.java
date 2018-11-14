@@ -55,8 +55,8 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.RemoteInputController;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 

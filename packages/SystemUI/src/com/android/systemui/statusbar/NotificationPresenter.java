@@ -16,11 +16,8 @@
 package com.android.systemui.statusbar;
 
 import android.content.Intent;
-import android.os.Handler;
-import android.view.View;
 
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;

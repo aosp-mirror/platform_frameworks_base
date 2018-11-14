@@ -33,10 +33,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Audio.AudioColumns;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
 import com.android.systemui.SystemUI;
 
 import java.io.FileDescriptor;

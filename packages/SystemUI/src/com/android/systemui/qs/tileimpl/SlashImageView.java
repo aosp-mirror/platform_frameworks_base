@@ -17,8 +17,9 @@ package com.android.systemui.qs.tileimpl;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
 import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.plugins.qs.QSTile.SlashState;

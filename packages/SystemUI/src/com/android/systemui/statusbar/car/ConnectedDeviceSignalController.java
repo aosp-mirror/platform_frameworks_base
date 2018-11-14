@@ -1,5 +1,7 @@
 package com.android.systemui.statusbar.car;
 
+import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadsetClient;
@@ -9,20 +11,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.telephony.SignalStrength;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
+
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ScalingDrawableWrapper;
 import com.android.systemui.statusbar.policy.BluetoothController;
-
-import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
 
 /**
  * Controller that monitors signal strength for a device that is connected via bluetooth.

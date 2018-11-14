@@ -17,16 +17,7 @@
 package com.android.systemui.chooser;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.util.Log;
-
-import com.android.systemui.R;
-
-import java.lang.Thread;
-import java.util.ArrayList;
 
 /**
  * Activity for selecting which application ought to handle an ACTION_SEND intent.

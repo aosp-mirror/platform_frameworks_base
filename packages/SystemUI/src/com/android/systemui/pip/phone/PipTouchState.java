@@ -18,7 +18,6 @@ package com.android.systemui.pip.phone;
 
 import android.graphics.PointF;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;

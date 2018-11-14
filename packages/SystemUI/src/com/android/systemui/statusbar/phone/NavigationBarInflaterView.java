@@ -14,6 +14,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -34,11 +36,11 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider;
+import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.ReverseLinearLayout.ReverseRelativeLayout;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.tuner.TunerService;
@@ -47,8 +49,6 @@ import com.android.systemui.tuner.TunerService.Tunable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 public class NavigationBarInflaterView extends FrameLayout
         implements Tunable, PluginListener<NavBarButtonProvider> {

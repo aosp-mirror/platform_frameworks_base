@@ -33,13 +33,13 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationHeaderUtil;
+import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.HybridGroupManager;
 import com.android.systemui.statusbar.notification.row.HybridNotificationView;
-import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
 
 import java.util.ArrayList;
 import java.util.List;

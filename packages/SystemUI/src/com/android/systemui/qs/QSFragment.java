@@ -22,8 +22,6 @@ import android.app.Fragment;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -34,6 +32,9 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout.LayoutParams;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -42,9 +43,9 @@ import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
-import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     private static final String TAG = "QS";

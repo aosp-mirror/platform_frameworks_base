@@ -28,11 +28,11 @@ import android.widget.Button;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 

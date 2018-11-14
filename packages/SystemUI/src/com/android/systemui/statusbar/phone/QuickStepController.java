@@ -42,10 +42,10 @@ import android.view.ViewPropertyAnimator;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
-import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.R;
-import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.NavigationBarCompat;

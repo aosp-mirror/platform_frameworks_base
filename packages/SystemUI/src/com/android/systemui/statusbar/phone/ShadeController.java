@@ -15,6 +15,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.view.View;
+
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 

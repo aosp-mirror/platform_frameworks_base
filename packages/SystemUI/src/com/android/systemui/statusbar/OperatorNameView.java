@@ -15,10 +15,9 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.graphics.Rect;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.text.TextUtils;

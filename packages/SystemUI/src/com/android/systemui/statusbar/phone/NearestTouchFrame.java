@@ -16,17 +16,14 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Rect;
-import androidx.annotation.VisibleForTesting;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.android.systemui.R;
+import androidx.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Comparator;

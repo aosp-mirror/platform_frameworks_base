@@ -37,11 +37,11 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.CrossFadeHelper;
+import com.android.systemui.statusbar.TransformableView;
+import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.notification.ImageTransformState;
 import com.android.systemui.statusbar.notification.TransformState;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.TransformableView;
-import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.notification.row.HybridNotificationView;
 
 /**

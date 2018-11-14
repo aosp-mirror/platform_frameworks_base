@@ -16,22 +16,23 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater
+        .FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.util.ArrayMap;
 import android.provider.Settings;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlertingNotificationManager;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

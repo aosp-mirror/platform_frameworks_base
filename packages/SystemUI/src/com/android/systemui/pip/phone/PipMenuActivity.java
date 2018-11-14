@@ -23,15 +23,14 @@ import static android.provider.Settings.ACTION_PICTURE_IN_PICTURE_SETTINGS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ACTIONS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ALLOW_TIMEOUT;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_CONTROLLER_MESSENGER;
-import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_WILL_RESIZE_MENU;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_DISMISS_FRACTION;
-import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MOVEMENT_BOUNDS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MENU_STATE;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MOVEMENT_BOUNDS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_STACK_BOUNDS;
-
-import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_WILL_RESIZE_MENU;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_CLOSE;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_FULL;
+import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

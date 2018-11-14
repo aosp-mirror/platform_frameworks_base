@@ -19,6 +19,7 @@ package com.android.systemui.keyguard;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
+
 import java.util.ArrayList;
 
 /**

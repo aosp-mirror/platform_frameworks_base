@@ -14,8 +14,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.content.Context;
-
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 
 public interface DeviceProvisionedController extends CallbackController<DeviceProvisionedListener> {

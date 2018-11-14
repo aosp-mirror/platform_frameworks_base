@@ -19,7 +19,6 @@ package com.android.systemui.usb;
 import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.Notification.Action;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;

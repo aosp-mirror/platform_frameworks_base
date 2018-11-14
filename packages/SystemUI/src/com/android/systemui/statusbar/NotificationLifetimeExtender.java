@@ -1,8 +1,8 @@
 package com.android.systemui.statusbar;
 
-import com.android.systemui.statusbar.notification.NotificationData;
-
 import androidx.annotation.NonNull;
+
+import com.android.systemui.statusbar.notification.NotificationData;
 
 /**
  * Interface for anything that may need to keep notifications managed even after

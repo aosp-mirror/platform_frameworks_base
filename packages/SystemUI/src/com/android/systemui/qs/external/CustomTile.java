@@ -15,6 +15,9 @@
  */
 package com.android.systemui.qs.external;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
+
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -41,13 +44,11 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile.State;
-import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import com.android.systemui.qs.QSTileHost;
-import java.util.Objects;
+import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
+import java.util.Objects;
 
 public class CustomTile extends QSTileImpl<State> implements TileChangeListener {
     public static final String PREFIX = "custom(";

@@ -28,10 +28,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
-import androidx.annotation.NonNull;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.Dependency;
