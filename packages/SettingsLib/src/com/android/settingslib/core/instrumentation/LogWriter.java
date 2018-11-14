@@ -51,7 +51,7 @@ public interface LogWriter {
     /**
      * Logs an user action.
      */
-    void action(Context context, int category, String pkg, Pair<Integer, Object>... taggedData);
+    void action(Context context, int category, String pkg);
 
     /**
      * Generically log action.
