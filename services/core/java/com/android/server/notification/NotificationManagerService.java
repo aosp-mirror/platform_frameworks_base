@@ -885,6 +885,9 @@ public class NotificationManagerService extends SystemService {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
                     r.recordDirectReplied();
+                    mMetricsLogger.write(r.getLogMaker()
+                            .setCategory(MetricsEvent.NOTIFICATION_DIRECT_REPLY_ACTION)
+                            .setType(MetricsEvent.TYPE_ACTION));
                     reportUserInteraction(r);
                 }
             }
