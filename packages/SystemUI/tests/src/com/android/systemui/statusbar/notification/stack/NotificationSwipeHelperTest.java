@@ -44,6 +44,7 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.Snoo
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,6 +56,7 @@ import org.mockito.stubbing.Answer;
  * Tests for {@link NotificationSwipeHelper}.
  */
 @SmallTest
+@Ignore
 @RunWith(AndroidJUnit4.class)
 @UiThreadTest
 public class NotificationSwipeHelperTest extends SysuiTestCase {

@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -92,10 +93,12 @@ public final class TextLinks implements Parcelable {
 
     private final String mFullText;
     private final List<TextLink> mLinks;
+    private final Bundle mExtras;
 
-    private TextLinks(String fullText, ArrayList<TextLink> links) {
+    private TextLinks(String fullText, ArrayList<TextLink> links, Bundle extras) {
         mFullText = fullText;
         mLinks = Collections.unmodifiableList(links);
+        mExtras = extras;
     }
 
     /**
@@ -113,6 +116,18 @@ public final class TextLinks implements Parcelable {
     @NonNull
     public Collection<TextLink> getLinks() {
         return mLinks;
+    }
+
+    /**
+     * Returns the extended data.
+     *
+     * <p><b>NOTE: </b>Each call to this method returns a new bundle copy so clients should
+     * prefer to hold a reference to the returned bundle rather than frequently calling this
+     * method.
+     */
+    @NonNull
+    public Bundle getExtras() {
+        return mExtras.deepCopy();
     }
 
     /**
@@ -158,6 +173,7 @@ public final class TextLinks implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mFullText);
         dest.writeTypedList(mLinks);
+        dest.writeBundle(mExtras);
     }
 
     public static final Parcelable.Creator<TextLinks> CREATOR =
@@ -176,6 +192,7 @@ public final class TextLinks implements Parcelable {
     private TextLinks(Parcel in) {
         mFullText = in.readString();
         mLinks = in.createTypedArrayList(TextLink.CREATOR);
+        mExtras = in.readBundle();
     }
 
     /**
@@ -304,18 +321,21 @@ public final class TextLinks implements Parcelable {
         @Nullable private final TextClassifier.EntityConfig mEntityConfig;
         private final boolean mLegacyFallback;
         private String mCallingPackageName;
+        private final Bundle mExtras;
 
         private Request(
                 CharSequence text,
                 LocaleList defaultLocales,
                 TextClassifier.EntityConfig entityConfig,
                 boolean legacyFallback,
-                String callingPackageName) {
+                String callingPackageName,
+                Bundle extras) {
             mText = text;
             mDefaultLocales = defaultLocales;
             mEntityConfig = entityConfig;
             mLegacyFallback = legacyFallback;
             mCallingPackageName = callingPackageName;
+            mExtras = extras;
         }
 
         /**
@@ -362,6 +382,18 @@ public final class TextLinks implements Parcelable {
         }
 
         /**
+         * Returns the extended data.
+         *
+         * <p><b>NOTE: </b>Each call to this method returns a new bundle copy so clients should
+         * prefer to hold a reference to the returned bundle rather than frequently calling this
+         * method.
+         */
+        @NonNull
+        public Bundle getExtras() {
+            return mExtras.deepCopy();
+        }
+
+        /**
          * A builder for building TextLinks requests.
          */
         public static final class Builder {
@@ -372,6 +404,7 @@ public final class TextLinks implements Parcelable {
             @Nullable private TextClassifier.EntityConfig mEntityConfig;
             private boolean mLegacyFallback = true; // Use legacy fall back by default.
             private String mCallingPackageName;
+            @Nullable private Bundle mExtras;
 
             public Builder(@NonNull CharSequence text) {
                 mText = Preconditions.checkNotNull(text);
@@ -431,15 +464,25 @@ public final class TextLinks implements Parcelable {
             }
 
             /**
+             * Sets the extended data.
+             *
+             * @return this builder
+             */
+            public Builder setExtras(@Nullable Bundle extras) {
+                mExtras = extras;
+                return this;
+            }
+
+            /**
              * Builds and returns the request object.
              */
             @NonNull
             public Request build() {
                 return new Request(
                         mText, mDefaultLocales, mEntityConfig,
-                        mLegacyFallback, mCallingPackageName);
+                        mLegacyFallback, mCallingPackageName,
+                        mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
             }
-
         }
 
         /**
@@ -469,6 +512,7 @@ public final class TextLinks implements Parcelable {
                 mEntityConfig.writeToParcel(dest, flags);
             }
             dest.writeString(mCallingPackageName);
+            dest.writeBundle(mExtras);
         }
 
         public static final Parcelable.Creator<Request> CREATOR =
@@ -491,6 +535,7 @@ public final class TextLinks implements Parcelable {
                     ? null : TextClassifier.EntityConfig.CREATOR.createFromParcel(in);
             mLegacyFallback = true;
             mCallingPackageName = in.readString();
+            mExtras = in.readBundle();
         }
     }
 
@@ -575,6 +620,7 @@ public final class TextLinks implements Parcelable {
     public static final class Builder {
         private final String mFullText;
         private final ArrayList<TextLink> mLinks;
+        private Bundle mExtras;
 
         /**
          * Create a new TextLinks.Builder.
@@ -622,13 +668,24 @@ public final class TextLinks implements Parcelable {
         }
 
         /**
+         * Sets the extended data.
+         *
+         * @return this builder
+         */
+        public Builder setExtras(@Nullable Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
+        /**
          * Constructs a TextLinks instance.
          *
          * @return the constructed TextLinks
          */
         @NonNull
         public TextLinks build() {
-            return new TextLinks(mFullText, mLinks);
+            return new TextLinks(mFullText, mLinks,
+                    mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
         }
     }
 }

@@ -15,6 +15,7 @@
 package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
+import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -28,23 +29,29 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.AlarmClock;
+import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Space;
 import android.widget.TextView;
 
 import androidx.annotation.VisibleForTesting;
@@ -57,12 +64,15 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.privacy.OngoingPrivacyDialog;
+import com.android.systemui.privacy.PrivacyItem;
+import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
@@ -70,6 +80,7 @@ import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -125,9 +136,14 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private Clock mClockView;
     private DateView mDateView;
     private OngoingPrivacyChip mPrivacyChip;
+    private Space mSpace;
+    private BatteryMeterView mBatteryRemainingIcon;
+    private TextView mBatteryRemainingText;
+    private boolean mShowBatteryPercentAndEstimate;
 
     private NextAlarmController mAlarmController;
     private ZenModeController mZenController;
+    private PrivacyItemController mPrivacyItemController;
     /** Counts how many times the long press tooltip has been shown to the user. */
     private int mShownCount;
 
@@ -138,16 +154,29 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             updateStatusText();
         }
     };
+    private boolean mHasTopCutout = false;
+
+    private final PercentSettingObserver mPercentSettingObserver =
+            new PercentSettingObserver(new Handler(mContext.getMainLooper()));
 
     /**
      * Runnable for automatically fading out the long press tooltip (as if it were animating away).
      */
     private final Runnable mAutoFadeOutTooltipRunnable = () -> hideLongPressTooltip(false);
 
+    private PrivacyItemController.Callback mPICCallback = new PrivacyItemController.Callback() {
+        @Override
+        public void privacyChanged(List<PrivacyItem> privacyItems) {
+            mPrivacyChip.setPrivacyList(privacyItems);
+            setChipVisibility(!privacyItems.isEmpty());
+        }
+    };
+
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
         mAlarmController = Dependency.get(NextAlarmController.class);
         mZenController = Dependency.get(ZenModeController.class);
+        mPrivacyItemController = new PrivacyItemController(context, mPICCallback);
         mShownCount = getStoredShownCount();
     }
 
@@ -186,14 +215,28 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         // Set the correct tint for the status icons so they contrast
         mIconManager.setTint(fillColor);
 
+        mShowBatteryPercentAndEstimate = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_battery_percentage_setting_available);
+
         mBatteryMeterView = findViewById(R.id.battery);
-        mBatteryMeterView.setForceShowPercent(true);
+        mBatteryMeterView.setPercentShowMode(mShowBatteryPercentAndEstimate
+                ? BatteryMeterView.MODE_ON : BatteryMeterView.MODE_OFF);
         mBatteryMeterView.setOnClickListener(this);
         mClockView = findViewById(R.id.clock);
         mClockView.setOnClickListener(this);
         mDateView = findViewById(R.id.date);
         mPrivacyChip = findViewById(R.id.privacy_chip);
         mPrivacyChip.setOnClickListener(this);
+        mSpace = findViewById(R.id.space);
+
+        // Tint for the battery icons are handled in setupHost()
+        mBatteryRemainingIcon = findViewById(R.id.batteryRemainingIcon);
+        mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_OFF);
+
+        mBatteryRemainingText = findViewById(R.id.batteryRemainingText);
+        mBatteryRemainingText.setTextColor(fillColor);
+
+        updateShowPercent();
     }
 
     private void updateStatusText() {
@@ -205,6 +248,16 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             mStatusSeparator.setVisibility(alarmVisible && ringerVisible ? View.VISIBLE
                     : View.GONE);
             updateTooltipShow();
+        }
+    }
+
+    private void setChipVisibility(boolean chipVisible) {
+        mBatteryMeterView.setVisibility(View.VISIBLE);
+        if (chipVisible) {
+            mPrivacyChip.setVisibility(View.VISIBLE);
+            if (mHasTopCutout) mBatteryMeterView.setVisibility(View.GONE);
+        } else {
+            mPrivacyChip.setVisibility(View.GONE);
         }
     }
 
@@ -342,6 +395,14 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                 .build();
     }
 
+    private void updateBatteryRemainingText() {
+        if (!mShowBatteryPercentAndEstimate) {
+            return;
+        }
+        mBatteryRemainingText.setText(
+                Dependency.get(BatteryController.class).getEstimatedTimeRemainingString());
+    }
+
     public void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
@@ -407,12 +468,16 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         super.onAttachedToWindow();
         Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
         requestApplyInsets();
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mPercentSettingObserver,
+                ActivityManager.getCurrentUser());
     }
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        DisplayCutout cutout = insets.getDisplayCutout();
         Pair<Integer, Integer> padding = PhoneStatusBarView.cornerCutoutMargins(
-                insets.getDisplayCutout(), getDisplay());
+                cutout, getDisplay());
         if (padding == null) {
             mSystemIconsView.setPaddingRelative(
                     getResources().getDimensionPixelSize(R.dimen.status_bar_padding_start), 0,
@@ -421,6 +486,22 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             mSystemIconsView.setPadding(padding.first, 0, padding.second, 0);
 
         }
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mSpace.getLayoutParams();
+        if (cutout != null) {
+            Rect topCutout = cutout.getBoundingRectTop();
+            if (topCutout.isEmpty()) {
+                mHasTopCutout = false;
+                lp.width = 0;
+                mSpace.setVisibility(View.GONE);
+            } else {
+                mHasTopCutout = true;
+                lp.width = topCutout.width();
+                mSpace.setVisibility(View.VISIBLE);
+            }
+        }
+        mSpace.setLayoutParams(lp);
+        // Decide whether to show BatteryMeterView
+        setChipVisibility(mPrivacyChip.getVisibility() == View.VISIBLE);
         return super.onApplyWindowInsets(insets);
     }
 
@@ -429,6 +510,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     public void onDetachedFromWindow() {
         setListening(false);
         Dependency.get(StatusBarIconController.class).removeIconGroup(mIconManager);
+        mContext.getContentResolver().unregisterContentObserver(mPercentSettingObserver);
         super.onDetachedFromWindow();
     }
 
@@ -437,7 +519,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             return;
         }
         mHeaderQsPanel.setListening(listening);
-        mPrivacyChip.setListening(listening);
+        mPrivacyItemController.setListening(listening);
         mListening = listening;
 
         if (listening) {
@@ -445,6 +527,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             mAlarmController.addCallback(this);
             mContext.registerReceiver(mRingerReceiver,
                     new IntentFilter(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
+            updateBatteryRemainingText();
         } else {
             mZenController.removeCallback(this);
             mAlarmController.removeCallback(this);
@@ -614,6 +697,14 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         // Use SystemUI context to get battery meter colors, and let it use the default tint (white)
         mBatteryMeterView.setColorsFromContext(mHost.getContext());
         mBatteryMeterView.onDarkChanged(new Rect(), 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
+
+        Rect tintArea = new Rect(0, 0, 0, 0);
+        int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
+                android.R.attr.colorForeground);
+        float intensity = getColorIntensity(colorForeground);
+        int fillColor = fillColorForIntensity(intensity, getContext());
+        mBatteryRemainingIcon.setColorsFromContext(mHost.getContext());
+        mBatteryRemainingIcon.onDarkChanged(tintArea, intensity, fillColor);
     }
 
     public void setCallback(Callback qsPanelCallback) {
@@ -644,6 +735,41 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) v.getLayoutParams();
             lp.leftMargin = sideMargins;
             lp.rightMargin = sideMargins;
+        }
+    }
+
+    private void updateShowPercent() {
+        final boolean systemSetting = 0 != Settings.System
+                .getIntForUser(getContext().getContentResolver(),
+                        SHOW_BATTERY_PERCENT, 0, ActivityManager.getCurrentUser());
+
+        mShowBatteryPercentAndEstimate = systemSetting;
+
+        updateBatteryViews();
+    }
+
+    private void updateBatteryViews() {
+        if (mShowBatteryPercentAndEstimate) {
+            mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ON);
+            mBatteryRemainingIcon.setVisibility(View.VISIBLE);
+            mBatteryRemainingText.setVisibility(View.VISIBLE);
+            updateBatteryRemainingText();
+        } else {
+            mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_OFF);
+            mBatteryRemainingIcon.setVisibility(View.GONE);
+            mBatteryRemainingText.setVisibility(View.GONE);
+        }
+    }
+
+    private final class PercentSettingObserver extends ContentObserver {
+        PercentSettingObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange, uri);
+            updateShowPercent();
         }
     }
 }

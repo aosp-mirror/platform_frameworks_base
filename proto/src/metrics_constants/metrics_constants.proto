@@ -6584,6 +6584,18 @@ message MetricsEvent {
     // OS: Q
     TOP_LEVEL_PRIVACY = 1587;
 
+    // OPEN: Settings > Sound & notification > Do Not Disturb > See all exceptions >
+    // Allow apps to override
+    // CATEGORY: SETTINGS
+    // OS: Q
+    NOTIFICATION_ZEN_MODE_OVERRIDING_APPS = 1588;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > See all exceptions >
+    // Allow apps to override > Choose app
+    // CATEGORY: SETTINGS
+    // OS: Q
+    NOTIFICATION_ZEN_MODE_OVERRIDING_APP = 1589;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.

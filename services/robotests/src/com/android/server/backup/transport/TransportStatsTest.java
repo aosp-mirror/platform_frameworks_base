@@ -25,17 +25,13 @@ import android.content.ComponentName;
 import android.platform.test.annotations.Presubmit;
 
 import com.android.server.backup.transport.TransportStats.Stats;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderPackages({"com.android.server.backup"})
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class TransportStatsTest {
     private static final double TOLERANCE = 0.0001;

@@ -801,7 +801,7 @@ public class StorageManager {
         try {
             for (VolumeInfo vol : mStorageManager.getVolumes(0)) {
                 if (vol.path != null && FileUtils.contains(vol.path, pathString)
-                        && vol.type != VolumeInfo.TYPE_PUBLIC) {
+                        && vol.type != VolumeInfo.TYPE_PUBLIC && vol.type != VolumeInfo.TYPE_STUB) {
                     // TODO: verify that emulated adopted devices have UUID of
                     // underlying volume
                     try {
@@ -1548,13 +1548,13 @@ public class StorageManager {
      *
      * @hide
      */
-    public File translateAppToSystem(File file, String packageName) {
+    public File translateAppToSystem(File file, int pid, int uid) {
         // We can only translate absolute paths
         if (!file.isAbsolute()) return file;
 
         try {
             return new File(mStorageManager.translateAppToSystem(file.getAbsolutePath(),
-                    packageName, mContext.getUserId()));
+                    pid, uid));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1566,13 +1566,13 @@ public class StorageManager {
      *
      * @hide
      */
-    public File translateSystemToApp(File file, String packageName) {
+    public File translateSystemToApp(File file, int pid, int uid) {
         // We can only translate absolute paths
         if (!file.isAbsolute()) return file;
 
         try {
             return new File(mStorageManager.translateSystemToApp(file.getAbsolutePath(),
-                    packageName, mContext.getUserId()));
+                    pid, uid));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

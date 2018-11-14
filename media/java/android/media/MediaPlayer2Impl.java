@@ -131,6 +131,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     @GuardedBy("mTaskLock")
     private Task mCurrentTask;
 
+    @GuardedBy("mTaskLock")
+    boolean mIsPreviousCommandSeekTo = false;
+    // |mPreviousSeekPos| and |mPreviousSeekMode| are valid only when |mIsPreviousCommandSeekTo|
+    // is true, and they are accessed on |mHandlerThread| only.
+    long mPreviousSeekPos = -1;
+    int mPreviousSeekMode = SEEK_PREVIOUS_SYNC;
+
     @GuardedBy("this")
     private boolean mReleased;
 
@@ -239,15 +246,14 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     final String msg = "Cannot set AudioAttributes to null";
                     throw new IllegalArgumentException(msg);
                 }
-                setParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, attributes);
+                native_setAudioAttributes(attributes);
             }
         });
     }
 
     @Override
     public @NonNull AudioAttributes getAudioAttributes() {
-        AudioAttributes attributes = (AudioAttributes) getParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES);
-        return attributes;
+        return native_getAudioAttributes();
     }
 
     @Override
@@ -927,14 +933,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private native PersistableBundle native_getMetrics();
 
     @Override
-    public native boolean isPlaying();
-
-    @Override
     @NonNull
-    public native BufferingParams getBufferingParams();
+    native BufferingParams getBufferingParams();
 
     @Override
-    public Object setBufferingParams(@NonNull BufferingParams params) {
+    Object setBufferingParams(@NonNull BufferingParams params) {
         return addTask(new Task(CALL_COMPLETED_SET_BUFFERING_PARAMS, false) {
             @Override
             void process() {
@@ -945,42 +948,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     private native void _setBufferingParams(@NonNull BufferingParams params);
-
-    /**
-     * Sets playback rate and audio mode.
-     *
-     * @param rate the ratio between desired playback rate and normal one.
-     * @param audioMode audio playback mode. Must be one of the supported
-     * audio modes.
-     *
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized.
-     * @throws IllegalArgumentException if audioMode is not supported.
-     *
-     * @hide
-     */
-    @Override
-    @NonNull
-    public PlaybackParams easyPlaybackParams(float rate, @PlaybackRateAudioMode int audioMode) {
-        PlaybackParams params = new PlaybackParams();
-        params.allowDefaults();
-        switch (audioMode) {
-        case PLAYBACK_RATE_AUDIO_MODE_DEFAULT:
-            params.setSpeed(rate).setPitch(1.0f);
-            break;
-        case PLAYBACK_RATE_AUDIO_MODE_STRETCH:
-            params.setSpeed(rate).setPitch(1.0f)
-                    .setAudioFallbackMode(params.AUDIO_FALLBACK_MODE_FAIL);
-            break;
-        case PLAYBACK_RATE_AUDIO_MODE_RESAMPLE:
-            params.setSpeed(rate).setPitch(rate);
-            break;
-        default:
-            final String msg = "Audio playback mode " + audioMode + " is not supported";
-            throw new IllegalArgumentException(msg);
-        }
-        return params;
-    }
 
     @Override
     public Object setPlaybackParams(@NonNull PlaybackParams params) {
@@ -995,26 +962,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native void _setPlaybackParams(@NonNull PlaybackParams params);
 
-    /**
-     * Gets the playback params, containing the current playback rate.
-     *
-     * @return the playback params.
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized.
-     */
     @Override
     @NonNull
     public native PlaybackParams getPlaybackParams();
 
-    /**
-     * Sets A/V sync mode.
-     *
-     * @param params the A/V sync params to apply
-     *
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized.
-     * @throws IllegalArgumentException if params are not supported.
-     */
     @Override
     public Object setSyncParams(@NonNull SyncParams params) {
         return addTask(new Task(CALL_COMPLETED_SET_SYNC_PARAMS, false) {
@@ -1028,48 +979,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native void _setSyncParams(@NonNull SyncParams params);
 
-    /**
-     * Gets the A/V sync mode.
-     *
-     * @return the A/V sync params
-     *
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized.
-     */
     @Override
     @NonNull
     public native SyncParams getSyncParams();
 
-    /**
-     * Moves the media to specified time position by considering the given mode.
-     * <p>
-     * When seekTo is finished, the user will be notified via OnSeekComplete supplied by the user.
-     * There is at most one active seekTo processed at any time. If there is a to-be-completed
-     * seekTo, new seekTo requests will be queued in such a way that only the last request
-     * is kept. When current seekTo is completed, the queued request will be processed if
-     * that request is different from just-finished seekTo operation, i.e., the requested
-     * position or mode is different.
-     *
-     * @param msec the offset in milliseconds from the start to seek to.
-     * When seeking to the given time position, there is no guarantee that the data source
-     * has a frame located at the position. When this happens, a frame nearby will be rendered.
-     * If msec is negative, time position zero will be used.
-     * If msec is larger than duration, duration will be used.
-     * @param mode the mode indicating where exactly to seek to.
-     * Use {@link #SEEK_PREVIOUS_SYNC} if one wants to seek to a sync frame
-     * that has a timestamp earlier than or the same as msec. Use
-     * {@link #SEEK_NEXT_SYNC} if one wants to seek to a sync frame
-     * that has a timestamp later than or the same as msec. Use
-     * {@link #SEEK_CLOSEST_SYNC} if one wants to seek to a sync frame
-     * that has a timestamp closest to or the same as msec. Use
-     * {@link #SEEK_CLOSEST} if one wants to seek to a frame that may
-     * or may not be a sync frame but is closest to or the same as msec.
-     * {@link #SEEK_CLOSEST} often has larger performance overhead compared
-     * to the other options if there is no sync frame located at msec.
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized
-     * @throws IllegalArgumentException if the mode is invalid.
-     */
     @Override
     public Object seekTo(final long msec, @SeekMode int mode) {
         return addTask(new Task(CALL_COMPLETED_SEEK_TO, true) {
@@ -1090,7 +1003,23 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                             + Integer.MIN_VALUE);
                     posMs = Integer.MIN_VALUE;
                 }
+
+                synchronized (mTaskLock) {
+                    if (mIsPreviousCommandSeekTo
+                            && mPreviousSeekPos == posMs
+                            && mPreviousSeekMode == mode) {
+                        throw new CommandSkippedException(
+                                "same as previous seekTo");
+                    }
+                }
+
                 _seekTo(posMs, mode);
+
+                synchronized (mTaskLock) {
+                    mIsPreviousCommandSeekTo = true;
+                    mPreviousSeekPos = posMs;
+                    mPreviousSeekMode = mode;
+                }
             }
         });
     }
@@ -1124,7 +1053,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             return new MediaTimestamp(
                     getCurrentPosition() * 1000L,
                     System.nanoTime(),
-                    isPlaying() ? getPlaybackParams().getSpeed() : 0.f);
+                    getState() == PLAYER_STATE_PLAYING ? getPlaybackParams().getSpeed() : 0.f);
         } catch (IllegalStateException e) {
             return null;
         }
@@ -1152,6 +1081,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             mNextSourceState = NEXT_SOURCE_STATE_INIT;
         }
 
+        synchronized (mTaskLock) {
+            mPendingTasks.clear();
+            mIsPreviousCommandSeekTo = false;
+        }
+
         stayAwake(false);
         _reset();
         // make sure none of the listeners get called anymore
@@ -1167,14 +1101,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     // Keep KEY_PARAMETER_* in sync with include/media/mediaplayer2.h
     private final static int KEY_PARAMETER_AUDIO_ATTRIBUTES = 1400;
     /**
-     * Sets the parameter indicated by key.
-     * @param key key indicates the parameter to be set.
+     * Sets the audio attributes.
      * @param value value of the parameter to be set.
      * @return true if the parameter is set successfully, false otherwise
      */
-    private native boolean setParameter(int key, Object value);
-
-    private native Object getParameter(int key);
+    private native boolean native_setAudioAttributes(AudioAttributes audioAttributes);
+    private native AudioAttributes native_getAudioAttributes();
 
 
     /**
@@ -1748,6 +1680,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 case MEDIA_SEEK_COMPLETE:
                 {
                     synchronized (mTaskLock) {
+                        if (!mPendingTasks.isEmpty()
+                                && mPendingTasks.get(0).mMediaCallType != CALL_COMPLETED_SEEK_TO
+                                && getState() == PLAYER_STATE_PLAYING) {
+                            mIsPreviousCommandSeekTo = false;
+                        }
+
                         if (mCurrentTask != null
                                 && mCurrentTask.mMediaCallType == CALL_COMPLETED_SEEK_TO
                                 && mCurrentTask.mNeedToWaitForEventToComplete) {
@@ -3148,6 +3086,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             }
             synchronized (mSrcLock) {
                 mDSD = mCurrentDSD;
+            }
+
+            if (mMediaCallType != CALL_COMPLETED_SEEK_TO) {
+                synchronized (mTaskLock) {
+                    mIsPreviousCommandSeekTo = false;
+                }
             }
 
             // TODO: Make native implementations asynchronous and let them send notifications.

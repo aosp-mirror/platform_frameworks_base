@@ -21,21 +21,18 @@ import static com.google.common.truth.Truth.assertThat;
 import android.platform.test.annotations.Presubmit;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
+
 import com.google.common.base.Charsets;
-import java.io.ByteArrayInputStream;
-import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26)
-// Include android.util.proto in addition to classes under test because the latest versions of
-// android.util.proto.Proto{Input|Output}Stream are not part of Robolectric.
-@SystemLoaderPackages({"com.android.server.backup", "android.util.proto"})
+import java.io.ByteArrayInputStream;
+import java.util.Arrays;
+
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class ChunkTest {
     private static final String CHUNK_A = "CHUNK_A";

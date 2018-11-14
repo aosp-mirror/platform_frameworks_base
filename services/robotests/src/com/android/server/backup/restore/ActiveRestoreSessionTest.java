@@ -19,7 +19,6 @@ package com.android.server.backup.restore;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createBackupWakeLock;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBackupManagerServiceBasics;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.startBackupThreadAndGetLooper;
-
 import static com.android.server.backup.testing.TestUtils.assertEventLogged;
 import static com.android.server.backup.testing.TestUtils.assertEventNotLogged;
 import static com.android.server.backup.testing.TransportData.backupTransport;
@@ -58,8 +57,6 @@ import com.android.server.backup.internal.BackupHandler;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.ShadowEventLog;
 import com.android.server.testing.shadows.ShadowPerformUnifiedRestoreTask;
 
@@ -69,6 +66,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
@@ -78,18 +76,14 @@ import org.robolectric.shadows.ShadowPackageManager;
 
 import java.util.ArrayDeque;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(
-        manifest = Config.NONE,
-        sdk = 26,
-        shadows = {ShadowEventLog.class, ShadowPerformUnifiedRestoreTask.class, ShadowBinder.class})
-@SystemLoaderPackages({"com.android.server.backup"})
+@RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowEventLog.class, ShadowPerformUnifiedRestoreTask.class, ShadowBinder.class})
 @Presubmit
 public class ActiveRestoreSessionTest {
     private static final String PACKAGE_1 = "com.example.package1";
     private static final String PACKAGE_2 = "com.example.package2";
-    public static final long TOKEN_1 = 1L;
-    public static final long TOKEN_2 = 2L;
+    private static final long TOKEN_1 = 1L;
+    private static final long TOKEN_2 = 2L;
 
     @Mock private BackupManagerService mBackupManagerService;
     @Mock private TransportManager mTransportManager;

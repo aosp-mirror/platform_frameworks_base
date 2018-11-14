@@ -22,7 +22,6 @@ import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.app.Fragment;
@@ -41,7 +40,6 @@ import android.graphics.Rect;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
-import android.util.FloatProperty;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.LayoutInflater;
@@ -51,7 +49,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
-import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
@@ -104,7 +101,7 @@ public class NotificationPanelView extends PanelView implements
         View.OnClickListener, NotificationStackScrollLayout.OnOverscrollTopChangedListener,
         KeyguardAffordanceHelper.Callback, NotificationStackScrollLayout.OnEmptySpaceClickListener,
         OnHeadsUpChangedListener, QS.HeightListener, ZenModeController.Callback,
-        ConfigurationController.ConfigurationListener {
+        ConfigurationController.ConfigurationListener, StateListener {
 
     private static final boolean DEBUG = false;
 
@@ -139,25 +136,9 @@ public class NotificationPanelView extends PanelView implements
 
     private static final Rect mDummyDirtyRect = new Rect(0, 0, 1, 1);
 
-    public static final long DOZE_ANIMATION_DURATION = 700;
-
     private static final AnimationProperties CLOCK_ANIMATION_PROPERTIES = new AnimationProperties()
             .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-    private static final FloatProperty<NotificationPanelView> SET_DARK_AMOUNT_PROPERTY =
-            new FloatProperty<NotificationPanelView>("mInterpolatedDarkAmount") {
 
-                @Override
-                public void setValue(NotificationPanelView object, float value) {
-                    object.setDarkAmount(value, object.mDarkInterpolator.getInterpolation(value));
-                }
-
-                @Override
-                public Float get(NotificationPanelView object) {
-                    return object.mLinearDarkAmount;
-                }
-            };
-
-    private Interpolator mDarkInterpolator;
     private final PowerManager mPowerManager;
     private final AccessibilityManager mAccessibilityManager;
 
@@ -295,11 +276,9 @@ public class NotificationPanelView extends PanelView implements
      */
     private boolean mSemiAwake;
 
-    private float mDarkAmountTarget;
     private boolean mPulsing;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mNoVisibleNotifications = true;
-    private ValueAnimator mDarkAnimator;
     private boolean mUserSetupComplete;
     private int mQsNotificationTopPadding;
     private float mExpandOffset;
@@ -339,7 +318,6 @@ public class NotificationPanelView extends PanelView implements
     private final NotificationEntryManager mEntryManager =
             Dependency.get(NotificationEntryManager.class);
 
-    private final StateListener mListener = this::setBarState;
     private final CommandQueue mCommandQueue;
     private final NotificationLockscreenUserManager mLockscreenUserManager =
             Dependency.get(NotificationLockscreenUserManager.class);
@@ -388,7 +366,7 @@ public class NotificationPanelView extends PanelView implements
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         FragmentHostManager.get(this).addTagListener(QS.TAG, mFragmentListener);
-        Dependency.get(StatusBarStateController.class).addListener(mListener);
+        Dependency.get(StatusBarStateController.class).addListener(this);
         Dependency.get(ZenModeController.class).addCallback(this);
         Dependency.get(ConfigurationController.class).addCallback(this);
     }
@@ -397,7 +375,7 @@ public class NotificationPanelView extends PanelView implements
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         FragmentHostManager.get(this).removeTagListener(QS.TAG, mFragmentListener);
-        Dependency.get(StatusBarStateController.class).removeListener(mListener);
+        Dependency.get(StatusBarStateController.class).removeListener(this);
         Dependency.get(ZenModeController.class).removeCallback(this);
         Dependency.get(ConfigurationController.class).removeCallback(this);
     }
@@ -475,7 +453,8 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardBottomArea.initFrom(oldBottomArea);
         addView(mKeyguardBottomArea, index);
         initBottomArea();
-        setDarkAmount(mLinearDarkAmount, mInterpolatedDarkAmount);
+        onDozeAmountChanged(mStatusBarStateController.getDozeAmount(),
+                mStatusBarStateController.getInterpolatedDozeAmount());
 
         if (mKeyguardStatusBar != null) {
             mKeyguardStatusBar.onThemeChanged();
@@ -1221,7 +1200,8 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    private void setBarState(int statusBarState) {
+    @Override
+    public void onStateChanged(int statusBarState) {
         boolean goingToFullShade = mStatusBarStateController.goingToFullShade();
         boolean keyguardFadingAway = mKeyguardMonitor.isKeyguardFadingAway();
         int oldState = mBarState;
@@ -2806,24 +2786,10 @@ public class NotificationPanelView extends PanelView implements
             updateDozingVisibilities(animate);
         }
 
-        final float darkAmount = dozing ? 1 : 0;
-        if (mDarkAnimator != null && mDarkAnimator.isRunning()) {
-            if (animate && mDarkAmountTarget == darkAmount) {
-                return;
-            } else {
-                mDarkAnimator.cancel();
-            }
-            if (mSemiAwake) {
-                setDarkAmount(0, 0);
-            }
-        }
-        mDarkAmountTarget = darkAmount;
-        if (!mSemiAwake) {
-            if (animate) {
-                startDarkAnimation();
-            } else {
-                setDarkAmount(darkAmount, darkAmount);
-            }
+        final float darkAmount = dozing && !mSemiAwake ? 1 : 0;
+        mStatusBarStateController.setDozeAmount(darkAmount, animate);
+        if (animate) {
+            mNotificationStackScroller.notifyDarkAnimationStart(mDozing);
         }
     }
 
@@ -2831,21 +2797,8 @@ public class NotificationPanelView extends PanelView implements
         return mSemiAwake;
     }
 
-    private void startDarkAnimation() {
-        if (mInterpolatedDarkAmount == 0f || mInterpolatedDarkAmount == 1f) {
-            mDarkInterpolator = mDozing
-                    ? Interpolators.FAST_OUT_SLOW_IN
-                    : Interpolators.TOUCH_RESPONSE_REVERSE;
-        }
-        mNotificationStackScroller.notifyDarkAnimationStart(mDozing);
-        mDarkAnimator = ObjectAnimator.ofFloat(this, SET_DARK_AMOUNT_PROPERTY, mDozing ? 1 : 0);
-        mDarkAnimator.setInterpolator(Interpolators.LINEAR);
-        mDarkAnimator.setDuration(
-                mNotificationStackScroller.getDarkAnimationDuration(mDozing));
-        mDarkAnimator.start();
-    }
-
-    private void setDarkAmount(float linearAmount, float amount) {
+    @Override
+    public void onDozeAmountChanged(float linearAmount, float amount) {
         mInterpolatedDarkAmount = amount;
         mLinearDarkAmount = linearAmount;
         mKeyguardStatusBar.setDarkAmount(mInterpolatedDarkAmount);
@@ -3047,7 +3000,8 @@ public class NotificationPanelView extends PanelView implements
             mSemiAwake = false;
             mNotificationStackScroller.setDark(false /* dark */, true /* animate */,
                     null /* touchLocation */);
-            startDarkAnimation();
+            mStatusBarStateController.setDozeAmount(0f, true /* animated */);
+            mNotificationStackScroller.notifyDarkAnimationStart(mDozing);
             mStatusBar.updateScrimController();
 
             return WAKE_UP_TO_SHADE;

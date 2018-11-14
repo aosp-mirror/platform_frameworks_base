@@ -18,10 +18,6 @@ package com.android.frameworks.perftests.usage.tests;
 
 import static junit.framework.Assert.assertEquals;
 
-import com.android.server.usage.UsageStatsDatabase;
-import com.android.server.usage.UsageStatsDatabase.StatCombiner;
-import com.android.server.usage.IntervalStats;
-
 import android.app.usage.EventList;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
@@ -29,9 +25,13 @@ import android.content.Context;
 import android.os.SystemClock;
 import android.perftests.utils.ManualBenchmarkState;
 import android.perftests.utils.PerfManualStatusReporter;
-import android.support.test.filters.LargeTest;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
+
+import com.android.server.usage.IntervalStats;
+import com.android.server.usage.UsageStatsDatabase;
+import com.android.server.usage.UsageStatsDatabase.StatCombiner;
 
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -90,11 +90,13 @@ public class UsageStatsDatabasePerfTest {
         for (int pkg = 0; pkg < packageCount; pkg++) {
             UsageEvents.Event event = new UsageEvents.Event();
             event.mPackage = "fake.package.name" + pkg;
+            event.mClass = event.mPackage + ".class1";
             event.mTimeStamp = 1;
             event.mEventType = UsageEvents.Event.MOVE_TO_FOREGROUND;
             for (int evt = 0; evt < eventsPerPackage; evt++) {
                 intervalStats.events.insert(event);
-                intervalStats.update(event.mPackage, event.mTimeStamp, event.mEventType);
+                intervalStats.update(event.mPackage, event.mClass, event.mTimeStamp,
+                        event.mEventType);
             }
         }
     }

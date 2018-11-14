@@ -21,11 +21,11 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.os.storage.StorageManagerInternal;
 
@@ -48,6 +48,7 @@ public class StorageManagerServiceTest {
     @Mock private PackageManager mPm;
     @Mock private PackageManagerInternal mPmi;
     @Mock private UserManagerInternal mUmi;
+    @Mock private ActivityManagerInternal mAmi;
 
     private static final String PKG_GREY = "com.grey";
     private static final String PKG_RED = "com.red";
@@ -55,6 +56,10 @@ public class StorageManagerServiceTest {
 
     private static final int UID_GREY = 10000;
     private static final int UID_COLORS = 10001;
+
+    private static final int PID_GREY = 1111;
+    private static final int PID_RED = 2222;
+    private static final int PID_BLUE = 3333;
 
     private static final String NAME_COLORS = "colors";
 
@@ -75,6 +80,8 @@ public class StorageManagerServiceTest {
         LocalServices.addService(PackageManagerInternal.class, mPmi);
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         LocalServices.addService(UserManagerInternal.class, mUmi);
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.addService(ActivityManagerInternal.class, mAmi);
 
         when(mContext.getPackageManager()).thenReturn(mPm);
 
@@ -87,37 +94,52 @@ public class StorageManagerServiceTest {
         when(mPmi.getPackagesForSharedUserId(eq(NAME_COLORS), anyInt()))
                 .thenReturn(new String[] { PKG_RED, PKG_BLUE });
 
+        when(mPm.getPackagesForUid(eq(UID_GREY))).thenReturn(new String[] { PKG_GREY });
+        when(mPm.getPackagesForUid(eq(UID_COLORS))).thenReturn(new String[] { PKG_RED, PKG_BLUE });
+
+        setIsAppStorageSandboxed(PID_BLUE, UID_COLORS, true);
+        setIsAppStorageSandboxed(PID_GREY, UID_GREY, true);
+        setIsAppStorageSandboxed(PID_RED, UID_COLORS, true);
+
         mService = new StorageManagerService(mContext);
+    }
+
+    private void setIsAppStorageSandboxed(int pid, int uid, boolean sandboxed) {
+        when(mAmi.isAppStorageSandboxed(pid, uid)).thenReturn(sandboxed);
     }
 
     @Test
     public void testNone() throws Exception {
         assertTranslation(
                 "/dev/null",
-                "/dev/null", PKG_GREY);
+                "/dev/null", PID_GREY, UID_GREY);
         assertTranslation(
                 "/dev/null",
-                "/dev/null", PKG_RED);
+                "/dev/null", PID_RED, UID_COLORS);
     }
 
     @Test
     public void testPrimary() throws Exception {
         assertTranslation(
                 "/storage/emulated/0/Android/sandbox/com.grey/foo.jpg",
-                "/storage/emulated/0/foo.jpg", PKG_GREY);
+                "/storage/emulated/0/foo.jpg",
+                PID_GREY, UID_GREY);
         assertTranslation(
                 "/storage/emulated/0/Android/sandbox/shared:colors/foo.jpg",
-                "/storage/emulated/0/foo.jpg", PKG_RED);
+                "/storage/emulated/0/foo.jpg",
+                PID_RED, UID_COLORS);
     }
 
     @Test
     public void testSecondary() throws Exception {
         assertTranslation(
                 "/storage/0000-0000/Android/sandbox/com.grey/foo/bar.jpg",
-                "/storage/0000-0000/foo/bar.jpg", PKG_GREY);
+                "/storage/0000-0000/foo/bar.jpg",
+                PID_GREY, UID_GREY);
         assertTranslation(
                 "/storage/0000-0000/Android/sandbox/shared:colors/foo/bar.jpg",
-                "/storage/0000-0000/foo/bar.jpg", PKG_RED);
+                "/storage/0000-0000/foo/bar.jpg",
+                PID_RED, UID_COLORS);
     }
 
     @Test
@@ -125,13 +147,15 @@ public class StorageManagerServiceTest {
         // Accessing their own paths goes straight through
         assertTranslation(
                 "/storage/emulated/0/Android/data/com.grey/foo.jpg",
-                "/storage/emulated/0/Android/data/com.grey/foo.jpg", PKG_GREY);
+                "/storage/emulated/0/Android/data/com.grey/foo.jpg",
+                PID_GREY, UID_GREY);
 
         // Accessing other package paths goes into sandbox
         assertTranslation(
                 "/storage/emulated/0/Android/sandbox/shared:colors/"
                         + "Android/data/com.grey/foo.jpg",
-                "/storage/emulated/0/Android/data/com.grey/foo.jpg", PKG_RED);
+                "/storage/emulated/0/Android/data/com.grey/foo.jpg",
+                PID_RED, UID_COLORS);
     }
 
     @Test
@@ -139,16 +163,19 @@ public class StorageManagerServiceTest {
         // Accessing their own paths goes straight through
         assertTranslation(
                 "/storage/emulated/0/Android/data/com.red/foo.jpg",
-                "/storage/emulated/0/Android/data/com.red/foo.jpg", PKG_RED);
+                "/storage/emulated/0/Android/data/com.red/foo.jpg",
+                PID_RED, UID_COLORS);
         assertTranslation(
                 "/storage/emulated/0/Android/data/com.red/foo.jpg",
-                "/storage/emulated/0/Android/data/com.red/foo.jpg", PKG_BLUE);
+                "/storage/emulated/0/Android/data/com.red/foo.jpg",
+                PID_BLUE, UID_COLORS);
 
         // Accessing other package paths goes into sandbox
         assertTranslation(
                 "/storage/emulated/0/Android/sandbox/com.grey/"
                         + "Android/data/com.red/foo.jpg",
-                "/storage/emulated/0/Android/data/com.red/foo.jpg", PKG_GREY);
+                "/storage/emulated/0/Android/data/com.red/foo.jpg",
+                PID_GREY, UID_GREY);
     }
 
     @Test
@@ -157,7 +184,7 @@ public class StorageManagerServiceTest {
         try {
             mService.translateAppToSystem(
                     "/storage/emulated/0/../foo.jpg",
-                    PKG_GREY, UserHandle.USER_SYSTEM);
+                    PID_GREY, UID_GREY);
             fail();
         } catch (SecurityException expected) {
         }
@@ -166,7 +193,7 @@ public class StorageManagerServiceTest {
         try {
             mService.translateSystemToApp(
                     "/storage/emulated/0/foo.jpg",
-                    PKG_GREY, UserHandle.USER_SYSTEM);
+                    PID_GREY, UID_GREY);
             fail();
         } catch (SecurityException expected) {
         }
@@ -175,17 +202,33 @@ public class StorageManagerServiceTest {
         try {
             mService.translateSystemToApp(
                     "/storage/emulated/0/Android/sandbox/shared:colors/foo.jpg",
-                    PKG_GREY, UserHandle.USER_SYSTEM);
+                    PID_GREY, UID_GREY);
             fail();
         } catch (SecurityException expected) {
         }
     }
 
-    private void assertTranslation(String system, String sandbox, String packageName)
-            throws Exception {
+    @Test
+    public void testPackageNotSandboxed() throws Exception {
+        setIsAppStorageSandboxed(PID_RED, UID_COLORS, false);
+
+        // Both app and system have the same view
+        assertTranslation(
+                "/storage/emulated/0/Android/data/com.red/foo.jpg",
+                "/storage/emulated/0/Android/data/com.red/foo.jpg",
+                PID_RED, UID_COLORS);
+
+        assertTranslation(
+                "/storage/emulated/0/Android/sandbox/com.grey/bar.jpg",
+                "/storage/emulated/0/Android/sandbox/com.grey/bar.jpg",
+                PID_RED, UID_COLORS);
+    }
+
+    private void assertTranslation(String system, String sandbox,
+            int pid, int uid) throws Exception {
         assertEquals(system,
-                mService.translateAppToSystem(sandbox, packageName, UserHandle.USER_SYSTEM));
+                mService.translateAppToSystem(sandbox, pid, uid));
         assertEquals(sandbox,
-                mService.translateSystemToApp(system, packageName, UserHandle.USER_SYSTEM));
+                mService.translateSystemToApp(system, pid, uid));
     }
 }

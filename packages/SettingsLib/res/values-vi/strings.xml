@@ -21,7 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Không thể dò tìm mạng"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"Không"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Đã lưu"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Đã tắt"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Lỗi cấu hình IP"</string>

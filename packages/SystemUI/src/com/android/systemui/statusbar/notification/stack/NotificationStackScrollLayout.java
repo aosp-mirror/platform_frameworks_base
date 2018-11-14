@@ -2312,7 +2312,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (mEntryManager.getNotificationData().isHighPriority(
+                if (!mEntryManager.getNotificationData().isHighPriority(
                         row.getStatusBarNotification())) {
                     break;
                 } else {
@@ -4396,16 +4396,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     ? Interpolators.FAST_OUT_SLOW_IN_REVERSE
                     : Interpolators.FAST_OUT_SLOW_IN;
         }
-    }
-
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    public long getDarkAnimationDuration(boolean dark) {
-        long duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP;
-        // Longer animation when sleeping with more than 1 notification
-        if (dark && getNotGoneChildCount() > 2) {
-            duration *= 1.2f;
-        }
-        return duration;
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)

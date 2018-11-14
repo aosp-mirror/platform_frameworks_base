@@ -4,24 +4,16 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.platform.test.annotations.Presubmit;
 
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.HashSet;
 
 /**
  * Unit tests for {@link GnssPositionMode}.
  */
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(
-        manifest = Config.NONE,
-        sdk = 27
-)
-@SystemLoaderPackages({"com.android.server.location"})
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class GnssPositionModeTest {
 

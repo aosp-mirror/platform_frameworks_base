@@ -31,7 +31,7 @@ public class ShadowFullBackup {
      * implementation.
      */
     @Implementation
-    public static int backupToTar(
+    protected static int backupToTar(
             String packageName,
             String domain,
             String linkdomain,

@@ -39,8 +39,8 @@
     <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP Suite-B security -->
     <string name="wifi_security_short_eap_suiteb" translatable="false">Suite-B</string>
 
-    <!-- Used in Wi-Fi settings dialogs when Wi-Fi does not have any security. -->
-    <string name="wifi_security_none" translatable="false">None</string>
+    <!-- Used in Wi-Fi settings dialogs when Wi-Fi does not have any security. [CHAR LIMIT=40] -->
+    <string name="wifi_security_none">None</string>
 
     <!-- Do not translate.  Terminology for wifi with WEP security -->
     <string name="wifi_security_wep" translatable="false">WEP</string>
@@ -930,6 +930,8 @@
     <string name="power_discharge_by">Should last until about <xliff:g id="time">%1$s</xliff:g> (<xliff:g id="level">%2$s</xliff:g>)</string>
     <!-- [CHAR_LIMIT=100] Label for estimated time that phone will run out of battery -->
     <string name="power_discharge_by_only">Should last until about <xliff:g id="time">%1$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=100] Label for estimated time that phone will run out of battery -->
+    <string name="power_discharge_by_only_short">Until <xliff:g id="time" example="12 PM">%1$s</xliff:g></string>
 
     <!-- [CHAR_LIMIT=60] label for estimated remaining duration of battery when under a certain amount -->
     <string name="power_remaining_less_than_duration_only">Less than <xliff:g id="threshold">%1$s</xliff:g> remaining</string>
@@ -1133,4 +1135,7 @@
 
     <!-- UI debug setting: opt in to use updated graphics driver? [CHAR LIMIT=100] -->
     <string name="updated_gfx_driver_dev_opt_in_app_summary">Opt in app to use updated graphcis driver in developement</string>
+
+    <!-- Name of the phone device [CHAR LIMIT=NONE] -->
+    <string name="media_transfer_phone_device_name">Phone speaker</string>
 </resources>

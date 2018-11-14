@@ -25,6 +25,10 @@ package android.animation {
 
 package android.app {
 
+  public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+    method public void onMovedToDisplay(int, android.content.res.Configuration);
+  }
+
   public class ActivityManager {
     method public void addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int);
     method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
@@ -710,6 +714,7 @@ package android.os {
 
   public class Environment {
     method public static java.io.File buildPath(java.io.File, java.lang.String...);
+    method public static java.io.File getProductDirectory();
     method public static java.io.File getStorageDirectory();
   }
 
@@ -739,7 +744,11 @@ package android.os {
   }
 
   public final class PowerManager {
+    method public int getPowerSaveMode();
+    method public boolean setDynamicPowerSavings(boolean, int);
     method public boolean setPowerSaveMode(boolean);
+    field public static final int POWER_SAVER_MODE_DYNAMIC = 1; // 0x1
+    field public static final int POWER_SAVER_MODE_PERCENTAGE = 0; // 0x0
   }
 
   public class Process {
@@ -976,6 +985,9 @@ package android.provider {
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field public static final java.lang.String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
+    field public static final java.lang.String AUTOMATIC_POWER_SAVER_MODE = "automatic_power_saver_mode";
+    field public static final java.lang.String DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD = "dynamic_power_savings_disable_threshold";
+    field public static final java.lang.String DYNAMIC_POWER_SAVINGS_ENABLED = "dynamic_power_savings_enabled";
     field public static final java.lang.String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
     field public static final java.lang.String LOCATION_GLOBAL_KILL_SWITCH = "location_global_kill_switch";
     field public static final java.lang.String LOW_POWER_MODE = "low_power";
@@ -1591,6 +1603,7 @@ package android.view {
 
   public class KeyEvent extends android.view.InputEvent implements android.os.Parcelable {
     method public static java.lang.String actionToString(int);
+    method public final void setDisplayId(int);
     field public static final int LAST_KEYCODE = 288; // 0x120
   }
 
@@ -1637,9 +1650,9 @@ package android.view {
   }
 
   public abstract interface WindowManager implements android.view.ViewManager {
-    method public abstract void setShouldShowIme(int, boolean);
-    method public abstract void setShouldShowWithInsecureKeyguard(int, boolean);
-    method public abstract void setShouldShowSystemDecors(int, boolean);
+    method public default void setShouldShowIme(int, boolean);
+    method public default void setShouldShowSystemDecors(int, boolean);
+    method public default void setShouldShowWithInsecureKeyguard(int, boolean);
   }
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {

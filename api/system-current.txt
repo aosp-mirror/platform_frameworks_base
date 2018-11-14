@@ -4109,8 +4109,12 @@ package android.os {
   }
 
   public final class PowerManager {
+    method public int getPowerSaveMode();
+    method public boolean setDynamicPowerSavings(boolean, int);
     method public boolean setPowerSaveMode(boolean);
     method public void userActivity(long, int, int);
+    field public static final int POWER_SAVER_MODE_DYNAMIC = 1; // 0x1
+    field public static final int POWER_SAVER_MODE_PERCENTAGE = 0; // 0x0
     field public static final int USER_ACTIVITY_EVENT_ACCESSIBILITY = 3; // 0x3
     field public static final int USER_ACTIVITY_EVENT_BUTTON = 1; // 0x1
     field public static final int USER_ACTIVITY_EVENT_OTHER = 0; // 0x0
@@ -5427,15 +5431,21 @@ package android.telecom {
     method public int getAllPhoneAccountsCount();
     method public int getCallState();
     method public android.telecom.PhoneAccountHandle getConnectionManager();
+    method public int getCurrentTtyMode();
     method public deprecated android.content.ComponentName getDefaultPhoneApp();
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsForPackage();
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
     method public boolean isInEmergencyCall();
     method public boolean isRinging();
     method public boolean isTtySupported();
+    method public boolean setDefaultDialer(java.lang.String);
     field public static final java.lang.String EXTRA_CALL_BACK_INTENT = "android.telecom.extra.CALL_BACK_INTENT";
     field public static final java.lang.String EXTRA_CLEAR_MISSED_CALLS_INTENT = "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecom.extra.CONNECTION_SERVICE";
+    field public static final int TTY_MODE_FULL = 1; // 0x1
+    field public static final int TTY_MODE_HCO = 2; // 0x2
+    field public static final int TTY_MODE_OFF = 0; // 0x0
+    field public static final int TTY_MODE_VCO = 3; // 0x3
   }
 
 }
@@ -5476,6 +5486,7 @@ package android.telephony {
     method public int getDomain();
     method public int getRegState();
     method public int getRejectCause();
+    method public int getRoamingType();
     method public int getTransportType();
     method public boolean isEmergencyEnabled();
     method public boolean isRoaming();
@@ -5535,6 +5546,10 @@ package android.telephony {
     method public deprecated android.telephony.NetworkRegistrationState getNetworkRegistrationStates(int, int);
     method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesForDomain(int);
     method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesForTransportType(int);
+    field public static final int ROAMING_TYPE_DOMESTIC = 2; // 0x2
+    field public static final int ROAMING_TYPE_INTERNATIONAL = 3; // 0x3
+    field public static final int ROAMING_TYPE_NOT_ROAMING = 0; // 0x0
+    field public static final int ROAMING_TYPE_UNKNOWN = 1; // 0x1
   }
 
   public final class SmsManager {
@@ -6994,8 +7009,8 @@ package android.view.intelligence {
     field public static final int TYPE_ACTIVITY_RESUMED = 2; // 0x2
     field public static final int TYPE_ACTIVITY_STARTED = 1; // 0x1
     field public static final int TYPE_ACTIVITY_STOPPED = 4; // 0x4
-    field public static final int TYPE_VIEW_ADDED = 5; // 0x5
-    field public static final int TYPE_VIEW_REMOVED = 6; // 0x6
+    field public static final int TYPE_VIEW_APPEARED = 5; // 0x5
+    field public static final int TYPE_VIEW_DISAPPEARED = 6; // 0x6
     field public static final int TYPE_VIEW_TEXT_CHANGED = 7; // 0x7
   }
 

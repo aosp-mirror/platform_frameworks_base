@@ -358,7 +358,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             if (mBundle != null) {
                 try {
                     mStatusBarService.showBiometricDialog(mBundle, mDialogReceiver,
-                            getBiometricType(), mRequireConfirmation);
+                            getBiometricType(), mRequireConfirmation, getTargetUserId());
                 } catch (RemoteException e) {
                     Slog.e(getLogTag(), "Unable to show biometric dialog", e);
                 }

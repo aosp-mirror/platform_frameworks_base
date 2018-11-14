@@ -97,17 +97,17 @@ import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
 
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import libcore.io.IoUtils;
 
 /**
  * Activity manager code dealing with processes.
@@ -1311,6 +1311,7 @@ public final class ProcessList {
                 if (gids[0] == UserHandle.ERR_GID) gids[0] = gids[2];
                 if (gids[1] == UserHandle.ERR_GID) gids[1] = gids[2];
             }
+            app.mountMode = mountExternal;
             checkSlow(startTime, "startProcess: building args");
             if (mService.mAtmInternal.isFactoryTestProcess(app.getWindowProcessController())) {
                 uid = 0;
@@ -1362,8 +1363,7 @@ public final class ProcessList {
 
             if (!disableHiddenApiChecks && !mService.mHiddenApiBlacklist.isDisabled()) {
                 app.info.maybeUpdateHiddenApiEnforcementPolicy(
-                        mService.mHiddenApiBlacklist.getPolicyForPrePApps(),
-                        mService.mHiddenApiBlacklist.getPolicyForPApps());
+                        mService.mHiddenApiBlacklist.getPolicy());
                 @ApplicationInfo.HiddenApiEnforcementPolicy int policy =
                         app.info.getHiddenApiEnforcementPolicy();
                 int policyBits = (policy << Zygote.API_ENFORCEMENT_POLICY_SHIFT);

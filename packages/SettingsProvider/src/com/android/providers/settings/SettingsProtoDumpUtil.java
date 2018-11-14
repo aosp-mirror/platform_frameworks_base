@@ -572,6 +572,15 @@ class SettingsProtoDumpUtil {
                 GlobalSettingsProto.Dropbox.SETTINGS);
         p.end(dropboxToken);
 
+        final long dynamicPowerSavingsToken = p.start(GlobalSettingsProto.DYNAMIC_POWER_SAVINGS);
+        dumpSetting(s, p,
+                Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
+                GlobalSettingsProto.DynamicPowerSavings.DISABLE_THRESHOLD);
+        dumpSetting(s, p,
+                Settings.Global.DYNAMIC_POWER_SAVINGS_ENABLED,
+                GlobalSettingsProto.DynamicPowerSavings.ENABLED);
+        p.end(dynamicPowerSavingsToken);
+
         final long emergencyToken = p.start(GlobalSettingsProto.EMERGENCY);
         dumpSetting(s, p,
                 Settings.Global.EMERGENCY_TONE,
@@ -794,6 +803,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                 GlobalSettingsProto.LowPowerMode.TRIGGER_LEVEL_MAX);
+        dumpSetting(s, p,
+                Settings.Global.AUTOMATIC_POWER_SAVER_MODE,
+                GlobalSettingsProto.LowPowerMode.AUTOMATIC_POWER_SAVER_MODE);
         p.end(lpmToken);
 
         dumpSetting(s, p,
@@ -1648,12 +1660,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
                 SecureSettingsProto.Accessibility.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS,
-                SecureSettingsProto.Accessibility.NON_INTERACTIVE_UI_TIMEOUT_MS);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
-                SecureSettingsProto.Accessibility.INTERACTIVE_UI_TIMEOUT_MS);
         p.end(accessibilityToken);
 
         dumpSetting(s, p,

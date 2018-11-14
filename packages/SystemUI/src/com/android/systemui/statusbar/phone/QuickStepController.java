@@ -47,6 +47,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.shared.recents.IOverviewProxy;
+import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.NavigationBarCompat;
 
 import java.io.PrintWriter;
@@ -54,7 +55,7 @@ import java.io.PrintWriter;
 /**
  * Class to detect gestures on the navigation bar and implement quick scrub.
  * Note that the variables in this class horizontal and vertical represents horizontal always
- * aligned with along the navigation bar).
+ * aligned with along the navigation bar.
  */
 public class QuickStepController implements GestureHelper {
 
@@ -65,7 +66,10 @@ public class QuickStepController implements GestureHelper {
     private static final long BACK_BUTTON_FADE_IN_ALPHA = 150;
 
     /** When the home-swipe-back gesture is disallowed, make it harder to pull */
-    private static final float DISALLOW_GESTURE_DAMPING_FACTOR = 0.16f;
+    private static final float HORIZONTAL_GESTURE_DAMPING = 0.3f;
+    private static final float VERTICAL_GESTURE_DAMPING = 0.15f;
+    private static final float HORIZONTAL_DISABLED_GESTURE_DAMPING = 0.16f;
+    private static final float VERTICAL_DISABLED_GESTURE_DAMPING = 0.06f;
 
     private static final int ACTION_SWIPE_UP_INDEX = 0;
     private static final int ACTION_SWIPE_DOWN_INDEX = 1;
@@ -89,13 +93,14 @@ public class QuickStepController implements GestureHelper {
     private boolean mIsInScreenPinning;
     private boolean mGestureHorizontalDragsButton;
     private boolean mGestureVerticalDragsButton;
-    private boolean mGestureTrackPositive;
+    private float mMaxDragLimit;
+    private float mMinDragLimit;
+    private float mDragDampeningFactor;
 
     private NavigationGestureAction mCurrentAction;
     private NavigationGestureAction[] mGestureActions = new NavigationGestureAction[MAX_GESTURES];
 
     private final OverviewProxyService mOverviewEventSender;
-    private final int mHomeBackGestureDragLimit;
     private final Context mContext;
     private final StatusBar mStatusBar;
     private final Matrix mTransformGlobalMatrix = new Matrix();
@@ -106,8 +111,6 @@ public class QuickStepController implements GestureHelper {
         mContext = context;
         mStatusBar = SysUiServiceProvider.getComponent(context, StatusBar.class);
         mOverviewEventSender = Dependency.get(OverviewProxyService.class);
-        mHomeBackGestureDragLimit =
-                res.getDimensionPixelSize(R.dimen.nav_home_back_gesture_drag_limit);
     }
 
     public void setComponents(NavigationBarView navigationBarView) {
@@ -335,21 +338,9 @@ public class QuickStepController implements GestureHelper {
                 mDragBtnAnimator = null;
             }
 
-            int diff = position - touchDown;
-            // If dragging the incorrect direction after starting gesture or unable to
-            // execute tried action, then move the button but dampen its distance
-            if (mCurrentAction == null || (mGestureTrackPositive ? diff < 0 : diff > 0)) {
-                diff *= DISALLOW_GESTURE_DAMPING_FACTOR;
-            } else if (Math.abs(diff) > mHomeBackGestureDragLimit) {
-                // Once the user drags the button past a certain limit, the distance will
-                // lessen as the button dampens that it was pulled too far
-                float distanceAfterDragLimit = (Math.abs(diff) - mHomeBackGestureDragLimit)
-                        * DISALLOW_GESTURE_DAMPING_FACTOR;
-                diff = (int) (distanceAfterDragLimit + mHomeBackGestureDragLimit);
-                if (!mGestureTrackPositive) {
-                    diff *= -1;
-                }
-            }
+            // Clamp drag to the bounding box of the navigation bar
+            float diff = (position - touchDown) * mDragDampeningFactor;
+            diff = Utilities.clamp(diff, mMinDragLimit, mMaxDragLimit);
             if (mGestureVerticalDragsButton ^ isNavBarVertical()) {
                 button.setTranslationY(diff);
             } else {
@@ -480,22 +471,44 @@ public class QuickStepController implements GestureHelper {
                 event.transform(mTransformGlobalMatrix);
                 action.startGesture(event);
                 event.transform(mTransformLocalMatrix);
+
+                // Calculate the bounding limits of drag to avoid dragging off nav bar's window
+                if (action.requiresDragWithHitTarget() && mHitTarget != null) {
+                    final int[] buttonCenter = new int[2];
+                    View button = mHitTarget.getCurrentView();
+                    button.getLocationInWindow(buttonCenter);
+                    buttonCenter[0] += button.getWidth() / 2;
+                    buttonCenter[1] += button.getHeight() / 2;
+                    final int x = isNavBarVertical() ? buttonCenter[1] : buttonCenter[0];
+                    final int y = isNavBarVertical() ? buttonCenter[0] : buttonCenter[1];
+                    final int iconHalfSize = mContext.getResources()
+                            .getDimensionPixelSize(R.dimen.navigation_icon_size) / 2;
+
+                    if (alignedWithNavBar) {
+                        mMinDragLimit =  iconHalfSize - x;
+                        mMaxDragLimit = -x - iconHalfSize + (isNavBarVertical()
+                                ? mNavigationBarView.getHeight() : mNavigationBarView.getWidth());
+                    } else {
+                        mMinDragLimit = iconHalfSize - y;
+                        mMaxDragLimit =  -y - iconHalfSize + (isNavBarVertical()
+                                ? mNavigationBarView.getWidth() : mNavigationBarView.getHeight());
+                    }
+                }
             }
 
             // Handle direction of the hit target drag from the axis that started the gesture
+            // Also calculate the dampening factor, weaker dampening if there is an active action
             if (action.requiresDragWithHitTarget()) {
                 if (alignedWithNavBar) {
                     mGestureHorizontalDragsButton = true;
                     mGestureVerticalDragsButton = false;
-                    if (positiveDirection) {
-                        mGestureTrackPositive = mDragHPositive;
-                    }
+                    mDragDampeningFactor = action.isActive()
+                            ? HORIZONTAL_GESTURE_DAMPING : HORIZONTAL_DISABLED_GESTURE_DAMPING;
                 } else {
                     mGestureVerticalDragsButton = true;
                     mGestureHorizontalDragsButton = false;
-                    if (positiveDirection) {
-                        mGestureTrackPositive = mDragVPositive;
-                    }
+                    mDragDampeningFactor = action.isActive()
+                            ? VERTICAL_GESTURE_DAMPING : VERTICAL_DISABLED_GESTURE_DAMPING;
                 }
             }
 

@@ -880,11 +880,15 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>The camera device is a monochrome camera that doesn't contain a color filter array,
-     * and the pixel values on U and V planes are all 128.</p>
+     * and for YUV_420_888 stream, the pixel values on U and V planes are all 128.</p>
      * <p>A MONOCHROME camera must support the guaranteed stream combinations required for
      * its device level and capabilities. Additionally, if the monochrome camera device
      * supports Y8 format, all mandatory stream combination requirements related to {@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888} apply
-     * to {@link android.graphics.ImageFormat#Y8 Y8} as well.</p>
+     * to {@link android.graphics.ImageFormat#Y8 Y8} as well. There are no
+     * mandatory stream combination requirements with regard to
+     * {@link android.graphics.ImageFormat#Y8 Y8} for Bayer camera devices.</p>
+     * <p>Starting from Android Q, the SENSOR_INFO_COLOR_FILTER_ARRANGEMENT of a MONOCHROME
+     * camera will be either MONO or NIR.</p>
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME = 12;
@@ -936,6 +940,23 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
      */
     public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGB = 4;
+
+    /**
+     * <p>Sensor doesn't have any Bayer color filter.
+     * Such sensor captures visible light in monochrome. The exact weighting and
+     * wavelengths captured is not specified, but generally only includes the visible
+     * frequencies. This value implies a MONOCHROME camera.</p>
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     */
+    public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_MONO = 5;
+
+    /**
+     * <p>Sensor has a near infrared filter capturing light with wavelength between
+     * roughly 750nm and 1400nm, and the same filter covers the whole sensor array. This
+     * value implies a MONOCHROME camera.</p>
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     */
+    public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_NIR = 6;
 
     //
     // Enumeration values for CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE

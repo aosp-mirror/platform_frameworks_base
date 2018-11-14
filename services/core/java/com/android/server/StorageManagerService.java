@@ -38,6 +38,7 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.KeyguardManager;
@@ -450,6 +451,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     private PackageManagerInternal mPmInternal;
     private UserManagerInternal mUmInternal;
+    private ActivityManagerInternal mAmInternal;
 
     private final Callbacks mCallbacks;
     private final LockPatternUtils mLockPatternUtils;
@@ -1233,6 +1235,9 @@ class StorageManagerService extends IStorageManager.Stub
         } else if (vol.type == VolumeInfo.TYPE_PRIVATE) {
             mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
 
+        } else if (vol.type == VolumeInfo.TYPE_STUB) {
+            vol.mountUserId = mCurrentUserId;
+            mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
         } else {
             Slog.d(TAG, "Skipping automatic mounting of " + vol);
         }
@@ -1243,6 +1248,7 @@ class StorageManagerService extends IStorageManager.Stub
             case VolumeInfo.TYPE_PRIVATE:
             case VolumeInfo.TYPE_PUBLIC:
             case VolumeInfo.TYPE_EMULATED:
+            case VolumeInfo.TYPE_STUB:
                 break;
             default:
                 return false;
@@ -1319,7 +1325,8 @@ class StorageManagerService extends IStorageManager.Stub
             }
         }
 
-        if (vol.type == VolumeInfo.TYPE_PUBLIC && vol.state == VolumeInfo.STATE_EJECTING) {
+        if ((vol.type == VolumeInfo.TYPE_PUBLIC || vol.type == VolumeInfo.TYPE_STUB)
+                    && vol.state == VolumeInfo.STATE_EJECTING) {
             // TODO: this should eventually be handled by new ObbVolume state changes
             /*
              * Some OBBs might have been unmounted when this volume was
@@ -1401,7 +1408,8 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         boolean isTypeRestricted = false;
-        if (vol.type == VolumeInfo.TYPE_PUBLIC || vol.type == VolumeInfo.TYPE_PRIVATE) {
+        if (vol.type == VolumeInfo.TYPE_PUBLIC || vol.type == VolumeInfo.TYPE_PRIVATE
+                || vol.type == VolumeInfo.TYPE_STUB) {
             isTypeRestricted = userManager
                     .hasUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
                     Binder.getCallingUserHandle());
@@ -1439,6 +1447,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         mPmInternal = LocalServices.getService(PackageManagerInternal.class);
         mUmInternal = LocalServices.getService(UserManagerInternal.class);
+        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         HandlerThread hthread = new HandlerThread(TAG);
         hthread.start();
@@ -2831,6 +2840,7 @@ class StorageManagerService extends IStorageManager.Stub
                 final VolumeInfo vol = mVolumes.valueAt(i);
                 switch (vol.getType()) {
                     case VolumeInfo.TYPE_PUBLIC:
+                    case VolumeInfo.TYPE_STUB:
                     case VolumeInfo.TYPE_EMULATED:
                         break;
                     default:
@@ -3060,25 +3070,25 @@ class StorageManagerService extends IStorageManager.Stub
             "(?i)^(/storage/[^/]+/(?:[0-9]+/)?)(.*)");
 
     @Override
-    public String translateAppToSystem(String path, String packageName, int userId) {
-        return translateInternal(path, packageName, userId, true);
+    public String translateAppToSystem(String path, int pid, int uid) {
+        return translateInternal(path, pid, uid, true);
     }
 
     @Override
-    public String translateSystemToApp(String path, String packageName, int userId) {
-        return translateInternal(path, packageName, userId, false);
+    public String translateSystemToApp(String path, int pid, int uid) {
+        return translateInternal(path, pid, uid, false);
     }
 
-    private String translateInternal(String path, String packageName, int userId,
-            boolean toSystem) {
+    private String translateInternal(String path, int pid, int uid, boolean toSystem) {
         if (!ENABLE_ISOLATED_STORAGE) return path;
 
         if (path.contains("/../")) {
             throw new SecurityException("Shady looking path " + path);
         }
 
-        final String sharedUserId = mPmInternal.getSharedUserIdForPackage(packageName);
-        final String sandboxId = getSandboxId(packageName, sharedUserId);
+        if (!mAmInternal.isAppStorageSandboxed(pid, uid)) {
+            return path;
+        }
 
         final Matcher m = PATTERN_TRANSLATE.matcher(path);
         if (m.matches()) {
@@ -3087,9 +3097,7 @@ class StorageManagerService extends IStorageManager.Stub
 
             // Does path belong to any packages belonging to this UID? If so,
             // they get to go straight through to legacy paths.
-            final String[] pkgs = (sharedUserId == null)
-                    ? new String[] {packageName}
-                    : mPmInternal.getPackagesForSharedUserId(sharedUserId, userId);
+            final String[] pkgs = mContext.getPackageManager().getPackagesForUid(uid);
             for (String pkg : pkgs) {
                 if (devicePath.startsWith("Android/data/" + pkg + "/") ||
                         devicePath.startsWith("Android/media/" + pkg + "/") ||
@@ -3097,6 +3105,9 @@ class StorageManagerService extends IStorageManager.Stub
                     return path;
                 }
             }
+
+            final String sharedUserId = mPmInternal.getSharedUserIdForPackage(pkgs[0]);
+            final String sandboxId = getSandboxId(pkgs[0], sharedUserId);
 
             if (toSystem) {
                 // Everything else goes into sandbox.

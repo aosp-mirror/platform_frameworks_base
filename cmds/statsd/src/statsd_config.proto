@@ -274,6 +274,7 @@ message ValueMetric {
   optional bool use_diff = 12;
 
   enum ValueDirection {
+      UNKNOWN = 0;
       INCREASING = 1;
       DECREASING = 2;
       ANY = 3;

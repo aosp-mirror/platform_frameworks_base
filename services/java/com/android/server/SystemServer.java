@@ -89,6 +89,7 @@ import com.android.server.emergency.EmergencyAffordanceService;
 import com.android.server.hdmi.HdmiControlService;
 import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
+import com.android.server.inputmethod.MultiClientInputMethodManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.lights.LightsService;
 import com.android.server.media.MediaResourceMonitorService;
@@ -117,6 +118,7 @@ import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.power.ThermalManagerService;
 import com.android.server.restrictions.RestrictionsManagerService;
+import com.android.server.role.RoleManagerService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.soundtrigger.SoundTriggerService;
@@ -1016,7 +1018,12 @@ public final class SystemServer {
         // Bring up services needed for UI.
         if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
             traceBeginAndSlog("StartInputMethodManagerLifecycle");
-            mSystemServiceManager.startService(InputMethodManagerService.Lifecycle.class);
+            if (MultiClientInputMethodManagerService.isConfiguredToUse()) {
+                mSystemServiceManager.startService(
+                        MultiClientInputMethodManagerService.Lifecycle.class);
+            } else {
+                mSystemServiceManager.startService(InputMethodManagerService.Lifecycle.class);
+            }
             traceEnd();
 
             traceBeginAndSlog("StartAccessibilityManagerService");
@@ -1903,6 +1910,11 @@ public final class SystemServer {
             } catch (Throwable e) {
                 reportWtf("observing native crashes", e);
             }
+            traceEnd();
+
+            // Grants default permissions and defines roles
+            traceBeginAndSlog("StartRoleManagerService");
+            mSystemServiceManager.startService(RoleManagerService.class);
             traceEnd();
 
             // No dependency on Webview preparation in system server. But this should

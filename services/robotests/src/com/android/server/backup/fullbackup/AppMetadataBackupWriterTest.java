@@ -7,6 +7,7 @@ import static com.android.server.backup.BackupManagerService.BACKUP_METADATA_VER
 import static com.android.server.backup.BackupManagerService.BACKUP_WIDGET_METADATA_TOKEN;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.robolectric.Shadows.shadowOf;
 import static org.testng.Assert.expectThrows;
 
@@ -21,17 +22,24 @@ import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.os.Build;
-import android.os.Build.VERSION_CODES;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderClasses;
-import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.ShadowBackupDataInput;
 import com.android.server.testing.shadows.ShadowBackupDataOutput;
 import com.android.server.testing.shadows.ShadowFullBackup;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowApplicationPackageManager;
+import org.robolectric.shadows.ShadowEnvironment;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -41,32 +49,20 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileTime;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowApplicationPackageManager;
-import org.robolectric.shadows.ShadowEnvironment;
-
-@RunWith(FrameworkRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(
-        manifest = Config.NONE,
-        sdk = 26,
         shadows = {
             ShadowBackupDataInput.class,
             ShadowBackupDataOutput.class,
             ShadowEnvironment.class,
             ShadowFullBackup.class,
         })
-@SystemLoaderPackages({"com.android.server.backup", "android.app.backup"})
-@SystemLoaderClasses({PackageInfo.class, SigningInfo.class})
 public class AppMetadataBackupWriterTest {
     private static final String TEST_PACKAGE = "com.test.package";
     private static final String TEST_PACKAGE_INSTALLER = "com.test.package.installer";
     private static final Long TEST_PACKAGE_VERSION_CODE = 100L;
 
+    private PackageManager mPackageManager;
     private ShadowApplicationPackageManager mShadowPackageManager;
     private File mFilesDir;
     private File mBackupDataOutputFile;
@@ -76,8 +72,8 @@ public class AppMetadataBackupWriterTest {
     public void setUp() throws Exception {
         Application application = RuntimeEnvironment.application;
 
-        PackageManager packageManager = application.getPackageManager();
-        mShadowPackageManager = (ShadowApplicationPackageManager) shadowOf(packageManager);
+        mPackageManager = application.getPackageManager();
+        mShadowPackageManager = (ShadowApplicationPackageManager) shadowOf(mPackageManager);
 
         mFilesDir = RuntimeEnvironment.application.getFilesDir();
         mBackupDataOutputFile = new File(mFilesDir, "output");
@@ -87,7 +83,7 @@ public class AppMetadataBackupWriterTest {
                         mBackupDataOutputFile, ParcelFileDescriptor.MODE_READ_WRITE);
         FullBackupDataOutput output =
                 new FullBackupDataOutput(pfd, /* quota */ -1, /* transportFlags */ 0);
-        mBackupWriter = new AppMetadataBackupWriter(output, packageManager);
+        mBackupWriter = new AppMetadataBackupWriter(output, mPackageManager);
     }
 
     @After
@@ -194,36 +190,6 @@ public class AppMetadataBackupWriterTest {
         assertThat(manifest[6]).isEqualTo("2"); // # of signatures
         assertThat(manifest[7]).isEqualTo("1234"); // first signature
         assertThat(manifest[8]).isEqualTo("5678"); // second signature
-        manifestFile.delete();
-    }
-
-    /**
-     * The manifest format is:
-     *
-     * <pre>
-     *     BACKUP_MANIFEST_VERSION
-     *     package name
-     *     package version code
-     *     platform version code
-     *     installer package name (can be empty)
-     *     boolean (1 if archive includes .apk, otherwise 0)
-     *     # of signatures N
-     *     N* (signature byte array in ascii format per Signature.toCharsString())
-     * </pre>
-     */
-    @Config(sdk = VERSION_CODES.O)
-    @Test
-    public void testBackupManifest_whenApiO_writesCorrectApi() throws Exception {
-        PackageInfo packageInfo =
-                createPackageInfo(TEST_PACKAGE, TEST_PACKAGE_INSTALLER, TEST_PACKAGE_VERSION_CODE);
-        File manifestFile = createFile(BACKUP_MANIFEST_FILENAME);
-
-        mBackupWriter.backupManifest(packageInfo, manifestFile, mFilesDir, /* withApk */ false);
-
-        byte[] manifestBytes = getWrittenBytes(mBackupDataOutputFile, /* includeTarHeader */ false);
-        String[] manifest = new String(manifestBytes, StandardCharsets.UTF_8).split("\n");
-        assertThat(manifest.length).isEqualTo(7);
-        assertThat(manifest[3]).isEqualTo(Integer.toString(VERSION_CODES.O)); // platform version
         manifestFile.delete();
     }
 
@@ -394,7 +360,7 @@ public class AppMetadataBackupWriterTest {
     }
 
     @Test
-    public void testBackupObb_withNoObbData_doesNotWriteBytesToOutput() throws Exception {
+    public void testBackupObb_withNoObbData_doesNotWriteBytesToOutput() {
         PackageInfo packageInfo =
                 createPackageInfo(TEST_PACKAGE, TEST_PACKAGE_INSTALLER, TEST_PACKAGE_VERSION_CODE);
         File obbDir = createObbDirForPackage(packageInfo.packageName);
@@ -416,7 +382,7 @@ public class AppMetadataBackupWriterTest {
         packageInfo.setLongVersionCode(versionCode);
         mShadowPackageManager.addPackage(packageInfo);
         if (installerPackageName != null) {
-            mShadowPackageManager.setInstallerPackageName(packageName, installerPackageName);
+            mPackageManager.setInstallerPackageName(packageName, installerPackageName);
         }
         return packageInfo;
     }

@@ -1978,6 +1978,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     @Override
     public final void setDisplayId(int displayId) {
         mDisplayId = displayId;
@@ -2039,6 +2040,16 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public final int getModifiers() {
         return normalizeMetaState(mMetaState) & META_MODIFIER_MASK;
+    }
+
+    /**
+     * Modifies the flags of the event.
+     *
+     * @param newFlags New flags for the event, replacing the entire value.
+     * @hide
+     */
+    public final void setFlags(int newFlags) {
+        mFlags = newFlags;
     }
 
     /**
@@ -2539,6 +2550,20 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public final int getRepeatCount() {
         return mRepeatCount;
+    }
+
+    /**
+     * Modifies the down time and the event time of the event.
+     *
+     * @param downTime The new down time (in {@link android.os.SystemClock#uptimeMillis}) of the
+     *                 event.
+     * @param eventTime The new event time (in {@link android.os.SystemClock#uptimeMillis}) of the
+     *                  event.
+     * @hide
+     */
+    public final void setTime(long downTime, long eventTime) {
+        mDownTime = downTime;
+        mEventTime = eventTime;
     }
 
     /**

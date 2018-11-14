@@ -26,6 +26,7 @@ import com.android.server.backup.utils.AppBackupUtils;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.annotation.Resetter;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -52,21 +53,22 @@ public class ShadowAppBackupUtils {
     }
 
     @Implementation
-    public static boolean appIsRunningAndEligibleForBackupWithTransport(
+    protected static boolean appIsRunningAndEligibleForBackupWithTransport(
             @Nullable TransportClient transportClient, String packageName, PackageManager pm) {
         return sAppsRunningAndEligibleForBackupWithTransport.contains(packageName);
     }
 
     @Implementation
-    public static boolean appIsEligibleForBackup(ApplicationInfo app, PackageManager pm) {
+    protected static boolean appIsEligibleForBackup(ApplicationInfo app, PackageManager pm) {
         return sAppsEligibleForBackup.contains(app.packageName);
     }
 
     @Implementation
-    public static boolean appGetsFullBackup(PackageInfo packageInfo) {
+    protected static boolean appGetsFullBackup(PackageInfo packageInfo) {
         return sAppsGetFullBackup.contains(packageInfo.packageName);
     }
 
+    @Resetter
     public static void reset() {
         sAppsRunningAndEligibleForBackupWithTransport.clear();
         sAppsEligibleForBackup.clear();

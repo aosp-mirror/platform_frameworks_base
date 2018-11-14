@@ -68,9 +68,7 @@ import static android.os.Process.THREAD_GROUP_DEFAULT;
 import static android.os.Process.THREAD_GROUP_RESTRICTED;
 import static android.os.Process.THREAD_GROUP_TOP_APP;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
-import static android.os.Process.getPidsForCommands;
 import static android.os.Process.getTotalMemory;
-import static android.os.Process.getUidForPid;
 import static android.os.Process.isThreadInProcess;
 import static android.os.Process.killProcess;
 import static android.os.Process.killProcessQuiet;
@@ -127,11 +125,8 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.MemoryStatUtil.MEMORY_STAT_INTERESTING_NATIVE_PROCESSES;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
-import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
-import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -318,6 +313,7 @@ import com.android.internal.os.ByteTransferPipe;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.os.Zygote;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -2059,8 +2055,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         private String mExemptionsStr;
         private List<String> mExemptions = Collections.emptyList();
         private int mLogSampleRate = -1;
-        @HiddenApiEnforcementPolicy private int mPolicyPreP = HIDDEN_API_ENFORCEMENT_DEFAULT;
-        @HiddenApiEnforcementPolicy private int mPolicyP = HIDDEN_API_ENFORCEMENT_DEFAULT;
+        @HiddenApiEnforcementPolicy private int mPolicy = HIDDEN_API_ENFORCEMENT_DEFAULT;
 
         public HiddenApiSettings(Handler handler, Context context) {
             super(handler);
@@ -2077,11 +2072,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     false,
                     this);
             mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_POLICY_PRE_P_APPS),
-                    false,
-                    this);
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_POLICY_P_APPS),
+                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_POLICY),
                     false,
                     this);
             update();
@@ -2116,8 +2107,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mLogSampleRate = logSampleRate;
                 zygoteProcess.setHiddenApiAccessLogSampleRate(mLogSampleRate);
             }
-            mPolicyPreP = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY_PRE_P_APPS);
-            mPolicyP = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY_P_APPS);
+            mPolicy = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY);
         }
 
         private @HiddenApiEnforcementPolicy int getValidEnforcementPolicy(String settingsKey) {
@@ -2134,12 +2124,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mBlacklistDisabled;
         }
 
-        @HiddenApiEnforcementPolicy int getPolicyForPrePApps() {
-            return mPolicyPreP;
-        }
-
-        @HiddenApiEnforcementPolicy int getPolicyForPApps() {
-            return mPolicyP;
+        @HiddenApiEnforcementPolicy int getPolicy() {
+            return mPolicy;
         }
 
         public void onChange(boolean selfChange) {
@@ -2690,8 +2676,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void updateUsageStats(ComponentName activity, int uid, int userId, boolean resumed) {
-        if (DEBUG_SWITCH) Slog.d(TAG_SWITCH,
-                "updateUsageStats: comp=" + activity + "res=" + resumed);
+        if (DEBUG_SWITCH) {
+            Slog.d(TAG_SWITCH,
+                    "updateUsageStats: comp=" + activity + "res=" + resumed);
+        }
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         StatsLog.write(StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
             uid, activity.getPackageName(),
@@ -2714,6 +2702,20 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             synchronized (stats) {
                 stats.noteActivityPausedLocked(uid);
+            }
+        }
+    }
+
+    void updateForegroundServiceUsageStats(ComponentName service, int userId, boolean started) {
+        if (DEBUG_SWITCH) {
+            Slog.d(TAG_SWITCH, "updateForegroundServiceUsageStats: comp="
+                    + service + "started=" + started);
+        }
+        synchronized (this) {
+            if (mUsageStatsService != null) {
+                mUsageStatsService.reportEvent(service, userId,
+                        started ? UsageEvents.Event.FOREGROUND_SERVICE_START
+                                : UsageEvents.Event.FOREGROUND_SERVICE_STOP);
             }
         }
     }
@@ -17161,6 +17163,179 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
+    final boolean updateLowMemStateLocked(int numCached, int numEmpty, int numTrimming) {
+        final int N = mProcessList.getLruSizeLocked();
+        final long now = SystemClock.uptimeMillis();
+        // Now determine the memory trimming level of background processes.
+        // Unfortunately we need to start at the back of the list to do this
+        // properly.  We only do this if the number of background apps we
+        // are managing to keep around is less than half the maximum we desire;
+        // if we are keeping a good number around, we'll let them use whatever
+        // memory they want.
+        final int numCachedAndEmpty = numCached + numEmpty;
+        int memFactor;
+        if (numCached <= mConstants.CUR_TRIM_CACHED_PROCESSES
+                && numEmpty <= mConstants.CUR_TRIM_EMPTY_PROCESSES) {
+            if (numCachedAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
+                memFactor = ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
+            } else if (numCachedAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
+                memFactor = ProcessStats.ADJ_MEM_FACTOR_LOW;
+            } else {
+                memFactor = ProcessStats.ADJ_MEM_FACTOR_MODERATE;
+            }
+        } else {
+            memFactor = ProcessStats.ADJ_MEM_FACTOR_NORMAL;
+        }
+        // We always allow the memory level to go up (better).  We only allow it to go
+        // down if we are in a state where that is allowed, *and* the total number of processes
+        // has gone down since last time.
+        if (DEBUG_OOM_ADJ) Slog.d(TAG_OOM_ADJ, "oom: memFactor=" + memFactor
+                + " last=" + mLastMemoryLevel + " allowLow=" + mAllowLowerMemLevel
+                + " numProcs=" + mProcessList.getLruSizeLocked() + " last=" + mLastNumProcesses);
+        if (memFactor > mLastMemoryLevel) {
+            if (!mAllowLowerMemLevel || mProcessList.getLruSizeLocked() >= mLastNumProcesses) {
+                memFactor = mLastMemoryLevel;
+                if (DEBUG_OOM_ADJ) Slog.d(TAG_OOM_ADJ, "Keeping last mem factor!");
+            }
+        }
+        if (memFactor != mLastMemoryLevel) {
+            EventLogTags.writeAmMemFactor(memFactor, mLastMemoryLevel);
+            StatsLog.write(StatsLog.MEMORY_FACTOR_STATE_CHANGED, memFactor);
+        }
+        mLastMemoryLevel = memFactor;
+        mLastNumProcesses = mProcessList.getLruSizeLocked();
+        boolean allChanged = mProcessStats.setMemFactorLocked(
+                memFactor, mAtmInternal != null ? !mAtmInternal.isSleeping() : true, now);
+        final int trackerMemFactor = mProcessStats.getMemFactorLocked();
+        if (memFactor != ProcessStats.ADJ_MEM_FACTOR_NORMAL) {
+            if (mLowRamStartTime == 0) {
+                mLowRamStartTime = now;
+            }
+            int step = 0;
+            int fgTrimLevel;
+            switch (memFactor) {
+                case ProcessStats.ADJ_MEM_FACTOR_CRITICAL:
+                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
+                    break;
+                case ProcessStats.ADJ_MEM_FACTOR_LOW:
+                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
+                    break;
+                default:
+                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE;
+                    break;
+            }
+            int factor = numTrimming/3;
+            int minFactor = 2;
+            if (mAtmInternal.getHomeProcess() != null) minFactor++;
+            if (mAtmInternal.getPreviousProcess() != null) minFactor++;
+            if (factor < minFactor) factor = minFactor;
+            int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
+            for (int i=N-1; i>=0; i--) {
+                ProcessRecord app = mProcessList.mLruProcesses.get(i);
+                if (allChanged || app.procStateChanged) {
+                    setProcessTrackerStateLocked(app, trackerMemFactor, now);
+                    app.procStateChanged = false;
+                }
+                if (app.getCurProcState() >= ActivityManager.PROCESS_STATE_HOME
+                        && !app.killedByAm) {
+                    if (app.trimMemoryLevel < curLevel && app.thread != null) {
+                        try {
+                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
+                                    "Trimming memory of " + app.processName + " to " + curLevel);
+                            app.thread.scheduleTrimMemory(curLevel);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                    app.trimMemoryLevel = curLevel;
+                    step++;
+                    if (step >= factor) {
+                        step = 0;
+                        switch (curLevel) {
+                            case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
+                                curLevel = ComponentCallbacks2.TRIM_MEMORY_MODERATE;
+                                break;
+                            case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
+                                curLevel = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
+                                break;
+                        }
+                    }
+                } else if (app.getCurProcState() == ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
+                        && !app.killedByAm) {
+                    if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
+                            && app.thread != null) {
+                        try {
+                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
+                                    "Trimming memory of heavy-weight " + app.processName
+                                    + " to " + ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
+                            app.thread.scheduleTrimMemory(
+                                    ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                    app.trimMemoryLevel = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
+                } else {
+                    if ((app.getCurProcState() >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+                            || app.systemNoUi) && app.hasPendingUiClean()) {
+                        // If this application is now in the background and it
+                        // had done UI, then give it the special trim level to
+                        // have it free UI resources.
+                        final int level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
+                        if (app.trimMemoryLevel < level && app.thread != null) {
+                            try {
+                                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
+                                        "Trimming memory of bg-ui " + app.processName
+                                        + " to " + level);
+                                app.thread.scheduleTrimMemory(level);
+                            } catch (RemoteException e) {
+                            }
+                        }
+                        app.setPendingUiClean(false);
+                    }
+                    if (app.trimMemoryLevel < fgTrimLevel && app.thread != null) {
+                        try {
+                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
+                                    "Trimming memory of fg " + app.processName
+                                    + " to " + fgTrimLevel);
+                            app.thread.scheduleTrimMemory(fgTrimLevel);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                    app.trimMemoryLevel = fgTrimLevel;
+                }
+            }
+        } else {
+            if (mLowRamStartTime != 0) {
+                mLowRamTimeSinceLastIdle += now - mLowRamStartTime;
+                mLowRamStartTime = 0;
+            }
+            for (int i=N-1; i>=0; i--) {
+                ProcessRecord app = mProcessList.mLruProcesses.get(i);
+                if (allChanged || app.procStateChanged) {
+                    setProcessTrackerStateLocked(app, trackerMemFactor, now);
+                    app.procStateChanged = false;
+                }
+                if ((app.getCurProcState() >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+                        || app.systemNoUi) && app.hasPendingUiClean()) {
+                    if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
+                            && app.thread != null) {
+                        try {
+                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
+                                    "Trimming memory of ui hidden " + app.processName
+                                    + " to " + ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
+                            app.thread.scheduleTrimMemory(
+                                    ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                    app.setPendingUiClean(false);
+                }
+                app.trimMemoryLevel = 0;
+            }
+        }
+        return allChanged;
+    }
+
+    @GuardedBy("this")
     final void updateOomAdjLocked() {
         mOomAdjProfiler.oomAdjStarted();
         final ProcessRecord TOP_APP = getTopAppLocked();
@@ -17392,172 +17567,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mNumServiceProcs = mNewNumServiceProcs;
 
-        // Now determine the memory trimming level of background processes.
-        // Unfortunately we need to start at the back of the list to do this
-        // properly.  We only do this if the number of background apps we
-        // are managing to keep around is less than half the maximum we desire;
-        // if we are keeping a good number around, we'll let them use whatever
-        // memory they want.
-        final int numCachedAndEmpty = numCached + numEmpty;
-        int memFactor;
-        if (numCached <= mConstants.CUR_TRIM_CACHED_PROCESSES
-                && numEmpty <= mConstants.CUR_TRIM_EMPTY_PROCESSES) {
-            if (numCachedAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
-                memFactor = ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
-            } else if (numCachedAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
-                memFactor = ProcessStats.ADJ_MEM_FACTOR_LOW;
-            } else {
-                memFactor = ProcessStats.ADJ_MEM_FACTOR_MODERATE;
-            }
-        } else {
-            memFactor = ProcessStats.ADJ_MEM_FACTOR_NORMAL;
-        }
-        // We always allow the memory level to go up (better).  We only allow it to go
-        // down if we are in a state where that is allowed, *and* the total number of processes
-        // has gone down since last time.
-        if (DEBUG_OOM_ADJ) Slog.d(TAG_OOM_ADJ, "oom: memFactor=" + memFactor
-                + " last=" + mLastMemoryLevel + " allowLow=" + mAllowLowerMemLevel
-                + " numProcs=" + mProcessList.getLruSizeLocked() + " last=" + mLastNumProcesses);
-        if (memFactor > mLastMemoryLevel) {
-            if (!mAllowLowerMemLevel || mProcessList.getLruSizeLocked() >= mLastNumProcesses) {
-                memFactor = mLastMemoryLevel;
-                if (DEBUG_OOM_ADJ) Slog.d(TAG_OOM_ADJ, "Keeping last mem factor!");
-            }
-        }
-        if (memFactor != mLastMemoryLevel) {
-            EventLogTags.writeAmMemFactor(memFactor, mLastMemoryLevel);
-            StatsLog.write(StatsLog.MEMORY_FACTOR_STATE_CHANGED, memFactor);
-        }
-        mLastMemoryLevel = memFactor;
-        mLastNumProcesses = mProcessList.getLruSizeLocked();
-        boolean allChanged = mProcessStats.setMemFactorLocked(
-                memFactor, mAtmInternal != null ? !mAtmInternal.isSleeping() : true, now);
-        final int trackerMemFactor = mProcessStats.getMemFactorLocked();
-        if (memFactor != ProcessStats.ADJ_MEM_FACTOR_NORMAL) {
-            if (mLowRamStartTime == 0) {
-                mLowRamStartTime = now;
-            }
-            int step = 0;
-            int fgTrimLevel;
-            switch (memFactor) {
-                case ProcessStats.ADJ_MEM_FACTOR_CRITICAL:
-                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
-                    break;
-                case ProcessStats.ADJ_MEM_FACTOR_LOW:
-                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
-                    break;
-                default:
-                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE;
-                    break;
-            }
-            int factor = numTrimming/3;
-            int minFactor = 2;
-            if (mAtmInternal.getHomeProcess() != null) minFactor++;
-            if (mAtmInternal.getPreviousProcess() != null) minFactor++;
-            if (factor < minFactor) factor = minFactor;
-            int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
-            for (int i=N-1; i>=0; i--) {
-                ProcessRecord app = mProcessList.mLruProcesses.get(i);
-                if (allChanged || app.procStateChanged) {
-                    setProcessTrackerStateLocked(app, trackerMemFactor, now);
-                    app.procStateChanged = false;
-                }
-                if (app.getCurProcState() >= ActivityManager.PROCESS_STATE_HOME
-                        && !app.killedByAm) {
-                    if (app.trimMemoryLevel < curLevel && app.thread != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
-                                    "Trimming memory of " + app.processName + " to " + curLevel);
-                            app.thread.scheduleTrimMemory(curLevel);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                    app.trimMemoryLevel = curLevel;
-                    step++;
-                    if (step >= factor) {
-                        step = 0;
-                        switch (curLevel) {
-                            case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
-                                curLevel = ComponentCallbacks2.TRIM_MEMORY_MODERATE;
-                                break;
-                            case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
-                                curLevel = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
-                                break;
-                        }
-                    }
-                } else if (app.getCurProcState() == ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
-                        && !app.killedByAm) {
-                    if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
-                            && app.thread != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
-                                    "Trimming memory of heavy-weight " + app.processName
-                                    + " to " + ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
-                            app.thread.scheduleTrimMemory(
-                                    ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                    app.trimMemoryLevel = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
-                } else {
-                    if ((app.getCurProcState() >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-                            || app.systemNoUi) && app.hasPendingUiClean()) {
-                        // If this application is now in the background and it
-                        // had done UI, then give it the special trim level to
-                        // have it free UI resources.
-                        final int level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
-                        if (app.trimMemoryLevel < level && app.thread != null) {
-                            try {
-                                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
-                                        "Trimming memory of bg-ui " + app.processName
-                                        + " to " + level);
-                                app.thread.scheduleTrimMemory(level);
-                            } catch (RemoteException e) {
-                            }
-                        }
-                        app.setPendingUiClean(false);
-                    }
-                    if (app.trimMemoryLevel < fgTrimLevel && app.thread != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
-                                    "Trimming memory of fg " + app.processName
-                                    + " to " + fgTrimLevel);
-                            app.thread.scheduleTrimMemory(fgTrimLevel);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                    app.trimMemoryLevel = fgTrimLevel;
-                }
-            }
-        } else {
-            if (mLowRamStartTime != 0) {
-                mLowRamTimeSinceLastIdle += now - mLowRamStartTime;
-                mLowRamStartTime = 0;
-            }
-            for (int i=N-1; i>=0; i--) {
-                ProcessRecord app = mProcessList.mLruProcesses.get(i);
-                if (allChanged || app.procStateChanged) {
-                    setProcessTrackerStateLocked(app, trackerMemFactor, now);
-                    app.procStateChanged = false;
-                }
-                if ((app.getCurProcState() >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-                        || app.systemNoUi) && app.hasPendingUiClean()) {
-                    if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
-                            && app.thread != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
-                                    "Trimming memory of ui hidden " + app.processName
-                                    + " to " + ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
-                            app.thread.scheduleTrimMemory(
-                                    ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                    app.setPendingUiClean(false);
-                }
-                app.trimMemoryLevel = 0;
-            }
-        }
+        boolean allChanged = updateLowMemStateLocked(numCached, numEmpty, numTrimming);
 
         if (mAlwaysFinishActivities) {
             // Need to do this on its own message because the stack may not
@@ -18758,28 +18768,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public List<ProcessMemoryState> getMemoryStateForNativeProcesses() {
-            List<ProcessMemoryState> processMemoryStates = new ArrayList<>();
-            int[] pids = getPidsForCommands(MEMORY_STAT_INTERESTING_NATIVE_PROCESSES);
-            for (int i = 0; i < pids.length; i++) {
-                int pid = pids[i];
-                MemoryStat memoryStat = readMemoryStatFromProcfs(pid);
-                if (memoryStat == null) {
-                    continue;
-                }
-                int uid = getUidForPid(pid);
-                String processName = readCmdlineFromProcfs(pid);
-                int oomScore = -1; // Unused, not included in the NativeProcessMemoryState atom.
-                ProcessMemoryState processMemoryState = new ProcessMemoryState(uid, processName,
-                        oomScore, memoryStat.pgfault, memoryStat.pgmajfault,
-                        memoryStat.rssInBytes, memoryStat.cacheInBytes, memoryStat.swapInBytes,
-                        memoryStat.rssHighWatermarkInBytes, memoryStat.startTimeNanos);
-                processMemoryStates.add(processMemoryState);
-            }
-            return processMemoryStates;
-        }
-
-        @Override
         public int handleIncomingUser(int callingPid, int callingUid, int userId,
                 boolean allowAll, int allowMode, String name, String callerPackage) {
             return mUserController.handleIncomingUser(callingPid, callingUid, userId, allowAll,
@@ -19174,6 +19162,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     wmLock.notify();
                 }
+            }
+        }
+
+        @Override
+        public boolean isAppStorageSandboxed(int pid, int uid) {
+            if (!SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+                return false;
+            }
+            synchronized (mPidsSelfLocked) {
+                final ProcessRecord pr = mPidsSelfLocked.get(pid);
+                return pr == null || pr.mountMode != Zygote.MOUNT_EXTERNAL_FULL;
             }
         }
     }

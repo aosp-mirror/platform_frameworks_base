@@ -19,17 +19,16 @@ package com.android.server.backup.encryption.chunk;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.platform.test.annotations.Presubmit;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
+
 import com.google.common.primitives.Bytes;
-import java.util.Arrays;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderPackages({"com.android.server.backup"})
+import java.util.Arrays;
+
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class ChunkHashTest {
     private static final int HASH_LENGTH_BYTES = 256 / 8;

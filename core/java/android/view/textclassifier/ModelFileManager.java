@@ -74,10 +74,9 @@ public final class ModelFileManager {
      * @param localeList the required locales, use {@code null} if there is no preference.
      */
     public ModelFile findBestModelFile(@Nullable LocaleList localeList) {
-        // Specified localeList takes priority over the system default, so it is listed first.
         final String languages = localeList == null || localeList.isEmpty()
                 ? LocaleList.getDefault().toLanguageTags()
-                : localeList.toLanguageTags() + "," + LocaleList.getDefault().toLanguageTags();
+                : localeList.toLanguageTags();
         final List<Locale.LanguageRange> languageRangeList = Locale.LanguageRange.parse(languages);
 
         ModelFile bestModel = null;

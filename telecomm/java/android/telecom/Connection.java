@@ -272,6 +272,9 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Call can be upgraded to a video call.
+     * @deprecated Use {@link #CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL} and
+     * {@link #CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL} to indicate for a call whether or not
+     * video calling is supported.
      */
     public static final int CAPABILITY_CAN_UPGRADE_TO_VIDEO = 0x00080000;
 

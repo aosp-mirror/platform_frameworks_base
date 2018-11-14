@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.Manifest.permission;
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
@@ -1179,6 +1180,105 @@ public final class PowerManager {
     public boolean setPowerSaveMode(boolean mode) {
         try {
             return mService.setPowerSaveMode(mode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Updates the current state of dynamic power savings and disable threshold. This is
+     * a signal to the system which an app can update to serve as an indicator that
+     * the user will be in a battery critical situation before being able to plug in.
+     * Only apps with the {@link android.Manifest.permission#POWER_SAVER} permission may do this.
+     * This is a device global state, not a per user setting.
+     *
+     * <p>When enabled, the system may enact various measures for reducing power consumption in
+     * order to help ensure that the user will make it to their next charging point. The most
+     * visible of these will be the automatic enabling of battery saver if the user has set
+     * their battery saver mode to "automatic". Note
+     * that this is NOT simply an on/off switch for features, but rather a hint for the
+     * system to consider enacting these power saving features, some of which have additional
+     * logic around when to activate based on this signal.
+     *
+     * <p>The provided threshold is the percentage the system should consider itself safe at given
+     * the current state of the device. The value is an integer representing a battery level.
+     *
+     * <p>The threshold is meant to set an explicit stopping point for dynamic power savings
+     * functionality so that the dynamic power savings itself remains a signal rather than becoming
+     * an on/off switch for a subset of features.
+     * @hide
+     *
+     * @param dynamicPowerSavingsEnabled A signal indicating to the system if it believes the
+     * dynamic power savings behaviors should be activated.
+     * @param disableThreshold When the suggesting app believes it would be safe to disable dynamic
+     * power savings behaviors.
+     * @return True if the update was allowed and succeeded.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(permission.POWER_SAVER)
+    public boolean setDynamicPowerSavings(boolean dynamicPowerSavingsEnabled,
+            int disableThreshold) {
+        try {
+            return mService.setDynamicPowerSavings(dynamicPowerSavingsEnabled, disableThreshold);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Indicates automatic battery saver toggling by the system will be based on percentage.
+     *
+     * @see PowerManager#getPowerSaveMode()
+     *
+     *  @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int POWER_SAVER_MODE_PERCENTAGE = 0;
+
+    /**
+     * Indicates automatic battery saver toggling by the system will be based on the state
+     * of the dynamic power savings signal.
+     *
+     * @see PowerManager#setDynamicPowerSavings(boolean, int)
+     * @see PowerManager#getPowerSaveMode()
+     *
+     *  @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int POWER_SAVER_MODE_DYNAMIC = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+        POWER_SAVER_MODE_PERCENTAGE,
+        POWER_SAVER_MODE_DYNAMIC
+
+    })
+    public @interface AutoPowerSaverMode{}
+
+
+    /**
+     * Returns the current battery saver control mode. Values it may return are defined in
+     * AutoPowerSaverMode. Note that this is a global device state, not a per user setting.
+     *
+     * @return The current value power saver mode for the system.
+     *
+     * @see AutoPowerSaverMode
+     * @see PowerManager#getPowerSaveMode()
+     * @hide
+     */
+    @AutoPowerSaverMode
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.POWER_SAVER)
+    public int getPowerSaveMode() {
+        try {
+            return mService.getPowerSaveMode();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

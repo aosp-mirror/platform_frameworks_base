@@ -17,6 +17,7 @@
 package com.android.server.backup.transport;
 
 import static com.android.server.backup.TransportManager.SERVICE_ACTION_TRANSPORT_HOST;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.argThat;
@@ -32,19 +33,15 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderPackages({"com.android.server.backup"})
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class TransportClientManagerTest {
     private static final String PACKAGE_NAME = "random.package.name";

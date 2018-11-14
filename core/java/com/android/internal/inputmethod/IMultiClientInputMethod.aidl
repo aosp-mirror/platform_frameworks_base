@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony;
+package com.android.internal.inputmethod;
 
-interface IRcs {
-    void deleteThread(int threadId);
+import android.os.IBinder;
+import com.android.internal.inputmethod.IMultiClientInputMethodPrivilegedOperations;
+
+oneway interface IMultiClientInputMethod {
+    void initialize(in IMultiClientInputMethodPrivilegedOperations privOps);
+    void addClient(int clientId, int uid, int pid, int selfReportedDisplayId);
+    void removeClient(int clientId);
 }

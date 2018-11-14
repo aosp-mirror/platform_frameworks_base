@@ -3417,6 +3417,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * used to interpolate between the provided color transforms when
      * processing raw sensor data.</p>
      * <p>The order of the values is R, G, B; where R is in the lowest index.</p>
+     * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
+     * the camera device has RAW capability.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      */
     @PublicKey
@@ -3442,6 +3444,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * that channel.</p>
      * <p>A more detailed description of the noise model can be found in the
      * Adobe DNG specification for the NoiseProfile tag.</p>
+     * <p>For a MONOCHROME camera, there is only one color channel. So the noise model coefficients
+     * will only contain one S and one O.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
@@ -3482,6 +3486,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <li>R &gt; 1.20 will require strong software correction to produce
      * a usuable image (&gt;20% divergence).</li>
      * </ul>
+     * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
+     * the camera device has RAW capability.</p>
      * <p><b>Range of valid values:</b><br></p>
      * <p>&gt;= 0</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
@@ -3592,6 +3598,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * layout key (see {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT android.sensor.info.colorFilterArrangement}), i.e. the
      * nth value given corresponds to the black level offset for the nth
      * color channel listed in the CFA.</p>
+     * <p>For a MONOCHROME camera, all of the 2x2 channels must have the same values.</p>
      * <p>This key will be available if {@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions} is available or the
      * camera device advertises this key via {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureResultKeys }.</p>
      * <p><b>Range of valid values:</b><br>
@@ -3852,6 +3859,17 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>As a visualization only, inverting the full-color map to recover an
      * image of a gray wall (using bicubic interpolation for visual quality) as captured by the sensor gives:</p>
      * <p><img alt="Image of a uniform white wall (inverse shading map)" src="/reference/images/camera2/metadata/android.statistics.lensShadingMap/inv_shading.png" /></p>
+     * <p>For a MONOCHROME camera, all of the 2x2 channels must have the same values. An example
+     * shading map for such a camera is defined as:</p>
+     * <pre><code>android.lens.info.shadingMapSize = [ 4, 3 ]
+     * android.statistics.lensShadingMap =
+     * [ 1.3, 1.3, 1.3, 1.3,  1.2, 1.2, 1.2, 1.2,
+     *     1.1, 1.1, 1.1, 1.1,  1.3, 1.3, 1.3, 1.3,
+     *   1.2, 1.2, 1.2, 1.2,  1.1, 1.1, 1.1, 1.1,
+     *     1.0, 1.0, 1.0, 1.0,  1.2, 1.2, 1.2, 1.2,
+     *   1.3, 1.3, 1.3, 1.3,   1.2, 1.2, 1.2, 1.2,
+     *     1.2, 1.2, 1.2, 1.2,  1.3, 1.3, 1.3, 1.3 ]
+     * </code></pre>
      * <p><b>Range of valid values:</b><br>
      * Each gain factor is &gt;= 1</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
@@ -3894,13 +3912,13 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * (x,y) ϵ (0 ... N-1, 0 ... M-1) is the value of the shading map at
      * pixel ( ((W-1)/(N-1)) * x, ((H-1)/(M-1)) * y) for the four color channels.
      * The map is assumed to be bilinearly interpolated between the sample points.</p>
-     * <p>The channel order is [R, Geven, Godd, B], where Geven is the green
-     * channel for the even rows of a Bayer pattern, and Godd is the odd rows.
+     * <p>For a Bayer camera, the channel order is [R, Geven, Godd, B], where Geven is
+     * the green channel for the even rows of a Bayer pattern, and Godd is the odd rows.
      * The shading map is stored in a fully interleaved format, and its size
      * is provided in the camera static metadata by android.lens.info.shadingMapSize.</p>
      * <p>The shading map will generally have on the order of 30-40 rows and columns,
      * and will be smaller than 64x64.</p>
-     * <p>As an example, given a very small map defined as:</p>
+     * <p>As an example, given a very small map for a Bayer camera defined as:</p>
      * <pre><code>android.lens.info.shadingMapSize = [ 4, 3 ]
      * android.statistics.lensShadingMap =
      * [ 1.3, 1.2, 1.15, 1.2,  1.2, 1.2, 1.15, 1.2,
@@ -3920,6 +3938,17 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * image of a gray wall (using bicubic interpolation for visual quality)
      * as captured by the sensor gives:</p>
      * <p><img alt="Image of a uniform white wall (inverse shading map)" src="/reference/images/camera2/metadata/android.statistics.lensShadingMap/inv_shading.png" /></p>
+     * <p>For a MONOCHROME camera, all of the 2x2 channels must have the same values. An example
+     * shading map for such a camera is defined as:</p>
+     * <pre><code>android.lens.info.shadingMapSize = [ 4, 3 ]
+     * android.statistics.lensShadingMap =
+     * [ 1.3, 1.3, 1.3, 1.3,  1.2, 1.2, 1.2, 1.2,
+     *     1.1, 1.1, 1.1, 1.1,  1.3, 1.3, 1.3, 1.3,
+     *   1.2, 1.2, 1.2, 1.2,  1.1, 1.1, 1.1, 1.1,
+     *     1.0, 1.0, 1.0, 1.0,  1.2, 1.2, 1.2, 1.2,
+     *   1.3, 1.3, 1.3, 1.3,   1.2, 1.2, 1.2, 1.2,
+     *     1.2, 1.2, 1.2, 1.2,  1.3, 1.3, 1.3, 1.3 ]
+     * </code></pre>
      * <p>Note that the RAW image data might be subject to lens shading
      * correction not reported on this map. Query
      * {@link CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED android.sensor.info.lensShadingApplied} to see if RAW image data has subject
@@ -4250,8 +4279,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * of points can be less than max (that is, the request doesn't have to
      * always provide a curve with number of points equivalent to
      * {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}).</p>
-     * <p>For devices with MONOCHROME capability, only red channel is used. Green and blue channels
-     * are ignored.</p>
+     * <p>For devices with MONOCHROME capability, all three channels must have the same set of
+     * control points.</p>
      * <p>A few examples, and their corresponding graphical mappings; these
      * only specify the red channel and the precision is limited to 4
      * digits, for conciseness.</p>
@@ -4314,8 +4343,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * of points can be less than max (that is, the request doesn't have to
      * always provide a curve with number of points equivalent to
      * {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}).</p>
-     * <p>For devices with MONOCHROME capability, only red channel is used. Green and blue channels
-     * are ignored.</p>
+     * <p>For devices with MONOCHROME capability, all three channels must have the same set of
+     * control points.</p>
      * <p>A few examples, and their corresponding graphical mappings; these
      * only specify the red channel and the precision is limited to 4
      * digits, for conciseness.</p>

@@ -2075,8 +2075,8 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
         // note that this assumes the message will not be removed from the queue before
         // it is handled (otherwise the wake lock would be leaked).
         mWakeLock.acquire();
-        if (Log.isLoggable(TAG, Log.INFO)) {
-            Log.i(TAG, "WakeLock acquired by sendMessage(" + messageIdAsString(message) + ", " + arg
+        if (DEBUG) {
+            Log.d(TAG, "WakeLock acquired by sendMessage(" + messageIdAsString(message) + ", " + arg
                     + ", " + obj + ")");
         }
         mHandler.obtainMessage(message, arg, 1, obj).sendToTarget();
@@ -2133,8 +2133,8 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             if (msg.arg2 == 1) {
                 // wakelock was taken for this message, release it
                 mWakeLock.release();
-                if (Log.isLoggable(TAG, Log.INFO)) {
-                    Log.i(TAG, "WakeLock released by handleMessage(" + messageIdAsString(message)
+                if (DEBUG) {
+                    Log.d(TAG, "WakeLock released by handleMessage(" + messageIdAsString(message)
                             + ", " + msg.arg1 + ", " + msg.obj + ")");
                 }
             }

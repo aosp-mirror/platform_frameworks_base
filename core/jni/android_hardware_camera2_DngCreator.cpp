@@ -892,6 +892,13 @@ static status_t convertCFA(uint8_t cfaEnum, /*out*/uint8_t* cfaOut) {
             cfaOut[3] = 0;
             break;
         }
+        // MONO and NIR are degenerate case of RGGB pattern: only Red channel
+        // will be used.
+        case ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_MONO:
+        case ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_NIR: {
+            cfaOut[0] = 0;
+            break;
+        }
         default: {
             return BAD_VALUE;
         }
@@ -1063,6 +1070,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
     uint32_t preWidth = 0;
     uint32_t preHeight = 0;
+    uint8_t colorFilter = 0;
+    bool isBayer = true;
     {
         // Check dimensions
         camera_metadata_entry entry =
@@ -1083,9 +1092,24 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                     "either the preCorrectionActiveArraySize or the pixelArraySize.");
             return nullptr;
         }
+
+        camera_metadata_entry colorFilterEntry =
+                characteristics.find(ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT);
+        colorFilter = colorFilterEntry.data.u8[0];
+        camera_metadata_entry capabilitiesEntry =
+                characteristics.find(ANDROID_REQUEST_AVAILABLE_CAPABILITIES);
+        size_t capsCount = capabilitiesEntry.count;
+        uint8_t* caps = capabilitiesEntry.data.u8;
+        if (std::find(caps, caps+capsCount, ANDROID_REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME)
+                != caps+capsCount) {
+            isBayer = false;
+        } else if (colorFilter == ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_MONO ||
+                colorFilter == ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_NIR) {
+            jniThrowException(env, "java/lang/AssertionError",
+                    "A camera device with MONO/NIR color filter must have MONOCHROME capability.");
+            return nullptr;
+        }
     }
-
-
 
     writer->addIfd(TIFF_IFD_0);
 
@@ -1094,9 +1118,12 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
     const uint32_t samplesPerPixel = 1;
     const uint32_t bitsPerSample = BITS_PER_SAMPLE;
 
-    OpcodeListBuilder::CfaLayout opcodeCfaLayout = OpcodeListBuilder::CFA_RGGB;
+    OpcodeListBuilder::CfaLayout opcodeCfaLayout = OpcodeListBuilder::CFA_NONE;
     uint8_t cfaPlaneColor[3] = {0, 1, 2};
-    uint8_t cfaEnum = -1;
+    camera_metadata_entry cfaEntry =
+            characteristics.find(ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT);
+    BAIL_IF_EMPTY_RET_NULL_SP(cfaEntry, env, TAG_CFAPATTERN, writer);
+    uint8_t cfaEnum = cfaEntry.data.u8[0];
 
     // TODO: Greensplit.
     // TODO: Add remaining non-essential tags
@@ -1141,12 +1168,20 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
     {
         // Set photometric interpretation
-        uint16_t interpretation = 32803; // CFA
+        uint16_t interpretation = isBayer ? 32803 /* CFA */ :
+                34892; /* Linear Raw */;
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_PHOTOMETRICINTERPRETATION, 1,
                 &interpretation, TIFF_IFD_0), env, TAG_PHOTOMETRICINTERPRETATION, writer);
     }
 
     {
+        uint16_t repeatDim[2] = {2, 2};
+        if (!isBayer) {
+            repeatDim[0] = repeatDim[1] = 1;
+        }
+        BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_BLACKLEVELREPEATDIM, 2, repeatDim,
+                TIFF_IFD_0), env, TAG_BLACKLEVELREPEATDIM, writer);
+
         // Set blacklevel tags, using dynamic black level if available
         camera_metadata_entry entry =
                 results.find(ANDROID_SENSOR_DYNAMIC_BLACK_LEVEL);
@@ -1165,14 +1200,9 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                 blackLevelRational[i * 2] = static_cast<uint32_t>(entry.data.i32[i]);
                 blackLevelRational[i * 2 + 1] = 1;
             }
-
         }
-        BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_BLACKLEVEL, 4, blackLevelRational,
-                TIFF_IFD_0), env, TAG_BLACKLEVEL, writer);
-
-        uint16_t repeatDim[2] = {2, 2};
-        BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_BLACKLEVELREPEATDIM, 2, repeatDim,
-                TIFF_IFD_0), env, TAG_BLACKLEVELREPEATDIM, writer);
+        BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_BLACKLEVEL, repeatDim[0]*repeatDim[1],
+                blackLevelRational, TIFF_IFD_0), env, TAG_BLACKLEVEL, writer);
     }
 
     {
@@ -1189,21 +1219,15 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                 TIFF_IFD_0), env, TAG_PLANARCONFIGURATION, writer);
     }
 
-    {
+    // All CFA pattern tags are not necessary for monochrome cameras.
+    if (isBayer) {
         // Set CFA pattern dimensions
         uint16_t repeatDim[2] = {2, 2};
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_CFAREPEATPATTERNDIM, 2, repeatDim,
                 TIFF_IFD_0), env, TAG_CFAREPEATPATTERNDIM, writer);
-    }
 
-    {
         // Set CFA pattern
-        camera_metadata_entry entry =
-                        characteristics.find(ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT);
-        BAIL_IF_EMPTY_RET_NULL_SP(entry, env, TAG_CFAPATTERN, writer);
-
         const int cfaLength = 4;
-        cfaEnum = entry.data.u8[0];
         uint8_t cfa[cfaLength];
         if ((err = convertCFA(cfaEnum, /*out*/cfa)) != OK) {
             jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
@@ -1214,15 +1238,11 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                 env, TAG_CFAPATTERN, writer);
 
         opcodeCfaLayout = convertCFAEnumToOpcodeLayout(cfaEnum);
-    }
 
-    {
         // Set CFA plane color
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_CFAPLANECOLOR, 3, cfaPlaneColor,
                 TIFF_IFD_0), env, TAG_CFAPLANECOLOR, writer);
-    }
 
-    {
         // Set CFA layout
         uint16_t cfaLayout = 1;
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_CFALAYOUT, 1, &cfaLayout, TIFF_IFD_0),
@@ -1442,7 +1462,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
     }
 
     bool singleIlluminant = false;
-    {
+    if (isBayer) {
         // Set calibration illuminants
         camera_metadata_entry entry1 =
             characteristics.find(ANDROID_SENSOR_REFERENCE_ILLUMINANT1);
@@ -1464,7 +1484,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         }
     }
 
-    {
+    if (isBayer) {
         // Set color transforms
         camera_metadata_entry entry1 =
             characteristics.find(ANDROID_SENSOR_COLOR_TRANSFORM1);
@@ -1497,7 +1517,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         }
     }
 
-    {
+    if (isBayer) {
         // Set calibration transforms
         camera_metadata_entry entry1 =
             characteristics.find(ANDROID_SENSOR_CALIBRATION_TRANSFORM1);
@@ -1531,7 +1551,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         }
     }
 
-    {
+    if (isBayer) {
         // Set forward transforms
         camera_metadata_entry entry1 =
             characteristics.find(ANDROID_SENSOR_FORWARD_MATRIX1);
@@ -1565,7 +1585,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         }
     }
 
-    {
+    if (isBayer) {
         // Set camera neutral
         camera_metadata_entry entry =
             results.find(ANDROID_SENSOR_NEUTRAL_COLOR_POINT);
@@ -1632,8 +1652,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         camera_metadata_entry entry =
             results.find(ANDROID_SENSOR_NOISE_PROFILE);
 
-        const status_t numPlaneColors = 3;
-        const status_t numCfaChannels = 4;
+        const status_t numPlaneColors = isBayer ? 3 : 1;
+        const status_t numCfaChannels = isBayer ? 4 : 1;
 
         uint8_t cfaOut[numCfaChannels];
         if ((err = convertCFA(cfaEnum, /*out*/cfaOut)) != OK) {
@@ -1710,41 +1730,43 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
             }
         }
 
+        // Hot pixel map is specific to bayer camera per DNG spec.
+        if (isBayer) {
+            // Set up bad pixel correction list
+            camera_metadata_entry entry3 = characteristics.find(ANDROID_STATISTICS_HOT_PIXEL_MAP);
 
-        // Set up bad pixel correction list
-        camera_metadata_entry entry3 = characteristics.find(ANDROID_STATISTICS_HOT_PIXEL_MAP);
-
-        if ((entry3.count % 2) != 0) {
-            ALOGE("%s: Hot pixel map contains odd number of values, cannot map to pairs!",
-                    __FUNCTION__);
-            jniThrowRuntimeException(env, "failed to add hotpixel map.");
-            return nullptr;
-        }
-
-        // Adjust the bad pixel coordinates to be relative to the origin of the active area DNG tag
-        std::vector<uint32_t> v;
-        for (size_t i = 0; i < entry3.count; i += 2) {
-            int32_t x = entry3.data.i32[i];
-            int32_t y = entry3.data.i32[i + 1];
-            x -= static_cast<int32_t>(xmin);
-            y -= static_cast<int32_t>(ymin);
-            if (x < 0 || y < 0 || static_cast<uint32_t>(x) >= width ||
-                    static_cast<uint32_t>(y) >= height) {
-                continue;
-            }
-            v.push_back(x);
-            v.push_back(y);
-        }
-        const uint32_t* badPixels = &v[0];
-        uint32_t badPixelCount = v.size();
-
-        if (badPixelCount > 0) {
-            err = builder.addBadPixelListForMetadata(badPixels, badPixelCount, opcodeCfaLayout);
-
-            if (err != OK) {
-                ALOGE("%s: Could not add hotpixel map.", __FUNCTION__);
+            if ((entry3.count % 2) != 0) {
+                ALOGE("%s: Hot pixel map contains odd number of values, cannot map to pairs!",
+                        __FUNCTION__);
                 jniThrowRuntimeException(env, "failed to add hotpixel map.");
                 return nullptr;
+            }
+
+            // Adjust the bad pixel coordinates to be relative to the origin of the active area DNG tag
+            std::vector<uint32_t> v;
+            for (size_t i = 0; i < entry3.count; i += 2) {
+                int32_t x = entry3.data.i32[i];
+                int32_t y = entry3.data.i32[i + 1];
+                x -= static_cast<int32_t>(xmin);
+                y -= static_cast<int32_t>(ymin);
+                if (x < 0 || y < 0 || static_cast<uint32_t>(x) >= width ||
+                        static_cast<uint32_t>(y) >= height) {
+                    continue;
+                }
+                v.push_back(x);
+                v.push_back(y);
+            }
+            const uint32_t* badPixels = &v[0];
+            uint32_t badPixelCount = v.size();
+
+            if (badPixelCount > 0) {
+                err = builder.addBadPixelListForMetadata(badPixels, badPixelCount, opcodeCfaLayout);
+
+                if (err != OK) {
+                    ALOGE("%s: Could not add hotpixel map.", __FUNCTION__);
+                    jniThrowRuntimeException(env, "failed to add hotpixel map.");
+                    return nullptr;
+                }
             }
         }
 
@@ -1960,10 +1982,12 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         tagsToMove.add(TAG_BLACKLEVELREPEATDIM);
         tagsToMove.add(TAG_SAMPLESPERPIXEL);
         tagsToMove.add(TAG_PLANARCONFIGURATION);
-        tagsToMove.add(TAG_CFAREPEATPATTERNDIM);
-        tagsToMove.add(TAG_CFAPATTERN);
-        tagsToMove.add(TAG_CFAPLANECOLOR);
-        tagsToMove.add(TAG_CFALAYOUT);
+        if (isBayer) {
+            tagsToMove.add(TAG_CFAREPEATPATTERNDIM);
+            tagsToMove.add(TAG_CFAPATTERN);
+            tagsToMove.add(TAG_CFAPLANECOLOR);
+            tagsToMove.add(TAG_CFALAYOUT);
+        }
         tagsToMove.add(TAG_XRESOLUTION);
         tagsToMove.add(TAG_YRESOLUTION);
         tagsToMove.add(TAG_RESOLUTIONUNIT);

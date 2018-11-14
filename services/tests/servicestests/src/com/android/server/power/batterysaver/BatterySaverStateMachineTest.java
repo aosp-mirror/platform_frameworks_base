@@ -115,7 +115,12 @@ public class BatterySaverStateMachineTest {
             mTarget.setSettingsLocked(
                     mPersistedState.global.getOrDefault(Global.LOW_POWER_MODE, 0) != 0,
                     mPersistedState.global.getOrDefault(Global.LOW_POWER_MODE_STICKY, 0) != 0,
-                    mDevice.getLowPowerModeTriggerLevel());
+                    mDevice.getLowPowerModeTriggerLevel(),
+                    mPersistedState.global.getOrDefault(Global.AUTOMATIC_POWER_SAVER_MODE, 0),
+                    mPersistedState.global.getOrDefault(
+                            Global.DYNAMIC_POWER_SAVINGS_ENABLED, 0) != 0,
+                    mPersistedState.global.getOrDefault(
+                            Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD, 100));
         }
 
         public void putGlobalSetting(String key, int value) {
@@ -174,6 +179,9 @@ public class BatterySaverStateMachineTest {
         when(mMockResources.getBoolean(
                 com.android.internal.R.bool.config_batterySaverStickyBehaviourDisabled))
                 .thenReturn(false);
+        when(mMockResources.getInteger(
+                com.android.internal.R.integer.config_dynamicPowerSavingsDefaultDisableThreshold))
+                .thenReturn(80);
 
         mPersistedState = new DevicePersistedState();
         initDevice();
@@ -303,6 +311,7 @@ public class BatterySaverStateMachineTest {
     @Test
     public void testAutoBatterySaver() {
         mDevice.putGlobalSetting(Global.LOW_POWER_MODE_TRIGGER_LEVEL, 50);
+        mDevice.putGlobalSetting(Global.AUTOMATIC_POWER_SAVER_MODE, 0);
 
         assertEquals(false, mDevice.batterySaverEnabled);
         assertEquals(100, mPersistedState.batteryLevel);
@@ -515,6 +524,7 @@ public class BatterySaverStateMachineTest {
                 .thenReturn(true);
         initDevice();
         mDevice.putGlobalSetting(Global.LOW_POWER_MODE_TRIGGER_LEVEL, 50);
+        mDevice.putGlobalSetting(Global.AUTOMATIC_POWER_SAVER_MODE, 0);
 
         mTarget.setBatterySaverEnabledManually(true);
 
@@ -625,5 +635,124 @@ public class BatterySaverStateMachineTest {
         assertEquals(true, mDevice.batterySaverEnabled);
         assertEquals(90, mPersistedState.batteryLevel);
         assertEquals(false, mPersistedState.batteryLow);
+    }
+
+    @Test
+    public void testAutoBatterySaver_smartBatterySaverEnabled() {
+        mDevice.putGlobalSetting(Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD, 50);
+        mDevice.putGlobalSetting(Global.AUTOMATIC_POWER_SAVER_MODE, 1);
+        mDevice.putGlobalSetting(Global.DYNAMIC_POWER_SAVINGS_ENABLED, 0);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(100, mPersistedState.batteryLevel);
+
+        mDevice.setBatteryLevel(90);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(90, mPersistedState.batteryLevel);
+
+        mDevice.setBatteryLevel(51);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(51, mPersistedState.batteryLevel);
+
+        // Hit the threshold. BS should be disabled since dynamic power savings still off
+        mDevice.setBatteryLevel(50);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(50, mPersistedState.batteryLevel);
+
+        // dynamic power savings comes on, battery saver should turn on
+        mDevice.putGlobalSetting(Global.DYNAMIC_POWER_SAVINGS_ENABLED, 1);
+        mDevice.setBatteryLevel(40);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(40, mPersistedState.batteryLevel);
+
+        mDevice.setPowered(true);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(40, mPersistedState.batteryLevel);
+
+        mDevice.setPowered(false);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(40, mPersistedState.batteryLevel);
+
+        mTarget.setBatterySaverEnabledManually(false); // Manually disable -> snooze.
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(40, mPersistedState.batteryLevel);
+
+        mDevice.setBatteryLevel(30);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(30, mPersistedState.batteryLevel);
+
+        // Plug in and out, snooze will reset.
+        mDevice.setPowered(true);
+        mDevice.setPowered(false);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(30, mPersistedState.batteryLevel);
+
+        mDevice.setPowered(true);
+        mDevice.setBatteryLevel(60);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(60, mPersistedState.batteryLevel);
+
+        mDevice.setPowered(false);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(60, mPersistedState.batteryLevel);
+
+        mDevice.setBatteryLevel(40);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(40, mPersistedState.batteryLevel);
+
+        mDevice.setBatteryLevel(70);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(70, mPersistedState.batteryLevel);
+
+        // Bump up the threshold.
+        mDevice.putGlobalSetting(Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD, 71);
+        mDevice.setBatteryLevel(mPersistedState.batteryLevel);
+
+        // changes are only registered if some battery level changed
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(70, mPersistedState.batteryLevel);
+
+        mDevice.setBatteryLevel(69);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(69, mPersistedState.batteryLevel);
+
+        // Then down.
+        mDevice.putGlobalSetting(Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD, 60);
+        mDevice.setBatteryLevel(mPersistedState.batteryLevel);
+
+        // changes are only registered if battery level changed
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(69, mPersistedState.batteryLevel);
+
+        mDevice.setBatteryLevel(68);
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(68, mPersistedState.batteryLevel);
+
+        // Reboot in low state -> automatically enable BS.
+        mDevice.setPowered(false);
+        mDevice.setBatteryLevel(30);
+        mTarget.setBatterySaverEnabledManually(false);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(30, mPersistedState.batteryLevel);
+
+        initDevice();
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(30, mPersistedState.batteryLevel);
     }
 }

@@ -15,11 +15,15 @@
  */
 package com.android.settingslib.core.instrumentation;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import android.app.Activity;
+import android.app.settings.SettingsEnums;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.util.ReflectionHelpers;
 
@@ -89,5 +94,29 @@ public class MetricsFeatureProviderTest {
                 eq(MetricsEvent.ACTION_SETTINGS_TILE_CLICK),
                 anyString(),
                 eq(Pair.create(MetricsEvent.FIELD_CONTEXT, MetricsEvent.SETTINGS_GESTURES)));
+    }
+
+    @Test
+    public void getAttribution_noActivity_shouldReturnUnknown() {
+        assertThat(mProvider.getAttribution(null /* activity */))
+                .isEqualTo(SettingsEnums.PAGE_UNKNOWN);
+    }
+
+    @Test
+    public void getAttribution_notSet_shouldReturnUnknown() {
+        final Activity activity = Robolectric.setupActivity(Activity.class);
+
+        assertThat(mProvider.getAttribution(activity))
+                .isEqualTo(SettingsEnums.PAGE_UNKNOWN);
+    }
+
+    @Test
+    public void getAttribution_set_shouldReturnAttribution() {
+        final Intent intent = new Intent()
+                .putExtra(MetricsFeatureProvider.EXTRA_SOURCE_METRICS_CATEGORY, 100);
+
+        final Activity activity = Robolectric.buildActivity(Activity.class, intent).create().get();
+
+        assertThat(mProvider.getAttribution(activity)).isEqualTo(100);
     }
 }

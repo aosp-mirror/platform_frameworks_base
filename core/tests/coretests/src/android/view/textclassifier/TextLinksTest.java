@@ -18,6 +18,7 @@ package android.view.textclassifier;
 
 import static org.junit.Assert.assertEquals;
 
+import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.support.test.filters.SmallTest;
@@ -38,6 +39,12 @@ import java.util.Map;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TextLinksTest {
+    private static final String BUNDLE_KEY = "key";
+    private static final String BUNDLE_VALUE = "value";
+    private static final Bundle BUNDLE = new Bundle();
+    static {
+        BUNDLE.putString(BUNDLE_KEY, BUNDLE_VALUE);
+    }
 
     private Map<String, Float> getEntityScores(float address, float phone, float other) {
         final Map<String, Float> result = new ArrayMap<>();
@@ -59,6 +66,7 @@ public class TextLinksTest {
         final TextLinks reference = new TextLinks.Builder(fullText)
                 .addLink(0, 4, getEntityScores(0.f, 0.f, 1.f))
                 .addLink(5, 12, getEntityScores(.8f, .1f, .5f))
+                .setExtras(BUNDLE)
                 .build();
 
         // Parcel and unparcel.
@@ -83,6 +91,7 @@ public class TextLinksTest {
         assertEquals(.8f, resultList.get(1).getConfidenceScore(TextClassifier.TYPE_ADDRESS), 1e-7f);
         assertEquals(.5f, resultList.get(1).getConfidenceScore(TextClassifier.TYPE_OTHER), 1e-7f);
         assertEquals(.1f, resultList.get(1).getConfidenceScore(TextClassifier.TYPE_PHONE), 1e-7f);
+        assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
     }
 
     @Test
@@ -94,6 +103,7 @@ public class TextLinksTest {
         final TextLinks.Request reference = new TextLinks.Request.Builder("text")
                 .setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY))
                 .setEntityConfig(entityConfig)
+                .setExtras(BUNDLE)
                 .build();
 
         // Parcel and unparcel.
@@ -108,5 +118,6 @@ public class TextLinksTest {
                 result.getEntityConfig().getHints().toArray());
         assertEquals(new HashSet<String>(Arrays.asList("a", "c")),
                 result.getEntityConfig().resolveEntityListModifications(Collections.emptyList()));
+        assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
     }
 }

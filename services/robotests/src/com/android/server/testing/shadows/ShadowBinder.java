@@ -17,6 +17,7 @@
 package com.android.server.testing.shadows;
 
 import android.os.Binder;
+
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
@@ -31,14 +32,14 @@ public class ShadowBinder extends org.robolectric.shadows.ShadowBinder {
     private static Integer originalCallingUid;
 
     @Implementation
-    public static long clearCallingIdentity() {
+    protected static long clearCallingIdentity() {
         originalCallingUid = getCallingUid();
         setCallingUid(LOCAL_UID);
         return 1L;
     }
 
     @Implementation
-    public static void restoreCallingIdentity(long token) {
+    protected static void restoreCallingIdentity(long token) {
         setCallingUid(originalCallingUid);
     }
 }

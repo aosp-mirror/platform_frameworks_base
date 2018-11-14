@@ -18,7 +18,6 @@ package com.android.server.usage;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.EventList;
 import android.app.usage.EventStats;
-import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
@@ -26,12 +25,16 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.proto.ProtoInputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.IOException;
 import java.util.List;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 public class IntervalStats {
+    public static final int CURRENT_MAJOR_VERSION = 1;
+    public static final int CURRENT_MINOR_VERSION = 1;
+    public int majorVersion = CURRENT_MAJOR_VERSION;
+    public int minorVersion = CURRENT_MINOR_VERSION;
     public long beginTime;
     public long endTime;
     public long lastTimeSaved;
@@ -219,8 +222,12 @@ public class IntervalStats {
         switch (eventType) {
             case UsageEvents.Event.MOVE_TO_FOREGROUND:
             case UsageEvents.Event.MOVE_TO_BACKGROUND:
+            case UsageEvents.Event.FOREGROUND_SERVICE_START:
+            case UsageEvents.Event.FOREGROUND_SERVICE_STOP:
             case UsageEvents.Event.END_OF_DAY:
+            case UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE:
             case UsageEvents.Event.CONTINUE_PREVIOUS_DAY:
+            case UsageEvents.Event.CONTINUING_FOREGROUND_SERVICE:
                 return true;
         }
         return false;
@@ -239,32 +246,9 @@ public class IntervalStats {
      * @hide
      */
     @VisibleForTesting
-    public void update(String packageName, long timeStamp, int eventType) {
+    public void update(String packageName, String className, long timeStamp, int eventType) {
         UsageStats usageStats = getOrCreateUsageStats(packageName);
-
-        // TODO(adamlesinski): Ensure that we recover from incorrect event sequences
-        // like double MOVE_TO_BACKGROUND, etc.
-        if (eventType == UsageEvents.Event.MOVE_TO_BACKGROUND ||
-                eventType == UsageEvents.Event.END_OF_DAY) {
-            if (usageStats.mLastEvent == UsageEvents.Event.MOVE_TO_FOREGROUND ||
-                    usageStats.mLastEvent == UsageEvents.Event.CONTINUE_PREVIOUS_DAY) {
-                usageStats.mTotalTimeInForeground += timeStamp - usageStats.mLastTimeUsed;
-            }
-        }
-
-        if (isStatefulEvent(eventType)) {
-            usageStats.mLastEvent = eventType;
-        }
-
-        if (isUserVisibleEvent(eventType)) {
-            usageStats.mLastTimeUsed = timeStamp;
-        }
-        usageStats.mEndTimeStamp = timeStamp;
-
-        if (eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-            usageStats.mLaunchCount += 1;
-        }
-
+        usageStats.update(className, timeStamp, eventType);
         endTime = timeStamp;
     }
 
@@ -371,5 +355,20 @@ public class IntervalStats {
             return str;
         }
         return mStringCache.valueAt(index);
+    }
+
+    /**
+     * When an IntervalStats object is deserialized, if the object's version number
+     * is lower than current version number, optionally perform a upgrade.
+     */
+    void upgradeIfNeeded() {
+        // We only uprade on majorVersion change, no need to upgrade on minorVersion change.
+        if (!(majorVersion < CURRENT_MAJOR_VERSION)) {
+            return;
+        }
+        /*
+          Optional upgrade code here.
+        */
+        majorVersion = CURRENT_MAJOR_VERSION;
     }
 }

@@ -55,4 +55,11 @@ public interface BatteryController extends DemoMode, Dumpable,
         default void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {}
         default void onPowerSaveChanged(boolean isPowerSave) {}
     }
+
+    /**
+     * If available, get the estimated battery time remaining as a string
+     */
+    default String getEstimatedTimeRemainingString() {
+        return null;
+    }
 }

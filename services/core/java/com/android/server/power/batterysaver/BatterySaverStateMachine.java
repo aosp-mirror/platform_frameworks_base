@@ -19,6 +19,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -87,12 +88,34 @@ public class BatterySaverStateMachine {
     /** Config flag to track if battery saver's sticky behaviour is disabled. */
     private final boolean mBatterySaverStickyBehaviourDisabled;
 
+    /** Config flag to track default disable threshold for Dynamic Power Savings enabled battery
+     * saver. */
+    @GuardedBy("mLock")
+    private final int mDynamicPowerSavingsDefaultDisableThreshold;
+
     /**
      * Previously known value of Global.LOW_POWER_MODE_TRIGGER_LEVEL.
      * (Currently only used in dumpsys.)
      */
     @GuardedBy("mLock")
     private int mSettingBatterySaverTriggerThreshold;
+
+    /** Previously known value of Global.AUTOMATIC_POWER_SAVER_MODE. */
+    @GuardedBy("mLock")
+    private int mSettingAutomaticBatterySaver;
+
+    /** When to disable battery saver again if it was enabled due to an external suggestion.
+     *  Corresponds to Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD.
+     */
+    @GuardedBy("mLock")
+    private int mDynamicPowerSavingsDisableThreshold;
+
+    /**
+     * Whether we've received a suggestion that battery saver should be on from an external app.
+     * Updates when Global.DYNAMIC_POWER_SAVINGS_ENABLED changes.
+     */
+    @GuardedBy("mLock")
+    private boolean mDynamicPowerSavingsBatterySaver;
 
     /**
      * Whether BS has been manually disabled while the battery level is low, in which case we
@@ -130,13 +153,15 @@ public class BatterySaverStateMachine {
 
         mBatterySaverStickyBehaviourDisabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_batterySaverStickyBehaviourDisabled);
+        mDynamicPowerSavingsDefaultDisableThreshold = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_dynamicPowerSavingsDefaultDisableThreshold);
     }
 
     private boolean isBatterySaverEnabled() {
         return mBatterySaverController.isEnabled();
     }
 
-    private boolean isAutoBatterySaverConfigured() {
+    private boolean isAutoBatterySaverConfiguredLocked() {
         return mSettingBatterySaverTriggerThreshold > 0;
     }
 
@@ -164,6 +189,15 @@ public class BatterySaverStateMachine {
                     false, mSettingsObserver, UserHandle.USER_SYSTEM);
             cr.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL),
+                    false, mSettingsObserver, UserHandle.USER_SYSTEM);
+            cr.registerContentObserver(Settings.Global.getUriFor(
+                    Global.AUTOMATIC_POWER_SAVER_MODE),
+                    false, mSettingsObserver, UserHandle.USER_SYSTEM);
+            cr.registerContentObserver(Settings.Global.getUriFor(
+                    Global.DYNAMIC_POWER_SAVINGS_ENABLED),
+                    false, mSettingsObserver, UserHandle.USER_SYSTEM);
+            cr.registerContentObserver(Settings.Global.getUriFor(
+                    Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD),
                     false, mSettingsObserver, UserHandle.USER_SYSTEM);
 
             synchronized (mLock) {
@@ -202,11 +236,20 @@ public class BatterySaverStateMachine {
                 Settings.Global.LOW_POWER_MODE, 0) != 0;
         final boolean lowPowerModeEnabledSticky = getGlobalSetting(
                 Settings.Global.LOW_POWER_MODE_STICKY, 0) != 0;
+        final boolean dynamicPowerSavingsBatterySaver = getGlobalSetting(
+                Global.DYNAMIC_POWER_SAVINGS_ENABLED, 0) != 0;
         final int lowPowerModeTriggerLevel = getGlobalSetting(
                 Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0);
+        final int automaticBatterySaver = getGlobalSetting(
+                Global.AUTOMATIC_POWER_SAVER_MODE,
+                PowerManager.POWER_SAVER_MODE_PERCENTAGE);
+        final int dynamicPowerSavingsDisableThreshold = getGlobalSetting(
+                Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
+                mDynamicPowerSavingsDefaultDisableThreshold);
 
         setSettingsLocked(lowPowerModeEnabled, lowPowerModeEnabledSticky,
-                lowPowerModeTriggerLevel);
+                lowPowerModeTriggerLevel, automaticBatterySaver, dynamicPowerSavingsBatterySaver,
+                dynamicPowerSavingsDisableThreshold);
     }
 
     /**
@@ -218,11 +261,16 @@ public class BatterySaverStateMachine {
     @GuardedBy("mLock")
     @VisibleForTesting
     void setSettingsLocked(boolean batterySaverEnabled, boolean batterySaverEnabledSticky,
-            int batterySaverTriggerThreshold) {
+            int batterySaverTriggerThreshold, int automaticBatterySaver,
+            boolean dynamicPowerSavingsBatterySaver, int dynamicPowerSavingsDisableThreshold) {
         if (DEBUG) {
             Slog.d(TAG, "setSettings: enabled=" + batterySaverEnabled
                     + " sticky=" + batterySaverEnabledSticky
-                    + " threshold=" + batterySaverTriggerThreshold);
+                    + " threshold=" + batterySaverTriggerThreshold
+                    + " automaticBatterySaver=" + automaticBatterySaver
+                    + " dynamicPowerSavingsBatterySaver=" + dynamicPowerSavingsBatterySaver
+                    + " dynamicPowerSavingsDisableThreshold="
+                    + dynamicPowerSavingsDisableThreshold);
         }
 
         mSettingsLoaded = true;
@@ -232,14 +280,23 @@ public class BatterySaverStateMachine {
                 mSettingBatterySaverEnabledSticky != batterySaverEnabledSticky;
         final boolean thresholdChanged
                 = mSettingBatterySaverTriggerThreshold != batterySaverTriggerThreshold;
+        final boolean automaticModeChanged = mSettingAutomaticBatterySaver != automaticBatterySaver;
+        final boolean dynamicPowerSavingsThresholdChanged =
+                mDynamicPowerSavingsDisableThreshold != dynamicPowerSavingsDisableThreshold;
+        final boolean dynamicPowerSavingsBatterySaverChanged =
+                mDynamicPowerSavingsBatterySaver != dynamicPowerSavingsBatterySaver;
 
-        if (!(enabledChanged || stickyChanged || thresholdChanged)) {
+        if (!(enabledChanged || stickyChanged || thresholdChanged || automaticModeChanged
+                || dynamicPowerSavingsThresholdChanged || dynamicPowerSavingsBatterySaverChanged)) {
             return;
         }
 
         mSettingBatterySaverEnabled = batterySaverEnabled;
         mSettingBatterySaverEnabledSticky = batterySaverEnabledSticky;
         mSettingBatterySaverTriggerThreshold = batterySaverTriggerThreshold;
+        mSettingAutomaticBatterySaver = automaticBatterySaver;
+        mDynamicPowerSavingsDisableThreshold = dynamicPowerSavingsDisableThreshold;
+        mDynamicPowerSavingsBatterySaver = dynamicPowerSavingsBatterySaver;
 
         if (thresholdChanged) {
             // To avoid spamming the event log, we throttle logging here.
@@ -287,6 +344,17 @@ public class BatterySaverStateMachine {
         }
     }
 
+    @GuardedBy("mLock")
+    private boolean isBatteryLowLocked() {
+        final boolean percentageLow =
+                mSettingAutomaticBatterySaver == PowerManager.POWER_SAVER_MODE_PERCENTAGE
+                && mIsBatteryLevelLow;
+        final boolean dynamicPowerSavingsLow =
+                mSettingAutomaticBatterySaver == PowerManager.POWER_SAVER_MODE_DYNAMIC
+                && mBatteryLevel <= mDynamicPowerSavingsDisableThreshold;
+        return percentageLow || dynamicPowerSavingsLow;
+    }
+
     /**
      * Decide whether to auto-start / stop battery saver.
      */
@@ -299,12 +367,14 @@ public class BatterySaverStateMachine {
                     + " mIsBatteryLevelLow=" + mIsBatteryLevelLow
                     + " mBatterySaverSnoozing=" + mBatterySaverSnoozing
                     + " mIsPowered=" + mIsPowered
+                    + " mSettingAutomaticBatterySaver=" + mSettingAutomaticBatterySaver
                     + " mSettingBatterySaverEnabledSticky=" + mSettingBatterySaverEnabledSticky);
         }
         if (!(mBootCompleted && mSettingsLoaded && mBatteryStatusSet)) {
             return; // Not fully initialized yet.
         }
-        if (!mIsBatteryLevelLow) {
+
+        if (!isBatteryLowLocked()) {
             updateSnoozingLocked(false, "Battery not low");
         }
         if (mIsPowered) {
@@ -319,20 +389,35 @@ public class BatterySaverStateMachine {
                     BatterySaverController.REASON_STICKY_RESTORE,
                     "Sticky restore");
 
-        } else if (mIsBatteryLevelLow) {
-            if (!mBatterySaverSnoozing && isAutoBatterySaverConfigured()) {
+        } else if (mSettingAutomaticBatterySaver
+                == PowerManager.POWER_SAVER_MODE_PERCENTAGE
+                && isAutoBatterySaverConfiguredLocked()) {
+            if (mIsBatteryLevelLow && !mBatterySaverSnoozing) {
                 enableBatterySaverLocked(/*enable=*/ true, /*manual=*/ false,
-                        BatterySaverController.REASON_AUTOMATIC_ON,
-                        "Auto ON");
+                        BatterySaverController.REASON_PERCENTAGE_AUTOMATIC_ON,
+                        "Percentage Auto ON");
+            } else {
+                // Battery not low
+                enableBatterySaverLocked(/*enable=*/ false, /*manual=*/ false,
+                        BatterySaverController.REASON_PERCENTAGE_AUTOMATIC_OFF,
+                        "Percentage Auto OFF");
             }
-        } else { // Battery not low
-            enableBatterySaverLocked(/*enable=*/ false, /*manual=*/ false,
-                    BatterySaverController.REASON_AUTOMATIC_OFF,
-                    "Auto OFF");
+        } else if (mSettingAutomaticBatterySaver
+                == PowerManager.POWER_SAVER_MODE_DYNAMIC) {
+            if (mBatteryLevel >= mDynamicPowerSavingsDisableThreshold) {
+                enableBatterySaverLocked(/*enable=*/ false, /*manual=*/ false,
+                        BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_OFF,
+                        "Dynamic Warning Auto OFF");
+            } else if (mDynamicPowerSavingsBatterySaver && !mBatterySaverSnoozing) {
+                enableBatterySaverLocked(/*enable=*/ true, /*manual=*/ false,
+                        BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON,
+                        "Dynamic Warning Auto ON");
+            }
         }
+        // do nothing if automatic battery saver mode = PERCENTAGE and low warning threshold = 0%
     }
 
-    /**
+  /**
      * {@link com.android.server.power.PowerManagerService} calls it when
      * {@link android.os.PowerManager#setPowerSaveMode} is called.
      *
@@ -383,7 +468,7 @@ public class BatterySaverStateMachine {
                 // When battery saver is disabled manually (while battery saver is enabled)
                 // when the battery level is low, we "snooze" BS -- i.e. disable auto battery saver.
                 // We resume auto-BS once the battery level is not low, or the device is plugged in.
-                if (isBatterySaverEnabled() && mIsBatteryLevelLow) {
+                if (isBatterySaverEnabled() && isBatteryLowLocked()) {
                     updateSnoozingLocked(true, "Manual snooze");
                 }
             }

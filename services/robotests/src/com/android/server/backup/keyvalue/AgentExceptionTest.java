@@ -20,29 +20,24 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.platform.test.annotations.Presubmit;
 
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
 import java.io.IOException;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderPackages({"com.android.server.backup"})
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class AgentExceptionTest {
     @Test
-    public void testTransitory_isTransitory() throws Exception {
+    public void testTransitory_isTransitory() {
         AgentException exception = AgentException.transitory();
 
         assertThat(exception.isTransitory()).isTrue();
     }
 
     @Test
-    public void testTransitory_withCause() throws Exception {
+    public void testTransitory_withCause() {
         Exception cause = new IOException();
 
         AgentException exception = AgentException.transitory(cause);
@@ -52,14 +47,14 @@ public class AgentExceptionTest {
     }
 
     @Test
-    public void testPermanent_isNotTransitory() throws Exception {
+    public void testPermanent_isNotTransitory() {
         AgentException exception = AgentException.permanent();
 
         assertThat(exception.isTransitory()).isFalse();
     }
 
     @Test
-    public void testPermanent_withCause() throws Exception {
+    public void testPermanent_withCause() {
         Exception cause = new IOException();
 
         AgentException exception = AgentException.permanent(cause);

@@ -73,7 +73,7 @@ public class RoleUserState {
      * Maps role names to its holders' package names. The values should never be null.
      */
     @GuardedBy("RoleManagerService.mLock")
-    private ArrayMap<String, ArraySet<String>> mRoles = new ArrayMap<>();
+    private ArrayMap<String, ArraySet<String>> mRoles = null;
 
     @GuardedBy("RoleManagerService.mLock")
     private boolean mDestroyed;
@@ -188,7 +188,8 @@ public class RoleUserState {
             roles.put(roleName, roleHolders);
         }
         mWriteHandler.removeCallbacksAndMessages(null);
-        mWriteHandler.sendMessage(PooledLambda.obtainMessage(this::writeSync, version, roles));
+        mWriteHandler.sendMessage(PooledLambda.obtainMessage(
+                RoleUserState::writeSync, this, version, roles));
     }
 
     @WorkerThread

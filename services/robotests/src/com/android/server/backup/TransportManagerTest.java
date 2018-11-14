@@ -56,17 +56,14 @@ import com.android.server.backup.transport.OnTransportRegisteredListener;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.transport.TransportClientManager;
 import com.android.server.backup.transport.TransportNotRegisteredException;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
-import com.android.server.testing.shadows.FrameworkShadowContextImpl;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowPackageManager;
 
 import java.util.ArrayList;
@@ -75,12 +72,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(
-        manifest = Config.NONE,
-        sdk = 26,
-        shadows = {FrameworkShadowContextImpl.class})
-@SystemLoaderPackages({"com.android.server.backup"})
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class TransportManagerTest {
     private static final String PACKAGE_A = "some.package.a";
@@ -682,7 +674,7 @@ public class TransportManagerTest {
                     transport.getTransportComponent().getPackageName(),
                     ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         }
-        setUpTransports(transportSet.toArray(new TransportData[transportSet.size()]));
+        setUpTransports(transportSet.toArray(new TransportData[0]));
         TransportManager transportManager = createTransportManager(selectedTransport, transports);
         transportManager.registerTransports();
         return transportManager;

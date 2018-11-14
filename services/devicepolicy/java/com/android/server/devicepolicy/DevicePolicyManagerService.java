@@ -491,6 +491,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     final boolean mIsWatch;
 
+    /**
+     * Whether this device has the telephony feature.
+     */
+    final boolean mHasTelephonyFeature;
+
     private final CertificateMonitor mCertificateMonitor;
     private final SecurityLogMonitor mSecurityLogMonitor;
 
@@ -2133,6 +2138,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mHasFeature = mInjector.hasFeature();
         mIsWatch = mInjector.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_WATCH);
+        mHasTelephonyFeature = mInjector.getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
         mBackgroundHandler = BackgroundThread.getHandler();
 
         // Needed when mHasFeature == false, because it controls the certificate warning text.
@@ -12927,7 +12934,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int addOverrideApn(@NonNull ComponentName who, @NonNull ApnSetting apnSetting) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mHasTelephonyFeature) {
             return -1;
         }
         Preconditions.checkNotNull(who, "ComponentName is null in addOverrideApn");
@@ -12956,7 +12963,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean updateOverrideApn(@NonNull ComponentName who, int apnId,
             @NonNull ApnSetting apnSetting) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mHasTelephonyFeature) {
             return false;
         }
         Preconditions.checkNotNull(who, "ComponentName is null in updateOverrideApn");
@@ -12978,7 +12985,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean removeOverrideApn(@NonNull ComponentName who, int apnId) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mHasTelephonyFeature) {
             return false;
         }
         Preconditions.checkNotNull(who, "ComponentName is null in removeOverrideApn");
@@ -13004,7 +13011,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public List<ApnSetting> getOverrideApns(@NonNull ComponentName who) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mHasTelephonyFeature) {
             return Collections.emptyList();
         }
         Preconditions.checkNotNull(who, "ComponentName is null in getOverrideApns");
@@ -13040,7 +13047,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setOverrideApnsEnabled(@NonNull ComponentName who, boolean enabled) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mHasTelephonyFeature) {
             return;
         }
         Preconditions.checkNotNull(who, "ComponentName is null in setOverrideApnEnabled");
@@ -13063,7 +13070,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isOverrideApnEnabled(@NonNull ComponentName who) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mHasTelephonyFeature) {
             return false;
         }
         Preconditions.checkNotNull(who, "ComponentName is null in isOverrideApnEnabled");
