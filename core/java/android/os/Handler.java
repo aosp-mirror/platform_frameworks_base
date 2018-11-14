@@ -739,7 +739,7 @@ public class Handler {
 
     private boolean enqueueMessage(MessageQueue queue, Message msg, long uptimeMillis) {
         msg.target = this;
-        msg.workSourceUid = ThreadLocalWorkSourceUid.get();
+        msg.workSourceUid = ThreadLocalWorkSource.getUid();
 
         if (mAsynchronous) {
             msg.setAsynchronous(true);

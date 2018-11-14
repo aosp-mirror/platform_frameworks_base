@@ -204,8 +204,8 @@ public final class Looper {
             if (observer != null) {
                 token = observer.messageDispatchStarting();
             }
+            long origWorkSource = ThreadLocalWorkSource.setUid(msg.workSourceUid);
             try {
-                ThreadLocalWorkSourceUid.set(msg.workSourceUid);
                 msg.target.dispatchMessage(msg);
                 if (observer != null) {
                     observer.messageDispatched(token, msg);
@@ -217,7 +217,7 @@ public final class Looper {
                 }
                 throw exception;
             } finally {
-                ThreadLocalWorkSourceUid.clear();
+                ThreadLocalWorkSource.restore(origWorkSource);
                 if (traceTag != 0) {
                     Trace.traceEnd(traceTag);
                 }

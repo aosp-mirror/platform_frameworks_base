@@ -421,7 +421,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     protected int getWorkSourceUid() {
-        return Binder.getThreadWorkSource();
+        return Binder.getCallingWorkSourceUid();
     }
 
     protected long getElapsedRealtimeMicro() {

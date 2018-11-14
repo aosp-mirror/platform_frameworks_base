@@ -19,26 +19,41 @@ package android.os;
 /**
  * @hide Only for use within system server.
  */
-public final class ThreadLocalWorkSourceUid {
+public final class ThreadLocalWorkSource {
     public static final int UID_NONE = Message.UID_NONE;
     private static final ThreadLocal<Integer> sWorkSourceUid =
             ThreadLocal.withInitial(() -> UID_NONE);
 
     /** Returns the original work source uid. */
-    public static int get() {
+    public static int getUid() {
         return sWorkSourceUid.get();
     }
 
     /** Sets the original work source uid. */
-    public static void set(int uid) {
+    public static long setUid(int uid) {
+        final long token = getToken();
         sWorkSourceUid.set(uid);
+        return token;
+    }
+
+    /** Restores the state using the provided token. */
+    public static void restore(long token) {
+        sWorkSourceUid.set(parseUidFromToken(token));
     }
 
     /** Clears the stored work source uid. */
-    public static void clear() {
-        sWorkSourceUid.set(UID_NONE);
+    public static long clear() {
+        return setUid(UID_NONE);
     }
 
-    private ThreadLocalWorkSourceUid() {
+    private static int parseUidFromToken(long token) {
+        return (int) token;
+    }
+
+    private static long getToken() {
+        return sWorkSourceUid.get();
+    }
+
+    private ThreadLocalWorkSource() {
     }
 }
