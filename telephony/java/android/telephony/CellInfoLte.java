@@ -19,7 +19,8 @@ package android.telephony;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.Rlog;
+
+import java.util.Objects;
 
 /**
  * A {@link CellInfo} representing an LTE cell that provides identity and measurement info.
@@ -31,6 +32,7 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
 
     private CellIdentityLte mCellIdentityLte;
     private CellSignalStrengthLte mCellSignalStrengthLte;
+    private CellConfigLte mCellConfig;
 
     /** @hide */
     @UnsupportedAppUsage
@@ -38,6 +40,7 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
         super();
         mCellIdentityLte = new CellIdentityLte();
         mCellSignalStrengthLte = new CellSignalStrengthLte();
+        mCellConfig = new CellConfigLte();
     }
 
     /** @hide */
@@ -45,6 +48,7 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
         super(ci);
         this.mCellIdentityLte = ci.mCellIdentityLte.copy();
         this.mCellSignalStrengthLte = ci.mCellSignalStrengthLte.copy();
+        this.mCellConfig = new CellConfigLte(ci.mCellConfig);
     }
 
     @Override
@@ -71,26 +75,37 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
         mCellSignalStrengthLte = css;
     }
 
+    /** @hide */
+    public void setCellConfig(CellConfigLte cellConfig) {
+        if (DBG) log("setCellConfig: " + cellConfig);
+        mCellConfig = cellConfig;
+    }
+
+    /** @hide */
+    public CellConfigLte getCellConfig() {
+        if (DBG) log("getCellConfig: " + mCellConfig);
+        return mCellConfig;
+    }
+
     /**
      * @return hash code
      */
     @Override
     public int hashCode() {
-        return super.hashCode() + mCellIdentityLte.hashCode() + mCellSignalStrengthLte.hashCode();
+        return Objects.hash(
+                super.hashCode(),
+                mCellIdentityLte.hashCode(),
+                mCellSignalStrengthLte.hashCode(),
+                mCellConfig.hashCode());
     }
 
     @Override
     public boolean equals(Object other) {
-        if (!super.equals(other)) {
-            return false;
-        }
-        try {
-            CellInfoLte o = (CellInfoLte) other;
-            return mCellIdentityLte.equals(o.mCellIdentityLte)
-                    && mCellSignalStrengthLte.equals(o.mCellSignalStrengthLte);
-        } catch (ClassCastException e) {
-            return false;
-        }
+        if (!(other instanceof CellInfoLte)) return false;
+        CellInfoLte o = (CellInfoLte) other;
+        return super.equals(o) && mCellIdentityLte.equals(o.mCellIdentityLte)
+                && mCellSignalStrengthLte.equals(o.mCellSignalStrengthLte)
+                && mCellConfig.equals(o.mCellConfig);
     }
 
     @Override
@@ -101,6 +116,7 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
         sb.append(super.toString());
         sb.append(" ").append(mCellIdentityLte);
         sb.append(" ").append(mCellSignalStrengthLte);
+        sb.append(" ").append(mCellConfig);
         sb.append("}");
 
         return sb.toString();
@@ -119,6 +135,7 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
         super.writeToParcel(dest, flags, TYPE_LTE);
         mCellIdentityLte.writeToParcel(dest, flags);
         mCellSignalStrengthLte.writeToParcel(dest, flags);
+        mCellConfig.writeToParcel(dest, flags);
     }
 
     /**
@@ -129,6 +146,7 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
         super(in);
         mCellIdentityLte = CellIdentityLte.CREATOR.createFromParcel(in);
         mCellSignalStrengthLte = CellSignalStrengthLte.CREATOR.createFromParcel(in);
+        mCellConfig = CellConfigLte.CREATOR.createFromParcel(in);
         if (DBG) log("CellInfoLte(Parcel): " + toString());
     }
 
