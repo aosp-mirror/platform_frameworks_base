@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
+
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -25,8 +27,6 @@ import android.util.KeyValueListParser;
 import android.util.Slog;
 
 import java.io.PrintWriter;
-
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
 
 /**
  * Settings constants that can modify the activity manager's behavior.
@@ -222,6 +222,10 @@ final class ActivityManagerConstants extends ContentObserver {
     // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
     volatile boolean mFlagActivityStartsLoggingEnabled;
 
+    // Indicates whether the background activity starts is enabled.
+    // Controlled by Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED
+    volatile boolean mFlagBackgroundActivityStartsEnabled;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -256,6 +260,10 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final Uri ACTIVITY_STARTS_LOGGING_ENABLED_URI = Settings.Global.getUriFor(
                 Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED);
 
+    private static final Uri BACKGROUND_ACTIVITY_STARTS_ENABLED_URI =
+                Settings.Global.getUriFor(
+                        Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED);
+
     public ActivityManagerConstants(ActivityManagerService service, Handler handler) {
         super(handler);
         mService = service;
@@ -266,8 +274,10 @@ final class ActivityManagerConstants extends ContentObserver {
         mResolver = resolver;
         mResolver.registerContentObserver(ACTIVITY_MANAGER_CONSTANTS_URI, false, this);
         mResolver.registerContentObserver(ACTIVITY_STARTS_LOGGING_ENABLED_URI, false, this);
+        mResolver.registerContentObserver(BACKGROUND_ACTIVITY_STARTS_ENABLED_URI, false, this);
         updateConstants();
         updateActivityStartsLoggingEnabled();
+        updateBackgroundActivityStartsEnabled();
     }
 
     public void setOverrideMaxCachedProcesses(int value) {
@@ -290,6 +300,8 @@ final class ActivityManagerConstants extends ContentObserver {
             updateConstants();
         } else if (ACTIVITY_STARTS_LOGGING_ENABLED_URI.equals(uri)) {
             updateActivityStartsLoggingEnabled();
+        } else if (BACKGROUND_ACTIVITY_STARTS_ENABLED_URI.equals(uri)) {
+            updateBackgroundActivityStartsEnabled();
         }
     }
 
@@ -371,6 +383,11 @@ final class ActivityManagerConstants extends ContentObserver {
     private void updateActivityStartsLoggingEnabled() {
         mFlagActivityStartsLoggingEnabled = Settings.Global.getInt(mResolver,
                 Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED, 0) == 1;
+    }
+
+    private void updateBackgroundActivityStartsEnabled() {
+        mFlagBackgroundActivityStartsEnabled = Settings.Global.getInt(mResolver,
+                Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED, 1) == 1;
     }
 
     private void updateMaxCachedProcesses() {

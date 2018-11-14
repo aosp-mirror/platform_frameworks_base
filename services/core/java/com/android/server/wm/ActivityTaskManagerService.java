@@ -5016,6 +5016,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mAmInternal.isActivityStartsLoggingEnabled();
     }
 
+    boolean isBackgroundActivityStartsEnabled() {
+        return mAmInternal.isBackgroundActivityStartsEnabled();
+    }
+
     void enableScreenAfterBoot(boolean booted) {
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_ENABLE_SCREEN,
                 SystemClock.uptimeMillis());

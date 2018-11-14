@@ -98,6 +98,7 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -108,6 +109,7 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
+import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
@@ -731,6 +733,12 @@ class ActivityStarter {
         abort |= !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
                 callingPid, resolvedType, aInfo.applicationInfo);
 
+        // not sure if we need to create START_ABORTED_BACKGROUND so for now piggybacking
+        // on START_ABORTED
+        if (!abort) {
+            abort |= shouldAbortBackgroundActivityStart(callingUid, callingPackage, callerApp);
+        }
+
         // Merge the two options bundles, while realCallerOptions takes precedence.
         ActivityOptions checkedOptions = options != null
                 ? options.getOptions(intent, aInfo, callerApp, mSupervisor) : null;
@@ -774,6 +782,8 @@ class ActivityStarter {
             // We pretend to the caller that it was really started, but
             // they will just get a cancel result.
             ActivityOptions.abort(checkedOptions);
+            maybeLogActivityStart(callingUid, callingPackage, realCallingUid, intent, callerApp,
+                    /* r= */ null, originatingPendingIntent, /* abortedStart= */ true);
             return START_ABORTED;
         }
 
@@ -866,19 +876,50 @@ class ActivityStarter {
         mController.doPendingActivityLaunches(false);
 
         maybeLogActivityStart(callingUid, callingPackage, realCallingUid, intent, callerApp, r,
-                originatingPendingIntent);
+                originatingPendingIntent, /* abortedStart= */ false);
 
         return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
                 true /* doResume */, checkedOptions, inTask, outActivity);
     }
 
+    private boolean shouldAbortBackgroundActivityStart(int callingUid, final String callingPackage,
+            WindowProcessController callerApp) {
+        if (mService.isBackgroundActivityStartsEnabled()) {
+            return false;
+        }
+        // don't abort for the most important UIDs
+        if (callingUid == Process.ROOT_UID || callingUid == Process.SYSTEM_UID) {
+            return false;
+        }
+        // don't abort if the callerApp has any visible activity
+        if (callerApp != null && callerApp.hasForegroundActivities()) {
+            return false;
+        }
+        // don't abort if the callingUid's process is important enough
+        if (mService.getUidStateLocked(callingUid) <= ActivityManager.PROCESS_STATE_TOP) {
+            return false;
+        }
+        // don't abort if the callingUid has any visible window
+        if (mService.mWindowManager.isAnyWindowVisibleForUid(callingUid)) {
+            return false;
+        }
+        // anything that has fallen through will currently be aborted
+        // TODO: remove this toast after feature development is done
+        mService.mUiHandler.post(() -> {
+            Toast.makeText(mService.mContext,
+                    "Blocking background activity start for " + callingPackage,
+                    Toast.LENGTH_SHORT).show();
+        });
+        return true;
+    }
+
     private void maybeLogActivityStart(int callingUid, String callingPackage, int realCallingUid,
             Intent intent, WindowProcessController callerApp, ActivityRecord r,
-            PendingIntentRecord originatingPendingIntent) {
+            PendingIntentRecord originatingPendingIntent, boolean abortedStart) {
         boolean callerAppHasForegroundActivity =
                 callerApp != null && callerApp.hasForegroundActivities();
         if (!mService.isActivityStartsLoggingEnabled() || callerAppHasForegroundActivity
-                || r == null) {
+                || (!abortedStart && r == null)) {
             // skip logging in this case
             return;
         }
@@ -894,8 +935,8 @@ class ActivityStarter {
             final boolean realCallingUidHasAnyVisibleWindow = (callingUid == realCallingUid)
                     ? callingUidHasAnyVisibleWindow
                     : mService.mWindowManager.isAnyWindowVisibleForUid(realCallingUid);
-            final String targetPackage = r.packageName;
-            final int targetUid = (r.appInfo != null) ? r.appInfo.uid : -1;
+            final String targetPackage = (r != null) ? r.packageName : null;
+            final int targetUid = (r!= null) ? ((r.appInfo != null) ? r.appInfo.uid : -1) : -1;
             final int targetUidProcState = mService.getUidStateLocked(targetUid);
             final boolean targetUidHasAnyVisibleWindow = (targetUid != -1)
                     ? mService.mWindowManager.isAnyWindowVisibleForUid(targetUid)

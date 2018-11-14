@@ -402,6 +402,8 @@ class ActivityTestsBase {
             spyOn(getLifecycleManager());
             spyOn(getLockTaskController());
             doReturn(mock(IPackageManager.class)).when(this).getPackageManager();
+            // allow background activity starts by default
+            doReturn(true).when(this).isBackgroundActivityStartsEnabled();
         }
 
         void setActivityManagerService(IntentFirewall intentFirewall,

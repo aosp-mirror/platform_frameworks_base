@@ -850,9 +850,10 @@ class ActivityMetricsLogger {
         builder.addTaggedData(FIELD_TARGET_UID_HAS_ANY_VISIBLE_WINDOW,
                 targetUidHasAnyVisibleWindow ? 1 : 0);
         builder.addTaggedData(FIELD_TARGET_WHITELIST_TAG, targetWhitelistTag);
-        builder.addTaggedData(FIELD_TARGET_SHORT_COMPONENT_NAME, r.shortComponentName);
         builder.addTaggedData(FIELD_COMING_FROM_PENDING_INTENT, comingFromPendingIntent ? 1 : 0);
-        builder.addTaggedData(FIELD_INTENT_ACTION, intent.getAction());
+        if (intent != null) {
+            builder.addTaggedData(FIELD_INTENT_ACTION, intent.getAction());
+        }
         if (callerApp != null) {
             builder.addTaggedData(FIELD_PROCESS_RECORD_PROCESS_NAME, callerApp.mName);
             builder.addTaggedData(FIELD_PROCESS_RECORD_CUR_PROC_STATE,
@@ -881,29 +882,34 @@ class ActivityMetricsLogger {
                         (nowUptime - callerApp.getWhenUnimportant()));
             }
         }
-        builder.addTaggedData(FIELD_ACTIVITY_RECORD_LAUNCH_MODE, r.info.launchMode);
-        builder.addTaggedData(FIELD_ACTIVITY_RECORD_TARGET_ACTIVITY, r.info.targetActivity);
-        builder.addTaggedData(FIELD_ACTIVITY_RECORD_FLAGS, r.info.flags);
-        builder.addTaggedData(FIELD_ACTIVITY_RECORD_REAL_ACTIVITY, r.realActivity.toShortString());
-        builder.addTaggedData(FIELD_ACTIVITY_RECORD_SHORT_COMPONENT_NAME, r.shortComponentName);
-        builder.addTaggedData(FIELD_ACTIVITY_RECORD_PROCESS_NAME, r.processName);
-        builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_FULLSCREEN, r.fullscreen ? 1 : 0);
-        builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_NO_DISPLAY, r.noDisplay ? 1 : 0);
-        if (r.lastVisibleTime != 0) {
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_VISIBLE,
-                    (nowUptime - r.lastVisibleTime));
-        }
-        if (r.resultTo != null) {
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_RESULT_TO_PKG_NAME, r.resultTo.packageName);
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_RESULT_TO_SHORT_COMPONENT_NAME,
-                    r.resultTo.shortComponentName);
-        }
-        builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_VISIBLE, r.visible ? 1 : 0);
-        builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_VISIBLE_IGNORING_KEYGUARD,
-                r.visibleIgnoringKeyguard ? 1 : 0);
-        if (r.lastLaunchTime != 0) {
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_LAUNCH,
-                    (nowUptime - r.lastLaunchTime));
+        if (r != null) {
+            builder.addTaggedData(FIELD_TARGET_SHORT_COMPONENT_NAME, r.shortComponentName);
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_LAUNCH_MODE, r.info.launchMode);
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_TARGET_ACTIVITY, r.info.targetActivity);
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_FLAGS, r.info.flags);
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_REAL_ACTIVITY,
+                    r.realActivity.toShortString());
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_SHORT_COMPONENT_NAME, r.shortComponentName);
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_PROCESS_NAME, r.processName);
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_FULLSCREEN, r.fullscreen ? 1 : 0);
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_NO_DISPLAY, r.noDisplay ? 1 : 0);
+            if (r.lastVisibleTime != 0) {
+                builder.addTaggedData(FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_VISIBLE,
+                        (nowUptime - r.lastVisibleTime));
+            }
+            if (r.resultTo != null) {
+                builder.addTaggedData(FIELD_ACTIVITY_RECORD_RESULT_TO_PKG_NAME,
+                        r.resultTo.packageName);
+                builder.addTaggedData(FIELD_ACTIVITY_RECORD_RESULT_TO_SHORT_COMPONENT_NAME,
+                        r.resultTo.shortComponentName);
+            }
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_VISIBLE, r.visible ? 1 : 0);
+            builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_VISIBLE_IGNORING_KEYGUARD,
+                    r.visibleIgnoringKeyguard ? 1 : 0);
+            if (r.lastLaunchTime != 0) {
+                builder.addTaggedData(FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_LAUNCH,
+                        (nowUptime - r.lastLaunchTime));
+            }
         }
         mMetricsLogger.write(builder);
     }
