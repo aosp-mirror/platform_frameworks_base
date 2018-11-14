@@ -251,6 +251,9 @@ public final class ModelFileManager {
             if (!mLanguageIndependent && model.mLanguageIndependent) {
                 return true;
             }
+            if (mLanguageIndependent && !model.mLanguageIndependent) {
+                return false;
+            }
 
             // A higher-version model is preferred.
             if (mVersion > model.getVersion()) {
