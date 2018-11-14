@@ -33,8 +33,6 @@ import android.provider.Settings;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * Controls the screen brightness when dozing.
  */
@@ -66,7 +64,6 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
      * --ei brightness_bucket 1}
      */
     private int mDebugBrightnessBucket = -1;
-    private AtomicBoolean mIsDestroyed = new AtomicBoolean();
 
     @VisibleForTesting
     public DozeScreenBrightness(Context context, DozeMachine.Service service,
@@ -89,9 +86,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
             Dependency.get(Dependency.BG_HANDLER).post(()-> {
                 IntentFilter filter = new IntentFilter();
                 filter.addAction(ACTION_AOD_BRIGHTNESS);
-                if (!mIsDestroyed.get()) {
-                    mContext.registerReceiverAsUser(this, UserHandle.ALL, filter, null, handler);
-                }
+                mContext.registerReceiverAsUser(this, UserHandle.ALL, filter, null, handler);
             });
         }
     }
@@ -129,10 +124,11 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     }
 
     private void onDestroy() {
-        mIsDestroyed.set(true);
         setLightSensorEnabled(false);
         if (mDebuggable) {
-            mContext.unregisterReceiver(this);
+            Dependency.get(Dependency.BG_HANDLER).post(()-> {
+                mContext.unregisterReceiver(this);
+            });
         }
     }
 
