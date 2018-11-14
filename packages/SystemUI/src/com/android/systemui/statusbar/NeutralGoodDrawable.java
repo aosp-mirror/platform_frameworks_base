@@ -17,14 +17,11 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
-import android.content.res.Resources.Theme;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
+
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 

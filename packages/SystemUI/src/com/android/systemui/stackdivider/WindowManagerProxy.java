@@ -18,7 +18,6 @@ package com.android.systemui.stackdivider;
 
 import static android.view.WindowManager.DOCKED_INVALID;
 
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.graphics.Rect;
 import android.os.RemoteException;

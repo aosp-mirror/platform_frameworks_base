@@ -19,6 +19,7 @@ package com.android.systemui.shortcut;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+
 import com.android.internal.policy.IShortcutService;
 
 /**

@@ -26,7 +26,6 @@ import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnLayoutChangeListener;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;

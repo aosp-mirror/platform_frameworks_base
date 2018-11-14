@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
+import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.res.Resources;
@@ -36,7 +37,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.app.WallpaperColors;
 import android.util.Log;
 
 import com.android.keyguard.KeyguardUpdateMonitor;

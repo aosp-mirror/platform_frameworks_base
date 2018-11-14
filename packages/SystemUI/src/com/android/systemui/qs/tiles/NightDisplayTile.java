@@ -24,16 +24,17 @@ import android.content.Intent;
 import android.metrics.LogMaker;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import androidx.annotation.StringRes;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Switch;
 
+import androidx.annotation.StringRes;
+
 import com.android.internal.app.ColorDisplayController;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
 import java.text.DateFormat;

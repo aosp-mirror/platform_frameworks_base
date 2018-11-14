@@ -30,8 +30,6 @@ import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.systemui.statusbar.policy.FlashlightController.FlashlightListener;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;

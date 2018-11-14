@@ -40,7 +40,6 @@ import android.widget.ImageView;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.KeyguardAffordanceHelper;
 
 /**
  * An ImageView which does not have overlapping renderings commands and therefore does not need a

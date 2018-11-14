@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import android.metrics.LogMaker;
 import android.util.ArrayMap;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;

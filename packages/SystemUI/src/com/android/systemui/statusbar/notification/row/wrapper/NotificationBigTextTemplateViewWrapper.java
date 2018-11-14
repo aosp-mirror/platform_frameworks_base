@@ -21,8 +21,8 @@ import android.service.notification.StatusBarNotification;
 import android.view.View;
 
 import com.android.internal.widget.ImageFloatingTextView;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
  * Wraps a notification containing a big text template

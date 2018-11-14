@@ -16,8 +16,6 @@
 
 package com.android.systemui.qs.tiles;
 
-import static com.android.settingslib.graph.BluetoothDeviceLayerDrawable.createLayerDrawable;
-
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;

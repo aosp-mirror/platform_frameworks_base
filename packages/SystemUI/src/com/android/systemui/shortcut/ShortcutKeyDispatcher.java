@@ -26,6 +26,7 @@ import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.Recents;

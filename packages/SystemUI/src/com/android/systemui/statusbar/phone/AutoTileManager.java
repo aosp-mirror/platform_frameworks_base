@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.phone;
 import android.content.Context;
 import android.os.Handler;
 import android.provider.Settings.Secure;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ColorDisplayController;
 import com.android.systemui.Dependency;

@@ -45,12 +45,13 @@ import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
-import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.NavigationBarCompat;
 
 public class KeyButtonView extends ImageView implements ButtonInterface {

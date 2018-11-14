@@ -18,7 +18,9 @@ package com.android.systemui.recents;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+
 import com.android.systemui.SysUiServiceProvider;
+
 import java.io.PrintWriter;
 
 interface RecentsImplementation {

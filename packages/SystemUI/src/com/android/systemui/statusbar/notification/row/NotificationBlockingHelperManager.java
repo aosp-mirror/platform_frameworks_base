@@ -16,10 +16,13 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_NEGATIVE;
+
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
-import android.util.Log;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dependency;
@@ -30,8 +33,6 @@ import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 
 /**
  * Manager for the notification blocking helper - tracks and helps create the blocking helper

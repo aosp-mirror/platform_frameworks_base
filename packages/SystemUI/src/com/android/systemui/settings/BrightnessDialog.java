@@ -18,7 +18,6 @@ package com.android.systemui.settings;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;

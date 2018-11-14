@@ -15,8 +15,9 @@
 package com.android.systemui.tuner;
 
 import android.content.Context;
-import androidx.preference.ListPreference;
 import android.util.AttributeSet;
+
+import androidx.preference.ListPreference;
 
 public class BetterListPreference extends ListPreference {
 

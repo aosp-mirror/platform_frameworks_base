@@ -16,6 +16,9 @@
 
 package com.android.systemui.recents;
 
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
+
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
@@ -49,9 +52,6 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.ArrayList;
-
-import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
-import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
 
 public class ScreenPinningRequest implements View.OnClickListener {
 

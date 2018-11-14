@@ -16,9 +16,10 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import androidx.collection.ArraySet;
 import android.util.Property;
 import android.view.View;
+
+import androidx.collection.ArraySet;
 
 import java.util.ArrayList;
 

@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+
 import static com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState;
 
 import android.annotation.Nullable;
@@ -30,7 +31,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.service.quicksettings.Tile;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;

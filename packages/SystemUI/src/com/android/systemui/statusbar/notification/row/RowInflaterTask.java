@@ -17,10 +17,11 @@
 package com.android.systemui.statusbar.notification.row;
 
 import android.content.Context;
-import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.InflationTask;

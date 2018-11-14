@@ -16,12 +16,12 @@
 
 package com.android.systemui.statusbar;
 
-import com.android.systemui.statusbar.phone.SystemUIDialog;
-import com.android.systemui.statusbar.policy.UserSwitcherController;
 import android.content.Context;
 import android.content.DialogInterface;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 public class UserUtil {
     public static void deleteUserWithPrompt(Context context, int userId,

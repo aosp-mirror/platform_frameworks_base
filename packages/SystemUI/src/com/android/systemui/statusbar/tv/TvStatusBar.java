@@ -25,7 +25,6 @@ import android.os.ServiceManager;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.SystemUI;
-import com.android.systemui.pip.tv.PipManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 

@@ -37,7 +37,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import androidx.annotation.VisibleForTesting;
 import android.service.quicksettings.Tile;
 import android.text.format.DateUtils;
 import android.util.Log;

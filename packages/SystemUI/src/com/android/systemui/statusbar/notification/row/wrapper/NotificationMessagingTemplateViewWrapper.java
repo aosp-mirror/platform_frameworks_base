@@ -16,14 +16,14 @@
 
 package com.android.systemui.statusbar.notification.row.wrapper;
 
+import android.content.Context;
+import android.view.View;
+
 import com.android.internal.widget.MessagingLayout;
 import com.android.internal.widget.MessagingLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-
-import android.content.Context;
-import android.view.View;
 
 /**
  * Wraps a notification containing a messaging template

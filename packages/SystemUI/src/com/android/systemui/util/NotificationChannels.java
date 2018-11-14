@@ -16,7 +16,6 @@ package com.android.systemui.util;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;

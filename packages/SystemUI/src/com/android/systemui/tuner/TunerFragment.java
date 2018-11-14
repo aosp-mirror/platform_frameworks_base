@@ -22,11 +22,12 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import androidx.preference.PreferenceFragment;
-import androidx.preference.Preference;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragment;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.logging.MetricsLogger;

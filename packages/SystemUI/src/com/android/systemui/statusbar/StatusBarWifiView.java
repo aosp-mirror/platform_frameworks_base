@@ -27,18 +27,14 @@ import android.content.res.ColorStateList;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
 import android.widget.LinearLayout;
-import com.android.keyguard.AlphaOptimizedLinearLayout;
+
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;

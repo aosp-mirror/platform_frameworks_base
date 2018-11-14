@@ -15,8 +15,9 @@
  */
 package com.android.keyguard;
 
-import com.android.internal.widget.LockPatternUtils;
 import android.content.res.ColorStateList;
+
+import com.android.internal.widget.LockPatternUtils;
 
 public interface KeyguardSecurityView {
     static public final int SCREEN_ON = 1;

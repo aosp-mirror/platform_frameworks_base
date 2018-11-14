@@ -16,7 +16,9 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.WallpaperColors;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -31,9 +33,6 @@ import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
 /**
  * Controls how light status bar flag applies to the icons.

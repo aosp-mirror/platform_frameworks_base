@@ -16,7 +16,6 @@ package com.android.systemui.privacy
 
 import android.content.Context
 import com.android.systemui.R
-import java.lang.IllegalStateException
 import java.lang.Math.max
 
 class PrivacyDialogBuilder(val context: Context, itemsList: List<PrivacyItem>) {

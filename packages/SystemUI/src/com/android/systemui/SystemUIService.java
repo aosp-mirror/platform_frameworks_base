@@ -24,12 +24,12 @@ import android.os.Process;
 import android.os.SystemProperties;
 import android.util.Slog;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-
 import com.android.internal.os.BinderInternal;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 public class SystemUIService extends Service {
 

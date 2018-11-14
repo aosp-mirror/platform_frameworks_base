@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import com.android.internal.statusbar.StatusBarIcon;
+
 import java.util.ArrayList;
 import java.util.List;
 

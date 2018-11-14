@@ -16,16 +16,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
-import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -53,8 +43,17 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class NotificationSnooze extends LinearLayout
         implements NotificationGuts.GutsContent, View.OnClickListener {

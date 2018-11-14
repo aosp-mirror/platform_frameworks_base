@@ -28,9 +28,9 @@ import android.view.animation.Interpolator;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
+import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 
 import java.io.FileDescriptor;

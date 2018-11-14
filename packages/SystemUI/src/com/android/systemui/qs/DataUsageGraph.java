@@ -18,7 +18,6 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;

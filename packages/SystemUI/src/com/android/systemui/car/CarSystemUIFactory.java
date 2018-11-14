@@ -23,10 +23,10 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dependency.DependencyProvider;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.car.CarFacetButtonController;
 import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.car.hvac.HvacController;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
 /**

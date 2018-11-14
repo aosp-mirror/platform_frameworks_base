@@ -27,7 +27,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
-
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 abstract public class SafetyWarningDialog extends SystemUIDialog

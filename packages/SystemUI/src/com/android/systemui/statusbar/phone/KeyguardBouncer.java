@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
