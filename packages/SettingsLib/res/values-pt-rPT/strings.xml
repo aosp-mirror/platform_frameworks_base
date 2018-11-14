@@ -278,7 +278,7 @@
     <string name="media_category" msgid="4388305075496848353">"Multimédia"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Monitorização"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Modo rigoroso ativado"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Piscar ecrã se aplic. fazem oper. prolong. no tópico princ."</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Piscar ecrã se app fazem oper. prolong. no tópico princ."</string>
     <string name="pointer_location" msgid="6084434787496938001">"Localização do ponteiro"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Apresentar dados atuais de toque"</string>
     <string name="show_touches" msgid="2642976305235070316">"Mostrar toques"</string>
@@ -307,7 +307,7 @@
     <string name="show_non_rect_clip" msgid="505954950474595172">"Depurar operações de clipe não retangulares"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"Conversão GPU do perfil"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Ativar cam. depuração GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Permitir carreg. cam. depuração GPU p/ dep. aplic."</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Permitir carreg. cam. depuração GPU p/ dep. app"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Escala de anim. da janela"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Escala de anim. de trans."</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Esc. de duração do anim."</string>
