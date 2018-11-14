@@ -268,6 +268,9 @@ public class StorageManager {
     public static final int ENCRYPTION_STATE_ERROR_CORRUPT =
             IVold.ENCRYPTION_STATE_ERROR_CORRUPT;
 
+    /** @hide Prefix used in sandboxIds for apps with sharedUserIds */
+    public static final String SHARED_SANDBOX_PREFIX = "shared-";
+
     private static volatile IStorageManager sStorageManager = null;
 
     private final Context mContext;

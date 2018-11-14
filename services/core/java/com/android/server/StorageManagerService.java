@@ -186,8 +186,6 @@ class StorageManagerService extends IStorageManager.Stub
     private static final boolean ENABLE_ISOLATED_STORAGE = SystemProperties
             .getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false);
 
-    private static final String SHARED_SANDBOX_ID_PREFIX = "shared:";
-
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
 
@@ -1501,7 +1499,8 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private static String getSandboxId(String packageName, String sharedUserId) {
-        return sharedUserId == null ? packageName : SHARED_SANDBOX_ID_PREFIX + sharedUserId;
+        return sharedUserId == null
+                ? packageName : StorageManager.SHARED_SANDBOX_PREFIX + sharedUserId;
     }
 
     private void connect() {

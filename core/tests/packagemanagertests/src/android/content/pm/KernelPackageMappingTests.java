@@ -81,7 +81,7 @@ public class KernelPackageMappingTests {
 
     @Test
     public void testSharedInstalledPrimary() throws Exception {
-        assertEquals("1001", getContent(getKernelPackageFile("shared:android.uid.phone", "appid")));
+        assertEquals("1001", getContent(getKernelPackageFile("shared-android.uid.phone", "appid")));
     }
 
     @Test
@@ -92,7 +92,7 @@ public class KernelPackageMappingTests {
 
     @Test
     public void testSharedInstalledAll() throws Exception {
-        assertEquals("", getContent(getKernelPackageFile("shared:android.uid.phone",
+        assertEquals("", getContent(getKernelPackageFile("shared-android.uid.phone",
                 "excluded_userids")));
     }
 

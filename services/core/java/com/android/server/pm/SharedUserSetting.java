@@ -19,6 +19,7 @@ package com.android.server.pm;
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
+import android.os.storage.StorageManager;
 import android.service.pm.PackageServiceDumpProto;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
@@ -166,8 +167,8 @@ public final class SharedUserSetting extends SettingBase {
         return excludedUserIds == null ? EmptyArray.INT : excludedUserIds;
     }
 
-    public String getSandboxName() {
-        return "shared:" + name;
+    public String getStorageSandboxName() {
+        return StorageManager.SHARED_SANDBOX_PREFIX + name;
     }
 
     /** Updates all fields in this shared user setting from another. */
