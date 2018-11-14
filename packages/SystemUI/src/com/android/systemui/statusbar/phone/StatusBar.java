@@ -342,7 +342,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected StatusBarWindowController mStatusBarWindowController;
     protected UnlockMethodCache mUnlockMethodCache;
-    private DozeServiceHost mDozeServiceHost = new DozeServiceHost();
+    @VisibleForTesting
+    DozeServiceHost mDozeServiceHost = new DozeServiceHost();
     private boolean mWakeUpComingFromTouch;
     private PointF mWakeUpTouchLocation;
 
@@ -479,7 +480,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mLaunchCameraOnScreenTurningOn;
     private boolean mLaunchCameraOnFinishedGoingToSleep;
     private int mLastCameraLaunchSource;
-    private PowerManager.WakeLock mGestureWakeLock;
+    protected PowerManager.WakeLock mGestureWakeLock;
     private Vibrator mVibrator;
     private long[] mCameraLaunchGestureVibePattern;
 
@@ -3609,6 +3610,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    @VisibleForTesting
     final WakefulnessLifecycle.Observer mWakefulnessObserver = new WakefulnessLifecycle.Observer() {
         @Override
         public void onFinishedGoingToSleep() {
@@ -3650,6 +3652,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mNotificationPanel.setTouchAndAnimationDisabled(false);
             updateVisibleToUser();
             updateIsKeyguard();
+            mDozeServiceHost.stopDozing();
         }
     };
 
@@ -3856,7 +3859,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mStatusBarKeyguardViewManager.isShowing();
     }
 
-    private final class DozeServiceHost implements DozeHost {
+    @VisibleForTesting
+    final class DozeServiceHost implements DozeHost {
         private final ArrayList<Callback> mCallbacks = new ArrayList<>();
         private boolean mAnimateWakeup;
         private boolean mAnimateScreenOff;
@@ -3944,7 +3948,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mDozingRequested = false;
                 DozeLog.traceDozing(mContext, mDozing);
                 updateDozing();
-                mWakefulnessLifecycle.dispatchStartedWakingUp();
             }
         }
 
