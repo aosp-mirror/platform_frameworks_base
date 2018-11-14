@@ -593,6 +593,30 @@ public class StatusBarTest extends SysuiTestCase {
         verify(mStatusBarStateController).setState(eq(StatusBarState.FULLSCREEN_USER_SWITCHER));
     }
 
+    @Test
+    public void testStartStopDozing() {
+        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        when(mStatusBarStateController.isKeyguardRequested()).thenReturn(true);
+
+        mStatusBar.mDozeServiceHost.startDozing();
+        verify(mStatusBarStateController).setIsDozing(eq(true));
+
+        mStatusBar.mDozeServiceHost.stopDozing();
+        verify(mStatusBarStateController).setIsDozing(eq(false));
+    }
+
+    @Test
+    public void testOnStartedWakingUp_isNotDozing() {
+        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        when(mStatusBarStateController.isKeyguardRequested()).thenReturn(true);
+
+        mStatusBar.mDozeServiceHost.startDozing();
+        verify(mStatusBarStateController).setIsDozing(eq(true));
+
+        mStatusBar.mWakefulnessObserver.onStartedWakingUp();
+        verify(mStatusBarStateController).setIsDozing(eq(false));
+    }
+
     static class TestableStatusBar extends StatusBar {
         public TestableStatusBar(StatusBarKeyguardViewManager man,
                 UnlockMethodCache unlock, KeyguardIndicationController key,
@@ -642,6 +666,7 @@ public class StatusBarTest extends SysuiTestCase {
             mLockscreenUserManager = notificationLockscreenUserManager;
             mCommandQueue = commandQueue;
             mPresenter = notificationPresenter;
+            mGestureWakeLock = mock(PowerManager.WakeLock.class);
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {
