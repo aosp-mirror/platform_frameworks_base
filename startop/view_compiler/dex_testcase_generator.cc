@@ -138,6 +138,71 @@ void GenerateSimpleTestCases(const string& outdir) {
   }(backwardsBranch);
   backwardsBranch.Encode();
 
+  // Test that we can make a null value. Basically:
+  //
+  // public static String returnNull() { return null; }
+  MethodBuilder returnNull{cbuilder.CreateMethod("returnNull", Prototype{string_type})};
+  [](MethodBuilder& method) {
+    Value zero = method.MakeRegister();
+    method.BuildConst4(zero, 0);
+    method.BuildReturn(zero, /*is_object=*/true);
+  }(returnNull);
+  returnNull.Encode();
+
+  // Test that we can make String literals. Basically:
+  //
+  // public static String makeString() { return "Hello, World!"; }
+  MethodBuilder makeString{cbuilder.CreateMethod("makeString", Prototype{string_type})};
+  [](MethodBuilder& method) {
+    Value string = method.MakeRegister();
+    method.BuildConstString(string, "Hello, World!");
+    method.BuildReturn(string, /*is_object=*/true);
+  }(makeString);
+  makeString.Encode();
+
+  // Make sure strings are sorted correctly.
+  //
+  // int returnStringIfZeroAB(int x) { if (x == 0) { return "a"; } else { return "b"; } }
+  MethodBuilder returnStringIfZeroAB{
+      cbuilder.CreateMethod("returnStringIfZeroAB", Prototype{string_type, TypeDescriptor::Int()})};
+  [&](MethodBuilder& method) {
+    Value resultIfZero{method.MakeRegister()};
+    Value else_target{method.MakeLabel()};
+    method.AddInstruction(Instruction::OpWithArgs(
+        Instruction::Op::kBranchEqz, /*dest=*/{}, Value::Parameter(0), else_target));
+    // else branch
+    method.BuildConstString(resultIfZero, "b");
+    method.AddInstruction(
+        Instruction::OpWithArgs(Instruction::Op::kReturnObject, /*dest=*/{}, resultIfZero));
+    // then branch
+    method.AddInstruction(
+        Instruction::OpWithArgs(Instruction::Op::kBindLabel, /*dest=*/{}, else_target));
+    method.BuildConstString(resultIfZero, "a");
+    method.AddInstruction(
+        Instruction::OpWithArgs(Instruction::Op::kReturnObject, /*dest=*/{}, resultIfZero));
+    method.Encode();
+  }(returnStringIfZeroAB);
+  // int returnStringIfZeroAB(int x) { if (x == 0) { return "b"; } else { return "a"; } }
+  MethodBuilder returnStringIfZeroBA{
+      cbuilder.CreateMethod("returnStringIfZeroBA", Prototype{string_type, TypeDescriptor::Int()})};
+  [&](MethodBuilder& method) {
+    Value resultIfZero{method.MakeRegister()};
+    Value else_target{method.MakeLabel()};
+    method.AddInstruction(Instruction::OpWithArgs(
+        Instruction::Op::kBranchEqz, /*dest=*/{}, Value::Parameter(0), else_target));
+    // else branch
+    method.BuildConstString(resultIfZero, "a");
+    method.AddInstruction(
+        Instruction::OpWithArgs(Instruction::Op::kReturnObject, /*dest=*/{}, resultIfZero));
+    // then branch
+    method.AddInstruction(
+        Instruction::OpWithArgs(Instruction::Op::kBindLabel, /*dest=*/{}, else_target));
+    method.BuildConstString(resultIfZero, "b");
+    method.AddInstruction(
+        Instruction::OpWithArgs(Instruction::Op::kReturnObject, /*dest=*/{}, resultIfZero));
+    method.Encode();
+  }(returnStringIfZeroBA);
+
   slicer::MemView image{dex_file.CreateImage()};
   std::ofstream out_file(outdir + "/simple.dex");
   out_file.write(image.ptr<const char>(), image.size());
