@@ -59,11 +59,11 @@ public class FragmentHostManager {
     private FragmentController mFragments;
     private FragmentLifecycleCallbacks mLifecycleCallbacks;
 
-    FragmentHostManager(Context context, FragmentService manager, View rootView) {
-        mContext = context;
+    FragmentHostManager(FragmentService manager, View rootView) {
+        mContext = rootView.getContext();
         mManager = manager;
         mRootView = rootView;
-        mConfigChanges.applyNewConfig(context.getResources());
+        mConfigChanges.applyNewConfig(mContext.getResources());
         createFragmentHost(null);
     }
 
@@ -201,6 +201,10 @@ public class FragmentHostManager {
             // TODO: Some auto handling here?
             throw e;
         }
+    }
+
+    public static void removeAndDestroy(View view) {
+        Dependency.get(FragmentService.class).removeAndDestroy(view);
     }
 
     class HostCallbacks extends FragmentHostCallback<FragmentHostManager> {

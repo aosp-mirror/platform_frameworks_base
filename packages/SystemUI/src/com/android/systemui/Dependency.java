@@ -296,7 +296,7 @@ public class Dependency extends SystemUI {
                 new WakefulnessLifecycle());
 
         mProviders.put(FragmentService.class, () ->
-                new FragmentService(mContext));
+                new FragmentService());
 
         mProviders.put(ExtensionController.class, () ->
                 new ExtensionControllerImpl(mContext));
