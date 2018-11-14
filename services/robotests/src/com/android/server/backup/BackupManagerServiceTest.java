@@ -22,7 +22,9 @@ import static com.android.server.backup.testing.TransportData.d2dTransport;
 import static com.android.server.backup.testing.TransportData.localTransport;
 import static com.android.server.backup.testing.TransportTestUtils.setUpCurrentTransport;
 import static com.android.server.backup.testing.TransportTestUtils.setUpTransports;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,24 +47,23 @@ import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
+
 import com.android.server.backup.testing.BackupManagerServiceTestUtils;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.TransportNotRegisteredException;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.ShadowAppBackupUtils;
 import com.android.server.testing.shadows.ShadowBinder;
 import com.android.server.testing.shadows.ShadowKeyValueBackupJob;
 import com.android.server.testing.shadows.ShadowKeyValueBackupTask;
-import java.io.File;
-import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implements;
@@ -71,9 +72,11 @@ import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
 import org.robolectric.shadows.ShadowSettings;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26, shadows = {ShadowAppBackupUtils.class})
-@SystemLoaderPackages({"com.android.server.backup"})
+import java.io.File;
+import java.util.List;
+
+@RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowAppBackupUtils.class})
 @Presubmit
 public class BackupManagerServiceTest {
     private static final String TAG = "BMSTest";

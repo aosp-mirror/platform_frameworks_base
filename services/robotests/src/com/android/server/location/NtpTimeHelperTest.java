@@ -9,16 +9,14 @@ import android.platform.test.annotations.Presubmit;
 import android.util.NtpTrustedTime;
 
 import com.android.server.location.NtpTimeHelper.InjectNtpTimeCallback;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowSystemClock;
 
@@ -28,12 +26,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Unit tests for {@link NtpTimeHelper}.
  */
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(
-        manifest = Config.NONE,
-        sdk = 27
-)
-@SystemLoaderPackages({"com.android.server.location"})
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class NtpTimeHelperTest {
 

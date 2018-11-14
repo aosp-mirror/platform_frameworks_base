@@ -27,9 +27,6 @@ import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import com.android.server.backup.BackupManagerService;
-import com.android.server.backup.remote.RemoteResult;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.ShadowEventLog;
 import com.android.server.testing.shadows.ShadowSlog;
 
@@ -37,17 +34,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowLog;
 
-import java.lang.reflect.Field;
-
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(
-        manifest = Config.NONE,
-        sdk = 26,
-        shadows = {ShadowEventLog.class, ShadowSlog.class})
-@SystemLoaderPackages({"com.android.server.backup"})
+@RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowEventLog.class, ShadowSlog.class})
 @Presubmit
 public class KeyValueBackupReporterTest {
     @Mock private BackupManagerService mBackupManagerService;
@@ -57,33 +48,31 @@ public class KeyValueBackupReporterTest {
     private KeyValueBackupReporter mReporter;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         mReporter = new KeyValueBackupReporter(mBackupManagerService, mObserver, mMonitor);
     }
 
     @Test
-    public void testMoreDebug_isFalse() throws Exception {
-        boolean moreDebug = KeyValueBackupReporter.MORE_DEBUG;
-
-        assertThat(moreDebug).isFalse();
+    public void testMoreDebug_isFalse() {
+        assertThat(KeyValueBackupReporter.MORE_DEBUG).isFalse();
     }
 
     @Test
-    public void testOnNewThread_logsCorrectly() throws Exception {
+    public void testOnNewThread_logsCorrectly() {
         KeyValueBackupReporter.onNewThread("foo");
 
         assertLogcat(TAG, Log.DEBUG);
     }
 
     @Test
-    public void testGetMonitor_returnsMonitor() throws Exception {
+    public void testGetMonitor_returnsMonitor() {
         IBackupManagerMonitor monitor = mReporter.getMonitor();
 
         assertThat(monitor).isEqualTo(mMonitor);
     }
 
     @Test
-    public void testGetObserver_returnsObserver() throws Exception {
+    public void testGetObserver_returnsObserver() {
         IBackupObserver observer = mReporter.getObserver();
 
         assertThat(observer).isEqualTo(mObserver);

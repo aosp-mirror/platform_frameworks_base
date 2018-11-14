@@ -17,21 +17,22 @@
 package com.android.server.backup.encryption.chunking;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.testng.Assert.assertThrows;
 
 import android.platform.test.annotations.Presubmit;
+
 import com.android.server.backup.encryption.chunk.ChunkHash;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
+
 import com.google.common.primitives.Bytes;
-import java.util.Arrays;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderPackages({"com.android.server.backup"})
+import java.util.Arrays;
+
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class EncryptedChunkTest {
     private static final byte[] CHUNK_HASH_1_BYTES =

@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-##############################################################
-# FrameworksServicesLib app just for Robolectric test target #
-##############################################################
+###################################################################
+# FrameworksServicesLib app just for Robolectric test target      #
+###################################################################
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
@@ -32,81 +31,51 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 include $(BUILD_PACKAGE)
 
-##############################################
-# FrameworksServices Robolectric test target #
-##############################################
+###################################################################
+# FrameworksServicesLib Robolectric test target.                  #
+###################################################################
 include $(CLEAR_VARS)
 
-# Dependency platform-robolectric-android-all-stubs below contains a bunch of Android classes as
-# stubs that throw RuntimeExceptions when we use them. The goal is to include hidden APIs that
-# weren't included in Robolectric's Android jar files. However, we are testing the framework itself
-# here, so if we write stuff that is being used in the tests and exist in
-# platform-robolectric-android-all-stubs, the class loader is going to pick up the latter, and thus
-# we are going to test what we don't want. To solve this:
-#
-#   1. If the class being used should be visible to bundled apps:
-#      => Bypass the stubs target by including them in LOCAL_SRC_FILES and LOCAL_AIDL_INCLUDES
-#         (if aidl).
-#
-#   2. If it's not visible:
-#      => Remove the class from the stubs jar (common/robolectric/android-all/android-all-stubs.jar)
-#         and add the class path to
-#         common/robolectric/android-all/android-all-stubs_removed_classes.txt.
-#
+LOCAL_MODULE := FrameworksServicesRoboTests
 
-INTERNAL_BACKUP := ../../core/java/com/android/internal/backup
+LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
-LOCAL_SRC_FILES := \
-    $(call all-java-files-under, src) \
-    $(call all-Iaidl-files-under, $(INTERNAL_BACKUP)) \
-    $(call all-java-files-under, ../../core/java/android/app/backup) \
-    $(call all-Iaidl-files-under, ../../core/java/android/app/backup) \
-    $(call all-java-files-under, ../../core/java/android/util/proto) \
-    ../../core/java/android/content/pm/PackageInfo.java \
-    ../../core/java/android/app/IBackupAgent.aidl \
-    ../../core/java/android/util/KeyValueSettingObserver.java \
-    ../../core/java/android/content/pm/PackageParser.java \
-    ../../core/java/android/content/pm/SigningInfo.java
+LOCAL_RESOURCE_DIR := \
+    $(LOCAL_PATH)/res
 
-LOCAL_AIDL_INCLUDES := \
-    $(call all-Iaidl-files-under, $(INTERNAL_BACKUP)) \
-    $(call all-Iaidl-files-under, ../../core/java/android/app/backup) \
-    ../../core/java/android/app/IBackupAgent.aidl
+LOCAL_JAVA_RESOURCE_DIRS := config
 
-LOCAL_STATIC_JAVA_LIBRARIES := \
-    platform-robolectric-android-all-stubs \
-    android-support-test \
-    guava \
-    mockito-robolectric-prebuilt \
+# Include the testing libraries
+LOCAL_JAVA_LIBRARIES := \
     platform-test-annotations \
+    robolectric_android-all-stub \
+    Robolectric_all-target \
+    mockito-robolectric-prebuilt \
     truth-prebuilt \
     testng
 
-LOCAL_JAVA_LIBRARIES := \
-    junit \
-    platform-robolectric-3.6.2-prebuilt
-
 LOCAL_INSTRUMENTATION_FOR := FrameworksServicesLib
-LOCAL_MODULE := FrameworksServicesRoboTests
 
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
-###############################################################
-# FrameworksServices runner target to run the previous target #
-###############################################################
+###################################################################
+# FrameworksServicesLib runner target to run the previous target. #
+###################################################################
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := RunFrameworksServicesRoboTests
 
-LOCAL_SDK_VERSION := current
-
-LOCAL_STATIC_JAVA_LIBRARIES := \
-    FrameworksServicesRoboTests
+LOCAL_JAVA_LIBRARIES := \
+    FrameworksServicesRoboTests \
+    platform-test-annotations \
+    robolectric_android-all-stub \
+    Robolectric_all-target \
+    mockito-robolectric-prebuilt \
+    truth-prebuilt \
+    testng
 
 LOCAL_TEST_PACKAGE := FrameworksServicesLib
 
-LOCAL_INSTRUMENT_SOURCE_DIRS := $(dir $(LOCAL_PATH))backup/java
-
-include prebuilts/misc/common/robolectric/3.6.2/run_robotests.mk
+include external/robolectric-shadows/run_robotests.mk

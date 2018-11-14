@@ -18,8 +18,10 @@ package com.android.server.testing.shadows;
 
 import android.content.Context;
 import android.os.Binder;
+
 import com.android.server.backup.BackupManagerConstants;
 import com.android.server.backup.KeyValueBackupJob;
+
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
@@ -32,7 +34,7 @@ public class ShadowKeyValueBackupJob {
     }
 
     @Implementation
-    public static void schedule(Context ctx, long delay, BackupManagerConstants constants) {
+    protected static void schedule(Context ctx, long delay, BackupManagerConstants constants) {
         callingUid = Binder.getCallingUid();
     }
 }

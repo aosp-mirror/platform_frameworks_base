@@ -25,22 +25,16 @@ import android.content.Context;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
-import android.util.KeyValueSettingObserver;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderClasses;
-import com.android.server.testing.SystemLoaderPackages;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 /** Tests for {@link BackupAgentTimeoutParameters}. */
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderPackages({"com.android.server.backup"})
-@SystemLoaderClasses({KeyValueSettingObserver.class})
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class BackupAgentTimeoutParametersTest {
     private ContentResolver mContentResolver;
