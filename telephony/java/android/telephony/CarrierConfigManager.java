@@ -1277,20 +1277,11 @@ public class CarrierConfigManager {
     public static final String KEY_WORLD_MODE_ENABLED_BOOL = "world_mode_enabled_bool";
 
     /**
-     * Package name of the carrier settings activity.
-     * @see {@link #KEY_CARRIER_SETTINGS_ACTIVITY_CLASS_NAME_STRING}.
+     * Flatten {@link android.content.ComponentName} of the carrier's settings activity.
      * @hide
      */
-    public static final String KEY_CARRIER_SETTINGS_ACTIVITY_PACKAGE_NAME_STRING =
-            "carrier_settings_activity_package_name_string";
-
-    /**
-     * Class name of the carrier settings activity.
-     * @see {@link #KEY_CARRIER_SETTINGS_ACTIVITY_PACKAGE_NAME_STRING}.
-     * @hide
-     */
-    public static final String KEY_CARRIER_SETTINGS_ACTIVITY_CLASS_NAME_STRING =
-            "carrier_settings_activity_class_name_string";
+    public static final String KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING =
+            "carrier_settings_activity_component_name_string";
 
     // These variables are used by the MMS service and exposed through another API,
     // SmsManager. The variable names and string values are copied from there.
@@ -2637,8 +2628,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
         sDefaults.putStringArray(KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_WORLD_MODE_ENABLED_BOOL, false);
-        sDefaults.putString(KEY_CARRIER_SETTINGS_ACTIVITY_PACKAGE_NAME_STRING, "");
-        sDefaults.putString(KEY_CARRIER_SETTINGS_ACTIVITY_CLASS_NAME_STRING, "");
+        sDefaults.putString(KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING, "");
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
         sDefaults.putIntArray(KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY,
