@@ -96,6 +96,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.MASTER_CLEAR"/>
+        <permission name="android.permission.NETWORK_MANAGED_PROVISIONING"/>
         <permission name="android.permission.PERFORM_CDMA_PROVISIONING"/>
         <permission name="android.permission.SET_TIME"/>
         <permission name="android.permission.SET_TIME_ZONE"/>
