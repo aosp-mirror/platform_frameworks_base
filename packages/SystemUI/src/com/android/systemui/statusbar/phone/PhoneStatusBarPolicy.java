@@ -66,6 +66,8 @@ import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.UiOffloadThread;
+import com.android.systemui.privacy.PrivacyItem;
+import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -101,7 +103,8 @@ import java.util.Locale;
  */
 public class PhoneStatusBarPolicy implements Callback, Callbacks,
         RotationLockControllerCallback, Listener, LocationChangeCallback,
-        ZenModeController.Callback, DeviceProvisionedListener, KeyguardMonitor.Callback {
+        ZenModeController.Callback, DeviceProvisionedListener, KeyguardMonitor.Callback,
+        PrivacyItemController.Callback {
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -120,6 +123,8 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     private final String mSlotHeadset;
     private final String mSlotDataSaver;
     private final String mSlotLocation;
+    private final String mSlotMicrophone;
+    private final String mSlotCamera;
 
     private final Context mContext;
     private final Handler mHandler = new Handler();
@@ -136,6 +141,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     private final DeviceProvisionedController mProvisionedController;
     private final KeyguardMonitor mKeyguardMonitor;
     private final LocationController mLocationController;
+    private final PrivacyItemController mPrivacyItemController;
     private final ArraySet<Pair<String, Integer>> mCurrentNotifs = new ArraySet<>();
     private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
 
@@ -169,6 +175,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
         mLocationController = Dependency.get(LocationController.class);
+        mPrivacyItemController = new PrivacyItemController(mContext, this);
 
         mSlotCast = context.getString(com.android.internal.R.string.status_bar_cast);
         mSlotHotspot = context.getString(com.android.internal.R.string.status_bar_hotspot);
@@ -183,6 +190,8 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mSlotHeadset = context.getString(com.android.internal.R.string.status_bar_headset);
         mSlotDataSaver = context.getString(com.android.internal.R.string.status_bar_data_saver);
         mSlotLocation = context.getString(com.android.internal.R.string.status_bar_location);
+        mSlotMicrophone = context.getString(com.android.internal.R.string.status_bar_microphone);
+        mSlotCamera = context.getString(com.android.internal.R.string.status_bar_camera);
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
@@ -241,6 +250,12 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                 context.getString(R.string.accessibility_data_saver_on));
         mIconController.setIconVisibility(mSlotDataSaver, false);
 
+        // privacy items
+        mIconController.setIcon(mSlotMicrophone, R.drawable.stat_sys_mic_none, null);
+        mIconController.setIconVisibility(mSlotMicrophone, false);
+        mIconController.setIcon(mSlotCamera, R.drawable.stat_sys_camera, null);
+        mIconController.setIconVisibility(mSlotCamera, false);
+
         mRotationLockController.addCallback(this);
         mBluetooth.addCallback(this);
         mProvisionedController.addCallback(this);
@@ -251,6 +266,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mDataSaver.addCallback(this);
         mKeyguardMonitor.addCallback(this);
         mLocationController.addCallback(this);
+        mPrivacyItemController.setListening(true);
 
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallbacks(this);
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskListener);
@@ -279,6 +295,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mDataSaver.removeCallback(this);
         mKeyguardMonitor.removeCallback(this);
         mLocationController.removeCallback(this);
+        mPrivacyItemController.setListening(false);
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallbacks(this);
         mContext.unregisterReceiver(mIntentReceiver);
 
@@ -796,6 +813,34 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     @Override
     public void onDataSaverChanged(boolean isDataSaving) {
         mIconController.setIconVisibility(mSlotDataSaver, isDataSaving);
+    }
+
+    @Override  // PrivacyItemController.Callback
+    public void privacyChanged(List<PrivacyItem> privacyItems) {
+        updatePrivacyItems(privacyItems);
+    }
+
+    private void updatePrivacyItems(List<PrivacyItem> items) {
+        boolean showCamera = false;
+        boolean showMicrophone = false;
+        boolean showLocation = false;
+        for (PrivacyItem item : items) {
+            switch (item.getPrivacyType()) {
+                case TYPE_CAMERA:
+                    showCamera = true;
+                    break;
+                case TYPE_LOCATION:
+                    showLocation = true;
+                    break;
+                case TYPE_MICROPHONE:
+                    showMicrophone = true;
+                    break;
+            }
+        }
+
+        mIconController.setIconVisibility(mSlotCamera, showCamera);
+        mIconController.setIconVisibility(mSlotMicrophone, showMicrophone);
+        mIconController.setIconVisibility(mSlotLocation, showLocation);
     }
 
     private final TaskStackChangeListener mTaskListener = new TaskStackChangeListener() {
