@@ -6076,7 +6076,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (needEditableForNotification) {
             sendAfterTextChanged((Editable) text);
         } else {
-            notifyManagersAfterTextChanged();
+            notifyListeningManagersAfterTextChanged();
         }
 
         // SelectionModifierCursorController depends on textCanBeSelected, which depends on text
@@ -10124,13 +10124,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        // Always notify AutoFillManager - it will return right away if autofill is disabled.
-        notifyManagersAfterTextChanged();
+        notifyListeningManagersAfterTextChanged();
 
         hideErrorIfUnchanged();
     }
 
-    private void notifyManagersAfterTextChanged() {
+    /**
+     * Notify managers (such as {@link AutofillManager} and {@link IntelligenceManager}) that are
+     * interested on text changes.
+     */
+    private void notifyListeningManagersAfterTextChanged() {
 
         // Autofill
         if (isAutofillable()) {
@@ -10911,34 +10914,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return TextView.class.getName();
     }
 
+    /** @hide */
     @Override
-    public void onProvideStructure(ViewStructure structure) {
-        super.onProvideStructure(structure);
-        onProvideStructureForAssistOrAutofillOrViewCapture(structure, /* forAutofill = */ false,
-                /* forViewCapture= */ false);
-    }
+    protected void onProvideStructure(@NonNull ViewStructure structure,
+            @ViewStructureType int viewFor, int flags) {
+        super.onProvideStructure(structure, viewFor, flags);
 
-    @Override
-    public void onProvideAutofillStructure(ViewStructure structure, int flags) {
-        super.onProvideAutofillStructure(structure, flags);
-        onProvideStructureForAssistOrAutofillOrViewCapture(structure, /* forAutofill = */ true,
-                /* forViewCapture= */ false);
-    }
-
-    @Override
-    public boolean onProvideContentCaptureStructure(ViewStructure structure, int flags) {
-        final boolean notifyManager = super.onProvideContentCaptureStructure(structure, flags);
-        onProvideStructureForAssistOrAutofillOrViewCapture(structure, /* forAutofill = */ false,
-                /* forViewCapture= */ true);
-        return notifyManager;
-    }
-
-    private void onProvideStructureForAssistOrAutofillOrViewCapture(ViewStructure structure,
-            boolean forAutofill, boolean forViewCapture) {
         final boolean isPassword = hasPasswordTransformationMethod()
                 || isPasswordInputType(getInputType());
-        if (forAutofill || forViewCapture) {
-            if (forAutofill) {
+        if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL
+                || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
+            if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
                 structure.setDataIsSensitive(!mTextSetFromXmlOrResourceId);
             }
             if (mTextId != ResourceId.ID_NULL) {
@@ -10953,7 +10939,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (!isPassword || forAutofill || forViewCapture) {
+        if (!isPassword || viewFor == VIEW_STRUCTURE_FOR_AUTOFILL
+                || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
             if (mLayout == null) {
                 assumeLayout();
             }
@@ -10962,7 +10949,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (lineCount <= 1) {
                 // Simple case: this is a single line.
                 final CharSequence text = getText();
-                if (forAutofill) {
+                if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
                     structure.setText(text);
                 } else {
                     structure.setText(text, getSelectionStart(), getSelectionEnd());
@@ -11026,7 +11013,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     text = text.subSequence(expandedTopChar, expandedBottomChar);
                 }
 
-                if (forAutofill) {
+                if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
                     structure.setText(text);
                 } else {
                     structure.setText(text, selStart - expandedTopChar, selEnd - expandedTopChar);
@@ -11042,7 +11029,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
 
-            if (!forAutofill) {
+            if (viewFor == VIEW_STRUCTURE_FOR_ASSIST
+                    || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
                 // Extract style information that applies to the TextView as a whole.
                 int style = 0;
                 int typefaceStyle = getTypefaceStyle();
@@ -11070,7 +11058,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 structure.setTextStyle(getTextSize(), getCurrentTextColor(),
                         AssistStructure.ViewNode.TEXT_COLOR_UNDEFINED /* bgColor */, style);
             }
-            if (forAutofill || forViewCapture) {
+            if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL
+                    || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
                 structure.setMinTextEms(getMinEms());
                 structure.setMaxTextEms(getMaxEms());
                 int maxLength = -1;

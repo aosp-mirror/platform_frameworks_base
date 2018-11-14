@@ -578,11 +578,16 @@ public abstract class CompoundButton extends Button implements Checkable {
         stream.addProperty("checked", isChecked());
     }
 
-    @Override
-    public void onProvideAutofillStructure(ViewStructure structure, int flags) {
-        super.onProvideAutofillStructure(structure, flags);
 
-        structure.setDataIsSensitive(!mCheckedFromResource);
+    /** @hide */
+    @Override
+    protected void onProvideStructure(@NonNull ViewStructure structure,
+            @ViewStructureType int viewFor, int flags) {
+        super.onProvideStructure(structure, viewFor, flags);
+
+        if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
+            structure.setDataIsSensitive(!mCheckedFromResource);
+        }
     }
 
     @Override

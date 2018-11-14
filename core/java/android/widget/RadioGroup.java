@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.IdRes;
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -424,10 +425,15 @@ public class RadioGroup extends LinearLayout {
         }
     }
 
+    /** @hide */
     @Override
-    public void onProvideAutofillStructure(ViewStructure structure, int flags) {
-        super.onProvideAutofillStructure(structure, flags);
-        structure.setDataIsSensitive(mCheckedId != mInitialCheckedId);
+    protected void onProvideStructure(@NonNull ViewStructure structure,
+            @ViewStructureType int viewFor, int flags) {
+        super.onProvideStructure(structure, viewFor, flags);
+
+        if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
+            structure.setDataIsSensitive(mCheckedId != mInitialCheckedId);
+        }
     }
 
     @Override

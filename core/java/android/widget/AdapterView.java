@@ -1309,13 +1309,23 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     @Override
     public void onProvideAutofillStructure(ViewStructure structure, int flags) {
         super.onProvideAutofillStructure(structure, flags);
+    }
 
-        final Adapter adapter = getAdapter();
-        if (adapter == null) return;
+    /** @hide */
+    @Override
+    protected void onProvideStructure(@NonNull ViewStructure structure,
+            @ViewStructureType int viewFor, int flags) {
+        super.onProvideStructure(structure, viewFor, flags);
 
-        final CharSequence[] options = adapter.getAutofillOptions();
-        if (options != null) {
-            structure.setAutofillOptions(options);
+        if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL
+                || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
+            final Adapter adapter = getAdapter();
+            if (adapter == null) return;
+
+            final CharSequence[] options = adapter.getAutofillOptions();
+            if (options != null) {
+                structure.setAutofillOptions(options);
+            }
         }
     }
 }
