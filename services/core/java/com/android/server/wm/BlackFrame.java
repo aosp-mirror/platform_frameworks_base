@@ -52,7 +52,7 @@ public class BlackFrame {
                     .setColorLayer(true)
                     .setParent(null) // TODO: Work-around for b/69259549
                     .build();
-
+            transaction.setWindowCrop(surface, w, h);
             transaction.setLayerStack(surface, dc.getDisplayId());
             transaction.setAlpha(surface, 1);
             transaction.setLayer(surface, layer);

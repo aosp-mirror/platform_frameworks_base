@@ -572,6 +572,10 @@ public class SurfaceControl implements Parcelable {
      * Good practice is to first create the surface with the {@link #HIDDEN} flag
      * specified, open a transaction, set the surface layer, layer stack, alpha,
      * and position, call {@link #show} if appropriate, and close the transaction.
+     * <p>
+     * Bounds of the surface is determined by its crop and its buffer size. If the
+     * surface has no buffer or crop, the surface is boundless and only constrained
+     * by the size of its parent bounds.
      *
      * @param session The surface session, must not be null.
      * @param name The surface name, must not be null.
@@ -959,10 +963,31 @@ public class SurfaceControl implements Parcelable {
         }
     }
 
+    /**
+     * Bounds the surface and its children to the bounds specified. Size of the surface will be
+     * ignored and only the crop and buffer size will be used to determine the bounds of the
+     * surface. If no crop is specified and the surface has no buffer, the surface bounds is only
+     * constrained by the size of its parent bounds.
+     *
+     * @param crop Bounds of the crop to apply.
+     */
     public void setWindowCrop(Rect crop) {
         checkNotReleased();
         synchronized (SurfaceControl.class) {
             sGlobalTransaction.setWindowCrop(this, crop);
+        }
+    }
+
+    /**
+     * Same as {@link SurfaceControl#setWindowCrop(Rect)} but sets the crop rect top left at 0, 0.
+     *
+     * @param width width of crop rect
+     * @param height height of crop rect
+     */
+    public void setWindowCrop(int width, int height) {
+        checkNotReleased();
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setWindowCrop(this, width, height);
         }
     }
 
@@ -1474,6 +1499,12 @@ public class SurfaceControl implements Parcelable {
                 nativeSetWindowCrop(mNativeObject, sc.mNativeObject, 0, 0, 0, 0);
             }
 
+            return this;
+        }
+
+        public Transaction setWindowCrop(SurfaceControl sc, int width, int height) {
+            sc.checkNotReleased();
+            nativeSetWindowCrop(mNativeObject, sc.mNativeObject, 0, 0, width, height);
             return this;
         }
 
