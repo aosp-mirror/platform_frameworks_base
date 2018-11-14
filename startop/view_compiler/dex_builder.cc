@@ -49,6 +49,9 @@ std::ostream& operator<<(std::ostream& out, const Instruction::Op& opcode) {
     case Instruction::Op::kReturn:
       out << "kReturn";
       return out;
+    case Instruction::Op::kReturnObject:
+      out << "kReturnObject";
+      return out;
     case Instruction::Op::kMove:
       out << "kMove";
       return out;
@@ -137,6 +140,9 @@ ir::String* DexBuilder::GetOrAddString(const std::string& string) {
     entry = Alloc<ir::String>();
     // +1 for null terminator
     entry->data = slicer::MemView{buffer.get(), header_length + string.size() + 1};
+    ::dex::u4 const new_index = dex_file_->strings_indexes.AllocateIndex();
+    dex_file_->strings_map[new_index] = entry;
+    entry->orig_index = new_index;
     string_data_.push_back(std::move(buffer));
   }
   return entry;
@@ -240,13 +246,19 @@ void MethodBuilder::AddInstruction(Instruction instruction) {
 
 void MethodBuilder::BuildReturn() { AddInstruction(Instruction::OpNoArgs(Op::kReturn)); }
 
-void MethodBuilder::BuildReturn(Value src) {
-  AddInstruction(Instruction::OpWithArgs(Op::kReturn, /*destination=*/{}, src));
+void MethodBuilder::BuildReturn(Value src, bool is_object) {
+  AddInstruction(Instruction::OpWithArgs(
+      is_object ? Op::kReturnObject : Op::kReturn, /*destination=*/{}, src));
 }
 
 void MethodBuilder::BuildConst4(Value target, int value) {
   DCHECK_LT(value, 16);
   AddInstruction(Instruction::OpWithArgs(Op::kMove, target, Value::Immediate(value)));
+}
+
+void MethodBuilder::BuildConstString(Value target, const std::string& value) {
+  const ir::String* const dex_string = dex_->GetOrAddString(value);
+  AddInstruction(Instruction::OpWithArgs(Op::kMove, target, Value::String(dex_string->orig_index)));
 }
 
 void MethodBuilder::EncodeInstructions() {
@@ -259,7 +271,9 @@ void MethodBuilder::EncodeInstructions() {
 void MethodBuilder::EncodeInstruction(const Instruction& instruction) {
   switch (instruction.opcode()) {
     case Instruction::Op::kReturn:
-      return EncodeReturn(instruction);
+      return EncodeReturn(instruction, ::art::Instruction::RETURN);
+    case Instruction::Op::kReturnObject:
+      return EncodeReturn(instruction, ::art::Instruction::RETURN_OBJECT);
     case Instruction::Op::kMove:
       return EncodeMove(instruction);
     case Instruction::Op::kInvokeVirtual:
@@ -271,15 +285,14 @@ void MethodBuilder::EncodeInstruction(const Instruction& instruction) {
   }
 }
 
-void MethodBuilder::EncodeReturn(const Instruction& instruction) {
-  DCHECK_EQ(Instruction::Op::kReturn, instruction.opcode());
+void MethodBuilder::EncodeReturn(const Instruction& instruction, ::art::Instruction::Code opcode) {
   DCHECK(!instruction.dest().has_value());
   if (instruction.args().size() == 0) {
     buffer_.push_back(art::Instruction::RETURN_VOID);
   } else {
-    DCHECK(instruction.args().size() == 1);
+    DCHECK_EQ(1, instruction.args().size());
     size_t source = RegisterValue(instruction.args()[0]);
-    buffer_.push_back(art::Instruction::RETURN | source << 8);
+    buffer_.push_back(opcode | source << 8);
   }
 }
 
@@ -297,6 +310,12 @@ void MethodBuilder::EncodeMove(const Instruction& instruction) {
     DCHECK_LT(source.value(), 16);
     buffer_.push_back(art::Instruction::CONST_4 | (source.value() << 12) |
                       (RegisterValue(*instruction.dest()) << 8));
+  } else if (source.is_string()) {
+    constexpr size_t kMaxRegisters = 256;
+    DCHECK_LT(RegisterValue(*instruction.dest()), kMaxRegisters);
+    DCHECK_LT(source.value(), 65536);  // make sure we don't need a jumbo string
+    buffer_.push_back(::art::Instruction::CONST_STRING | (RegisterValue(*instruction.dest()) << 8));
+    buffer_.push_back(source.value());
   } else {
     UNIMPLEMENTED(FATAL);
   }
