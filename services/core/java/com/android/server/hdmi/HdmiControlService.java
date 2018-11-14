@@ -1668,13 +1668,11 @@ public class HdmiControlService extends SystemService {
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (powerStatus == HdmiControlManager.POWER_STATUS_ON
-                            || powerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON) {
-                        sendCecCommand(HdmiCecMessageBuilder.buildStandby(
-                                getRemoteControlSourceAddress(), logicalAddress));
-                    } else {
-                        Slog.w(TAG, "Device " + logicalAddress + " is already off " + powerStatus);
-                    }
+                    Slog.w(TAG, "Device "
+                            + logicalAddress + " power status is " + powerStatus
+                            + " before standby command sent out");
+                    sendCecCommand(HdmiCecMessageBuilder.buildStandby(
+                            getRemoteControlSourceAddress(), logicalAddress));
                 }
             });
         }
