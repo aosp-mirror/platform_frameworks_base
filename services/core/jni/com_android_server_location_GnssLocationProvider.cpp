@@ -20,9 +20,11 @@
 
 #include <android/hardware/gnss/1.0/IGnss.h>
 #include <android/hardware/gnss/1.1/IGnss.h>
+#include <android/hardware/gnss/2.0/IGnss.h>
 
 #include <android/hardware/gnss/1.0/IGnssMeasurement.h>
 #include <android/hardware/gnss/1.1/IGnssMeasurement.h>
+#include <android/hardware/gnss/2.0/IGnssMeasurement.h>
 #include <nativehelper/JNIHelp.h>
 #include "jni.h"
 #include "hardware_legacy/power.h"
@@ -110,13 +112,15 @@ using android::hidl::base::V1_0::IBase;
 
 using IGnss_V1_0 = android::hardware::gnss::V1_0::IGnss;
 using IGnss_V1_1 = android::hardware::gnss::V1_1::IGnss;
+using IGnss_V2_0 = android::hardware::gnss::V2_0::IGnss;
 using IGnssConfiguration_V1_0 = android::hardware::gnss::V1_0::IGnssConfiguration;
 using IGnssConfiguration_V1_1 = android::hardware::gnss::V1_1::IGnssConfiguration;
 using IGnssMeasurement_V1_0 = android::hardware::gnss::V1_0::IGnssMeasurement;
 using IGnssMeasurement_V1_1 = android::hardware::gnss::V1_1::IGnssMeasurement;
+using IGnssMeasurement_V2_0 = android::hardware::gnss::V2_0::IGnssMeasurement;
 using IGnssMeasurementCallback_V1_0 = android::hardware::gnss::V1_0::IGnssMeasurementCallback;
 using IGnssMeasurementCallback_V1_1 = android::hardware::gnss::V1_1::IGnssMeasurementCallback;
-
+using IGnssMeasurementCallback_V2_0 = android::hardware::gnss::V2_0::IGnssMeasurementCallback;
 
 struct GnssDeathRecipient : virtual public hidl_death_recipient
 {
@@ -135,6 +139,7 @@ static const uint32_t ADR_STATE_HALF_CYCLE_REPORTED = (1<<4);
 sp<GnssDeathRecipient> gnssHalDeathRecipient = nullptr;
 sp<IGnss_V1_0> gnssHal = nullptr;
 sp<IGnss_V1_1> gnssHal_V1_1 = nullptr;
+sp<IGnss_V2_0> gnssHal_V2_0 = nullptr;
 sp<IGnssXtra> gnssXtraIface = nullptr;
 sp<IAGnssRil> agnssRilIface = nullptr;
 sp<IGnssGeofencing> gnssGeofencingIface = nullptr;
@@ -146,6 +151,7 @@ sp<IGnssConfiguration_V1_1> gnssConfigurationIface_V1_1 = nullptr;
 sp<IGnssNi> gnssNiIface = nullptr;
 sp<IGnssMeasurement_V1_0> gnssMeasurementIface = nullptr;
 sp<IGnssMeasurement_V1_1> gnssMeasurementIface_V1_1 = nullptr;
+sp<IGnssMeasurement_V2_0> gnssMeasurementIface_V2_0 = nullptr;
 sp<IGnssNavigationMessage> gnssNavigationMessageIface = nullptr;
 
 #define WAKE_LOCK_NAME  "GPS"
@@ -744,7 +750,9 @@ Return<void> GnssNavigationMessageCallback::gnssNavigationMessageCb(
  * GnssMeasurementCallback implements the callback methods required for the
  * GnssMeasurement interface.
  */
-struct GnssMeasurementCallback : public IGnssMeasurementCallback_V1_1 {
+struct GnssMeasurementCallback : public IGnssMeasurementCallback_V2_0 {
+    Return<void> gnssMeasurementCb_2_0(const IGnssMeasurementCallback_V2_0::GnssData& data)
+            override;
     Return<void> gnssMeasurementCb(const IGnssMeasurementCallback_V1_1::GnssData& data) override;
     Return<void> GnssMeasurementCb(const IGnssMeasurementCallback_V1_0::GnssData& data) override;
  private:
@@ -761,6 +769,11 @@ struct GnssMeasurementCallback : public IGnssMeasurementCallback_V1_1 {
     void setMeasurementData(JNIEnv* env, jobject clock, jobjectArray measurementArray);
 };
 
+Return<void> GnssMeasurementCallback::gnssMeasurementCb_2_0(
+        const IGnssMeasurementCallback_V2_0::GnssData& data) {
+    // TODO(b/119571122): implement gnssMeasurementCb_2_0
+    return Void();
+}
 
 Return<void> GnssMeasurementCallback::gnssMeasurementCb(
         const IGnssMeasurementCallback_V1_1::GnssData& data) {
@@ -1126,13 +1139,22 @@ Return<void> GnssBatchingCallback::gnssLocationBatchCb(const hidl_vec<GnssLocati
 }
 
 static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env, jclass clazz) {
-    gnssHal_V1_1 = IGnss_V1_1::getService();
-    if (gnssHal_V1_1 == nullptr) {
-        ALOGD("gnssHal 1.1 was null, trying 1.0");
-        gnssHal = IGnss_V1_0::getService();
-    } else {
-        gnssHal = gnssHal_V1_1;
+    gnssHal_V2_0 = IGnss_V2_0::getService();
+    if (gnssHal_V2_0 != nullptr) {
+        gnssHal = gnssHal_V2_0;
+        gnssHal_V1_1 = gnssHal_V2_0;
+        return;
     }
+
+    ALOGD("gnssHal 2.0 was null, trying 1.1");
+    gnssHal_V1_1 = IGnss_V1_1::getService();
+    if (gnssHal_V1_1 != nullptr) {
+        gnssHal = gnssHal_V1_1;
+        return;
+    }
+
+    ALOGD("gnssHal 1.1 was null, trying 1.0");
+    gnssHal = IGnss_V1_0::getService();
 }
 
 static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass clazz) {
@@ -1187,110 +1209,120 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
         LOG_ALWAYS_FATAL("Unable to get Java VM. Error: %d", jvmStatus);
     }
 
-    if (gnssHal != nullptr) {
-      gnssHalDeathRecipient = new GnssDeathRecipient();
-      hardware::Return<bool> linked = gnssHal->linkToDeath(
-          gnssHalDeathRecipient, /*cookie*/ 0);
-        if (!linked.isOk()) {
-            ALOGE("Transaction error in linking to GnssHAL death: %s",
-                    linked.description().c_str());
-        } else if (!linked) {
-            ALOGW("Unable to link to GnssHal death notifications");
-        } else {
-            ALOGD("Link to death notification successful");
-        }
+    if (gnssHal == nullptr) {
+        ALOGE("Unable to get GPS service\n");
+        return;
+    }
 
-        auto gnssXtra = gnssHal->getExtensionXtra();
-        if (!gnssXtra.isOk()) {
-            ALOGD("Unable to get a handle to Xtra");
-        } else {
-            gnssXtraIface = gnssXtra;
-        }
+    gnssHalDeathRecipient = new GnssDeathRecipient();
+    hardware::Return<bool> linked = gnssHal->linkToDeath(gnssHalDeathRecipient, /*cookie*/ 0);
+    if (!linked.isOk()) {
+        ALOGE("Transaction error in linking to GnssHAL death: %s",
+                linked.description().c_str());
+    } else if (!linked) {
+        ALOGW("Unable to link to GnssHal death notifications");
+    } else {
+        ALOGD("Link to death notification successful");
+    }
 
-        auto gnssRil = gnssHal->getExtensionAGnssRil();
-        if (!gnssRil.isOk()) {
-            ALOGD("Unable to get a handle to AGnssRil");
-        } else {
-            agnssRilIface = gnssRil;
-        }
+    auto gnssXtra = gnssHal->getExtensionXtra();
+    if (!gnssXtra.isOk()) {
+        ALOGD("Unable to get a handle to Xtra");
+    } else {
+        gnssXtraIface = gnssXtra;
+    }
 
-        auto gnssAgnss = gnssHal->getExtensionAGnss();
-        if (!gnssAgnss.isOk()) {
-            ALOGD("Unable to get a handle to AGnss");
-        } else {
-            agnssIface = gnssAgnss;
-        }
+    auto gnssRil = gnssHal->getExtensionAGnssRil();
+    if (!gnssRil.isOk()) {
+        ALOGD("Unable to get a handle to AGnssRil");
+    } else {
+        agnssRilIface = gnssRil;
+    }
 
-        auto gnssNavigationMessage = gnssHal->getExtensionGnssNavigationMessage();
-        if (!gnssNavigationMessage.isOk()) {
-            ALOGD("Unable to get a handle to GnssNavigationMessage");
-        } else {
-            gnssNavigationMessageIface = gnssNavigationMessage;
-        }
+    auto gnssAgnss = gnssHal->getExtensionAGnss();
+    if (!gnssAgnss.isOk()) {
+        ALOGD("Unable to get a handle to AGnss");
+    } else {
+        agnssIface = gnssAgnss;
+    }
 
-        if (gnssHal_V1_1 != nullptr) {
-             auto gnssMeasurement = gnssHal_V1_1->getExtensionGnssMeasurement_1_1();
-             if (!gnssMeasurement.isOk()) {
-                 ALOGD("Unable to get a handle to GnssMeasurement");
-             } else {
-                 gnssMeasurementIface_V1_1 = gnssMeasurement;
-                 gnssMeasurementIface = gnssMeasurementIface_V1_1;
-             }
-        } else {
-             auto gnssMeasurement_V1_0 = gnssHal->getExtensionGnssMeasurement();
-             if (!gnssMeasurement_V1_0.isOk()) {
-                 ALOGD("Unable to get a handle to GnssMeasurement");
-             } else {
-                 gnssMeasurementIface = gnssMeasurement_V1_0;
-             }
-        }
+    auto gnssNavigationMessage = gnssHal->getExtensionGnssNavigationMessage();
+    if (!gnssNavigationMessage.isOk()) {
+        ALOGD("Unable to get a handle to GnssNavigationMessage");
+    } else {
+        gnssNavigationMessageIface = gnssNavigationMessage;
+    }
 
-        auto gnssDebug = gnssHal->getExtensionGnssDebug();
-        if (!gnssDebug.isOk()) {
-            ALOGD("Unable to get a handle to GnssDebug");
+    if (gnssHal_V2_0 != nullptr) {
+        // TODO(b/119638366): getExtensionGnssMeasurement_1_1 from gnssHal_V2_0
+        auto gnssMeasurement = gnssHal_V2_0->getExtensionGnssMeasurement_2_0();
+        if (!gnssMeasurement.isOk()) {
+            ALOGD("Unable to get a handle to GnssMeasurement_V2_0");
         } else {
-            gnssDebugIface = gnssDebug;
+            gnssMeasurementIface_V2_0 = gnssMeasurement;
+            gnssMeasurementIface_V1_1 = gnssMeasurementIface_V2_0;
+            gnssMeasurementIface = gnssMeasurementIface_V2_0;
         }
+    } else if (gnssHal_V1_1 != nullptr) {
+         auto gnssMeasurement = gnssHal_V1_1->getExtensionGnssMeasurement_1_1();
+         if (!gnssMeasurement.isOk()) {
+             ALOGD("Unable to get a handle to GnssMeasurement_V1_1");
+         } else {
+             gnssMeasurementIface_V1_1 = gnssMeasurement;
+             gnssMeasurementIface = gnssMeasurementIface_V1_1;
+         }
+    } else {
+         auto gnssMeasurement_V1_0 = gnssHal->getExtensionGnssMeasurement();
+         if (!gnssMeasurement_V1_0.isOk()) {
+             ALOGD("Unable to get a handle to GnssMeasurement");
+         } else {
+             gnssMeasurementIface = gnssMeasurement_V1_0;
+         }
+    }
 
-        auto gnssNi = gnssHal->getExtensionGnssNi();
-        if (!gnssNi.isOk()) {
-            ALOGD("Unable to get a handle to GnssNi");
-        } else {
-            gnssNiIface = gnssNi;
-        }
+    auto gnssDebug = gnssHal->getExtensionGnssDebug();
+    if (!gnssDebug.isOk()) {
+        ALOGD("Unable to get a handle to GnssDebug");
+    } else {
+        gnssDebugIface = gnssDebug;
+    }
 
-        if (gnssHal_V1_1 != nullptr) {
-            auto gnssConfiguration = gnssHal_V1_1->getExtensionGnssConfiguration_1_1();
-            if (!gnssConfiguration.isOk()) {
-                ALOGD("Unable to get a handle to GnssConfiguration");
-            } else {
-                gnssConfigurationIface_V1_1 = gnssConfiguration;
-                gnssConfigurationIface = gnssConfigurationIface_V1_1;
-            }
-        } else {
-            auto gnssConfiguration_V1_0 = gnssHal->getExtensionGnssConfiguration();
-            if (!gnssConfiguration_V1_0.isOk()) {
-                ALOGD("Unable to get a handle to GnssConfiguration");
-            } else {
-                gnssConfigurationIface = gnssConfiguration_V1_0;
-            }
-        }
+    auto gnssNi = gnssHal->getExtensionGnssNi();
+    if (!gnssNi.isOk()) {
+        ALOGD("Unable to get a handle to GnssNi");
+    } else {
+        gnssNiIface = gnssNi;
+    }
 
-        auto gnssGeofencing = gnssHal->getExtensionGnssGeofencing();
-        if (!gnssGeofencing.isOk()) {
-            ALOGD("Unable to get a handle to GnssGeofencing");
+    if (gnssHal_V1_1 != nullptr) {
+        auto gnssConfiguration = gnssHal_V1_1->getExtensionGnssConfiguration_1_1();
+        if (!gnssConfiguration.isOk()) {
+            ALOGD("Unable to get a handle to GnssConfiguration");
         } else {
-            gnssGeofencingIface = gnssGeofencing;
-        }
-
-        auto gnssBatching = gnssHal->getExtensionGnssBatching();
-        if (!gnssBatching.isOk()) {
-            ALOGD("Unable to get a handle to gnssBatching");
-        } else {
-            gnssBatchingIface = gnssBatching;
+            gnssConfigurationIface_V1_1 = gnssConfiguration;
+            gnssConfigurationIface = gnssConfigurationIface_V1_1;
         }
     } else {
-      ALOGE("Unable to get GPS service\n");
+        auto gnssConfiguration_V1_0 = gnssHal->getExtensionGnssConfiguration();
+        if (!gnssConfiguration_V1_0.isOk()) {
+            ALOGD("Unable to get a handle to GnssConfiguration");
+        } else {
+            gnssConfigurationIface = gnssConfiguration_V1_0;
+        }
+    }
+
+    auto gnssGeofencing = gnssHal->getExtensionGnssGeofencing();
+    if (!gnssGeofencing.isOk()) {
+        ALOGD("Unable to get a handle to GnssGeofencing");
+    } else {
+        gnssGeofencingIface = gnssGeofencing;
+    }
+
+    auto gnssBatching = gnssHal->getExtensionGnssBatching();
+    if (!gnssBatching.isOk()) {
+        ALOGD("Unable to get a handle to gnssBatching");
+    } else {
+        gnssBatchingIface = gnssBatching;
     }
 }
 
@@ -1820,10 +1852,11 @@ static jboolean android_location_GnssMeasurementsProvider_start_measurement_coll
 
     sp<GnssMeasurementCallback> cbIface = new GnssMeasurementCallback();
     IGnssMeasurement_V1_0::GnssMeasurementStatus result =
-                    IGnssMeasurement_V1_0::GnssMeasurementStatus::ERROR_GENERIC;;
-    if (gnssMeasurementIface_V1_1 != nullptr) {
-         result = gnssMeasurementIface_V1_1->setCallback_1_1(cbIface,
-                        enableFullTracking);
+            IGnssMeasurement_V1_0::GnssMeasurementStatus::ERROR_GENERIC;
+    if (gnssMeasurementIface_V2_0 != nullptr) {
+        result = gnssMeasurementIface_V2_0->setCallback_2_0(cbIface, enableFullTracking);
+    } else if (gnssMeasurementIface_V1_1 != nullptr) {
+        result = gnssMeasurementIface_V1_1->setCallback_1_1(cbIface, enableFullTracking);
     } else {
         if (enableFullTracking == JNI_TRUE) {
             // full tracking mode not supported in 1.0 HAL
@@ -1837,7 +1870,7 @@ static jboolean android_location_GnssMeasurementsProvider_start_measurement_coll
               static_cast<int32_t>(result));
         return JNI_FALSE;
     } else {
-      ALOGD("gnss measurement infc has been enabled");
+        ALOGD("gnss measurement infc has been enabled");
     }
 
     return JNI_TRUE;
