@@ -3043,7 +3043,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     if (!startIt) {
                         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Adding activity " + r + " to task "
                                 + task, new RuntimeException("here").fillInStackTrace());
-                        r.createWindowContainer();
+                        r.createAppWindowToken();
                         ActivityOptions.abort(options);
                         return;
                     }
@@ -3073,9 +3073,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // TODO: Need to investigate if it is okay for the controller to already be created by the
         // time we get to this point. I think it is, but need to double check.
         // Use test in b/34179495 to trace the call path.
-        if (r.getWindowContainerController() == null) {
-            r.createWindowContainer();
+        if (r.mAppWindowToken == null) {
+            r.createAppWindowToken();
         }
+
         task.setFrontOfTask();
 
         if (!isHomeOrRecentsStack() || numActivities() > 0) {

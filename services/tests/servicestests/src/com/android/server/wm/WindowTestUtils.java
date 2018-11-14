@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -116,12 +115,11 @@ public class WindowTestUtils {
                 ComponentName activityComponent, boolean voiceInteraction, DisplayContent dc,
                 long inputDispatchingTimeoutNanos, boolean fullscreen, boolean showForAllUsers,
                 int targetSdk, int orientation, int rotationAnimationHint, int configChanges,
-                boolean launchTaskBehind, boolean alwaysFocusable,
-                AppWindowContainerController controller) {
+                boolean launchTaskBehind, boolean alwaysFocusable, ActivityRecord activityRecord) {
             super(service, token, activityComponent, voiceInteraction, dc,
                     inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk,
                     orientation, rotationAnimationHint, configChanges, launchTaskBehind,
-                    alwaysFocusable, controller);
+                    alwaysFocusable, activityRecord);
         }
 
         int getWindowsCount() {
@@ -272,45 +270,6 @@ public class WindowTestUtils {
                 boolean supportsPictureInPicture, ActivityManager.TaskDescription taskDescription) {
             return new TestTask(taskId, stack, userId, mService, resizeMode,
                     supportsPictureInPicture, this);
-        }
-    }
-
-    public static class TestAppWindowContainerController extends AppWindowContainerController {
-
-        final IApplicationToken mToken;
-
-        TestAppWindowContainerController(TestTaskWindowContainerController taskController) {
-            this(taskController, new TestIApplicationToken());
-        }
-
-        TestAppWindowContainerController(TestTaskWindowContainerController taskController,
-                IApplicationToken token) {
-            super(taskController, token, new ComponentName("", "") /* activityComponent */,
-                    null /* listener */, 0 /* index */, SCREEN_ORIENTATION_UNSPECIFIED,
-                    true /* fullscreen */, true /* showForAllUsers */, 0 /* configChanges */,
-                    false /* voiceInteraction */, false /* launchTaskBehind */,
-                    false /* alwaysFocusable */, 0 /* targetSdkVersion */,
-                    0 /* rotationAnimationHint */, 0 /* inputDispatchingTimeoutNanos */,
-                    taskController.mService);
-            mToken = token;
-        }
-
-        @Override
-        AppWindowToken createAppWindow(WindowManagerService service, IApplicationToken token,
-                ComponentName activityComponent, boolean voiceInteraction, DisplayContent dc,
-                long inputDispatchingTimeoutNanos,
-                boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
-                int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
-                boolean alwaysFocusable, AppWindowContainerController controller) {
-            return new TestAppWindowToken(service, token, activityComponent, voiceInteraction, dc,
-                    inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk,
-                    orientation,
-                    rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
-                    controller);
-        }
-
-        AppWindowToken getAppWindowToken(DisplayContent dc) {
-            return (AppWindowToken) dc.getWindowToken(mToken.asBinder());
         }
     }
 

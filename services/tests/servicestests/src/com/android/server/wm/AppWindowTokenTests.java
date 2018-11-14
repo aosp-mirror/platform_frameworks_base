@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.content.ActivityInfoProto.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
@@ -31,8 +32,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_UNSET;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -65,6 +69,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
     TaskStack mStack;
     Task mTask;
     WindowTestUtils.TestAppWindowToken mToken;
+
+    private final String mPackageName = getInstrumentation().getTargetContext().getPackageName();
 
     @Before
     public void setUp() throws Exception {
@@ -251,13 +257,131 @@ public class AppWindowTokenTests extends WindowTestsBase {
                 "closingWindow");
         closingWindow.mAnimatingExit = true;
         closingWindow.mRemoveOnExit = true;
-        closingWindow.mAppToken.setVisibility(null, false /* visible */, TRANSIT_UNSET,
+        closingWindow.mAppToken.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
                 true /* performLayout */, false /* isVoiceInteraction */);
 
         // We pretended that we were running an exit animation, but that should have been cleared up
         // by changing visibility of AppWindowToken
         closingWindow.removeIfPossible();
         assertTrue(closingWindow.mRemoved);
+    }
+
+    @Test
+    public void testSetOrientation() {
+        // Assert orientation is unspecified to start.
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, mToken.getOrientation());
+
+        mToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, mToken.getOrientation());
+
+        mDisplayContent.removeAppToken(mToken.token);
+        // Assert orientation is unset to after container is removed.
+        assertEquals(SCREEN_ORIENTATION_UNSET, mToken.getOrientation());
+
+        // Reset display frozen state
+        mWm.mDisplayFrozen = false;
+    }
+
+    @Test
+    public void testCreateRemoveStartingWindow() {
+        mToken.addStartingWindow(mPackageName,
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
+                false, false);
+        waitUntilHandlersIdle();
+        assertHasStartingWindow(mToken);
+        mToken.removeStartingWindow();
+        waitUntilHandlersIdle();
+        assertNoStartingWindow(mToken);
+    }
+
+    @Test
+    public void testAddRemoveRace() {
+        // There was once a race condition between adding and removing starting windows
+        for (int i = 0; i < 1000; i++) {
+            final WindowTestUtils.TestAppWindowToken appToken = createIsolatedTestAppWindowToken();
+
+            appToken.addStartingWindow(mPackageName,
+                    android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
+                    false, false);
+            appToken.removeStartingWindow();
+            waitUntilHandlersIdle();
+            assertNoStartingWindow(appToken);
+
+            appToken.getParent().getParent().removeImmediately();
+        }
+    }
+
+    @Test
+    public void testTransferStartingWindow() {
+        final WindowTestUtils.TestAppWindowToken token1 = createIsolatedTestAppWindowToken();
+        final WindowTestUtils.TestAppWindowToken token2 = createIsolatedTestAppWindowToken();
+        token1.addStartingWindow(mPackageName,
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
+                false, false);
+        waitUntilHandlersIdle();
+        token2.addStartingWindow(mPackageName,
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, token1.appToken.asBinder(),
+                true, true, false, true, false, false);
+        waitUntilHandlersIdle();
+        assertNoStartingWindow(token1);
+        assertHasStartingWindow(token2);
+    }
+
+    @Test
+    public void testTransferStartingWindowWhileCreating() {
+        final WindowTestUtils.TestAppWindowToken token1 = createIsolatedTestAppWindowToken();
+        final WindowTestUtils.TestAppWindowToken token2 = createIsolatedTestAppWindowToken();
+        ((TestWindowManagerPolicy) token1.mService.mPolicy).setRunnableWhenAddingSplashScreen(
+                () -> {
+                    // Surprise, ...! Transfer window in the middle of the creation flow.
+                    token2.addStartingWindow(mPackageName,
+                            android.R.style.Theme, null, "Test", 0, 0, 0, 0,
+                            token1.appToken.asBinder(), true, true, false,
+                            true, false, false);
+                });
+        token1.addStartingWindow(mPackageName,
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
+                false, false);
+        waitUntilHandlersIdle();
+        assertNoStartingWindow(token1);
+        assertHasStartingWindow(token2);
+    }
+
+    private WindowTestUtils.TestAppWindowToken createIsolatedTestAppWindowToken() {
+        final TaskStack taskStack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(taskStack, 0 /* userId */);
+        return createTestAppWindowTokenForGivenTask(task);
+    }
+
+    private WindowTestUtils.TestAppWindowToken createTestAppWindowTokenForGivenTask(Task task) {
+        final WindowTestUtils.TestAppWindowToken appToken =
+                WindowTestUtils.createTestAppWindowToken(mDisplayContent);
+        task.addChild(appToken, 0);
+        waitUntilHandlersIdle();
+        return appToken;
+    }
+
+    @Test
+    public void testTryTransferStartingWindowFromHiddenAboveToken() {
+        // Add two tasks on top of each other.
+        final WindowTestUtils.TestAppWindowToken tokenTop = createIsolatedTestAppWindowToken();
+        final WindowTestUtils.TestAppWindowToken tokenBottom =
+                createTestAppWindowTokenForGivenTask(tokenTop.getTask());
+
+        // Add a starting window.
+        tokenTop.addStartingWindow(mPackageName,
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
+                false, false);
+        waitUntilHandlersIdle();
+
+        // Make the top one invisible, and try transferring the starting window from the top to the
+        // bottom one.
+        tokenTop.setVisibility(false, false);
+        tokenBottom.transferStartingWindowFromHiddenAboveTokenIfNeeded();
+
+        // Assert that the bottom window now has the starting window.
+        assertNoStartingWindow(tokenTop);
+        assertHasStartingWindow(tokenBottom);
     }
 
     @Test
@@ -284,5 +408,20 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertEquals(expectedX, outPosition.x);
         assertEquals(expectedY, outPosition.y);
         assertEquals(expectedBounds, outBounds);
+    }
+
+    private void assertHasStartingWindow(AppWindowToken atoken) {
+        assertNotNull(atoken.startingSurface);
+        assertNotNull(atoken.startingData);
+        assertNotNull(atoken.startingWindow);
+    }
+
+    private void assertNoStartingWindow(AppWindowToken atoken) {
+        assertNull(atoken.startingSurface);
+        assertNull(atoken.startingWindow);
+        assertNull(atoken.startingData);
+        atoken.forAllWindows(windowState -> {
+            assertFalse(windowState.getBaseType() == TYPE_APPLICATION_STARTING);
+        }, true);
     }
 }

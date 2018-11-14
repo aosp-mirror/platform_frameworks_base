@@ -18,7 +18,17 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.TaskDescription.ATTR_TASKDESCRIPTION_PREFIX;
+import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
+import static android.app.ActivityOptions.ANIM_CUSTOM;
+import static android.app.ActivityOptions.ANIM_NONE;
+import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
+import static android.app.ActivityOptions.ANIM_REMOTE_ANIMATION;
+import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_DOWN;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_UP;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
@@ -63,6 +73,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
 import static android.content.pm.ActivityInfo.isFixedOrientationPortrait;
 import static android.content.res.Configuration.EMPTY;
@@ -111,12 +122,18 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
-import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+import static com.android.server.wm.ActivityTaskManagerService
+        .RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.TaskPersister.DEBUG;
 import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMENT;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -147,6 +164,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Build;
@@ -167,11 +185,14 @@ import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+import android.view.AppTransitionAnimationSpec;
+import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.util.XmlUtils;
@@ -200,7 +221,7 @@ import java.util.Objects;
 /**
  * An entry in the history stack, representing an activity.
  */
-final class ActivityRecord extends ConfigurationContainer implements AppWindowContainerListener {
+final class ActivityRecord extends ConfigurationContainer {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityRecord" : TAG_ATM;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_SAVED_STATE = TAG + POSTFIX_SAVED_STATE;
@@ -225,7 +246,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     final ActivityTaskManagerService service; // owner
     final IApplicationToken.Stub appToken; // window manager token
-    AppWindowContainerController mWindowContainerController;
+    // TODO: Remove after unification
+    AppWindowToken mAppWindowToken;
+
     final ActivityInfo info; // all about me
     // TODO: This is duplicated state already contained in info.applicationInfo - remove
     ApplicationInfo appInfo; // information about activity's app
@@ -769,10 +792,16 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     /**
-     * See {@link AppWindowContainerController#setWillCloseOrEnterPip(boolean)}
+     * Notifies AWT that this app is waiting to pause in order to determine if it will enter PIP.
+     * This information helps AWT know that the app is in the process of pausing before it gets the
+     * signal on the WM side.
      */
     void setWillCloseOrEnterPip(boolean willCloseOrEnterPip) {
-        getWindowContainerController().setWillCloseOrEnterPip(willCloseOrEnterPip);
+        if (mAppWindowToken == null) {
+            return;
+        }
+
+        mAppWindowToken.setWillCloseOrEnterPip(willCloseOrEnterPip);
     }
 
     static class Token extends IApplicationToken.Stub {
@@ -991,13 +1020,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return hasProcess() && app.hasThread();
     }
 
-    AppWindowContainerController getWindowContainerController() {
-        return mWindowContainerController;
-    }
-
-    void createWindowContainer() {
-        if (mWindowContainerController != null) {
-            throw new IllegalArgumentException("Window container=" + mWindowContainerController
+    void createAppWindowToken() {
+        if (mAppWindowToken != null) {
+            throw new IllegalArgumentException("App Window Token=" + mAppWindowToken
                     + " already created for r=" + this);
         }
 
@@ -1010,12 +1035,31 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // Make sure override configuration is up-to-date before using to create window controller.
         updateOverrideConfiguration();
 
-        mWindowContainerController = new AppWindowContainerController(taskController, appToken,
-                realActivity, this, Integer.MAX_VALUE /* add on top */, info.screenOrientation,
-                fullscreen, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, info.configChanges,
-                task.voiceSession != null, mLaunchTaskBehind, isAlwaysFocusable(),
-                appInfo.targetSdkVersion, mRotationAnimationHint,
-                ActivityTaskManagerService.getInputDispatchingTimeoutLocked(this) * 1000000L);
+        // TODO: remove after unification
+        mAppWindowToken = service.mWindowManager.mRoot.getAppWindowToken(appToken.asBinder());
+        if (mAppWindowToken != null) {
+            // TODO: Should this throw an exception instead?
+            Slog.w(TAG, "Attempted to add existing app token: " + appToken);
+        } else {
+            final Task container = taskController.mContainer;
+            if (container == null) {
+                throw new IllegalArgumentException("AppWindowContainerController: invalid "
+                        + " controller=" + taskController);
+            }
+            mAppWindowToken = createAppWindow(service.mWindowManager, appToken,
+                    task.voiceSession != null, container.getDisplayContent(),
+                    ActivityTaskManagerService.getInputDispatchingTimeoutLocked(this)
+                            * 1000000L, fullscreen,
+                    (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, appInfo.targetSdkVersion,
+                    info.screenOrientation, mRotationAnimationHint, info.configChanges,
+                    mLaunchTaskBehind, isAlwaysFocusable());
+            if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) {
+                Slog.v(TAG, "addAppToken: "
+                        + mAppWindowToken + " controller=" + taskController + " at "
+                        + Integer.MAX_VALUE);
+            }
+            container.addChild(mAppWindowToken, Integer.MAX_VALUE /* add on top */);
+        }
 
         task.addActivityToTop(this);
 
@@ -1026,17 +1070,49 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         mLastReportedPictureInPictureMode = inPinnedWindowingMode();
     }
 
+    boolean addStartingWindow(String pkg, int theme, CompatibilityInfo compatInfo,
+            CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
+            IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
+            boolean allowTaskSnapshot, boolean activityCreated, boolean fromRecents) {
+        if (DEBUG_STARTING_WINDOW) {
+            Slog.v(TAG, "setAppStartingWindow: token=" + appToken
+                    + " pkg=" + pkg + " transferFrom=" + transferFrom + " newTask=" + newTask
+                    + " taskSwitch=" + taskSwitch + " processRunning=" + processRunning
+                    + " allowTaskSnapshot=" + allowTaskSnapshot);
+        }
+        if (mAppWindowToken == null) {
+            Slog.w(TAG_WM, "Attempted to set icon of non-existing app token: " + appToken);
+            return false;
+        }
+        return mAppWindowToken.addStartingWindow(pkg, theme, compatInfo, nonLocalizedLabel,
+                labelRes, icon, logo, windowFlags, transferFrom, newTask, taskSwitch,
+                processRunning, allowTaskSnapshot, activityCreated, fromRecents);
+    }
+
+    // TODO: Remove after unification
+    @VisibleForTesting
+    AppWindowToken createAppWindow(WindowManagerService service, IApplicationToken token,
+            boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
+            boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
+            int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
+            boolean alwaysFocusable) {
+        return new AppWindowToken(service, token, realActivity, voiceInteraction, dc,
+                inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk, orientation,
+                rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
+                this);
+    }
+
     void removeWindowContainer() {
-        // Do not try to remove a window container if we have already removed it.
-        if (mWindowContainerController == null) {
+        final DisplayContent dc = service.mWindowManager.mRoot.getDisplayContent(
+                getDisplayId());
+        if (dc == null) {
+            Slog.w(TAG, "removeWindowContainer: Attempted to remove token: "
+                    + appToken + " from non-existing displayId=" + getDisplayId());
             return;
         }
-
         // Resume key dispatching if it is currently paused before we remove the container.
         resumeKeyDispatchingLocked();
-
-        mWindowContainerController.removeContainer(getDisplayId());
-        mWindowContainerController = null;
+        dc.removeAppToken(appToken.asBinder());
     }
 
     /**
@@ -1044,6 +1120,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      * should ensure that the {@param newTask} is not already the parent of this activity.
      */
     void reparent(TaskRecord newTask, int position, String reason) {
+        if (mAppWindowToken == null) {
+            Slog.w(TAG, "reparent: Attempted to reparent non-existing app token: " + appToken);
+            return;
+        }
         final TaskRecord prevTask = task;
         if (prevTask == newTask) {
             throw new IllegalArgumentException(reason + ": task=" + newTask
@@ -1059,8 +1139,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     + " r=" + this + " (" + prevTask.getStackId() + ")");
         }
 
-        // Must reparent first in window manager
-        mWindowContainerController.reparent(newTask.getWindowContainerController(), position);
+        mAppWindowToken.reparent(newTask.getWindowContainerController(), position);
 
         // Reparenting prevents informing the parent stack of activity removal in the case that
         // the new stack has the same parent. we must manually signal here if this is not the case.
@@ -1490,13 +1569,111 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     void applyOptionsLocked() {
         if (pendingOptions != null
                 && pendingOptions.getAnimationType() != ANIM_SCENE_TRANSITION) {
-            mWindowContainerController.applyOptionsLocked(pendingOptions, intent);
+            applyOptionsLocked(pendingOptions, intent);
             if (task == null) {
                 clearOptionsLocked(false /* withAbort */);
             } else {
                 // This will clear the options for all the ActivityRecords for this Task.
                 task.clearAllPendingOptions();
             }
+        }
+    }
+
+    /**
+     * Apply override app transition base on options & animation type.
+     */
+    void applyOptionsLocked(ActivityOptions pendingOptions, Intent intent) {
+        final int animationType = pendingOptions.getAnimationType();
+        final DisplayContent displayContent = mAppWindowToken.getDisplayContent();
+        switch (animationType) {
+            case ANIM_CUSTOM:
+                displayContent.mAppTransition.overridePendingAppTransition(
+                        pendingOptions.getPackageName(),
+                        pendingOptions.getCustomEnterResId(),
+                        pendingOptions.getCustomExitResId(),
+                        pendingOptions.getOnAnimationStartListener());
+                break;
+            case ANIM_CLIP_REVEAL:
+                displayContent.mAppTransition.overridePendingAppTransitionClipReveal(
+                        pendingOptions.getStartX(), pendingOptions.getStartY(),
+                        pendingOptions.getWidth(), pendingOptions.getHeight());
+                if (intent.getSourceBounds() == null) {
+                    intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
+                            pendingOptions.getStartY(),
+                            pendingOptions.getStartX() + pendingOptions.getWidth(),
+                            pendingOptions.getStartY() + pendingOptions.getHeight()));
+                }
+                break;
+            case ANIM_SCALE_UP:
+                displayContent.mAppTransition.overridePendingAppTransitionScaleUp(
+                        pendingOptions.getStartX(), pendingOptions.getStartY(),
+                        pendingOptions.getWidth(), pendingOptions.getHeight());
+                if (intent.getSourceBounds() == null) {
+                    intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
+                            pendingOptions.getStartY(),
+                            pendingOptions.getStartX() + pendingOptions.getWidth(),
+                            pendingOptions.getStartY() + pendingOptions.getHeight()));
+                }
+                break;
+            case ANIM_THUMBNAIL_SCALE_UP:
+            case ANIM_THUMBNAIL_SCALE_DOWN:
+                final boolean scaleUp = (animationType == ANIM_THUMBNAIL_SCALE_UP);
+                final GraphicBuffer buffer = pendingOptions.getThumbnail();
+                displayContent.mAppTransition.overridePendingAppTransitionThumb(buffer,
+                        pendingOptions.getStartX(), pendingOptions.getStartY(),
+                        pendingOptions.getOnAnimationStartListener(),
+                        scaleUp);
+                if (intent.getSourceBounds() == null && buffer != null) {
+                    intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
+                            pendingOptions.getStartY(),
+                            pendingOptions.getStartX() + buffer.getWidth(),
+                            pendingOptions.getStartY() + buffer.getHeight()));
+                }
+                break;
+            case ANIM_THUMBNAIL_ASPECT_SCALE_UP:
+            case ANIM_THUMBNAIL_ASPECT_SCALE_DOWN:
+                final AppTransitionAnimationSpec[] specs = pendingOptions.getAnimSpecs();
+                final IAppTransitionAnimationSpecsFuture specsFuture =
+                        pendingOptions.getSpecsFuture();
+                if (specsFuture != null) {
+                    // TODO(multidisplay): Shouldn't be really used anymore from next CL.
+                    displayContent.mAppTransition.overridePendingAppTransitionMultiThumbFuture(
+                            specsFuture, pendingOptions.getOnAnimationStartListener(),
+                            animationType == ANIM_THUMBNAIL_ASPECT_SCALE_UP);
+                } else if (animationType == ANIM_THUMBNAIL_ASPECT_SCALE_DOWN
+                        && specs != null) {
+                    displayContent.mAppTransition.overridePendingAppTransitionMultiThumb(
+                            specs, pendingOptions.getOnAnimationStartListener(),
+                            pendingOptions.getAnimationFinishedListener(), false);
+                } else {
+                    displayContent.mAppTransition.overridePendingAppTransitionAspectScaledThumb(
+                            pendingOptions.getThumbnail(),
+                            pendingOptions.getStartX(), pendingOptions.getStartY(),
+                            pendingOptions.getWidth(), pendingOptions.getHeight(),
+                            pendingOptions.getOnAnimationStartListener(),
+                            (animationType == ANIM_THUMBNAIL_ASPECT_SCALE_UP));
+                    if (intent.getSourceBounds() == null) {
+                        intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
+                                pendingOptions.getStartY(),
+                                pendingOptions.getStartX() + pendingOptions.getWidth(),
+                                pendingOptions.getStartY() + pendingOptions.getHeight()));
+                    }
+                }
+                break;
+            case ANIM_OPEN_CROSS_PROFILE_APPS:
+                displayContent.mAppTransition
+                        .overridePendingAppTransitionStartCrossProfileApps();
+                break;
+            case ANIM_REMOTE_ANIMATION:
+                // TODO(multidisplay): Will pass displayId and adjust dependencies from next CL.
+                displayContent.mAppTransition.overridePendingAppTransitionRemote(
+                        pendingOptions.getRemoteAnimationAdapter());
+                break;
+            case ANIM_NONE:
+                break;
+            default:
+                Slog.e(TAG_WM, "applyOptionsLocked: Unknown animationType=" + animationType);
+                break;
         }
     }
 
@@ -1532,8 +1709,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         if (!keysPaused) {
             keysPaused = true;
 
-            if (mWindowContainerController != null) {
-                mWindowContainerController.pauseKeyDispatching();
+            // TODO: remove the check after unification with AppWindowToken. The DC check is not
+            // needed after no mock mAppWindowToken in tests.
+            if (mAppWindowToken != null && mAppWindowToken.getDisplayContent() != null) {
+                mAppWindowToken.getDisplayContent().getInputMonitor().pauseDispatchingLw(
+                        mAppWindowToken);
             }
         }
     }
@@ -1542,8 +1722,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         if (keysPaused) {
             keysPaused = false;
 
-            if (mWindowContainerController != null) {
-                mWindowContainerController.resumeKeyDispatching();
+            // TODO: remove the check after unification with AppWindowToken. The DC check is not
+            // needed after no mock mAppWindowToken in tests.
+            if (mAppWindowToken != null && mAppWindowToken.getDisplayContent() != null) {
+                mAppWindowToken.getDisplayContent().getInputMonitor().resumeDispatchingLw(
+                        mAppWindowToken);
             }
         }
     }
@@ -1565,11 +1748,16 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void setVisibility(boolean visible) {
-        mWindowContainerController.setVisibility(visible, mDeferHidingClient);
+        if (mAppWindowToken == null) {
+            Slog.w(TAG_WM, "Attempted to set visibility of non-existing app token: "
+                    + appToken);
+            return;
+        }
+        mAppWindowToken.setVisibility(visible, mDeferHidingClient);
         mStackSupervisor.getActivityMetricsLogger().notifyVisibilityChanged(this);
     }
 
-    // TODO: Look into merging with #setVisibility()
+    // TODO: Look into merging with #commitVisibility()
     void setVisible(boolean newVisible) {
         visible = newVisible;
         mDeferHidingClient = !visible && mDeferHidingClient;
@@ -1599,7 +1787,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // an indication that the Surface will eventually be destroyed.
         // This however isn't necessarily true if we are going to sleep.
         if (state == STOPPING && !isSleeping()) {
-            mWindowContainerController.notifyAppStopping();
+            if (mAppWindowToken == null) {
+                Slog.w(TAG_WM, "Attempted to notify stopping on non-existing app token: "
+                        + appToken);
+                return;
+            }
+            mAppWindowToken.detachChildren();
         }
     }
 
@@ -1637,7 +1830,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void notifyAppResumed(boolean wasStopped) {
-        mWindowContainerController.notifyAppResumed(wasStopped);
+        if (mAppWindowToken == null) {
+            Slog.w(TAG_WM, "Attempted to notify resumed of non-existing app token: "
+                    + appToken);
+            return;
+        }
+        mAppWindowToken.notifyAppResumed(wasStopped);
     }
 
     void notifyUnknownVisibilityLaunched() {
@@ -1645,7 +1843,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // No display activities never add a window, so there is no point in waiting them for
         // relayout.
         if (!noDisplay) {
-            mWindowContainerController.notifyUnknownVisibilityLaunched();
+            if (mAppWindowToken != null) {
+                mAppWindowToken.getDisplayContent().mUnknownAppVisibilityController
+                        .notifyLaunched(mAppWindowToken);
+            }
         }
     }
 
@@ -1857,7 +2058,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             stopped = true;
             setState(STOPPED, "activityStoppedLocked");
 
-            mWindowContainerController.notifyAppStopped();
+            if (mAppWindowToken != null) {
+                mAppWindowToken.notifyAppStopped();
+            }
 
             if (finishing) {
                 clearOptionsLocked();
@@ -1918,14 +2121,33 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     public void startFreezingScreenLocked(WindowProcessController app, int configChanges) {
         if (mayFreezeScreenLocked(app)) {
-            mWindowContainerController.startFreezingScreen(configChanges);
+            if (mAppWindowToken == null) {
+                Slog.w(TAG_WM,
+                        "Attempted to freeze screen with non-existing app token: " + appToken);
+                return;
+            }
+
+            if (configChanges == 0 && mAppWindowToken.okToDisplay()) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Skipping set freeze of " + appToken);
+                return;
+            }
+
+            mAppWindowToken.startFreezingScreen();
         }
     }
 
     public void stopFreezingScreenLocked(boolean force) {
         if (force || frozenBeforeDestroy) {
             frozenBeforeDestroy = false;
-            mWindowContainerController.stopFreezingScreen(force);
+            if (mAppWindowToken == null) {
+                return;
+            }
+            if (DEBUG_ORIENTATION) {
+                Slog.v(TAG_WM, "Clear freezing of " + appToken + ": hidden="
+                        + mAppWindowToken.isHidden() + " freezing="
+                        + mAppWindowToken.isFreezingScreen());
+            }
+            mAppWindowToken.stopFreezingScreen(true, force);
         }
     }
 
@@ -1937,7 +2159,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     info.windowsFullyDrawnDelayMs);
         }
     }
-    @Override
+
+    /**
+     * Called when the starting window for this container is drawn.
+     */
     public void onStartingWindowDrawn(long timestamp) {
         synchronized (service.mGlobalLock) {
             mStackSupervisor.getActivityMetricsLogger().notifyStartingWindowDrawn(
@@ -1945,7 +2170,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
-    @Override
+    /** Called when the windows associated app window container are drawn. */
     public void onWindowsDrawn(boolean drawn, long timestamp) {
         synchronized (service.mGlobalLock) {
             mDrawn = drawn;
@@ -1965,7 +2190,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
-    @Override
+    /** Called when the windows associated app window container are visible. */
     public void onWindowsVisible() {
         synchronized (service.mGlobalLock) {
             mStackSupervisor.reportActivityVisibleLocked(this);
@@ -1999,7 +2224,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
-    @Override
+    /** Called when the windows associated app window container are no longer visible. */
     public void onWindowsGone() {
         synchronized (service.mGlobalLock) {
             if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "windowsGone(): " + this);
@@ -2007,7 +2232,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
-    @Override
+    /**
+     * Called when the key dispatching to a window associated with the app window container
+     * timed-out.
+     *
+     * @param reason The reason for the key dispatching time out.
+     * @param windowPid The pid of the window key dispatching timed out on.
+     * @return True if input dispatching should be aborted.
+     */
     public boolean keyDispatchingTimedOut(String reason, int windowPid) {
         ActivityRecord anrActivity;
         WindowProcessController anrApp;
@@ -2183,7 +2415,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     void showStartingWindow(ActivityRecord prev, boolean newTask, boolean taskSwitch,
             boolean fromRecents) {
-        if (mWindowContainerController == null) {
+        if (mAppWindowToken == null) {
             return;
         }
         if (mTaskOverlay) {
@@ -2198,7 +2430,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         final CompatibilityInfo compatInfo =
                 service.compatibilityInfoForPackageLocked(info.applicationInfo);
-        final boolean shown = mWindowContainerController.addStartingWindow(packageName, theme,
+        final boolean shown = addStartingWindow(packageName, theme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
                 allowTaskSnapshot(),
@@ -2213,12 +2445,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         if (mStartingWindowState == STARTING_WINDOW_SHOWN && behindFullscreenActivity) {
             if (DEBUG_VISIBILITY) Slog.w(TAG_VISIBILITY, "Found orphaned starting window " + this);
             mStartingWindowState = STARTING_WINDOW_REMOVED;
-            mWindowContainerController.removeStartingWindow();
+            mAppWindowToken.removeStartingWindow();
         }
     }
 
     int getRequestedOrientation() {
-        return mWindowContainerController.getOrientation();
+        return getOrientation();
     }
 
     void setRequestedOrientation(int requestedOrientation) {
@@ -2226,7 +2458,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         final Configuration displayConfig =
                 mStackSupervisor.getDisplayOverrideConfiguration(displayId);
 
-        final Configuration config = mWindowContainerController.setOrientation(requestedOrientation,
+        final Configuration config = setOrientation(requestedOrientation,
                 displayId, displayConfig, mayFreezeScreenLocked(app));
         if (config != null) {
             frozenBeforeDestroy = true;
@@ -2239,8 +2471,36 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 task.taskId, requestedOrientation);
     }
 
+    Configuration setOrientation(int requestedOrientation, int displayId,
+            Configuration displayConfig, boolean freezeScreenIfNeeded) {
+        if (mAppWindowToken == null) {
+            Slog.w(TAG_WM,
+                    "Attempted to set orientation of non-existing app token: " + appToken);
+            return null;
+        }
+
+        mAppWindowToken.setOrientation(requestedOrientation);
+
+        final IBinder binder = freezeScreenIfNeeded ? appToken.asBinder() : null;
+        return service.mWindowManager.updateOrientationFromAppTokens(displayConfig, binder,
+                displayId);
+    }
+
+    int getOrientation() {
+        if (mAppWindowToken == null) {
+            return SCREEN_ORIENTATION_UNSPECIFIED;
+        }
+
+        return mAppWindowToken.getOrientationIgnoreVisibility();
+    }
+
     void setDisablePreviewScreenshots(boolean disable) {
-        mWindowContainerController.setDisablePreviewScreenshots(disable);
+        if (mAppWindowToken == null) {
+            Slog.w(TAG_WM, "Attempted to set disable screenshots of non-existing app"
+                    + " token: " + appToken);
+            return;
+        }
+        mAppWindowToken.setDisablePreviewScreenshots(disable);
     }
 
     /**
@@ -2288,8 +2548,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     /** Returns true if the configuration is compatible with this activity. */
     boolean isConfigurationCompatible(Configuration config) {
-        final int orientation = mWindowContainerController != null
-                ? mWindowContainerController.getOrientation() : info.screenOrientation;
+        final int orientation = mAppWindowToken != null
+                ? getOrientation() : info.screenOrientation;
         if (isFixedOrientationPortrait(orientation)
                 && config.orientation != ORIENTATION_PORTRAIT) {
             return false;
@@ -2918,7 +3178,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void registerRemoteAnimations(RemoteAnimationDefinition definition) {
-        mWindowContainerController.registerRemoteAnimations(definition);
+        if (mAppWindowToken == null) {
+            Slog.w(TAG_WM, "Attempted to register remote animations with non-existing app"
+                    + " token: " + appToken);
+            return;
+        }
+        mAppWindowToken.registerRemoteAnimations(definition);
     }
 
     @Override

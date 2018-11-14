@@ -3174,7 +3174,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 "Added restored task=" + task + " to stack=" + stack);
         final ArrayList<ActivityRecord> activities = task.mActivities;
         for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-            activities.get(activityNdx).createWindowContainer();
+            activities.get(activityNdx).createAppWindowToken();
         }
         return true;
     }

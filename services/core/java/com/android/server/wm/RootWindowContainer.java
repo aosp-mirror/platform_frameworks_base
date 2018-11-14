@@ -497,9 +497,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) logSurface(winAnimator.mWin,
                             "RECOVER DESTROY", false);
                     winAnimator.destroySurface();
-                    if (winAnimator.mWin.mAppToken != null
-                            && winAnimator.mWin.mAppToken.getController() != null) {
-                        winAnimator.mWin.mAppToken.getController().removeStartingWindow();
+                    if (winAnimator.mWin.mAppToken != null) {
+                        winAnimator.mWin.mAppToken.removeStartingWindow();
                     }
                 }
 
