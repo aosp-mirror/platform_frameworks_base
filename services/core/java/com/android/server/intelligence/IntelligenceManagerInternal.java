@@ -15,7 +15,10 @@
  */
 package com.android.server.intelligence;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.os.Bundle;
+import android.os.IBinder;
 
 /**
  * Intelligence Manager local system service interface.
@@ -30,4 +33,12 @@ public abstract class IntelligenceManagerInternal {
      * given {@code userId}.
      */
     public abstract boolean isIntelligenceServiceForUser(int uid, @UserIdInt int userId);
+
+    /**
+     * Notifies the intelligence service of new assist data for the given activity.
+     *
+     * @return {@code false} if there was no service set for the given user
+     */
+    public abstract boolean sendActivityAssistData(@UserIdInt int userId,
+            @NonNull IBinder activityToken, @NonNull Bundle data);
 }

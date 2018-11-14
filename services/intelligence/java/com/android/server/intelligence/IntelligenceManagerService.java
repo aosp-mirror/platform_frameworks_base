@@ -23,6 +23,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserManager;
 import android.service.intelligence.InteractionSessionId;
@@ -83,6 +84,20 @@ public final class IntelligenceManagerService
     protected void onServiceRemoved(@NonNull IntelligencePerUserService service,
             @UserIdInt int userId) {
         service.destroyLocked();
+    }
+
+    /**
+     * Notifies the intelligence service of new assist data for the given activity.
+     *
+     * @return {@code false} if there was no service set for the given user
+     */
+    private boolean sendActivityAssistDataLocked(@UserIdInt int userId,
+            @NonNull IBinder activityToken, @NonNull Bundle data) {
+        final IntelligencePerUserService service = peekServiceForUserLocked(userId);
+        if (service != null) {
+            return service.sendActivityAssistDataLocked(activityToken, data);
+        }
+        return false;
     }
 
     private ActivityManagerInternal getAmInternal() {
@@ -162,6 +177,14 @@ public final class IntelligenceManagerService
             }
 
             return false;
+        }
+
+        @Override
+        public boolean sendActivityAssistData(@UserIdInt int userId, @NonNull IBinder activityToken,
+                @NonNull Bundle data) {
+            synchronized (mLock) {
+                return sendActivityAssistDataLocked(userId, activityToken, data);
+            }
         }
     }
 }

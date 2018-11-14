@@ -22,6 +22,7 @@ import android.os.IBinder;
 import android.service.intelligence.IntelligenceService;
 import android.service.intelligence.InteractionContext;
 import android.service.intelligence.InteractionSessionId;
+import android.service.intelligence.SnapshotData;
 import android.util.Slog;
 import android.view.intelligence.ContentCaptureEvent;
 
@@ -61,6 +62,13 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
     }
 
     /**
+     * Returns whether this session is for the given activity.
+     */
+    boolean isActivitySession(@NonNull IBinder activityToken) {
+        return mActivityToken.equals(activityToken);
+    }
+
+    /**
      * Notifies the {@link IntelligenceService} that the service started.
      */
     @GuardedBy("mLock")
@@ -71,8 +79,16 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
     /**
      * Notifies the {@link IntelligenceService} of a batch of events.
      */
-    public void sendEventsLocked(List<ContentCaptureEvent> events) {
+    public void sendEventsLocked(@NonNull List<ContentCaptureEvent> events) {
         mRemoteService.onContentCaptureEventsRequest(mId, events);
+    }
+
+    /**
+     * Notifies the {@link IntelligenceService} of a snapshot of an activity.
+     */
+    @GuardedBy("mLock")
+    public void sendActivitySnapshotLocked(@NonNull SnapshotData snapshotData) {
+        mRemoteService.onActivitySnapshotRequest(mId, snapshotData);
     }
 
     /**

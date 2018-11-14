@@ -25,6 +25,7 @@ import android.os.RemoteException;
 import android.service.intelligence.IIntelligenceService;
 import android.service.intelligence.InteractionContext;
 import android.service.intelligence.InteractionSessionId;
+import android.service.intelligence.SnapshotData;
 import android.text.format.DateUtils;
 import android.util.Slog;
 import android.view.intelligence.ContentCaptureEvent;
@@ -89,6 +90,15 @@ final class RemoteIntelligenceService extends AbstractRemoteService {
             @NonNull List<ContentCaptureEvent> events) {
         cancelScheduledUnbind();
         scheduleRequest(new PendingOnContentCaptureEventsRequest(this, sessionId, events));
+    }
+
+    /**
+     * Called by {@link ContentCaptureSession} to send snapshot data to the service.
+     */
+    public void onActivitySnapshotRequest(@NonNull InteractionSessionId sessionId,
+            @NonNull SnapshotData snapshotData) {
+        cancelScheduledUnbind();
+        scheduleRequest(new PendingOnActivitySnapshotRequest(this, sessionId, snapshotData));
     }
 
 
@@ -160,6 +170,24 @@ final class RemoteIntelligenceService extends AbstractRemoteService {
         @Override // from MyPendingRequest
         public void myRun(@NonNull RemoteIntelligenceService remoteService) throws RemoteException {
             remoteService.mService.onContentCaptureEvents(mSessionId, mEvents);
+        }
+    }
+
+    private static final class PendingOnActivitySnapshotRequest extends MyPendingRequest {
+
+        private final SnapshotData mSnapshotData;
+
+        protected PendingOnActivitySnapshotRequest(@NonNull RemoteIntelligenceService service,
+                @NonNull InteractionSessionId sessionId,
+                @NonNull SnapshotData snapshotData) {
+            super(service, sessionId);
+            mSnapshotData = snapshotData;
+        }
+
+        @Override // from MyPendingRequest
+        protected void myRun(@NonNull RemoteIntelligenceService remoteService)
+                throws RemoteException {
+            remoteService.mService.onActivitySnapshot(mSessionId, mSnapshotData);
         }
     }
 
