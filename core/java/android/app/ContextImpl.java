@@ -140,6 +140,13 @@ class ReceiverRestrictedContext extends ContextWrapper {
         throw new ReceiverCallNotAllowedException(
                 "BroadcastReceiver components are not allowed to bind to services");
     }
+
+    @Override
+    public boolean bindIsolatedService(Intent service, ServiceConnection conn, int flags,
+            String instanceName) {
+        throw new ReceiverCallNotAllowedException(
+                "BroadcastReceiver components are not allowed to bind to services");
+    }
 }
 
 /**
@@ -1630,14 +1637,25 @@ class ContextImpl extends Context {
     public boolean bindService(Intent service, ServiceConnection conn,
             int flags) {
         warnIfCallingFromSystemProcess();
-        return bindServiceCommon(service, conn, flags, mMainThread.getHandler(), getUser());
+        return bindServiceCommon(service, conn, flags, null, mMainThread.getHandler(), getUser());
+    }
+
+    @Override
+    public boolean bindIsolatedService(Intent service, ServiceConnection conn,
+            int flags, String instanceName) {
+        warnIfCallingFromSystemProcess();
+        if (instanceName == null) {
+            throw new NullPointerException("null instanceName");
+        }
+        return bindServiceCommon(service, conn, flags, instanceName, mMainThread.getHandler(),
+                getUser());
     }
 
     /** @hide */
     @Override
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             UserHandle user) {
-        return bindServiceCommon(service, conn, flags, mMainThread.getHandler(), user);
+        return bindServiceCommon(service, conn, flags, null, mMainThread.getHandler(), user);
     }
 
     /** @hide */
@@ -1647,7 +1665,7 @@ class ContextImpl extends Context {
         if (handler == null) {
             throw new IllegalArgumentException("handler must not be null.");
         }
-        return bindServiceCommon(service, conn, flags, handler, user);
+        return bindServiceCommon(service, conn, flags, null, handler, user);
     }
 
     /** @hide */
@@ -1669,7 +1687,8 @@ class ContextImpl extends Context {
         return mMainThread.getHandler();
     }
 
-    private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags, Handler
+    private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags,
+            String instanceName, Handler
             handler, UserHandle user) {
         // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser.
         IServiceConnection sd;
@@ -1690,10 +1709,10 @@ class ContextImpl extends Context {
                 flags |= BIND_WAIVE_PRIORITY;
             }
             service.prepareToLeaveProcess(this);
-            int res = ActivityManager.getService().bindService(
+            int res = ActivityManager.getService().bindIsolatedService(
                 mMainThread.getApplicationThread(), getActivityToken(), service,
                 service.resolveTypeIfNeeded(getContentResolver()),
-                sd, flags, getOpPackageName(), user.getIdentifier());
+                sd, flags, instanceName, getOpPackageName(), user.getIdentifier());
             if (res < 0) {
                 throw new SecurityException(
                         "Not allowed to bind to service " + service);

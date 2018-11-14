@@ -59,12 +59,12 @@ final class AppBindRecord {
     public String toString() {
         return "AppBindRecord{"
             + Integer.toHexString(System.identityHashCode(this))
-            + " " + service.shortName + ":" + client.processName + "}";
+            + " " + service.shortInstanceName + ":" + client.processName + "}";
     }
 
     void writeToProto(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
-        proto.write(AppBindRecordProto.SERVICE_NAME, service.shortName);
+        proto.write(AppBindRecordProto.SERVICE_NAME, service.shortInstanceName);
         proto.write(AppBindRecordProto.CLIENT_PROC_NAME, client.processName);
         final int N = connections.size();
         for (int i=0; i<N; i++) {

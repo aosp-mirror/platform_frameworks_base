@@ -2906,8 +2906,9 @@ public abstract class Context {
      * @param flags Operation options for the binding.  May be 0,
      *          {@link #BIND_AUTO_CREATE}, {@link #BIND_DEBUG_UNBIND},
      *          {@link #BIND_NOT_FOREGROUND}, {@link #BIND_ABOVE_CLIENT},
-     *          {@link #BIND_ALLOW_OOM_MANAGEMENT}, or
-     *          {@link #BIND_WAIVE_PRIORITY}.
+     *          {@link #BIND_ALLOW_OOM_MANAGEMENT}, {@link #BIND_WAIVE_PRIORITY}.
+     *          {@link #BIND_IMPORTANT}, or
+     *          {@link #BIND_ADJUST_WITH_ACTIVITY}.
      * @return {@code true} if the system is in the process of bringing up a
      *         service that your client has permission to bind to; {@code false}
      *         if the system couldn't find the service or if your client doesn't
@@ -2923,9 +2924,36 @@ public abstract class Context {
      * @see #BIND_AUTO_CREATE
      * @see #BIND_DEBUG_UNBIND
      * @see #BIND_NOT_FOREGROUND
+     * @see #BIND_ABOVE_CLIENT
+     * @see #BIND_ALLOW_OOM_MANAGEMENT
+     * @see #BIND_WAIVE_PRIORITY
+     * @see #BIND_IMPORTANT
+     * @see #BIND_ADJUST_WITH_ACTIVITY
      */
     public abstract boolean bindService(@RequiresPermission Intent service,
             @NonNull ServiceConnection conn, @BindServiceFlags int flags);
+
+    /**
+     * Variation of {@link #bindService} that, in the specific case of isolated
+     * services, allows the caller to generate multiple instances of a service
+     * from a single component declaration.
+     *
+     * @param service Identifies the service to connect to.  The Intent must
+     *      specify an explicit component name.
+     * @param conn Receives information as the service is started and stopped.
+     *      This must be a valid ServiceConnection object; it must not be null.
+     * @param flags Operation options for the binding as per {@link #bindService}.
+     * @param instanceName Unique identifier for the service instance.  Each unique
+     *      name here will result in a different service instance being created.
+     * @return Returns success of binding as per {@link #bindService}.
+     *
+     * @throws SecurityException If the caller does not have permission to access the service
+     *
+     * @see #bindService
+     */
+    public abstract boolean bindIsolatedService(@RequiresPermission Intent service,
+            @NonNull ServiceConnection conn, @BindServiceFlags int flags,
+            @NonNull String instanceName);
 
     /**
      * Same as {@link #bindService(Intent, ServiceConnection, int)}, but with an explicit userHandle
@@ -2941,7 +2969,7 @@ public abstract class Context {
     }
 
     /**
-     * Same as {@link #bindService(Intent, ServiceConnection, int, UserHandle)}, but with an
+     * Same as {@link #bindServiceAsUser(Intent, ServiceConnection, int, UserHandle)}, but with an
      * explicit non-null Handler to run the ServiceConnection callbacks on.
      *
      * @hide
