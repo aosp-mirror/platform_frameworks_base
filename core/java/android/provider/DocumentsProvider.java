@@ -677,6 +677,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      *            cursor. If {@code null} all supported columns should be
      *            included.
      * @param queryArgs the query arguments.
+     *            {@link DocumentsContract#QUERY_ARG_EXCLUDE_MEDIA},
      *            {@link DocumentsContract#QUERY_ARG_DISPLAY_NAME},
      *            {@link DocumentsContract#QUERY_ARG_MIME_TYPES},
      *            {@link DocumentsContract#QUERY_ARG_FILE_SIZE_OVER},

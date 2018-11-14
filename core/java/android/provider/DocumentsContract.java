@@ -152,6 +152,17 @@ public final class DocumentsContract {
             "android:query-arg-last-modified-after";
 
     /**
+     * Key for {@link DocumentsProvider} to decide whether the files that
+     * have been added to MediaStore should be excluded. If the value is
+     * true, exclude them. Otherwise, include them.
+     *
+     * @see DocumentsProvider#querySearchDocuments(String, String[],
+     *      Bundle)
+     * {@hide}
+     */
+    public static final String QUERY_ARG_EXCLUDE_MEDIA = "android:query-arg-exclude-media";
+
+    /**
      * Sets the desired initial location visible to user when file chooser is shown.
      *
      * <p>Applicable to {@link Intent} with actions:
@@ -1017,6 +1028,7 @@ public final class DocumentsContract {
 
     /**
      * Get the handled query arguments from the query bundle. The handled arguments are
+     * {@link DocumentsContract#QUERY_ARG_EXCLUDE_MEDIA},
      * {@link DocumentsContract#QUERY_ARG_DISPLAY_NAME},
      * {@link DocumentsContract#QUERY_ARG_MIME_TYPES},
      * {@link DocumentsContract#QUERY_ARG_FILE_SIZE_OVER} and
@@ -1032,6 +1044,11 @@ public final class DocumentsContract {
         }
 
         final ArrayList<String> args = new ArrayList<>();
+
+        if (queryArgs.keySet().contains(QUERY_ARG_EXCLUDE_MEDIA)) {
+            args.add(QUERY_ARG_EXCLUDE_MEDIA);
+        }
+
         if (queryArgs.keySet().contains(QUERY_ARG_DISPLAY_NAME)) {
             args.add(QUERY_ARG_DISPLAY_NAME);
         }
