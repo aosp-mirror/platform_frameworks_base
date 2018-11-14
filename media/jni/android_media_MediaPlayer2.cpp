@@ -1050,9 +1050,9 @@ android_media_MediaPlayer2_native_finalize(JNIEnv *env, jobject thiz)
     android_media_MediaPlayer2_release(env, thiz);
 }
 
-static void android_media_MediaPlayer2_set_audio_session_id(JNIEnv *env,  jobject thiz,
+static void android_media_MediaPlayer2_setAudioSessionId(JNIEnv *env,  jobject thiz,
         jint sessionId) {
-    ALOGV("set_session_id(): %d", sessionId);
+    ALOGV("setAudioSessionId(): %d", sessionId);
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
@@ -1062,8 +1062,8 @@ static void android_media_MediaPlayer2_set_audio_session_id(JNIEnv *env,  jobjec
             NULL);
 }
 
-static jint android_media_MediaPlayer2_get_audio_session_id(JNIEnv *env,  jobject thiz) {
-    ALOGV("get_session_id()");
+static jint android_media_MediaPlayer2_getAudioSessionId(JNIEnv *env,  jobject thiz) {
+    ALOGV("getAudioSessionId()");
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
@@ -1419,8 +1419,8 @@ static const JNINativeMethod gMethods[] = {
     {"native_init",         "()V",                              (void *)android_media_MediaPlayer2_native_init},
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer2_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer2_native_finalize},
-    {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer2_get_audio_session_id},
-    {"_setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer2_set_audio_session_id},
+    {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer2_getAudioSessionId},
+    {"_setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer2_setAudioSessionId},
     {"_setAuxEffectSendLevel", "(F)V",                          (void *)android_media_MediaPlayer2_setAuxEffectSendLevel},
     {"_attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer2_attachAuxEffect},
     // Modular DRM

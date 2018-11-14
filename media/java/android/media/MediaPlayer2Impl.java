@@ -56,7 +56,6 @@ import java.net.URL;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -64,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
@@ -1013,24 +1011,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native final void _seekTo(long msec, int mode);
 
-    /**
-     * Get current playback position as a {@link MediaTimestamp}.
-     * <p>
-     * The MediaTimestamp represents how the media time correlates to the system time in
-     * a linear fashion using an anchor and a clock rate. During regular playback, the media
-     * time moves fairly constantly (though the anchor frame may be rebased to a current
-     * system time, the linear correlation stays steady). Therefore, this method does not
-     * need to be called often.
-     * <p>
-     * To help users get current playback position, this method always anchors the timestamp
-     * to the current {@link System#nanoTime system time}, so
-     * {@link MediaTimestamp#getAnchorMediaTimeUs} can be used as current playback position.
-     *
-     * @return a MediaTimestamp object if a timestamp is available, or {@code null} if no timestamp
-     *         is available, e.g. because the media player has not been initialized.
-     *
-     * @see MediaTimestamp
-     */
     @Override
     @Nullable
     public MediaTimestamp getTimestamp()
@@ -1046,11 +1026,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
     }
 
-    /**
-     * Resets the MediaPlayer2 to its uninitialized state. After calling
-     * this method, you will have to initialize it again by setting the
-     * data source and calling prepare().
-     */
     @Override
     public void reset() {
         synchronized (mEventCbLock) {
@@ -1083,41 +1058,14 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     // Keep KEY_PARAMETER_* in sync with include/media/mediaplayer2.h
     private final static int KEY_PARAMETER_AUDIO_ATTRIBUTES = 1400;
-    /**
-     * Sets the audio attributes.
-     * @param value value of the parameter to be set.
-     * @return true if the parameter is set successfully, false otherwise
-     */
+
+    // return true if the parameter is set successfully, false otherwise
     private native boolean native_setAudioAttributes(AudioAttributes audioAttributes);
     private native AudioAttributes native_getAudioAttributes();
 
-
-    /**
-     * Checks whether the MediaPlayer2 is looping or non-looping.
-     *
-     * @return true if the MediaPlayer2 is currently looping, false otherwise
-     * @hide
-     */
     @Override
     public native boolean isLooping();
 
-    /**
-     * Sets the audio session ID.
-     *
-     * @param sessionId the audio session ID.
-     * The audio session ID is a system wide unique identifier for the audio stream played by
-     * this MediaPlayer2 instance.
-     * The primary use of the audio session ID  is to associate audio effects to a particular
-     * instance of MediaPlayer2: if an audio session ID is provided when creating an audio effect,
-     * this effect will be applied only to the audio content of media players within the same
-     * audio session and not to the output mix.
-     * When created, a MediaPlayer2 instance automatically generates its own audio session ID.
-     * However, it is possible to force this player to be part of an already existing audio session
-     * by calling this method.
-     * This method must be called before one of the overloaded <code> setDataSource </code> methods.
-     * @throws IllegalStateException if it is called in an invalid state
-     * @throws IllegalArgumentException if the sessionId is invalid.
-     */
     @Override
     public Object setAudioSessionId(int sessionId) {
         return addTask(new Task(CALL_COMPLETED_SET_AUDIO_SESSION_ID, false) {
@@ -1130,29 +1078,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native void _setAudioSessionId(int sessionId);
 
-    /**
-     * Returns the audio session ID.
-     *
-     * @return the audio session ID. {@see #setAudioSessionId(int)}
-     * Note that the audio session ID is 0 only if a problem occured when the MediaPlayer2 was contructed.
-     */
     @Override
     public native int getAudioSessionId();
 
-    /**
-     * Attaches an auxiliary effect to the player. A typical auxiliary effect is a reverberation
-     * effect which can be applied on any sound source that directs a certain amount of its
-     * energy to this effect. This amount is defined by setAuxEffectSendLevel().
-     * See {@link #setAuxEffectSendLevel(float)}.
-     * <p>After creating an auxiliary effect (e.g.
-     * {@link android.media.audiofx.EnvironmentalReverb}), retrieve its ID with
-     * {@link android.media.audiofx.AudioEffect#getId()} and use it when calling this method
-     * to attach the player to the effect.
-     * <p>To detach the effect from the player, call this method with a null effect id.
-     * <p>This method must be called after one of the overloaded <code> setDataSource </code>
-     * methods.
-     * @param effectId system wide unique id of the effect to attach
-     */
     @Override
     public Object attachAuxEffect(int effectId) {
         return addTask(new Task(CALL_COMPLETED_ATTACH_AUX_EFFECT, false) {
@@ -1165,18 +1093,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native void _attachAuxEffect(int effectId);
 
-    /**
-     * Sets the send level of the player to the attached auxiliary effect.
-     * See {@link #attachAuxEffect(int)}. The level value range is 0 to 1.0.
-     * <p>By default the send level is 0, so even if an effect is attached to the player
-     * this method must be called for the effect to be applied.
-     * <p>Note that the passed level value is a raw scalar. UI controls should be scaled
-     * logarithmically: the gain applied by audio framework ranges from -72dB to 0dB,
-     * so an appropriate conversion from linear UI input x to level is:
-     * x == 0 -> level = 0
-     * 0 < x <= R -> level = 10^(72*(x-R)/20/R)
-     * @param level send level scalar
-     */
     @Override
     public Object setAuxEffectSendLevel(float level) {
         return addTask(new Task(CALL_COMPLETED_SET_AUX_EFFECT_SEND_LEVEL, false) {
@@ -1206,31 +1122,17 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @see android.media.MediaPlayer2#getTrackInfo
      */
     public static final class TrackInfoImpl extends TrackInfo {
-        /**
-         * Gets the track type.
-         * @return TrackType which indicates if the track is video, audio, timed text.
-         */
         @Override
         public int getTrackType() {
             return mTrackType;
         }
 
-        /**
-         * Gets the language code of the track.
-         * @return a language code in either way of ISO-639-1 or ISO-639-2.
-         * When the language is unknown or could not be determined,
-         * ISO-639-2 language code, "und", is returned.
-         */
         @Override
         public String getLanguage() {
             String language = mFormat.getString(MediaFormat.KEY_LANGUAGE);
             return language == null ? "und" : language;
         }
 
-        /**
-         * Gets the {@link MediaFormat} of the track.  If the format is
-         * unknown or could not be determined, null is returned.
-         */
         @Override
         public MediaFormat getFormat() {
             if (mTrackType == MEDIA_TRACK_TYPE_TIMEDTEXT
@@ -1292,14 +1194,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
     };
 
-    /**
-     * Returns a List of track information.
-     *
-     * @return List of track info. The total number of tracks is the array length.
-     * Must be called again if an external timed text source has been added after
-     * addTimedTextSource method is called.
-     * @throws IllegalStateException if it is called in an invalid state.
-     */
     @Override
     public List<TrackInfo> getTrackInfo() {
         TrackInfoImpl trackInfo[] = getInbandTrackInfoImpl();
@@ -1326,33 +1220,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         return trackInfo;
     }
 
-    /*
-     * A helper function to check if the mime type is supported by media framework.
-     */
-    private static boolean availableMimeTypeForExternalSource(String mimeType) {
-        if (MEDIA_MIMETYPE_TEXT_SUBRIP.equals(mimeType)) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Returns the index of the audio, video, or subtitle track currently selected for playback,
-     * The return value is an index into the array returned by {@link #getTrackInfo()}, and can
-     * be used in calls to {@link #selectTrack(int)} or {@link #deselectTrack(int)}.
-     *
-     * @param trackType should be one of {@link TrackInfo#MEDIA_TRACK_TYPE_VIDEO},
-     * {@link TrackInfo#MEDIA_TRACK_TYPE_AUDIO}, or
-     * {@link TrackInfo#MEDIA_TRACK_TYPE_SUBTITLE}
-     * @return index of the audio, video, or subtitle track currently selected for playback;
-     * a negative integer is returned when there is no selected track for {@code trackType} or
-     * when {@code trackType} is not one of audio, video, or subtitle.
-     * @throws IllegalStateException if called after {@link #close()}
-     *
-     * @see #getTrackInfo()
-     * @see #selectTrack(int)
-     * @see #deselectTrack(int)
-     */
     @Override
     public int getSelectedTrack(int trackType) {
         PlayerMessage request = PlayerMessage.newBuilder()
@@ -1366,34 +1233,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         return response.getValues(0).getInt32Value();
     }
 
-    /**
-     * Selects a track.
-     * <p>
-     * If a MediaPlayer2 is in invalid state, it throws an IllegalStateException exception.
-     * If a MediaPlayer2 is in <em>Started</em> state, the selected track is presented immediately.
-     * If a MediaPlayer2 is not in Started state, it just marks the track to be played.
-     * </p>
-     * <p>
-     * In any valid state, if it is called multiple times on the same type of track (ie. Video,
-     * Audio, Timed Text), the most recent one will be chosen.
-     * </p>
-     * <p>
-     * The first audio and video tracks are selected by default if available, even though
-     * this method is not called. However, no timed text track will be selected until
-     * this function is called.
-     * </p>
-     * <p>
-     * Currently, only timed text tracks or audio tracks can be selected via this method.
-     * In addition, the support for selecting an audio track at runtime is pretty limited
-     * in that an audio track can only be selected in the <em>Prepared</em> state.
-     * </p>
-     * @param index the index of the track to be selected. The valid range of the index
-     * is 0..total number of track - 1. The total number of tracks as well as the type of
-     * each individual track can be found by calling {@link #getTrackInfo()} method.
-     * @throws IllegalStateException if called in an invalid state.
-     *
-     * @see android.media.MediaPlayer2#getTrackInfo
-     */
     @Override
     public Object selectTrack(int index) {
         return addTask(new Task(CALL_COMPLETED_SELECT_TRACK, false) {
@@ -1404,20 +1243,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         });
     }
 
-    /**
-     * Deselect a track.
-     * <p>
-     * Currently, the track must be a timed text track and no audio or video tracks can be
-     * deselected. If the timed text track identified by index has not been
-     * selected before, it throws an exception.
-     * </p>
-     * @param index the index of the track to be deselected. The valid range of the index
-     * is 0..total number of tracks - 1. The total number of tracks as well as the type of
-     * each individual track can be found by calling {@link #getTrackInfo()} method.
-     * @throws IllegalStateException if called in an invalid state.
-     *
-     * @see android.media.MediaPlayer2#getTrackInfo
-     */
     @Override
     public Object deselectTrack(int index) {
         return addTask(new Task(CALL_COMPLETED_DESELECT_TRACK, false) {
