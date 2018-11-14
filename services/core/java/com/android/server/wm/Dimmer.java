@@ -126,9 +126,10 @@ class Dimmer {
         DimState(SurfaceControl dimLayer) {
             mDimLayer = dimLayer;
             mDimming = true;
-            mSurfaceAnimator = new SurfaceAnimator(new DimAnimatable(dimLayer), () -> {
+            final DimAnimatable dimAnimatable = new DimAnimatable(dimLayer);
+            mSurfaceAnimator = new SurfaceAnimator(dimAnimatable, () -> {
                 if (!mDimming) {
-                    mDimLayer.destroy();
+                    dimAnimatable.getPendingTransaction().destroy(mDimLayer);
                 }
             }, mHost.mService);
         }

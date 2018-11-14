@@ -37,7 +37,7 @@ import org.junit.Test;
 
 /**
  * Build/Install/Run:
- *  atest FrameworksServicesTests:DimmerTests;
+ *  atest FrameworksServicesTests:DimmerTests
  */
 @Presubmit
 public class DimmerTests extends WindowTestsBase {
@@ -211,7 +211,7 @@ public class DimmerTests extends WindowTestsBase {
         mDimmer.updateDims(mTransaction, new Rect());
         verify(mSurfaceAnimatorStarter).startAnimation(any(SurfaceAnimator.class), any(
                 SurfaceControl.Transaction.class), any(AnimationAdapter.class), anyBoolean());
-        verify(dimLayer).destroy();
+        verify(mHost.getPendingTransaction()).destroy(dimLayer);
     }
 
     @Test
