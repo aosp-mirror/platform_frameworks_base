@@ -76,7 +76,7 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
     }
 
     /**
-     * Cleans up the session and remove itself from the service.
+     * Cleans up the session and removes it from the service.
      *
      * @param notifyRemoteService whether it should trigger a {@link
      * IntelligenceService#onDestroyInteractionSession(InteractionSessionId)}
@@ -85,11 +85,27 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
     @GuardedBy("mLock")
     public void removeSelfLocked(boolean notifyRemoteService) {
         try {
-            if (notifyRemoteService) {
-                mRemoteService.onSessionLifecycleRequest(/* context= */ null, mId);
-            }
+            destroyLocked(notifyRemoteService);
         } finally {
             mService.removeSessionLocked(mId);
+        }
+    }
+
+    /**
+     * Cleans up the session, but not removes it from the service.
+     *
+     * @param notifyRemoteService whether it should trigger a {@link
+     * IntelligenceService#onDestroyInteractionSession(InteractionSessionId)}
+     * request.
+     */
+    @GuardedBy("mLock")
+    public void destroyLocked(boolean notifyRemoteService) {
+        if (mService.isVerbose()) {
+            Slog.v(TAG, "destroyLocked(notifyRemoteService=" + notifyRemoteService + ")");
+        }
+        // TODO(b/111276913): must call client to set session as FINISHED_BY_SERVER
+        if (notifyRemoteService) {
+            mRemoteService.onSessionLifecycleRequest(/* context= */ null, mId);
         }
     }
 

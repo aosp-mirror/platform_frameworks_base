@@ -88,12 +88,18 @@ final class IntelligencePerUserService
             @NonNull ComponentName componentName, int taskId, int displayId,
             @NonNull InteractionSessionId sessionId, int flags,
             @NonNull IResultReceiver resultReceiver) {
+        if (!isEnabledLocked()) {
+            sendToClient(resultReceiver, IntelligenceManager.STATE_DISABLED);
+            return;
+        }
         final ComponentName serviceComponentName = getServiceComponentName();
         if (serviceComponentName == null) {
             // TODO(b/111276913): this happens when the system service is starting, we should
             // probably handle it in a more elegant way (like waiting for boot_complete or
             // something like that
-            Slog.w(TAG, "startSession(" + activityToken + "): hold your horses");
+            if (mMaster.debug) {
+                Slog.d(TAG, "startSession(" + activityToken + "): hold your horses");
+            }
             return;
         }
 
@@ -128,9 +134,15 @@ final class IntelligencePerUserService
     // TODO(b/111276913): log metrics
     @GuardedBy("mLock")
     public void finishSessionLocked(@NonNull InteractionSessionId sessionId) {
+        if (!isEnabledLocked()) {
+            return;
+        }
+
         final ContentCaptureSession session = mSessions.get(sessionId);
         if (session == null) {
-            Slog.w(TAG, "finishSession(): no session with id" + sessionId);
+            if (mMaster.debug) {
+                Slog.d(TAG, "finishSession(): no session with id" + sessionId);
+            }
             return;
         }
         if (mMaster.verbose) {
@@ -139,12 +151,19 @@ final class IntelligencePerUserService
         session.removeSelfLocked(true);
     }
 
+    // TODO(b/111276913): need to figure out why some events are sent before session is started;
+    // probably because IntelligenceManager is not buffering them until it gets the session back
     @GuardedBy("mLock")
     public void sendEventsLocked(@NonNull InteractionSessionId sessionId,
             @NonNull List<ContentCaptureEvent> events) {
+        if (!isEnabledLocked()) {
+            return;
+        }
         final ContentCaptureSession session = mSessions.get(sessionId);
         if (session == null) {
-            Slog.w(TAG, "sendEvents(): no session for " + sessionId);
+            if (mMaster.verbose) {
+                Slog.v(TAG, "sendEvents(): no session for " + sessionId);
+            }
             return;
         }
         if (mMaster.verbose) {
@@ -161,6 +180,22 @@ final class IntelligencePerUserService
     @GuardedBy("mLock")
     public boolean isIntelligenceServiceForUserLocked(int uid) {
         return uid == getServiceUidLocked();
+    }
+
+    /**
+     * Destroys the service and all state associated with it.
+     *
+     * <p>Called when the service was disabled (for example, if the settings change).
+     */
+    @GuardedBy("mLock")
+    public void destroyLocked() {
+        if (mMaster.debug) Slog.d(TAG, "destroyLocked()");
+        final int numSessions = mSessions.size();
+        for (int i = 0; i < numSessions; i++) {
+            final ContentCaptureSession session = mSessions.valueAt(i);
+            session.destroyLocked(true);
+        }
+        mSessions.clear();
     }
 
     @Override
