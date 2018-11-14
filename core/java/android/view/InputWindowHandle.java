@@ -57,6 +57,8 @@ public final class InputWindowHandle {
     public int frameRight;
     public int frameBottom;
 
+    public int surfaceInset;
+
     // Global scaling factor applied to touch events when they are dispatched
     // to the window
     public float scaleFactor;

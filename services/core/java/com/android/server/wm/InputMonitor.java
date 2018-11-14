@@ -215,6 +215,11 @@ final class InputMonitor {
         inputWindowHandle.frameRight = frame.right;
         inputWindowHandle.frameBottom = frame.bottom;
 
+        // Surface insets are hardcoded to be the same in all directions
+        // and we could probably deprecate the "left/right/top/bottom" concept.
+        // we avoid reintroducing this concept by just choosing one of them here.
+        inputWindowHandle.surfaceInset = child.getAttrs().surfaceInsets.left;
+
         if (child.mGlobalScale != 1) {
             // If we are scaling the window, input coordinates need
             // to be inversely scaled to map from what is on screen

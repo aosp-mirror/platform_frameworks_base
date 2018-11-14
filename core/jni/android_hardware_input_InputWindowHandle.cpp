@@ -42,6 +42,7 @@ static struct {
     jfieldID frameTop;
     jfieldID frameRight;
     jfieldID frameBottom;
+    jfieldID surfaceInset;
     jfieldID scaleFactor;
     jfieldID touchableRegion;
     jfieldID visible;
@@ -117,6 +118,8 @@ bool NativeInputWindowHandle::updateInfo() {
             gInputWindowHandleClassInfo.frameRight);
     mInfo.frameBottom = env->GetIntField(obj,
             gInputWindowHandleClassInfo.frameBottom);
+    mInfo.surfaceInset = env->GetIntField(obj,
+            gInputWindowHandleClassInfo.surfaceInset);
     mInfo.scaleFactor = env->GetFloatField(obj,
             gInputWindowHandleClassInfo.scaleFactor);
 
@@ -265,6 +268,9 @@ int register_android_server_InputWindowHandle(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.frameBottom, clazz,
             "frameBottom", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.surfaceInset, clazz,
+            "surfaceInset", "I");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.scaleFactor, clazz,
             "scaleFactor", "F");
