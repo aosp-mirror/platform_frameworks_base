@@ -48,13 +48,25 @@ public class ContextHubClient implements Closeable {
      */
     private final ContextHubInfo mAttachedHub;
 
-    private final CloseGuard mCloseGuard = CloseGuard.get();
+    private final CloseGuard mCloseGuard;
 
     private final AtomicBoolean mIsClosed = new AtomicBoolean(false);
 
-    /* package */ ContextHubClient(ContextHubInfo hubInfo) {
+    /*
+     * True if this is a persistent client (i.e. does not have to close the connection when the
+     * resource is freed from the system).
+     */
+    private final boolean mPersistent;
+
+    /* package */ ContextHubClient(ContextHubInfo hubInfo, boolean persistent) {
         mAttachedHub = hubInfo;
-        mCloseGuard.open("close");
+        mPersistent = persistent;
+        if (mPersistent) {
+            mCloseGuard = null;
+        } else {
+            mCloseGuard = CloseGuard.get();
+            mCloseGuard.open("close");
+        }
     }
 
     /**
@@ -96,7 +108,9 @@ public class ContextHubClient implements Closeable {
      */
     public void close() {
         if (!mIsClosed.getAndSet(true)) {
-            mCloseGuard.close();
+            if (mCloseGuard != null) {
+                mCloseGuard.close();
+            }
             try {
                 mClientProxy.close();
             } catch (RemoteException e) {
@@ -138,7 +152,9 @@ public class ContextHubClient implements Closeable {
             if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
             }
-            close();
+            if (!mPersistent) {
+                close();
+            }
         } finally {
             super.finalize();
         }

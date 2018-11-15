@@ -758,7 +758,7 @@ public final class ContextHubManager {
         Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
         Preconditions.checkNotNull(executor, "Executor cannot be null");
 
-        ContextHubClient client = new ContextHubClient(hubInfo);
+        ContextHubClient client = new ContextHubClient(hubInfo, false /* persistent */);
         IContextHubClientCallback clientInterface = createClientCallback(
                 client, callback, executor);
 
@@ -837,7 +837,7 @@ public final class ContextHubManager {
         Preconditions.checkNotNull(pendingIntent);
         Preconditions.checkNotNull(hubInfo);
 
-        ContextHubClient client = new ContextHubClient(hubInfo);
+        ContextHubClient client = new ContextHubClient(hubInfo, true /* persistent */);
 
         IContextHubClient clientProxy;
         try {
