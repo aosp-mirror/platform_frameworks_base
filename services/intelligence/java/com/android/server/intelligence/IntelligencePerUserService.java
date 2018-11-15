@@ -158,6 +158,11 @@ final class IntelligencePerUserService
         mSessions.remove(sessionId);
     }
 
+    @GuardedBy("mLock")
+    public boolean isIntelligenceServiceForUserLocked(int uid) {
+        return uid == getServiceUidLocked();
+    }
+
     @Override
     protected void dumpLocked(String prefix, PrintWriter pw) {
         super.dumpLocked(prefix, pw);

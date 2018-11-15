@@ -1136,6 +1136,13 @@ public final class SystemServer {
                 traceEnd();
             }
 
+            if (!disableIntelligence) {
+                traceBeginAndSlog("StartIntelligenceService");
+                mSystemServiceManager.startService(INTELLIGENCE_MANAGER_SERVICE_CLASS);
+                traceEnd();
+            }
+
+            // NOTE: ClipboardService indirectly depends on IntelligenceService
             traceBeginAndSlog("StartClipboardService");
             mSystemServiceManager.startService(ClipboardService.class);
             traceEnd();
@@ -1764,12 +1771,6 @@ public final class SystemServer {
         if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOFILL)) {
             traceBeginAndSlog("StartAutoFillService");
             mSystemServiceManager.startService(AUTO_FILL_MANAGER_SERVICE_CLASS);
-            traceEnd();
-        }
-
-        if (!disableIntelligence) {
-            traceBeginAndSlog("StartIntelligenceService");
-            mSystemServiceManager.startService(INTELLIGENCE_MANAGER_SERVICE_CLASS);
             traceEnd();
         }
 

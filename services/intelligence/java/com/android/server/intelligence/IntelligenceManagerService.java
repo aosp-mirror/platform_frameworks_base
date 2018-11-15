@@ -53,6 +53,8 @@ public final class IntelligenceManagerService
     @GuardedBy("mLock")
     private ActivityManagerInternal mAm;
 
+    private final LocalService mLocalService = new LocalService();
+
     public IntelligenceManagerService(Context context) {
         super(context, UserManager.DISALLOW_INTELLIGENCE_CAPTURE);
     }
@@ -73,6 +75,7 @@ public final class IntelligenceManagerService
     public void onStart() {
         publishBinderService(INTELLIGENCE_MANAGER_SERVICE,
                 new IntelligenceManagerServiceStub());
+        publishLocalService(IntelligenceManagerInternal.class, mLocalService);
     }
 
     private ActivityManagerInternal getAmInternal() {
@@ -137,6 +140,21 @@ public final class IntelligenceManagerService
             synchronized (mLock) {
                 dumpLocked("", pw);
             }
+        }
+    }
+
+    private final class LocalService extends IntelligenceManagerInternal {
+
+        @Override
+        public boolean isIntelligenceServiceForUser(int uid, int userId) {
+            synchronized (mLock) {
+                final IntelligencePerUserService service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    return service.isIntelligenceServiceForUserLocked(uid);
+                }
+            }
+
+            return false;
         }
     }
 }
