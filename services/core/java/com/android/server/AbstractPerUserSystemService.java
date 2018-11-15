@@ -269,6 +269,10 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
         pw.print(prefix); pw.print("User: "); pw.println(mUserId);
         pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
         pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
+        if (mServiceInfo != null) {
+            pw.print(prefix); pw.print("Service UID: ");
+            pw.println(mServiceInfo.applicationInfo.uid);
+        }
         pw.print(prefix); pw.print("Service name: "); pw.println(getComponentNameFromSettings());
     }
 }
