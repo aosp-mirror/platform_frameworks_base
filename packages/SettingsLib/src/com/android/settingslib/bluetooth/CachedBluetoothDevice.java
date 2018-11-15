@@ -887,39 +887,24 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         int stringRes = R.string.bluetooth_pairing;
         //when profile is connected, information would be available
         if (profileConnected) {
+            // Set default string with battery level in device connected situation.
+            if (batteryLevelPercentageString != null) {
+                stringRes = R.string.bluetooth_battery_level;
+            }
+
+            // Set active string in following device connected situation.
+            //    1. Hearing Aid device active.
+            //    2. Headset device active with in-calling state.
+            //    3. A2DP device active without in-calling state.
             if (a2dpConnected || hfpConnected || hearingAidConnected) {
-                //contain battery information
-                if (batteryLevelPercentageString != null) {
-                    //device is in phone call
-                    if (com.android.settingslib.Utils.isAudioModeOngoingCall(mContext)) {
-                        if (mIsActiveDeviceHearingAid || mIsActiveDeviceHeadset) {
-                            stringRes = R.string.bluetooth_active_battery_level;
-                        } else {
-                            stringRes = R.string.bluetooth_battery_level;
-                        }
-                    } else {//device is not in phone call(ex. idle or playing media)
-                        //need to check if A2DP and HearingAid are exclusive
-                        if (mIsActiveDeviceHearingAid || mIsActiveDeviceA2dp) {
-                            stringRes = R.string.bluetooth_active_battery_level;
-                        } else {
-                            stringRes = R.string.bluetooth_battery_level;
-                        }
-                    }
-                } else {
-                    //no battery information
-                    if (com.android.settingslib.Utils.isAudioModeOngoingCall(mContext)) {
-                        if (mIsActiveDeviceHearingAid || mIsActiveDeviceHeadset) {
-                            stringRes = R.string.bluetooth_active_no_battery_level;
-                        }
-                    } else {
-                        if (mIsActiveDeviceHearingAid || mIsActiveDeviceA2dp) {
-                            stringRes = R.string.bluetooth_active_no_battery_level;
-                        }
-                    }
-                }
-            } else {//unknown profile with battery information
-                if (batteryLevelPercentageString != null) {
-                    stringRes = R.string.bluetooth_battery_level;
+                final boolean isOnCall =
+                        com.android.settingslib.Utils.isAudioModeOngoingCall(mContext);
+                if ((mIsActiveDeviceHearingAid)
+                        || (mIsActiveDeviceHeadset && isOnCall)
+                        || (mIsActiveDeviceA2dp && !isOnCall)) {
+                    stringRes = (batteryLevelPercentageString != null)
+                            ? R.string.bluetooth_active_battery_level
+                            : R.string.bluetooth_active_no_battery_level;
                 }
             }
         }
