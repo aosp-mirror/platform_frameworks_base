@@ -54,6 +54,7 @@ import java.math.BigInteger;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
@@ -306,6 +307,31 @@ public class KeyStore {
             return null;
         }
     }
+
+    /**
+     * List uids of all keys that are auth bound to the current user. 
+     * Only system is allowed to call this method.
+     */
+    @UnsupportedAppUsage
+    public int[] listUidsOfAuthBoundKeys() {
+        final int MAX_RESULT_SIZE = 100;
+        int[] uidsOut = new int[MAX_RESULT_SIZE];
+        try {
+            int rc = mBinder.listUidsOfAuthBoundKeys(uidsOut);
+            if (rc != NO_ERROR) {
+                Log.w(TAG, String.format("listUidsOfAuthBoundKeys failed with error code %d", rc));
+                return null;
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return null;
+        } catch (android.os.ServiceSpecificException e) {
+            Log.w(TAG, "KeyStore exception", e);
+            return null;
+        }
+        // Remove any 0 entries
+        return Arrays.stream(uidsOut).filter(x -> x > 0).toArray();
+   }
 
     public String[] list(String prefix) {
         return list(prefix, UID_SELF);
