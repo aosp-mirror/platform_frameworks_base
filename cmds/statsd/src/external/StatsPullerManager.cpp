@@ -243,6 +243,20 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           {2, 3, 4, 5, 6},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::CPU_TIME_PER_THREAD_FREQ)}},
+        // DeviceCalculatedPowerUse.
+        {android::util::DEVICE_CALCULATED_POWER_USE,
+         {{}, {}, 1 * NS_PER_SEC,
+          new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_USE)}},
+        // DeviceCalculatedPowerBlameUid.
+        {android::util::DEVICE_CALCULATED_POWER_BLAME_UID,
+         {{}, {}, // BatteryStats already merged isolated with host ids so it's unnecessary here.
+          1 * NS_PER_SEC,
+          new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_BLAME_UID)}},
+        // DeviceCalculatedPowerBlameOther.
+        {android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER,
+         {{}, {},
+          1 * NS_PER_SEC,
+          new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {

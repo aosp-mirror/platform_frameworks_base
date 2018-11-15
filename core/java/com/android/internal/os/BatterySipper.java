@@ -130,6 +130,10 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public double wakeLockPowerMah;
     public double wifiPowerMah;
 
+    //                           ****************
+    // This list must be kept current with atoms.proto (frameworks/base/cmds/statsd/src/atoms.proto)
+    // so the ordinal values (and therefore the order) must never change.
+    //                           ****************
     public enum DrainType {
         AMBIENT_DISPLAY,
         @UnsupportedAppUsage

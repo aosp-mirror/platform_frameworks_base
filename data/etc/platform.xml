@@ -173,6 +173,7 @@
     <assign-permission name="android.permission.ACCESS_LOWPAN_STATE" uid="lowpan" />
     <assign-permission name="android.permission.MANAGE_LOWPAN_INTERFACES" uid="lowpan" />
 
+    <assign-permission name="android.permission.BATTERY_STATS" uid="statsd" />
     <assign-permission name="android.permission.DUMP" uid="statsd" />
     <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="statsd" />
     <assign-permission name="android.permission.STATSCOMPANION" uid="statsd" />
