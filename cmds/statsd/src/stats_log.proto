@@ -219,6 +219,8 @@ message StatsLogReport {
   optional DimensionsValue dimensions_path_in_what = 11;
 
   optional DimensionsValue dimensions_path_in_condition = 12;
+
+  optional bool is_active = 13;
 }
 
 message UidMapping {
