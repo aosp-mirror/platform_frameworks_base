@@ -20,6 +20,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.graphics.BaseRecordingCanvas;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
+import android.os.Build;
 
 /**
  * This class exists temporarily to workaround broken apps
@@ -36,13 +37,13 @@ public abstract class DisplayListCanvas extends BaseRecordingCanvas {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public abstract void drawRoundRect(CanvasProperty<Float> left, CanvasProperty<Float> top,
             CanvasProperty<Float> right, CanvasProperty<Float> bottom, CanvasProperty<Float> rx,
             CanvasProperty<Float> ry, CanvasProperty<Paint> paint);
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public abstract void drawCircle(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
             CanvasProperty<Float> radius, CanvasProperty<Paint> paint);
 }
