@@ -16,12 +16,17 @@
 
 package com.android.ims;
 
-import android.content.Context;
+import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.telephony.Rlog;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.aidl.IImsConfig;
-import android.telephony.ims.stub.ImsConfigImplBase;
+import android.telephony.ims.aidl.IImsConfigCallback;
+
+import java.util.concurrent.Executor;
 
 /**
  * Provides APIs to get/set the IMS service feature/capability/parameters.
@@ -29,8 +34,10 @@ import android.telephony.ims.stub.ImsConfigImplBase;
  * 1) Items provisioned by the operator.
  * 2) Items configured by user. Mainly service feature class.
  *
+ * @deprecated Use {@link  ProvisioningManager} to change these configurations in the ImsService.
  * @hide
  */
+@Deprecated
 public class ImsConfig {
     private static final String TAG = "ImsConfig";
     private boolean DBG = true;
@@ -46,7 +53,7 @@ public class ImsConfig {
 
     /**
      * Broadcast action: the configuration was changed
-     * @deprecated Use {@link ImsConfig#addConfigCallback(ImsConfigImplBase.Callback)} instead.
+     * @deprecated Use {@link android.telephony.ims.ProvisioningManager.Callback} instead.
      * @hide
      */
     public static final String ACTION_IMS_CONFIG_CHANGED =
@@ -673,13 +680,25 @@ public class ImsConfig {
     }
 
     /**
-     * Adds a {@link ImsConfigImplBase.Callback} to the ImsService to notify when a Configuration
+     * Adds a {@link ProvisioningManager.Callback} to the ImsService to notify when a Configuration
      * item has changed.
      *
-     * Make sure to call {@link #removeConfigCallback(ImsConfigImplBase.Callback)} when finished
+     * Make sure to call {@link #removeConfigCallback(IImsConfigCallback)} when finished
      * using this callback.
      */
-    public void addConfigCallback(ImsConfigImplBase.Callback callback) throws ImsException {
+    public void addConfigCallback(ProvisioningManager.Callback callback) throws ImsException {
+        callback.setExecutor(getThreadExecutor());
+        addConfigCallback(callback.getBinder());
+    }
+
+    /**
+     * Adds a {@link IImsConfigCallback} to the ImsService to notify when a Configuration
+     * item has changed.
+     *
+     * Make sure to call {@link #removeConfigCallback(IImsConfigCallback)} when finished
+     * using this callback.
+     */
+    public void addConfigCallback(IImsConfigCallback callback) throws ImsException {
         if (DBG) Rlog.d(TAG, "addConfigCallback: " + callback);
         try {
             miConfig.addImsConfigCallback(callback);
@@ -690,10 +709,9 @@ public class ImsConfig {
     }
 
     /**
-     * Removes a {@link ImsConfigImplBase.Callback} from the ImsService that was previously added
-     * by {@link #addConfigCallback(ImsConfigImplBase.Callback)}.
+     * Removes an existing {@link IImsConfigCallback} from the ImsService.
      */
-    public void removeConfigCallback(ImsConfigImplBase.Callback callback) throws ImsException {
+    public void removeConfigCallback(IImsConfigCallback callback) throws ImsException {
         if (DBG) Rlog.d(TAG, "removeConfigCallback: " + callback);
         try {
             miConfig.removeImsConfigCallback(callback);
@@ -708,5 +726,12 @@ public class ImsConfig {
      */
     public boolean isBinderAlive() {
         return miConfig.asBinder().isBinderAlive();
+    }
+
+    private Executor getThreadExecutor() {
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+        return new HandlerExecutor(new Handler(Looper.myLooper()));
     }
 }
