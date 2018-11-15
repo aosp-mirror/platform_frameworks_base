@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.notification.CustomInterpolatorTransformation;
 import com.android.systemui.statusbar.notification.ImageTransformState;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.TransformState;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -69,7 +70,8 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     protected NotificationHeaderViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
         super(ctx, view, row);
         mShowExpandButtonAtEnd = ctx.getResources().getBoolean(
-                R.bool.config_showNotificationExpandButtonAtEnd);
+                R.bool.config_showNotificationExpandButtonAtEnd)
+                || NotificationUtils.useNewInterruptionModel(ctx);
         mTransformationHelper = new ViewTransformationHelper();
 
         // we want to avoid that the header clashes with the other text when transforming
