@@ -5535,8 +5535,10 @@ package android.telephony {
   public class PhoneStateListener {
     method public void onRadioPowerStateChanged(int);
     method public void onSrvccStateChanged(int);
+    method public void onVoiceActivationStateChanged(int);
     field public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000
     field public static final int LISTEN_SRVCC_STATE_CHANGED = 16384; // 0x4000
+    field public static final int LISTEN_VOICE_ACTIVATION_STATE = 131072; // 0x20000
   }
 
   public class ServiceState implements android.os.Parcelable {
