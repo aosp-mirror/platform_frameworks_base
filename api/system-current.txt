@@ -6604,6 +6604,22 @@ package android.telephony.ims {
     method public void receiveSessionModifyResponse(int, android.telecom.VideoProfile, android.telecom.VideoProfile);
   }
 
+  public class ProvisioningManager {
+    method public static android.telephony.ims.ProvisioningManager createForSubscriptionId(android.content.Context, int);
+    method public int getProvisioningIntValue(int);
+    method public java.lang.String getProvisioningStringValue(int);
+    method public void registerProvisioningChangedCallback(java.util.concurrent.Executor, android.telephony.ims.ProvisioningManager.Callback);
+    method public int setProvisioningIntValue(int, int);
+    method public int setProvisioningStringValue(int, java.lang.String);
+    method public void unregisterProvisioningChangedCallback(android.telephony.ims.ProvisioningManager.Callback);
+  }
+
+  public static class ProvisioningManager.Callback {
+    ctor public ProvisioningManager.Callback();
+    method public void onProvisioningIntChanged(int, int);
+    method public void onProvisioningStringChanged(int, java.lang.String);
+  }
+
 }
 
 package android.telephony.ims.feature {
