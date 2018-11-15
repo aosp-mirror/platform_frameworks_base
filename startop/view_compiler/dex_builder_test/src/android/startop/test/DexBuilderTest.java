@@ -82,4 +82,38 @@ public class DexBuilderTest {
     Method method = clazz.getMethod("backwardsBranch");
     Assert.assertEquals(2, method.invoke(null));
   }
+
+  @Test
+  public void returnNull() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("returnNull");
+    Assert.assertEquals(null, method.invoke(null));
+  }
+
+  @Test
+  public void makeString() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("makeString");
+    Assert.assertEquals("Hello, World!", method.invoke(null));
+  }
+
+  @Test
+  public void returnStringIfZeroAB() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("returnStringIfZeroAB", int.class);
+    Assert.assertEquals("a", method.invoke(null, 0));
+    Assert.assertEquals("b", method.invoke(null, 1));
+  }
+
+  @Test
+  public void returnStringIfZeroBA() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("returnStringIfZeroBA", int.class);
+    Assert.assertEquals("b", method.invoke(null, 0));
+    Assert.assertEquals("a", method.invoke(null, 1));
+  }
 }
