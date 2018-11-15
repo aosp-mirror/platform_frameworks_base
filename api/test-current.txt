@@ -703,6 +703,21 @@ package android.net {
     field public static final android.os.Parcelable.Creator<android.net.StaticIpConfiguration> CREATOR;
   }
 
+  public final class TestNetworkInterface implements android.os.Parcelable {
+    ctor public TestNetworkInterface(android.os.ParcelFileDescriptor, String);
+    method public int describeContents();
+    method public android.os.ParcelFileDescriptor getFileDescriptor();
+    method public String getInterfaceName();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.net.TestNetworkInterface> CREATOR;
+  }
+
+  public class TestNetworkManager {
+    method public android.net.TestNetworkInterface createTunInterface(@NonNull android.net.LinkAddress[]);
+    method public void setupTestNetwork(@NonNull String, @NonNull android.os.IBinder);
+    method public void teardownTestNetwork(@NonNull android.net.Network);
+  }
+
   public class TrafficStats {
     method public static long getLoopbackRxBytes();
     method public static long getLoopbackRxPackets();
