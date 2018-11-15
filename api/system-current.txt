@@ -3679,6 +3679,10 @@ package android.net.wifi {
 
   public class WifiManager {
     method public void connect(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
+    method public void connect(int, android.net.wifi.WifiManager.ActionListener);
+    method public void disable(int, android.net.wifi.WifiManager.ActionListener);
+    method public void disableEphemeralNetwork(java.lang.String);
+    method public void forget(int, android.net.wifi.WifiManager.ActionListener);
     method public java.util.List<android.net.wifi.WifiConfiguration> getAllMatchingWifiConfigs(java.util.List<android.net.wifi.ScanResult>);
     method public java.util.List<android.net.wifi.hotspot2.OsuProvider> getMatchingOsuProviders(java.util.List<android.net.wifi.ScanResult>);
     method public java.util.List<android.net.wifi.WifiConfiguration> getPrivilegedConfiguredNetworks();
@@ -3690,6 +3694,7 @@ package android.net.wifi {
     method public boolean isWifiApEnabled();
     method public boolean isWifiScannerSupported();
     method public void registerNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback, android.os.Handler);
+    method public void save(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
     method public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
     method public boolean startScan(android.os.WorkSource);
     method public void unregisterNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback);
