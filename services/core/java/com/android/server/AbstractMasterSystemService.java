@@ -244,7 +244,7 @@ public abstract class AbstractMasterSystemService<S extends AbstractPerUserSyste
      */
     @GuardedBy("mLock")
     @Nullable
-    protected S peekServiceForUserLocked(int userId) {
+    protected S peekServiceForUserLocked(@UserIdInt int userId) {
         final int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, false, null, null);
         return mServicesCache.get(resolvedUserId);
@@ -254,7 +254,7 @@ public abstract class AbstractMasterSystemService<S extends AbstractPerUserSyste
      * Updates a cached service for a given user.
      */
     @GuardedBy("mLock")
-    protected void updateCachedServiceLocked(int userId) {
+    protected void updateCachedServiceLocked(@UserIdInt int userId) {
         updateCachedServiceLocked(userId, isDisabledLocked(userId));
     }
 
@@ -262,7 +262,7 @@ public abstract class AbstractMasterSystemService<S extends AbstractPerUserSyste
      * Checks whether the service is disabled (through {@link UserManager} restrictions) for the
      * given user.
      */
-    protected boolean isDisabledLocked(int userId) {
+    protected boolean isDisabledLocked(@UserIdInt int userId) {
         return mDisabledUsers == null ? false : mDisabledUsers.get(userId);
     }
 
@@ -274,7 +274,7 @@ public abstract class AbstractMasterSystemService<S extends AbstractPerUserSyste
      * @return service for the user.
      */
     @GuardedBy("mLock")
-    protected S updateCachedServiceLocked(int userId, boolean disabled) {
+    protected S updateCachedServiceLocked(@UserIdInt int userId, boolean disabled) {
         final S service = getServiceForUserLocked(userId);
         if (service != null) {
             service.updateLocked(disabled);
@@ -304,7 +304,7 @@ public abstract class AbstractMasterSystemService<S extends AbstractPerUserSyste
      * <p>By default doesn't do anything, but can be overridden by subclasses.
      */
     @SuppressWarnings("unused")
-    protected void onServiceEnabledLocked(S service, @UserIdInt int userId) {
+    protected void onServiceEnabledLocked(@NonNull S service, @UserIdInt int userId) {
     }
 
     /**
@@ -314,12 +314,20 @@ public abstract class AbstractMasterSystemService<S extends AbstractPerUserSyste
      */
     @GuardedBy("mLock")
     @NonNull
-    protected S removeCachedServiceLocked(@UserIdInt int userId) {
+    private S removeCachedServiceLocked(@UserIdInt int userId) {
         final S service = peekServiceForUserLocked(userId);
         if (service != null) {
             mServicesCache.delete(userId);
+            onServiceRemoved(service, userId);
         }
         return service;
+    }
+
+    /**
+     * Called after the service is removed from the cache.
+     */
+    @SuppressWarnings("unused")
+    protected void onServiceRemoved(@NonNull S service, @UserIdInt int userId) {
     }
 
     /**
