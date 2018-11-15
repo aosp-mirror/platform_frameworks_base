@@ -233,34 +233,35 @@ public class PhoneStateListener {
     public static final int LISTEN_CARRIER_NETWORK_CHANGE                   = 0x00010000;
 
     /**
-     *  Listen for changes to the sim voice activation state
-     *  @see TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATING
-     *  @see TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATED
-     *  @see TelephonyManager#SIM_ACTIVATION_STATE_DEACTIVATED
-     *  @see TelephonyManager#SIM_ACTIVATION_STATE_RESTRICTED
-     *  @see TelephonyManager#SIM_ACTIVATION_STATE_UNKNOWN
-     *  {@more}
-     *  Example: TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATED indicates voice service has been
-     *  fully activated
+     * Listen for changes to the sim voice activation state
+     * @see TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATING
+     * @see TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATED
+     * @see TelephonyManager#SIM_ACTIVATION_STATE_DEACTIVATED
+     * @see TelephonyManager#SIM_ACTIVATION_STATE_RESTRICTED
+     * @see TelephonyManager#SIM_ACTIVATION_STATE_UNKNOWN
+     * {@more}
+     * Example: TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATED indicates voice service has been
+     * fully activated
      *
-     *  @see #onVoiceActivationStateChanged
-     *  @hide
+     * @see #onVoiceActivationStateChanged
+     * @hide
      */
+    @SystemApi
     public static final int LISTEN_VOICE_ACTIVATION_STATE                   = 0x00020000;
 
     /**
-     *  Listen for changes to the sim data activation state
-     *  @see TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATING
-     *  @see TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATED
-     *  @see TelephonyManager#SIM_ACTIVATION_STATE_DEACTIVATED
-     *  @see TelephonyManager#SIM_ACTIVATION_STATE_RESTRICTED
-     *  @see TelephonyManager#SIM_ACTIVATION_STATE_UNKNOWN
-     *  {@more}
-     *  Example: TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATED indicates data service has been
-     *  fully activated
+     * Listen for changes to the sim data activation state
+     * @see TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATING
+     * @see TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATED
+     * @see TelephonyManager#SIM_ACTIVATION_STATE_DEACTIVATED
+     * @see TelephonyManager#SIM_ACTIVATION_STATE_RESTRICTED
+     * @see TelephonyManager#SIM_ACTIVATION_STATE_UNKNOWN
+     * {@more}
+     * Example: TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATED indicates data service has been
+     * fully activated
      *
-     *  @see #onDataActivationStateChanged
-     *  @hide
+     * @see #onDataActivationStateChanged
+     * @hide
      */
     public static final int LISTEN_DATA_ACTIVATION_STATE                   = 0x00040000;
 
@@ -569,8 +570,8 @@ public class PhoneStateListener {
      * @param state is the current SIM voice activation state
      * @hide
      */
-    public void onVoiceActivationStateChanged(int state) {
-
+    @SystemApi
+    public void onVoiceActivationStateChanged(@TelephonyManager.SimActivationState int state) {
     }
 
     /**
@@ -578,8 +579,7 @@ public class PhoneStateListener {
      * @param state is the current SIM data activation state
      * @hide
      */
-    public void onDataActivationStateChanged(int state) {
-
+    public void onDataActivationStateChanged(@TelephonyManager.SimActivationState int state) {
     }
 
     /**
