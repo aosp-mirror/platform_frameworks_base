@@ -301,11 +301,11 @@ void MethodBuilder::EncodeInstruction(const Instruction& instruction) {
 void MethodBuilder::EncodeReturn(const Instruction& instruction, ::art::Instruction::Code opcode) {
   DCHECK(!instruction.dest().has_value());
   if (instruction.args().size() == 0) {
-    buffer_.push_back(art::Instruction::RETURN_VOID);
+    Encode10x(art::Instruction::RETURN_VOID);
   } else {
     DCHECK_EQ(1, instruction.args().size());
     size_t source = RegisterValue(instruction.args()[0]);
-    buffer_.push_back(opcode | source << 8);
+    Encode11x(opcode, source);
   }
 }
 
@@ -320,44 +320,40 @@ void MethodBuilder::EncodeMove(const Instruction& instruction) {
   if (source.is_immediate()) {
     // TODO: support more registers
     DCHECK_LT(RegisterValue(*instruction.dest()), 16);
-    DCHECK_LT(source.value(), 16);
-    buffer_.push_back(art::Instruction::CONST_4 | (source.value() << 12) |
-                      (RegisterValue(*instruction.dest()) << 8));
+    Encode11n(art::Instruction::CONST_4, RegisterValue(*instruction.dest()), source.value());
   } else if (source.is_string()) {
     constexpr size_t kMaxRegisters = 256;
     DCHECK_LT(RegisterValue(*instruction.dest()), kMaxRegisters);
     DCHECK_LT(source.value(), 65536);  // make sure we don't need a jumbo string
-    buffer_.push_back(::art::Instruction::CONST_STRING | (RegisterValue(*instruction.dest()) << 8));
-    buffer_.push_back(source.value());
+    Encode21c(::art::Instruction::CONST_STRING, RegisterValue(*instruction.dest()), source.value());
   } else {
     UNIMPLEMENTED(FATAL);
   }
 }
 
 void MethodBuilder::EncodeInvoke(const Instruction& instruction, ::art::Instruction::Code opcode) {
-  // TODO: support more than one argument (i.e. the this argument) and change this to DCHECK_GE
-  DCHECK_LE(4, instruction.args().size());
-  // So far we only support the 4-bit length field, so we support at most 15 arguments, even if we
-  // remove the earlier limits.
-  DCHECK_LT(16, instruction.args().size());
+  constexpr size_t kMaxArgs = 5;
 
-  buffer_.push_back(instruction.args().size() << 12 | opcode);
-  buffer_.push_back(instruction.method_id());
+  CHECK_LE(instruction.args().size(), kMaxArgs);
 
-  // Encode up to four arguments
-  ::dex::u2 args = 0;
-  size_t arg_shift = 0;
-  for (const auto& arg : instruction.args()) {
-    DCHECK(arg.is_variable());
-    args |= (0xf & RegisterValue(arg)) << arg_shift;
-    arg_shift += 4;
+  uint8_t arguments[kMaxArgs]{};
+  for (size_t i = 0; i < instruction.args().size(); ++i) {
+    CHECK(instruction.args()[i].is_variable());
+    arguments[i] = RegisterValue(instruction.args()[i]);
   }
-  buffer_.push_back(args);
+
+  Encode35c(opcode,
+            instruction.args().size(),
+            instruction.method_id(),
+            arguments[0],
+            arguments[1],
+            arguments[2],
+            arguments[3],
+            arguments[4]);
 
   // If there is a return value, add a move-result instruction
   if (instruction.dest().has_value()) {
-    size_t real_reg = RegisterValue(*instruction.dest());
-    buffer_.push_back(real_reg << 8 | art::Instruction::MOVE_RESULT);
+    Encode11x(art::Instruction::MOVE_RESULT, RegisterValue(*instruction.dest()));
   }
 
   max_args_ = std::max(max_args_, instruction.args().size());
@@ -373,9 +369,9 @@ void MethodBuilder::EncodeBranch(art::Instruction::Code op, const Instruction& i
   CHECK(branch_target.is_label());
 
   size_t instruction_offset = buffer_.size();
-  buffer_.push_back(op | (RegisterValue(test_value) << 8));
-  size_t field_offset = buffer_.size();
-  buffer_.push_back(LabelValue(branch_target, instruction_offset, field_offset));
+  size_t field_offset = buffer_.size() + 1;
+  Encode21c(
+      op, RegisterValue(test_value), LabelValue(branch_target, instruction_offset, field_offset));
 }
 
 void MethodBuilder::EncodeNew(const Instruction& instruction) {
@@ -387,8 +383,7 @@ void MethodBuilder::EncodeNew(const Instruction& instruction) {
   const Value& type = instruction.args()[0];
   DCHECK_LT(RegisterValue(*instruction.dest()), 256);
   DCHECK(type.is_type());
-  buffer_.push_back(::art::Instruction::NEW_INSTANCE | (RegisterValue(*instruction.dest()) << 8));
-  buffer_.push_back(type.value());
+  Encode21c(::art::Instruction::NEW_INSTANCE, RegisterValue(*instruction.dest()), type.value());
 }
 
 size_t MethodBuilder::RegisterValue(const Value& value) const {
