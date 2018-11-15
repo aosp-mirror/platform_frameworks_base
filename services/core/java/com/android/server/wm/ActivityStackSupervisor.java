@@ -145,6 +145,7 @@ import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.power.V1_0.PowerHint;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.FactoryTest;
@@ -835,9 +836,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         final boolean supportMultipleInstance = homeInfo.launchMode != LAUNCH_SINGLE_TASK
-                && homeInfo.launchMode != LAUNCH_SINGLE_INSTANCE;
+                && homeInfo.launchMode != LAUNCH_SINGLE_INSTANCE
+                && homeInfo.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q;
         if (!supportMultipleInstance) {
-            // Can't launch home on other displays if it requested to be single instance.
+            // Can't launch home on other displays if it requested to be single instance. Also we
+            // don't allow home applications that target before Q to have multiple home activity
+            // instances because they may not be expected to have multiple home scenario and
+            // haven't explicitly request for single instance.
             return false;
         }
 
