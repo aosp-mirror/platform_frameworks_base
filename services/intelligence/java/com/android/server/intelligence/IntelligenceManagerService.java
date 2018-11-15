@@ -78,6 +78,15 @@ public final class IntelligenceManagerService
         publishLocalService(IntelligenceManagerInternal.class, mLocalService);
     }
 
+    @Override // from AbstractMasterSystemService
+    protected IntelligencePerUserService removeCachedServiceLocked(int userId) {
+        final IntelligencePerUserService service = super.removeCachedServiceLocked(userId);
+        if (service != null) {
+            service.destroyLocked();
+        }
+        return service;
+    }
+
     private ActivityManagerInternal getAmInternal() {
         synchronized (mLock) {
             if (mAm == null) {
