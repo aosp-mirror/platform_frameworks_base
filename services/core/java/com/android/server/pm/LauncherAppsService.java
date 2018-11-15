@@ -362,7 +362,7 @@ public class LauncherAppsService extends SystemService {
         }
 
         private static boolean shouldShowHiddenApp(ApplicationInfo appInfo) {
-            if (appInfo.isSystemApp() || appInfo.isUpdatedSystemApp()) {
+            if (appInfo == null || appInfo.isSystemApp() || appInfo.isUpdatedSystemApp()) {
                 return false;
             }
             return true;
