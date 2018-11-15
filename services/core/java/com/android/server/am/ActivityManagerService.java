@@ -7004,7 +7004,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mCoreSettingsObserver = new CoreSettingsObserver(this);
         mActivityTaskManager.installSystemProviders();
         mDevelopmentSettingsObserver = new DevelopmentSettingsObserver();
-        GlobalSettingsToPropertiesMapper.start(mContext.getContentResolver());
+        SettingsToPropertiesMapper.start(mContext.getContentResolver());
 
         // Now that the settings provider is published we can consider sending
         // in a rescue party.
