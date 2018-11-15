@@ -3577,6 +3577,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    void setRotateForApp(int displayId, boolean enabled) {
+        synchronized (mGlobalLock) {
+            final DisplayContent display = mRoot.getDisplayContent(displayId);
+            if (display == null) {
+                Slog.w(TAG, "Trying to set rotate for app for a missing display.");
+                return;
+            }
+            display.getDisplayRotation().setFixedToUserRotation(enabled);
+        }
+    }
+
     @Override
     public void freezeRotation(int rotation) {
         freezeDisplayRotation(Display.DEFAULT_DISPLAY, rotation);
@@ -5383,7 +5394,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             displayContent.updateDisplayInfo();
             screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
-                    displayContent.getDisplayRotation().isDefaultOrientationForced(), isSecure,
+                    displayContent.getDisplayRotation().isFixedToUserRotation(), isSecure,
                     this);
             mAnimator.setScreenRotationAnimationLocked(mFrozenDisplayId,
                     screenRotationAnimation);
