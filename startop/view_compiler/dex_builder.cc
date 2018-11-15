@@ -58,11 +58,17 @@ std::ostream& operator<<(std::ostream& out, const Instruction::Op& opcode) {
     case Instruction::Op::kInvokeVirtual:
       out << "kInvokeVirtual";
       return out;
+    case Instruction::Op::kInvokeDirect:
+      out << "kInvokeDirect";
+      return out;
     case Instruction::Op::kBindLabel:
       out << "kBindLabel";
       return out;
     case Instruction::Op::kBranchEqz:
       out << "kBranchEqz";
+      return out;
+    case Instruction::Op::kNew:
+      out << "kNew";
       return out;
   }
 }
@@ -167,6 +173,8 @@ ir::Type* DexBuilder::GetOrAddType(const std::string& descriptor) {
   ir::Type* type = Alloc<ir::Type>();
   type->descriptor = GetOrAddString(descriptor);
   types_by_descriptor_[descriptor] = type;
+  type->orig_index = dex_file_->types_indexes.AllocateIndex();
+  dex_file_->types_map[type->orig_index] = type;
   return type;
 }
 
@@ -223,9 +231,10 @@ ir::EncodedMethod* MethodBuilder::Encode() {
       decl_->prototype->param_types != nullptr ? decl_->prototype->param_types->types.size() : 0;
   code->registers = num_registers_ + num_args;
   code->ins_count = num_args;
-  code->outs_count = decl_->prototype->return_type == dex_->GetOrAddType("V") ? 0 : 1;
   EncodeInstructions();
   code->instructions = slicer::ArrayView<const ::dex::u2>(buffer_.data(), buffer_.size());
+  size_t const return_count = decl_->prototype->return_type == dex_->GetOrAddType("V") ? 0 : 1;
+  code->outs_count = std::max(return_count, max_args_);
   method->code = code;
 
   class_->direct_methods.push_back(method);
@@ -277,11 +286,15 @@ void MethodBuilder::EncodeInstruction(const Instruction& instruction) {
     case Instruction::Op::kMove:
       return EncodeMove(instruction);
     case Instruction::Op::kInvokeVirtual:
-      return EncodeInvokeVirtual(instruction);
+      return EncodeInvoke(instruction, art::Instruction::INVOKE_VIRTUAL);
+    case Instruction::Op::kInvokeDirect:
+      return EncodeInvoke(instruction, art::Instruction::INVOKE_DIRECT);
     case Instruction::Op::kBindLabel:
       return BindLabel(instruction.args()[0]);
     case Instruction::Op::kBranchEqz:
       return EncodeBranch(art::Instruction::IF_EQZ, instruction);
+    case Instruction::Op::kNew:
+      return EncodeNew(instruction);
   }
 }
 
@@ -321,23 +334,33 @@ void MethodBuilder::EncodeMove(const Instruction& instruction) {
   }
 }
 
-void MethodBuilder::EncodeInvokeVirtual(const Instruction& instruction) {
-  DCHECK_EQ(Instruction::Op::kInvokeVirtual, instruction.opcode());
-
+void MethodBuilder::EncodeInvoke(const Instruction& instruction, ::art::Instruction::Code opcode) {
   // TODO: support more than one argument (i.e. the this argument) and change this to DCHECK_GE
-  DCHECK_EQ(1, instruction.args().size());
+  DCHECK_LE(4, instruction.args().size());
+  // So far we only support the 4-bit length field, so we support at most 15 arguments, even if we
+  // remove the earlier limits.
+  DCHECK_LT(16, instruction.args().size());
 
-  const Value& this_arg = instruction.args()[0];
-
-  size_t real_reg = RegisterValue(this_arg) & 0xf;
-  buffer_.push_back(1 << 12 | art::Instruction::INVOKE_VIRTUAL);
+  buffer_.push_back(instruction.args().size() << 12 | opcode);
   buffer_.push_back(instruction.method_id());
-  buffer_.push_back(real_reg);
 
+  // Encode up to four arguments
+  ::dex::u2 args = 0;
+  size_t arg_shift = 0;
+  for (const auto& arg : instruction.args()) {
+    DCHECK(arg.is_variable());
+    args |= (0xf & RegisterValue(arg)) << arg_shift;
+    arg_shift += 4;
+  }
+  buffer_.push_back(args);
+
+  // If there is a return value, add a move-result instruction
   if (instruction.dest().has_value()) {
-    real_reg = RegisterValue(*instruction.dest());
+    size_t real_reg = RegisterValue(*instruction.dest());
     buffer_.push_back(real_reg << 8 | art::Instruction::MOVE_RESULT);
   }
+
+  max_args_ = std::max(max_args_, instruction.args().size());
 }
 
 // Encodes a conditional branch that tests a single argument.
@@ -353,6 +376,19 @@ void MethodBuilder::EncodeBranch(art::Instruction::Code op, const Instruction& i
   buffer_.push_back(op | (RegisterValue(test_value) << 8));
   size_t field_offset = buffer_.size();
   buffer_.push_back(LabelValue(branch_target, instruction_offset, field_offset));
+}
+
+void MethodBuilder::EncodeNew(const Instruction& instruction) {
+  DCHECK_EQ(Instruction::Op::kNew, instruction.opcode());
+  DCHECK(instruction.dest().has_value());
+  DCHECK(instruction.dest()->is_variable());
+  DCHECK_EQ(1, instruction.args().size());
+
+  const Value& type = instruction.args()[0];
+  DCHECK_LT(RegisterValue(*instruction.dest()), 256);
+  DCHECK(type.is_type());
+  buffer_.push_back(::art::Instruction::NEW_INSTANCE | (RegisterValue(*instruction.dest()) << 8));
+  buffer_.push_back(type.value());
 }
 
 size_t MethodBuilder::RegisterValue(const Value& value) const {

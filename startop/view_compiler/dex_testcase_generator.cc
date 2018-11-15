@@ -53,6 +53,19 @@ void GenerateSimpleTestCases(const string& outdir) {
   }
   return5.Encode();
 
+  // int return5() { return 5; }
+  auto integer_type{TypeDescriptor::FromClassname("java.lang.Integer")};
+  auto returnInteger5{cbuilder.CreateMethod("returnInteger5", Prototype{integer_type})};
+  [&](MethodBuilder& method) {
+    Value five{method.MakeRegister()};
+    method.BuildConst4(five, 5);
+    Value object{method.MakeRegister()};
+    method.BuildNew(
+        object, integer_type, Prototype{TypeDescriptor::Void(), TypeDescriptor::Int()}, five);
+    method.BuildReturn(object, /*is_object=*/true);
+  }(returnInteger5);
+  returnInteger5.Encode();
+
   // // int returnParam(int x) { return x; }
   auto returnParam{cbuilder.CreateMethod("returnParam",
                                          Prototype{TypeDescriptor::Int(), TypeDescriptor::Int()})};
