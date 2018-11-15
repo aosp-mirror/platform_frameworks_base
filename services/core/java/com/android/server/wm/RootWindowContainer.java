@@ -122,7 +122,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
     // The ID of the display which is responsible for receiving display-unspecified key and pointer
     // events.
-    private int mTopFocusedDisplayId = INVALID_DISPLAY;
+    int mTopFocusedDisplayId = INVALID_DISPLAY;
 
     // Only a seperate transaction until we seperate the apply surface changes
     // transaction from the global transaction.
@@ -156,7 +156,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
         boolean changed = false;
         int topFocusedDisplayId = INVALID_DISPLAY;
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
+
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
             final DisplayContent dc = mChildren.get(i);
             changed |= dc.updateFocusedWindowLocked(mode, updateInputWindows,
                     topFocusedDisplayId != INVALID_DISPLAY /* focusFound */);
@@ -167,12 +168,35 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         if (topFocusedDisplayId == INVALID_DISPLAY) {
             topFocusedDisplayId = DEFAULT_DISPLAY;
         }
+        // TODO(b/118865114): Review if need callback top focus display change to view component.
+        // (i.e. Activity or View)
+        // Currently we only tracked topFocusedDisplayChanged for notifying InputMethodManager via
+        // ViewRootImpl.windowFocusChanged to refocus IME window when top display focus changed
+        // but window focus remain the same case.
+        // It may need to review if any use case that need to add new callback for reporting
+        // this change.
+        final boolean topFocusedDisplayChanged =
+                mTopFocusedDisplayId != topFocusedDisplayId && mode == UPDATE_FOCUS_NORMAL;
         if (mTopFocusedDisplayId != topFocusedDisplayId) {
             mTopFocusedDisplayId = topFocusedDisplayId;
-            mService.mInputManager.setFocusedDisplay(topFocusedDisplayId);
+            mService.mInputManager.setFocusedDisplay(mTopFocusedDisplayId);
             if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "New topFocusedDisplayId="
-                    + topFocusedDisplayId);
+                    + mTopFocusedDisplayId);
         }
+
+        // Report window focus or top display focus changed through REPORT_FOCUS_CHANGE.
+        forAllDisplays((dc) -> {
+            final boolean windowFocusChanged =
+                    dc.mCurrentFocus != null && dc.mCurrentFocus != dc.mLastFocus;
+            final boolean isTopFocusedDisplay =
+                    topFocusedDisplayChanged && dc.getDisplayId() == mTopFocusedDisplayId;
+            if (windowFocusChanged || isTopFocusedDisplay) {
+                final Message msg = mService.mH.obtainMessage(
+                        WindowManagerService.H.REPORT_FOCUS_CHANGE, dc);
+                msg.arg1 = topFocusedDisplayChanged ? 1 : 0;
+                mService.mH.sendMessage(msg);
+            }
+        });
         final WindowState topFocusedWindow = getTopFocusedDisplayContent().mCurrentFocus;
         mService.mInputManager.setFocusedWindow(
                 topFocusedWindow != null ? topFocusedWindow.mInputWindowHandle : null);

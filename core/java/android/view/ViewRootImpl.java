@@ -2695,7 +2695,7 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void handleWindowFocusChanged() {
+    private void handleWindowFocusChanged(boolean reportToClient) {
         final boolean hasWindowFocus;
         final boolean inTouchMode;
         synchronized (this) {
@@ -2730,8 +2730,9 @@ public final class ViewRootImpl implements ViewParent,
                         } catch (RemoteException ex) {
                         }
                         // Retry in a bit.
-                        mHandler.sendMessageDelayed(mHandler.obtainMessage(
-                                MSG_WINDOW_FOCUS_CHANGED), 500);
+                        final Message msg = mHandler.obtainMessage(MSG_WINDOW_FOCUS_CHANGED);
+                        msg.arg1 = reportToClient ? 1 : 0;
+                        mHandler.sendMessageDelayed(msg, 500);
                         return;
                     }
                 }
@@ -2748,9 +2749,15 @@ public final class ViewRootImpl implements ViewParent,
             }
             if (mView != null) {
                 mAttachInfo.mKeyDispatchState.reset();
-                mView.dispatchWindowFocusChanged(hasWindowFocus);
-                mAttachInfo.mTreeObserver.dispatchOnWindowFocusChange(hasWindowFocus);
-
+                // We dispatch onWindowFocusChanged to child view only when window is gaining /
+                // losing focus.
+                // If the focus is updated from top display change but window focus on the display
+                // remains unchanged, will not callback onWindowFocusChanged again since it may
+                // be redundant & can affect the state when it callbacks.
+                if (reportToClient) {
+                    mView.dispatchWindowFocusChanged(hasWindowFocus);
+                    mAttachInfo.mTreeObserver.dispatchOnWindowFocusChange(hasWindowFocus);
+                }
                 if (mAttachInfo.mTooltipHost != null) {
                     mAttachInfo.mTooltipHost.hideTooltip();
                 }
@@ -4340,7 +4347,7 @@ public final class ViewRootImpl implements ViewParent,
                     }
                     break;
                 case MSG_WINDOW_FOCUS_CHANGED: {
-                    handleWindowFocusChanged();
+                    handleWindowFocusChanged(msg.arg1 != 0 /* reportToClient */);
                 } break;
                 case MSG_DIE:
                     doDie();
@@ -7263,7 +7270,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (stage != null) {
-            handleWindowFocusChanged();
+            handleWindowFocusChanged(true /* reportToClient */);
             stage.deliver(q);
         } else {
             finishInputEvent(q);
@@ -7580,6 +7587,11 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) {
+        windowFocusChanged(hasFocus, inTouchMode, true /* reportToClient */);
+    }
+
+    public void windowFocusChanged(boolean hasFocus, boolean inTouchMode,
+            boolean reportToClient) {
         synchronized (this) {
             mWindowFocusChanged = true;
             mUpcomingWindowFocus = hasFocus;
@@ -7587,6 +7599,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         Message msg = Message.obtain();
         msg.what = MSG_WINDOW_FOCUS_CHANGED;
+        msg.arg1 = reportToClient ? 1 : 0;
         mHandler.sendMessage(msg);
     }
 
@@ -8131,10 +8144,11 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) {
+        public void windowFocusChanged(boolean hasFocus, boolean inTouchMode,
+                boolean reportToClient) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.windowFocusChanged(hasFocus, inTouchMode);
+                viewAncestor.windowFocusChanged(hasFocus, inTouchMode, reportToClient);
             }
         }
 
