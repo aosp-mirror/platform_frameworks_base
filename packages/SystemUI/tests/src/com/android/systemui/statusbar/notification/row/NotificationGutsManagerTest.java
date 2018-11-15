@@ -284,7 +284,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
 
-        mGutsManager.initializeNotificationInfo(row, notificationInfoView);
+        mGutsManager.initializeNotificationInfo(row, notificationInfoView,
+                NotificationInfo.ACTION_NONE);
 
         verify(notificationInfoView).bindNotification(
                 any(PackageManager.class),
@@ -301,7 +302,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(true) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
                 eq(false) /*isNoisy */,
-                eq(0));
+                eq(0),
+                eq(NotificationInfo.ACTION_NONE));
     }
 
     @Test
@@ -313,7 +315,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
 
-        mGutsManager.initializeNotificationInfo(row, notificationInfoView);
+        mGutsManager.initializeNotificationInfo(row, notificationInfoView,
+                NotificationInfo.ACTION_NONE);
 
         verify(notificationInfoView).bindNotification(
                 any(PackageManager.class),
@@ -330,7 +333,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
                 eq(false) /*isNoisy */,
-                eq(0));
+                eq(0),
+                eq(NotificationInfo.ACTION_NONE));
     }
 
     @Test
@@ -343,7 +347,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
 
-        mGutsManager.initializeNotificationInfo(row, notificationInfoView);
+        mGutsManager.initializeNotificationInfo(row, notificationInfoView,
+                NotificationInfo.ACTION_NONE);
 
         verify(notificationInfoView).bindNotification(
                 any(PackageManager.class),
@@ -360,7 +365,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(true) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
                 eq(true) /*isNoisy */,
-                eq(0));
+                eq(0),
+                eq(NotificationInfo.ACTION_NONE));
     }
 
     @Test
@@ -373,7 +379,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
 
-        mGutsManager.initializeNotificationInfo(row, notificationInfoView);
+        mGutsManager.initializeNotificationInfo(row, notificationInfoView,
+                NotificationInfo.ACTION_NONE);
 
         verify(notificationInfoView).bindNotification(
                 any(PackageManager.class),
@@ -390,7 +397,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(true) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
                 eq(false) /*isNoisy */,
-                eq(IMPORTANCE_DEFAULT));
+                eq(IMPORTANCE_DEFAULT),
+                eq(NotificationInfo.ACTION_NONE));
     }
 
     @Test
@@ -403,7 +411,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
 
-        mGutsManager.initializeNotificationInfo(row, notificationInfoView);
+        mGutsManager.initializeNotificationInfo(row, notificationInfoView,
+                NotificationInfo.ACTION_NONE);
 
         verify(notificationInfoView).bindNotification(
                 any(PackageManager.class),
@@ -420,7 +429,39 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
                 eq(false) /*isNoisy */,
-                eq(0));
+                eq(0),
+                eq(NotificationInfo.ACTION_NONE));
+    }
+
+    @Test
+    public void testInitializeNotificationInfoView_withInitialAction() throws Exception {
+        NotificationInfo notificationInfoView = mock(NotificationInfo.class);
+        ExpandableNotificationRow row = spy(mHelper.createRow());
+        row.setBlockingHelperShowing(true);
+        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        when(row.getIsNonblockable()).thenReturn(false);
+        StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+
+        mGutsManager.initializeNotificationInfo(row, notificationInfoView,
+                NotificationInfo.ACTION_BLOCK);
+
+        verify(notificationInfoView).bindNotification(
+                any(PackageManager.class),
+                any(INotificationManager.class),
+                eq(statusBarNotification.getPackageName()),
+                any(NotificationChannel.class),
+                anyInt(),
+                eq(statusBarNotification),
+                any(NotificationInfo.CheckSaveListener.class),
+                any(NotificationInfo.OnSettingsClickListener.class),
+                any(NotificationInfo.OnAppSettingsClickListener.class),
+                eq(false),
+                eq(false),
+                eq(true) /* isForBlockingHelper */,
+                eq(true) /* isUserSentimentNegative */,
+                eq(false) /*isNoisy */,
+                eq(0),
+                eq(NotificationInfo.ACTION_BLOCK));
     }
 
     @Test
