@@ -764,7 +764,7 @@ public final class ContextHubManager {
 
         IContextHubClient clientProxy;
         try {
-            clientProxy = mService.createClient(clientInterface, hubInfo.getId());
+            clientProxy = mService.createClient(hubInfo.getId(), clientInterface);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
