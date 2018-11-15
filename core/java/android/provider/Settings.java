@@ -10324,6 +10324,18 @@ public final class Settings {
         private static final Validator WIFI_PNO_FREQUENCY_CULLING_ENABLED_VALIDATOR =
                 BOOLEAN_VALIDATOR;
 
+        /**
+         * Setting to enable including recency information when determining pno network priorities.
+         * Disabled by default, and setting it to 1 will enable it.
+         * The value is boolean (0 or 1).
+         * @hide
+         */
+        public static final String WIFI_PNO_RECENCY_SORTING_ENABLED =
+                "wifi_pno_recency_sorting_enabled";
+
+        private static final Validator WIFI_PNO_RECENCY_SORTING_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
        /**
         * The maximum number of times we will retry a connection to an access
         * point for which we have failed in acquiring an IP address from DHCP.
@@ -12799,6 +12811,8 @@ public final class Settings {
             VALIDATORS.put(DEVICE_DEMO_MODE, BOOLEAN_VALIDATOR);
             VALIDATORS.put(WIFI_PNO_FREQUENCY_CULLING_ENABLED,
                     WIFI_PNO_FREQUENCY_CULLING_ENABLED_VALIDATOR);
+            VALIDATORS.put(WIFI_PNO_RECENCY_SORTING_ENABLED,
+                    WIFI_PNO_RECENCY_SORTING_ENABLED_VALIDATOR);
         }
 
         /**
