@@ -261,7 +261,7 @@ void EglManager::createPBufferSurface() {
     }
 }
 
-EGLSurface EglManager::createSurface(EGLNativeWindowType window, ColorMode colorMode) {
+Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window, ColorMode colorMode) {
     LOG_ALWAYS_FATAL_IF(!hasEglContext(), "Not initialized");
 
     bool wideColorGamut = colorMode == ColorMode::WideColorGamut && EglExtensions.glColorSpace &&
@@ -311,9 +311,9 @@ EGLSurface EglManager::createSurface(EGLNativeWindowType window, ColorMode color
 
     EGLSurface surface = eglCreateWindowSurface(
             mEglDisplay, wideColorGamut ? mEglConfigWideGamut : mEglConfig, window, attribs);
-    LOG_ALWAYS_FATAL_IF(surface == EGL_NO_SURFACE,
-                        "Failed to create EGLSurface for window %p, eglErr = %s", (void*)window,
-                        eglErrorString());
+    if (surface == EGL_NO_SURFACE) {
+        return Error<EGLint> { eglGetError() };
+    }
 
     if (mSwapBehavior != SwapBehavior::Preserved) {
         LOG_ALWAYS_FATAL_IF(eglSurfaceAttrib(mEglDisplay, surface, EGL_SWAP_BEHAVIOR,

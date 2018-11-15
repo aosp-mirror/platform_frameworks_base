@@ -25,6 +25,7 @@
 #include <ui/GraphicBuffer.h>
 #include <utils/StrongPointer.h>
 #include "IRenderPipeline.h"
+#include "utils/Result.h"
 
 namespace android {
 namespace uirenderer {
@@ -47,7 +48,7 @@ public:
 
     bool hasEglContext();
 
-    EGLSurface createSurface(EGLNativeWindowType window, ColorMode colorMode);
+    Result<EGLSurface, EGLint> createSurface(EGLNativeWindowType window, ColorMode colorMode);
     void destroySurface(EGLSurface surface);
 
     void destroy();
