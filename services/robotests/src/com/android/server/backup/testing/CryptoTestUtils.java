@@ -17,6 +17,8 @@
 package com.android.server.backup.testing;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Random;
+
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
@@ -31,5 +33,13 @@ public class CryptoTestUtils {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM);
         keyGenerator.init(KEY_SIZE_BITS);
         return keyGenerator.generateKey();
+    }
+
+    /** Generates a byte array of size {@code n} containing random bytes. */
+    public static byte[] generateRandomBytes(int n) {
+        byte[] bytes = new byte[n];
+        Random random = new Random();
+        random.nextBytes(bytes);
+        return bytes;
     }
 }
