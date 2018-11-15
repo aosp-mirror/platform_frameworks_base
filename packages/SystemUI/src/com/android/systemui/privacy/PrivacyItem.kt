@@ -23,9 +23,9 @@ import com.android.systemui.R
 typealias Privacy = PrivacyType
 
 enum class PrivacyType(val nameId: Int, val iconId: Int) {
-    TYPE_CAMERA(R.string.privacy_type_camera, com.android.internal.R.drawable.ic_camera),
+    TYPE_CAMERA(R.string.privacy_type_camera, R.drawable.stat_sys_camera),
     TYPE_LOCATION(R.string.privacy_type_location, R.drawable.stat_sys_location),
-    TYPE_MICROPHONE(R.string.privacy_type_microphone, R.drawable.ic_mic_26dp);
+    TYPE_MICROPHONE(R.string.privacy_type_microphone, R.drawable.stat_sys_mic_none);
 
     fun getName(context: Context) = context.resources.getString(nameId)
 
