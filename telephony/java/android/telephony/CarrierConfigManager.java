@@ -1320,18 +1320,13 @@ public class CarrierConfigManager {
     public static final String KEY_MMS_CLOSE_CONNECTION_BOOL = "mmsCloseConnection";
 
     /**
-     * If carriers require differentiate un-provisioned status: cold sim or out of credit sim
-     * a package name and activity name can be provided to launch a supported carrier application
-     * that check the sim provisioning status
-     * The first element is the package name and the second element is the activity name
-     * of the provisioning app
-     * example:
-     * <item>com.google.android.carrierPackageName</item>
-     * <item>com.google.android.carrierPackageName.CarrierActivityName</item>
-     * The ComponentName of the carrier activity that can setup the device and activate with the
-     * network as part of the Setup Wizard flow.
+     * The flatten {@link android.content.ComponentName componentName} of the activity that can
+     * setup the device and activate with the network per carrier requirements.
+     *
+     * e.g, com.google.android.carrierPackageName/.CarrierActivityName
      * @hide
      */
+    @SystemApi
     public static final String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
 
     /**
