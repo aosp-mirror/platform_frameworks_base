@@ -104,7 +104,6 @@ import com.android.server.SystemService;
 import com.android.server.backup.fullbackup.FullBackupEntry;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
 import com.android.server.backup.internal.BackupHandler;
-import com.android.server.backup.keyvalue.BackupRequest;
 import com.android.server.backup.internal.ClearDataObserver;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.internal.Operation;
@@ -112,6 +111,7 @@ import com.android.server.backup.internal.PerformInitializeTask;
 import com.android.server.backup.internal.ProvisionedObserver;
 import com.android.server.backup.internal.RunBackupReceiver;
 import com.android.server.backup.internal.RunInitializeReceiver;
+import com.android.server.backup.keyvalue.BackupRequest;
 import com.android.server.backup.params.AdbBackupParams;
 import com.android.server.backup.params.AdbParams;
 import com.android.server.backup.params.AdbRestoreParams;
@@ -160,7 +160,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BackupManagerService {
-
     public static final String TAG = "BackupManagerService";
     public static final boolean DEBUG = true;
     public static final boolean MORE_DEBUG = false;
@@ -169,6 +168,9 @@ public class BackupManagerService {
     // File containing backup-enabled state.  Contains a single byte;
     // nonzero == enabled.  File missing or contains a zero byte == disabled.
     private static final String BACKUP_ENABLE_FILE = "backup_enabled";
+
+    // Persistently track the need to do a full init.
+    private static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
 
     // System-private key used for backing up an app's widget state.  Must
     // begin with U+FFxx by convention (we reserve all keys starting
@@ -196,11 +198,16 @@ public class BackupManagerService {
     public static final int BACKUP_METADATA_VERSION = 1;
     public static final int BACKUP_WIDGET_METADATA_TOKEN = 0x01FFED01;
 
-    private static final boolean COMPRESS_FULL_BACKUPS = true; // should be true in production
+    private static final int CURRENT_ANCESTRAL_RECORD_VERSION = 1;
+
+    // Round-robin queue for scheduling full backup passes.
+    private static final int SCHEDULE_FILE_VERSION = 1;
 
     public static final String SETTINGS_PACKAGE = "com.android.providers.settings";
     public static final String SHARED_BACKUP_AGENT_PACKAGE = "com.android.sharedstoragebackup";
-    private static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
+
+    // Pseudoname that we use for the Package Manager metadata "package".
+    public static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
 
     // Retry interval for clear/init when the transport is unavailable
     private static final long TRANSPORT_RETRY_INTERVAL = 1 * AlarmManager.INTERVAL_HOUR;
@@ -209,6 +216,21 @@ public class BackupManagerService {
     public static final String RUN_INITIALIZE_ACTION = "android.app.backup.intent.INIT";
     public static final String BACKUP_FINISHED_ACTION = "android.intent.action.BACKUP_FINISHED";
     public static final String BACKUP_FINISHED_PACKAGE_EXTRA = "packageName";
+
+    // Bookkeeping of in-flight operations. The operation token is the index of the entry in the
+    // pending operations list.
+    public static final int OP_PENDING = 0;
+    private static final int OP_ACKNOWLEDGED = 1;
+    private static final int OP_TIMEOUT = -1;
+
+    // Waiting for backup agent to respond during backup operation.
+    public static final int OP_TYPE_BACKUP_WAIT = 0;
+
+    // Waiting for backup agent to respond during restore operation.
+    public static final int OP_TYPE_RESTORE_WAIT = 1;
+
+    // An entire backup operation spanning multiple packages.
+    public static final int OP_TYPE_BACKUP = 2;
 
     // Time delay for initialization operations that can be delayed so as not to consume too much CPU
     // on bring-up and increase time-to-UI.
@@ -226,8 +248,62 @@ public class BackupManagerService {
     private static final long BUSY_BACKOFF_MIN_MILLIS = 1000 * 60 * 60;  // one hour
     private static final int BUSY_BACKOFF_FUZZ = 1000 * 60 * 60 * 2;  // two hours
 
-    private BackupManagerConstants mConstants;
+    // The published binder is a singleton Trampoline object that calls through to the proper code.
+    // This indirection lets us turn down the heavy implementation object on the fly without
+    // disturbing binders that have been cached elsewhere in the system.
+    private static Trampoline sInstance;
+
+    static Trampoline getInstance() {
+        // Always constructed during system bring up, so no need to lazy-init.
+        return sInstance;
+    }
+
+    /** Helper to create the {@link BackupManagerService} instance. */
+    public static BackupManagerService create(
+            Context context,
+            Trampoline parent,
+            HandlerThread backupThread) {
+        // Set up our transport options and initialize the default transport
+        SystemConfig systemConfig = SystemConfig.getInstance();
+        Set<ComponentName> transportWhitelist = systemConfig.getBackupTransportWhitelist();
+        if (transportWhitelist == null) {
+            transportWhitelist = Collections.emptySet();
+        }
+
+        String transport =
+                Settings.Secure.getString(
+                        context.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT);
+        if (TextUtils.isEmpty(transport)) {
+            transport = null;
+        }
+        if (DEBUG) {
+            Slog.v(TAG, "Starting with transport " + transport);
+        }
+        TransportManager transportManager =
+                new TransportManager(
+                        context,
+                        transportWhitelist,
+                        transport);
+
+        // If encrypted file systems is enabled or disabled, this call will return the
+        // correct directory.
+        File baseStateDir = new File(Environment.getDataDirectory(), "backup");
+
+        // This dir on /cache is managed directly in init.rc
+        File dataDir = new File(Environment.getDownloadCacheDirectory(), "backup_stage");
+
+        return new BackupManagerService(
+                context,
+                parent,
+                backupThread,
+                baseStateDir,
+                dataDir,
+                transportManager);
+    }
+
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
+    private final TransportManager mTransportManager;
+
     private Context mContext;
     private PackageManager mPackageManager;
     private IPackageManager mPackageManagerBinder;
@@ -235,20 +311,21 @@ public class BackupManagerService {
     private PowerManager mPowerManager;
     private AlarmManager mAlarmManager;
     private IStorageManager mStorageManager;
+    private BackupManagerConstants mConstants;
+    private PowerManager.WakeLock mWakelock;
+    private BackupHandler mBackupHandler;
 
     private IBackupManager mBackupManagerBinder;
-
-    private final TransportManager mTransportManager;
 
     private boolean mEnabled;   // access to this is synchronized on 'this'
     private boolean mProvisioned;
     private boolean mAutoRestore;
-    private PowerManager.WakeLock mWakelock;
-    private BackupHandler mBackupHandler;
+
     private PendingIntent mRunBackupIntent;
     private PendingIntent mRunInitIntent;
-    private BroadcastReceiver mRunBackupReceiver;
-    private BroadcastReceiver mRunInitReceiver;
+
+    private final ArraySet<String> mPendingInits = new ArraySet<>();  // transport names
+
     // map UIDs to the set of participating packages under that UID
     private final SparseArray<HashSet<String>> mBackupParticipants
             = new SparseArray<>();
@@ -256,9 +333,6 @@ public class BackupManagerService {
     // Backups that we haven't started yet.  Keys are package names.
     private HashMap<String, BackupRequest> mPendingBackups
             = new HashMap<>();
-
-    // Pseudoname that we use for the Package Manager metadata "package"
-    public static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
 
     // locking around the pending-backup management
     private final Object mQueueLock = new Object();
@@ -269,25 +343,32 @@ public class BackupManagerService {
     // completed.
     private final Object mAgentConnectLock = new Object();
     private IBackupAgent mConnectedAgent;
-    private volatile boolean mBackupRunning;
     private volatile boolean mConnecting;
-    private volatile long mLastBackupPass;
 
-    // For debugging, we maintain a progress trace of operations during backup
-    public static final boolean DEBUG_BACKUP_TRACE = true;
-    private final List<String> mBackupTrace = new ArrayList<>();
+    private volatile boolean mBackupRunning;
+    private volatile long mLastBackupPass;
 
     // A similar synchronization mechanism around clearing apps' data for restore
     private final Object mClearDataLock = new Object();
     private volatile boolean mClearingData;
 
+    // Used by ADB.
     private final BackupPasswordManager mBackupPasswordManager;
+    private final SparseArray<AdbParams> mAdbBackupRestoreConfirmations = new SparseArray<>();
+    private final SecureRandom mRng = new SecureRandom();
 
     // Time when we post the transport registration operation
     private final long mRegisterTransportsRequestedTime;
 
+    @GuardedBy("mQueueLock")
+    private PerformFullTransportBackupTask mRunningFullBackupTask;
+
+    @GuardedBy("mQueueLock")
+    private ArrayList<FullBackupEntry> mFullBackupQueue;
+
     @GuardedBy("mPendingRestores")
     private boolean mIsRestoreInProgress;
+
     @GuardedBy("mPendingRestores")
     private final Queue<PerformUnifiedRestoreTask> mPendingRestores = new ArrayDeque<>();
 
@@ -296,16 +377,154 @@ public class BackupManagerService {
     // Watch the device provisioning operation during setup
     private ContentObserver mProvisionedObserver;
 
-    // The published binder is actually to a singleton trampoline object that calls
-    // through to the proper code.  This indirection lets us turn down the heavy
-    // implementation object on the fly without disturbing binders that have been
-    // cached elsewhere in the system.
-    static Trampoline sInstance;
+    /**
+     * mCurrentOperations contains the list of currently active operations.
+     *
+     * If type of operation is OP_TYPE_WAIT, it are waiting for an ack or timeout.
+     * An operation wraps a BackupRestoreTask within it.
+     * It's the responsibility of this task to remove the operation from this array.
+     *
+     * A BackupRestore task gets notified of ack/timeout for the operation via
+     * BackupRestoreTask#handleCancel, BackupRestoreTask#operationComplete and notifyAll called
+     * on the mCurrentOpLock.
+     * {@link BackupManagerService#waitUntilOperationComplete(int)} is
+     * used in various places to 'wait' for notifyAll and detect change of pending state of an
+     * operation. So typically, an operation will be removed from this array by:
+     * - BackupRestoreTask#handleCancel and
+     * - BackupRestoreTask#operationComplete OR waitUntilOperationComplete. Do not remove at both
+     * these places because waitUntilOperationComplete relies on the operation being present to
+     * determine its completion status.
+     *
+     * If type of operation is OP_BACKUP, it is a task running backups. It provides a handle to
+     * cancel backup tasks.
+     */
+    @GuardedBy("mCurrentOpLock")
+    private final SparseArray<Operation> mCurrentOperations = new SparseArray<>();
+    private final Object mCurrentOpLock = new Object();
+    private final Random mTokenGenerator = new Random();
+    final AtomicInteger mNextToken = new AtomicInteger();
 
-    static Trampoline getInstance() {
-        // Always constructed during system bringup, so no need to lazy-init
-        return sInstance;
+    // Where we keep our journal files and other bookkeeping.
+    private File mBaseStateDir;
+    private File mDataDir;
+    private File mJournalDir;
+    @Nullable
+    private DataChangedJournal mJournal;
+    private File mFullBackupScheduleFile;
+
+    // Keep a log of all the apps we've ever backed up.
+    private ProcessedPackagesJournal mProcessedPackagesJournal;
+
+    private File mTokenFile;
+    private Set<String> mAncestralPackages = null;
+    private long mAncestralToken = 0;
+    private long mCurrentToken = 0;
+
+    @VisibleForTesting
+    public BackupManagerService(
+            Context context,
+            Trampoline parent,
+            HandlerThread backupThread,
+            File baseStateDir,
+            File dataDir,
+            TransportManager transportManager) {
+        mContext = context;
+        mPackageManager = context.getPackageManager();
+        mPackageManagerBinder = AppGlobals.getPackageManager();
+        mActivityManager = ActivityManager.getService();
+
+        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mStorageManager = IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
+
+        mBackupManagerBinder = Trampoline.asInterface(parent.asBinder());
+
+        mAgentTimeoutParameters = new
+                BackupAgentTimeoutParameters(Handler.getMain(), mContext.getContentResolver());
+        mAgentTimeoutParameters.start();
+
+        // spin up the backup/restore handler thread
+        mBackupHandler = new BackupHandler(this, backupThread.getLooper());
+
+        // Set up our bookkeeping
+        final ContentResolver resolver = context.getContentResolver();
+        mProvisioned = Settings.Global.getInt(resolver,
+                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+        mAutoRestore = Settings.Secure.getInt(resolver,
+                Settings.Secure.BACKUP_AUTO_RESTORE, 1) != 0;
+
+        mProvisionedObserver = new ProvisionedObserver(this, mBackupHandler);
+        resolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
+                false, mProvisionedObserver);
+
+        mBaseStateDir = baseStateDir;
+        mBaseStateDir.mkdirs();
+        if (!SELinux.restorecon(mBaseStateDir)) {
+            Slog.e(TAG, "SELinux restorecon failed on " + mBaseStateDir);
+        }
+
+        mDataDir = dataDir;
+
+        mBackupPasswordManager = new BackupPasswordManager(mContext, mBaseStateDir, mRng);
+
+        // Alarm receivers for scheduled backups & initialization operations
+        BroadcastReceiver mRunBackupReceiver = new RunBackupReceiver(this);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(RUN_BACKUP_ACTION);
+        context.registerReceiver(mRunBackupReceiver, filter,
+                android.Manifest.permission.BACKUP, null);
+
+        BroadcastReceiver mRunInitReceiver = new RunInitializeReceiver(this);
+        filter = new IntentFilter();
+        filter.addAction(RUN_INITIALIZE_ACTION);
+        context.registerReceiver(mRunInitReceiver, filter,
+                android.Manifest.permission.BACKUP, null);
+
+        Intent backupIntent = new Intent(RUN_BACKUP_ACTION);
+        backupIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        mRunBackupIntent = PendingIntent.getBroadcast(context, 0, backupIntent, 0);
+
+        Intent initIntent = new Intent(RUN_INITIALIZE_ACTION);
+        initIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        mRunInitIntent = PendingIntent.getBroadcast(context, 0, initIntent, 0);
+
+        // Set up the backup-request journaling
+        mJournalDir = new File(mBaseStateDir, "pending");
+        mJournalDir.mkdirs();   // creates mBaseStateDir along the way
+        mJournal = null;        // will be created on first use
+
+        mConstants = new BackupManagerConstants(mBackupHandler, mContext.getContentResolver());
+        // We are observing changes to the constants throughout the lifecycle of BMS. This is
+        // because we reference the constants in multiple areas of BMS, which otherwise would
+        // require frequent starting and stopping.
+        mConstants.start();
+
+        // Set up the various sorts of package tracking we do
+        mFullBackupScheduleFile = new File(mBaseStateDir, "fb-schedule");
+        initPackageTracking();
+
+        // Build our mapping of uid to backup client services.  This implicitly
+        // schedules a backup pass on the Package Manager metadata the first
+        // time anything needs to be backed up.
+        synchronized (mBackupParticipants) {
+            addPackageParticipantsLocked(null);
+        }
+
+        mTransportManager = transportManager;
+        mTransportManager.setOnTransportRegisteredListener(this::onTransportRegistered);
+        mRegisterTransportsRequestedTime = SystemClock.elapsedRealtime();
+        mBackupHandler.postDelayed(
+                mTransportManager::registerTransports, INITIALIZATION_DELAY_MILLIS);
+
+        // Now that we know about valid backup participants, parse any leftover journal files into
+        // the pending backup set
+        mBackupHandler.postDelayed(this::parseLeftoverJournals, INITIALIZATION_DELAY_MILLIS);
+
+        // Power management
+        mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*");
     }
+
 
     public BackupManagerConstants getConstants() {
         return mConstants;
@@ -549,6 +768,7 @@ public class BackupManagerService {
         return mPendingInits;
     }
 
+    /** Clear all pending transport initializations. */
     public void clearPendingInits() {
         mPendingInits.clear();
     }
@@ -562,28 +782,10 @@ public class BackupManagerService {
         mRunningFullBackupTask = runningFullBackupTask;
     }
 
-    public static final class Lifecycle extends SystemService {
-
-        public Lifecycle(Context context) {
-            super(context);
-            sInstance = new Trampoline(context);
-        }
-
-        @Override
-        public void onStart() {
-            publishBinderService(Context.BACKUP_SERVICE, sInstance);
-        }
-
-        @Override
-        public void onUnlockUser(int userId) {
-            if (userId == UserHandle.USER_SYSTEM) {
-                sInstance.unlockSystemUser();
-            }
-        }
-    }
-
-    // Called through the trampoline from onUnlockUser(), then we buck the work
-    // off to the background thread to keep the unlock time down.
+    /**
+     * Called through Trampoline from {@link Lifecycle#onUnlockUser(int)}. We run the heavy work on
+     * a background thread to keep the unlock time down.
+     */
     public void unlockSystemUser() {
         // Migrate legacy setting
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup migrate");
@@ -618,89 +820,10 @@ public class BackupManagerService {
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
-    // Bookkeeping of in-flight operations for timeout etc. purposes.  The operation
-    // token is the index of the entry in the pending-operations list.
-    public static final int OP_PENDING = 0;
-    private static final int OP_ACKNOWLEDGED = 1;
-    private static final int OP_TIMEOUT = -1;
-
-    // Waiting for backup agent to respond during backup operation.
-    public static final int OP_TYPE_BACKUP_WAIT = 0;
-
-    // Waiting for backup agent to respond during restore operation.
-    public static final int OP_TYPE_RESTORE_WAIT = 1;
-
-    // An entire backup operation spanning multiple packages.
-    public static final int OP_TYPE_BACKUP = 2;
-
     /**
-     * mCurrentOperations contains the list of currently active operations.
-     *
-     * If type of operation is OP_TYPE_WAIT, it are waiting for an ack or timeout.
-     * An operation wraps a BackupRestoreTask within it.
-     * It's the responsibility of this task to remove the operation from this array.
-     *
-     * A BackupRestore task gets notified of ack/timeout for the operation via
-     * BackupRestoreTask#handleCancel, BackupRestoreTask#operationComplete and notifyAll called
-     * on the mCurrentOpLock.
-     * {@link BackupManagerService#waitUntilOperationComplete(int)} is
-     * used in various places to 'wait' for notifyAll and detect change of pending state of an
-     * operation. So typically, an operation will be removed from this array by:
-     * - BackupRestoreTask#handleCancel and
-     * - BackupRestoreTask#operationComplete OR waitUntilOperationComplete. Do not remove at both
-     * these places because waitUntilOperationComplete relies on the operation being present to
-     * determine its completion status.
-     *
-     * If type of operation is OP_BACKUP, it is a task running backups. It provides a handle to
-     * cancel backup tasks.
+     *  Utility: build a new random integer token. The low bits are the ordinal of the operation for
+     *  near-time uniqueness, and the upper bits are random for app-side unpredictability.
      */
-    @GuardedBy("mCurrentOpLock")
-    private final SparseArray<Operation> mCurrentOperations = new SparseArray<>();
-    private final Object mCurrentOpLock = new Object();
-    private final Random mTokenGenerator = new Random();
-    final AtomicInteger mNextToken = new AtomicInteger();
-
-    private final SparseArray<AdbParams> mAdbBackupRestoreConfirmations = new SparseArray<>();
-
-    // Where we keep our journal files and other bookkeeping
-    private File mBaseStateDir;
-    private File mDataDir;
-    private File mJournalDir;
-    @Nullable
-    private DataChangedJournal mJournal;
-
-    private final SecureRandom mRng = new SecureRandom();
-
-    // Keep a log of all the apps we've ever backed up, and what the dataset tokens are for both
-    // the current backup dataset and the ancestral dataset.
-    private ProcessedPackagesJournal mProcessedPackagesJournal;
-
-    private static final int CURRENT_ANCESTRAL_RECORD_VERSION = 1;
-    // increment when the schema changes
-    private File mTokenFile;
-    private Set<String> mAncestralPackages = null;
-    private long mAncestralToken = 0;
-    private long mCurrentToken = 0;
-
-    // Persistently track the need to do a full init
-    private static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
-    private final ArraySet<String> mPendingInits = new ArraySet<>();  // transport names
-
-    // Round-robin queue for scheduling full backup passes
-    private static final int SCHEDULE_FILE_VERSION = 1; // current version of the schedule file
-
-    private File mFullBackupScheduleFile;
-    // If we're running a schedule-driven full backup, this is the task instance doing it
-
-    @GuardedBy("mQueueLock")
-    private PerformFullTransportBackupTask mRunningFullBackupTask;
-
-    @GuardedBy("mQueueLock")
-    private ArrayList<FullBackupEntry> mFullBackupQueue;
-
-    // Utility: build a new random integer token. The low bits are the ordinal of the
-    // operation for near-time uniqueness, and the upper bits are random for app-
-    // side unpredictability.
     public int generateRandomIntegerToken() {
         int token = mTokenGenerator.nextInt();
         if (token < 0) token = -token;
@@ -709,10 +832,9 @@ public class BackupManagerService {
         return token;
     }
 
-    /*
-     * Construct a backup agent instance for the metadata pseudopackage.  This is a
-     * process-local non-lifecycle agent instance, so we manually set up the context
-     * topology for it.
+    /**
+     * Construct a backup agent instance for the metadata pseudopackage. This is a process-local
+     * non-lifecycle agent instance, so we manually set up the context topology for it.
      */
     public BackupAgent makeMetadataAgent() {
         PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(mPackageManager);
@@ -721,8 +843,8 @@ public class BackupManagerService {
         return pmAgent;
     }
 
-    /*
-     * Same as above but with the explicit package-set configuration.
+    /**
+     * Same as {@link #makeMetadataAgent()} but with explicit package-set configuration.
      */
     public PackageManagerBackupAgent makeMetadataAgent(List<PackageInfo> packages) {
         PackageManagerBackupAgent pmAgent =
@@ -730,172 +852,6 @@ public class BackupManagerService {
         pmAgent.attach(mContext);
         pmAgent.onCreate();
         return pmAgent;
-    }
-
-    // ----- Debug-only backup operation trace -----
-    public void addBackupTrace(String s) {
-        if (DEBUG_BACKUP_TRACE) {
-            synchronized (mBackupTrace) {
-                mBackupTrace.add(s);
-            }
-        }
-    }
-
-    public void clearBackupTrace() {
-        if (DEBUG_BACKUP_TRACE) {
-            synchronized (mBackupTrace) {
-                mBackupTrace.clear();
-            }
-        }
-    }
-
-    // ----- Main service implementation -----
-
-    public static BackupManagerService create(
-            Context context,
-            Trampoline parent,
-            HandlerThread backupThread) {
-        // Set up our transport options and initialize the default transport
-        SystemConfig systemConfig = SystemConfig.getInstance();
-        Set<ComponentName> transportWhitelist = systemConfig.getBackupTransportWhitelist();
-        if (transportWhitelist == null) {
-            transportWhitelist = Collections.emptySet();
-        }
-
-        String transport =
-                Settings.Secure.getString(
-                        context.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT);
-        if (TextUtils.isEmpty(transport)) {
-            transport = null;
-        }
-        if (DEBUG) {
-            Slog.v(TAG, "Starting with transport " + transport);
-        }
-        TransportManager transportManager =
-                new TransportManager(
-                        context,
-                        transportWhitelist,
-                        transport);
-
-        // If encrypted file systems is enabled or disabled, this call will return the
-        // correct directory.
-        File baseStateDir = new File(Environment.getDataDirectory(), "backup");
-
-        // This dir on /cache is managed directly in init.rc
-        File dataDir = new File(Environment.getDownloadCacheDirectory(), "backup_stage");
-
-        return new BackupManagerService(
-                context,
-                parent,
-                backupThread,
-                baseStateDir,
-                dataDir,
-                transportManager);
-    }
-
-    @VisibleForTesting
-    public BackupManagerService(
-            Context context,
-            Trampoline parent,
-            HandlerThread backupThread,
-            File baseStateDir,
-            File dataDir,
-            TransportManager transportManager) {
-        mContext = context;
-        mPackageManager = context.getPackageManager();
-        mPackageManagerBinder = AppGlobals.getPackageManager();
-        mActivityManager = ActivityManager.getService();
-
-        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        mStorageManager = IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
-
-        mBackupManagerBinder = Trampoline.asInterface(parent.asBinder());
-
-        mAgentTimeoutParameters = new
-                BackupAgentTimeoutParameters(Handler.getMain(), mContext.getContentResolver());
-        mAgentTimeoutParameters.start();
-
-        // spin up the backup/restore handler thread
-        mBackupHandler = new BackupHandler(this, backupThread.getLooper());
-
-        // Set up our bookkeeping
-        final ContentResolver resolver = context.getContentResolver();
-        mProvisioned = Settings.Global.getInt(resolver,
-                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
-        mAutoRestore = Settings.Secure.getInt(resolver,
-                Settings.Secure.BACKUP_AUTO_RESTORE, 1) != 0;
-
-        mProvisionedObserver = new ProvisionedObserver(this, mBackupHandler);
-        resolver.registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
-                false, mProvisionedObserver);
-
-        mBaseStateDir = baseStateDir;
-        mBaseStateDir.mkdirs();
-        if (!SELinux.restorecon(mBaseStateDir)) {
-            Slog.e(TAG, "SELinux restorecon failed on " + mBaseStateDir);
-        }
-
-        mDataDir = dataDir;
-
-        mBackupPasswordManager = new BackupPasswordManager(mContext, mBaseStateDir, mRng);
-
-        // Alarm receivers for scheduled backups & initialization operations
-        mRunBackupReceiver = new RunBackupReceiver(this);
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(RUN_BACKUP_ACTION);
-        context.registerReceiver(mRunBackupReceiver, filter,
-                android.Manifest.permission.BACKUP, null);
-
-        mRunInitReceiver = new RunInitializeReceiver(this);
-        filter = new IntentFilter();
-        filter.addAction(RUN_INITIALIZE_ACTION);
-        context.registerReceiver(mRunInitReceiver, filter,
-                android.Manifest.permission.BACKUP, null);
-
-        Intent backupIntent = new Intent(RUN_BACKUP_ACTION);
-        backupIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mRunBackupIntent = PendingIntent.getBroadcast(context, 0, backupIntent, 0);
-
-        Intent initIntent = new Intent(RUN_INITIALIZE_ACTION);
-        initIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mRunInitIntent = PendingIntent.getBroadcast(context, 0, initIntent, 0);
-
-        // Set up the backup-request journaling
-        mJournalDir = new File(mBaseStateDir, "pending");
-        mJournalDir.mkdirs();   // creates mBaseStateDir along the way
-        mJournal = null;        // will be created on first use
-
-        mConstants = new BackupManagerConstants(mBackupHandler, mContext.getContentResolver());
-        // We are observing changes to the constants throughout the lifecycle of BMS. This is
-        // because we reference the constants in multiple areas of BMS, which otherwise would
-        // require frequent starting and stopping.
-        mConstants.start();
-
-        // Set up the various sorts of package tracking we do
-        mFullBackupScheduleFile = new File(mBaseStateDir, "fb-schedule");
-        initPackageTracking();
-
-        // Build our mapping of uid to backup client services.  This implicitly
-        // schedules a backup pass on the Package Manager metadata the first
-        // time anything needs to be backed up.
-        synchronized (mBackupParticipants) {
-            addPackageParticipantsLocked(null);
-        }
-
-        mTransportManager = transportManager;
-        mTransportManager.setOnTransportRegisteredListener(this::onTransportRegistered);
-        mRegisterTransportsRequestedTime = SystemClock.elapsedRealtime();
-        mBackupHandler.postDelayed(
-                mTransportManager::registerTransports, INITIALIZATION_DELAY_MILLIS);
-
-        // Now that we know about valid backup participants, parse any leftover journal files into
-        // the pending backup set
-        mBackupHandler.postDelayed(this::parseLeftoverJournals, INITIALIZATION_DELAY_MILLIS);
-
-        // Power management
-        mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*");
     }
 
     private void initPackageTracking() {
@@ -2750,54 +2706,6 @@ public class BackupManagerService {
         }
     }
 
-    private static boolean backupSettingMigrated(int userId) {
-        File base = new File(Environment.getDataDirectory(), "backup");
-        File enableFile = new File(base, BACKUP_ENABLE_FILE);
-        return enableFile.exists();
-    }
-
-    private static boolean readBackupEnableState(int userId) {
-        File base = new File(Environment.getDataDirectory(), "backup");
-        File enableFile = new File(base, BACKUP_ENABLE_FILE);
-        if (enableFile.exists()) {
-            try (FileInputStream fin = new FileInputStream(enableFile)) {
-                int state = fin.read();
-                return state != 0;
-            } catch (IOException e) {
-                // can't read the file; fall through to assume disabled
-                Slog.e(TAG, "Cannot read enable state; assuming disabled");
-            }
-        } else {
-            if (DEBUG) {
-                Slog.i(TAG, "isBackupEnabled() => false due to absent settings file");
-            }
-        }
-        return false;
-    }
-
-    private static void writeBackupEnableState(boolean enable, int userId) {
-        File base = new File(Environment.getDataDirectory(), "backup");
-        File enableFile = new File(base, BACKUP_ENABLE_FILE);
-        File stage = new File(base, BACKUP_ENABLE_FILE + "-stage");
-        try (FileOutputStream fout = new FileOutputStream(stage)) {
-            fout.write(enable ? 1 : 0);
-            fout.close();
-            stage.renameTo(enableFile);
-            // will be synced immediately by the try-with-resources call to close()
-        } catch (IOException | RuntimeException e) {
-            // Whoops; looks like we're doomed.  Roll everything out, disabled,
-            // including the legacy state.
-            Slog.e(TAG, "Unable to record backup enable state; reverting to disabled: "
-                    + e.getMessage());
-
-            ContentResolver resolver = sInstance.getContext().getContentResolver();
-            Settings.Secure.putStringForUser(resolver,
-                    Settings.Secure.BACKUP_ENABLED, null, userId);
-            enableFile.delete();
-            stage.delete();
-        }
-    }
-
     // Enable/disable backups
     public void setBackupEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
@@ -3565,17 +3473,6 @@ public class BackupManagerService {
                 pw.println("    " + s);
             }
 
-            if (DEBUG_BACKUP_TRACE) {
-                synchronized (mBackupTrace) {
-                    if (!mBackupTrace.isEmpty()) {
-                        pw.println("Most recent backup trace:");
-                        for (String s : mBackupTrace) {
-                            pw.println("   " + s);
-                        }
-                    }
-                }
-            }
-
             pw.print("Ancestral: ");
             pw.println(Long.toHexString(mAncestralToken));
             pw.print("Current:   ");
@@ -3627,4 +3524,71 @@ public class BackupManagerService {
         return mBackupManagerBinder;
     }
 
+    private static boolean backupSettingMigrated(int userId) {
+        File base = new File(Environment.getDataDirectory(), "backup");
+        File enableFile = new File(base, BACKUP_ENABLE_FILE);
+        return enableFile.exists();
+    }
+
+    private static boolean readBackupEnableState(int userId) {
+        File base = new File(Environment.getDataDirectory(), "backup");
+        File enableFile = new File(base, BACKUP_ENABLE_FILE);
+        if (enableFile.exists()) {
+            try (FileInputStream fin = new FileInputStream(enableFile)) {
+                int state = fin.read();
+                return state != 0;
+            } catch (IOException e) {
+                // can't read the file; fall through to assume disabled
+                Slog.e(TAG, "Cannot read enable state; assuming disabled");
+            }
+        } else {
+            if (DEBUG) {
+                Slog.i(TAG, "isBackupEnabled() => false due to absent settings file");
+            }
+        }
+        return false;
+    }
+
+    private static void writeBackupEnableState(boolean enable, int userId) {
+        File base = new File(Environment.getDataDirectory(), "backup");
+        File enableFile = new File(base, BACKUP_ENABLE_FILE);
+        File stage = new File(base, BACKUP_ENABLE_FILE + "-stage");
+        try (FileOutputStream fout = new FileOutputStream(stage)) {
+            fout.write(enable ? 1 : 0);
+            fout.close();
+            stage.renameTo(enableFile);
+            // will be synced immediately by the try-with-resources call to close()
+        } catch (IOException | RuntimeException e) {
+            // Whoops; looks like we're doomed.  Roll everything out, disabled,
+            // including the legacy state.
+            Slog.e(TAG, "Unable to record backup enable state; reverting to disabled: "
+                    + e.getMessage());
+
+            ContentResolver resolver = sInstance.getContext().getContentResolver();
+            Settings.Secure.putStringForUser(resolver,
+                    Settings.Secure.BACKUP_ENABLED, null, userId);
+            enableFile.delete();
+            stage.delete();
+        }
+    }
+
+    /** Implementation to receive lifecycle event callbacks for system services. */
+    public static final class Lifecycle extends SystemService {
+        public Lifecycle(Context context) {
+            super(context);
+            sInstance = new Trampoline(context);
+        }
+
+        @Override
+        public void onStart() {
+            publishBinderService(Context.BACKUP_SERVICE, sInstance);
+        }
+
+        @Override
+        public void onUnlockUser(int userId) {
+            if (userId == UserHandle.USER_SYSTEM) {
+                sInstance.unlockSystemUser();
+            }
+        }
+    }
 }
