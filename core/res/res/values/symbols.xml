@@ -2637,13 +2637,14 @@
   <java-symbol type="attr" name="floatingToolbarDividerColor" />
 
   <!-- Magnifier -->
-  <java-symbol type="dimen" name="magnifier_width" />
-  <java-symbol type="dimen" name="magnifier_height" />
-  <java-symbol type="dimen" name="magnifier_elevation" />
-  <java-symbol type="dimen" name="magnifier_zoom" />
-  <java-symbol type="dimen" name="magnifier_vertical_offset" />
-  <java-symbol type="dimen" name="magnifier_horizontal_offset" />
-  <java-symbol type="color" name="magnifier_color_overlay" />
+  <java-symbol type="dimen" name="default_magnifier_width" />
+  <java-symbol type="dimen" name="default_magnifier_height" />
+  <java-symbol type="dimen" name="default_magnifier_elevation" />
+  <java-symbol type="dimen" name="default_magnifier_corner_radius" />
+  <java-symbol type="dimen" name="default_magnifier_zoom" />
+  <java-symbol type="dimen" name="default_magnifier_vertical_offset" />
+  <java-symbol type="dimen" name="default_magnifier_horizontal_offset" />
+  <java-symbol type="color" name="default_magnifier_color_overlay" />
   <java-symbol type="attr" name="magnifierWidth" />
   <java-symbol type="attr" name="magnifierHeight" />
   <java-symbol type="attr" name="magnifierElevation" />
