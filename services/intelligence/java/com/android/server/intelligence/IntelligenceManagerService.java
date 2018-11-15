@@ -19,6 +19,7 @@ package com.android.server.intelligence;
 import static android.content.Context.INTELLIGENCE_MANAGER_SERVICE;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
@@ -59,14 +60,14 @@ public final class IntelligenceManagerService
         super(context, UserManager.DISALLOW_INTELLIGENCE_CAPTURE);
     }
 
-    @Override // from MasterSystemService
+    @Override // from AbstractMasterSystemService
     protected String getServiceSettingsProperty() {
         // TODO(b/111276913): STOPSHIP temporary settings, until it's set by resourcs + cmd
         return "intel_service";
     }
 
-    @Override // from MasterSystemService
-    protected IntelligencePerUserService newServiceLocked(int resolvedUserId,
+    @Override // from AbstractMasterSystemService
+    protected IntelligencePerUserService newServiceLocked(@UserIdInt int resolvedUserId,
             boolean disabled) {
         return new IntelligencePerUserService(this, mLock, resolvedUserId);
     }
@@ -79,12 +80,9 @@ public final class IntelligenceManagerService
     }
 
     @Override // from AbstractMasterSystemService
-    protected IntelligencePerUserService removeCachedServiceLocked(int userId) {
-        final IntelligencePerUserService service = super.removeCachedServiceLocked(userId);
-        if (service != null) {
-            service.destroyLocked();
-        }
-        return service;
+    protected void onServiceRemoved(@NonNull IntelligencePerUserService service,
+            @UserIdInt int userId) {
+        service.destroyLocked();
     }
 
     private ActivityManagerInternal getAmInternal() {

@@ -166,12 +166,12 @@ public final class AutofillManagerService
         context.registerReceiver(mBroadcastReceiver, filter, null, FgThread.getHandler());
     }
 
-    @Override // from MasterSystemService
+    @Override // from AbstractMasterSystemService
     protected String getServiceSettingsProperty() {
         return Settings.Secure.AUTOFILL_SERVICE;
     }
 
-    @Override // from MasterSystemService
+    @Override // from AbstractMasterSystemService
     protected void registerForExtraSettingsChanges(@NonNull ContentResolver resolver,
             @NonNull ContentObserver observer) {
         resolver.registerContentObserver(Settings.Global.getUriFor(
@@ -188,7 +188,7 @@ public final class AutofillManagerService
                 UserHandle.USER_ALL);
     }
 
-    @Override // from MasterSystemService
+    @Override // from AbstractMasterSystemService
     protected void onSettingsChanged(int userId, @NonNull String property) {
         switch (property) {
             case Settings.Global.AUTOFILL_LOGGING_LEVEL:
@@ -210,25 +210,24 @@ public final class AutofillManagerService
         }
     }
 
-    @Override // from MasterSystemService
-    protected AutofillManagerServiceImpl newServiceLocked(int resolvedUserId, boolean disabled) {
+    @Override // from AbstractMasterSystemService
+    protected AutofillManagerServiceImpl newServiceLocked(@UserIdInt int resolvedUserId,
+            boolean disabled) {
         return new AutofillManagerServiceImpl(this, mLock, mRequestsHistory,
                 mUiLatencyHistory, mWtfHistory, resolvedUserId, mUi, mAutofillCompatState,
                 disabled);
     }
 
-    @Override // MasterSystemService
-    protected AutofillManagerServiceImpl removeCachedServiceLocked(int userId) {
-        final AutofillManagerServiceImpl service = super.removeCachedServiceLocked(userId);
-        if (service != null) {
-            service.destroyLocked();
-            mAutofillCompatState.removeCompatibilityModeRequests(userId);
-        }
-        return service;
+    @Override // AbstractMasterSystemService
+    protected void onServiceRemoved(@NonNull AutofillManagerServiceImpl service,
+            @UserIdInt int userId) {
+        service.destroyLocked();
+        mAutofillCompatState.removeCompatibilityModeRequests(userId);
     }
 
-    @Override // from MasterSystemService
-    protected void onServiceEnabledLocked(@NonNull AutofillManagerServiceImpl service, int userId) {
+    @Override // from AbstractMasterSystemService
+    protected void onServiceEnabledLocked(@NonNull AutofillManagerServiceImpl service,
+            @UserIdInt int userId) {
         addCompatibilityModeRequestsLocked(service, userId);
     }
 
@@ -245,7 +244,7 @@ public final class AutofillManagerService
     }
 
     // Called by Shell command.
-    void destroySessions(int userId, IResultReceiver receiver) {
+    void destroySessions(@UserIdInt int userId, IResultReceiver receiver) {
         Slog.i(TAG, "destroySessions() for userId " + userId);
         getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
