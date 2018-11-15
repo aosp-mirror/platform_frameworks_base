@@ -426,6 +426,31 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     }
 
     /**
+     * Authenticates for the given user.
+     * @param cancel An object that can be used to cancel authentication
+     * @param executor An executor to handle callback events
+     * @param callback An object to receive authentication events
+     * @param userId The user to authenticate
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void authenticateUser(@NonNull CancellationSignal cancel,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AuthenticationCallback callback,
+            int userId) {
+        if (cancel == null) {
+            throw new IllegalArgumentException("Must supply a cancellation signal");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must supply an executor");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("Must supply a callback");
+        }
+        authenticateInternal(null /* crypto */, cancel, executor, callback, userId);
+    }
+
+    /**
      * This call warms up the biometric hardware, displays a system-provided dialog, and starts
      * scanning for a biometric. It terminates when {@link
      * AuthenticationCallback#onAuthenticationError(int, CharSequence)} is called, when {@link
@@ -465,7 +490,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a callback");
         }
-        authenticateInternal(crypto, cancel, executor, callback);
+        authenticateInternal(crypto, cancel, executor, callback, mContext.getUserId());
     }
 
     /**
@@ -502,7 +527,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a callback");
         }
-        authenticateInternal(null /* crypto */, cancel, executor, callback);
+        authenticateInternal(null /* crypto */, cancel, executor, callback, mContext.getUserId());
     }
 
     private void cancelAuthentication() {
@@ -518,7 +543,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     private void authenticateInternal(@Nullable CryptoObject crypto,
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull AuthenticationCallback callback) {
+            @NonNull AuthenticationCallback callback,
+            int userId) {
         try {
             if (cancel.isCanceled()) {
                 Log.w(TAG, "Authentication already canceled");
@@ -531,7 +557,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             mExecutor = executor;
             mAuthenticationCallback = callback;
             final long sessionId = crypto != null ? crypto.getOpId() : 0;
-            mService.authenticate(mToken, sessionId, mContext.getUserId(),
+            mService.authenticate(mToken, sessionId, userId,
                     mBiometricServiceReceiver, 0 /* flags */, mContext.getOpPackageName(),
                     mBundle, mDialogReceiver);
         } catch (RemoteException e) {
