@@ -191,7 +191,7 @@ import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
-import com.android.server.input.InputWindowHandle;
+import android.view.InputWindowHandle;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.utils.InsetUtils;
@@ -718,7 +718,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLastRequestedHeight = 0;
         mLayer = 0;
         mInputWindowHandle = new InputWindowHandle(
-                mAppToken != null ? mAppToken.mInputApplicationHandle : null, this, c,
+                mAppToken != null ? mAppToken.mInputApplicationHandle : null, c,
                     getDisplayId());
     }
 
@@ -2047,7 +2047,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Create dummy event receiver that simply reports all events as handled.
             mDeadWindowEventReceiver = new DeadWindowEventReceiver(mClientChannel);
         }
-        mService.mInputManager.registerInputChannel(mInputChannel, mInputWindowHandle);
+        mService.mInputManager.registerInputChannel(mInputChannel, mClient.asBinder());
     }
 
     void disposeInputChannel() {
@@ -2059,6 +2059,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // unregister server channel first otherwise it complains about broken channel
         if (mInputChannel != null) {
             mService.mInputManager.unregisterInputChannel(mInputChannel);
+
             mInputChannel.dispose();
             mInputChannel = null;
         }

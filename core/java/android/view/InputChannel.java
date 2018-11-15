@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
+import android.os.IBinder;
 import android.os.Parcelable;
 import android.util.Slog;
 
@@ -50,15 +51,17 @@ public final class InputChannel implements Parcelable {
     @SuppressWarnings("unused")
     @UnsupportedAppUsage
     private long mPtr; // used by native code
-    
+
     private static native InputChannel[] nativeOpenInputChannelPair(String name);
-    
+
     private native void nativeDispose(boolean finalized);
     private native void nativeTransferTo(InputChannel other);
     private native void nativeReadFromParcel(Parcel parcel);
     private native void nativeWriteToParcel(Parcel parcel);
     private native void nativeDup(InputChannel target);
-    
+    private native IBinder nativeGetToken();
+    private native void nativeSetToken(IBinder token);
+
     private native String nativeGetName();
 
     /**
@@ -159,14 +162,22 @@ public final class InputChannel implements Parcelable {
         }
         
         nativeWriteToParcel(out);
-        
+
         if ((flags & PARCELABLE_WRITE_RETURN_VALUE) != 0) {
             dispose();
         }
     }
-    
+
     @Override
     public String toString() {
         return getName();
+    }
+
+    public IBinder getToken() {
+        return nativeGetToken();
+    }
+
+    public void setToken(IBinder token) {
+        nativeSetToken(token);
     }
 }

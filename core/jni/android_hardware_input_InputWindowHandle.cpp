@@ -221,20 +221,20 @@ static const JNINativeMethod gInputWindowHandleMethods[] = {
         LOG_FATAL_IF(! (var), "Unable to find field " fieldName);
 
 int register_android_server_InputWindowHandle(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "com/android/server/input/InputWindowHandle",
+    int res = jniRegisterNativeMethods(env, "android/view/InputWindowHandle",
             gInputWindowHandleMethods, NELEM(gInputWindowHandleMethods));
     (void) res;  // Faked use when LOG_NDEBUG.
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
 
     jclass clazz;
-    FIND_CLASS(clazz, "com/android/server/input/InputWindowHandle");
+    FIND_CLASS(clazz, "android/view/InputWindowHandle");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.ptr, clazz,
             "ptr", "J");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.inputApplicationHandle,
             clazz,
-            "inputApplicationHandle", "Lcom/android/server/input/InputApplicationHandle;");
+            "inputApplicationHandle", "Landroid/view/InputApplicationHandle;");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.inputChannel, clazz,
             "inputChannel", "Landroid/view/InputChannel;");

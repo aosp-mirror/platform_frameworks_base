@@ -42,6 +42,8 @@
 #include <utils/Trace.h>
 #include <utils/SortedVector.h>
 
+#include <binder/IServiceManager.h>
+
 #include <input/PointerController.h>
 #include <input/SpriteController.h>
 
@@ -63,6 +65,7 @@
 #include "android_hardware_input_InputApplicationHandle.h"
 #include "android_hardware_input_InputWindowHandle.h"
 #include "android_hardware_display_DisplayViewport.h"
+#include "android_util_Binder.h"
 
 #include <vector>
 
@@ -153,15 +156,6 @@ static jobject getInputApplicationHandleObjLocalRef(JNIEnv* env,
             getInputApplicationHandleObjLocalRef(env);
 }
 
-static jobject getInputWindowHandleObjLocalRef(JNIEnv* env,
-        const sp<InputWindowHandle>& inputWindowHandle) {
-    if (inputWindowHandle == nullptr) {
-        return nullptr;
-    }
-    return static_cast<NativeInputWindowHandle*>(inputWindowHandle.get())->
-            getInputWindowHandleObjLocalRef(env);
-}
-
 static void loadSystemIconAsSpriteWithPointerIcon(JNIEnv* env, jobject contextObj, int32_t style,
         PointerIcon* outPointerIcon, SpriteIcon* outSpriteIcon) {
     status_t status = android_view_PointerIcon_loadSystemIcon(env,
@@ -216,8 +210,7 @@ public:
 
     void setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray);
 
-    status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel,
-            const sp<InputWindowHandle>& inputWindowHandle, int32_t displayId);
+    status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel, int32_t displayId);
     status_t unregisterInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
 
     void setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray, int32_t displayId);
@@ -253,17 +246,17 @@ public:
             uint32_t policyFlags);
     virtual void notifyConfigurationChanged(nsecs_t when);
     virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
-            const sp<InputWindowHandle>& inputWindowHandle,
+            const sp<IBinder>& token,
             const std::string& reason);
-    virtual void notifyInputChannelBroken(const sp<InputWindowHandle>& inputWindowHandle);
+    virtual void notifyInputChannelBroken(const sp<IBinder>& token);
     virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags);
     virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig);
     virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags);
     virtual void interceptMotionBeforeQueueing(nsecs_t when, uint32_t& policyFlags);
     virtual nsecs_t interceptKeyBeforeDispatching(
-            const sp<InputWindowHandle>& inputWindowHandle,
+            const sp<IBinder>& token,
             const KeyEvent* keyEvent, uint32_t policyFlags);
-    virtual bool dispatchUnhandledKey(const sp<InputWindowHandle>& inputWindowHandle,
+    virtual bool dispatchUnhandledKey(const sp<IBinder>& token,
             const KeyEvent* keyEvent, uint32_t policyFlags, KeyEvent* outFallbackKeyEvent);
     virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType);
     virtual bool checkInjectEventsPermissionNonReentrant(
@@ -442,11 +435,10 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
 }
 
 status_t NativeInputManager::registerInputChannel(JNIEnv* /* env */,
-        const sp<InputChannel>& inputChannel, const sp<InputWindowHandle>& inputWindowHandle,
-                int32_t displayId) {
+        const sp<InputChannel>& inputChannel, int32_t displayId) {
     ATRACE_CALL();
-    return mInputManager->getDispatcher()->registerInputChannel(inputChannel, inputWindowHandle,
-            displayId);
+    return mInputManager->getDispatcher()->registerInputChannel(
+            inputChannel, displayId);
 }
 
 status_t NativeInputManager::unregisterInputChannel(JNIEnv* /* env */,
@@ -657,7 +649,7 @@ void NativeInputManager::notifyConfigurationChanged(nsecs_t when) {
 }
 
 nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
-        const sp<InputWindowHandle>& inputWindowHandle, const std::string& reason) {
+        const sp<IBinder>& token, const std::string& reason) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
     ALOGD("notifyANR");
 #endif
@@ -667,12 +659,11 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
 
     jobject inputApplicationHandleObj =
             getInputApplicationHandleObjLocalRef(env, inputApplicationHandle);
-    jobject inputWindowHandleObj =
-            getInputWindowHandleObjLocalRef(env, inputWindowHandle);
+    jobject tokenObj = javaObjectForIBinder(env, token);
     jstring reasonObj = env->NewStringUTF(reason.c_str());
 
     jlong newTimeout = env->CallLongMethod(mServiceObj,
-                gServiceClassInfo.notifyANR, inputApplicationHandleObj, inputWindowHandleObj,
+                gServiceClassInfo.notifyANR, inputApplicationHandleObj, tokenObj,
                 reasonObj);
     if (checkAndClearExceptionFromCallback(env, "notifyANR")) {
         newTimeout = 0; // abort dispatch
@@ -681,12 +672,11 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
     }
 
     env->DeleteLocalRef(reasonObj);
-    env->DeleteLocalRef(inputWindowHandleObj);
     env->DeleteLocalRef(inputApplicationHandleObj);
     return newTimeout;
 }
 
-void NativeInputManager::notifyInputChannelBroken(const sp<InputWindowHandle>& inputWindowHandle) {
+void NativeInputManager::notifyInputChannelBroken(const sp<IBinder>& token) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
     ALOGD("notifyInputChannelBroken");
 #endif
@@ -694,14 +684,11 @@ void NativeInputManager::notifyInputChannelBroken(const sp<InputWindowHandle>& i
 
     JNIEnv* env = jniEnv();
 
-    jobject inputWindowHandleObj =
-            getInputWindowHandleObjLocalRef(env, inputWindowHandle);
-    if (inputWindowHandleObj) {
+    jobject tokenObj = javaObjectForIBinder(env, token);
+    if (tokenObj) {
         env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyInputChannelBroken,
-                inputWindowHandleObj);
+                tokenObj);
         checkAndClearExceptionFromCallback(env, "notifyInputChannelBroken");
-
-        env->DeleteLocalRef(inputWindowHandleObj);
     }
 }
 
@@ -1061,7 +1048,7 @@ void NativeInputManager::handleInterceptActions(jint wmActions, nsecs_t when,
 }
 
 nsecs_t NativeInputManager::interceptKeyBeforeDispatching(
-        const sp<InputWindowHandle>& inputWindowHandle,
+        const sp<IBinder>& token,
         const KeyEvent* keyEvent, uint32_t policyFlags) {
     ATRACE_CALL();
     // Policy:
@@ -1072,13 +1059,14 @@ nsecs_t NativeInputManager::interceptKeyBeforeDispatching(
     if (policyFlags & POLICY_FLAG_TRUSTED) {
         JNIEnv* env = jniEnv();
 
-        // Note: inputWindowHandle may be null.
-        jobject inputWindowHandleObj = getInputWindowHandleObjLocalRef(env, inputWindowHandle);
+        // Token may be null
+        jobject tokenObj = javaObjectForIBinder(env, token);
+
         jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
         if (keyEventObj) {
             jlong delayMillis = env->CallLongMethod(mServiceObj,
                     gServiceClassInfo.interceptKeyBeforeDispatching,
-                    inputWindowHandleObj, keyEventObj, policyFlags);
+                    tokenObj, keyEventObj, policyFlags);
             bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
             android_view_KeyEvent_recycle(env, keyEventObj);
             env->DeleteLocalRef(keyEventObj);
@@ -1092,12 +1080,11 @@ nsecs_t NativeInputManager::interceptKeyBeforeDispatching(
         } else {
             ALOGE("Failed to obtain key event object for interceptKeyBeforeDispatching.");
         }
-        env->DeleteLocalRef(inputWindowHandleObj);
     }
     return result;
 }
 
-bool NativeInputManager::dispatchUnhandledKey(const sp<InputWindowHandle>& inputWindowHandle,
+bool NativeInputManager::dispatchUnhandledKey(const sp<IBinder>& token,
         const KeyEvent* keyEvent, uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) {
     ATRACE_CALL();
     // Policy:
@@ -1106,13 +1093,13 @@ bool NativeInputManager::dispatchUnhandledKey(const sp<InputWindowHandle>& input
     if (policyFlags & POLICY_FLAG_TRUSTED) {
         JNIEnv* env = jniEnv();
 
-        // Note: inputWindowHandle may be null.
-        jobject inputWindowHandleObj = getInputWindowHandleObjLocalRef(env, inputWindowHandle);
+        // Note: tokenObj may be null.
+        jobject tokenObj = javaObjectForIBinder(env, token);
         jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
         if (keyEventObj) {
             jobject fallbackKeyEventObj = env->CallObjectMethod(mServiceObj,
                     gServiceClassInfo.dispatchUnhandledKey,
-                    inputWindowHandleObj, keyEventObj, policyFlags);
+                    tokenObj, keyEventObj, policyFlags);
             if (checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey")) {
                 fallbackKeyEventObj = nullptr;
             }
@@ -1131,7 +1118,6 @@ bool NativeInputManager::dispatchUnhandledKey(const sp<InputWindowHandle>& input
         } else {
             ALOGE("Failed to obtain key event object for dispatchUnhandledKey.");
         }
-        env->DeleteLocalRef(inputWindowHandleObj);
     }
     return result;
 }
@@ -1316,7 +1302,7 @@ static void handleInputChannelDisposed(JNIEnv* env,
 }
 
 static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
-        jlong ptr, jobject inputChannelObj, jobject inputWindowHandleObj, jint displayId) {
+        jlong ptr, jobject inputChannelObj, jint displayId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
@@ -1325,12 +1311,10 @@ static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
         throwInputChannelNotInitialized(env);
         return;
     }
+    bool monitor = inputChannel->getToken() == nullptr && displayId != ADISPLAY_ID_NONE;
 
-    sp<InputWindowHandle> inputWindowHandle =
-            android_server_InputWindowHandle_getHandle(env, inputWindowHandleObj);
+    status_t status = im->registerInputChannel(env, inputChannel, displayId);
 
-    status_t status = im->registerInputChannel(
-            env, inputChannel, inputWindowHandle, displayId);
     if (status) {
         std::string message;
         message += StringPrintf("Failed to register input channel.  status=%d", status);
@@ -1339,7 +1323,7 @@ static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
     }
 
     // If inputWindowHandle is null and displayId >= 0, treat inputChannel as monitor.
-    if (inputWindowHandle != nullptr || displayId == ADISPLAY_ID_NONE) {
+    if (!monitor) {
         android_view_InputChannel_setDisposeCallback(env, inputChannelObj,
                 handleInputChannelDisposed, im);
     }
@@ -1640,7 +1624,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
     { "nativeHasKeys", "(JII[I[Z)Z",
             (void*) nativeHasKeys },
     { "nativeRegisterInputChannel",
-            "(JLandroid/view/InputChannel;Lcom/android/server/input/InputWindowHandle;I)V",
+            "(JLandroid/view/InputChannel;I)V",
             (void*) nativeRegisterInputChannel },
     { "nativeUnregisterInputChannel", "(JLandroid/view/InputChannel;)V",
             (void*) nativeUnregisterInputChannel },
@@ -1650,9 +1634,9 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeInjectInputEvent },
     { "nativeToggleCapsLock", "(JI)V",
             (void*) nativeToggleCapsLock },
-    { "nativeSetInputWindows", "(J[Lcom/android/server/input/InputWindowHandle;I)V",
+    { "nativeSetInputWindows", "(J[Landroid/view/InputWindowHandle;I)V",
             (void*) nativeSetInputWindows },
-    { "nativeSetFocusedApplication", "(JILcom/android/server/input/InputApplicationHandle;)V",
+    { "nativeSetFocusedApplication", "(JILandroid/view/InputApplicationHandle;)V",
             (void*) nativeSetFocusedApplication },
     { "nativeSetFocusedDisplay", "(JI)V",
             (void*) nativeSetFocusedDisplay },
@@ -1731,11 +1715,11 @@ int register_android_server_InputManager(JNIEnv* env) {
             "notifySwitch", "(JII)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyInputChannelBroken, clazz,
-            "notifyInputChannelBroken", "(Lcom/android/server/input/InputWindowHandle;)V");
+            "notifyInputChannelBroken", "(Landroid/os/IBinder;)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyANR, clazz,
             "notifyANR",
-            "(Lcom/android/server/input/InputApplicationHandle;Lcom/android/server/input/InputWindowHandle;Ljava/lang/String;)J");
+            "(Landroid/view/InputApplicationHandle;Landroid/os/IBinder;Ljava/lang/String;)J");
 
     GET_METHOD_ID(gServiceClassInfo.filterInputEvent, clazz,
             "filterInputEvent", "(Landroid/view/InputEvent;I)Z");
@@ -1748,11 +1732,11 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.interceptKeyBeforeDispatching, clazz,
             "interceptKeyBeforeDispatching",
-            "(Lcom/android/server/input/InputWindowHandle;Landroid/view/KeyEvent;I)J");
+            "(Landroid/os/IBinder;Landroid/view/KeyEvent;I)J");
 
     GET_METHOD_ID(gServiceClassInfo.dispatchUnhandledKey, clazz,
             "dispatchUnhandledKey",
-            "(Lcom/android/server/input/InputWindowHandle;Landroid/view/KeyEvent;I)Landroid/view/KeyEvent;");
+            "(Landroid/os/IBinder;Landroid/view/KeyEvent;I)Landroid/view/KeyEvent;");
 
     GET_METHOD_ID(gServiceClassInfo.checkInjectEventsPermission, clazz,
             "checkInjectEventsPermission", "(II)Z");

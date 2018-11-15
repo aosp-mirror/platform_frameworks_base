@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.input;
+package android.view;
 
 import android.graphics.Region;
 import android.view.IWindow;
@@ -33,9 +33,6 @@ public final class InputWindowHandle {
 
     // The input application handle.
     public final InputApplicationHandle inputApplicationHandle;
-
-    // The window manager's window state.
-    public final Object windowState;
 
     // The client window.
     public final IWindow clientWindow;
@@ -97,9 +94,8 @@ public final class InputWindowHandle {
     private native void nativeDispose();
 
     public InputWindowHandle(InputApplicationHandle inputApplicationHandle,
-            Object windowState, IWindow clientWindow, int displayId) {
+            IWindow clientWindow, int displayId) {
         this.inputApplicationHandle = inputApplicationHandle;
-        this.windowState = windowState;
         this.clientWindow = clientWindow;
         this.displayId = displayId;
     }

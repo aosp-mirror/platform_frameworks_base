@@ -72,6 +72,8 @@ import android.view.IInputFilter;
 import android.view.IInputFilterHost;
 import android.view.IWindow;
 import android.view.InputChannel;
+import android.view.InputApplicationHandle;
+import android.view.InputWindowHandle;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.KeyEvent;
@@ -197,7 +199,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native boolean nativeHasKeys(long ptr,
             int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists);
     private static native void nativeRegisterInputChannel(long ptr, InputChannel inputChannel,
-            InputWindowHandle inputWindowHandle, int displayId);
+            int displayId);
     private static native void nativeUnregisterInputChannel(long ptr, InputChannel inputChannel);
     private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
     private static native int nativeInjectInputEvent(long ptr, InputEvent event,
@@ -486,8 +488,7 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
-        // Register channel for monitor.
-        nativeRegisterInputChannel(mPtr, inputChannels[0], null, displayId);
+        nativeRegisterInputChannel(mPtr, inputChannels[0], displayId);
         inputChannels[0].dispose(); // don't need to retain the Java object reference
         return inputChannels[1];
     }
@@ -498,14 +499,17 @@ public class InputManagerService extends IInputManager.Stub
      * @param inputWindowHandle The handle of the input window associated with the
      * input channel, or null if none.
      */
-    public void registerInputChannel(InputChannel inputChannel,
-            InputWindowHandle inputWindowHandle) {
+    public void registerInputChannel(InputChannel inputChannel, IBinder token) {
         if (inputChannel == null) {
             throw new IllegalArgumentException("inputChannel must not be null.");
         }
 
-        // Register channel for normal.
-        nativeRegisterInputChannel(mPtr, inputChannel, inputWindowHandle, Display.INVALID_DISPLAY);
+        if (token == null) {
+            token = new Binder();
+        }
+        inputChannel.setToken(token);
+
+        nativeRegisterInputChannel(mPtr, inputChannel, Display.INVALID_DISPLAY);
     }
 
     /**
@@ -1791,15 +1795,15 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private void notifyInputChannelBroken(InputWindowHandle inputWindowHandle) {
-        mWindowManagerCallbacks.notifyInputChannelBroken(inputWindowHandle);
+    private void notifyInputChannelBroken(IBinder token) {
+        mWindowManagerCallbacks.notifyInputChannelBroken(token);
     }
 
     // Native callback.
     private long notifyANR(InputApplicationHandle inputApplicationHandle,
-            InputWindowHandle inputWindowHandle, String reason) {
+            IBinder token, String reason) {
         return mWindowManagerCallbacks.notifyANR(
-                inputApplicationHandle, inputWindowHandle, reason);
+                inputApplicationHandle, token, reason);
     }
 
     // Native callback.
@@ -1830,13 +1834,13 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private long interceptKeyBeforeDispatching(InputWindowHandle focus,
+    private long interceptKeyBeforeDispatching(IBinder focus,
             KeyEvent event, int policyFlags) {
         return mWindowManagerCallbacks.interceptKeyBeforeDispatching(focus, event, policyFlags);
     }
 
     // Native callback.
-    private KeyEvent dispatchUnhandledKey(InputWindowHandle focus,
+    private KeyEvent dispatchUnhandledKey(IBinder focus,
             KeyEvent event, int policyFlags) {
         return mWindowManagerCallbacks.dispatchUnhandledKey(focus, event, policyFlags);
     }
@@ -1987,19 +1991,19 @@ public class InputManagerService extends IInputManager.Stub
 
         public void notifyCameraLensCoverSwitchChanged(long whenNanos, boolean lensCovered);
 
-        public void notifyInputChannelBroken(InputWindowHandle inputWindowHandle);
+        public void notifyInputChannelBroken(IBinder token);
 
         public long notifyANR(InputApplicationHandle inputApplicationHandle,
-                InputWindowHandle inputWindowHandle, String reason);
+                IBinder token, String reason);
 
         public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
 
         public int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags);
 
-        public long interceptKeyBeforeDispatching(InputWindowHandle focus,
+        public long interceptKeyBeforeDispatching(IBinder token,
                 KeyEvent event, int policyFlags);
 
-        public KeyEvent dispatchUnhandledKey(InputWindowHandle focus,
+        public KeyEvent dispatchUnhandledKey(IBinder token,
                 KeyEvent event, int policyFlags);
 
         public int getPointerLayer();

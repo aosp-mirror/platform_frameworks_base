@@ -57,8 +57,8 @@ import android.view.animation.Interpolator;
 
 import com.android.internal.view.IDragAndDropPermissions;
 import com.android.server.LocalServices;
-import com.android.server.input.InputApplicationHandle;
-import com.android.server.input.InputWindowHandle;
+import android.view.InputApplicationHandle;
+import android.view.InputWindowHandle;
 
 import java.util.ArrayList;
 
@@ -223,7 +223,7 @@ class DragState {
             mDragApplicationHandle.dispatchingTimeoutNanos =
                     WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
-            mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null, null,
+            mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null,
                     display.getDisplayId());
             mDragWindowHandle.name = "drag";
             mDragWindowHandle.inputChannel = mServerChannel;

@@ -29,7 +29,7 @@ import android.view.IWindow;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.input.InputManagerService;
-import com.android.server.input.InputWindowHandle;
+import android.view.InputWindowHandle;
 
 /**
  * Controller for task positioning by drag.
