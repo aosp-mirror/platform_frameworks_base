@@ -2015,9 +2015,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         clearThumbnail();
         setClientHidden(isHidden() && hiddenRequested);
 
-        if (mService.mInputMethodTarget != null && mService.mInputMethodTarget.mAppToken == this) {
-            getDisplayContent().computeImeTarget(true /* updateImeTarget */);
-        }
+        getDisplayContent().computeImeTargetIfNeeded(this);
 
         if (DEBUG_ANIM) Slog.v(TAG, "Animation done in " + this
                 + ": reportedVisible=" + reportedVisible
