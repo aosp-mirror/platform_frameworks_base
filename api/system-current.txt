@@ -4545,10 +4545,6 @@ package android.provider {
   public final class Settings {
     field public static final java.lang.String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
     field public static final java.lang.String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
-    field public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10; // 0xa
-    field public static final int USER_SETUP_PERSONALIZATION_NOT_STARTED = 0; // 0x0
-    field public static final int USER_SETUP_PERSONALIZATION_PAUSED = 2; // 0x2
-    field public static final int USER_SETUP_PERSONALIZATION_STARTED = 1; // 0x1
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
@@ -4592,6 +4588,10 @@ package android.provider {
     field public static final java.lang.String LOCK_SCREEN_SHOW_NOTIFICATIONS = "lock_screen_show_notifications";
     field public static final java.lang.String MANUAL_RINGER_TOGGLE_COUNT = "manual_ringer_toggle_count";
     field public static final java.lang.String USER_SETUP_COMPLETE = "user_setup_complete";
+    field public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10; // 0xa
+    field public static final int USER_SETUP_PERSONALIZATION_NOT_STARTED = 0; // 0x0
+    field public static final int USER_SETUP_PERSONALIZATION_PAUSED = 2; // 0x2
+    field public static final int USER_SETUP_PERSONALIZATION_STARTED = 1; // 0x1
     field public static final java.lang.String USER_SETUP_PERSONALIZATION_STATE = "user_setup_personalization_state";
     field public static final java.lang.String VOLUME_HUSH_GESTURE = "volume_hush_gesture";
   }

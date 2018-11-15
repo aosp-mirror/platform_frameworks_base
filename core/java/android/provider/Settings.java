@@ -1825,53 +1825,6 @@ public final class Settings {
     })
     public @interface ResetMode{}
 
-
-    /**
-     * Indicates that the user has not started setup personalization.
-     * One of the possible states for {@link Secure#USER_SETUP_PERSONALIZATION_STATE}.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int USER_SETUP_PERSONALIZATION_NOT_STARTED = 0;
-
-    /**
-     * Indicates that the user has not yet completed setup personalization.
-     * One of the possible states for {@link Secure#USER_SETUP_PERSONALIZATION_STATE}.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int USER_SETUP_PERSONALIZATION_STARTED = 1;
-
-    /**
-     * Indicates that the user has snoozed personalization and will complete it later.
-     * One of the possible states for {@link Secure#USER_SETUP_PERSONALIZATION_STATE}.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int USER_SETUP_PERSONALIZATION_PAUSED = 2;
-
-    /**
-     * Indicates that the user has completed setup personalization.
-     * One of the possible states for {@link Secure#USER_SETUP_PERSONALIZATION_STATE}.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
-            USER_SETUP_PERSONALIZATION_NOT_STARTED,
-            USER_SETUP_PERSONALIZATION_STARTED,
-            USER_SETUP_PERSONALIZATION_PAUSED,
-            USER_SETUP_PERSONALIZATION_COMPLETE
-    })
-    public @interface UserSetupPersonalization {}
-
     /**
      * Activity Extra: Number of certificates
      * <p>
@@ -5648,6 +5601,52 @@ public final class Settings {
         @SystemApi
         @TestApi
         public static final String USER_SETUP_COMPLETE = "user_setup_complete";
+
+        /**
+         * Indicates that the user has not started setup personalization.
+         * One of the possible states for {@link #USER_SETUP_PERSONALIZATION_STATE}.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final int USER_SETUP_PERSONALIZATION_NOT_STARTED = 0;
+
+        /**
+         * Indicates that the user has not yet completed setup personalization.
+         * One of the possible states for {@link #USER_SETUP_PERSONALIZATION_STATE}.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final int USER_SETUP_PERSONALIZATION_STARTED = 1;
+
+        /**
+         * Indicates that the user has snoozed personalization and will complete it later.
+         * One of the possible states for {@link #USER_SETUP_PERSONALIZATION_STATE}.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final int USER_SETUP_PERSONALIZATION_PAUSED = 2;
+
+        /**
+         * Indicates that the user has completed setup personalization.
+         * One of the possible states for {@link #USER_SETUP_PERSONALIZATION_STATE}.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+                USER_SETUP_PERSONALIZATION_NOT_STARTED,
+                USER_SETUP_PERSONALIZATION_STARTED,
+                USER_SETUP_PERSONALIZATION_PAUSED,
+                USER_SETUP_PERSONALIZATION_COMPLETE
+        })
+        public @interface UserSetupPersonalization {}
 
         /**
          * Defines the user's current state of device personalization.
