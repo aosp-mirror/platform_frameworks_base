@@ -16,8 +16,6 @@
 
 package com.android.systemui.volume;
 
-import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
-import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_GENERIC;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
@@ -32,7 +30,6 @@ import static android.view.View.VISIBLE;
 
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
 
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -68,13 +65,12 @@ import android.view.ContextThemeWrapper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
-import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
@@ -112,6 +108,10 @@ public class VolumeDialogImpl implements VolumeDialog {
 
     private static final long USER_ATTEMPT_GRACE_PERIOD = 1000;
     private static final int UPDATE_ANIMATION_DURATION = 80;
+
+    static final int DIALOG_TIMEOUT_MILLIS = 3000;
+    static final int DIALOG_SAFETYWARNING_TIMEOUT_MILLIS = 5000;
+    static final int DIALOG_HOVERING_TIMEOUT_MILLIS = 16000;
 
     private final Context mContext;
     private final H mHandler = new H();
@@ -170,7 +170,6 @@ public class VolumeDialogImpl implements VolumeDialog {
 
     @Override
     public void destroy() {
-        mAccessibility.destroy();
         mController.removeCallback(mControllerCallbackH);
         mHandler.removeCallbacksAndMessages(null);
     }
@@ -356,8 +355,6 @@ public class VolumeDialogImpl implements VolumeDialog {
         writer.print("  mDynamic: "); writer.println(mDynamic);
         writer.print("  mAutomute: "); writer.println(mAutomute);
         writer.print("  mSilentMode: "); writer.println(mSilentMode);
-        writer.print("  mAccessibility.mFeedbackEnabled: ");
-        writer.println(mAccessibility.mFeedbackEnabled);
     }
 
     private static int getImpliedLevel(SeekBar seekBar, int progress) {
@@ -571,10 +568,18 @@ public class VolumeDialogImpl implements VolumeDialog {
     }
 
     private int computeTimeoutH() {
-        if (mAccessibility.mFeedbackEnabled) return 20000;
-        if (mHovering) return 16000;
-        if (mSafetyWarning != null) return 5000;
-        return 3000;
+        if (mHovering) {
+            return mAccessibilityMgr.getRecommendedTimeoutMillis(DIALOG_HOVERING_TIMEOUT_MILLIS,
+                    AccessibilityManager.FLAG_CONTENT_CONTROLS);
+        }
+        if (mSafetyWarning != null) {
+            return mAccessibilityMgr.getRecommendedTimeoutMillis(
+                    DIALOG_SAFETYWARNING_TIMEOUT_MILLIS,
+                    AccessibilityManager.FLAG_CONTENT_TEXT
+                            | AccessibilityManager.FLAG_CONTENT_CONTROLS);
+        }
+        return mAccessibilityMgr.getRecommendedTimeoutMillis(DIALOG_TIMEOUT_MILLIS,
+                AccessibilityManager.FLAG_CONTENT_CONTROLS);
     }
 
     protected void dismissH(int reason) {
@@ -1261,28 +1266,8 @@ public class VolumeDialogImpl implements VolumeDialog {
     }
 
     private final class Accessibility extends AccessibilityDelegate {
-        private boolean mFeedbackEnabled;
-
         public void init() {
-            mDialogView.addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
-                @Override
-                public void onViewDetachedFromWindow(View v) {
-                    if (D.BUG) Log.d(TAG, "onViewDetachedFromWindow");
-                }
-
-                @Override
-                public void onViewAttachedToWindow(View v) {
-                    if (D.BUG) Log.d(TAG, "onViewAttachedToWindow");
-                    updateFeedbackEnabled();
-                }
-            });
             mDialogView.setAccessibilityDelegate(this);
-            mAccessibilityMgr.addCallback(mListener);
-            updateFeedbackEnabled();
-        }
-
-        public void destroy() {
-            mAccessibilityMgr.removeCallback(mListener);
         }
 
         @Override
@@ -1298,25 +1283,6 @@ public class VolumeDialogImpl implements VolumeDialog {
             rescheduleTimeoutH();
             return super.onRequestSendAccessibilityEvent(host, child, event);
         }
-
-        private void updateFeedbackEnabled() {
-            mFeedbackEnabled = computeFeedbackEnabled();
-        }
-
-        private boolean computeFeedbackEnabled() {
-            // are there any enabled non-generic a11y services?
-            final List<AccessibilityServiceInfo> services =
-                    mAccessibilityMgr.getEnabledAccessibilityServiceList(FEEDBACK_ALL_MASK);
-            for (AccessibilityServiceInfo asi : services) {
-                if (asi.feedbackType != 0 && asi.feedbackType != FEEDBACK_GENERIC) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private final AccessibilityServicesStateChangeListener mListener =
-                enabled -> updateFeedbackEnabled();
     }
 
     private static class VolumeRow {

@@ -27,18 +27,23 @@ import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
 
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
 import android.media.AudioManager;
+import android.os.SystemClock;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.text.TextUtils;
+import android.view.InputDevice;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
@@ -48,10 +53,11 @@ import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.function.Predicate;
@@ -59,7 +65,6 @@ import java.util.function.Predicate;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-@Ignore
 public class VolumeDialogImplTest extends SysuiTestCase {
 
     VolumeDialogImpl mDialog;
@@ -113,6 +118,45 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                     + " failed test", condition.test(view));
         }
     }
+
+    @Test
+    public void testComputeTimeout() {
+        Mockito.reset(mAccessibilityMgr);
+        mDialog.rescheduleTimeoutH();
+        verify(mAccessibilityMgr).getRecommendedTimeoutMillis(
+                VolumeDialogImpl.DIALOG_TIMEOUT_MILLIS,
+                AccessibilityManager.FLAG_CONTENT_CONTROLS);
+    }
+
+    @Test
+    public void testComputeTimeout_withHovering() {
+        Mockito.reset(mAccessibilityMgr);
+        View dialog = mDialog.getDialogView();
+        long uptimeMillis = SystemClock.uptimeMillis();
+        MotionEvent event = MotionEvent.obtain(uptimeMillis, uptimeMillis,
+                MotionEvent.ACTION_HOVER_ENTER, 0, 0, 0);
+        event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        dialog.dispatchGenericMotionEvent(event);
+        event.recycle();
+        verify(mAccessibilityMgr).getRecommendedTimeoutMillis(
+                VolumeDialogImpl.DIALOG_HOVERING_TIMEOUT_MILLIS,
+                AccessibilityManager.FLAG_CONTENT_CONTROLS);
+    }
+
+    @Test
+    public void testComputeTimeout_withSafetyWarningOn() {
+        Mockito.reset(mAccessibilityMgr);
+        ArgumentCaptor<VolumeDialogController.Callbacks> controllerCallbackCapture =
+                ArgumentCaptor.forClass(VolumeDialogController.Callbacks.class);
+        verify(mController).addCallback(controllerCallbackCapture.capture(), any());
+        VolumeDialogController.Callbacks callbacks = controllerCallbackCapture.getValue();
+        callbacks.onShowSafetyWarning(AudioManager.FLAG_SHOW_UI);
+        verify(mAccessibilityMgr).getRecommendedTimeoutMillis(
+                VolumeDialogImpl.DIALOG_SAFETYWARNING_TIMEOUT_MILLIS,
+                AccessibilityManager.FLAG_CONTENT_TEXT
+                        | AccessibilityManager.FLAG_CONTENT_CONTROLS);
+    }
+
 /*
     @Test
     public void testContentDescriptions() {

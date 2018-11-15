@@ -14,13 +14,10 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
-
-import java.util.List;
 
 /**
  * For mocking because AccessibilityManager is final for some reason...
@@ -62,8 +59,8 @@ public class AccessibilityManagerWrapper implements
         mAccessibilityManager.sendAccessibilityEvent(event);
     }
 
-    public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(
-            int feedbackTypeFlags) {
-        return mAccessibilityManager.getEnabledAccessibilityServiceList(feedbackTypeFlags);
+    /** Returns a recommended ui timeout value in milliseconds. */
+    public int getRecommendedTimeoutMillis(int originalTimeout, int uiContentFlags) {
+        return mAccessibilityManager.getRecommendedTimeoutMillis(originalTimeout, uiContentFlags);
     }
 }
