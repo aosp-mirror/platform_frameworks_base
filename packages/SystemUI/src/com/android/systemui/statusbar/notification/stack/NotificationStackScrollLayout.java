@@ -404,6 +404,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      */
     private float mBackgroundXFactor = 1f;
 
+    private boolean mSwipingInProgress;
+
     private boolean mUsingLightTheme;
     private boolean mQsExpanded;
     private boolean mForwardScrollable;
@@ -3175,7 +3177,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 || ev.getActionMasked() == MotionEvent.ACTION_UP;
         handleEmptySpaceClick(ev);
         boolean expandWantsIt = false;
-        boolean swipingInProgress = mSwipeHelper.isSwipingInProgress();
+        boolean swipingInProgress = mSwipingInProgress;
         if (mIsExpanded && !swipingInProgress && !mOnlyScrollingInThisMotion) {
             if (isCancelOrUp) {
                 mExpandHelper.onlyObserveMovements(false);
@@ -3230,7 +3232,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @Override
     @ShadeViewRefactor(RefactorComponent.INPUT)
     public boolean onGenericMotionEvent(MotionEvent event) {
-        if (!isScrollingEnabled() || !mIsExpanded || mSwipeHelper.isSwipingInProgress() || mExpandingNotification
+        if (!isScrollingEnabled() || !mIsExpanded || mSwipingInProgress || mExpandingNotification
                 || mDisallowScrollingInThisMotion) {
             return false;
         }
@@ -3457,7 +3459,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         initDownStates(ev);
         handleEmptySpaceClick(ev);
         boolean expandWantsIt = false;
-        boolean swipingInProgress = mSwipeHelper.isSwipingInProgress();
+        boolean swipingInProgress = mSwipingInProgress;
         if (!swipingInProgress && !mOnlyScrollingInThisMotion) {
             expandWantsIt = mExpandHelper.onInterceptTouchEvent(ev);
         }
@@ -3733,6 +3735,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     false /* force */, true /* removeControls */, -1 /* x */, -1 /* y */,
                     false /* resetMenu */);
             resetExposedMenuView(true /* animate */, true /* force */);
+        }
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    private void setSwipingInProgress(boolean swiping) {
+        mSwipingInProgress = swiping;
+        if (swiping) {
+            requestDisallowInterceptTouchEvent(true);
         }
     }
 
@@ -5502,6 +5512,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         @Override
         public void onDragCancelled(View v) {
+            setSwipingInProgress(false);
             mFalsingManager.onNotificatonStopDismissing();
         }
 
@@ -5529,6 +5540,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
          */
 
         public void handleChildViewDismissed(View view) {
+            setSwipingInProgress(false);
             if (mDismissAllInProgress) {
                 return;
             }
@@ -5597,6 +5609,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         @Override
         public void onBeginDrag(View v) {
             mFalsingManager.onNotificatonStartDismissing();
+            setSwipingInProgress(true);
             mAmbientState.onBeginDrag(v);
             updateContinuousShadowDrawing();
             if (mAnimationsEnabled && (mIsExpanded || !isPinnedHeadsUp(v))) {
