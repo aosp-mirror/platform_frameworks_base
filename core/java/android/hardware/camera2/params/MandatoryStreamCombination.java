@@ -59,11 +59,12 @@ public final class MandatoryStreamCombination {
     public static final class MandatoryStreamInformation {
         private final int mFormat;
         private final ArrayList<Size> mAvailableSizes = new ArrayList<Size> ();
+        private final boolean mIsInput;
 
         /**
          * Create a new {@link MandatoryStreamInformation}.
          *
-           @param sizes List of possible stream sizes.
+           @param availableSizes List of possible stream sizes.
          * @param format Image format.
          *
          * @throws IllegalArgumentException
@@ -72,11 +73,37 @@ public final class MandatoryStreamCombination {
          * @hide
          */
         public MandatoryStreamInformation(@NonNull List<Size> availableSizes, int format) {
+            this(availableSizes, format, /*isInput*/false);
+        }
+
+        /**
+         * Create a new {@link MandatoryStreamInformation}.
+         *
+           @param availableSizes List of possible stream sizes.
+         * @param format Image format.
+         * @param isInput Flag indicating whether this stream is input.
+         *
+         * @throws IllegalArgumentException
+         *              if sizes is empty or if the format was not user-defined in
+         *              ImageFormat/PixelFormat.
+         * @hide
+         */
+        public MandatoryStreamInformation(@NonNull List<Size> availableSizes, int format,
+                boolean isInput) {
             if (availableSizes.isEmpty()) {
                 throw new IllegalArgumentException("No available sizes");
             }
             mAvailableSizes.addAll(availableSizes);
             mFormat = checkArgumentFormat(format);
+            mIsInput = isInput;
+        }
+
+        /**
+         * Confirms whether or not this is an input stream.
+         * @return true in case the stream is input, false otherwise.
+         */
+        public boolean isInput() {
+            return mIsInput;
         }
 
         /**
@@ -123,7 +150,7 @@ public final class MandatoryStreamCombination {
             }
             if (obj instanceof MandatoryStreamInformation) {
                 final MandatoryStreamInformation other = (MandatoryStreamInformation) obj;
-                if ((mFormat != other.mFormat) ||
+                if ((mFormat != other.mFormat) || (mIsInput != other.mIsInput) ||
                         (mAvailableSizes.size() != other.mAvailableSizes.size())) {
                     return false;
                 }
@@ -139,11 +166,13 @@ public final class MandatoryStreamCombination {
          */
         @Override
         public int hashCode() {
-            return HashCodeHelpers.hashCode(mFormat, mAvailableSizes.hashCode());
+            return HashCodeHelpers.hashCode(mFormat, Boolean.hashCode(mIsInput),
+                    mAvailableSizes.hashCode());
         }
     }
 
-    private final String mDesciption;
+    private final String mDescription;
+    private final boolean mIsReprocessable;
     private final ArrayList<MandatoryStreamInformation> mStreamsInformation =
             new ArrayList<MandatoryStreamInformation>();
     /**
@@ -151,18 +180,20 @@ public final class MandatoryStreamCombination {
      *
      * @param streamsInformation list of available streams in the stream combination.
      * @param description Summary of the stream combination use case.
+     * @param isReprocessable Flag whether the mandatory stream combination is reprocessable.
      *
      * @throws IllegalArgumentException
      *              if stream information is empty
      * @hide
      */
     public MandatoryStreamCombination(@NonNull List<MandatoryStreamInformation> streamsInformation,
-            String description) {
+            String description, boolean isReprocessable) {
         if (streamsInformation.isEmpty()) {
             throw new IllegalArgumentException("Empty stream information");
         }
         mStreamsInformation.addAll(streamsInformation);
-        mDesciption = description;
+        mDescription = description;
+        mIsReprocessable = isReprocessable;
     }
 
     /**
@@ -171,7 +202,17 @@ public final class MandatoryStreamCombination {
      * @return String with the mandatory combination description.
      */
     public String getDescription() {
-        return mDesciption;
+        return mDescription;
+    }
+
+    /**
+     * Indicates whether the mandatory stream combination is reprocessable.
+     *
+     * @return {@code true} in case the mandatory stream combination contains an input,
+     *         {@code false} otherwise.
+     */
+    public boolean isReprocessable() {
+        return mIsReprocessable;
     }
 
     /**
@@ -202,18 +243,13 @@ public final class MandatoryStreamCombination {
         }
         if (obj instanceof MandatoryStreamCombination) {
             final MandatoryStreamCombination other = (MandatoryStreamCombination) obj;
-            if ((mDesciption != other.mDesciption) ||
+            if ((mDescription != other.mDescription) ||
+                    (mIsReprocessable != other.mIsReprocessable) ||
                     (mStreamsInformation.size() != other.mStreamsInformation.size())) {
                 return false;
             }
 
-            for (int i = 0;  i < mStreamsInformation.size(); i++) {
-                if (!mStreamsInformation.get(i).equals(other.mStreamsInformation.get(i))){
-                    return false;
-                }
-            }
-
-            return true;
+            return mStreamsInformation.equals(other.mStreamsInformation);
         }
 
         return false;
@@ -224,25 +260,40 @@ public final class MandatoryStreamCombination {
      */
     @Override
     public int hashCode() {
-        return HashCodeHelpers.hashCode(mDesciption.hashCode(), mStreamsInformation.hashCode());
+        return HashCodeHelpers.hashCode(Boolean.hashCode(mIsReprocessable), mDescription.hashCode(),
+                mStreamsInformation.hashCode());
     }
 
     private static enum SizeThreshold { VGA, PREVIEW, RECORD, MAXIMUM }
+    private static enum ReprocessType { NONE, PRIVATE, YUV }
     private static final class StreamTemplate {
         public int mFormat;
         public SizeThreshold mSizeThreshold;
+        public boolean mIsInput;
         public StreamTemplate(int format, SizeThreshold sizeThreshold) {
+            this(format, sizeThreshold, /*isInput*/false);
+        }
+
+        public StreamTemplate(int format, SizeThreshold sizeThreshold, boolean isInput) {
             mFormat = format;
             mSizeThreshold = sizeThreshold;
+            mIsInput = isInput;
         }
     }
 
     private static final class StreamCombinationTemplate {
         public StreamTemplate[] mStreamTemplates;
         public String mDescription;
+        public ReprocessType mReprocessType;
 
         public StreamCombinationTemplate(StreamTemplate[] streamTemplates, String description) {
+            this(streamTemplates, description, /*reprocessType*/ReprocessType.NONE);
+        }
+
+        public StreamCombinationTemplate(StreamTemplate[] streamTemplates, String description,
+                ReprocessType reprocessType) {
             mStreamTemplates = streamTemplates;
+            mReprocessType = reprocessType;
             mDescription = description;
         }
     }
@@ -409,6 +460,189 @@ public final class MandatoryStreamCombination {
                 "In-app viewfinder analysis with dynamic selection of output format")
     };
 
+    private static StreamCombinationTemplate sLimitedPrivateReprocCombinations[] = {
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM) },
+                "No-viewfinder still image reprocessing",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM) },
+                "ZSL(Zero-Shutter-Lag) still imaging",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM) },
+                "ZSL still and in-app processing imaging",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM) },
+                "ZSL in-app processing with still capture",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+    };
+
+    private static StreamCombinationTemplate sLimitedYUVReprocCombinations[] = {
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM) },
+                "No-viewfinder still image reprocessing",
+                /*reprocessType*/ ReprocessType.YUV),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM) },
+                "ZSL(Zero-Shutter-Lag) still imaging",
+                /*reprocessType*/ ReprocessType.YUV),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM) },
+                "ZSL still and in-app processing imaging",
+                /*reprocessType*/ ReprocessType.YUV),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM) },
+                "ZSL in-app processing with still capture",
+                /*reprocessType*/ ReprocessType.YUV),
+    };
+
+    private static StreamCombinationTemplate sFullPrivateReprocCombinations[] = {
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD) },
+                "High-resolution ZSL in-app video processing with regular preview",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM) },
+                "Maximum-resolution ZSL in-app processing with regular preview",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM) },
+                "Maximum-resolution two-input ZSL in-app processing",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM) },
+                "ZSL still capture and in-app processing",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+    };
+
+    private static StreamCombinationTemplate sFullYUVReprocCombinations[] = {
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW) },
+                "Maximum-resolution multi-frame image fusion in-app processing with regular "
+                + "preview",
+                /*reprocessType*/ ReprocessType.YUV),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW) },
+                "Maximum-resolution multi-frame image fusion two-input in-app processing",
+                /*reprocessType*/ ReprocessType.YUV),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD) },
+                "High-resolution ZSL in-app video processing with regular preview",
+                /*reprocessType*/ ReprocessType.YUV),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM) },
+                "ZSL still capture and in-app processing",
+                /*reprocessType*/ ReprocessType.YUV),
+    };
+
+    private static StreamCombinationTemplate sRAWPrivateReprocCombinations[] = {
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM) },
+                "Mutually exclusive ZSL in-app processing and DNG capture",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM) },
+                "Mutually exclusive ZSL in-app processing and preview with DNG capture",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM) },
+                "Mutually exclusive ZSL two-input in-app processing and DNG capture",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM) },
+                "Mutually exclusive ZSL still capture and preview with DNG capture",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM) },
+                "Mutually exclusive ZSL in-app processing with still capture and DNG capture",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+    };
+
+    private static StreamCombinationTemplate sRAWYUVReprocCombinations[] = {
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM) },
+                "Mutually exclusive ZSL in-app processing and DNG capture",
+                /*reprocessType*/ ReprocessType.YUV),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM) },
+                "Mutually exclusive ZSL in-app processing and preview with DNG capture",
+                /*reprocessType*/ ReprocessType.YUV),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM) },
+                "Mutually exclusive ZSL two-input in-app processing and DNG capture",
+                /*reprocessType*/ ReprocessType.YUV),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM) },
+                "Mutually exclusive ZSL still capture and preview with DNG capture",
+                /*reprocessType*/ ReprocessType.YUV),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM) },
+                "Mutually exclusive ZSL in-app processing with still capture and DNG capture",
+                /*reprocessType*/ ReprocessType.YUV),
+    };
+
+    private static StreamCombinationTemplate sLevel3PrivateReprocCombinations[] = {
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.VGA),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM) },
+                "In-app viewfinder analysis with ZSL, RAW, and JPEG reprocessing output",
+                /*reprocessType*/ ReprocessType.PRIVATE),
+    };
+
+    private static StreamCombinationTemplate sLevel3YUVReprocCombinations[] = {
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.VGA),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM) },
+                "In-app viewfinder analysis with ZSL and RAW",
+                /*reprocessType*/ ReprocessType.YUV),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.VGA),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM) },
+                "In-app viewfinder analysis with ZSL, RAW, and JPEG reprocessing output",
+                /*reprocessType*/ ReprocessType.YUV),
+    };
+
     /**
      * Helper builder class to generate a list of available mandatory stream combinations.
      * @hide
@@ -466,6 +700,15 @@ public final class MandatoryStreamCombination {
             // External devices are identical to limited devices w.r.t. stream combinations.
             if (isHardwareLevelAtLeastLimited() || isExternalCamera()) {
                 availableTemplates.addAll(Arrays.asList(sLimitedCombinations));
+
+                if (isPrivateReprocessingSupported()) {
+                    availableTemplates.addAll(Arrays.asList(sLimitedPrivateReprocCombinations));
+                }
+
+                if (isYUVReprocessingSupported()) {
+                    availableTemplates.addAll(Arrays.asList(sLimitedYUVReprocCombinations));
+                }
+
             }
 
             if (isCapabilitySupported(
@@ -475,15 +718,42 @@ public final class MandatoryStreamCombination {
 
             if (isHardwareLevelAtLeastFull()) {
                 availableTemplates.addAll(Arrays.asList(sFullCombinations));
+
+                if (isPrivateReprocessingSupported()) {
+                    availableTemplates.addAll(Arrays.asList(sFullPrivateReprocCombinations));
+                }
+
+                if (isYUVReprocessingSupported()) {
+                    availableTemplates.addAll(Arrays.asList(sFullYUVReprocCombinations));
+                }
+
             }
 
             if (isCapabilitySupported(
                     CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW)) {
                 availableTemplates.addAll(Arrays.asList(sRawCombinations));
+
+                if (isPrivateReprocessingSupported()) {
+                    availableTemplates.addAll(Arrays.asList(sRAWPrivateReprocCombinations));
+                }
+
+                if (isYUVReprocessingSupported()) {
+                    availableTemplates.addAll(Arrays.asList(sRAWYUVReprocCombinations));
+                }
+
             }
 
             if (isHardwareLevelAtLeastLevel3()) {
                 availableTemplates.addAll(Arrays.asList(sLevel3Combinations));
+
+                if (isPrivateReprocessingSupported()) {
+                    availableTemplates.addAll(Arrays.asList(sLevel3PrivateReprocCombinations));
+                }
+
+                if (isYUVReprocessingSupported()) {
+                    availableTemplates.addAll(Arrays.asList(sLevel3YUVReprocCombinations));
+                }
+
             }
 
             return generateAvailableCombinations(availableTemplates);
@@ -519,6 +789,18 @@ public final class MandatoryStreamCombination {
                 availableRawSizes.addAll(Arrays.asList(rawSizes));
             }
 
+            Size maxPrivateInputSize = new Size(0, 0);
+            if (isPrivateReprocessingSupported()) {
+                maxPrivateInputSize = getMaxSize(mStreamConfigMap.getInputSizes(
+                            ImageFormat.PRIVATE));
+            }
+
+            Size maxYUVInputSize = new Size(0, 0);
+            if (isYUVReprocessingSupported()) {
+                maxYUVInputSize = getMaxSize(mStreamConfigMap.getInputSizes(
+                            ImageFormat.YUV_420_888));
+            }
+
             // Generate the available mandatory stream combinations given the supported templates
             // and size ranges.
             ArrayList<MandatoryStreamCombination> availableStreamCombinations =
@@ -528,6 +810,26 @@ public final class MandatoryStreamCombination {
                 ArrayList<MandatoryStreamInformation> streamsInfo =
                         new ArrayList<MandatoryStreamInformation>();
                 streamsInfo.ensureCapacity(combTemplate.mStreamTemplates.length);
+                boolean isReprocessable = combTemplate.mReprocessType != ReprocessType.NONE;
+                if (isReprocessable) {
+                    // The first and second streams in a reprocessable combination have the
+                    // same size and format. The first is the input and the second is the output
+                    // used for generating the subsequent input buffers.
+                    ArrayList<Size> inputSize = new ArrayList<Size>();
+                    int format;
+                    if (combTemplate.mReprocessType == ReprocessType.PRIVATE) {
+                        inputSize.add(maxPrivateInputSize);
+                        format = ImageFormat.PRIVATE;
+                    } else {
+                        inputSize.add(maxYUVInputSize);
+                        format = ImageFormat.YUV_420_888;
+                    }
+
+                    streamsInfo.add(new MandatoryStreamInformation(inputSize, format,
+                                /*isInput*/true));
+                    streamsInfo.add(new MandatoryStreamInformation(inputSize, format));
+                }
+
                 for (StreamTemplate template : combTemplate.mStreamTemplates) {
                     List<Size> sizes = null;
                     if (template.mFormat == ImageFormat.RAW_SENSOR) {
@@ -555,7 +857,7 @@ public final class MandatoryStreamCombination {
                 MandatoryStreamCombination streamCombination;
                 try {
                     streamCombination = new MandatoryStreamCombination(streamsInfo,
-                            combTemplate.mDescription);
+                            combTemplate.mDescription, isReprocessable);
                 } catch (IllegalArgumentException e) {
                     Log.e(TAG, "No stream information for mandatory combination: "
                             + combTemplate.mDescription);
@@ -650,6 +952,30 @@ public final class MandatoryStreamCombination {
         }
 
         /**
+         * Get the largest size by area.
+         *
+         * @param sizes an array of sizes, must have at least 1 element
+         *
+         * @return Largest Size
+         *
+         * @throws IllegalArgumentException if sizes was null or had 0 elements
+         */
+        public static Size getMaxSize(Size... sizes) {
+            if (sizes == null || sizes.length == 0) {
+                throw new IllegalArgumentException("sizes was empty");
+            }
+
+            Size sz = sizes[0];
+            for (Size size : sizes) {
+                if (size.getWidth() * size.getHeight() > sz.getWidth() * sz.getHeight()) {
+                    sz = size;
+                }
+            }
+
+            return sz;
+        }
+
+        /**
          * Whether or not the hardware level reported by android.info.supportedHardwareLevel is
          * at least the desired one (but could be higher)
          */
@@ -740,6 +1066,22 @@ public final class MandatoryStreamCombination {
         private boolean isColorOutputSupported() {
             return isCapabilitySupported(
                     CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE);
+        }
+
+        /**
+         * Check whether the current device supports private reprocessing.
+         */
+        private boolean isPrivateReprocessingSupported() {
+            return isCapabilitySupported(
+                    CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_PRIVATE_REPROCESSING);
+        }
+
+        /**
+         * Check whether the current device supports YUV reprocessing.
+         */
+        private boolean isYUVReprocessingSupported() {
+            return isCapabilitySupported(
+                    CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING);
         }
 
         /**
