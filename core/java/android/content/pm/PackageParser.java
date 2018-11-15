@@ -7555,6 +7555,7 @@ public class PackageParser {
         }
         if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) != 0) {
             ai.sharedLibraryFiles = p.usesLibraryFiles;
+            ai.sharedLibraryInfos = p.usesLibraryInfos;
         }
         if (state.stopped) {
             ai.flags |= ApplicationInfo.FLAG_STOPPED;

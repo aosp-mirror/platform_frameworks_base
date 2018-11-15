@@ -17,6 +17,7 @@
 package com.android.server.pm.dex;
 
 import android.content.pm.ApplicationInfo;
+import android.content.pm.SharedLibraryInfo;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -28,6 +29,11 @@ import java.util.List;
 
 public final class DexoptUtils {
     private static final String TAG = "DexoptUtils";
+
+    // Shared libraries have more or less followed PCL behavior due to the way
+    // they were added to the classpath pre Q.
+    private static final String SHARED_LIBRARY_LOADER_TYPE =
+            ClassLoaderFactory.getPathClassLoaderName();
 
     private DexoptUtils() {}
 
@@ -62,12 +68,15 @@ public final class DexoptUtils {
      * android.app.ActivityThread, boolean, ApplicationInfo, List, List)}.
      */
     public static String[] getClassLoaderContexts(ApplicationInfo info,
-            String[] sharedLibraries, boolean[] pathsWithCode) {
+            List<SharedLibraryInfo> sharedLibraries, boolean[] pathsWithCode) {
         // The base class loader context contains only the shared library.
-        String sharedLibrariesClassPath = encodeClasspath(sharedLibraries);
-        String baseApkContextClassLoader = encodeClassLoader(
-                sharedLibrariesClassPath, info.classLoaderName);
+        String sharedLibrariesContext = "";
+        if (sharedLibraries != null) {
+            sharedLibrariesContext = encodeSharedLibraries(sharedLibraries);
+        }
 
+        String baseApkContextClassLoader = encodeClassLoader(
+                "", info.classLoaderName, sharedLibrariesContext);
         if (info.getSplitCodePaths() == null) {
             // The application has no splits.
             return new String[] {baseApkContextClassLoader};
@@ -81,11 +90,10 @@ public final class DexoptUtils {
         // The splits have an implicit dependency on the base apk.
         // This means that we have to add the base apk file in addition to the shared libraries.
         String baseApkName = new File(info.getBaseCodePath()).getName();
-        String sharedLibrariesAndBaseClassPath =
-                encodeClasspath(sharedLibrariesClassPath, baseApkName);
+        String baseClassPath = baseApkName;
 
         // The result is stored in classLoaderContexts.
-        // Index 0 is the class loaded context for the base apk.
+        // Index 0 is the class loader context for the base apk.
         // Index `i` is the class loader context encoding for split `i`.
         String[] classLoaderContexts = new String[/*base apk*/ 1 + splitRelativeCodePaths.length];
         classLoaderContexts[0] = pathsWithCode[0] ? baseApkContextClassLoader : null;
@@ -94,10 +102,14 @@ public final class DexoptUtils {
             // If the app didn't request for the splits to be loaded in isolation or if it does not
             // declare inter-split dependencies, then all the splits will be loaded in the base
             // apk class loader (in the order of their definition).
-            String classpath = sharedLibrariesAndBaseClassPath;
+            String classpath = baseClassPath;
             for (int i = 1; i < classLoaderContexts.length; i++) {
-                classLoaderContexts[i] = pathsWithCode[i]
-                        ? encodeClassLoader(classpath, info.classLoaderName) : null;
+                if (pathsWithCode[i]) {
+                    classLoaderContexts[i] = encodeClassLoader(
+                            classpath, info.classLoaderName, sharedLibrariesContext);
+                } else {
+                    classLoaderContexts[i] = null;
+                }
                 // Note that the splits with no code are not removed from the classpath computation.
                 // i.e. split_n might get the split_n-1 in its classpath dependency even
                 // if split_n-1 has no code.
@@ -124,7 +136,7 @@ public final class DexoptUtils {
                         info.splitClassLoaderNames[i]);
             }
             String splitDependencyOnBase = encodeClassLoader(
-                    sharedLibrariesAndBaseClassPath, info.classLoaderName);
+                    baseClassPath, info.classLoaderName);
             SparseArray<int[]> splitDependencies = info.splitDependencies;
 
             // Note that not all splits have dependencies (e.g. configuration splits)
@@ -149,7 +161,8 @@ public final class DexoptUtils {
                     // any dependency. In this case its context equals its declared class loader.
                     classLoaderContexts[i] = classLoaderContexts[i] == null
                             ? splitClassLoader
-                            : encodeClassLoaderChain(splitClassLoader, classLoaderContexts[i]);
+                            : encodeClassLoaderChain(splitClassLoader, classLoaderContexts[i])
+                                    + sharedLibrariesContext;
                 } else {
                     // This is a split without code, it has no dependency and it is not compiled.
                     // Its context will be null.
@@ -207,6 +220,31 @@ public final class DexoptUtils {
         return splitContext;
     }
 
+    private static String encodeSharedLibrary(SharedLibraryInfo sharedLibrary) {
+        List<String> paths = sharedLibrary.getAllCodePaths();
+        String classLoaderSpec = encodeClassLoader(
+                encodeClasspath(paths.toArray(new String[paths.size()])),
+                SHARED_LIBRARY_LOADER_TYPE);
+        if (sharedLibrary.getDependencies() != null) {
+            classLoaderSpec += encodeSharedLibraries(sharedLibrary.getDependencies());
+        }
+        return classLoaderSpec;
+    }
+
+    private static String encodeSharedLibraries(List<SharedLibraryInfo> sharedLibraries) {
+        String sharedLibrariesContext = "{";
+        boolean first = true;
+        for (SharedLibraryInfo info : sharedLibraries) {
+            if (!first) {
+                sharedLibrariesContext += "#";
+            }
+            first = false;
+            sharedLibrariesContext += encodeSharedLibrary(info);
+        }
+        sharedLibrariesContext += "}";
+        return sharedLibrariesContext;
+    }
+
     /**
      * Encodes the shared libraries classpathElements in a format accepted by dexopt.
      * NOTE: Keep this in sync with the dexopt expectations! Right now that is
@@ -255,6 +293,14 @@ public final class DexoptUtils {
             Slog.wtf(TAG, "Unsupported classLoaderName: " + classLoaderName);
         }
         return classLoaderDexoptEncoding + "[" + classpath + "]";
+    }
+
+    /**
+     * Same as above, but appends {@param sharedLibraries} to the result.
+     */
+    private static String encodeClassLoader(String classpath, String classLoaderName,
+            String sharedLibraries) {
+        return encodeClassLoader(classpath, classLoaderName) + sharedLibraries;
     }
 
     /**
