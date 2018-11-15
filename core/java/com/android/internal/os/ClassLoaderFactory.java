@@ -22,6 +22,8 @@ import dalvik.system.DelegateLastClassLoader;
 import dalvik.system.DexClassLoader;
 import dalvik.system.PathClassLoader;
 
+import java.util.List;
+
 /**
  * Creates class loaders.
  *
@@ -35,6 +37,13 @@ public class ClassLoaderFactory {
     private static final String DEX_CLASS_LOADER_NAME = DexClassLoader.class.getName();
     private static final String DELEGATE_LAST_CLASS_LOADER_NAME =
             DelegateLastClassLoader.class.getName();
+
+    /**
+     * Returns the name of the class for PathClassLoader.
+     */
+    public static String getPathClassLoaderName() {
+        return PATH_CLASS_LOADER_NAME;
+    }
 
     /**
      * Returns true if {@code name} is a supported classloader. {@code name} must be a
@@ -68,25 +77,43 @@ public class ClassLoaderFactory {
      * is created.
      */
     public static ClassLoader createClassLoader(String dexPath,
-            String librarySearchPath, ClassLoader parent, String classloaderName) {
+            String librarySearchPath, ClassLoader parent, String classloaderName,
+            List<ClassLoader> sharedLibraries) {
+        ClassLoader[] arrayOfSharedLibraries = (sharedLibraries == null)
+                ? null
+                : sharedLibraries.toArray(new ClassLoader[sharedLibraries.size()]);
         if (isPathClassLoaderName(classloaderName)) {
-            return new PathClassLoader(dexPath, librarySearchPath, parent);
+            return new PathClassLoader(dexPath, librarySearchPath, parent, arrayOfSharedLibraries);
         } else if (isDelegateLastClassLoaderName(classloaderName)) {
-            return new DelegateLastClassLoader(dexPath, librarySearchPath, parent);
+            return new DelegateLastClassLoader(dexPath, librarySearchPath, parent,
+                    arrayOfSharedLibraries);
         }
 
         throw new AssertionError("Invalid classLoaderName: " + classloaderName);
     }
 
     /**
+     * Same as {@code createClassLoader} below, but passes a null list of shared
+     * libraries.
+     */
+    public static ClassLoader createClassLoader(String dexPath,
+            String librarySearchPath, String libraryPermittedPath, ClassLoader parent,
+            int targetSdkVersion, boolean isNamespaceShared, String classLoaderName) {
+        return createClassLoader(dexPath, librarySearchPath, libraryPermittedPath,
+            parent, targetSdkVersion, isNamespaceShared, classLoaderName, null);
+    }
+
+
+    /**
      * Create a ClassLoader and initialize a linker-namespace for it.
      */
     public static ClassLoader createClassLoader(String dexPath,
             String librarySearchPath, String libraryPermittedPath, ClassLoader parent,
-            int targetSdkVersion, boolean isNamespaceShared, String classloaderName) {
+            int targetSdkVersion, boolean isNamespaceShared, String classLoaderName,
+            List<ClassLoader> sharedLibraries) {
 
         final ClassLoader classLoader = createClassLoader(dexPath, librarySearchPath, parent,
-                classloaderName);
+                classLoaderName, sharedLibraries);
 
         boolean isForVendor = false;
         for (String path : dexPath.split(":")) {

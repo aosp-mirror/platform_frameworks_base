@@ -2233,7 +2233,7 @@ public class PackageManagerService extends IPackageManager.Stub
             for (int i = 0; i < builtInLibCount; i++) {
                 String name = libConfig.keyAt(i);
                 String path = libConfig.valueAt(i);
-                addSharedLibraryLPw(path, null, name, SharedLibraryInfo.VERSION_UNDEFINED,
+                addSharedLibraryLPw(path, null, null, name, SharedLibraryInfo.VERSION_UNDEFINED,
                         SharedLibraryInfo.TYPE_BUILTIN, PLATFORM_PACKAGE_NAME, 0);
             }
             // Builtin libraries cannot encode their dependency where they are
@@ -4844,7 +4844,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     SharedLibraryInfo resLibInfo = new SharedLibraryInfo(libInfo.getPath(),
-                            libInfo.getPackageName(), libInfo.getName(), libInfo.getLongVersion(),
+                            libInfo.getPackageName(), libInfo.getAllCodePaths(),
+                            libInfo.getName(), libInfo.getLongVersion(),
                             libInfo.getType(), libInfo.getDeclaringPackage(),
                             getPackagesUsingSharedLibraryLPr(libInfo, flags, userId),
                             (libInfo.getDependencies() == null
@@ -9225,7 +9226,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     mDexManager.getPackageUseInfoOrDefault(depPackage.packageName), libraryOptions);
             }
         }
-        return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets,
+        return pdo.performDexOpt(p, p.usesLibraryInfos, instructionSets,
                 getOrCreateCompilerPackageStats(p),
                 mDexManager.getPackageUseInfoOrDefault(p.packageName), options);
     }
@@ -9628,7 +9629,6 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mPackages")
     private void addSharedLibraryLPr(PackageParser.Package pkg, Set<String> usesLibraryFiles,
             SharedLibraryInfo libInfo, PackageParser.Package changingLib) {
-
         if (libInfo.getPath() != null) {
             usesLibraryFiles.add(libInfo.getPath());
             return;
@@ -11224,8 +11224,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private boolean addSharedLibraryLPw(String path, String apk, String name, long version,
-            int type, String declaringPackageName, long declaringVersionCode) {
+    private boolean addSharedLibraryLPw(String path, String apk, List<String> codePaths,
+            String name, long version, int type, String declaringPackageName,
+            long declaringVersionCode) {
         LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(name);
         if (versionedLib == null) {
             versionedLib = new LongSparseArray<>();
@@ -11236,7 +11237,7 @@ public class PackageManagerService extends IPackageManager.Stub
         } else if (versionedLib.indexOfKey(version) >= 0) {
             return false;
         }
-        SharedLibraryInfo libraryInfo = new SharedLibraryInfo(path, apk, name,
+        SharedLibraryInfo libraryInfo = new SharedLibraryInfo(path, apk, codePaths, name,
                 version, type, new VersionedPackage(declaringPackageName, declaringVersionCode),
                 null, null);
         versionedLib.put(version, libraryInfo);
@@ -11323,10 +11324,17 @@ public class PackageManagerService extends IPackageManager.Stub
             if (pkg.staticSharedLibName != null) {
                 // Static shared libs don't allow renaming as they have synthetic package
                 // names to allow install of multiple versions, so use name from manifest.
-                if (addSharedLibraryLPw(null, pkg.packageName, pkg.staticSharedLibName,
+                if (addSharedLibraryLPw(null, pkg.packageName, pkg.getAllCodePaths(),
+                        pkg.staticSharedLibName,
                         pkg.staticSharedLibVersion, SharedLibraryInfo.TYPE_STATIC,
                         pkg.manifestPackageName, pkg.getLongVersionCode())) {
                     hasStaticSharedLibs = true;
+                    // Shared libraries for the package need to be updated.
+                    try {
+                        updateSharedLibrariesLPr(pkg, null);
+                    } catch (PackageManagerException e) {
+                        Slog.e(TAG, "updateSharedLibrariesLPr failed: ", e);
+                    }
                 } else {
                     Slog.w(TAG, "Package " + pkg.packageName + " library "
                                 + pkg.staticSharedLibName + " already exists; skipping");
@@ -11368,12 +11376,18 @@ public class PackageManagerService extends IPackageManager.Stub
                             allowed = true;
                         }
                         if (allowed) {
-                            if (!addSharedLibraryLPw(null, pkg.packageName, name,
-                                    SharedLibraryInfo.VERSION_UNDEFINED,
+                            if (!addSharedLibraryLPw(null, pkg.packageName, pkg.getAllCodePaths(),
+                                    name, SharedLibraryInfo.VERSION_UNDEFINED,
                                     SharedLibraryInfo.TYPE_DYNAMIC,
                                     pkg.packageName, pkg.getLongVersionCode())) {
                                 Slog.w(TAG, "Package " + pkg.packageName + " library "
                                         + name + " already exists; skipping");
+                            }
+                            // Shared libraries for the package need to be updated.
+                            try {
+                                updateSharedLibrariesLPr(pkg, null);
+                            } catch (PackageManagerException e) {
+                                Slog.e(TAG, "updateSharedLibrariesLPr failed: ", e);
                             }
                         } else {
                             Slog.w(TAG, "Package " + pkg.packageName + " declares lib "
@@ -15617,7 +15631,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         REASON_INSTALL,
                         DexoptOptions.DEXOPT_BOOT_COMPLETE
                                 | DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE);
-                mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
+                mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryInfos,
                         null /* instructionSets */,
                         getOrCreateCompilerPackageStats(pkg),
                         mDexManager.getPackageUseInfoOrDefault(packageName),

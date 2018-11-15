@@ -1388,6 +1388,7 @@ public class BackupManagerService {
                     app = mPackageManager.getApplicationInfo(pkg.packageName,
                             PackageManager.GET_SHARED_LIBRARY_FILES);
                     pkg.applicationInfo.sharedLibraryFiles = app.sharedLibraryFiles;
+                    pkg.applicationInfo.sharedLibraryInfos = app.sharedLibraryInfos;
                 }
             } catch (NameNotFoundException e) {
                 packages.remove(a);
