@@ -26,9 +26,11 @@ import android.view.IDockedStackListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManagerGlobal;
+
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.Recents;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 

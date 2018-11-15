@@ -22,9 +22,9 @@ import android.app.RemoteInput;
 import android.graphics.drawable.Icon;
 import android.text.TextUtils;
 
-import com.android.systemui.statusbar.notification.NotificationData;
-
 import androidx.annotation.VisibleForTesting;
+
+import com.android.systemui.statusbar.notification.NotificationData;
 
 import java.util.ArrayList;
 import java.util.Arrays;

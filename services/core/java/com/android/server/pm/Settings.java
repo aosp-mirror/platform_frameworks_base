@@ -2637,7 +2637,7 @@ public final class Settings {
         }
 
         for (final SharedUserSetting sus : mSharedUsers.values()) {
-            knownSet.remove(sus.getSandboxName());
+            knownSet.remove(sus.getStorageSandboxName());
         }
 
         // Remove any unclaimed mappings
@@ -2653,7 +2653,8 @@ public final class Settings {
     void writeKernelMappingLPr(SharedUserSetting sus) {
         if (mKernelMappingFilename == null || sus == null || sus.name == null) return;
 
-        writeKernelMappingLPr(sus.getSandboxName(), sus.userId, sus.getNotInstalledUserIds());
+        writeKernelMappingLPr(sus.getStorageSandboxName(),
+                sus.userId, sus.getNotInstalledUserIds());
     }
 
     void writeKernelMappingLPr(PackageSetting ps) {

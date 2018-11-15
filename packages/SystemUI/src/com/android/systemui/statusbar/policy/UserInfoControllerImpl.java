@@ -37,7 +37,6 @@ import android.util.Log;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 
 import java.util.ArrayList;
 

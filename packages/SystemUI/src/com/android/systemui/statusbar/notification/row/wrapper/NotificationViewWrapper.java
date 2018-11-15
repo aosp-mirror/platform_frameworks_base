@@ -24,9 +24,9 @@ import android.view.NotificationHeaderView;
 import android.view.View;
 
 import com.android.systemui.statusbar.CrossFadeHelper;
+import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.TransformState;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.TransformableView;
 
 /**
  * Wraps the actual notification content view; used to implement behaviors which are different for

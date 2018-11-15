@@ -29,12 +29,14 @@ import android.location.LocationManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+
 import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.util.Utils;
+
 import java.util.ArrayList;
 import java.util.List;
 

@@ -20,9 +20,11 @@ import android.content.ContentResolver;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.provider.Settings;
+
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.CommandQueue;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 

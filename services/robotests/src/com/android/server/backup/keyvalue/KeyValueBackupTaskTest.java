@@ -25,9 +25,12 @@ import static android.app.backup.BackupManager.SUCCESS;
 import static android.app.backup.ForwardingBackupAgent.forward;
 
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createBackupWakeLock;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createInitializedBackupManagerService;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBackupManagerServiceBasics;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBinderCallerAndApplicationAsSystem;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils
+        .createInitializedBackupManagerService;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils
+        .setUpBackupManagerServiceBasics;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils
+        .setUpBinderCallerAndApplicationAsSystem;
 import static com.android.server.backup.testing.PackageData.PM_PACKAGE;
 import static com.android.server.backup.testing.PackageData.fullBackupPackage;
 import static com.android.server.backup.testing.PackageData.keyValuePackage;
@@ -325,6 +328,22 @@ public class KeyValueBackupTaskTest {
                 .isEqualTo("pmState".getBytes());
         assertThat(Files.readAllBytes(getStateFile(mTransport, PACKAGE_1)))
                 .isEqualTo("packageState".getBytes());
+    }
+
+    /**
+     * Do not update backup token if the backup queue was empty
+     */
+    @Test
+    public void testRunTask_whenQueueEmptyOnFirstBackup_doesNotUpdateCurrentToken()
+            throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, true);
+        mBackupManagerService.setCurrentToken(0L);
+        when(transportMock.transport.getCurrentRestoreSet()).thenReturn(1234L);
+
+        runTask(task);
+
+        assertThat(mBackupManagerService.getCurrentToken()).isEqualTo(0L);
     }
 
     @Test
@@ -2295,6 +2314,24 @@ public class KeyValueBackupTaskTest {
         KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
 
         expectThrows(IllegalArgumentException.class, () -> task.handleCancel(false));
+    }
+
+    /**
+     * Do not update backup token if no data was moved.
+     */
+    @Test
+    public void testRunTask_whenNoDataToBackupOnFirstBackup_doesNotUpdateCurrentToken()
+            throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        mBackupManagerService.setCurrentToken(0L);
+        when(transportMock.transport.getCurrentRestoreSet()).thenReturn(1234L);
+        // Set up agent with no data.
+        setUpAgent(PACKAGE_1);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, true, PACKAGE_1);
+
+        runTask(task);
+
+        assertThat(mBackupManagerService.getCurrentToken()).isEqualTo(0L);
     }
 
     private void runTask(KeyValueBackupTask task) {

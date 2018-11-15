@@ -56,15 +56,20 @@ import java.net.URL;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.UUID;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @hide
@@ -94,17 +99,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private final Object mSrcLock = new Object();
     //--- guarded by |mSrcLock| start
-    private long mSrcIdGenerator = 0;
-    private DataSourceDesc mCurrentDSD;
-    private long mCurrentSrcId = mSrcIdGenerator++;
-    private List<DataSourceDesc> mNextDSDs;
-    private long mNextSrcId = mSrcIdGenerator++;
-    private int mNextSourceState = NEXT_SOURCE_STATE_INIT;
-    private boolean mNextSourcePlayPending = false;
+    private SourceInfo mCurrentSourceInfo;
+    private final Queue<SourceInfo> mNextSourceInfos = new ConcurrentLinkedQueue<>();
     //--- guarded by |mSrcLock| end
+    private final AtomicLong mSrcIdGenerator = new AtomicLong(0);
 
-    private AtomicInteger mBufferedPercentageCurrent = new AtomicInteger(0);
-    private AtomicInteger mBufferedPercentageNext = new AtomicInteger(0);
     private volatile float mVolume = 1.0f;
     private VideoSize mVideoSize = new VideoSize(0, 0);
 
@@ -227,7 +226,15 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     @Override
     public long getBufferedPosition() {
         // Use cached buffered percent for now.
-        return getDuration() * mBufferedPercentageCurrent.get() / 100;
+        int bufferedPercentage;
+        synchronized (mSrcLock) {
+            if (mCurrentSourceInfo == null) {
+                bufferedPercentage = 0;
+            } else {
+                bufferedPercentage = mCurrentSourceInfo.mBufferedPercentage.get();
+            }
+        }
+        return getDuration() * bufferedPercentage / 100;
     }
 
     @Override
@@ -268,9 +275,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
 
                 synchronized (mSrcLock) {
-                    mCurrentDSD = dsd;
-                    mCurrentSrcId = mSrcIdGenerator++;
-                    handleDataSource(true /* isCurrent */, dsd, mCurrentSrcId);
+                    mCurrentSourceInfo = new SourceInfo(dsd);
+                    handleDataSource(true /* isCurrent */, dsd, mCurrentSourceInfo.mId);
                 }
             }
         });
@@ -283,10 +289,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             void process() {
                 checkArgument(dsd != null, "the DataSourceDesc cannot be null");
                 synchronized (mSrcLock) {
-                    mNextDSDs = new ArrayList<DataSourceDesc>(1);
-                    mNextDSDs.add(dsd);
-                    mNextSrcId = mSrcIdGenerator++;
-                    mNextSourceState = NEXT_SOURCE_STATE_INIT;
+                    mNextSourceInfos.clear();
+                    mNextSourceInfos.add(new SourceInfo(dsd));
                 }
                 prepareNextDataSource();
             }
@@ -309,9 +313,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
 
                 synchronized (mSrcLock) {
-                    mNextDSDs = new ArrayList(dsds);
-                    mNextSrcId = mSrcIdGenerator++;
-                    mNextSourceState = NEXT_SOURCE_STATE_INIT;
+                    mNextSourceInfos.clear();
+                    for (DataSourceDesc dsd : dsds) {
+                        mNextSourceInfos.add(new SourceInfo(dsd));
+                    }
                 }
                 prepareNextDataSource();
             }
@@ -323,22 +328,15 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         return addTask(new Task(CALL_COMPLETED_CLEAR_NEXT_DATA_SOURCES, false) {
             @Override
             void process() {
-                synchronized (mSrcLock) {
-                    if (mNextDSDs != null) {
-                        mNextDSDs.clear();
-                        mNextDSDs = null;
-                    }
-                    mNextSrcId = mSrcIdGenerator++;
-                    mNextSourceState = NEXT_SOURCE_STATE_INIT;
-                }
+                mNextSourceInfos.clear();
             }
         });
     }
 
     @Override
-    public @NonNull DataSourceDesc getCurrentDataSource() {
+    public DataSourceDesc getCurrentDataSource() {
         synchronized (mSrcLock) {
-            return mCurrentDSD;
+            return mCurrentSourceInfo == null ? null : mCurrentSourceInfo.mDSD;
         }
     }
 
@@ -702,39 +700,35 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     // return true if there is a next data source, false otherwise.
     // This function should be always called on |mHandlerThread|.
     private boolean prepareNextDataSource() {
-        if (Looper.myLooper() != mHandlerThread.getLooper()) {
+        HandlerThread handlerThread = mHandlerThread;
+        if (handlerThread != null && Looper.myLooper() != handlerThread.getLooper()) {
             Log.e(TAG, "prepareNextDataSource: called on wrong looper");
         }
 
         boolean hasNextDSD;
-        synchronized (mSrcLock) {
-            hasNextDSD = (mNextDSDs != null && !mNextDSDs.isEmpty());
-        }
-
         int state = getState();
-        if (state == PLAYER_STATE_ERROR || state == PLAYER_STATE_IDLE) {
-            // Current source has not been prepared yet.
-            return hasNextDSD;
-        }
-
         synchronized (mSrcLock) {
-            if (!hasNextDSD || mNextSourceState != NEXT_SOURCE_STATE_INIT) {
+            hasNextDSD = !mNextSourceInfos.isEmpty();
+            if (state == PLAYER_STATE_ERROR || state == PLAYER_STATE_IDLE) {
+                // Current source has not been prepared yet.
+                return hasNextDSD;
+            }
+
+            SourceInfo nextSource = mNextSourceInfos.peek();
+            if (!hasNextDSD || nextSource.mStateAsNextSource != NEXT_SOURCE_STATE_INIT) {
                 // There is no next source or it's in preparing or prepared state.
                 return hasNextDSD;
             }
 
             try {
-                mNextSourceState = NEXT_SOURCE_STATE_PREPARING;
-                handleDataSource(false /* isCurrent */, mNextDSDs.get(0), mNextSrcId);
+                nextSource.mStateAsNextSource = NEXT_SOURCE_STATE_PREPARING;
+                handleDataSource(false /* isCurrent */, nextSource.mDSD, nextSource.mId);
             } catch (Exception e) {
                 Message msg = mTaskHandler.obtainMessage(
                         MEDIA_ERROR, MEDIA_ERROR_IO, MEDIA_ERROR_UNKNOWN, null);
-                mTaskHandler.handleMessage(msg, mNextSrcId);
+                mTaskHandler.handleMessage(msg, nextSource.mId);
 
-                mNextDSDs.remove(0);
-                // make a new SrcId to obsolete notification for previous one.
-                mNextSrcId = mSrcIdGenerator++;
-                mNextSourceState = NEXT_SOURCE_STATE_INIT;
+                mNextSourceInfos.poll();
                 return prepareNextDataSource();
             }
         }
@@ -743,25 +737,21 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     // This function should be always called on |mHandlerThread|.
     private void playNextDataSource() {
-        if (Looper.myLooper() != mHandlerThread.getLooper()) {
+        HandlerThread handlerThread = mHandlerThread;
+        if (handlerThread != null && Looper.myLooper() != handlerThread.getLooper()) {
             Log.e(TAG, "playNextDataSource: called on wrong looper");
         }
 
         boolean hasNextDSD = false;
         synchronized (mSrcLock) {
-            if (mNextDSDs != null && !mNextDSDs.isEmpty()) {
+            if (!mNextSourceInfos.isEmpty()) {
                 hasNextDSD = true;
-                if (mNextSourceState == NEXT_SOURCE_STATE_PREPARED) {
+                SourceInfo nextSourceInfo = mNextSourceInfos.peek();
+                if (nextSourceInfo.mStateAsNextSource == NEXT_SOURCE_STATE_PREPARED) {
                     // Switch to next source only when it has been prepared.
-                    mCurrentDSD = mNextDSDs.get(0);
-                    mCurrentSrcId = mNextSrcId;
-                    mBufferedPercentageCurrent.set(mBufferedPercentageNext.get());
-                    mNextDSDs.remove(0);
-                    mNextSrcId = mSrcIdGenerator++;  // make it different from |mCurrentSrcId|
-                    mBufferedPercentageNext.set(0);
-                    mNextSourceState = NEXT_SOURCE_STATE_INIT;
+                    mCurrentSourceInfo = mNextSourceInfos.poll();
 
-                    long srcId = mCurrentSrcId;
+                    long srcId = mCurrentSourceInfo.mId;
                     try {
                         nativePlayNextDataSource(srcId);
                     } catch (Exception e) {
@@ -776,9 +766,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
                         // Now a new current src is playing.
                         // Wait for MEDIA_INFO_DATA_SOURCE_START to prepare next source.
-                        mNextSourcePlayPending = false;
                     }
-                } else if (mNextSourceState == NEXT_SOURCE_STATE_INIT) {
+                } else if (nextSourceInfo.mStateAsNextSource == NEXT_SOURCE_STATE_INIT) {
                     hasNextDSD = prepareNextDataSource();
                 }
             }
@@ -1073,12 +1062,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             mDrmEventCallbackRecords.clear();
         }
         synchronized (mSrcLock) {
-            if (mNextDSDs != null) {
-                mNextDSDs.clear();
-                mNextDSDs = null;
-            }
-            mNextSrcId = mSrcIdGenerator++;
-            mNextSourceState = NEXT_SOURCE_STATE_INIT;
+            mCurrentSourceInfo = null;
+            mNextSourceInfos.clear();
         }
 
         synchronized (mTaskLock) {
@@ -1532,20 +1517,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             final int what = msg.arg1;
             final int extra = msg.arg2;
 
-            final DataSourceDesc dsd;
-            boolean isCurrentSrcId = false;
-            boolean isNextSrcId = false;
-            synchronized (mSrcLock) {
-                if (srcId == mCurrentSrcId) {
-                    dsd = mCurrentDSD;
-                    isCurrentSrcId = true;
-                } else if (mNextDSDs != null && !mNextDSDs.isEmpty() && srcId == mNextSrcId) {
-                    dsd = mNextDSDs.get(0);
-                    isNextSrcId = true;
-                } else {
-                    return;
-                }
+            final SourceInfo sourceInfo = getSourceInfoById(srcId);
+            if (sourceInfo == null) {
+                return;
             }
+            final DataSourceDesc dsd = sourceInfo.mDSD;
 
             switch(msg.what) {
                 case MEDIA_PREPARED:
@@ -1561,14 +1537,16 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     }
 
                     synchronized (mSrcLock) {
+                        SourceInfo nextSourceInfo = mNextSourceInfos.peek();
                         Log.i(TAG, "MEDIA_PREPARED: srcId=" + srcId
-                                + ", currentSrcId=" + mCurrentSrcId + ", nextSrcId=" + mNextSrcId);
+                                + ", curSrc=" + mCurrentSourceInfo
+                                + ", nextSrc=" + nextSourceInfo);
 
-                        if (isCurrentSrcId) {
+                        if (isCurrentSource(srcId)) {
                             prepareNextDataSource();
-                        } else if (isNextSrcId) {
-                            mNextSourceState = NEXT_SOURCE_STATE_PREPARED;
-                            if (mNextSourcePlayPending) {
+                        } else if (isNextSource(srcId)) {
+                            nextSourceInfo.mStateAsNextSource = NEXT_SOURCE_STATE_PREPARED;
+                            if (nextSourceInfo.mPlayPendingAsNextSource) {
                                 playNextDataSource();
                             }
                         }
@@ -1621,7 +1599,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
                 case MEDIA_PLAYBACK_COMPLETE:
                 {
-                    if (isCurrentSrcId) {
+                    if (isCurrentSource(srcId)) {
                         sendEvent(new EventNotifier() {
                             @Override
                             public void notify(EventCallback callback) {
@@ -1632,11 +1610,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                         stayAwake(false);
 
                         synchronized (mSrcLock) {
-                            mNextSourcePlayPending = true;
-
+                            SourceInfo nextSourceInfo = mNextSourceInfos.peek();
+                            if (nextSourceInfo != null) {
+                                nextSourceInfo.mPlayPendingAsNextSource = true;
+                            }
                             Log.i(TAG, "MEDIA_PLAYBACK_COMPLETE: srcId=" + srcId
-                                    + ", currentSrcId=" + mCurrentSrcId
-                                    + ", nextSrcId=" + mNextSrcId);
+                                    + ", curSrc=" + mCurrentSourceInfo
+                                    + ", nextSrc=" + nextSourceInfo);
                         }
 
                         playNextDataSource();
@@ -1667,13 +1647,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                         }
                     });
 
-                    synchronized (mSrcLock) {
-                        if (isCurrentSrcId) {
-                            mBufferedPercentageCurrent.set(percent);
-                        } else if (isNextSrcId) {
-                            mBufferedPercentageNext.set(percent);
-                        }
+                    SourceInfo src = getSourceInfoById(srcId);
+                    if (src != null) {
+                        src.mBufferedPercentage.set(percent);
                     }
+
                     return;
                 }
 
@@ -1751,7 +1729,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     });
 
                     if (msg.arg1 == MEDIA_INFO_DATA_SOURCE_START) {
-                        if (isCurrentSrcId) {
+                        if (isCurrentSource(srcId)) {
                             prepareNextDataSource();
                         }
                     }
@@ -1854,6 +1832,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
             }
         }
+
     }
 
     /*
@@ -2130,7 +2109,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                         @Override
                         public void notify(DrmEventCallback callback) {
                             callback.onDrmPrepared(
-                                    MediaPlayer2Impl.this, mCurrentDSD, prepareDrmStatus);
+                                    MediaPlayer2Impl.this, getCurrentDataSource(), prepareDrmStatus);
                         }
                     });
 
@@ -2196,7 +2175,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
         // call the callback outside the lock
         if (mOnDrmConfigHelper != null)  {
-            mOnDrmConfigHelper.onDrmConfig(this, mCurrentDSD);
+            mOnDrmConfigHelper.onDrmConfig(this, getCurrentDataSource());
         }
 
         synchronized (mDrmLock) {
@@ -2817,7 +2796,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 @Override
                 public void notify(DrmEventCallback callback) {
                     callback.onDrmPrepared(
-                            mediaPlayer, mCurrentDSD, status);
+                            mediaPlayer, getCurrentDataSource(), status);
                 }
             });
 
@@ -3084,9 +3063,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             } catch (Exception e) {
                 status = CALL_STATUS_ERROR_UNKNOWN;
             }
-            synchronized (mSrcLock) {
-                mDSD = mCurrentDSD;
-            }
+            mDSD = getCurrentDataSource();
 
             if (mMediaCallType != CALL_COMPLETED_SEEK_TO) {
                 synchronized (mTaskLock) {
@@ -3129,4 +3106,50 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             super(detailMessage);
         }
     };
+
+    private final class SourceInfo {
+        final DataSourceDesc mDSD;
+        final long mId = mSrcIdGenerator.getAndIncrement();
+        AtomicInteger mBufferedPercentage = new AtomicInteger(0);
+
+        // m*AsNextSource (below) only applies to pending data sources in the playlist;
+        // the meanings of mCurrentSourceInfo.{mStateAsNextSource,mPlayPendingAsNextSource}
+        // are undefined.
+        int mStateAsNextSource = NEXT_SOURCE_STATE_INIT;
+        boolean mPlayPendingAsNextSource = false;
+
+        SourceInfo(DataSourceDesc dsd) {
+            this.mDSD = dsd;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s(%d)", SourceInfo.class.getName(), mId);
+        }
+
+    }
+
+    private SourceInfo getSourceInfoById(long srcId) {
+        synchronized (mSrcLock) {
+            if (isCurrentSource(srcId)) {
+                return mCurrentSourceInfo;
+            }
+            if (isNextSource(srcId)) {
+                return mNextSourceInfos.peek();
+            }
+        }
+        return null;
+    }
+
+    private boolean isCurrentSource(long srcId) {
+        synchronized (mSrcLock) {
+            return mCurrentSourceInfo != null && mCurrentSourceInfo.mId == srcId;
+        }
+    }
+
+    private boolean isNextSource(long srcId) {
+        SourceInfo nextSourceInfo = mNextSourceInfos.peek();
+        return nextSourceInfo != null && nextSourceInfo.mId == srcId;
+    }
+
 }

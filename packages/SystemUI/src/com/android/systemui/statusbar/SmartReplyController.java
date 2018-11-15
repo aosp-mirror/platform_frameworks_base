@@ -16,13 +16,11 @@
 package com.android.systemui.statusbar;
 
 import android.os.RemoteException;
-import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.notification.NotificationData;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
 import java.util.Set;
 

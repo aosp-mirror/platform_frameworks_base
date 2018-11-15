@@ -75,6 +75,12 @@ public class IsolatedContext extends ContextWrapper {
     }
 
     @Override
+    public boolean bindIsolatedService(Intent service, ServiceConnection conn, int flags,
+            String instanceName) {
+        return false;
+    }
+
+    @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
         return null;
     }

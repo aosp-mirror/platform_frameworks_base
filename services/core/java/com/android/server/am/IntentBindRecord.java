@@ -99,7 +99,7 @@ final class IntentBindRecord {
         if ((collectFlags()&Context.BIND_AUTO_CREATE) != 0) {
             sb.append("CR ");
         }
-        sb.append(service.shortName);
+        sb.append(service.shortInstanceName);
         sb.append(':');
         if (intent != null) {
             intent.getIntent().toShortString(sb, false, false, false, false);

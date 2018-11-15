@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.hardware.biometrics.BiometricSourceType;
 import android.content.Context;
+import android.hardware.biometrics.BiometricSourceType;
 import android.os.Trace;
 
 import com.android.internal.widget.LockPatternUtils;

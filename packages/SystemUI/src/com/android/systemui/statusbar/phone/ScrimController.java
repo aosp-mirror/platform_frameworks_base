@@ -23,7 +23,6 @@ import android.app.AlarmManager;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Trace;

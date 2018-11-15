@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.notification.row.wrapper;
 import android.content.Context;
 import android.view.View;
 
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
  * Wraps a notification containing a media template

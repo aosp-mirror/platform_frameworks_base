@@ -16,10 +16,11 @@ package com.android.systemui.qs.car;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
-import androidx.annotation.IdRes;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
+
+import androidx.annotation.IdRes;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;

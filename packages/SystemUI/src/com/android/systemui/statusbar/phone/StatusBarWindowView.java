@@ -33,7 +33,6 @@ import android.media.AudioManager;
 import android.media.session.MediaSessionLegacyHelper;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.ActionMode;
@@ -50,8 +49,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;

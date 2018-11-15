@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -268,6 +268,8 @@ public class KeyguardBouncer {
     }
 
     public void hide(boolean destroyView) {
+        // TODO(b/113914868): investigation log for disappearing home button
+        Log.i(TAG, "KeyguardBouncer.hide (b/113914868): destroyView=" + destroyView);
         if (isShowing()) {
             StatsLog.write(StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
                 StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__HIDDEN);

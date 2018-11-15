@@ -14,18 +14,13 @@
 
 package com.android.systemui.fragments;
 
-import android.content.Context;
 import android.content.res.Configuration;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.view.View;
 
 import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.Dumpable;
-import com.android.systemui.SystemUI;
-import com.android.systemui.SystemUIApplication;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -40,11 +35,6 @@ public class FragmentService implements ConfigurationChangedReceiver, Dumpable {
 
     private final ArrayMap<View, FragmentHostState> mHosts = new ArrayMap<>();
     private final Handler mHandler = new Handler();
-    private final Context mContext;
-
-    public FragmentService(Context context) {
-        mContext = context;
-    }
 
     public FragmentHostManager getFragmentHostManager(View view) {
         View root = view.getRootView();
@@ -54,6 +44,13 @@ public class FragmentService implements ConfigurationChangedReceiver, Dumpable {
             mHosts.put(root, state);
         }
         return state.getFragmentHostManager();
+    }
+
+    public void removeAndDestroy(View view) {
+        final FragmentHostState state = mHosts.remove(view.getRootView());
+        if (state != null) {
+            state.mFragmentHostManager.destroy();
+        }
     }
 
     public void destroyAll() {
@@ -84,7 +81,7 @@ public class FragmentService implements ConfigurationChangedReceiver, Dumpable {
 
         public FragmentHostState(View view) {
             mView = view;
-            mFragmentHostManager = new FragmentHostManager(mContext, FragmentService.this, mView);
+            mFragmentHostManager = new FragmentHostManager(FragmentService.this, mView);
         }
 
         public void sendConfigurationChange(Configuration newConfig) {

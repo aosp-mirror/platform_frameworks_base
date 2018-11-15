@@ -16,18 +16,18 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.hardware.biometrics.BiometricSourceType;
 import android.content.Context;
+import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Log;
 
+import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.internal.util.LatencyTracker;
 import com.android.systemui.Dependency;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;

@@ -260,6 +260,10 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     @Nullable private ParcelFileDescriptor mSavedState;
     @Nullable private ParcelFileDescriptor mBackupData;
     @Nullable private ParcelFileDescriptor mNewState;
+    // Indicates whether there was any data to be backed up, i.e. the queue was not empty
+    // and at least one of the packages had data. Used to avoid updating current token for
+    // empty backups.
+    private boolean mHasDataToBackup;
 
     /**
      * This {@link ConditionVariable} is used to signal that the cancel operation has been
@@ -331,6 +335,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     @Override
     public void run() {
         Process.setThreadPriority(THREAD_PRIORITY);
+
+        mHasDataToBackup = false;
 
         int status = BackupTransport.TRANSPORT_OK;
         try {
@@ -529,10 +535,10 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
         String callerLogString = "KVBT.finishTask()";
 
-        // If we succeeded and this is the first time we've done a backup, we can record the current
-        // backup dataset token.
+        // If the backup data was not empty, we succeeded and this is the first time
+        // we've done a backup, we can record the current backup dataset token.
         long currentToken = mBackupManagerService.getCurrentToken();
-        if ((status == BackupTransport.TRANSPORT_OK) && (currentToken == 0)) {
+        if (mHasDataToBackup && (status == BackupTransport.TRANSPORT_OK) && (currentToken == 0)) {
             try {
                 IBackupTransport transport = mTransportClient.connectOrThrow(callerLogString);
                 mBackupManagerService.setCurrentToken(transport.getCurrentRestoreSet());
@@ -837,6 +843,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             mReporter.onEmptyData(packageInfo);
             return BackupTransport.TRANSPORT_OK;
         }
+
+        mHasDataToBackup = true;
 
         int status;
         try (ParcelFileDescriptor backupData =

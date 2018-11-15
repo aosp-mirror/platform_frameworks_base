@@ -126,9 +126,10 @@ class Dimmer {
         DimState(SurfaceControl dimLayer) {
             mDimLayer = dimLayer;
             mDimming = true;
-            mSurfaceAnimator = new SurfaceAnimator(new DimAnimatable(dimLayer), () -> {
+            final DimAnimatable dimAnimatable = new DimAnimatable(dimLayer);
+            mSurfaceAnimator = new SurfaceAnimator(dimAnimatable, () -> {
                 if (!mDimming) {
-                    mDimLayer.destroy();
+                    dimAnimatable.getPendingTransaction().destroy(mDimLayer);
                 }
             }, mHost.mService);
         }
@@ -309,6 +310,7 @@ class Dimmer {
             // TODO: Once we use geometry from hierarchy this falls away.
             t.setSize(mDimState.mDimLayer, bounds.width(), bounds.height());
             t.setPosition(mDimState.mDimLayer, bounds.left, bounds.top);
+            t.setWindowCrop(mDimState.mDimLayer, bounds.width(), bounds.height());
             if (!mDimState.isVisible) {
                 mDimState.isVisible = true;
                 t.show(mDimState.mDimLayer);

@@ -23,8 +23,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
 
-import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;

@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.MathUtils;
 import android.util.TimeUtils;
 
 import com.android.systemui.Dependency;
@@ -29,6 +30,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
+import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 import java.io.FileDescriptor;
@@ -37,7 +39,8 @@ import java.io.PrintWriter;
 /**
  * Class to control all aspects about light bar changes.
  */
-public class LightBarTransitionsController implements Dumpable, Callbacks {
+public class LightBarTransitionsController implements Dumpable, Callbacks,
+        StatusBarStateController.StateListener {
 
     public static final long DEFAULT_TINT_ANIMATION_DURATION = 120;
     private static final String EXTRA_DARK_INTENSITY = "dark_intensity";
@@ -45,6 +48,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks {
     private final Handler mHandler;
     private final DarkIntensityApplier mApplier;
     private final KeyguardMonitor mKeyguardMonitor;
+    private final StatusBarStateController mStatusBarStateController;
 
     private boolean mTransitionDeferring;
     private long mTransitionDeferringStartTime;
@@ -55,6 +59,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks {
     private ValueAnimator mTintAnimator;
     private float mDarkIntensity;
     private float mNextDarkIntensity;
+    private float mDozeAmount;
     private final Runnable mTransitionDeferringDoneRunnable = new Runnable() {
         @Override
         public void run() {
@@ -66,13 +71,17 @@ public class LightBarTransitionsController implements Dumpable, Callbacks {
         mApplier = applier;
         mHandler = new Handler();
         mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+        mStatusBarStateController = Dependency.get(StatusBarStateController.class);
         SysUiServiceProvider.getComponent(context, CommandQueue.class)
                 .addCallbacks(this);
+        mStatusBarStateController.addListener(this);
+        mDozeAmount = mStatusBarStateController.getDozeAmount();
     }
 
     public void destroy(Context context) {
         SysUiServiceProvider.getComponent(context, CommandQueue.class)
                 .removeCallbacks(this);
+        mStatusBarStateController.removeListener(this);
     }
 
     public void saveState(Bundle outState) {
@@ -173,7 +182,11 @@ public class LightBarTransitionsController implements Dumpable, Callbacks {
 
     private void setIconTintInternal(float darkIntensity) {
         mDarkIntensity = darkIntensity;
-        mApplier.applyDarkIntensity(darkIntensity);
+        dispatchDark();
+    }
+
+    private void dispatchDark() {
+        mApplier.applyDarkIntensity(MathUtils.lerp(mDarkIntensity, 0f, mDozeAmount));
     }
 
     @Override
@@ -194,6 +207,15 @@ public class LightBarTransitionsController implements Dumpable, Callbacks {
         pw.print("  mPendingDarkIntensity="); pw.print(mPendingDarkIntensity);
         pw.print(" mDarkIntensity="); pw.print(mDarkIntensity);
         pw.print(" mNextDarkIntensity="); pw.println(mNextDarkIntensity);
+    }
+
+    @Override
+    public void onStateChanged(int newState) { }
+
+    @Override
+    public void onDozeAmountChanged(float linear, float eased) {
+        mDozeAmount = eased;
+        dispatchDark();
     }
 
     /**

@@ -576,6 +576,13 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public boolean bindIsolatedService(Intent service,
+            ServiceConnection conn, int flags,
+            String instanceName) {
+        throw new UnsupportedOperationException();
+    }
+
     /** @hide */
     @Override
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,

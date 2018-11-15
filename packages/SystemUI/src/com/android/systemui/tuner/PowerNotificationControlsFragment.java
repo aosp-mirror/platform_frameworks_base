@@ -15,10 +15,6 @@
  */
 package com.android.systemui.tuner;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.R;
-
 import android.annotation.Nullable;
 import android.app.Fragment;
 import android.os.Bundle;
@@ -28,6 +24,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Switch;
 import android.widget.TextView;
+
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.R;
 
 public class PowerNotificationControlsFragment extends Fragment {
 

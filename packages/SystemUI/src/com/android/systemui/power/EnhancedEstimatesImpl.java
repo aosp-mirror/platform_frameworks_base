@@ -1,7 +1,5 @@
 package com.android.systemui.power;
 
-import android.util.Log;
-
 public class EnhancedEstimatesImpl implements EnhancedEstimates {
 
     @Override

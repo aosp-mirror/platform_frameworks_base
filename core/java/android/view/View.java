@@ -3406,18 +3406,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final int PFLAG4_NOTIFIED_CONTENT_CAPTURE_ADDED = 0x20;
     private static final int PFLAG4_LAST_CONTENT_CAPTURE_NOTIFICATION_TYPE = 0x40;
 
+    /* End of masks for mPrivateFlags4 */
+
     private static final int CONTENT_CAPTURE_NOTIFICATION_TYPE_APPEARED = 1;
     private static final int CONTENT_CAPTURE_NOTIFICATION_TYPE_DISAPPEARED = 0;
 
-    /** @hide */
     @IntDef(flag = true, prefix = { "CONTENT_CAPTURE_NOTIFICATION_TYPE_" }, value = {
             CONTENT_CAPTURE_NOTIFICATION_TYPE_APPEARED,
             CONTENT_CAPTURE_NOTIFICATION_TYPE_DISAPPEARED
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ContentCaptureNotificationType {}
+    private @interface ContentCaptureNotificationType {}
 
-    /* End of masks for mPrivateFlags4 */
+    /** @hide */
+    protected static final int VIEW_STRUCTURE_FOR_ASSIST = 0;
+    /** @hide */
+    protected  static final int VIEW_STRUCTURE_FOR_AUTOFILL = 1;
+    /** @hide */
+    protected  static final int VIEW_STRUCTURE_FOR_CONTENT_CAPTURE = 2;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "VIEW_STRUCTURE_FOR" }, value = {
+            VIEW_STRUCTURE_FOR_ASSIST,
+            VIEW_STRUCTURE_FOR_AUTOFILL,
+            VIEW_STRUCTURE_FOR_CONTENT_CAPTURE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ViewStructureType {}
 
     /**
      * Always allow a user to over-scroll this view, provided it is a
@@ -8043,8 +8058,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * fills in all data that can be inferred from the view itself.
      */
     public void onProvideStructure(ViewStructure structure) {
-        onProvideStructureForAssistOrAutofillOrViewCapture(structure, /* forAutofill = */ false,
-                /* forViewCapture= */ false, /* flags= */ 0);
+        onProvideStructure(structure, VIEW_STRUCTURE_FOR_ASSIST, /* flags= */ 0);
     }
 
     /**
@@ -8117,8 +8131,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
      */
     public void onProvideAutofillStructure(ViewStructure structure, @AutofillFlags int flags) {
-        onProvideStructureForAssistOrAutofillOrViewCapture(structure, /* forAutofill = */ true,
-                /* forViewCapture= */ false, flags);
+        onProvideStructure(structure, VIEW_STRUCTURE_FOR_AUTOFILL, flags);
     }
 
     /**
@@ -8150,13 +8163,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * virtual views are rendered.
      */
     public boolean onProvideContentCaptureStructure(@NonNull ViewStructure structure, int flags) {
-        onProvideStructureForAssistOrAutofillOrViewCapture(structure, /* forAutofill = */ false,
-                /* forViewCapture= */ true, flags);
+        onProvideStructure(structure, VIEW_STRUCTURE_FOR_CONTENT_CAPTURE, flags);
         return true;
     }
 
-    private void onProvideStructureForAssistOrAutofillOrViewCapture(ViewStructure structure,
-            boolean forAutofill, boolean forViewCapture, @AutofillFlags int flags) {
+    /** @hide */
+    protected void onProvideStructure(@NonNull ViewStructure structure,
+            @ViewStructureType int viewFor, int flags) {
         final int id = mID;
         if (id != NO_ID && !isViewIdGenerated(id)) {
             String pkg, type, entry;
@@ -8172,11 +8185,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             structure.setId(id, null, null, null);
         }
-        if (forViewCapture) {
+        if (viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
+            //TODO(b/111276913): STOPSHIP - don't set it if not needed
             structure.setDataIsSensitive(false);
         }
 
-        if (forAutofill || forViewCapture) {
+        if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL
+                || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
             final @AutofillType int autofillType = getAutofillType();
             // Don't need to fill autofill info if view does not support it.
             // For example, only TextViews that are editable support autofill
@@ -8190,7 +8205,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         int ignoredParentLeft = 0;
         int ignoredParentTop = 0;
-        if (forAutofill && (flags & AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) == 0) {
+        if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL
+                && (flags & AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) == 0) {
             View parentGroup = null;
 
             ViewParent viewParent = getParent();
@@ -8213,7 +8229,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         structure.setDimens(ignoredParentLeft + mLeft, ignoredParentTop + mTop, mScrollX, mScrollY,
                 mRight - mLeft, mBottom - mTop);
-        if (!forAutofill) {
+        if (viewFor == VIEW_STRUCTURE_FOR_ASSIST
+                || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
             if (!hasIdentityMatrix()) {
                 structure.setTransformation(getMatrix());
             }
@@ -8907,10 +8924,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Helper used to notify the {@link IntelligenceManager}anager when the view is removed or
+     * Helper used to notify the {@link IntelligenceManager} when the view is removed or
      * added, based on whether it's laid out and visible, and without knowing if the parent removed
-     * it from the view
-     * hierarchy.
+     * it from the view hierarchy.
      */
     // TODO(b/111276913): make sure the current algorithm covers all cases. For example, it should
     // probably be called every time notifyEnterOrExitForAutoFillIfNeeded() is called as well.
@@ -9084,7 +9100,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #onProvideVirtualStructure}.
      */
     public void dispatchProvideStructure(ViewStructure structure) {
-        dispatchProvideStructureForAssistOrAutofill(structure, false, 0);
+        dispatchProvideStructure(structure, VIEW_STRUCTURE_FOR_ASSIST, /* flags= */ 0);
     }
 
     /**
@@ -9126,12 +9142,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void dispatchProvideAutofillStructure(@NonNull ViewStructure structure,
             @AutofillFlags int flags) {
-        dispatchProvideStructureForAssistOrAutofill(structure, true, flags);
+        dispatchProvideStructure(structure, VIEW_STRUCTURE_FOR_AUTOFILL, flags);
     }
 
-    private void dispatchProvideStructureForAssistOrAutofill(ViewStructure structure,
-            boolean forAutofill, @AutofillFlags int flags) {
-        if (forAutofill) {
+    private void dispatchProvideStructure(@NonNull ViewStructure structure,
+            @ViewStructureType int viewFor, @AutofillFlags int flags) {
+        if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
             structure.setAutofillId(getAutofillId());
             onProvideAutofillStructure(structure, flags);
             onProvideAutofillVirtualStructure(structure, flags);

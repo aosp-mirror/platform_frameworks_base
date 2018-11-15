@@ -27,8 +27,9 @@ import android.net.Uri;
 import android.os.Debug;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import androidx.core.content.FileProvider;
 import android.util.Log;
+
+import androidx.core.content.FileProvider;
 
 import com.google.android.collect.Lists;
 

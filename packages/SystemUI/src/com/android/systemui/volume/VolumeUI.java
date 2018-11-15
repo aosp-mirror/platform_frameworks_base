@@ -23,8 +23,6 @@ import android.util.Log;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.qs.tiles.DndTile;
-import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

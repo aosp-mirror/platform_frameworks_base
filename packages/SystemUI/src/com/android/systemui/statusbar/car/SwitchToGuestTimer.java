@@ -21,9 +21,9 @@ import android.content.Context;
 import android.os.CountDownTimer;
 import android.util.Log;
 
-import com.android.systemui.R;
-
 import androidx.annotation.GuardedBy;
+
+import com.android.systemui.R;
 
 /**
  * Wrapper for a countdown timer that switches to Guest if the user has been driving with

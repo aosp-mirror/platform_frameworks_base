@@ -13183,8 +13183,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     public int bindService(IApplicationThread caller, IBinder token, Intent service,
-            String resolvedType, IServiceConnection connection, int flags, String callingPackage,
-            int userId) throws TransactionTooLargeException {
+            String resolvedType, IServiceConnection connection, int flags,
+            String callingPackage, int userId) throws TransactionTooLargeException {
+        return bindIsolatedService(caller, token, service, resolvedType, connection, flags,
+                null, callingPackage, userId);
+    }
+
+    public int bindIsolatedService(IApplicationThread caller, IBinder token, Intent service,
+            String resolvedType, IServiceConnection connection, int flags, String instanceName,
+            String callingPackage, int userId) throws TransactionTooLargeException {
         enforceNotIsolatedCaller("bindService");
 
         // Refuse possible leaked file descriptors
@@ -13198,7 +13205,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized(this) {
             return mServices.bindServiceLocked(caller, token, service,
-                    resolvedType, connection, flags, callingPackage, userId);
+                    resolvedType, connection, flags, instanceName, callingPackage, userId);
         }
     }
 
@@ -15831,7 +15838,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     mayBeTop = true;
                                     mayBeTopType = "service";
                                     mayBeTopSource = cr.binding.client;
-                                    mayBeTopTarget = s.name;
+                                    mayBeTopTarget = s.instanceName;
                                     clientProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
                                 } else {
                                     // Special handling for above-top states (persistent
@@ -15885,7 +15892,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     .REASON_SERVICE_IN_USE;
                             app.adjSource = cr.binding.client;
                             app.adjSourceProcState = clientProcState;
-                            app.adjTarget = s.name;
+                            app.adjTarget = s.instanceName;
                             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                                 reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to " + adjType
                                         + ": " + app + ", due to " + cr.binding.client
@@ -15915,7 +15922,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     .REASON_SERVICE_IN_USE;
                             app.adjSource = a;
                             app.adjSourceProcState = procState;
-                            app.adjTarget = s.name;
+                            app.adjTarget = s.instanceName;
                             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                                 reportOomAdjMessageLocked(TAG_OOM_ADJ,
                                         "Raise to service w/activity: " + app);
@@ -19168,6 +19175,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public boolean isAppStorageSandboxed(int pid, int uid) {
             if (!SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+                return false;
+            }
+            if (uid == SHELL_UID || uid == ROOT_UID) {
                 return false;
             }
             synchronized (mPidsSelfLocked) {

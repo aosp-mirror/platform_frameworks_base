@@ -18,6 +18,7 @@ package com.android.systemui.util.wakelock;
 
 import android.content.Context;
 import android.os.PowerManager;
+
 import androidx.annotation.VisibleForTesting;
 
 /** WakeLock wrapper for testability */

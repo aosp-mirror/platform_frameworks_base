@@ -70,7 +70,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     final ActivityManagerService ams;
     final BatteryStatsImpl.Uid.Pkg.Serv stats;
     final ComponentName name; // service component.
-    final String shortName; // name.flattenToShortString().
+    final ComponentName instanceName; // service component's per-instance name.
+    final String shortInstanceName; // instanceName.flattenToShortString().
     final Intent.FilterComparison intent;
                             // original intent used to find service.
     final ServiceInfo serviceInfo;
@@ -190,7 +191,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             StringBuilder sb = new StringBuilder(128);
             sb.append("ServiceRecord{")
                 .append(Integer.toHexString(System.identityHashCode(sr)))
-                .append(' ').append(sr.shortName)
+                .append(' ').append(sr.shortInstanceName)
                 .append(" StartItem ")
                 .append(Integer.toHexString(System.identityHashCode(this)))
                 .append(" id=").append(id).append('}');
@@ -235,7 +236,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     void writeToProto(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
-        proto.write(ServiceRecordProto.SHORT_NAME, this.shortName);
+        proto.write(ServiceRecordProto.SHORT_NAME, this.shortInstanceName);
         proto.write(ServiceRecordProto.IS_RUNNING, app != null);
         if (app != null) {
             proto.write(ServiceRecordProto.PID, app.pid);
@@ -448,12 +449,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     ServiceRecord(ActivityManagerService ams,
             BatteryStatsImpl.Uid.Pkg.Serv servStats, ComponentName name,
+            ComponentName instanceName,
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
             Runnable restarter) {
         this.ams = ams;
         this.stats = servStats;
         this.name = name;
-        shortName = name.flattenToShortString();
+        this.instanceName = instanceName;
+        shortInstanceName = instanceName.flattenToShortString();
         this.intent = intent;
         serviceInfo = sInfo;
         appInfo = sInfo.applicationInfo;
@@ -618,7 +621,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                             // those dirty apps we will create a notification clearly
                             // blaming the app.
                             Slog.v(TAG, "Attempted to start a foreground service ("
-                                    + name
+                                    + shortInstanceName
                                     + ") with a broken notification (no icon: "
                                     + localForegroundNoti
                                     + ")");
@@ -701,7 +704,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                         Slog.w(TAG, "Error showing notification for service", e);
                         // If it gave us a garbage notification, it doesn't
                         // get to be foreground.
-                        ams.setServiceForeground(name, ServiceRecord.this,
+                        ams.setServiceForeground(instanceName, ServiceRecord.this,
                                 0, null, 0);
                         ams.crashApplication(appUid, appPid, localPackageName, -1,
                                 "Bad notification for startForeground: " + e);
@@ -773,7 +776,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         sb.append("ServiceRecord{")
             .append(Integer.toHexString(System.identityHashCode(this)))
             .append(" u").append(userId)
-            .append(' ').append(shortName).append('}');
+            .append(' ').append(shortInstanceName).append('}');
         return stringName = sb.toString();
     }
 

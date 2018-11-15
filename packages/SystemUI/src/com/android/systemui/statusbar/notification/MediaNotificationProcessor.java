@@ -23,9 +23,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.util.LayoutDirection;
+
 import androidx.annotation.VisibleForTesting;
 import androidx.palette.graphics.Palette;
-import android.util.LayoutDirection;
 
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.R;

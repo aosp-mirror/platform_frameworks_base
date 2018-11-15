@@ -560,13 +560,6 @@ public final class ColorDisplayController {
     }
 
     /**
-     * Returns {@code true} if Night display is supported by the device.
-     */
-    public static boolean isAvailable(Context context) {
-        return context.getResources().getBoolean(R.bool.config_nightDisplayAvailable);
-    }
-
-    /**
      * Callback invoked whenever the Night display settings are changed.
      */
     public interface Callback {

@@ -29,7 +29,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,8 +43,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.util.UserIcons;
 import com.android.systemui.R;
-
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+
 import java.util.ArrayList;
 import java.util.List;
 

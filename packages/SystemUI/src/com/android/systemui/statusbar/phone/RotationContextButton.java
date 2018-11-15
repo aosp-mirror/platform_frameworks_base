@@ -39,10 +39,10 @@ import android.view.Surface;
 import android.view.View;
 import android.view.WindowManagerGlobal;
 
-import com.android.systemui.Dependency;
-import com.android.systemui.Interpolators;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;

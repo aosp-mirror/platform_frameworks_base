@@ -45,8 +45,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.android.systemui.statusbar.phone.StatusBarIconController.TAG_PRIMARY;
-
 /**
  * Receives the callbacks from CommandQueue related to icons and tracks the state of
  * all the icons. Dispatches this state to any IconManagers that are currently

@@ -26,17 +26,15 @@ import android.content.IntentFilter;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 
-import com.android.systemui.util.NotificationChannels;
-import com.android.systemui.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.systemui.R;
+import com.android.systemui.util.NotificationChannels;
 
 /**
  * A notification that informs users that PIP is running and also provides PIP controls.

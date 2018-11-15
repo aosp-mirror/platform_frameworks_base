@@ -125,7 +125,7 @@ public class StorageManagerServiceTest {
                 "/storage/emulated/0/foo.jpg",
                 PID_GREY, UID_GREY);
         assertTranslation(
-                "/storage/emulated/0/Android/sandbox/shared:colors/foo.jpg",
+                "/storage/emulated/0/Android/sandbox/shared-colors/foo.jpg",
                 "/storage/emulated/0/foo.jpg",
                 PID_RED, UID_COLORS);
     }
@@ -137,7 +137,7 @@ public class StorageManagerServiceTest {
                 "/storage/0000-0000/foo/bar.jpg",
                 PID_GREY, UID_GREY);
         assertTranslation(
-                "/storage/0000-0000/Android/sandbox/shared:colors/foo/bar.jpg",
+                "/storage/0000-0000/Android/sandbox/shared-colors/foo/bar.jpg",
                 "/storage/0000-0000/foo/bar.jpg",
                 PID_RED, UID_COLORS);
     }
@@ -152,7 +152,7 @@ public class StorageManagerServiceTest {
 
         // Accessing other package paths goes into sandbox
         assertTranslation(
-                "/storage/emulated/0/Android/sandbox/shared:colors/"
+                "/storage/emulated/0/Android/sandbox/shared-colors/"
                         + "Android/data/com.grey/foo.jpg",
                 "/storage/emulated/0/Android/data/com.grey/foo.jpg",
                 PID_RED, UID_COLORS);
@@ -201,7 +201,7 @@ public class StorageManagerServiceTest {
         // Sandboxes can't see paths in other sandboxes
         try {
             mService.translateSystemToApp(
-                    "/storage/emulated/0/Android/sandbox/shared:colors/foo.jpg",
+                    "/storage/emulated/0/Android/sandbox/shared-colors/foo.jpg",
                     PID_GREY, UID_GREY);
             fail();
         } catch (SecurityException expected) {

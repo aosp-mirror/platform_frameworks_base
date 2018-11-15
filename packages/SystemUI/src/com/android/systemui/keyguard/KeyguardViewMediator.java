@@ -1940,11 +1940,6 @@ public class KeyguardViewMediator extends SystemUI {
                     mContext.getSystemService(Context.STATUS_BAR_SERVICE);
         }
 
-        // TODO(b/113914868): investigation log for disappearing home button
-        Log.d(TAG, "adjustStatusBarLocked (b/113914868): mShowing=" + mShowing
-                + " mStatusBarManager=" + mStatusBarManager + " mOccluded="
-                + mOccluded + " isSecure=" + isSecure() + " force=" + forceHideHomeRecentsButtons);
-
         if (mStatusBarManager == null) {
             Log.w(TAG, "Could not get status bar manager");
         } else {
@@ -1960,6 +1955,12 @@ public class KeyguardViewMediator extends SystemUI {
                         + " isSecure=" + isSecure() + " force=" + forceHideHomeRecentsButtons
                         +  " --> flags=0x" + Integer.toHexString(flags));
             }
+
+            // TODO(b/113914868): investigation log for disappearing home button
+            Log.d(TAG, "adjustStatusBarLocked (b/113914868): flags=" + flags
+                    + "mShowing=" + mShowing + " mStatusBarManager=" + mStatusBarManager
+                    + " mOccluded=" + mOccluded + " isSecure=" + isSecure()
+                    + " force=" + forceHideHomeRecentsButtons);
 
             mStatusBarManager.disable(flags);
         }

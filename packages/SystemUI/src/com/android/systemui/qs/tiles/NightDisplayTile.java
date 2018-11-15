@@ -21,19 +21,21 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Intent;
+import android.hardware.display.ColorDisplayManager;
 import android.metrics.LogMaker;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import androidx.annotation.StringRes;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Switch;
 
+import androidx.annotation.StringRes;
+
 import com.android.internal.app.ColorDisplayController;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
 import java.text.DateFormat;
@@ -53,7 +55,6 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
     private static final String PATTERN_HOUR_MINUTE = "h:mm a";
     private static final String PATTERN_HOUR_NINUTE_24 = "HH:mm";
 
-
     private ColorDisplayController mController;
     private boolean mIsListening;
 
@@ -64,7 +65,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
 
     @Override
     public boolean isAvailable() {
-        return ColorDisplayController.isAvailable(mContext);
+        return ColorDisplayManager.isNightDisplayAvailable(mContext);
     }
 
     @Override

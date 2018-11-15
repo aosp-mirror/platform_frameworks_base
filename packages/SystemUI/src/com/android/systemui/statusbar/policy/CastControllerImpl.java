@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.media.MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -30,6 +32,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.R;
 
@@ -39,10 +43,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-
-import static android.media.MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
-
-import androidx.annotation.VisibleForTesting;
 
 
 /** Platform implementation of the cast controller. **/

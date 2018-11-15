@@ -16,16 +16,16 @@
 
 package com.android.systemui.statusbar;
 
-import com.android.internal.util.Preconditions;
-import com.android.systemui.statusbar.notification.NotificationData;
-import com.android.systemui.statusbar.policy.RemoteInputView;
-
 import android.app.Notification;
 import android.app.RemoteInput;
 import android.content.Context;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Pair;
+
+import com.android.internal.util.Preconditions;
+import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.policy.RemoteInputView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

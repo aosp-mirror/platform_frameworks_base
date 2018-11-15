@@ -16,7 +16,6 @@
 
 package com.android.keyguard;
 
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.content.Context;
@@ -37,8 +36,8 @@ import android.widget.Button;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.telephony.IccCardConstants.State;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.util.EmergencyDialerConstants;
 
 /**

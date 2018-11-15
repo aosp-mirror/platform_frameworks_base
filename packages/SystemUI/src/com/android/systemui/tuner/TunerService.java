@@ -26,8 +26,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.UserHandle;
 import android.provider.Settings;
 
-import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
-import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;

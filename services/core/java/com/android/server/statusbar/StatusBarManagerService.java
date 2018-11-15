@@ -37,6 +37,7 @@ import android.os.UserHandle;
 import android.service.notification.NotificationStats;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -671,6 +672,20 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         // Ensure state for the current user is applied, even if passed a non-current user.
         final int net1 = gatherDisableActionsLocked(mCurrentUserId, 1);
         final int net2 = gatherDisableActionsLocked(mCurrentUserId, 2);
+
+        // TODO(b/113914868): investigation log for disappearing home button
+        if (whichFlag == 1 && pkg.contains("systemui")) {
+            String disabledData = "{ ";
+            for (int i = 0; i < mDisableRecords.size(); i++) {
+                DisableRecord tok = mDisableRecords.get(i);
+                disabledData += "    ([" + i + "] " + tok + "), ";
+            }
+            disabledData += " }";
+            Log.d(TAG, "disabledlocked (b/113914868): net1=" + net1 + ", mDisabled1=" + mDisabled1
+                    + ", token=" + token + ", mDisableRecords=" + mDisableRecords.size() + " => "
+                    + disabledData);
+        }
+
         if (net1 != mDisabled1 || net2 != mDisabled2) {
             mDisabled1 = net1;
             mDisabled2 = net2;

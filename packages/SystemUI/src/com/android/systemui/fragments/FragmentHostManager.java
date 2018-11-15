@@ -28,10 +28,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
-import androidx.annotation.NonNull;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.Dependency;
@@ -59,11 +60,11 @@ public class FragmentHostManager {
     private FragmentController mFragments;
     private FragmentLifecycleCallbacks mLifecycleCallbacks;
 
-    FragmentHostManager(Context context, FragmentService manager, View rootView) {
-        mContext = context;
+    FragmentHostManager(FragmentService manager, View rootView) {
+        mContext = rootView.getContext();
         mManager = manager;
         mRootView = rootView;
-        mConfigChanges.applyNewConfig(context.getResources());
+        mConfigChanges.applyNewConfig(mContext.getResources());
         createFragmentHost(null);
     }
 
@@ -201,6 +202,10 @@ public class FragmentHostManager {
             // TODO: Some auto handling here?
             throw e;
         }
+    }
+
+    public static void removeAndDestroy(View view) {
+        Dependency.get(FragmentService.class).removeAndDestroy(view);
     }
 
     class HostCallbacks extends FragmentHostCallback<FragmentHostManager> {

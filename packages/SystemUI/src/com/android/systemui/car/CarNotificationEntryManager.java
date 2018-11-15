@@ -17,9 +17,9 @@ package com.android.systemui.car;
 
 import android.content.Context;
 
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 public class CarNotificationEntryManager extends NotificationEntryManager {
     public CarNotificationEntryManager(Context context) {

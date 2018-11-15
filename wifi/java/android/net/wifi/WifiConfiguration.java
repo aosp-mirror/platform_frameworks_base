@@ -58,7 +58,7 @@ public class WifiConfiguration implements Parcelable {
     /**
      * Current Version of the Backup Serializer.
     */
-    private static final int BACKUP_VERSION = 2;
+    private static final int BACKUP_VERSION = 3;
     /** {@hide} */
     public static final String ssidVarName = "ssid";
     /** {@hide} */
@@ -2420,6 +2420,7 @@ public class WifiConfiguration implements Parcelable {
         out.writeInt(apChannel);
         BackupUtils.writeString(out, preSharedKey);
         out.writeInt(getAuthType());
+        out.writeBoolean(hiddenSSID);
         return baos.toByteArray();
     }
 
@@ -2442,6 +2443,9 @@ public class WifiConfiguration implements Parcelable {
         config.apChannel = in.readInt();
         config.preSharedKey = BackupUtils.readString(in);
         config.allowedKeyManagement.set(in.readInt());
+        if (version >= 3) {
+            config.hiddenSSID = in.readBoolean();
+        }
         return config;
     }
 }

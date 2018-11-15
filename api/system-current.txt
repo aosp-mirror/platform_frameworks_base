@@ -7410,6 +7410,7 @@ package android.webkit {
     method public default void onMovedToDisplay(int, android.content.res.Configuration);
     method public abstract void onOverScrolled(int, int, boolean, boolean);
     method public default void onProvideAutofillVirtualStructure(android.view.ViewStructure, int);
+    method public default boolean onProvideContentCaptureStructure(android.view.ViewStructure, int);
     method public abstract void onProvideVirtualStructure(android.view.ViewStructure);
     method public abstract void onScrollChanged(int, int, int, int);
     method public abstract void onSizeChanged(int, int, int, int);

@@ -49,4 +49,33 @@ interface IAns {
     * @param callingPackage caller's package name
     */
     boolean isEnabled(String callingPackage);
+
+    /**
+     * Set preferred opportunistic data subscription id.
+     *
+     * <p>Requires that the calling app has carrier privileges on both primary and
+     * secondary subscriptions (see
+     * {@link #hasCarrierPrivileges}), or has permission
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
+     * @param subId which opportunistic subscription
+     * {@link SubscriptionManager#getOpportunisticSubscriptions} is preferred for cellular data.
+     * Pass {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID} to unset the preference
+     * @param callingPackage caller's package name
+     * @return true if request is accepted, else false.
+     *
+     */
+    boolean setPreferredData(int subId, String callingPackage);
+
+    /**
+     * Get preferred opportunistic data subscription Id
+     *
+     * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}),
+     * or has permission {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}.
+     * @return subId preferred opportunistic subscription id or
+     * {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID} if there are no preferred
+     * subscription id
+     *
+     */
+    int getPreferredData(String callingPackage);
 }

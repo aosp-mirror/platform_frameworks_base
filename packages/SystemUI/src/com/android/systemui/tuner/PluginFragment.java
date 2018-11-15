@@ -29,6 +29,11 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.View;
 
+import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceScreen;
+import androidx.preference.PreferenceViewHolder;
+import androidx.preference.SwitchPreference;
+
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -40,11 +45,6 @@ import com.android.systemui.shared.plugins.PluginPrefs;
 
 import java.util.List;
 import java.util.Set;
-
-import androidx.preference.PreferenceFragment;
-import androidx.preference.PreferenceScreen;
-import androidx.preference.PreferenceViewHolder;
-import androidx.preference.SwitchPreference;
 
 public class PluginFragment extends PreferenceFragment {
 

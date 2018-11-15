@@ -44,7 +44,14 @@ public class EventLogWriter implements LogWriter {
 
     @Override
     public void action(Context context, int category, Pair<Integer, Object>... taggedData) {
-        action(context, category, "", taggedData);
+        final LogMaker logMaker = new LogMaker(category)
+                .setType(MetricsProto.MetricsEvent.TYPE_ACTION);
+        if (taggedData != null) {
+            for (Pair<Integer, Object> pair : taggedData) {
+                logMaker.addTaggedData(pair.first, pair.second);
+            }
+        }
+        MetricsLogger.action(logMaker);
     }
 
     @Override
@@ -58,19 +65,12 @@ public class EventLogWriter implements LogWriter {
     }
 
     @Override
-    public void action(Context context, int category, String pkg,
-            Pair<Integer, Object>... taggedData) {
-        if (taggedData == null || taggedData.length == 0) {
-            MetricsLogger.action(context, category, pkg);
-        } else {
-            final LogMaker logMaker = new LogMaker(category)
-                    .setType(MetricsProto.MetricsEvent.TYPE_ACTION)
-                    .setPackageName(pkg);
-            for (Pair<Integer, Object> pair : taggedData) {
-                logMaker.addTaggedData(pair.first, pair.second);
-            }
-            MetricsLogger.action(logMaker);
-        }
+    public void action(Context context, int category, String pkg) {
+        final LogMaker logMaker = new LogMaker(category)
+                .setType(MetricsProto.MetricsEvent.TYPE_ACTION)
+                .setPackageName(pkg);
+
+        MetricsLogger.action(logMaker);
     }
 
     @Override
