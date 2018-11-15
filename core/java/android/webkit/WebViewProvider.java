@@ -341,10 +341,9 @@ public interface WebViewProvider {
             return true; // true is the default value returned by View.isVisibleToUserForAutofill()
         }
 
-        default boolean onProvideContentCaptureStructure(
+        default void onProvideContentCaptureStructure(
                 @SuppressWarnings("unused") android.view.ViewStructure structure,
                 @SuppressWarnings("unused") int flags) {
-            return false; // WebView provides virtual views and is responsible to notify manager
         }
 
         public AccessibilityNodeProvider getAccessibilityNodeProvider();
