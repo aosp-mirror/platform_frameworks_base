@@ -203,6 +203,28 @@ public class ModelFileManagerTest {
     }
 
     @Test
+    public void findBestModel_languageIsMoreImportantThanVersion_bestModelComesFirst() {
+        ModelFileManager.ModelFile matchLocaleModel =
+                new ModelFileManager.ModelFile(
+                        new File("/path/b"), 1,
+                        Collections.singletonList(Locale.forLanguageTag("ja")), false);
+
+        ModelFileManager.ModelFile languageIndependentModel =
+                new ModelFileManager.ModelFile(
+                        new File("/path/a"), 2,
+                        Collections.emptyList(), true);
+        when(mModelFileSupplier.get())
+                .thenReturn(
+                        Arrays.asList(matchLocaleModel, languageIndependentModel));
+
+        ModelFileManager.ModelFile bestModelFile =
+                mModelFileManager.findBestModelFile(
+                        LocaleList.forLanguageTags("ja"));
+
+        assertThat(bestModelFile).isEqualTo(matchLocaleModel);
+    }
+
+    @Test
     public void modelFileEquals() {
         ModelFileManager.ModelFile modelA =
                 new ModelFileManager.ModelFile(
