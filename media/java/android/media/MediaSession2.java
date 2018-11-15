@@ -59,10 +59,6 @@ import java.util.concurrent.Executor;
  * handle media keys. In general an app only needs one session for all playback, though multiple
  * sessions can be created to provide finer grain controls of media.
  * <p>
- * If you want to support background playback, {@link MediaSessionService2} is preferred
- * instead. With it, your playback can be revived even after playback is finished. See
- * {@link MediaSessionService2} for details.
- * <p>
  * A session can be obtained by {@link Builder}. The owner of the session may pass its session token
  * to other processes to allow them to create a {@link MediaController2} to interact with the
  * session.
@@ -75,8 +71,6 @@ import java.util.concurrent.Executor;
  * and notify any controllers.
  * <p>
  * {@link MediaSession2} objects should be used on the thread on the looper.
- *
- * @see MediaSessionService2
  */
 public class MediaSession2 implements AutoCloseable {
     private final MediaSession2Provider mProvider;
