@@ -20,7 +20,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.security.IKeystoreService;
+import android.security.keystore.IKeystoreService;
 import android.util.Slog;
 
 import com.android.internal.policy.IKeyguardService;
