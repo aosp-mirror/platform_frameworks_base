@@ -28,6 +28,11 @@ public class ExportResult implements Parcelable {
     public final int resultCode;
     public final byte[] exportData;
 
+    public ExportResult(int resultCode) {
+        this.resultCode = resultCode;
+        this.exportData = new byte[0];
+    }
+
     @UnsupportedAppUsage
     public static final Parcelable.Creator<ExportResult> CREATOR = new
             Parcelable.Creator<ExportResult>() {
