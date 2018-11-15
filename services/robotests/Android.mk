@@ -27,7 +27,8 @@ LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     services.backup \
-    services.core
+    services.core \
+    services.net
 
 include $(BUILD_PACKAGE)
 
