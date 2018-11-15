@@ -856,11 +856,9 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * Checks whether the MediaPlayer2 is looping or non-looping.
      *
      * @return true if the MediaPlayer2 is currently looping, false otherwise
-     * @hide
      */
-    public boolean isLooping() {
-        return false;
-    }
+    // This is a synchronous call.
+    public abstract boolean isLooping();
 
     /**
      * Sets the audio session ID.
@@ -875,7 +873,8 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * When created, a MediaPlayer2 instance automatically generates its own audio session ID.
      * However, it is possible to force this player to be part of an already existing audio session
      * by calling this method.
-     * This method must be called before one of the overloaded <code> setDataSource </code> methods.
+     * This method must be called when player is in {@link #PLAYER_STATE_IDLE} or
+     * {@link #PLAYER_STATE_PREPARED} state in order to have sessionId take effect.
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
@@ -885,8 +884,10 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * Returns the audio session ID.
      *
      * @return the audio session ID. {@see #setAudioSessionId(int)}
-     * Note that the audio session ID is 0 only if a problem occured when the MediaPlayer2 was contructed.
+     * Note that the audio session ID is 0 only if a problem occured when the MediaPlayer2 was
+     * contructed.
      */
+    // This is a synchronous call.
     public abstract int getAudioSessionId();
 
     /**
@@ -906,7 +907,6 @@ public abstract class MediaPlayer2 implements AutoCloseable
      */
     // This is an asynchronous call.
     public abstract Object attachAuxEffect(int effectId);
-
 
     /**
      * Sets the send level of the player to the attached auxiliary effect.
@@ -972,35 +972,9 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return List of track info. The total number of tracks is the array length.
      * Must be called again if an external timed text source has been added after
      * addTimedTextSource method is called.
+     * @throws IllegalStateException if it is called in an invalid state.
      */
     public abstract List<TrackInfo> getTrackInfo();
-
-    /* Do not change these values without updating their counterparts
-     * in include/media/stagefright/MediaDefs.h and media/libstagefright/MediaDefs.cpp!
-     */
-    /**
-     * MIME type for SubRip (SRT) container. Used in addTimedTextSource APIs.
-     * @hide
-     */
-    public static final String MEDIA_MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
-
-    /**
-     * MIME type for WebVTT subtitle data.
-     * @hide
-     */
-    public static final String MEDIA_MIMETYPE_TEXT_VTT = "text/vtt";
-
-    /**
-     * MIME type for CEA-608 closed caption data.
-     * @hide
-     */
-    public static final String MEDIA_MIMETYPE_TEXT_CEA_608 = "text/cea-608";
-
-    /**
-     * MIME type for CEA-708 closed caption data.
-     * @hide
-     */
-    public static final String MEDIA_MIMETYPE_TEXT_CEA_708 = "text/cea-708";
 
     /**
      * Returns the index of the audio, video, or subtitle track currently selected for playback,
@@ -1202,7 +1176,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
     public abstract void unregisterEventCallback(EventCallback eventCallback);
 
     /* Do not change these values without updating their counterparts
-     * in include/media/mediaplayer2.h!
+     * in include/media/MediaPlayer2Types.h!
      */
     /** Unspecified media player error.
      * @see EventCallback#onError
