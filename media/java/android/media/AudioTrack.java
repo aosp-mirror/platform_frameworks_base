@@ -16,23 +16,13 @@
 
 package android.media;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.ref.WeakReference;
-import java.lang.Math;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.NioUtils;
-import java.util.LinkedList;
-import java.util.concurrent.Executor;
-
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -42,6 +32,15 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.NioUtils;
+import java.util.LinkedList;
+import java.util.concurrent.Executor;
 
 /**
  * The AudioTrack class manages and plays a single audio resource for Java applications.
