@@ -20,6 +20,7 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.TaskDescription.ATTR_TASKDESCRIPTION_PREFIX;
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityTaskManager.INVALID_STACK_ID;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
 import static android.app.WaitResult.INVALID_DELAY;
@@ -75,6 +76,25 @@ import static android.os.Process.SYSTEM_UID;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 
+import static com.android.server.am.ActivityRecordProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.ActivityRecordProto.FRONT_OF_TASK;
+import static com.android.server.am.ActivityRecordProto.IDENTIFIER;
+import static com.android.server.am.ActivityRecordProto.PROC_ID;
+import static com.android.server.am.ActivityRecordProto.STATE;
+import static com.android.server.am.ActivityRecordProto.TRANSLUCENT;
+import static com.android.server.am.ActivityRecordProto.VISIBLE;
+import static com.android.server.am.EventLogTags.AM_RELAUNCH_ACTIVITY;
+import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
+import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
+import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
+import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
+import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
+import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
+import static com.android.server.wm.ActivityStack.LAUNCH_TICK;
+import static com.android.server.wm.ActivityStack.LAUNCH_TICK_MSG;
+import static com.android.server.wm.ActivityStack.PAUSE_TIMEOUT_MSG;
+import static com.android.server.wm.ActivityStack.STOP_TIMEOUT_MSG;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SAVED_STATE;
@@ -89,34 +109,14 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITC
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityRecordProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.ActivityRecordProto.FRONT_OF_TASK;
-import static com.android.server.am.ActivityRecordProto.IDENTIFIER;
-import static com.android.server.am.ActivityRecordProto.PROC_ID;
-import static com.android.server.am.ActivityRecordProto.STATE;
-import static com.android.server.am.ActivityRecordProto.TRANSLUCENT;
-import static com.android.server.am.ActivityRecordProto.VISIBLE;
-import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
-import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
-import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
-import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
-import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
-import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
-import static com.android.server.wm.ActivityStack.LAUNCH_TICK;
-import static com.android.server.wm.ActivityStack.LAUNCH_TICK_MSG;
-import static com.android.server.wm.ActivityStack.PAUSE_TIMEOUT_MSG;
-import static com.android.server.wm.ActivityStack.STOP_TIMEOUT_MSG;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
-import static com.android.server.am.EventLogTags.AM_RELAUNCH_ACTIVITY;
-import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
-import static com.android.server.wm.TaskPersister.DEBUG;
-import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
+import static com.android.server.wm.TaskPersister.DEBUG;
+import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -179,9 +179,9 @@ import com.android.server.AttributeCache;
 import com.android.server.AttributeCache.Entry;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.PendingIntentRecord;
+import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityMetricsLogger.WindowingModeTransitionInfoSnapshot;
 import com.android.server.wm.ActivityStack.ActivityState;
-import com.android.server.uri.UriPermissionOwner;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -303,6 +303,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                                         // process that it is hidden.
     boolean sleeping;       // have we told the activity to sleep?
     boolean nowVisible;     // is this activity's window visible?
+    boolean mDrawn;          // is this activity's window drawn?
     boolean mClientVisibilityDeferred;// was the visibility change message to client deferred?
     boolean idle;           // has the activity gone idle?
     boolean hasBeenLaunched;// has this activity ever been launched?
@@ -869,6 +870,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         inHistory = false;
         visible = false;
         nowVisible = false;
+        mDrawn = false;
         idle = false;
         hasBeenLaunched = false;
         mStackSupervisor = supervisor;
@@ -1944,8 +1946,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     @Override
-    public void onWindowsDrawn(long timestamp) {
+    public void onWindowsDrawn(boolean drawn, long timestamp) {
         synchronized (service.mGlobalLock) {
+            mDrawn = drawn;
+            if (!drawn) {
+                return;
+            }
             final WindowingModeTransitionInfoSnapshot info = mStackSupervisor
                     .getActivityMetricsLogger().notifyWindowsDrawn(getWindowingMode(), timestamp);
             final int windowsDrawnDelayMs = info != null ? info.windowsDrawnDelayMs : INVALID_DELAY;
