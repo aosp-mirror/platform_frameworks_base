@@ -292,7 +292,7 @@ public class ImsMmTelManager {
      * Create an instance of ImsManager for the subscription id specified.
      *
      * @param context
-     * @param subId The ID of the subscription that this ImsManager will use.
+     * @param subId The ID of the subscription that this ImsMmTelManager will use.
      * @see android.telephony.SubscriptionManager#getActiveSubscriptionInfoList()
      * @throws IllegalArgumentException if the subscription is invalid or
      *         the subscription ID is not an active subscription.

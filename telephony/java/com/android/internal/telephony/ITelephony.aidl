@@ -40,6 +40,7 @@ import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsConfig;
+import android.telephony.ims.aidl.IImsConfigCallback;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
@@ -1569,24 +1570,24 @@ interface ITelephony {
     /**
      * Adds an IMS registration status callback for the subscription id specified.
      */
-    oneway void addImsRegistrationCallback(int subId, IImsRegistrationCallback c,
+    void addImsRegistrationCallback(int subId, IImsRegistrationCallback c,
             String callingPackage);
      /**
       * Removes an existing IMS registration status callback for the subscription specified.
       */
-    oneway void removeImsRegistrationCallback(int subId, IImsRegistrationCallback c,
+    void removeImsRegistrationCallback(int subId, IImsRegistrationCallback c,
             String callingPackage);
 
     /**
      * Adds an IMS MmTel capabilities callback for the subscription specified.
      */
-    oneway void addMmTelCapabilityCallback(int subId, IImsCapabilityCallback c,
+    void addMmTelCapabilityCallback(int subId, IImsCapabilityCallback c,
             String callingPackage);
 
     /**
      * Removes an existing IMS MmTel capabilities callback for the subscription specified.
      */
-    oneway void removeMmTelCapabilityCallback(int subId, IImsCapabilityCallback c,
+    void removeMmTelCapabilityCallback(int subId, IImsCapabilityCallback c,
             String callingPackage);
 
     /**
@@ -1691,4 +1692,34 @@ interface ITelephony {
      * Return a list of certs in hex string from loaded carrier privileges access rules.
      */
     List<String> getCertsFromCarrierPrivilegeAccessRules(int subId);
+
+    /**
+     * Register an IMS provisioning change callback with Telephony.
+     */
+    void registerImsProvisioningChangedCallback(int subId, IImsConfigCallback callback);
+
+    /**
+     * unregister an existing IMS provisioning change callback.
+     */
+    void unregisterImsProvisioningChangedCallback(int subId, IImsConfigCallback callback);
+
+    /**
+     * Return an integer containing the provisioning value for the specified provisioning key.
+     */
+    int getImsProvisioningInt(int subId, int key);
+
+    /**
+     * return a String containing the provisioning value for the provisioning key specified.
+     */
+    String getImsProvisioningString(int subId, int key);
+
+    /**
+     * Set the integer provisioning value for the provisioning key specified.
+     */
+    int setImsProvisioningInt(int subId, int key, int value);
+
+    /**
+     * Set the String provisioning value for the provisioning key specified.
+     */
+    int setImsProvisioningString(int subId, int key, String value);
 }
