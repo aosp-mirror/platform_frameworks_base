@@ -16,10 +16,10 @@
 
 package com.android.server.role;
 
-import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.app.role.IRoleManagerCallback;
 import android.app.role.RoleManagerCallback;
 import android.content.ComponentName;
@@ -34,6 +34,7 @@ import android.rolecontrollerservice.IRoleControllerService;
 import android.rolecontrollerservice.RoleControllerService;
 import android.util.Slog;
 
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.util.ArrayDeque;
@@ -44,7 +45,11 @@ import java.util.Queue;
  */
 public class RemoteRoleControllerService {
 
+    static final boolean DEBUG = false;
     private static final String LOG_TAG = RemoteRoleControllerService.class.getSimpleName();
+
+    @NonNull
+    private static final Handler sCallbackHandler = BackgroundThread.getHandler();
 
     @NonNull
     private final Connection mConnection;
@@ -87,6 +92,16 @@ public class RemoteRoleControllerService {
                 service.onClearRoleHolders(roleName, callbackDelegate), callback));
     }
 
+    /**
+     * Performs granting of default roles and permissions and appops
+     *
+     * @see RoleControllerService#onGrantDefaultRoles(RoleManagerCallback)
+     */
+    public void onGrantDefaultRoles(@NonNull IRoleManagerCallback callback) {
+        mConnection.enqueueCall(
+                new Connection.Call(IRoleControllerService::onGrantDefaultRoles, callback));
+    }
+
     private static final class Connection implements ServiceConnection {
 
         private static final long UNBIND_DELAY_MILLIS = 15 * 1000;
@@ -106,9 +121,6 @@ public class RemoteRoleControllerService {
         private final Queue<Call> mPendingCalls = new ArrayDeque<>();
 
         @NonNull
-        private final Handler mMainHandler = Handler.getMain();
-
-        @NonNull
         private final Runnable mUnbindRunnable = this::unbind;
 
         Connection(@UserIdInt int userId, @NonNull Context context) {
@@ -116,14 +128,14 @@ public class RemoteRoleControllerService {
             mContext = context;
         }
 
-        @MainThread
         @Override
+        @WorkerThread
         public void onServiceConnected(@NonNull ComponentName name, @NonNull IBinder service) {
             mService = IRoleControllerService.Stub.asInterface(service);
             executePendingCalls();
         }
 
-        @MainThread
+        @WorkerThread
         private void executePendingCalls() {
             while (!mPendingCalls.isEmpty()) {
                 Call call = mPendingCalls.poll();
@@ -132,26 +144,33 @@ public class RemoteRoleControllerService {
             scheduleUnbind();
         }
 
-        @MainThread
         @Override
+        @WorkerThread
         public void onServiceDisconnected(@NonNull ComponentName name) {
             mService = null;
         }
 
-        @MainThread
         @Override
+        @WorkerThread
         public void onBindingDied(@NonNull ComponentName name) {
             unbind();
         }
 
         public void enqueueCall(@NonNull Call call) {
-            mMainHandler.post(PooledLambda.obtainRunnable(this::executeCall, call));
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "Enqueue " + call);
+            }
+            sCallbackHandler.executeOrSendMessage(PooledLambda.obtainMessage(
+                    Connection::executeCall, this, call));
         }
 
-        @MainThread
+        @WorkerThread
         private void executeCall(@NonNull Call call) {
             ensureBound();
             if (mService == null) {
+                if (DEBUG) {
+                    Slog.i(LOG_TAG, "Delaying until service connected: " + call);
+                }
                 mPendingCalls.offer(call);
                 return;
             }
@@ -159,24 +178,28 @@ public class RemoteRoleControllerService {
             scheduleUnbind();
         }
 
-        @MainThread
+        @WorkerThread
         private void ensureBound() {
-            mMainHandler.removeCallbacks(mUnbindRunnable);
+            sCallbackHandler.removeCallbacks(mUnbindRunnable);
             if (!mBound) {
                 Intent intent = new Intent(RoleControllerService.SERVICE_INTERFACE);
                 intent.setPackage(mContext.getPackageManager()
                         .getPermissionControllerPackageName());
+                // Use direct handler to ensure onServiceConnected callback happens in the same
+                // call frame, as required by onGrantDefaultRoles
+                //
+                // Note that as a result, onServiceConnected may happen not on main thread!
                 mBound = mContext.bindServiceAsUser(intent, this, Context.BIND_AUTO_CREATE,
-                        UserHandle.of(mUserId));
+                        sCallbackHandler, UserHandle.of(mUserId));
             }
         }
 
         private void scheduleUnbind() {
-            mMainHandler.removeCallbacks(mUnbindRunnable);
-            mMainHandler.postDelayed(mUnbindRunnable, UNBIND_DELAY_MILLIS);
+            sCallbackHandler.removeCallbacks(mUnbindRunnable);
+            sCallbackHandler.postDelayed(mUnbindRunnable, UNBIND_DELAY_MILLIS);
         }
 
-        @MainThread
+        @WorkerThread
         private void unbind() {
             if (mBound) {
                 mService = null;
@@ -196,9 +219,6 @@ public class RemoteRoleControllerService {
             private final IRoleManagerCallback mCallback;
 
             @NonNull
-            private final Handler mMainHandler = Handler.getMain();
-
-            @NonNull
             private final Runnable mTimeoutRunnable = () -> notifyCallback(false);
 
             private boolean mCallbackNotified;
@@ -209,10 +229,13 @@ public class RemoteRoleControllerService {
                 mCallback = callback;
             }
 
-            @MainThread
+            @WorkerThread
             public void execute(IRoleControllerService service) {
+                if (DEBUG) {
+                    Slog.i(LOG_TAG, "Executing " + this);
+                }
                 try {
-                    mMainHandler.postDelayed(mTimeoutRunnable, TIMEOUT_MILLIS);
+                    sCallbackHandler.postDelayed(mTimeoutRunnable, TIMEOUT_MILLIS);
                     mCallExecutor.execute(service, new CallbackDelegate());
                 } catch (RemoteException e) {
                     Slog.e(LOG_TAG, "Error calling RoleControllerService", e);
@@ -220,13 +243,13 @@ public class RemoteRoleControllerService {
                 }
             }
 
-            @MainThread
+            @WorkerThread
             private void notifyCallback(boolean success) {
                 if (mCallbackNotified) {
                     return;
                 }
                 mCallbackNotified = true;
-                mMainHandler.removeCallbacks(mTimeoutRunnable);
+                sCallbackHandler.removeCallbacks(mTimeoutRunnable);
                 try {
                     if (success) {
                         mCallback.onSuccess();
@@ -239,10 +262,15 @@ public class RemoteRoleControllerService {
                 }
             }
 
+            @Override
+            public String toString() {
+                return "Call with callback: " + mCallback;
+            }
+
             @FunctionalInterface
             public interface CallExecutor {
 
-                @MainThread
+                @WorkerThread
                 void execute(IRoleControllerService service, IRoleManagerCallback callbackDelegate)
                         throws RemoteException;
             }
@@ -251,13 +279,14 @@ public class RemoteRoleControllerService {
 
                 @Override
                 public void onSuccess() throws RemoteException {
-                    mMainHandler.post(PooledLambda.obtainRunnable(Call.this::notifyCallback, true));
+                    sCallbackHandler.sendMessage(PooledLambda.obtainMessage(
+                            Call::notifyCallback, Call.this, true));
                 }
 
                 @Override
                 public void onFailure() throws RemoteException {
-                    mMainHandler.post(PooledLambda.obtainRunnable(Call.this::notifyCallback,
-                            false));
+                    sCallbackHandler.sendMessage(PooledLambda.obtainMessage(
+                            Call::notifyCallback, Call.this, false));
                 }
             }
         }

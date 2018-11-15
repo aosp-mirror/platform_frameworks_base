@@ -89,6 +89,13 @@ public abstract class RoleControllerService extends Service {
                 RoleControllerService.this.onClearRoleHolders(roleName,
                         new RoleManagerCallbackDelegate(callback));
             }
+
+            @Override
+            public void onGrantDefaultRoles(IRoleManagerCallback callback) {
+                Preconditions.checkNotNull(callback, "callback cannot be null");
+                RoleControllerService.this.onGrantDefaultRoles(
+                        new RoleManagerCallbackDelegate(callback));
+            }
         };
     }
 
@@ -132,6 +139,16 @@ public abstract class RoleControllerService extends Service {
      */
     public abstract void onClearRoleHolders(@NonNull String roleName,
             @NonNull RoleManagerCallback callback);
+
+    /**
+     * Called by system to grant default permissions and roles.
+     * <p>
+     * This is typically when creating a new user or upgrading either system or
+     * permission controller package
+     *
+     * @param callback the callback for whether this call is successful
+     */
+    public abstract void onGrantDefaultRoles(@NonNull RoleManagerCallback callback);
 
     private static class RoleManagerCallbackDelegate implements RoleManagerCallback {
 

@@ -45,6 +45,10 @@ import com.android.server.SystemService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Service for role management.
@@ -105,17 +109,37 @@ public class RoleManagerService extends SystemService {
     public void onStart() {
         publishBinderService(Context.ROLE_SERVICE, new Stub());
         //TODO add watch for new user creation and run default grants for them
+        //TODO add package update watch to detect PermissionController upgrade and run def. grants
     }
 
     @Override
     public void onStartUser(@UserIdInt int userId) {
         synchronized (mLock) {
             //TODO only call into PermissionController if it or system upgreaded (for boot time)
-            // (add package changes watch;
-            //     we can detect upgrade using build fingerprint and app version)
             getUserStateLocked(userId);
-            //TODO call permission grant policy here
+        }
+        //TODO consider calling grants only when certain conditions are met
+        // such as OS or PermissionController upgrade
+        if (RemoteRoleControllerService.DEBUG) {
             Slog.i(LOG_TAG, "Granting default permissions...");
+            CompletableFuture<Void> result = new CompletableFuture<>();
+            getControllerService(userId).onGrantDefaultRoles(
+                    new IRoleManagerCallback.Stub() {
+                        @Override
+                        public void onSuccess() {
+                            result.complete(null);
+                        }
+
+                        @Override
+                        public void onFailure() {
+                            result.completeExceptionally(new RuntimeException());
+                        }
+                    });
+            try {
+                result.get(5, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                Slog.e(LOG_TAG, "Failed to grant defaults for user " + userId, e);
+            }
         }
     }
 
