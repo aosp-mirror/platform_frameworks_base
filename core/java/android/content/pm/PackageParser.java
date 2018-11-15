@@ -6317,6 +6317,7 @@ public class PackageParser {
         public ArrayList<String> usesOptionalLibraries = null;
         @UnsupportedAppUsage
         public String[] usesLibraryFiles = null;
+        public ArrayList<SharedLibraryInfo> usesLibraryInfos = null;
 
         public ArrayList<ActivityIntentInfo> preferredActivityFilters = null;
 
@@ -6846,6 +6847,8 @@ public class PackageParser {
             internStringArrayList(usesOptionalLibraries);
             usesLibraryFiles = dest.readStringArray();
 
+            usesLibraryInfos = dest.createTypedArrayList(SharedLibraryInfo.CREATOR);
+
             final int libCount = dest.readInt();
             if (libCount > 0) {
                 usesStaticLibraries = new ArrayList<>(libCount);
@@ -6996,6 +6999,7 @@ public class PackageParser {
             dest.writeStringList(usesLibraries);
             dest.writeStringList(usesOptionalLibraries);
             dest.writeStringArray(usesLibraryFiles);
+            dest.writeTypedList(usesLibraryInfos);
 
             if (ArrayUtils.isEmpty(usesStaticLibraries)) {
                 dest.writeInt(-1);
@@ -7454,6 +7458,10 @@ public class PackageParser {
         }
         if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) != 0
                 && p.usesLibraryFiles != null) {
+            return true;
+        }
+        if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) != 0
+                && p.usesLibraryInfos != null) {
             return true;
         }
         if (p.staticSharedLibName != null) {
