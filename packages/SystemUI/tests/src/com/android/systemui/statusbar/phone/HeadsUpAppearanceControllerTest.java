@@ -151,6 +151,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mHeadsUpStatusBarView,
                 mStackScroller,
                 mPanelView,
+                new View(mContext),
                 new View(mContext));
         newController.readFrom(mHeadsUpAppearanceController);
 
