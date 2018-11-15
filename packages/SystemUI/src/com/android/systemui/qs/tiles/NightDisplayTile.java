@@ -21,6 +21,7 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Intent;
+import android.hardware.display.ColorDisplayManager;
 import android.metrics.LogMaker;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
@@ -54,7 +55,6 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
     private static final String PATTERN_HOUR_MINUTE = "h:mm a";
     private static final String PATTERN_HOUR_NINUTE_24 = "HH:mm";
 
-
     private ColorDisplayController mController;
     private boolean mIsListening;
 
@@ -65,7 +65,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
 
     @Override
     public boolean isAvailable() {
-        return ColorDisplayController.isAvailable(mContext);
+        return ColorDisplayManager.isNightDisplayAvailable(mContext);
     }
 
     @Override

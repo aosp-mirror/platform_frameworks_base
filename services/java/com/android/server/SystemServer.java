@@ -35,6 +35,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
+import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.BaseBundle;
 import android.os.Binder;
@@ -62,7 +63,6 @@ import android.util.TimingsTraceLog;
 import android.view.WindowManager;
 
 import com.android.internal.R;
-import com.android.internal.app.ColorDisplayController;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BinderInternal;
@@ -150,6 +150,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
 public final class SystemServer {
+
     private static final String TAG = "SystemServer";
 
     // Tag for timing measurement of main thread.
@@ -263,9 +264,8 @@ public final class SystemServer {
     private static final int sMaxBinderThreads = 31;
 
     /**
-     * Default theme used by the system context. This is used to style
-     * system-provided dialogs, such as the Power Off dialog, and other
-     * visual content.
+     * Default theme used by the system context. This is used to style system-provided dialogs, such
+     * as the Power Off dialog, and other visual content.
      */
     private static final int DEFAULT_SYSTEM_THEME =
             com.android.internal.R.style.Theme_DeviceDefault_System;
@@ -306,8 +306,7 @@ public final class SystemServer {
     private static native void startSensorService();
 
     /**
-     * Start all HIDL services that are run inside the system server. This
-     * may take some time.
+     * Start all HIDL services that are run inside the system server. This may take some time.
      */
     private static native void startHidlServices();
 
@@ -343,7 +342,7 @@ public final class SystemServer {
             //
             // Default the timezone property to GMT if not set.
             //
-            String timezoneProperty =  SystemProperties.get("persist.sys.timezone");
+            String timezoneProperty = SystemProperties.get("persist.sys.timezone");
             if (timezoneProperty == null || timezoneProperty.isEmpty()) {
                 Slog.w(TAG, "Timezone not set; setting to GMT.");
                 SystemProperties.set("persist.sys.timezone", "GMT");
@@ -424,7 +423,7 @@ public final class SystemServer {
 
             // Prepare the main looper thread (this thread).
             android.os.Process.setThreadPriority(
-                android.os.Process.THREAD_PRIORITY_FOREGROUND);
+                    android.os.Process.THREAD_PRIORITY_FOREGROUND);
             android.os.Process.setCanSelfBackground(false);
             Looper.prepareMainLooper();
             Looper.getMainLooper().setSlowLogThresholdMs(
@@ -529,7 +528,7 @@ public final class SystemServer {
                     if (filename != null && filename.startsWith("/data")) {
                         if (!new File(BLOCK_MAP_FILE).exists()) {
                             Slog.e(TAG, "Can't find block map file, uncrypt failed or " +
-                                       "unexpected runtime restart?");
+                                    "unexpected runtime restart?");
                             return;
                         }
                     }
@@ -562,11 +561,10 @@ public final class SystemServer {
     }
 
     /**
-     * Starts the small tangle of critical services that are needed to get
-     * the system off the ground.  These services have complex mutual dependencies
-     * which is why we initialize them all in one place here.  Unless your service
-     * is also entwined in these dependencies, it should be initialized in one of
-     * the other functions.
+     * Starts the small tangle of critical services that are needed to get the system off the
+     * ground.  These services have complex mutual dependencies which is why we initialize them all
+     * in one place here.  Unless your service is also entwined in these dependencies, it should be
+     * initialized in one of the other functions.
      */
     private void startBootstrapServices() {
         Slog.i(TAG, "Reading configuration...");
@@ -783,8 +781,7 @@ public final class SystemServer {
     }
 
     /**
-     * Starts a miscellaneous grab bag of stuff that has yet to be refactored
-     * and organized.
+     * Starts a miscellaneous grab bag of stuff that has yet to be refactored and organized.
      */
     private void startOtherServices() {
         final Context context = mSystemContext;
@@ -795,7 +792,7 @@ public final class SystemServer {
         NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
         ConnectivityService connectivity = null;
-        NsdService serviceDiscovery= null;
+        NsdService serviceDiscovery = null;
         WindowManagerService wm = null;
         SerialService serial = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
@@ -984,7 +981,7 @@ public final class SystemServer {
             } else if (mFactoryTestMode == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
                 Slog.i(TAG, "No Bluetooth Service (factory test)");
             } else if (!context.getPackageManager().hasSystemFeature
-                       (PackageManager.FEATURE_BLUETOOTH)) {
+                    (PackageManager.FEATURE_BLUETOOTH)) {
                 Slog.i(TAG, "No Bluetooth Service (Bluetooth Hardware Not Present)");
             } else {
                 traceBeginAndSlog("StartBluetoothService");
@@ -1098,7 +1095,7 @@ public final class SystemServer {
             try {
                 mSystemServiceManager.startService(LOCK_SETTINGS_SERVICE_CLASS);
                 lockSettings = ILockSettings.Stub.asInterface(
-                    ServiceManager.getService("lock_settings"));
+                        ServiceManager.getService("lock_settings"));
             } catch (Throwable e) {
                 reportWtf("starting LockSettingsService service", e);
             }
@@ -1167,7 +1164,8 @@ public final class SystemServer {
 
             if (!disableSystemTextClassifier) {
                 traceBeginAndSlog("StartTextClassificationManagerService");
-                mSystemServiceManager.startService(TextClassificationManagerService.Lifecycle.class);
+                mSystemServiceManager
+                        .startService(TextClassificationManagerService.Lifecycle.class);
                 traceEnd();
             }
 
@@ -1196,41 +1194,41 @@ public final class SystemServer {
 
             if (!mOnlyCore) {
                 if (context.getPackageManager().hasSystemFeature(
-                            PackageManager.FEATURE_WIFI)) {
+                        PackageManager.FEATURE_WIFI)) {
                     // Wifi Service must be started first for wifi-related services.
                     traceBeginAndSlog("StartWifi");
                     mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
                     traceEnd();
                     traceBeginAndSlog("StartWifiScanning");
                     mSystemServiceManager.startService(
-                        "com.android.server.wifi.scanner.WifiScanningService");
+                            "com.android.server.wifi.scanner.WifiScanningService");
                     traceEnd();
                 }
 
                 if (context.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_WIFI_RTT)) {
+                        PackageManager.FEATURE_WIFI_RTT)) {
                     traceBeginAndSlog("StartRttService");
                     mSystemServiceManager.startService(
-                        "com.android.server.wifi.rtt.RttService");
+                            "com.android.server.wifi.rtt.RttService");
                     traceEnd();
                 }
 
                 if (context.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_WIFI_AWARE)) {
+                        PackageManager.FEATURE_WIFI_AWARE)) {
                     traceBeginAndSlog("StartWifiAware");
                     mSystemServiceManager.startService(WIFI_AWARE_SERVICE_CLASS);
                     traceEnd();
                 }
 
                 if (context.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_WIFI_DIRECT)) {
+                        PackageManager.FEATURE_WIFI_DIRECT)) {
                     traceBeginAndSlog("StartWifiP2P");
                     mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
                     traceEnd();
                 }
 
                 if (context.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_LOWPAN)) {
+                        PackageManager.FEATURE_LOWPAN)) {
                     traceBeginAndSlog("StartLowpan");
                     mSystemServiceManager.startService(LOWPAN_SERVICE_CLASS);
                     traceEnd();
@@ -1238,7 +1236,7 @@ public final class SystemServer {
             }
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_ETHERNET) ||
-                mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)) {
+                    mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)) {
                 traceBeginAndSlog("StartEthernet");
                 mSystemServiceManager.startService(ETHERNET_SERVICE_CLASS);
                 traceEnd();
@@ -1247,10 +1245,10 @@ public final class SystemServer {
             traceBeginAndSlog("StartConnectivityService");
             try {
                 connectivity = new ConnectivityService(
-                    context, networkManagement, networkStats, networkPolicy);
+                        context, networkManagement, networkStats, networkPolicy);
                 ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity,
-                            /* allowIsolated= */ false,
-                    DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
+                        /* allowIsolated= */ false,
+                        DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
                 networkStats.bindConnectivityManager(connectivity);
                 networkPolicy.bindConnectivityManager(connectivity);
             } catch (Throwable e) {
@@ -1262,7 +1260,7 @@ public final class SystemServer {
             try {
                 serviceDiscovery = NsdService.create(context);
                 ServiceManager.addService(
-                    Context.NSD_SERVICE, serviceDiscovery);
+                        Context.NSD_SERVICE, serviceDiscovery);
             } catch (Throwable e) {
                 reportWtf("starting Service Discovery Service", e);
             }
@@ -1280,7 +1278,7 @@ public final class SystemServer {
             traceBeginAndSlog("StartUpdateLockService");
             try {
                 ServiceManager.addService(Context.UPDATE_LOCK_SERVICE,
-                    new UpdateLockService(context));
+                        new UpdateLockService(context));
             } catch (Throwable e) {
                 reportWtf("starting UpdateLockService", e);
             }
@@ -1398,9 +1396,9 @@ public final class SystemServer {
             }
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)
-                || mPackageManager.hasSystemFeature(
-                PackageManager.FEATURE_USB_ACCESSORY)
-                || isEmulator) {
+                    || mPackageManager.hasSystemFeature(
+                    PackageManager.FEATURE_USB_ACCESSORY)
+                    || isEmulator) {
                 // Manage USB host and device support
                 traceBeginAndSlog("StartUsbService");
                 mSystemServiceManager.startService(USB_SERVICE_CLASS);
@@ -1432,7 +1430,7 @@ public final class SystemServer {
             try {
                 hardwarePropertiesService = new HardwarePropertiesManagerService(context);
                 ServiceManager.addService(Context.HARDWARE_PROPERTIES_SERVICE,
-                    hardwarePropertiesService);
+                        hardwarePropertiesService);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting HardwarePropertiesManagerService", e);
             }
@@ -1442,8 +1440,8 @@ public final class SystemServer {
             mSystemServiceManager.startService(TwilightService.class);
             traceEnd();
 
-            if (ColorDisplayController.isAvailable(context)) {
-                traceBeginAndSlog("StartNightDisplay");
+            if (ColorDisplayManager.isNightDisplayAvailable(context)) {
+                traceBeginAndSlog("StartColorDisplay");
                 mSystemServiceManager.startService(ColorDisplayService.class);
                 traceEnd();
             }
@@ -1467,7 +1465,7 @@ public final class SystemServer {
             }
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_APP_WIDGETS)
-                || context.getResources().getBoolean(R.bool.config_enableAppWidgetService)) {
+                    || context.getResources().getBoolean(R.bool.config_enableAppWidgetService)) {
                 traceBeginAndSlog("StartAppWidgetService");
                 mSystemServiceManager.startService(APPWIDGET_SERVICE_CLASS);
                 traceEnd();
@@ -1553,7 +1551,7 @@ public final class SystemServer {
 
             traceBeginAndSlog("AddGraphicsStatsService");
             ServiceManager.addService(GraphicsStatsService.GRAPHICS_STATS_SERVICE,
-                new GraphicsStatsService(context));
+                    new GraphicsStatsService(context));
             traceEnd();
 
             if (CoverageService.ENABLED) {
@@ -1825,7 +1823,7 @@ public final class SystemServer {
         // propagate to it.
         final Configuration config = wm.computeNewConfiguration(DEFAULT_DISPLAY);
         DisplayMetrics metrics = new DisplayMetrics();
-        WindowManager w = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+        WindowManager w = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         w.getDefaultDisplay().getMetrics(metrics);
         context.getResources().updateConfiguration(config, metrics);
 
@@ -1949,7 +1947,9 @@ public final class SystemServer {
             traceEnd();
             traceBeginAndSlog("MakeNetworkManagementServiceReady");
             try {
-                if (networkManagementF != null) networkManagementF.systemReady();
+                if (networkManagementF != null) {
+                    networkManagementF.systemReady();
+                }
             } catch (Throwable e) {
                 reportWtf("making Network Managment Service ready", e);
             }
@@ -1961,21 +1961,27 @@ public final class SystemServer {
             traceEnd();
             traceBeginAndSlog("MakeIpSecServiceReady");
             try {
-                if (ipSecServiceF != null) ipSecServiceF.systemReady();
+                if (ipSecServiceF != null) {
+                    ipSecServiceF.systemReady();
+                }
             } catch (Throwable e) {
                 reportWtf("making IpSec Service ready", e);
             }
             traceEnd();
             traceBeginAndSlog("MakeNetworkStatsServiceReady");
             try {
-                if (networkStatsF != null) networkStatsF.systemReady();
+                if (networkStatsF != null) {
+                    networkStatsF.systemReady();
+                }
             } catch (Throwable e) {
                 reportWtf("making Network Stats Service ready", e);
             }
             traceEnd();
             traceBeginAndSlog("MakeConnectivityServiceReady");
             try {
-                if (connectivityF != null) connectivityF.systemReady();
+                if (connectivityF != null) {
+                    connectivityF.systemReady();
+                }
             } catch (Throwable e) {
                 reportWtf("making Connectivity Service ready", e);
             }
@@ -2010,21 +2016,27 @@ public final class SystemServer {
 
             traceBeginAndSlog("MakeLocationServiceReady");
             try {
-                if (locationF != null) locationF.systemRunning();
+                if (locationF != null) {
+                    locationF.systemRunning();
+                }
             } catch (Throwable e) {
                 reportWtf("Notifying Location Service running", e);
             }
             traceEnd();
             traceBeginAndSlog("MakeCountryDetectionServiceReady");
             try {
-                if (countryDetectorF != null) countryDetectorF.systemRunning();
+                if (countryDetectorF != null) {
+                    countryDetectorF.systemRunning();
+                }
             } catch (Throwable e) {
                 reportWtf("Notifying CountryDetectorService running", e);
             }
             traceEnd();
             traceBeginAndSlog("MakeNetworkTimeUpdateReady");
             try {
-                if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemRunning();
+                if (networkTimeUpdaterF != null) {
+                    networkTimeUpdaterF.systemRunning();
+                }
             } catch (Throwable e) {
                 reportWtf("Notifying NetworkTimeService running", e);
             }
@@ -2032,28 +2044,36 @@ public final class SystemServer {
             traceBeginAndSlog("MakeInputManagerServiceReady");
             try {
                 // TODO(BT) Pass parameter to input manager
-                if (inputManagerF != null) inputManagerF.systemRunning();
+                if (inputManagerF != null) {
+                    inputManagerF.systemRunning();
+                }
             } catch (Throwable e) {
                 reportWtf("Notifying InputManagerService running", e);
             }
             traceEnd();
             traceBeginAndSlog("MakeTelephonyRegistryReady");
             try {
-                if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
+                if (telephonyRegistryF != null) {
+                    telephonyRegistryF.systemRunning();
+                }
             } catch (Throwable e) {
                 reportWtf("Notifying TelephonyRegistry running", e);
             }
             traceEnd();
             traceBeginAndSlog("MakeMediaRouterServiceReady");
             try {
-                if (mediaRouterF != null) mediaRouterF.systemRunning();
+                if (mediaRouterF != null) {
+                    mediaRouterF.systemRunning();
+                }
             } catch (Throwable e) {
                 reportWtf("Notifying MediaRouterService running", e);
             }
             traceEnd();
             traceBeginAndSlog("MakeMmsServiceReady");
             try {
-                if (mmsServiceF != null) mmsServiceF.systemRunning();
+                if (mmsServiceF != null) {
+                    mmsServiceF.systemRunning();
+                }
             } catch (Throwable e) {
                 reportWtf("Notifying MmsService running", e);
             }
@@ -2065,7 +2085,9 @@ public final class SystemServer {
                 // in the build and should reliably be there.
                 final IIncidentManager incident = IIncidentManager.Stub.asInterface(
                         ServiceManager.getService(Context.INCIDENT_SERVICE));
-                if (incident != null) incident.systemRunning();
+                if (incident != null) {
+                    incident.systemRunning();
+                }
             } catch (Throwable e) {
                 reportWtf("Notifying incident daemon running", e);
             }
@@ -2076,7 +2098,7 @@ public final class SystemServer {
     static final void startSystemUi(Context context, WindowManagerService windowManager) {
         Intent intent = new Intent();
         intent.setComponent(new ComponentName("com.android.systemui",
-                    "com.android.systemui.SystemUIService"));
+                "com.android.systemui.SystemUIService"));
         intent.addFlags(Intent.FLAG_DEBUG_TRIAGED_MISSING);
         //Slog.d(TAG, "Starting service: " + intent);
         context.startServiceAsUser(intent, UserHandle.SYSTEM);

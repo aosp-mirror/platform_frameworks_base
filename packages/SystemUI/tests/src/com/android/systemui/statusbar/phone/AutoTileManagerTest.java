@@ -19,22 +19,22 @@ package com.android.systemui.statusbar.phone;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import android.hardware.display.ColorDisplayManager;
 import android.os.Handler;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+
 import com.android.internal.app.ColorDisplayController;
-import com.android.systemui.Dependency;
-import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
@@ -56,7 +56,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
     @Test
     public void nightTileAdded_whenActivated() {
-        if (!ColorDisplayController.isAvailable(mContext)) {
+        if (!ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             return;
         }
         mAutoTileManager.mColorDisplayCallback.onActivated(true);
@@ -65,7 +65,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
     @Test
     public void nightTileNotAdded_whenDeactivated() {
-        if (!ColorDisplayController.isAvailable(mContext)) {
+        if (!ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             return;
         }
         mAutoTileManager.mColorDisplayCallback.onActivated(false);
@@ -74,7 +74,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
     @Test
     public void nightTileAdded_whenNightModeTwilight() {
-        if (!ColorDisplayController.isAvailable(mContext)) {
+        if (!ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             return;
         }
         mAutoTileManager.mColorDisplayCallback.onAutoModeChanged(
@@ -84,7 +84,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
     @Test
     public void nightTileAdded_whenNightModeCustom() {
-        if (!ColorDisplayController.isAvailable(mContext)) {
+        if (!ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             return;
         }
         mAutoTileManager.mColorDisplayCallback.onAutoModeChanged(
@@ -94,7 +94,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
     @Test
     public void nightTileNotAdded_whenNightModeDisabled() {
-        if (!ColorDisplayController.isAvailable(mContext)) {
+        if (!ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             return;
         }
         mAutoTileManager.mColorDisplayCallback.onAutoModeChanged(
