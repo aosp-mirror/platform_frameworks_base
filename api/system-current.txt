@@ -3325,6 +3325,11 @@ package android.net {
     field public static final int ERROR_INVALID_NETWORK = 1; // 0x1
   }
 
+  public class LinkAddress implements android.os.Parcelable {
+    ctor public LinkAddress(java.net.InetAddress, int);
+    ctor public LinkAddress(java.lang.String);
+  }
+
   public final class NetworkCapabilities implements android.os.Parcelable {
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
   }
@@ -3684,7 +3689,8 @@ package android.net.wifi {
   }
 
   public static abstract interface WifiManager.NetworkRequestMatchCallback {
-    method public abstract void onMatch(java.util.List<android.net.wifi.WifiConfiguration>);
+    method public abstract void onAbort();
+    method public abstract void onMatch(java.util.List<android.net.wifi.ScanResult>);
     method public abstract void onUserSelectionCallbackRegistration(android.net.wifi.WifiManager.NetworkRequestUserSelectionCallback);
     method public abstract void onUserSelectionConnectFailure(android.net.wifi.WifiConfiguration);
     method public abstract void onUserSelectionConnectSuccess(android.net.wifi.WifiConfiguration);
@@ -4641,6 +4647,7 @@ package android.rolecontrollerservice {
     method public abstract void onAddRoleHolder(java.lang.String, java.lang.String, android.app.role.RoleManagerCallback);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void onClearRoleHolders(java.lang.String, android.app.role.RoleManagerCallback);
+    method public abstract void onGrantDefaultRoles(android.app.role.RoleManagerCallback);
     method public abstract void onRemoveRoleHolder(java.lang.String, java.lang.String, android.app.role.RoleManagerCallback);
     field public static final java.lang.String SERVICE_INTERFACE = "android.rolecontrollerservice.RoleControllerService";
   }
@@ -4795,8 +4802,8 @@ package android.service.carrier {
 
   public abstract class ApnService extends android.app.Service {
     ctor public ApnService();
-    method public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
     method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
   }
 
 }
