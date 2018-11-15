@@ -746,7 +746,7 @@
         android:description="@string/permdesc_receiveMms"
         android:protectionLevel="dangerous" />
 
-    <!-- @TestApi Allows an application to read previously received cell broadcast
+    <!-- @SystemApi @TestApi Allows an application to read previously received cell broadcast
          messages and to register a content observer to get notifications when
          a cell broadcast has been received and added to the database. For
          emergency alerts, the database is updated immediately after the
