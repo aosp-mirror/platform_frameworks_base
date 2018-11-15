@@ -50,6 +50,14 @@ public class DexBuilderTest {
   }
 
   @Test
+  public void returnInteger5() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("returnInteger5");
+    Assert.assertEquals(5, method.invoke(null));
+  }
+
+  @Test
   public void returnParam() throws Exception {
     ClassLoader loader = loadDexFile("simple.dex");
     Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
