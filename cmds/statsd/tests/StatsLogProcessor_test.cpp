@@ -153,7 +153,8 @@ TEST(StatsLogProcessorTest, TestUidMapHasSnapshot) {
     // Setup simple config key corresponding to empty config.
     sp<UidMap> m = new UidMap();
     sp<StatsPullerManager> pullerManager = new StatsPullerManager();
-    m->updateMap(1, {1, 2}, {1, 2}, {String16("p1"), String16("p2")});
+    m->updateMap(1, {1, 2}, {1, 2}, {String16("v1"), String16("v2")},
+                 {String16("p1"), String16("p2")}, {String16(""), String16("")});
     sp<AlarmMonitor> anomalyAlarmMonitor;
     sp<AlarmMonitor> subscriberAlarmMonitor;
     int broadcastCount = 0;
@@ -182,7 +183,8 @@ TEST(StatsLogProcessorTest, TestEmptyConfigHasNoUidMap) {
     // Setup simple config key corresponding to empty config.
     sp<UidMap> m = new UidMap();
     sp<StatsPullerManager> pullerManager = new StatsPullerManager();
-    m->updateMap(1, {1, 2}, {1, 2}, {String16("p1"), String16("p2")});
+    m->updateMap(1, {1, 2}, {1, 2}, {String16("v1"), String16("v2")},
+                 {String16("p1"), String16("p2")}, {String16(""), String16("")});
     sp<AlarmMonitor> anomalyAlarmMonitor;
     sp<AlarmMonitor> subscriberAlarmMonitor;
     int broadcastCount = 0;

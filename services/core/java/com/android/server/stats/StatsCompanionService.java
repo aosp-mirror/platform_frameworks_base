@@ -366,6 +366,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         List<Integer> uids = new ArrayList<>();
         List<Long> versions = new ArrayList<>();
         List<String> apps = new ArrayList<>();
+        List<String> versionStrings = new ArrayList<>();
+        List<String> installers = new ArrayList<>();
 
         // Add in all the apps for every user/profile.
         for (UserInfo profile : users) {
@@ -373,14 +375,24 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     pm.getInstalledPackagesAsUser(PackageManager.MATCH_KNOWN_PACKAGES, profile.id);
             for (int j = 0; j < pi.size(); j++) {
                 if (pi.get(j).applicationInfo != null) {
+                    String installer;
+                    try {
+                        installer = pm.getInstallerPackageName(pi.get(j).packageName);
+                    } catch (IllegalArgumentException e) {
+                        installer = "";
+                    }
+                    installers.add(installer == null ? "" : installer);
                     uids.add(pi.get(j).applicationInfo.uid);
                     versions.add(pi.get(j).getLongVersionCode());
+                    versionStrings.add(pi.get(j).versionName);
                     apps.add(pi.get(j).packageName);
                 }
             }
         }
-        sStatsd.informAllUidData(toIntArray(uids), toLongArray(versions), apps.toArray(new
-                String[apps.size()]));
+        sStatsd.informAllUidData(toIntArray(uids), toLongArray(versions),
+                versionStrings.toArray(new String[versionStrings.size()]),
+                apps.toArray(new String[apps.size()]),
+                installers.toArray(new String[installers.size()]));
         if (DEBUG) {
             Slog.d(TAG, "Sent data for " + uids.size() + " apps");
         }
@@ -422,7 +434,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         int uid = b.getInt(Intent.EXTRA_UID);
                         String app = intent.getData().getSchemeSpecificPart();
                         PackageInfo pi = pm.getPackageInfo(app, PackageManager.MATCH_ANY_USER);
-                        sStatsd.informOnePackage(app, uid, pi.getLongVersionCode());
+                        String installer;
+                        try {
+                            installer = pm.getInstallerPackageName(app);
+                        } catch (IllegalArgumentException e) {
+                            installer = "";
+                        }
+                        sStatsd.informOnePackage(app, uid, pi.getLongVersionCode(), pi.versionName,
+                                installer == null ? "" : installer);
                     }
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to inform statsd of an app update", e);

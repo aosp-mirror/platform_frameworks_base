@@ -233,6 +233,14 @@ message UidMapping {
             optional bool deleted = 4;
 
             optional uint64 name_hash = 5;
+
+            optional string version_string = 6;
+
+            optional uint64 version_string_hash = 7;
+
+            optional string installer = 8;
+
+            optional uint64 installer_hash = 9;
         }
         optional int64 elapsed_timestamp_nanos = 1;
 
@@ -250,6 +258,10 @@ message UidMapping {
         optional int64 new_version = 5;
         optional int64 prev_version = 6;
         optional uint64 app_hash = 7;
+        optional string new_version_string = 8;
+        optional string prev_version_string = 9;
+        optional uint64 new_version_string_hash = 10;
+        optional uint64 prev_version_string_hash = 11;
     }
     repeated Change changes = 2;
 }

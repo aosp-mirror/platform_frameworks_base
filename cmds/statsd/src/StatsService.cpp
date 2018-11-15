@@ -787,21 +787,24 @@ status_t StatsService::cmd_print_logs(int out, const Vector<String8>& args) {
 }
 
 Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<int64_t>& version,
-                                      const vector<String16>& app) {
+                                      const vector<String16>& version_string,
+                                      const vector<String16>& app,
+                                      const vector<String16>& installer) {
     ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::informAllUidData was called");
-    mUidMap->updateMap(getElapsedRealtimeNs(), uid, version, app);
+    mUidMap->updateMap(getElapsedRealtimeNs(), uid, version, version_string, app, installer);
     VLOG("StatsService::informAllUidData succeeded");
 
     return Status::ok();
 }
 
-Status StatsService::informOnePackage(const String16& app, int32_t uid, int64_t version) {
+Status StatsService::informOnePackage(const String16& app, int32_t uid, int64_t version,
+                                      const String16& version_string, const String16& installer) {
     ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::informOnePackage was called");
-    mUidMap->updateApp(getElapsedRealtimeNs(), app, uid, version);
+    mUidMap->updateApp(getElapsedRealtimeNs(), app, uid, version, version_string, installer);
     return Status::ok();
 }
 
