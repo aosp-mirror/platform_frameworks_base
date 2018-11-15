@@ -844,6 +844,8 @@ message MetricsEvent {
     //   PACKAGE: App that posted the notification
     // DETAIL: Notification is expanded by user.
     //   PACKAGE: App that posted the notification
+    // COLLAPSE: Notification is collapsed by user.
+    //   PACKAGE: App that posted the notification
     // DISMISS: Notification is dismissed.
     //   PACKAGE: App that posted the notification
     //   SUBTYPE: Dismiss reason from NotificationManagerService.java
@@ -6595,6 +6597,12 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: Q
     NOTIFICATION_ZEN_MODE_OVERRIDING_APP = 1589;
+
+    // ACTION: User sent a direct reply
+    //    PACKAGE: App that posted the notification
+    // CATEGORY: NOTIFICATION
+    // OS: Q
+    NOTIFICATION_DIRECT_REPLY_ACTION = 1590;
 
     // ---- End Q Constants, all Q constants go above this line ----
 
