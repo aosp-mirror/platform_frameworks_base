@@ -37,6 +37,7 @@ cc_library_shared {
             ldflags: ["-Wl,--hash-style=both"],
         },
     },
+    version_script: "libjnigraphics.map.txt",
 }
 
 // The headers module is in frameworks/native/Android.bp.
