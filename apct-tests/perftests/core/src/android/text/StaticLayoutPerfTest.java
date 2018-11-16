@@ -169,6 +169,25 @@ public class StaticLayoutPerfTest {
     }
 
     @Test
+    public void testCreate_PrecomputedText_NoStyled_Greedy_NoHyphenation_DirDifferent() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final PrecomputedText text = makeMeasured(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT,
+                    Layout.BREAK_STRATEGY_SIMPLE, Layout.HYPHENATION_FREQUENCY_NONE);
+            Canvas.freeTextLayoutCaches();
+            state.resumeTiming();
+
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                    .setTextDirection(TextDirectionHeuristics.RTL)
+                    .build();
+        }
+    }
+
+    @Test
     public void testCreate_PrecomputedText_NoStyled_Greedy_Hyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
