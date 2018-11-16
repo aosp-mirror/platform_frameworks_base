@@ -252,7 +252,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             final String titleText;
             Resources res = mContext.getResources();
             if (mCurrentDrag == null) {
-                titleText = res.getString(R.string.drag_to_add_tiles);
+                titleText = res.getString(R.string.drag_or_tap_to_add_tiles);
             } else if (!canRemoveTiles() && mCurrentDrag.getAdapterPosition() < mEditIndex) {
                 titleText = res.getString(R.string.drag_to_remove_disabled, mMinNumTiles);
             } else {

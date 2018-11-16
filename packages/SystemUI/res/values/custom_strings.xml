@@ -104,4 +104,7 @@
     <string name="vpn_credentials_password">Password</string>
     <string name="vpn_credentials_dialog_connect">Connect</string>
 
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">Drag or tap to add/remove tiles</string>
+
 </resources>
