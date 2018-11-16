@@ -3278,17 +3278,17 @@ message CpuTimePerThreadFreq {
     // UID that owns the process.
     optional int32 uid = 1 [(is_uid) = true];
     // ID of the process.
-    optional uint32 process_id = 2;
+    optional int32 process_id = 2;
     // ID of the thread.
-    optional uint32 thread_id = 3;
+    optional int32 thread_id = 3;
     // Name of the process taken from `/proc/$PID/cmdline`.
     optional string process_name = 4;
     // Name of the thread taken from `/proc/$PID/task/$TID/comm`
     optional string thread_name = 5;
     // What frequency the CPU was running at, in KHz
-    optional uint32 frequency_khz = 6;
+    optional int32 frequency_khz = 6;
     // Time spent in frequency in milliseconds, since thread start.
-    optional uint32 time_millis = 7;
+    optional int32 time_millis = 7;
 }
 
 /**
