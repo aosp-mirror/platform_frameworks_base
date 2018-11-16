@@ -18,10 +18,10 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
-import android.graphics.drawable.Drawable
+import android.content.Intent
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -34,29 +34,25 @@ class OngoingPrivacyDialog constructor(
     val dialogBuilder: PrivacyDialogBuilder
 ) {
 
-    val iconHeight = context.resources.getDimensionPixelSize(
+    val iconSize = context.resources.getDimensionPixelSize(
             R.dimen.ongoing_appops_dialog_icon_height)
-    val textMargin = context.resources.getDimensionPixelSize(
-            R.dimen.ongoing_appops_dialog_text_margin)
     val iconColor = context.resources.getColor(
             com.android.internal.R.color.text_color_primary, context.theme)
+    companion object {
+        private const val MAX_ITEMS = 10
+    }
 
     fun createDialog(): Dialog {
-        val builder = AlertDialog.Builder(context)
-                .setNeutralButton(R.string.ongoing_privacy_dialog_open_settings, null)
-        if (dialogBuilder.app != null) {
-            builder.setPositiveButton(R.string.ongoing_privacy_dialog_open_app,
+        val builder = AlertDialog.Builder(context).apply {
+            setNegativeButton(R.string.ongoing_privacy_dialog_cancel, null)
+            setPositiveButton(R.string.ongoing_privacy_dialog_open_settings,
                     object : DialogInterface.OnClickListener {
-                        val intent = context.packageManager
-                                .getLaunchIntentForPackage(dialogBuilder.app.packageName)
+                        val intent = Intent(Intent.ACTION_REVIEW_PERMISSION_USAGE)
 
                         override fun onClick(dialog: DialogInterface?, which: Int) {
                             Dependency.get(ActivityStarter::class.java).startActivity(intent, false)
                         }
                     })
-            builder.setNegativeButton(R.string.ongoing_privacy_dialog_cancel, null)
-        } else {
-            builder.setPositiveButton(R.string.ongoing_privacy_dialog_okay, null)
         }
         builder.setView(getContentView())
         return builder.create()
@@ -66,44 +62,67 @@ class OngoingPrivacyDialog constructor(
         val layoutInflater = LayoutInflater.from(context)
         val contentView = layoutInflater.inflate(R.layout.ongoing_privacy_dialog_content, null)
 
-        val iconsContainer = contentView.findViewById(R.id.icons_container) as LinearLayout
-        val textContainer = contentView.findViewById(R.id.text_container) as LinearLayout
+        val title = contentView.findViewById(R.id.title) as TextView
+        val appsList = contentView.findViewById(R.id.items_container) as LinearLayout
 
-        addIcons(dialogBuilder, iconsContainer)
-        val lm = ViewGroup.MarginLayoutParams(
-                ViewGroup.MarginLayoutParams.WRAP_CONTENT,
-                ViewGroup.MarginLayoutParams.WRAP_CONTENT)
-        lm.topMargin = textMargin
-        val now = System.currentTimeMillis()
-        dialogBuilder.generateText(now).forEach {
-            val text = layoutInflater.inflate(R.layout.ongoing_privacy_text_item, null) as TextView
-            text.setText(it)
-            textContainer.addView(text, lm)
+        title.setText(dialogBuilder.getDialogTitle())
+
+        val numItems = dialogBuilder.appsAndTypes.size
+        for (i in 0..(numItems - 1)) {
+            if (i >= MAX_ITEMS) break
+            val item = dialogBuilder.appsAndTypes[i]
+            addAppItem(appsList, item.first, item.second, dialogBuilder.types.size > 1)
         }
+
+        if (numItems > MAX_ITEMS) {
+            val overflow = contentView.findViewById(R.id.overflow) as LinearLayout
+            overflow.visibility = View.VISIBLE
+            val overflowText = overflow.findViewById(R.id.app_name) as TextView
+            overflowText.text = context.resources.getQuantityString(
+                    R.plurals.ongoing_privacy_dialog_overflow_text,
+                    numItems - MAX_ITEMS,
+                    numItems - MAX_ITEMS
+            )
+            val overflowPlus = overflow.findViewById(R.id.app_icon) as ImageView
+            overflowPlus.apply {
+                imageTintList = ColorStateList.valueOf(iconColor)
+                setImageDrawable(context.getDrawable(R.drawable.plus))
+            }
+        }
+
         return contentView
     }
 
-    private fun addIcons(dialogBuilder: PrivacyDialogBuilder, iconsContainer: LinearLayout) {
+    private fun addAppItem(
+        itemList: LinearLayout,
+        app: PrivacyApplication,
+        types: List<PrivacyType>,
+        showIcons: Boolean = true
+    ) {
+        val layoutInflater = LayoutInflater.from(context)
+        val item = layoutInflater.inflate(R.layout.ongoing_privacy_dialog_item, itemList, false)
+        val appIcon = item.findViewById(R.id.app_icon) as ImageView
+        val appName = item.findViewById(R.id.app_name) as TextView
+        val icons = item.findViewById(R.id.icons) as LinearLayout
 
-        fun LinearLayout.addIcon(icon: Drawable) {
-            val image = ImageView(context).apply {
-                setImageDrawable(icon.apply {
-                    setBounds(0, 0, iconHeight, iconHeight)
-                    maxHeight = this@addIcon.height
-                })
-                adjustViewBounds = true
+        app.icon?.let {
+            appIcon.setImageDrawable(it)
+        }
+
+        appName.text = app.applicationName
+        if (showIcons) {
+            dialogBuilder.generateIconsForApp(types).forEach {
+                it.setBounds(0, 0, iconSize, iconSize)
+                val image = ImageView(context).apply {
+                    imageTintList = ColorStateList.valueOf(iconColor)
+                    setImageDrawable(it)
+                }
+                icons.addView(image, iconSize, LinearLayout.LayoutParams.WRAP_CONTENT)
             }
-            addView(image, LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT)
+            icons.visibility = View.VISIBLE
+        } else {
+            icons.visibility = View.GONE
         }
-
-        dialogBuilder.generateIcons().forEach {
-            it.mutate()
-            it.setTint(iconColor)
-            iconsContainer.addIcon(it)
-        }
-        dialogBuilder.app.let {
-            it?.icon?.let { iconsContainer.addIcon(it) }
-        }
+        itemList.addView(item)
     }
 }

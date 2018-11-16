@@ -325,14 +325,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                 newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
         mBatteryMeterView.useWallpaperTextColor(shouldUseWallpaperTextColor);
         mClockView.useWallpaperTextColor(shouldUseWallpaperTextColor);
-
-        MarginLayoutParams lm = (MarginLayoutParams) mPrivacyChip.getLayoutParams();
-        int sideMargins = lm.leftMargin;
-        int topBottomMargins = (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
-                ? 0 : sideMargins;
-        lm.setMargins(sideMargins, topBottomMargins, sideMargins, topBottomMargins);
-        mPrivacyChip.setLayoutParams(lm);
     }
+
+
 
     @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
@@ -377,6 +372,15 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         }
 
         setLayoutParams(lp);
+
+        if (mPrivacyChip != null) {
+            MarginLayoutParams lm = (MarginLayoutParams) mPrivacyChip.getLayoutParams();
+            int sideMargins = lm.leftMargin;
+            int topBottomMargins = resources.getDimensionPixelSize(
+                    R.dimen.ongoing_appops_top_chip_margin);
+            lm.setMargins(sideMargins, topBottomMargins, sideMargins, topBottomMargins);
+            mPrivacyChip.setLayoutParams(lm);
+        }
 
         updateStatusIconAlphaAnimator();
         updateHeaderTextContainerAlphaAnimator();
@@ -729,7 +733,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     public void setMargins(int sideMargins) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getChildAt(i);
-            if (v == mSystemIconsView || v == mQuickQsStatusIcons || v == mHeaderQsPanel) {
+            if (v == mSystemIconsView || v == mQuickQsStatusIcons || v == mHeaderQsPanel
+                    || v == mPrivacyChip) {
                 continue;
             }
             RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) v.getLayoutParams();

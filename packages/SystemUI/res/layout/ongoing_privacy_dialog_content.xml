@@ -29,22 +29,30 @@
         android:orientation="vertical"
         android:padding="@dimen/ongoing_appops_dialog_content_padding">
 
-        <LinearLayout
-            android:id="@+id/icons_container"
+        <TextView
+            android:id="@+id/title"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/ongoing_appops_dialog_icon_height"
-            android:orientation="horizontal"
+            android:layout_height="wrap_content"
             android:gravity="center"
-            android:importantForAccessibility="no"
+            android:textDirection="locale"
+            android:textAppearance="@style/TextAppearance.AppOpsDialog.Title"
+            android:textColor="@*android:color/text_color_primary"
+            android:paddingStart="@dimen/ongoing_appops_dialog_title_padding"
+            android:paddingEnd="@dimen/ongoing_appops_dialog_title_padding"
+            android:paddingBottom="@dimen/ongoing_appops_dialog_sep"
         />
 
         <LinearLayout
-            android:id="@+id/text_container"
+            android:id="@+id/items_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="start"
         />
+
+        <include android:id="@+id/overflow" layout="@layout/ongoing_privacy_dialog_item"
+                 android:visibility="gone" />
+
     </LinearLayout>
 
 </ScrollView>
