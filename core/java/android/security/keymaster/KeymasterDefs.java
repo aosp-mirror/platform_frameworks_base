@@ -154,7 +154,7 @@ public final class KeymasterDefs {
 
     // User authenticators.
     public static final int HW_AUTH_PASSWORD = 1 << 0;
-    public static final int HW_AUTH_FINGERPRINT = 1 << 1;
+    public static final int HW_AUTH_BIOMETRIC = 1 << 1;
 
     // Error codes.
     public static final int KM_ERROR_OK = 0;

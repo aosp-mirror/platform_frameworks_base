@@ -23,6 +23,7 @@ import android.app.Application;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -1254,10 +1255,18 @@ public class KeyStore {
                     return new UserNotAuthenticatedException();
                 }
 
-                long fingerprintOnlySid = getFingerprintOnlySid();
+                final long fingerprintOnlySid = getFingerprintOnlySid();
                 if ((fingerprintOnlySid != 0)
                         && (keySids.contains(KeymasterArguments.toUint64(fingerprintOnlySid)))) {
                     // One of the key's SIDs is the current fingerprint SID -- user can be
+                    // authenticated against that SID.
+                    return new UserNotAuthenticatedException();
+                }
+
+                final long faceOnlySid = getFaceOnlySid();
+                if ((faceOnlySid != 0)
+                        && (keySids.contains(KeymasterArguments.toUint64(faceOnlySid)))) {
+                    // One of the key's SIDs is the current face SID -- user can be
                     // authenticated against that SID.
                     return new UserNotAuthenticatedException();
                 }
@@ -1270,6 +1279,21 @@ public class KeyStore {
             default:
                 return new InvalidKeyException("Keystore operation failed", e);
         }
+    }
+
+    private long getFaceOnlySid() {
+        final PackageManager packageManager = mContext.getPackageManager();
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            return 0;
+        }
+        FaceManager faceManager = mContext.getSystemService(FaceManager.class);
+        if (faceManager == null) {
+            return 0;
+        }
+
+        // TODO: Restore USE_BIOMETRIC or USE_BIOMETRIC_INTERNAL permission check in
+        // FaceManager.getAuthenticatorId once the ID is no longer needed here.
+        return faceManager.getAuthenticatorId();
     }
 
     private long getFingerprintOnlySid() {
