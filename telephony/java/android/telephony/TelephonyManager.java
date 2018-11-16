@@ -6349,7 +6349,6 @@ public class TelephonyManager {
 
     /**
      * Set the preferred network type.
-     * Used for device configuration by some CDMA operators.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
