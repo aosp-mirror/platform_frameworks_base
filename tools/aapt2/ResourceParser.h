@@ -96,10 +96,6 @@ class ResourceParser {
   bool ParseSymbolImpl(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseSymbol(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseOverlayable(xml::XmlPullParser* parser, ParsedResource* out_resource);
-  bool ParseOverlayableItem(xml::XmlPullParser* parser,
-                            const std::vector<Overlayable::Policy>& policies,
-                            const std::string& comment,
-                            ParsedResource* out_resource);
   bool ParseAddResource(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseAttr(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseAttrImpl(xml::XmlPullParser* parser, ParsedResource* out_resource, bool weak);

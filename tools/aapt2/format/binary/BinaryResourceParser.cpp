@@ -441,25 +441,25 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
       const ResTable_overlayable_policy_header* policy_header =
           ConvertTo<ResTable_overlayable_policy_header>(parser.chunk());
 
-      std::vector<Overlayable::Policy> policies;
+      Overlayable::PolicyFlags policies = Overlayable::Policy::kNone;
       if (policy_header->policy_flags & ResTable_overlayable_policy_header::POLICY_PUBLIC) {
-        policies.push_back(Overlayable::Policy::kPublic);
+        policies |= Overlayable::Policy::kPublic;
       }
       if (policy_header->policy_flags
           & ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION) {
-        policies.push_back(Overlayable::Policy::kSystem);
+        policies |= Overlayable::Policy::kSystem;
       }
       if (policy_header->policy_flags
           & ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION) {
-        policies.push_back(Overlayable::Policy::kVendor);
+        policies |= Overlayable::Policy::kVendor;
       }
       if (policy_header->policy_flags
           & ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION) {
-        policies.push_back(Overlayable::Policy::kProduct);
+        policies |= Overlayable::Policy::kProduct;
       }
       if (policy_header->policy_flags
           & ResTable_overlayable_policy_header::POLICY_PRODUCT_SERVICES_PARTITION) {
-        policies.push_back(Overlayable::Policy::kProductServices);
+        policies |= Overlayable::Policy::kProductServices;
       }
 
       const ResTable_ref* const ref_begin = reinterpret_cast<const ResTable_ref*>(
@@ -478,13 +478,11 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
           return false;
         }
 
-        for (Overlayable::Policy policy : policies) {
-          Overlayable overlayable;
-          overlayable.source = source_.WithLine(0);
-          overlayable.policy = policy;
-          if (!table_->AddOverlayable(iter->second, overlayable, diag_)) {
-            return false;
-          }
+        Overlayable overlayable{};
+        overlayable.source = source_.WithLine(0);
+        overlayable.policies = policies;
+        if (!table_->SetOverlayable(iter->second, overlayable, diag_)) {
+          return false;
         }
       }
     }

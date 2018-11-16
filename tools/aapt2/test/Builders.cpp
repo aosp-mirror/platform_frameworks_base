@@ -135,12 +135,11 @@ ResourceTableBuilder& ResourceTableBuilder::SetSymbolState(const StringPiece& na
   return *this;
 }
 
-ResourceTableBuilder& ResourceTableBuilder::AddOverlayable(const StringPiece& name,
-                                                           const Maybe<Overlayable::Policy> p) {
+ResourceTableBuilder& ResourceTableBuilder::SetOverlayable(const StringPiece& name,
+                                                           const Overlayable& overlayable) {
+
   ResourceName res_name = ParseNameOrDie(name);
-  Overlayable overlayable;
-  overlayable.policy = p;
-  CHECK(table_->AddOverlayable(res_name, overlayable, GetDiagnostics()));
+  CHECK(table_->SetOverlayable(res_name, overlayable, GetDiagnostics()));
   return *this;
 }
 

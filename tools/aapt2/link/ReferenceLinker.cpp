@@ -374,8 +374,8 @@ bool ReferenceLinker::Consume(IAaptContext* context, ResourceTable* table) {
         }
 
         // Ensure that definitions for values declared as overlayable exist
-        if (!entry->overlayable_declarations.empty() && entry->values.empty()) {
-          context->GetDiagnostics()->Error(DiagMessage(entry->overlayable_declarations[0].source)
+        if (entry->overlayable && entry->values.empty()) {
+          context->GetDiagnostics()->Error(DiagMessage(entry->overlayable.value().source)
                                            << "no definition for overlayable symbol '"
                                            << name << "'");
           error = true;

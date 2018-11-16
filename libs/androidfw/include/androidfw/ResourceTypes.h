@@ -1622,7 +1622,7 @@ struct ResTable_overlayable_policy_header
 {
   struct ResChunk_header header;
 
-  enum PolicyFlags {
+  enum PolicyFlags : uint32_t {
     // Any overlay can overlay these resources.
     POLICY_PUBLIC = 0x00000001,
 

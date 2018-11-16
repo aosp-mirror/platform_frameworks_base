@@ -255,6 +255,7 @@ class DumpCommand : public Command {
     AddOptionalSubcommand(util::make_unique<DumpXmlStringsCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpXmlTreeCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpBadgerCommand>(printer), /* hidden */ true);
+    // TODO(b/120609160): Add aapt2 overlayable dump command
   }
 
   int Action(const std::vector<std::string>& args) override {

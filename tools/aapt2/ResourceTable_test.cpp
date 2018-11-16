@@ -242,69 +242,50 @@ TEST(ResourceTableTest, SetAllowNew) {
   ASSERT_THAT(result.value().entry->allow_new.value().comment, StrEq("second"));
 }
 
-TEST(ResourceTableTest, AddOverlayable) {
+TEST(ResourceTableTest, SetOverlayable) {
   ResourceTable table;
+  Overlayable overlayable{};
+  overlayable.policies |= Overlayable::Policy::kProduct;
+  overlayable.policies |= Overlayable::Policy::kProductServices;
+  overlayable.comment = "comment";
+
   const ResourceName name = test::ParseNameOrDie("android:string/foo");
+  ASSERT_TRUE(table.SetOverlayable(name, overlayable, test::GetDiagnostics()));
+  Maybe<ResourceTable::SearchResult> search_result = table.FindResource(name);
 
-  Overlayable overlayable;
-  overlayable.policy = Overlayable::Policy::kProduct;
-  overlayable.comment = "first";
-  ASSERT_TRUE(table.AddOverlayable(name, overlayable, test::GetDiagnostics()));
-  Maybe<ResourceTable::SearchResult> result = table.FindResource(name);
-  ASSERT_TRUE(result);
-  ASSERT_THAT(result.value().entry->overlayable_declarations.size(), Eq(1));
-  ASSERT_THAT(result.value().entry->overlayable_declarations[0].comment, StrEq("first"));
-  ASSERT_THAT(result.value().entry->overlayable_declarations[0].policy,
-              Eq(Overlayable::Policy::kProduct));
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable);
 
-  Overlayable overlayable2;
-  overlayable2.comment = "second";
-  overlayable2.policy = Overlayable::Policy::kProductServices;
-  ASSERT_TRUE(table.AddOverlayable(name, overlayable2, test::GetDiagnostics()));
-  result = table.FindResource(name);
-  ASSERT_TRUE(result);
-  ASSERT_THAT(result.value().entry->overlayable_declarations.size(), Eq(2));
-  ASSERT_THAT(result.value().entry->overlayable_declarations[0].comment, StrEq("first"));
-  ASSERT_THAT(result.value().entry->overlayable_declarations[0].policy,
-              Eq(Overlayable::Policy::kProduct));
-  ASSERT_THAT(result.value().entry->overlayable_declarations[1].comment, StrEq("second"));
-  ASSERT_THAT(result.value().entry->overlayable_declarations[1].policy,
-              Eq(Overlayable::Policy::kProductServices));
+  Overlayable& result_overlayable = search_result.value().entry->overlayable.value();
+  ASSERT_THAT(result_overlayable.comment, StrEq("comment"));
+  EXPECT_THAT(result_overlayable.policies, Eq(Overlayable::Policy::kProduct
+                                              | Overlayable::Policy::kProductServices));
 }
 
-TEST(ResourceTableTest, AddDuplicateOverlayableFail) {
+TEST(ResourceTableTest, AddDuplicateOverlayableSamePolicyFail) {
   ResourceTable table;
   const ResourceName name = test::ParseNameOrDie("android:string/foo");
 
-  Overlayable overlayable;
-  overlayable.policy = Overlayable::Policy::kProduct;
-  ASSERT_TRUE(table.AddOverlayable(name, overlayable, test::GetDiagnostics()));
+  Overlayable overlayable{};
+  overlayable.policies = Overlayable::Policy::kProduct;
+  ASSERT_TRUE(table.SetOverlayable(name, overlayable, test::GetDiagnostics()));
 
-  Overlayable overlayable2;
-  overlayable2.policy = Overlayable::Policy::kProduct;
-  ASSERT_FALSE(table.AddOverlayable(name, overlayable2, test::GetDiagnostics()));
+  Overlayable overlayable2{};
+  overlayable2.policies = Overlayable::Policy::kProduct;
+  ASSERT_FALSE(table.SetOverlayable(name, overlayable2, test::GetDiagnostics()));
 }
 
-TEST(ResourceTableTest, AddOverlayablePolicyAndNoneFirstFail) {
+TEST(ResourceTableTest, AddDuplicateOverlayableDifferentPolicyFail) {
   ResourceTable table;
   const ResourceName name = test::ParseNameOrDie("android:string/foo");
 
-  ASSERT_TRUE(table.AddOverlayable(name, {}, test::GetDiagnostics()));
+  Overlayable overlayable{};
+  overlayable.policies = Overlayable::Policy::kProduct;
+  ASSERT_TRUE(table.SetOverlayable(name, overlayable, test::GetDiagnostics()));
 
-  Overlayable overlayable2;
-  overlayable2.policy = Overlayable::Policy::kProduct;
-  ASSERT_FALSE(table.AddOverlayable(name, overlayable2, test::GetDiagnostics()));
-}
-
-TEST(ResourceTableTest, AddOverlayablePolicyAndNoneLastFail) {
-  ResourceTable table;
-  const ResourceName name = test::ParseNameOrDie("android:string/foo");
-
-  Overlayable overlayable;
-  overlayable.policy = Overlayable::Policy::kProduct;
-  ASSERT_TRUE(table.AddOverlayable(name, overlayable, test::GetDiagnostics()));
-
-  ASSERT_FALSE(table.AddOverlayable(name, {}, test::GetDiagnostics()));
+  Overlayable overlayable2{};
+  overlayable2.policies = Overlayable::Policy::kVendor;
+  ASSERT_FALSE(table.SetOverlayable(name, overlayable2, test::GetDiagnostics()));
 }
 
 TEST(ResourceTableTest, AllowDuplictaeResourcesNames) {

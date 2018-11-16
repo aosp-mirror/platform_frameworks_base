@@ -429,56 +429,52 @@ class PackageFlattener {
       CHECK(bool(type->id)) << "type must have an ID set when flattening <overlayable>";
       for (auto& entry : type->entries) {
         CHECK(bool(type->id)) << "entry must have an ID set when flattening <overlayable>";
-
-        // TODO(b/120298168): Convert the policies vector to a policy set or bitmask
-        if (!entry->overlayable_declarations.empty()) {
-          uint16_t policy_flags = 0;
-          for (Overlayable overlayable : entry->overlayable_declarations) {
-            if (overlayable.policy) {
-              switch (overlayable.policy.value()) {
-                case Overlayable::Policy::kPublic:
-                  policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
-                  break;
-                case Overlayable::Policy::kSystem:
-                  policy_flags |= ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION;
-                  break;
-                case Overlayable::Policy::kVendor:
-                  policy_flags |= ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION;
-                  break;
-                case Overlayable::Policy::kProduct:
-                  policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION;
-                  break;
-                case Overlayable::Policy::kProductServices:
-                  policy_flags |=
-                      ResTable_overlayable_policy_header::POLICY_PRODUCT_SERVICES_PARTITION;
-                  break;
-              }
-            } else {
-              // Encode overlayable entries defined without a policy as publicly overlayable
-              policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
-            }
-          }
-
-          // Find the overlayable policy chunk with the same policies as the entry
-          PolicyChunk* policy_chunk = nullptr;
-          for (PolicyChunk& policy : policies) {
-            if (policy.policy_flags == policy_flags) {
-              policy_chunk = &policy;
-              break;
-            }
-          }
-
-          // Create a new policy chunk if an existing one with the same policy cannot be found
-          if (policy_chunk == nullptr) {
-            PolicyChunk p;
-            p.policy_flags = policy_flags;
-            policies.push_back(p);
-            policy_chunk = &policies.back();
-          }
-
-          policy_chunk->ids.insert(android::make_resid(package_->id.value(), type->id.value(),
-                                                       entry->id.value()));
+        if (!entry->overlayable) {
+          continue;
         }
+
+        Overlayable overlayable = entry->overlayable.value();
+        uint32_t policy_flags = Overlayable::Policy::kNone;
+        if (overlayable.policies & Overlayable::Policy::kPublic) {
+          policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
+        }
+        if (overlayable.policies & Overlayable::Policy::kSystem) {
+          policy_flags |= ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION;
+        }
+        if (overlayable.policies & Overlayable::Policy::kVendor) {
+          policy_flags |= ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION;
+        }
+        if (overlayable.policies & Overlayable::Policy::kProduct) {
+          policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION;
+        }
+        if (overlayable.policies & Overlayable::Policy::kProductServices) {
+          policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_SERVICES_PARTITION;
+        }
+
+        if (overlayable.policies == Overlayable::Policy::kNone) {
+          // Encode overlayable entries defined without a policy as publicly overlayable
+          policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
+        }
+
+        // Find the overlayable policy chunk with the same policies as the entry
+        PolicyChunk* policy_chunk = nullptr;
+        for (PolicyChunk& policy : policies) {
+          if (policy.policy_flags == policy_flags) {
+            policy_chunk = &policy;
+            break;
+          }
+        }
+
+        // Create a new policy chunk if an existing one with the same policy cannot be found
+        if (policy_chunk == nullptr) {
+          PolicyChunk p;
+          p.policy_flags = policy_flags;
+          policies.push_back(p);
+          policy_chunk = &policies.back();
+        }
+
+        policy_chunk->ids.insert(android::make_resid(package_->id.value(), type->id.value(),
+                                                     entry->id.value()));
       }
     }
 
