@@ -24,6 +24,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.service.dreams.Sandman;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
@@ -998,6 +999,29 @@ public final class PowerManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Requests the device to start dreaming.
+     * <p>
+     * If dream can not be started, for example if another {@link PowerManager} transition is in
+     * progress, does nothing. Unlike {@link #nap(long)}, this does not put device to sleep when
+     * dream ends.
+     * </p><p>
+     * Requires the {@link android.Manifest.permission#WRITE_DREAM_STATE} permission.
+     * </p>
+     *
+     * @param time The time when the request to nap was issued, in the
+     * {@link SystemClock#uptimeMillis()} time base.  This timestamp may be used to correctly
+     * order the dream request with other power management functions.  It should be set
+     * to the timestamp of the input event that caused the request to dream.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
+    public void dream(long time) {
+        Sandman.startDreamByUserRequest(mContext);
     }
 
     /**
