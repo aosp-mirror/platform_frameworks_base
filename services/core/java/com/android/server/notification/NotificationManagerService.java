@@ -870,6 +870,7 @@ public class NotificationManagerService extends SystemService {
                     }
                     if (expanded && userAction) {
                         r.recordExpanded();
+                        reportUserInteraction(r);
                     }
                     EventLogTags.writeNotificationExpansion(key,
                             userAction ? 1 : 0, expanded ? 1 : 0,
@@ -1987,7 +1988,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     /**
-     * Report to usage stats that the notification was clicked.
+     * Report to usage stats that the user interacted with the notification.
      * @param r notification record
      */
     protected void reportUserInteraction(NotificationRecord r) {
