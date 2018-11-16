@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.os.ResultReceiver;
+import android.os.WorkSource;
 import android.net.NetworkStats;
 import android.net.Uri;
 import android.service.carrier.CarrierIdentifier;
@@ -30,6 +31,7 @@ import android.telecom.PhoneAccountHandle;
 import android.telephony.CellInfo;
 import android.telephony.ClientRequestStats;
 import android.telephony.IccOpenLogicalChannelResponse;
+import android.telephony.ICellInfoCallback;
 import android.telephony.ModemActivityInfo;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.NetworkScanRequest;
@@ -507,9 +509,24 @@ interface ITelephony {
     int getLteOnCdmaModeForSubscriber(int subId, String callingPackage);
 
     /**
-     * Returns the all observed cell information of the device.
+     * Returns all observed cell information of the device.
      */
     List<CellInfo> getAllCellInfo(String callingPkg);
+
+    /**
+     * Request a cell information update for the specified subscription,
+     * reported via the CellInfoCallback.
+     */
+    void requestCellInfoUpdate(int subId, in ICellInfoCallback cb, String callingPkg);
+
+    /**
+     * Request a cell information update for the specified subscription,
+     * reported via the CellInfoCallback.
+     *
+     * @param workSource the requestor to whom the power consumption for this should be attributed.
+     */
+    void requestCellInfoUpdateWithWorkSource(
+            int subId, in ICellInfoCallback cb, in String callingPkg, in WorkSource ws);
 
     /**
      * Sets minimum time in milli-seconds between onCellInfoChanged
