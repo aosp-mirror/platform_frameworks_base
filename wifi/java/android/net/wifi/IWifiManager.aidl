@@ -61,9 +61,7 @@ interface IWifiManager
 
     ParceledListSlice getPrivilegedConfiguredNetworks();
 
-    WifiConfiguration getMatchingWifiConfig(in ScanResult scanResult);
-
-    List<WifiConfiguration> getAllMatchingWifiConfigs(in ScanResult scanResult);
+    List<WifiConfiguration> getAllMatchingWifiConfigs(in List<ScanResult> scanResult);
 
     List<OsuProvider> getMatchingOsuProviders(in ScanResult scanResult);
 

@@ -1073,41 +1073,26 @@ public class WifiManager {
     }
 
     /**
-     * Returns a WifiConfiguration matching this ScanResult
-     *
-     * @param scanResult scanResult that represents the BSSID
-     * @return {@link WifiConfiguration} that matches this BSSID or null
-     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public WifiConfiguration getMatchingWifiConfig(ScanResult scanResult) {
-        try {
-            return mService.getMatchingWifiConfig(scanResult);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Return all matching WifiConfigurations for this ScanResult.
+     * Returns all matching WifiConfigurations for a given list of ScanResult.
      *
      * An empty list will be returned when no configurations are installed or if no configurations
      * match the ScanResult.
-     *
-     * @param scanResult scanResult that represents the BSSID
-     * @return A list of {@link WifiConfiguration}
+
+     * @param scanResults a list of scanResult that represents the BSSID
+     * @return A list of {@link WifiConfiguration} that can have duplicate entries.
      * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
-    public List<WifiConfiguration> getAllMatchingWifiConfigs(ScanResult scanResult) {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public List<WifiConfiguration> getAllMatchingWifiConfigs(
+            @NonNull List<ScanResult> scanResults) {
         try {
-            return mService.getAllMatchingWifiConfigs(scanResult);
+            return mService.getAllMatchingWifiConfigs(scanResults);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
-
 
     /**
      * Returns a list of Hotspot 2.0 OSU (Online Sign-Up) providers associated with the given AP.
@@ -1119,6 +1104,7 @@ public class WifiManager {
      * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public List<OsuProvider> getMatchingOsuProviders(ScanResult scanResult) {
         try {
             return mService.getMatchingOsuProviders(scanResult);

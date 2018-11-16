@@ -25,7 +25,6 @@ import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ITrafficStateCallback;
 import android.net.wifi.IWifiManager;
-import android.net.wifi.PasspointManagementObjectDefinition;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.wifi.WifiConfiguration;
@@ -37,7 +36,6 @@ import android.os.IBinder;
 import android.os.Messenger;
 import android.os.ResultReceiver;
 import android.os.WorkSource;
-import android.util.Slog;
 
 import java.util.List;
 
@@ -83,13 +81,30 @@ public abstract class AbstractWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /**
+     * Returns a WifiConfiguration matching this ScanResult
+     * @param scanResult a single ScanResult Object
+     * @return
+     * @deprecated use {@link #getAllMatchingWifiConfigs(List)} instead.
+     */
+    @Deprecated
     public WifiConfiguration getMatchingWifiConfig(ScanResult scanResult) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /**
+     * Returns all matching WifiConfigurations for this ScanResult.
+     * @param scanResult a single ScanResult Object
+     * @return
+     * @deprecated use {@link #getAllMatchingWifiConfigs(List)} instead.
+     */
+    @Deprecated
     public List<WifiConfiguration> getAllMatchingWifiConfigs(ScanResult scanResult) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<WifiConfiguration> getAllMatchingWifiConfigs(List<ScanResult> scanResults) {
         throw new UnsupportedOperationException();
     }
 
