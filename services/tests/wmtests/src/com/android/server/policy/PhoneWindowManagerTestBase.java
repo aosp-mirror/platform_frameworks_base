@@ -28,10 +28,13 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
-import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.server.wm.utils.CoordinateTransforms
+        .transformPhysicalToLogicalCoordinates;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -54,8 +57,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
-
-import androidx.test.InstrumentationRegistry;
 
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.wm.DisplayFrames;
@@ -83,7 +84,7 @@ class PhoneWindowManagerTestBase {
 
     @Before
     public void setUpBase() {
-        mContext = new TestContextWrapper(InstrumentationRegistry.getTargetContext());
+        mContext = new TestContextWrapper(getInstrumentation().getTargetContext());
         mContext.getResourceMocker().addOverride(
                 com.android.internal.R.dimen.status_bar_height_portrait, STATUS_BAR_HEIGHT);
         mContext.getResourceMocker().addOverride(
@@ -259,7 +260,7 @@ class PhoneWindowManagerTestBase {
 
         public static TestablePhoneWindowManager create(Context context) {
             TestablePhoneWindowManager[] policy = new TestablePhoneWindowManager[1];
-            InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            getInstrumentation().runOnMainSync(() -> {
                 policy[0] = new TestablePhoneWindowManager();
                 policy[0].mContext = context;
                 policy[0].mKeyguardDelegate = mock(KeyguardServiceDelegate.class);

@@ -26,6 +26,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
@@ -44,10 +48,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;

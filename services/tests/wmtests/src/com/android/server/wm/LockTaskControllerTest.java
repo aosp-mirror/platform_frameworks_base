@@ -34,6 +34,13 @@ import static android.telecom.TelecomManager.EMERGENCY_DIALER_COMPONENT;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.LockTaskController.STATUS_BAR_MASK_LOCKED;
 import static com.android.server.wm.LockTaskController.STATUS_BAR_MASK_PINNED;
 
@@ -44,13 +51,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.app.StatusBarManager;
 import android.app.admin.DevicePolicyManager;
@@ -75,7 +75,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
-import com.android.server.wm.WindowManagerService;
 
 import org.junit.After;
 import org.junit.Before;

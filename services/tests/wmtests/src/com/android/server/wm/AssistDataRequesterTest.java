@@ -22,6 +22,10 @@ import static android.app.AppOpsManager.OP_ASSIST_SCREENSHOT;
 import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.graphics.Bitmap.Config.ARGB_8888;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -32,9 +36,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 import android.app.AppOpsManager;
 import android.app.IActivityManager;

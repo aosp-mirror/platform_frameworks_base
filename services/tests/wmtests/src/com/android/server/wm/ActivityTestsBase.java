@@ -26,18 +26,17 @@ import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyString;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
-
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;

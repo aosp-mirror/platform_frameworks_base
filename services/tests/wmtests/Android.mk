@@ -18,7 +18,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     services.core \
     androidx.test.runner \
     androidx.test.rules \
-    mockito-target-minus-junit4 \
+    mockito-target-extended-minus-junit4 \
     platform-test-annotations \
     truth-prebuilt \
     testables \
@@ -29,6 +29,11 @@ LOCAL_JAVA_LIBRARIES := \
     android.test.mock \
     android.test.base \
     android.test.runner \
+
+# These are not normally accessible from apps so they must be explicitly included.
+LOCAL_JNI_SHARED_LIBRARIES := \
+    libdexmakerjvmtiagent \
+    libstaticjvmtiagent \
 
 LOCAL_PACKAGE_NAME := WmTests
 LOCAL_PRIVATE_PLATFORM_APIS := true

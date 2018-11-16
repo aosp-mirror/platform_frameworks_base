@@ -18,13 +18,16 @@ package com.android.server.wm;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
+import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
+import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
-import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
-import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
-import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
 
 import static junit.framework.TestCase.assertNotNull;
 
@@ -32,9 +35,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityOptions;
 import android.app.servertransaction.ClientTransaction;
