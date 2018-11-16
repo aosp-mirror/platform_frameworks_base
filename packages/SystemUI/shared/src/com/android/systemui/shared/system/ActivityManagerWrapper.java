@@ -54,7 +54,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
-
 import android.view.RemoteAnimationTarget;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
@@ -479,5 +478,17 @@ public class ActivityManagerWrapper {
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    /**
+     * Returns true if the system supports freeform multi-window.
+     */
+    public boolean supportsFreeformMultiWindow(Context context) {
+        final boolean freeformDevOption = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
+        return ActivityTaskManager.supportsMultiWindow(context)
+                && (context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT)
+                || freeformDevOption);
     }
 }
