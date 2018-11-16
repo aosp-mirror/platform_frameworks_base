@@ -58,8 +58,9 @@ import java.util.Set;
 /**
  * BROADCASTS
  *
- * We keep two broadcast queues and associated bookkeeping, one for those at
- * foreground priority, and one for normal (background-priority) broadcasts.
+ * We keep three broadcast queues and associated bookkeeping, one for those at
+ * foreground priority, and one for normal (background-priority) broadcasts, and one to
+ * offload special broadcasts that we know take a long time, such as BOOT_COMPLETED.
  */
 public final class BroadcastQueue {
     private static final String TAG = "BroadcastQueue";
