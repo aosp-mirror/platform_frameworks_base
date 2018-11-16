@@ -4588,6 +4588,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name="com.android.server.WallpaperUpdateReceiver"
+                  android:permission="android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY">
+            <intent-filter>
+                <action android:name="android.intent.action.DEVICE_CUSTOMIZATION_READY"/>
+            </intent-filter>
+        </receiver>
+
         <service android:name="android.hardware.location.GeofenceHardwareService"
             android:permission="android.permission.LOCATION_HARDWARE"
             android:exported="false" />
