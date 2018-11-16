@@ -1270,7 +1270,13 @@ public abstract class Layout {
      */
     public float getLineLeft(int line) {
         final int dir = getParagraphDirection(line);
-        final Alignment align = getParagraphAlignment(line);
+        Alignment align = getParagraphAlignment(line);
+        // Before Q, StaticLayout.Builder.setAlignment didn't check whether the input alignment
+        // is null. And when it is null, the old behavior is the same as ALIGN_CENTER.
+        // To keep consistency, we convert a null alignment to ALIGN_CENTER.
+        if (align == null) {
+            align = Alignment.ALIGN_CENTER;
+        }
 
         // First convert combinations of alignment and direction settings to
         // three basic cases: ALIGN_LEFT, ALIGN_RIGHT and ALIGN_CENTER.
@@ -1319,7 +1325,13 @@ public abstract class Layout {
      */
     public float getLineRight(int line) {
         final int dir = getParagraphDirection(line);
-        final Alignment align = getParagraphAlignment(line);
+        Alignment align = getParagraphAlignment(line);
+        // Before Q, StaticLayout.Builder.setAlignment didn't check whether the input alignment
+        // is null. And when it is null, the old behavior is the same as ALIGN_CENTER.
+        // To keep consistency, we convert a null alignment to ALIGN_CENTER.
+        if (align == null) {
+            align = Alignment.ALIGN_CENTER;
+        }
 
         final Alignment resultAlign;
         switch(align) {
