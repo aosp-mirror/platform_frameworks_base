@@ -3644,12 +3644,9 @@ package android.net.wifi {
     method public int getWifiApState();
     method public boolean isDeviceToApRttSupported();
     method public boolean isDeviceToDeviceRttSupported();
-    method public boolean isOweSupported();
     method public boolean isPortableHotspotSupported();
     method public boolean isWifiApEnabled();
     method public boolean isWifiScannerSupported();
-    method public boolean isWpa3SaeSupported();
-    method public boolean isWpa3SuiteBSupported();
     method public void registerNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback, android.os.Handler);
     method public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
     method public boolean startScan(android.os.WorkSource);
