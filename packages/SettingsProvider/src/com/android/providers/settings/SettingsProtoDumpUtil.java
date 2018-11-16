@@ -855,6 +855,10 @@ class SettingsProtoDumpUtil {
                 GlobalSettingsProto.MultiSim.SMS_PROMPT);
         p.end(multiSimToken);
 
+        dumpSetting(s, p,
+                Global.NATIVE_FLAGS_HEALTH_CHECK_ENABLED,
+                GlobalSettingsProto.NATIVE_FLAGS_HEALTH_CHECK_ENABLED);
+
         final long netstatsToken = p.start(GlobalSettingsProto.NETSTATS);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_ENABLED,

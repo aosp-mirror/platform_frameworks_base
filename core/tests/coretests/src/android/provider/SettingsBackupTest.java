@@ -308,6 +308,7 @@ public class SettingsBackupTest {
                     Settings.Global.MULTI_SIM_SMS_SUBSCRIPTION,
                     Settings.Global.MULTI_SIM_VOICE_CALL_SUBSCRIPTION,
                     Settings.Global.MULTI_SIM_VOICE_PROMPT,
+                    Settings.Global.NATIVE_FLAGS_HEALTH_CHECK_ENABLED,
                     Settings.Global.NETSTATS_DEV_BUCKET_DURATION,
                     Settings.Global.NETSTATS_DEV_DELETE_AGE,
                     Settings.Global.NETSTATS_DEV_PERSIST_BYTES,

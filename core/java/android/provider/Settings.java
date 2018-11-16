@@ -13700,6 +13700,15 @@ public final class Settings {
          */
         public static final String LAST_ACTIVE_USER_ID = "last_active_persistent_user_id";
 
+
+        /**
+         * Whether we've enabled native flags health check on this device. Takes effect on
+         * reboot. The value "1" enables native flags health check; otherwise it's disabled.
+         * @hide
+         */
+        public static final String NATIVE_FLAGS_HEALTH_CHECK_ENABLED =
+                "native_flags_health_check_enabled";
+
     }
 
     /**

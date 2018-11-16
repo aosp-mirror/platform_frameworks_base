@@ -65,6 +65,7 @@ class SettingsToPropertiesMapper {
     // permission in the corresponding .te file your feature belongs to.
     @VisibleForTesting
     static final String[] sGlobalSettings = new String[] {
+            Settings.Global.NATIVE_FLAGS_HEALTH_CHECK_ENABLED,
     };
 
     @VisibleForTesting
