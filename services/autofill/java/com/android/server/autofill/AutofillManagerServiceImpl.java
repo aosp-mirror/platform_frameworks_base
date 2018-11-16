@@ -73,6 +73,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.AbstractPerUserSystemService;
 import com.android.server.LocalServices;
 import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
+import com.android.server.autofill.AutofillManagerService.SmartSuggestionMode;
 import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
@@ -268,8 +269,8 @@ final class AutofillManagerServiceImpl
         pruneAbandonedSessionsLocked();
 
         final Session newSession = createSessionByTokenLocked(activityToken, taskId, uid,
-                appCallbackToken, hasCallback, componentName, compatMode, bindInstantServiceAllowed,
-                flags);
+                appCallbackToken, hasCallback, componentName, compatMode,
+                bindInstantServiceAllowed, flags);
         if (newSession == null) {
             return NO_SESSION;
         }
@@ -823,6 +824,12 @@ final class AutofillManagerServiceImpl
         return true;
     }
 
+    @GuardedBy("mLock")
+    @SmartSuggestionMode int getSupportedSmartSuggestionModesLocked() {
+        // TODO(b/111330312): once we support IME, we need to set it per-user (OR'ed with master)
+        return mMaster.getSupportedSmartSuggestionModesLocked();
+    }
+
     @Override
     @GuardedBy("mLock")
     protected void dumpLocked(String prefix, PrintWriter pw) {
@@ -961,6 +968,9 @@ final class AutofillManagerServiceImpl
             if (session.isSavingLocked()) {
                 if (sDebug) Slog.d(TAG, "destroyFinishedSessionsLocked(): " + session.id);
                 session.forceRemoveSelfLocked();
+            }
+            else {
+                session.destroyAugmentedAutofillWindowsLocked();
             }
         }
     }

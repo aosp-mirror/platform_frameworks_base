@@ -24,11 +24,14 @@ import android.service.intelligence.InteractionContext;
 import android.service.intelligence.InteractionSessionId;
 import android.service.intelligence.SnapshotData;
 import android.util.Slog;
+import android.view.autofill.AutofillId;
+import android.view.autofill.IAutoFillManagerClient;
 import android.view.intelligence.ContentCaptureEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.AbstractRemoteService;
+import com.android.server.intelligence.IntelligenceManagerInternal.AugmentedAutofillCallback;
 import com.android.server.intelligence.RemoteIntelligenceService.RemoteIntelligenceServiceCallbacks;
 
 import java.io.PrintWriter;
@@ -39,12 +42,12 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
     private static final String TAG = "ContentCaptureSession";
 
     private final Object mLock;
-    private final IBinder mActivityToken;
-
+    final IBinder mActivityToken;
     private final IntelligencePerUserService mService;
     private final RemoteIntelligenceService mRemoteService;
     private final InteractionContext mInterationContext;
     private final InteractionSessionId mId;
+    private AugmentedAutofillCallback mAutofillCallback;
 
     ContentCaptureSession(@NonNull Context context, int userId, @NonNull Object lock,
             @NonNull IBinder activityToken, @NonNull IntelligencePerUserService service,
@@ -92,6 +95,18 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
     }
 
     /**
+     * Requests the service to autofill the given field.
+     */
+    public AugmentedAutofillCallback requestAutofillLocked(@NonNull IAutoFillManagerClient client,
+            int autofillSessionId, @NonNull AutofillId focusedId) {
+        mRemoteService.onRequestAutofillLocked(mId, client, autofillSessionId, focusedId);
+        if (mAutofillCallback == null) {
+            mAutofillCallback = () -> mRemoteService.onDestroyAutofillWindowsRequest(mId);
+        }
+        return mAutofillCallback;
+    }
+
+    /**
      * Cleans up the session and removes it from the service.
      *
      * @param notifyRemoteService whether it should trigger a {@link
@@ -119,6 +134,11 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
         if (mService.isVerbose()) {
             Slog.v(TAG, "destroyLocked(notifyRemoteService=" + notifyRemoteService + ")");
         }
+        if (mAutofillCallback != null) {
+            mAutofillCallback.destroy();
+            mAutofillCallback = null;
+        }
+
         // TODO(b/111276913): must call client to set session as FINISHED_BY_SERVER
         if (notifyRemoteService) {
             mRemoteService.onSessionLifecycleRequest(/* context= */ null, mId);
@@ -152,6 +172,8 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
         pw.print(prefix); pw.print("id: ");  mId.dump(pw); pw.println();
         pw.print(prefix); pw.print("context: ");  mInterationContext.dump(pw); pw.println();
         pw.print(prefix); pw.print("activity token: "); pw.println(mActivityToken);
+        pw.print(prefix); pw.print("has autofill callback: ");
+        pw.println(mAutofillCallback != null);
     }
 
     @Override

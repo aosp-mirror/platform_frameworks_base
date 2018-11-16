@@ -391,7 +391,7 @@ public final class IntelligenceManager {
     }
 
     /**
-     * Called by apps to explicitly enabled  or disable content capture.
+     * Called by apps to explicitly enable or disable content capture.
      *
      * <p><b>Note: </b> this call is not persisted accross reboots, so apps should typically call
      * it on {@link android.app.Activity#onCreate(android.os.Bundle, android.os.PersistableBundle)}.

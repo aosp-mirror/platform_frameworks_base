@@ -124,6 +124,7 @@ public class SettingsBackupTest {
                     Settings.Global.AUTOFILL_LOGGING_LEVEL,
                     Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE,
                     Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
+                    Settings.Global.AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS,
                     Settings.Global.AUTOMATIC_POWER_SAVER_MODE,
                     Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD,
                     Settings.Global.BATTERY_DISCHARGE_THRESHOLD,

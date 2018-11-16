@@ -4938,12 +4938,47 @@ package android.service.euicc {
 
 package android.service.intelligence {
 
+  public final class FillCallback {
+    method public void onSuccess(android.service.intelligence.FillResponse);
+  }
+
+  public final class FillController {
+    method public void autofill(java.util.List<android.util.Pair<android.view.autofill.AutofillId, android.view.autofill.AutofillValue>>);
+  }
+
+  public final class FillRequest {
+    method public android.view.autofill.AutofillId getFocusedId();
+    method public android.service.intelligence.PresentationParams getPresentationParams();
+    method public android.service.intelligence.InteractionSessionId getSessionId();
+  }
+
+  public final class FillResponse implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.intelligence.FillResponse> CREATOR;
+  }
+
+  public static class FillResponse.Builder {
+    ctor public FillResponse.Builder();
+    method public android.service.intelligence.FillResponse build();
+    method public android.service.intelligence.FillResponse.Builder setFillWindow(android.service.intelligence.FillWindow);
+    method public android.service.intelligence.FillResponse.Builder setIgnoredIds(java.util.List<android.view.autofill.AutofillId>);
+  }
+
+  public final class FillWindow {
+    ctor public FillWindow();
+    method public void destroy();
+    method public boolean update(android.service.intelligence.PresentationParams.Area, android.view.View, long);
+    field public static final long FLAG_METADATA_ADDRESS = 1L; // 0x1L
+  }
+
   public abstract class IntelligenceService extends android.app.Service {
     ctor public IntelligenceService();
     method public void onActivitySnapshot(android.service.intelligence.InteractionSessionId, android.service.intelligence.SnapshotData);
     method public abstract void onContentCaptureEvent(android.service.intelligence.InteractionSessionId, java.util.List<android.view.intelligence.ContentCaptureEvent>);
     method public void onCreateInteractionSession(android.service.intelligence.InteractionContext, android.service.intelligence.InteractionSessionId);
     method public void onDestroyInteractionSession(android.service.intelligence.InteractionSessionId);
+    method public void onFillRequest(android.service.intelligence.InteractionSessionId, android.service.intelligence.FillRequest, android.os.CancellationSignal, android.service.intelligence.FillController, android.service.intelligence.FillCallback);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.intelligence.IntelligenceService";
   }
 
@@ -4963,6 +4998,23 @@ package android.service.intelligence {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.intelligence.InteractionSessionId> CREATOR;
+  }
+
+  public abstract class PresentationParams {
+    method public int getFlags();
+    method public android.service.intelligence.PresentationParams.Area getFullArea();
+    method public android.service.intelligence.PresentationParams.Area getSuggestionArea();
+    field public static final int FLAG_HINT_GRAVITY_BOTTOM = 2; // 0x2
+    field public static final int FLAG_HINT_GRAVITY_LEFT = 4; // 0x4
+    field public static final int FLAG_HINT_GRAVITY_RIGHT = 8; // 0x8
+    field public static final int FLAG_HINT_GRAVITY_TOP = 1; // 0x1
+    field public static final int FLAG_HOST_IME = 16; // 0x10
+    field public static final int FLAG_HOST_SYSTEM = 32; // 0x20
+  }
+
+  public static abstract class PresentationParams.Area {
+    method public android.graphics.Rect getBounds();
+    method public android.service.intelligence.PresentationParams.Area getSubArea(android.graphics.Rect);
   }
 
   public final class SnapshotData implements android.os.Parcelable {
