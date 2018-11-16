@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import libcore.icu.ICU;
+import libcore.timezone.TzDataSetVersion;
 import libcore.util.TimeZoneFinder;
 import libcore.util.ZoneInfoDB;
 
@@ -66,8 +67,8 @@ public final class RulesManagerService extends IRulesManager.Stub {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     static final DistroFormatVersion DISTRO_FORMAT_VERSION_SUPPORTED =
             new DistroFormatVersion(
-                    DistroVersion.CURRENT_FORMAT_MAJOR_VERSION,
-                    DistroVersion.CURRENT_FORMAT_MINOR_VERSION);
+                    TzDataSetVersion.currentFormatMajorVersion(),
+                    TzDataSetVersion.currentFormatMinorVersion());
 
     public static class Lifecycle extends SystemService {
         public Lifecycle(Context context) {
