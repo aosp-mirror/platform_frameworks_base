@@ -21,6 +21,7 @@ import static android.content.Context.TELECOM_SERVICE;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -43,6 +44,7 @@ import android.net.NetworkStats;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.BatteryStats;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -52,6 +54,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.WorkSource;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.carrier.CarrierIdentifier;
 import android.telecom.PhoneAccount;
@@ -4728,37 +4731,42 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns all observed cell information from all radios on the
-     * device including the primary and neighboring cells. Calling this method does
-     * not trigger a call to {@link android.telephony.PhoneStateListener#onCellInfoChanged
-     * onCellInfoChanged()}, or change the rate at which
-     * {@link android.telephony.PhoneStateListener#onCellInfoChanged
-     * onCellInfoChanged()} is called.
+     * Requests all available cell information from all radios on the device including the
+     * camped/registered, serving, and neighboring cells.
      *
-     *<p>
-     * The list can include one or more {@link android.telephony.CellInfoGsm CellInfoGsm},
+     * <p>The response can include one or more {@link android.telephony.CellInfoGsm CellInfoGsm},
      * {@link android.telephony.CellInfoCdma CellInfoCdma},
+     * {@link android.telephony.CellInfoTdscdma CellInfoTdscdma},
      * {@link android.telephony.CellInfoLte CellInfoLte}, and
      * {@link android.telephony.CellInfoWcdma CellInfoWcdma} objects, in any combination.
-     * On devices with multiple radios it is typical to see instances of
-     * one or more of any these in the list. In addition, zero, one, or more
-     * of the returned objects may be considered registered; that is, their
+     * It is typical to see instances of one or more of any these in the list. In addition, zero
+     * or more of the returned objects may be considered registered; that is, their
      * {@link android.telephony.CellInfo#isRegistered CellInfo.isRegistered()}
-     * methods may return true.
+     * methods may return true, indicating that the cell is being used or would be used for
+     * signaling communication if necessary.
      *
-     * <p>This method returns valid data for registered cells on devices with
-     * {@link android.content.pm.PackageManager#FEATURE_TELEPHONY}. In cases where only
-     * partial information is available for a particular CellInfo entry, unavailable fields
-     * will be reported as Integer.MAX_VALUE. All reported cells will include at least a
-     * valid set of technology-specific identification info and a power level measurement.
+     * <p>Beginning with {@link android.os.Build.VERSION_CODES#Q Android Q},
+     * if this API results in a change of the cached CellInfo, that change will be reported via
+     * {@link android.telephony.PhoneStateListener#onCellInfoChanged onCellInfoChanged()}.
      *
-     *<p>
-     * This method is preferred over using {@link
+     * <p>Apps targeting {@link android.os.Build.VERSION_CODES#Q Android Q} or higher will no
+     * longer trigger a refresh of the cached CellInfo by invoking this API. Instead, those apps
+     * will receive the latest cached results. Apps targeting
+     * {@link android.os.Build.VERSION_CODES#Q Android Q} or higher that wish to request updated
+     * CellInfo should call
+     * {android.telephony.TelephonyManager#requestCellInfoUpdate requestCellInfoUpdate()} and
+     * listen for responses via {@link android.telephony.PhoneStateListener#onCellInfoChanged
+     * onCellInfoChanged()}.
+     *
+     * <p>This method returns valid data for devices with
+     * {@link android.content.pm.PackageManager#FEATURE_TELEPHONY FEATURE_TELEPHONY}. In cases
+     * where only partial information is available for a particular CellInfo entry, unavailable
+     * fields will be reported as {@link android.telephony.CellInfo#UNAVAILABLE}. All reported
+     * cells will include at least a valid set of technology-specific identification info and a
+     * power level measurement.
+     *
+     * <p>This method is preferred over using {@link
      * android.telephony.TelephonyManager#getCellLocation getCellLocation()}.
-     * However, for older devices, <code>getAllCellInfo()</code> may return
-     * null. In these cases, you should call {@link
-     * android.telephony.TelephonyManager#getCellLocation getCellLocation()}
-     * instead.
      *
      * @return List of {@link android.telephony.CellInfo}; null if cell
      * information is unavailable.
@@ -4769,11 +4777,92 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getAllCellInfo(getOpPackageName());
+            return telephony.getAllCellInfo(
+                    getOpPackageName());
         } catch (RemoteException ex) {
-            return null;
         } catch (NullPointerException ex) {
-            return null;
+        }
+        return null;
+    }
+
+    /** Callback for providing asynchronous {@link CellInfo} on request */
+    public abstract static class CellInfoCallback {
+        /**
+         * Response to
+         * {@link android.telephony.TelephonyManager#requestCellInfoUpdate requestCellInfoUpdate()}.
+         *
+         * <p>Invoked when there is a response to
+         * {@link android.telephony.TelephonyManager#requestCellInfoUpdate requestCellInfoUpdate()}
+         * to provide a list of {@link CellInfo}. If no {@link CellInfo} is available then an empty
+         * list will be provided. If an error occurs, null will be provided.
+         *
+         * @param cellInfo a list of {@link CellInfo}, an empty list, or null.
+         *
+         * {@see android.telephony.TelephonyManager#getAllCellInfo getAllCellInfo()}
+         */
+        public abstract void onCellInfo(List<CellInfo> cellInfo);
+    };
+
+    /**
+     * Requests all available cell information from the current subscription for observed
+     * camped/registered, serving, and neighboring cells.
+     *
+     * <p>Any available results from this request will be provided by calls to
+     * {@link android.telephony.PhoneStateListener#onCellInfoChanged onCellInfoChanged()}
+     * for each active subscription.
+     *
+     * @param executor the executor on which callback will be invoked.
+     * @param callback a callback to receive CellInfo.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+    public void requestCellInfoUpdate(
+            @NonNull Executor executor, @NonNull CellInfoCallback callback) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) return;
+            telephony.requestCellInfoUpdate(
+                    getSubId(),
+                    new ICellInfoCallback.Stub() {
+                        public void onCellInfo(List<CellInfo> cellInfo) {
+                            Binder.withCleanCallingIdentity(() ->
+                                    executor.execute(() -> callback.onCellInfo(cellInfo)));
+                        }
+                    }, getOpPackageName());
+
+        } catch (RemoteException ex) {
+        }
+    }
+
+    /**
+     * Requests all available cell information from the current subscription for observed
+     * camped/registered, serving, and neighboring cells.
+     *
+     * <p>Any available results from this request will be provided by calls to
+     * {@link android.telephony.PhoneStateListener#onCellInfoChanged onCellInfoChanged()}
+     * for each active subscription.
+     *
+     * @param workSource the requestor to whom the power consumption for this should be attributed.
+     * @param executor the executor on which callback will be invoked.
+     * @param callback a callback to receive CellInfo.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            android.Manifest.permission.MODIFY_PHONE_STATE})
+    public void requestCellInfoUpdate(@NonNull WorkSource workSource,
+            @NonNull @CallbackExecutor Executor executor, @NonNull CellInfoCallback callback) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) return;
+            telephony.requestCellInfoUpdateWithWorkSource(
+                    getSubId(),
+                    new ICellInfoCallback.Stub() {
+                        public void onCellInfo(List<CellInfo> cellInfo) {
+                            Binder.withCleanCallingIdentity(() ->
+                                    executor.execute(() -> callback.onCellInfo(cellInfo)));
+                        }
+                    }, getOpPackageName(), workSource);
+        } catch (RemoteException ex) {
         }
     }
 
