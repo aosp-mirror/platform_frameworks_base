@@ -201,7 +201,7 @@ public class TextLine {
             }
         }
 
-        mCharsValid = hasReplacement;
+        mCharsValid = hasReplacement || hasTabs || directions != Layout.DIRS_ALL_LEFT_TO_RIGHT;
 
         if (mCharsValid) {
             if (mChars == null || mChars.length < mLen) {
@@ -815,6 +815,7 @@ public class TextLine {
         } else {
             final int delta = mStart;
             if (mComputed == null) {
+                // TODO: Enable measured getRunAdvance for ReplacementSpan and RTL text.
                 return wp.getRunAdvance(mText, delta + start, delta + end,
                         delta + contextStart, delta + contextEnd, runIsRtl, delta + offset);
             } else {
