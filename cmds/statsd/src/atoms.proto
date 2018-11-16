@@ -1207,6 +1207,12 @@ message UsbDeviceAttached {
     optional bool has_audio = 3;
     optional bool has_hid = 4;
     optional bool has_storage = 5;
+    enum State {
+        STATE_DISCONNECTED = 0;
+        STATE_CONNECTED = 1;
+    }
+    optional State state = 6;
+    optional int64 last_connect_duration_ms = 7;
 }
 
 
