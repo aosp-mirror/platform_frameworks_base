@@ -148,6 +148,11 @@ message Atom {
         UserRestrictionChanged user_restriction_changed = 96;
         SettingsUIChanged settings_ui_changed = 97;
         ConnectivityStateChanged connectivity_state_changed = 98;
+        // TODO: service state change is very noisy shortly after boot, as well
+        // as at other transitions - coming out of doze, device plugged in, etc.
+        // Consider removing this if it becomes a problem
+        ServiceStateChanged service_state_changed = 99;
+        ServiceLaunchReported service_launch_reported = 100;
     }
 
     // Pulled events will start at field 10000.
@@ -2138,16 +2143,51 @@ message Notification {
  * Logged in StatsCompanionService.java
  */
 message ConnectivityStateChanged {
-    // Id of the network.
-    optional int32 net_id = 1;
+  // Id of the network.
+  optional int32 net_id = 1;
+
+  enum State {
+    UNKNOWN = 0;
+    CONNECTED = 1;
+    DISCONNECTED = 2;
+  }
+  // Connected state of a network.
+  optional State state = 2;
+}
+
+/**
+ * Logs when a service starts and stops.
+ * Logged from:
+ *   services/core/java/com/android/server/am/ActiveServices.java
+ */
+message ServiceStateChanged {
+
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional string package_name = 2;
+
+    optional string service_name = 3;
 
     enum State {
-        UNKNOWN = 0;
-        CONNECTED = 1;
-        DISCONNECTED = 2;
+        START = 1;
+        STOP = 2;
     }
-    // Connected state of a network.
-    optional State state = 2;
+
+    optional State state = 4;
+}
+
+/**
+ * Logs when a service is launched.
+ * Logged from:
+ *   services/core/java/com/android/server/am/ActiveServices.java
+ */
+message ServiceLaunchReported {
+
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional string package_name = 2;
+
+    optional string service_name = 3;
 }
 
 //////////////////////////////////////////////////////////////////////
