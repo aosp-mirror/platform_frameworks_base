@@ -45,9 +45,9 @@ import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FullBackupJob;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.internal.Operation;
@@ -599,7 +599,6 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 cleanUpPipes(enginePipes);
                 if (currentPackage.applicationInfo != null) {
                     Slog.i(TAG, "Unbinding agent in " + packageName);
-                    backupManagerService.addBackupTrace("unbinding " + packageName);
                     try {
                         backupManagerService.getActivityManager().unbindBackupAgent(
                                 currentPackage.applicationInfo);
@@ -709,7 +708,6 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             try {
                 backupManagerService.prepareOperationTimeout(
                         mCurrentOpToken, fullBackupAgentTimeoutMillis, this, OP_TYPE_BACKUP_WAIT);
-                backupManagerService.addBackupTrace("preflighting");
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "Preflighting full payload of " + pkg.packageName);
                 }
