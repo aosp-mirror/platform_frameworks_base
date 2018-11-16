@@ -177,10 +177,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
     private static final int AGPS_SUPL_MODE_MSB = 0x01;
 
-    // these need to match AGnssType enum in IAGnssCallback.hal
-    private static final int AGPS_TYPE_SUPL = 1;
-    private static final int AGPS_TYPE_C2K = 2;
-
     // Handler messages
     private static final int CHECK_LOCATION = 1;
     private static final int ENABLE = 2;
@@ -973,7 +969,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (mSuplServerHost != null
                 && mSuplServerPort > TCP_MIN_PORT
                 && mSuplServerPort <= TCP_MAX_PORT) {
-            native_set_agps_server(AGPS_TYPE_SUPL, mSuplServerHost, mSuplServerPort);
+            native_set_agps_server(GnssNetworkConnectivityHandler.AGPS_TYPE_SUPL,
+                    mSuplServerHost, mSuplServerPort);
         }
     }
 
@@ -1025,10 +1022,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
             // TODO: remove the following native calls if we can make sure they are redundant.
             if (mSuplServerHost != null) {
-                native_set_agps_server(AGPS_TYPE_SUPL, mSuplServerHost, mSuplServerPort);
+                native_set_agps_server(GnssNetworkConnectivityHandler.AGPS_TYPE_SUPL,
+                        mSuplServerHost, mSuplServerPort);
             }
             if (mC2KServerHost != null) {
-                native_set_agps_server(AGPS_TYPE_C2K, mC2KServerHost, mC2KServerPort);
+                native_set_agps_server(GnssNetworkConnectivityHandler.AGPS_TYPE_C2K,
+                        mC2KServerHost, mC2KServerPort);
             }
 
             mGnssMeasurementsProvider.onGpsEnabledChanged();
@@ -1575,8 +1574,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     @NativeEntryPoint
-    private void reportAGpsStatus(int type, int status, byte[] ipaddr) {
-        mNetworkConnectivityHandler.onReportAGpsStatus(type, status, ipaddr);
+    private void reportAGpsStatus(int agpsType, int agpsStatus, byte[] suplIpAddr) {
+        mNetworkConnectivityHandler.onReportAGpsStatus(agpsType, agpsStatus, suplIpAddr);
     }
 
     @NativeEntryPoint
