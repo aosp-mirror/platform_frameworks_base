@@ -639,6 +639,21 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_HAS_FRAGILE_USER_DATA = 1 << 24;
 
+    /**
+     * Indicate whether this application prefers code integrity, that is, run only code that is
+     * signed. This requires android:extractNativeLibs to be "false", as well as .dex and .so (if
+     * any) stored uncompressed inside the APK, which is signed. At run time, the implications
+     * include:
+     *
+     * <ul>
+     * <li>ART will JIT the dex code directly from the APK. There may be performance characteristic
+     * changes depend on the actual workload.
+     * </ul>
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_PREFER_CODE_INTEGRITY = 1 << 25;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
             PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
@@ -654,6 +669,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_ISOLATED_SPLIT_LOADING,
             PRIVATE_FLAG_OEM,
             PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE,
+            PRIVATE_FLAG_PREFER_CODE_INTEGRITY,
             PRIVATE_FLAG_PRIVILEGED,
             PRIVATE_FLAG_PRODUCT,
             PRIVATE_FLAG_PRODUCT_SERVICES,

@@ -475,6 +475,7 @@ public class PackageParser {
         public final boolean extractNativeLibs;
         public final boolean isolatedSplits;
         public final boolean isSplitRequired;
+        public final boolean preferCodeIntegrity;
 
         public ApkLite(String codePath, String packageName, String splitName,
                 boolean isFeatureSplit,
@@ -483,7 +484,7 @@ public class PackageParser {
                 int revisionCode, int installLocation, List<VerifierInfo> verifiers,
                 SigningDetails signingDetails, boolean coreApp,
                 boolean debuggable, boolean multiArch, boolean use32bitAbi,
-                boolean extractNativeLibs, boolean isolatedSplits) {
+                boolean preferCodeIntegrity, boolean extractNativeLibs, boolean isolatedSplits) {
             this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
@@ -500,6 +501,7 @@ public class PackageParser {
             this.debuggable = debuggable;
             this.multiArch = multiArch;
             this.use32bitAbi = use32bitAbi;
+            this.preferCodeIntegrity = preferCodeIntegrity;
             this.extractNativeLibs = extractNativeLibs;
             this.isolatedSplits = isolatedSplits;
             this.isSplitRequired = isSplitRequired;
@@ -1722,6 +1724,7 @@ public class PackageParser {
         boolean isolatedSplits = false;
         boolean isFeatureSplit = false;
         boolean isSplitRequired = false;
+        boolean preferCodeIntegrity = false;
         String configForSplit = null;
         String usesSplitName = null;
 
@@ -1784,6 +1787,9 @@ public class PackageParser {
                     if ("extractNativeLibs".equals(attr)) {
                         extractNativeLibs = attrs.getAttributeBooleanValue(i, true);
                     }
+                    if ("preferCodeIntegrity".equals(attr)) {
+                        preferCodeIntegrity = attrs.getAttributeBooleanValue(i, false);
+                    }
                 }
             } else if (TAG_USES_SPLIT.equals(parser.getName())) {
                 if (usesSplitName != null) {
@@ -1800,10 +1806,16 @@ public class PackageParser {
             }
         }
 
+        if (preferCodeIntegrity && extractNativeLibs) {
+            throw new PackageParserException(
+                    PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                    "Can't request both preferCodeIntegrity and extractNativeLibs");
+        }
+
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, isFeatureSplit,
                 configForSplit, usesSplitName, isSplitRequired, versionCode, versionCodeMajor,
                 revisionCode, installLocation, verifiers, signingDetails, coreApp, debuggable,
-                multiArch, use32bitAbi, extractNativeLibs, isolatedSplits);
+                multiArch, use32bitAbi, preferCodeIntegrity, extractNativeLibs, isolatedSplits);
     }
 
     /**
@@ -3652,6 +3664,12 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestApplication_extractNativeLibs,
                 true)) {
             ai.flags |= ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS;
+        }
+
+        if (sa.getBoolean(
+                R.styleable.AndroidManifestApplication_preferCodeIntegrity,
+                false)) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PREFER_CODE_INTEGRITY;
         }
 
         if (sa.getBoolean(
