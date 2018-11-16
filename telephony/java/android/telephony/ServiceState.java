@@ -83,7 +83,45 @@ public class ServiceState implements Parcelable {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({DUPLEX_MODE_UNKNOWN, DUPLEX_MODE_FDD, DUPLEX_MODE_TDD})
+    @IntDef(prefix = "FREQUENCY_RANGE_",
+            value = {FREQUENCY_RANGE_UNKNOWN, FREQUENCY_RANGE_LOW, FREQUENCY_RANGE_MID,
+                    FREQUENCY_RANGE_HIGH, FREQUENCY_RANGE_MMWAVE})
+    public @interface FrequencyRange {}
+
+    /**
+     * Indicates frequency range is unknown.
+     * @hide
+     */
+    public static final int FREQUENCY_RANGE_UNKNOWN = -1;
+
+    /**
+     * Indicates the frequency range is below 1GHz.
+     * @hide
+     */
+    public static final int FREQUENCY_RANGE_LOW = 1;
+
+    /**
+     * Indicates the frequency range is between 1GHz to 3GHz.
+     * @hide
+     */
+    public static final int FREQUENCY_RANGE_MID = 2;
+
+    /**
+     * Indicates the frequency range is between 3GHz and 6GHz.
+     * @hide
+     */
+    public static final int FREQUENCY_RANGE_HIGH = 3;
+
+    /**
+     * Indicates the frequency range is above 6GHz (millimeter wave frequency).
+     * @hide
+     */
+    public static final int FREQUENCY_RANGE_MMWAVE = 4;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "DUPLEX_MODE_",
+            value = {DUPLEX_MODE_UNKNOWN, DUPLEX_MODE_FDD, DUPLEX_MODE_TDD})
     public @interface DuplexMode {}
 
     /**
@@ -283,6 +321,8 @@ public class ServiceState implements Parcelable {
     @UnsupportedAppUsage
     private boolean mIsUsingCarrierAggregation;
 
+    @FrequencyRange
+    private int mNrFrequencyRange;
     private int mChannelNumber;
     private int[] mCellBandwidths = new int[0];
 
@@ -375,6 +415,7 @@ public class ServiceState implements Parcelable {
         mLteEarfcnRsrpBoost = s.mLteEarfcnRsrpBoost;
         mNetworkRegistrationStates = s.mNetworkRegistrationStates == null ? null :
                 new ArrayList<>(s.mNetworkRegistrationStates);
+        mNrFrequencyRange = s.mNrFrequencyRange;
     }
 
     /**
@@ -406,6 +447,7 @@ public class ServiceState implements Parcelable {
         in.readList(mNetworkRegistrationStates, NetworkRegistrationState.class.getClassLoader());
         mChannelNumber = in.readInt();
         mCellBandwidths = in.createIntArray();
+        mNrFrequencyRange = in.readInt();
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -433,6 +475,7 @@ public class ServiceState implements Parcelable {
         out.writeList(mNetworkRegistrationStates);
         out.writeInt(mChannelNumber);
         out.writeIntArray(mCellBandwidths);
+        out.writeInt(mNrFrequencyRange);
     }
 
     public int describeContents() {
@@ -792,7 +835,8 @@ public class ServiceState implements Parcelable {
                 mIsEmergencyOnly,
                 mIsUsingCarrierAggregation,
                 mLteEarfcnRsrpBoost,
-                mNetworkRegistrationStates);
+                mNetworkRegistrationStates,
+                mNrFrequencyRange);
     }
 
     @Override
@@ -823,7 +867,8 @@ public class ServiceState implements Parcelable {
                 && mIsUsingCarrierAggregation == s.mIsUsingCarrierAggregation)
                 && (mNetworkRegistrationStates == null ? s.mNetworkRegistrationStates == null :
                         s.mNetworkRegistrationStates != null &&
-                        mNetworkRegistrationStates.containsAll(s.mNetworkRegistrationStates));
+                        mNetworkRegistrationStates.containsAll(s.mNetworkRegistrationStates))
+                && mNrFrequencyRange == s.mNrFrequencyRange;
     }
 
     /**
@@ -958,6 +1003,7 @@ public class ServiceState implements Parcelable {
             .append(", mIsUsingCarrierAggregation=").append(mIsUsingCarrierAggregation)
             .append(", mLteEarfcnRsrpBoost=").append(mLteEarfcnRsrpBoost)
             .append(", mNetworkRegistrationStates=").append(mNetworkRegistrationStates)
+            .append(", mNrFrequencyRange=").append(mNrFrequencyRange)
             .append("}").toString();
     }
 
@@ -987,6 +1033,7 @@ public class ServiceState implements Parcelable {
         mIsUsingCarrierAggregation = false;
         mLteEarfcnRsrpBoost = 0;
         mNetworkRegistrationStates = new ArrayList<>();
+        mNrFrequencyRange = FREQUENCY_RANGE_UNKNOWN;
     }
 
     public void setStateOutOfService() {
@@ -1225,6 +1272,7 @@ public class ServiceState implements Parcelable {
         m.putInt("LteEarfcnRsrpBoost", mLteEarfcnRsrpBoost);
         m.putInt("ChannelNumber", mChannelNumber);
         m.putIntArray("CellBandwidths", mCellBandwidths);
+        m.putInt("mNrFrequencyRange", mNrFrequencyRange);
     }
 
     /** @hide */
@@ -1286,6 +1334,22 @@ public class ServiceState implements Parcelable {
     /** @hide */
     public void setIsUsingCarrierAggregation(boolean ca) {
         mIsUsingCarrierAggregation = ca;
+    }
+
+    /**
+     * @return the frequency range of 5G NR.
+     * @hide
+     */
+    public @FrequencyRange int getNrFrequencyRange() {
+        return mNrFrequencyRange;
+    }
+
+    /**
+     * @param nrFrequencyRange the frequency range of 5G NR.
+     * @hide
+     */
+    public void setNrFrequencyRange(@FrequencyRange int nrFrequencyRange) {
+        mNrFrequencyRange = nrFrequencyRange;
     }
 
     /** @hide */
