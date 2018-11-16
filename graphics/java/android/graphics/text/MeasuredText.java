@@ -19,6 +19,7 @@ package android.graphics.text;
 import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.Px;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -49,12 +50,17 @@ import libcore.util.NativeAllocationRegistry;
  */
 public class MeasuredText {
     private long mNativePtr;
+    private boolean mComputeHyphenation;
+    private boolean mComputeLayout;
     private @NonNull char[] mChars;
 
     // Use builder instead.
-    private MeasuredText(long ptr, @NonNull char[] chars) {
+    private MeasuredText(long ptr, @NonNull char[] chars, boolean computeHyphenation,
+            boolean computeLayout) {
         mNativePtr = ptr;
         mChars = chars;
+        mComputeHyphenation = computeHyphenation;
+        mComputeLayout = computeLayout;
     }
 
     /**
@@ -172,6 +178,7 @@ public class MeasuredText {
         private boolean mComputeHyphenation = false;
         private boolean mComputeLayout = true;
         private int mCurrentOffset = 0;
+        private @Nullable MeasuredText mHintMt = null;
 
         /**
          * Construct a builder.
@@ -185,6 +192,27 @@ public class MeasuredText {
             Preconditions.checkNotNull(text);
             mText = text;
             mNativePtr = nInitBuilder();
+        }
+
+        /**
+         * Construct a builder with existing MeasuredText.
+         *
+         * The MeasuredText returned by build method will hold a reference of the text. Developer is
+         * not supposed to modify the text.
+         *
+         * @param text a text
+         */
+        public Builder(@NonNull MeasuredText text) {
+            Preconditions.checkNotNull(text);
+            mText = text.mChars;
+            mNativePtr = nInitBuilder();
+            if (!text.mComputeLayout) {
+                throw new IllegalArgumentException(
+                    "The input MeasuredText must not be created with setComputeLayout(false).");
+            }
+            mComputeHyphenation = text.mComputeHyphenation;
+            mComputeLayout = text.mComputeLayout;
+            mHintMt = text;
         }
 
         /**
@@ -282,10 +310,16 @@ public class MeasuredText {
             if (mCurrentOffset != mText.length) {
                 throw new IllegalStateException("Style info has not been provided for all text.");
             }
+            if (mHintMt != null && mHintMt.mComputeHyphenation != mComputeHyphenation) {
+                throw new IllegalArgumentException(
+                        "The hyphenation configuration is different from given hint MeasuredText");
+            }
             try {
-                long ptr = nBuildMeasuredText(mNativePtr, mText, mComputeHyphenation,
+                long hintPtr = (mHintMt == null) ? 0 : mHintMt.getNativePtr();
+                long ptr = nBuildMeasuredText(mNativePtr, hintPtr, mText, mComputeHyphenation,
                         mComputeLayout);
-                MeasuredText res = new MeasuredText(ptr, mText);
+                final MeasuredText res = new MeasuredText(ptr, mText, mComputeHyphenation,
+                        mComputeLayout);
                 sRegistry.registerNativeAllocation(res, ptr);
                 return res;
             } finally {
@@ -339,6 +373,7 @@ public class MeasuredText {
 
         private static native long nBuildMeasuredText(
                 /* Non Zero */ long nativeBuilderPtr,
+                long hintMtPtr,
                 @NonNull char[] text,
                 boolean computeHyphenation,
                 boolean computeLayout);

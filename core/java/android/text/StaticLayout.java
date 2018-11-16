@@ -650,10 +650,26 @@ public class StaticLayout extends Layout {
         final Spanned spanned = (source instanceof Spanned) ? (Spanned) source : null;
         if (source instanceof PrecomputedText) {
             PrecomputedText precomputed = (PrecomputedText) source;
-            if (precomputed.canUseMeasuredResult(bufStart, bufEnd, textDir, paint,
-                      b.mBreakStrategy, b.mHyphenationFrequency)) {
-                // Some parameters are different from the ones when measured text is created.
-                paragraphInfo = precomputed.getParagraphInfo();
+            final @PrecomputedText.Params.CheckResultUsableResult int checkResult =
+                    precomputed.checkResultUsable(bufStart, bufEnd, textDir, paint,
+                            b.mBreakStrategy, b.mHyphenationFrequency);
+            switch (checkResult) {
+                case PrecomputedText.Params.UNUSABLE:
+                    break;
+                case PrecomputedText.Params.NEED_RECOMPUTE:
+                    final PrecomputedText.Params newParams =
+                            new PrecomputedText.Params.Builder(paint)
+                                .setBreakStrategy(b.mBreakStrategy)
+                                .setHyphenationFrequency(b.mHyphenationFrequency)
+                                .setTextDirection(textDir)
+                                .build();
+                    precomputed = PrecomputedText.create(precomputed, newParams);
+                    paragraphInfo = precomputed.getParagraphInfo();
+                    break;
+                case PrecomputedText.Params.USABLE:
+                    // Some parameters are different from the ones when measured text is created.
+                    paragraphInfo = precomputed.getParagraphInfo();
+                    break;
             }
         }
 

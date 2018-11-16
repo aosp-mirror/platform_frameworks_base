@@ -133,7 +133,8 @@ public class MeasuredParagraphTest {
     public void buildForStaticLayout() {
         MeasuredParagraph mt = null;
 
-        mt = MeasuredParagraph.buildForStaticLayout(PAINT, "XXX", 0, 3, LTR, false, false, null);
+        mt = MeasuredParagraph.buildForStaticLayout(
+                PAINT, "XXX", 0, 3, LTR, false, false, null /* no hint */, null);
         assertNotNull(mt);
         assertNotNull(mt.getChars());
         assertEquals("XXX", charsToString(mt.getChars()));
@@ -147,8 +148,8 @@ public class MeasuredParagraphTest {
         assertNotNull(mt.getMeasuredText());
 
         // Recycle it
-        MeasuredParagraph mt2 =
-                MeasuredParagraph.buildForStaticLayout(PAINT, "_VVV_", 1, 4, RTL, false, false, mt);
+        MeasuredParagraph mt2 = MeasuredParagraph.buildForStaticLayout(
+                PAINT, "_VVV_", 1, 4, RTL, false, false, null /* no hint */, mt);
         assertEquals(mt2, mt);
         assertNotNull(mt2.getChars());
         assertEquals("VVV", charsToString(mt.getChars()));
