@@ -857,7 +857,10 @@ public class HdmiControlService extends SystemService {
     int pathToPortId(int path) {
         int mask = 0xF000;
         int finalMask = 0xF000;
-        int physicalAddress = getPhysicalAddress();
+        int physicalAddress;
+        synchronized (mLock) {
+            physicalAddress = mPhysicalAddress;
+        }
         int maskedAddress = physicalAddress;
 
         while (maskedAddress != 0) {
