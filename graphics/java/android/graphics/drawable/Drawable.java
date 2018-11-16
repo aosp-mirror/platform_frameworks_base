@@ -595,7 +595,12 @@ public abstract class Drawable {
      * <p class="note"><strong>Note:</strong> Setting a color filter disables
      * {@link #setTintList(ColorStateList) tint}.
      * </p>
+     *
+     * @see {@link #setColorFilter(ColorFilter)} }
+     * @deprecated use {@link #setColorFilter(ColorFilter)} with an instance
+     * of {@link android.graphics.BlendModeColorFilter}
      */
+    @Deprecated
     public void setColorFilter(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
         if (getColorFilter() instanceof PorterDuffColorFilter) {
             PorterDuffColorFilter existing = (PorterDuffColorFilter) getColorFilter();

@@ -845,12 +845,23 @@ namespace PaintGlue {
         static_assert(9 == static_cast<int>(SkBlendMode::kSrcATop), "xfermode_mismatch");
         static_assert(10 == static_cast<int>(SkBlendMode::kDstATop), "xfermode_mismatch");
         static_assert(11 == static_cast<int>(SkBlendMode::kXor), "xfermode_mismatch");
-        static_assert(16 == static_cast<int>(SkBlendMode::kDarken), "xfermode_mismatch");
-        static_assert(17 == static_cast<int>(SkBlendMode::kLighten), "xfermode_mismatch");
+        static_assert(12 == static_cast<int>(SkBlendMode::kPlus), "xfermode_mismatch");
         static_assert(13 == static_cast<int>(SkBlendMode::kModulate), "xfermode_mismatch");
         static_assert(14 == static_cast<int>(SkBlendMode::kScreen), "xfermode_mismatch");
-        static_assert(12 == static_cast<int>(SkBlendMode::kPlus), "xfermode_mismatch");
         static_assert(15 == static_cast<int>(SkBlendMode::kOverlay), "xfermode_mismatch");
+        static_assert(16 == static_cast<int>(SkBlendMode::kDarken), "xfermode_mismatch");
+        static_assert(17 == static_cast<int>(SkBlendMode::kLighten), "xfermode_mismatch");
+        static_assert(18 == static_cast<int>(SkBlendMode::kColorDodge), "xfermode mismatch");
+        static_assert(19 == static_cast<int>(SkBlendMode::kColorBurn), "xfermode mismatch");
+        static_assert(20 == static_cast<int>(SkBlendMode::kHardLight), "xfermode mismatch");
+        static_assert(21 == static_cast<int>(SkBlendMode::kSoftLight), "xfermode mismatch");
+        static_assert(22 == static_cast<int>(SkBlendMode::kDifference), "xfermode mismatch");
+        static_assert(23 == static_cast<int>(SkBlendMode::kExclusion), "xfermode mismatch");
+        static_assert(24 == static_cast<int>(SkBlendMode::kMultiply), "xfermode mismatch");
+        static_assert(25 == static_cast<int>(SkBlendMode::kHue), "xfermode mismatch");
+        static_assert(26 == static_cast<int>(SkBlendMode::kSaturation), "xfermode mismatch");
+        static_assert(27 == static_cast<int>(SkBlendMode::kColor), "xfermode mismatch");
+        static_assert(28 == static_cast<int>(SkBlendMode::kLuminosity), "xfermode mismatch");
 
         SkBlendMode mode = static_cast<SkBlendMode>(xfermodeHandle);
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);

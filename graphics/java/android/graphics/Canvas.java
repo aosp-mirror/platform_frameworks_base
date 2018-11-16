@@ -1684,8 +1684,22 @@ public class Canvas extends BaseCanvas {
      *
      * @param color the color to draw with
      * @param mode the porter-duff mode to apply to the color
+     *
+     * @deprecated use {@link #drawColor(int, BlendMode)} instead
      */
+    @Deprecated
     public void drawColor(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
+        super.drawColor(color, mode);
+    }
+
+    /**
+     * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color and
+     * blendmode.
+     *
+     * @param color the color to draw with
+     * @param mode the blendmode to apply to the color
+     */
+    public void drawColor(@ColorInt int color, @NonNull BlendMode mode) {
         super.drawColor(color, mode);
     }
 
