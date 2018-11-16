@@ -4402,22 +4402,24 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         lastFocus = displayContent.mLastFocus;
                         newFocus = displayContent.mCurrentFocus;
-                        if (lastFocus == newFocus) {
-                            // Report focus to ViewRootImpl when top focused display changes.
-                            // Or, nothing to do for no window focus change.
-                            if (topFocusedDisplayChanged && newFocus != null) {
-                                if (DEBUG_FOCUS_LIGHT) {
-                                    Slog.d(TAG, "Reporting focus: " + newFocus
-                                            + " due to top focused display change.");
-                                }
-                                // See {@link IWindow#windowFocusChanged} to know why set
-                                // reportToClient as false.
-                                newFocus.reportFocusChangedSerialized(true, mInTouchMode,
-                                        false /* reportToClient */);
-                                notifyFocusChanged();
+                    }
+                    if (lastFocus == newFocus) {
+                        // Report focus to ViewRootImpl when top focused display changes.
+                        // Or, nothing to do for no window focus change.
+                        if (topFocusedDisplayChanged && newFocus != null) {
+                            if (DEBUG_FOCUS_LIGHT) {
+                                Slog.d(TAG, "Reporting focus: " + newFocus
+                                        + " due to top focused display change.");
                             }
-                            return;
+                            // See {@link IWindow#windowFocusChanged} to know why set
+                            // reportToClient as false.
+                            newFocus.reportFocusChangedSerialized(true, mInTouchMode,
+                                    false /* reportToClient */);
+                            notifyFocusChanged();
                         }
+                        return;
+                    }
+                    synchronized (mGlobalLock) {
                         displayContent.mLastFocus = newFocus;
                         if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Focus moving from " + lastFocus +
                                 " to " + newFocus + " displayId=" + displayContent.getDisplayId());
