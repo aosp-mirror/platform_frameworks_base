@@ -227,7 +227,6 @@ class NotificationSwipeHelper extends SwipeHelper
         if (mCallback.isExpanded()) {
             // We don't want to quick-dismiss when it's a heads up as this might lead to closing
             // of the panel early.
-            mSwipingInProgress = false;
             mCallback.handleChildViewDismissed(view);
         }
         mCallback.onDismiss();
@@ -247,7 +246,6 @@ class NotificationSwipeHelper extends SwipeHelper
     @Override
     public void snapChild(final View animView, final float targetLeft, float velocity) {
         superSnapChild(animView, targetLeft, velocity);
-        mSwipingInProgress = false;
         mCallback.onDragCancelled(animView);
         if (targetLeft == 0) {
             handleMenuCoveredOrDismissed();
@@ -354,7 +352,6 @@ class NotificationSwipeHelper extends SwipeHelper
 
     public void onMenuShown(View animView) {
         setExposedMenuView(getTranslatingParentView());
-        mSwipingInProgress = false;
         mCallback.onDragCancelled(animView);
         Handler handler = getHandler();
 

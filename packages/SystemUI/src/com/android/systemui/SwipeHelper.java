@@ -88,8 +88,6 @@ public class SwipeHelper implements Gefingerpoken {
     private Runnable mWatchLongPress;
     private final long mLongPressTimeout;
 
-    protected boolean mSwipingInProgress;
-
     final private int[] mTmpPos = new int[2];
     private final int mFalsingThreshold;
     private boolean mTouchAboveFalsingThreshold;
@@ -128,10 +126,6 @@ public class SwipeHelper implements Gefingerpoken {
 
     public void setDisableHardwareLayers(boolean disableHwLayers) {
         mDisableHwLayers = disableHwLayers;
-    }
-
-    public boolean isSwipingInProgress() {
-        return mSwipingInProgress;
     }
 
     private float getPos(MotionEvent ev) {
@@ -325,7 +319,6 @@ public class SwipeHelper implements Gefingerpoken {
                     if (Math.abs(delta) > mPagingTouchSlop
                             && Math.abs(delta) > Math.abs(deltaPerpendicular)) {
                         if (mCallback.canChildBeDragged(mCurrView)) {
-                            mSwipingInProgress = true;
                             mCallback.onBeginDrag(mCurrView);
                             mDragging = true;
                             mInitialTouchPos = getPos(ev);
@@ -445,7 +438,6 @@ public class SwipeHelper implements Gefingerpoken {
                     wasRemoved = row.isRemoved();
                 }
                 if (!mCancelled || wasRemoved) {
-                    mSwipingInProgress = false;
                     mCallback.onChildDismissed(animView);
                 }
                 if (endAction != null) {
@@ -637,7 +629,6 @@ public class SwipeHelper implements Gefingerpoken {
                                 !swipedFastEnough() /* useAccelerateInterpolator */);
                     } else {
                         // snappity
-                        mSwipingInProgress = false;
                         mCallback.onDragCancelled(mCurrView);
                         snapChild(mCurrView, 0 /* leftTarget */, velocity);
                     }
