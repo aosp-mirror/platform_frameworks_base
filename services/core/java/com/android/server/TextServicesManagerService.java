@@ -184,7 +184,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         buildSpellCheckerMapLocked(mContext, mSpellCheckerList, mSpellCheckerMap, mSettings);
         SpellCheckerInfo sci = getCurrentSpellChecker(null);
         if (sci == null) {
-            sci = findAvailSpellCheckerLocked(null);
+            sci = findAvailSystemSpellCheckerLocked(null);
             if (sci != null) {
                 // Set the current spell checker if there is one or more spell checkers
                 // available. In this case, "sci" is the first one in the available spell
@@ -228,7 +228,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                         change == PACKAGE_PERMANENT_CHANGE || change == PACKAGE_TEMPORARY_CHANGE
                         // Package modified
                         || isPackageModified(packageName)) {
-                    sci = findAvailSpellCheckerLocked(packageName);
+                    sci = findAvailSystemSpellCheckerLocked(packageName);
                     if (sci != null) {
                         setCurrentSpellCheckerLocked(sci.getId());
                     }
@@ -372,8 +372,16 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         mSpellCheckerBindGroups.clear();
     }
 
-    private SpellCheckerInfo findAvailSpellCheckerLocked(String prefPackage) {
-        final int spellCheckersCount = mSpellCheckerList.size();
+    private SpellCheckerInfo findAvailSystemSpellCheckerLocked(String prefPackage) {
+        // Filter the spell checker list to remove spell checker services that are not pre-installed
+        ArrayList<SpellCheckerInfo> spellCheckerList = new ArrayList<>();
+        for (SpellCheckerInfo sci : mSpellCheckerList) {
+            if ((sci.getServiceInfo().applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                spellCheckerList.add(sci);
+            }
+        }
+
+        final int spellCheckersCount = spellCheckerList.size();
         if (spellCheckersCount == 0) {
             Slog.w(TAG, "no available spell checker services found");
             return null;
@@ -383,7 +391,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 final SpellCheckerInfo sci = mSpellCheckerList.get(i);
                 if (prefPackage.equals(sci.getPackageName())) {
                     if (DBG) {
-                        Slog.d(TAG, "findAvailSpellCheckerLocked: " + sci.getPackageName());
+                        Slog.d(TAG, "findAvailSystemSpellCheckerLocked: " + sci.getPackageName());
                     }
                     return sci;
                 }
@@ -397,7 +405,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         final ArrayList<Locale> suitableLocales =
                 InputMethodUtils.getSuitableLocalesForSpellChecker(systemLocal);
         if (DBG) {
-            Slog.w(TAG, "findAvailSpellCheckerLocked suitableLocales="
+            Slog.w(TAG, "findAvailSystemSpellCheckerLocked suitableLocales="
                     + Arrays.toString(suitableLocales.toArray(new Locale[suitableLocales.size()])));
         }
         final int localeCount = suitableLocales.size();
