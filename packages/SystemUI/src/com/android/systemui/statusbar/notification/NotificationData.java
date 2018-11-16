@@ -114,8 +114,9 @@ public class NotificationData {
         public CharSequence remoteInputText;
         public List<SnoozeCriterion> snoozeCriteria;
         public int userSentiment = Ranking.USER_SENTIMENT_NEUTRAL;
+        /** Smart Actions provided by the NotificationAssistantService. */
         @NonNull
-        public List<Notification.Action> smartActions = Collections.emptyList();
+        public List<Notification.Action> systemGeneratedSmartActions = Collections.emptyList();
         public CharSequence[] smartReplies = new CharSequence[0];
 
         private int mCachedContrastColor = COLOR_INVALID;
@@ -171,7 +172,7 @@ public class NotificationData {
             importance = ranking.getImportance();
             snoozeCriteria = ranking.getSnoozeCriteria();
             userSentiment = ranking.getUserSentiment();
-            smartActions = ranking.getSmartActions() == null
+            systemGeneratedSmartActions = ranking.getSmartActions() == null
                     ? Collections.emptyList() : ranking.getSmartActions();
             smartReplies = ranking.getSmartReplies() == null
                     ? new CharSequence[0]

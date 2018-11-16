@@ -163,7 +163,11 @@ public final class NotificationRecord {
     private Light mLight;
     private String mGroupLogTag;
     private String mChannelIdLogTag;
-    private ArrayList<Notification.Action> mSmartActions;
+    /**
+     * This list contains system generated smart actions from NAS, app-generated smart actions are
+     * stored in Notification.actions marked as SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION.
+     */
+    private ArrayList<Notification.Action> mSystemGeneratedSmartActions;
     private ArrayList<CharSequence> mSmartReplies;
 
     private final List<Adjustment> mAdjustments;
@@ -653,10 +657,11 @@ public final class NotificationRecord {
                     }
                 }
                 if (signals.containsKey(Adjustment.KEY_SMART_ACTIONS)) {
-                    setSmartActions(signals.getParcelableArrayList(Adjustment.KEY_SMART_ACTIONS));
+                    setSystemGeneratedSmartActions(
+                            signals.getParcelableArrayList(Adjustment.KEY_SMART_ACTIONS));
                     MetricsLogger.action(getAdjustmentLogMaker()
                             .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_SMART_ACTIONS,
-                                    getSmartActions().size()));
+                                    getSystemGeneratedSmartActions().size()));
                 }
                 if (signals.containsKey(Adjustment.KEY_SMART_REPLIES)) {
                     setSmartReplies(signals.getCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES));
@@ -1132,12 +1137,13 @@ public final class NotificationRecord {
         mHasSeenSmartReplies = hasSeenSmartReplies;
     }
 
-    public void setSmartActions(ArrayList<Notification.Action> smartActions) {
-        mSmartActions = smartActions;
+    public void setSystemGeneratedSmartActions(
+            ArrayList<Notification.Action> systemGeneratedSmartActions) {
+        mSystemGeneratedSmartActions = systemGeneratedSmartActions;
     }
 
-    public ArrayList<Notification.Action> getSmartActions() {
-        return mSmartActions;
+    public ArrayList<Notification.Action> getSystemGeneratedSmartActions() {
+        return mSystemGeneratedSmartActions;
     }
 
     public void setSmartReplies(ArrayList<CharSequence> smartReplies) {

@@ -39,7 +39,6 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -1565,10 +1564,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void setUseIncreasedCollapsedHeight(boolean use) {
         mUseIncreasedCollapsedHeight = use;
         mNotificationInflater.setUsesIncreasedHeight(use);
-    }
-
-    public void setSmartActions(List<Notification.Action> smartActions) {
-        mNotificationInflater.setSmartActions(smartActions);
     }
 
     public void setUseIncreasedHeadsUpHeight(boolean use) {
