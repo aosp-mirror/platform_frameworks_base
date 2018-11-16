@@ -614,6 +614,11 @@ public class HdmiControlService extends SystemService {
                         tv().setSystemAudioControlFeatureEnabled(enabled);
                     }
                     if (isAudioSystemDevice()) {
+                        if (audioSystem() == null) {
+                            Slog.e(TAG, "Audio System device has not registered yet."
+                                    + " Can't turn system audio mode on.");
+                            break;
+                        }
                         audioSystem().onSystemAduioControlFeatureSupportChanged(enabled);
                     }
                     break;
