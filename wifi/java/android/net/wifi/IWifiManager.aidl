@@ -63,7 +63,7 @@ interface IWifiManager
 
     List<WifiConfiguration> getAllMatchingWifiConfigs(in List<ScanResult> scanResult);
 
-    List<OsuProvider> getMatchingOsuProviders(in ScanResult scanResult);
+    List<OsuProvider> getMatchingOsuProviders(in List<ScanResult> scanResult);
 
     int addOrUpdateNetwork(in WifiConfiguration config, String packageName);
 

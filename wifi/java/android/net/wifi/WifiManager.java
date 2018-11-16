@@ -1095,19 +1095,21 @@ public class WifiManager {
     }
 
     /**
-     * Returns a list of Hotspot 2.0 OSU (Online Sign-Up) providers associated with the given AP.
+     * Returns a list of unique Hotspot 2.0 OSU (Online Sign-Up) providers associated with a given
+     * list of ScanResult.
      *
      * An empty list will be returned if no match is found.
      *
-     * @param scanResult scanResult that represents the BSSID
-     * @return list of {@link OsuProvider}
+     * @param scanResults a list of ScanResult
+     * @return A list of {@link OsuProvider} that does not contain duplicate entries.
      * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public List<OsuProvider> getMatchingOsuProviders(ScanResult scanResult) {
+    public List<OsuProvider> getMatchingOsuProviders(List<ScanResult> scanResults) {
         try {
-            return mService.getMatchingOsuProviders(scanResult);
+            return mService.getMatchingOsuProviders(scanResults);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

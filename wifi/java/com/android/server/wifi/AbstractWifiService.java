@@ -108,8 +108,20 @@ public abstract class AbstractWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /**
+     * Returns a list of Hotspot 2.0 OSU (Online Sign-Up) providers associated with the given AP.
+     *
+     * @param scanResult a single ScanResult Object
+     * @return
+     * @deprecated use {@link #getMatchingOsuProviders(List)} instead.
+     */
+    @Deprecated
     public List<OsuProvider> getMatchingOsuProviders(ScanResult scanResult) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<OsuProvider> getMatchingOsuProviders(List<ScanResult> scanResults) {
         throw new UnsupportedOperationException();
     }
 
