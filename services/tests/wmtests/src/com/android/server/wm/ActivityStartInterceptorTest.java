@@ -90,6 +90,8 @@ public class ActivityStartInterceptorTest {
     @Mock
     private ActivityTaskManagerService mService;
     @Mock
+    private RootActivityContainer mRootActivityContainer;
+    @Mock
     private ActivityStackSupervisor mSupervisor;
     @Mock
     private DevicePolicyManagerInternal mDevicePolicyManager;
@@ -111,7 +113,8 @@ public class ActivityStartInterceptorTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mService.mAmInternal = mAmInternal;
-        mInterceptor = new ActivityStartInterceptor(mService, mSupervisor, mContext);
+        mInterceptor = new ActivityStartInterceptor(
+                mService, mSupervisor, mRootActivityContainer, mContext);
         mInterceptor.setStates(TEST_USER_ID, TEST_REAL_CALLING_PID, TEST_REAL_CALLING_UID,
                 TEST_START_FLAGS, TEST_CALLING_PACKAGE);
 

@@ -125,7 +125,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
     public void testUpdateLaunchBounds() {
         // When in a non-resizeable stack, the task bounds should be updated.
         final TaskRecord task = new TaskBuilder(mService.mStackSupervisor)
-                .setStack(mService.mStackSupervisor.getDefaultDisplay().createStack(
+                .setStack(mService.mRootActivityContainer.getDefaultDisplay().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */))
                 .build();
         final Rect bounds = new Rect(10, 10, 100, 100);
@@ -136,7 +136,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // When in a resizeable stack, the stack bounds should be updated as well.
         final TaskRecord task2 = new TaskBuilder(mService.mStackSupervisor)
-                .setStack(mService.mStackSupervisor.getDefaultDisplay().createStack(
+                .setStack(mService.mRootActivityContainer.getDefaultDisplay().createStack(
                         WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */))
                 .build();
         assertThat((Object) task2.getStack()).isInstanceOf(PinnedActivityStack.class);
@@ -314,7 +314,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
      * Creates a {@link ActivityStarter} with default parameters and necessary mocks.
      *
      * @param launchFlags The intent flags to launch activity.
-     * @param mockGetLaunchStack Whether to mock {@link ActivityStackSupervisor#getLaunchStack} for
+     * @param mockGetLaunchStack Whether to mock {@link RootActivityContainer#getLaunchStack} for
      *                           always launching to the testing stack. Set to false when allowing
      *                           the activity can be launched to any stack that is decided by real
      *                           implementation.
@@ -323,14 +323,14 @@ public class ActivityStarterTests extends ActivityTestsBase {
     private ActivityStarter prepareStarter(@Intent.Flags int launchFlags,
             boolean mockGetLaunchStack) {
         // always allow test to start activity.
-        doReturn(true).when(mService.mStackSupervisor).checkStartAnyActivityPermission(
+        doReturn(true).when(mSupervisor).checkStartAnyActivityPermission(
                 any(), any(), any(), anyInt(), anyInt(), anyInt(), any(),
                 anyBoolean(), anyBoolean(), any(), any(), any());
 
         // instrument the stack and task used.
-        final ActivityStack stack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+        final ActivityStack stack = mRootActivityContainer.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor)
+        final TaskRecord task = new TaskBuilder(mSupervisor)
                 .setCreateStack(false)
                 .build();
 
@@ -343,9 +343,9 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         if (mockGetLaunchStack) {
             // Direct starter to use spy stack.
-            doReturn(stack).when(mService.mStackSupervisor)
+            doReturn(stack).when(mRootActivityContainer)
                     .getLaunchStack(any(), any(), any(), anyBoolean());
-            doReturn(stack).when(mService.mStackSupervisor)
+            doReturn(stack).when(mRootActivityContainer)
                     .getLaunchStack(any(), any(), any(), anyBoolean(), any());
         }
 
@@ -441,7 +441,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final ActivityStack focusStack = focusActivity.getStack();
         focusStack.moveToFront("testSplitScreenDeliverToTop");
 
-        doReturn(reusableActivity).when(mService.mStackSupervisor).findTaskLocked(any(), anyInt());
+        doReturn(reusableActivity).when(mRootActivityContainer).findTask(any(), anyInt());
 
         final int result = starter.setReason("testSplitScreenDeliverToTop").execute();
 
@@ -473,7 +473,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // Enter split-screen. Primary stack should have focus.
         focusActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
 
-        doReturn(reusableActivity).when(mService.mStackSupervisor).findTaskLocked(any(), anyInt());
+        doReturn(reusableActivity).when(mRootActivityContainer).findTask(any(), anyInt());
 
         final int result = starter.setReason("testSplitScreenMoveToFront").execute();
 
@@ -486,7 +486,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
      */
     @Test
     public void testTaskModeViolation() {
-        final ActivityDisplay display = mService.mStackSupervisor.getDefaultDisplay();
+        final ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
         ((TestActivityDisplay) display).removeAllTasks();
         assertNoTasks(display);
 
@@ -562,7 +562,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // Create a secondary display at bottom.
         final TestActivityDisplay secondaryDisplay = spy(createNewActivityDisplay());
-        mSupervisor.addChild(secondaryDisplay, POSITION_BOTTOM);
+        mRootActivityContainer.addChild(secondaryDisplay, POSITION_BOTTOM);
         final ActivityStack stack = secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
@@ -600,7 +600,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // Create a secondary display with an activity.
         final TestActivityDisplay secondaryDisplay = spy(createNewActivityDisplay());
-        mSupervisor.addChild(secondaryDisplay, POSITION_TOP);
+        mRootActivityContainer.addChild(secondaryDisplay, POSITION_TOP);
         final ActivityRecord singleTaskActivity = createSingleTaskActivityOn(
                 secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
                         ACTIVITY_TYPE_STANDARD, false /* onTop */));

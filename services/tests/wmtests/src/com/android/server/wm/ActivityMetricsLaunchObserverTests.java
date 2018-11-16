@@ -74,7 +74,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
         // Sometimes we need an ActivityRecord for ActivityMetricsLogger to do anything useful.
         // This seems to be the easiest way to create an ActivityRecord.
-        mStack = mSupervisor.getDefaultDisplay().createStack(
+        mStack = mRootActivityContainer.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         mTask = new TaskBuilder(mSupervisor).setStack(mStack).build();
         mActivityRecord = new ActivityBuilder(mService).setTask(mTask).build();

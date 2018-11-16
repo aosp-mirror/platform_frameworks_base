@@ -63,7 +63,7 @@ public class RunningTasksTest extends ActivityTestsBase {
         final int numStacks = 2;
         for (int stackIndex = 0; stackIndex < numStacks; stackIndex++) {
             final ActivityStack stack =
-                    new StackBuilder(mSupervisor).setCreateActivity(false).build();
+                    new StackBuilder(mRootActivityContainer).setCreateActivity(false).build();
             display.addChild(stack, POSITION_BOTTOM);
         }
 

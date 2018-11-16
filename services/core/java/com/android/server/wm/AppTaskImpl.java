@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
 import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.wm.RootActivityContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
 
 import android.app.ActivityManager;
 import android.app.IAppTask;
@@ -77,7 +77,7 @@ class AppTaskImpl extends IAppTask.Stub {
         synchronized (mService.mGlobalLock) {
             long origId = Binder.clearCallingIdentity();
             try {
-                TaskRecord tr = mService.mStackSupervisor.anyTaskForIdLocked(mTaskId,
+                TaskRecord tr = mService.mRootActivityContainer.anyTaskForId(mTaskId,
                         MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
                 if (tr == null) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
@@ -115,7 +115,7 @@ class AppTaskImpl extends IAppTask.Stub {
         TaskRecord tr;
         IApplicationThread appThread;
         synchronized (mService.mGlobalLock) {
-            tr = mService.mStackSupervisor.anyTaskForIdLocked(mTaskId,
+            tr = mService.mRootActivityContainer.anyTaskForId(mTaskId,
                     MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
             if (tr == null) {
                 throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
@@ -143,7 +143,7 @@ class AppTaskImpl extends IAppTask.Stub {
         synchronized (mService.mGlobalLock) {
             long origId = Binder.clearCallingIdentity();
             try {
-                TaskRecord tr = mService.mStackSupervisor.anyTaskForIdLocked(mTaskId,
+                TaskRecord tr = mService.mRootActivityContainer.anyTaskForId(mTaskId,
                         MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
                 if (tr == null) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);

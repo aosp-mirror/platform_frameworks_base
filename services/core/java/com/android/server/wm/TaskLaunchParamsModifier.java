@@ -138,7 +138,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // STEP 1: Determine the display to launch the activity/task.
         final int displayId = getPreferredLaunchDisplay(task, options, source, currentParams);
         outParams.mPreferredDisplayId = displayId;
-        ActivityDisplay display = mSupervisor.getActivityDisplay(displayId);
+        ActivityDisplay display = mSupervisor.mRootActivityContainer.getActivityDisplay(displayId);
         if (DEBUG) {
             appendLog("display-id=" + outParams.mPreferredDisplayId + " display-windowing-mode="
                     + display.getWindowingMode());
@@ -300,12 +300,14 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             displayId = stack.mDisplayId;
         }
 
-        if (displayId != INVALID_DISPLAY && mSupervisor.getActivityDisplay(displayId) == null) {
+        if (displayId != INVALID_DISPLAY
+                && mSupervisor.mRootActivityContainer.getActivityDisplay(displayId) == null) {
             displayId = currentParams.mPreferredDisplayId;
         }
         displayId = (displayId == INVALID_DISPLAY) ? currentParams.mPreferredDisplayId : displayId;
 
-        return (displayId != INVALID_DISPLAY && mSupervisor.getActivityDisplay(displayId) != null)
+        return (displayId != INVALID_DISPLAY
+                && mSupervisor.mRootActivityContainer.getActivityDisplay(displayId) != null)
                 ? displayId : DEFAULT_DISPLAY;
     }
 
@@ -606,7 +608,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 || displayBounds.height() < inOutBounds.height()) {
             // There is no way for us to fit the bounds in the display without changing width
             // or height. Just move the start to align with the display.
-            final int layoutDirection = mSupervisor.getConfiguration().getLayoutDirection();
+            final int layoutDirection =
+                    mSupervisor.mRootActivityContainer.getConfiguration().getLayoutDirection();
             final int left = layoutDirection == View.LAYOUT_DIRECTION_RTL
                     ? displayBounds.width() - inOutBounds.width()
                     : 0;

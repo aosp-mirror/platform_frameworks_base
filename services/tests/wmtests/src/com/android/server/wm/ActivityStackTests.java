@@ -74,7 +74,7 @@ public class ActivityStackTests extends ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         setupActivityTaskManagerService();
-        mDefaultDisplay = mSupervisor.getDefaultDisplay();
+        mDefaultDisplay = mRootActivityContainer.getDefaultDisplay();
         mStack = spy(mDefaultDisplay.createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */));
         mTask = new TaskBuilder(mSupervisor).setStack(mStack).build();
@@ -112,7 +112,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         r.setState(RESUMED, "testResumedActivityFromTaskReparenting");
         assertEquals(r, mStack.getResumedActivity());
 
-        final ActivityStack destStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+        final ActivityStack destStack = mRootActivityContainer.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         mTask.reparent(destStack, true /* toTop */, TaskRecord.REPARENT_KEEP_STACK_AT_FRONT,
@@ -130,7 +130,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         r.setState(RESUMED, "testResumedActivityFromActivityReparenting");
         assertEquals(r, mStack.getResumedActivity());
 
-        final ActivityStack destStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+        final ActivityStack destStack = mRootActivityContainer.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final TaskRecord destTask = new TaskBuilder(mSupervisor).setStack(destStack).build();
 
@@ -239,8 +239,8 @@ public class ActivityStackTests extends ActivityTestsBase {
                 .setUid(UserHandle.PER_USER_RANGE * 2).build();
         taskOverlay.mTaskOverlay = true;
 
-        final ActivityStackSupervisor.FindTaskResult result =
-                new ActivityStackSupervisor.FindTaskResult();
+        final RootActivityContainer.FindTaskResult result =
+                new RootActivityContainer.FindTaskResult();
         mStack.findTaskLocked(r, result);
 
         assertEquals(r, task.getTopActivity(false /* includeOverlays */));
@@ -700,7 +700,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         // should be destroyed immediately with updating configuration to restore original state.
         final ActivityRecord activity1 = finishCurrentActivity(stack1);
         assertEquals(DESTROYING, activity1.getState());
-        verify(mSupervisor).ensureVisibilityAndConfig(eq(null) /* starting */,
+        verify(mRootActivityContainer).ensureVisibilityAndConfig(eq(null) /* starting */,
                 eq(display.mDisplayId), anyBoolean(), anyBoolean());
     }
 
@@ -778,7 +778,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         final ActivityDisplay display = mock(ActivityDisplay.class);
         final KeyguardController keyguardController = mSupervisor.getKeyguardController();
 
-        doReturn(display).when(mSupervisor).getActivityDisplay(anyInt());
+        doReturn(display).when(mRootActivityContainer).getActivityDisplay(anyInt());
         doReturn(keyguardGoingAway).when(keyguardController).isKeyguardGoingAway();
         doReturn(displaySleeping).when(display).isSleeping();
         doReturn(focusedStack).when(mStack).isFocusedStackOnDisplay();

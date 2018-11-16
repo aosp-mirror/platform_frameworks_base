@@ -322,6 +322,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     private boolean inHistory;  // are we in the history stack?
     final ActivityStackSupervisor mStackSupervisor;
+    final RootActivityContainer mRootActivityContainer;
 
     static final int STARTING_WINDOW_NOT_SHOWN = 0;
     static final int STARTING_WINDOW_SHOWN = 1;
@@ -844,6 +845,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             boolean _rootVoiceInteraction, ActivityStackSupervisor supervisor,
             ActivityOptions options, ActivityRecord sourceRecord) {
         service = _service;
+        mRootActivityContainer = _service.mRootActivityContainer;
         appToken = new Token(this, _intent);
         info = aInfo;
         launchedFromPid = _launchedFromPid;
@@ -1200,7 +1202,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     boolean isFocusable() {
-        return mStackSupervisor.isFocusable(this, isAlwaysFocusable());
+        return mRootActivityContainer.isFocusable(this, isAlwaysFocusable());
     }
 
     boolean isResizeable() {
@@ -1353,7 +1355,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             return false;
         }
 
-        if (mStackSupervisor.getTopResumedActivity() == this) {
+        if (mRootActivityContainer.getTopResumedActivity() == this) {
             if (DEBUG_FOCUS) {
                 Slog.d(TAG_FOCUS, "moveActivityStackToFront: already on top, activity=" + this);
             }
@@ -1366,7 +1368,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         stack.moveToFront(reason, task);
         // Report top activity change to tracking services and WM
-        if (mStackSupervisor.getTopResumedActivity() == this) {
+        if (mRootActivityContainer.getTopResumedActivity() == this) {
             // TODO(b/111361570): Support multiple focused apps in WM
             service.setResumedActivityUncheckLocked(this, reason);
         }
@@ -1864,9 +1866,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             } else {
                 if (deferRelaunchUntilPaused) {
                     stack.destroyActivityLocked(this, true /* removeFromApp */, "stop-config");
-                    mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
+                    mRootActivityContainer.resumeFocusedStacksTopActivities();
                 } else {
-                    mStackSupervisor.updatePreviousProcessLocked(this);
+                    mRootActivityContainer.updatePreviousProcess(this);
                 }
             }
         }
@@ -2036,7 +2038,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // another activity to start or has stopped, then the key dispatching
         // timeout should not be caused by this.
         if (mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(this) || stopped) {
-            final ActivityStack stack = mStackSupervisor.getTopDisplayFocusedStack();
+            final ActivityStack stack = mRootActivityContainer.getTopDisplayFocusedStack();
             // Try to use the one which is closest to top.
             ActivityRecord r = stack.getResumedActivity();
             if (r == null) {
@@ -2224,7 +2226,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     void setRequestedOrientation(int requestedOrientation) {
         final int displayId = getDisplayId();
         final Configuration displayConfig =
-                mStackSupervisor.getDisplayOverrideConfiguration(displayId);
+                mRootActivityContainer.getDisplayOverrideConfiguration(displayId);
 
         final Configuration config = mWindowContainerController.setOrientation(requestedOrientation,
                 displayId, displayConfig, mayFreezeScreenLocked(app));
@@ -2232,7 +2234,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             frozenBeforeDestroy = true;
             if (!service.updateDisplayOverrideConfigurationLocked(config, this,
                     false /* deferResume */, displayId)) {
-                mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
+                mRootActivityContainer.resumeFocusedStacksTopActivities();
             }
         }
         service.getTaskChangeNotificationController().notifyActivityRequestedOrientationChanged(
@@ -2867,7 +2869,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     void setShowWhenLocked(boolean showWhenLocked) {
         mShowWhenLocked = showWhenLocked;
-        mStackSupervisor.ensureActivitiesVisibleLocked(null, 0 /* configChanges */,
+        mRootActivityContainer.ensureActivitiesVisible(null, 0 /* configChanges */,
                 false /* preserveWindows */);
     }
 
@@ -2905,7 +2907,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     boolean isTopRunningActivity() {
-        return mStackSupervisor.topRunningActivityLocked() == this;
+        return mRootActivityContainer.topRunningActivity() == this;
     }
 
     /**
