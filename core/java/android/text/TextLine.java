@@ -16,7 +16,6 @@
 
 package android.text;
 
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
@@ -51,8 +50,6 @@ import java.util.ArrayList;
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public class TextLine {
     private static final boolean DEBUG = false;
-
-    private static final char TAB_CHAR = '\t';
 
     private TextPaint mPaint;
     @UnsupportedAppUsage
@@ -235,10 +232,6 @@ public class TextLine {
         mEllipsisEnd = ellipsisStart != ellipsisEnd ? ellipsisEnd : 0;
     }
 
-    private char charAt(int i) {
-        return mCharsValid ? mChars[i] : mText.charAt(i + mStart);
-    }
-
     /**
      * Justify the line to the given width.
      */
@@ -268,23 +261,51 @@ public class TextLine {
      * @param bottom the bottom of the line
      */
     void draw(Canvas c, float x, int top, int y, int bottom) {
+        if (!mHasTabs) {
+            if (mDirections == Layout.DIRS_ALL_LEFT_TO_RIGHT) {
+                drawRun(c, 0, mLen, false, x, top, y, bottom, false);
+                return;
+            }
+            if (mDirections == Layout.DIRS_ALL_RIGHT_TO_LEFT) {
+                drawRun(c, 0, mLen, true, x, top, y, bottom, false);
+                return;
+            }
+        }
+
         float h = 0;
-        final int runCount = mDirections.getRunCount();
-        for (int runIndex = 0; runIndex < runCount; runIndex++) {
-            final int runStart = mDirections.getRunStart(runIndex);
-            final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
-            final boolean runIsRtl = mDirections.isRunRtl(runIndex);
+        int[] runs = mDirections.mDirections;
 
-            int segStart = runStart;
+        int lastRunIndex = runs.length - 2;
+        for (int i = 0; i < runs.length; i += 2) {
+            int runStart = runs[i];
+            int runLimit = runStart + (runs[i+1] & Layout.RUN_LENGTH_MASK);
+            if (runLimit > mLen) {
+                runLimit = mLen;
+            }
+            boolean runIsRtl = (runs[i+1] & Layout.RUN_RTL_FLAG) != 0;
+
+            int segstart = runStart;
             for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
-                if (j == runLimit || charAt(j) == TAB_CHAR) {
-                    h += drawRun(c, segStart, j, runIsRtl, x + h, top, y, bottom,
-                            runIndex != (runCount - 1) || j != mLen);
+                int codept = 0;
+                if (mHasTabs && j < runLimit) {
+                    codept = mChars[j];
+                    if (codept >= 0xD800 && codept < 0xDC00 && j + 1 < runLimit) {
+                        codept = Character.codePointAt(mChars, j);
+                        if (codept > 0xFFFF) {
+                            ++j;
+                            continue;
+                        }
+                    }
+                }
 
-                    if (j != runLimit) {  // charAt(j) == TAB_CHAR
+                if (j == runLimit || codept == '\t') {
+                    h += drawRun(c, segstart, j, runIsRtl, x+h, top, y, bottom,
+                            i != lastRunIndex || j != mLen);
+
+                    if (codept == '\t') {
                         h = mDir * nextTab(h * mDir);
                     }
-                    segStart = j + 1;
+                    segstart = j + 1;
                 }
             }
         }
@@ -302,81 +323,75 @@ public class TextLine {
     }
 
     /**
-     * Returns the signed graphical offset from the leading margin.
+     * Returns information about a position on the line.
      *
-     * Following examples are all for measuring offset=3. LX(e.g. L0, L1, ...) denotes a
-     * character which has LTR BiDi property. On the other hand, RX(e.g. R0, R1, ...) denotes a
-     * character which has RTL BiDi property. Assuming all character has 1em width.
-     *
-     * Example 1: All LTR chars within LTR context
-     *   Input Text (logical)  :   L0 L1 L2 L3 L4 L5 L6 L7 L8
-     *   Input Text (visual)   :   L0 L1 L2 L3 L4 L5 L6 L7 L8
-     *   Output(trailing=true) :  |--------| (Returns 3em)
-     *   Output(trailing=false):  |--------| (Returns 3em)
-     *
-     * Example 2: All RTL chars within RTL context.
-     *   Input Text (logical)  :   R0 R1 R2 R3 R4 R5 R6 R7 R8
-     *   Input Text (visual)   :   R8 R7 R6 R5 R4 R3 R2 R1 R0
-     *   Output(trailing=true) :                    |--------| (Returns -3em)
-     *   Output(trailing=false):                    |--------| (Returns -3em)
-     *
-     * Example 3: BiDi chars within LTR context.
-     *   Input Text (logical)  :   L0 L1 L2 R3 R4 R5 L6 L7 L8
-     *   Input Text (visual)   :   L0 L1 L2 R5 R4 R3 L6 L7 L8
-     *   Output(trailing=true) :  |-----------------| (Returns 6em)
-     *   Output(trailing=false):  |--------| (Returns 3em)
-     *
-     * Example 4: BiDi chars within RTL context.
-     *   Input Text (logical)  :   L0 L1 L2 R3 R4 R5 L6 L7 L8
-     *   Input Text (visual)   :   L6 L7 L8 R5 R4 R3 L0 L1 L2
-     *   Output(trailing=true) :           |-----------------| (Returns -6em)
-     *   Output(trailing=false):                    |--------| (Returns -3em)
-     *
-     * @param offset the line-relative character offset, between 0 and the line length, inclusive
-     * @param trailing no effect if the offset is not on the BiDi transition offset. If the offset
-     *                 is on the BiDi transition offset and true is passed, the offset is regarded
-     *                 as the edge of the trailing run's edge. If false, the offset is regarded as
-     *                 the edge of the preceding run's edge. See example above.
-     * @param fmi receives metrics information about the requested character, can be null
-     * @return the signed graphical offset from the leading margin to the requested character edge.
-     *         The positive value means the offset is right from the leading edge. The negative
-     *         value means the offset is left from the leading edge.
+     * @param offset the line-relative character offset, between 0 and the
+     * line length, inclusive
+     * @param trailing true to measure the trailing edge of the character
+     * before offset, false to measure the leading edge of the character
+     * at offset.
+     * @param fmi receives metrics information about the requested
+     * character, can be null.
+     * @return the signed offset from the leading margin to the requested
+     * character edge.
      */
-    public float measure(@IntRange(from = 0) int offset, boolean trailing,
-            @NonNull FontMetricsInt fmi) {
-        if (offset > mLen) {
-            throw new IndexOutOfBoundsException(
-                    "offset(" + offset + ") should be less than line limit(" + mLen + ")");
-        }
-        final int target = trailing ? offset - 1 : offset;
+    public float measure(int offset, boolean trailing, FontMetricsInt fmi) {
+        int target = trailing ? offset - 1 : offset;
         if (target < 0) {
             return 0;
         }
 
         float h = 0;
-        for (int runIndex = 0; runIndex < mDirections.getRunCount(); runIndex++) {
-            final int runStart = mDirections.getRunStart(runIndex);
-            final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
-            final boolean runIsRtl = mDirections.isRunRtl(runIndex);
 
-            int segStart = runStart;
+        if (!mHasTabs) {
+            if (mDirections == Layout.DIRS_ALL_LEFT_TO_RIGHT) {
+                return measureRun(0, offset, mLen, false, fmi);
+            }
+            if (mDirections == Layout.DIRS_ALL_RIGHT_TO_LEFT) {
+                return measureRun(0, offset, mLen, true, fmi);
+            }
+        }
+
+        char[] chars = mChars;
+        int[] runs = mDirections.mDirections;
+        for (int i = 0; i < runs.length; i += 2) {
+            int runStart = runs[i];
+            int runLimit = runStart + (runs[i+1] & Layout.RUN_LENGTH_MASK);
+            if (runLimit > mLen) {
+                runLimit = mLen;
+            }
+            boolean runIsRtl = (runs[i+1] & Layout.RUN_RTL_FLAG) != 0;
+
+            int segstart = runStart;
             for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
-                if (j == runLimit || charAt(j) == TAB_CHAR) {
-                    final boolean targetIsInThisSegment = target >= segStart && target < j;
-                    final boolean sameDirection = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
+                int codept = 0;
+                if (mHasTabs && j < runLimit) {
+                    codept = chars[j];
+                    if (codept >= 0xD800 && codept < 0xDC00 && j + 1 < runLimit) {
+                        codept = Character.codePointAt(chars, j);
+                        if (codept > 0xFFFF) {
+                            ++j;
+                            continue;
+                        }
+                    }
+                }
 
-                    if (targetIsInThisSegment && sameDirection) {
-                        return h + measureRun(segStart, offset, j, runIsRtl, fmi);
+                if (j == runLimit || codept == '\t') {
+                    boolean inSegment = target >= segstart && target < j;
+
+                    boolean advance = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
+                    if (inSegment && advance) {
+                        return h + measureRun(segstart, offset, j, runIsRtl, fmi);
                     }
 
-                    final float segmentWidth = measureRun(segStart, j, j, runIsRtl, fmi);
-                    h += sameDirection ? segmentWidth : -segmentWidth;
+                    float w = measureRun(segstart, j, j, runIsRtl, fmi);
+                    h += advance ? w : -w;
 
-                    if (targetIsInThisSegment) {
-                        return h + measureRun(segStart, offset, j, runIsRtl, null);
+                    if (inSegment) {
+                        return h + measureRun(segstart, offset, j, runIsRtl, null);
                     }
 
-                    if (j != runLimit) {  // charAt(j) == TAB_CHAR
+                    if (codept == '\t') {
                         if (offset == j) {
                             return h;
                         }
@@ -386,7 +401,7 @@ public class TextLine {
                         }
                     }
 
-                    segStart = j + 1;
+                    segstart = j + 1;
                 }
             }
         }
@@ -411,29 +426,62 @@ public class TextLine {
         }
 
         float h = 0;
-        for (int runIndex = 0; runIndex < mDirections.getRunCount(); runIndex++) {
-            final int runStart = mDirections.getRunStart(runIndex);
-            final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
-            final boolean runIsRtl = mDirections.isRunRtl(runIndex);
 
-            int segStart = runStart;
+        if (!mHasTabs) {
+            if (mDirections == Layout.DIRS_ALL_LEFT_TO_RIGHT) {
+                for (int offset = 0; offset <= mLen; ++offset) {
+                    measurement[offset] = measureRun(0, offset, mLen, false, fmi);
+                }
+                return measurement;
+            }
+            if (mDirections == Layout.DIRS_ALL_RIGHT_TO_LEFT) {
+                for (int offset = 0; offset <= mLen; ++offset) {
+                    measurement[offset] = measureRun(0, offset, mLen, true, fmi);
+                }
+                return measurement;
+            }
+        }
+
+        char[] chars = mChars;
+        int[] runs = mDirections.mDirections;
+        for (int i = 0; i < runs.length; i += 2) {
+            int runStart = runs[i];
+            int runLimit = runStart + (runs[i + 1] & Layout.RUN_LENGTH_MASK);
+            if (runLimit > mLen) {
+                runLimit = mLen;
+            }
+            boolean runIsRtl = (runs[i + 1] & Layout.RUN_RTL_FLAG) != 0;
+
+            int segstart = runStart;
             for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; ++j) {
-                if (j == runLimit || charAt(j) == TAB_CHAR) {
-                    final  float oldh = h;
-                    final boolean advance = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
-                    final float w = measureRun(segStart, j, j, runIsRtl, fmi);
+                int codept = 0;
+                if (mHasTabs && j < runLimit) {
+                    codept = chars[j];
+                    if (codept >= 0xD800 && codept < 0xDC00 && j + 1 < runLimit) {
+                        codept = Character.codePointAt(chars, j);
+                        if (codept > 0xFFFF) {
+                            ++j;
+                            continue;
+                        }
+                    }
+                }
+
+                if (j == runLimit || codept == '\t') {
+                    float oldh = h;
+                    boolean advance = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
+                    float w = measureRun(segstart, j, j, runIsRtl, fmi);
                     h += advance ? w : -w;
 
-                    final float baseh = advance ? oldh : h;
+                    float baseh = advance ? oldh : h;
                     FontMetricsInt crtfmi = advance ? fmi : null;
-                    for (int offset = segStart; offset <= j && offset <= mLen; ++offset) {
-                        if (target[offset] >= segStart && target[offset] < j) {
+                    for (int offset = segstart; offset <= j && offset <= mLen; ++offset) {
+                        if (target[offset] >= segstart && target[offset] < j) {
                             measurement[offset] =
-                                    baseh + measureRun(segStart, offset, j, runIsRtl, crtfmi);
+                                    baseh + measureRun(segstart, offset, j, runIsRtl, crtfmi);
                         }
                     }
 
-                    if (j != runLimit) {  // charAt(j) == TAB_CHAR
+                    if (codept == '\t') {
                         if (target[j] == j) {
                             measurement[j] = h;
                         }
@@ -443,7 +491,7 @@ public class TextLine {
                         }
                     }
 
-                    segStart = j + 1;
+                    segstart = j + 1;
                 }
             }
         }
