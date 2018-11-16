@@ -3646,4 +3646,11 @@
 
     <!-- Component name for the default module metadata provider on this device -->
     <string name="config_defaultModuleMetadataProvider">com.android.modulemetadata</string>
+
+    <!-- This is the default launcher component to use on secondary displays that support system
+         decorations.
+         This launcher activity must support multiple instances and have corresponding launch mode
+         set in AndroidManifest.
+         {@see android.view.Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS} -->
+    <string name="config_secondaryHomeComponent" translatable="false">com.android.launcher3/com.android.launcher3.SecondaryDisplayLauncher</string>
 </resources>

@@ -23,8 +23,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
-import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -36,7 +36,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.RootActivityContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
-import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -47,18 +47,27 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.refEq;
 
 import android.app.ActivityOptions;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ResolveInfo;
 import android.graphics.Rect;
-import android.os.Build;
 import android.platform.test.annotations.Presubmit;
+import android.util.Pair;
+
 import androidx.test.filters.MediumTest;
+
+import com.android.internal.app.ResolverActivity;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tests for the {@link ActivityStackSupervisor} class.
@@ -385,31 +394,10 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     }
 
     /**
-     * Tests home activities that targeted sdk before Q cannot start on secondary display.
-     */
-    @Test
-    public void testStartHomeTargetSdkBeforeQ() throws Exception {
-        final TestActivityDisplay secondDisplay = spy(createNewActivityDisplay());
-        mRootActivityContainer.addChild(secondDisplay, POSITION_TOP);
-        doReturn(true).when(secondDisplay).supportsSystemDecorations();
-
-        final ActivityInfo info = new ActivityInfo();
-        info.launchMode = LAUNCH_MULTIPLE;
-        info.applicationInfo = new ApplicationInfo();
-        info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.Q;
-        assertTrue(mRootActivityContainer.canStartHomeOnDisplay(info, secondDisplay.mDisplayId,
-                false /* allowInstrumenting */));
-
-        info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.P;
-        assertFalse(mRootActivityContainer.canStartHomeOnDisplay(info, secondDisplay.mDisplayId,
-                false /* allowInstrumenting */));
-    }
-
-    /**
      * Tests that home activities can be started on the displays that supports system decorations.
      */
-    @Test
-    public void testStartHomeOnAllDisplays() {
+    // TODO (b/118206886): Will add it back once launcher's patch is merged into master.
+    private void testStartHomeOnAllDisplays() {
         // Create secondary displays.
         final TestActivityDisplay secondDisplay = spy(createNewActivityDisplay());
         mRootActivityContainer.addChild(secondDisplay, POSITION_TOP);
@@ -476,5 +464,143 @@ public class RootActivityContainerTests extends ActivityTestsBase {
                 false /* allowInstrumenting*/));
         assertTrue(mRootActivityContainer.canStartHomeOnDisplay(info, DEFAULT_DISPLAY,
                 true /* allowInstrumenting*/));
+    }
+
+    /**
+     * Tests that secondary home should be selected if default home not set.
+     */
+    @Test
+    public void testResolveSecondaryHomeActivityWhenDefaultHomeNotSet() {
+        final Intent defaultHomeIntent = mService.getHomeIntent();
+        final ActivityInfo aInfoDefault = new ActivityInfo();
+        aInfoDefault.name = ResolverActivity.class.getName();
+        doReturn(aInfoDefault).when(mRootActivityContainer).resolveHomeActivity(anyInt(),
+                refEq(defaultHomeIntent));
+
+        final String secondaryHomeComponent = mService.mContext.getResources().getString(
+                com.android.internal.R.string.config_secondaryHomeComponent);
+        final ComponentName comp = ComponentName.unflattenFromString(secondaryHomeComponent);
+        final Intent secondaryHomeIntent = mService.getSecondaryHomeIntent(null);
+        final ActivityInfo aInfoSecondary = new ActivityInfo();
+        aInfoSecondary.name = comp.getClassName();
+        doReturn(aInfoSecondary).when(mRootActivityContainer).resolveHomeActivity(anyInt(),
+                refEq(secondaryHomeIntent));
+
+        // Should fallback to secondary home if default home not set.
+        final Pair<ActivityInfo, Intent> resolvedInfo = mRootActivityContainer
+                .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
+
+        assertEquals(comp.getClassName(), resolvedInfo.first.name);
+    }
+
+    /**
+     * Tests that secondary home should be selected if default home not support secondary displays
+     * or there is no matched activity in the same package as selected default home.
+     */
+    @Test
+    public void testResolveSecondaryHomeActivityWhenDefaultHomeNotSupportMultiDisplay() {
+        final Intent defaultHomeIntent = mService.getHomeIntent();
+        final ActivityInfo aInfoDefault = new ActivityInfo();
+        aInfoDefault.name = "fakeHomeActivity";
+        aInfoDefault.applicationInfo = new ApplicationInfo();
+        aInfoDefault.applicationInfo.packageName = "fakeHomePackage";
+        doReturn(aInfoDefault).when(mRootActivityContainer).resolveHomeActivity(anyInt(),
+                refEq(defaultHomeIntent));
+
+        final List<ResolveInfo> resolutions = new ArrayList<>();
+        doReturn(resolutions).when(mRootActivityContainer).resolveActivities(anyInt(), any());
+
+        final String secondaryHomeComponent = mService.mContext.getResources().getString(
+                com.android.internal.R.string.config_secondaryHomeComponent);
+        final ComponentName comp = ComponentName.unflattenFromString(secondaryHomeComponent);
+        final Intent secondaryHomeIntent = mService.getSecondaryHomeIntent(null);
+        final ActivityInfo aInfoSecondary = new ActivityInfo();
+        aInfoSecondary.name = comp.getClassName();
+        doReturn(aInfoSecondary).when(mRootActivityContainer).resolveHomeActivity(anyInt(),
+                refEq(secondaryHomeIntent));
+
+        // Should fallback to secondary home if selected default home not support secondary displays
+        // or there is no matched activity in the same package as selected default home.
+        final Pair<ActivityInfo, Intent> resolvedInfo = mRootActivityContainer
+                .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
+
+        assertEquals(comp.getClassName(), resolvedInfo.first.name);
+    }
+
+    /**
+     * Tests that default home activity should be selected if it already support secondary displays.
+     */
+    @Test
+    public void testResolveSecondaryHomeActivityWhenDefaultHomeSupportMultiDisplay() {
+        final Intent homeIntent = mService.getHomeIntent();
+        final ActivityInfo aInfoDefault = new ActivityInfo();
+        aInfoDefault.name = "fakeHomeActivity";
+        aInfoDefault.applicationInfo = new ApplicationInfo();
+        aInfoDefault.applicationInfo.packageName = "fakeHomePackage";
+        doReturn(aInfoDefault).when(mRootActivityContainer).resolveHomeActivity(anyInt(),
+                refEq(homeIntent));
+
+        final List<ResolveInfo> resolutions = new ArrayList<>();
+        final ResolveInfo infoFake1 = new ResolveInfo();
+        infoFake1.activityInfo = new ActivityInfo();
+        infoFake1.activityInfo.name = "fakeActivity1";
+        infoFake1.activityInfo.applicationInfo = new ApplicationInfo();
+        infoFake1.activityInfo.applicationInfo.packageName = "fakePackage1";
+        final ResolveInfo infoFake2 = new ResolveInfo();
+        infoFake2.activityInfo = aInfoDefault;
+        resolutions.add(infoFake1);
+        resolutions.add(infoFake2);
+        doReturn(resolutions).when(mRootActivityContainer).resolveActivities(anyInt(), any());
+
+        doReturn(true).when(mRootActivityContainer).canStartHomeOnDisplay(
+                any(), anyInt(), anyBoolean());
+
+        // Use default home activity if it support secondary displays.
+        final Pair<ActivityInfo, Intent> resolvedInfo = mRootActivityContainer
+                .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
+
+        assertEquals(aInfoDefault.applicationInfo.packageName,
+                resolvedInfo.first.applicationInfo.packageName);
+        assertEquals(aInfoDefault.name, resolvedInfo.first.name);
+    }
+
+    /**
+     * Tests that the first one that matches should be selected if there are multiple activities.
+     */
+    @Test
+    public void testResolveSecondaryHomeActivityWhenOtherActivitySupportMultiDisplay() {
+        final Intent homeIntent = mService.getHomeIntent();
+        final ActivityInfo aInfoDefault = new ActivityInfo();
+        aInfoDefault.name = "fakeHomeActivity";
+        aInfoDefault.applicationInfo = new ApplicationInfo();
+        aInfoDefault.applicationInfo.packageName = "fakeHomePackage";
+        doReturn(aInfoDefault).when(mRootActivityContainer).resolveHomeActivity(anyInt(),
+                refEq(homeIntent));
+
+        final List<ResolveInfo> resolutions = new ArrayList<>();
+        final ResolveInfo infoFake1 = new ResolveInfo();
+        infoFake1.activityInfo = new ActivityInfo();
+        infoFake1.activityInfo.name = "fakeActivity1";
+        infoFake1.activityInfo.applicationInfo = new ApplicationInfo();
+        infoFake1.activityInfo.applicationInfo.packageName = "fakePackage1";
+        final ResolveInfo infoFake2 = new ResolveInfo();
+        infoFake2.activityInfo = new ActivityInfo();
+        infoFake2.activityInfo.name = "fakeActivity2";
+        infoFake2.activityInfo.applicationInfo = new ApplicationInfo();
+        infoFake2.activityInfo.applicationInfo.packageName = "fakePackage2";
+        resolutions.add(infoFake1);
+        resolutions.add(infoFake2);
+        doReturn(resolutions).when(mRootActivityContainer).resolveActivities(anyInt(), any());
+
+        doReturn(true).when(mRootActivityContainer).canStartHomeOnDisplay(
+                any(), anyInt(), anyBoolean());
+
+        // Use the first one of matched activities in the same package as selected default home.
+        final Pair<ActivityInfo, Intent> resolvedInfo = mRootActivityContainer
+                .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
+
+        assertEquals(infoFake1.activityInfo.applicationInfo.packageName,
+                resolvedInfo.first.applicationInfo.packageName);
+        assertEquals(infoFake1.activityInfo.name, resolvedInfo.first.name);
     }
 }
