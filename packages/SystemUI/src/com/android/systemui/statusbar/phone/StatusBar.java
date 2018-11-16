@@ -3264,6 +3264,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mNotificationPanel.setDozing(mDozing, animate, mWakeUpTouchLocation,
                 mDozeServiceHost.wasPassivelyInterrupted());
+        if (mNotificationPanel.isSemiAwake()
+                && SystemProperties.getBoolean("persist.systemui.show_swipe_up", false)) {
+            mKeyguardIndicationController.showTransientIndication(R.string.keyguard_unlock);
+        }
         updateQsExpansionEnabled();
         Trace.endSection();
     }
