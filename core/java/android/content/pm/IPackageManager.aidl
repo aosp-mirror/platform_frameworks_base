@@ -276,6 +276,8 @@ interface IPackageManager {
             in PersistableBundle appExtras, in PersistableBundle launcherExtras,
             in SuspendDialogInfo dialogInfo, String callingPackage, int userId);
 
+    boolean canSuspendPackageForUser(String packageName, int userId);
+
     boolean isPackageSuspendedForUser(String packageName, int userId);
 
     PersistableBundle getSuspendedPackageAppExtras(String packageName, int userId);
