@@ -153,6 +153,8 @@ message Atom {
         // Consider removing this if it becomes a problem
         ServiceStateChanged service_state_changed = 99;
         ServiceLaunchReported service_launch_reported = 100;
+        PhenotypeFlagStateChanged phenotype_flag_state_changed = 101;
+        BinaryPushStateChanged binary_push_state_changed = 102;
     }
 
     // Pulled events will start at field 10000.
@@ -2136,6 +2138,43 @@ message Notification {
 
     // The most recent visibility event.
     optional int64 visible_millis = 16;
+}
+
+/*
+ * Logs when a flag flip state changes.
+ * Logged in P/h.
+ */
+message PhenotypeFlagStateChanged {
+    // Mendel configuration name.
+    optional string mendel_config_name = 1;
+    // State
+    enum State {
+        STATE_UNKNOWN = 0;
+        COMMITTED = 1;
+    }
+    optional State state = 2;
+}
+
+/*
+ * Logs when a binary push state changes.
+ * Logged in Play store
+ */
+message BinaryPushStateChanged {
+    // Binary package name.
+    optional string binary_name = 1;
+    // Version code.
+    optional int64 version = 2;
+    // State
+    enum State {
+        STATE_UNKNOWN = 0;
+        DOWNLOAD_START = 1;
+        DOWNLOAD_DONE = 2;
+        INSTALL_START = 3;
+        INSTALL_DONE = 4;
+        REBOOT_START = 5;
+        REBOOT_DONE = 6;
+    }
+    optional State state = 3;
 }
 
 /*
