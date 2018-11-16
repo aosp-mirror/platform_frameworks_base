@@ -59,6 +59,8 @@ public final class MidiOutputPort extends MidiSender implements Closeable {
                     // read next event
                     int count = mInputStream.read(buffer);
                     if (count < 0) {
+                        // This is the exit condition as read() returning <0 indicates
+                        // that the pipe has been closed.
                         break;
                         // FIXME - inform receivers here?
                     }
@@ -81,10 +83,15 @@ public final class MidiOutputPort extends MidiSender implements Closeable {
                             Log.e(TAG, "Unknown packet type " + packetType);
                             break;
                     }
-                }
+                } // while (true)
             } catch (IOException e) {
                 // FIXME report I/O failure?
-                Log.e(TAG, "read failed", e);
+                // TODO: The comment above about the exit condition is not currently working
+                // as intended. The read from the closed pipe is throwing an error rather than
+                // returning <0, so this becomes (probably) not an error, but the exit case.
+                // This warrants further investigation;
+                // Silence the (probably) spurious error message.
+                // Log.e(TAG, "read failed", e);
             } finally {
                 IoUtils.closeQuietly(mInputStream);
             }
