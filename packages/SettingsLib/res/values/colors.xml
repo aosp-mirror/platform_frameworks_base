@@ -18,4 +18,5 @@
     <color name="disabled_text_color">#66000000</color> <!-- 38% black -->
 
     <color name="usage_graph_dots">@*android:color/tertiary_device_default_settings</color>
+    <color name="list_divider_color">#64000000</color>
 </resources>
