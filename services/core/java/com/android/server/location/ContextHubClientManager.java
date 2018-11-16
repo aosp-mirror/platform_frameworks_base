@@ -24,6 +24,7 @@ import android.hardware.location.ContextHubInfo;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
 import android.hardware.location.NanoAppMessage;
+import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,7 +69,7 @@ import java.util.function.Consumer;
     /*
      * The next host endpoint ID to start iterating for the next available host endpoint ID.
      */
-    private int mNextHostEndpointId = 0;
+    private int mNextHostEndPointId = 0;
 
     /* package */ ContextHubClientManager(
             Context context, IContexthub contextHubProxy) {
@@ -88,9 +89,22 @@ import java.util.function.Consumer;
      */
     /* package */ IContextHubClient registerClient(
             IContextHubClientCallback clientCallback, ContextHubInfo contextHubInfo) {
-        ContextHubClientBroker broker = createNewClientBroker(contextHubInfo);
-        if (!broker.setCallback(clientCallback)) {
-            return null; // Client process has died, so we return null
+        ContextHubClientBroker broker;
+        synchronized (this) {
+            short hostEndPointId = getHostEndPointId();
+            broker = new ContextHubClientBroker(
+                    mContext, mContextHubProxy, this /* clientManager */, contextHubInfo,
+                    hostEndPointId, clientCallback);
+            mHostEndPointIdToClientMap.put(hostEndPointId, broker);
+        }
+
+        try {
+            broker.attachDeathRecipient();
+        } catch (RemoteException e) {
+            // The client process has died, so we close the connection and return null
+            Log.e(TAG, "Failed to attach death recipient to client");
+            broker.close();
+            return null;
         }
 
         Log.d(TAG, "Registered client with host endpoint ID " + broker.getHostEndPointId());
@@ -98,32 +112,36 @@ import java.util.function.Consumer;
     }
 
     /**
-     * Binds a existing and registered client with a new callback interface, provided a previously
-     * registered PendingIntent.
+     * Registers a new client with the service.
      *
-     * @param pendingIntent  a previously registered PendingIntent for a registered client
-     * @param clientCallback the callback interface of the client to bind to
-     * @param contextHubId   the ID of the hub this client is attached to
+     * @param pendingIntent  the callback interface of the client to register
+     * @param contextHubInfo the object describing the hub this client is attached to
+     * @param nanoAppId      the ID of the nanoapp to receive Intent events for
      *
      * @return the client interface
      *
-     * @throws IllegalArgumentException if no matching client is found
-     * @throws IllegalStateException    if the client has already been registered to a callback
+     * @throws IllegalArgumentException the PendingIntent was already registered for a different
+     *                                  ContextHubClient
+     * @throws IllegalStateException    if there were too many registered clients at the service
      */
-    /* package */ IContextHubClient bindClient(
-            PendingIntent pendingIntent, IContextHubClientCallback clientCallback,
-            int contextHubId) {
-        ContextHubClientBroker broker = getClientBroker(pendingIntent, contextHubId);
-        if (broker == null) {
-            throw new IllegalArgumentException("Could not find client of Context Hub (ID = "
-                    + contextHubId + ") with PendingIntent");
+    /* package */ IContextHubClient registerClient(
+            ContextHubInfo contextHubInfo, PendingIntent pendingIntent, long nanoAppId) {
+        ContextHubClientBroker broker;
+        String registerString = "Regenerated";
+        synchronized (this) {
+            broker = getClientBroker(contextHubInfo.getId(), pendingIntent, nanoAppId);
+
+            if (broker == null) {
+                short hostEndPointId = getHostEndPointId();
+                broker = new ContextHubClientBroker(
+                        mContext, mContextHubProxy, this /* clientManager */, contextHubInfo,
+                        hostEndPointId, pendingIntent, nanoAppId);
+                mHostEndPointIdToClientMap.put(hostEndPointId, broker);
+                registerString = "Registered";
+            }
         }
 
-        if (!broker.setCallback(clientCallback)) {
-            return null; // Client process has died, so we return null
-        }
-
-        Log.d(TAG, "Re-registered client with host endpoint ID " + broker.getHostEndPointId());
+        Log.d(TAG, registerString + " client with host endpoint ID " + broker.getHostEndPointId());
         return IContextHubClient.Stub.asInterface(broker);
     }
 
@@ -203,50 +221,28 @@ import java.util.function.Consumer;
     }
 
     /**
-     * @param pendingIntent the PendingIntent to check
-     * @return true if the given PendingIntent is registered by a client, false otherwise
-     */
-    /* package */ boolean isPendingIntentRegistered(PendingIntent pendingIntent) {
-        for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
-            if (broker.hasPendingIntent(pendingIntent)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Creates a new ContextHubClientBroker object for a client and registers it with the client
-     * manager.
+     * Returns an available host endpoint ID.
      *
-     * @param contextHubInfo the object describing the hub this client is attached to
-     *
-     * @return the ContextHubClientBroker object
+     * @returns an available host endpoint ID
      *
      * @throws IllegalStateException if max number of clients have already registered
      */
-    private synchronized ContextHubClientBroker createNewClientBroker(
-            ContextHubInfo contextHubInfo) {
+    private short getHostEndPointId() {
         if (mHostEndPointIdToClientMap.size() == MAX_CLIENT_ID + 1) {
             throw new IllegalStateException("Could not register client - max limit exceeded");
         }
 
-        ContextHubClientBroker broker = null;
-        int id = mNextHostEndpointId;
+        int id = mNextHostEndPointId;
         for (int i = 0; i <= MAX_CLIENT_ID; i++) {
             if (!mHostEndPointIdToClientMap.containsKey((short) id)) {
-                broker = new ContextHubClientBroker(
-                        mContext, mContextHubProxy, this, contextHubInfo, (short) id);
-                mHostEndPointIdToClientMap.put((short) id, broker);
-                mNextHostEndpointId = (id == MAX_CLIENT_ID) ? 0 : id + 1;
+                mNextHostEndPointId = (id == MAX_CLIENT_ID) ? 0 : id + 1;
                 break;
             }
 
             id = (id == MAX_CLIENT_ID) ? 0 : id + 1;
         }
 
-        return broker;
+        return (short) id;
     }
 
     /**
@@ -280,9 +276,10 @@ import java.util.function.Consumer;
      * @param contextHubId  the ID of the Context Hub the client is attached to
      * @return the matching ContextHubClientBroker, null if not found
      */
-    private ContextHubClientBroker getClientBroker(PendingIntent pendingIntent, int contextHubId) {
+    private ContextHubClientBroker getClientBroker(
+            int contextHubId, PendingIntent pendingIntent, long nanoAppId) {
         for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
-            if (broker.hasPendingIntent(pendingIntent)
+            if (broker.hasPendingIntent(pendingIntent, nanoAppId)
                     && broker.getAttachedContextHubId() == contextHubId) {
                 return broker;
             }

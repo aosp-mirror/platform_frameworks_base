@@ -632,34 +632,26 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /**
-     * Recreates and binds a IContextHubClientCallback interface to an existing and registered
-     * client at the service for the specified Context Hub, provided a previously registered
-     * PendingIntent.
+     * Creates and registers a PendingIntent client at the service for the specified Context Hub.
      *
-     * @param pendingIntent  the PendingIntent previously registered for the client
-     * @param clientCallback the client interface to register with the service
-     * @param contextHubId   the ID of the hub this client is attached to
-     * @return the generated client interface, null if registration was unsuccessful
+     * @param contextHubId  the ID of the hub this client is attached to
+     * @param pendingIntent the PendingIntent associated with this client
+     * @param nanoAppId     the ID of the nanoapp PendingIntent events will be sent for
+     * @return the generated client interface
      *
-     * @throws IllegalArgumentException if contextHubId is not a valid ID
-     * @throws NullPointerException if clientCallback or pendingIntent is null
+     * @throws IllegalArgumentException if hubInfo does not represent a valid hub
+     * @throws IllegalStateException    if there were too many registered clients at the service
      */
     @Override
-    public IContextHubClient bindClient(
-            PendingIntent pendingIntent, IContextHubClientCallback clientCallback,
-            int contextHubId) throws RemoteException {
+    public IContextHubClient createPendingIntentClient(
+            int contextHubId, PendingIntent pendingIntent, long nanoAppId) throws RemoteException {
         checkPermissions();
         if (!isValidContextHubId(contextHubId)) {
             throw new IllegalArgumentException("Invalid context hub ID " + contextHubId);
         }
-        if (pendingIntent == null) {
-            throw new NullPointerException("Cannot create client with null pending intent");
-        }
-        if (clientCallback == null) {
-            throw new NullPointerException("Cannot create client with null callback");
-        }
 
-        return mClientManager.bindClient(pendingIntent, clientCallback, contextHubId);
+        ContextHubInfo contextHubInfo = mContextHubIdToInfoMap.get(contextHubId);
+        return mClientManager.registerClient(contextHubInfo, pendingIntent, nanoAppId);
     }
 
     /**

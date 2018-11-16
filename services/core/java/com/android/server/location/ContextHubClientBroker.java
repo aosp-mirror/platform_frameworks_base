@@ -40,6 +40,8 @@ import java.util.function.Supplier;
  * notification callbacks. This class implements the IContextHubClient object, and the implemented
  * APIs must be thread-safe.
  *
+ * TODO: Consider refactoring this class via inheritance
+ *
  * @hide
  */
 public class ContextHubClientBroker extends IContextHubClient.Stub
@@ -92,7 +94,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     /*
      * The PendingIntent registered with this client.
      */
-    private final PendingIntentRequest mPendingIntentRequest = new PendingIntentRequest();
+    private final PendingIntentRequest mPendingIntentRequest;
 
     /*
      * Helper class to manage registered PendingIntent requests from the client.
@@ -130,41 +132,31 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         public void clear() {
             mPendingIntent = null;
         }
-
-        public boolean register(PendingIntent pendingIntent, long nanoAppId) {
-            boolean success = false;
-            if (hasPendingIntent()) {
-                Log.e(TAG, "Failed to register PendingIntent: registered PendingIntent exists");
-            } else {
-                mNanoAppId = nanoAppId;
-                mPendingIntent = pendingIntent;
-                success = true;
-            }
-
-            return success;
-        }
-
-        public boolean unregister(PendingIntent pendingIntent) {
-            boolean success = false;
-            if (!hasPendingIntent() || !mPendingIntent.equals(pendingIntent)) {
-                Log.e(TAG, "Failed to unregister PendingIntent: PendingIntent is not registered");
-            } else {
-                mPendingIntent = null;
-                success = true;
-            }
-
-            return success;
-        }
     }
 
     /* package */ ContextHubClientBroker(
             Context context, IContexthub contextHubProxy, ContextHubClientManager clientManager,
-            ContextHubInfo contextHubInfo, short hostEndPointId) {
+            ContextHubInfo contextHubInfo, short hostEndPointId,
+            IContextHubClientCallback callback) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
         mClientManager = clientManager;
         mAttachedContextHubInfo = contextHubInfo;
         mHostEndPointId = hostEndPointId;
+        mCallbackInterface = callback;
+        mPendingIntentRequest = new PendingIntentRequest();
+    }
+
+    /* package */ ContextHubClientBroker(
+            Context context, IContexthub contextHubProxy, ContextHubClientManager clientManager,
+            ContextHubInfo contextHubInfo, short hostEndPointId, PendingIntent pendingIntent,
+            long nanoAppId) {
+        mContext = context;
+        mContextHubProxy = contextHubProxy;
+        mClientManager = clientManager;
+        mAttachedContextHubInfo = contextHubInfo;
+        mHostEndPointId = hostEndPointId;
+        mPendingIntentRequest = new PendingIntentRequest(pendingIntent, nanoAppId);
     }
 
     /**
@@ -179,11 +171,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         ContextHubServiceUtil.checkPermissions(mContext);
 
         int result;
-        IContextHubClientCallback callback = null;
-        synchronized (this) {
-            callback = mCallbackInterface;
-        }
-        if (callback != null) {
+        if (isRegistered()) {
             ContextHubMsg messageToNanoApp =
                     ContextHubServiceUtil.createHidlContextHubMessage(mHostEndPointId, message);
 
@@ -204,64 +192,16 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     /**
-     * @param pendingIntent the intent to register
-     * @param nanoAppId     the ID of the nanoapp to send events for
-     * @return true on success, false otherwise
-     */
-    @Override
-    public boolean registerIntent(PendingIntent pendingIntent, long nanoAppId) {
-        ContextHubServiceUtil.checkPermissions(mContext);
-        if (mClientManager.isPendingIntentRegistered(pendingIntent)) {
-            Log.e(TAG, "Failed to register PendingIntent: already registered");
-            return false;
-        }
-
-        boolean success = false;
-        synchronized (this) {
-            if (mCallbackInterface == null) {
-                Log.e(TAG, "Failed to register PendingIntent: client connection is closed");
-            } else {
-                success = mPendingIntentRequest.register(pendingIntent, nanoAppId);
-            }
-        }
-
-        return success;
-    }
-
-    /**
-     * @param pendingIntent the intent to unregister
-     * @return true on success, false otherwise
-     */
-    @Override
-    public boolean unregisterIntent(PendingIntent pendingIntent) {
-        ContextHubServiceUtil.checkPermissions(mContext);
-
-        boolean success = false;
-        synchronized (this) {
-            success = mPendingIntentRequest.unregister(pendingIntent);
-            if (mCallbackInterface == null) {
-                close();
-            }
-        }
-
-        return success;
-    }
-
-    /**
      * Closes the connection for this client with the service.
+     *
+     * If the client has a PendingIntent registered, this method also unregisters it.
      */
     @Override
     public void close() {
         synchronized (this) {
-            if (mCallbackInterface != null) {
-                mCallbackInterface.asBinder().unlinkToDeath(this, 0 /* flags */);
-                mCallbackInterface = null;
-            }
-            if (!mPendingIntentRequest.hasPendingIntent() && mRegistered) {
-                mClientManager.unregisterClient(mHostEndPointId);
-                mRegistered = false;
-            }
+            mPendingIntentRequest.clear();
         }
+        onClientExit();
     }
 
     /**
@@ -269,38 +209,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     @Override
     public void binderDied() {
-        close();
-    }
-
-    /**
-     * Sets the callback interface for this client, only if the callback is currently unregistered.
-     *
-     * Also attaches a death recipient to a ContextHubClientBroker object. If unsuccessful, the
-     * connection is closed.
-     *
-     * @param callback the callback interface
-     * @return true if the callback was successfully set, false otherwise
-     *
-     * @throws IllegalStateException if the client has already been registered to a callback
-     */
-    /* package */
-    synchronized boolean setCallback(IContextHubClientCallback callback) {
-        boolean success = false;
-        if (mCallbackInterface != null) {
-            throw new IllegalStateException("Client is already registered with a callback");
-        } else {
-            mCallbackInterface = callback;
-            try {
-                mCallbackInterface.asBinder().linkToDeath(this, 0 /* flags */);
-                success = true;
-            } catch (RemoteException e) {
-                // The client process has died, so we close the connection.
-                Log.e(TAG, "Failed to attach death recipient to client");
-                close();
-            }
-        }
-
-        return success;
+        onClientExit();
     }
 
     /**
@@ -375,15 +284,30 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     /**
-     * @param intent the PendingIntent to compare to
+     * @param intent    the PendingIntent to compare to
+     * @param nanoAppId the ID of the nanoapp of the PendingIntent to compare to
      * @return true if the given PendingIntent is currently registered, false otherwise
      */
-    /* package */ boolean hasPendingIntent(PendingIntent intent) {
+    /* package */ boolean hasPendingIntent(PendingIntent intent, long nanoAppId) {
         PendingIntent pendingIntent = null;
+        long intentNanoAppId;
         synchronized (this) {
             pendingIntent = mPendingIntentRequest.getPendingIntent();
+            intentNanoAppId = mPendingIntentRequest.getNanoAppId();
         }
-        return (pendingIntent != null) && pendingIntent.equals(intent);
+        return (pendingIntent != null) && pendingIntent.equals(intent)
+                && intentNanoAppId == nanoAppId;
+    }
+
+    /**
+     * Attaches the death recipient to the callback interface object, if any.
+     *
+     * @throws RemoteException if the client process already died
+     */
+    /* package */ void attachDeathRecipient() throws RemoteException {
+        if (mCallbackInterface != null) {
+            mCallbackInterface.asBinder().linkToDeath(this, 0 /* flags */);
+        }
     }
 
     /**
@@ -446,11 +370,29 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                 // The PendingIntent is no longer valid
                 Log.w(TAG, "PendingIntent has been canceled, unregistering from client"
                         + " (host endpoint ID " + mHostEndPointId + ")");
-                mPendingIntentRequest.clear();
-                if (mCallbackInterface == null) {
-                    close();
-                }
+                close();
             }
+        }
+    }
+
+    /**
+     * @return true if the client is still registered with the service, false otherwise
+     */
+    private synchronized boolean isRegistered() {
+        return mRegistered;
+    }
+
+    /**
+     * Invoked when a client exits either explicitly or by binder death.
+     */
+    private synchronized void onClientExit() {
+        if (mCallbackInterface != null) {
+            mCallbackInterface.asBinder().unlinkToDeath(this, 0 /* flags */);
+            mCallbackInterface = null;
+        }
+        if (!mPendingIntentRequest.hasPendingIntent() && mRegistered) {
+            mClientManager.unregisterClient(mHostEndPointId);
+            mRegistered = false;
         }
     }
 }
