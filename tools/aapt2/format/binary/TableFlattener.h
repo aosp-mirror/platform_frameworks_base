@@ -43,6 +43,9 @@ struct TableFlattenerOptions {
 
   // Set of whitelisted resource names to avoid altering in key stringpool
   std::set<std::string> whitelisted_resources;
+
+  // When true, sort the entries in the values string pool by priority and configuration.
+  bool sort_stringpool_entries = true;
 };
 
 class TableFlattener : public IResourceTableConsumer {
