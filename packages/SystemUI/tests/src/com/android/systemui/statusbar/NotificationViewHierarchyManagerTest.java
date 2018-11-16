@@ -74,7 +74,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Mock private ShadeController mShadeController;
 
     private NotificationViewHierarchyManager mViewHierarchyManager;
-    private NotificationTestHelper mHelper = new NotificationTestHelper(mContext);;
+    private NotificationTestHelper mHelper = new NotificationTestHelper(mContext);
 
     @Before
     public void setUp() {
@@ -209,19 +209,19 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         public void setChildTransferInProgress(boolean childTransferInProgress) {}
 
         @Override
-        public void changeViewPosition(View child, int newIndex) {
+        public void changeViewPosition(ExpandableView child, int newIndex) {
             mRows.remove(child);
             mRows.add(newIndex, child);
         }
 
         @Override
-        public void notifyGroupChildAdded(View row) {}
+        public void notifyGroupChildAdded(ExpandableView row) {}
 
         @Override
-        public void notifyGroupChildRemoved(View row, ViewGroup childrenContainer) {}
+        public void notifyGroupChildRemoved(ExpandableView row, ViewGroup childrenContainer) {}
 
         @Override
-        public void generateAddAnimation(View child, boolean fromMoreCard) {}
+        public void generateAddAnimation(ExpandableView child, boolean fromMoreCard) {}
 
         @Override
         public void generateChildOrderChangedEvent() {}

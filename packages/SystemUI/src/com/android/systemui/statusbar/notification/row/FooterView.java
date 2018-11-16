@@ -24,7 +24,6 @@ import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
-import com.android.systemui.statusbar.notification.stack.StackScrollState;
 
 public class FooterView extends StackScrollerDecorView {
     private final int mClearAllTopPadding;
@@ -87,7 +86,7 @@ public class FooterView extends StackScrollerDecorView {
     }
 
     @Override
-    public ExpandableViewState createNewViewState(StackScrollState stackScrollState) {
+    public ExpandableViewState createExpandableViewState() {
         return new FooterViewState();
     }
 

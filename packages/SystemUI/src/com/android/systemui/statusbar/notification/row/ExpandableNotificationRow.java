@@ -17,22 +17,14 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
-import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator
-        .ExpandAnimationParameters;
-import static com.android.systemui.statusbar.notification.row.NotificationContentView
-        .VISIBLE_TYPE_AMBIENT;
-import static com.android.systemui.statusbar.notification.row.NotificationContentView
-        .VISIBLE_TYPE_CONTRACTED;
-import static com.android.systemui.statusbar.notification.row.NotificationContentView
-        .VISIBLE_TYPE_HEADSUP;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater
-        .FLAG_CONTENT_VIEW_AMBIENT;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater
-        .FLAG_CONTENT_VIEW_HEADS_UP;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater
-        .FLAG_CONTENT_VIEW_PUBLIC;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater
-        .InflationCallback;
+import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_AMBIENT;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_AMBIENT;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_PUBLIC;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.InflationCallback;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -105,7 +97,6 @@ import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.notification.stack.StackScrollState;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -337,7 +328,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private float mTranslationWhenRemoved;
     private boolean mWasChildInGroupWhenRemoved;
     private int mNotificationColorAmbient;
-    private NotificationViewState mNotificationViewState;
 
     private SystemNotificationAsyncTask mSystemNotificationAsyncTask =
             new SystemNotificationAsyncTask();
@@ -894,29 +884,32 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 visualStabilityManager, callback);
     }
 
-    public void getChildrenStates(StackScrollState resultState,
-            AmbientState ambientState) {
+    /** Updates states of all children. */
+    public void updateChildrenStates(AmbientState ambientState) {
         if (mIsSummaryWithChildren) {
-            ExpandableViewState parentState = resultState.getViewStateForView(this);
-            mChildrenContainer.getState(resultState, parentState, ambientState);
+            ExpandableViewState parentState = getViewState();
+            mChildrenContainer.updateState(parentState, ambientState);
         }
     }
 
-    public void applyChildrenState(StackScrollState state) {
+    /** Applies children states. */
+    public void applyChildrenState() {
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.applyState(state);
+            mChildrenContainer.applyState();
         }
     }
 
-    public void prepareExpansionChanged(StackScrollState state) {
+    /** Prepares expansion changed. */
+    public void prepareExpansionChanged() {
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.prepareExpansionChanged(state);
+            mChildrenContainer.prepareExpansionChanged();
         }
     }
 
-    public void startChildAnimation(StackScrollState finalState, AnimationProperties properties) {
+    /** Starts child animations. */
+    public void startChildAnimation(AnimationProperties properties) {
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.startAnimationToState(finalState, properties);
+            mChildrenContainer.startAnimationToState(properties);
         }
     }
 
@@ -2047,7 +2040,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     .setInterpolator(Interpolators.ALPHA_OUT);
             setAboveShelf(true);
             mExpandAnimationRunning = true;
-            mNotificationViewState.cancelAnimations(this);
+            getViewState().cancelAnimations(this);
             mNotificationLaunchHeight = AmbientState.getNotificationLaunchHeight(getContext());
         } else {
             mExpandAnimationRunning = false;
@@ -2924,13 +2917,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    public ExpandableViewState createNewViewState(StackScrollState stackScrollState) {
-        mNotificationViewState = new NotificationViewState(stackScrollState);
-        return mNotificationViewState;
-    }
-
-    public NotificationViewState getViewState() {
-        return mNotificationViewState;
+    public ExpandableViewState createExpandableViewState() {
+        return new NotificationViewState();
     }
 
     @Override
@@ -3040,14 +3028,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    public static class NotificationViewState extends ExpandableViewState {
-
-        private final StackScrollState mOverallState;
-
-
-        private NotificationViewState(StackScrollState stackScrollState) {
-            mOverallState = stackScrollState;
-        }
+    private static class NotificationViewState extends ExpandableViewState {
 
         @Override
         public void applyToView(View view) {
@@ -3058,7 +3039,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 }
                 handleFixedTranslationZ(row);
                 super.applyToView(view);
-                row.applyChildrenState(mOverallState);
+                row.applyChildrenState();
             }
         }
 
@@ -3089,7 +3070,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 }
                 handleFixedTranslationZ(row);
                 super.animateTo(child, properties);
-                row.startChildAnimation(mOverallState, properties);
+                row.startChildAnimation(properties);
             }
         }
     }
@@ -3144,8 +3125,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         pw.println();
         showingLayout.dump(fd, pw, args);
         pw.print("    ");
-        if (mNotificationViewState != null) {
-            mNotificationViewState.dump(fd, pw, args);
+        if (getViewState() != null) {
+            getViewState().dump(fd, pw, args);
         } else {
             pw.print("no viewState!!!");
         }

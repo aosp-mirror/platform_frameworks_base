@@ -16,14 +16,12 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
-        .NUM_SECTIONS;
-
-import android.view.View;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.NUM_SECTIONS;
 
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.HashSet;
@@ -38,7 +36,7 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
     private ActivatableNotificationView[] mLastInSectionViews;
     private ActivatableNotificationView[] mTmpFirstInSectionViews;
     private ActivatableNotificationView[] mTmpLastInSectionViews;
-    private HashSet<View> mAnimatedChildren;
+    private HashSet<ExpandableView> mAnimatedChildren;
     private Runnable mRoundingChangedCallback;
     private ExpandableNotificationRow mTrackedHeadsUp;
     private float mAppearFraction;
@@ -212,7 +210,7 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
         return anyChanged;
     }
 
-    public void setAnimatedChildren(HashSet<View> animatedChildren) {
+    public void setAnimatedChildren(HashSet<ExpandableView> animatedChildren) {
         mAnimatedChildren = animatedChildren;
     }
 

@@ -47,7 +47,6 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.notification.stack.StackScrollState;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 
@@ -68,7 +67,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     private boolean mDark;
     private NotificationIconContainer mShelfIcons;
-    private ShelfState mShelfState;
     private int[] mTmp = new int[2];
     private boolean mHideBackground;
     private int mIconAppearTopPadding;
@@ -115,7 +113,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         setClipChildren(false);
         setClipToPadding(false);
         mShelfIcons.setIsStaticLayout(false);
-        mShelfState = new ShelfState();
         setBottomRoundness(1.0f, false /* animate */);
         initDimens();
     }
@@ -187,52 +184,53 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     @Override
-    public ExpandableViewState createNewViewState(StackScrollState stackScrollState) {
-        return mShelfState;
+    public ExpandableViewState createExpandableViewState() {
+        return new ShelfState();
     }
 
-    public void updateState(StackScrollState resultState,
-            AmbientState ambientState) {
-        View lastView = ambientState.getLastVisibleBackgroundChild();
+    /** Update the state of the shelf. */
+    public void updateState(AmbientState ambientState) {
+        ExpandableView lastView = ambientState.getLastVisibleBackgroundChild();
+        ShelfState viewState = (ShelfState) getViewState();
         if (mShowNotificationShelf && lastView != null) {
             float maxShelfEnd = ambientState.getInnerHeight() + ambientState.getTopPadding()
                     + ambientState.getStackTranslation();
-            ExpandableViewState lastViewState = resultState.getViewStateForView(lastView);
+            ExpandableViewState lastViewState = lastView.getViewState();
             float viewEnd = lastViewState.yTranslation + lastViewState.height;
-            mShelfState.copyFrom(lastViewState);
-            mShelfState.height = getIntrinsicHeight();
+            viewState.copyFrom(lastViewState);
+            viewState.height = getIntrinsicHeight();
 
-            float awakenTranslation = Math.max(Math.min(viewEnd, maxShelfEnd) - mShelfState.height,
+            float awakenTranslation = Math.max(Math.min(viewEnd, maxShelfEnd) - viewState.height,
                     getFullyClosedTranslation());
             float darkTranslation = mAmbientState.getDarkTopPadding();
             float yRatio = mAmbientState.hasPulsingNotifications() ?
                     0 : mAmbientState.getDarkAmount();
-            mShelfState.yTranslation = MathUtils.lerp(awakenTranslation, darkTranslation, yRatio);
-            mShelfState.zTranslation = ambientState.getBaseZHeight();
+            viewState.yTranslation = MathUtils.lerp(awakenTranslation, darkTranslation, yRatio);
+            viewState.zTranslation = ambientState.getBaseZHeight();
             // For the small display size, it's not enough to make the icon not covered by
             // the top cutout so the denominator add the height of cutout.
             // Totally, (getIntrinsicHeight() * 2 + mCutoutHeight) should be smaller then
             // mAmbientState.getTopPadding().
-            float openedAmount = (mShelfState.yTranslation - getFullyClosedTranslation())
+            float openedAmount = (viewState.yTranslation - getFullyClosedTranslation())
                     / (getIntrinsicHeight() * 2 + mCutoutHeight);
             openedAmount = Math.min(1.0f, openedAmount);
-            mShelfState.openedAmount = openedAmount;
-            mShelfState.clipTopAmount = 0;
-            mShelfState.alpha = mAmbientState.hasPulsingNotifications() ? 0 : 1;
-            mShelfState.belowSpeedBump = mAmbientState.getSpeedBumpIndex() == 0;
-            mShelfState.hideSensitive = false;
-            mShelfState.xTranslation = getTranslationX();
+            viewState.openedAmount = openedAmount;
+            viewState.clipTopAmount = 0;
+            viewState.alpha = mAmbientState.hasPulsingNotifications() ? 0 : 1;
+            viewState.belowSpeedBump = mAmbientState.getSpeedBumpIndex() == 0;
+            viewState.hideSensitive = false;
+            viewState.xTranslation = getTranslationX();
             if (mNotGoneIndex != -1) {
-                mShelfState.notGoneIndex = Math.min(mShelfState.notGoneIndex, mNotGoneIndex);
+                viewState.notGoneIndex = Math.min(viewState.notGoneIndex, mNotGoneIndex);
             }
-            mShelfState.hasItemsInStableShelf = lastViewState.inShelf;
-            mShelfState.hidden = !mAmbientState.isShadeExpanded()
+            viewState.hasItemsInStableShelf = lastViewState.inShelf;
+            viewState.hidden = !mAmbientState.isShadeExpanded()
                     || mAmbientState.isQsCustomizerShowing();
-            mShelfState.maxShelfEnd = maxShelfEnd;
+            viewState.maxShelfEnd = maxShelfEnd;
         } else {
-            mShelfState.hidden = true;
-            mShelfState.location = ExpandableViewState.LOCATION_GONE;
-            mShelfState.hasItemsInStableShelf = false;
+            viewState.hidden = true;
+            viewState.location = ExpandableViewState.LOCATION_GONE;
+            viewState.hasItemsInStableShelf = false;
         }
     }
 
@@ -261,7 +259,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         int notGoneIndex = 0;
         int colorOfViewBeforeLast = NO_COLOR;
         boolean backgroundForceHidden = false;
-        if (mHideBackground && !mShelfState.hasItemsInStableShelf) {
+        if (mHideBackground && !((ShelfState) getViewState()).hasItemsInStableShelf) {
             backgroundForceHidden = true;
         }
         int colorTwoBefore = NO_COLOR;

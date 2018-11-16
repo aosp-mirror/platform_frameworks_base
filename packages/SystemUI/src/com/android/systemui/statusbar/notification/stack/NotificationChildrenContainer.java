@@ -274,7 +274,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         updateGroupOverflow();
         row.setContentTransformationAmount(0, false /* isLastChild */);
         // It doesn't make sense to keep old animations around, lets cancel them!
-        ExpandableNotificationRow.NotificationViewState viewState = row.getViewState();
+        ExpandableViewState viewState = row.getViewState();
         if (viewState != null) {
             viewState.cancelAnimations(row);
             row.cancelAppearDrawing();
@@ -562,12 +562,10 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     /**
      * Update the state of all its children based on a linear layout algorithm.
-     *  @param resultState the state to update
      * @param parentState the state of the parent
      * @param ambientState
      */
-    public void getState(StackScrollState resultState, ExpandableViewState parentState,
-            AmbientState ambientState) {
+    public void updateState(ExpandableViewState parentState, AmbientState ambientState) {
         int childCount = mChildren.size();
         int yPosition = mNotificationHeaderMargin + mCurrentHeaderTranslation;
         boolean firstChild = true;
@@ -605,7 +603,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                 firstChild = false;
             }
 
-            ExpandableViewState childState = resultState.getViewStateForView(child);
+            ExpandableViewState childState = child.getViewState();
             int intrinsicHeight = child.getIntrinsicHeight();
             childState.height = intrinsicHeight;
             childState.yTranslation = yPosition + launchTransitionCompensation;
@@ -639,7 +637,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         if (mOverflowNumber != null) {
             ExpandableNotificationRow overflowView = mChildren.get(Math.min(
                     getMaxAllowedVisibleChildren(true /* likeCollapsed */), childCount) - 1);
-            mGroupOverFlowState.copyFrom(resultState.getViewStateForView(overflowView));
+            mGroupOverFlowState.copyFrom(overflowView.getViewState());
 
             if (mContainingNotification.isOnAmbient()) {
                 mGroupOverFlowState.alpha = 0.0f;
@@ -724,7 +722,8 @@ public class NotificationChildrenContainer extends ViewGroup {
         return NUMBER_OF_CHILDREN_WHEN_COLLAPSED;
     }
 
-    public void applyState(StackScrollState state) {
+    /** Applies state to children. */
+    public void applyState() {
         int childCount = mChildren.size();
         ViewState tmpState = new ViewState();
         float expandFraction = 0.0f;
@@ -737,7 +736,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                 && !mHideDividersDuringExpand);
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
-            ExpandableViewState viewState = state.getViewStateForView(child);
+            ExpandableViewState viewState = child.getViewState();
             viewState.applyToView(child);
 
             // layout the divider
@@ -799,14 +798,14 @@ public class NotificationChildrenContainer extends ViewGroup {
      * This is called when the children expansion has changed and positions the children properly
      * for an appear animation.
      *
-     * @param state the new state we animate to
      */
-    public void prepareExpansionChanged(StackScrollState state) {
+    public void prepareExpansionChanged() {
         // TODO: do something that makes sense, like placing the invisible views correctly
         return;
     }
 
-    public void startAnimationToState(StackScrollState state, AnimationProperties properties) {
+    /** Animate to a given state. */
+    public void startAnimationToState(AnimationProperties properties) {
         int childCount = mChildren.size();
         ViewState tmpState = new ViewState();
         float expandFraction = getGroupExpandFraction();
@@ -816,7 +815,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                 && !mHideDividersDuringExpand);
         for (int i = childCount - 1; i >= 0; i--) {
             ExpandableNotificationRow child = mChildren.get(i);
-            ExpandableViewState viewState = state.getViewStateForView(child);
+            ExpandableViewState viewState = child.getViewState();
             viewState.animateTo(child, properties);
 
             // layout the divider
