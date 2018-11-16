@@ -250,6 +250,14 @@ public class WifiScanner {
          */
         @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
         public int type = TYPE_LOW_LATENCY;
+        /**
+         * This scan request may ignore location settings while receiving scans. This should only
+         * be used in emergency situations.
+         * {@hide}
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+        public boolean ignoreLocationSettings;
 
         /** Implement the Parcelable interface {@hide} */
         public int describeContents() {
@@ -267,6 +275,7 @@ public class WifiScanner {
             dest.writeInt(stepCount);
             dest.writeInt(isPnoScan ? 1 : 0);
             dest.writeInt(type);
+            dest.writeInt(ignoreLocationSettings ? 1 : 0);
             if (channels != null) {
                 dest.writeInt(channels.length);
                 for (int i = 0; i < channels.length; i++) {
@@ -301,6 +310,7 @@ public class WifiScanner {
                         settings.stepCount = in.readInt();
                         settings.isPnoScan = in.readInt() == 1;
                         settings.type = in.readInt();
+                        settings.ignoreLocationSettings = in.readInt() == 1;
                         int num_channels = in.readInt();
                         settings.channels = new ChannelSpec[num_channels];
                         for (int i = 0; i < num_channels; i++) {
