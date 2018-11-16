@@ -219,6 +219,21 @@ public class Build {
         }
     }
 
+    /** Various vendor strings */
+    public static class VENDOR {
+        /**
+         * The build number override from an OEM vendor prop.
+         * In return, this should retarget the default build number.
+         */
+        public static final String BUILD_NUMBER_OVERRIDE = SystemProperties.get("ro.vendor.override.build_display", "");
+        
+        /**
+         * The security patch level override from an OEM vendor prop.
+         * In return, this should retarget the default patch level.
+         */
+        public static final String SECURITY_PATCH_OVERRIDE = SystemProperties.get("ro.vendor.override.security_patch", "");
+    }
+    
     /** Various version strings. */
     public static class VERSION {
         /**
