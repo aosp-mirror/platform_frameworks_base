@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony;
+package com.android.internal.telephony.rcs;
 
 interface IRcs {
+    // RcsManager APIs
     void deleteThread(int threadId);
+
+    // RcsThread APIs
+    int getMessageCount(int rcsThreadId);
 }
