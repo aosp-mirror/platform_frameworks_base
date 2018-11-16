@@ -2145,7 +2145,7 @@ class ActivityStarter {
             if (mTargetStack == null && targetDisplayId != sourceStack.mDisplayId) {
                 // Can't use target display, lets find a stack on the source display.
                 mTargetStack = mSupervisor.getValidLaunchStackOnDisplay(
-                        sourceStack.mDisplayId, mStartActivity, mOptions);
+                        sourceStack.mDisplayId, mStartActivity, mOptions, mLaunchParams);
             }
             if (mTargetStack == null) {
                 // There are no suitable stacks on the target and source display(s). Look on all
@@ -2368,7 +2368,8 @@ class ActivityStarter {
 
         if (mPreferredDisplayId != DEFAULT_DISPLAY) {
             // Try to put the activity in a stack on a secondary display.
-            stack = mSupervisor.getValidLaunchStackOnDisplay(mPreferredDisplayId, r, aOptions);
+            stack = mSupervisor.getValidLaunchStackOnDisplay(mPreferredDisplayId, r, aOptions,
+                    mLaunchParams);
             if (stack == null) {
                 // If source display is not suitable - look for topmost valid stack in the system.
                 if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
@@ -2432,9 +2433,12 @@ class ActivityStarter {
                  || mPreferredDisplayId != DEFAULT_DISPLAY) {
             // We don't pass in the default display id into the get launch stack call so it can do a
             // full resolution.
-            final int candidateDisplay =
+            mLaunchParams.mPreferredDisplayId =
                     mPreferredDisplayId != DEFAULT_DISPLAY ? mPreferredDisplayId : INVALID_DISPLAY;
-            return mSupervisor.getLaunchStack(r, aOptions, task, ON_TOP, candidateDisplay);
+            final ActivityStack stack = mSupervisor.getLaunchStack(r, aOptions, task, ON_TOP,
+                    mLaunchParams);
+            mLaunchParams.mPreferredDisplayId = mPreferredDisplayId;
+            return stack;
         }
         // Otherwise handle adjacent launch.
 

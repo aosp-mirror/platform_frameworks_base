@@ -121,6 +121,7 @@ import android.app.AppOpsManager;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.WaitResult;
+import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
 import android.app.servertransaction.ActivityLifecycleItem;
@@ -2405,7 +2406,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     <T extends ActivityStack> T getLaunchStack(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop) {
-        return getLaunchStack(r, options, candidateTask, onTop, INVALID_DISPLAY);
+        return getLaunchStack(r, options, candidateTask, onTop, null /* launchParams */);
     }
 
     /**
@@ -2414,12 +2415,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * @param r The activity we are trying to launch. Can be null.
      * @param options The activity options used to the launch. Can be null.
      * @param candidateTask The possible task the activity might be launched in. Can be null.
+     * @params launchParams The resolved launch params to use.
      *
      * @return The stack to use for the launch or INVALID_STACK_ID.
      */
     <T extends ActivityStack> T getLaunchStack(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop,
-            int candidateDisplayId) {
+            @Nullable LaunchParamsController.LaunchParams launchParams) {
         int taskId = INVALID_TASK_ID;
         int displayId = INVALID_DISPLAY;
         //Rect bounds = null;
@@ -2427,9 +2429,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // We give preference to the launch preference in activity options.
         if (options != null) {
             taskId = options.getLaunchTaskId();
-            displayId = options.getLaunchDisplayId();
-            // TODO: Need to work this into the equation...
-            //bounds = options.getLaunchBounds();
         }
 
         // First preference for stack goes to the task Id set in the activity options. Use the stack
@@ -2446,16 +2445,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         final int activityType = resolveActivityType(r, options, candidateTask);
-        T stack = null;
+        T stack;
 
-        // Next preference for stack goes to the display Id set in the activity options or the
-        // candidate display.
-        if (displayId == INVALID_DISPLAY) {
-            displayId = candidateDisplayId;
+        // Next preference for stack goes to the display Id set the candidate display.
+        if (launchParams != null) {
+            displayId = launchParams.mPreferredDisplayId;
         }
         if (displayId != INVALID_DISPLAY && canLaunchOnDisplay(r, displayId)) {
             if (r != null) {
-                stack = (T) getValidLaunchStackOnDisplay(displayId, r, candidateTask, options);
+                stack = (T) getValidLaunchStackOnDisplay(displayId, r, candidateTask, options,
+                        launchParams);
                 if (stack != null) {
                     return stack;
                 }
@@ -2482,8 +2481,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (stack != null) {
             display = stack.getDisplay();
             if (display != null && canLaunchOnDisplay(r, display.mDisplayId)) {
-                final int windowingMode =
-                        display.resolveWindowingMode(r, options, candidateTask, activityType);
+                int windowingMode = launchParams != null ? launchParams.mWindowingMode
+                        : WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+                if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
+                    windowingMode = display.resolveWindowingMode(r, options, candidateTask,
+                            activityType);
+                }
                 if (stack.isCompatible(windowingMode, activityType)) {
                     return stack;
                 }
@@ -2523,8 +2526,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * @param candidateTask The possible task the activity might be put in.
      * @return Existing stack if there is a valid one, new dynamic stack if it is valid or null.
      */
-    ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r,
-            @Nullable TaskRecord candidateTask, @Nullable ActivityOptions options) {
+    private ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r,
+            @Nullable TaskRecord candidateTask, @Nullable ActivityOptions options,
+            @Nullable LaunchParamsController.LaunchParams launchParams) {
         final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(displayId);
         if (activityDisplay == null) {
             throw new IllegalArgumentException(
@@ -2552,8 +2556,18 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         // If there is no valid stack on the external display - check if new dynamic stack will do.
         if (displayId != DEFAULT_DISPLAY) {
+            final int windowingMode;
+            if (launchParams != null) {
+                // When launch params is not null, we always defer to its windowing mode. Sometimes
+                // it could be unspecified, which indicates it should inherit windowing mode from
+                // display.
+                windowingMode = launchParams.mWindowingMode;
+            } else {
+                windowingMode = options != null ? options.getLaunchWindowingMode()
+                        : r.getWindowingMode();
+            }
             return activityDisplay.createStack(
-                    options != null ? options.getLaunchWindowingMode() : r.getWindowingMode(),
+                    windowingMode,
                     options != null ? options.getLaunchActivityType() : r.getActivityType(),
                     true /*onTop*/);
         }
@@ -2563,8 +2577,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r,
-            @Nullable ActivityOptions options) {
-        return getValidLaunchStackOnDisplay(displayId, r, null /* candidateTask */, options);
+            @Nullable ActivityOptions options,
+            @Nullable LaunchParamsController.LaunchParams launchParams) {
+        return getValidLaunchStackOnDisplay(displayId, r, null /* candidateTask */, options,
+                launchParams);
     }
 
     // TODO: Can probably be consolidated into getLaunchStack()...
@@ -2644,7 +2660,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 continue;
             }
             final ActivityStack stack = getValidLaunchStackOnDisplay(display.mDisplayId, r,
-                    null /* options */);
+                    null /* options */, null /* launchParams */);
             if (stack != null) {
                 return stack;
             }
