@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!-- Test power profile that parses correctly. -->
+<device>
+    <item name="battery.capacity">2915</item>
+
+    <!-- Number of cores each CPU cluster contains -->
+    <array name="cpu.clusters.cores">
+        <value>4</value>
+        <value>2</value>
+    </array>
+
+    <!-- Power consumption when CPU is suspended -->
+    <item name="cpu.suspend">1.3</item>
+
+    <!-- Additional power consumption when CPU is in a kernel idle loop -->
+    <item name="cpu.idle">3.9</item>
+
+    <!-- Additional power consumption by CPU excluding cluster and core when
+         running -->
+    <item name="cpu.active">18.33</item>
+
+    <!-- Additional power consumption by CPU cluster0 itself when running
+         excluding cores in it -->
+    <item name="cpu.cluster_power.cluster0">2.41</item>
+
+    <!-- Additional power consumption by CPU cluster1 itself when running
+         excluding cores in it -->
+    <item name="cpu.cluster_power.cluster1">5.29</item>
+
+    <!-- Different CPU speeds as reported in
+         /sys/devices/system/cpu/cpu0/cpufreq/stats/scaling_available_frequencies -->
+    <array name="cpu.core_speeds.cluster0">
+        <value>100000</value>
+        <value>303200</value>
+        <value>380000</value>
+        <value>476000</value>
+        <value>552800</value>
+        <value>648800</value>
+        <value>725600</value>
+        <value>802400</value>
+        <value>879200</value>
+    </array>
+
+    <!-- Different CPU speeds as reported in
+         /sys/devices/system/cpu/cpu4/cpufreq/stats/scaling_available_frequencies -->
+    <array name="cpu.core_speeds.cluster1">
+        <value>825600</value>
+        <value>902400</value>
+        <value>979200</value>
+        <value>1056000</value>
+        <value>1209600</value>
+        <value>1286400</value>
+        <value>1363200</value>
+    </array>
+
+    <!-- Additional power used by a CPU core from cluster 0 when running at
+         different speeds, excluding cluster and active cost -->
+    <array name="cpu.core_power.cluster0">
+        <value>0.29</value>
+        <value>0.63</value>
+        <value>1.23</value>
+        <value>1.24</value>
+        <value>2.47</value>
+        <value>2.54</value>
+        <value>3.60</value>
+        <value>3.64</value>
+        <value>4.42</value>
+    </array>
+
+    <!-- Additional power used by a CPU core from cluster 1 when running at
+         different speeds, excluding cluster and active cost -->
+    <array name="cpu.core_power.cluster1">
+        <value>28.98</value>
+        <value>31.40</value>
+        <value>33.33</value>
+        <value>40.12</value>
+        <value>44.10</value>
+        <value>90.14</value>
+        <value>100</value>
+    </array>
+
+    <!-- Additional power used when screen is ambient mode -->
+    <item name="ambient.on">12</item>
+
+    <!-- Additional power used when screen is turned on at minimum brightness -->
+    <item name="screen.on">102.4</item>
+    <!-- Additional power used when screen is at maximum brightness, compared to
+         screen at minimum brightness -->
+    <item name="screen.full">1234</item>
+
+    <!-- Average power used by the camera flash module when on -->
+    <item name="camera.flashlight">1233.47</item>
+
+    <!-- Average power use by the camera subsystem for a typical camera
+         application. Intended as a rough estimate for an application running a
+         preview and capturing approximately 10 full-resolution pictures per
+         minute. -->
+    <item name="camera.avg">941</item>
+
+    <!-- Additional power used when video is playing -->
+    <item name="video">123</item>
+
+    <!-- Additional power used when audio is playing -->
+    <item name="audio">12</item>
+
+    <!-- Cellular modem related values.-->
+    <item name="modem.controller.sleep">1</item>
+    <item name="modem.controller.idle">44</item>
+    <item name="modem.controller.rx">11</item>
+    <array name="modem.controller.tx"> <!-- Strength 0 to 4 -->
+      <value>16</value>
+      <value>19</value>
+      <value>22</value>
+      <value>73</value>
+      <value>132</value>
+    </array>
+    <item name="modem.controller.voltage">1400</item>
+    <item name="radio.scanning">12</item>
+
+    <!-- GPS related values.-->
+    <item name="gps.on">1</item>
+    <array name="gps.signalqualitybased"> <!-- Strength 0 to 1 -->
+      <value>88</value>
+      <value>07</value>
+    </array>
+    <item name="gps.voltage">1500</item>
+
+    <!-- Idle Receive current for wifi radio in mA.-->
+    <item name="wifi.controller.idle">2</item>
+
+    <!-- Rx current for wifi radio in mA.-->
+    <item name="wifi.controller.rx">123</item>
+
+    <!-- Tx current for wifi radio in mA-->
+    <item name="wifi.controller.tx">333</item>
+
+    <!-- Operating volatage for wifi radio in mV.-->
+    <item name="wifi.controller.voltage">3700</item>
+
+    <!-- Idle current for bluetooth in mA.-->
+    <item name="bluetooth.controller.idle">0.02</item>
+
+    <!-- Rx current for bluetooth in mA.-->
+    <item name="bluetooth.controller.rx">3</item>
+
+    <!-- Tx current for bluetooth in mA-->
+    <item name="bluetooth.controller.tx">5</item>
+
+    <!-- Operating voltage for bluetooth in mV.-->
+    <item name="bluetooth.controller.voltage">3300</item>
+
+</device>
+
+
