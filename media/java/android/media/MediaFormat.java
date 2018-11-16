@@ -919,7 +919,7 @@ public final class MediaFormat {
      * a media track.
      * <p>
      * This key is set by {@link MediaExtractor} if the track is scrambled with a conditional
-     * access system.
+     * access system, regardless of the presence of a valid {@link MediaCas} object.
      * <p>
      * The associated value is an integer.
      * @hide
@@ -930,12 +930,24 @@ public final class MediaFormat {
      * A key describing the {@link MediaCas.Session} object associated with a media track.
      * <p>
      * This key is set by {@link MediaExtractor} if the track is scrambled with a conditional
-     * access system.
+     * access system, after it receives a valid {@link MediaCas} object.
      * <p>
      * The associated value is a ByteBuffer.
      * @hide
      */
     public static final String KEY_CA_SESSION_ID = "ca-session-id";
+
+
+    /**
+     * A key describing the private data in the CA_descriptor associated with a media track.
+     * <p>
+     * This key is set by {@link MediaExtractor} if the track is scrambled with a conditional
+     * access system, before it receives a valid {@link MediaCas} object.
+     * <p>
+     * The associated value is a ByteBuffer.
+     * @hide
+     */
+    public static final String KEY_CA_PRIVATE_DATA = "ca-private-data";
 
     /* package private */ MediaFormat(Map<String, Object> map) {
         mMap = map;
