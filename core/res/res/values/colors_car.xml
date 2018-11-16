@@ -284,4 +284,8 @@
 
     <color name="car_red_500a">#ffd50000</color>
     <color name="car_red_a700">#ffd50000</color>
+
+    <color name="car_keyboard_divider_line">#38ffffff</color>
+    <color name="car_keyboard_text_primary_color">@color/car_grey_50</color>
+    <color name="car_keyboard_text_secondary_color">#8af8f9fa</color>
 </resources>
