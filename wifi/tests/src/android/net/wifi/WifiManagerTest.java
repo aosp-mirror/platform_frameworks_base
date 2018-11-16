@@ -1278,12 +1278,12 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Check the call to getMatchingOsuProviders calls getMatchingOsuProviders of WifiService
-     * with the provided a single ScanResult.
+     * with the provided a list of ScanResult.
      */
     @Test
     public void testGetMatchingOsuProviders() throws Exception {
-        mWifiManager.getMatchingOsuProviders(new ScanResult());
+        mWifiManager.getMatchingOsuProviders(new ArrayList<>());
 
-        verify(mWifiService).getMatchingOsuProviders(any(ScanResult.class));
+        verify(mWifiService).getMatchingOsuProviders(any(List.class));
     }
 }
