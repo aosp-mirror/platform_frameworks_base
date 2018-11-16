@@ -17,12 +17,12 @@
 package android.telephony;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.CarrierConfigManager;
 import android.util.Log;
-import android.content.res.Resources;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,25 +37,25 @@ public class SignalStrength implements Parcelable {
     private static final boolean DBG = false;
 
     /** @hide */
-    @UnsupportedAppUsage
-    public static final int SIGNAL_STRENGTH_NONE_OR_UNKNOWN
-            = TelephonyProtoEnums.SIGNAL_STRENGTH_NONE_OR_UNKNOWN; // = 0
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    public static final int SIGNAL_STRENGTH_NONE_OR_UNKNOWN =
+            CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN; // = 0
     /** @hide */
-    @UnsupportedAppUsage
-    public static final int SIGNAL_STRENGTH_POOR
-            = TelephonyProtoEnums.SIGNAL_STRENGTH_POOR; // = 1
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    public static final int SIGNAL_STRENGTH_POOR =
+            CellSignalStrength.SIGNAL_STRENGTH_POOR; // = 1
     /** @hide */
-    @UnsupportedAppUsage
-    public static final int SIGNAL_STRENGTH_MODERATE
-            = TelephonyProtoEnums.SIGNAL_STRENGTH_MODERATE; // = 2
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    public static final int SIGNAL_STRENGTH_MODERATE =
+            CellSignalStrength.SIGNAL_STRENGTH_MODERATE; // = 2
     /** @hide */
-    @UnsupportedAppUsage
-    public static final int SIGNAL_STRENGTH_GOOD
-            = TelephonyProtoEnums.SIGNAL_STRENGTH_GOOD; // = 3
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    public static final int SIGNAL_STRENGTH_GOOD =
+            CellSignalStrength.SIGNAL_STRENGTH_GOOD; // = 3
     /** @hide */
-    @UnsupportedAppUsage
-    public static final int SIGNAL_STRENGTH_GREAT
-            = TelephonyProtoEnums.SIGNAL_STRENGTH_GREAT; // = 4
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    public static final int SIGNAL_STRENGTH_GREAT =
+            CellSignalStrength.SIGNAL_STRENGTH_GREAT; // = 4
     /** @hide */
     @UnsupportedAppUsage
     public static final int NUM_SIGNAL_STRENGTH_BINS = 5;
