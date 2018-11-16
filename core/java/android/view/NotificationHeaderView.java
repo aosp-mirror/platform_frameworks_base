@@ -218,11 +218,6 @@ public class NotificationHeaderView extends ViewGroup {
                 layoutRight = end - paddingEnd;
                 end = layoutLeft = layoutRight - child.getMeasuredWidth();
             }
-            if (child == mAudiblyAlertedIcon) {
-                int paddingEnd = mContentEndMargin;
-                layoutRight = end - paddingEnd;
-                end = layoutLeft = layoutRight - child.getMeasuredWidth();
-            }
             if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
                 int ltrLeft = layoutLeft;
                 layoutLeft = getWidth() - layoutRight;
