@@ -57,6 +57,15 @@ public class RawBatteryStats {
     private ImmutableMap<String,ImmutableList<Record>> mRecordsByType;
 
     /**
+     * The attribution keys for which we have data (corresponding to UIDs we've seen).
+     * <p>
+     * Does not include the synthetic apps.
+     * <p>
+     * Don't use this before {@link #indexRecords()} has been called.
+     */
+    private ImmutableSet<AttributionKey> mApps;
+
+    /**
      * The warnings that have been issued during parsing.
      */
     private ArrayList<Warning> mWarnings = new ArrayList<Warning>();
@@ -687,6 +696,13 @@ public class RawBatteryStats {
     }
 
     /**
+     * Get the UIDs that are covered by this batterystats dump.
+     */
+    public Set<AttributionKey> getApps() {
+        return mApps;
+    }
+
+    /**
      * No public constructor. Use {@link #parse}.
      */
     private RawBatteryStats() {
@@ -721,6 +737,9 @@ public class RawBatteryStats {
 
         // Gather the records by class name for the getSingle() and getMultiple() functions.
         indexRecords();
+
+        // Gather the uids from all the places UIDs come from, for getApps().
+        indexApps();
     }
 
     /**
@@ -829,6 +848,53 @@ public class RawBatteryStats {
 
         // Initialize here so uninitialized access will result in NPE.
         mRecordsByType = ImmutableMap.copyOf(result);
+    }
+
+    /**
+     * Collect the UIDs from the csv.
+     *
+     * They come from two places.
+     * <ul>
+     *   <li>The uid to package name map entries ({@link #Uid}) at the beginning.
+     *   <li>The uid fields of the rest of the entries, some of which might not
+     *       have package names associated with them.
+     * </ul>
+     *
+     * TODO: Is this where we should also do the logic about the special UIDs?
+     */
+    private void indexApps() {
+        final HashMap<Integer,HashSet<String>> uids = new HashMap<Integer,HashSet<String>>();
+
+        // The Uid rows, from which we get package names
+        for (Uid record: getMultiple(Uid.class)) {
+            HashSet<String> list = uids.get(record.uidKey);
+            if (list == null) {
+                list = new HashSet<String>();
+                uids.put(record.uidKey, list);
+            }
+            list.add(record.pkg);
+        }
+
+        // The uid fields of everything
+        for (Record record: mRecords) {
+            // The 0 in the INFO records isn't really root, it's just unfilled data.
+            // The root uid (0) will show up practically in every record, but don't force it.
+            if (record.category != Category.INFO) {
+                if (uids.get(record.uid) == null) {
+                    // There is no other data about this UID, but it does exist!
+                    uids.put(record.uid, new HashSet<String>());
+                }
+            }
+        }
+
+        // Turn our temporary lists of package names into AttributionKeys.
+        final HashSet<AttributionKey> result = new HashSet<AttributionKey>();
+        for (HashMap.Entry<Integer,HashSet<String>> entry: uids.entrySet()) {
+            result.add(new AttributionKey(entry.getKey(), entry.getValue()));
+        }
+
+        // Initialize here so uninitialized access will result in NPE.
+        mApps = ImmutableSet.copyOf(result);
     }
 
     /**
