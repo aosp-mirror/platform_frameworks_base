@@ -805,7 +805,7 @@ public final class SystemServer {
         boolean disableSystemTextClassifier = SystemProperties.getBoolean(
                 "config.disable_systemtextclassifier", false);
         boolean disableIntelligence = SystemProperties.getBoolean(
-                "config.disable_intelligence", false);
+                "config.disable_intelligence", true);
         boolean disableNetworkTime = SystemProperties.getBoolean("config.disable_networktime",
                 false);
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
