@@ -16,14 +16,14 @@
 
 package com.android.server.wm;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.anyFloat;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyFloat;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -46,34 +46,29 @@ public class WindowTestUtils {
                 WallpaperController wallpaperController, DisplayWindowController controller) {
             super(display, service, wallpaperController, controller);
         }
-
-        /** Create a mocked default {@link DisplayContent}. */
-        public static TestDisplayContent create(Context context) {
-            final TestDisplayContent displayContent = mock(TestDisplayContent.class);
-            displayContent.isDefaultDisplay = true;
-
-            final DisplayPolicy displayPolicy = mock(DisplayPolicy.class);
-            when(displayPolicy.navigationBarCanMove()).thenReturn(true);
-            when(displayPolicy.hasNavigationBar()).thenReturn(true);
-
-            final DisplayRotation displayRotation = new DisplayRotation(
-                    mock(WindowManagerService.class), displayContent, displayPolicy,
-                    context, new Object());
-            displayRotation.mPortraitRotation = Surface.ROTATION_0;
-            displayRotation.mLandscapeRotation = Surface.ROTATION_90;
-            displayRotation.mUpsideDownRotation = Surface.ROTATION_180;
-            displayRotation.mSeascapeRotation = Surface.ROTATION_270;
-
-            when(displayContent.getDisplayRotation()).thenReturn(displayRotation);
-
-            return displayContent;
-        }
     }
 
-    /**
-     * Creates a mock instance of {@link StackWindowController}.
-     */
-    public static StackWindowController createMockStackWindowContainerController() {
+    public static DisplayRotation createTestDisplayRotation(
+            Context context, TestDisplayContent displayContent) {
+        displayContent.isDefaultDisplay = true;
+
+        final DisplayPolicy displayPolicy = mock(DisplayPolicy.class);
+        doReturn(true).when(displayPolicy).navigationBarCanMove();
+        doReturn(true).when(displayPolicy).hasNavigationBar();
+
+        final DisplayRotation displayRotation = new DisplayRotation(
+                mock(WindowManagerService.class), displayContent, displayPolicy,
+                context, new Object());
+        displayRotation.mPortraitRotation = Surface.ROTATION_0;
+        displayRotation.mLandscapeRotation = Surface.ROTATION_90;
+        displayRotation.mUpsideDownRotation = Surface.ROTATION_180;
+        displayRotation.mSeascapeRotation = Surface.ROTATION_270;
+
+        return displayRotation;
+    }
+
+    /** Creates a mock instance of {@link StackWindowController}. */
+    static StackWindowController createMockStackWindowContainerController() {
         StackWindowController controller = mock(StackWindowController.class);
         controller.mContainer = mock(TestTaskStack.class);
 
@@ -94,7 +89,7 @@ public class WindowTestUtils {
      * An extension of {@link TestTaskStack}, which overrides package scoped methods that would not
      * normally be mocked out.
      */
-    public static class TestTaskStack extends TaskStack {
+    static class TestTaskStack extends TaskStack {
         TestTaskStack(WindowManagerService service, int stackId) {
             super(service, stackId, null);
         }

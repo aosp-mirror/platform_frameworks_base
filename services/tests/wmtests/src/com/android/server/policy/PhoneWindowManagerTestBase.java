@@ -28,10 +28,11 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.server.wm.WindowTestUtils.createTestDisplayRotation;
 import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -59,6 +60,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.wm.DisplayFrames;
+import com.android.server.wm.DisplayRotation;
 import com.android.server.wm.WindowTestUtils.TestDisplayContent;
 import com.android.server.wm.utils.WmDisplayCutout;
 
@@ -95,7 +97,8 @@ class PhoneWindowManagerTestBase {
         mContext.getResourceMocker().addOverride(
                 com.android.internal.R.dimen.navigation_bar_width, NAV_BAR_HEIGHT);
 
-        mPolicy = TestablePhoneWindowManager.create(mContext);
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> mPolicy = new TestablePhoneWindowManager(mContext));
 
         updateDisplayFrames();
     }
@@ -232,9 +235,21 @@ class PhoneWindowManagerTestBase {
         }
     }
 
-    static class TestablePhoneWindowManager extends PhoneWindowManager {
+    class TestablePhoneWindowManager extends PhoneWindowManager {
 
-        TestablePhoneWindowManager() {
+        TestablePhoneWindowManager(Context context) {
+            mContext = context;
+            mKeyguardDelegate = mock(KeyguardServiceDelegate.class);
+            mAccessibilityManager = new AccessibilityManager(context,
+                    mock(IAccessibilityManager.class), UserHandle.USER_CURRENT);
+            mSystemGestures = mock(SystemGesturesPointerEventListener.class);
+
+            final TestDisplayContent displayContent = mock(TestDisplayContent.class);
+            final DisplayRotation displayRotation =
+                    createTestDisplayRotation(mContext, displayContent);
+
+            setDefaultDisplay(displayContent.getDisplay(), displayRotation);
+            onConfigurationChanged(displayRotation);
         }
 
         @Override
@@ -255,23 +270,6 @@ class PhoneWindowManagerTestBase {
             }
             adjustWindowParamsLw(state, state.getAttrs(), true /* hasStatusBarPermission */);
             assertEquals(WindowManagerGlobal.ADD_OKAY, prepareAddWindowLw(state, state.getAttrs()));
-        }
-
-        public static TestablePhoneWindowManager create(Context context) {
-            TestablePhoneWindowManager[] policy = new TestablePhoneWindowManager[1];
-            InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-                policy[0] = new TestablePhoneWindowManager();
-                policy[0].mContext = context;
-                policy[0].mKeyguardDelegate = mock(KeyguardServiceDelegate.class);
-                policy[0].mAccessibilityManager = new AccessibilityManager(context,
-                        mock(IAccessibilityManager.class), UserHandle.USER_CURRENT);
-                policy[0].mSystemGestures = mock(SystemGesturesPointerEventListener.class);
-
-                final TestDisplayContent displayContent = TestDisplayContent.create(context);
-                policy[0].setDefaultDisplay(displayContent);
-                policy[0].onConfigurationChanged(displayContent);
-            });
-            return policy[0];
         }
     }
 }
