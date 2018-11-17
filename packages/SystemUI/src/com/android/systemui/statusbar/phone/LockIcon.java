@@ -22,6 +22,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -44,6 +45,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private static final int STATE_FACE_UNLOCK = 2;
     private static final int STATE_FINGERPRINT = 3;
     private static final int STATE_FINGERPRINT_ERROR = 4;
+    private static final boolean HOLLOW_PILL = SystemProperties
+            .getBoolean("persist.sysui.hollow_pill", false);
 
     private int mLastState = 0;
     private boolean mLastDeviceInteractive;
@@ -219,6 +222,16 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
                 break;
             default:
                 throw new IllegalArgumentException();
+        }
+
+        if (HOLLOW_PILL && deviceInteractive) {
+            switch (state) {
+                case STATE_FINGERPRINT:
+                case STATE_LOCK_OPEN:
+                case STATE_LOCKED:
+                case STATE_FACE_UNLOCK:
+                    iconRes = R.drawable.ic_home_button_outline;
+            }
         }
 
         return mContext.getDrawable(iconRes);
