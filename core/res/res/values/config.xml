@@ -3349,6 +3349,13 @@
          See android.view.textclassifier.TextClassificationManager.
     -->
     <string name="config_defaultTextClassifierPackage" translatable="false"></string>
+    
+    <!-- The package name for the default wellbeing app.
+         This package must be trusted, as it has the permissions to control other applications
+         on the device.
+         Example: "com.android.wellbeing"
+     -->
+    <string name="config_defaultWellbeingPackage" translatable="false"></string>
 
     <!-- The package name for the system's content capture service.
          This service must be trusted, as it can be activated without explicit consent of the user.

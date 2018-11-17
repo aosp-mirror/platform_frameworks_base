@@ -6424,6 +6424,17 @@ public abstract class PackageManager {
     }
 
     /**
+     * @return the wellbeing app package name, or null if it's not defined by the OEM.
+     *
+     * @hide
+     */
+    @SystemApi
+    public String getWellbeingPackageName() {
+        throw new UnsupportedOperationException(
+                "getWellbeingPackageName not implemented in subclass");
+    }
+
+    /**
      * @return whether a given package's state is protected, e.g. package cannot be disabled,
      *         suspended, hidden or force stopped.
      *

@@ -53,6 +53,7 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_BROWSER = 4;
     public static final int PACKAGE_SYSTEM_TEXT_CLASSIFIER = 5;
     public static final int PACKAGE_PERMISSION_CONTROLLER = 6;
+    public static final int PACKAGE_WELLBEING = 7;
     @IntDef(value = {
         PACKAGE_SYSTEM,
         PACKAGE_SETUP_WIZARD,
@@ -61,6 +62,7 @@ public abstract class PackageManagerInternal {
         PACKAGE_BROWSER,
         PACKAGE_SYSTEM_TEXT_CLASSIFIER,
         PACKAGE_PERMISSION_CONTROLLER,
+        PACKAGE_WELLBEING,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KnownPackage {}

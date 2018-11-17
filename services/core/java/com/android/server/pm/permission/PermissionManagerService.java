@@ -1637,6 +1637,12 @@ public class PermissionManagerService {
                 // Special permissions for the system default text classifier.
                 allowed = true;
             }
+            if (!allowed && bp.isWellbeing()
+                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
+                    PackageManagerInternal.PACKAGE_WELLBEING, UserHandle.USER_SYSTEM))) {
+                // Special permission granted only to the OEM specified wellbeing app
+                allowed = true;
+            }
         }
         return allowed;
     }

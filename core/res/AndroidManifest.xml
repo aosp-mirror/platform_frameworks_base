@@ -1648,7 +1648,7 @@
          @hide
     -->
     <permission android:name="android.permission.SUSPEND_APPS"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|wellbeing" />
 
     <!-- Allows applications to discover and pair bluetooth devices.
          <p>Protection level: normal
@@ -4086,10 +4086,10 @@
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
 
-    <!-- Allows the holder to access and manage instant applications on the device.
-    @hide -->
+    <!-- @SystemApi Allows the holder to access and manage instant applications on the device.
+         @hide -->
     <permission android:name="android.permission.ACCESS_INSTANT_APPS"
-            android:protectionLevel="signature|installer|verifier" />
+            android:protectionLevel="signature|installer|verifier|wellbeing" />
     <uses-permission android:name="android.permission.ACCESS_INSTANT_APPS"/>
 
     <!-- Allows the holder to view the instant applications on the device.
