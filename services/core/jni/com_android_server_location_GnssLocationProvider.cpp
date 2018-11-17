@@ -92,7 +92,6 @@ using android::hardware::gnss::V1_0::GnssLocationFlags;
 using android::hardware::gnss::V1_0::IAGnss;
 using android::hardware::gnss::V1_0::IAGnssCallback;
 using android::hardware::gnss::V1_0::IAGnssCallback;
-using android::hardware::gnss::V1_0::IAGnssRil;
 using android::hardware::gnss::V1_0::IAGnssRilCallback;
 using android::hardware::gnss::V1_0::IGnssBatching;
 using android::hardware::gnss::V1_0::IGnssBatchingCallback;
@@ -121,6 +120,8 @@ using IGnssMeasurement_V2_0 = android::hardware::gnss::V2_0::IGnssMeasurement;
 using IGnssMeasurementCallback_V1_0 = android::hardware::gnss::V1_0::IGnssMeasurementCallback;
 using IGnssMeasurementCallback_V1_1 = android::hardware::gnss::V1_1::IGnssMeasurementCallback;
 using IGnssMeasurementCallback_V2_0 = android::hardware::gnss::V2_0::IGnssMeasurementCallback;
+using IAGnssRil_V1_0 = android::hardware::gnss::V1_0::IAGnssRil;
+using IAGnssRil_V2_0 = android::hardware::gnss::V2_0::IAGnssRil;
 
 struct GnssDeathRecipient : virtual public hidl_death_recipient
 {
@@ -141,7 +142,8 @@ sp<IGnss_V1_0> gnssHal = nullptr;
 sp<IGnss_V1_1> gnssHal_V1_1 = nullptr;
 sp<IGnss_V2_0> gnssHal_V2_0 = nullptr;
 sp<IGnssXtra> gnssXtraIface = nullptr;
-sp<IAGnssRil> agnssRilIface = nullptr;
+sp<IAGnssRil_V1_0> agnssRilIface = nullptr;
+sp<IAGnssRil_V2_0> agnssRilIface_V2_0 = nullptr;
 sp<IGnssGeofencing> gnssGeofencingIface = nullptr;
 sp<IAGnss> agnssIface = nullptr;
 sp<IGnssBatching> gnssBatchingIface = nullptr;
@@ -1247,11 +1249,21 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
         gnssXtraIface = gnssXtra;
     }
 
-    auto gnssRil = gnssHal->getExtensionAGnssRil();
-    if (!gnssRil.isOk()) {
-        ALOGD("Unable to get a handle to AGnssRil");
+    if (gnssHal_V2_0 != nullptr) {
+        auto agnssRil_V2_0 = gnssHal_V2_0->getExtensionAGnssRil_2_0();
+        if (!agnssRil_V2_0.isOk()) {
+            ALOGD("Unable to get a handle to AGnssRil_V2_0");
+        } else {
+            agnssRilIface_V2_0 = agnssRil_V2_0;
+            agnssRilIface = agnssRilIface_V2_0;
+        }
     } else {
-        agnssRilIface = gnssRil;
+        auto agnssRil_V1_0 = gnssHal->getExtensionAGnssRil();
+        if (!agnssRil_V1_0.isOk()) {
+            ALOGD("Unable to get a handle to AGnssRil");
+        } else {
+            agnssRilIface = agnssRil_V1_0;
+        }
     }
 
     auto gnssAgnss = gnssHal->getExtensionAGnss();
@@ -1496,17 +1508,17 @@ static void android_location_GnssLocationProvider_delete_aiding_data(JNIEnv* /* 
 
 static void android_location_GnssLocationProvider_agps_set_reference_location_cellid(
         JNIEnv* /* env */, jobject /* obj */, jint type, jint mcc, jint mnc, jint lac, jint cid) {
-    IAGnssRil::AGnssRefLocation location;
+    IAGnssRil_V1_0::AGnssRefLocation location;
 
     if (agnssRilIface == nullptr) {
         ALOGE("No AGPS RIL interface in agps_set_reference_location_cellid");
         return;
     }
 
-    switch (static_cast<IAGnssRil::AGnssRefLocationType>(type)) {
-        case IAGnssRil::AGnssRefLocationType::GSM_CELLID:
-        case IAGnssRil::AGnssRefLocationType::UMTS_CELLID:
-          location.type = static_cast<IAGnssRil::AGnssRefLocationType>(type);
+    switch (static_cast<IAGnssRil_V1_0::AGnssRefLocationType>(type)) {
+        case IAGnssRil_V1_0::AGnssRefLocationType::GSM_CELLID:
+        case IAGnssRil_V1_0::AGnssRefLocationType::UMTS_CELLID:
+          location.type = static_cast<IAGnssRil_V1_0::AGnssRefLocationType>(type);
           location.cellID.mcc = mcc;
           location.cellID.mnc = mnc;
           location.cellID.lac = lac;
@@ -1529,7 +1541,7 @@ static void android_location_GnssLocationProvider_agps_set_id(JNIEnv *env, jobje
     }
 
     const char *setid = env->GetStringUTFChars(setid_string, nullptr);
-    agnssRilIface->setSetId((IAGnssRil::SetIDType)type, setid);
+    agnssRilIface->setSetId((IAGnssRil_V1_0::SetIDType)type, setid);
     env->ReleaseStringUTFChars(setid_string, setid);
 }
 
@@ -1771,26 +1783,44 @@ static void android_location_GnssNetworkConnectivityHandler_update_network_state
                                                                        jint type,
                                                                        jboolean roaming,
                                                                        jboolean available,
-                                                                       jstring extraInfo,
-                                                                       jstring apn) {
-    if (agnssRilIface != nullptr) {
+                                                                       jstring apn,
+                                                                       jlong networkHandle,
+                                                                       jshort capabilities) {
+    if (agnssRilIface == nullptr) {
+        ALOGE("AGnssRilInterface does not exist");
+        return;
+    }
+
+    const char *c_apn = env->GetStringUTFChars(apn, nullptr);
+    const android::hardware::hidl_string hidl_apn{c_apn};
+    if (agnssRilIface_V2_0 != nullptr) {
+        IAGnssRil_V2_0::NetworkAttributes networkAttributes = {
+            .networkHandle = static_cast<uint64_t>(networkHandle),
+            .isConnected = static_cast<bool>(connected),
+            .capabilities = static_cast<uint16_t>(capabilities),
+            .apn = hidl_apn
+        };
+
+        auto result = agnssRilIface_V2_0->updateNetworkState_2_0(networkAttributes);
+        if (!result.isOk() || !result) {
+            ALOGE("updateNetworkState_2_0 failed");
+        }
+    } else {
         auto result = agnssRilIface->updateNetworkState(connected,
-                                                       static_cast<IAGnssRil::NetworkType>(type),
-                                                       roaming);
+                static_cast<IAGnssRil_V1_0::NetworkType>(type), roaming);
         if (!result.isOk() || !result) {
             ALOGE("updateNetworkState failed");
         }
 
-        const char *c_apn = env->GetStringUTFChars(apn, nullptr);
-        result = agnssRilIface->updateNetworkAvailability(available, c_apn);
-        if (!result.isOk() || !result) {
-            ALOGE("updateNetworkAvailability failed");
+        if (!hidl_apn.empty()) {
+            result = agnssRilIface->updateNetworkAvailability(available, hidl_apn);
+            if (!result.isOk() || !result) {
+                ALOGE("updateNetworkAvailability failed");
+            }
         }
-
-        env->ReleaseStringUTFChars(apn, c_apn);
-    } else {
-        ALOGE("AGnssRilInterface does not exist");
     }
+
+    env->ReleaseStringUTFChars(apn, c_apn);
 }
 
 static jboolean android_location_GnssGeofenceProvider_is_geofence_supported(
@@ -2098,7 +2128,6 @@ static jboolean android_location_GnssLocationProvider_set_satellite_blacklist(
     }
 }
 
-
 static jint android_location_GnssBatchingProvider_get_batch_size(JNIEnv*, jclass) {
     if (gnssBatchingIface == nullptr) {
         return 0; // batching not supported, size = 0
@@ -2317,7 +2346,7 @@ static const JNINativeMethod sNetworkConnectivityMethods[] = {
     {"native_is_agps_ril_supported", "()Z",
             reinterpret_cast<void *>(android_location_GnssNetworkConnectivityHandler_is_agps_ril_supported)},
     {"native_update_network_state",
-            "(ZIZZLjava/lang/String;Ljava/lang/String;)V",
+            "(ZIZZLjava/lang/String;JS)V",
             reinterpret_cast<void *>(android_location_GnssNetworkConnectivityHandler_update_network_state)},
     {"native_agps_data_conn_open",
             "(Ljava/lang/String;I)V",
