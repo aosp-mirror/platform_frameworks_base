@@ -24,8 +24,9 @@ import com.android.internal.util.Preconditions;
 
 /**
  * A helper class to retrieve information about a Intent event received for a PendingIntent
- * registered through {@link ContextHubClient.registerIntent(PendingIntent, long)}. This object
- * can only be created through the factory method {@link ContextHubIntentEvent.fromIntent(Intent)}.
+ * registered with {@link ContextHubManager.createClient(ContextHubInfo, PendingIntent, long)}.
+ * This object can only be created through the factory method
+ * {@link ContextHubIntentEvent.fromIntent(Intent)}.
  *
  * @hide
  */
@@ -77,7 +78,7 @@ public class ContextHubIntentEvent {
 
     /**
      * Creates a ContextHubIntentEvent object from an Intent received through a PendingIntent
-     * registered through {@link ContextHubClient.registerIntent(PendingIntent, long)}.
+     * registered with {@link ContextHubManager.createClient(ContextHubInfo, PendingIntent, long)}.
      *
      * @param intent the Intent object from an Intent event
      * @return the ContextHubIntentEvent object describing the event
