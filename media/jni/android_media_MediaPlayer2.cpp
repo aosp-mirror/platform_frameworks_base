@@ -1009,10 +1009,11 @@ android_media_MediaPlayer2_native_init(JNIEnv *env)
 }
 
 static void
-android_media_MediaPlayer2_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
+android_media_MediaPlayer2_native_setup(JNIEnv *env, jobject thiz,
+        jint sessionId, jobject weak_this)
 {
     ALOGV("native_setup");
-    sp<MediaPlayer2> mp = MediaPlayer2::Create();
+    sp<MediaPlayer2> mp = MediaPlayer2::Create(sessionId);
     if (mp == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
@@ -1417,7 +1418,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_setVolume",    "(F)V",                             (void *)android_media_MediaPlayer2_setVolume},
     {"native_invoke",       "([B)[B",                           (void *)android_media_MediaPlayer2_invoke},
     {"native_init",         "()V",                              (void *)android_media_MediaPlayer2_native_init},
-    {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer2_native_setup},
+    {"native_setup",        "(ILjava/lang/Object;)V",           (void *)android_media_MediaPlayer2_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer2_native_finalize},
     {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer2_getAudioSessionId},
     {"native_setAudioSessionId", "(I)V",                        (void *)android_media_MediaPlayer2_setAudioSessionId},
