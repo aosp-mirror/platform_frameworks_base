@@ -196,6 +196,7 @@ public final class IntelligenceManager {
 
     private void handleSendEvent(@NonNull ContentCaptureEvent event) {
 
+        //TODO(b/111276913): make a copy and don't use lock
         synchronized (mLock) {
             mEvents.add(event);
             final int numberEvents = mEvents.size();

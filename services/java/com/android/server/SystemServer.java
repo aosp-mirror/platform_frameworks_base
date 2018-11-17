@@ -804,8 +804,11 @@ public final class SystemServer {
 
         boolean disableSystemTextClassifier = SystemProperties.getBoolean(
                 "config.disable_systemtextclassifier", false);
+
+        //TODO(b/111276913): temporarily disabled until the manager is properly implemented to
+        // ignore events when disabled and buffer when enabled
         boolean disableIntelligence = SystemProperties.getBoolean(
-                "config.disable_intelligence", false);
+                "config.disable_intelligence", true);
         boolean disableNetworkTime = SystemProperties.getBoolean("config.disable_networktime",
                 false);
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
@@ -1140,6 +1143,8 @@ public final class SystemServer {
                 traceBeginAndSlog("StartIntelligenceService");
                 mSystemServiceManager.startService(INTELLIGENCE_MANAGER_SERVICE_CLASS);
                 traceEnd();
+            } else {
+                Slog.d(TAG, "IntelligenceService disabled");
             }
 
             // NOTE: ClipboardService indirectly depends on IntelligenceService
