@@ -52,7 +52,9 @@ public interface SensorManagerPlugin extends Plugin {
     }
 
     class Sensor {
-        public static int TYPE_WAKE_LOCK_SCREEN = 1;
+        public static final int TYPE_WAKE_LOCK_SCREEN = 1;
+        public static final int TYPE_WAKE_DISPLAY = 2;
+        public static final int TYPE_SWIPE = 3;
 
         int mType;
 
@@ -68,6 +70,7 @@ public interface SensorManagerPlugin extends Plugin {
     class TriggerEvent {
         Sensor mSensor;
         int mVendorType;
+        float[] mValues;
 
         /**
          * Creates a trigger event
@@ -76,12 +79,28 @@ public interface SensorManagerPlugin extends Plugin {
          *                   e.g. SINGLE_TAP = 1, DOUBLE_TAP = 2, etc.
          */
         public TriggerEvent(Sensor sensor, int vendorType) {
+            this(sensor, vendorType, null);
+        }
+
+        /**
+         * Creates a trigger event
+         * @param sensor The type of sensor, e.g. TYPE_WAKE_LOCK_SCREEN
+         * @param vendorType The vendor type, which should be unique for each type of sensor,
+         *                   e.g. SINGLE_TAP = 1, DOUBLE_TAP = 2, etc.
+         * @param values Values captured by the sensor.
+         */
+        public TriggerEvent(Sensor sensor, int vendorType, float[] values) {
             mSensor = sensor;
             mVendorType = vendorType;
+            mValues = values;
         }
 
         public Sensor getSensor() {
             return mSensor;
+        }
+
+        public float[] getValues() {
+            return mValues;
         }
 
         public int getVendorType() {
