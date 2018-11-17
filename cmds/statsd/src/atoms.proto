@@ -1264,6 +1264,9 @@ message UsbConnectorStateChanged {
     }
     optional State state = 1;
     optional string id = 2;
+    // Last active session in ms.
+    // 0 when the port is in connected state.
+    optional int64 last_connect_duration_millis = 3;
 }
 
 /**

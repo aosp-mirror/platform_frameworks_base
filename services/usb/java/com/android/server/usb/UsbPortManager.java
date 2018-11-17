@@ -41,6 +41,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.usb.UsbPortInfoProto;
 import android.service.usb.UsbPortManagerProto;
@@ -706,6 +707,8 @@ public class UsbPortManager {
         // Guard against possible reentrance by posting the broadcast from the handler
         // instead of from within the critical section.
         mHandler.post(() -> mContext.sendBroadcastAsUser(intent, UserHandle.ALL));
+
+        // Log to statsd
         if (!mConnected.containsKey(portInfo.mUsbPort.getId())
                 || (mConnected.get(portInfo.mUsbPort.getId())
                 != portInfo.mUsbPortStatus.isConnected())) {
@@ -714,7 +717,7 @@ public class UsbPortManager {
                     portInfo.mUsbPortStatus.isConnected()
                     ? StatsLog.USB_CONNECTOR_STATE_CHANGED__STATE__STATE_CONNECTED :
                     StatsLog.USB_CONNECTOR_STATE_CHANGED__STATE__STATE_DISCONNECTED,
-                    portInfo.mUsbPort.getId());
+                    portInfo.mUsbPort.getId(), portInfo.mLastConnectDurationMillis);
         }
     }
 
@@ -762,7 +765,12 @@ public class UsbPortManager {
         public boolean mCanChangeMode;
         public boolean mCanChangePowerRole;
         public boolean mCanChangeDataRole;
-        public int mDisposition; // default initialized to 0 which means added
+        // default initialized to 0 which means added
+        public int mDisposition;
+        // Tracks elapsedRealtime() of when the port was connected
+        public long mConnectedAtMillis;
+        // 0 when port is connected. Else reports the last connected duration
+        public long mLastConnectDurationMillis;
 
         public PortInfo(String portId, int supportedModes) {
             mUsbPort = new UsbPort(portId, supportedModes);
@@ -772,6 +780,8 @@ public class UsbPortManager {
                 int currentPowerRole, boolean canChangePowerRole,
                 int currentDataRole, boolean canChangeDataRole,
                 int supportedRoleCombinations) {
+            boolean dispositionChanged = false;
+
             mCanChangeMode = canChangeMode;
             mCanChangePowerRole = canChangePowerRole;
             mCanChangeDataRole = canChangeDataRole;
@@ -783,9 +793,18 @@ public class UsbPortManager {
                     != supportedRoleCombinations) {
                 mUsbPortStatus = new UsbPortStatus(currentMode, currentPowerRole, currentDataRole,
                         supportedRoleCombinations);
-                return true;
+                dispositionChanged = true;
             }
-            return false;
+
+            if (mUsbPortStatus.isConnected() && mConnectedAtMillis == 0) {
+                mConnectedAtMillis = SystemClock.elapsedRealtime();
+                mLastConnectDurationMillis = 0;
+            } else if (!mUsbPortStatus.isConnected() && mConnectedAtMillis != 0) {
+                mLastConnectDurationMillis = SystemClock.elapsedRealtime() - mConnectedAtMillis;
+                mConnectedAtMillis = 0;
+            }
+
+            return dispositionChanged;
         }
 
         void dump(@NonNull DualDumpOutputStream dump, @NonNull String idName, long id) {
@@ -798,6 +817,10 @@ public class UsbPortManager {
                     mCanChangePowerRole);
             dump.write("can_change_data_role", UsbPortInfoProto.CAN_CHANGE_DATA_ROLE,
                     mCanChangeDataRole);
+            dump.write("connected_at_millis",
+                    UsbPortInfoProto.CONNECTED_AT_MILLIS, mConnectedAtMillis);
+            dump.write("last_connect_duration_millis",
+                    UsbPortInfoProto.LAST_CONNECT_DURATION_MILLIS, mLastConnectDurationMillis);
 
             dump.end(token);
         }
@@ -807,7 +830,9 @@ public class UsbPortManager {
             return "port=" + mUsbPort + ", status=" + mUsbPortStatus
                     + ", canChangeMode=" + mCanChangeMode
                     + ", canChangePowerRole=" + mCanChangePowerRole
-                    + ", canChangeDataRole=" + mCanChangeDataRole;
+                    + ", canChangeDataRole=" + mCanChangeDataRole
+                    + ", connectedAtMillis=" + mConnectedAtMillis
+                    + ", lastConnectDurationMillis=" + mLastConnectDurationMillis;
         }
     }
 
