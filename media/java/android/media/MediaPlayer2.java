@@ -789,38 +789,34 @@ public class MediaPlayer2 implements AutoCloseable
             throws IOException {
         checkArgument(dsd != null, "the DataSourceDesc cannot be null");
 
-        switch (dsd.getType()) {
-            case DataSourceDesc.TYPE_CALLBACK:
-                handleDataSource(isCurrent,
-                                 srcId,
-                                 dsd.getMedia2DataSource(),
-                                 dsd.getStartPosition(),
-                                 dsd.getEndPosition());
-                break;
-
-            case DataSourceDesc.TYPE_FD:
-                handleDataSource(isCurrent,
-                                 srcId,
-                                 dsd.getFileDescriptor(),
-                                 dsd.getFileDescriptorOffset(),
-                                 dsd.getFileDescriptorLength(),
-                                 dsd.getStartPosition(),
-                                 dsd.getEndPosition());
-                break;
-
-            case DataSourceDesc.TYPE_URI:
-                handleDataSource(isCurrent,
-                                 srcId,
-                                 dsd.getUriContext(),
-                                 dsd.getUri(),
-                                 dsd.getUriHeaders(),
-                                 dsd.getUriCookies(),
-                                 dsd.getStartPosition(),
-                                 dsd.getEndPosition());
-                break;
-
-            default:
-                break;
+        if (dsd instanceof CallbackDataSourceDesc) {
+            CallbackDataSourceDesc cbDSD = (CallbackDataSourceDesc) dsd;
+            handleDataSource(isCurrent,
+                             srcId,
+                             cbDSD.getMedia2DataSource(),
+                             cbDSD.getStartPosition(),
+                             cbDSD.getEndPosition());
+        } else if (dsd instanceof FileDataSourceDesc) {
+            FileDataSourceDesc fileDSD = (FileDataSourceDesc) dsd;
+            handleDataSource(isCurrent,
+                             srcId,
+                             fileDSD.getFileDescriptor(),
+                             fileDSD.getOffset(),
+                             fileDSD.getLength(),
+                             fileDSD.getStartPosition(),
+                             fileDSD.getEndPosition());
+        } else if (dsd instanceof UriDataSourceDesc) {
+            UriDataSourceDesc uriDSD = (UriDataSourceDesc) dsd;
+            handleDataSource(isCurrent,
+                             srcId,
+                             uriDSD.getContext(),
+                             uriDSD.getUri(),
+                             uriDSD.getHeaders(),
+                             uriDSD.getCookies(),
+                             uriDSD.getStartPosition(),
+                             uriDSD.getEndPosition());
+        } else {
+            throw new IllegalArgumentException("Unsupported DataSourceDesc. " + dsd.toString());
         }
     }
 
