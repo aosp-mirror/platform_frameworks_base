@@ -313,6 +313,11 @@ public class MediaPlayer2 implements AutoCloseable
     private ProvisioningThread mDrmProvisioningThread;
     //--- guarded by |mDrmLock| end
 
+    // Creating a dummy audio track, used for keeping session id alive
+    private final Object mSessionIdLock = new Object();
+    @GuardedBy("mSessionIdLock")
+    private AudioTrack mDummyAudioTrack;
+
     private HandlerThread mHandlerThread;
     private final TaskHandler mTaskHandler;
     private final Object mTaskLock = new Object();
@@ -347,14 +352,17 @@ public class MediaPlayer2 implements AutoCloseable
         mHandlerThread.start();
         Looper looper = mHandlerThread.getLooper();
         mTaskHandler = new TaskHandler(this, looper);
+        AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        int sessionId = am.generateAudioSessionId();
+        keepAudioSessionIdAlive(sessionId);
 
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
-        native_setup(new WeakReference<MediaPlayer2>(this));
+        native_setup(sessionId, new WeakReference<MediaPlayer2>(this));
     }
 
-    private native void native_setup(Object mediaplayer2This);
+    private native void native_setup(int sessionId, Object mediaplayer2This);
 
     /**
      * Releases the resources held by this {@code MediaPlayer2} object.
@@ -410,6 +418,11 @@ public class MediaPlayer2 implements AutoCloseable
         resetDrmState();
 
         native_release();
+
+        synchronized (mSessionIdLock) {
+            mDummyAudioTrack.release();
+        }
+
         mReleased = true;
     }
 
@@ -454,6 +467,11 @@ public class MediaPlayer2 implements AutoCloseable
 
         stayAwake(false);
         native_reset();
+
+        AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        int sessionId = am.generateAudioSessionId();
+        keepAudioSessionIdAlive(sessionId);
+
         // make sure none of the listeners get called anymore
         if (mTaskHandler != null) {
             mTaskHandler.removeCallbacksAndMessages(null);
@@ -1748,6 +1766,7 @@ public class MediaPlayer2 implements AutoCloseable
      */
     // This is an asynchronous call.
     public Object setAudioSessionId(int sessionId) {
+        keepAudioSessionIdAlive(sessionId);
         return addTask(new Task(CALL_COMPLETED_SET_AUDIO_SESSION_ID, false) {
             @Override
             void process() {
@@ -4547,5 +4566,20 @@ public class MediaPlayer2 implements AutoCloseable
          */
         public static final String ERROR_CODE = "android.media.mediaplayer.errcode";
 
+    }
+
+    private void keepAudioSessionIdAlive(int sessionId) {
+        synchronized (mSessionIdLock) {
+            if (mDummyAudioTrack != null) {
+                if (mDummyAudioTrack.getAudioSessionId() == sessionId) {
+                    return;
+                }
+                mDummyAudioTrack.release();
+            }
+            // TODO: parameters can be optimized
+            mDummyAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
+                    AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, 2,
+                    AudioTrack.MODE_STATIC, sessionId);
+        }
     }
 }
