@@ -23,8 +23,20 @@ package com.android.powermodel;
 public class ComponentActivity {
     public AttributionKey attribution;
 
-    public ComponentActivity(AttributionKey attribution) {
+    protected ComponentActivity(AttributionKey attribution) {
         this.attribution = attribution;
+    }
+
+    // TODO: Can we refactor what goes into the activities so this function
+    // doesn't need the global state?
+    /**
+     * Apply the power profile for this component.  Subclasses should implement this
+     * to do the per-component calculatinos.  The default implementation returns null.
+     * If this method returns null, then there will be no power associated for this
+     * component, which, for example is true with some of the GLOBAL activities.
+     */
+    public ComponentPower applyProfile(ActivityReport activityReport, PowerProfile profile) {
+        return null;
     }
 }
 

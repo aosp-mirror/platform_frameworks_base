@@ -20,13 +20,13 @@ import com.android.powermodel.ActivityReport;
 import com.android.powermodel.AttributionKey;
 import com.android.powermodel.Component;
 import com.android.powermodel.ComponentActivity;
+import com.android.powermodel.PowerProfile;
+import com.android.powermodel.util.Conversion;
 
 /**
  * Encapsulates the work done by the remaining 
  */
 public class ModemRemainderActivity extends ComponentActivity {
-    private static final double MS_PER_HR = 3600000.0;
-
     /**
      * Construct a new ModemRemainderActivity.
      */
@@ -49,5 +49,39 @@ public class ModemRemainderActivity extends ComponentActivity {
      * than an app transmitting and receiving data.
      */
     public long activeTimeMs;
+
+    @Override
+    public ModemRemainderPower applyProfile(ActivityReport activityReport, PowerProfile profile) {
+        // Profile
+        final ModemProfile modemProfile = (ModemProfile)profile.getComponent(Component.MODEM);
+        if (modemProfile == null) {
+            return null;
+        }
+
+        // Activity
+        final ModemRemainderPower result = new ModemRemainderPower();
+        result.attribution = this.attribution;
+        result.activity = this;
+
+        // strengthMah
+        // TODO: If the array lengths don't match... then?
+        result.strengthMah = new double[this.strengthTimeMs.length];
+        for (int i=0; i<this.strengthTimeMs.length; i++) {
+            result.strengthMah[i] = Conversion.msToHr(
+                    this.strengthTimeMs[i] * modemProfile.getTxMa()[i]);
+            result.powerMah += result.strengthMah[i];
+        }
+
+        // scanningMah
+        result.scanningMah = Conversion.msToHr(this.scanningTimeMs * modemProfile.getScanningMa());
+        result.powerMah += result.scanningMah;
+
+        // activeMah
+        result.activeMah = Conversion.msToHr(
+                this.activeTimeMs * ModemAppActivity.getAverageModemPowerMa(modemProfile));
+        result.powerMah += result.activeMah;
+
+        return result;
+    }
 }
 

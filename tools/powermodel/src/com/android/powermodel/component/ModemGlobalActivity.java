@@ -19,6 +19,8 @@ package com.android.powermodel.component;
 import com.android.powermodel.ActivityReport;
 import com.android.powermodel.AttributionKey;
 import com.android.powermodel.ComponentActivity;
+import com.android.powermodel.ComponentPower;
+import com.android.powermodel.PowerProfile;
 
 /**
  * Encapsulates total work done by the modem for the device.
