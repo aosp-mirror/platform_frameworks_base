@@ -762,6 +762,13 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
+     * Indicate whther the network is trusted or not. Networks are considered trusted
+     * if the user explicitly allowed this network connection.
+     * @hide
+     */
+    public boolean trusted;
+
+    /**
      * Indicates if the creator of this configuration has expressed that it
      * should be considered metered.
      *
@@ -1638,6 +1645,7 @@ public class WifiConfiguration implements Parcelable {
         selfAdded = false;
         didSelfAdd = false;
         ephemeral = false;
+        trusted = true; // Networks are considered trusted by default.
         meteredHint = false;
         meteredOverride = METERED_OVERRIDE_NONE;
         useExternalScores = false;
@@ -1747,10 +1755,11 @@ public class WifiConfiguration implements Parcelable {
         if (this.selfAdded) sbuf.append(" selfAdded");
         if (this.validatedInternetAccess) sbuf.append(" validatedInternetAccess");
         if (this.ephemeral) sbuf.append(" ephemeral");
+        if (this.trusted) sbuf.append(" trusted");
         if (this.meteredHint) sbuf.append(" meteredHint");
         if (this.useExternalScores) sbuf.append(" useExternalScores");
         if (this.didSelfAdd || this.selfAdded || this.validatedInternetAccess
-            || this.ephemeral || this.meteredHint || this.useExternalScores) {
+                || this.ephemeral || this.trusted || this.meteredHint || this.useExternalScores) {
             sbuf.append("\n");
         }
         if (this.meteredOverride != METERED_OVERRIDE_NONE) {
@@ -2235,6 +2244,7 @@ public class WifiConfiguration implements Parcelable {
             validatedInternetAccess = source.validatedInternetAccess;
             isLegacyPasspointConfig = source.isLegacyPasspointConfig;
             ephemeral = source.ephemeral;
+            trusted = source.trusted;
             meteredHint = source.meteredHint;
             meteredOverride = source.meteredOverride;
             useExternalScores = source.useExternalScores;
@@ -2310,6 +2320,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(validatedInternetAccess ? 1 : 0);
         dest.writeInt(isLegacyPasspointConfig ? 1 : 0);
         dest.writeInt(ephemeral ? 1 : 0);
+        dest.writeInt(trusted ? 1 : 0);
         dest.writeInt(meteredHint ? 1 : 0);
         dest.writeInt(meteredOverride);
         dest.writeInt(useExternalScores ? 1 : 0);
@@ -2379,6 +2390,7 @@ public class WifiConfiguration implements Parcelable {
                 config.validatedInternetAccess = in.readInt() != 0;
                 config.isLegacyPasspointConfig = in.readInt() != 0;
                 config.ephemeral = in.readInt() != 0;
+                config.trusted = in.readInt() != 0;
                 config.meteredHint = in.readInt() != 0;
                 config.meteredOverride = in.readInt();
                 config.useExternalScores = in.readInt() != 0;

@@ -1202,7 +1202,12 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
                 mock(INetworkRequestUserSelectionCallback.class);
 
         assertEquals(0, mLooper.dispatchAll());
-        callbackCaptor.getValue().onMatch(new ArrayList<WifiConfiguration>());
+
+        callbackCaptor.getValue().onAbort();
+        assertEquals(1, mLooper.dispatchAll());
+        verify(mNetworkRequestMatchCallback).onAbort();
+
+        callbackCaptor.getValue().onMatch(new ArrayList<ScanResult>());
         assertEquals(1, mLooper.dispatchAll());
         verify(mNetworkRequestMatchCallback).onMatch(anyList());
 
@@ -1285,5 +1290,21 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
         mWifiManager.getMatchingOsuProviders(new ArrayList<>());
 
         verify(mWifiService).getMatchingOsuProviders(any(List.class));
+    }
+
+    /**
+     * Verify calls to {@link WifiManager#addNetworkSuggestions(List)} and
+     * {@link WifiManager#removeNetworkSuggestions(List)}.
+     */
+    @Test
+    public void addRemoveNetworkSuggestions() throws Exception {
+        when(mWifiService.addNetworkSuggestions(any(List.class), anyString())).thenReturn(true);
+        when(mWifiService.removeNetworkSuggestions(any(List.class), anyString())).thenReturn(true);
+
+        assertTrue(mWifiManager.addNetworkSuggestions(new ArrayList<>()));
+        verify(mWifiService).addNetworkSuggestions(anyList(), eq(TEST_PACKAGE_NAME));
+
+        assertTrue(mWifiManager.removeNetworkSuggestions(new ArrayList<>()));
+        verify(mWifiService).removeNetworkSuggestions(anyList(), eq(TEST_PACKAGE_NAME));
     }
 }

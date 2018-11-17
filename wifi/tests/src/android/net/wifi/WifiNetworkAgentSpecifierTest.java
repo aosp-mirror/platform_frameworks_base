@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 import android.net.MacAddress;
 import android.net.MatchAllNetworkSpecifier;
 import android.net.NetworkRequest;
-import android.net.NetworkSpecifier;
 import android.os.Parcel;
 import android.os.PatternMatcher;
 import android.support.test.filters.SmallTest;
@@ -182,11 +181,10 @@ public class WifiNetworkAgentSpecifierTest {
      * Validate NetworkAgentSpecifier matching with itself.
      * a) Create network agent specifier 1 for WPA_PSK network
      * b) Create network agent specifier 2 with the same params as specifier 1.
-     * c) Ensure that invoking {@link NetworkSpecifier#satisfiedBy(NetworkSpecifier)} on 2
-     * {@link WifiNetworkAgentSpecifier} throws an exception.
+     * c) Ensure that the agent specifier is satisfied by itself.
      */
-    @Test(expected = IllegalStateException.class)
-    public void testWifiNetworkAgentSpecifierDoesNotSatisifySame() {
+    @Test
+    public void testWifiNetworkAgentSpecifierDoesSatisifySame() {
         WifiNetworkAgentSpecifier specifier1 = createDefaultNetworkAgentSpecifier();
         WifiNetworkAgentSpecifier specifier2 = createDefaultNetworkAgentSpecifier();
 

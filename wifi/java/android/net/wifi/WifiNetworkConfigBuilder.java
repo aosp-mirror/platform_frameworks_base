@@ -20,7 +20,6 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.PendingIntent;
 import android.net.MacAddress;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
@@ -38,7 +37,7 @@ import java.util.List;
  * <li>See {@link #buildNetworkSpecifier()} for creating a network specifier to use in
  * {@link NetworkRequest}.</li>
  * <li>See {@link #buildNetworkSuggestion()} for creating a network suggestion to use in
- * {@link WifiManager#addNetworkSuggestions(List, PendingIntent)}.</li>
+ * {@link WifiManager#addNetworkSuggestions(List)}.</li>
  */
 public class WifiNetworkConfigBuilder {
     private static final String MATCH_ALL_SSID_PATTERN_PATH = ".*";
@@ -242,13 +241,11 @@ public class WifiNetworkConfigBuilder {
     /**
      * Specifies whether the app needs to log in to a captive portal to obtain Internet access.
      * <p>
-     * This will dictate if the associated pending intent in
-     * {@link WifiManager#addNetworkSuggestions(List, PendingIntent)} will be sent after
-     * successfully connecting to the network.
+     * This will dictate if the directed broadcast
+     * {@link WifiManager#ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION} will be sent to the app
+     * after successfully connecting to the network.
      * Use this for captive portal type networks where the app needs to authenticate the user
      * before the device can access the network.
-     * This setting will be ignored if the {@code PendingIntent} used to add this network
-     * suggestion is null.
      * <p>
      * <li>Only allowed for creating network suggestion, i.e {@link #buildNetworkSuggestion()}.</li>
      * <li>If not set, defaults to false (i.e no app interaction required).</li>
@@ -481,7 +478,7 @@ public class WifiNetworkConfigBuilder {
 
     /**
      * Create a network suggestion object use in
-     * {@link WifiManager#addNetworkSuggestions(List, PendingIntent)}.
+     * {@link WifiManager#addNetworkSuggestions(List)}.
      * See {@link WifiNetworkSuggestion}.
      *
      * @return Instance of {@link WifiNetworkSuggestion}.

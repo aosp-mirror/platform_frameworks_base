@@ -29,6 +29,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiNetworkSuggestion;
 import android.net.wifi.hotspot2.IProvisioningCallback;
 import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
@@ -437,6 +438,18 @@ public abstract class AbstractWifiService extends IWifiManager.Stub {
 
     @Override
     public void unregisterNetworkRequestMatchCallback(int callbackIdentifier) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean addNetworkSuggestions(
+            List<WifiNetworkSuggestion> networkSuggestions, String callingPackageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean removeNetworkSuggestions(
+            List<WifiNetworkSuggestion> networkSuggestions, String callingPackageName) {
         throw new UnsupportedOperationException();
     }
 }

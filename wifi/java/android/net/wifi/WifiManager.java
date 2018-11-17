@@ -25,7 +25,6 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.net.ConnectivityManager;
@@ -871,6 +870,28 @@ public class WifiManager {
     public static final String ACTION_REQUEST_DISABLE = "android.net.wifi.action.REQUEST_DISABLE";
 
     /**
+     * Directed broadcast intent action indicating that the device has connected to one of the
+     * network suggestions provided by the app. This will be sent post connection to a network
+     * which was created with {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()} flag
+     * set.
+     * <p>
+     * Note: The broadcast is sent to the app only if it holds either one of
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission.
+     *
+     * @see #EXTRA_NETWORK_SUGGESTION
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION =
+            "android.net.wifi.action.WIFI_NETWORK_SUGGESTION_POST_CONNECTION";
+    /**
+     * Sent as as a part of {@link #ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION} that holds
+     * an instance of {@link WifiNetworkSuggestion} corresponding to the connected network.
+     */
+    public static final String EXTRA_NETWORK_SUGGESTION =
+            "android.net.wifi.extra.NETWORK_SUGGESTION";
+
+    /**
      * Internally used Wi-Fi lock mode representing the case were no locks are held.
      * @hide
      */
@@ -1036,7 +1057,7 @@ public class WifiManager {
      * @deprecated
      * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
      * mechanism to trigger connection to a Wi-Fi network.
-     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
@@ -1134,7 +1155,7 @@ public class WifiManager {
      * @deprecated
      * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
      * mechanism to trigger connection to a Wi-Fi network.
-     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
@@ -1169,7 +1190,7 @@ public class WifiManager {
      * @deprecated
      * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
      * mechanism to trigger connection to a Wi-Fi network.
-     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
@@ -1248,14 +1269,23 @@ public class WifiManager {
                 @NonNull NetworkRequestUserSelectionCallback userSelectionCallback);
 
         /**
+         * Invoked when the active network request is aborted, either because
+         * <li> The app released the request, OR</li>
+         * <li> Request was overridden by a new request</li>
+         * This signals the end of processing for the current request and should stop the UI
+         * component. No subsequent calls from the UI component will be handled by the platform.
+         */
+        void onAbort();
+
+        /**
          * Invoked when a network request initiated by an app matches some networks in scan results.
          * This may be invoked multiple times for a single network request as the platform finds new
-         * networks in scan results.
+         * matching networks in scan results.
          *
-         * @param wifiConfigurations List of {@link WifiConfiguration} objects corresponding to the
-         *                           networks matching the request.
+         * @param scanResults List of {@link ScanResult} objects corresponding to the networks
+         *                    matching the request.
          */
-        void onMatch(@NonNull List<WifiConfiguration> wifiConfigurations);
+        void onMatch(@NonNull List<ScanResult> scanResults);
 
         /**
          * Invoked on a successful connection with the network that the user selected
@@ -1344,13 +1374,23 @@ public class WifiManager {
         }
 
         @Override
-        public void onMatch(List<WifiConfiguration> wifiConfigurations) {
+        public void onAbort() {
             if (mVerboseLoggingEnabled) {
-                Log.v(TAG, "NetworkRequestMatchCallbackProxy: onMatch wificonfigurations: "
-                        + wifiConfigurations);
+                Log.v(TAG, "NetworkRequestMatchCallbackProxy: onAbort");
             }
             mHandler.post(() -> {
-                mCallback.onMatch(wifiConfigurations);
+                mCallback.onAbort();
+            });
+        }
+
+        @Override
+        public void onMatch(List<ScanResult> scanResults) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestMatchCallbackProxy: onMatch scanResults: "
+                        + scanResults);
+            }
+            mHandler.post(() -> {
+                mCallback.onMatch(scanResults);
             });
         }
 
@@ -1439,13 +1479,10 @@ public class WifiManager {
     /**
      * Provide a list of network suggestions to the device. See {@link WifiNetworkSuggestion}
      * for a detailed explanation of the parameters.
-     *<p>
-     * When the device decides to connect to one of the provided network suggestions, platform fires
-     * the associated {@code pendingIntent} if
+     * When the device decides to connect to one of the provided network suggestions, platform sends
+     * a directed broadcast {@link #ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION} to the app if
      * the network was created with {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()}
-     * flag set and the provided {@code pendingIntent} is non-null.
-     *<p>
-     * Registration of a non-null pending intent {@code pendingIntent} requires
+     * flag set and the app holds either one of
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission.
      *<p>
@@ -1460,19 +1497,17 @@ public class WifiManager {
      * suggestion back using this API.</li>
      *
      * @param networkSuggestions List of network suggestions provided by the app.
-     * @param pendingIntent Pending intent to be fired post connection for networks. These will be
-     *                      fired only when connecting to a network that was created with
-     *                      {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()} flag set.
-     *                      Pending intent must hold a foreground service, else will be rejected.
      * @return true on success, false if any of the suggestions match (See
      * {@link WifiNetworkSuggestion#equals(Object)} any previously provided suggestions by the app.
      * @throws {@link SecurityException} if the caller is missing required permissions.
      */
-    public boolean addNetworkSuggestions(
-            @NonNull List<WifiNetworkSuggestion> networkSuggestions,
-            @Nullable PendingIntent pendingIntent) {
-        // TODO(b/115504887): Implementation
-        return false;
+    @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE)
+    public boolean addNetworkSuggestions(@NonNull List<WifiNetworkSuggestion> networkSuggestions) {
+        try {
+            return mService.addNetworkSuggestions(networkSuggestions, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
 
@@ -1488,10 +1523,15 @@ public class WifiManager {
      * previously provided by the app. Any matching suggestions are removed from the device and
      * will not be considered for any further connection attempts.
      */
+    @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE)
     public boolean removeNetworkSuggestions(
             @NonNull List<WifiNetworkSuggestion> networkSuggestions) {
-        // TODO(b/115504887): Implementation
-        return false;
+        try {
+            return mService.removeNetworkSuggestions(
+                    networkSuggestions, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1613,7 +1653,7 @@ public class WifiManager {
      * @deprecated
      * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
      * mechanism to trigger connection to a Wi-Fi network.
-     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
@@ -1657,7 +1697,7 @@ public class WifiManager {
      * @deprecated
      * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
      * mechanism to trigger connection to a Wi-Fi network.
-     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
@@ -1689,7 +1729,7 @@ public class WifiManager {
      * @deprecated
      * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
      * mechanism to trigger connection to a Wi-Fi network.
-     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
@@ -1712,7 +1752,7 @@ public class WifiManager {
      * @deprecated
      * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
      * mechanism to trigger connection to a Wi-Fi network.
-     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
@@ -1737,7 +1777,7 @@ public class WifiManager {
      * @deprecated
      * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
      * mechanism to trigger connection to a Wi-Fi network.
-     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
@@ -1762,7 +1802,7 @@ public class WifiManager {
      * @deprecated
      * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
      * mechanism to trigger connection to a Wi-Fi network.
-     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
