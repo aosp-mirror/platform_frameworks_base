@@ -47,6 +47,7 @@ import android.service.usb.UsbPortManagerProto;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
@@ -54,6 +55,7 @@ import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 
 /**
@@ -116,6 +118,10 @@ public class UsbPortManager {
     // List of all simulated ports, indexed by id.
     private final ArrayMap<String, RawPortInfo> mSimulatedPorts =
             new ArrayMap<>();
+
+    // Maintains the current connected status of the port.
+    // Uploads logs only when the connection status is changes.
+    private final HashMap<String, Boolean> mConnected = new HashMap<>();
 
     public UsbPortManager(Context context) {
         mContext = context;
@@ -700,6 +706,16 @@ public class UsbPortManager {
         // Guard against possible reentrance by posting the broadcast from the handler
         // instead of from within the critical section.
         mHandler.post(() -> mContext.sendBroadcastAsUser(intent, UserHandle.ALL));
+        if (!mConnected.containsKey(portInfo.mUsbPort.getId())
+                || (mConnected.get(portInfo.mUsbPort.getId())
+                != portInfo.mUsbPortStatus.isConnected())) {
+            mConnected.put(portInfo.mUsbPort.getId(), portInfo.mUsbPortStatus.isConnected());
+            StatsLog.write(StatsLog.USB_CONNECTOR_STATE_CHANGED,
+                    portInfo.mUsbPortStatus.isConnected()
+                    ? StatsLog.USB_CONNECTOR_STATE_CHANGED__STATE__STATE_CONNECTED :
+                    StatsLog.USB_CONNECTOR_STATE_CHANGED__STATE__STATE_DISCONNECTED,
+                    portInfo.mUsbPort.getId());
+        }
     }
 
     private static void logAndPrint(int priority, IndentingPrintWriter pw, String msg) {
