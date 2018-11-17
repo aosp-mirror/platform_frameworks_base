@@ -219,7 +219,7 @@ public class RemoteRoleControllerService {
             private final IRoleManagerCallback mCallback;
 
             @NonNull
-            private final Runnable mTimeoutRunnable = () -> notifyCallback(false);
+            private final Runnable mTimeoutRunnable = this::notifyTimeout;
 
             private boolean mCallbackNotified;
 
@@ -241,6 +241,12 @@ public class RemoteRoleControllerService {
                     Slog.e(LOG_TAG, "Error calling RoleControllerService", e);
                     notifyCallback(false);
                 }
+            }
+
+            @WorkerThread
+            private void notifyTimeout() {
+                Slog.e(LOG_TAG, "Call timed out, calling onFailure()");
+                notifyCallback(false);
             }
 
             @WorkerThread

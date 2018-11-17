@@ -93,8 +93,8 @@ public abstract class RoleControllerService extends Service {
             @Override
             public void onGrantDefaultRoles(IRoleManagerCallback callback) {
                 Preconditions.checkNotNull(callback, "callback cannot be null");
-                RoleControllerService.this.onGrantDefaultRoles(
-                        new RoleManagerCallbackDelegate(callback));
+                RoleControllerService.this.onGrantDefaultRoles(new RoleManagerCallbackDelegate(
+                        callback));
             }
         };
     }
