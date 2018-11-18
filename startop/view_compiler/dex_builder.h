@@ -110,18 +110,22 @@ class Value {
   static constexpr Value Local(size_t id) { return Value{id, Kind::kLocalRegister}; }
   static constexpr Value Parameter(size_t id) { return Value{id, Kind::kParameter}; }
   static constexpr Value Immediate(size_t value) { return Value{value, Kind::kImmediate}; }
+  static constexpr Value String(size_t value) { return Value{value, Kind::kString}; }
   static constexpr Value Label(size_t id) { return Value{id, Kind::kLabel}; }
+  static constexpr Value Type(size_t id) { return Value{id, Kind::kType}; }
 
   bool is_register() const { return kind_ == Kind::kLocalRegister; }
   bool is_parameter() const { return kind_ == Kind::kParameter; }
   bool is_variable() const { return is_register() || is_parameter(); }
   bool is_immediate() const { return kind_ == Kind::kImmediate; }
+  bool is_string() const { return kind_ == Kind::kString; }
   bool is_label() const { return kind_ == Kind::kLabel; }
+  bool is_type() const { return kind_ == Kind::kType; }
 
   size_t value() const { return value_; }
 
  private:
-  enum class Kind { kLocalRegister, kParameter, kImmediate, kLabel };
+  enum class Kind { kLocalRegister, kParameter, kImmediate, kString, kLabel, kType };
 
   const size_t value_;
   const Kind kind_;
@@ -137,7 +141,16 @@ class Instruction {
  public:
   // The operation performed by this instruction. These are virtual instructions that do not
   // correspond exactly to DEX instructions.
-  enum class Op { kReturn, kMove, kInvokeVirtual, kBindLabel, kBranchEqz };
+  enum class Op {
+    kReturn,
+    kReturnObject,
+    kMove,
+    kInvokeVirtual,
+    kInvokeDirect,
+    kBindLabel,
+    kBranchEqz,
+    kNew
+  };
 
   ////////////////////////
   // Named Constructors //
@@ -157,6 +170,12 @@ class Instruction {
   static inline Instruction InvokeVirtual(size_t method_id, std::optional<const Value> dest,
                                           Value this_arg, T... args) {
     return Instruction{Op::kInvokeVirtual, method_id, dest, this_arg, args...};
+  }
+  // For direct calls (basically, constructors).
+  template <typename... T>
+  static inline Instruction InvokeDirect(size_t method_id, std::optional<const Value> dest,
+                                         Value this_arg, T... args) {
+    return Instruction{Op::kInvokeDirect, method_id, dest, this_arg, args...};
   }
 
   ///////////////
@@ -187,6 +206,12 @@ class Instruction {
 // Needed for CHECK_EQ, DCHECK_EQ, etc.
 std::ostream& operator<<(std::ostream& out, const Instruction::Op& opcode);
 
+// Keeps track of information needed to manipulate or call a method.
+struct MethodDeclData {
+  size_t id;
+  ir::MethodDecl* decl;
+};
+
 // Tools to help build methods and their bodies.
 class MethodBuilder {
  public:
@@ -210,19 +235,74 @@ class MethodBuilder {
 
   // return-void
   void BuildReturn();
-  void BuildReturn(Value src);
+  void BuildReturn(Value src, bool is_object = false);
   // const/4
   void BuildConst4(Value target, int value);
+  void BuildConstString(Value target, const std::string& value);
+  template <typename... T>
+  void BuildNew(Value target, TypeDescriptor type, Prototype constructor, T... args);
 
   // TODO: add builders for more instructions
 
  private:
   void EncodeInstructions();
   void EncodeInstruction(const Instruction& instruction);
-  void EncodeReturn(const Instruction& instruction);
+
+  // Encodes a return instruction. For instructions with no return value, the opcode field is
+  // ignored. Otherwise, this specifies which return instruction will be used (return,
+  // return-object, etc.)
+  void EncodeReturn(const Instruction& instruction, ::art::Instruction::Code opcode);
+
   void EncodeMove(const Instruction& instruction);
-  void EncodeInvokeVirtual(const Instruction& instruction);
+  void EncodeInvoke(const Instruction& instruction, ::art::Instruction::Code opcode);
   void EncodeBranch(art::Instruction::Code op, const Instruction& instruction);
+  void EncodeNew(const Instruction& instruction);
+
+  // Low-level instruction format encoding. See
+  // https://source.android.com/devices/tech/dalvik/instruction-formats for documentation of
+  // formats.
+
+  inline void Encode10x(art::Instruction::Code opcode) {
+    // 00|op
+    buffer_.push_back(opcode);
+  }
+
+  inline void Encode11x(art::Instruction::Code opcode, uint8_t a) {
+    // aa|op
+    buffer_.push_back((a << 8) | opcode);
+  }
+
+  inline void Encode11n(art::Instruction::Code opcode, uint8_t a, int8_t b) {
+    // b|a|op
+
+    // Make sure the fields are in bounds (4 bits for a, 4 bits for b).
+    CHECK_LT(a, 16);
+    CHECK_LE(-8, b);
+    CHECK_LT(b, 8);
+
+    buffer_.push_back(((b & 0xf) << 12) | (a << 8) | opcode);
+  }
+
+  inline void Encode21c(art::Instruction::Code opcode, uint8_t a, uint16_t b) {
+    // aa|op|bbbb
+    buffer_.push_back((a << 8) | opcode);
+    buffer_.push_back(b);
+  }
+
+  inline void Encode35c(art::Instruction::Code opcode, size_t a, uint16_t b, uint8_t c, uint8_t d,
+                        uint8_t e, uint8_t f, uint8_t g) {
+    // a|g|op|bbbb|f|e|d|c
+
+    CHECK_LE(a, 5);
+    CHECK_LT(c, 16);
+    CHECK_LT(d, 16);
+    CHECK_LT(e, 16);
+    CHECK_LT(f, 16);
+    CHECK_LT(g, 16);
+    buffer_.push_back((a << 12) | (g << 8) | opcode);
+    buffer_.push_back(b);
+    buffer_.push_back((f << 12) | (e << 8) | (d << 4) | c);
+  }
 
   // Converts a register or parameter to its DEX register number.
   size_t RegisterValue(const Value& value) const;
@@ -262,6 +342,10 @@ class MethodBuilder {
   };
 
   std::vector<LabelData> labels_;
+
+  // During encoding, keep track of the largest number of arguments needed, so we can use it for our
+  // outs count
+  size_t max_args_{0};
 };
 
 // A helper to build class definitions.
@@ -279,12 +363,6 @@ class ClassBuilder {
   DexBuilder* const parent_;
   const TypeDescriptor type_descriptor_;
   ir::Class* const class_;
-};
-
-// Keeps track of information needed to manipulate or call a method.
-struct MethodDeclData {
-  size_t id;
-  ir::MethodDecl* decl;
 };
 
 // Builds Dex files from scratch.
@@ -353,6 +431,17 @@ class DexBuilder {
 
   // Keep track of already-encoded protos.
   std::map<Prototype, ir::Proto*> proto_map_;
+};
+
+template <typename... T>
+void MethodBuilder::BuildNew(Value target, TypeDescriptor type, Prototype constructor, T... args) {
+  MethodDeclData constructor_data{dex_->GetOrDeclareMethod(type, "<init>", constructor)};
+  // allocate the object
+  ir::Type* type_def = dex_->GetOrAddType(type.descriptor());
+  AddInstruction(
+      Instruction::OpWithArgs(Instruction::Op::kNew, target, Value::Type(type_def->orig_index)));
+  // call the constructor
+  AddInstruction(Instruction::InvokeDirect(constructor_data.id, /*dest=*/{}, target, args...));
 };
 
 }  // namespace dex

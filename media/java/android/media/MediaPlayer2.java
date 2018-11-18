@@ -21,22 +21,59 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.media.MediaPlayer2Proto.PlayerMessage;
+import android.media.MediaPlayer2Proto.Value;
+import android.net.Uri;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.os.PersistableBundle;
+import android.os.PowerManager;
+import android.util.Log;
+import android.util.Pair;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import com.android.framework.protobuf.InvalidProtocolBufferException;
+import com.android.internal.annotations.GuardedBy;
+
 import dalvik.system.CloseGuard;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
+import java.net.HttpCookie;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
-
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @hide
@@ -225,26 +262,107 @@ import java.util.concurrent.Executor;
  * successful transition. Any other value will be an error. Call {@link #getState()} to
  * determine the current state. </p>
  */
-public abstract class MediaPlayer2 implements AutoCloseable
+public class MediaPlayer2 implements AutoCloseable
                                             , AudioRouting {
+    static {
+        System.loadLibrary("media2_jni");
+        native_init();
+    }
+
+    private static native void native_init();
+
+    private static final int NEXT_SOURCE_STATE_ERROR = -1;
+    private static final int NEXT_SOURCE_STATE_INIT = 0;
+    private static final int NEXT_SOURCE_STATE_PREPARING = 1;
+    private static final int NEXT_SOURCE_STATE_PREPARED = 2;
+
+    private static final String TAG = "MediaPlayer2";
+
+    private Context mContext;
+
+    private long mNativeContext;  // accessed by native methods
+    private long mNativeSurfaceTexture;  // accessed by native methods
+    private int mListenerContext;  // accessed by native methods
+    private SurfaceHolder mSurfaceHolder;
+    private PowerManager.WakeLock mWakeLock = null;
+    private boolean mScreenOnWhilePlaying;
+    private boolean mStayAwake;
+
+    private final Object mSrcLock = new Object();
+    //--- guarded by |mSrcLock| start
+    private SourceInfo mCurrentSourceInfo;
+    private final Queue<SourceInfo> mNextSourceInfos = new ConcurrentLinkedQueue<>();
+    //--- guarded by |mSrcLock| end
+    private final AtomicLong mSrcIdGenerator = new AtomicLong(0);
+
+    private volatile float mVolume = 1.0f;
+    private VideoSize mVideoSize = new VideoSize(0, 0);
+
+    // Modular DRM
+    private final Object mDrmLock = new Object();
+    //--- guarded by |mDrmLock| start
+    private UUID mDrmUUID;
+    private DrmInfo mDrmInfo;
+    private MediaDrm mDrmObj;
+    private byte[] mDrmSessionId;
+    private boolean mDrmInfoResolved;
+    private boolean mActiveDrmScheme;
+    private boolean mDrmConfigAllowed;
+    private boolean mDrmProvisioningInProgress;
+    private boolean mPrepareDrmInProgress;
+    private ProvisioningThread mDrmProvisioningThread;
+    //--- guarded by |mDrmLock| end
+
+    // Creating a dummy audio track, used for keeping session id alive
+    private final Object mSessionIdLock = new Object();
+    @GuardedBy("mSessionIdLock")
+    private AudioTrack mDummyAudioTrack;
+
+    private HandlerThread mHandlerThread;
+    private final TaskHandler mTaskHandler;
+    private final Object mTaskLock = new Object();
+    @GuardedBy("mTaskLock")
+    private final List<Task> mPendingTasks = new LinkedList<>();
+    @GuardedBy("mTaskLock")
+    private Task mCurrentTask;
+
+    @GuardedBy("mTaskLock")
+    boolean mIsPreviousCommandSeekTo = false;
+    // |mPreviousSeekPos| and |mPreviousSeekMode| are valid only when |mIsPreviousCommandSeekTo|
+    // is true, and they are accessed on |mHandlerThread| only.
+    long mPreviousSeekPos = -1;
+    int mPreviousSeekMode = SEEK_PREVIOUS_SYNC;
+
+    @GuardedBy("this")
+    private boolean mReleased;
+
     private final CloseGuard mGuard = CloseGuard.get();
 
     /**
-     * Create a MediaPlayer2 object.
-     *
-     * @return A MediaPlayer2 object created
+     * Default constructor.
+     * <p>When done with the MediaPlayer2, you should call {@link #close()},
+     * to free the resources. If not released, too many MediaPlayer2 instances may
+     * result in an exception.</p>
      */
-    public static final MediaPlayer2 create(Context context) {
-        return new MediaPlayer2Impl(context);
+    public MediaPlayer2(Context context) {
+        mGuard.open("close");
+
+        mContext = context;
+        mHandlerThread = new HandlerThread("MediaPlayer2TaskThread");
+        mHandlerThread.start();
+        Looper looper = mHandlerThread.getLooper();
+        mTaskHandler = new TaskHandler(this, looper);
+        AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        int sessionId = am.generateAudioSessionId();
+        keepAudioSessionIdAlive(sessionId);
+
+        /* Native setup requires a weak reference to our object.
+         * It's easier to create it here than in C++.
+         */
+        native_setup(sessionId, new WeakReference<MediaPlayer2>(this));
     }
 
-    /**
-     * @hide
-     */
-    // add hidden empty constructor so it doesn't show in SDK
-    public MediaPlayer2() {
-        mGuard.open("close");
-    }
+    private native void native_setup(int sessionId, Object mediaplayer2This);
 
     /**
      * Releases the resources held by this {@code MediaPlayer2} object.
@@ -275,7 +393,40 @@ public abstract class MediaPlayer2 implements AutoCloseable
         synchronized (mGuard) {
             mGuard.close();
         }
+        release();
     }
+
+    private synchronized void release() {
+        if (mReleased) {
+            return;
+        }
+        stayAwake(false);
+        updateSurfaceScreenOn();
+        synchronized (mEventCbLock) {
+            mEventCallbackRecords.clear();
+        }
+        if (mHandlerThread != null) {
+            mHandlerThread.quitSafely();
+            mHandlerThread = null;
+        }
+
+        // Modular DRM clean up
+        mOnDrmConfigHelper = null;
+        synchronized (mDrmEventCbLock) {
+            mDrmEventCallbackRecords.clear();
+        }
+        resetDrmState();
+
+        native_release();
+
+        synchronized (mSessionIdLock) {
+            mDummyAudioTrack.release();
+        }
+
+        mReleased = true;
+    }
+
+    private native void native_release();
 
     // Have to declare protected for finalize() since it is protected
     // in the base class Object.
@@ -286,7 +437,50 @@ public abstract class MediaPlayer2 implements AutoCloseable
         }
 
         close();
+        native_finalize();
     }
+
+    private native void native_finalize();
+
+    /**
+     * Resets the MediaPlayer2 to its uninitialized state. After calling
+     * this method, you will have to initialize it again by setting the
+     * data source and calling prepare().
+     */
+    // This is a synchronous call.
+    public void reset() {
+        synchronized (mEventCbLock) {
+            mEventCallbackRecords.clear();
+        }
+        synchronized (mDrmEventCbLock) {
+            mDrmEventCallbackRecords.clear();
+        }
+        synchronized (mSrcLock) {
+            mCurrentSourceInfo = null;
+            mNextSourceInfos.clear();
+        }
+
+        synchronized (mTaskLock) {
+            mPendingTasks.clear();
+            mIsPreviousCommandSeekTo = false;
+        }
+
+        stayAwake(false);
+        native_reset();
+
+        AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        int sessionId = am.generateAudioSessionId();
+        keepAudioSessionIdAlive(sessionId);
+
+        // make sure none of the listeners get called anymore
+        if (mTaskHandler != null) {
+            mTaskHandler.removeCallbacksAndMessages(null);
+        }
+
+        resetDrmState();
+    }
+
+    private native void native_reset();
 
     /**
      * Starts or resumes playback. If playback had previously been paused,
@@ -297,39 +491,78 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object play();
+    public Object play() {
+        return addTask(new Task(CALL_COMPLETED_PLAY, false) {
+            @Override
+            void process() {
+                stayAwake(true);
+                native_start();
+            }
+        });
+    }
+
+    private native void native_start() throws IllegalStateException;
 
     /**
      * Prepares the player for playback, asynchronously.
      *
-     * After setting the datasource and the display surface, you need to
-     * call prepare().
+     * After setting the datasource and the display surface, you need to call prepare().
      *
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object prepare();
+    public Object prepare() {
+        return addTask(new Task(CALL_COMPLETED_PREPARE, true) {
+            @Override
+            void process() {
+                native_prepare();
+            }
+        });
+    }
+
+    private native void native_prepare();
 
     /**
      * Pauses playback. Call play() to resume.
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object pause();
+    public Object pause() {
+        return addTask(new Task(CALL_COMPLETED_PAUSE, false) {
+            @Override
+            void process() {
+                stayAwake(false);
+
+                native_pause();
+            }
+        });
+    }
+
+    private native void native_pause() throws IllegalStateException;
 
     /**
      * Tries to play next data source if applicable.
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object skipToNext();
+    public Object skipToNext() {
+        return addTask(new Task(CALL_COMPLETED_SKIP_TO_NEXT, false) {
+            @Override
+            void process() {
+                if (getState() == PLAYER_STATE_PLAYING) {
+                    pause();
+                }
+                playNextDataSource();
+            }
+        });
+    }
 
     /**
      * Gets the current playback position.
      *
      * @return the current position in milliseconds
      */
-    public abstract long getCurrentPosition();
+    public native long getCurrentPosition();
 
     /**
      * Gets the duration of the file.
@@ -337,7 +570,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return the duration in milliseconds, if no duration is available
      *         (for example, if streaming live content), -1 is returned.
      */
-    public abstract long getDuration();
+    public native long getDuration();
 
     /**
      * Gets the current buffered media source position received through progressive downloading.
@@ -347,7 +580,18 @@ public abstract class MediaPlayer2 implements AutoCloseable
      *
      * @return the current buffered media source position in milliseconds
      */
-    public abstract long getBufferedPosition();
+    public long getBufferedPosition() {
+        // Use cached buffered percent for now.
+        int bufferedPercentage;
+        synchronized (mSrcLock) {
+            if (mCurrentSourceInfo == null) {
+                bufferedPercentage = 0;
+            } else {
+                bufferedPercentage = mCurrentSourceInfo.mBufferedPercentage.get();
+            }
+        }
+        return getDuration() * bufferedPercentage / 100;
+    }
 
     /**
      * MediaPlayer2 has not been prepared or just has been reset.
@@ -396,7 +640,11 @@ public abstract class MediaPlayer2 implements AutoCloseable
      *
      * @return the current player state.
      */
-    public abstract @MediaPlayer2State int getState();
+    public @MediaPlayer2State int getState() {
+        return native_getState();
+    }
+
+    private native int native_getState();
 
     /**
      * Sets the audio attributes for this MediaPlayer2.
@@ -407,13 +655,31 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object setAudioAttributes(@NonNull AudioAttributes attributes);
+    public Object setAudioAttributes(@NonNull AudioAttributes attributes) {
+        return addTask(new Task(CALL_COMPLETED_SET_AUDIO_ATTRIBUTES, false) {
+            @Override
+            void process() {
+                if (attributes == null) {
+                    final String msg = "Cannot set AudioAttributes to null";
+                    throw new IllegalArgumentException(msg);
+                }
+                native_setAudioAttributes(attributes);
+            }
+        });
+    }
+
+    // return true if the parameter is set successfully, false otherwise
+    private native boolean native_setAudioAttributes(AudioAttributes audioAttributes);
 
     /**
      * Gets the audio attributes for this MediaPlayer2.
      * @return attributes a set of audio attributes
      */
-    public abstract @Nullable AudioAttributes getAudioAttributes();
+    public @NonNull AudioAttributes getAudioAttributes() {
+        return native_getAudioAttributes();
+    }
+
+    private native AudioAttributes native_getAudioAttributes();
 
     /**
      * Sets the data source as described by a DataSourceDesc.
@@ -422,7 +688,23 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object setDataSource(@NonNull DataSourceDesc dsd);
+    public Object setDataSource(@NonNull DataSourceDesc dsd) {
+        return addTask(new Task(CALL_COMPLETED_SET_DATA_SOURCE, false) {
+            @Override
+            void process() throws IOException {
+                checkArgument(dsd != null, "the DataSourceDesc cannot be null");
+                int state = getState();
+                if (state != PLAYER_STATE_ERROR && state != PLAYER_STATE_IDLE) {
+                    throw new IllegalStateException("called in wrong state " + state);
+                }
+
+                synchronized (mSrcLock) {
+                    mCurrentSourceInfo = new SourceInfo(dsd);
+                    handleDataSource(true /* isCurrent */, dsd, mCurrentSourceInfo.mId);
+                }
+            }
+        });
+    }
 
     /**
      * Sets a single data source as described by a DataSourceDesc which will be played
@@ -432,7 +714,19 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object setNextDataSource(@NonNull DataSourceDesc dsd);
+    public Object setNextDataSource(@NonNull DataSourceDesc dsd) {
+        return addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCE, false) {
+            @Override
+            void process() {
+                checkArgument(dsd != null, "the DataSourceDesc cannot be null");
+                synchronized (mSrcLock) {
+                    mNextSourceInfos.clear();
+                    mNextSourceInfos.add(new SourceInfo(dsd));
+                }
+                prepareNextDataSource();
+            }
+        });
+    }
 
     /**
      * Sets a list of data sources to be played sequentially after current data source is done.
@@ -441,21 +735,367 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object setNextDataSources(@NonNull List<DataSourceDesc> dsds);
+    public Object setNextDataSources(@NonNull List<DataSourceDesc> dsds) {
+        return addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCES, false) {
+            @Override
+            void process() {
+                if (dsds == null || dsds.size() == 0) {
+                    throw new IllegalArgumentException("data source list cannot be null or empty.");
+                }
+                for (DataSourceDesc dsd : dsds) {
+                    if (dsd == null) {
+                        throw new IllegalArgumentException(
+                                "DataSourceDesc in the source list cannot be null.");
+                    }
+                }
+
+                synchronized (mSrcLock) {
+                    mNextSourceInfos.clear();
+                    for (DataSourceDesc dsd : dsds) {
+                        mNextSourceInfos.add(new SourceInfo(dsd));
+                    }
+                }
+                prepareNextDataSource();
+            }
+        });
+    }
 
     /**
      * Removes all data sources pending to be played.
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object clearNextDataSources();
+    public Object clearNextDataSources() {
+        return addTask(new Task(CALL_COMPLETED_CLEAR_NEXT_DATA_SOURCES, false) {
+            @Override
+            void process() {
+                mNextSourceInfos.clear();
+            }
+        });
+    }
 
     /**
      * Gets the current data source as described by a DataSourceDesc.
      *
      * @return the current DataSourceDesc
      */
-    public abstract @NonNull DataSourceDesc getCurrentDataSource();
+    public DataSourceDesc getCurrentDataSource() {
+        synchronized (mSrcLock) {
+            return mCurrentSourceInfo == null ? null : mCurrentSourceInfo.mDSD;
+        }
+    }
+
+    private void handleDataSource(boolean isCurrent, @NonNull DataSourceDesc dsd, long srcId)
+            throws IOException {
+        checkArgument(dsd != null, "the DataSourceDesc cannot be null");
+
+        switch (dsd.getType()) {
+            case DataSourceDesc.TYPE_CALLBACK:
+                handleDataSource(isCurrent,
+                                 srcId,
+                                 dsd.getMedia2DataSource(),
+                                 dsd.getStartPosition(),
+                                 dsd.getEndPosition());
+                break;
+
+            case DataSourceDesc.TYPE_FD:
+                handleDataSource(isCurrent,
+                                 srcId,
+                                 dsd.getFileDescriptor(),
+                                 dsd.getFileDescriptorOffset(),
+                                 dsd.getFileDescriptorLength(),
+                                 dsd.getStartPosition(),
+                                 dsd.getEndPosition());
+                break;
+
+            case DataSourceDesc.TYPE_URI:
+                handleDataSource(isCurrent,
+                                 srcId,
+                                 dsd.getUriContext(),
+                                 dsd.getUri(),
+                                 dsd.getUriHeaders(),
+                                 dsd.getUriCookies(),
+                                 dsd.getStartPosition(),
+                                 dsd.getEndPosition());
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    /**
+     * To provide cookies for the subsequent HTTP requests, you can install your own default cookie
+     * handler and use other variants of setDataSource APIs instead. Alternatively, you can use
+     * this API to pass the cookies as a list of HttpCookie. If the app has not installed
+     * a CookieHandler already, this API creates a CookieManager and populates its CookieStore with
+     * the provided cookies. If the app has installed its own handler already, this API requires the
+     * handler to be of CookieManager type such that the API can update the manager’s CookieStore.
+     *
+     * <p><strong>Note</strong> that the cross domain redirection is allowed by default,
+     * but that can be changed with key/value pairs through the headers parameter with
+     * "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value to
+     * disallow or allow cross domain redirection.
+     *
+     * @throws IllegalArgumentException if cookies are provided and the installed handler is not
+     *                                  a CookieManager
+     * @throws IllegalStateException    if it is called in an invalid state
+     * @throws NullPointerException     if context or uri is null
+     * @throws IOException              if uri has a file scheme and an I/O error occurs
+     */
+    private void handleDataSource(
+            boolean isCurrent, long srcId,
+            @NonNull Context context, @NonNull Uri uri,
+            @Nullable Map<String, String> headers, @Nullable List<HttpCookie> cookies,
+            long startPos, long endPos)
+            throws IOException {
+        // The context and URI usually belong to the calling user. Get a resolver for that user.
+        final ContentResolver resolver = context.getContentResolver();
+        final String scheme = uri.getScheme();
+        if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+            handleDataSource(isCurrent, srcId, uri.getPath(), null, null, startPos, endPos);
+            return;
+        }
+
+        final int ringToneType = RingtoneManager.getDefaultType(uri);
+        try {
+            AssetFileDescriptor afd;
+            // Try requested Uri locally first
+            if (ContentResolver.SCHEME_CONTENT.equals(scheme) && ringToneType != -1) {
+                afd = RingtoneManager.openDefaultRingtoneUri(context, uri);
+                if (attemptDataSource(isCurrent, srcId, afd, startPos, endPos)) {
+                    return;
+                }
+                final Uri actualUri = RingtoneManager.getActualDefaultRingtoneUri(
+                        context, ringToneType);
+                afd = resolver.openAssetFileDescriptor(actualUri, "r");
+            } else {
+                afd = resolver.openAssetFileDescriptor(uri, "r");
+            }
+            if (attemptDataSource(isCurrent, srcId, afd, startPos, endPos)) {
+                return;
+            }
+        } catch (NullPointerException | SecurityException | IOException ex) {
+            Log.w(TAG, "Couldn't open " + uri + ": " + ex);
+            // Fallback to media server
+        }
+        handleDataSource(isCurrent, srcId, uri.toString(), headers, cookies, startPos, endPos);
+    }
+
+    private boolean attemptDataSource(boolean isCurrent, long srcId, AssetFileDescriptor afd,
+            long startPos, long endPos) throws IOException {
+        try {
+            if (afd.getDeclaredLength() < 0) {
+                handleDataSource(isCurrent,
+                        srcId,
+                        afd.getFileDescriptor(),
+                        0,
+                        DataSourceDesc.LONG_MAX,
+                        startPos,
+                        endPos);
+            } else {
+                handleDataSource(isCurrent,
+                        srcId,
+                        afd.getFileDescriptor(),
+                        afd.getStartOffset(),
+                        afd.getDeclaredLength(),
+                        startPos,
+                        endPos);
+            }
+            return true;
+        } catch (NullPointerException | SecurityException | IOException ex) {
+            Log.w(TAG, "Couldn't open srcId:" + srcId + ": " + ex);
+            return false;
+        } finally {
+            if (afd != null) {
+                afd.close();
+            }
+        }
+    }
+
+    private void handleDataSource(
+            boolean isCurrent, long srcId,
+            String path, Map<String, String> headers, List<HttpCookie> cookies,
+            long startPos, long endPos)
+            throws IOException {
+        String[] keys = null;
+        String[] values = null;
+
+        if (headers != null) {
+            keys = new String[headers.size()];
+            values = new String[headers.size()];
+
+            int i = 0;
+            for (Map.Entry<String, String> entry: headers.entrySet()) {
+                keys[i] = entry.getKey();
+                values[i] = entry.getValue();
+                ++i;
+            }
+        }
+        handleDataSource(isCurrent, srcId, path, keys, values, cookies, startPos, endPos);
+    }
+
+    private void handleDataSource(boolean isCurrent, long srcId,
+            String path, String[] keys, String[] values, List<HttpCookie> cookies,
+            long startPos, long endPos)
+            throws IOException {
+        final Uri uri = Uri.parse(path);
+        final String scheme = uri.getScheme();
+        if ("file".equals(scheme)) {
+            path = uri.getPath();
+        } else if (scheme != null) {
+            // handle non-file sources
+            Media2Utils.storeCookies(cookies);
+            nativeHandleDataSourceUrl(
+                    isCurrent,
+                    srcId,
+                    Media2HTTPService.createHTTPService(path),
+                    path,
+                    keys,
+                    values,
+                    startPos,
+                    endPos);
+            return;
+        }
+
+        final File file = new File(path);
+        if (file.exists()) {
+            FileInputStream is = new FileInputStream(file);
+            FileDescriptor fd = is.getFD();
+            handleDataSource(isCurrent, srcId, fd, 0, DataSourceDesc.LONG_MAX, startPos, endPos);
+            is.close();
+        } else {
+            throw new IOException("handleDataSource failed.");
+        }
+    }
+
+    private native void nativeHandleDataSourceUrl(
+            boolean isCurrent, long srcId,
+            Media2HTTPService httpService, String path, String[] keys, String[] values,
+            long startPos, long endPos)
+            throws IOException;
+
+    /**
+     * Sets the data source (FileDescriptor) to use. The FileDescriptor must be
+     * seekable (N.B. a LocalSocket is not seekable). It is the caller's responsibility
+     * to close the file descriptor. It is safe to do so as soon as this call returns.
+     *
+     * @throws IllegalStateException if it is called in an invalid state
+     * @throws IllegalArgumentException if fd is not a valid FileDescriptor
+     * @throws IOException if fd can not be read
+     */
+    private void handleDataSource(
+            boolean isCurrent, long srcId,
+            FileDescriptor fd, long offset, long length,
+            long startPos, long endPos) throws IOException {
+        nativeHandleDataSourceFD(isCurrent, srcId, fd, offset, length, startPos, endPos);
+    }
+
+    private native void nativeHandleDataSourceFD(boolean isCurrent, long srcId,
+            FileDescriptor fd, long offset, long length,
+            long startPos, long endPos) throws IOException;
+
+    /**
+     * @throws IllegalStateException if it is called in an invalid state
+     * @throws IllegalArgumentException if dataSource is not a valid Media2DataSource
+     */
+    private void handleDataSource(boolean isCurrent, long srcId, Media2DataSource dataSource,
+            long startPos, long endPos) {
+        nativeHandleDataSourceCallback(isCurrent, srcId, dataSource, startPos, endPos);
+    }
+
+    private native void nativeHandleDataSourceCallback(
+            boolean isCurrent, long srcId, Media2DataSource dataSource,
+            long startPos, long endPos);
+
+    // return true if there is a next data source, false otherwise.
+    // This function should be always called on |mHandlerThread|.
+    private boolean prepareNextDataSource() {
+        HandlerThread handlerThread = mHandlerThread;
+        if (handlerThread != null && Looper.myLooper() != handlerThread.getLooper()) {
+            Log.e(TAG, "prepareNextDataSource: called on wrong looper");
+        }
+
+        boolean hasNextDSD;
+        int state = getState();
+        synchronized (mSrcLock) {
+            hasNextDSD = !mNextSourceInfos.isEmpty();
+            if (state == PLAYER_STATE_ERROR || state == PLAYER_STATE_IDLE) {
+                // Current source has not been prepared yet.
+                return hasNextDSD;
+            }
+
+            SourceInfo nextSource = mNextSourceInfos.peek();
+            if (!hasNextDSD || nextSource.mStateAsNextSource != NEXT_SOURCE_STATE_INIT) {
+                // There is no next source or it's in preparing or prepared state.
+                return hasNextDSD;
+            }
+
+            try {
+                nextSource.mStateAsNextSource = NEXT_SOURCE_STATE_PREPARING;
+                handleDataSource(false /* isCurrent */, nextSource.mDSD, nextSource.mId);
+            } catch (Exception e) {
+                Message msg = mTaskHandler.obtainMessage(
+                        MEDIA_ERROR, MEDIA_ERROR_IO, MEDIA_ERROR_UNKNOWN, null);
+                mTaskHandler.handleMessage(msg, nextSource.mId);
+
+                mNextSourceInfos.poll();
+                return prepareNextDataSource();
+            }
+        }
+        return hasNextDSD;
+    }
+
+    // This function should be always called on |mHandlerThread|.
+    private void playNextDataSource() {
+        HandlerThread handlerThread = mHandlerThread;
+        if (handlerThread != null && Looper.myLooper() != handlerThread.getLooper()) {
+            Log.e(TAG, "playNextDataSource: called on wrong looper");
+        }
+
+        boolean hasNextDSD = false;
+        synchronized (mSrcLock) {
+            if (!mNextSourceInfos.isEmpty()) {
+                hasNextDSD = true;
+                SourceInfo nextSourceInfo = mNextSourceInfos.peek();
+                if (nextSourceInfo.mStateAsNextSource == NEXT_SOURCE_STATE_PREPARED) {
+                    // Switch to next source only when it has been prepared.
+                    mCurrentSourceInfo = mNextSourceInfos.poll();
+
+                    long srcId = mCurrentSourceInfo.mId;
+                    try {
+                        nativePlayNextDataSource(srcId);
+                    } catch (Exception e) {
+                        Message msg2 = mTaskHandler.obtainMessage(
+                                MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED, null);
+                        mTaskHandler.handleMessage(msg2, srcId);
+                        // Keep |mNextSourcePlayPending|
+                        hasNextDSD = prepareNextDataSource();
+                    }
+                    if (hasNextDSD) {
+                        stayAwake(true);
+
+                        // Now a new current src is playing.
+                        // Wait for MEDIA_INFO_DATA_SOURCE_START to prepare next source.
+                    }
+                } else if (nextSourceInfo.mStateAsNextSource == NEXT_SOURCE_STATE_INIT) {
+                    hasNextDSD = prepareNextDataSource();
+                }
+            }
+        }
+
+        if (!hasNextDSD) {
+            sendEvent(new EventNotifier() {
+                @Override
+                public void notify(EventCallback callback) {
+                    callback.onInfo(
+                            MediaPlayer2.this, null, MEDIA_INFO_DATA_SOURCE_LIST_END, 0);
+                }
+            });
+        }
+    }
+
+    private native void nativePlayNextDataSource(long srcId);
 
     /**
      * Configures the player to loop on the current data source.
@@ -463,7 +1103,16 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object loopCurrent(boolean loop);
+    public Object loopCurrent(boolean loop) {
+        return addTask(new Task(CALL_COMPLETED_LOOP_CURRENT, false) {
+            @Override
+            void process() {
+                setLooping(loop);
+            }
+        });
+    }
+
+    private native void setLooping(boolean looping);
 
     /**
      * Sets the volume of the audio of the media to play, expressed as a linear multiplier
@@ -476,14 +1125,26 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object setPlayerVolume(float volume);
+    public Object setPlayerVolume(float volume) {
+        return addTask(new Task(CALL_COMPLETED_SET_PLAYER_VOLUME, false) {
+            @Override
+            void process() {
+                mVolume = volume;
+                native_setVolume(volume);
+            }
+        });
+    }
+
+    private native void native_setVolume(float volume);
 
     /**
      * Returns the current volume of this player.
      * Note that it does not take into account the associated stream volume.
      * @return the player volume.
      */
-    public abstract float getPlayerVolume();
+    public float getPlayerVolume() {
+        return mVolume;
+    }
 
     /**
      * @return the maximum volume that can be used in {@link #setPlayerVolume(float)}.
@@ -505,7 +1166,20 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object notifyWhenCommandLabelReached(@NonNull Object label);
+    public Object notifyWhenCommandLabelReached(@NonNull Object label) {
+        return addTask(new Task(CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED, false) {
+            @Override
+            void process() {
+                sendEvent(new EventNotifier() {
+                    @Override
+                    public void notify(EventCallback callback) {
+                        callback.onCommandLabelReached(
+                                MediaPlayer2.this, label);
+                    }
+                });
+            }
+        });
+    }
 
     /**
      * Sets the {@link SurfaceHolder} to use for displaying the video
@@ -520,7 +1194,22 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @param sh the SurfaceHolder to use for video display
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
-    public abstract Object setDisplay(SurfaceHolder sh);
+    public Object setDisplay(SurfaceHolder sh) {
+        return addTask(new Task(CALL_COMPLETED_SET_DISPLAY, false) {
+            @Override
+            void process() {
+                mSurfaceHolder = sh;
+                Surface surface;
+                if (sh != null) {
+                    surface = sh.getSurface();
+                } else {
+                    surface = null;
+                }
+                native_setVideoSurface(surface);
+                updateSurfaceScreenOn();
+            }
+        });
+    }
 
     /**
      * Sets the {@link Surface} to be used as the sink for the video portion of
@@ -541,7 +1230,21 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object setSurface(Surface surface);
+    public Object setSurface(Surface surface) {
+        return addTask(new Task(CALL_COMPLETED_SET_SURFACE, false) {
+            @Override
+            void process() {
+                if (mScreenOnWhilePlaying && surface != null) {
+                    Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective for Surface");
+                }
+                mSurfaceHolder = null;
+                native_setVideoSurface(surface);
+                updateSurfaceScreenOn();
+            }
+        });
+    }
+
+    private native void native_setVideoSurface(Surface surface);
 
     /**
      * Set the low-level power management behavior for this MediaPlayer2. This
@@ -562,7 +1265,42 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @see android.os.PowerManager
      */
     // This is an asynchronous call.
-    public abstract Object setWakeMode(Context context, int mode);
+    public Object setWakeMode(Context context, int mode) {
+        return addTask(new Task(CALL_COMPLETED_SET_WAKE_MODE, false) {
+            @Override
+            void process() {
+                boolean washeld = false;
+
+                if (mWakeLock != null) {
+                    if (mWakeLock.isHeld()) {
+                        washeld = true;
+                        mWakeLock.release();
+                    }
+                    mWakeLock = null;
+                }
+
+                PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+                ActivityManager am =
+                        (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+                List<RunningAppProcessInfo> runningAppsProcInfo = am.getRunningAppProcesses();
+                int pid = android.os.Process.myPid();
+                String name = "pid " + String.valueOf(pid);
+                if (runningAppsProcInfo != null) {
+                    for (RunningAppProcessInfo procInfo : runningAppsProcInfo) {
+                        if (procInfo.pid == pid) {
+                            name = procInfo.processName;
+                            break;
+                        }
+                    }
+                }
+                mWakeLock = pm.newWakeLock(mode | PowerManager.ON_AFTER_RELEASE, name);
+                mWakeLock.setReferenceCounted(false);
+                if (washeld) {
+                    mWakeLock.acquire();
+                }
+            }
+        });
+    }
 
     /**
      * Control whether we should use the attached SurfaceHolder to keep the
@@ -575,7 +1313,39 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object setScreenOnWhilePlaying(boolean screenOn);
+    public Object setScreenOnWhilePlaying(boolean screenOn) {
+        return addTask(new Task(CALL_COMPLETED_SET_SCREEN_ON_WHILE_PLAYING, false) {
+            @Override
+            void process() {
+                if (mScreenOnWhilePlaying != screenOn) {
+                    if (screenOn && mSurfaceHolder == null) {
+                        Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective"
+                                + " without a SurfaceHolder");
+                    }
+                    mScreenOnWhilePlaying = screenOn;
+                    updateSurfaceScreenOn();
+                }
+            }
+        });
+    }
+
+    private void stayAwake(boolean awake) {
+        if (mWakeLock != null) {
+            if (awake && !mWakeLock.isHeld()) {
+                mWakeLock.acquire();
+            } else if (!awake && mWakeLock.isHeld()) {
+                mWakeLock.release();
+            }
+        }
+        mStayAwake = awake;
+        updateSurfaceScreenOn();
+    }
+
+    private void updateSurfaceScreenOn() {
+        if (mSurfaceHolder != null) {
+            mSurfaceHolder.setKeepScreenOn(mScreenOnWhilePlaying && mStayAwake);
+        }
+    }
 
     /**
      * Cancels a pending command.
@@ -584,17 +1354,26 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return {@code false} if the task could not be cancelled; {@code true} otherwise.
      */
     // This is a synchronous call.
-    public abstract boolean cancelCommand(Object token);
+    public boolean cancelCommand(Object token) {
+        synchronized (mTaskLock) {
+            return mPendingTasks.remove(token);
+        }
+    }
 
     /**
      * Discards all pending commands.
      */
     // This is a synchronous call.
-    public abstract void clearPendingCommands();
+    public void clearPendingCommands() {
+        synchronized (mTaskLock) {
+            mPendingTasks.clear();
+        }
+    }
 
     //--------------------------------------------------------------------------
     // Explicit Routing
     //--------------------
+    private AudioDeviceInfo mPreferredDevice = null;
 
     /**
      * Specifies an audio device (via an {@link AudioDeviceInfo} object) to route
@@ -606,14 +1385,28 @@ public abstract class MediaPlayer2 implements AutoCloseable
      */
     // This is a synchronous call.
     @Override
-    public abstract boolean setPreferredDevice(AudioDeviceInfo deviceInfo);
+    public boolean setPreferredDevice(AudioDeviceInfo deviceInfo) {
+        boolean status = native_setPreferredDevice(deviceInfo);
+        if (status) {
+            synchronized (this) {
+                mPreferredDevice = deviceInfo;
+            }
+        }
+        return status;
+    }
+
+    private native boolean native_setPreferredDevice(AudioDeviceInfo device);
 
     /**
      * Returns the selected output specified by {@link #setPreferredDevice}. Note that this
      * is not guaranteed to correspond to the actual device being used for playback.
      */
     @Override
-    public abstract AudioDeviceInfo getPreferredDevice();
+    public AudioDeviceInfo getPreferredDevice() {
+        synchronized (this) {
+            return mPreferredDevice;
+        }
+    }
 
     /**
      * Returns an {@link AudioDeviceInfo} identifying the current routing of this MediaPlayer2
@@ -622,7 +1415,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * selected device when the player was last active.
      */
     @Override
-    public abstract AudioDeviceInfo getRoutedDevice();
+    public native AudioDeviceInfo getRoutedDevice();
 
     /**
      * Adds an {@link AudioRouting.OnRoutingChangedListener} to receive notifications of routing
@@ -634,8 +1427,16 @@ public abstract class MediaPlayer2 implements AutoCloseable
      */
     // This is a synchronous call.
     @Override
-    public abstract void addOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener,
-            Handler handler);
+    public void addOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener,
+            Handler handler) {
+        if (listener == null) {
+            throw new IllegalArgumentException("addOnRoutingChangedListener: listener is NULL");
+        }
+        RoutingDelegate routingDelegate = new RoutingDelegate(this, listener, handler);
+        native_addDeviceCallback(routingDelegate);
+    }
+
+    private native void native_addDeviceCallback(RoutingDelegate rd);
 
     /**
      * Removes an {@link AudioRouting.OnRoutingChangedListener} which has been previously added
@@ -645,7 +1446,14 @@ public abstract class MediaPlayer2 implements AutoCloseable
      */
     // This is a synchronous call.
     @Override
-    public abstract void removeOnRoutingChangedListener(
+    public void removeOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("removeOnRoutingChangedListener: listener is NULL");
+        }
+        native_removeDeviceCallback(listener);
+    }
+
+    private native void native_removeDeviceCallback(
             AudioRouting.OnRoutingChangedListener listener);
 
     /**
@@ -658,7 +1466,9 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * notification {@code EventCallback.onVideoSizeChanged} when the size
      * is available.
      */
-    public abstract VideoSize getVideoSize();
+    public VideoSize getVideoSize() {
+        return mVideoSize;
+    }
 
     /**
      * Return Metrics data about the current player.
@@ -669,7 +1479,13 @@ public abstract class MediaPlayer2 implements AutoCloseable
      *
      * Additional vendor-specific fields may also be present in the return value.
      */
-    public abstract PersistableBundle getMetrics();
+    public PersistableBundle getMetrics() {
+        PersistableBundle bundle = native_getMetrics();
+        return bundle;
+    }
+
+    private native PersistableBundle native_getMetrics();
+
 
     /**
      * Gets the current buffering management params used by the source component.
@@ -682,9 +1498,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      */
     // TODO: make it public when ready
     @NonNull
-    BufferingParams getBufferingParams() {
-        return new BufferingParams.Builder().build();
-    }
+    native BufferingParams getBufferingParams();
 
     /**
      * Sets buffering management params.
@@ -698,7 +1512,18 @@ public abstract class MediaPlayer2 implements AutoCloseable
      */
     // TODO: make it public when ready
     // This is an asynchronous call.
-    abstract Object setBufferingParams(@NonNull BufferingParams params);
+    Object setBufferingParams(@NonNull BufferingParams params) {
+        return addTask(new Task(CALL_COMPLETED_SET_BUFFERING_PARAMS, false) {
+            @Override
+            void process() {
+                checkArgument(params != null, "the BufferingParams cannot be null");
+                native_setBufferingParams(params);
+            }
+        });
+    }
+
+    private native void native_setBufferingParams(@NonNull BufferingParams params);
+
 
     /**
      * Sets playback rate using {@link PlaybackParams}. The object sets its internal
@@ -710,7 +1535,17 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object setPlaybackParams(@NonNull PlaybackParams params);
+    public Object setPlaybackParams(@NonNull PlaybackParams params) {
+        return addTask(new Task(CALL_COMPLETED_SET_PLAYBACK_PARAMS, false) {
+            @Override
+            void process() {
+                checkArgument(params != null, "the PlaybackParams cannot be null");
+                native_setPlaybackParams(params);
+            }
+        });
+    }
+
+    private native void native_setPlaybackParams(@NonNull PlaybackParams params);
 
     /**
      * Gets the playback params, containing the current playback rate.
@@ -719,7 +1554,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @throws IllegalStateException if the internal player engine has not been initialized.
      */
     @NonNull
-    public abstract PlaybackParams getPlaybackParams();
+    public native PlaybackParams getPlaybackParams();
 
     /**
      * Sets A/V sync mode.
@@ -728,7 +1563,17 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object setSyncParams(@NonNull SyncParams params);
+    public Object setSyncParams(@NonNull SyncParams params) {
+        return addTask(new Task(CALL_COMPLETED_SET_SYNC_PARAMS, false) {
+            @Override
+            void process() {
+                checkArgument(params != null, "the SyncParams cannot be null");
+                native_setSyncParams(params);
+            }
+        });
+    }
+
+    private native void native_setSyncParams(@NonNull SyncParams params);
 
     /**
      * Gets the A/V sync mode.
@@ -737,7 +1582,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @throws IllegalStateException if the internal player engine has not been initialized.
      */
     @NonNull
-    public abstract SyncParams getSyncParams();
+    public native SyncParams getSyncParams();
 
     /**
      * Moves the media to specified time position.
@@ -821,7 +1666,47 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object seekTo(long msec, @SeekMode int mode);
+    public Object seekTo(long msec, @SeekMode int mode) {
+        return addTask(new Task(CALL_COMPLETED_SEEK_TO, true) {
+            @Override
+            void process() {
+                if (mode < SEEK_PREVIOUS_SYNC || mode > SEEK_CLOSEST) {
+                    final String msg = "Illegal seek mode: " + mode;
+                    throw new IllegalArgumentException(msg);
+                }
+                // TODO: pass long to native, instead of truncating here.
+                long posMs = msec;
+                if (posMs > Integer.MAX_VALUE) {
+                    Log.w(TAG, "seekTo offset " + posMs + " is too large, cap to "
+                            + Integer.MAX_VALUE);
+                    posMs = Integer.MAX_VALUE;
+                } else if (posMs < Integer.MIN_VALUE) {
+                    Log.w(TAG, "seekTo offset " + posMs + " is too small, cap to "
+                            + Integer.MIN_VALUE);
+                    posMs = Integer.MIN_VALUE;
+                }
+
+                synchronized (mTaskLock) {
+                    if (mIsPreviousCommandSeekTo
+                            && mPreviousSeekPos == posMs
+                            && mPreviousSeekMode == mode) {
+                        throw new CommandSkippedException(
+                                "same as previous seekTo");
+                    }
+                }
+
+                native_seekTo(posMs, mode);
+
+                synchronized (mTaskLock) {
+                    mIsPreviousCommandSeekTo = true;
+                    mPreviousSeekPos = posMs;
+                    mPreviousSeekMode = mode;
+                }
+            }
+        });
+    }
+
+    private native void native_seekTo(long msec, int mode);
 
     /**
      * Get current playback position as a {@link MediaTimestamp}.
@@ -842,25 +1727,25 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @see MediaTimestamp
      */
     @Nullable
-    public abstract MediaTimestamp getTimestamp();
-
-    /**
-     * Resets the MediaPlayer2 to its uninitialized state. After calling
-     * this method, you will have to initialize it again by setting the
-     * data source and calling prepare().
-     */
-    // This is a synchronous call.
-    public abstract void reset();
+    public MediaTimestamp getTimestamp() {
+        try {
+            // TODO: get the timestamp from native side
+            return new MediaTimestamp(
+                    getCurrentPosition() * 1000L,
+                    System.nanoTime(),
+                    getState() == PLAYER_STATE_PLAYING ? getPlaybackParams().getSpeed() : 0.f);
+        } catch (IllegalStateException e) {
+            return null;
+        }
+    }
 
     /**
      * Checks whether the MediaPlayer2 is looping or non-looping.
      *
      * @return true if the MediaPlayer2 is currently looping, false otherwise
-     * @hide
      */
-    public boolean isLooping() {
-        return false;
-    }
+    // This is a synchronous call.
+    public native boolean isLooping();
 
     /**
      * Sets the audio session ID.
@@ -875,19 +1760,32 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * When created, a MediaPlayer2 instance automatically generates its own audio session ID.
      * However, it is possible to force this player to be part of an already existing audio session
      * by calling this method.
-     * This method must be called before one of the overloaded <code> setDataSource </code> methods.
+     * This method must be called when player is in {@link #PLAYER_STATE_IDLE} or
+     * {@link #PLAYER_STATE_PREPARED} state in order to have sessionId take effect.
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object setAudioSessionId(int sessionId);
+    public Object setAudioSessionId(int sessionId) {
+        keepAudioSessionIdAlive(sessionId);
+        return addTask(new Task(CALL_COMPLETED_SET_AUDIO_SESSION_ID, false) {
+            @Override
+            void process() {
+                native_setAudioSessionId(sessionId);
+            }
+        });
+    }
+
+    private native void native_setAudioSessionId(int sessionId);
 
     /**
      * Returns the audio session ID.
      *
      * @return the audio session ID. {@see #setAudioSessionId(int)}
-     * Note that the audio session ID is 0 only if a problem occured when the MediaPlayer2 was contructed.
+     * Note that the audio session ID is 0 only if a problem occured when the MediaPlayer2 was
+     * contructed.
      */
-    public abstract int getAudioSessionId();
+    // This is a synchronous call.
+    public native int getAudioSessionId();
 
     /**
      * Attaches an auxiliary effect to the player. A typical auxiliary effect is a reverberation
@@ -905,8 +1803,16 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object attachAuxEffect(int effectId);
+    public Object attachAuxEffect(int effectId) {
+        return addTask(new Task(CALL_COMPLETED_ATTACH_AUX_EFFECT, false) {
+            @Override
+            void process() {
+                native_attachAuxEffect(effectId);
+            }
+        });
+    }
 
+    private native void native_attachAuxEffect(int effectId);
 
     /**
      * Sets the send level of the player to the attached auxiliary effect.
@@ -922,20 +1828,72 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object setAuxEffectSendLevel(float level);
+    public Object setAuxEffectSendLevel(float level) {
+        return addTask(new Task(CALL_COMPLETED_SET_AUX_EFFECT_SEND_LEVEL, false) {
+            @Override
+            void process() {
+                native_setAuxEffectSendLevel(level);
+            }
+        });
+    }
+
+    private native void native_setAuxEffectSendLevel(float level);
+
+    private static native void native_stream_event_onTearDown(
+            long nativeCallbackPtr, long userDataPtr);
+    private static native void native_stream_event_onStreamPresentationEnd(
+            long nativeCallbackPtr, long userDataPtr);
+    private static native void native_stream_event_onStreamDataRequest(
+            long jAudioTrackPtr, long nativeCallbackPtr, long userDataPtr);
+
+    /* Do not change these values (starting with INVOKE_ID) without updating
+     * their counterparts in include/media/mediaplayer2.h!
+     */
+    private static final int INVOKE_ID_GET_TRACK_INFO = 1;
+    private static final int INVOKE_ID_ADD_EXTERNAL_SOURCE = 2;
+    private static final int INVOKE_ID_ADD_EXTERNAL_SOURCE_FD = 3;
+    private static final int INVOKE_ID_SELECT_TRACK = 4;
+    private static final int INVOKE_ID_DESELECT_TRACK = 5;
+    private static final int INVOKE_ID_GET_SELECTED_TRACK = 7;
+
+    /**
+     * Invoke a generic method on the native player using opaque protocol
+     * buffer message for the request and reply. Both payloads' format is a
+     * convention between the java caller and the native player.
+     *
+     * @param msg PlayerMessage for the extension.
+     *
+     * @return PlayerMessage with the data returned by the
+     * native player.
+     */
+    private PlayerMessage invoke(PlayerMessage msg) {
+        byte[] ret = native_invoke(msg.toByteArray());
+        if (ret == null) {
+            return null;
+        }
+        try {
+            return PlayerMessage.parseFrom(ret);
+        } catch (InvalidProtocolBufferException e) {
+            return null;
+        }
+    }
+
+    private native byte[] native_invoke(byte[] request);
 
     /**
      * Class for MediaPlayer2 to return each audio/video/subtitle track's metadata.
      *
      * @see MediaPlayer2#getTrackInfo
      */
-    public abstract static class TrackInfo {
+    public static class TrackInfo {
         /**
          * Gets the track type.
          * @return TrackType which indicates if the track is video, audio, timed text.
          */
         @UnsupportedAppUsage
-        public abstract int getTrackType();
+        public int getTrackType() {
+            return mTrackType;
+        }
 
         /**
          * Gets the language code of the track.
@@ -944,13 +1902,22 @@ public abstract class MediaPlayer2 implements AutoCloseable
          * ISO-639-2 language code, "und", is returned.
          */
         @UnsupportedAppUsage
-        public abstract String getLanguage();
+        public String getLanguage() {
+            String language = mFormat.getString(MediaFormat.KEY_LANGUAGE);
+            return language == null ? "und" : language;
+        }
 
         /**
          * Gets the {@link MediaFormat} of the track.  If the format is
          * unknown or could not be determined, null is returned.
          */
-        public abstract MediaFormat getFormat();
+        public MediaFormat getFormat() {
+            if (mTrackType == MEDIA_TRACK_TYPE_TIMEDTEXT
+                    || mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
+                return mFormat;
+            }
+            return null;
+        }
 
         public static final int MEDIA_TRACK_TYPE_UNKNOWN = 0;
         public static final int MEDIA_TRACK_TYPE_VIDEO = 1;
@@ -962,8 +1929,56 @@ public abstract class MediaPlayer2 implements AutoCloseable
         public static final int MEDIA_TRACK_TYPE_SUBTITLE = 4;
         public static final int MEDIA_TRACK_TYPE_METADATA = 5;
 
+        final int mTrackType;
+        final MediaFormat mFormat;
+
+        TrackInfo(Iterator<Value> in) {
+            mTrackType = in.next().getInt32Value();
+            // TODO: build the full MediaFormat; currently we are using createSubtitleFormat
+            // even for audio/video tracks, meaning we only set the mime and language.
+            String mime = in.next().getStringValue();
+            String language = in.next().getStringValue();
+            mFormat = MediaFormat.createSubtitleFormat(mime, language);
+
+            if (mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
+                mFormat.setInteger(MediaFormat.KEY_IS_AUTOSELECT, in.next().getInt32Value());
+                mFormat.setInteger(MediaFormat.KEY_IS_DEFAULT, in.next().getInt32Value());
+                mFormat.setInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE, in.next().getInt32Value());
+            }
+        }
+
+        /** @hide */
+        TrackInfo(int type, MediaFormat format) {
+            mTrackType = type;
+            mFormat = format;
+        }
+
         @Override
-        public abstract String toString();
+        public String toString() {
+            StringBuilder out = new StringBuilder(128);
+            out.append(getClass().getName());
+            out.append('{');
+            switch (mTrackType) {
+                case MEDIA_TRACK_TYPE_VIDEO:
+                    out.append("VIDEO");
+                    break;
+                case MEDIA_TRACK_TYPE_AUDIO:
+                    out.append("AUDIO");
+                    break;
+                case MEDIA_TRACK_TYPE_TIMEDTEXT:
+                    out.append("TIMEDTEXT");
+                    break;
+                case MEDIA_TRACK_TYPE_SUBTITLE:
+                    out.append("SUBTITLE");
+                    break;
+                default:
+                    out.append("UNKNOWN");
+                    break;
+            }
+            out.append(", " + mFormat.toString());
+            out.append("}");
+            return out.toString();
+        }
     };
 
     /**
@@ -972,35 +1987,32 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return List of track info. The total number of tracks is the array length.
      * Must be called again if an external timed text source has been added after
      * addTimedTextSource method is called.
+     * @throws IllegalStateException if it is called in an invalid state.
      */
-    public abstract List<TrackInfo> getTrackInfo();
+    public List<TrackInfo> getTrackInfo() {
+        TrackInfo[] trackInfo = getInbandTrackInfo();
+        return Arrays.asList(trackInfo);
+    }
 
-    /* Do not change these values without updating their counterparts
-     * in include/media/stagefright/MediaDefs.h and media/libstagefright/MediaDefs.cpp!
-     */
-    /**
-     * MIME type for SubRip (SRT) container. Used in addTimedTextSource APIs.
-     * @hide
-     */
-    public static final String MEDIA_MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
-
-    /**
-     * MIME type for WebVTT subtitle data.
-     * @hide
-     */
-    public static final String MEDIA_MIMETYPE_TEXT_VTT = "text/vtt";
-
-    /**
-     * MIME type for CEA-608 closed caption data.
-     * @hide
-     */
-    public static final String MEDIA_MIMETYPE_TEXT_CEA_608 = "text/cea-608";
-
-    /**
-     * MIME type for CEA-708 closed caption data.
-     * @hide
-     */
-    public static final String MEDIA_MIMETYPE_TEXT_CEA_708 = "text/cea-708";
+    private TrackInfo[] getInbandTrackInfo() throws IllegalStateException {
+        PlayerMessage request = PlayerMessage.newBuilder()
+                .addValues(Value.newBuilder().setInt32Value(INVOKE_ID_GET_TRACK_INFO))
+                .build();
+        PlayerMessage response = invoke(request);
+        if (response == null) {
+            return null;
+        }
+        Iterator<Value> in = response.getValuesList().iterator();
+        int size = in.next().getInt32Value();
+        if (size == 0) {
+            return null;
+        }
+        TrackInfo[] trackInfo = new TrackInfo[size];
+        for (int i = 0; i < size; ++i) {
+            trackInfo[i] = new TrackInfo(in);
+        }
+        return trackInfo;
+    }
 
     /**
      * Returns the index of the audio, video, or subtitle track currently selected for playback,
@@ -1019,7 +2031,17 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @see #selectTrack(int)
      * @see #deselectTrack(int)
      */
-    public abstract int getSelectedTrack(int trackType);
+    public int getSelectedTrack(int trackType) {
+        PlayerMessage request = PlayerMessage.newBuilder()
+                .addValues(Value.newBuilder().setInt32Value(INVOKE_ID_GET_SELECTED_TRACK))
+                .addValues(Value.newBuilder().setInt32Value(trackType))
+                .build();
+        PlayerMessage response = invoke(request);
+        if (response == null) {
+            return -1;
+        }
+        return response.getValues(0).getInt32Value();
+    }
 
     /**
      * Selects a track.
@@ -1050,7 +2072,14 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @see MediaPlayer2#getTrackInfo
      */
     // This is an asynchronous call.
-    public abstract Object selectTrack(int index);
+    public Object selectTrack(int index) {
+        return addTask(new Task(CALL_COMPLETED_SELECT_TRACK, false) {
+            @Override
+            void process() {
+                selectOrDeselectTrack(index, true /* select */);
+            }
+        });
+    }
 
     /**
      * Deselect a track.
@@ -1067,13 +2096,450 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @see MediaPlayer2#getTrackInfo
      */
     // This is an asynchronous call.
-    public abstract Object deselectTrack(int index);
+    public Object deselectTrack(int index) {
+        return addTask(new Task(CALL_COMPLETED_DESELECT_TRACK, false) {
+            @Override
+            void process() {
+                selectOrDeselectTrack(index, false /* select */);
+            }
+        });
+    }
+
+    private void selectOrDeselectTrack(int index, boolean select)
+            throws IllegalStateException {
+        PlayerMessage request = PlayerMessage.newBuilder()
+                .addValues(Value.newBuilder().setInt32Value(
+                            select ? INVOKE_ID_SELECT_TRACK : INVOKE_ID_DESELECT_TRACK))
+                .addValues(Value.newBuilder().setInt32Value(index))
+                .build();
+        invoke(request);
+    }
+
+    /* Do not change these values without updating their counterparts
+     * in include/media/mediaplayer2.h!
+     */
+    private static final int MEDIA_NOP = 0; // interface test message
+    private static final int MEDIA_PREPARED = 1;
+    private static final int MEDIA_PLAYBACK_COMPLETE = 2;
+    private static final int MEDIA_BUFFERING_UPDATE = 3;
+    private static final int MEDIA_SEEK_COMPLETE = 4;
+    private static final int MEDIA_SET_VIDEO_SIZE = 5;
+    private static final int MEDIA_STARTED = 6;
+    private static final int MEDIA_PAUSED = 7;
+    private static final int MEDIA_STOPPED = 8;
+    private static final int MEDIA_SKIPPED = 9;
+    private static final int MEDIA_NOTIFY_TIME = 98;
+    private static final int MEDIA_TIMED_TEXT = 99;
+    private static final int MEDIA_ERROR = 100;
+    private static final int MEDIA_INFO = 200;
+    private static final int MEDIA_SUBTITLE_DATA = 201;
+    private static final int MEDIA_META_DATA = 202;
+    private static final int MEDIA_DRM_INFO = 210;
+
+    private class TaskHandler extends Handler {
+        private MediaPlayer2 mMediaPlayer;
+
+        TaskHandler(MediaPlayer2 mp, Looper looper) {
+            super(looper);
+            mMediaPlayer = mp;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            handleMessage(msg, 0);
+        }
+
+        public void handleMessage(Message msg, long srcId) {
+            if (mMediaPlayer.mNativeContext == 0) {
+                Log.w(TAG, "mediaplayer2 went away with unhandled events");
+                return;
+            }
+            final int what = msg.arg1;
+            final int extra = msg.arg2;
+
+            final SourceInfo sourceInfo = getSourceInfoById(srcId);
+            if (sourceInfo == null) {
+                return;
+            }
+            final DataSourceDesc dsd = sourceInfo.mDSD;
+
+            switch(msg.what) {
+                case MEDIA_PREPARED:
+                {
+                    if (dsd != null) {
+                        sendEvent(new EventNotifier() {
+                            @Override
+                            public void notify(EventCallback callback) {
+                                callback.onInfo(
+                                        mMediaPlayer, dsd, MEDIA_INFO_PREPARED, 0);
+                            }
+                        });
+                    }
+
+                    synchronized (mSrcLock) {
+                        SourceInfo nextSourceInfo = mNextSourceInfos.peek();
+                        Log.i(TAG, "MEDIA_PREPARED: srcId=" + srcId
+                                + ", curSrc=" + mCurrentSourceInfo
+                                + ", nextSrc=" + nextSourceInfo);
+
+                        if (isCurrentSource(srcId)) {
+                            prepareNextDataSource();
+                        } else if (isNextSource(srcId)) {
+                            nextSourceInfo.mStateAsNextSource = NEXT_SOURCE_STATE_PREPARED;
+                            if (nextSourceInfo.mPlayPendingAsNextSource) {
+                                playNextDataSource();
+                            }
+                        }
+                    }
+
+                    synchronized (mTaskLock) {
+                        if (mCurrentTask != null
+                                && mCurrentTask.mMediaCallType == CALL_COMPLETED_PREPARE
+                                && mCurrentTask.mDSD == dsd
+                                && mCurrentTask.mNeedToWaitForEventToComplete) {
+                            mCurrentTask.sendCompleteNotification(CALL_STATUS_NO_ERROR);
+                            mCurrentTask = null;
+                            processPendingTask_l();
+                        }
+                    }
+                    return;
+                }
+
+                case MEDIA_DRM_INFO:
+                {
+                    if (msg.obj == null) {
+                        Log.w(TAG, "MEDIA_DRM_INFO msg.obj=NULL");
+                    } else if (msg.obj instanceof byte[]) {
+                        // The PlayerMessage was parsed already in postEventFromNative
+                        final DrmInfo drmInfo;
+
+                        synchronized (mDrmLock) {
+                            if (mDrmInfo != null) {
+                                drmInfo = mDrmInfo.makeCopy();
+                            } else {
+                                drmInfo = null;
+                            }
+                        }
+
+                        // notifying the client outside the lock
+                        if (drmInfo != null) {
+                            sendDrmEvent(new DrmEventNotifier() {
+                                @Override
+                                public void notify(DrmEventCallback callback) {
+                                    callback.onDrmInfo(
+                                            mMediaPlayer, dsd, drmInfo);
+                                }
+                            });
+                        }
+                    } else {
+                        Log.w(TAG, "MEDIA_DRM_INFO msg.obj of unexpected type " + msg.obj);
+                    }
+                    return;
+                }
+
+                case MEDIA_PLAYBACK_COMPLETE:
+                {
+                    if (isCurrentSource(srcId)) {
+                        sendEvent(new EventNotifier() {
+                            @Override
+                            public void notify(EventCallback callback) {
+                                callback.onInfo(
+                                        mMediaPlayer, dsd, MEDIA_INFO_DATA_SOURCE_END, 0);
+                            }
+                        });
+                        stayAwake(false);
+
+                        synchronized (mSrcLock) {
+                            SourceInfo nextSourceInfo = mNextSourceInfos.peek();
+                            if (nextSourceInfo != null) {
+                                nextSourceInfo.mPlayPendingAsNextSource = true;
+                            }
+                            Log.i(TAG, "MEDIA_PLAYBACK_COMPLETE: srcId=" + srcId
+                                    + ", curSrc=" + mCurrentSourceInfo
+                                    + ", nextSrc=" + nextSourceInfo);
+                        }
+
+                        playNextDataSource();
+                    }
+
+                    return;
+                }
+
+                case MEDIA_STOPPED:
+                case MEDIA_STARTED:
+                case MEDIA_PAUSED:
+                case MEDIA_SKIPPED:
+                case MEDIA_NOTIFY_TIME:
+                {
+                    // Do nothing. The client should have enough information with
+                    // {@link EventCallback#onMediaTimeDiscontinuity}.
+                    break;
+                }
+
+                case MEDIA_BUFFERING_UPDATE:
+                {
+                    final int percent = msg.arg1;
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onInfo(
+                                    mMediaPlayer, dsd, MEDIA_INFO_BUFFERING_UPDATE, percent);
+                        }
+                    });
+
+                    SourceInfo src = getSourceInfoById(srcId);
+                    if (src != null) {
+                        src.mBufferedPercentage.set(percent);
+                    }
+
+                    return;
+                }
+
+                case MEDIA_SEEK_COMPLETE:
+                {
+                    synchronized (mTaskLock) {
+                        if (!mPendingTasks.isEmpty()
+                                && mPendingTasks.get(0).mMediaCallType != CALL_COMPLETED_SEEK_TO
+                                && getState() == PLAYER_STATE_PLAYING) {
+                            mIsPreviousCommandSeekTo = false;
+                        }
+
+                        if (mCurrentTask != null
+                                && mCurrentTask.mMediaCallType == CALL_COMPLETED_SEEK_TO
+                                && mCurrentTask.mNeedToWaitForEventToComplete) {
+                            mCurrentTask.sendCompleteNotification(CALL_STATUS_NO_ERROR);
+                            mCurrentTask = null;
+                            processPendingTask_l();
+                        }
+                    }
+                    return;
+                }
+
+                case MEDIA_SET_VIDEO_SIZE:
+                {
+                    final int width = msg.arg1;
+                    final int height = msg.arg2;
+
+                    mVideoSize = new VideoSize(width, height);
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onVideoSizeChanged(
+                                    mMediaPlayer, dsd, mVideoSize);
+                        }
+                    });
+                    return;
+                }
+
+                case MEDIA_ERROR:
+                {
+                    Log.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onError(
+                                    mMediaPlayer, dsd, what, extra);
+                        }
+                    });
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onInfo(
+                                    mMediaPlayer, dsd, MEDIA_INFO_DATA_SOURCE_END, 0);
+                        }
+                    });
+                    stayAwake(false);
+                    return;
+                }
+
+                case MEDIA_INFO:
+                {
+                    switch (msg.arg1) {
+                        case MEDIA_INFO_VIDEO_TRACK_LAGGING:
+                            Log.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
+                            break;
+                    }
+
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onInfo(
+                                    mMediaPlayer, dsd, what, extra);
+                        }
+                    });
+
+                    if (msg.arg1 == MEDIA_INFO_DATA_SOURCE_START) {
+                        if (isCurrentSource(srcId)) {
+                            prepareNextDataSource();
+                        }
+                    }
+
+                    // No real default action so far.
+                    return;
+                }
+
+                case MEDIA_TIMED_TEXT:
+                {
+                    final TimedText text;
+                    if (msg.obj instanceof byte[]) {
+                        PlayerMessage playerMsg;
+                        try {
+                            playerMsg = PlayerMessage.parseFrom((byte[]) msg.obj);
+                        } catch (InvalidProtocolBufferException e) {
+                            Log.w(TAG, "Failed to parse timed text.", e);
+                            return;
+                        }
+                        text = TimedTextUtil.parsePlayerMessage(playerMsg);
+                    } else {
+                        text = null;
+                    }
+
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onTimedText(
+                                    mMediaPlayer, dsd, text);
+                        }
+                    });
+                    return;
+                }
+
+                case MEDIA_SUBTITLE_DATA:
+                {
+                    if (msg.obj instanceof byte[]) {
+                        PlayerMessage playerMsg;
+                        try {
+                            playerMsg = PlayerMessage.parseFrom((byte[]) msg.obj);
+                        } catch (InvalidProtocolBufferException e) {
+                            Log.w(TAG, "Failed to parse subtitle data.", e);
+                            return;
+                        }
+                        Iterator<Value> in = playerMsg.getValuesList().iterator();
+                        SubtitleData data = new SubtitleData(
+                                in.next().getInt32Value(),  // trackIndex
+                                in.next().getInt64Value(),  // startTimeUs
+                                in.next().getInt64Value(),  // durationUs
+                                in.next().getBytesValue().toByteArray());  // data
+                        sendEvent(new EventNotifier() {
+                            @Override
+                            public void notify(EventCallback callback) {
+                                callback.onSubtitleData(
+                                        mMediaPlayer, dsd, data);
+                            }
+                        });
+                    }
+                    return;
+                }
+
+                case MEDIA_META_DATA:
+                {
+                    final TimedMetaData data;
+                    if (msg.obj instanceof byte[]) {
+                        PlayerMessage playerMsg;
+                        try {
+                            playerMsg = PlayerMessage.parseFrom((byte[]) msg.obj);
+                        } catch (InvalidProtocolBufferException e) {
+                            Log.w(TAG, "Failed to parse timed meta data.", e);
+                            return;
+                        }
+                        Iterator<Value> in = playerMsg.getValuesList().iterator();
+                        data = new TimedMetaData(
+                                in.next().getInt64Value(),  // timestampUs
+                                in.next().getBytesValue().toByteArray());  // metaData
+                    } else {
+                        data = null;
+                    }
+
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onTimedMetaDataAvailable(
+                                    mMediaPlayer, dsd, data);
+                        }
+                    });
+                    return;
+                }
+
+                case MEDIA_NOP: // interface test message - ignore
+                {
+                    break;
+                }
+
+                default:
+                {
+                    Log.e(TAG, "Unknown message type " + msg.what);
+                    return;
+                }
+            }
+        }
+    }
+
+    /*
+     * Called from native code when an interesting event happens.  This method
+     * just uses the TaskHandler system to post the event back to the main app thread.
+     * We use a weak reference to the original MediaPlayer2 object so that the native
+     * code is safe from the object disappearing from underneath it.  (This is
+     * the cookie passed to native_setup().)
+     */
+    private static void postEventFromNative(Object mediaplayer2Ref, long srcId,
+                                            int what, int arg1, int arg2, byte[] obj) {
+        final MediaPlayer2 mp = (MediaPlayer2) ((WeakReference) mediaplayer2Ref).get();
+        if (mp == null) {
+            return;
+        }
+
+        switch (what) {
+            case MEDIA_DRM_INFO:
+                // We need to derive mDrmInfo before prepare() returns so processing it here
+                // before the notification is sent to TaskHandler below. TaskHandler runs in the
+                // notification looper so its handleMessage might process the event after prepare()
+                // has returned.
+                Log.v(TAG, "postEventFromNative MEDIA_DRM_INFO");
+                if (obj != null) {
+                    PlayerMessage playerMsg;
+                    try {
+                        playerMsg = PlayerMessage.parseFrom(obj);
+                    } catch (InvalidProtocolBufferException e) {
+                        Log.w(TAG, "MEDIA_DRM_INFO failed to parse msg.obj " + obj);
+                        break;
+                    }
+                    DrmInfo drmInfo = new DrmInfo(playerMsg);
+                    synchronized (mp.mDrmLock) {
+                        mp.mDrmInfo = drmInfo;
+                    }
+                } else {
+                    Log.w(TAG, "MEDIA_DRM_INFO msg.obj of unexpected type " + obj);
+                }
+                break;
+
+            case MEDIA_PREPARED:
+                // By this time, we've learned about DrmInfo's presence or absence. This is meant
+                // mainly for prepare() use case. For prepare(), this still can run to a race
+                // condition b/c MediaPlayerNative releases the prepare() lock before calling notify
+                // so we also set mDrmInfoResolved in prepare().
+                synchronized (mp.mDrmLock) {
+                    mp.mDrmInfoResolved = true;
+                }
+                break;
+        }
+
+        if (mp.mTaskHandler != null) {
+            Message m = mp.mTaskHandler.obtainMessage(what, arg1, arg2, obj);
+
+            mp.mTaskHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mp.mTaskHandler.handleMessage(m, srcId);
+                }
+            });
+        }
+    }
 
     /**
      * Interface definition for callbacks to be invoked when the player has the corresponding
      * events.
      */
-    public abstract static class EventCallback {
+    public static class EventCallback {
         /**
          * Called to indicate the video size
          *
@@ -1183,6 +2649,10 @@ public abstract class MediaPlayer2 implements AutoCloseable
                 MediaPlayer2 mp, DataSourceDesc dsd, @NonNull SubtitleData data) { }
     }
 
+    private final Object mEventCbLock = new Object();
+    private ArrayList<Pair<Executor, EventCallback>> mEventCallbackRecords =
+            new ArrayList<Pair<Executor, EventCallback>>();
+
     /**
      * Registers the callback to be invoked for various events covered by {@link EventCallback}.
      *
@@ -1190,8 +2660,19 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @param eventCallback the callback that will be run
      */
     // This is a synchronous call.
-    public abstract void registerEventCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull EventCallback eventCallback);
+    public void registerEventCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull EventCallback eventCallback) {
+        if (eventCallback == null) {
+            throw new IllegalArgumentException("Illegal null EventCallback");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException(
+                    "Illegal null Executor for the EventCallback");
+        }
+        synchronized (mEventCbLock) {
+            mEventCallbackRecords.add(new Pair(executor, eventCallback));
+        }
+    }
 
     /**
      * Unregisters the {@link EventCallback}.
@@ -1199,10 +2680,58 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @param eventCallback the callback to be unregistered
      */
     // This is a synchronous call.
-    public abstract void unregisterEventCallback(EventCallback eventCallback);
+    public void unregisterEventCallback(EventCallback eventCallback) {
+        synchronized (mEventCbLock) {
+            for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
+                if (cb.second == eventCallback) {
+                    mEventCallbackRecords.remove(cb);
+                }
+            }
+        }
+    }
+
+    private static void checkArgument(boolean expression, String errorMessage) {
+        if (!expression) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    private void sendEvent(final EventNotifier notifier) {
+        synchronized (mEventCbLock) {
+            try {
+                for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
+                    cb.first.execute(() -> notifier.notify(cb.second));
+                }
+            } catch (RejectedExecutionException e) {
+                // The executor has been shut down.
+                Log.w(TAG, "The executor has been shut down. Ignoring event.");
+            }
+        }
+    }
+
+    private void sendDrmEvent(final DrmEventNotifier notifier) {
+        synchronized (mDrmEventCbLock) {
+            try {
+                for (Pair<Executor, DrmEventCallback> cb : mDrmEventCallbackRecords) {
+                    cb.first.execute(() -> notifier.notify(cb.second));
+                }
+            } catch (RejectedExecutionException e) {
+                // The executor has been shut down.
+                Log.w(TAG, "The executor has been shut down. Ignoring drm event.");
+            }
+        }
+    }
+
+    private interface EventNotifier {
+        void notify(EventCallback callback);
+    }
+
+    private interface DrmEventNotifier {
+        void notify(DrmEventCallback callback);
+    }
 
     /* Do not change these values without updating their counterparts
-     * in include/media/mediaplayer2.h!
+     * in include/media/MediaPlayer2Types.h!
      */
     /** Unspecified media player error.
      * @see EventCallback#onError
@@ -1651,8 +3180,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * The only allowed DRM calls in this listener are {@link #getDrmPropertyString}
      * and {@link #setDrmPropertyString}.
      */
-    public interface OnDrmConfigHelper
-    {
+    public interface OnDrmConfigHelper {
         /**
          * Called to give the app the opportunity to configure DRM before the session is created
          *
@@ -1671,13 +3199,19 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @param listener the callback that will be run
      */
     // This is a synchronous call.
-    public abstract void setOnDrmConfigHelper(OnDrmConfigHelper listener);
+    public void setOnDrmConfigHelper(OnDrmConfigHelper listener) {
+        synchronized (mDrmLock) {
+            mOnDrmConfigHelper = listener;
+        }
+    }
+
+    private OnDrmConfigHelper mOnDrmConfigHelper;
 
     /**
      * Interface definition for callbacks to be invoked when the player has the corresponding
      * DRM events.
      */
-    public abstract static class DrmEventCallback {
+    public static class DrmEventCallback {
         /**
          * Called to indicate DRM info is available
          *
@@ -1700,6 +3234,10 @@ public abstract class MediaPlayer2 implements AutoCloseable
                 MediaPlayer2 mp, DataSourceDesc dsd, @PrepareDrmStatusCode int status) { }
     }
 
+    private final Object mDrmEventCbLock = new Object();
+    private ArrayList<Pair<Executor, DrmEventCallback>> mDrmEventCallbackRecords =
+            new ArrayList<Pair<Executor, DrmEventCallback>>();
+
     /**
      * Registers the callback to be invoked for various DRM events.
      *
@@ -1707,8 +3245,19 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @param executor the executor through which the callback should be invoked
      */
     // This is a synchronous call.
-    public abstract void registerDrmEventCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull DrmEventCallback eventCallback);
+    public void registerDrmEventCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull DrmEventCallback eventCallback) {
+        if (eventCallback == null) {
+            throw new IllegalArgumentException("Illegal null EventCallback");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException(
+                    "Illegal null Executor for the EventCallback");
+        }
+        synchronized (mDrmEventCbLock) {
+            mDrmEventCallbackRecords.add(new Pair(executor, eventCallback));
+        }
+    }
 
     /**
      * Unregisters the {@link DrmEventCallback}.
@@ -1716,7 +3265,15 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @param eventCallback the callback to be unregistered
      */
     // This is a synchronous call.
-    public abstract void unregisterDrmEventCallback(DrmEventCallback eventCallback);
+    public void unregisterDrmEventCallback(DrmEventCallback eventCallback) {
+        synchronized (mDrmEventCbLock) {
+            for (Pair<Executor, DrmEventCallback> cb : mDrmEventCallbackRecords) {
+                if (cb.second == eventCallback) {
+                    mDrmEventCallbackRecords.remove(cb);
+                }
+            }
+        }
+    }
 
     /**
      * The status codes for {@link DrmEventCallback#onDrmPrepared} listener.
@@ -1768,7 +3325,25 @@ public abstract class MediaPlayer2 implements AutoCloseable
      *
      * @throws IllegalStateException if called before being prepared
      */
-    public abstract DrmInfo getDrmInfo();
+    public DrmInfo getDrmInfo() {
+        DrmInfo drmInfo = null;
+
+        // there is not much point if the app calls getDrmInfo within an OnDrmInfoListenet;
+        // regardless below returns drmInfo anyway instead of raising an exception
+        synchronized (mDrmLock) {
+            if (!mDrmInfoResolved && mDrmInfo == null) {
+                final String msg = "The Player has not been prepared yet";
+                Log.v(TAG, msg);
+                throw new IllegalStateException(msg);
+            }
+
+            if (mDrmInfo != null) {
+                drmInfo = mDrmInfo.makeCopy();
+            }
+        }  // synchronized
+
+        return drmInfo;
+    }
 
     /**
      * Prepares the DRM for the current source
@@ -1798,7 +3373,161 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public abstract Object prepareDrm(@NonNull UUID uuid);
+    public Object prepareDrm(@NonNull UUID uuid) {
+        return addTask(new Task(CALL_COMPLETED_PREPARE_DRM, true) {
+            @Override
+            void process() {
+                int status = PREPARE_DRM_STATUS_SUCCESS;
+                boolean sendEvent = true;
+
+                try {
+                    doPrepareDrm(uuid);
+                } catch (ResourceBusyException e) {
+                    status = PREPARE_DRM_STATUS_RESOURCE_BUSY;
+                } catch (UnsupportedSchemeException e) {
+                    status = PREPARE_DRM_STATUS_UNSUPPORTED_SCHEME;
+                } catch (NotProvisionedException e) {
+                    Log.w(TAG, "prepareDrm: NotProvisionedException");
+
+                    // handle provisioning internally; it'll reset mPrepareDrmInProgress
+                    status = handleProvisioninig(uuid);
+
+                    if (status == PREPARE_DRM_STATUS_SUCCESS) {
+                        // DrmEventCallback will be fired in provisioning
+                        sendEvent = false;
+                    } else {
+                        synchronized (mDrmLock) {
+                            cleanDrmObj();
+                        }
+
+                        switch (status) {
+                            case PREPARE_DRM_STATUS_PROVISIONING_NETWORK_ERROR:
+                                Log.e(TAG, "prepareDrm: Provisioning was required but failed "
+                                        + "due to a network error.");
+                                break;
+
+                            case PREPARE_DRM_STATUS_PROVISIONING_SERVER_ERROR:
+                                Log.e(TAG, "prepareDrm: Provisioning was required but the request "
+                                        + "was denied by the server.");
+                                break;
+
+                            case PREPARE_DRM_STATUS_PREPARATION_ERROR:
+                            default:
+                                Log.e(TAG, "prepareDrm: Post-provisioning preparation failed.");
+                                break;
+                        }
+                    }
+                } catch (Exception e) {
+                    status = PREPARE_DRM_STATUS_PREPARATION_ERROR;
+                }
+
+                if (sendEvent) {
+                    final int prepareDrmStatus = status;
+                    sendDrmEvent(new DrmEventNotifier() {
+                        @Override
+                        public void notify(DrmEventCallback callback) {
+                            callback.onDrmPrepared(
+                                    MediaPlayer2.this, getCurrentDataSource(), prepareDrmStatus);
+                        }
+                    });
+
+                    synchronized (mTaskLock) {
+                        mCurrentTask = null;
+                        processPendingTask_l();
+                    }
+                }
+            }
+        });
+    }
+
+    private void doPrepareDrm(@NonNull UUID uuid)
+            throws UnsupportedSchemeException, ResourceBusyException,
+                   NotProvisionedException {
+        Log.v(TAG, "prepareDrm: uuid: " + uuid + " mOnDrmConfigHelper: " + mOnDrmConfigHelper);
+
+        synchronized (mDrmLock) {
+            // only allowing if tied to a protected source; might relax for releasing offline keys
+            if (mDrmInfo == null) {
+                final String msg = "prepareDrm(): Wrong usage: The player must be prepared and "
+                        + "DRM info be retrieved before this call.";
+                Log.e(TAG, msg);
+                throw new IllegalStateException(msg);
+            }
+
+            if (mActiveDrmScheme) {
+                final String msg = "prepareDrm(): Wrong usage: There is already "
+                        + "an active DRM scheme with " + mDrmUUID;
+                Log.e(TAG, msg);
+                throw new IllegalStateException(msg);
+            }
+
+            if (mPrepareDrmInProgress) {
+                final String msg = "prepareDrm(): Wrong usage: There is already "
+                        + "a pending prepareDrm call.";
+                Log.e(TAG, msg);
+                throw new IllegalStateException(msg);
+            }
+
+            if (mDrmProvisioningInProgress) {
+                final String msg = "prepareDrm(): Unexpectd: Provisioning is already in progress.";
+                Log.e(TAG, msg);
+                throw new IllegalStateException(msg);
+            }
+
+            // shouldn't need this; just for safeguard
+            cleanDrmObj();
+
+            mPrepareDrmInProgress = true;
+
+            try {
+                // only creating the DRM object to allow pre-openSession configuration
+                prepareDrm_createDrmStep(uuid);
+            } catch (Exception e) {
+                Log.w(TAG, "prepareDrm(): Exception ", e);
+                mPrepareDrmInProgress = false;
+                throw e;
+            }
+
+            mDrmConfigAllowed = true;
+        }  // synchronized
+
+        // call the callback outside the lock
+        if (mOnDrmConfigHelper != null)  {
+            mOnDrmConfigHelper.onDrmConfig(this, getCurrentDataSource());
+        }
+
+        synchronized (mDrmLock) {
+            mDrmConfigAllowed = false;
+            boolean earlyExit = false;
+
+            try {
+                prepareDrm_openSessionStep(uuid);
+
+                mDrmUUID = uuid;
+                mActiveDrmScheme = true;
+                mPrepareDrmInProgress = false;
+            } catch (IllegalStateException e) {
+                final String msg = "prepareDrm(): Wrong usage: The player must be "
+                        + "in the prepared state to call prepareDrm().";
+                Log.e(TAG, msg);
+                earlyExit = true;
+                mPrepareDrmInProgress = false;
+                throw new IllegalStateException(msg);
+            } catch (NotProvisionedException e) {
+                Log.w(TAG, "prepareDrm: NotProvisionedException", e);
+                throw e;
+            } catch (Exception e) {
+                Log.e(TAG, "prepareDrm: Exception " + e);
+                earlyExit = true;
+                mPrepareDrmInProgress = false;
+                throw e;
+            } finally {
+                if (earlyExit) {  // clean up object if didn't succeed
+                    cleanDrmObj();
+                }
+            }  // finally
+        }  // synchronized
+    }
 
     /**
      * Releases the DRM session
@@ -1810,8 +3539,39 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @throws NoDrmSchemeException if there is no active DRM session to release
      */
     // This is a synchronous call.
-    public abstract void releaseDrm()
-            throws NoDrmSchemeException;
+    public void releaseDrm()
+            throws NoDrmSchemeException {
+        synchronized (mDrmLock) {
+            Log.v(TAG, "releaseDrm:");
+
+            if (!mActiveDrmScheme) {
+                Log.e(TAG, "releaseDrm(): No active DRM scheme to release.");
+                throw new NoDrmSchemeException(
+                        "releaseDrm: No active DRM scheme to release.");
+            }
+
+            try {
+                // we don't have the player's state in this layer. The below call raises
+                // exception if we're in a non-stopped/prepared state.
+
+                // for cleaning native/mediaserver crypto object
+                native_releaseDrm();
+
+                // for cleaning client-side MediaDrm object; only called if above has succeeded
+                cleanDrmObj();
+
+                mActiveDrmScheme = false;
+            } catch (IllegalStateException e) {
+                Log.w(TAG, "releaseDrm: Exception ", e);
+                throw new IllegalStateException(
+                        "releaseDrm: The player is not in a valid state.");
+            } catch (Exception e) {
+                Log.e(TAG, "releaseDrm: Exception ", e);
+            }
+        }  // synchronized
+    }
+
+    private native void native_releaseDrm();
 
     /**
      * A key request/response exchange occurs between the app and a license server
@@ -1851,11 +3611,49 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @throws NoDrmSchemeException if there is no active DRM session
      */
     @NonNull
-    public abstract MediaDrm.KeyRequest getDrmKeyRequest(
+    public MediaDrm.KeyRequest getDrmKeyRequest(
             @Nullable byte[] keySetId, @Nullable byte[] initData,
             @Nullable String mimeType, @MediaDrm.KeyType int keyType,
             @Nullable Map<String, String> optionalParameters)
-            throws NoDrmSchemeException;
+            throws NoDrmSchemeException {
+        Log.v(TAG, "getDrmKeyRequest: "
+                + " keySetId: " + keySetId + " initData:" + initData + " mimeType: " + mimeType
+                + " keyType: " + keyType + " optionalParameters: " + optionalParameters);
+
+        synchronized (mDrmLock) {
+            if (!mActiveDrmScheme) {
+                Log.e(TAG, "getDrmKeyRequest NoDrmSchemeException");
+                throw new NoDrmSchemeException(
+                        "getDrmKeyRequest: Has to set a DRM scheme first.");
+            }
+
+            try {
+                byte[] scope = (keyType != MediaDrm.KEY_TYPE_RELEASE)
+                        ? mDrmSessionId :  // sessionId for KEY_TYPE_STREAMING/OFFLINE
+                        keySetId;  // keySetId for KEY_TYPE_RELEASE
+
+                HashMap<String, String> hmapOptionalParameters =
+                                                (optionalParameters != null)
+                                                ? new HashMap<String, String>(optionalParameters) :
+                                                null;
+
+                MediaDrm.KeyRequest request = mDrmObj.getKeyRequest(scope, initData, mimeType,
+                                                              keyType, hmapOptionalParameters);
+                Log.v(TAG, "getDrmKeyRequest:   --> request: " + request);
+
+                return request;
+
+            } catch (NotProvisionedException e) {
+                Log.w(TAG, "getDrmKeyRequest NotProvisionedException: "
+                        + "Unexpected. Shouldn't have reached here.");
+                throw new IllegalStateException("getDrmKeyRequest: Unexpected provisioning error.");
+            } catch (Exception e) {
+                Log.w(TAG, "getDrmKeyRequest Exception " + e);
+                throw e;
+            }
+
+        }  // synchronized
+    }
 
     /**
      * A key response is received from the license server by the app, then it is
@@ -1877,9 +3675,43 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * server rejected the request
      */
     // This is a synchronous call.
-    public abstract byte[] provideDrmKeyResponse(
+    public byte[] provideDrmKeyResponse(
             @Nullable byte[] keySetId, @NonNull byte[] response)
-            throws NoDrmSchemeException, DeniedByServerException;
+            throws NoDrmSchemeException, DeniedByServerException {
+        Log.v(TAG, "provideDrmKeyResponse: keySetId: " + keySetId + " response: " + response);
+
+        synchronized (mDrmLock) {
+
+            if (!mActiveDrmScheme) {
+                Log.e(TAG, "getDrmKeyRequest NoDrmSchemeException");
+                throw new NoDrmSchemeException(
+                        "getDrmKeyRequest: Has to set a DRM scheme first.");
+            }
+
+            try {
+                byte[] scope = (keySetId == null)
+                                ? mDrmSessionId :     // sessionId for KEY_TYPE_STREAMING/OFFLINE
+                                keySetId;           // keySetId for KEY_TYPE_RELEASE
+
+                byte[] keySetResult = mDrmObj.provideKeyResponse(scope, response);
+
+                Log.v(TAG, "provideDrmKeyResponse: keySetId: " + keySetId + " response: " + response
+                        + " --> " + keySetResult);
+
+
+                return keySetResult;
+
+            } catch (NotProvisionedException e) {
+                Log.w(TAG, "provideDrmKeyResponse NotProvisionedException: "
+                        + "Unexpected. Shouldn't have reached here.");
+                throw new IllegalStateException("provideDrmKeyResponse: "
+                        + "Unexpected provisioning error.");
+            } catch (Exception e) {
+                Log.w(TAG, "provideDrmKeyResponse Exception " + e);
+                throw e;
+            }
+        }  // synchronized
+    }
 
     /**
      * Restore persisted offline keys into a new session.  keySetId identifies the
@@ -1890,8 +3722,25 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @throws NoDrmSchemeException if there is no active DRM session
      */
     // This is a synchronous call.
-    public abstract void restoreDrmKeys(@NonNull byte[] keySetId)
-            throws NoDrmSchemeException;
+    public void restoreDrmKeys(@NonNull byte[] keySetId)
+            throws NoDrmSchemeException {
+        Log.v(TAG, "restoreDrmKeys: keySetId: " + keySetId);
+
+        synchronized (mDrmLock) {
+            if (!mActiveDrmScheme) {
+                Log.w(TAG, "restoreDrmKeys NoDrmSchemeException");
+                throw new NoDrmSchemeException(
+                        "restoreDrmKeys: Has to set a DRM scheme first.");
+            }
+
+            try {
+                mDrmObj.restoreKeys(mDrmSessionId, keySetId);
+            } catch (Exception e) {
+                Log.w(TAG, "restoreKeys Exception " + e);
+                throw e;
+            }
+        }  // synchronized
+    }
 
     /**
      * Read a DRM engine plugin String property value, given the property name string.
@@ -1903,9 +3752,32 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * {@link MediaDrm#PROPERTY_DESCRIPTION}, {@link MediaDrm#PROPERTY_ALGORITHMS}
      */
     @NonNull
-    public abstract String getDrmPropertyString(
+    public String getDrmPropertyString(
             @NonNull @MediaDrm.StringProperty String propertyName)
-            throws NoDrmSchemeException;
+            throws NoDrmSchemeException {
+        Log.v(TAG, "getDrmPropertyString: propertyName: " + propertyName);
+
+        String value;
+        synchronized (mDrmLock) {
+
+            if (!mActiveDrmScheme && !mDrmConfigAllowed) {
+                Log.w(TAG, "getDrmPropertyString NoDrmSchemeException");
+                throw new NoDrmSchemeException(
+                        "getDrmPropertyString: Has to prepareDrm() first.");
+            }
+
+            try {
+                value = mDrmObj.getPropertyString(propertyName);
+            } catch (Exception e) {
+                Log.w(TAG, "getDrmPropertyString Exception " + e);
+                throw e;
+            }
+        }  // synchronized
+
+        Log.v(TAG, "getDrmPropertyString: propertyName: " + propertyName + " --> value: " + value);
+
+        return value;
+    }
 
     /**
      * Set a DRM engine plugin String property value.
@@ -1918,35 +3790,689 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * {@link MediaDrm#PROPERTY_DESCRIPTION}, {@link MediaDrm#PROPERTY_ALGORITHMS}
      */
     // This is a synchronous call.
-    public abstract void setDrmPropertyString(
+    public void setDrmPropertyString(
             @NonNull @MediaDrm.StringProperty String propertyName, @NonNull String value)
-            throws NoDrmSchemeException;
+            throws NoDrmSchemeException {
+        Log.v(TAG, "setDrmPropertyString: propertyName: " + propertyName + " value: " + value);
+
+        synchronized (mDrmLock) {
+
+            if (!mActiveDrmScheme && !mDrmConfigAllowed) {
+                Log.w(TAG, "setDrmPropertyString NoDrmSchemeException");
+                throw new NoDrmSchemeException(
+                        "setDrmPropertyString: Has to prepareDrm() first.");
+            }
+
+            try {
+                mDrmObj.setPropertyString(propertyName, value);
+            } catch (Exception e) {
+                Log.w(TAG, "setDrmPropertyString Exception " + e);
+                throw e;
+            }
+        }  // synchronized
+    }
 
     /**
      * Encapsulates the DRM properties of the source.
      */
-    public abstract static class DrmInfo {
+    public static final class DrmInfo {
+        private Map<UUID, byte[]> mMapPssh;
+        private UUID[] mSupportedSchemes;
+
         /**
          * Returns the PSSH info of the data source for each supported DRM scheme.
          */
-        public abstract Map<UUID, byte[]> getPssh();
+        public Map<UUID, byte[]> getPssh() {
+            return mMapPssh;
+        }
 
         /**
          * Returns the intersection of the data source and the device DRM schemes.
          * It effectively identifies the subset of the source's DRM schemes which
          * are supported by the device too.
          */
-        public abstract List<UUID> getSupportedSchemes();
+        public List<UUID> getSupportedSchemes() {
+            return Arrays.asList(mSupportedSchemes);
+        }
+
+        private DrmInfo(Map<UUID, byte[]> pssh, UUID[] supportedSchemes) {
+            mMapPssh = pssh;
+            mSupportedSchemes = supportedSchemes;
+        }
+
+        private DrmInfo(PlayerMessage msg) {
+            Log.v(TAG, "DrmInfo(" + msg + ")");
+
+            Iterator<Value> in = msg.getValuesList().iterator();
+            byte[] pssh = in.next().getBytesValue().toByteArray();
+
+            Log.v(TAG, "DrmInfo() PSSH: " + arrToHex(pssh));
+            mMapPssh = parsePSSH(pssh, pssh.length);
+            Log.v(TAG, "DrmInfo() PSSH: " + mMapPssh);
+
+            int supportedDRMsCount = in.next().getInt32Value();
+            mSupportedSchemes = new UUID[supportedDRMsCount];
+            for (int i = 0; i < supportedDRMsCount; i++) {
+                byte[] uuid = new byte[16];
+                in.next().getBytesValue().copyTo(uuid, 0);
+
+                mSupportedSchemes[i] = bytesToUUID(uuid);
+
+                Log.v(TAG, "DrmInfo() supportedScheme[" + i + "]: " + mSupportedSchemes[i]);
+            }
+
+            Log.v(TAG, "DrmInfo() psshsize: " + pssh.length
+                    + " supportedDRMsCount: " + supportedDRMsCount);
+        }
+
+        private DrmInfo makeCopy() {
+            return new DrmInfo(this.mMapPssh, this.mSupportedSchemes);
+        }
+
+        private String arrToHex(byte[] bytes) {
+            String out = "0x";
+            for (int i = 0; i < bytes.length; i++) {
+                out += String.format("%02x", bytes[i]);
+            }
+
+            return out;
+        }
+
+        private UUID bytesToUUID(byte[] uuid) {
+            long msb = 0, lsb = 0;
+            for (int i = 0; i < 8; i++) {
+                msb |= (((long) uuid[i]     & 0xff) << (8 * (7 - i)));
+                lsb |= (((long) uuid[i + 8] & 0xff) << (8 * (7 - i)));
+            }
+
+            return new UUID(msb, lsb);
+        }
+
+        private Map<UUID, byte[]> parsePSSH(byte[] pssh, int psshsize) {
+            Map<UUID, byte[]> result = new HashMap<UUID, byte[]>();
+
+            final int uuidSize = 16;
+            final int dataLenSize = 4;
+
+            int len = psshsize;
+            int numentries = 0;
+            int i = 0;
+
+            while (len > 0) {
+                if (len < uuidSize) {
+                    Log.w(TAG, String.format("parsePSSH: len is too short to parse "
+                                             + "UUID: (%d < 16) pssh: %d", len, psshsize));
+                    return null;
+                }
+
+                byte[] subset = Arrays.copyOfRange(pssh, i, i + uuidSize);
+                UUID uuid = bytesToUUID(subset);
+                i += uuidSize;
+                len -= uuidSize;
+
+                // get data length
+                if (len < 4) {
+                    Log.w(TAG, String.format("parsePSSH: len is too short to parse "
+                                             + "datalen: (%d < 4) pssh: %d", len, psshsize));
+                    return null;
+                }
+
+                subset = Arrays.copyOfRange(pssh, i, i + dataLenSize);
+                int datalen = (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN)
+                        ? ((subset[3] & 0xff) << 24) | ((subset[2] & 0xff) << 16)
+                        | ((subset[1] & 0xff) <<  8) |  (subset[0] & 0xff)        :
+                        ((subset[0] & 0xff) << 24) | ((subset[1] & 0xff) << 16)
+                        | ((subset[2] & 0xff) <<  8) |  (subset[3] & 0xff);
+                i += dataLenSize;
+                len -= dataLenSize;
+
+                if (len < datalen) {
+                    Log.w(TAG, String.format("parsePSSH: len is too short to parse "
+                                             + "data: (%d < %d) pssh: %d", len, datalen, psshsize));
+                    return null;
+                }
+
+                byte[] data = Arrays.copyOfRange(pssh, i, i + datalen);
+
+                // skip the data
+                i += datalen;
+                len -= datalen;
+
+                Log.v(TAG, String.format("parsePSSH[%d]: <%s, %s> pssh: %d",
+                                         numentries, uuid, arrToHex(data), psshsize));
+                numentries++;
+                result.put(uuid, data);
+            }
+
+            return result;
+        }
     };  // DrmInfo
 
     /**
      * Thrown when a DRM method is called before preparing a DRM scheme through prepareDrm().
      * Extends MediaDrm.MediaDrmException
      */
-    public abstract static class NoDrmSchemeException extends MediaDrmException {
-          protected NoDrmSchemeException(String detailMessage) {
-              super(detailMessage);
-          }
+    public static final class NoDrmSchemeException extends MediaDrmException {
+        public NoDrmSchemeException(String detailMessage) {
+            super(detailMessage);
+        }
+    }
+
+    private native void native_prepareDrm(@NonNull byte[] uuid, @NonNull byte[] drmSessionId);
+
+    // Modular DRM helpers
+
+    private void prepareDrm_createDrmStep(@NonNull UUID uuid)
+            throws UnsupportedSchemeException {
+        Log.v(TAG, "prepareDrm_createDrmStep: UUID: " + uuid);
+
+        try {
+            mDrmObj = new MediaDrm(uuid);
+            Log.v(TAG, "prepareDrm_createDrmStep: Created mDrmObj=" + mDrmObj);
+        } catch (Exception e) { // UnsupportedSchemeException
+            Log.e(TAG, "prepareDrm_createDrmStep: MediaDrm failed with " + e);
+            throw e;
+        }
+    }
+
+    private void prepareDrm_openSessionStep(@NonNull UUID uuid)
+            throws NotProvisionedException, ResourceBusyException {
+        Log.v(TAG, "prepareDrm_openSessionStep: uuid: " + uuid);
+
+        // TODO: don't need an open session for a future specialKeyReleaseDrm mode but we should do
+        // it anyway so it raises provisioning error if needed. We'd rather handle provisioning
+        // at prepareDrm/openSession rather than getDrmKeyRequest/provideDrmKeyResponse
+        try {
+            mDrmSessionId = mDrmObj.openSession();
+            Log.v(TAG, "prepareDrm_openSessionStep: mDrmSessionId=" + mDrmSessionId);
+
+            // Sending it down to native/mediaserver to create the crypto object
+            // This call could simply fail due to bad player state, e.g., after play().
+            native_prepareDrm(getByteArrayFromUUID(uuid), mDrmSessionId);
+            Log.v(TAG, "prepareDrm_openSessionStep: native_prepareDrm/Crypto succeeded");
+
+        } catch (Exception e) { //ResourceBusyException, NotProvisionedException
+            Log.e(TAG, "prepareDrm_openSessionStep: open/crypto failed with " + e);
+            throw e;
+        }
+    }
+
+    // Instantiated from the native side
+    @SuppressWarnings("unused")
+    private static class StreamEventCallback extends AudioTrack.StreamEventCallback {
+        public long mJAudioTrackPtr;
+        public long mNativeCallbackPtr;
+        public long mUserDataPtr;
+
+        StreamEventCallback(long jAudioTrackPtr, long nativeCallbackPtr, long userDataPtr) {
+            super();
+            mJAudioTrackPtr = jAudioTrackPtr;
+            mNativeCallbackPtr = nativeCallbackPtr;
+            mUserDataPtr = userDataPtr;
+        }
+
+        @Override
+        public void onTearDown(AudioTrack track) {
+            native_stream_event_onTearDown(mNativeCallbackPtr, mUserDataPtr);
+        }
+
+        @Override
+        public void onPresentationEnded(AudioTrack track) {
+            native_stream_event_onStreamPresentationEnd(mNativeCallbackPtr, mUserDataPtr);
+        }
+
+        @Override
+        public void onDataRequest(AudioTrack track, int size) {
+            native_stream_event_onStreamDataRequest(
+                    mJAudioTrackPtr, mNativeCallbackPtr, mUserDataPtr);
+        }
+    }
+
+    private class ProvisioningThread extends Thread {
+        public static final int TIMEOUT_MS = 60000;
+
+        private UUID mUuid;
+        private String mUrlStr;
+        private Object mDrmLock;
+        private MediaPlayer2 mMediaPlayer;
+        private int mStatus;
+        public  int status() {
+            return mStatus;
+        }
+
+        public ProvisioningThread initialize(MediaDrm.ProvisionRequest request,
+                                          UUID uuid, MediaPlayer2 mediaPlayer) {
+            // lock is held by the caller
+            mDrmLock = mediaPlayer.mDrmLock;
+            this.mMediaPlayer = mediaPlayer;
+
+            mUrlStr = request.getDefaultUrl() + "&signedRequest=" + new String(request.getData());
+            this.mUuid = uuid;
+
+            mStatus = PREPARE_DRM_STATUS_PREPARATION_ERROR;
+
+            Log.v(TAG, "handleProvisioninig: Thread is initialised url: " + mUrlStr);
+            return this;
+        }
+
+        public void run() {
+
+            byte[] response = null;
+            boolean provisioningSucceeded = false;
+            try {
+                URL url = new URL(mUrlStr);
+                final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                try {
+                    connection.setRequestMethod("POST");
+                    connection.setDoOutput(false);
+                    connection.setDoInput(true);
+                    connection.setConnectTimeout(TIMEOUT_MS);
+                    connection.setReadTimeout(TIMEOUT_MS);
+
+                    connection.connect();
+                    response = readInputStreamFully(connection.getInputStream());
+
+                    Log.v(TAG, "handleProvisioninig: Thread run: response "
+                            + response.length + " " + response);
+                } catch (Exception e) {
+                    mStatus = PREPARE_DRM_STATUS_PROVISIONING_NETWORK_ERROR;
+                    Log.w(TAG, "handleProvisioninig: Thread run: connect " + e + " url: " + url);
+                } finally {
+                    connection.disconnect();
+                }
+            } catch (Exception e)   {
+                mStatus = PREPARE_DRM_STATUS_PROVISIONING_NETWORK_ERROR;
+                Log.w(TAG, "handleProvisioninig: Thread run: openConnection " + e);
+            }
+
+            if (response != null) {
+                try {
+                    mDrmObj.provideProvisionResponse(response);
+                    Log.v(TAG, "handleProvisioninig: Thread run: "
+                            + "provideProvisionResponse SUCCEEDED!");
+
+                    provisioningSucceeded = true;
+                } catch (Exception e) {
+                    mStatus = PREPARE_DRM_STATUS_PROVISIONING_SERVER_ERROR;
+                    Log.w(TAG, "handleProvisioninig: Thread run: "
+                            + "provideProvisionResponse " + e);
+                }
+            }
+
+            boolean succeeded = false;
+
+            synchronized (mDrmLock) {
+                // continuing with prepareDrm
+                if (provisioningSucceeded) {
+                    succeeded = mMediaPlayer.resumePrepareDrm(mUuid);
+                    mStatus = (succeeded)
+                            ? PREPARE_DRM_STATUS_SUCCESS :
+                            PREPARE_DRM_STATUS_PREPARATION_ERROR;
+                }
+                mMediaPlayer.mDrmProvisioningInProgress = false;
+                mMediaPlayer.mPrepareDrmInProgress = false;
+                if (!succeeded) {
+                    cleanDrmObj();  // cleaning up if it hasn't gone through while in the lock
+                }
+            }  // synchronized
+
+            // calling the callback outside the lock
+            sendDrmEvent(new DrmEventNotifier() {
+                @Override
+                public void notify(DrmEventCallback callback) {
+                    callback.onDrmPrepared(
+                            mMediaPlayer, getCurrentDataSource(), mStatus);
+                }
+            });
+
+            synchronized (mTaskLock) {
+                if (mCurrentTask != null
+                        && mCurrentTask.mMediaCallType == CALL_COMPLETED_PREPARE_DRM
+                        && mCurrentTask.mNeedToWaitForEventToComplete) {
+                    mCurrentTask = null;
+                    processPendingTask_l();
+                }
+            }
+        }
+
+        /**
+         * Returns a byte[] containing the remainder of 'in', closing it when done.
+         */
+        private byte[] readInputStreamFully(InputStream in) throws IOException {
+            try {
+                return readInputStreamFullyNoClose(in);
+            } finally {
+                in.close();
+            }
+        }
+
+        /**
+         * Returns a byte[] containing the remainder of 'in'.
+         */
+        private byte[] readInputStreamFullyNoClose(InputStream in) throws IOException {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int count;
+            while ((count = in.read(buffer)) != -1) {
+                bytes.write(buffer, 0, count);
+            }
+            return bytes.toByteArray();
+        }
+    }  // ProvisioningThread
+
+    private int handleProvisioninig(UUID uuid) {
+        synchronized (mDrmLock) {
+            if (mDrmProvisioningInProgress) {
+                Log.e(TAG, "handleProvisioninig: Unexpected mDrmProvisioningInProgress");
+                return PREPARE_DRM_STATUS_PREPARATION_ERROR;
+            }
+
+            MediaDrm.ProvisionRequest provReq = mDrmObj.getProvisionRequest();
+            if (provReq == null) {
+                Log.e(TAG, "handleProvisioninig: getProvisionRequest returned null.");
+                return PREPARE_DRM_STATUS_PREPARATION_ERROR;
+            }
+
+            Log.v(TAG, "handleProvisioninig provReq "
+                    + " data: " + provReq.getData() + " url: " + provReq.getDefaultUrl());
+
+            // networking in a background thread
+            mDrmProvisioningInProgress = true;
+
+            mDrmProvisioningThread = new ProvisioningThread().initialize(provReq, uuid, this);
+            mDrmProvisioningThread.start();
+
+            return PREPARE_DRM_STATUS_SUCCESS;
+        }
+    }
+
+    private boolean resumePrepareDrm(UUID uuid) {
+        Log.v(TAG, "resumePrepareDrm: uuid: " + uuid);
+
+        // mDrmLock is guaranteed to be held
+        boolean success = false;
+        try {
+            // resuming
+            prepareDrm_openSessionStep(uuid);
+
+            mDrmUUID = uuid;
+            mActiveDrmScheme = true;
+
+            success = true;
+        } catch (Exception e) {
+            Log.w(TAG, "handleProvisioninig: Thread run native_prepareDrm resume failed with " + e);
+            // mDrmObj clean up is done by the caller
+        }
+
+        return success;
+    }
+
+    private void resetDrmState() {
+        synchronized (mDrmLock) {
+            Log.v(TAG, "resetDrmState:"
+                    + " mDrmInfo=" + mDrmInfo
+                    + " mDrmProvisioningThread=" + mDrmProvisioningThread
+                    + " mPrepareDrmInProgress=" + mPrepareDrmInProgress
+                    + " mActiveDrmScheme=" + mActiveDrmScheme);
+
+            mDrmInfoResolved = false;
+            mDrmInfo = null;
+
+            if (mDrmProvisioningThread != null) {
+                // timeout; relying on HttpUrlConnection
+                try {
+                    mDrmProvisioningThread.join();
+                } catch (InterruptedException e) {
+                    Log.w(TAG, "resetDrmState: ProvThread.join Exception " + e);
+                }
+                mDrmProvisioningThread = null;
+            }
+
+            mPrepareDrmInProgress = false;
+            mActiveDrmScheme = false;
+
+            cleanDrmObj();
+        }  // synchronized
+    }
+
+    private void cleanDrmObj() {
+        // the caller holds mDrmLock
+        Log.v(TAG, "cleanDrmObj: mDrmObj=" + mDrmObj + " mDrmSessionId=" + mDrmSessionId);
+
+        if (mDrmSessionId != null)    {
+            mDrmObj.closeSession(mDrmSessionId);
+            mDrmSessionId = null;
+        }
+        if (mDrmObj != null) {
+            mDrmObj.release();
+            mDrmObj = null;
+        }
+    }
+
+    private static byte[] getByteArrayFromUUID(@NonNull UUID uuid) {
+        long msb = uuid.getMostSignificantBits();
+        long lsb = uuid.getLeastSignificantBits();
+
+        byte[] uuidBytes = new byte[16];
+        for (int i = 0; i < 8; ++i) {
+            uuidBytes[i] = (byte) (msb >>> (8 * (7 - i)));
+            uuidBytes[8 + i] = (byte) (lsb >>> (8 * (7 - i)));
+        }
+
+        return uuidBytes;
+    }
+
+    // Modular DRM end
+
+    private static class TimedTextUtil {
+        // These keys must be in sync with the keys in TextDescription2.h
+        private static final int KEY_START_TIME                     = 7; // int
+        private static final int KEY_STRUCT_TEXT_POS               = 14; // TextPos
+        private static final int KEY_STRUCT_TEXT                   = 16; // Text
+        private static final int KEY_GLOBAL_SETTING               = 101;
+        private static final int KEY_LOCAL_SETTING                = 102;
+
+        private static TimedText parsePlayerMessage(PlayerMessage playerMsg) {
+            if (playerMsg.getValuesCount() == 0) {
+                return null;
+            }
+
+            String textChars = null;
+            Rect textBounds = null;
+            Iterator<Value> in = playerMsg.getValuesList().iterator();
+            int type = in.next().getInt32Value();
+            if (type == KEY_LOCAL_SETTING) {
+                type = in.next().getInt32Value();
+                if (type != KEY_START_TIME) {
+                    return null;
+                }
+                int startTimeMs = in.next().getInt32Value();
+
+                type = in.next().getInt32Value();
+                if (type != KEY_STRUCT_TEXT) {
+                    return null;
+                }
+
+                byte[] text = in.next().getBytesValue().toByteArray();
+                if (text == null || text.length == 0) {
+                    textChars = null;
+                } else {
+                    textChars = new String(text);
+                }
+
+            } else if (type != KEY_GLOBAL_SETTING) {
+                Log.w(TAG, "Invalid timed text key found: " + type);
+                return null;
+            }
+            if (in.hasNext()) {
+                type = in.next().getInt32Value();
+                if (type == KEY_STRUCT_TEXT_POS) {
+                    int top = in.next().getInt32Value();
+                    int left = in.next().getInt32Value();
+                    int bottom = in.next().getInt32Value();
+                    int right = in.next().getInt32Value();
+                    textBounds = new Rect(left, top, right, bottom);
+                }
+            }
+            return new TimedText(textChars, textBounds);
+        }
+    }
+
+    private Object addTask(Task task) {
+        synchronized (mTaskLock) {
+            mPendingTasks.add(task);
+            processPendingTask_l();
+        }
+        return task;
+    }
+
+    @GuardedBy("mTaskLock")
+    private void processPendingTask_l() {
+        if (mCurrentTask != null) {
+            return;
+        }
+        if (!mPendingTasks.isEmpty()) {
+            Task task = mPendingTasks.remove(0);
+            mCurrentTask = task;
+            mTaskHandler.post(task);
+        }
+    }
+
+    private abstract class Task implements Runnable {
+        private final int mMediaCallType;
+        private final boolean mNeedToWaitForEventToComplete;
+        private DataSourceDesc mDSD;
+
+        Task(int mediaCallType, boolean needToWaitForEventToComplete) {
+            mMediaCallType = mediaCallType;
+            mNeedToWaitForEventToComplete = needToWaitForEventToComplete;
+        }
+
+        abstract void process() throws IOException, NoDrmSchemeException;
+
+        @Override
+        public void run() {
+            int status = CALL_STATUS_NO_ERROR;
+            try {
+                if (mMediaCallType != CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED
+                        && getState() == PLAYER_STATE_ERROR) {
+                    status = CALL_STATUS_INVALID_OPERATION;
+                } else {
+                    if (mMediaCallType == CALL_COMPLETED_SEEK_TO) {
+                        synchronized (mTaskLock) {
+                            if (!mPendingTasks.isEmpty()) {
+                                Task nextTask = mPendingTasks.get(0);
+                                if (nextTask.mMediaCallType == mMediaCallType) {
+                                    throw new CommandSkippedException(
+                                            "consecutive seekTo is skipped except last one");
+                                }
+                            }
+                        }
+                    }
+                    process();
+                }
+            } catch (IllegalStateException e) {
+                status = CALL_STATUS_INVALID_OPERATION;
+            } catch (IllegalArgumentException e) {
+                status = CALL_STATUS_BAD_VALUE;
+            } catch (SecurityException e) {
+                status = CALL_STATUS_PERMISSION_DENIED;
+            } catch (IOException e) {
+                status = CALL_STATUS_ERROR_IO;
+            } catch (NoDrmSchemeException e) {
+                status = CALL_STATUS_NO_DRM_SCHEME;
+            } catch (CommandSkippedException e) {
+                status = CALL_STATUS_SKIPPED;
+            } catch (Exception e) {
+                status = CALL_STATUS_ERROR_UNKNOWN;
+            }
+            mDSD = getCurrentDataSource();
+
+            if (mMediaCallType != CALL_COMPLETED_SEEK_TO) {
+                synchronized (mTaskLock) {
+                    mIsPreviousCommandSeekTo = false;
+                }
+            }
+
+            // TODO: Make native implementations asynchronous and let them send notifications.
+            if (!mNeedToWaitForEventToComplete || status != CALL_STATUS_NO_ERROR) {
+
+                sendCompleteNotification(status);
+
+                synchronized (mTaskLock) {
+                    mCurrentTask = null;
+                    processPendingTask_l();
+                }
+            }
+        }
+
+        private void sendCompleteNotification(int status) {
+            // In {@link #notifyWhenCommandLabelReached} case, a separate callback
+            // {@link #onCommandLabelReached} is already called in {@code process()}.
+            // CALL_COMPLETED_PREPARE_DRM is sent via DrmEventCallback#onDrmPrepared
+            if (mMediaCallType == CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED
+                    || mMediaCallType == CALL_COMPLETED_PREPARE_DRM) {
+                return;
+            }
+            sendEvent(new EventNotifier() {
+                @Override
+                public void notify(EventCallback callback) {
+                    callback.onCallCompleted(
+                            MediaPlayer2.this, mDSD, mMediaCallType, status);
+                }
+            });
+        }
+    };
+
+    private final class CommandSkippedException extends RuntimeException {
+        CommandSkippedException(String detailMessage) {
+            super(detailMessage);
+        }
+    };
+
+    private final class SourceInfo {
+        final DataSourceDesc mDSD;
+        final long mId = mSrcIdGenerator.getAndIncrement();
+        AtomicInteger mBufferedPercentage = new AtomicInteger(0);
+
+        // m*AsNextSource (below) only applies to pending data sources in the playlist;
+        // the meanings of mCurrentSourceInfo.{mStateAsNextSource,mPlayPendingAsNextSource}
+        // are undefined.
+        int mStateAsNextSource = NEXT_SOURCE_STATE_INIT;
+        boolean mPlayPendingAsNextSource = false;
+
+        SourceInfo(DataSourceDesc dsd) {
+            this.mDSD = dsd;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s(%d)", SourceInfo.class.getName(), mId);
+        }
+
+    }
+
+    private SourceInfo getSourceInfoById(long srcId) {
+        synchronized (mSrcLock) {
+            if (isCurrentSource(srcId)) {
+                return mCurrentSourceInfo;
+            }
+            if (isNextSource(srcId)) {
+                return mNextSourceInfos.peek();
+            }
+        }
+        return null;
+    }
+
+    private boolean isCurrentSource(long srcId) {
+        synchronized (mSrcLock) {
+            return mCurrentSourceInfo != null && mCurrentSourceInfo.mId == srcId;
+        }
+    }
+
+    private boolean isNextSource(long srcId) {
+        SourceInfo nextSourceInfo = mNextSourceInfos.peek();
+        return nextSourceInfo != null && nextSourceInfo.mId == srcId;
     }
 
     public static final class MetricsConstants {
@@ -2040,5 +4566,20 @@ public abstract class MediaPlayer2 implements AutoCloseable
          */
         public static final String ERROR_CODE = "android.media.mediaplayer.errcode";
 
+    }
+
+    private void keepAudioSessionIdAlive(int sessionId) {
+        synchronized (mSessionIdLock) {
+            if (mDummyAudioTrack != null) {
+                if (mDummyAudioTrack.getAudioSessionId() == sessionId) {
+                    return;
+                }
+                mDummyAudioTrack.release();
+            }
+            // TODO: parameters can be optimized
+            mDummyAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
+                    AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, 2,
+                    AudioTrack.MODE_STATIC, sessionId);
+        }
     }
 }

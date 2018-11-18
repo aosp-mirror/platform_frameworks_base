@@ -4820,6 +4820,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             String packageName, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes,
             int flags, Bundle bOptions, int userId) {
+
+        // NOTE: The service lock isn't held in this method because nothing in the method requires
+        // the service lock to be held.
+
         enforceNotIsolatedCaller("getIntentSender");
         // Refuse possible leaked file descriptors
         if (intents != null) {
@@ -4851,43 +4855,41 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        synchronized(this) {
-            int callingUid = Binder.getCallingUid();
-            int origUserId = userId;
-            userId = mUserController.handleIncomingUser(Binder.getCallingPid(), callingUid, userId,
-                    type == ActivityManager.INTENT_SENDER_BROADCAST,
-                    ALLOW_NON_FULL, "getIntentSender", null);
-            if (origUserId == UserHandle.USER_CURRENT) {
-                // We don't want to evaluate this until the pending intent is
-                // actually executed.  However, we do want to always do the
-                // security checking for it above.
-                userId = UserHandle.USER_CURRENT;
-            }
-            try {
-                if (callingUid != 0 && callingUid != SYSTEM_UID) {
-                    final int uid = AppGlobals.getPackageManager().getPackageUid(packageName,
-                            MATCH_DEBUG_TRIAGED_MISSING, UserHandle.getUserId(callingUid));
-                    if (!UserHandle.isSameApp(callingUid, uid)) {
-                        String msg = "Permission Denial: getIntentSender() from pid="
-                            + Binder.getCallingPid()
-                            + ", uid=" + Binder.getCallingUid()
-                            + ", (need uid=" + uid + ")"
-                            + " is not allowed to send as package " + packageName;
-                        Slog.w(TAG, msg);
-                        throw new SecurityException(msg);
-                    }
+        int callingUid = Binder.getCallingUid();
+        int origUserId = userId;
+        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), callingUid, userId,
+                type == ActivityManager.INTENT_SENDER_BROADCAST,
+                ALLOW_NON_FULL, "getIntentSender", null);
+        if (origUserId == UserHandle.USER_CURRENT) {
+            // We don't want to evaluate this until the pending intent is
+            // actually executed.  However, we do want to always do the
+            // security checking for it above.
+            userId = UserHandle.USER_CURRENT;
+        }
+        try {
+            if (callingUid != 0 && callingUid != SYSTEM_UID) {
+                final int uid = AppGlobals.getPackageManager().getPackageUid(packageName,
+                        MATCH_DEBUG_TRIAGED_MISSING, UserHandle.getUserId(callingUid));
+                if (!UserHandle.isSameApp(callingUid, uid)) {
+                    String msg = "Permission Denial: getIntentSender() from pid="
+                        + Binder.getCallingPid()
+                        + ", uid=" + Binder.getCallingUid()
+                        + ", (need uid=" + uid + ")"
+                        + " is not allowed to send as package " + packageName;
+                    Slog.w(TAG, msg);
+                    throw new SecurityException(msg);
                 }
+            }
 
-                if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
-                    return mAtmInternal.getIntentSender(type, packageName, callingUid, userId,
-                            token, resultWho, requestCode, intents, resolvedTypes, flags, bOptions);
-                }
-                return mPendingIntentController.getIntentSender(type, packageName, callingUid,
-                        userId, token, resultWho, requestCode, intents, resolvedTypes, flags,
-                        bOptions);
-            } catch (RemoteException e) {
-                throw new SecurityException(e);
+            if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
+                return mAtmInternal.getIntentSender(type, packageName, callingUid, userId,
+                        token, resultWho, requestCode, intents, resolvedTypes, flags, bOptions);
             }
+            return mPendingIntentController.getIntentSender(type, packageName, callingUid,
+                    userId, token, resultWho, requestCode, intents, resolvedTypes, flags,
+                    bOptions);
+        } catch (RemoteException e) {
+            throw new SecurityException(e);
         }
     }
 
@@ -7002,7 +7004,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mCoreSettingsObserver = new CoreSettingsObserver(this);
         mActivityTaskManager.installSystemProviders();
         mDevelopmentSettingsObserver = new DevelopmentSettingsObserver();
-        GlobalSettingsToPropertiesMapper.start(mContext.getContentResolver());
+        SettingsToPropertiesMapper.start(mContext.getContentResolver());
 
         // Now that the settings provider is published we can consider sending
         // in a rescue party.

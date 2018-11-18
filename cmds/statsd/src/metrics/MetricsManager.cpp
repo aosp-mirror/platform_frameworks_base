@@ -77,6 +77,8 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
             mActivationAtomTrackerToMetricMap, mMetricIndexesWithActivation, mNoReportMetricIds);
 
     mHashStringsInReport = config.hash_strings_in_metric_report();
+    mVersionStringsInReport = config.version_strings_in_metric_report();
+    mInstallerInReport = config.installer_in_metric_report();
 
     if (config.allowed_log_source_size() == 0) {
         mConfigValid = false;

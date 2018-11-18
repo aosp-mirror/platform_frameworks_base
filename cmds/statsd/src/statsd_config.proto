@@ -409,6 +409,10 @@ message StatsdConfig {
 
   repeated MetricActivation metric_activation = 17;
 
+  optional bool version_strings_in_metric_report = 18;
+
+  optional bool installer_in_metric_report = 19;
+
   // Field number 1000 is reserved for later use.
   reserved 1000;
 }

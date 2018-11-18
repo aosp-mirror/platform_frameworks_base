@@ -33,6 +33,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiNetworkSuggestion;
 
 import android.os.Messenger;
 import android.os.ResultReceiver;
@@ -61,11 +62,9 @@ interface IWifiManager
 
     ParceledListSlice getPrivilegedConfiguredNetworks();
 
-    WifiConfiguration getMatchingWifiConfig(in ScanResult scanResult);
+    List<WifiConfiguration> getAllMatchingWifiConfigs(in List<ScanResult> scanResult);
 
-    List<WifiConfiguration> getAllMatchingWifiConfigs(in ScanResult scanResult);
-
-    List<OsuProvider> getMatchingOsuProviders(in ScanResult scanResult);
+    List<OsuProvider> getMatchingOsuProviders(in List<ScanResult> scanResult);
 
     int addOrUpdateNetwork(in WifiConfiguration config, String packageName);
 
@@ -190,5 +189,9 @@ interface IWifiManager
     void registerNetworkRequestMatchCallback(in IBinder binder, in INetworkRequestMatchCallback callback, int callbackIdentifier);
 
     void unregisterNetworkRequestMatchCallback(int callbackIdentifier);
+
+    boolean addNetworkSuggestions(in List<WifiNetworkSuggestion> networkSuggestions, in String packageName);
+
+    boolean removeNetworkSuggestions(in List<WifiNetworkSuggestion> networkSuggestions, in String packageName);
 }
 

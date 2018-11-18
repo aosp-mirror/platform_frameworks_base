@@ -44,12 +44,16 @@ namespace statsd {
 
 struct AppData {
     int64_t versionCode;
+    string versionString;
+    string installer;
     bool deleted;
 
     // Empty constructor needed for unordered map.
     AppData() {
     }
-    AppData(const int64_t v) : versionCode(v), deleted(false){};
+
+    AppData(const int64_t v, const string& versionString, const string& installer)
+        : versionCode(v), versionString(versionString), installer(installer), deleted(false){};
 };
 
 // When calling appendUidMap, we retrieve all the ChangeRecords since the last
@@ -61,15 +65,20 @@ struct ChangeRecord {
     const int32_t uid;
     const int64_t version;
     const int64_t prevVersion;
+    const string versionString;
+    const string prevVersionString;
 
     ChangeRecord(const bool isDeletion, const int64_t timestampNs, const string& package,
-                 const int32_t uid, const int64_t version, const int64_t prevVersion)
+                 const int32_t uid, const int64_t version, const string versionString,
+                 const int64_t prevVersion, const string prevVersionString)
         : deletion(isDeletion),
           timestampNs(timestampNs),
           package(package),
           uid(uid),
           version(version),
-          prevVersion(prevVersion) {
+          prevVersion(prevVersion),
+          versionString(versionString),
+          prevVersionString(prevVersionString) {
     }
 };
 
@@ -87,10 +96,12 @@ public:
      * tuple, ie. uid[j] corresponds to packageName[j] with versionCode[j].
      */
     void updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
-                   const vector<int64_t>& versionCode, const vector<String16>& packageName);
+                   const vector<int64_t>& versionCode, const vector<String16>& versionString,
+                   const vector<String16>& packageName, const vector<String16>& installer);
 
     void updateApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid,
-                   const int64_t& versionCode);
+                   const int64_t& versionCode, const String16& versionString,
+                   const String16& installer);
     void removeApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid);
 
     // Returns true if the given uid contains the specified app (eg. com.google.android.gms).
@@ -127,8 +138,9 @@ public:
     // Gets all snapshots and changes that have occurred since the last output.
     // If every config key has received a change or snapshot record, then this
     // record is deleted.
-    void appendUidMap(const int64_t& timestamp, const ConfigKey& key,
-                      std::set<string> *str_set, util::ProtoOutputStream* proto);
+    void appendUidMap(const int64_t& timestamp, const ConfigKey& key, std::set<string>* str_set,
+                      bool includeVersionStrings, bool includeInstaller,
+                      util::ProtoOutputStream* proto);
 
     // Forces the output to be cleared. We still generate a snapshot based on the current state.
     // This results in extra data uploaded but helps us reconstruct the uid mapping on the server

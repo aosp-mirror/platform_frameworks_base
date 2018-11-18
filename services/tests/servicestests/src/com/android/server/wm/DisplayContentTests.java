@@ -40,6 +40,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
@@ -108,7 +109,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowState imeAppTarget =
                 createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "imeAppTarget");
 
-        mWm.mInputMethodTarget = imeAppTarget;
+        mDisplayContent.mInputMethodTarget = imeAppTarget;
 
         assertForAllWindowsOrder(Arrays.asList(
                 mWallpaperWindow,
@@ -124,8 +125,8 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
-    public void testForAllWindows_WithChildWindowImeTarget() {
-        mWm.mInputMethodTarget = mChildAppWindowAbove;
+    public void testForAllWindows_WithChildWindowImeTarget() throws Exception {
+        mDisplayContent.mInputMethodTarget = mChildAppWindowAbove;
 
         assertForAllWindowsOrder(Arrays.asList(
                 mWallpaperWindow,
@@ -140,8 +141,8 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
-    public void testForAllWindows_WithStatusBarImeTarget() {
-        mWm.mInputMethodTarget = mStatusBarWindow;
+    public void testForAllWindows_WithStatusBarImeTarget() throws Exception {
+        mDisplayContent.mInputMethodTarget = mStatusBarWindow;
 
         assertForAllWindowsOrder(Arrays.asList(
                 mWallpaperWindow,
@@ -566,6 +567,32 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(isOptionsPanelAtRight(landscapeDisplay.getDisplayId()));
         landscapeDisplay.setRotation(Surface.ROTATION_90);
         assertFalse(isOptionsPanelAtRight(landscapeDisplay.getDisplayId()));
+    }
+
+    @Test
+    public void testInputMethodTargetUpdateWhenSwitchingOnDisplays() {
+        final DisplayContent newDisplay = createNewDisplay();
+
+        final WindowState appWin = createWindow(null, TYPE_APPLICATION, mDisplayContent, "appWin");
+        final WindowState appWin1 = createWindow(null, TYPE_APPLICATION, newDisplay, "appWin1");
+        appWin.setHasSurface(true);
+        appWin1.setHasSurface(true);
+
+        // Set current input method window on default display, make sure the input method target
+        // is appWin & null on the other display.
+        mDisplayContent.setInputMethodWindowLocked(mImeWindow);
+        newDisplay.setInputMethodWindowLocked(null);
+        assertTrue("appWin should be IME target window",
+                appWin.equals(mDisplayContent.mInputMethodTarget));
+        assertNull("newDisplay Ime target: ", newDisplay.mInputMethodTarget);
+
+        // Switch input method window on new display & make sure the input method target also
+        // switched as expected.
+        newDisplay.setInputMethodWindowLocked(mImeWindow);
+        mDisplayContent.setInputMethodWindowLocked(null);
+        assertTrue("appWin1 should be IME target window",
+                appWin1.equals(newDisplay.mInputMethodTarget));
+        assertNull("default display Ime target: ", mDisplayContent.mInputMethodTarget);
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {

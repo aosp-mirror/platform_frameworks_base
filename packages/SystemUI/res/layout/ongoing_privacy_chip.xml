@@ -18,11 +18,14 @@
 <com.android.systemui.privacy.OngoingPrivacyChip
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/privacy_chip"
-    android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:layout_margin="@dimen/ongoing_appops_chip_margin"
+    android:layout_width="wrap_content"
+    android:layout_marginLeft="@dimen/ongoing_appops_chip_margin"
+    android:layout_marginRight="@dimen/ongoing_appops_chip_margin"
+    android:layout_marginTop="@dimen/ongoing_appops_top_chip_margin"
+    android:layout_marginBottom="@dimen/ongoing_appops_top_chip_margin"
     android:gravity="center_vertical|center_horizontal"
-    android:layout_gravity="center_vertical|end"
+    android:layout_gravity="center_vertical|start"
     android:orientation="horizontal"
     android:paddingStart="@dimen/ongoing_appops_chip_side_padding"
     android:paddingEnd="@dimen/ongoing_appops_chip_side_padding"
@@ -38,12 +41,17 @@
             />
 
         <TextView
-            android:id="@+id/app_name"
+            android:id="@+id/text_container"
             android:layout_height="match_parent"
             android:layout_width="wrap_content"
             android:singleLine="true"
             android:ellipsize="end"
+            android:lines="1"
             android:layout_gravity="center_vertical|end"
             android:gravity="center_vertical"
+            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+            android:textColor="@color/status_bar_clock_color"
+            android:layout_marginStart="@dimen/ongoing_appops_chip_icon_margin"
+            android:layout_marginEnd="@dimen/ongoing_appops_chip_icon_margin"
         />
 </com.android.systemui.privacy.OngoingPrivacyChip>

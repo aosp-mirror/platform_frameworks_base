@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.os.ResultReceiver;
+import android.os.WorkSource;
 import android.net.NetworkStats;
 import android.net.Uri;
 import android.service.carrier.CarrierIdentifier;
@@ -30,6 +31,7 @@ import android.telecom.PhoneAccountHandle;
 import android.telephony.CellInfo;
 import android.telephony.ClientRequestStats;
 import android.telephony.IccOpenLogicalChannelResponse;
+import android.telephony.ICellInfoCallback;
 import android.telephony.ModemActivityInfo;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.NetworkScanRequest;
@@ -40,6 +42,7 @@ import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsConfig;
+import android.telephony.ims.aidl.IImsConfigCallback;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
@@ -506,9 +509,24 @@ interface ITelephony {
     int getLteOnCdmaModeForSubscriber(int subId, String callingPackage);
 
     /**
-     * Returns the all observed cell information of the device.
+     * Returns all observed cell information of the device.
      */
     List<CellInfo> getAllCellInfo(String callingPkg);
+
+    /**
+     * Request a cell information update for the specified subscription,
+     * reported via the CellInfoCallback.
+     */
+    void requestCellInfoUpdate(int subId, in ICellInfoCallback cb, String callingPkg);
+
+    /**
+     * Request a cell information update for the specified subscription,
+     * reported via the CellInfoCallback.
+     *
+     * @param workSource the requestor to whom the power consumption for this should be attributed.
+     */
+    void requestCellInfoUpdateWithWorkSource(
+            int subId, in ICellInfoCallback cb, in String callingPkg, in WorkSource ws);
 
     /**
      * Sets minimum time in milli-seconds between onCellInfoChanged
@@ -1569,24 +1587,24 @@ interface ITelephony {
     /**
      * Adds an IMS registration status callback for the subscription id specified.
      */
-    oneway void addImsRegistrationCallback(int subId, IImsRegistrationCallback c,
+    void addImsRegistrationCallback(int subId, IImsRegistrationCallback c,
             String callingPackage);
      /**
       * Removes an existing IMS registration status callback for the subscription specified.
       */
-    oneway void removeImsRegistrationCallback(int subId, IImsRegistrationCallback c,
+    void removeImsRegistrationCallback(int subId, IImsRegistrationCallback c,
             String callingPackage);
 
     /**
      * Adds an IMS MmTel capabilities callback for the subscription specified.
      */
-    oneway void addMmTelCapabilityCallback(int subId, IImsCapabilityCallback c,
+    void addMmTelCapabilityCallback(int subId, IImsCapabilityCallback c,
             String callingPackage);
 
     /**
      * Removes an existing IMS MmTel capabilities callback for the subscription specified.
      */
-    oneway void removeMmTelCapabilityCallback(int subId, IImsCapabilityCallback c,
+    void removeMmTelCapabilityCallback(int subId, IImsCapabilityCallback c,
             String callingPackage);
 
     /**
@@ -1691,4 +1709,34 @@ interface ITelephony {
      * Return a list of certs in hex string from loaded carrier privileges access rules.
      */
     List<String> getCertsFromCarrierPrivilegeAccessRules(int subId);
+
+    /**
+     * Register an IMS provisioning change callback with Telephony.
+     */
+    void registerImsProvisioningChangedCallback(int subId, IImsConfigCallback callback);
+
+    /**
+     * unregister an existing IMS provisioning change callback.
+     */
+    void unregisterImsProvisioningChangedCallback(int subId, IImsConfigCallback callback);
+
+    /**
+     * Return an integer containing the provisioning value for the specified provisioning key.
+     */
+    int getImsProvisioningInt(int subId, int key);
+
+    /**
+     * return a String containing the provisioning value for the provisioning key specified.
+     */
+    String getImsProvisioningString(int subId, int key);
+
+    /**
+     * Set the integer provisioning value for the provisioning key specified.
+     */
+    int setImsProvisioningInt(int subId, int key, int value);
+
+    /**
+     * Set the String provisioning value for the provisioning key specified.
+     */
+    int setImsProvisioningString(int subId, int key, String value);
 }

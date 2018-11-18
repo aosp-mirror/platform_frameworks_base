@@ -156,9 +156,6 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
             FieldValue(Field(mTagId, getSimpleField(1)), Value(speakerImpedance.speakerLocation)));
     mValues.push_back(
             FieldValue(Field(mTagId, getSimpleField(2)), Value(speakerImpedance.milliOhms)));
-    if (!mValues.empty()) {
-        mValues.back().mField.decorateLastPos(1);
-    }
 }
 
 LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
@@ -173,9 +170,6 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
             FieldValue(Field(mTagId, getSimpleField(2)), Value(hardwareFailed.hardwareLocation)));
     mValues.push_back(
             FieldValue(Field(mTagId, getSimpleField(3)), Value(int32_t(hardwareFailed.errorCode))));
-    if (!mValues.empty()) {
-        mValues.back().mField.decorateLastPos(1);
-    }
 }
 
 LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
@@ -190,9 +184,6 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
             FieldValue(Field(mTagId, getSimpleField(2)), Value(physicalDropDetected.accelPeak)));
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)),
                                  Value(physicalDropDetected.freefallDuration)));
-    if (!mValues.empty()) {
-        mValues.back().mField.decorateLastPos(1);
-    }
 }
 
 LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
@@ -204,10 +195,6 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
     for (size_t i = 0; i < chargeCycles.cycleBucket.size(); i++) {
         mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 1)),
                                      Value(chargeCycles.cycleBucket[i])));
-    }
-
-    if (!mValues.empty()) {
-        mValues.back().mField.decorateLastPos(1);
     }
 }
 
@@ -231,10 +218,6 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                                  Value(batteryHealthSnapshotArgs.resistanceMicroOhm)));
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(7)),
                                  Value(batteryHealthSnapshotArgs.levelPercent)));
-
-    if (!mValues.empty()) {
-        mValues.back().mField.decorateLastPos(1);
-    }
 }
 
 LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs, const SlowIo& slowIo) {
@@ -247,10 +230,6 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs, con
             FieldValue(Field(mTagId, getSimpleField(1)), Value(int32_t(slowIo.operation))));
     pos[0]++;
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(slowIo.count)));
-
-    if (!mValues.empty()) {
-        mValues.back().mField.decorateLastPos(1);
-    }
 }
 
 LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
@@ -261,10 +240,6 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
 
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)),
                                  Value(batteryCausedShutdown.voltageMicroV)));
-
-    if (!mValues.empty()) {
-        mValues.back().mField.decorateLastPos(1);
-    }
 }
 
 LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, 0) {}

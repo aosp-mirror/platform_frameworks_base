@@ -72,6 +72,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -390,10 +392,16 @@ public class NotificationDataTest extends SysuiTestCase {
     @Test
     public void testCreateNotificationDataEntry_RankingUpdate() {
         Ranking ranking = mock(Ranking.class);
+        initStatusBarNotification(false);
 
-        ArrayList<Notification.Action> smartActions = new ArrayList<>();
-        smartActions.add(createAction());
-        when(ranking.getSmartActions()).thenReturn(smartActions);
+        List<Notification.Action> appGeneratedSmartActions =
+                Collections.singletonList(createContextualAction("appGeneratedAction"));
+        mMockStatusBarNotification.getNotification().actions =
+                appGeneratedSmartActions.toArray(new Notification.Action[0]);
+
+        List<Notification.Action> systemGeneratedSmartActions =
+                Collections.singletonList(createAction("systemGeneratedAction"));
+        when(ranking.getSmartActions()).thenReturn(systemGeneratedSmartActions);
 
         when(ranking.getChannel()).thenReturn(NOTIFICATION_CHANNEL);
 
@@ -407,7 +415,7 @@ public class NotificationDataTest extends SysuiTestCase {
         NotificationData.Entry entry =
                 new NotificationData.Entry(mMockStatusBarNotification, ranking);
 
-        assertEquals(smartActions, entry.smartActions);
+        assertEquals(systemGeneratedSmartActions, entry.systemGeneratedSmartActions);
         assertEquals(NOTIFICATION_CHANNEL, entry.channel);
         assertEquals(Ranking.USER_SENTIMENT_NEGATIVE, entry.userSentiment);
         assertEquals(snoozeCriterions, entry.snoozeCriteria);
@@ -459,10 +467,20 @@ public class NotificationDataTest extends SysuiTestCase {
         }
     }
 
-    private Notification.Action createAction() {
+    private Notification.Action createContextualAction(String title) {
         return new Notification.Action.Builder(
                 Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
-                "action",
+                title,
+                PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"), 0))
+                        .setSemanticAction(
+                                Notification.Action.SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION)
+                        .build();
+    }
+
+    private Notification.Action createAction(String title) {
+        return new Notification.Action.Builder(
+                Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
+                title,
                 PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"), 0)).build();
     }
 }

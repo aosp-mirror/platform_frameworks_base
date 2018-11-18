@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Sieť, ku ktorej sa pokúšate pripojiť, má problémy so zabezpečením"</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Napríklad prihlasovacia stránka nemusí patriť uvedenej organizácii."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Pokračovať pomocou prehliadača"</string>
+    <string name="ok" msgid="1509280796718850364">"OK"</string>
+    <string name="page_info" msgid="4048529256302257195">"Informácie o stránke"</string>
+    <string name="page_info_address" msgid="2222306609532903254">"Adresa:"</string>
+    <string name="ssl_security_warning_title" msgid="6607795404322797541">"Upozornenie zabezpečenia"</string>
+    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"Zobraziť certifikát"</string>
+    <string name="ssl_error_untrusted" msgid="7754507359360636447">"Tento certifikát nepochádza od dôveryhodnej autority."</string>
+    <string name="ssl_error_mismatch" msgid="3809794439740523641">"Názov stránky sa nezhoduje s názvom uvedeným v certifikáte."</string>
+    <string name="ssl_error_expired" msgid="5739349389499575559">"Platnosť certifikátu skončila."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"Tento certifikát zatiaľ nie je platný."</string>
+    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"Tento certifikát má neplatný dátum."</string>
+    <string name="ssl_error_invalid" msgid="9041704741505449967">"Tento certifikát je neplatný."</string>
+    <string name="ssl_error_unknown" msgid="5679243486524754571">"Neznáma chyba certifikátu."</string>
 </resources>

@@ -2808,6 +2808,8 @@
   <java-symbol type="string" name="status_bar_mobile" />
   <java-symbol type="string" name="status_bar_ethernet" />
   <java-symbol type="string" name="status_bar_vpn" />
+  <java-symbol type="string" name="status_bar_microphone" />
+  <java-symbol type="string" name="status_bar_camera" />
 
   <!-- Locale picker -->
   <java-symbol type="id" name="locale_search_menu" />

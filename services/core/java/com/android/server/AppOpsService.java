@@ -80,6 +80,7 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsActiveCallback;
 import com.android.internal.app.IAppOpsCallback;
@@ -219,6 +220,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     SparseIntArray mProfileOwners;
 
+    @GuardedBy("this")
     private CheckOpsDelegate mCheckOpsDelegate;
 
     /**
@@ -1589,24 +1591,28 @@ public class AppOpsService extends IAppOpsService.Stub {
     public int checkOperation(int code, int uid, String packageName) {
         final CheckOpsDelegate delegate;
         synchronized (this) {
-            if (mCheckOpsDelegate == null) {
-                return checkOperationImpl(code, uid, packageName);
-            }
             delegate = mCheckOpsDelegate;
+        }
+        if (delegate == null) {
+            return checkOperationImpl(code, uid, packageName);
         }
         return delegate.checkOperation(code, uid, packageName,
                     AppOpsService.this::checkOperationImpl);
     }
 
     private int checkOperationImpl(int code, int uid, String packageName) {
+        verifyIncomingUid(uid);
+        verifyIncomingOp(code);
+        String resolvedPackageName = resolvePackageName(uid, packageName);
+        if (resolvedPackageName == null) {
+            return AppOpsManager.MODE_IGNORED;
+        }
+        return checkOperationUnchecked(code, uid, resolvedPackageName);
+    }
+
+    private int checkOperationUnchecked(int code, int uid, String packageName) {
         synchronized (this) {
-            verifyIncomingUid(uid);
-            verifyIncomingOp(code);
-            String resolvedPackageName = resolvePackageName(uid, packageName);
-            if (resolvedPackageName == null) {
-                return AppOpsManager.MODE_IGNORED;
-            }
-            if (isOpRestrictedLocked(uid, code, resolvedPackageName)) {
+            if (isOpRestrictedLocked(uid, code, packageName)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             code = AppOpsManager.opToSwitch(code);
@@ -1615,7 +1621,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     && uidState.opModes.indexOfKey(code) >= 0) {
                 return uidState.opModes.get(code);
             }
-            Op op = getOpLocked(code, uid, resolvedPackageName, false, true, false);
+            Op op = getOpLocked(code, uid, packageName, false, true, false);
             if (op == null) {
                 return AppOpsManager.opToDefaultMode(code);
             }
@@ -1627,31 +1633,31 @@ public class AppOpsService extends IAppOpsService.Stub {
     public int checkAudioOperation(int code, int usage, int uid, String packageName) {
         final CheckOpsDelegate delegate;
         synchronized (this) {
-            if (mCheckOpsDelegate == null) {
-                return checkAudioOperationImpl(code, usage, uid, packageName);
-            }
             delegate = mCheckOpsDelegate;
+        }
+        if (delegate == null) {
+            return checkAudioOperationImpl(code, usage, uid, packageName);
         }
         return delegate.checkAudioOperation(code, usage, uid, packageName,
                 AppOpsService.this::checkAudioOperationImpl);
     }
 
     private int checkAudioOperationImpl(int code, int usage, int uid, String packageName) {
+        boolean suspended;
+        try {
+            suspended = isPackageSuspendedForUser(packageName, uid);
+        } catch (IllegalArgumentException ex) {
+            // Package not found.
+            suspended = false;
+        }
+
+        if (suspended) {
+            Slog.i(TAG, "Audio disabled for suspended package=" + packageName
+                    + " for uid=" + uid);
+            return AppOpsManager.MODE_IGNORED;
+        }
+
         synchronized (this) {
-            boolean suspended;
-            try {
-                suspended = isPackageSuspendedForUser(packageName, uid);
-            } catch (IllegalArgumentException ex) {
-                // Package not found.
-                suspended = false;
-            }
-
-            if (suspended) {
-                Slog.i(TAG, "Audio disabled for suspended package=" + packageName
-                        + " for uid=" + uid);
-                return AppOpsManager.MODE_IGNORED;
-            }
-
             final int mode = checkRestrictionLocked(code, usage, uid, packageName);
             if (mode != AppOpsManager.MODE_ALLOWED) {
                 return mode;
@@ -1754,10 +1760,10 @@ public class AppOpsService extends IAppOpsService.Stub {
     public int noteOperation(int code, int uid, String packageName) {
         final CheckOpsDelegate delegate;
         synchronized (this) {
-            if (mCheckOpsDelegate == null) {
-                return noteOperationImpl(code, uid, packageName);
-            }
             delegate = mCheckOpsDelegate;
+        }
+        if (delegate == null) {
+            return noteOperationImpl(code, uid, packageName);
         }
         return delegate.noteOperation(code, uid, packageName,
                 AppOpsService.this::noteOperationImpl);

@@ -72,7 +72,7 @@ public class NotificationAdjustmentExtractorTest extends UiServiceTestCase {
         assertTrue(r.getGroupKey().contains(GroupHelper.AUTOGROUP_KEY));
         assertEquals(people, r.getPeopleOverride());
         assertEquals(snoozeCriteria, r.getSnoozeCriteria());
-        assertEquals(smartActions, r.getSmartActions());
+        assertEquals(smartActions, r.getSystemGeneratedSmartActions());
     }
 
     @Test

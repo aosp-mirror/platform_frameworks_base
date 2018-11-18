@@ -16,12 +16,11 @@
 
 package android.provider;
 
-import static android.system.OsConstants.SEEK_SET;
-
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ContentProviderClient;
@@ -29,13 +28,12 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.MimeTypeFilter;
 import android.content.pm.ResolveInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.ImageDecoder;
-import android.graphics.Matrix;
 import android.graphics.Point;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -50,20 +48,13 @@ import android.os.Parcelable;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.storage.StorageVolume;
-import android.system.ErrnoException;
-import android.system.Os;
 import android.util.DataUnit;
 import android.util.Log;
-import android.util.Size;
 
-import libcore.io.IoUtils;
-
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -111,6 +102,54 @@ public final class DocumentsContract {
 
     /** {@hide} */
     public static final String EXTRA_TARGET_URI = "android.content.extra.TARGET_URI";
+
+    /**
+     * Key for {@link DocumentsProvider} to query display name is matched.
+     * The match of display name is partial matching and case-insensitive.
+     * Ex: The value is "o", the display name of the results will contain
+     * both "foo" and "Open".
+     *
+     * @see DocumentsProvider#querySearchDocuments(String, String[],
+     *      Bundle)
+     * {@hide}
+     */
+    public static final String QUERY_ARG_DISPLAY_NAME = "android:query-arg-display-name";
+
+    /**
+     * Key for {@link DocumentsProvider} to query mime types is matched.
+     * The value is a string array, it can support different mime types.
+     * Each items will be treated as "OR" condition. Ex: {"image/*" ,
+     * "video/*"}. The mime types of the results will contain both image
+     * type and video type.
+     *
+     * @see DocumentsProvider#querySearchDocuments(String, String[],
+     *      Bundle)
+     * {@hide}
+     */
+    public static final String QUERY_ARG_MIME_TYPES = "android:query-arg-mime-types";
+
+    /**
+     * Key for {@link DocumentsProvider} to query the file size in bytes is
+     * larger than the value.
+     *
+     * @see DocumentsProvider#querySearchDocuments(String, String[],
+     *      Bundle)
+     * {@hide}
+     */
+    public static final String QUERY_ARG_FILE_SIZE_OVER = "android:query-arg-file-size-over";
+
+    /**
+     * Key for {@link DocumentsProvider} to query the last modified time
+     * is newer than the value. The unit is in milliseconds since
+     * January 1, 1970 00:00:00.0 UTC.
+     *
+     * @see DocumentsProvider#querySearchDocuments(String, String[],
+     *      Bundle)
+     * @see Document#COLUMN_LAST_MODIFIED
+     * {@hide}
+     */
+    public static final String QUERY_ARG_LAST_MODIFIED_AFTER =
+            "android:query-arg-last-modified-after";
 
     /**
      * Sets the desired initial location visible to user when file chooser is shown.
@@ -929,6 +968,89 @@ public final class DocumentsContract {
     }
 
     /**
+     * Check if the values match the query arguments.
+     *
+     * @param queryArgs the query arguments
+     * @param displayName the display time to check against
+     * @param mimeType the mime type to check against
+     * @param lastModified the last modified time to check against
+     * @param size the size to check against
+     * @hide
+     */
+    public static boolean matchSearchQueryArguments(Bundle queryArgs, String displayName,
+            String mimeType, long lastModified, long size) {
+        if (queryArgs == null) {
+            return true;
+        }
+
+        final String argDisplayName = queryArgs.getString(QUERY_ARG_DISPLAY_NAME, "");
+        if (!argDisplayName.isEmpty()) {
+            // TODO (118795812) : Enhance the search string handled in DocumentsProvider
+            if (!displayName.toLowerCase().contains(argDisplayName.toLowerCase())) {
+                return false;
+            }
+        }
+
+        final long argFileSize = queryArgs.getLong(QUERY_ARG_FILE_SIZE_OVER, -1 /* defaultValue */);
+        if (argFileSize != -1 && size < argFileSize) {
+            return false;
+        }
+
+        final long argLastModified = queryArgs.getLong(QUERY_ARG_LAST_MODIFIED_AFTER,
+                -1 /* defaultValue */);
+        if (argLastModified != -1 && lastModified < argLastModified) {
+            return false;
+        }
+
+        final String[] argMimeTypes = queryArgs.getStringArray(QUERY_ARG_MIME_TYPES);
+        if (argMimeTypes != null && argMimeTypes.length > 0) {
+            mimeType = Intent.normalizeMimeType(mimeType);
+            for (String type : argMimeTypes) {
+                if (MimeTypeFilter.matches(mimeType, Intent.normalizeMimeType(type))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Get the handled query arguments from the query bundle. The handled arguments are
+     * {@link DocumentsContract#QUERY_ARG_DISPLAY_NAME},
+     * {@link DocumentsContract#QUERY_ARG_MIME_TYPES},
+     * {@link DocumentsContract#QUERY_ARG_FILE_SIZE_OVER} and
+     * {@link DocumentsContract#QUERY_ARG_LAST_MODIFIED_AFTER}.
+     *
+     * @param queryArgs the query arguments to be parsed.
+     * @return the handled query arguments
+     * @hide
+     */
+    public static String[] getHandledQueryArguments(Bundle queryArgs) {
+        if (queryArgs == null) {
+            return new String[0];
+        }
+
+        final ArrayList<String> args = new ArrayList<>();
+        if (queryArgs.keySet().contains(QUERY_ARG_DISPLAY_NAME)) {
+            args.add(QUERY_ARG_DISPLAY_NAME);
+        }
+
+        if (queryArgs.keySet().contains(QUERY_ARG_FILE_SIZE_OVER)) {
+            args.add(QUERY_ARG_FILE_SIZE_OVER);
+        }
+
+        if (queryArgs.keySet().contains(QUERY_ARG_LAST_MODIFIED_AFTER)) {
+            args.add(QUERY_ARG_LAST_MODIFIED_AFTER);
+        }
+
+        if (queryArgs.keySet().contains(QUERY_ARG_MIME_TYPES)) {
+            args.add(QUERY_ARG_MIME_TYPES);
+        }
+        return args.toArray(new String[0]);
+    }
+
+    /**
      * Test if the given URI represents a {@link Document} backed by a
      * {@link DocumentsProvider}.
      *
@@ -1050,6 +1172,15 @@ public final class DocumentsContract {
      */
     public static String getSearchDocumentsQuery(Uri searchDocumentsUri) {
         return searchDocumentsUri.getQueryParameter(PARAM_QUERY);
+    }
+
+    /**
+     * Extract the search query from a Bundle
+     * {@link #QUERY_ARG_DISPLAY_NAME}.
+     * {@hide}
+     */
+    public static String getSearchDocumentsQuery(@NonNull Bundle bundle) {
+        return bundle.getString(QUERY_ARG_DISPLAY_NAME, "" /* defaultValue */);
     }
 
     /** {@hide} */

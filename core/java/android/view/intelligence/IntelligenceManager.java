@@ -86,6 +86,13 @@ public final class IntelligenceManager {
      */
     public static final int STATE_ACTIVE = 2;
 
+    /**
+     * Session is disabled.
+     *
+     * @hide
+     */
+    public static final int STATE_DISABLED = 3;
+
     private static final String BG_THREAD_NAME = "intel_svc_streamer_thread";
 
     /**
@@ -166,13 +173,7 @@ public final class IntelligenceManager {
                             public void send(int resultCode, Bundle resultData)
                                     throws RemoteException {
                                 synchronized (mLock) {
-                                    if (resultCode > 0) {
-                                        mState = STATE_ACTIVE;
-                                    } else {
-                                        // TODO(b/111276913): handle other cases like disabled by
-                                        // service
-                                        resetStateLocked();
-                                    }
+                                    mState = resultCode;
                                     if (VERBOSE) {
                                         Log.v(TAG, "onActivityStarted() result: code=" + resultCode
                                                 + ", id=" + mId
@@ -195,6 +196,7 @@ public final class IntelligenceManager {
 
     private void handleSendEvent(@NonNull ContentCaptureEvent event) {
 
+        //TODO(b/111276913): make a copy and don't use lock
         synchronized (mLock) {
             mEvents.add(event);
             final int numberEvents = mEvents.size();
@@ -203,9 +205,13 @@ public final class IntelligenceManager {
                     // Typically happens on system apps that are started before the system service
                     // is ready (like com.android.settings/.FallbackHome)
                     //TODO(b/111276913): try to ignore session while system is not ready / boot
-                    // not complete instead.
-                    Log.w(TAG, "Closing session for " + getActivityDebugNameLocked()
-                            + " after " + numberEvents + " delayed events");
+                    // not complete instead. Similarly, the manager service should return right away
+                    // when the user does not have a service set
+                    if (VERBOSE) {
+                        Log.v(TAG, "Closing session for " + getActivityDebugNameLocked()
+                                + " after " + numberEvents + " delayed events and state "
+                                + getStateAsString(mState));
+                    }
                     // TODO(b/111276913): blacklist activity / use special flag to indicate that
                     // when it's launched again
                     resetStateLocked();
@@ -380,7 +386,7 @@ public final class IntelligenceManager {
         //TODO(b/111276913): properly implement by checking if it was explicitly disabled by
         // service, or if service is not set
         // (and probably renamign to isEnabledLocked()
-        return mService != null;
+        return mService != null && mState != STATE_DISABLED;
     }
 
     /**
@@ -509,6 +515,8 @@ public final class IntelligenceManager {
                 return "WAITING_FOR_SERVER";
             case STATE_ACTIVE:
                 return "ACTIVE";
+            case STATE_DISABLED:
+                return "DISABLED";
             default:
                 return "INVALID:" + state;
         }

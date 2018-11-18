@@ -47,6 +47,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkStats;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
+import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Bundle;
@@ -87,6 +88,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.IProcessStats;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.net.NetworkStatsFactory;
+import com.android.internal.os.BatterySipper;
+import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
 import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.KernelCpuThreadReader;
@@ -204,6 +207,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             new StoragedUidIoStatsReader();
     @Nullable
     private final KernelCpuThreadReader mKernelCpuThreadReader;
+
+    private BatteryStatsHelper mBatteryStatsHelper = null;
+    private static final int MAX_BATTERY_STATS_HELPER_FREQUENCY_MS = 1000;
+    private long mBatteryStatsHelperTimestampMs = -MAX_BATTERY_STATS_HELPER_FREQUENCY_MS;
 
     private static IThermalService sThermalService;
     private File mBaseDir =
@@ -366,6 +373,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         List<Integer> uids = new ArrayList<>();
         List<Long> versions = new ArrayList<>();
         List<String> apps = new ArrayList<>();
+        List<String> versionStrings = new ArrayList<>();
+        List<String> installers = new ArrayList<>();
 
         // Add in all the apps for every user/profile.
         for (UserInfo profile : users) {
@@ -373,14 +382,24 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     pm.getInstalledPackagesAsUser(PackageManager.MATCH_KNOWN_PACKAGES, profile.id);
             for (int j = 0; j < pi.size(); j++) {
                 if (pi.get(j).applicationInfo != null) {
+                    String installer;
+                    try {
+                        installer = pm.getInstallerPackageName(pi.get(j).packageName);
+                    } catch (IllegalArgumentException e) {
+                        installer = "";
+                    }
+                    installers.add(installer == null ? "" : installer);
                     uids.add(pi.get(j).applicationInfo.uid);
                     versions.add(pi.get(j).getLongVersionCode());
+                    versionStrings.add(pi.get(j).versionName);
                     apps.add(pi.get(j).packageName);
                 }
             }
         }
-        sStatsd.informAllUidData(toIntArray(uids), toLongArray(versions), apps.toArray(new
-                String[apps.size()]));
+        sStatsd.informAllUidData(toIntArray(uids), toLongArray(versions),
+                versionStrings.toArray(new String[versionStrings.size()]),
+                apps.toArray(new String[apps.size()]),
+                installers.toArray(new String[installers.size()]));
         if (DEBUG) {
             Slog.d(TAG, "Sent data for " + uids.size() + " apps");
         }
@@ -422,7 +441,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         int uid = b.getInt(Intent.EXTRA_UID);
                         String app = intent.getData().getSchemeSpecificPart();
                         PackageInfo pi = pm.getPackageInfo(app, PackageManager.MATCH_ANY_USER);
-                        sStatsd.informOnePackage(app, uid, pi.getLongVersionCode());
+                        String installer;
+                        try {
+                            installer = pm.getInstallerPackageName(app);
+                        } catch (IllegalArgumentException e) {
+                            installer = "";
+                        }
+                        sStatsd.informOnePackage(app, uid, pi.getLongVersionCode(), pi.versionName,
+                                installer == null ? "" : installer);
                     }
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to inform statsd of an app update", e);
@@ -1430,6 +1456,73 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
+    private BatteryStatsHelper getBatteryStatsHelper() {
+        if (mBatteryStatsHelper == null) {
+            final long callingToken = Binder.clearCallingIdentity();
+            try {
+                // clearCallingIdentity required for BatteryStatsHelper.checkWifiOnly().
+                mBatteryStatsHelper = new BatteryStatsHelper(mContext, false);
+            } finally {
+                Binder.restoreCallingIdentity(callingToken);
+            }
+            mBatteryStatsHelper.create((Bundle) null);
+        }
+        long currentTime = SystemClock.elapsedRealtime();
+        if (currentTime - mBatteryStatsHelperTimestampMs >= MAX_BATTERY_STATS_HELPER_FREQUENCY_MS) {
+            // Load BatteryStats and do all the calculations.
+            mBatteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED, UserHandle.USER_ALL);
+            // Calculations are done so we don't need to save the raw BatteryStats data in RAM.
+            mBatteryStatsHelper.clearStats();
+            mBatteryStatsHelperTimestampMs = currentTime;
+        }
+        return mBatteryStatsHelper;
+    }
+
+    private void pullDeviceCalculatedPowerUse(int tagId,
+            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        BatteryStatsHelper bsHelper = getBatteryStatsHelper();
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeFloat((float) bsHelper.getComputedPower());
+        pulledData.add(e);
+    }
+
+    private void pullDeviceCalculatedPowerBlameUid(int tagId,
+            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
+        if (sippers == null) {
+            return;
+        }
+        for (BatterySipper bs : sippers) {
+            if (bs.drainType != bs.drainType.APP) {
+                continue;
+            }
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(bs.uidObj.getUid());
+            e.writeFloat((float) bs.totalPowerMah);
+            pulledData.add(e);
+        }
+    }
+
+    private void pullDeviceCalculatedPowerBlameOther(int tagId,
+            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
+        if (sippers == null) {
+            return;
+        }
+        for (BatterySipper bs : sippers) {
+            if (bs.drainType == bs.drainType.APP) {
+                continue; // This is a separate atom; see pullDeviceCalculatedPowerBlameUid().
+            }
+            if (bs.drainType == bs.drainType.USER) {
+                continue; // This is not supported. We purposefully calculate over USER_ALL.
+            }
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(bs.drainType.ordinal());
+            e.writeFloat((float) bs.totalPowerMah);
+            pulledData.add(e);
+        }
+    }
+
     private void pullDiskIo(int tagId, long elapsedNanos, final long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         mStoragedUidIoStatsReader.readAbsolute((uid, fgCharsRead, fgCharsWrite, fgBytesRead,
@@ -1653,6 +1746,18 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.CPU_TIME_PER_THREAD_FREQ: {
                 pullCpuTimePerThreadFreq(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DEVICE_CALCULATED_POWER_USE: {
+                pullDeviceCalculatedPowerUse(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DEVICE_CALCULATED_POWER_BLAME_UID: {
+                pullDeviceCalculatedPowerBlameUid(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER: {
+                pullDeviceCalculatedPowerBlameOther(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:

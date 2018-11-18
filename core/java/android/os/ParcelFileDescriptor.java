@@ -1056,6 +1056,9 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     /**
      * Internal class representing a remote status read by
      * {@link ParcelFileDescriptor#readCommStatus(FileDescriptor, byte[])}.
+     *
+     * Warning: this must be kept in sync with ParcelFileDescriptorStatus at
+     * frameworks/native/libs/binder/Parcel.cpp
      */
     private static class Status {
         /** Special value indicating remote side died. */

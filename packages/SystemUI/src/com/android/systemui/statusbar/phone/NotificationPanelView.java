@@ -2787,7 +2787,9 @@ public class NotificationPanelView extends PanelView implements
         }
 
         final float darkAmount = dozing && !mSemiAwake ? 1 : 0;
-        mStatusBarStateController.setDozeAmount(darkAmount, animate);
+        if (!mSemiAwake) {
+            mStatusBarStateController.setDozeAmount(darkAmount, animate);
+        }
         if (animate) {
             mNotificationStackScroller.notifyDarkAnimationStart(mDozing);
         }

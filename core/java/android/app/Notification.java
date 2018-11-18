@@ -207,7 +207,8 @@ public class Notification implements Parcelable
     private static final int MAX_REPLY_HISTORY = 5;
 
     /**
-     * Maximum numbers of action buttons in a notification.
+     * Maximum number of (generic) action buttons in a notification (contextual action buttons are
+     * handled separately).
      * @hide
      */
     public static final int MAX_ACTION_BUTTONS = 3;
@@ -1421,6 +1422,12 @@ public class Notification implements Parcelable
          */
         public static final int SEMANTIC_ACTION_CALL = 10;
 
+        /**
+         * {@code SemanticAction}: Contextual action - dependent on the current notification. E.g.
+         * open a Map application with an address shown in the notification.
+         */
+        public static final int SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION = 11;
+
         private final Bundle mExtras;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private Icon mIcon;
@@ -2042,7 +2049,8 @@ public class Notification implements Parcelable
                 SEMANTIC_ACTION_UNMUTE,
                 SEMANTIC_ACTION_THUMBS_UP,
                 SEMANTIC_ACTION_THUMBS_DOWN,
-                SEMANTIC_ACTION_CALL
+                SEMANTIC_ACTION_CALL,
+                SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface SemanticAction {}
@@ -4962,6 +4970,18 @@ public class Notification implements Parcelable
                     result);
         }
 
+        private static List<Notification.Action> filterOutContextualActions(
+                List<Notification.Action> actions) {
+            List<Notification.Action> nonContextualActions = new ArrayList<>();
+            for (Notification.Action action : actions) {
+                if (action.getSemanticAction()
+                        != Action.SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION) {
+                    nonContextualActions.add(action);
+                }
+            }
+            return nonContextualActions;
+        }
+
         private RemoteViews applyStandardTemplateWithActions(int layoutId,
                 StandardTemplateParams p, TemplateBindResult result) {
             RemoteViews big = applyStandardTemplate(layoutId, p, result);
@@ -4970,7 +4990,11 @@ public class Notification implements Parcelable
 
             boolean validRemoteInput = false;
 
-            int N = mActions.size();
+            // In the UI contextual actions appear separately from the standard actions, so we
+            // filter them out here.
+            List<Notification.Action> nonContextualActions = filterOutContextualActions(mActions);
+
+            int N = nonContextualActions.size();
             boolean emphazisedMode = mN.fullScreenIntent != null && !p.ambient;
             big.setBoolean(R.id.actions, "setEmphasizedMode", emphazisedMode);
             if (N > 0) {
@@ -4979,7 +5003,8 @@ public class Notification implements Parcelable
                 big.setViewLayoutMarginBottomDimen(R.id.notification_action_list_margin_target, 0);
                 if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
                 for (int i=0; i<N; i++) {
-                    Action action = mActions.get(i);
+                    Action action = nonContextualActions.get(i);
+
                     boolean actionHasValidInput = hasValidRemoteInput(action);
                     validRemoteInput |= actionHasValidInput;
 

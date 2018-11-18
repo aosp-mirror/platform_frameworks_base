@@ -293,6 +293,12 @@ public class RenderNodeAnimator extends Animator {
         setTarget(canvas.mNode);
     }
 
+    /** @hide */
+    @UnsupportedAppUsage
+    public void setTarget(DisplayListCanvas canvas) {
+        setTarget((RecordingCanvas) canvas);
+    }
+
     private void setTarget(RenderNode node) {
         checkMutable();
         if (mTarget != null) {

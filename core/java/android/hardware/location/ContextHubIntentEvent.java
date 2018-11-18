@@ -16,6 +16,7 @@
 package android.hardware.location;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Intent;
 
@@ -23,8 +24,9 @@ import com.android.internal.util.Preconditions;
 
 /**
  * A helper class to retrieve information about a Intent event received for a PendingIntent
- * registered through {@link ContextHubClient.registerIntent(PendingIntent, long)}. This object
- * can only be created through the factory method {@link ContextHubIntentEvent.fromIntent(Intent)}.
+ * registered with {@link ContextHubManager.createClient(ContextHubInfo, PendingIntent, long)}.
+ * This object can only be created through the factory method
+ * {@link ContextHubIntentEvent.fromIntent(Intent)}.
  *
  * @hide
  */
@@ -76,7 +78,7 @@ public class ContextHubIntentEvent {
 
     /**
      * Creates a ContextHubIntentEvent object from an Intent received through a PendingIntent
-     * registered through {@link ContextHubClient.registerIntent(PendingIntent, long)}.
+     * registered with {@link ContextHubManager.createClient(ContextHubInfo, PendingIntent, long)}.
      *
      * @param intent the Intent object from an Intent event
      * @return the ContextHubIntentEvent object describing the event
@@ -204,6 +206,37 @@ public class ContextHubIntentEvent {
         }
 
         return out + "]";
+    }
+
+    @Override
+    public boolean equals(@Nullable Object object) {
+        if (object == this) {
+            return true;
+        }
+
+        boolean isEqual = false;
+        if (object instanceof ContextHubIntentEvent) {
+            ContextHubIntentEvent other = (ContextHubIntentEvent) object;
+            if (other.getEventType() == mEventType
+                    && other.getContextHubInfo().equals(mContextHubInfo)) {
+                isEqual = true;
+                try {
+                    if (mEventType != ContextHubManager.EVENT_HUB_RESET) {
+                        isEqual &= (other.getNanoAppId() == mNanoAppId);
+                    }
+                    if (mEventType == ContextHubManager.EVENT_NANOAPP_ABORTED) {
+                        isEqual &= (other.getNanoAppAbortCode() == mNanoAppAbortCode);
+                    }
+                    if (mEventType == ContextHubManager.EVENT_NANOAPP_MESSAGE) {
+                        isEqual &= other.getNanoAppMessage().equals(mNanoAppMessage);
+                    }
+                } catch (UnsupportedOperationException e) {
+                    isEqual = false;
+                }
+            }
+        }
+
+        return isEqual;
     }
 
     private static void hasExtraOrThrow(Intent intent, String extra) {

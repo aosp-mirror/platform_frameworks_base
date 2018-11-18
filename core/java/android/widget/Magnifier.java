@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,6 +41,7 @@ import android.graphics.RenderNode;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.PixelCopy;
@@ -55,11 +57,15 @@ import android.view.ViewRootImpl;
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Android magnifier widget. Can be used by any view which is attached to a window.
  */
 @UiThread
 public final class Magnifier {
+    private static final String TAG = "Magnifier";
     // Use this to specify that a previous configuration value does not exist.
     private static final int NONEXISTENT_PREVIOUS_CONFIG_VALUE = -1;
     // The callbacks of the pixel copy requests will be invoked on
@@ -83,8 +89,8 @@ public final class Magnifier {
     private int mSourceWidth;
     // The height of the content that will be copied to the magnifier.
     private int mSourceHeight;
-    // Whether the zoom of the magnifier has changed since last content copy.
-    private boolean mDirtyZoom;
+    // Whether the zoom of the magnifier or the view position have changed since last content copy.
+    private boolean mDirtyState;
     // The elevation of the window containing the magnifier.
     private final float mWindowElevation;
     // The corner radius of the window containing the magnifier.
@@ -95,6 +101,14 @@ public final class Magnifier {
     private final int mDefaultVerticalSourceToMagnifierOffset;
     // Whether the magnifier will be clamped inside the main surface and not overlap system insets.
     private final boolean mForcePositionWithinWindowSystemInsetsBounds;
+    // The behavior of the left bound of the rectangle where the content can be copied from.
+    private @SourceBound int mLeftContentBound;
+    // The behavior of the top bound of the rectangle where the content can be copied from.
+    private @SourceBound int mTopContentBound;
+    // The behavior of the right bound of the rectangle where the content can be copied from.
+    private @SourceBound int mRightContentBound;
+    // The behavior of the bottom bound of the rectangle where the content can be copied from.
+    private @SourceBound int mBottomContentBound;
     // The parent surface for the magnifier surface.
     private SurfaceInfo mParentSurface;
     // The surface where the content will be copied from.
@@ -145,6 +159,10 @@ public final class Magnifier {
                 params.mVerticalDefaultSourceToMagnifierOffset;
         mForcePositionWithinWindowSystemInsetsBounds =
                 params.mForcePositionWithinWindowSystemInsetsBounds;
+        mLeftContentBound = params.mLeftContentBound;
+        mTopContentBound = params.mTopContentBound;
+        mRightContentBound = params.mRightContentBound;
+        mBottomContentBound = params.mBottomContentBound;
         // The view's surface coordinates will not be updated until the magnifier is first shown.
         mViewCoordinatesInSurface = new int[2];
     }
@@ -195,8 +213,6 @@ public final class Magnifier {
     public void show(@FloatRange(from = 0) float sourceCenterX,
             @FloatRange(from = 0) float sourceCenterY,
             float magnifierCenterX, float magnifierCenterY) {
-        sourceCenterX = Math.max(0, Math.min(sourceCenterX, mView.getWidth()));
-        sourceCenterY = Math.max(0, Math.min(sourceCenterY, mView.getHeight()));
 
         obtainSurfaces();
         obtainContentCoordinates(sourceCenterX, sourceCenterY);
@@ -205,7 +221,7 @@ public final class Magnifier {
         final int startX = mClampedCenterZoomCoords.x - mSourceWidth / 2;
         final int startY = mClampedCenterZoomCoords.y - mSourceHeight / 2;
         if (sourceCenterX != mPrevShowSourceCoords.x || sourceCenterY != mPrevShowSourceCoords.y
-                || mDirtyZoom) {
+                || mDirtyState) {
             if (mWindow == null) {
                 synchronized (mLock) {
                     mWindow = new InternalPopupWindow(mView.getContext(), mView.getDisplay(),
@@ -262,13 +278,13 @@ public final class Magnifier {
     public void update() {
         if (mWindow != null) {
             obtainSurfaces();
-            if (!mDirtyZoom) {
+            if (!mDirtyState) {
                 // Update the content shown in the magnifier.
                 performPixelCopy(mPrevStartCoordsInSurface.x, mPrevStartCoordsInSurface.y,
                         false /* update window position */);
             } else {
-                // If the zoom has changed, we cannot use the same top left coordinates
-                // as before, so just #show again to have them recomputed.
+                // If for example the zoom has changed, we cannot use the same top left
+                // coordinates as before, so just #show again to have them recomputed.
                 show(mPrevShowSourceCoords.x, mPrevShowSourceCoords.y,
                         mPrevShowWindowCoords.x, mPrevShowWindowCoords.y);
             }
@@ -315,6 +331,7 @@ public final class Magnifier {
 
     /**
      * Sets the zoom to be applied to the chosen content before being copied to the magnifier popup.
+     * The change will become effective at the next #show or #update call.
      * @param zoom the zoom to be set
      */
     public void setZoom(@FloatRange(from = 0f) float zoom) {
@@ -322,7 +339,7 @@ public final class Magnifier {
         mZoom = zoom;
         mSourceWidth = Math.round(mWindowWidth / mZoom);
         mSourceHeight = Math.round(mWindowHeight / mZoom);
-        mDirtyZoom = true;
+        mDirtyState = true;
     }
 
     /**
@@ -480,7 +497,14 @@ public final class Magnifier {
      * magnifier. These are relative to the surface the content is copied from.
      */
     private void obtainContentCoordinates(final float xPosInView, final float yPosInView) {
+        final int prevViewXInSurface = mViewCoordinatesInSurface[0];
+        final int prevViewYInSurface = mViewCoordinatesInSurface[1];
         mView.getLocationInSurface(mViewCoordinatesInSurface);
+        if (mViewCoordinatesInSurface[0] != prevViewXInSurface
+                || mViewCoordinatesInSurface[1] != prevViewYInSurface) {
+            mDirtyState = true;
+        }
+
         final int zoomCenterX;
         final int zoomCenterY;
         if (mView instanceof SurfaceView) {
@@ -492,8 +516,25 @@ public final class Magnifier {
             zoomCenterY = Math.round(yPosInView + mViewCoordinatesInSurface[1]);
         }
 
-        // Clamp the x location to avoid magnifying content which does not belong
-        // to the magnified view. This will not take into account overlapping views.
+        final Rect[] bounds = new Rect[3]; // [MAX_IN_SURFACE, MAX_IN_VIEW, MAX_VISIBLE]
+        // Obtain the surface bounds rectangle.
+        final Rect surfaceBounds = new Rect(0, 0,
+                mContentCopySurface.mWidth, mContentCopySurface.mHeight);
+        bounds[0] = surfaceBounds;
+        // Obtain the view bounds rectangle.
+        final Rect viewBounds;
+        if (mView instanceof SurfaceView) {
+            viewBounds = new Rect(0, 0, mContentCopySurface.mWidth, mContentCopySurface.mHeight);
+        } else {
+            viewBounds = new Rect(
+                    mViewCoordinatesInSurface[0],
+                    mViewCoordinatesInSurface[1],
+                    mViewCoordinatesInSurface[0] + mView.getWidth(),
+                    mViewCoordinatesInSurface[1] + mView.getHeight()
+            );
+        }
+        bounds[1] = viewBounds;
+        // Obtain the visible view region rectangle.
         final Rect viewVisibleRegion = new Rect();
         mView.getGlobalVisibleRect(viewVisibleRegion);
         if (mView.getViewRootImpl() != null) {
@@ -505,9 +546,40 @@ public final class Magnifier {
             // If we copy content from a SurfaceView, clamp coordinates relative to it.
             viewVisibleRegion.offset(-mViewCoordinatesInSurface[0], -mViewCoordinatesInSurface[1]);
         }
-        mClampedCenterZoomCoords.x = Math.max(viewVisibleRegion.left + mSourceWidth / 2, Math.min(
-                zoomCenterX, viewVisibleRegion.right - mSourceWidth / 2));
-        mClampedCenterZoomCoords.y = zoomCenterY;
+        bounds[2] = viewVisibleRegion;
+
+        // Aggregate the above to obtain the bounds where the content copy will be restricted.
+        int resolvedLeft = Integer.MIN_VALUE;
+        for (int i = mLeftContentBound; i >= 0; --i) {
+            resolvedLeft = Math.max(resolvedLeft, bounds[i].left);
+        }
+        int resolvedTop = Integer.MIN_VALUE;
+        for (int i = mTopContentBound; i >= 0; --i) {
+            resolvedTop = Math.max(resolvedTop, bounds[i].top);
+        }
+        int resolvedRight = Integer.MAX_VALUE;
+        for (int i = mRightContentBound; i >= 0; --i) {
+            resolvedRight = Math.min(resolvedRight, bounds[i].right);
+        }
+        int resolvedBottom = Integer.MAX_VALUE;
+        for (int i = mBottomContentBound; i >= 0; --i) {
+            resolvedBottom = Math.min(resolvedBottom, bounds[i].bottom);
+        }
+        // Adjust <left-right> and <top-bottom> pairs of bounds to make sense.
+        resolvedLeft = Math.min(resolvedLeft, mContentCopySurface.mWidth - mSourceWidth);
+        resolvedTop = Math.min(resolvedTop, mContentCopySurface.mHeight - mSourceHeight);
+        if (resolvedLeft < 0 || resolvedTop < 0) {
+            Log.e(TAG, "Magnifier's content is copied from a surface smaller than"
+                    + "the content requested size. This will probably lead to distorted content.");
+        }
+        resolvedRight = Math.max(resolvedRight, resolvedLeft + mSourceWidth);
+        resolvedBottom = Math.max(resolvedBottom, resolvedTop + mSourceHeight);
+
+        // Finally compute the coordinates of the source center.
+        mClampedCenterZoomCoords.x = Math.max(resolvedLeft + mSourceWidth / 2, Math.min(
+                zoomCenterX, resolvedRight - mSourceWidth / 2));
+        mClampedCenterZoomCoords.y = Math.max(resolvedTop + mSourceHeight / 2, Math.min(
+                zoomCenterY, resolvedBottom - mSourceHeight / 2));
     }
 
     /**
@@ -539,20 +611,16 @@ public final class Magnifier {
         if (mContentCopySurface.mSurface == null || !mContentCopySurface.mSurface.isValid()) {
             return;
         }
-        // Clamp copy coordinates inside the surface to avoid displaying distorted content.
-        final int clampedStartXInSurface = Math.max(0,
-                Math.min(startXInSurface, mContentCopySurface.mWidth - mSourceWidth));
-        final int clampedStartYInSurface = Math.max(0,
-                Math.min(startYInSurface, mContentCopySurface.mHeight - mSourceHeight));
+
         // Clamp window coordinates inside the parent surface, to avoid displaying
         // the magnifier out of screen or overlapping with system insets.
         final Point windowCoords = getCurrentClampedWindowCoordinates();
 
         // Perform the pixel copy.
-        mPixelCopyRequestRect.set(clampedStartXInSurface,
-                clampedStartYInSurface,
-                clampedStartXInSurface + mSourceWidth,
-                clampedStartYInSurface + mSourceHeight);
+        mPixelCopyRequestRect.set(startXInSurface,
+                startYInSurface,
+                startXInSurface + mSourceWidth,
+                startYInSurface + mSourceHeight);
         final InternalPopupWindow currentWindowInstance = mWindow;
         final Bitmap bitmap =
                 Bitmap.createBitmap(mSourceWidth, mSourceHeight, Bitmap.Config.ARGB_8888);
@@ -573,7 +641,7 @@ public final class Magnifier {
                 sPixelCopyHandlerThread.getThreadHandler());
         mPrevStartCoordsInSurface.x = startXInSurface;
         mPrevStartCoordsInSurface.y = startYInSurface;
-        mDirtyZoom = false;
+        mDirtyState = false;
     }
 
     /**
@@ -912,6 +980,10 @@ public final class Magnifier {
         private int mHorizontalDefaultSourceToMagnifierOffset;
         private int mVerticalDefaultSourceToMagnifierOffset;
         private boolean mForcePositionWithinWindowSystemInsetsBounds;
+        private @SourceBound int mLeftContentBound;
+        private @SourceBound int mTopContentBound;
+        private @SourceBound int mRightContentBound;
+        private @SourceBound int  mBottomContentBound;
 
         /**
          * Construct a new builder for {@link Magnifier} objects.
@@ -937,6 +1009,10 @@ public final class Magnifier {
                     a.getDimensionPixelSize(R.styleable.Magnifier_magnifierVerticalOffset, 0);
             a.recycle();
             mForcePositionWithinWindowSystemInsetsBounds = true;
+            mLeftContentBound = SOURCE_BOUND_MAX_VISIBLE;
+            mTopContentBound = SOURCE_BOUND_MAX_IN_SURFACE;
+            mRightContentBound = SOURCE_BOUND_MAX_VISIBLE;
+            mBottomContentBound = SOURCE_BOUND_MAX_IN_SURFACE;
         }
 
         /**
@@ -1044,12 +1120,90 @@ public final class Magnifier {
         }
 
         /**
+         * Defines the bounds of the rectangle where the magnifier will be able to copy its content
+         * from. The content will always be copied from the {@link Surface} of the main application
+         * window unless the magnified view is a {@link SurfaceView}, in which case its backing
+         * surface will be used. Each bound can have a different behavior, with the options being:
+         * <ul>
+         *   <li>{@link #SOURCE_BOUND_MAX_VISIBLE}, which extends the bound as much as possible
+         *   while remaining in the visible region of the magnified view, as given by
+         *   {@link android.view.View#getGlobalVisibleRect(Rect)}. For example, this will take into
+         *   account the case when the view is contained in a scrollable container, and the
+         *   magnifier will refuse to copy content outside of the visible view region</li>
+         *   <li>{@link #SOURCE_BOUND_MAX_IN_VIEW}, which extends the bound as much as possible
+         *   while remaining in the bounds of the view. Note that, although this option is
+         *   used, the magnifier will always only display content visible on the screen: if the
+         *   view lays outside the screen or is covered by a different view either partially or
+         *   totally, the magnifier will not show any view region not visible on the screen.</li>
+         *   <li>{@link #SOURCE_BOUND_MAX_IN_SURFACE}, which extends the bound as much
+         *   as possible while remaining inside the surface the content is copied from.</li>
+         * </ul>
+         * Note that if either of the first three options is used, the bound will be compared to
+         * the bound of the surface (i.e. as if {@link #SOURCE_BOUND_MAX_IN_SURFACE} was used),
+         * and the more restrictive one will be chosen. In other words, no attempt to copy content
+         * from outside the surface will be permitted. If two opposite bounds are not well-behaved
+         * (i.e. left + sourceWidth > right or top + sourceHeight > bottom), the left and top
+         * bounds will have priority and the others will be extended accordingly. If the pairs
+         * obtained this way still remain out of bounds, the smallest possible offset will be added
+         * to the pairs to bring them inside the surface bounds. If this is impossible
+         * (i.e. the surface is too small for the size of the content we try to copy on either
+         * dimension), an error will be logged and the magnifier content will look distorted.
+         * The default values assumed by the builder for the source bounds are
+         * left: {@link #SOURCE_BOUND_MAX_VISIBLE}, top: {@link #SOURCE_BOUND_MAX_IN_SURFACE},
+         * right: {@link #SOURCE_BOUND_MAX_VISIBLE}, bottom: {@link #SOURCE_BOUND_MAX_IN_SURFACE}.
+         * @param left the left bound for content copy
+         * @param top the top bound for content copy
+         * @param right the right bound for content copy
+         * @param bottom the bottom bound for content copy
+         */
+        public Builder setSourceBounds(@SourceBound int left, @SourceBound int top,
+                @SourceBound int right, @SourceBound int bottom) {
+            mLeftContentBound = left;
+            mTopContentBound = top;
+            mRightContentBound = right;
+            mBottomContentBound = bottom;
+            return this;
+        }
+
+        /**
          * Builds a {@link Magnifier} instance based on the configuration of this {@link Builder}.
          */
         public @NonNull Magnifier build() {
             return new Magnifier(this);
         }
     }
+
+    /**
+     * A source bound that will extend as much as possible, while remaining within the surface
+     * the content is copied from.
+     */
+
+    public static final int SOURCE_BOUND_MAX_IN_SURFACE = 0;
+    /**
+     * A source bound that will extend as much as possible, while remaining within the
+     * magnified view.
+     */
+
+    public static final int SOURCE_BOUND_MAX_IN_VIEW = 1;
+
+    /**
+     * A source bound that will extend as much as possible, while remaining within the
+     * visible region of the magnified view, as determined by
+     * {@link View#getGlobalVisibleRect(Rect)}.
+     */
+    public static final int SOURCE_BOUND_MAX_VISIBLE = 2;
+
+
+    /**
+     * Used to describe the {@link Surface} rectangle where the magnifier's content is allowed
+     * to be copied from. For more details, see method
+     * {@link Magnifier.Builder#setSourceBounds(int, int, int, int)}
+     *
+     * @hide
+     */
+    @IntDef({SOURCE_BOUND_MAX_IN_SURFACE, SOURCE_BOUND_MAX_IN_VIEW, SOURCE_BOUND_MAX_VISIBLE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SourceBound {}
 
     // The rest of the file consists of test APIs.
 

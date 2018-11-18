@@ -55,6 +55,7 @@ import android.util.SparseArray;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.intelligence.IntelligenceManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -157,6 +158,7 @@ public class ClipboardService extends SystemService {
     private final IUserManager mUm;
     private final PackageManager mPm;
     private final AppOpsManager mAppOps;
+    private final IntelligenceManagerInternal mIm;
     private final IBinder mPermissionOwner;
     private HostClipboardMonitor mHostClipboardMonitor = null;
     private Thread mHostMonitorThread = null;
@@ -176,6 +178,7 @@ public class ClipboardService extends SystemService {
         mPm = getContext().getPackageManager();
         mUm = (IUserManager) ServiceManager.getService(Context.USER_SERVICE);
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
+        mIm = LocalServices.getService(IntelligenceManagerInternal.class);
         final IBinder permOwner = mUgmInternal.newUriPermissionOwner("clipboard");
         mPermissionOwner = permOwner;
         if (IS_EMULATOR) {
@@ -635,8 +638,9 @@ public class ClipboardService extends SystemService {
             return true;
         }
         // The default IME is always allowed to access the clipboard.
+        int userId = UserHandle.getUserId(callingUid);
         String defaultIme = Settings.Secure.getStringForUser(getContext().getContentResolver(),
-                Settings.Secure.DEFAULT_INPUT_METHOD, UserHandle.getUserId(callingUid));
+                Settings.Secure.DEFAULT_INPUT_METHOD, userId);
         if (!TextUtils.isEmpty(defaultIme)) {
             final String imePkg = ComponentName.unflattenFromString(defaultIme).getPackageName();
             if (imePkg.equals(callingPackage)) {
@@ -646,13 +650,18 @@ public class ClipboardService extends SystemService {
 
         switch (op) {
             case AppOpsManager.OP_READ_CLIPBOARD:
-                // Clipboard can only be read by applications with focus.
-                boolean uidFocused = mWm.isUidFocused(callingUid);
-                if (!uidFocused) {
-                    Slog.e(TAG, "Denying clipboard access to " + callingPackage
-                            + ", application is not in focus.");
+                // Clipboard can only be read by applications with focus..
+                boolean allowed = mWm.isUidFocused(callingUid);
+                if (!allowed && mIm != null) {
+                    // ...or the Intelligence Service
+                    allowed = mIm.isIntelligenceServiceForUser(callingUid, userId);
                 }
-                return uidFocused;
+                if (!allowed) {
+                    Slog.e(TAG, "Denying clipboard access to " + callingPackage
+                            + ", application is not in focus neither is the IntelligeService for "
+                            + "user " + userId);
+                }
+                return allowed;
             case AppOpsManager.OP_WRITE_CLIPBOARD:
                 // Writing is allowed without focus.
                 return true;

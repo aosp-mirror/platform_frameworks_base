@@ -4732,6 +4732,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private TouchDelegate mTouchDelegate = null;
 
     /**
+     * While touch exploration is in use, set to true when hovering across boundaries and
+     * inside the touch area of the delegate at receiving {@link MotionEvent#ACTION_HOVER_ENTER}
+     * or {@link MotionEvent#ACTION_HOVER_MOVE}. False when leaving boundaries or receiving a
+     * {@link MotionEvent#ACTION_HOVER_EXIT}.
+     * Note that children of view group are excluded in the touch area.
+     * @see #dispatchTouchExplorationHoverEvent
+     */
+    private boolean mHoveringTouchDelegate = false;
+
+    /**
      * Solid color to use as a background when creating the drawing cache. Enables
      * the cache to use 16 bit bitmaps instead of 32 bit.
      */
@@ -13965,6 +13975,96 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Dispatching hover events to {@link TouchDelegate} to improve accessibility.
+     * <p>
+     * This method is dispatching hover events to the delegate target to support explore by touch.
+     * Similar to {@link ViewGroup#dispatchTouchEvent}, this method send proper hover events to
+     * the delegate target according to the pointer and the touch area of the delegate while touch
+     * exploration enabled.
+     * </p>
+     *
+     * @param event The motion event dispatch to the delegate target.
+     * @return True if the event was handled, false otherwise.
+     *
+     * @see #onHoverEvent
+     */
+    private boolean dispatchTouchExplorationHoverEvent(MotionEvent event) {
+        final AccessibilityManager manager = AccessibilityManager.getInstance(mContext);
+        if (!manager.isEnabled() || !manager.isTouchExplorationEnabled()) {
+            return false;
+        }
+
+        final boolean oldHoveringTouchDelegate = mHoveringTouchDelegate;
+        final int action = event.getActionMasked();
+        boolean pointInDelegateRegion = false;
+        boolean handled = false;
+
+        final AccessibilityNodeInfo.TouchDelegateInfo info = mTouchDelegate.getTouchDelegateInfo();
+        for (int i = 0; i < info.getRegionCount(); i++) {
+            Region r = info.getRegionAt(i);
+            if (r.contains((int) event.getX(), (int) event.getY())) {
+                pointInDelegateRegion = true;
+            }
+        }
+
+        // Explore by touch should dispatch events to children under the pointer first if any
+        // before dispatching to TouchDelegate. For non-hoverable views that do not consume
+        // hover events but receive accessibility focus, it should also not delegate to these
+        // views when hovered.
+        if (!oldHoveringTouchDelegate) {
+            if ((action == MotionEvent.ACTION_HOVER_ENTER
+                    || action == MotionEvent.ACTION_HOVER_MOVE)
+                    && !pointInHoveredChild(event)
+                    && pointInDelegateRegion) {
+                mHoveringTouchDelegate = true;
+            }
+        } else {
+            if (action == MotionEvent.ACTION_HOVER_EXIT
+                    || (action == MotionEvent.ACTION_HOVER_MOVE
+                        && (pointInHoveredChild(event) || !pointInDelegateRegion))) {
+                mHoveringTouchDelegate = false;
+            }
+        }
+        switch (action) {
+            case MotionEvent.ACTION_HOVER_MOVE:
+                if (oldHoveringTouchDelegate && mHoveringTouchDelegate) {
+                    // Inside bounds, dispatch as is.
+                    handled = mTouchDelegate.onTouchExplorationHoverEvent(event);
+                } else if (!oldHoveringTouchDelegate && mHoveringTouchDelegate) {
+                    // Moving inbound, synthesize hover enter.
+                    MotionEvent eventNoHistory = (event.getHistorySize() == 0)
+                            ? event : MotionEvent.obtainNoHistory(event);
+                    eventNoHistory.setAction(MotionEvent.ACTION_HOVER_ENTER);
+                    handled = mTouchDelegate.onTouchExplorationHoverEvent(eventNoHistory);
+                    eventNoHistory.setAction(action);
+                    handled |= mTouchDelegate.onTouchExplorationHoverEvent(eventNoHistory);
+                } else if (oldHoveringTouchDelegate && !mHoveringTouchDelegate) {
+                    // Moving outbound, synthesize hover exit.
+                    final boolean hoverExitPending = event.isHoverExitPending();
+                    event.setHoverExitPending(true);
+                    mTouchDelegate.onTouchExplorationHoverEvent(event);
+                    MotionEvent eventNoHistory = (event.getHistorySize() == 0)
+                            ? event : MotionEvent.obtainNoHistory(event);
+                    eventNoHistory.setHoverExitPending(hoverExitPending);
+                    eventNoHistory.setAction(MotionEvent.ACTION_HOVER_EXIT);
+                    mTouchDelegate.onTouchExplorationHoverEvent(eventNoHistory);
+                }  // else: outside bounds, do nothing.
+                break;
+            case MotionEvent.ACTION_HOVER_ENTER:
+                if (!oldHoveringTouchDelegate && mHoveringTouchDelegate) {
+                    handled = mTouchDelegate.onTouchExplorationHoverEvent(event);
+                }
+                break;
+            case MotionEvent.ACTION_HOVER_EXIT:
+                if (oldHoveringTouchDelegate) {
+                    mTouchDelegate.onTouchExplorationHoverEvent(event);
+                }
+                break;
+        }
+        return handled;
+    }
+
+    /**
      * Implement this method to handle hover events.
      * <p>
      * This method is called whenever a pointer is hovering into, over, or out of the
@@ -14001,15 +14101,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #onHoverChanged
      */
     public boolean onHoverEvent(MotionEvent event) {
-        // Explore by touch should dispatch events to children under pointer first if any before
-        // dispatching to TouchDelegate. For children non-hoverable that will not consume events,
-        // it should also not delegate when they got the pointer hovered.
-        if (mTouchDelegate != null && !pointInHoveredChild(event)) {
-            final AccessibilityManager manager = AccessibilityManager.getInstance(mContext);
-            if (manager.isEnabled() && manager.isTouchExplorationEnabled()
-                    && mTouchDelegate.onTouchExplorationHoverEvent(event)) {
-                return true;
-            }
+        if (mTouchDelegate != null && dispatchTouchExplorationHoverEvent(event)) {
+            return true;
         }
 
         // The root view may receive hover (or touch) events that are outside the bounds of

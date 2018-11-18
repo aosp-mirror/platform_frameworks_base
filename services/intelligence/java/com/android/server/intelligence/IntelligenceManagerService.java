@@ -19,6 +19,7 @@ package com.android.server.intelligence;
 import static android.content.Context.INTELLIGENCE_MANAGER_SERVICE;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
@@ -53,18 +54,20 @@ public final class IntelligenceManagerService
     @GuardedBy("mLock")
     private ActivityManagerInternal mAm;
 
+    private final LocalService mLocalService = new LocalService();
+
     public IntelligenceManagerService(Context context) {
         super(context, UserManager.DISALLOW_INTELLIGENCE_CAPTURE);
     }
 
-    @Override // from MasterSystemService
+    @Override // from AbstractMasterSystemService
     protected String getServiceSettingsProperty() {
         // TODO(b/111276913): STOPSHIP temporary settings, until it's set by resourcs + cmd
         return "intel_service";
     }
 
-    @Override // from MasterSystemService
-    protected IntelligencePerUserService newServiceLocked(int resolvedUserId,
+    @Override // from AbstractMasterSystemService
+    protected IntelligencePerUserService newServiceLocked(@UserIdInt int resolvedUserId,
             boolean disabled) {
         return new IntelligencePerUserService(this, mLock, resolvedUserId);
     }
@@ -73,6 +76,13 @@ public final class IntelligenceManagerService
     public void onStart() {
         publishBinderService(INTELLIGENCE_MANAGER_SERVICE,
                 new IntelligenceManagerServiceStub());
+        publishLocalService(IntelligenceManagerInternal.class, mLocalService);
+    }
+
+    @Override // from AbstractMasterSystemService
+    protected void onServiceRemoved(@NonNull IntelligencePerUserService service,
+            @UserIdInt int userId) {
+        service.destroyLocked();
     }
 
     private ActivityManagerInternal getAmInternal() {
@@ -137,6 +147,21 @@ public final class IntelligenceManagerService
             synchronized (mLock) {
                 dumpLocked("", pw);
             }
+        }
+    }
+
+    private final class LocalService extends IntelligenceManagerInternal {
+
+        @Override
+        public boolean isIntelligenceServiceForUser(int uid, int userId) {
+            synchronized (mLock) {
+                final IntelligencePerUserService service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    return service.isIntelligenceServiceForUserLocked(uid);
+                }
+            }
+
+            return false;
         }
     }
 }

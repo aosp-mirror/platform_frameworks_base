@@ -16,23 +16,13 @@
 
 package android.media;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.ref.WeakReference;
-import java.lang.Math;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.NioUtils;
-import java.util.LinkedList;
-import java.util.concurrent.Executor;
-
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -42,6 +32,15 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.NioUtils;
+import java.util.LinkedList;
+import java.util.concurrent.Executor;
 
 /**
  * The AudioTrack class manages and plays a single audio resource for Java applications.
@@ -372,6 +371,10 @@ public class AudioTrack extends PlayerBase
      */
     private int mAudioFormat;   // initialized by all constructors via audioParamCheck()
     /**
+     * The AudioAttributes used in configuration.
+     */
+    private AudioAttributes mConfiguredAudioAttributes;
+    /**
      * Audio session ID
      */
     private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
@@ -570,6 +573,8 @@ public class AudioTrack extends PlayerBase
                     throws IllegalArgumentException {
         super(attributes, AudioPlaybackConfiguration.PLAYER_TYPE_JAM_AUDIOTRACK);
         // mState already == STATE_UNINITIALIZED
+
+        mConfiguredAudioAttributes = attributes; // object copy not needed, immutable.
 
         if (format == null) {
             throw new IllegalArgumentException("Illegal null AudioFormat");
@@ -1299,6 +1304,23 @@ public class AudioTrack extends PlayerBase
      */
     public @NonNull PlaybackParams getPlaybackParams() {
         return native_get_playback_params();
+    }
+
+    /**
+     * Returns the {@link AudioAttributes} used in configuration.
+     * If a {@code streamType} is used instead of an {@code AudioAttributes}
+     * to configure the AudioTrack
+     * (the use of {@code streamType} for configuration is deprecated),
+     * then the {@code AudioAttributes}
+     * equivalent to the {@code streamType} is returned.
+     * @return The {@code AudioAttributes} used to configure the AudioTrack.
+     * @throws IllegalStateException If the track is not initialized.
+     */
+    public @NonNull AudioAttributes getAudioAttributes() {
+        if (mState == STATE_UNINITIALIZED || mConfiguredAudioAttributes == null) {
+            throw new IllegalStateException("track not initialized");
+        }
+        return mConfiguredAudioAttributes;
     }
 
     /**

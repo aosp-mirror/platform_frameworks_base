@@ -24,14 +24,13 @@ import android.net.wifi.FakeKeys;
 import android.os.Parcel;
 import android.support.test.filters.SmallTest;
 
+import org.junit.Test;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-
-import org.junit.Test;
 
 /**
  * Unit tests for {@link android.net.wifi.hotspot2.pps.CredentialTest}.
@@ -169,7 +168,12 @@ public class CredentialTest {
     @Test
     public void validateUserCredential() throws Exception {
         Credential cred = createCredentialWithUserCredential();
-        assertTrue(cred.validate());
+
+        // For R1 validation
+        assertTrue(cred.validate(true));
+
+        // For R2 validation
+        assertTrue(cred.validate(false));
     }
 
     /**
@@ -181,7 +185,12 @@ public class CredentialTest {
     public void validateUserCredentialWithoutCaCert() throws Exception {
         Credential cred = createCredentialWithUserCredential();
         cred.setCaCertificate(null);
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertTrue(cred.validate(false));
     }
 
     /**
@@ -193,7 +202,12 @@ public class CredentialTest {
     public void validateUserCredentialWithEapTls() throws Exception {
         Credential cred = createCredentialWithUserCredential();
         cred.getUserCredential().setEapType(EAPConstants.EAP_TLS);
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertFalse(cred.validate(false));
     }
 
 
@@ -206,7 +220,12 @@ public class CredentialTest {
     public void validateUserCredentialWithoutRealm() throws Exception {
         Credential cred = createCredentialWithUserCredential();
         cred.setRealm(null);
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertFalse(cred.validate(false));
     }
 
     /**
@@ -218,7 +237,12 @@ public class CredentialTest {
     public void validateUserCredentialWithoutUsername() throws Exception {
         Credential cred = createCredentialWithUserCredential();
         cred.getUserCredential().setUsername(null);
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertFalse(cred.validate(false));
     }
 
     /**
@@ -230,7 +254,12 @@ public class CredentialTest {
     public void validateUserCredentialWithoutPassword() throws Exception {
         Credential cred = createCredentialWithUserCredential();
         cred.getUserCredential().setPassword(null);
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertFalse(cred.validate(false));
     }
 
     /**
@@ -242,7 +271,12 @@ public class CredentialTest {
     public void validateUserCredentialWithoutAuthMethod() throws Exception {
         Credential cred = createCredentialWithUserCredential();
         cred.getUserCredential().setNonEapInnerMethod(null);
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertFalse(cred.validate(false));
     }
 
     /**
@@ -255,7 +289,12 @@ public class CredentialTest {
     @Test
     public void validateCertCredential() throws Exception {
         Credential cred = createCredentialWithCertificateCredential();
-        assertTrue(cred.validate());
+
+        // For R1 validation
+        assertTrue(cred.validate(true));
+
+        // For R2 validation
+        assertTrue(cred.validate(true));
     }
 
     /**
@@ -267,7 +306,12 @@ public class CredentialTest {
     public void validateCertCredentialWithoutCaCert() throws Exception {
         Credential cred = createCredentialWithCertificateCredential();
         cred.setCaCertificate(null);
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertTrue(cred.validate(false));
     }
 
     /**
@@ -279,7 +323,12 @@ public class CredentialTest {
     public void validateCertCredentialWithoutClientCertChain() throws Exception {
         Credential cred = createCredentialWithCertificateCredential();
         cred.setClientCertificateChain(null);
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertFalse(cred.validate(false));
     }
 
     /**
@@ -291,7 +340,12 @@ public class CredentialTest {
     public void validateCertCredentialWithoutClientPrivateKey() throws Exception {
         Credential cred = createCredentialWithCertificateCredential();
         cred.setClientPrivateKey(null);
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertFalse(cred.validate(false));
     }
 
     /**
@@ -304,7 +358,12 @@ public class CredentialTest {
     public void validateCertCredentialWithMismatchFingerprint() throws Exception {
         Credential cred = createCredentialWithCertificateCredential();
         cred.getCertCredential().setCertSha256Fingerprint(new byte[32]);
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertFalse(cred.validate(false));
     }
 
     /**
@@ -315,7 +374,12 @@ public class CredentialTest {
     @Test
     public void validateSimCredentialWithEapSim() throws Exception {
         Credential cred = createCredentialWithSimCredential();
-        assertTrue(cred.validate());
+
+        // For R1 validation
+        assertTrue(cred.validate(true));
+
+        // For R2 validation
+        assertTrue(cred.validate(false));
     }
 
     /**
@@ -327,7 +391,12 @@ public class CredentialTest {
     public void validateSimCredentialWithEapAka() throws Exception {
         Credential cred = createCredentialWithSimCredential();
         cred.getSimCredential().setEapType(EAPConstants.EAP_AKA);
-        assertTrue(cred.validate());
+
+        // For R1 validation
+        assertTrue(cred.validate(true));
+
+        // For R2 validation
+        assertTrue(cred.validate(false));
     }
 
     /**
@@ -339,7 +408,12 @@ public class CredentialTest {
     public void validateSimCredentialWithEapAkaPrime() throws Exception {
         Credential cred = createCredentialWithSimCredential();
         cred.getSimCredential().setEapType(EAPConstants.EAP_AKA_PRIME);
-        assertTrue(cred.validate());
+
+        // For R1 validation
+        assertTrue(cred.validate(true));
+
+        // For R2 validation
+        assertTrue(cred.validate(false));
     }
 
     /**
@@ -351,7 +425,12 @@ public class CredentialTest {
     public void validateSimCredentialWithoutIMSI() throws Exception {
         Credential cred = createCredentialWithSimCredential();
         cred.getSimCredential().setImsi(null);
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertFalse(cred.validate(false));
     }
 
     /**
@@ -363,7 +442,12 @@ public class CredentialTest {
     public void validateSimCredentialWithInvalidIMSI() throws Exception {
         Credential cred = createCredentialWithSimCredential();
         cred.getSimCredential().setImsi("dummy");
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertFalse(cred.validate(false));
     }
 
     /**
@@ -375,7 +459,12 @@ public class CredentialTest {
     public void validateSimCredentialWithEapTls() throws Exception {
         Credential cred = createCredentialWithSimCredential();
         cred.getSimCredential().setEapType(EAPConstants.EAP_TLS);
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertFalse(cred.validate(false));
     }
 
     /**
@@ -391,7 +480,12 @@ public class CredentialTest {
         simCredential.setImsi("1234*");
         simCredential.setEapType(EAPConstants.EAP_SIM);
         cred.setSimCredential(simCredential);
-        assertFalse(cred.validate());
+
+        // For R1 validation
+        assertFalse(cred.validate(true));
+
+        // For R2 validation
+        assertFalse(cred.validate(false));
     }
 
     /**

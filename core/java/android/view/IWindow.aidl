@@ -58,10 +58,33 @@ oneway interface IWindow {
     void dispatchGetNewSurface();
 
     /**
-     * Tell the window that it is either gaining or losing focus.  Keep it up
-     * to date on the current state showing navigational focus (touch mode) too.
+     * Tell the window that it is either gaining or losing focus.
+     *
+     * @param hasFocus       {@code true} if window has focus, {@code false} otherwise.
+     * @param inTouchMode    {@code true} if screen is in touch mode, {@code false} otherwise.
+     * @param reportToClient {@code true} when need to report to child view with
+     *                       {@link View#onWindowFocusChanged(boolean)}, {@code false} otherwise.
+     * <p>
+     * Note: In the previous design, there is only one window focus state tracked by
+     * WindowManagerService.
+     * For multi-display, the window focus state is tracked by each display independently.
+     * <p>
+     * It will introduce a problem if the window was already focused on one display and then
+     * switched to another display, since the window focus state on each display is independent,
+     * there is no global window focus state in WindowManagerService, so the window focus state of
+     * the former display remains unchanged.
+     * <p>
+     * When switched back to former display, some flows that rely on the global window focus state
+     * in view root will be missed due to the window focus state remaining unchanged.
+     * (i.e: Showing single IME window when switching between displays.)
+     * <p>
+     * To solve the problem, WindowManagerService tracks the top focused display change and then
+     * callbacks to the client via this method to make sure that the client side will request the
+     * IME on the top focused display, and then set {@param reportToClient} as {@code false} to
+     * ignore reporting to the application, since its focus remains unchanged on its display.
+     *
      */
-    void windowFocusChanged(boolean hasFocus, boolean inTouchMode);
+    void windowFocusChanged(boolean hasFocus, boolean inTouchMode, boolean reportToClient);
     
     void closeSystemDialogs(String reason);
     

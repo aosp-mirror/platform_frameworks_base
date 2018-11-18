@@ -104,14 +104,6 @@ public final class StatsLogEventWrapper implements Parcelable {
     }
 
     /**
-     * Write a double value.
-     */
-    public void writeDouble(double val) {
-        mTypes.add(EVENT_TYPE_DOUBLE);
-        mValues.add(val);
-    }
-
-    /**
      * Write a storage value.
      */
     public void writeStorage(byte[] val) {

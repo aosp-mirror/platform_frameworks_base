@@ -346,7 +346,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
             doReturn(stack).when(mService.mStackSupervisor)
                     .getLaunchStack(any(), any(), any(), anyBoolean());
             doReturn(stack).when(mService.mStackSupervisor)
-                    .getLaunchStack(any(), any(), any(), anyBoolean(), anyInt());
+                    .getLaunchStack(any(), any(), any(), anyBoolean(), any());
         }
 
         // Set up mock package manager internal and make sure no unmocked methods are called

@@ -3,6 +3,7 @@ java_library_static {
 
     aidl: {
         include_dirs: [
+            "frameworks/base/cmds/idmap2/idmap2d/aidl",
             "frameworks/native/aidl/binder",
             "frameworks/native/cmds/dumpstate/binder",
             "system/core/storaged/binder",
@@ -13,6 +14,7 @@ java_library_static {
     srcs: [
         "java/**/*.java",
         ":dumpstate_aidl",
+        ":idmap2_aidl",
         ":netd_aidl",
         ":netd_metrics_aidl",
         ":installd_aidl",

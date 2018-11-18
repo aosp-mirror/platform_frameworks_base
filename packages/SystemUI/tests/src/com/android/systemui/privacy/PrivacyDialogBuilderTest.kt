@@ -27,55 +27,28 @@ import org.junit.runner.RunWith
 @SmallTest
 class PrivacyDialogBuilderTest : SysuiTestCase() {
 
-    companion object {
-        val MILLIS_IN_MINUTE: Long = 1000 * 60
-        val NOW = 4 * MILLIS_IN_MINUTE
-    }
-
     @Test
-    fun testGenerateText_multipleApps() {
+    fun testGenerateAppsList() {
         val bar2 = PrivacyItem(Privacy.TYPE_CAMERA, PrivacyApplication(
-                "Bar", context), 2 * MILLIS_IN_MINUTE)
+                "Bar", context))
         val bar3 = PrivacyItem(Privacy.TYPE_LOCATION, PrivacyApplication(
-                "Bar", context), 3 * MILLIS_IN_MINUTE)
+                "Bar", context))
         val foo0 = PrivacyItem(Privacy.TYPE_CAMERA, PrivacyApplication(
-                "Foo", context), 0)
+                "Foo", context))
         val baz1 = PrivacyItem(Privacy.TYPE_CAMERA, PrivacyApplication(
-                "Baz", context), 1 * MILLIS_IN_MINUTE)
+                "Baz", context))
 
         val items = listOf(bar2, foo0, baz1, bar3)
 
         val textBuilder = PrivacyDialogBuilder(context, items)
 
-        val textList = textBuilder.generateText(NOW)
-        assertEquals(2, textList.size)
-        assertEquals("Bar, Foo, Baz are using your camera", textList[0])
-        assertEquals("Bar is using your location for the last 1 min", textList[1])
-    }
-
-    @Test
-    fun testGenerateText_singleApp() {
-        val bar2 = PrivacyItem(Privacy.TYPE_CAMERA, PrivacyApplication(
-                "Bar", context), 0)
-        val bar1 = PrivacyItem(Privacy.TYPE_LOCATION, PrivacyApplication(
-                "Bar", context), 0)
-
-        val items = listOf(bar2, bar1)
-
-        val textBuilder = PrivacyDialogBuilder(context, items)
-        val textList = textBuilder.generateText(NOW)
-        assertEquals(1, textList.size)
-        assertEquals("Bar is using your camera, location", textList[0])
-    }
-
-    @Test
-    fun testGenerateText_singleApp_singleType() {
-        val bar2 = PrivacyItem(Privacy.TYPE_CAMERA, PrivacyApplication(
-                "Bar", context), 2 * MILLIS_IN_MINUTE)
-        val items = listOf(bar2)
-        val textBuilder = PrivacyDialogBuilder(context, items)
-        val textList = textBuilder.generateText(NOW)
-        assertEquals(1, textList.size)
-        assertEquals("Bar is using your camera for the last 2 min", textList[0])
+        val list = textBuilder.appsAndTypes
+        assertEquals(3, list.size)
+        val appsList = list.map { it.first }
+        val typesList = list.map { it.second }
+        assertEquals(listOf("Bar", "Baz", "Foo"), appsList.map { it.packageName })
+        assertEquals(listOf(Privacy.TYPE_CAMERA, Privacy.TYPE_LOCATION), typesList[0])
+        assertEquals(listOf(Privacy.TYPE_CAMERA), typesList[1])
+        assertEquals(listOf(Privacy.TYPE_CAMERA), typesList[2])
     }
 }

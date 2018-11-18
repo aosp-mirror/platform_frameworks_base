@@ -7508,7 +7508,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, String)
      */
-    public String getStringExtra(String name) {
+    public @Nullable String getStringExtra(String name) {
         return mExtras == null ? null : mExtras.getString(name);
     }
 
@@ -7522,7 +7522,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, CharSequence)
      */
-    public CharSequence getCharSequenceExtra(String name) {
+    public @Nullable CharSequence getCharSequenceExtra(String name) {
         return mExtras == null ? null : mExtras.getCharSequence(name);
     }
 
@@ -7536,7 +7536,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, Parcelable)
      */
-    public <T extends Parcelable> T getParcelableExtra(String name) {
+    public @Nullable <T extends Parcelable> T getParcelableExtra(String name) {
         return mExtras == null ? null : mExtras.<T>getParcelable(name);
     }
 
@@ -7550,7 +7550,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, Parcelable[])
      */
-    public Parcelable[] getParcelableArrayExtra(String name) {
+    public @Nullable Parcelable[] getParcelableArrayExtra(String name) {
         return mExtras == null ? null : mExtras.getParcelableArray(name);
     }
 
@@ -7565,7 +7565,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putParcelableArrayListExtra(String, ArrayList)
      */
-    public <T extends Parcelable> ArrayList<T> getParcelableArrayListExtra(String name) {
+    public @Nullable <T extends Parcelable> ArrayList<T> getParcelableArrayListExtra(String name) {
         return mExtras == null ? null : mExtras.<T>getParcelableArrayList(name);
     }
 
@@ -7579,7 +7579,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, Serializable)
      */
-    public Serializable getSerializableExtra(String name) {
+    public @Nullable Serializable getSerializableExtra(String name) {
         return mExtras == null ? null : mExtras.getSerializable(name);
     }
 
@@ -7594,7 +7594,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putIntegerArrayListExtra(String, ArrayList)
      */
-    public ArrayList<Integer> getIntegerArrayListExtra(String name) {
+    public @Nullable ArrayList<Integer> getIntegerArrayListExtra(String name) {
         return mExtras == null ? null : mExtras.getIntegerArrayList(name);
     }
 
@@ -7609,7 +7609,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putStringArrayListExtra(String, ArrayList)
      */
-    public ArrayList<String> getStringArrayListExtra(String name) {
+    public @Nullable ArrayList<String> getStringArrayListExtra(String name) {
         return mExtras == null ? null : mExtras.getStringArrayList(name);
     }
 
@@ -7624,7 +7624,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putCharSequenceArrayListExtra(String, ArrayList)
      */
-    public ArrayList<CharSequence> getCharSequenceArrayListExtra(String name) {
+    public @Nullable ArrayList<CharSequence> getCharSequenceArrayListExtra(String name) {
         return mExtras == null ? null : mExtras.getCharSequenceArrayList(name);
     }
 
@@ -7638,7 +7638,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, boolean[])
      */
-    public boolean[] getBooleanArrayExtra(String name) {
+    public @Nullable boolean[] getBooleanArrayExtra(String name) {
         return mExtras == null ? null : mExtras.getBooleanArray(name);
     }
 
@@ -7652,7 +7652,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, byte[])
      */
-    public byte[] getByteArrayExtra(String name) {
+    public @Nullable byte[] getByteArrayExtra(String name) {
         return mExtras == null ? null : mExtras.getByteArray(name);
     }
 
@@ -7666,7 +7666,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, short[])
      */
-    public short[] getShortArrayExtra(String name) {
+    public @Nullable short[] getShortArrayExtra(String name) {
         return mExtras == null ? null : mExtras.getShortArray(name);
     }
 
@@ -7680,7 +7680,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, char[])
      */
-    public char[] getCharArrayExtra(String name) {
+    public @Nullable char[] getCharArrayExtra(String name) {
         return mExtras == null ? null : mExtras.getCharArray(name);
     }
 
@@ -7694,7 +7694,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, int[])
      */
-    public int[] getIntArrayExtra(String name) {
+    public @Nullable int[] getIntArrayExtra(String name) {
         return mExtras == null ? null : mExtras.getIntArray(name);
     }
 
@@ -7708,7 +7708,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, long[])
      */
-    public long[] getLongArrayExtra(String name) {
+    public @Nullable long[] getLongArrayExtra(String name) {
         return mExtras == null ? null : mExtras.getLongArray(name);
     }
 
@@ -7722,7 +7722,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, float[])
      */
-    public float[] getFloatArrayExtra(String name) {
+    public @Nullable float[] getFloatArrayExtra(String name) {
         return mExtras == null ? null : mExtras.getFloatArray(name);
     }
 
@@ -7736,7 +7736,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, double[])
      */
-    public double[] getDoubleArrayExtra(String name) {
+    public @Nullable double[] getDoubleArrayExtra(String name) {
         return mExtras == null ? null : mExtras.getDoubleArray(name);
     }
 
@@ -7750,7 +7750,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, String[])
      */
-    public String[] getStringArrayExtra(String name) {
+    public @Nullable String[] getStringArrayExtra(String name) {
         return mExtras == null ? null : mExtras.getStringArray(name);
     }
 
@@ -7764,7 +7764,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, CharSequence[])
      */
-    public CharSequence[] getCharSequenceArrayExtra(String name) {
+    public @Nullable CharSequence[] getCharSequenceArrayExtra(String name) {
         return mExtras == null ? null : mExtras.getCharSequenceArray(name);
     }
 
@@ -7778,7 +7778,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra(String, Bundle)
      */
-    public Bundle getBundleExtra(String name) {
+    public @Nullable Bundle getBundleExtra(String name) {
         return mExtras == null ? null : mExtras.getBundle(name);
     }
 
@@ -8584,7 +8584,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getStringExtra(String)
      */
-    public @NonNull Intent putExtra(String name, String value) {
+    public @NonNull Intent putExtra(String name, @Nullable String value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8607,7 +8607,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getCharSequenceExtra(String)
      */
-    public @NonNull Intent putExtra(String name, CharSequence value) {
+    public @NonNull Intent putExtra(String name, @Nullable CharSequence value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8630,7 +8630,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getParcelableExtra(String)
      */
-    public @NonNull Intent putExtra(String name, Parcelable value) {
+    public @NonNull Intent putExtra(String name, @Nullable Parcelable value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8653,7 +8653,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getParcelableArrayExtra(String)
      */
-    public @NonNull Intent putExtra(String name, Parcelable[] value) {
+    public @NonNull Intent putExtra(String name, @Nullable Parcelable[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8677,7 +8677,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #getParcelableArrayListExtra(String)
      */
     public @NonNull Intent putParcelableArrayListExtra(String name,
-            ArrayList<? extends Parcelable> value) {
+            @Nullable ArrayList<? extends Parcelable> value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8700,7 +8700,8 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getIntegerArrayListExtra(String)
      */
-    public @NonNull Intent putIntegerArrayListExtra(String name, ArrayList<Integer> value) {
+    public @NonNull Intent putIntegerArrayListExtra(String name,
+            @Nullable ArrayList<Integer> value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8723,7 +8724,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getStringArrayListExtra(String)
      */
-    public @NonNull Intent putStringArrayListExtra(String name, ArrayList<String> value) {
+    public @NonNull Intent putStringArrayListExtra(String name, @Nullable ArrayList<String> value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8747,7 +8748,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #getCharSequenceArrayListExtra(String)
      */
     public @NonNull Intent putCharSequenceArrayListExtra(String name,
-            ArrayList<CharSequence> value) {
+            @Nullable ArrayList<CharSequence> value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8770,7 +8771,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getSerializableExtra(String)
      */
-    public @NonNull Intent putExtra(String name, Serializable value) {
+    public @NonNull Intent putExtra(String name, @Nullable Serializable value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8793,7 +8794,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getBooleanArrayExtra(String)
      */
-    public @NonNull Intent putExtra(String name, boolean[] value) {
+    public @NonNull Intent putExtra(String name, @Nullable boolean[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8816,7 +8817,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getByteArrayExtra(String)
      */
-    public @NonNull Intent putExtra(String name, byte[] value) {
+    public @NonNull Intent putExtra(String name, @Nullable byte[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8839,7 +8840,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getShortArrayExtra(String)
      */
-    public @NonNull Intent putExtra(String name, short[] value) {
+    public @NonNull Intent putExtra(String name, @Nullable short[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8862,7 +8863,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getCharArrayExtra(String)
      */
-    public @NonNull Intent putExtra(String name, char[] value) {
+    public @NonNull Intent putExtra(String name, @Nullable char[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8885,7 +8886,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getIntArrayExtra(String)
      */
-    public @NonNull Intent putExtra(String name, int[] value) {
+    public @NonNull Intent putExtra(String name, @Nullable int[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8908,7 +8909,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getLongArrayExtra(String)
      */
-    public @NonNull Intent putExtra(String name, long[] value) {
+    public @NonNull Intent putExtra(String name, @Nullable long[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8931,7 +8932,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getFloatArrayExtra(String)
      */
-    public @NonNull Intent putExtra(String name, float[] value) {
+    public @NonNull Intent putExtra(String name, @Nullable float[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8954,7 +8955,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getDoubleArrayExtra(String)
      */
-    public @NonNull Intent putExtra(String name, double[] value) {
+    public @NonNull Intent putExtra(String name, @Nullable double[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8977,7 +8978,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getStringArrayExtra(String)
      */
-    public @NonNull Intent putExtra(String name, String[] value) {
+    public @NonNull Intent putExtra(String name, @Nullable String[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -9000,7 +9001,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getCharSequenceArrayExtra(String)
      */
-    public @NonNull Intent putExtra(String name, CharSequence[] value) {
+    public @NonNull Intent putExtra(String name, @Nullable CharSequence[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -9023,7 +9024,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getBundleExtra(String)
      */
-    public @NonNull Intent putExtra(String name, Bundle value) {
+    public @NonNull Intent putExtra(String name, @Nullable Bundle value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }

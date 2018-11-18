@@ -167,7 +167,7 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     @GuardedBy("mLock")
     protected final int getServiceUidLocked() {
         if (mServiceInfo == null) {
-            Slog.w(mTag, "getServiceUidLocked(): no mServiceInfo");
+            if (mMaster.verbose) Slog.v(mTag, "getServiceUidLocked(): no mServiceInfo");
             return Process.INVALID_UID;
         }
         return mServiceInfo.applicationInfo.uid;
@@ -267,8 +267,18 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     @GuardedBy("mLock")
     protected void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
         pw.print(prefix); pw.print("User: "); pw.println(mUserId);
-        pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
+        pw.print(prefix); pw.print("Disabled by UserManager: "); pw.println(mDisabled);
         pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
-        pw.print(prefix); pw.print("Service name: "); pw.println(getComponentNameFromSettings());
+        if (mServiceInfo != null) {
+            pw.print(prefix); pw.print("Service UID: ");
+            pw.println(mServiceInfo.applicationInfo.uid);
+        }
+        final String componentName = getComponentNameFromSettings();
+        if (componentName != null) {
+            pw.print(prefix); pw.print("Service name: ");
+            pw.println(componentName);
+        } else {
+            pw.println("No service package set");
+        }
     }
 }

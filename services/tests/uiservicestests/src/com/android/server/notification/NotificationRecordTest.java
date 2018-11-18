@@ -708,14 +708,14 @@ public class NotificationRecordTest extends UiServiceTestCase {
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, groupId /* group */);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-        assertNull(record.getSmartActions());
+        assertNull(record.getSystemGeneratedSmartActions());
 
         ArrayList<Notification.Action> smartActions = new ArrayList<>();
         smartActions.add(new Notification.Action.Builder(
                 Icon.createWithResource(getContext(), R.drawable.btn_default),
                 "text", null).build());
-        record.setSmartActions(smartActions);
-        assertEquals(smartActions, record.getSmartActions());
+        record.setSystemGeneratedSmartActions(smartActions);
+        assertEquals(smartActions, record.getSystemGeneratedSmartActions());
     }
 
     @Test

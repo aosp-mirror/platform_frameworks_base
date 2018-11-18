@@ -623,13 +623,6 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     final Handler mAnimationHandler = new Handler(AnimationThread.getHandler().getLooper());
 
-    /** This just indicates the window the input method is on top of, not
-     * necessarily the window its input is going to. */
-    WindowState mInputMethodTarget = null;
-
-    /** If true hold off on modifying the animation layer of mInputMethodTarget */
-    boolean mInputMethodTargetWaitingAnim;
-
     boolean mHardKeyboardAvailable;
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
     SettingsObserver mSettingsObserver;
@@ -4400,6 +4393,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     AccessibilityController accessibilityController = null;
 
+                    final boolean topFocusedDisplayChanged = msg.arg1 != 0;
                     synchronized (mGlobalLock) {
                         // TODO(multidisplay): Accessibility supported only of default desiplay.
                         if (mAccessibilityController != null && displayContent.isDefaultDisplay) {
@@ -4408,10 +4402,24 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         lastFocus = displayContent.mLastFocus;
                         newFocus = displayContent.mCurrentFocus;
-                        if (lastFocus == newFocus) {
-                            // Focus is not changing, so nothing to do.
-                            return;
+                    }
+                    if (lastFocus == newFocus) {
+                        // Report focus to ViewRootImpl when top focused display changes.
+                        // Or, nothing to do for no window focus change.
+                        if (topFocusedDisplayChanged && newFocus != null) {
+                            if (DEBUG_FOCUS_LIGHT) {
+                                Slog.d(TAG, "Reporting focus: " + newFocus
+                                        + " due to top focused display change.");
+                            }
+                            // See {@link IWindow#windowFocusChanged} to know why set
+                            // reportToClient as false.
+                            newFocus.reportFocusChangedSerialized(true, mInTouchMode,
+                                    false /* reportToClient */);
+                            notifyFocusChanged();
                         }
+                        return;
+                    }
+                    synchronized (mGlobalLock) {
                         displayContent.mLastFocus = newFocus;
                         if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Focus moving from " + lastFocus +
                                 " to " + newFocus + " displayId=" + displayContent.getDisplayId());
@@ -4430,13 +4438,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     if (newFocus != null) {
                         if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Gaining focus: " + newFocus);
-                        newFocus.reportFocusChangedSerialized(true, mInTouchMode);
+                        newFocus.reportFocusChangedSerialized(true, mInTouchMode,
+                                true /* reportToClient */);
                         notifyFocusChanged();
                     }
 
                     if (lastFocus != null) {
                         if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Losing focus: " + lastFocus);
-                        lastFocus.reportFocusChangedSerialized(false, mInTouchMode);
+                        lastFocus.reportFocusChangedSerialized(false, mInTouchMode,
+                                true /* reportToClient */);
                     }
                 } break;
 
@@ -4453,7 +4463,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     for (int i = 0; i < N; i++) {
                         if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Losing delayed focus: " +
                                 losers.get(i));
-                        losers.get(i).reportFocusChangedSerialized(false, mInTouchMode);
+                        losers.get(i).reportFocusChangedSerialized(false, mInTouchMode,
+                                true /* reportToClient */);
                     }
                 } break;
 
@@ -5930,9 +5941,13 @@ public class WindowManagerService extends IWindowManager.Stub
         pw.print("  mGlobalConfiguration="); pw.println(mRoot.getConfiguration());
         pw.print("  mHasPermanentDpad="); pw.println(mHasPermanentDpad);
         mRoot.dumpTopFocusedDisplayId(pw);
-        if (mInputMethodTarget != null) {
-            pw.print("  mInputMethodTarget="); pw.println(mInputMethodTarget);
-        }
+        mRoot.forAllDisplays(dc -> {
+            final WindowState inputMethodTarget = dc.mInputMethodTarget;
+            if (inputMethodTarget != null) {
+                pw.print("  mInputMethodTarget in display# "); pw.print(dc.getDisplayId());
+                pw.print(' '); pw.println(inputMethodTarget);
+            }
+        });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
         pw.print("  mLastDisplayFreezeDuration=");
                 TimeUtils.formatDuration(mLastDisplayFreezeDuration, pw);

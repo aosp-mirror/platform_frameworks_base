@@ -24,8 +24,12 @@
 #include <sys/system_properties.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include <private/android_filesystem_config.h> // for AID_SYSTEM
+
+#include <sstream>
+#include <string>
 
 #include "android-base/logging.h"
 #include "android-base/properties.h"
@@ -38,6 +42,7 @@
 #include "androidfw/AssetManager2.h"
 #include "androidfw/AttributeResolution.h"
 #include "androidfw/MutexGuard.h"
+#include "androidfw/PosixUtils.h"
 #include "androidfw/ResourceTypes.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
@@ -54,6 +59,7 @@ extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
 extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
 
 using ::android::base::StringPrintf;
+using ::android::util::ExecuteBinary;
 
 namespace android {
 
@@ -161,18 +167,20 @@ static void NativeVerifySystemIdmaps(JNIEnv* /*env*/, jclass /*clazz*/) {
       argv[argc++] = AssetManager::IDMAP_DIR;
 
       // Directories to scan for overlays: if OVERLAY_THEME_DIR_PROPERTY is defined,
-      // use OVERLAY_DIR/<value of OVERLAY_THEME_DIR_PROPERTY> in addition to OVERLAY_DIR.
+      // use VENDOR_OVERLAY_DIR/<value of OVERLAY_THEME_DIR_PROPERTY> in
+      // addition to VENDOR_OVERLAY_DIR.
       std::string overlay_theme_path = base::GetProperty(AssetManager::OVERLAY_THEME_DIR_PROPERTY,
                                                          "");
       if (!overlay_theme_path.empty()) {
-        overlay_theme_path = std::string(AssetManager::OVERLAY_DIR) + "/" + overlay_theme_path;
+        overlay_theme_path =
+          std::string(AssetManager::VENDOR_OVERLAY_DIR) + "/" + overlay_theme_path;
         if (stat(overlay_theme_path.c_str(), &st) == 0) {
           argv[argc++] = overlay_theme_path.c_str();
         }
       }
 
-      if (stat(AssetManager::OVERLAY_DIR, &st) == 0) {
-        argv[argc++] = AssetManager::OVERLAY_DIR;
+      if (stat(AssetManager::VENDOR_OVERLAY_DIR, &st) == 0) {
+        argv[argc++] = AssetManager::VENDOR_OVERLAY_DIR;
       }
 
       if (stat(AssetManager::PRODUCT_OVERLAY_DIR, &st) == 0) {
@@ -198,6 +206,75 @@ static void NativeVerifySystemIdmaps(JNIEnv* /*env*/, jclass /*clazz*/) {
     waitpid(pid, nullptr, 0);
     break;
   }
+}
+
+static jobjectArray NativeCreateIdmapsForStaticOverlaysTargetingAndroid(JNIEnv* env,
+                                                                        jclass /*clazz*/) {
+  // --input-directory can be given multiple times, but idmap2 expects the directory to exist
+  std::vector<std::string> input_dirs;
+  struct stat st;
+  if (stat(AssetManager::VENDOR_OVERLAY_DIR, &st) == 0) {
+    input_dirs.push_back(AssetManager::VENDOR_OVERLAY_DIR);
+  }
+
+  if (stat(AssetManager::PRODUCT_OVERLAY_DIR, &st) == 0) {
+    input_dirs.push_back(AssetManager::PRODUCT_OVERLAY_DIR);
+  }
+
+  if (stat(AssetManager::PRODUCT_SERVICES_OVERLAY_DIR, &st) == 0) {
+    input_dirs.push_back(AssetManager::PRODUCT_SERVICES_OVERLAY_DIR);
+  }
+
+  if (input_dirs.empty()) {
+    LOG(WARNING) << "no directories for idmap2 to scan";
+    return env->NewObjectArray(0, g_stringClass, nullptr);
+  }
+
+  std::vector<std::string> argv{"/system/bin/idmap2",
+    "scan",
+    "--recursive",
+    "--target-package-name", "android",
+    "--target-apk-path", "/system/framework/framework-res.apk",
+    "--output-directory", "/data/resource-cache"};
+
+  for (const auto& dir : input_dirs) {
+    argv.push_back("--input-directory");
+    argv.push_back(dir);
+  }
+
+  const auto result = ExecuteBinary(argv);
+
+  if (!result) {
+      LOG(ERROR) << "failed to execute idmap2";
+      return nullptr;
+  }
+
+  if (result->status != 0) {
+    LOG(ERROR) << "idmap2: " << result->stderr;
+    return nullptr;
+  }
+
+  std::vector<std::string> idmap_paths;
+  std::istringstream input(result->stdout);
+  std::string path;
+  while (std::getline(input, path)) {
+    idmap_paths.push_back(path);
+  }
+
+  jobjectArray array = env->NewObjectArray(idmap_paths.size(), g_stringClass, nullptr);
+  if (array == nullptr) {
+    return nullptr;
+  }
+  for (size_t i = 0; i < idmap_paths.size(); i++) {
+    const std::string path = idmap_paths[i];
+    jstring java_string = env->NewStringUTF(path.c_str());
+    if (env->ExceptionCheck()) {
+      return nullptr;
+    }
+    env->SetObjectArrayElement(array, i, java_string);
+    env->DeleteLocalRef(java_string);
+  }
+  return array;
 }
 
 static jint CopyValue(JNIEnv* env, ApkAssetsCookie cookie, const Res_value& value, uint32_t ref,
@@ -1405,6 +1482,8 @@ static const JNINativeMethod gAssetManagerMethods[] = {
 
     // System/idmap related methods.
     {"nativeVerifySystemIdmaps", "()V", (void*)NativeVerifySystemIdmaps},
+    {"nativeCreateIdmapsForStaticOverlaysTargetingAndroid", "()[Ljava/lang/String;",
+     (void*)NativeCreateIdmapsForStaticOverlaysTargetingAndroid},
 
     // Global management/debug methods.
     {"getGlobalAssetCount", "()I", (void*)NativeGetGlobalAssetCount},

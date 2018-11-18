@@ -58,6 +58,7 @@ import java.util.HashMap;
 public final class AssetManager implements AutoCloseable {
     private static final String TAG = "AssetManager";
     private static final boolean DEBUG_REFS = false;
+    private static final boolean FEATURE_FLAG_IDMAP2 = false;
 
     private static final String FRAMEWORK_APK_PATH = "/system/framework/framework-res.apk";
 
@@ -195,13 +196,23 @@ public final class AssetManager implements AutoCloseable {
             return;
         }
 
-        // Make sure that all IDMAPs are up to date.
-        nativeVerifySystemIdmaps();
 
         try {
             final ArrayList<ApkAssets> apkAssets = new ArrayList<>();
             apkAssets.add(ApkAssets.loadFromPath(FRAMEWORK_APK_PATH, true /*system*/));
-            loadStaticRuntimeOverlays(apkAssets);
+            if (FEATURE_FLAG_IDMAP2) {
+                final String[] systemIdmapPaths =
+                    nativeCreateIdmapsForStaticOverlaysTargetingAndroid();
+                if (systemIdmapPaths == null) {
+                    throw new IOException("idmap2 scan failed");
+                }
+                for (String idmapPath : systemIdmapPaths) {
+                    apkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, true /*system*/));
+                }
+            } else {
+                nativeVerifySystemIdmaps();
+                loadStaticRuntimeOverlays(apkAssets);
+            }
 
             sSystemApkAssetsSet = new ArraySet<>(apkAssets);
             sSystemApkAssets = apkAssets.toArray(new ApkAssets[apkAssets.size()]);
@@ -1404,6 +1415,7 @@ public final class AssetManager implements AutoCloseable {
     private static native long nativeAssetGetRemainingLength(long assetPtr);
 
     private static native void nativeVerifySystemIdmaps();
+    private static native String[] nativeCreateIdmapsForStaticOverlaysTargetingAndroid();
 
     // Global debug native methods.
     /**

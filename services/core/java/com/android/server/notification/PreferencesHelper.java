@@ -111,7 +111,6 @@ public class PreferencesHelper implements RankingConfig {
     // pkg => PackagePreferences
     private final ArrayMap<String, PackagePreferences> mRestoredWithoutUids = new ArrayMap<>();
 
-
     private final Context mContext;
     private final PackageManager mPm;
     private final RankingHandler mRankingHandler;
@@ -119,7 +118,6 @@ public class PreferencesHelper implements RankingConfig {
 
     private SparseBooleanArray mBadgingEnabled;
     private boolean mAreChannelsBypassingDnd;
-
 
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper) {
@@ -129,11 +127,7 @@ public class PreferencesHelper implements RankingConfig {
         mPm = pm;
 
         updateBadgingEnabled();
-
-        mAreChannelsBypassingDnd = (mZenModeHelper.getNotificationPolicy().state &
-                NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND) == 1;
-        updateChannelsBypassingDnd();
-
+        syncChannelsBypassingDnd(mContext.getUserId());
     }
 
     public void readXml(XmlPullParser parser, boolean forRestore)
@@ -525,6 +519,7 @@ public class PreferencesHelper implements RankingConfig {
                 // but the system can
                 if (group.isBlocked() != oldGroup.isBlocked()) {
                     group.lockFields(NotificationChannelGroup.USER_LOCKED_BLOCKED_STATE);
+                    updateChannelsBypassingDnd(mContext.getUserId());
                 }
                 if (group.canOverlayApps() != oldGroup.canOverlayApps()) {
                     group.lockFields(NotificationChannelGroup.USER_LOCKED_ALLOW_APP_OVERLAY);
@@ -571,6 +566,7 @@ public class PreferencesHelper implements RankingConfig {
 
             // Apps are allowed to downgrade channel importance if the user has not changed any
             // fields on this channel yet.
+            final int previousExistingImportance = existing.getImportance();
             if (existing.getUserLockedFields() == 0 &&
                     channel.getImportance() < existing.getImportance()) {
                 existing.setImportance(channel.getImportance());
@@ -582,8 +578,9 @@ public class PreferencesHelper implements RankingConfig {
                 boolean bypassDnd = channel.canBypassDnd();
                 existing.setBypassDnd(bypassDnd);
 
-                if (bypassDnd != mAreChannelsBypassingDnd) {
-                    updateChannelsBypassingDnd();
+                if (bypassDnd != mAreChannelsBypassingDnd
+                        || previousExistingImportance != existing.getImportance()) {
+                    updateChannelsBypassingDnd(mContext.getUserId());
                 }
             }
 
@@ -613,7 +610,7 @@ public class PreferencesHelper implements RankingConfig {
 
         r.channels.put(channel.getId(), channel);
         if (channel.canBypassDnd() != mAreChannelsBypassingDnd) {
-            updateChannelsBypassingDnd();
+            updateChannelsBypassingDnd(mContext.getUserId());
         }
         MetricsLogger.action(getChannelLog(channel, pkg).setType(
                 com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_OPEN));
@@ -663,8 +660,9 @@ public class PreferencesHelper implements RankingConfig {
             MetricsLogger.action(getChannelLog(updatedChannel, pkg));
         }
 
-        if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd) {
-            updateChannelsBypassingDnd();
+        if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd
+                || channel.getImportance() != updatedChannel.getImportance()) {
+            updateChannelsBypassingDnd(mContext.getUserId());
         }
         updateConfig();
     }
@@ -701,7 +699,7 @@ public class PreferencesHelper implements RankingConfig {
             MetricsLogger.action(lm);
 
             if (mAreChannelsBypassingDnd && channel.canBypassDnd()) {
-                updateChannelsBypassingDnd();
+                updateChannelsBypassingDnd(mContext.getUserId());
             }
         }
     }
@@ -859,6 +857,27 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     /**
+     * Gets all notification channels associated with the given pkg and userId that can bypass dnd
+     */
+    public ParceledListSlice<NotificationChannel> getNotificationChannelsBypassingDnd(String pkg,
+            int userId) {
+        List<NotificationChannel> channels = new ArrayList<>();
+        synchronized (mPackagePreferences) {
+            final PackagePreferences r = mPackagePreferences.get(
+                    packagePreferencesKey(pkg, userId));
+            // notifications from this package aren't blocked
+            if (r != null && r.importance != IMPORTANCE_NONE) {
+                for (NotificationChannel channel : r.channels.values()) {
+                    if (channelIsLive(r, channel) && channel.canBypassDnd()) {
+                        channels.add(channel);
+                    }
+                }
+            }
+        }
+        return new ParceledListSlice<>(channels);
+    }
+
+    /**
      * True for pre-O apps that only have the default channel, or pre O apps that have no
      * channels yet. This method will create the default channel for pre-O apps that don't have it.
      * Should never be true for O+ targeting apps, but that's enforced on boot/when an app
@@ -922,18 +941,62 @@ public class PreferencesHelper implements RankingConfig {
         return count;
     }
 
-    public void updateChannelsBypassingDnd() {
+    /**
+     * Returns the number of apps that have at least one notification channel that can bypass DND
+     * for given particular user
+     */
+    public int getAppsBypassingDndCount(int userId) {
+        int count = 0;
         synchronized (mPackagePreferences) {
-            final int numPackagePreferencess = mPackagePreferences.size();
-            for (int PackagePreferencesIndex = 0; PackagePreferencesIndex < numPackagePreferencess;
-                    PackagePreferencesIndex++) {
-                final PackagePreferences r = mPackagePreferences.valueAt(PackagePreferencesIndex);
-                final int numChannels = r.channels.size();
+            final int numPackagePreferences = mPackagePreferences.size();
+            for (int i = 0; i < numPackagePreferences; i++) {
+                final PackagePreferences r = mPackagePreferences.valueAt(i);
+                // Package isn't associated with this userId or notifications from this package are
+                // blocked
+                if (userId != UserHandle.getUserId(r.uid) || r.importance == IMPORTANCE_NONE) {
+                    continue;
+                }
 
-                for (int channelIndex = 0; channelIndex < numChannels; channelIndex++) {
-                    NotificationChannel channel = r.channels.valueAt(channelIndex);
-                    if (!channel.isDeleted() && channel.canBypassDnd()) {
-                        // If any channel bypasses DND, synchronize state and return early.
+                for (NotificationChannel channel : r.channels.values()) {
+                    if (channelIsLive(r, channel) && channel.canBypassDnd()) {
+                        count++;
+                        break;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Syncs {@link #mAreChannelsBypassingDnd} with the user's notification policy before
+     * updating
+     * @param userId
+     */
+    private void syncChannelsBypassingDnd(int userId) {
+        mAreChannelsBypassingDnd = (mZenModeHelper.getNotificationPolicy().state
+                & NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND) == 1;
+        updateChannelsBypassingDnd(userId);
+    }
+
+    /**
+     * Updates the user's NotificationPolicy based on whether the given userId
+     * has channels bypassing DND
+     * @param userId
+     */
+    private void updateChannelsBypassingDnd(int userId) {
+        synchronized (mPackagePreferences) {
+            final int numPackagePreferences = mPackagePreferences.size();
+            for (int i = 0; i < numPackagePreferences; i++) {
+                final PackagePreferences r = mPackagePreferences.valueAt(i);
+                // Package isn't associated with this userId or notifications from this package are
+                // blocked
+                if (userId != UserHandle.getUserId(r.uid) || r.importance == IMPORTANCE_NONE) {
+                    continue;
+                }
+
+                for (NotificationChannel channel : r.channels.values()) {
+                    if (channelIsLive(r, channel) && channel.canBypassDnd()) {
                         if (!mAreChannelsBypassingDnd) {
                             mAreChannelsBypassingDnd = true;
                             updateZenPolicy(true);
@@ -943,12 +1006,27 @@ public class PreferencesHelper implements RankingConfig {
                 }
             }
         }
-
         // If no channels bypass DND, update the zen policy once to disable DND bypass.
         if (mAreChannelsBypassingDnd) {
             mAreChannelsBypassingDnd = false;
             updateZenPolicy(false);
         }
+    }
+
+    private boolean channelIsLive(PackagePreferences pkgPref, NotificationChannel channel) {
+        // Channel is in a group that's blocked
+        if (!TextUtils.isEmpty(channel.getGroup())) {
+            if (pkgPref.groups.get(channel.getGroup()).isBlocked()) {
+                return false;
+            }
+        }
+
+        // Channel is deleted or is blocked
+        if (channel.isDeleted() || channel.getImportance() == IMPORTANCE_NONE) {
+            return false;
+        }
+
+        return true;
     }
 
     public void updateZenPolicy(boolean areChannelsBypassingDnd) {
@@ -1327,6 +1405,20 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
         return packageChannels;
+    }
+
+    /**
+     * Called when user switches
+     */
+    public void onUserSwitched(int userId) {
+        syncChannelsBypassingDnd(userId);
+    }
+
+    /**
+     * Called when user is unlocked
+     */
+    public void onUserUnlocked(int userId) {
+        syncChannelsBypassingDnd(userId);
     }
 
     public void onUserRemoved(int userId) {

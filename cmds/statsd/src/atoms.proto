@@ -27,6 +27,7 @@ import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
+import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
@@ -118,7 +119,7 @@ message Atom {
         ResourceConfigurationChanged resource_configuration_changed = 66;
         BluetoothEnabledStateChanged bluetooth_enabled_state_changed = 67;
         BluetoothConnectionStateChanged bluetooth_connection_state_changed = 68;
-        // 69 is blank but need not be.
+        GpsSignalQualityChanged gps_signal_quality_changed = 69;
         UsbConnectorStateChanged usb_connector_state_changed = 70;
         SpeakerImpedanceReported speaker_impedance_reported = 71;
         HardwareFailed hardware_failed = 72;
@@ -148,6 +149,13 @@ message Atom {
         UserRestrictionChanged user_restriction_changed = 96;
         SettingsUIChanged settings_ui_changed = 97;
         ConnectivityStateChanged connectivity_state_changed = 98;
+        // TODO: service state change is very noisy shortly after boot, as well
+        // as at other transitions - coming out of doze, device plugged in, etc.
+        // Consider removing this if it becomes a problem
+        ServiceStateChanged service_state_changed = 99;
+        ServiceLaunchReported service_launch_reported = 100;
+        PhenotypeFlagStateChanged phenotype_flag_state_changed = 101;
+        BinaryPushStateChanged binary_push_state_changed = 102;
     }
 
     // Pulled events will start at field 10000.
@@ -192,6 +200,9 @@ message Atom {
         NativeProcessMemoryState native_process_memory_state = 10036;
         CpuTimePerThreadFreq cpu_time_per_thread_freq = 10037;
         OnDevicePowerMeasurement on_device_power_measurement = 10038;
+        DeviceCalculatedPowerUse device_calculated_power_use = 10039;
+        DeviceCalculatedPowerBlameUid device_calculated_power_blame_uid = 10040;
+        DeviceCalculatedPowerBlameOther device_calculated_power_blame_other = 10041;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -486,7 +497,6 @@ message SensorStateChanged {
     optional State state = 3;
 }
 
-
 /**
  * Logs when GPS state changes.
  *
@@ -501,6 +511,16 @@ message GpsScanStateChanged {
         ON = 1;
     }
     optional State state = 2;
+}
+
+/**
+ * Logs when GPS signal quality.
+ *
+ * Logged from:
+ *   /frameworks/base/location/java/com/android/internal/location/gnssmetrics/GnssMetrics.java
+ */
+message GpsSignalQualityChanged {
+    optional android.server.location.GpsSignalQualityEnum level = 1;
 }
 
 
@@ -2131,20 +2151,92 @@ message Notification {
 }
 
 /*
+ * Logs when a flag flip state changes.
+ * Logged in P/h.
+ */
+message PhenotypeFlagStateChanged {
+    // Mendel configuration name.
+    optional string mendel_config_name = 1;
+    // State
+    enum State {
+        STATE_UNKNOWN = 0;
+        COMMITTED = 1;
+    }
+    optional State state = 2;
+}
+
+/*
+ * Logs when a binary push state changes.
+ * Logged in Play store
+ */
+message BinaryPushStateChanged {
+    // Binary package name.
+    optional string binary_name = 1;
+    // Version code.
+    optional int64 version = 2;
+    // State
+    enum State {
+        STATE_UNKNOWN = 0;
+        DOWNLOAD_START = 1;
+        DOWNLOAD_DONE = 2;
+        INSTALL_START = 3;
+        INSTALL_DONE = 4;
+        REBOOT_START = 5;
+        REBOOT_DONE = 6;
+    }
+    optional State state = 3;
+}
+
+/*
  * Logs when a connection becomes available and lost.
  * Logged in StatsCompanionService.java
  */
 message ConnectivityStateChanged {
-    // Id of the network.
-    optional int32 net_id = 1;
+  // Id of the network.
+  optional int32 net_id = 1;
+
+  enum State {
+    UNKNOWN = 0;
+    CONNECTED = 1;
+    DISCONNECTED = 2;
+  }
+  // Connected state of a network.
+  optional State state = 2;
+}
+
+/**
+ * Logs when a service starts and stops.
+ * Logged from:
+ *   services/core/java/com/android/server/am/ActiveServices.java
+ */
+message ServiceStateChanged {
+
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional string package_name = 2;
+
+    optional string service_name = 3;
 
     enum State {
-        UNKNOWN = 0;
-        CONNECTED = 1;
-        DISCONNECTED = 2;
+        START = 1;
+        STOP = 2;
     }
-    // Connected state of a network.
-    optional State state = 2;
+
+    optional State state = 4;
+}
+
+/**
+ * Logs when a service is launched.
+ * Logged from:
+ *   services/core/java/com/android/server/am/ActiveServices.java
+ */
+message ServiceLaunchReported {
+
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional string package_name = 2;
+
+    optional string service_name = 3;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3197,4 +3289,64 @@ message CpuTimePerThreadFreq {
     optional uint32 frequency_khz = 6;
     // Time spent in frequency in milliseconds, since thread start.
     optional uint32 time_millis = 7;
+}
+
+/**
+ * Pulls on-device BatteryStats power use calculations for the overall device.
+ */
+message DeviceCalculatedPowerUse {
+    // Power used by the device in mAh, as computed by BatteryStats, since BatteryStats last reset
+    // (i.e. roughly since device was last significantly charged).
+    // Currently, this is BatteryStatsHelper.getComputedPower() (not getTotalPower()).
+    optional float computed_power_milli_amp_hours = 1;
+}
+
+/**
+ * Pulls on-device BatteryStats power use calculations broken down by uid.
+ * This atom should be complemented by DeviceCalculatedPowerBlameOther, which contains the power use
+ * that is attributed to non-uid items. They must all be included to get the total power use.
+ */
+message DeviceCalculatedPowerBlameUid {
+    // Uid being blamed. Note: isolated uids have already been mapped to host uid.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Power used by this uid in mAh, as computed by BatteryStats, since BatteryStats last reset
+    // (i.e. roughly since device was last significantly charged).
+    optional float power_milli_amp_hours = 2;
+}
+
+/**
+ * Pulls on-device BatteryStats power use calculations that are not due to a uid, broken down by
+ * drain type.
+ * This atom should be complemented by DeviceCalculatedPowerBlameUid, which contains the blame that
+ * is attributed uids. They must all be included to get the total power use.
+ */
+message DeviceCalculatedPowerBlameOther {
+    // The type of item whose power use is being reported.
+    enum DrainType {
+        AMBIENT_DISPLAY = 0;
+        // reserved 1; reserved "APP"; // Logged instead in DeviceCalculatedPowerBlameUid.
+        BLUETOOTH = 2;
+        CAMERA = 3;
+        // Cell-standby
+        CELL = 4;
+        FLASHLIGHT = 5;
+        IDLE = 6;
+        MEMORY = 7;
+        // Amount that total computed drain exceeded the drain estimated using the
+        // battery level changes and capacity.
+        OVERCOUNTED = 8;
+        PHONE = 9;
+        SCREEN = 10;
+        // Amount that total computed drain was below the drain estimated using the
+        // battery level changes and capacity.
+        UNACCOUNTED = 11;
+        // reserved 12; reserved "USER"; // Entire drain for a user. This is NOT supported.
+        WIFI = 13;
+    }
+    optional DrainType drain_type = 1;
+
+    // Power used by this item in mAh, as computed by BatteryStats, since BatteryStats last reset
+    // (i.e. roughly since device was last significantly charged).
+    optional float power_milli_amp_hours = 2;
 }

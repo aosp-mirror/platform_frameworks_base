@@ -27,7 +27,6 @@ import static junit.framework.Assert.fail;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -98,7 +97,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     private static final UserHandle USER = UserHandle.of(0);
     private static final int UID_O = 1111;
     private static final String SYSTEM_PKG = "android";
-    private static final int SYSTEM_UID= 1000;
+    private static final int SYSTEM_UID = 1000;
     private static final UserHandle USER2 = UserHandle.of(10);
     private static final String TEST_CHANNEL_ID = "test_channel_id";
     private static final String TEST_AUTHORITY = "test";
@@ -1088,6 +1087,158 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         assertEquals(1, mHelper.getBlockedChannelCount(PKG_N_MR1, UID_N_MR1));
         assertEquals(0, mHelper.getBlockedChannelCount("pkg2", UID_O));
+    }
+
+    @Test
+    public void testGetChannelsBypassingDndCount_noChannelsBypassing() throws Exception {
+        assertEquals(0, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
+                USER.getIdentifier()).getList().size());
+    }
+
+    @Test
+    public void testGetChannelsBypassingDnd_noChannelsForUserIdBypassing()
+            throws Exception {
+        int user = 9;
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_MAX);
+        channel.setBypassDnd(true);
+        mHelper.createNotificationChannel(PKG_N_MR1, 111, channel, true, true);
+
+        assertEquals(0, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
+                user).getList().size());
+    }
+
+    @Test
+    public void testGetChannelsBypassingDndCount_oneChannelBypassing_groupBlocked() {
+        int user = USER.getIdentifier();
+        NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
+        NotificationChannel channel1 = new NotificationChannel("id1", "name1",
+                NotificationManager.IMPORTANCE_MAX);
+        channel1.setBypassDnd(true);
+        channel1.setGroup(ncg.getId());
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, user, ncg,  /* fromTargetApp */ true);
+        mHelper.createNotificationChannel(PKG_N_MR1, user, channel1, true, /*has DND access*/ true);
+
+        assertEquals(1, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
+                user).getList().size());
+
+        // disable group
+        ncg.setBlocked(true);
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, user, ncg,  /* fromTargetApp */ false);
+        assertEquals(0, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
+                user).getList().size());
+    }
+
+    @Test
+    public void testGetChannelsBypassingDndCount_multipleChannelsBypassing() {
+        int user = USER.getIdentifier();
+        NotificationChannel channel1 = new NotificationChannel("id1", "name1",
+                NotificationManager.IMPORTANCE_MAX);
+        NotificationChannel channel2 = new NotificationChannel("id2", "name2",
+                NotificationManager.IMPORTANCE_MAX);
+        NotificationChannel channel3 = new NotificationChannel("id3", "name3",
+                NotificationManager.IMPORTANCE_MAX);
+        channel1.setBypassDnd(true);
+        channel2.setBypassDnd(true);
+        channel3.setBypassDnd(true);
+        // has DND access, so can set bypassDnd attribute
+        mHelper.createNotificationChannel(PKG_N_MR1, user, channel1, true, /*has DND access*/ true);
+        mHelper.createNotificationChannel(PKG_N_MR1, user, channel2, true, true);
+        mHelper.createNotificationChannel(PKG_N_MR1, user, channel3, true, true);
+        assertEquals(3, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
+                user).getList().size());
+
+        // block notifications from this app
+        mHelper.setEnabled(PKG_N_MR1, user, false);
+        assertEquals(0, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
+                user).getList().size());
+
+        // re-enable notifications from this app
+        mHelper.setEnabled(PKG_N_MR1, user, true);
+        assertEquals(3, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
+                user).getList().size());
+
+        // setBypassDnd false for some channels
+        channel1.setBypassDnd(false);
+        channel2.setBypassDnd(false);
+        assertEquals(1, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
+                user).getList().size());
+
+        // setBypassDnd false for rest of the channels
+        channel3.setBypassDnd(false);
+        assertEquals(0, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
+                user).getList().size());
+    }
+
+    @Test
+    public void testGetAppsBypassingDndCount_noAppsBypassing() throws Exception {
+        assertEquals(0, mHelper.getAppsBypassingDndCount(USER.getIdentifier()));
+    }
+
+    @Test
+    public void testGetAppsBypassingDndCount_noAppsForUserIdBypassing() throws Exception {
+        int user = 9;
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_MAX);
+        channel.setBypassDnd(true);
+        mHelper.createNotificationChannel(PKG_N_MR1, 111, channel, true, true);
+
+        assertEquals(0, mHelper.getAppsBypassingDndCount(user));
+    }
+
+    @Test
+    public void testGetAppsBypassingDndCount_oneChannelBypassing_groupBlocked() {
+        int user = USER.getIdentifier();
+        NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
+        NotificationChannel channel1 = new NotificationChannel("id1", "name1",
+                NotificationManager.IMPORTANCE_MAX);
+        channel1.setBypassDnd(true);
+        channel1.setGroup(ncg.getId());
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, user, ncg,  /* fromTargetApp */ true);
+        mHelper.createNotificationChannel(PKG_N_MR1, user, channel1, true, /*has DND access*/ true);
+
+        assertEquals(1, mHelper.getAppsBypassingDndCount(user));
+
+        // disable group
+        ncg.setBlocked(true);
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, user, ncg,  /* fromTargetApp */ false);
+        assertEquals(0, mHelper.getAppsBypassingDndCount(user));
+    }
+
+    @Test
+    public void testGetAppsBypassingDndCount_oneAppBypassing() {
+        int user = USER.getIdentifier();
+        NotificationChannel channel1 = new NotificationChannel("id1", "name1",
+                NotificationManager.IMPORTANCE_MAX);
+        NotificationChannel channel2 = new NotificationChannel("id2", "name2",
+                NotificationManager.IMPORTANCE_MAX);
+        NotificationChannel channel3 = new NotificationChannel("id3", "name3",
+                NotificationManager.IMPORTANCE_MAX);
+        channel1.setBypassDnd(true);
+        channel2.setBypassDnd(true);
+        channel3.setBypassDnd(true);
+        // has DND access, so can set bypassDnd attribute
+        mHelper.createNotificationChannel(PKG_N_MR1, user, channel1, true, /*has DND access*/ true);
+        mHelper.createNotificationChannel(PKG_N_MR1, user, channel2, true, true);
+        mHelper.createNotificationChannel(PKG_N_MR1, user, channel3, true, true);
+        assertEquals(1, mHelper.getAppsBypassingDndCount(user));
+
+        // block notifications from this app
+        mHelper.setEnabled(PKG_N_MR1, user, false);
+        assertEquals(0, mHelper.getAppsBypassingDndCount(user)); // no apps can bypass dnd
+
+        // re-enable notifications from this app
+        mHelper.setEnabled(PKG_N_MR1, user, true);
+        assertEquals(1, mHelper.getAppsBypassingDndCount(user));
+
+        // setBypassDnd false for some channels
+        channel1.setBypassDnd(false);
+        channel2.setBypassDnd(false);
+        assertEquals(1, mHelper.getAppsBypassingDndCount(user));
+
+        // setBypassDnd false for rest of the channels
+        channel3.setBypassDnd(false);
+        assertEquals(0, mHelper.getAppsBypassingDndCount(user));
     }
 
     @Test

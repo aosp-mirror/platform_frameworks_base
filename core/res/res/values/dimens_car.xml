@@ -34,7 +34,6 @@
     <!-- The diff between keyline 1 and keyline 3. -->
     <dimen name="car_keyline_1_keyline_3_diff">88dp</dimen>
     <dimen name="car_dialog_action_bar_height">@dimen/car_card_action_bar_height</dimen>
-    <dimen name="car_primary_icon_size">44dp</dimen>
 
     <!-- Text size for car -->
     <dimen name="car_title_size">32sp</dimen>
@@ -56,16 +55,19 @@
 
     <!-- Common icon size for car app -->
     <dimen name="car_icon_size">56dp</dimen>
+    <dimen name="car_primary_icon_size">44dp</dimen>
+    <dimen name="car_secondary_icon_size">36dp</dimen>
 
-    <dimen name="car_card_header_height">96dp</dimen>
-    <dimen name="car_card_action_bar_height">96dp</dimen>
+    <dimen name="car_card_header_height">76dp</dimen>
+    <dimen name="car_card_action_bar_height">76dp</dimen>
 
     <!-- Paddings -->
-    <dimen name="car_padding_1">4dp</dimen>
-    <dimen name="car_padding_2">10dp</dimen>
-    <dimen name="car_padding_3">16dp</dimen>
-    <dimen name="car_padding_4">28dp</dimen>
-    <dimen name="car_padding_5">32dp</dimen>
+    <dimen name="car_padding_0">4dp</dimen>
+    <dimen name="car_padding_1">8dp</dimen>
+    <dimen name="car_padding_2">16dp</dimen>
+    <dimen name="car_padding_3">28dp</dimen>
+    <dimen name="car_padding_4">32dp</dimen>
+    <dimen name="car_padding_5">64dp</dimen>
 
     <!-- Radius -->
     <dimen name="car_radius_1">4dp</dimen>

@@ -57,78 +57,6 @@ class IApkSerializer {
   Source source_;
 };
 
-bool ConvertApk(IAaptContext* context, unique_ptr<LoadedApk> apk, IApkSerializer* serializer,
-                IArchiveWriter* writer) {
-  io::IFile* manifest = apk->GetFileCollection()->FindFile(kAndroidManifestPath);
-  if (!serializer->SerializeXml(apk->GetManifest(), kAndroidManifestPath, true /*utf16*/, writer,
-                                (manifest != nullptr && manifest->WasCompressed())
-                                    ? ArchiveEntry::kCompress : 0u)) {
-    context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
-                                     << "failed to serialize AndroidManifest.xml");
-    return false;
-  }
-
-  if (apk->GetResourceTable() != nullptr) {
-    // The table might be modified by below code.
-    auto converted_table = apk->GetResourceTable();
-
-    // Resources
-    for (const auto& package : converted_table->packages) {
-      for (const auto& type : package->types) {
-        for (const auto& entry : type->entries) {
-          for (const auto& config_value : entry->values) {
-            FileReference* file = ValueCast<FileReference>(config_value->value.get());
-            if (file != nullptr) {
-              if (file->file == nullptr) {
-                context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
-                                                 << "no file associated with " << *file);
-                return false;
-              }
-
-              if (!serializer->SerializeFile(file, writer)) {
-                context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
-                                                 << "failed to serialize file " << *file->path);
-                return false;
-              }
-            } // file
-          } // config_value
-        } // entry
-      } // type
-    } // package
-
-    // Converted resource table
-    if (!serializer->SerializeTable(converted_table, writer)) {
-      context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
-                                       << "failed to serialize the resource table");
-      return false;
-    }
-  }
-
-  // Other files
-  std::unique_ptr<io::IFileCollectionIterator> iterator = apk->GetFileCollection()->Iterator();
-  while (iterator->HasNext()) {
-    io::IFile* file = iterator->Next();
-    std::string path = file->GetSource().path;
-
-    // Manifest, resource table and resources have already been taken care of.
-    if (path == kAndroidManifestPath ||
-        path == kApkResourceTablePath ||
-        path == kProtoResourceTablePath ||
-        path.find("res/") == 0) {
-      continue;
-    }
-
-    if (!io::CopyFileToArchivePreserveCompression(context, file, path, writer)) {
-      context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
-                                       << "failed to copy file " << path);
-      return false;
-    }
-  }
-
-  return true;
-}
-
-
 class BinaryApkSerializer : public IApkSerializer {
  public:
   BinaryApkSerializer(IAaptContext* context, const Source& source,
@@ -323,12 +251,97 @@ class Context : public IAaptContext {
   StdErrDiagnostics diag_;
 };
 
+int Convert(IAaptContext* context, LoadedApk* apk, IArchiveWriter* output_writer,
+            ApkFormat output_format, TableFlattenerOptions& options) {
+  // Do not change the ordering of strings in the values string pool
+  options.sort_stringpool_entries = false;
+
+  unique_ptr<IApkSerializer> serializer;
+  if (output_format == ApkFormat::kBinary) {
+    serializer.reset(new BinaryApkSerializer(context, apk->GetSource(), options));
+  } else if (output_format == ApkFormat::kProto) {
+    serializer.reset(new ProtoApkSerializer(context, apk->GetSource()));
+  } else {
+    context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                     << "Cannot convert APK to unknown format");
+    return 1;
+  }
+
+  io::IFile* manifest = apk->GetFileCollection()->FindFile(kAndroidManifestPath);
+  if (!serializer->SerializeXml(apk->GetManifest(), kAndroidManifestPath, true /*utf16*/,
+                                output_writer, (manifest != nullptr && manifest->WasCompressed())
+                                ? ArchiveEntry::kCompress : 0u)) {
+    context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                     << "failed to serialize AndroidManifest.xml");
+    return 1;
+  }
+
+  if (apk->GetResourceTable() != nullptr) {
+    // The table might be modified by below code.
+    auto converted_table = apk->GetResourceTable();
+
+    // Resources
+    for (const auto& package : converted_table->packages) {
+      for (const auto& type : package->types) {
+        for (const auto& entry : type->entries) {
+          for (const auto& config_value : entry->values) {
+            FileReference* file = ValueCast<FileReference>(config_value->value.get());
+            if (file != nullptr) {
+              if (file->file == nullptr) {
+                context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                                 << "no file associated with " << *file);
+                return 1;
+              }
+
+              if (!serializer->SerializeFile(file, output_writer)) {
+                context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                                 << "failed to serialize file " << *file->path);
+                return 1;
+              }
+            } // file
+          } // config_value
+        } // entry
+      } // type
+    } // package
+
+    // Converted resource table
+    if (!serializer->SerializeTable(converted_table, output_writer)) {
+      context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                       << "failed to serialize the resource table");
+      return 1;
+    }
+  }
+
+  // Other files
+  std::unique_ptr<io::IFileCollectionIterator> iterator = apk->GetFileCollection()->Iterator();
+  while (iterator->HasNext()) {
+    io::IFile* file = iterator->Next();
+    std::string path = file->GetSource().path;
+
+    // Manifest, resource table and resources have already been taken care of.
+    if (path == kAndroidManifestPath ||
+        path == kApkResourceTablePath ||
+        path == kProtoResourceTablePath ||
+        path.find("res/") == 0) {
+      continue;
+    }
+
+    if (!io::CopyFileToArchivePreserveCompression(context, file, path, output_writer)) {
+      context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                       << "failed to copy file " << path);
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
 const char* ConvertCommand::kOutputFormatProto = "proto";
 const char* ConvertCommand::kOutputFormatBinary = "binary";
 
 int ConvertCommand::Action(const std::vector<std::string>& args) {
   if (args.size() != 1) {
-    std::cerr << "must supply a single proto APK\n";
+    std::cerr << "must supply a single APK\n";
     Usage(&std::cerr);
     return 1;
   }
@@ -341,34 +354,31 @@ int ConvertCommand::Action(const std::vector<std::string>& args) {
     return 1;
   }
 
-  Maybe<AppInfo> app_info =
-      ExtractAppInfoFromBinaryManifest(*apk->GetManifest(), context.GetDiagnostics());
+  Maybe<AppInfo> app_info = ExtractAppInfoFromBinaryManifest(*apk->GetManifest(),
+                                                             context.GetDiagnostics());
   if (!app_info) {
     return 1;
   }
 
   context.package_ = app_info.value().package;
-
-  unique_ptr<IArchiveWriter> writer =
-      CreateZipFileArchiveWriter(context.GetDiagnostics(), output_path_);
+  unique_ptr<IArchiveWriter> writer = CreateZipFileArchiveWriter(context.GetDiagnostics(),
+                                                                 output_path_);
   if (writer == nullptr) {
     return 1;
   }
 
-  unique_ptr<IApkSerializer> serializer;
+  ApkFormat format;
   if (!output_format_ || output_format_.value() == ConvertCommand::kOutputFormatBinary) {
-
-    serializer.reset(new BinaryApkSerializer(&context, apk->GetSource(), options_));
+    format = ApkFormat::kBinary;
   } else if (output_format_.value() == ConvertCommand::kOutputFormatProto) {
-    serializer.reset(new ProtoApkSerializer(&context, apk->GetSource()));
+    format = ApkFormat::kProto;
   } else {
-    context.GetDiagnostics()->Error(DiagMessage(path)
-        << "Invalid value for flag --output-format: "
-        << output_format_.value());
+    context.GetDiagnostics()->Error(DiagMessage(path) << "Invalid value for flag --output-format: "
+                                                      << output_format_.value());
     return 1;
   }
 
-  return ConvertApk(&context, std::move(apk), serializer.get(), writer.get()) ? 0 : 1;
+  return Convert(&context, apk.get(), writer.get(), format, options_);
 }
 
 }  // namespace aapt

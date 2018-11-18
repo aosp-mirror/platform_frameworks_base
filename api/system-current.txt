@@ -137,6 +137,7 @@ package android {
     field public static final java.lang.String PROVIDE_RESOLVER_RANKER_SERVICE = "android.permission.PROVIDE_RESOLVER_RANKER_SERVICE";
     field public static final java.lang.String PROVIDE_TRUST_AGENT = "android.permission.PROVIDE_TRUST_AGENT";
     field public static final java.lang.String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
+    field public static final java.lang.String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final java.lang.String READ_CONTENT_RATING_SYSTEMS = "android.permission.READ_CONTENT_RATING_SYSTEMS";
     field public static final java.lang.String READ_DREAM_STATE = "android.permission.READ_DREAM_STATE";
     field public static final java.lang.String READ_INSTALL_SESSIONS = "android.permission.READ_INSTALL_SESSIONS";
@@ -1205,6 +1206,7 @@ package android.content.pm {
   public abstract class PackageManager {
     method public abstract void addOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public abstract boolean arePermissionsIndividuallyControlled();
+    method public boolean canSuspendPackage(java.lang.String);
     method public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(java.lang.String);
     method public android.content.pm.dex.ArtManager getArtManager();
     method public abstract java.lang.String getDefaultBrowserPackageNameAsUser(int);
@@ -3639,17 +3641,16 @@ package android.net.wifi {
 
   public class WifiManager {
     method public void connect(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
+    method public java.util.List<android.net.wifi.WifiConfiguration> getAllMatchingWifiConfigs(java.util.List<android.net.wifi.ScanResult>);
+    method public java.util.List<android.net.wifi.hotspot2.OsuProvider> getMatchingOsuProviders(java.util.List<android.net.wifi.ScanResult>);
     method public java.util.List<android.net.wifi.WifiConfiguration> getPrivilegedConfiguredNetworks();
     method public android.net.wifi.WifiConfiguration getWifiApConfiguration();
     method public int getWifiApState();
     method public boolean isDeviceToApRttSupported();
     method public boolean isDeviceToDeviceRttSupported();
-    method public boolean isOweSupported();
     method public boolean isPortableHotspotSupported();
     method public boolean isWifiApEnabled();
     method public boolean isWifiScannerSupported();
-    method public boolean isWpa3SaeSupported();
-    method public boolean isWpa3SuiteBSupported();
     method public void registerNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback, android.os.Handler);
     method public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
     method public boolean startScan(android.os.WorkSource);
@@ -4109,6 +4110,7 @@ package android.os {
   }
 
   public final class PowerManager {
+    method public void dream(long);
     method public int getPowerSaveMode();
     method public boolean setDynamicPowerSavings(boolean, int);
     method public boolean setPowerSaveMode(boolean);
@@ -4545,10 +4547,6 @@ package android.provider {
   public final class Settings {
     field public static final java.lang.String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
     field public static final java.lang.String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
-    field public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10; // 0xa
-    field public static final int USER_SETUP_PERSONALIZATION_NOT_STARTED = 0; // 0x0
-    field public static final int USER_SETUP_PERSONALIZATION_PAUSED = 2; // 0x2
-    field public static final int USER_SETUP_PERSONALIZATION_STARTED = 1; // 0x1
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
@@ -4592,6 +4590,10 @@ package android.provider {
     field public static final java.lang.String LOCK_SCREEN_SHOW_NOTIFICATIONS = "lock_screen_show_notifications";
     field public static final java.lang.String MANUAL_RINGER_TOGGLE_COUNT = "manual_ringer_toggle_count";
     field public static final java.lang.String USER_SETUP_COMPLETE = "user_setup_complete";
+    field public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10; // 0xa
+    field public static final int USER_SETUP_PERSONALIZATION_NOT_STARTED = 0; // 0x0
+    field public static final int USER_SETUP_PERSONALIZATION_PAUSED = 2; // 0x2
+    field public static final int USER_SETUP_PERSONALIZATION_STARTED = 1; // 0x1
     field public static final java.lang.String USER_SETUP_PERSONALIZATION_STATE = "user_setup_personalization_state";
     field public static final java.lang.String VOLUME_HUSH_GESTURE = "volume_hush_gesture";
   }
@@ -4779,6 +4781,16 @@ package android.service.autofill {
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.autofill.AutofillFieldClassificationService";
     field public static final java.lang.String SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS = "android.autofill.field_classification.available_algorithms";
     field public static final java.lang.String SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM = "android.autofill.field_classification.default_algorithm";
+  }
+
+}
+
+package android.service.carrier {
+
+  public abstract class ApnService extends android.app.Service {
+    ctor public ApnService();
+    method public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
+    method public android.os.IBinder onBind(android.content.Intent);
   }
 
 }
@@ -5461,6 +5473,7 @@ package android.telephony {
     method public static android.os.PersistableBundle getDefaultConfig();
     method public void overrideConfig(int, android.os.PersistableBundle);
     method public void updateConfigForPhoneId(int, java.lang.String);
+    field public static final java.lang.String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
     field public static final java.lang.String KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING = "config_plans_package_override_string";
   }
 
@@ -5535,8 +5548,10 @@ package android.telephony {
   public class PhoneStateListener {
     method public void onRadioPowerStateChanged(int);
     method public void onSrvccStateChanged(int);
+    method public void onVoiceActivationStateChanged(int);
     field public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000
     field public static final int LISTEN_SRVCC_STATE_CHANGED = 16384; // 0x4000
+    field public static final int LISTEN_VOICE_ACTIVATION_STATE = 131072; // 0x20000
   }
 
   public class ServiceState implements android.os.Parcelable {
@@ -5693,6 +5708,7 @@ package android.telephony {
     method public deprecated boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method public boolean needsOtaServiceProvisioning();
     method public boolean rebootRadio();
+    method public void requestCellInfoUpdate(android.os.WorkSource, java.util.concurrent.Executor, android.telephony.TelephonyManager.CellInfoCallback);
     method public boolean resetRadioConfig();
     method public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method public void setCarrierDataEnabled(boolean);
@@ -6598,6 +6614,22 @@ package android.telephony.ims {
     method public abstract void onSetZoom(float);
     method public void receiveSessionModifyRequest(android.telecom.VideoProfile);
     method public void receiveSessionModifyResponse(int, android.telecom.VideoProfile, android.telecom.VideoProfile);
+  }
+
+  public class ProvisioningManager {
+    method public static android.telephony.ims.ProvisioningManager createForSubscriptionId(android.content.Context, int);
+    method public int getProvisioningIntValue(int);
+    method public java.lang.String getProvisioningStringValue(int);
+    method public void registerProvisioningChangedCallback(java.util.concurrent.Executor, android.telephony.ims.ProvisioningManager.Callback);
+    method public int setProvisioningIntValue(int, int);
+    method public int setProvisioningStringValue(int, java.lang.String);
+    method public void unregisterProvisioningChangedCallback(android.telephony.ims.ProvisioningManager.Callback);
+  }
+
+  public static class ProvisioningManager.Callback {
+    ctor public ProvisioningManager.Callback();
+    method public void onProvisioningIntChanged(int, int);
+    method public void onProvisioningStringChanged(int, java.lang.String);
   }
 
 }

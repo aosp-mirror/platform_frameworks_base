@@ -36,7 +36,7 @@ import android.view.SurfaceSession;
 import android.view.View;
 
 import com.android.internal.util.Preconditions;
-import com.android.server.input.InputWindowHandle;
+import android.view.InputWindowHandle;
 import com.android.server.wm.WindowManagerInternal.IDragDropCallback;
 import java.util.concurrent.atomic.AtomicReference;
 

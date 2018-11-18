@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
+import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
@@ -57,6 +58,7 @@ import android.app.WaitResult;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Rect;
+import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.MediumTest;
@@ -433,6 +435,26 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
                 eq(activity), eq(null /* targetOptions */));
     }
 
+    /**
+     * Tests home activities that targeted sdk before Q cannot start on secondary display.
+     */
+    @Test
+    public void testStartHomeTargetSdkBeforeQ() throws Exception {
+        final TestActivityDisplay secondDisplay = spy(createNewActivityDisplay());
+        mSupervisor.addChild(secondDisplay, POSITION_TOP);
+        doReturn(true).when(secondDisplay).supportsSystemDecorations();
+
+        final ActivityInfo info = new ActivityInfo();
+        info.launchMode = LAUNCH_MULTIPLE;
+        info.applicationInfo = new ApplicationInfo();
+        info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.Q;
+        assertTrue(mSupervisor.canStartHomeOnDisplay(info, secondDisplay.mDisplayId,
+                false /* allowInstrumenting */));
+
+        info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.P;
+        assertFalse(mSupervisor.canStartHomeOnDisplay(info, secondDisplay.mDisplayId,
+                false /* allowInstrumenting */));
+    }
 
     /**
      * Tests that home activities can be started on the displays that supports system decorations.

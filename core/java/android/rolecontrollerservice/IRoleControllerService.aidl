@@ -30,4 +30,6 @@ oneway interface IRoleControllerService {
                            in IRoleManagerCallback callback);
 
     void onClearRoleHolders(in String roleName, in IRoleManagerCallback callback);
+
+    void onGrantDefaultRoles(in IRoleManagerCallback callback);
 }

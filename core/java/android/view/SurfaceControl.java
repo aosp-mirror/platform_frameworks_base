@@ -153,6 +153,9 @@ public class SurfaceControl implements Parcelable {
 
     private static native Display.HdrCapabilities nativeGetHdrCapabilities(IBinder displayToken);
 
+    private static native void nativeSetInputWindowInfo(long transactionObj, long nativeObject,
+            InputWindowHandle handle);
+
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private final String mName;
@@ -1456,6 +1459,12 @@ public class SurfaceControl implements Parcelable {
         public Transaction setAlpha(SurfaceControl sc, float alpha) {
             sc.checkNotReleased();
             nativeSetAlpha(mNativeObject, sc.mNativeObject, alpha);
+            return this;
+        }
+
+        public Transaction setInputWindowInfo(SurfaceControl sc, InputWindowHandle handle) {
+            sc.checkNotReleased();
+            nativeSetInputWindowInfo(mNativeObject, sc.mNativeObject, handle);
             return this;
         }
 

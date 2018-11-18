@@ -243,46 +243,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         }
     }
 
-    /**
-     * Breaks a string in 2 lines where both have similar character count
-     * but first line is always longer.
-     *
-     * @param charSequence Original text.
-     * @return Optimal string.
-     */
-    private static CharSequence findBestLineBreak(CharSequence charSequence) {
-        if (TextUtils.isEmpty(charSequence)) {
-            return charSequence;
-        }
-
-        String source = charSequence.toString();
-        // Ignore if there is only 1 word,
-        // or if line breaks were manually set.
-        if (source.contains("\n") || !source.contains(" ")) {
-            return source;
-        }
-
-        final String[] words = source.split(" ");
-        final StringBuilder optimalString = new StringBuilder(source.length());
-        int current = 0;
-        while (optimalString.length() < source.length() - optimalString.length()) {
-            optimalString.append(words[current]);
-            if (current < words.length - 1) {
-                optimalString.append(" ");
-            }
-            current++;
-        }
-        optimalString.append("\n");
-        for (int i = current; i < words.length; i++) {
-            optimalString.append(words[i]);
-            if (current < words.length - 1) {
-                optimalString.append(" ");
-            }
-        }
-
-        return optimalString.toString();
-    }
-
     public void setDarkAmount(float darkAmount) {
         mDarkAmount = darkAmount;
         mRow.setDarkAmount(darkAmount);

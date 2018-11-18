@@ -100,7 +100,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.CUSTOM_SCREEN_ROTATION;
-import static com.android.server.wm.WindowManagerService.H.REPORT_FOCUS_CHANGE;
 import static com.android.server.wm.WindowManagerService.H.REPORT_LOSING_FOCUS;
 import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.H.UPDATE_DOCKED_STACK_DIVIDER;
@@ -496,6 +495,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     WindowState mInputMethodWindow;
 
+    /**
+     * This just indicates the window the input method is on top of, not
+     * necessarily the window its input is going to.
+     */
+    WindowState mInputMethodTarget;
+
+    /** If true hold off on modifying the animation layer of mInputMethodTarget */
+    boolean mInputMethodTargetWaitingAnim;
+
     private final PointerEventDispatcher mPointerEventDispatcher;
 
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
@@ -699,7 +707,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private final Consumer<WindowState> mApplyPostLayoutPolicy =
             w -> mService.mPolicy.applyPostLayoutPolicyLw(w, w.mAttrs, w.getParentWindow(),
-                    mService.mInputMethodTarget);
+                    mInputMethodTarget);
 
     private final Consumer<WindowState> mApplySurfaceChangesTransaction = w -> {
         final WindowSurfacePlacer surfacePlacer = mService.mWindowPlacerLocked;
@@ -1928,7 +1936,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * rather than directly above their target.
      */
     private boolean skipTraverseChild(WindowContainer child) {
-        if (child == mImeWindowsContainers && mService.mInputMethodTarget != null
+        if (child == mImeWindowsContainers && mInputMethodTarget != null
                 && !hasSplitScreenPrimaryStack()) {
             return true;
         }
@@ -2800,13 +2808,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (mCurrentFocus == newFocus) {
             return false;
         }
-        mService.mH.obtainMessage(REPORT_FOCUS_CHANGE, this).sendToTarget();
         boolean imWindowChanged = false;
         // TODO (b/111080190): Multi-Session IME
         if (!focusFound) {
             final WindowState imWindow = mInputMethodWindow;
             if (imWindow != null) {
-                final WindowState prevTarget = mService.mInputMethodTarget;
+                final WindowState prevTarget = mInputMethodTarget;
 
                 final WindowState newTarget = computeImeTarget(true /* updateImeTarget*/);
                 imWindowChanged = prevTarget != newTarget;
@@ -2998,13 +3005,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // There isn't an IME so there shouldn't be a target...That was easy!
             if (updateImeTarget) {
                 if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from "
-                        + mService.mInputMethodTarget + " to null since mInputMethodWindow is null");
-                setInputMethodTarget(null, mService.mInputMethodTargetWaitingAnim);
+                        + mInputMethodTarget + " to null since mInputMethodWindow is null");
+                setInputMethodTarget(null, mInputMethodTargetWaitingAnim);
             }
             return null;
         }
 
-        final WindowState curTarget = mService.mInputMethodTarget;
+        final WindowState curTarget = mInputMethodTarget;
         if (!canUpdateImeTarget()) {
             if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Defer updating IME target");
             return curTarget;
@@ -3031,7 +3038,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         if (DEBUG_INPUT_METHOD && updateImeTarget) Slog.v(TAG_WM,
-                "Proposed new IME target: " + target);
+                "Proposed new IME target: " + target + " for display: " + getDisplayId());
 
         // Now, a special case -- if the last target's window is in the process of exiting, but
         // not removed, and the new target is home, keep on the last target to avoid flicker.
@@ -3052,7 +3059,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget
                         + " to null." + (SHOW_STACK_CRAWLS ? " Callers="
                         + Debug.getCallers(4) : ""));
-                setInputMethodTarget(null, mService.mInputMethodTargetWaitingAnim);
+                setInputMethodTarget(null, mInputMethodTargetWaitingAnim);
             }
 
             return null;
@@ -3091,14 +3098,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return target;
     }
 
+    /**
+     * Calling {@link #computeImeTarget(boolean)} to update the input method target window in
+     * the candidate app window token if needed.
+     */
+    void computeImeTargetIfNeeded(AppWindowToken candidate) {
+        if (mInputMethodTarget != null && mInputMethodTarget.mAppToken == candidate) {
+            computeImeTarget(true /* updateImeTarget */);
+        }
+    }
+
     private void setInputMethodTarget(WindowState target, boolean targetWaitingAnim) {
-        if (target == mService.mInputMethodTarget
-                && mService.mInputMethodTargetWaitingAnim == targetWaitingAnim) {
+        if (target == mInputMethodTarget && mInputMethodTargetWaitingAnim == targetWaitingAnim) {
             return;
         }
 
-        mService.mInputMethodTarget = target;
-        mService.mInputMethodTargetWaitingAnim = targetWaitingAnim;
+        mInputMethodTarget = target;
+        mInputMethodTargetWaitingAnim = targetWaitingAnim;
         assignWindowLayers(false /* setLayoutNeeded */);
     }
 
@@ -4487,7 +4503,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mTaskStackContainers.assignLayer(t, 1);
         mAboveAppWindowsContainers.assignLayer(t, 2);
 
-        WindowState imeTarget = mService.mInputMethodTarget;
+        final WindowState imeTarget = mInputMethodTarget;
         boolean needAssignIme = true;
 
         // In the case where we have an IME target that is not in split-screen

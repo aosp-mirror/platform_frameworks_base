@@ -2421,7 +2421,7 @@ public abstract class BatteryStats implements Parcelable {
 
     public static final IntToString[] HISTORY_EVENT_INT_FORMATTERS = new IntToString[] {
             sUidToString, sUidToString, sUidToString, sUidToString, sUidToString, sUidToString,
-            sUidToString, sUidToString, sUidToString, sUidToString, sUidToString, sUidToString,
+            sUidToString, sUidToString, sUidToString, sUidToString, sUidToString, sIntToString,
             sUidToString, sUidToString, sUidToString, sUidToString, sUidToString, sUidToString,
             sUidToString, sUidToString, sUidToString, sIntToString
     };

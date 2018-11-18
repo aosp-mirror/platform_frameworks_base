@@ -191,7 +191,7 @@ import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
-import com.android.server.input.InputWindowHandle;
+import android.view.InputWindowHandle;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.utils.InsetUtils;
@@ -718,7 +718,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLastRequestedHeight = 0;
         mLayer = 0;
         mInputWindowHandle = new InputWindowHandle(
-                mAppToken != null ? mAppToken.mInputApplicationHandle : null, this, c,
+                mAppToken != null ? mAppToken.mInputApplicationHandle : null, c,
                     getDisplayId());
     }
 
@@ -2047,7 +2047,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Create dummy event receiver that simply reports all events as handled.
             mDeadWindowEventReceiver = new DeadWindowEventReceiver(mClientChannel);
         }
-        mService.mInputManager.registerInputChannel(mInputChannel, mInputWindowHandle);
+        mService.mInputManager.registerInputChannel(mInputChannel, mClient.asBinder());
     }
 
     void disposeInputChannel() {
@@ -2059,6 +2059,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // unregister server channel first otherwise it complains about broken channel
         if (mInputChannel != null) {
             mService.mInputManager.unregisterInputChannel(mInputChannel);
+
             mInputChannel.dispose();
             mInputChannel = null;
         }
@@ -2841,12 +2842,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Report a focus change.  Must be called with no locks held, and consistently
      * from the same serialized thread (such as dispatched from a handler).
      */
-    void reportFocusChangedSerialized(boolean focused, boolean inTouchMode) {
+    void reportFocusChangedSerialized(boolean focused, boolean inTouchMode,
+            boolean reportToClient) {
         try {
-            mClient.windowFocusChanged(focused, inTouchMode);
+            mClient.windowFocusChanged(focused, inTouchMode, reportToClient);
         } catch (RemoteException e) {
         }
-        if (mFocusCallbacks != null) {
+        if (mFocusCallbacks != null && reportToClient) {
             final int N = mFocusCallbacks.beginBroadcast();
             for (int i=0; i<N; i++) {
                 IWindowFocusObserver obs = mFocusCallbacks.getBroadcastItem(i);
@@ -4476,8 +4478,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean needsZBoost() {
-        if (mIsImWindow && mService.mInputMethodTarget != null) {
-            final AppWindowToken appToken = mService.mInputMethodTarget.mAppToken;
+        final WindowState inputMethodTarget = getDisplayContent().mInputMethodTarget;
+        if (mIsImWindow && inputMethodTarget != null) {
+            final AppWindowToken appToken = inputMethodTarget.mAppToken;
             if (appToken != null) {
                 return appToken.needsZBoost();
             }
@@ -4607,7 +4610,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Likewise if we share a token with the Input method target and are ordered
             // above it but not necessarily a child (e.g. a Dialog) then we also need
             // this promotion.
-            final WindowState imeTarget = mService.mInputMethodTarget;
+            final WindowState imeTarget = getDisplayContent().mInputMethodTarget;
             boolean inTokenWithAndAboveImeTarget = imeTarget != null && imeTarget != this
                     && imeTarget.mToken == mToken && imeTarget.compareTo(this) <= 0;
             return inTokenWithAndAboveImeTarget;
@@ -4684,7 +4687,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public boolean isInputMethodTarget() {
-        return mService.mInputMethodTarget == this;
+        return getDisplayContent().mInputMethodTarget == this;
     }
 
     long getFrameNumber() {

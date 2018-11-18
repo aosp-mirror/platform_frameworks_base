@@ -4335,6 +4335,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {android.os.IIdmap2} for managing idmap files (used by overlay
+     * packages).
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String IDMAP_SERVICE = "idmap";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link VrManager} for accessing the VR service.
      *
      * @see #getSystemService(String)

@@ -99,11 +99,7 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
         if (other instanceof WifiNetworkSpecifier) {
             return satisfiesNetworkSpecifier((WifiNetworkSpecifier) other);
         }
-        if (other instanceof WifiNetworkAgentSpecifier) {
-            throw new IllegalStateException("WifiNetworkAgentSpecifier instances should never be "
-                    + "compared");
-        }
-        return false;
+        return equals(other);
     }
 
     /**
@@ -172,7 +168,7 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("WifiNetworkAgentSpecifier [");
-        sb.append(", WifiConfiguration=").append(
+        sb.append("WifiConfiguration=").append(
                 mWifiConfiguration == null ? null : mWifiConfiguration.configKey())
                 .append(", mOriginalRequestorUid=").append(mOriginalRequestorUid)
                 .append("]");

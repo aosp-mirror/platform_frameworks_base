@@ -18,6 +18,7 @@
 #define AAPT2_CONVERT_H
 
 #include "Command.h"
+#include "LoadedApk.h"
 #include "format/binary/TableFlattener.h"
 
 namespace aapt {
@@ -49,6 +50,9 @@ class ConvertCommand : public Command {
   bool verbose_ = false;
 };
 
-}// namespace aapt
+int Convert(IAaptContext* context, LoadedApk* input, IArchiveWriter* output_writer,
+            ApkFormat output_format, TableFlattenerOptions& options);
+
+}  // namespace aapt
 
 #endif //AAPT2_CONVERT_H

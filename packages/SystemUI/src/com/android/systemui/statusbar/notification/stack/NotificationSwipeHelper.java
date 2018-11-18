@@ -165,15 +165,15 @@ class NotificationSwipeHelper extends SwipeHelper
 
         if (menuRow.isSnappedAndOnSameSide()) {
             // Menu was snapped to previously and we're on the same side
-            handleSwipeFromSnap(ev, animView, velocity, menuRow);
+            handleSwipeFromOpenState(ev, animView, velocity, menuRow);
         } else {
             // Menu has not been snapped, or was snapped previously but is now on
             // the opposite side.
-            handleSwipeFromNonSnap(ev, animView, velocity, menuRow);
+            handleSwipeFromClosedState(ev, animView, velocity, menuRow);
         }
     }
 
-    private void handleSwipeFromNonSnap(MotionEvent ev, View animView, float velocity,
+    private void handleSwipeFromClosedState(MotionEvent ev, View animView, float velocity,
             NotificationMenuRowPlugin menuRow) {
         boolean isDismissGesture = isDismissGesture(ev);
         final boolean gestureTowardsMenu = menuRow.isTowardsMenu(velocity);
@@ -183,10 +183,14 @@ class NotificationSwipeHelper extends SwipeHelper
         final boolean showMenuForSlowOnGoing = !menuRow.canBeDismissed()
                 && timeForGesture >= SWIPE_MENU_TIMING;
 
-        if (!isFalseGesture(ev)
-                && (swipedEnoughToShowMenu(menuRow)
-                && (!gestureFastEnough || showMenuForSlowOnGoing))
-                || (gestureTowardsMenu && !isDismissGesture)) {
+        boolean isNonDismissGestureTowardsMenu = gestureTowardsMenu && !isDismissGesture;
+        boolean isSlowSwipe = !gestureFastEnough || showMenuForSlowOnGoing;
+        boolean slowSwipedFarEnough = swipedEnoughToShowMenu(menuRow) && isSlowSwipe;
+        boolean isFastNonDismissGesture =
+                gestureFastEnough && !gestureTowardsMenu && !isDismissGesture;
+        boolean isMenuRevealingGestureAwayFromMenu = slowSwipedFarEnough || isFastNonDismissGesture;
+        if (isNonDismissGestureTowardsMenu
+                || (!isFalseGesture(ev) && isMenuRevealingGestureAwayFromMenu)) {
             // Menu has not been snapped to previously and this is menu revealing gesture
             snapOpen(animView, menuRow.getMenuSnapTarget(), velocity);
             menuRow.onSnapOpen();
@@ -199,7 +203,7 @@ class NotificationSwipeHelper extends SwipeHelper
         }
     }
 
-    private void handleSwipeFromSnap(MotionEvent ev, View animView, float velocity,
+    private void handleSwipeFromOpenState(MotionEvent ev, View animView, float velocity,
             NotificationMenuRowPlugin menuRow) {
         boolean isDismissGesture = isDismissGesture(ev);
 
@@ -227,7 +231,6 @@ class NotificationSwipeHelper extends SwipeHelper
         if (mCallback.isExpanded()) {
             // We don't want to quick-dismiss when it's a heads up as this might lead to closing
             // of the panel early.
-            mSwipingInProgress = false;
             mCallback.handleChildViewDismissed(view);
         }
         mCallback.onDismiss();
@@ -247,7 +250,6 @@ class NotificationSwipeHelper extends SwipeHelper
     @Override
     public void snapChild(final View animView, final float targetLeft, float velocity) {
         superSnapChild(animView, targetLeft, velocity);
-        mSwipingInProgress = false;
         mCallback.onDragCancelled(animView);
         if (targetLeft == 0) {
             handleMenuCoveredOrDismissed();
@@ -354,7 +356,6 @@ class NotificationSwipeHelper extends SwipeHelper
 
     public void onMenuShown(View animView) {
         setExposedMenuView(getTranslatingParentView());
-        mSwipingInProgress = false;
         mCallback.onDragCancelled(animView);
         Handler handler = getHandler();
 

@@ -23,8 +23,8 @@ import android.os.UserHandle;
 import android.view.InputChannel;
 import android.view.WindowManager;
 
-import com.android.server.input.InputApplicationHandle;
-import com.android.server.input.InputWindowHandle;
+import android.view.InputApplicationHandle;
+import android.view.InputWindowHandle;
 
 import java.io.PrintWriter;
 
@@ -63,7 +63,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mApplicationHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
-        mWindowHandle = new InputWindowHandle(mApplicationHandle, null, null, displayId);
+        mWindowHandle = new InputWindowHandle(mApplicationHandle, null, displayId);
         mWindowHandle.name = name;
         mWindowHandle.inputChannel = mServerChannel;
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;

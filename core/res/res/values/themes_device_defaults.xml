@@ -1475,6 +1475,8 @@ easier.
 
         <!-- Toolbar attributes -->
         <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
+
+        <item name="listDivider">@color/list_divider_color_light</item>
     </style>
 
     <!-- @hide DeviceDefault theme for a window that should use Settings theme colors
