@@ -53,8 +53,6 @@ public class Events {
     public static final int EVENT_TOUCH_LEVEL_DONE = 16;  // (stream|int) (level|bool)
     public static final int EVENT_ZEN_CONFIG_CHANGED = 17; // (allow/disallow|string)
     public static final int EVENT_RINGER_TOGGLE = 18; // (ringer_mode)
-    public static final int EVENT_SHOW_OVERHEAT_ALARM = 19; // (reason|int) (keyguard|bool)
-    public static final int EVENT_DISMISS_OVERHEAT_ALARM = 20; // (reason|int) (keyguard|bool)
 
     private static final String[] EVENT_TAGS = {
             "show_dialog",
@@ -75,9 +73,7 @@ public class Events {
             "mute_changed",
             "touch_level_done",
             "zen_mode_config_changed",
-            "ringer_toggle",
-            "show_overheat_alarm",
-            "dismiss_overheat_alarm"
+            "ringer_toggle"
     };
 
     public static final int DISMISS_REASON_UNKNOWN = 0;
@@ -104,12 +100,10 @@ public class Events {
     public static final int SHOW_REASON_UNKNOWN = 0;
     public static final int SHOW_REASON_VOLUME_CHANGED = 1;
     public static final int SHOW_REASON_REMOTE_VOLUME_CHANGED = 2;
-    public static final int SHOW_REASON_OVERHEAD_ALARM_CHANGED = 3;
     public static final String[] SHOW_REASONS = {
         "unknown",
         "volume_changed",
-        "remote_volume_changed",
-        "overheat_alarm_changed"
+        "remote_volume_changed"
     };
 
     public static final int ICON_STATE_UNKNOWN = 0;
@@ -186,19 +180,6 @@ public class Events {
                     break;
                 case EVENT_SUPPRESSOR_CHANGED:
                     sb.append(list[0]).append(' ').append(list[1]);
-                    break;
-                case EVENT_SHOW_OVERHEAT_ALARM:
-                    MetricsLogger.visible(context, MetricsEvent.POWER_OVERHEAT_ALARM);
-                    MetricsLogger.histogram(context, "overheat_alarm",
-                            (Boolean) list[1] ? 1 : 0);
-                    sb.append(SHOW_REASONS[(Integer) list[0]]).append(" keyguard=").append(list[1]);
-                    break;
-                case EVENT_DISMISS_OVERHEAT_ALARM:
-                    MetricsLogger.hidden(context, MetricsEvent.POWER_OVERHEAT_ALARM);
-                    MetricsLogger.histogram(context, "overheat_alarm",
-                            (Boolean) list[1] ? 1 : 0);
-                    sb.append(DISMISS_REASONS[(Integer) list[0]]).append(" keyguard=").append(
-                            list[1]);
                     break;
                 default:
                     sb.append(Arrays.asList(list));
