@@ -82,6 +82,13 @@ public abstract class EuiccService extends Service {
     // LUI actions. These are passthroughs of the corresponding EuiccManager actions.
 
     /**
+     * Action used to bind the carrier app and get the activation code from the carrier app. This
+     * activation code will be used to download the eSIM profile during eSIM activation flow.
+     */
+    public static final String ACTION_BIND_CARRIER_PROVISIONING_SERVICE =
+            "android.service.euicc.action.BIND_CARRIER_PROVISIONING_SERVICE";
+
+    /**
      * @see android.telephony.euicc.EuiccManager#ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS
      * The difference is this one is used by system to bring up the LUI.
      */

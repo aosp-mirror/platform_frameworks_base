@@ -186,6 +186,7 @@ public class EuiccManager {
      * whether the user choses to use eUICC to set up network in SUW.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_FORCE_PROVISION =
             "android.telephony.euicc.extra.FORCE_PROVISION";
 
