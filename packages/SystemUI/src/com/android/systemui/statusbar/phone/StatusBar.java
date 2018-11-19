@@ -22,6 +22,7 @@ import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
@@ -843,16 +844,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGroupAlertTransferHelper.setHeadsUpManager(mHeadsUpManager);
         putComponent(HeadsUpManager.class, mHeadsUpManager);
 
-
-        try {
-            boolean showNav = mWindowManagerService.hasNavigationBar();
-            if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
-            if (showNav) {
-                createNavigationBar();
-            }
-        } catch (RemoteException ex) {
-            // no window manager? good luck with that
-        }
+        createNavigationBar();
 
         if (ENABLE_LOCKSCREEN_WALLPAPER) {
             mLockscreenWallpaper = new LockscreenWallpaper(mContext, this, mHandler);
@@ -1061,13 +1053,24 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     protected void createNavigationBar() {
-        mNavigationBarView = NavigationBarFragment.create(mContext, (tag, fragment) -> {
-            mNavigationBar = (NavigationBarFragment) fragment;
-            if (mLightBarController != null) {
-                mNavigationBar.setLightBarController(mLightBarController);
-            }
-            mNavigationBar.setCurrentSysuiVisibility(mSystemUiVisibility);
-        });
+        try {
+            // TODO(117478341): Move this into DisplayNavigationBarController#createNavigationBars
+            // for-loop. We will also move the whole navigation bar logic together.
+            final boolean showNav = mWindowManagerService.hasNavigationBar(DEFAULT_DISPLAY);
+            if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
+            if (!showNav) return;
+
+            mNavigationBarView = NavigationBarFragment.create(mContext, (tag, fragment) -> {
+                mNavigationBar = (NavigationBarFragment) fragment;
+                if (mLightBarController != null) {
+                    mNavigationBar.setLightBarController(mLightBarController);
+                }
+                mNavigationBar.setCurrentSysuiVisibility(mSystemUiVisibility);
+            });
+        } catch (RemoteException ex) {
+            // no window manager? good luck with that
+        }
+        mNavigationBarController.createNavigationBars();
     }
 
     /**

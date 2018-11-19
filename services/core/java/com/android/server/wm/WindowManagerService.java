@@ -5707,8 +5707,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public boolean hasNavigationBar() {
-        return mPolicy.hasNavigationBar();
+    public boolean hasNavigationBar(int displayId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent dc = mRoot.getDisplayContent(displayId);
+            if (dc == null) {
+                return false;
+            }
+            return dc.getDisplayPolicy().hasNavigationBar();
+        }
     }
 
     @Override

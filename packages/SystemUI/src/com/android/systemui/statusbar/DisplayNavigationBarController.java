@@ -22,8 +22,11 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.os.Handler;
+import android.os.RemoteException;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowManagerGlobal;
 
@@ -33,6 +36,8 @@ import com.android.systemui.statusbar.phone.NavigationBarFragment;
  * A controller to handle external navigation bars
  */
 public class DisplayNavigationBarController implements DisplayListener {
+
+    private static final String TAG = DisplayNavigationBarController.class.getName();
 
     private final Context mContext;
     private final Handler mHandler;
@@ -112,14 +117,23 @@ public class DisplayNavigationBarController implements DisplayListener {
         }
 
         final int displayId = display.getDisplayId();
+        final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
+
+        try {
+            if (!wms.hasNavigationBar(displayId)) {
+                return;
+            }
+        } catch (RemoteException e) {
+            // Cannot get wms, just return with warning message.
+            Log.w(TAG, "Cannot get WindowManager.");
+            return;
+        }
         final Context externalDisplayContext = mContext.createDisplayContext(display);
-        NavigationBarFragment.create(externalDisplayContext,
-                (tag, fragment) -> {
-                    final NavigationBarFragment navBar = (NavigationBarFragment) fragment;
-                    // TODO(b/115978725): handle external nav bars sysuiVisibility
-                    navBar.setCurrentSysuiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-                    mExternalNavigationBarMap.append(displayId, navBar);
-                }
-        );
+        NavigationBarFragment.create(externalDisplayContext, (tag, fragment) -> {
+            final NavigationBarFragment navBar = (NavigationBarFragment) fragment;
+            // TODO(b/115978725): handle external nav bars sysuiVisibility
+            navBar.setCurrentSysuiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            mExternalNavigationBarMap.append(displayId, navBar);
+        });
     }
 }
