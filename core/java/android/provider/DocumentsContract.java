@@ -1232,7 +1232,7 @@ public final class DocumentsContract {
     public static Bitmap getDocumentThumbnail(ContentProviderClient client, Uri documentUri,
             Point size, CancellationSignal signal) throws IOException {
         return ContentResolver.loadThumbnail(client, documentUri, Point.convert(size), signal,
-                ImageDecoder.ALLOCATOR_DEFAULT);
+                ImageDecoder.ALLOCATOR_SOFTWARE);
     }
 
     /**
