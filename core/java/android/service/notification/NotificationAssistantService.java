@@ -160,6 +160,21 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     }
 
     /**
+     * Implement this to know when a notification is expanded / collapsed.
+     * @param key the notification key
+     * @param isUserAction whether the expanded change is caused by user action.
+     * @param isExpanded whether the notification is expanded.
+     */
+    public void onNotificationExpansionChanged(
+            String key, boolean isUserAction, boolean isExpanded) {}
+
+    /**
+     * Implement this to know when a direct reply is sent from a notification.
+     * @param key the notification key
+     */
+    public void onNotificationDirectReply(String key) {}
+
+    /**
      * Updates a notification.  N.B. this won’t cause
      * an existing notification to alert, but might allow a future update to
      * this notification to alert.
@@ -255,12 +270,33 @@ public abstract class NotificationAssistantService extends NotificationListenerS
             mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATIONS_SEEN,
                     args).sendToTarget();
         }
+
+        @Override
+        public void onNotificationExpansionChanged(String key, boolean isUserAction,
+                boolean isExpanded) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = key;
+            args.argi1 = isUserAction ? 1 : 0;
+            args.argi2 = isExpanded ? 1 : 0;
+            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_EXPANSION_CHANGED, args)
+                    .sendToTarget();
+        }
+
+        @Override
+        public void onNotificationDirectReply(String key) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = key;
+            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_DIRECT_REPLY_SENT, args)
+                    .sendToTarget();
+        }
     }
 
     private final class MyHandler extends Handler {
         public static final int MSG_ON_NOTIFICATION_ENQUEUED = 1;
         public static final int MSG_ON_NOTIFICATION_SNOOZED = 2;
         public static final int MSG_ON_NOTIFICATIONS_SEEN = 3;
+        public static final int MSG_ON_NOTIFICATION_EXPANSION_CHANGED = 4;
+        public static final int MSG_ON_NOTIFICATION_DIRECT_REPLY_SENT = 5;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -303,6 +339,22 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                     List<String> keys = (List<String>) args.arg1;
                     args.recycle();
                     onNotificationsSeen(keys);
+                    break;
+                }
+                case MSG_ON_NOTIFICATION_EXPANSION_CHANGED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String key = (String) args.arg1;
+                    boolean isUserAction = args.argi1 == 1;
+                    boolean isExpanded = args.argi2 == 1;
+                    args.recycle();
+                    onNotificationExpansionChanged(key, isUserAction, isExpanded);
+                    break;
+                }
+                case MSG_ON_NOTIFICATION_DIRECT_REPLY_SENT: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String key = (String) args.arg1;
+                    args.recycle();
+                    onNotificationDirectReply(key);
                     break;
                 }
             }

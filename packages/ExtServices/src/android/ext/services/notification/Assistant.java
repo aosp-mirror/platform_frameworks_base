@@ -355,6 +355,21 @@ public class Assistant extends NotificationAssistantService {
     }
 
     @Override
+    public void onNotificationExpansionChanged(String key, boolean isUserAction,
+            boolean isExpanded) {
+        if (DEBUG) {
+            Log.i(TAG,
+                    "onNotificationExpansionChanged " + key + ", isUserAction =" + isUserAction
+                            + ", isExpanded = isExpanded");
+        }
+    }
+
+    @Override
+    public void onNotificationDirectReply(String key) {
+        if (DEBUG) Log.i(TAG, "onNotificationDirectReply " + key);
+    }
+
+    @Override
     public void onListenerConnected() {
         if (DEBUG) Log.i(TAG, "CONNECTED");
         try {
