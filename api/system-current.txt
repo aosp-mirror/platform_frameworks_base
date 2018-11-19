@@ -4656,6 +4656,11 @@ package android.security.keystore {
     field public static final int ID_TYPE_SERIAL = 1; // 0x1
   }
 
+  public class DeviceIdAttestationException extends java.lang.Exception {
+    ctor public DeviceIdAttestationException(java.lang.String);
+    ctor public DeviceIdAttestationException(java.lang.String, java.lang.Throwable);
+  }
+
 }
 
 package android.security.keystore.recovery {
@@ -6700,7 +6705,7 @@ package android.telephony.ims.feature {
     field public static final int PROCESS_CALL_IMS = 0; // 0x0
   }
 
-  public static class MmTelFeature.MmTelCapabilities {
+  public static class MmTelFeature.MmTelCapabilities extends android.telephony.ims.feature.ImsFeature.Capabilities {
     ctor public MmTelFeature.MmTelCapabilities();
     ctor public deprecated MmTelFeature.MmTelCapabilities(android.telephony.ims.feature.ImsFeature.Capabilities);
     ctor public MmTelFeature.MmTelCapabilities(int);
