@@ -24,8 +24,6 @@ import com.android.internal.os.ClassLoaderFactory;
 import com.android.server.pm.PackageDexOptimizer;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public final class DexoptUtils {
