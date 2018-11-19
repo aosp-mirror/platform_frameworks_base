@@ -85,6 +85,29 @@ public class NotificationGroupAlertTransferHelper implements OnGroupChangeListen
         Dependency.get(StatusBarStateController.class).addListener(this);
     }
 
+    /**
+     * Whether or not a notification has transferred its alert state to the notification and
+     * the notification should alert after inflating.
+     *
+     * @param entry notification to check
+     * @return true if the entry was transferred to and should inflate + alert
+     */
+    public boolean isAlertTransferPending(@NonNull Entry entry) {
+        PendingAlertInfo alertInfo = mPendingAlerts.get(entry.key);
+        return alertInfo != null && alertInfo.isStillValid();
+    }
+
+    /**
+     * Removes any alerts pending on this entry. Note that this will not stop any inflation tasks
+     * started by a transfer, so this should only be used as clean-up for when inflation is stopped
+     * and the pending alert no longer needs to happen.
+     *
+     * @param key notification key that may have info that needs to be cleaned up
+     */
+    public void cleanUpPendingAlertInfo(@NonNull String key) {
+        mPendingAlerts.remove(key);
+    }
+
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
         mHeadsUpManager = headsUpManager;
     }
@@ -178,20 +201,6 @@ public class NotificationGroupAlertTransferHelper implements OnGroupChangeListen
                 entry.row.freeContentViewWhenSafe(alertInfo.mAlertManager.getContentFlag());
             }
         }
-    }
-
-    /**
-     * Called when the entry's reinflation has been aborted.
-     *
-     * @param entry entry whose inflation has been aborted
-     */
-    public void onInflationAborted(@NonNull Entry entry) {
-        GroupAlertEntry groupAlertEntry = mGroupAlertEntries.get(
-                mGroupManager.getGroupKey(entry.notification));
-        if (groupAlertEntry == null) {
-            return;
-        }
-        mPendingAlerts.remove(entry.key);
     }
 
     /**
@@ -382,8 +391,7 @@ public class NotificationGroupAlertTransferHelper implements OnGroupChangeListen
             @NonNull AlertingNotificationManager alertManager) {
         @InflationFlag int contentFlag = alertManager.getContentFlag();
         if (!entry.row.isInflationFlagSet(contentFlag)) {
-            // Take in the current alert manager in case it changes.
-            mPendingAlerts.put(entry.key, new PendingAlertInfo(alertManager));
+            mPendingAlerts.put(entry.key, new PendingAlertInfo(entry, alertManager));
             entry.row.updateInflationFlag(contentFlag, true /* shouldInflate */);
             entry.row.inflateViews();
             return;
@@ -409,7 +417,18 @@ public class NotificationGroupAlertTransferHelper implements OnGroupChangeListen
      * inflation completes.
      */
     private class PendingAlertInfo {
+        /**
+         * The alert manager when the transfer is initiated.
+         */
         final AlertingNotificationManager mAlertManager;
+
+        /**
+         * The original notification when the transfer is initiated. This is used to determine if
+         * the transfer is still valid if the notification is updated.
+         */
+        final StatusBarNotification mOriginalNotification;
+        final Entry mEntry;
+
         /**
          * The notification is still pending inflation but we've decided that we no longer need
          * the content view (e.g. suppression might have changed and we decided we need to transfer
@@ -419,7 +438,9 @@ public class NotificationGroupAlertTransferHelper implements OnGroupChangeListen
          */
         boolean mAbortOnInflation;
 
-        PendingAlertInfo(AlertingNotificationManager alertManager) {
+        PendingAlertInfo(Entry entry, AlertingNotificationManager alertManager) {
+            mOriginalNotification = entry.notification;
+            mEntry = entry;
             mAlertManager = alertManager;
         }
 
@@ -435,6 +456,15 @@ public class NotificationGroupAlertTransferHelper implements OnGroupChangeListen
             }
             if (mAlertManager != getActiveAlertManager()) {
                 // Alert manager has changed
+                return false;
+            }
+            if (mEntry.notification.getGroupKey() != mOriginalNotification.getGroupKey()) {
+                // Groups have changed
+                return false;
+            }
+            if (mEntry.notification.getNotification().isGroupSummary()
+                    != mOriginalNotification.getNotification().isGroupSummary()) {
+                // Notification has changed from group summary to not or vice versa
                 return false;
             }
             return true;

@@ -18,11 +18,14 @@ package com.android.systemui.statusbar.phone;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -155,6 +158,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         // content is not inflated.
         assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
         assertFalse(mHeadsUpManager.isAlerting(childEntry.key));
+        assertTrue(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
     }
 
     @Test
@@ -200,5 +204,65 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
         verify(childEntry.row, times(1)).freeContentViewWhenSafe(mHeadsUpManager.getContentFlag());
         assertFalse(mHeadsUpManager.isAlerting(childEntry.key));
+    }
+
+    @Test
+    public void testCleanUpPendingAlertInfo() {
+        NotificationData.Entry summaryEntry =
+                mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
+        NotificationData.Entry childEntry =
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
+        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(false);
+        mHeadsUpManager.showNotification(summaryEntry);
+        // Trigger a transfer of alert state from summary to child.
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        mGroupAlertTransferHelper.cleanUpPendingAlertInfo(childEntry.key);
+
+        assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
+    }
+
+    @Test
+    public void testUpdateGroupChangeDoesNotTransfer() {
+        NotificationData.Entry summaryEntry =
+                mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
+        NotificationData.Entry childEntry =
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
+        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(false);
+        mHeadsUpManager.showNotification(summaryEntry);
+        // Trigger a transfer of alert state from summary to child.
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        // Notify that entry changed groups.
+        StatusBarNotification oldNotification = childEntry.notification;
+        StatusBarNotification newSbn = spy(childEntry.notification.clone());
+        doReturn("other_group").when(newSbn).getGroupKey();
+        childEntry.notification = newSbn;
+        mGroupManager.onEntryUpdated(childEntry, oldNotification);
+
+        assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
+    }
+
+    @Test
+    public void testUpdateChildToSummaryDoesNotTransfer() {
+        NotificationData.Entry summaryEntry =
+                mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
+        NotificationData.Entry childEntry =
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
+        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(false);
+        mHeadsUpManager.showNotification(summaryEntry);
+        // Trigger a transfer of alert state from summary to child.
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        // Update that child to a summary.
+        StatusBarNotification oldNotification = childEntry.notification;
+        childEntry.notification = mGroupTestHelper.createSummaryNotification(
+                Notification.GROUP_ALERT_SUMMARY).notification;
+        mGroupManager.onEntryUpdated(childEntry, oldNotification);
+
+        assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
     }
 }

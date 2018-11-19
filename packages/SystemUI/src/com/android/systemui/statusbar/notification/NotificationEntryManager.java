@@ -510,7 +510,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         NotificationData.Entry addedEntry = mNotificationData.get(key);
         if (addedEntry != null) {
             addedEntry.abortTask();
-            mGroupAlertTransferHelper.onInflationAborted(addedEntry);
         }
     }
 
@@ -583,6 +582,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     private void removeNotificationInternal(String key,
             @Nullable NotificationListenerService.RankingMap ranking, boolean forceRemove) {
         abortExistingInflation(key);
+        mGroupAlertTransferHelper.cleanUpPendingAlertInfo(key);
 
         // Attempt to remove notifications from their alert managers (heads up, ambient pulse).
         // Though the remove itself may fail, it lets the manager know to remove as soon as
@@ -744,8 +744,12 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         row.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
         row.setEntry(entry);
 
-        row.updateInflationFlag(FLAG_CONTENT_VIEW_HEADS_UP, shouldHeadsUp(entry));
-        row.updateInflationFlag(FLAG_CONTENT_VIEW_AMBIENT, shouldPulse(entry));
+        if (shouldHeadsUp(entry)) {
+            row.updateInflationFlag(FLAG_CONTENT_VIEW_HEADS_UP, true /* shouldInflate */);
+        }
+        if (shouldPulse(entry)) {
+            row.updateInflationFlag(FLAG_CONTENT_VIEW_AMBIENT, true /* shouldInflate */);
+        }
         row.setNeedsRedaction(
                 Dependency.get(NotificationLockscreenUserManager.class).needsRedaction(entry));
         row.inflateViews();
