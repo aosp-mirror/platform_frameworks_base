@@ -19,12 +19,12 @@
 #include <android/os/BnIncidentReportStatusListener.h>
 #include <frameworks/base/libs/incident/proto/android/os/header.pb.h>
 
-#include <android-base/file.h>
-#include <android-base/test_utils.h>
 #include <dirent.h>
+#include <string.h>
+
+#include <android-base/file.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <string.h>
 
 using namespace android;
 using namespace android::base;

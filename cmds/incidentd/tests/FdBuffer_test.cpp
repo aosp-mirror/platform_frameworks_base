@@ -17,12 +17,12 @@
 #include "FdBuffer.h"
 #include "incidentd_util.h"
 
-#include <android-base/file.h>
-#include <android-base/test_utils.h>
 #include <fcntl.h>
-#include <gtest/gtest.h>
 #include <signal.h>
 #include <string.h>
+
+#include <android-base/file.h>
+#include <gtest/gtest.h>
 
 using namespace android;
 using namespace android::base;

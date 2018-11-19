@@ -18,7 +18,6 @@
 
 #include "android-base/file.h"
 #include "android-base/macros.h"
-#include "android-base/test_utils.h"
 
 #include "test/Test.h"
 
