@@ -46,8 +46,8 @@ import java.util.List;
  * <p>The data collected by this service can be analyzed and combined with other sources to provide
  * contextual data in other areas of the system such as Autofill.
  */
-public final class IntelligenceManagerService
-        extends AbstractMasterSystemService<IntelligencePerUserService> {
+public final class IntelligenceManagerService extends
+        AbstractMasterSystemService<IntelligenceManagerService, IntelligencePerUserService> {
 
     private static final String TAG = "IntelligenceManagerService";
 

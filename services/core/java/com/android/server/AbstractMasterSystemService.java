@@ -62,13 +62,14 @@ import java.util.List;
  * <p>See {@code com.android.server.autofill.AutofillManagerService} for a concrete
  * (no pun intended) example of how to use it.
  *
+ * @param <M> "master" service class.
  * @param <S> "real" service class.
  *
  * @hide
  */
 // TODO(b/117779333): improve javadoc above instead of using Autofill as an example
-public abstract class AbstractMasterSystemService<S extends AbstractPerUserSystemService<S>>
-        extends SystemService {
+public abstract class AbstractMasterSystemService<M extends AbstractMasterSystemService<M, S>,
+        S extends AbstractPerUserSystemService<S, M>> extends SystemService {
 
     /**
      * Log tag

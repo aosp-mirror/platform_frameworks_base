@@ -42,7 +42,8 @@ import java.util.List;
  * Per-user instance of {@link IntelligenceManagerService}.
  */
 final class IntelligencePerUserService
-        extends AbstractPerUserSystemService<IntelligencePerUserService> {
+        extends AbstractPerUserSystemService<IntelligencePerUserService,
+            IntelligenceManagerService> {
 
     private static final String TAG = "IntelligencePerUserService";
 

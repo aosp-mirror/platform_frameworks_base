@@ -86,7 +86,7 @@ import java.util.Random;
  *
  */
 final class AutofillManagerServiceImpl
-        extends AbstractPerUserSystemService<AutofillManagerServiceImpl> {
+        extends AbstractPerUserSystemService<AutofillManagerServiceImpl, AutofillManagerService> {
 
     private static final String TAG = "AutofillManagerServiceImpl";
     private static final int MAX_SESSION_ID_CREATE_TRIES = 2048;
