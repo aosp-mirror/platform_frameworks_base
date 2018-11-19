@@ -589,7 +589,7 @@ TEST(GaugeMetricProducerTest, TestPullOnTrigger) {
     GaugeMetric metric;
     metric.set_id(metricId);
     metric.set_bucket(ONE_MINUTE);
-    metric.set_sampling_type(GaugeMetric::ALL_CONDITION_CHANGES);
+    metric.set_sampling_type(GaugeMetric::FIRST_N_SAMPLES);
     metric.mutable_gauge_fields_filter()->set_include_all(false);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
@@ -662,7 +662,7 @@ TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput) {
     GaugeMetric metric;
     metric.set_id(metricId);
     metric.set_bucket(ONE_MINUTE);
-    metric.set_sampling_type(GaugeMetric::ALL_CONDITION_CHANGES);
+    metric.set_sampling_type(GaugeMetric::FIRST_N_SAMPLES);
     metric.mutable_gauge_fields_filter()->set_include_all(true);
     auto dimensionMatcher = metric.mutable_dimensions_in_what();
     // use field 1 as dimension.

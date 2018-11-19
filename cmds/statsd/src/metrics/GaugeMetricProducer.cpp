@@ -320,11 +320,11 @@ void GaugeMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
             triggerPuller = mCondition && mCurrentSlicedBucket->empty();
             break;
         }
-        case GaugeMetric::ALL_CONDITION_CHANGES: {
-            triggerPuller = true;
+        case GaugeMetric::CONDITION_CHANGE_TO_TRUE: {
+            triggerPuller = mCondition;
             break;
         }
-        case GaugeMetric::CONDITION_CHANGE_TO_TRUE: {
+        case GaugeMetric::FIRST_N_SAMPLES: {
             triggerPuller = mCondition;
             break;
         }
@@ -352,7 +352,7 @@ void GaugeMetricProducer::onConditionChangedLocked(const bool conditionMet,
     VLOG("GaugeMetric %lld onConditionChanged", (long long)mMetricId);
     flushIfNeededLocked(eventTimeNs);
     mCondition = conditionMet;
-    if (mIsPulled) {
+    if (mIsPulled && mTriggerAtomId == -1) {
         pullAndMatchEventsLocked(eventTimeNs);
     }  // else: Push mode. No need to proactively pull the gauge data.
 }
@@ -365,7 +365,7 @@ void GaugeMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition
     // If the condition is sliced, mCondition is true if any of the dimensions is true. And we will
     // pull for every dimension.
     mCondition = overallCondition;
-    if (mIsPulled) {
+    if (mIsPulled && mTriggerAtomId == -1) {
         pullAndMatchEventsLocked(eventTimeNs);
     }  // else: Push mode. No need to proactively pull the gauge data.
 }

@@ -233,8 +233,9 @@ message GaugeMetric {
 
   enum SamplingType {
     RANDOM_ONE_SAMPLE = 1;
-    ALL_CONDITION_CHANGES = 2;
+    ALL_CONDITION_CHANGES = 2 [deprecated = true];
     CONDITION_CHANGE_TO_TRUE = 3;
+    FIRST_N_SAMPLES = 4;
   }
   optional SamplingType sampling_type = 9 [default = RANDOM_ONE_SAMPLE] ;
 
