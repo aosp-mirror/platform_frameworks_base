@@ -400,6 +400,9 @@ public class Binder implements IBinder {
      * }
      * </pre>
      *
+     * <p>The work source will be propagated for future outgoing binder transactions
+     * executed on this thread.
+     *
      * @param workSource The original UID responsible for the binder call.
      * @return token to restore original work source.
      * @hide
@@ -423,6 +426,9 @@ public class Binder implements IBinder {
     /**
      * Clears the work source on this thread.
      *
+     * <p>The work source will be propagated for future outgoing binder transactions
+     * executed on this thread.
+     *
      * @return token to restore original work source.
      * @hide
      **/
@@ -442,6 +448,9 @@ public class Binder implements IBinder {
      *   Binder.restoreCallingWorkSource(token);
      * }
      * </pre>
+     *
+     * <p>The work source will be propagated for future outgoing binder transactions
+     * executed on this thread.
      * @hide
      **/
     @CriticalNative
