@@ -16,7 +16,6 @@
 
 package android.media.update;
 
-import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.media.MediaBrowser2;
@@ -48,9 +47,6 @@ import android.media.update.MediaSession2Provider.ControllerInfoProvider;
 import android.media.update.MediaSessionService2Provider.MediaNotificationProvider;
 import android.os.Bundle;
 import android.os.IInterface;
-import android.util.AttributeSet;
-import android.widget.MediaControlView2;
-import android.widget.VideoView2;
 
 import java.util.concurrent.Executor;
 
@@ -62,13 +58,6 @@ import java.util.concurrent.Executor;
  * @hide
  */
 public interface StaticProvider {
-    MediaControlView2Provider createMediaControlView2(MediaControlView2 instance,
-            ViewGroupProvider superProvider, ViewGroupProvider privateProvider,
-            @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes);
-    VideoView2Provider createVideoView2(VideoView2 instance,
-            ViewGroupProvider superProvider, ViewGroupProvider privateProvider,
-            @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes);
-
     CommandProvider createMediaSession2Command(SessionCommand2 instance,
             int commandCode, String action, Bundle extra);
     SessionCommand2 fromBundle_MediaSession2Command(Bundle bundle);
