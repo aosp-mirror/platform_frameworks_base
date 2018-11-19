@@ -18,8 +18,6 @@ package com.android.server.pm.dex;
 
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 
-import android.annotation.Nullable;
-
 /**
  * Options used for dexopt invocations.
  */
