@@ -40,6 +40,7 @@ import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
 
 import libcore.io.IoUtils;
+import libcore.timezone.TzDataSetVersion;
 
 import static com.android.server.timezone.RulesManagerService.REQUIRED_QUERY_PERMISSION;
 import static com.android.server.timezone.RulesManagerService.REQUIRED_UPDATER_PERMISSION;
@@ -128,15 +129,15 @@ public class RulesManagerServiceTest {
         configureDeviceSystemRulesVersion("2016a");
 
         DistroVersion stagedDistroVersion = new DistroVersion(
-                DistroVersion.CURRENT_FORMAT_MAJOR_VERSION,
-                DistroVersion.CURRENT_FORMAT_MINOR_VERSION - 1,
+                TzDataSetVersion.currentFormatMajorVersion(),
+                TzDataSetVersion.currentFormatMinorVersion() - 1,
                 "2016c",
                 3);
         configureStagedInstall(stagedDistroVersion);
 
         DistroVersion installedDistroVersion = new DistroVersion(
-                DistroVersion.CURRENT_FORMAT_MAJOR_VERSION,
-                DistroVersion.CURRENT_FORMAT_MINOR_VERSION - 1,
+                TzDataSetVersion.currentFormatMajorVersion(),
+                TzDataSetVersion.currentFormatMinorVersion() - 1,
                 "2016b",
                 4);
         configureInstalledDistroVersion(installedDistroVersion);
@@ -162,8 +163,8 @@ public class RulesManagerServiceTest {
         configureNoStagedOperation();
 
         DistroVersion installedDistroVersion = new DistroVersion(
-                DistroVersion.CURRENT_FORMAT_MAJOR_VERSION,
-                DistroVersion.CURRENT_FORMAT_MINOR_VERSION - 1,
+                TzDataSetVersion.currentFormatMajorVersion(),
+                TzDataSetVersion.currentFormatMinorVersion() - 1,
                 "2016b",
                 4);
         configureInstalledDistroVersion(installedDistroVersion);
@@ -187,8 +188,8 @@ public class RulesManagerServiceTest {
         configureStagedUninstall();
 
         DistroVersion installedDistroVersion = new DistroVersion(
-                DistroVersion.CURRENT_FORMAT_MAJOR_VERSION,
-                DistroVersion.CURRENT_FORMAT_MINOR_VERSION - 1,
+                TzDataSetVersion.currentFormatMajorVersion(),
+                TzDataSetVersion.currentFormatMinorVersion() - 1,
                 "2016b",
                 4);
         configureInstalledDistroVersion(installedDistroVersion);
@@ -231,8 +232,8 @@ public class RulesManagerServiceTest {
         configureDeviceCannotReadStagedDistroOperation();
 
         DistroVersion installedDistroVersion = new DistroVersion(
-                DistroVersion.CURRENT_FORMAT_MAJOR_VERSION,
-                DistroVersion.CURRENT_FORMAT_MINOR_VERSION - 1,
+                TzDataSetVersion.currentFormatMajorVersion(),
+                TzDataSetVersion.currentFormatMinorVersion() - 1,
                 "2016b",
                 4);
         configureInstalledDistroVersion(installedDistroVersion);
@@ -275,8 +276,8 @@ public class RulesManagerServiceTest {
         configureDeviceSystemRulesVersion(systemRulesVersion);
 
         DistroVersion installedDistroVersion = new DistroVersion(
-                DistroVersion.CURRENT_FORMAT_MAJOR_VERSION,
-                DistroVersion.CURRENT_FORMAT_MINOR_VERSION - 1,
+                TzDataSetVersion.currentFormatMajorVersion(),
+                TzDataSetVersion.currentFormatMinorVersion() - 1,
                 installedRulesVersion,
                 revision);
         configureInstalledDistroVersion(installedDistroVersion);
