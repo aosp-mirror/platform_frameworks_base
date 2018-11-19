@@ -982,7 +982,7 @@ public class AudioEffect {
     // --------------------
     /**
      * The OnEnableStatusChangeListener interface defines a method called by the AudioEffect
-     * when a the enabled state of the effect engine was changed by the controlling application.
+     * when the enabled state of the effect engine was changed by the controlling application.
      */
     public interface OnEnableStatusChangeListener {
         /**
@@ -996,7 +996,7 @@ public class AudioEffect {
 
     /**
      * The OnControlStatusChangeListener interface defines a method called by the AudioEffect
-     * when a the control of the effect engine is gained or lost by the application
+     * when control of the effect engine is gained or lost by the application
      */
     public interface OnControlStatusChangeListener {
         /**
