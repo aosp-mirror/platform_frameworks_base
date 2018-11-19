@@ -484,8 +484,38 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
 
     @Override
     public boolean isSessionConfigurationSupported(SessionConfiguration sessionConfig) {
-        // TODO: Add support for this in legacy mode
-        throw new UnsupportedOperationException("Session configuration query not supported!");
+        if (sessionConfig.getSessionType() != SessionConfiguration.SESSION_REGULAR) {
+            Log.e(TAG, "Session type: " + sessionConfig.getSessionType() + " is different from " +
+                    " regular. Legacy devices support only regular session types!");
+            return false;
+        }
+
+        if (sessionConfig.getInputConfiguration() != null) {
+            Log.e(TAG, "Input configuration present, legacy devices do not support this feature!");
+            return false;
+        }
+
+        List<OutputConfiguration> outputConfigs = sessionConfig.getOutputConfigurations();
+        if (outputConfigs.isEmpty()) {
+            Log.e(TAG, "Empty output configuration list!");
+            return false;
+        }
+
+        SparseArray<Surface> surfaces = new SparseArray<Surface>(outputConfigs.size());
+        int idx = 0;
+        for (OutputConfiguration outputConfig : outputConfigs) {
+            List<Surface> surfaceList = outputConfig.getSurfaces();
+            if (surfaceList.isEmpty() || (surfaceList.size() > 1)) {
+                Log.e(TAG, "Legacy devices do not support deferred or shared surfaces!");
+                return false;
+            }
+
+            surfaces.put(idx++, outputConfig.getSurface());
+        }
+
+        int ret = mLegacyDevice.configureOutputs(surfaces, /*validateSurfacesOnly*/true);
+
+        return ret == LegacyExceptionUtils.NO_ERROR;
     }
 
     @Override

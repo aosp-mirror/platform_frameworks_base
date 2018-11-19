@@ -346,6 +346,25 @@ public class LegacyCameraDevice implements AutoCloseable {
      *          on success.
      */
     public int configureOutputs(SparseArray<Surface> outputs) {
+        return configureOutputs(outputs, /*validateSurfacesOnly*/false);
+    }
+
+    /**
+     * Configure the device with a set of output surfaces.
+     *
+     * <p>Using empty or {@code null} {@code outputs} is the same as unconfiguring.</p>
+     *
+     * <p>Every surface in {@code outputs} must be non-{@code null}.</p>
+     *
+     * @param outputs a list of surfaces to set. LegacyCameraDevice will take ownership of this
+     *          list; it must not be modified by the caller once it's passed in.
+     * @param validateSurfacesOnly If set it will only check whether the outputs are supported
+     *                             and avoid any device configuration.
+     * @return an error code for this binder operation, or {@link NO_ERROR}
+     *          on success.
+     * @hide
+     */
+    public int configureOutputs(SparseArray<Surface> outputs, boolean validateSurfacesOnly) {
         List<Pair<Surface, Size>> sizedSurfaces = new ArrayList<>();
         if (outputs != null) {
             int count = outputs.size();
@@ -397,13 +416,19 @@ public class LegacyCameraDevice implements AutoCloseable {
                         sizedSurfaces.add(new Pair<>(output, s));
                     }
                     // Lock down the size before configuration
-                    setSurfaceDimens(output, s.getWidth(), s.getHeight());
+                    if (!validateSurfacesOnly) {
+                        setSurfaceDimens(output, s.getWidth(), s.getHeight());
+                    }
                 } catch (BufferQueueAbandonedException e) {
                     Log.e(TAG, "Surface bufferqueue is abandoned, cannot configure as output: ", e);
                     return BAD_VALUE;
                 }
 
             }
+        }
+
+        if (validateSurfacesOnly) {
+            return LegacyExceptionUtils.NO_ERROR;
         }
 
         boolean success = false;
