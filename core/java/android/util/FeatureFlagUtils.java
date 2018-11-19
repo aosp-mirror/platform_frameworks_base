@@ -46,7 +46,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
         DEFAULT_FLAGS.put("settings_dynamic_homepage", "true");
         DEFAULT_FLAGS.put("settings_mobile_network_v2", "true");
-        DEFAULT_FLAGS.put("settings_data_usage_v2", "false");
+        DEFAULT_FLAGS.put("settings_data_usage_v2", "true");
         DEFAULT_FLAGS.put("settings_seamless_transfer", "false");
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
         DEFAULT_FLAGS.put(EMERGENCY_DIAL_SHORTCUTS, "true");
