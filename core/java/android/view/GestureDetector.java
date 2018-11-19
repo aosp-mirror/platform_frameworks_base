@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 
@@ -225,7 +226,7 @@ public class GestureDetector {
     private int mMinimumFlingVelocity;
     private int mMaximumFlingVelocity;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static final int LONGPRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
     private static final int TAP_TIMEOUT = ViewConfiguration.getTapTimeout();
     private static final int DOUBLE_TAP_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
@@ -592,8 +593,8 @@ public class GestureDetector {
 
                 if (mIsLongpressEnabled) {
                     mHandler.removeMessages(LONG_PRESS);
-                    mHandler.sendEmptyMessageAtTime(LONG_PRESS,
-                            mCurrentDownEvent.getDownTime() + LONGPRESS_TIMEOUT);
+                    mHandler.sendEmptyMessageAtTime(LONG_PRESS, mCurrentDownEvent.getDownTime()
+                            + ViewConfiguration.getLongPressTimeout());
                 }
                 mHandler.sendEmptyMessageAtTime(SHOW_PRESS,
                         mCurrentDownEvent.getDownTime() + TAP_TIMEOUT);
