@@ -123,6 +123,7 @@ package android {
     field public static final java.lang.String MOUNT_FORMAT_FILESYSTEMS = "android.permission.MOUNT_FORMAT_FILESYSTEMS";
     field public static final java.lang.String MOUNT_UNMOUNT_FILESYSTEMS = "android.permission.MOUNT_UNMOUNT_FILESYSTEMS";
     field public static final java.lang.String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
+    field public static final java.lang.String NETWORK_MANAGED_PROVISIONING = "android.permission.NETWORK_MANAGED_PROVISIONING";
     field public static final java.lang.String NETWORK_SETUP_WIZARD = "android.permission.NETWORK_SETUP_WIZARD";
     field public static final java.lang.String NOTIFICATION_DURING_SETUP = "android.permission.NOTIFICATION_DURING_SETUP";
     field public static final java.lang.String NOTIFY_TV_INPUTS = "android.permission.NOTIFY_TV_INPUTS";
