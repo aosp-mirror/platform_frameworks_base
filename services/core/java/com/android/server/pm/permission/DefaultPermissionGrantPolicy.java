@@ -1205,6 +1205,21 @@ public final class DefaultPermissionGrantPolicy {
                     if (DEBUG) {
                         Log.i(TAG, "Granted " + (systemFixed ? "fixed " : "not fixed ")
                                 + permission + " to default handler " + pkg);
+
+                        int appOp = AppOpsManager.permissionToOpCode(permission);
+                        if (appOp != AppOpsManager.OP_NONE
+                                && AppOpsManager.opToDefaultMode(appOp)
+                                        != AppOpsManager.MODE_ALLOWED) {
+                            // Permission has a corresponding appop which is not allowed by default
+                            // We must allow it as well, as it's usually checked alongside the
+                            // permission
+                            if (DEBUG) {
+                                Log.i(TAG, "Granting OP_" + AppOpsManager.opToName(appOp)
+                                        + " to " + pkg.packageName);
+                            }
+                            mContext.getSystemService(AppOpsManager.class).setUidMode(
+                                    appOp, pkg.applicationInfo.uid, AppOpsManager.MODE_ALLOWED);
+                        }
                     }
                 }
 

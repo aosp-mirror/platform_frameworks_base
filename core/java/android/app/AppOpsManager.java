@@ -1009,7 +1009,7 @@ public class AppOpsManager {
             "WRITE_WALLPAPER",
             "ASSIST_STRUCTURE",
             "ASSIST_SCREENSHOT",
-            "OP_READ_PHONE_STATE",
+            "READ_PHONE_STATE",
             "ADD_VOICEMAIL",
             "USE_SIP",
             "PROCESS_OUTGOING_CALLS",

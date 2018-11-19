@@ -25,6 +25,8 @@ import static android.app.AppOpsManager.UID_STATE_LAST_NON_RESTRICTED;
 import static android.app.AppOpsManager.UID_STATE_PERSISTENT;
 import static android.app.AppOpsManager.UID_STATE_TOP;
 import static android.app.AppOpsManager._NUM_UID_STATE;
+import static android.app.AppOpsManager.modeToName;
+import static android.app.AppOpsManager.opToName;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -879,6 +881,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private ArrayList<AppOpsManager.OpEntry> collectOps(SparseIntArray uidOps, int[] ops) {
+        if (uidOps == null) {
+            return null;
+        }
         ArrayList<AppOpsManager.OpEntry> resOps = null;
         if (ops == null) {
             resOps = new ArrayList<>();
@@ -1133,6 +1138,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void setUidMode(int code, int uid, int mode) {
+        if (DEBUG) {
+            Slog.i(TAG, "uid " + uid + " OP_" + opToName(code) + " := " + modeToName(mode)
+                    + " by uid " + Binder.getCallingUid());
+        }
+
         enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingOp(code);
         code = AppOpsManager.opToSwitch(code);
@@ -3030,11 +3040,21 @@ public class AppOpsService extends IAppOpsService.Stub {
                         return res;
                     }
 
-                    List<AppOpsManager.PackageOps> ops;
+                    List<AppOpsManager.PackageOps> ops = new ArrayList<>();
                     if (shell.packageName != null) {
-                        ops = shell.mInterface.getOpsForPackage(
+                        // Uid mode overrides package mode, so make sure it's also reported
+                        List<AppOpsManager.PackageOps> r = shell.mInterface.getUidOps(
+                                shell.packageUid,
+                                shell.op != AppOpsManager.OP_NONE ? new int[]{shell.op} : null);
+                        if (r != null) {
+                            ops.addAll(r);
+                        }
+                        r = shell.mInterface.getOpsForPackage(
                                 shell.packageUid, shell.packageName,
                                 shell.op != AppOpsManager.OP_NONE ? new int[]{shell.op} : null);
+                        if (r != null) {
+                            ops.addAll(r);
+                        }
                     } else {
                         ops = shell.mInterface.getUidOps(
                                 shell.nonpackageUid,
@@ -3050,7 +3070,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                     final long now = System.currentTimeMillis();
                     for (int i=0; i<ops.size(); i++) {
-                        List<AppOpsManager.OpEntry> entries = ops.get(i).getOps();
+                        AppOpsManager.PackageOps packageOps = ops.get(i);
+                        if (packageOps.getPackageName() == null) {
+                            pw.print("Uid mode: ");
+                        }
+                        List<AppOpsManager.OpEntry> entries = packageOps.getOps();
                         for (int j=0; j<entries.size(); j++) {
                             AppOpsManager.OpEntry ent = entries.get(j);
                             pw.print(AppOpsManager.opToName(ent.getOp()));
