@@ -21,17 +21,26 @@ import android.test.suitebuilder.annotation.SmallTest;
 import junit.framework.TestCase;
 
 public class BinderTest extends TestCase {
+    private static final int UID = 100;
 
     @SmallTest
     public void testSetWorkSource() throws Exception {
-        Binder.setThreadWorkSource(100);
-        assertEquals(100, Binder.getThreadWorkSource());
+        Binder.setCallingWorkSourceUid(UID);
+        assertEquals(UID, Binder.getCallingWorkSourceUid());
     }
 
     @SmallTest
     public void testClearWorkSource() throws Exception {
-        Binder.setThreadWorkSource(100);
-        Binder.clearThreadWorkSource();
-        assertEquals(-1, Binder.getThreadWorkSource());
+        Binder.setCallingWorkSourceUid(UID);
+        Binder.clearCallingWorkSource();
+        assertEquals(-1, Binder.getCallingWorkSourceUid());
+    }
+
+    @SmallTest
+    public void testRestoreWorkSource() throws Exception {
+        Binder.setCallingWorkSourceUid(UID);
+        long token = Binder.clearCallingWorkSource();
+        Binder.restoreCallingWorkSource(token);
+        assertEquals(UID, Binder.getCallingWorkSourceUid());
     }
 }
