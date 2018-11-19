@@ -16,12 +16,12 @@
 
 package com.android.systemui.shared.system;
 
+import android.graphics.HardwareRenderer;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
-import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewRootImpl;
 
@@ -52,7 +52,7 @@ public class SyncRtSurfaceTransactionApplier {
         if (mTargetViewRootImpl == null) {
             return;
         }
-        mTargetViewRootImpl.registerRtFrameCallback(new ThreadedRenderer.FrameDrawingCallback() {
+        mTargetViewRootImpl.registerRtFrameCallback(new HardwareRenderer.FrameDrawingCallback() {
             @Override
             public void onFrameDraw(long frame) {
                 if (mTargetSurface == null || !mTargetSurface.isValid()) {
