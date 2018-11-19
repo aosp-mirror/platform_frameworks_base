@@ -341,7 +341,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     ActivityManagerInternal mAmInternal;
     UriGrantsManagerInternal mUgmInternal;
     private PackageManagerInternal mPmInternal;
-    private ActivityTaskManagerInternal mInternal;
+    @VisibleForTesting
+    final ActivityTaskManagerInternal mInternal;
     PowerManagerInternal mPowerManagerInternal;
     private UsageStatsManagerInternal mUsageStatsInternal;
 
@@ -643,6 +644,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mSystemThread = ActivityThread.currentActivityThread();
         mUiContext = mSystemThread.getSystemUiContext();
         mLifecycleManager = new ClientLifecycleManager();
+        mInternal = new LocalService();
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version", GL_ES_VERSION_UNDEFINED);
     }
 
@@ -893,7 +895,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     private void start() {
-        mInternal = new LocalService();
         LocalServices.addService(ActivityTaskManagerInternal.class, mInternal);
     }
 
