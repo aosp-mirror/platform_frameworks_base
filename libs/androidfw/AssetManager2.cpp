@@ -637,6 +637,7 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& 
       new_entry->key = new_key;
       new_entry->key_pool = nullptr;
       new_entry->type_pool = nullptr;
+      new_entry->style = resid;
       new_entry->value.copyFrom_dtoh(map_entry->value);
       status_t err = entry.dynamic_ref_table->lookupResourceValue(&new_entry->value);
       if (err != NO_ERROR) {
@@ -695,6 +696,7 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& 
       new_entry->key_pool = nullptr;
       new_entry->type_pool = nullptr;
       new_entry->value.copyFrom_dtoh(map_entry->value);
+      new_entry->style = resid;
       status_t err = entry.dynamic_ref_table->lookupResourceValue(&new_entry->value);
       if (err != NO_ERROR) {
         LOG(ERROR) << base::StringPrintf(
@@ -731,6 +733,7 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& 
     new_entry->key_pool = nullptr;
     new_entry->type_pool = nullptr;
     new_entry->value.copyFrom_dtoh(map_entry->value);
+    new_entry->style = resid;
     status_t err = entry.dynamic_ref_table->lookupResourceValue(&new_entry->value);
     if (err != NO_ERROR) {
       LOG(ERROR) << base::StringPrintf("Failed to resolve value t=0x%02x d=0x%08x for key 0x%08x.",

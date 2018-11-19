@@ -49,6 +49,9 @@ struct ResolvedBag {
 
     Res_value value;
 
+    // The resource ID of the origin style associated with the given entry.
+    uint32_t style;
+
     // Which ApkAssets this entry came from.
     ApkAssetsCookie cookie;
 

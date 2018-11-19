@@ -298,11 +298,13 @@ TEST_F(AssetManager2Test, MergesStylesWithParentFromSingleApkAssets) {
   EXPECT_EQ(Res_value::TYPE_INT_DEC, bag_two->entries[0].value.dataType);
   EXPECT_EQ(1u, bag_two->entries[0].value.data);
   EXPECT_EQ(0, bag_two->entries[0].cookie);
+  EXPECT_EQ(app::R::style::StyleOne, bag_two->entries[0].style);
 
   // attr_two should be overridden from StyleOne by StyleTwo.
   EXPECT_EQ(app::R::attr::attr_two, bag_two->entries[1].key);
   EXPECT_EQ(Res_value::TYPE_STRING, bag_two->entries[1].value.dataType);
   EXPECT_EQ(0, bag_two->entries[1].cookie);
+  EXPECT_EQ(app::R::style::StyleTwo, bag_two->entries[1].style);
   EXPECT_EQ(std::string("string"), GetStringFromPool(assetmanager.GetStringPoolForCookie(0),
                                                      bag_two->entries[1].value.data));
 
@@ -312,21 +314,25 @@ TEST_F(AssetManager2Test, MergesStylesWithParentFromSingleApkAssets) {
   EXPECT_EQ(Res_value::TYPE_ATTRIBUTE, bag_two->entries[2].value.dataType);
   EXPECT_EQ(app::R::attr::attr_indirect, bag_two->entries[2].value.data);
   EXPECT_EQ(0, bag_two->entries[2].cookie);
+  EXPECT_EQ(app::R::style::StyleTwo, bag_two->entries[2].style);
 
   EXPECT_EQ(app::R::attr::attr_five, bag_two->entries[3].key);
   EXPECT_EQ(Res_value::TYPE_REFERENCE, bag_two->entries[3].value.dataType);
   EXPECT_EQ(app::R::string::string_one, bag_two->entries[3].value.data);
   EXPECT_EQ(0, bag_two->entries[3].cookie);
+  EXPECT_EQ(app::R::style::StyleTwo, bag_two->entries[3].style);
 
   EXPECT_EQ(app::R::attr::attr_indirect, bag_two->entries[4].key);
   EXPECT_EQ(Res_value::TYPE_INT_DEC, bag_two->entries[4].value.dataType);
   EXPECT_EQ(3u, bag_two->entries[4].value.data);
   EXPECT_EQ(0, bag_two->entries[4].cookie);
+  EXPECT_EQ(app::R::style::StyleTwo, bag_two->entries[4].style);
 
   EXPECT_EQ(app::R::attr::attr_empty, bag_two->entries[5].key);
   EXPECT_EQ(Res_value::TYPE_NULL, bag_two->entries[5].value.dataType);
   EXPECT_EQ(Res_value::DATA_NULL_EMPTY, bag_two->entries[5].value.data);
   EXPECT_EQ(0, bag_two->entries[5].cookie);
+  EXPECT_EQ(app::R::style::StyleTwo, bag_two->entries[5].style);
 }
 
 TEST_F(AssetManager2Test, MergeStylesCircularDependency) {

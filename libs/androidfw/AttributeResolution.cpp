@@ -310,7 +310,8 @@ void ApplyStyle(Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
         type_set_flags = style_flags;
         value = entry->value;
         if (kDebugStyles) {
-          ALOGI("-> From style: type=0x%x, data=0x%08x", value.dataType, value.data);
+          ALOGI("-> From style: type=0x%x, data=0x%08x, style=0x%08x", value.dataType, value.data,
+              entry->style);
         }
       }
     }
@@ -388,7 +389,6 @@ void ApplyStyle(Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
       // out_indices must NOT be nullptr.
       out_indices[indices_idx] = ii;
     }
-
     out_values += STYLE_NUM_ENTRIES;
   }
 
