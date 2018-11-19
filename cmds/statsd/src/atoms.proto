@@ -204,6 +204,7 @@ message Atom {
         DeviceCalculatedPowerBlameUid device_calculated_power_blame_uid = 10040;
         DeviceCalculatedPowerBlameOther device_calculated_power_blame_other = 10041;
         ProcessMemoryHighWaterMark process_memory_high_water_mark = 10042;
+        BatteryLevel battery_level = 10043;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -2676,6 +2677,17 @@ message FullBatteryCapacity {
 message BatteryVoltage {
     // The voltage of the battery, in millivolts.
     optional int32 voltage_millivolt = 1;
+}
+
+/**
+ * Pulls battery level (percent full, from 0 to 100).
+ *
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ */
+message BatteryLevel {
+    // Battery level. Should be in [0, 100].
+    optional int32 battery_level = 1;
 }
 
 /**
