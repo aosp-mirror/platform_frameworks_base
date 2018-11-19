@@ -90,6 +90,8 @@ public final class MediaProjectionManager {
      * int, android.content.Intent)}
      * @param resultData The resulting data from {@link android.app.Activity#onActivityResult(int,
      * int, android.content.Intent)}
+     * @throws IllegalStateException on pre-Q devices if a previously gotten MediaProjection
+     * from the same {@code resultData} has not yet been stopped
      */
     public MediaProjection getMediaProjection(int resultCode, @NonNull Intent resultData) {
         if (resultCode != Activity.RESULT_OK || resultData == null) {
