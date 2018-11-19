@@ -59,7 +59,7 @@ interface IContextHubService {
     int sendMessage(int contextHubHandle, int nanoAppHandle, in ContextHubMessage msg);
 
     // Creates a client to send and receive messages
-    IContextHubClient createClient(in IContextHubClientCallback client, int contextHubId);
+    IContextHubClient createClient(int contextHubId, in IContextHubClientCallback client);
 
     // Creates a PendingIntent-based client to send and receive messages
     IContextHubClient createPendingIntentClient(

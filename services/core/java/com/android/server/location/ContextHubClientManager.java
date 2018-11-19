@@ -80,15 +80,15 @@ import java.util.function.Consumer;
     /**
      * Registers a new client with the service.
      *
-     * @param clientCallback the callback interface of the client to register
      * @param contextHubInfo the object describing the hub this client is attached to
+     * @param clientCallback the callback interface of the client to register
      *
      * @return the client interface
      *
      * @throws IllegalStateException if max number of clients have already registered
      */
     /* package */ IContextHubClient registerClient(
-            IContextHubClientCallback clientCallback, ContextHubInfo contextHubInfo) {
+            ContextHubInfo contextHubInfo, IContextHubClientCallback clientCallback) {
         ContextHubClientBroker broker;
         synchronized (this) {
             short hostEndPointId = getHostEndPointId();
@@ -120,8 +120,6 @@ import java.util.function.Consumer;
      *
      * @return the client interface
      *
-     * @throws IllegalArgumentException the PendingIntent was already registered for a different
-     *                                  ContextHubClient
      * @throws IllegalStateException    if there were too many registered clients at the service
      */
     /* package */ IContextHubClient registerClient(

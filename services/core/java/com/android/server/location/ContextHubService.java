@@ -173,7 +173,7 @@ public class ContextHubService extends IContextHubService.Stub {
         for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
             ContextHubInfo contextHubInfo = mContextHubIdToInfoMap.get(contextHubId);
             IContextHubClient client = mClientManager.registerClient(
-                    createDefaultClientCallback(contextHubId), contextHubInfo);
+                    contextHubInfo, createDefaultClientCallback(contextHubId));
             defaultClientMap.put(contextHubId, client);
 
             try {
@@ -608,8 +608,8 @@ public class ContextHubService extends IContextHubService.Stub {
     /**
      * Creates and registers a client at the service for the specified Context Hub.
      *
-     * @param clientCallback the client interface to register with the service
      * @param contextHubId   the ID of the hub this client is attached to
+     * @param clientCallback the client interface to register with the service
      * @return the generated client interface, null if registration was unsuccessful
      *
      * @throws IllegalArgumentException if contextHubId is not a valid ID
@@ -618,7 +618,7 @@ public class ContextHubService extends IContextHubService.Stub {
      */
     @Override
     public IContextHubClient createClient(
-            IContextHubClientCallback clientCallback, int contextHubId) throws RemoteException {
+            int contextHubId, IContextHubClientCallback clientCallback) throws RemoteException {
         checkPermissions();
         if (!isValidContextHubId(contextHubId)) {
             throw new IllegalArgumentException("Invalid context hub ID " + contextHubId);
@@ -628,7 +628,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         ContextHubInfo contextHubInfo = mContextHubIdToInfoMap.get(contextHubId);
-        return mClientManager.registerClient(clientCallback, contextHubInfo);
+        return mClientManager.registerClient(contextHubInfo, clientCallback);
     }
 
     /**
