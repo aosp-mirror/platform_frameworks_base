@@ -38,7 +38,7 @@ public:
     void syncFunctor() const override;
 
 protected:
-    virtual void onDraw(SkCanvas* canvas) override;
+    void onDraw(SkCanvas* canvas) override;
 };
 
 };  // namespace skiapipeline
