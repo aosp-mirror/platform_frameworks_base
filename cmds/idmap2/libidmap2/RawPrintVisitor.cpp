@@ -16,7 +16,6 @@
 
 #include <cstdarg>
 #include <string>
-#include <utility>
 
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
@@ -24,6 +23,7 @@
 
 #include "idmap2/RawPrintVisitor.h"
 #include "idmap2/ResourceUtils.h"
+#include "idmap2/Result.h"
 
 using android::ApkAssets;
 
@@ -75,14 +75,13 @@ void RawPrintVisitor::visit(const IdmapData::TypeEntry& te) {
       const ResourceId target_resid =
           RESID(last_seen_package_id_, te.GetTargetTypeId(), te.GetEntryOffset() + i);
       const ResourceId overlay_resid = RESID(last_seen_package_id_, te.GetOverlayTypeId(), entry);
-      bool lookup_ok = false;
-      std::string name;
+      Result<std::string> name;
       if (target_package_loaded) {
-        std::tie(lookup_ok, name) = utils::ResToTypeEntryName(target_am_, target_resid);
+        name = utils::ResToTypeEntryName(target_am_, target_resid);
       }
-      if (lookup_ok) {
+      if (name) {
         print(static_cast<uint32_t>(entry), "0x%08x -> 0x%08x %s", target_resid, overlay_resid,
-              name.c_str());
+              name->c_str());
       } else {
         print(static_cast<uint32_t>(entry), "0x%08x -> 0x%08x", target_resid, overlay_resid);
       }

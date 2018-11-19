@@ -16,8 +16,8 @@
 
 #include <cstdio>  // fclose
 #include <string>
-#include <utility>
 
+#include "idmap2/Result.h"
 #include "idmap2/ZipFile.h"
 
 #include "gmock/gmock.h"
@@ -44,14 +44,12 @@ TEST(ZipFileTests, Crc) {
   auto zip = ZipFile::Open(GetTestDataPath() + "/target/target.apk");
   ASSERT_THAT(zip, NotNull());
 
-  bool status;
-  uint32_t crc;
-  std::tie(status, crc) = zip->Crc("AndroidManifest.xml");
-  ASSERT_TRUE(status);
-  ASSERT_EQ(crc, 0x762f3d24);
+  Result<uint32_t> crc = zip->Crc("AndroidManifest.xml");
+  ASSERT_TRUE(crc);
+  ASSERT_EQ(*crc, 0x762f3d24);
 
-  std::tie(status, std::ignore) = zip->Crc("does-not-exist");
-  ASSERT_FALSE(status);
+  Result<uint32_t> crc2 = zip->Crc("does-not-exist");
+  ASSERT_FALSE(crc2);
 }
 
 TEST(ZipFileTests, Uncompress) {

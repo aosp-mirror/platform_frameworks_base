@@ -16,8 +16,8 @@
 
 #include <memory>
 #include <string>
-#include <utility>
 
+#include "idmap2/Result.h"
 #include "idmap2/ZipFile.h"
 
 namespace android {
@@ -57,10 +57,10 @@ std::unique_ptr<const MemoryChunk> ZipFile::Uncompress(const std::string& entryP
   return chunk;
 }
 
-std::pair<bool, uint32_t> ZipFile::Crc(const std::string& entryPath) const {
+Result<uint32_t> ZipFile::Crc(const std::string& entryPath) const {
   ::ZipEntry entry;
   int32_t status = ::FindEntry(handle_, ::ZipString(entryPath.c_str()), &entry);
-  return std::make_pair(status == 0, entry.crc32);
+  return status == 0 ? Result<uint32_t>(entry.crc32) : kResultError;
 }
 
 }  // namespace idmap2

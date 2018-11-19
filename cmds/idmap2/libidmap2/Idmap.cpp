@@ -33,6 +33,7 @@
 
 #include "idmap2/Idmap.h"
 #include "idmap2/ResourceUtils.h"
+#include "idmap2/Result.h"
 #include "idmap2/ZipFile.h"
 
 namespace android {
@@ -143,18 +144,16 @@ bool IdmapHeader::IsUpToDate(std::ostream& out_error) const {
     return false;
   }
 
-  bool status;
-  uint32_t target_crc;
-  std::tie(status, target_crc) = target_zip->Crc("resources.arsc");
-  if (!status) {
+  Result<uint32_t> target_crc = target_zip->Crc("resources.arsc");
+  if (!target_crc) {
     out_error << "error: failed to get target crc" << std::endl;
     return false;
   }
 
-  if (target_crc_ != target_crc) {
+  if (target_crc_ != *target_crc) {
     out_error << base::StringPrintf(
                      "error: bad target crc: idmap version 0x%08x, file system version 0x%08x",
-                     target_crc_, target_crc)
+                     target_crc_, *target_crc)
               << std::endl;
     return false;
   }
@@ -165,17 +164,16 @@ bool IdmapHeader::IsUpToDate(std::ostream& out_error) const {
     return false;
   }
 
-  uint32_t overlay_crc;
-  std::tie(status, overlay_crc) = overlay_zip->Crc("resources.arsc");
-  if (!status) {
+  Result<uint32_t> overlay_crc = overlay_zip->Crc("resources.arsc");
+  if (!overlay_crc) {
     out_error << "error: failed to get overlay crc" << std::endl;
     return false;
   }
 
-  if (overlay_crc_ != overlay_crc) {
+  if (overlay_crc_ != *overlay_crc) {
     out_error << base::StringPrintf(
                      "error: bad overlay crc: idmap version 0x%08x, file system version 0x%08x",
-                     overlay_crc_, overlay_crc)
+                     overlay_crc_, *overlay_crc)
               << std::endl;
     return false;
   }
@@ -322,17 +320,20 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(const std::string& target_apk_
   std::unique_ptr<IdmapHeader> header(new IdmapHeader());
   header->magic_ = kIdmapMagic;
   header->version_ = kIdmapCurrentVersion;
-  bool crc_status;
-  std::tie(crc_status, header->target_crc_) = target_zip->Crc("resources.arsc");
-  if (!crc_status) {
+
+  Result<uint32_t> crc = target_zip->Crc("resources.arsc");
+  if (!crc) {
     out_error << "error: failed to get zip crc for target" << std::endl;
     return nullptr;
   }
-  std::tie(crc_status, header->overlay_crc_) = overlay_zip->Crc("resources.arsc");
-  if (!crc_status) {
+  header->target_crc_ = *crc;
+
+  crc = overlay_zip->Crc("resources.arsc");
+  if (!crc) {
     out_error << "error: failed to get zip crc for overlay" << std::endl;
     return nullptr;
   }
+  header->overlay_crc_ = *crc;
 
   if (target_apk_path.size() > sizeof(header->target_path_)) {
     out_error << "error: target apk path \"" << target_apk_path << "\" longer that maximum size "
@@ -358,15 +359,14 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(const std::string& target_apk_
   const auto end = overlay_pkg->end();
   for (auto iter = overlay_pkg->begin(); iter != end; ++iter) {
     const ResourceId overlay_resid = *iter;
-    bool lookup_ok;
-    std::string name;
-    std::tie(lookup_ok, name) = utils::ResToTypeEntryName(overlay_asset_manager, overlay_resid);
-    if (!lookup_ok) {
+    Result<std::string> name = utils::ResToTypeEntryName(overlay_asset_manager, overlay_resid);
+    if (!name) {
       continue;
     }
     // prepend "<package>:" to turn name into "<package>:<type>/<name>"
-    name = base::StringPrintf("%s:%s", target_pkg->GetPackageName().c_str(), name.c_str());
-    const ResourceId target_resid = NameToResid(target_asset_manager, name);
+    const std::string full_name =
+        base::StringPrintf("%s:%s", target_pkg->GetPackageName().c_str(), name->c_str());
+    const ResourceId target_resid = NameToResid(target_asset_manager, full_name);
     if (target_resid == 0) {
       continue;
     }
