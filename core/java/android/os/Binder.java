@@ -85,6 +85,15 @@ public class Binder implements IBinder {
     public static boolean LOG_RUNTIME_EXCEPTION = false; // DO NOT SUBMIT WITH TRUE
 
     /**
+     * Value to represents that a calling work source is not set.
+     *
+     * This constatnt needs to be kept in sync with IPCThreadState::kUnsetWorkSource.
+     *
+     * @hide
+     */
+    public static final int UNSET_WORKSOURCE = -1;
+
+    /**
      * Control whether dump() calls are allowed.
      */
     private static volatile String sDumpDisabled = null;
@@ -449,8 +458,6 @@ public class Binder implements IBinder {
      * }
      * </pre>
      *
-     * <p>The work source will be propagated for future outgoing binder transactions
-     * executed on this thread.
      * @hide
      **/
     @CriticalNative
@@ -972,7 +979,6 @@ public class Binder implements IBinder {
         if (observer != null) {
             observer.callEnded(callSession, requestSizeBytes, replySizeBytes);
         }
-
         return res;
     }
 }

@@ -528,22 +528,6 @@ public class BinderCallsStatsTest {
     }
 
     @Test
-    public void testCallingUidUsedWhenWorkSourceNotSet() {
-        TestBinderCallsStats bcs = new TestBinderCallsStats();
-        bcs.setDetailedTracking(true);
-        bcs.workSourceUid = -1;
-
-        Binder binder = new Binder();
-        CallSession callSession = bcs.callStarted(binder, 1);
-        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
-
-        assertEquals(1, bcs.getExportedCallStats().size());
-        BinderCallsStats.ExportedCallStat stat = bcs.getExportedCallStats().get(0);
-        assertEquals(CALLING_UID, stat.workSourceUid);
-        assertEquals(CALLING_UID, stat.callingUid);
-    }
-
-    @Test
     public void testGetExportedStatsWithoutCalls() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         Binder binder = new Binder();
