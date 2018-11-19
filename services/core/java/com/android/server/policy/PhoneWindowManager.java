@@ -2258,8 +2258,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /**
-     * @return whether the navigation bar can be hidden, e.g. the device has a
-     *         navigation bar and touch exploration is not enabled
+     * @return whether the navigation bar can be hidden, e.g. the device has a navigation bar
      */
     private boolean canHideNavigationBar() {
         return mDefaultDisplayPolicy.hasNavigationBar();
@@ -4305,8 +4304,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean screenDecor = (pfl & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0;
 
         if (layoutInScreenAndInsetDecor && !screenDecor) {
-            if (canHideNavigationBar() &&
-                    (sysUiVis & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
+            if ((sysUiVis & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
                 outFrame.set(displayFrames.mUnrestricted);
             } else {
                 outFrame.set(displayFrames.mRestricted);
@@ -4965,8 +4963,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         of.set(displayFrames.mOverscan);
                         df.set(displayFrames.mOverscan);
                         pf.set(displayFrames.mOverscan);
-                    } else if (canHideNavigationBar()
-                            && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+                    } else if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                             && (type >= FIRST_APPLICATION_WINDOW && type <= LAST_SUB_WINDOW
                             || type == TYPE_VOLUME_OVERLAY)) {
                         // Asking for layout as if the nav bar is hidden, lets the application
@@ -5062,8 +5059,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     of.set(displayFrames.mOverscan);
                     df.set(displayFrames.mOverscan);
                     pf.set(displayFrames.mOverscan);
-                } else if (canHideNavigationBar()
-                        && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+                } else if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                         && (type == TYPE_STATUS_BAR
                             || type == TYPE_TOAST
                             || type == TYPE_DOCK_DIVIDER
