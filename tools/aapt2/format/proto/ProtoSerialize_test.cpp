@@ -257,6 +257,42 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
   EXPECT_THAT(child_text->text, StrEq("woah there"));
 }
 
+TEST(ProtoSerializeTest, SerializeAndDeserializeXmlTrimEmptyWhitepsace) {
+  xml::Element element;
+  element.line_number = 22;
+  element.column_number = 23;
+  element.name = "element";
+
+  std::unique_ptr<xml::Text> trim_text = util::make_unique<xml::Text>();
+  trim_text->line_number = 25;
+  trim_text->column_number = 3;
+  trim_text->text = "  \n   ";
+  element.AppendChild(std::move(trim_text));
+
+  std::unique_ptr<xml::Text> keep_text = util::make_unique<xml::Text>();
+  keep_text->line_number = 26;
+  keep_text->column_number = 3;
+  keep_text->text = "  hello   ";
+  element.AppendChild(std::move(keep_text));
+
+  pb::XmlNode pb_xml;
+  SerializeXmlOptions options;
+  options.remove_empty_text_nodes = true;
+  SerializeXmlToPb(element, &pb_xml, options);
+
+  StringPool pool;
+  xml::Element actual_el;
+  std::string error;
+  ASSERT_TRUE(DeserializeXmlFromPb(pb_xml, &actual_el, &pool, &error));
+  ASSERT_THAT(error, IsEmpty());
+
+  // Only the child that does not consist of only whitespace should remain
+  ASSERT_THAT(actual_el.children, SizeIs(1u));
+  const xml::Text* child_text_keep = xml::NodeCast<xml::Text>(actual_el.children[0].get());
+  ASSERT_THAT(child_text_keep, NotNull());
+  EXPECT_THAT(child_text_keep->text, StrEq( "  hello   "));
+}
+
 TEST(ProtoSerializeTest, SerializeAndDeserializePrimitives) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   std::unique_ptr<ResourceTable> table =
