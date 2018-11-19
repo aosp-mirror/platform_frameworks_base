@@ -1183,8 +1183,32 @@ void Theme::SetTo(const Theme& o) {
             continue;
           }
 
-          // The package id of the attribute needs to be rewritten to the package id of the value in
-          // the destination
+          // If the attribute value represents an attribute or reference, the package id of the
+          // value needs to be rewritten to the package id of the value in the destination
+          uint32_t attribue_data = entry.value.data;
+          if ((entry.value.dataType == Res_value::TYPE_ATTRIBUTE
+              || entry.value.dataType == Res_value::TYPE_REFERENCE
+              || entry.value.dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE
+              || entry.value.dataType == Res_value::TYPE_DYNAMIC_REFERENCE)
+              && attribue_data != 0x0) {
+
+            // Determine the package id of the reference in the destination AssetManager
+            auto value_package_map = src_asset_cookie_id_map.find(entry.cookie);
+            if (value_package_map == src_asset_cookie_id_map.end()) {
+              continue;
+            }
+
+            auto value_dest_package = value_package_map->second.find(
+                get_package_id(entry.value.data));
+            if (value_dest_package == value_package_map->second.end()) {
+              continue;
+            }
+
+            attribue_data = fix_package_id(entry.value.data, value_dest_package->second);
+          }
+
+          // The package id of the attribute needs to be rewritten to the package id of the
+          // attribute in the destination
           int attribute_dest_package_id = p;
           if (attribute_dest_package_id != 0x01) {
             // Find the cookie of the attribute resource id
@@ -1204,29 +1228,6 @@ void Theme::SetTo(const Theme& o) {
               continue;
             }
             attribute_dest_package_id = attribute_dest_package->second;
-          }
-
-          // If the attribute value represents an attribute or reference, the package id of the
-          // value needs to be rewritten to the package id of the value in the destination
-          uint32_t attribue_data = entry.value.data;
-          if (entry.value.dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE
-              || entry.value.dataType == Res_value::TYPE_DYNAMIC_REFERENCE
-              || entry.value.dataType == Res_value::TYPE_ATTRIBUTE
-              || entry.value.dataType == Res_value::TYPE_REFERENCE) {
-
-            // Determine the package id of the reference in the destination AssetManager
-            auto value_package_map = src_asset_cookie_id_map.find(entry.cookie);
-            if (value_package_map == src_asset_cookie_id_map.end()) {
-              continue;
-            }
-
-            auto value_dest_package = value_package_map->second.find(
-                get_package_id(entry.value.data));
-            if (value_dest_package == value_package_map->second.end()) {
-              continue;
-            }
-
-            attribue_data = fix_package_id(entry.value.data, value_dest_package->second);
           }
 
           // Lazily instantiate the destination package
