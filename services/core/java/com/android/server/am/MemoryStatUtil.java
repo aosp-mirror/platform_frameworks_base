@@ -39,38 +39,6 @@ import java.util.regex.Pattern;
  * Static utility methods related to {@link MemoryStat}.
  */
 public final class MemoryStatUtil {
-    /**
-     * Which native processes to create {@link MemoryStat} for.
-     *
-     * <p>Processes are matched by their cmdline in procfs. Example: cat /proc/pid/cmdline returns
-     * /system/bin/statsd for the stats daemon.
-     */
-    public static final String[] MEMORY_STAT_INTERESTING_NATIVE_PROCESSES = new String[]{
-            "/system/bin/statsd",  // Stats daemon.
-            "/system/bin/surfaceflinger",
-            "/system/bin/apexd",  // APEX daemon.
-            "/system/bin/audioserver",
-            "/system/bin/cameraserver",
-            "/system/bin/drmserver",
-            "/system/bin/healthd",
-            "/system/bin/incidentd",
-            "/system/bin/installd",
-            "/system/bin/lmkd",  // Low memory killer daemon.
-            "/system/bin/logd",
-            "media.codec",
-            "media.extractor",
-            "media.metrics",
-            "/system/bin/mediadrmserver",
-            "/system/bin/mediaserver",
-            "/system/bin/performanced",
-            "/system/bin/tombstoned",
-            "/system/bin/traced",  // Perfetto.
-            "/system/bin/traced_probes",  // Perfetto.
-            "webview_zygote",
-            "zygote",
-            "zygote64",
-    };
-
     static final int BYTES_IN_KILOBYTE = 1024;
     static final int PAGE_SIZE = 4096;
     static final long JIFFY_NANOS = 1_000_000_000 / Os.sysconf(OsConstants._SC_CLK_TCK);
@@ -152,9 +120,17 @@ public final class MemoryStatUtil {
         if (stat == null) {
             return null;
         }
-        final String statusPath = String.format(Locale.US, PROC_STATUS_FILE_FMT, pid);
-        stat.rssHighWatermarkInBytes = parseVmHWMFromProcfs(readFileContents(statusPath));
+        stat.rssHighWatermarkInBytes = readRssHighWaterMarkFromProcfs(pid);
         return stat;
+    }
+
+    /**
+     * Reads RSS high-water mark of a process from procfs. Returns value of the VmHWM field in
+     * /proc/PID/status in bytes or 0 if not available.
+     */
+    public static long readRssHighWaterMarkFromProcfs(int pid) {
+        final String statusPath = String.format(Locale.US, PROC_STATUS_FILE_FMT, pid);
+        return parseVmHWMFromProcfs(readFileContents(statusPath));
     }
 
     /**

@@ -32,6 +32,7 @@ public final class ProcessMemoryState implements Parcelable {
     public final long rssInBytes;
     public final long cacheInBytes;
     public final long swapInBytes;
+    // TODO(rslawik): Delete this field once ProcessMemoryHighWaterMark is ready.
     public final long rssHighWatermarkInBytes;
     public final long startTimeNanos;
 

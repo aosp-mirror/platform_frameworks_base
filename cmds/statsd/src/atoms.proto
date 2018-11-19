@@ -159,7 +159,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10038
+    // Next: 10043
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -203,6 +203,7 @@ message Atom {
         DeviceCalculatedPowerUse device_calculated_power_use = 10039;
         DeviceCalculatedPowerBlameUid device_calculated_power_blame_uid = 10040;
         DeviceCalculatedPowerBlameOther device_calculated_power_blame_other = 10041;
+        ProcessMemoryHighWaterMark process_memory_high_water_mark = 10042;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -2537,7 +2538,8 @@ message ProcessMemoryState {
     // RSS high watermark.
     // Peak RSS usage of the process. Value is read from the VmHWM field in /proc/PID/status or
     // from memory.max_usage_in_bytes under /dev/memcg if the device uses per-app memory cgroups.
-    optional int64 rss_high_watermark_in_bytes = 9;
+    // Deprecated: use ProcessMemoryHighWaterMark atom instead.
+    optional int64 rss_high_watermark_in_bytes = 9 [deprecated = true];
 
     // Elapsed real time when the process started.
     // Value is read from /proc/PID/stat, field 22. 0 if read from per-app memory cgroups.
@@ -2565,11 +2567,28 @@ message NativeProcessMemoryState {
 
     // RSS high watermark.
     // Peak RSS usage of the process. Value is read from the VmHWM field in /proc/PID/status.
-    optional int64 rss_high_watermark_in_bytes = 6;
+    // Deprecated: use ProcessMemoryHighWaterMark atom instead.
+    optional int64 rss_high_watermark_in_bytes = 6 [deprecated = true];
 
     // Elapsed real time when the process started.
     // Value is read from /proc/PID/stat, field 22.
     optional int64 start_time_nanos = 7;
+}
+
+/*
+ * Logs the memory high-water mark for a process.
+ * Recorded in ActivityManagerService.
+ */
+message ProcessMemoryHighWaterMark {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The process name. Provided by ActivityManagerService or read from /proc/PID/cmdline.
+    optional string process_name = 2;
+
+    // RSS high-water mark. Peak RSS usage of the process. Read from the VmHWM field in
+    // /proc/PID/status.
+    optional int64 rss_high_water_mark_in_bytes = 3;
 }
 
 /*

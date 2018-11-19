@@ -127,6 +127,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.am.MemoryStatUtil.readRssHighWaterMarkFromProcfs;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -182,6 +183,7 @@ import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProcessMemoryHighWaterMark;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
@@ -18760,6 +18762,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (memoryStat == null) {
                         continue;
                     }
+                    // TODO(rslawik): Delete RSS high-water mark field.
                     ProcessMemoryState processMemoryState =
                             new ProcessMemoryState(uid,
                                     r.processName,
@@ -18775,6 +18778,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             return processMemoryStates;
+        }
+
+        @Override
+        public List<ProcessMemoryHighWaterMark> getMemoryHighWaterMarkForProcesses() {
+            List<ProcessMemoryHighWaterMark> results = new ArrayList<>();
+            synchronized (mPidsSelfLocked) {
+                for (int i = 0, size = mPidsSelfLocked.size(); i < size; i++) {
+                    final ProcessRecord r = mPidsSelfLocked.valueAt(i);
+                    final long rssHighWaterMarkInBytes = readRssHighWaterMarkFromProcfs(r.pid);
+                    results.add(new ProcessMemoryHighWaterMark(r.uid, r.processName,
+                            rssHighWaterMarkInBytes));
+                }
+            }
+            return results;
         }
 
         @Override
