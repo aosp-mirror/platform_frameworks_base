@@ -86,7 +86,14 @@ import java.util.Set;
  * @attr ref android.R.styleable#Preference_recycleEnabled
  * @attr ref android.R.styleable#Preference_singleLineTitle
  * @attr ref android.R.styleable#Preference_iconSpaceReserved
+ *
+ * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+ *      Preference Library</a> for consistent behavior across all devices. For more information on
+ *      using the AndroidX Preference Library see
+ *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
  */
+@Deprecated
 public class Preference implements Comparable<Preference> {
     /**
      * Specify for {@link #setOrder(int)} if a specific order is not required.
@@ -165,7 +172,14 @@ public class Preference implements Comparable<Preference> {
      * {@link Preference} has been changed by the user and is
      * about to be set and/or persisted.  This gives the client a chance
      * to prevent setting and/or persisting the value.
+     *
+     * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+     *      Preference Library</a> for consistent behavior across all devices.
+     *      For more information on using the AndroidX Preference Library see
+     *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
      */
+    @Deprecated
     public interface OnPreferenceChangeListener {
         /**
          * Called when a Preference has been changed by the user. This is
@@ -182,7 +196,14 @@ public class Preference implements Comparable<Preference> {
     /**
      * Interface definition for a callback to be invoked when a {@link Preference} is
      * clicked.
+     *
+     * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+     *      Preference Library</a> for consistent behavior across all devices.
+     *      For more information on using the AndroidX Preference Library see
+     *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
      */
+    @Deprecated
     public interface OnPreferenceClickListener {
         /**
          * Called when a Preference has been clicked.
@@ -2070,7 +2091,14 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * A base class for managing the instance state of a {@link Preference}.
+     *
+     * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+     *      Preference Library</a> for consistent behavior across all devices.
+     *      For more information on using the AndroidX Preference Library see
+     *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
      */
+    @Deprecated
     public static class BaseSavedState extends AbsSavedState {
         public BaseSavedState(Parcel source) {
             super(source);
