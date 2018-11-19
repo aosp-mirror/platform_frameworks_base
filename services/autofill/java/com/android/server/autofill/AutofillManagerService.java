@@ -89,7 +89,7 @@ import java.util.Objects;
  * {@link AutofillManagerServiceImpl} itself.
  */
 public final class AutofillManagerService
-        extends AbstractMasterSystemService<AutofillManagerServiceImpl> {
+        extends AbstractMasterSystemService<AutofillManagerService, AutofillManagerServiceImpl> {
 
     private static final String TAG = "AutofillManagerService";
 
