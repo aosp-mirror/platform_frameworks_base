@@ -462,9 +462,11 @@ public class AppOpsManager {
     public static final int OP_USE_BIOMETRIC = 78;
     /** @hide Physical activity recognition. */
     public static final int OP_ACTIVITY_RECOGNITION = 79;
+    /** @hide Financial app sms read. */
+    public static final int OP_SMS_FINANCIAL_TRANSACTIONS = 80;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 80;
+    public static final int _NUM_OP = 81;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -715,6 +717,10 @@ public class AppOpsManager {
     /** @hide Recognize physical activity. */
     public static final String OPSTR_ACTIVITY_RECOGNITION = "android:activity_recognition";
 
+    /** @hide Financial app read sms. */
+    public static final String OPSTR_SMS_FINANCIAL_TRANSACTIONS =
+            "android:sms_financial_transactions";
+
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
     private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
@@ -765,6 +771,7 @@ public class AppOpsManager {
             OP_WRITE_SETTINGS,
             OP_REQUEST_INSTALL_PACKAGES,
             OP_START_FOREGROUND,
+            OP_SMS_FINANCIAL_TRANSACTIONS,
     };
 
     /**
@@ -856,6 +863,7 @@ public class AppOpsManager {
             OP_COARSE_LOCATION,                 // BLUETOOTH_SCAN
             OP_USE_BIOMETRIC,                   // BIOMETRIC
             OP_ACTIVITY_RECOGNITION,            // ACTIVITY_RECOGNITION
+            OP_SMS_FINANCIAL_TRANSACTIONS,      // SMS_FINANCIAL_TRANSACTIONS
     };
 
     /**
@@ -942,6 +950,7 @@ public class AppOpsManager {
             OPSTR_BLUETOOTH_SCAN,
             OPSTR_USE_BIOMETRIC,
             OPSTR_ACTIVITY_RECOGNITION,
+            OPSTR_SMS_FINANCIAL_TRANSACTIONS,
     };
 
     /**
@@ -1029,6 +1038,7 @@ public class AppOpsManager {
             "BLUETOOTH_SCAN",
             "USE_BIOMETRIC",
             "ACTIVITY_RECOGNITION",
+            "SMS_FINANCIAL_TRANSACTIONS",
     };
 
     /**
@@ -1117,6 +1127,7 @@ public class AppOpsManager {
             null, // no permission for OP_BLUETOOTH_SCAN
             Manifest.permission.USE_BIOMETRIC,
             Manifest.permission.ACTIVITY_RECOGNITION,
+            Manifest.permission.SMS_FINANCIAL_TRANSACTIONS,
     };
 
     /**
@@ -1205,6 +1216,7 @@ public class AppOpsManager {
             null, // maybe should be UserManager.DISALLOW_SHARE_LOCATION, //BLUETOOTH_SCAN
             null, // USE_BIOMETRIC
             null, // ACTIVITY_RECOGNITION
+            UserManager.DISALLOW_SMS, // SMS_FINANCIAL_TRANSACTIONS
     };
 
     /**
@@ -1292,6 +1304,7 @@ public class AppOpsManager {
             true, // BLUETOOTH_SCAN
             false, // USE_BIOMETRIC
             false, // ACTIVITY_RECOGNITION
+            false, // SMS_FINANCIAL_TRANSACTIONS
     };
 
     /**
@@ -1378,6 +1391,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // BLUETOOTH_SCAN
             AppOpsManager.MODE_ALLOWED, // USE_BIOMETRIC
             AppOpsManager.MODE_ALLOWED, // ACTIVITY_RECOGNITION
+            AppOpsManager.MODE_DEFAULT, // SMS_FINANCIAL_TRANSACTIONS
     };
 
     /**
@@ -1468,6 +1482,7 @@ public class AppOpsManager {
             false, // BLUETOOTH_SCAN
             false, // USE_BIOMETRIC
             false, // ACTIVITY_RECOGNITION
+            false, // SMS_FINANCIAL_TRANSACTIONS
     };
 
     /**
