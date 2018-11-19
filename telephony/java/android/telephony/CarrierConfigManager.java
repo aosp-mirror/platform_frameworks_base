@@ -2292,6 +2292,45 @@ public class CarrierConfigManager {
     public static final String KEY_SUPPORT_EMERGENCY_DIALER_SHORTCUT_BOOL =
             "support_emergency_dialer_shortcut_bool";
 
+    /**
+     * Call forwarding uses USSD command without SS command.
+     * When {@code true}, the call forwarding query/set by ussd command and UI only display Call
+     * Forwarding when unanswered.
+     * When {@code false}, don't use USSD to query/set call forwarding.
+     * @hide
+     */
+    public static final String KEY_USE_CALL_FORWARDING_USSD_BOOL = "use_call_forwarding_ussd_bool";
+
+    /**
+     * This flag specifies whether to support for the caller id set command by ussd.
+     * When {@code true}, device shall sync caller id ussd result to ss command.
+     * When {@code false}, caller id don't support ussd command.
+     * @hide
+     */
+    public static final String KEY_USE_CALLER_ID_USSD_BOOL = "use_caller_id_ussd_bool";
+
+    /**
+     * Specifies the service class for call waiting service.
+     * Default value is
+     * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_VOICE}.
+     * <p>
+     * See 27.007 +CCFC or +CLCK.
+     * The value set as below:
+     * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_NONE}
+     * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_VOICE}
+     * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_DATA}
+     * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_FAX}
+     * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_SMS}
+     * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_DATA_SYNC}
+     * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_DATA_ASYNC}
+     * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_PACKET}
+     * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_PAD}
+     * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_MAX}
+     * @hide
+     */
+    public static final String KEY_CALL_WAITING_SERVICE_CLASS_INT =
+            "call_waiting_service_class_int";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -2648,6 +2687,9 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CALL_WAITING_OVER_UT_WARNING_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_CLIR_NETWORK_DEFAULT_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_EMERGENCY_DIALER_SHORTCUT_BOOL, true);
+        sDefaults.putBoolean(KEY_USE_CALL_FORWARDING_USSD_BOOL, false);
+        sDefaults.putBoolean(KEY_USE_CALLER_ID_USSD_BOOL, false);
+        sDefaults.putInt(KEY_CALL_WAITING_SERVICE_CLASS_INT, 1 /* SERVICE_CLASS_VOICE */);
     }
 
     /**
