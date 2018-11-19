@@ -90,8 +90,8 @@ public class LingerMonitor {
         mNotifier = notifier;
         mDailyLimit = dailyLimit;
         mRateLimitMillis = rateLimitMillis;
-        // Ensure that (now - mFirstNotificationMillis) >= rateLimitMillis at first
-        mFirstNotificationMillis = -rateLimitMillis;
+        // Ensure that (now - mLastNotificationMillis) >= rateLimitMillis at first
+        mLastNotificationMillis = -rateLimitMillis;
     }
 
     private static HashMap<String, Integer> makeTransportToNameMap() {
