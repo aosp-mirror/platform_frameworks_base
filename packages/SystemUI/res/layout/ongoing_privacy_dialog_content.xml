@@ -26,9 +26,7 @@
         android:id="@+id/dialog_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="@dimen/ongoing_appops_dialog_content_padding">
-
+        android:orientation="vertical" >
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
@@ -37,21 +35,29 @@
             android:textDirection="locale"
             android:textAppearance="@style/TextAppearance.AppOpsDialog.Title"
             android:textColor="@*android:color/text_color_primary"
-            android:paddingStart="@dimen/ongoing_appops_dialog_title_padding"
-            android:paddingEnd="@dimen/ongoing_appops_dialog_title_padding"
-            android:paddingBottom="@dimen/ongoing_appops_dialog_sep"
+            android:layout_marginStart="@dimen/ongoing_appops_dialog_title_margin_sides"
+            android:layout_marginEnd="@dimen/ongoing_appops_dialog_title_margin_sides"
+            android:layout_marginBottom="@dimen/ongoing_appops_dialog_title_margin_top_bottom"
+            android:layout_marginTop="@dimen/ongoing_appops_dialog_title_margin_top_bottom"
         />
 
         <LinearLayout
-            android:id="@+id/items_container"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="start"
-        />
+            android:layout_marginBottom="@dimen/ongoing_appops_dialog_items_bottom_margin" >
 
-        <include android:id="@+id/overflow" layout="@layout/ongoing_privacy_dialog_item"
-                 android:visibility="gone" />
+            <LinearLayout
+                android:id="@+id/items_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="start"
+            />
+
+            <include android:id="@+id/overflow" layout="@layout/ongoing_privacy_dialog_item"
+                     android:visibility="gone" />
+        </LinearLayout>
 
     </LinearLayout>
 

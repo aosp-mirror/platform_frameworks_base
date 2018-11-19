@@ -2292,6 +2292,6 @@
     <!-- Text for indicating extra apps using app ops [CHAR LIMIT=NONE] -->
     <plurals name="ongoing_privacy_dialog_overflow_text">
         <item quantity="one"><xliff:g id="num_apps" example="1">%d</xliff:g> other app</item>
-        <item quantity="other"><xliff:g id="num_apps" example="3">%d</xliff:g> other app</item>
+        <item quantity="other"><xliff:g id="num_apps" example="3">%d</xliff:g> other apps</item>
     </plurals>
 </resources>
