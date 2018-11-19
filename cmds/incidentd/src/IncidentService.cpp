@@ -82,15 +82,17 @@ static Status checkIncidentPermissions(const IncidentReportArgs& args) {
                         Status::EX_SECURITY,
                         "Calling process does not have permission to get local data.");
             }
+            break;
         case DEST_EXPLICIT:
             if (callingUid != AID_SHELL && callingUid != AID_ROOT && callingUid != AID_STATSD &&
-                callingUid != AID_SYSTEM) {
+                    callingUid != AID_SYSTEM) {
                 ALOGW("Calling pid %d and uid %d does not have permission to get explicit data.",
                       callingPid, callingUid);
                 return Status::fromExceptionCode(
                         Status::EX_SECURITY,
                         "Calling process does not have permission to get explicit data.");
             }
+            break;
     }
     return Status::ok();
 }
@@ -298,7 +300,7 @@ status_t IncidentService::onTransact(uint32_t code, const Parcel& data, Parcel* 
             }
 
             return NO_ERROR;
-        }
+        } break;
         default: { return BnIncidentManager::onTransact(code, data, reply, flags); }
     }
 }
