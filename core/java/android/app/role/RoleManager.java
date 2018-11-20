@@ -25,6 +25,7 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -189,7 +190,7 @@ public final class RoleManager {
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
     @SystemApi
     public List<String> getRoleHolders(@NonNull String roleName) {
-        return getRoleHoldersAsUser(roleName, UserHandle.of(UserHandle.getCallingUserId()));
+        return getRoleHoldersAsUser(roleName, Process.myUserHandle());
     }
 
     /**

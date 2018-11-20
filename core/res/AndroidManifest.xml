@@ -2467,7 +2467,7 @@
          {@link android.content.pm.PackageManager#addPackageToPreferred}
          for details. -->
     <permission android:name="android.permission.SET_PREFERRED_APPLICATIONS"
-        android:protectionLevel="signature|verifier" />
+        android:protectionLevel="signature|installer|verifier" />
 
     <!-- Allows an application to receive the
          {@link android.content.Intent#ACTION_BOOT_COMPLETED} that is
