@@ -674,7 +674,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
     @Override
     public int getAlpha() {
-        return PixelFormat.TRANSLUCENT;
+        return mPaint.getAlpha();
     }
 
     @Override
@@ -718,10 +718,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
     @Override
     public int getOpacity() {
-        if (mLayerState.mOpacityOverride != PixelFormat.UNKNOWN) {
-            return mLayerState.mOpacityOverride;
-        }
-        return mLayerState.getOpacity();
+        return PixelFormat.TRANSLUCENT;
     }
 
     @Override
