@@ -26,11 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.IRemoteVolumeController;
-import android.media.ISessionTokensListener;
-import android.media.MediaSession2;
-import android.media.SessionToken2;
 import android.media.browse.MediaBrowser;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -44,10 +40,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 
 /**
  * Provides support for interacting with {@link MediaSession media sessions}
@@ -75,8 +69,6 @@ public final class MediaSessionManager {
 
     private final ArrayMap<OnActiveSessionsChangedListener, SessionsChangedWrapper> mListeners
             = new ArrayMap<OnActiveSessionsChangedListener, SessionsChangedWrapper>();
-    private final ArrayMap<OnSessionTokensChangedListener, SessionTokensChangedWrapper>
-            mSessionTokensListener = new ArrayMap<>();
     private final Object mLock = new Object();
     private final ISessionManager mService;
 
@@ -413,73 +405,6 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Called when a {@link MediaSession2} is created.
-     * @hide
-     */
-    public boolean createSession2(@NonNull SessionToken2 token) {
-        if (token == null) {
-            return false;
-        }
-        try {
-            return mService.createSession2(token.toBundle());
-        } catch (RemoteException e) {
-            Log.wtf(TAG, "Cannot communicate with the service.", e);
-        }
-        return false;
-    }
-
-    /**
-     * Called when a {@link MediaSession2} is destroyed.
-     * @hide
-     */
-    public void destroySession2(@NonNull SessionToken2 token) {
-        if (token == null) {
-            return;
-        }
-        try {
-            mService.destroySession2(token.toBundle());
-        } catch (RemoteException e) {
-            Log.wtf(TAG, "Cannot communicate with the service.", e);
-        }
-    }
-
-    /**
-     * @hide
-     * Get {@link List} of {@link SessionToken2} whose sessions are active now. This list represents
-     * active sessions regardless of whether they're {@link MediaSession2}.
-     * <p>
-     * This requires the android.Manifest.permission.MEDIA_CONTENT_CONTROL permission be held by the
-     * calling app. You may also retrieve this list if your app is an enabled notification listener
-     * using the {@link NotificationListenerService} APIs.
-     *
-     * @return list of tokens
-     */
-    public List<SessionToken2> getActiveSessionTokens() {
-        try {
-            List<Bundle> bundles = mService.getSessionTokens(
-                    /* activeSessionOnly */ true, /* sessionServiceOnly */ false,
-                    mContext.getOpPackageName());
-            return toTokenList(bundles);
-        } catch (RemoteException e) {
-            Log.wtf(TAG, "Cannot communicate with the service.", e);
-            return Collections.emptyList();
-        }
-    }
-
-    private static List<SessionToken2> toTokenList(List<Bundle> bundles) {
-        List<SessionToken2> tokens = new ArrayList<>();
-        if (bundles != null) {
-            for (int i = 0; i < bundles.size(); i++) {
-                SessionToken2 token = SessionToken2.fromBundle(bundles.get(i));
-                if (token != null) {
-                    tokens.add(token);
-                }
-            }
-        }
-        return tokens;
-    }
-
-    /**
      * Check if the global priority session is currently active. This can be
      * used to decide if media keys should be sent to the session or to the app.
      *
@@ -598,15 +523,6 @@ public final class MediaSessionManager {
      */
     public interface OnActiveSessionsChangedListener {
         public void onActiveSessionsChanged(@Nullable List<MediaController> controllers);
-    }
-
-    /**
-     * @hide
-     * Listens for changes to the {@link #getAllSessionTokens()}. This can be added
-     * using {@link #addOnActiveSessionsChangedListener}.
-     */
-    public interface OnSessionTokensChangedListener {
-        void onSessionTokensChanged(@NonNull List<SessionToken2> tokens);
     }
 
     /**
@@ -812,41 +728,6 @@ public final class MediaSessionManager {
             mListener = null;
             mContext = null;
             mHandler = null;
-        }
-    }
-
-    private static final class SessionTokensChangedWrapper {
-        private Context mContext;
-        private Executor mExecutor;
-        private OnSessionTokensChangedListener mListener;
-
-        public SessionTokensChangedWrapper(Context context, Executor executor,
-                OnSessionTokensChangedListener listener) {
-            mContext = context;
-            mExecutor = executor;
-            mListener = listener;
-        }
-
-        private final ISessionTokensListener.Stub mStub = new ISessionTokensListener.Stub() {
-            @Override
-            public void onSessionTokensChanged(final List<Bundle> bundles) {
-                final Executor executor = mExecutor;
-                if (executor != null) {
-                    executor.execute(() -> {
-                        final Context context = mContext;
-                        final OnSessionTokensChangedListener listener = mListener;
-                        if (context != null && listener != null) {
-                            listener.onSessionTokensChanged(toTokenList(bundles));
-                        }
-                    });
-                }
-            }
-        };
-
-        private void release() {
-            mListener = null;
-            mContext = null;
-            mExecutor = null;
         }
     }
 
