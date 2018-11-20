@@ -192,6 +192,20 @@ public enum ScrimState {
                 mBlankScreen = false;
             }
         }
+    },
+
+    /**
+     * Unlocked with a bubble expanded.
+     */
+    BUBBLE_EXPANDED(7) {
+        @Override
+        public void prepare(ScrimState previousState) {
+            mCurrentInFrontTint = Color.TRANSPARENT;
+            mCurrentBehindTint = Color.TRANSPARENT;
+            mAnimationDuration = ScrimController.ANIMATION_DURATION;
+            mCurrentBehindAlpha = ScrimController.GRADIENT_SCRIM_ALPHA_BUSY;
+            mBlankScreen = false;
+        }
     };
 
     boolean mBlankScreen = false;

@@ -89,7 +89,6 @@ public class PipManager implements BasePipManager {
             final Pair<ComponentName, Integer> topPipActivityInfo = PipUtils.getTopPinnedActivity(
                     mContext, mActivityManager);
             final ComponentName topActivity = topPipActivityInfo.first;
-            final int userId = topActivity != null ? topPipActivityInfo.second : 0;
             mMenuController.onActivityUnpinned();
             mTouchHandler.onActivityUnpinned(topActivity);
             mAppOpsListener.onActivityUnpinned();

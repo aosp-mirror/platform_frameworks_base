@@ -70,6 +70,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.appops.AppOpsControllerImpl;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -138,6 +139,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private NotificationPresenter mNotificationPresenter;
     @Mock private NotificationEntryManager.Callback mCallback;
+    @Mock private BubbleController mBubbleController;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
@@ -162,6 +164,7 @@ public class StatusBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
         mDependency.injectTestDependency(DeviceProvisionedController.class,
                 mDeviceProvisionedController);
+        mDependency.injectMockDependency(BubbleController.class);
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
@@ -210,7 +213,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mock(NotificationIconAreaController.class), mock(DozeScrimController.class),
                 mock(NotificationShelf.class), mLockscreenUserManager,
                 mCommandQueue,
-                mNotificationPresenter);
+                mNotificationPresenter, mock(BubbleController.class));
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         mStatusBar.putComponent(StatusBar.class, mStatusBar);
@@ -638,7 +641,8 @@ public class StatusBarTest extends SysuiTestCase {
                 NotificationShelf notificationShelf,
                 NotificationLockscreenUserManager notificationLockscreenUserManager,
                 CommandQueue commandQueue,
-                NotificationPresenter notificationPresenter) {
+                NotificationPresenter notificationPresenter,
+                BubbleController bubbleController) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -667,6 +671,7 @@ public class StatusBarTest extends SysuiTestCase {
             mCommandQueue = commandQueue;
             mPresenter = notificationPresenter;
             mGestureWakeLock = mock(PowerManager.WakeLock.class);
+            mBubbleController = bubbleController;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {

@@ -263,6 +263,19 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void transitionToBubbleExpanded() {
+        mScrimController.transitionTo(ScrimState.BUBBLE_EXPANDED);
+        mScrimController.finishAnimationsImmediately();
+
+        // Front scrim should be transparent
+        Assert.assertEquals(ScrimController.VISIBILITY_FULLY_TRANSPARENT,
+                mScrimInFront.getViewAlpha(), 0.0f);
+        // Back scrim should be visible
+        Assert.assertEquals(ScrimController.GRADIENT_SCRIM_ALPHA_BUSY,
+                mScrimBehind.getViewAlpha(), 0.0f);
+    }
+
+    @Test
     public void scrimStateCallback() {
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         mScrimController.finishAnimationsImmediately();

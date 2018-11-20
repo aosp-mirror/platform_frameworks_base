@@ -21,6 +21,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,11 +34,14 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 
+/**
+ * Displays the dismiss UI and target for floating objects.
+ */
 public class PipDismissViewController {
 
     // This delay controls how long to wait before we show the target when the user first moves
     // the PIP, to prevent the target from animating if the user just wants to fling the PIP
-    private static final int SHOW_TARGET_DELAY = 100;
+    public static final int SHOW_TARGET_DELAY = 100;
     private static final int SHOW_TARGET_DURATION = 350;
     private static final int HIDE_TARGET_DURATION = 225;
 
@@ -44,9 +49,16 @@ public class PipDismissViewController {
     private WindowManager mWindowManager;
     private View mDismissView;
 
+    // Used for dismissing a bubble -- bubble should be in the target to be considered a dismiss
+    private View mTargetView;
+    private int[] mLoc = new int[2];
+    private boolean mIntersecting;
+    private Vibrator mVibe;
+
     public PipDismissViewController(Context context) {
         mContext = context;
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        mVibe = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
     /**
@@ -76,9 +88,10 @@ public class PipDismissViewController {
             mDismissView.setBackground(gradient);
 
             // Adjust bottom margins of the text
-            View text = mDismissView.findViewById(R.id.pip_dismiss_text);
-            FrameLayout.LayoutParams tlp = (FrameLayout.LayoutParams) text.getLayoutParams();
+            mTargetView = mDismissView.findViewById(R.id.pip_dismiss_text);
+            FrameLayout.LayoutParams tlp = (FrameLayout.LayoutParams) mTargetView.getLayoutParams();
             tlp.bottomMargin = stableInsets.bottom + bottomMargin;
+            mTargetView.setLayoutParams(tlp);
 
             // Add the target to the window
             LayoutParams lp =  new LayoutParams(
@@ -96,6 +109,36 @@ public class PipDismissViewController {
         }
         mDismissView.animate().cancel();
     }
+
+
+    /**
+     * Updates the dismiss target based on location of the view.
+     *
+     * @return whether the view is within the dismiss target.
+     */
+    public boolean updateTarget(View view) {
+        if (mDismissView == null) {
+            return false;
+        }
+        if (mDismissView.getAlpha() > 0) {
+            view.getLocationOnScreen(mLoc);
+            Rect viewRect = new Rect(mLoc[0], mLoc[1], mLoc[0] + view.getWidth(),
+                    mLoc[1] + view.getHeight());
+            mTargetView.getLocationOnScreen(mLoc);
+            Rect targetRect = new Rect(mLoc[0], mLoc[1], mLoc[0] + mTargetView.getWidth(),
+                    mLoc[1] + mTargetView.getHeight());
+            boolean intersecting = targetRect.intersect(viewRect);
+            if (intersecting && !mIntersecting) {
+                // TODO: is this the right effect?
+                mVibe.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_CLICK));
+                mIntersecting = true;
+            }
+            mIntersecting = intersecting;
+            return intersecting;
+        }
+        return false;
+    }
+
 
     /**
      * Shows the dismiss target.
