@@ -105,7 +105,6 @@ public final class LooperStatsTest {
         assertThat(entry.recordedDelayMessageCount).isEqualTo(1);
         assertThat(entry.delayMillis).isEqualTo(30);
         assertThat(entry.maxDelayMillis).isEqualTo(30);
-
     }
 
     @Test
@@ -429,6 +428,28 @@ public final class LooperStatsTest {
         assertThat(entries).hasSize(0);
     }
 
+    @Test
+    public void testAddsDebugEntries() {
+        TestableLooperStats looperStats = new TestableLooperStats(1, 100);
+        looperStats.setAddDebugEntries(true);
+
+        Message message = mHandlerFirst.obtainMessage(1000);
+        message.when = looperStats.getSystemUptimeMillis();
+        Object token = looperStats.messageDispatchStarting();
+        looperStats.messageDispatched(token, message);
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        assertThat(entries).hasSize(3);
+        LooperStats.ExportedEntry debugEntry1 = entries.get(1);
+        assertThat(debugEntry1.handlerClassName).isEqualTo("");
+        assertThat(debugEntry1.messageName).isEqualTo("__DEBUG_start_time_millis");
+        assertThat(debugEntry1.maxDelayMillis).isEqualTo(looperStats.getStartTimeMillis());
+        LooperStats.ExportedEntry debugEntry2 = entries.get(2);
+        assertThat(debugEntry2.handlerClassName).isEqualTo("");
+        assertThat(debugEntry2.messageName).isEqualTo("__DEBUG_end_time_millis");
+        assertThat(debugEntry2.maxDelayMillis).isAtLeast(looperStats.getStartTimeMillis());
+    }
+
     private static void assertThrows(Class<? extends Exception> exceptionClass, Runnable r) {
         try {
             r.run();
@@ -450,6 +471,7 @@ public final class LooperStatsTest {
             super(samplingInterval, sizeCap);
             this.mSamplingInterval = samplingInterval;
             this.setDeviceState(mDeviceState.getReadonlyClient());
+            this.setAddDebugEntries(false);
         }
 
         void tickRealtime(long micros) {
