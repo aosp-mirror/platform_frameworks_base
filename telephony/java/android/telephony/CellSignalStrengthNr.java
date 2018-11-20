@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 
 import java.util.Objects;
 
@@ -48,6 +49,12 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     private int mSsRsrp;
     private int mSsRsrq;
     private int mSsSinr;
+    private int mLevel;
+
+    /** @hide */
+    public CellSignalStrengthNr() {
+        setDefaultValues();
+    }
 
     /**
      * @param csiRsrp CSI reference signal received power.
@@ -60,12 +67,13 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
      */
     public CellSignalStrengthNr(
             int csiRsrp, int csiRsrq, int csiSinr, int ssRsrp, int ssRsrq, int ssSinr) {
-        mCsiRsrp = csiRsrp;
-        mCsiRsrq = csiRsrq;
-        mCsiSinr = csiSinr;
-        mSsRsrp = ssRsrp;
-        mSsRsrq = ssRsrq;
-        mSsSinr = ssSinr;
+        mCsiRsrp = inRangeOrUnavailable(csiRsrp, -140, -44);
+        mCsiRsrq = inRangeOrUnavailable(csiRsrq, -20, -3);
+        mCsiSinr = inRangeOrUnavailable(csiSinr, -23, 23);
+        mSsRsrp = inRangeOrUnavailable(ssRsrp, -140, -44);
+        mSsRsrq = inRangeOrUnavailable(ssRsrq, -20, -3);
+        mSsSinr = inRangeOrUnavailable(ssSinr, -23, 40);
+        updateLevel(null, null);
     }
 
     /**
@@ -142,6 +150,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         dest.writeInt(mSsRsrp);
         dest.writeInt(mSsRsrq);
         dest.writeInt(mSsSinr);
+        dest.writeInt(mLevel);
     }
 
     private CellSignalStrengthNr(Parcel in) {
@@ -151,6 +160,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         mSsRsrp = in.readInt();
         mSsRsrq = in.readInt();
         mSsSinr = in.readInt();
+        mLevel = in.readInt();
     }
 
     /** @hide */
@@ -162,27 +172,36 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         mSsRsrp = CellInfo.UNAVAILABLE;
         mSsRsrq = CellInfo.UNAVAILABLE;
         mSsSinr = CellInfo.UNAVAILABLE;
+        mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
     }
 
     @Override
     public int getLevel() {
+        return mLevel;
+    }
+
+    /** @hide */
+    @Override
+    public void updateLevel(PersistableBundle cc, ServiceState ss) {
         if (mCsiRsrp == CellInfo.UNAVAILABLE) {
-            return SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+            mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
         } else if (mCsiRsrp >= SIGNAL_GREAT_THRESHOLD) {
-            return SIGNAL_STRENGTH_GREAT;
+            mLevel = SIGNAL_STRENGTH_GREAT;
         } else if (mCsiRsrp >= SIGNAL_GOOD_THRESHOLD) {
-            return SIGNAL_STRENGTH_GOOD;
+            mLevel = SIGNAL_STRENGTH_GOOD;
         } else if (mCsiRsrp >= SIGNAL_MODERATE_THRESHOLD) {
-            return SIGNAL_STRENGTH_MODERATE;
+            mLevel = SIGNAL_STRENGTH_MODERATE;
         } else {
-            return SIGNAL_STRENGTH_POOR;
+            mLevel = SIGNAL_STRENGTH_POOR;
         }
     }
 
     /**
-     * Calculates the NR signal as an asu value between 0..97, 99 is unknown.
-     * Asu is calculated based on 3GPP RSRP, refer to 3GPP TS 27.007 section 8.69.
-     * @return an integer represent the asu level of the signal strength.
+     * Get the RSRP in ASU.
+     *
+     * Asu is calculated based on 3GPP RSRP. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
+     *
+     * @return RSCP in ASU 0..97, 255, or UNAVAILABLE
      */
     @Override
     public int getAsuLevel() {
@@ -206,15 +225,33 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     }
 
     /** @hide */
+    public CellSignalStrengthNr(CellSignalStrengthNr s) {
+        mCsiRsrp = s.mCsiRsrp;
+        mCsiRsrq = s.mCsiRsrq;
+        mCsiSinr = s.mCsiSinr;
+        mSsRsrp = s.mSsRsrp;
+        mSsRsrq = s.mSsRsrq;
+        mSsSinr = s.mSsSinr;
+        mLevel = s.mLevel;
+    }
+
+    /** @hide */
     @Override
-    public CellSignalStrength copy() {
-        return new CellSignalStrengthNr(
-                mCsiRsrp, mCsiRsrq, mCsiSinr, mSsRsrp, mSsRsrq, mSsSinr);
+    public CellSignalStrengthNr copy() {
+        return new CellSignalStrengthNr(this);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mCsiRsrp, mCsiRsrq, mCsiSinr, mSsRsrp, mSsRsrq, mSsSinr);
+        return Objects.hash(mCsiRsrp, mCsiRsrq, mCsiSinr, mSsRsrp, mSsRsrq, mSsSinr, mLevel);
+    }
+
+    private static final CellSignalStrengthNr sInvalid = new CellSignalStrengthNr();
+
+    /** @hide */
+    @Override
+    public boolean isValid() {
+        return !this.equals(sInvalid);
     }
 
     @Override
@@ -222,7 +259,8 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         if (obj instanceof CellSignalStrengthNr) {
             CellSignalStrengthNr o = (CellSignalStrengthNr) obj;
             return mCsiRsrp == o.mCsiRsrp && mCsiRsrq == o.mCsiRsrq && mCsiSinr == o.mCsiSinr
-                    && mSsRsrp == o.mSsRsrp && mSsRsrq == o.mSsRsrq && mSsSinr == o.mSsSinr;
+                    && mSsRsrp == o.mSsRsrp && mSsRsrq == o.mSsRsrq && mSsSinr == o.mSsSinr
+                    && mLevel == o.mLevel;
         }
         return false;
     }
@@ -237,6 +275,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
                 .append(" ssRsrp = " + mSsRsrp)
                 .append(" ssRsrq = " + mSsRsrq)
                 .append(" ssSinr = " + mSsSinr)
+                .append(" level = " + mLevel)
                 .append(" }")
                 .toString();
     }
