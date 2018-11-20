@@ -45,6 +45,7 @@ import com.android.internal.util.Preconditions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -390,12 +391,12 @@ public final class IntelligenceManager {
     }
 
     /**
-     * Called by apps to disable content capture.
+     * Called by apps to explicitly enabled  or disable content capture.
      *
      * <p><b>Note: </b> this call is not persisted accross reboots, so apps should typically call
      * it on {@link android.app.Activity#onCreate(android.os.Bundle, android.os.PersistableBundle)}.
      */
-    public void disableContentCapture() {
+    public void setContentCaptureEnabled(boolean enabled) {
         //TODO(b/111276913): implement
     }
 
@@ -415,6 +416,35 @@ public final class IntelligenceManager {
     @SystemApi
     public void setActivityContentCaptureEnabled(@NonNull ComponentName activity,
             boolean enabled) {
+        //TODO(b/111276913): implement
+    }
+
+    /**
+     * Called by the the service {@link android.service.intelligence.IntelligenceService}
+     * to explicitly limit content capture to the given packages and activities.
+     *
+     * <p>When the whitelist is set, it overrides the values passed to
+     * {@link #setActivityContentCaptureEnabled(ComponentName, boolean)}
+     * and {@link #setPackageContentCaptureEnabled(String, boolean)}.
+     *
+     * <p>To reset the whitelist, call it passing {@code null} to both arguments.
+     *
+     * <p>Useful when the service wants to restrict content capture to a category of apps, like
+     * chat apps. For example, if the service wants to support view captures on all activities of
+     * app {@code ChatApp1} and just activities {@code act1} and {@code act2} of {@code ChatApp2},
+     * it would call: {@code setContentCaptureWhitelist(Arrays.asList("ChatApp1"),
+     * Arrays.asList(new ComponentName("ChatApp2", "act1"),
+     * new ComponentName("ChatApp2", "act2")));}
+     *
+     * @throws UnsupportedOperationException if not called by the UID that owns the
+     * {@link android.service.intelligence.IntelligenceService} associated with the
+     * current user.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setContentCaptureWhitelist(@Nullable List<String> packages,
+            @Nullable List<ComponentName> activities) {
         //TODO(b/111276913): implement
     }
 

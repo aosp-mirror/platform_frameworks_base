@@ -7058,6 +7058,7 @@ package android.view.intelligence {
     method public java.util.Set<android.content.ComponentName> getContentCaptureDisabledActivities();
     method public java.util.Set<java.lang.String> getContentCaptureDisabledPackages();
     method public void setActivityContentCaptureEnabled(android.content.ComponentName, boolean);
+    method public void setContentCaptureWhitelist(java.util.List<java.lang.String>, java.util.List<android.content.ComponentName>);
     method public void setPackageContentCaptureEnabled(java.lang.String, boolean);
   }
 
