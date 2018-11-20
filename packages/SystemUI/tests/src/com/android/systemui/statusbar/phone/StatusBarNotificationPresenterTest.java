@@ -46,7 +46,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper()
 public class StatusBarNotificationPresenterTest extends SysuiTestCase {
 
 
