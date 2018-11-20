@@ -1015,10 +1015,8 @@ public class PreferencesHelper implements RankingConfig {
 
     private boolean channelIsLive(PackagePreferences pkgPref, NotificationChannel channel) {
         // Channel is in a group that's blocked
-        if (!TextUtils.isEmpty(channel.getGroup())) {
-            if (pkgPref.groups.get(channel.getGroup()).isBlocked()) {
-                return false;
-            }
+        if (isGroupBlocked(pkgPref.pkg, pkgPref.uid, channel.getGroup())) {
+            return false;
         }
 
         // Channel is deleted or is blocked
