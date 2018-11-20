@@ -77,6 +77,15 @@ public class WindowTestUtils {
         }
     }
 
+    /** Create a mocked default {@link DisplayContent}. */
+    public static TestDisplayContent createTestDisplayContent() {
+        final TestDisplayContent displayContent = mock(TestDisplayContent.class);
+        DockedStackDividerController divider = mock(DockedStackDividerController.class);
+        when(displayContent.getDockedDividerController()).thenReturn(divider);
+
+        return displayContent;
+    }
+
     /**
      * Creates a mock instance of {@link StackWindowController}.
      */

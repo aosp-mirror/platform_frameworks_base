@@ -2921,7 +2921,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 final Rect otherTaskRect = new Rect();
                 for (int i = display.getChildCount() - 1; i >= 0; --i) {
                     final ActivityStack current = display.getChildAt(i);
-                    if (current.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                    if (!current.inSplitScreenSecondaryWindowingMode()) {
                         continue;
                     }
                     if (!current.affectedBySplitScreenResize()) {
@@ -2932,12 +2932,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         // interaction.
                         continue;
                     }
-                    // Need to set windowing mode here before we try to get the dock bounds.
-                    current.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-                    current.getStackDockedModeBounds(
+                    current.getStackDockedModeBounds(dockedBounds,
                             tempOtherTaskBounds /* currentTempTaskBounds */,
                             tempRect /* outStackBounds */,
-                            otherTaskRect /* outTempTaskBounds */, true /* ignoreVisibility */);
+                            otherTaskRect /* outTempTaskBounds */);
 
                     resizeStackLocked(current, !tempRect.isEmpty() ? tempRect : null,
                             !otherTaskRect.isEmpty() ? otherTaskRect : tempOtherTaskBounds,

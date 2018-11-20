@@ -233,13 +233,40 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     @Override
-    protected ConfigurationContainer getParent() {
+    protected ActivityDisplay getParent() {
         return getDisplay();
+    }
+
+    void setParent(ActivityDisplay parent) {
+        ActivityDisplay current = getParent();
+        if (current != parent) {
+            mDisplayId = parent.mDisplayId;
+            onParentChanged();
+        }
     }
 
     @Override
     protected void onParentChanged() {
+        ActivityDisplay display = getParent();
+        if (display != null) {
+            // Rotations are relative to the display. This means if there are 2 displays rotated
+            // differently (eg. 2 monitors with one landscape and one portrait), moving a stack
+            // from one to the other could look like a rotation change. To prevent this
+            // apparent rotation change (and corresponding bounds rotation), pretend like our
+            // current rotation is already the same as the new display.
+            // Note, if ActivityStack or related logic ever gets nested, this logic will need
+            // to move to onConfigurationChanged.
+            getConfiguration().windowConfiguration.setRotation(
+                    display.getWindowConfiguration().getRotation());
+        }
         super.onParentChanged();
+        if (display != null && inSplitScreenPrimaryWindowingMode()) {
+            // If we created a docked stack we want to resize it so it resizes all other stacks
+            // in the system.
+            getStackDockedModeBounds(null, null, mTmpRect2, mTmpRect3);
+            mStackSupervisor.resizeDockedStackLocked(
+                    getOverrideBounds(), mTmpRect2, mTmpRect2, null, null, PRESERVE_WINDOWS);
+        }
         mStackSupervisor.updateUIDsPresentOnDisplay();
     }
 
@@ -353,7 +380,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     private final SparseArray<Rect> mTmpBounds = new SparseArray<>();
     private final SparseArray<Rect> mTmpInsetBounds = new SparseArray<>();
+    private final Rect mTmpRect = new Rect();
     private final Rect mTmpRect2 = new Rect();
+    private final Rect mTmpRect3 = new Rect();
     private final ActivityOptions mTmpOptions = ActivityOptions.makeBasic();
 
     /** List for processing through a set of activities */
@@ -469,10 +498,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // stacks on a wrong display.
         mDisplayId = display.mDisplayId;
         setActivityType(activityType);
-        setWindowingMode(windowingMode);
         mWindowContainerController = createStackWindowController(display.mDisplayId, onTop,
                 mTmpRect2);
-        postAddToDisplay(display, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
+        setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
+                false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,
+                true /* creating */);
+        display.addChild(this, onTop ? POSITION_TOP : POSITION_BOTTOM);
     }
 
     T createStackWindowController(int displayId, boolean onTop, Rect outBounds) {
@@ -514,21 +545,85 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         final int prevWindowingMode = getWindowingMode();
         final boolean prevIsAlwaysOnTop = isAlwaysOnTop();
         final ActivityDisplay display = getDisplay();
+        final int prevRotation = getWindowConfiguration().getRotation();
+        final int prevDensity = getConfiguration().densityDpi;
+        final int prevScreenW = getConfiguration().screenWidthDp;
+        final int prevScreenH = getConfiguration().screenHeightDp;
 
-        getBounds(mTmpRect2);
-        final boolean hasNewBounds = display != null && getWindowContainerController() != null
-                && getWindowContainerController().updateBoundsForConfigChange(
-                        newParentConfig, getConfiguration(), mTmpRect2);
+        getBounds(mTmpRect); // previous bounds
 
         super.onConfigurationChanged(newParentConfig);
         if (display == null) {
-          return;
+            return;
+        }
+
+        // Update bounds if applicable
+        boolean hasNewOverrideBounds = false;
+        // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
+        if (getOverrideWindowingMode() == WINDOWING_MODE_PINNED) {
+            // Pinned calculation already includes rotation
+            mTmpRect2.set(mTmpRect);
+            hasNewOverrideBounds = getWindowContainerController().mContainer
+                            .calculatePinnedBoundsForConfigChange(mTmpRect2);
+        } else {
+            final int newRotation = getWindowConfiguration().getRotation();
+            if (!matchParentBounds()) {
+                // If the parent (display) has rotated, rotate our bounds to best-fit where their
+                // bounds were on the pre-rotated display.
+                if (prevRotation != newRotation) {
+                    mTmpRect2.set(mTmpRect);
+                    getDisplay().getWindowContainerController().mContainer
+                            .rotateBounds(newParentConfig.windowConfiguration.getBounds(),
+                                    prevRotation, newRotation, mTmpRect2);
+                    hasNewOverrideBounds = true;
+                }
+
+                // If entering split screen or if something about the available split area changes,
+                // recalculate the split windows to match the new configuration.
+                if (prevRotation != newRotation
+                        || prevDensity != getConfiguration().densityDpi
+                        || prevWindowingMode != getWindowingMode()
+                        || prevScreenW != getConfiguration().screenWidthDp
+                        || prevScreenH != getConfiguration().screenHeightDp) {
+                    // Use override windowing mode to prevent extra bounds changes if inheriting
+                    // the mode.
+                    if (getOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                            || getOverrideWindowingMode()
+                            == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+                        mTmpRect2.set(mTmpRect);
+                        getWindowContainerController().mContainer
+                                .calculateDockedBoundsForConfigChange(newParentConfig, mTmpRect2);
+                        hasNewOverrideBounds = true;
+                    }
+                }
+            }
+        }
+        if (getWindowingMode() != prevWindowingMode) {
+            // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
+            if (getOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                getStackDockedModeBounds(null, null, mTmpRect2, mTmpRect3);
+                // immediately resize so docked bounds are available in onSplitScreenModeActivated
+                resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */);
+            } else if (getOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+                Rect dockedBounds = display.getSplitScreenPrimaryStack().getBounds();
+                final boolean isMinimizedDock = getDisplay().getWindowContainerController()
+                        .mContainer.getDockedDividerController().isMinimizedDock();
+                if (isMinimizedDock) {
+                    TaskRecord topTask = display.getSplitScreenPrimaryStack().topTask();
+                    if (topTask != null) {
+                        dockedBounds = topTask.getBounds();
+                    }
+                }
+                getStackDockedModeBounds(dockedBounds, null, mTmpRect2, mTmpRect3);
+                hasNewOverrideBounds = true;
+            }
         }
         if (prevWindowingMode != getWindowingMode()) {
             display.onStackWindowingModeChanged(this);
         }
-        if (hasNewBounds) {
-            resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */);
+        if (hasNewOverrideBounds) {
+            mStackSupervisor.resizeStackLocked(this, mTmpRect2, null, null, PRESERVE_WINDOWS,
+                    true /* allowResizeInDockedMode */, true /* deferResume */);
         }
         if (prevIsAlwaysOnTop != isAlwaysOnTop()) {
             // Since always on top is only on when the stack is freeform or pinned, the state
@@ -541,7 +636,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     @Override
     public void setWindowingMode(int windowingMode) {
         setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
-                false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */);
+                false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,
+                false /* creating */);
     }
 
     /**
@@ -569,10 +665,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * @param enteringSplitScreenMode {@code true} if entering split mode.
      * @param deferEnsuringVisibility Whether visibility updates are deferred. This is set when
      *         many operations (which can effect visibility) are being performed in bulk.
+     * @param creating {@code true} if this is being run during ActivityStack construction.
      */
     void setWindowingMode(int preferredWindowingMode, boolean animate, boolean showRecents,
-            boolean enteringSplitScreenMode, boolean deferEnsuringVisibility) {
-        final boolean creating = mWindowContainerController == null;
+            boolean enteringSplitScreenMode, boolean deferEnsuringVisibility, boolean creating) {
         final int currentMode = getWindowingMode();
         final int currentOverrideMode = getOverrideWindowingMode();
         final ActivityDisplay display = getDisplay();
@@ -615,9 +711,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 // doesn't support split-screen mode, go ahead an dismiss split-screen and display a
                 // warning toast about it.
                 mService.getTaskChangeNotificationController().notifyActivityDismissingDockedStack();
-                display.getSplitScreenPrimaryStack().setWindowingMode(WINDOWING_MODE_UNDEFINED,
+                final ActivityStack primarySplitStack = display.getSplitScreenPrimaryStack();
+                primarySplitStack.setWindowingMode(WINDOWING_MODE_UNDEFINED,
                         false /* animate */, false /* showRecents */,
-                        false /* enteringSplitScreenMode */, true /* deferEnsuringVisibility */);
+                        false /* enteringSplitScreenMode */, true /* deferEnsuringVisibility */,
+                        primarySplitStack == this ? creating : false);
             }
         }
 
@@ -746,7 +844,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // the new display below
         mTmpRect2.setEmpty();
         mWindowContainerController.reparent(activityDisplay.mDisplayId, mTmpRect2, onTop);
-        postAddToDisplay(activityDisplay, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
+        setBounds(mTmpRect2.isEmpty() ? null : mTmpRect2);
+        activityDisplay.addChild(this, onTop ? POSITION_TOP : POSITION_BOTTOM);
         if (!displayRemoved) {
             postReparent();
         }
@@ -760,31 +859,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // windows that are no longer visible.
         mStackSupervisor.ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
                 !PRESERVE_WINDOWS);
-    }
-
-    /**
-     * Updates internal state after adding to new display.
-     * @param activityDisplay New display to which this stack was attached.
-     * @param bounds Updated bounds.
-     */
-    private void postAddToDisplay(ActivityDisplay activityDisplay, Rect bounds, boolean onTop) {
-        if (mDisplayId != activityDisplay.mDisplayId) {
-            // rotations are relative to the display, so pretend like our current rotation is
-            // the same as the new display so we don't try to rotate bounds.
-            getConfiguration().windowConfiguration.setRotation(
-                    activityDisplay.getWindowConfiguration().getRotation());
-        }
-        mDisplayId = activityDisplay.mDisplayId;
-        setBounds(bounds);
-        onParentChanged();
-
-        activityDisplay.addChild(this, onTop ? POSITION_TOP : POSITION_BOTTOM);
-        if (inSplitScreenPrimaryWindowingMode()) {
-            // If we created a docked stack we want to resize it so it resizes all other stacks
-            // in the system.
-            mStackSupervisor.resizeDockedStackLocked(
-                    getOverrideBounds(), null, null, null, null, PRESERVE_WINDOWS);
-        }
     }
 
     /**
@@ -812,12 +886,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     /**
-     * @see #getStackDockedModeBounds(Rect, Rect, Rect, boolean)
+     * @see #getStackDockedModeBounds(Rect, Rect, Rect, Rect)
      */
-    void getStackDockedModeBounds(Rect currentTempTaskBounds, Rect outStackBounds,
-            Rect outTempTaskBounds, boolean ignoreVisibility) {
-        mWindowContainerController.getStackDockedModeBounds(currentTempTaskBounds,
-                outStackBounds, outTempTaskBounds, ignoreVisibility);
+    void getStackDockedModeBounds(Rect dockedBounds, Rect currentTempTaskBounds,
+            Rect outStackBounds, Rect outTempTaskBounds) {
+        mWindowContainerController.getStackDockedModeBounds(getParent().getConfiguration(),
+                dockedBounds, currentTempTaskBounds,
+                outStackBounds, outTempTaskBounds);
     }
 
     void prepareFreezingTaskBounds() {
