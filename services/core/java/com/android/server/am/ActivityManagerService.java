@@ -497,6 +497,18 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final int MINIMUM_MEMORY_GROWTH_THRESHOLD = 10 * 1000; // 10 MB
 
     /**
+     * The number of binder proxies we need to have before we start warning and
+     * dumping debug info.
+     */
+    private static final int BINDER_PROXY_HIGH_WATERMARK = 6000;
+
+    /**
+     * Low watermark that needs to be met before we consider dumping info again,
+     * after already hitting the high watermark.
+     */
+    private static final int BINDER_PROXY_LOW_WATERMARK = 5500;
+
+    /**
      * State indicating that there is no need for any blocking for network.
      */
     @VisibleForTesting
@@ -8477,7 +8489,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
             mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
 
-            BinderInternal.nSetBinderProxyCountWatermarks(6000,5500);
+            BinderInternal.nSetBinderProxyCountWatermarks(BINDER_PROXY_HIGH_WATERMARK,
+                    BINDER_PROXY_LOW_WATERMARK);
             BinderInternal.nSetBinderProxyCountEnabled(true);
             BinderInternal.setBinderProxyCountCallback(
                     new BinderInternal.BinderProxyLimitListener() {
@@ -9217,11 +9230,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
                 }
-                dumpBinderProxies(pw);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
                 dumpLmkLocked(pw);
             }
             pw.println();
@@ -9234,6 +9242,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage, dumpAppId);
+        }
+        if (dumpPackage == null) {
+            // Intentionally dropping the lock for this, because dumpBinderProxies() will make many
+            // outgoing binder calls to retrieve interface descriptors; while that is system code,
+            // there is nothing preventing an app from overriding this implementation by talking to
+            // the binder driver directly, and hang up system_server in the process. So, dump
+            // without locks held, and even then only when there is an unreasonably large number of
+            // proxies in the first place.
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpBinderProxies(pw, BINDER_PROXY_HIGH_WATERMARK /* minToDump */);
         }
     }
 
@@ -9373,7 +9394,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         cmd, fd, pw, args, opti, true /* dumpAll */, dumpClient, dumpPackage);
             } else if ("binder-proxies".equals(cmd)) {
                 if (opti >= args.length) {
-                    dumpBinderProxies(pw);
+                    dumpBinderProxies(pw, 0 /* minToDump */);
                 } else {
                     String uid = args[opti];
                     opti++;
@@ -9714,10 +9735,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         return false;
     }
 
-    void dumpBinderProxies(PrintWriter pw) {
+    void dumpBinderProxies(PrintWriter pw, int minCountToDumpInterfaces) {
         pw.println("ACTIVITY MANAGER BINDER PROXY STATE (dumpsys activity binder-proxies)");
-        dumpBinderProxyInterfaceCounts(pw,
-                "  Top proxy interface names held by SYSTEM");
+        final int proxyCount = BinderProxy.getProxyCount();
+        if (proxyCount >= minCountToDumpInterfaces) {
+            dumpBinderProxyInterfaceCounts(pw,
+                    "Top proxy interface names held by SYSTEM");
+        } else {
+            pw.print("Not dumping proxy interface counts because size ("
+                    + Integer.toString(proxyCount) + ") looks reasonable");
+            pw.println();
+        }
         dumpBinderProxiesCounts(pw,
                 "  Counts of Binder Proxies held by SYSTEM");
     }
