@@ -2429,6 +2429,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // We give preference to the launch preference in activity options.
         if (options != null) {
             taskId = options.getLaunchTaskId();
+            displayId = options.getLaunchDisplayId();
         }
 
         // First preference for stack goes to the task Id set in the activity options. Use the stack
@@ -2448,7 +2449,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         T stack;
 
         // Next preference for stack goes to the display Id set the candidate display.
-        if (launchParams != null) {
+        if (launchParams != null && launchParams.mPreferredDisplayId != INVALID_DISPLAY) {
             displayId = launchParams.mPreferredDisplayId;
         }
         if (displayId != INVALID_DISPLAY && canLaunchOnDisplay(r, displayId)) {
