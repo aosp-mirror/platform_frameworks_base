@@ -2473,11 +2473,16 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // If the current top activity may be able to occlude keyguard but the occluded state
             // has not been set, update visibility and check again if we should continue to resume.
             boolean nothingToResume = true;
-            if (!mService.mShuttingDown && !mTopActivityOccludesKeyguard
-                    && next.canShowWhenLocked()) {
-                ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
-                        !PRESERVE_WINDOWS);
-                nothingToResume = shouldSleepActivities();
+            if (!mService.mShuttingDown) {
+                final boolean canShowWhenLocked = !mTopActivityOccludesKeyguard
+                        && next.canShowWhenLocked();
+                final boolean mayDismissKeyguard = mTopDismissingKeyguardActivity != next
+                        && next.hasDismissKeyguardWindows();
+                if (canShowWhenLocked || mayDismissKeyguard) {
+                    ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
+                            !PRESERVE_WINDOWS);
+                    nothingToResume = shouldSleepActivities();
+                }
             }
             if (nothingToResume) {
                 // Make sure we have executed any pending transitions, since there
