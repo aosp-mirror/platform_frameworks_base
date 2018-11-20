@@ -368,16 +368,30 @@
 
     <bool name="quick_settings_show_full_alarm">false</bool>
 
+    <!-- Whether or not beep sound should be when overheat -->
+    <bool name="config_alarmTemperatureBeepSound">false</bool>
+
     <!-- Whether to show a warning notification when the device reaches a certain temperature. -->
     <integer name="config_showTemperatureWarning">0</integer>
+
+    <!-- Whether to show a alarm dialog when device of usb cable reaches a certain temperature. -->
+    <integer name="config_showTemperatureAlarm">0</integer>
 
     <!-- Temp at which to show a warning notification if config_showTemperatureWarning is true.
          If < 0, uses the skin temperature sensor shutdown value from
          HardwarePropertiesManager#getDeviceTemperatures - config_warningTemperatureTolerance. -->
     <integer name="config_warningTemperature">-1</integer>
 
+    <!-- Temp at which to show a alarm dialog if config_showTemperatureAlarm is true.
+         If < 0, uses the skin temperature sensor shutdown value of index[1] from
+         HardwarePropertiesManager#getDeviceTemperatures -->
+    <integer name="config_alarmTemperature">60</integer>
+
     <!-- Fudge factor for how much below the shutdown temp to show the warning. -->
     <integer name="config_warningTemperatureTolerance">2</integer>
+
+    <!-- Fudge factor for how much below the overheat temp to dismiss alarm. -->
+    <integer name="config_alarmTemperatureTolerance">5</integer>
 
     <!-- Accessibility actions -->
     <item type="id" name="action_split_task_to_left" />
