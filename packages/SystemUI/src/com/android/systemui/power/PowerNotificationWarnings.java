@@ -16,17 +16,12 @@
 
 package com.android.systemui.power;
 
-import static android.content.DialogInterface.BUTTON_POSITIVE;
-
-import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.StatusBarManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioAttributes;
@@ -37,7 +32,6 @@ import android.os.PowerManager;
 import android.os.UserHandle;
 import android.support.annotation.VisibleForTesting;
 import android.text.Annotation;
-import android.text.Html;
 import android.text.Layout;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -57,7 +51,6 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.NotificationChannels;
-import com.android.systemui.volume.Events;
 
 import java.io.PrintWriter;
 import java.text.NumberFormat;
@@ -118,8 +111,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private final Context mContext;
     private final NotificationManager mNoMan;
     private final PowerManager mPowerMan;
-    private final StatusBarManager mStatusBarManager;
-    private final KeyguardManager mKeyguard;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Receiver mReceiver = new Receiver();
     private final Intent mOpenBatterySettings = settings(Intent.ACTION_POWER_USAGE_SUMMARY);
@@ -143,38 +134,25 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private boolean mHighTempWarning;
     private SystemUIDialog mHighTempDialog;
     private SystemUIDialog mThermalShutdownDialog;
-    @VisibleForTesting
-    protected OverheatAlarmDialog mOverheatAlarmDialog;
 
     public PowerNotificationWarnings(Context context) {
         mContext = context;
         mNoMan = mContext.getSystemService(NotificationManager.class);
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        mKeyguard = mContext.getSystemService(KeyguardManager.class);
-        mStatusBarManager = context.getSystemService(StatusBarManager.class);
         mReceiver.init();
     }
 
     @Override
     public void dump(PrintWriter pw) {
-        pw.print("mWarning=");
-        pw.println(mWarning);
-        pw.print("mPlaySound=");
-        pw.println(mPlaySound);
-        pw.print("mInvalidCharger=");
-        pw.println(mInvalidCharger);
-        pw.print("mShowing=");
-        pw.println(SHOWING_STRINGS[mShowing]);
-        pw.print("mSaverConfirmation=");
-        pw.println(mSaverConfirmation != null ? "not null" : null);
+        pw.print("mWarning="); pw.println(mWarning);
+        pw.print("mPlaySound="); pw.println(mPlaySound);
+        pw.print("mInvalidCharger="); pw.println(mInvalidCharger);
+        pw.print("mShowing="); pw.println(SHOWING_STRINGS[mShowing]);
+        pw.print("mSaverConfirmation="); pw.println(mSaverConfirmation != null ? "not null" : null);
         pw.print("mSaverEnabledConfirmation=");
         pw.println(mSaverEnabledConfirmation != null ? "not null" : null);
-        pw.print("mHighTempWarning=");
-        pw.println(mHighTempWarning);
-        pw.print("mHighTempDialog=");
-        pw.println(mHighTempDialog != null ? "not null" : null);
-        pw.print("mOverheatAlarmDialog=");
-        pw.println(mOverheatAlarmDialog != null ? "not null" : null);
+        pw.print("mHighTempWarning="); pw.println(mHighTempWarning);
+        pw.print("mHighTempDialog="); pw.println(mHighTempDialog != null ? "not null" : null);
         pw.print("mThermalShutdownDialog=");
         pw.println(mThermalShutdownDialog != null ? "not null" : null);
     }
@@ -332,21 +310,11 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             mEstimate.isBasedOnUsage);
     }
 
-    private void requestDismissableDialogShowing(String action, Boolean allowDismiss,
-            String extra) {
-        mContext.sendBroadcast(getSystemUiBroadcast(action).putExtra(extra, allowDismiss));
-    }
-
     private PendingIntent pendingBroadcast(String action) {
         return PendingIntent.getBroadcastAsUser(mContext, 0,
                 new Intent(action).setPackage(mContext.getPackageName())
                     .setFlags(Intent.FLAG_RECEIVER_FOREGROUND),
                 0, UserHandle.CURRENT);
-    }
-
-    private Intent getSystemUiBroadcast(String action) {
-        return new Intent(action).setPackage(mContext.getPackageName())
-                .setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
     }
 
     private static Intent settings(String action) {
@@ -400,67 +368,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         SystemUI.overrideNotificationAppName(mContext, nb, false);
         final Notification n = nb.build();
         mNoMan.notifyAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_HIGH_TEMP, n, UserHandle.ALL);
-    }
-
-    /**
-     * PowerUI detect thermal overheat, notify to popup alarm dialog.
-     * Alarm with beep sound, showing overheat alarm dialog until user click OK or link of help.
-     * Do not auto dismiss even temperature drop.
-     *
-     * @param overheat true if device overheat, temperature >= threshold.
-     *                 false if device temperature <= threshold tolerance after overheat alarmed.
-     * @param shouldBeepSound true alarm beep sound until user interactive with device
-     *                        false showing alarm dialog only
-     */
-    @Override
-    public void notifyHighTemperatureAlarm(boolean overheat, boolean shouldBeepSound) {
-        // Overheat and non-null dialog are XOR(exclusive or) relationship
-        if (overheat ^ (mOverheatAlarmDialog != null)) {
-            setOverheatAlarmDialogShowing(overheat);
-            setAlarmShouldSound(shouldBeepSound);
-        }
-    }
-
-    /**
-     * Showing overheat alarm dialog until user click OK button or link of help to dismiss
-     *
-     * @param shouldShow whether to show overheat alarm dialog.
-     */
-    protected void setOverheatAlarmDialogShowing(boolean shouldShow) {
-        if (shouldShow && mOverheatAlarmDialog == null) {
-            OverheatAlarmDialog d = new OverheatAlarmDialog(mContext);
-            d.setCancelable(false);
-            d.setIconAttribute(android.R.attr.alertDialogIcon);
-            d.setTitle(R.string.high_temp_alarm_title);
-            d.setButton(BUTTON_POSITIVE, mContext.getString(com.android.internal.R.string.ok),
-                    (dialogInterface, i) -> mOverheatAlarmDialog = null);
-            d.setMessage(mContext.getString(R.string.high_temp_alarm_notify_message));
-            d.setOnDismissListener(dialogInterface -> {
-                mOverheatAlarmDialog = null;
-                Events.writeEvent(mContext, Events.EVENT_DISMISS_OVERHEAT_ALARM,
-                        Events.DISMISS_REASON_DONE_CLICKED,
-                        mKeyguard.isKeyguardLocked());
-            });
-            d.show();
-            Events.writeEvent(mContext, Events.EVENT_SHOW_DIALOG,
-                    Events.SHOW_REASON_OVERHEAD_ALARM_CHANGED,
-                    mKeyguard.isKeyguardLocked());
-            mOverheatAlarmDialog = d;
-        }
-    }
-
-    /**
-     * Whether to alarm beep sound when overheat dialog showing.
-     *
-     * @param shouldSound whether to alarm beep sound.
-     */
-    protected void setAlarmShouldSound(boolean shouldSound) {
-        Log.d(TAG, "setAlarmShouldSound, " + shouldSound);
-        if (shouldSound) {
-            OverheatAlarmController.getInstance(mContext).startAlarm();
-        } else {
-            OverheatAlarmController.getInstance(mContext).stopAlarm();
-        }
     }
 
     private void showHighTemperatureDialog() {
@@ -736,7 +643,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             filter.addAction(ACTION_ENABLE_AUTO_SAVER);
             filter.addAction(ACTION_AUTO_SAVER_NO_THANKS);
             filter.addAction(ACTION_DISMISS_AUTO_SAVER_SUGGESTION);
-            filter.addAction(Intent.ACTION_ALARM_CHANGED);
             mContext.registerReceiverAsUser(this, UserHandle.ALL, filter,
                     android.Manifest.permission.DEVICE_POWER, mHandler);
         }
@@ -776,8 +682,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             } else if (ACTION_AUTO_SAVER_NO_THANKS.equals(action)) {
                 dismissAutoSaverSuggestion();
                 BatterySaverUtils.suppressAutoBatterySaver(context);
-            } else if (Intent.ACTION_ALARM_CHANGED.equals(action)) {
-                setAlarmShouldSound(false /* mHasUserInteracted */);
             }
         }
     }
