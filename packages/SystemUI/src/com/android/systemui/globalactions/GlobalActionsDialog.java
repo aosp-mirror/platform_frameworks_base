@@ -326,8 +326,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         ArraySet<String> addedKeys = new ArraySet<String>();
         mHasLogoutButton = false;
         mHasLockdownButton = false;
-        mSeparatedEmergencyButtonEnabled = FeatureFlagUtils
-                .isEnabled(mContext, FeatureFlagUtils.EMERGENCY_DIAL_SHORTCUTS);
+        mSeparatedEmergencyButtonEnabled = true;
         for (int i = 0; i < defaultActions.length; i++) {
             String actionKey = defaultActions[i];
             if (addedKeys.contains(actionKey)) {
