@@ -535,9 +535,13 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
 
         int triggerTrackerIndex;
         int triggerAtomId = -1;
-        if (pullTagId != -1 && metric.has_trigger_event()) {
-            // event_trigger should be used with ALL_CONDITION_CHANGES
-            if (metric.sampling_type() != GaugeMetric::ALL_CONDITION_CHANGES) {
+        if (metric.has_trigger_event()) {
+            if (pullTagId == -1) {
+                ALOGW("Pull atom not specified for trigger");
+                return false;
+            }
+            // event_trigger should be used with FIRST_N_SAMPLES
+            if (metric.sampling_type() != GaugeMetric::FIRST_N_SAMPLES) {
                 return false;
             }
             if (!handlePullMetricTriggerWithLogTrackers(metric.trigger_event(), metricIndex,
@@ -547,6 +551,12 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
             sp<LogMatchingTracker> triggerAtomMatcher = allAtomMatchers.at(triggerTrackerIndex);
             triggerAtomId = *(triggerAtomMatcher->getAtomIds().begin());
+        }
+
+        if (!metric.has_trigger_event() && pullTagId != -1 &&
+            metric.sampling_type() == GaugeMetric::FIRST_N_SAMPLES) {
+            ALOGW("FIRST_N_SAMPLES is only for pushed event or pull_on_trigger");
+            return false;
         }
 
         int conditionIndex = -1;
