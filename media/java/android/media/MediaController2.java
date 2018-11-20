@@ -41,21 +41,14 @@ import java.util.concurrent.Executor;
 
 /**
  * @hide
- * Allows an app to interact with an active {@link MediaSession2} or a
- * {@link MediaSessionService2} in any status. Media buttons and other commands can be sent to
- * the session.
+ * Allows an app to interact with an active {@link MediaSession2} in any status. Media buttons and
+ * other commands can be sent to the session.
  * <p>
  * When you're done, use {@link #close()} to clean up resources. This also helps session service
  * to be destroyed when there's no controller associated with it.
  * <p>
  * When controlling {@link MediaSession2}, the controller will be available immediately after
  * the creation.
- * <p>
- * When controlling {@link MediaSessionService2}, the {@link MediaController2} would be
- * available only if the session service allows this controller by
- * {@link MediaSession2.SessionCallback#onConnect(MediaSession2, ControllerInfo)} for the service.
- * Wait {@link ControllerCallback#onConnected(MediaController2, SessionCommandGroup2)} or
- * {@link ControllerCallback#onDisconnected(MediaController2)} for the result.
  * <p>
  * A controller can be created through token from {@link MediaSessionManager} if you hold the
  * signature|privileged permission "android.permission.MEDIA_CONTENT_CONTROL" permission or are
@@ -65,7 +58,6 @@ import java.util.concurrent.Executor;
  * MediaController2 objects are thread-safe.
  * <p>
  * @see MediaSession2
- * @see MediaSessionService2
  */
 public class MediaController2 implements AutoCloseable {
     /**

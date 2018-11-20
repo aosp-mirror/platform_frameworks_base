@@ -30,12 +30,9 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.media.AudioManager;
@@ -45,8 +42,6 @@ import android.media.IAudioService;
 import android.media.IRemoteVolumeController;
 import android.media.ISessionTokensListener;
 import android.media.MediaController2;
-import android.media.MediaLibraryService2;
-import android.media.MediaSessionService2;
 import android.media.SessionToken2;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.ICallback;
@@ -81,7 +76,6 @@ import android.util.SparseIntArray;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
@@ -90,10 +84,8 @@ import com.android.server.Watchdog.Monitor;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.NoSuchElementException;
 
 /**
@@ -187,10 +179,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                 PackageManager.FEATURE_LEANBACK);
 
         updateUser();
-
-        registerPackageBroadcastReceivers();
-        // TODO(jaewan): Query per users (b/73597722)
-        buildMediaSessionService2List();
     }
 
     private IAudioService getAudioService() {
@@ -442,148 +430,6 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
         session.onDestroy();
         mHandler.postSessionsChanged(session.getUserId());
-    }
-
-    private void registerPackageBroadcastReceivers() {
-        // TODO(jaewan): Only consider changed packages when building session service list
-        //               when we make this multi-user aware. At that time,
-        //               use PackageMonitor.getChangingUserId() to know which user has changed.
-        //               (b/73597722)
-        IntentFilter filter = new IntentFilter();
-        filter.addDataScheme("package");
-        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        filter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
-        filter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
-        filter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
-        filter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
-
-        getContext().registerReceiverAsUser(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final int changeUserId = intent.getIntExtra(
-                        Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
-                if (changeUserId == UserHandle.USER_NULL) {
-                    Log.w(TAG, "Intent broadcast does not contain user handle: "+ intent);
-                    return;
-                }
-                // Check if the package is replacing (i.e. reinstalling)
-                final boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
-                // TODO(jaewan): Add multi-user support with this. (b/73597722)
-                // final int uid = intent.getIntExtra(Intent.EXTRA_UID, 0);
-
-                if (DEBUG) {
-                    Log.d(TAG, "Received change in packages, intent=" + intent);
-                }
-                switch (intent.getAction()) {
-                    case Intent.ACTION_PACKAGE_ADDED:
-                    case Intent.ACTION_PACKAGE_REMOVED:
-                    case Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE:
-                    case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
-                        if (isReplacing) {
-                            // Ignore if the package(s) are replacing. In that case, followings will
-                            // happen in order.
-                            //    1. ACTION_PACKAGE_REMOVED with isReplacing=true
-                            //    2. ACTION_PACKAGE_ADDED with isReplacing=true
-                            //    3. ACTION_PACKAGE_REPLACED
-                            //    (Note that ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE and
-                            //     ACTION_EXTERNAL_APPLICATIONS_AVAILABLE will be also called with
-                            //     isReplacing=true for both ASEC hosted packages and packages in
-                            //     external storage)
-                            // Since we only want to update session service list once, ignore
-                            // actions above when replacing.
-                            // Replacing will be handled only once with the ACTION_PACKAGE_REPLACED.
-                            break;
-                        }
-                        // pass-through
-                    case Intent.ACTION_PACKAGE_CHANGED:
-                    case Intent.ACTION_PACKAGES_SUSPENDED:
-                    case Intent.ACTION_PACKAGES_UNSUSPENDED:
-                    case Intent.ACTION_PACKAGE_REPLACED:
-                        buildMediaSessionService2List();
-                }
-            }
-        }, UserHandle.ALL, filter, null, BackgroundThread.getHandler());
-    }
-
-    private void buildMediaSessionService2List() {
-        if (!USE_MEDIA2_APIS) {
-            return;
-        }
-        if (DEBUG) {
-            Log.d(TAG, "buildMediaSessionService2List");
-        }
-        // TODO(jaewan): Also query for managed profile users. (b/73597722)
-        PackageManager manager = getContext().getPackageManager();
-        List<ResolveInfo> services = new ArrayList<>();
-        // If multiple actions are declared for a service, browser gets higher priority.
-        List<ResolveInfo> libraryServices = manager.queryIntentServices(
-                new Intent(MediaLibraryService2.SERVICE_INTERFACE), PackageManager.GET_META_DATA);
-        if (libraryServices != null) {
-            services.addAll(libraryServices);
-        }
-        List<ResolveInfo> sessionServices = manager.queryIntentServices(
-                new Intent(MediaSessionService2.SERVICE_INTERFACE), PackageManager.GET_META_DATA);
-        if (sessionServices != null) {
-            services.addAll(sessionServices);
-        }
-        synchronized (mLock) {
-            // List to keep the session services that need be removed because they don't exist
-            // in the 'services' above.
-            boolean notifySessionTokensUpdated = false;
-            Set<SessionToken2> sessionTokensToRemove = new HashSet<>();
-            for (SessionToken2 token : mSessionRecords.keySet()) {
-                if (token.getType() != TYPE_SESSION) {
-                    sessionTokensToRemove.add(token);
-                }
-            }
-
-            for (int i = 0; i < services.size(); i++) {
-                if (services.get(i) == null || services.get(i).serviceInfo == null) {
-                    continue;
-                }
-                ServiceInfo serviceInfo = services.get(i).serviceInfo;
-                int uid;
-                try {
-                    // TODO(jaewan): Do this per user. (b/73597722)
-                    uid = manager.getPackageUid(serviceInfo.packageName,
-                            PackageManager.GET_META_DATA);
-                } catch (NameNotFoundException e) {
-                    continue;
-                }
-                SessionToken2 token;
-                try {
-                    token = new SessionToken2(getContext(),
-                            serviceInfo.packageName, serviceInfo.name, uid);
-                } catch (IllegalArgumentException e) {
-                    Log.w(TAG, "Invalid session service", e);
-                    continue;
-                }
-                // If the token already exists, keep it in the mSessions by removing from
-                // sessionTokensToRemove.
-                if (!sessionTokensToRemove.remove(token)) {
-                    // New session service is found.
-                    notifySessionTokensUpdated |= addSessionRecordLocked(token);
-                }
-            }
-            for (SessionToken2 token : sessionTokensToRemove) {
-                mSessionRecords.remove(token);
-                notifySessionTokensUpdated |= removeSessionRecordLocked(token);
-            }
-
-            if (notifySessionTokensUpdated) {
-                // TODO(jaewan): Pass proper user id to postSessionTokensUpdated(...)
-                postSessionTokensUpdated(UserHandle.USER_ALL);
-            }
-        }
-        if (DEBUG) {
-            Log.d(TAG, "Found " + mSessionRecords.size() + " session services");
-            for (SessionToken2 token : mSessionRecords.keySet()) {
-                Log.d(TAG, "   " + token);
-            }
-        }
     }
 
     private void enforcePackageName(String packageName, int uid) {
@@ -2245,11 +2091,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         synchronized (mLock) {
             List<Bundle> tokens = new ArrayList<>();
             for (SessionToken2 token : mSessionRecords.keySet()) {
-                // TODO(jaewan): Remove the check for UserHandle.USER_ALL (shouldn't happen).
-                //               This happens when called form buildMediaSessionService2List(...).
-                //               (b/73760382)
-                if (UserHandle.getUserId(token.getUid()) == userId
-                        || UserHandle.USER_ALL == userId) {
+                if (UserHandle.getUserId(token.getUid()) == userId) {
                     tokens.add(token.toBundle());
                 }
             }
