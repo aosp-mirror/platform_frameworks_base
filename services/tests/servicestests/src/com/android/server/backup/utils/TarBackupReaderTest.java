@@ -51,8 +51,8 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.servicestests.R;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.FileMetadata;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.restore.PerformAdbRestoreTask;
 import com.android.server.backup.restore.RestorePolicy;
 import com.android.server.backup.testutils.PackageManagerStub;
@@ -150,7 +150,7 @@ public class TarBackupReaderTest {
 
         assertThat(restorePolicy).isEqualTo(RestorePolicy.IGNORE);
         assertThat(fileMetadata.packageName).isEqualTo(TEST_PACKAGE_NAME);
-        assertThat(fileMetadata.path).isEqualTo(BackupManagerService.BACKUP_MANIFEST_FILENAME);
+        assertThat(fileMetadata.path).isEqualTo(UserBackupManagerService.BACKUP_MANIFEST_FILENAME);
 
         tarBackupReader.skipTarPadding(fileMetadata.size);
 

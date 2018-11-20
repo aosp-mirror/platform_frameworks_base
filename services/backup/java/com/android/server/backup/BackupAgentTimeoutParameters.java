@@ -16,12 +16,15 @@
 
 package com.android.server.backup;
 
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG_SCHEDULING;
+
 import android.content.ContentResolver;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.KeyValueListParser;
 import android.util.KeyValueSettingObserver;
 import android.util.Slog;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -137,7 +140,7 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
 
     public long getKvBackupAgentTimeoutMillis() {
         synchronized (mLock) {
-            if (BackupManagerService.DEBUG_SCHEDULING) {
+            if (DEBUG_SCHEDULING) {
                 Slog.v(TAG, "getKvBackupAgentTimeoutMillis(): " + mKvBackupAgentTimeoutMillis);
             }
             return mKvBackupAgentTimeoutMillis;
@@ -146,7 +149,7 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
 
     public long getFullBackupAgentTimeoutMillis() {
         synchronized (mLock) {
-            if (BackupManagerService.DEBUG_SCHEDULING) {
+            if (DEBUG_SCHEDULING) {
                 Slog.v(TAG, "getFullBackupAgentTimeoutMillis(): " + mFullBackupAgentTimeoutMillis);
             }
             return mFullBackupAgentTimeoutMillis;
@@ -155,7 +158,7 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
 
     public long getSharedBackupAgentTimeoutMillis() {
         synchronized (mLock) {
-            if (BackupManagerService.DEBUG_SCHEDULING) {
+            if (DEBUG_SCHEDULING) {
                 Slog.v(
                         TAG,
                         "getSharedBackupAgentTimeoutMillis(): " + mSharedBackupAgentTimeoutMillis);
@@ -166,7 +169,7 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
 
     public long getRestoreAgentTimeoutMillis() {
         synchronized (mLock) {
-            if (BackupManagerService.DEBUG_SCHEDULING) {
+            if (DEBUG_SCHEDULING) {
                 Slog.v(TAG, "getRestoreAgentTimeoutMillis(): " + mRestoreAgentTimeoutMillis);
             }
             return mRestoreAgentTimeoutMillis;
@@ -175,7 +178,7 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
 
     public long getRestoreAgentFinishedTimeoutMillis() {
         synchronized (mLock) {
-            if (BackupManagerService.DEBUG_SCHEDULING) {
+            if (DEBUG_SCHEDULING) {
                 Slog.v(
                         TAG,
                         "getRestoreAgentFinishedTimeoutMillis(): "
@@ -187,7 +190,7 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
 
     public long getQuotaExceededTimeoutMillis() {
         synchronized (mLock) {
-            if (BackupManagerService.DEBUG_SCHEDULING) {
+            if (DEBUG_SCHEDULING) {
                 Slog.v(
                         TAG,
                         "getQuotaExceededTimeoutMillis(): "

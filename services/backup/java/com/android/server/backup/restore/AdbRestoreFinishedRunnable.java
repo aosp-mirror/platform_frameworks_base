@@ -3,7 +3,7 @@ package com.android.server.backup.restore;
 import android.app.IBackupAgent;
 import android.os.RemoteException;
 
-import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.UserBackupManagerService;
 
 /**
  * Runner that can be placed on a separate thread to do in-process invocation of the "restore
@@ -13,10 +13,10 @@ public class AdbRestoreFinishedRunnable implements Runnable {
 
     private final IBackupAgent mAgent;
     private final int mToken;
-    private final BackupManagerService mBackupManagerService;
+    private final UserBackupManagerService mBackupManagerService;
 
     AdbRestoreFinishedRunnable(IBackupAgent agent, int token,
-            BackupManagerService backupManagerService) {
+            UserBackupManagerService backupManagerService) {
         mAgent = agent;
         mToken = token;
         mBackupManagerService = backupManagerService;

@@ -16,13 +16,13 @@
 
 package com.android.server.backup.restore;
 
-import static com.android.server.backup.BackupManagerService.BACKUP_MANIFEST_FILENAME;
-import static com.android.server.backup.BackupManagerService.BACKUP_METADATA_FILENAME;
-import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.BackupManagerService.OP_TYPE_RESTORE_WAIT;
-import static com.android.server.backup.BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
-import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_FILENAME;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA_FILENAME;
+import static com.android.server.backup.UserBackupManagerService.OP_TYPE_RESTORE_WAIT;
+import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
 
 import android.app.ApplicationThreadConstants;
@@ -44,10 +44,10 @@ import android.util.Slog;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.backup.BackupAgentTimeoutParameters;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FileMetadata;
 import com.android.server.backup.KeyValueAdbRestoreEngine;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
 import com.android.server.backup.utils.BytesReadListener;
 import com.android.server.backup.utils.FullBackupRestoreObserverUtils;
@@ -57,7 +57,6 @@ import com.android.server.backup.utils.TarBackupReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -68,7 +67,7 @@ import java.util.List;
  */
 public class FullRestoreEngine extends RestoreEngine {
 
-    private final BackupManagerService mBackupManagerService;
+    private final UserBackupManagerService mBackupManagerService;
     // Task in charge of monitoring timeouts
     private final BackupRestoreTask mMonitorTask;
 
@@ -129,7 +128,7 @@ public class FullRestoreEngine extends RestoreEngine {
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     final boolean mIsAdbRestore;
 
-    public FullRestoreEngine(BackupManagerService backupManagerService,
+    public FullRestoreEngine(UserBackupManagerService backupManagerService,
             BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
             IBackupManagerMonitor monitor, PackageInfo onlyPackage, boolean allowApks,
             boolean allowObbs, int ephemeralOpToken, boolean isAdbRestore) {

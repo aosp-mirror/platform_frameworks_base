@@ -16,8 +16,8 @@
 
 package com.android.server.backup.restore;
 
-import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_GET_RESTORE_SETS;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
@@ -36,8 +36,8 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.util.Slog;
 
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.params.RestoreGetSetsParams;
 import com.android.server.backup.params.RestoreParams;
@@ -53,14 +53,14 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
     private final TransportManager mTransportManager;
     private final String mTransportName;
-    private final BackupManagerService mBackupManagerService;
+    private final UserBackupManagerService mBackupManagerService;
     @Nullable private final String mPackageName;
     public RestoreSet[] mRestoreSets = null;
     boolean mEnded = false;
     boolean mTimedOut = false;
 
     public ActiveRestoreSession(
-            BackupManagerService backupManagerService,
+            UserBackupManagerService backupManagerService,
             @Nullable String packageName,
             String transportName) {
         mBackupManagerService = backupManagerService;
@@ -405,10 +405,10 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
     // Posted to the handler to tear down a restore session in a cleanly synchronized way
     public class EndRestoreRunnable implements Runnable {
 
-        BackupManagerService mBackupManager;
+        UserBackupManagerService mBackupManager;
         ActiveRestoreSession mSession;
 
-        public EndRestoreRunnable(BackupManagerService manager, ActiveRestoreSession session) {
+        public EndRestoreRunnable(UserBackupManagerService manager, ActiveRestoreSession session) {
             mBackupManager = manager;
             mSession = session;
         }

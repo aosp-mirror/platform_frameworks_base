@@ -26,7 +26,7 @@ import static android.app.backup.ForwardingBackupAgent.forward;
 
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createBackupWakeLock;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils
-        .createInitializedBackupManagerService;
+        .createInitializedUserBackupManagerService;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils
         .setUpBackupManagerServiceBasics;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils
@@ -103,12 +103,12 @@ import android.util.Pair;
 
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.KeyValueBackupJob;
 import com.android.server.backup.PackageManagerBackupAgent;
 import com.android.server.backup.TransportManager;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.BackupHandler;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.remote.RemoteCall;
@@ -178,7 +178,7 @@ public class KeyValueBackupTaskTest {
     @Mock private IBackupObserver mObserver;
     @Mock private IBackupManagerMonitor mMonitor;
     @Mock private OnTaskFinishedListener mListener;
-    private BackupManagerService mBackupManagerService;
+    private UserBackupManagerService mBackupManagerService;
     private TransportData mTransport;
     private ShadowLooper mShadowBackupLooper;
     private Handler mBackupHandler;
@@ -227,7 +227,7 @@ public class KeyValueBackupTaskTest {
         setUpBinderCallerAndApplicationAsSystem(mApplication);
         mBackupManagerService =
                 spy(
-                        createInitializedBackupManagerService(
+                        createInitializedUserBackupManagerService(
                                 mContext, mBaseStateDir, mDataDir, mTransportManager));
         setUpBackupManagerServiceBasics(
                 mBackupManagerService,
@@ -720,7 +720,7 @@ public class KeyValueBackupTaskTest {
     }
 
     /**
-     * Agent unavailable means {@link BackupManagerService#bindToAgentSynchronous(ApplicationInfo,
+     * Agent unavailable means {@link UserBackupManagerService#bindToAgentSynchronous(ApplicationInfo,
      * int)} returns {@code null}.
      *
      * @see #setUpAgent(PackageData)
@@ -2597,7 +2597,7 @@ public class KeyValueBackupTaskTest {
      *
      * <ul>
      *   <li>The transport being initialized with {@link IBackupTransport#initializeDevice()}
-     *   <li>{@link BackupManagerService#resetBackupState(File)} being called, which will:
+     *   <li>{@link UserBackupManagerService#resetBackupState(File)} being called, which will:
      *       <ul>
      *         <li>Reset processed packages journal.
      *         <li>Reset current token to 0.
@@ -2617,7 +2617,7 @@ public class KeyValueBackupTaskTest {
 
     /**
      * Forces transport initialization and call to {@link
-     * BackupManagerService#resetBackupState(File)}
+     * UserBackupManagerService#resetBackupState(File)}
      */
     private void deletePmStateFile() throws IOException {
         Files.deleteIfExists(getStateFile(mTransport, PM_PACKAGE));

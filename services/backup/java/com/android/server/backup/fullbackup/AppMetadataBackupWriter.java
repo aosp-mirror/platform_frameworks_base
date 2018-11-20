@@ -1,10 +1,10 @@
 package com.android.server.backup.fullbackup;
 
-import static com.android.server.backup.BackupManagerService.BACKUP_MANIFEST_VERSION;
-import static com.android.server.backup.BackupManagerService.BACKUP_METADATA_VERSION;
-import static com.android.server.backup.BackupManagerService.BACKUP_WIDGET_METADATA_TOKEN;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_VERSION;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA_VERSION;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_WIDGET_METADATA_TOKEN;
 
 import android.annotation.Nullable;
 import android.app.backup.FullBackup;

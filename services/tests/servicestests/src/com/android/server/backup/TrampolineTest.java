@@ -83,7 +83,7 @@ public class TrampolineTest {
     };
     private final int NON_USER_SYSTEM = UserHandle.USER_SYSTEM + 1;
 
-    @Mock private BackupManagerService mBackupManagerServiceMock;
+    @Mock private GlobalBackupManagerService mBackupManagerServiceMock;
     @Mock private Context mContextMock;
     @Mock private File mSuppressFileMock;
     @Mock private File mSuppressFileParentMock;
@@ -864,7 +864,7 @@ public class TrampolineTest {
         static boolean sBackupDisabled = false;
         static File sSuppressFile = null;
         static int sCallingUid = -1;
-        static BackupManagerService sBackupManagerServiceMock = null;
+        static GlobalBackupManagerService sBackupManagerServiceMock = null;
         private int mCreateServiceCallsCount = 0;
 
         TrampolineTestable(Context context) {
@@ -887,7 +887,7 @@ public class TrampolineTest {
         }
 
         @Override
-        protected BackupManagerService createBackupManagerService() {
+        protected GlobalBackupManagerService createBackupManagerService() {
             mCreateServiceCallsCount++;
             return sBackupManagerServiceMock;
         }

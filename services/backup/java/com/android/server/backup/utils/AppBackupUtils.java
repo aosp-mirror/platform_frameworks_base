@@ -16,9 +16,9 @@
 
 package com.android.server.backup.utils;
 
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
-import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
 import android.annotation.Nullable;
 import android.app.backup.BackupTransport;

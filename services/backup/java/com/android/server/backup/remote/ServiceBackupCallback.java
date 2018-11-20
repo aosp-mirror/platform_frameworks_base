@@ -20,12 +20,12 @@ import android.app.backup.IBackupCallback;
 import android.app.backup.IBackupManager;
 import android.os.RemoteException;
 
-import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.UserBackupManagerService;
 
 /**
  * An implementation of {@link IBackupCallback} that routes the result to {@link
- * BackupManagerService} via {@link IBackupManager#opComplete(int, long)} passing the token provided
- * in the constructor.
+ * UserBackupManagerService} via {@link IBackupManager#opComplete(int, long)} passing the token
+ * provided in the constructor.
  */
 public class ServiceBackupCallback extends IBackupCallback.Stub {
     private final IBackupManager mBackupManager;

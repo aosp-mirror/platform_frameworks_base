@@ -16,10 +16,10 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.BackupManagerService.RUN_BACKUP_ACTION;
-import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.UserBackupManagerService.RUN_BACKUP_ACTION;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_BACKUP;
 
 import android.app.PendingIntent;
@@ -29,13 +29,13 @@ import android.content.Intent;
 import android.os.Message;
 import android.util.Slog;
 
-import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.UserBackupManagerService;
 
 public class RunBackupReceiver extends BroadcastReceiver {
 
-    private BackupManagerService backupManagerService;
+    private UserBackupManagerService backupManagerService;
 
-    public RunBackupReceiver(BackupManagerService backupManagerService) {
+    public RunBackupReceiver(UserBackupManagerService backupManagerService) {
         this.backupManagerService = backupManagerService;
     }
 
