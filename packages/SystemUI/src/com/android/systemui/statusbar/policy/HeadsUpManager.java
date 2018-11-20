@@ -33,6 +33,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -134,6 +135,10 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
                 }
             }
         }
+    }
+
+    public @InflationFlag int getContentFlag() {
+        return FLAG_CONTENT_VIEW_HEADS_UP;
     }
 
     @Override

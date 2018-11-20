@@ -26,6 +26,7 @@ import android.util.ArraySet;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 
 /**
  * Manager which handles high priority notifications that should "pulse" in when the device is
@@ -69,6 +70,10 @@ public final class AmbientPulseManager extends AlertingNotificationManager {
             return;
         }
         topEntry.extendPulse();
+    }
+
+    public @InflationFlag int getContentFlag() {
+        return FLAG_CONTENT_VIEW_AMBIENT;
     }
 
     @Override

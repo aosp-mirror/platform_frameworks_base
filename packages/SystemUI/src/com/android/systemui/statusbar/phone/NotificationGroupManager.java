@@ -16,17 +16,12 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.Notification;
-import android.os.SystemClock;
+import android.annotation.Nullable;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
-import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.AmbientPulseManager.OnAmbientChangedListener;
 import com.android.systemui.statusbar.StatusBarState;
@@ -40,9 +35,7 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
@@ -53,23 +46,25 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         OnAmbientChangedListener, StateListener {
 
     private static final String TAG = "NotificationGroupManager";
-    private static final long ALERT_TRANSFER_TIMEOUT = 300;
     private final HashMap<String, NotificationGroup> mGroupMap = new HashMap<>();
-    private OnGroupChangeListener mListener;
+    private final ArraySet<OnGroupChangeListener> mListeners = new ArraySet<>();
     private int mBarState = -1;
     private HashMap<String, StatusBarNotification> mIsolatedEntries = new HashMap<>();
     private HeadsUpManager mHeadsUpManager;
     private AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
-    private boolean mIsDozing;
     private boolean mIsUpdatingUnchangedGroup;
-    private HashMap<String, NotificationData.Entry> mPendingNotifications;
 
     public NotificationGroupManager() {
         Dependency.get(StatusBarStateController.class).addListener(this);
     }
 
-    public void setOnGroupChangeListener(OnGroupChangeListener listener) {
-        mListener = listener;
+    /**
+     * Add a listener for changes to groups.
+     *
+     * @param listener listener to add
+     */
+    public void addOnGroupChangeListener(OnGroupChangeListener listener) {
+        mListeners.add(listener);
     }
 
     public boolean isGroupExpanded(StatusBarNotification sbn) {
@@ -91,7 +86,10 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     private void setGroupExpanded(NotificationGroup group, boolean expanded) {
         group.expanded = expanded;
         if (group.summary != null) {
-            mListener.onGroupExpansionChanged(group.summary.row, expanded);
+            for (OnGroupChangeListener listener : mListeners) {
+                listener.onGroupExpansionChanged(group.summary.row,
+                        expanded);
+            }
         }
     }
 
@@ -127,6 +125,9 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         if (group.children.isEmpty()) {
             if (group.summary == null) {
                 mGroupMap.remove(groupKey);
+                for (OnGroupChangeListener listener : mListeners) {
+                    listener.onGroupRemoved(group, groupKey);
+                }
             }
         }
     }
@@ -142,6 +143,9 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         if (group == null) {
             group = new NotificationGroup();
             mGroupMap.put(groupKey, group);
+            for (OnGroupChangeListener listener : mListeners) {
+                listener.onGroupCreated(group, groupKey);
+            }
         }
         if (isGroupChild) {
             NotificationData.Entry existing = group.children.get(added.key);
@@ -166,125 +170,11 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
                 for (NotificationData.Entry child : childrenCopy) {
                     onEntryBecomingChild(child);
                 }
-                mListener.onGroupCreatedFromChildren(group);
-            }
-        }
-        cleanUpAlertStatesOnAdd(group, false /* addIsPending */);
-    }
-
-    public void onPendingEntryAdded(NotificationData.Entry shadeEntry) {
-        String groupKey = getGroupKey(shadeEntry.notification);
-        NotificationGroup group = mGroupMap.get(groupKey);
-        if (group != null) {
-            cleanUpAlertStatesOnAdd(group, true /* addIsPending */);
-        }
-    }
-
-    /**
-     * Set whether or not the device is dozing.  This allows the group manager to reset some
-     * specific alert state logic based off when the state changes.
-     * @param isDozing if the device is dozing.
-     */
-    @VisibleForTesting
-    public void setDozing(boolean isDozing) {
-        if (mIsDozing != isDozing) {
-            for (NotificationGroup group : mGroupMap.values()) {
-                group.lastAlertTransfer = 0;
-                group.alertSummaryOnNextAddition = false;
-            }
-        }
-        mIsDozing = isDozing;
-    }
-
-    /**
-     * Clean up the alert states when a new child was added.
-     * @param group The group where a view was added or will be added.
-     * @param addIsPending True if is the addition still pending or false has it already been added.
-     */
-    private void cleanUpAlertStatesOnAdd(NotificationGroup group, boolean addIsPending) {
-
-        AlertingNotificationManager alertManager =
-                mIsDozing ? mAmbientPulseManager : mHeadsUpManager;
-        if (!addIsPending && group.alertSummaryOnNextAddition) {
-            if (!alertManager.isAlerting(group.summary.key)) {
-                alertManager.showNotification(group.summary);
-            }
-            group.alertSummaryOnNextAddition = false;
-        }
-        // Because notification groups are not delivered as a whole unit, it may happen that a
-        // group child gets added quite a bit after the summary got posted. Our guidance is, that
-        // apps should always post the group summary as well and we'll hide it for them if the child
-        // is the only child in a group. Because of this, we also have to transfer alert to the
-        // child, otherwise the invisible summary would be alerted.
-        // This transfer to the child is not always correct in case the app has just posted another
-        // child in addition to the existing one, but it hasn't arrived in systemUI yet. In such
-        // a scenario we would transfer the alert to the old child and the wrong notification
-        // would be alerted. In order to avoid this, we'll recover from this issue and alert the
-        // summary again instead of the old child if it's within a certain timeout.
-        if (SystemClock.elapsedRealtime() - group.lastAlertTransfer < ALERT_TRANSFER_TIMEOUT) {
-            if (!onlySummaryAlerts(group.summary)) {
-                return;
-            }
-            int numChildren = group.children.size();
-            NotificationData.Entry isolatedChild = getIsolatedChild(getGroupKey(
-                    group.summary.notification));
-            int numPendingChildren = getPendingChildrenNotAlerting(group);
-            numChildren += numPendingChildren;
-            if (isolatedChild != null) {
-                numChildren++;
-            }
-            if (numChildren <= 1) {
-                return;
-            }
-            boolean releasedChild = false;
-            ArrayList<NotificationData.Entry> children = new ArrayList<>(group.children.values());
-            int size = children.size();
-            for (int i = 0; i < size; i++) {
-                NotificationData.Entry entry = children.get(i);
-                if (onlySummaryAlerts(entry) && alertManager.isAlerting(entry.key)) {
-                    releasedChild = true;
-                    alertManager.removeNotification(entry.key, true /* releaseImmediately */);
+                for (OnGroupChangeListener listener : mListeners) {
+                    listener.onGroupCreatedFromChildren(group);
                 }
             }
-            if (isolatedChild != null && onlySummaryAlerts(isolatedChild)
-                    && alertManager.isAlerting(isolatedChild.key)) {
-                releasedChild = true;
-                alertManager.removeNotification(isolatedChild.key, true /* releaseImmediately */);
-            }
-            if (releasedChild && !alertManager.isAlerting(group.summary.key)) {
-                boolean notifyImmediately = (numChildren - numPendingChildren) > 1;
-                if (notifyImmediately) {
-                    alertManager.showNotification(group.summary);
-                } else {
-                    group.alertSummaryOnNextAddition = true;
-                }
-                group.lastAlertTransfer = 0;
-            }
         }
-    }
-
-    private int getPendingChildrenNotAlerting(NotificationGroup group) {
-        if (mPendingNotifications == null) {
-            return 0;
-        }
-        int number = 0;
-        String groupKey = getGroupKey(group.summary.notification);
-        Collection<NotificationData.Entry> values = mPendingNotifications.values();
-        for (NotificationData.Entry entry : values) {
-            if (!isGroupChild(entry.notification)) {
-                continue;
-            }
-            if (!Objects.equals(getGroupKey(entry.notification), groupKey)) {
-                continue;
-            }
-            if (group.children.containsKey(entry.key)) {
-                continue;
-            }
-            if (onlySummaryAlerts(entry)) {
-                number++;
-            }
-        }
-        return number;
     }
 
     private void onEntryBecomingChild(NotificationData.Entry entry) {
@@ -304,15 +194,11 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
                         && group.summary.notification.getNotification().isGroupSummary()
                         && hasIsolatedChildren(group)));
         if (prevSuppressed != group.suppressed) {
-            if (group.suppressed) {
-                if (mHeadsUpManager.isAlerting(group.summary.key)) {
-                    handleSuppressedSummaryAlerted(group.summary, mHeadsUpManager);
-                } else if (mAmbientPulseManager.isAlerting(group.summary.key)) {
-                    handleSuppressedSummaryAlerted(group.summary, mAmbientPulseManager);
+            for (OnGroupChangeListener listener : mListeners) {
+                if (!mIsUpdatingUnchangedGroup) {
+                    listener.onGroupSuppressionChanged(group, group.suppressed);
+                    listener.onGroupsChanged();
                 }
-            }
-            if (!mIsUpdatingUnchangedGroup && mListener != null) {
-                mListener.onGroupsChanged();
             }
         }
     }
@@ -462,8 +348,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
      * but the logical summary, i.e when a child is isolated, it still returns the summary as if
      * it wasn't isolated.
      */
-    public ExpandableNotificationRow getLogicalGroupSummary(
-            StatusBarNotification sbn) {
+    public ExpandableNotificationRow getLogicalGroupSummary(StatusBarNotification sbn) {
         return getGroupSummary(sbn.getGroupKey());
     }
 
@@ -473,6 +358,39 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         return group == null ? null
                 : group.summary == null ? null
                         : group.summary.row;
+    }
+
+    /**
+     * Get the children that are logically in the summary's group, whether or not they are isolated.
+     *
+     * @param summary summary of a group
+     * @return list of the children
+     */
+    public ArrayList<NotificationData.Entry> getLogicalChildren(StatusBarNotification summary) {
+        NotificationGroup group = mGroupMap.get(summary.getGroupKey());
+        if (group == null) {
+            return null;
+        }
+        ArrayList<NotificationData.Entry> children = new ArrayList<>(group.children.values());
+        NotificationData.Entry isolatedChild = getIsolatedChild(summary.getGroupKey());
+        if (isolatedChild != null) {
+            children.add(isolatedChild);
+        }
+        return children;
+    }
+
+    /**
+     * Get the group key. May differ from the one in the notification due to the notification
+     * being temporarily isolated.
+     *
+     * @param sbn notification to check
+     * @return the key of the notification
+     */
+    public String getGroupKey(StatusBarNotification sbn) {
+        if (isIsolated(sbn)) {
+            return sbn.getKey();
+        }
+        return sbn.getGroupKey();
     }
 
     /** @return group expansion state after toggling. */
@@ -489,25 +407,30 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         return mIsolatedEntries.containsKey(sbn.getKey());
     }
 
-    private boolean isGroupSummary(StatusBarNotification sbn) {
+    /**
+     * Whether a notification is visually a group summary.
+     *
+     * @param sbn notification to check
+     * @return true if it is visually a group summary
+     */
+    public boolean isGroupSummary(StatusBarNotification sbn) {
         if (isIsolated(sbn)) {
             return true;
         }
         return sbn.getNotification().isGroupSummary();
     }
 
-    private boolean isGroupChild(StatusBarNotification sbn) {
+    /**
+     * Whether a notification is visually a group child.
+     *
+     * @param sbn notification to check
+     * @return true if it is visually a group child
+     */
+    public boolean isGroupChild(StatusBarNotification sbn) {
         if (isIsolated(sbn)) {
             return false;
         }
         return sbn.isGroup() && !sbn.getNotification().isGroupSummary();
-    }
-
-    private String getGroupKey(StatusBarNotification sbn) {
-        if (isIsolated(sbn)) {
-            return sbn.getKey();
-        }
-        return sbn.getGroupKey();
     }
 
     @Override
@@ -524,121 +447,22 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
 
     @Override
     public void onAmbientStateChanged(NotificationData.Entry entry, boolean isAmbient) {
-        onAlertStateChanged(entry, isAmbient, mAmbientPulseManager);
+        onAlertStateChanged(entry, isAmbient);
     }
 
     @Override
     public void onHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp) {
-        onAlertStateChanged(entry, isHeadsUp, mHeadsUpManager);
+        onAlertStateChanged(entry, isHeadsUp);
     }
 
-    private void onAlertStateChanged(NotificationData.Entry entry, boolean isAlerting,
-            AlertingNotificationManager alertManager) {
-        final StatusBarNotification sbn = entry.notification;
+    private void onAlertStateChanged(NotificationData.Entry entry, boolean isAlerting) {
         if (isAlerting) {
             if (shouldIsolate(entry)) {
                 isolateNotification(entry);
-            } else if (sbn.getNotification().isGroupSummary()
-                    && isGroupSuppressed(sbn.getGroupKey())){
-                handleSuppressedSummaryAlerted(entry, alertManager);
             }
         } else {
             stopIsolatingNotification(entry);
         }
-    }
-
-    /**
-     * Handles the scenario where a summary that has been suppressed is alerted.  A suppressed
-     * summary should for all intents and purposes be invisible to the user and as a result should
-     * not alert.  When this is the case, it is our responsibility to pass the alert to the
-     * appropriate child which will be the representative notification alerting for the group.
-     * @param summary the summary that is suppressed and alerting
-     * @param alertManager the alert manager that manages the alerting summary
-     */
-    private void handleSuppressedSummaryAlerted(@NonNull NotificationData.Entry summary,
-            @NonNull AlertingNotificationManager alertManager) {
-        StatusBarNotification sbn = summary.notification;
-        if (!isGroupSuppressed(sbn.getGroupKey())
-                || !sbn.getNotification().isGroupSummary()
-                || !alertManager.isAlerting(sbn.getKey())) {
-            return;
-        }
-
-        // The parent of a suppressed group got alerted, lets alert the child!
-        NotificationGroup notificationGroup = mGroupMap.get(sbn.getGroupKey());
-
-        if (notificationGroup != null) {
-            if (pendingInflationsWillAddChildren(notificationGroup)) {
-                // New children will actually be added to this group, let's not transfer the alert.
-                return;
-            }
-
-            Iterator<NotificationData.Entry> iterator
-                    = notificationGroup.children.values().iterator();
-            NotificationData.Entry child = iterator.hasNext() ? iterator.next() : null;
-            if (child == null) {
-                child = getIsolatedChild(sbn.getGroupKey());
-            }
-            if (child != null) {
-                if (child.row.keepInParent() || child.row.isRemoved() || child.row.isDismissed()) {
-                    // the notification is actually already removed, no need to do alert on it.
-                    return;
-                }
-                transferAlertStateToChild(summary, child, alertManager);
-            }
-        }
-    }
-
-    /**
-     * Transfers the alert state from a given summary notification to the specified child.  The
-     * result is the child will now alert while the summary does not.
-     *
-     * @param summary the currently alerting summary notification
-     * @param child the child that should receive the alert
-     * @param alertManager the manager for the alert
-     */
-    private void transferAlertStateToChild(@NonNull NotificationData.Entry summary,
-            @NonNull NotificationData.Entry child,
-            @NonNull AlertingNotificationManager alertManager) {
-        NotificationGroup notificationGroup = mGroupMap.get(summary.notification.getGroupKey());
-        if (alertManager.isAlerting(child.key)) {
-            alertManager.updateNotification(child.key, true /* alert */);
-        } else {
-            if (onlySummaryAlerts(summary)) {
-                notificationGroup.lastAlertTransfer = SystemClock.elapsedRealtime();
-            }
-            alertManager.showNotification(child);
-        }
-        alertManager.removeNotification(summary.key, true /* releaseImmediately */);
-    }
-
-    private boolean onlySummaryAlerts(NotificationData.Entry entry) {
-        return entry.notification.getNotification().getGroupAlertBehavior()
-                == Notification.GROUP_ALERT_SUMMARY;
-    }
-
-    /**
-     * Check if the pending inflations will add children to this group.
-     * @param group The group to check.
-     */
-    private boolean pendingInflationsWillAddChildren(NotificationGroup group) {
-        if (mPendingNotifications == null) {
-            return false;
-        }
-        Collection<NotificationData.Entry> values = mPendingNotifications.values();
-        String groupKey = getGroupKey(group.summary.notification);
-        for (NotificationData.Entry entry : values) {
-            if (!isGroupChild(entry.notification)) {
-                continue;
-            }
-            if (!Objects.equals(getGroupKey(entry.notification), groupKey)) {
-                continue;
-            }
-            if (!group.children.containsKey(entry.key)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -656,10 +480,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         if (!sbn.isGroup() || sbn.getNotification().isGroupSummary()) {
             return false;
         }
-        if (!mIsDozing && !mHeadsUpManager.isAlerting(entry.key)) {
-            return false;
-        }
-        if (mIsDozing && !mAmbientPulseManager.isAlerting(entry.key)) {
+        if (!mHeadsUpManager.isAlerting(entry.key) && !mAmbientPulseManager.isAlerting(entry.key)) {
             return false;
         }
         return (sbn.getNotification().fullScreenIntent != null
@@ -687,7 +508,9 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         // When the notification gets added afterwards it is already isolated and therefore
         // it doesn't lead to an update.
         updateSuppression(mGroupMap.get(entry.notification.getGroupKey()));
-        mListener.onGroupsChanged();
+        for (OnGroupChangeListener listener : mListeners) {
+            listener.onGroupsChanged();
+        }
     }
 
     /**
@@ -702,7 +525,9 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
             onEntryRemovedInternal(entry, entry.notification);
             mIsolatedEntries.remove(sbn.getKey());
             onEntryAdded(entry);
-            mListener.onGroupsChanged();
+            for (OnGroupChangeListener listener : mListeners) {
+                listener.onGroupsChanged();
+            }
         }
     }
 
@@ -729,18 +554,9 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         }
     }
 
-    public void setPendingEntries(HashMap<String, NotificationData.Entry> pendingNotifications) {
-        mPendingNotifications = pendingNotifications;
-    }
-
     @Override
     public void onStateChanged(int newState) {
         setStatusBarState(newState);
-    }
-
-    @Override
-    public void onDozingChanged(boolean isDozing) {
-        setDozing(isDozing);
     }
 
     public static class NotificationGroup {
@@ -751,12 +567,6 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
          * Is this notification group suppressed, i.e its summary is hidden
          */
         public boolean suppressed;
-        /**
-         * The time when the last alert transfer from group to child happened, while the summary
-         * has the flags to alert up on its own.
-         */
-        public long lastAlertTransfer;
-        public boolean alertSummaryOnNextAddition;
 
         @Override
         public String toString() {
@@ -777,13 +587,39 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     }
 
     public interface OnGroupChangeListener {
+
+        /**
+         * A new group has been created.
+         *
+         * @param group the group that was created
+         * @param groupKey the group's key
+         */
+        default void onGroupCreated(NotificationGroup group, String groupKey) {}
+
+        /**
+         * A group has been removed.
+         *
+         * @param group the group that was removed
+         * @param groupKey the group's key
+         */
+        default void onGroupRemoved(NotificationGroup group, String groupKey) {}
+
+        /**
+         * The suppression of a group has changed.
+         *
+         * @param group the group that has changed
+         * @param suppressed true if the group is now suppressed, false o/w
+         */
+        default void onGroupSuppressionChanged(NotificationGroup group, boolean suppressed) {}
+
         /**
          * The expansion of a group has changed.
          *
          * @param changedRow the row for which the expansion has changed, which is also the summary
          * @param expanded a boolean indicating the new expanded state
          */
-        void onGroupExpansionChanged(ExpandableNotificationRow changedRow, boolean expanded);
+        default void onGroupExpansionChanged(ExpandableNotificationRow changedRow,
+                boolean expanded) {}
 
         /**
          * A group of children just received a summary notification and should therefore become
@@ -791,12 +627,12 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
          *
          * @param group the group created
          */
-        void onGroupCreatedFromChildren(NotificationGroup group);
+        default void onGroupCreatedFromChildren(NotificationGroup group) {}
 
         /**
          * The groups have changed. This can happen if the isolation of a child has changes or if a
          * group became suppressed / unsuppressed
          */
-        void onGroupsChanged();
+        default void onGroupsChanged() {}
     }
 }

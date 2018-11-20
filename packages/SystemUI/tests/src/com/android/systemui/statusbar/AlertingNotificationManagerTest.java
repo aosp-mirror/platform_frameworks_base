@@ -17,6 +17,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_CONTRACTED;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -84,6 +86,11 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
 
         @Override
         protected void onAlertEntryRemoved(AlertEntry alertEntry) {}
+
+        @Override
+        public int getContentFlag() {
+            return FLAG_CONTENT_VIEW_CONTRACTED;
+        }
     }
 
     protected AlertingNotificationManager createAlertingNotificationManager() {
