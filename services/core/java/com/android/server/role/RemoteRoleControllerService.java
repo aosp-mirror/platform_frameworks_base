@@ -48,6 +48,7 @@ public class RemoteRoleControllerService {
     static final boolean DEBUG = false;
     private static final String LOG_TAG = RemoteRoleControllerService.class.getSimpleName();
 
+    // TODO: STOPSHIP: This isn't the right thread, as we are also using it to write to disk.
     @NonNull
     private static final Handler sCallbackHandler = BackgroundThread.getHandler();
 

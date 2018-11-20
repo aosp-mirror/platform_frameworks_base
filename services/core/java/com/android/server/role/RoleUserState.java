@@ -45,6 +45,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * Stores the state of roles for a user.
@@ -101,7 +102,11 @@ public class RoleUserState {
     @GuardedBy("RoleManagerService.mLock")
     public void setVersionLocked(int version) {
         throwIfDestroyedLocked();
+        if (mVersion == version) {
+            return;
+        }
         mVersion = version;
+        writeAsyncLocked();
     }
 
     /**
@@ -132,6 +137,41 @@ public class RoleUserState {
     }
 
     /**
+     * Set the names of all available roles.
+     *
+     * @param roleNames the names of all the available roles
+     */
+    @GuardedBy("RoleManagerService.mLock")
+    public void setRoleNamesLocked(@NonNull List<String> roleNames) {
+        throwIfDestroyedLocked();
+        boolean changed = false;
+        for (int i = mRoles.size() - 1; i >= 0; i--) {
+            String roleName = mRoles.keyAt(i);
+            if (!roleNames.contains(roleName)) {
+                ArraySet<String> packageNames = mRoles.valueAt(i);
+                if (!packageNames.isEmpty()) {
+                    Slog.e(LOG_TAG, "Holders of a removed role should have been cleaned up, role: "
+                            + roleName + ", holders: " + packageNames);
+                }
+                mRoles.removeAt(i);
+                changed = true;
+            }
+        }
+        int roleNamesSize = roleNames.size();
+        for (int i = 0; i < roleNamesSize; i++) {
+            String roleName = roleNames.get(i);
+            if (!mRoles.containsKey(roleName)) {
+                mRoles.put(roleName, new ArraySet<>());
+                Slog.i(LOG_TAG, "Added new role: " + roleName);
+                changed = true;
+            }
+        }
+        if (changed) {
+            writeAsyncLocked();
+        }
+    }
+
+    /**
      * Add a holder to a role.
      *
      * @param roleName the name of the role to add the holder to
@@ -150,7 +190,10 @@ public class RoleUserState {
                     + ", package: " + packageName);
             return false;
         }
-        roleHolders.add(packageName);
+        boolean changed = roleHolders.add(packageName);
+        if (changed) {
+            writeAsyncLocked();
+        }
         return true;
     }
 
@@ -173,7 +216,10 @@ public class RoleUserState {
                     + ", package: " + packageName);
             return false;
         }
-        roleHolders.remove(packageName);
+        boolean changed = roleHolders.remove(packageName);
+        if (changed) {
+            writeAsyncLocked();
+        }
         return true;
     }
 
@@ -181,7 +227,7 @@ public class RoleUserState {
      * Schedule writing the state to file.
      */
     @GuardedBy("RoleManagerService.mLock")
-    public void writeAsyncLocked() {
+    private void writeAsyncLocked() {
         throwIfDestroyedLocked();
         int version = mVersion;
         ArrayMap<String, ArraySet<String>> roles = new ArrayMap<>();
@@ -192,6 +238,7 @@ public class RoleUserState {
             roles.put(roleName, roleHolders);
         }
         mWriteHandler.removeCallbacksAndMessages(null);
+        // TODO: Throttle writes.
         mWriteHandler.sendMessage(PooledLambda.obtainMessage(
                 RoleUserState::writeSync, this, version, roles));
     }
