@@ -424,36 +424,6 @@ jobject GraphicsJNI::createRegion(JNIEnv* env, SkRegion* region)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-android::Bitmap* GraphicsJNI::mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
-        int fd, void* addr, size_t size, bool readOnly) {
-    const SkImageInfo& info = bitmap->info();
-    if (info.colorType() == kUnknown_SkColorType) {
-        doThrowIAE(env, "unknown bitmap configuration");
-        return nullptr;
-    }
-
-    if (!addr) {
-        // Map existing ashmem region if not already mapped.
-        int flags = readOnly ? (PROT_READ) : (PROT_READ | PROT_WRITE);
-        size = ashmem_get_size_region(fd);
-        addr = mmap(NULL, size, flags, MAP_SHARED, fd, 0);
-        if (addr == MAP_FAILED) {
-            return nullptr;
-        }
-    }
-
-    // we must respect the rowBytes value already set on the bitmap instead of
-    // attempting to compute our own.
-    const size_t rowBytes = bitmap->rowBytes();
-
-    auto wrapper = new android::Bitmap(addr, fd, size, info, rowBytes);
-    wrapper->getSkBitmap(bitmap);
-    if (readOnly) {
-        bitmap->pixelRef()->setImmutable();
-    }
-    return wrapper;
-}
-
 SkColorSpaceTransferFn GraphicsJNI::getNativeTransferParameters(JNIEnv* env, jobject transferParams) {
     SkColorSpaceTransferFn p;
     p.fA = (float) env->GetDoubleField(transferParams, gTransferParams_aFieldID);

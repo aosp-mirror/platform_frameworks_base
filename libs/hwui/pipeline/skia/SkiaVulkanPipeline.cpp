@@ -158,7 +158,7 @@ sk_sp<Bitmap> SkiaVulkanPipeline::allocateHardwareBitmap(renderthread::RenderThr
         ALOGW("SkiaVulkanPipeline::allocateHardwareBitmap() failed in GraphicBuffer.create()");
         return nullptr;
     }
-    return sk_sp<Bitmap>(new Bitmap(buffer.get(), skBitmap.info()));
+    return Bitmap::createFrom(buffer, skBitmap.refColorSpace());
 }
 
 } /* namespace skiapipeline */
