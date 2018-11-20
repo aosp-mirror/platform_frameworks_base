@@ -481,7 +481,6 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         viewState.dimmed = false;
         viewState.dark = false;
         viewState.alpha = 1f;
-        viewState.shadowAlpha = 1f;
         viewState.notGoneIndex = -1;
         viewState.xTranslation = 0;
         viewState.yTranslation = 0;

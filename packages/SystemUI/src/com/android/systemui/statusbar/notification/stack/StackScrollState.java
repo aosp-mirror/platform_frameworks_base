@@ -77,7 +77,6 @@ public class StackScrollState {
         viewState.height = view.getIntrinsicHeight();
         viewState.gone = view.getVisibility() == View.GONE;
         viewState.alpha = 1f;
-        viewState.shadowAlpha = 1f;
         viewState.notGoneIndex = -1;
         viewState.xTranslation = view.getTranslationX();
         viewState.hidden = false;

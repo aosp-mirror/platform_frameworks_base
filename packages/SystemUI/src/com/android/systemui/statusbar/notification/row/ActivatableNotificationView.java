@@ -166,7 +166,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             updateOutlineAlpha();
         }
     };
-    private float mShadowAlpha = 1.0f;
     private FakeShadowView mFakeShadow;
     private int mCurrentBackgroundTint;
     private int mTargetTint;
@@ -479,7 +478,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
         float alpha = NotificationStackScrollLayout.BACKGROUND_ALPHA_DIMMED;
         alpha = (alpha + (1.0f - alpha) * mNormalBackgroundVisibilityAmount);
-        alpha *= mShadowAlpha;
         if (mFadeInFromDarkAnimator != null) {
             alpha *= mFadeInFromDarkAnimator.getAnimatedFraction();
         }
@@ -1091,19 +1089,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     public boolean hasSameBgColor(ActivatableNotificationView otherView) {
         return calculateBgColor() == otherView.calculateBgColor();
-    }
-
-    @Override
-    public float getShadowAlpha() {
-        return mShadowAlpha;
-    }
-
-    @Override
-    public void setShadowAlpha(float shadowAlpha) {
-        if (shadowAlpha != mShadowAlpha) {
-            mShadowAlpha = shadowAlpha;
-            updateOutlineAlpha();
-        }
     }
 
     @Override

@@ -227,7 +227,6 @@ public class StackScrollAlgorithm {
                             nextChild);
                     // The child below the dragged one must be fully visible
                     if (ambientState.isShadeExpanded()) {
-                        viewState.shadowAlpha = 1;
                         viewState.hidden = false;
                     }
                 }

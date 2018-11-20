@@ -217,8 +217,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private HashSet<View> mChildrenToAddAnimated = new HashSet<>();
     private ArrayList<View> mAddedHeadsUpChildren = new ArrayList<>();
     private ArrayList<View> mChildrenToRemoveAnimated = new ArrayList<>();
-    private ArrayList<View> mSnappedBackChildren = new ArrayList<>();
-    private ArrayList<View> mDragAnimPendingChildren = new ArrayList<>();
     private ArrayList<View> mChildrenChangingPositions = new ArrayList<>();
     private HashSet<View> mFromMoreCardAdditions = new HashSet<>();
     private ArrayList<AnimationEvent> mAnimationEvents = new ArrayList<>();
@@ -3001,8 +2999,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         generateChildRemovalEvents();
         generateChildAdditionEvents();
         generatePositionChangeEvents();
-        generateSnapBackEvents();
-        generateDragEvents();
         generateTopPaddingEvent();
         generateActivateEvent();
         generateDimmedEvent();
@@ -3095,24 +3091,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
         }
         mNeedViewResizeAnimation = false;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    private void generateSnapBackEvents() {
-        for (View child : mSnappedBackChildren) {
-            mAnimationEvents.add(new AnimationEvent(child,
-                    AnimationEvent.ANIMATION_TYPE_SNAP_BACK));
-        }
-        mSnappedBackChildren.clear();
-    }
-
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    private void generateDragEvents() {
-        for (View child : mDragAnimPendingChildren) {
-            mAnimationEvents.add(new AnimationEvent(child,
-                    AnimationEvent.ANIMATION_TYPE_START_DRAG));
-        }
-        mDragAnimPendingChildren.clear();
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -5280,7 +5258,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 // ANIMATION_TYPE_ADD
                 new AnimationFilter()
-                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -5289,7 +5266,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 // ANIMATION_TYPE_REMOVE
                 new AnimationFilter()
-                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -5298,7 +5274,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 // ANIMATION_TYPE_REMOVE_SWIPED_OUT
                 new AnimationFilter()
-                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -5307,21 +5282,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 // ANIMATION_TYPE_TOP_PADDING_CHANGED
                 new AnimationFilter()
-                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
                         .animateDimmed()
                         .animateZ(),
-
-                // ANIMATION_TYPE_START_DRAG
-                new AnimationFilter()
-                        .animateShadowAlpha(),
-
-                // ANIMATION_TYPE_SNAP_BACK
-                new AnimationFilter()
-                        .animateShadowAlpha()
-                        .animateHeight(),
 
                 // ANIMATION_TYPE_ACTIVATED_CHILD
                 new AnimationFilter()
@@ -5334,7 +5299,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 // ANIMATION_TYPE_CHANGE_POSITION
                 new AnimationFilter()
                         .animateAlpha() // maybe the children change positions
-                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -5345,7 +5309,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 // ANIMATION_TYPE_GO_TO_FULL_SHADE
                 new AnimationFilter()
-                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -5359,7 +5322,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 // ANIMATION_TYPE_VIEW_RESIZE
                 new AnimationFilter()
-                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -5368,7 +5330,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 // ANIMATION_TYPE_GROUP_EXPANSION_CHANGED
                 new AnimationFilter()
                         .animateAlpha()
-                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -5376,7 +5337,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 // ANIMATION_TYPE_HEADS_UP_APPEAR
                 new AnimationFilter()
-                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -5384,7 +5344,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 // ANIMATION_TYPE_HEADS_UP_DISAPPEAR
                 new AnimationFilter()
-                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -5393,7 +5352,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 // ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK
                 new AnimationFilter()
-                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -5402,7 +5360,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 // ANIMATION_TYPE_HEADS_UP_OTHER
                 new AnimationFilter()
-                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -5411,7 +5368,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 // ANIMATION_TYPE_EVERYTHING
                 new AnimationFilter()
                         .animateAlpha()
-                        .animateShadowAlpha()
                         .animateDark()
                         .animateDimmed()
                         .animateHideSensitive()
@@ -5445,12 +5401,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 StackStateAnimator.ANIMATION_DURATION_STANDARD,
 
                 // ANIMATION_TYPE_TOP_PADDING_CHANGED
-                StackStateAnimator.ANIMATION_DURATION_STANDARD,
-
-                // ANIMATION_TYPE_START_DRAG
-                StackStateAnimator.ANIMATION_DURATION_STANDARD,
-
-                // ANIMATION_TYPE_SNAP_BACK
                 StackStateAnimator.ANIMATION_DURATION_STANDARD,
 
                 // ANIMATION_TYPE_ACTIVATED_CHILD
@@ -5503,23 +5453,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         static final int ANIMATION_TYPE_REMOVE = 1;
         static final int ANIMATION_TYPE_REMOVE_SWIPED_OUT = 2;
         static final int ANIMATION_TYPE_TOP_PADDING_CHANGED = 3;
-        static final int ANIMATION_TYPE_START_DRAG = 4;
-        static final int ANIMATION_TYPE_SNAP_BACK = 5;
-        static final int ANIMATION_TYPE_ACTIVATED_CHILD = 6;
-        static final int ANIMATION_TYPE_DIMMED = 7;
-        static final int ANIMATION_TYPE_CHANGE_POSITION = 8;
-        static final int ANIMATION_TYPE_DARK = 9;
-        static final int ANIMATION_TYPE_GO_TO_FULL_SHADE = 10;
-        static final int ANIMATION_TYPE_HIDE_SENSITIVE = 11;
-        static final int ANIMATION_TYPE_VIEW_RESIZE = 12;
-        static final int ANIMATION_TYPE_GROUP_EXPANSION_CHANGED = 13;
-        static final int ANIMATION_TYPE_HEADS_UP_APPEAR = 14;
-        static final int ANIMATION_TYPE_HEADS_UP_DISAPPEAR = 15;
-        static final int ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK = 16;
-        static final int ANIMATION_TYPE_HEADS_UP_OTHER = 17;
-        static final int ANIMATION_TYPE_EVERYTHING = 18;
-        static final int ANIMATION_TYPE_PULSE_APPEAR = 19;
-        static final int ANIMATION_TYPE_PULSE_DISAPPEAR = 20;
+        static final int ANIMATION_TYPE_ACTIVATED_CHILD = 4;
+        static final int ANIMATION_TYPE_DIMMED = 5;
+        static final int ANIMATION_TYPE_CHANGE_POSITION = 6;
+        static final int ANIMATION_TYPE_DARK = 7;
+        static final int ANIMATION_TYPE_GO_TO_FULL_SHADE = 8;
+        static final int ANIMATION_TYPE_HIDE_SENSITIVE = 9;
+        static final int ANIMATION_TYPE_VIEW_RESIZE = 10;
+        static final int ANIMATION_TYPE_GROUP_EXPANSION_CHANGED = 11;
+        static final int ANIMATION_TYPE_HEADS_UP_APPEAR = 12;
+        static final int ANIMATION_TYPE_HEADS_UP_DISAPPEAR = 13;
+        static final int ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK = 14;
+        static final int ANIMATION_TYPE_HEADS_UP_OTHER = 15;
+        static final int ANIMATION_TYPE_EVERYTHING = 16;
+        static final int ANIMATION_TYPE_PULSE_APPEAR = 17;
+        static final int ANIMATION_TYPE_PULSE_DISAPPEAR = 18;
 
         static final int DARK_ANIMATION_ORIGIN_INDEX_ABOVE = -1;
         static final int DARK_ANIMATION_ORIGIN_INDEX_BELOW = -2;
@@ -5687,11 +5635,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
             boolean isBlockingHelperShown = false;
 
-            if (mDragAnimPendingChildren.contains(view)) {
-                // We start the swipe and finish it in the same frame; we don't want a drag
-                // animation.
-                mDragAnimPendingChildren.remove(view);
-            }
             mAmbientState.onDragFinished(view);
             updateContinuousShadowDrawing();
 
@@ -5752,10 +5695,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             setSwipingInProgress(true);
             mAmbientState.onBeginDrag(v);
             updateContinuousShadowDrawing();
-            if (mAnimationsEnabled && (mIsExpanded || !isPinnedHeadsUp(v))) {
-                mDragAnimPendingChildren.add(v);
-                mNeedsAnimation = true;
-            }
             requestChildrenUpdate();
         }
 
@@ -5763,16 +5702,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         public void onChildSnappedBack(View animView, float targetLeft) {
             mAmbientState.onDragFinished(animView);
             updateContinuousShadowDrawing();
-            if (!mDragAnimPendingChildren.contains(animView)) {
-                if (mAnimationsEnabled) {
-                    mSnappedBackChildren.add(animView);
-                    mNeedsAnimation = true;
-                }
-                requestChildrenUpdate();
-            } else {
-                // We start the swipe and snap back in the same frame, we don't want any animation
-                mDragAnimPendingChildren.remove(animView);
-            }
             NotificationMenuRowPlugin menuRow = mSwipeHelper.getCurrentMenuRow();
             if (menuRow != null && targetLeft == 0) {
                 menuRow.resetMenu();
