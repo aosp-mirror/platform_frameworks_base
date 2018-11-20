@@ -1700,3 +1700,20 @@ filegroup {
         "core/java/android/annotation/NonNull.java",
     ],
 }
+
+filegroup {
+    name: "framework-media-annotation-srcs",
+    srcs: [
+        "core/java/android/annotation/CallbackExecutor.java",
+        "core/java/android/annotation/DrawableRes.java",
+        "core/java/android/annotation/IntDef.java",
+        "core/java/android/annotation/LongDef.java",
+        "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/Nullable.java",
+        "core/java/android/annotation/RequiresPermission.java",
+        "core/java/android/annotation/SdkConstant.java",
+        "core/java/android/annotation/StringDef.java",
+        "core/java/android/annotation/UnsupportedAppUsage.java",
+    ],
+}
+
