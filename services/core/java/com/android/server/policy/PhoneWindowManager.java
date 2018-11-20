@@ -1925,13 +1925,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void setDefaultDisplay(DisplayContentInfo displayContentInfo) {
-        setDefaultDisplay(displayContentInfo.getDisplay(), displayContentInfo.getDisplayRotation());
-    }
-
-    @VisibleForTesting
-    void setDefaultDisplay(Display display, DisplayRotation displayRotation) {
-        mDefaultDisplay = display;
-        mDefaultDisplayRotation = displayRotation;
+        mDefaultDisplay = displayContentInfo.getDisplay();
+        mDefaultDisplayRotation = displayContentInfo.getDisplayRotation();
         mDefaultDisplayPolicy = mDefaultDisplayRotation.getDisplayPolicy();
         mDefaultOrientationListener = mDefaultDisplayRotation.getOrientationListener();
     }
@@ -2668,11 +2663,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void onConfigurationChanged(DisplayContentInfo displayContentInfo) {
-        onConfigurationChanged(displayContentInfo.getDisplayRotation());
-    }
-
-    @VisibleForTesting
-    void onConfigurationChanged(DisplayRotation displayRotation) {
+        final DisplayRotation displayRotation = displayContentInfo.getDisplayRotation();
         // TODO(multi-display): Define policy for secondary displays.
         if (!displayRotation.isDefaultDisplay) {
             return;

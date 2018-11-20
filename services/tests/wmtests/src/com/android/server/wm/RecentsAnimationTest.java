@@ -22,14 +22,13 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -52,50 +51,61 @@ import org.junit.Test;
 public class RecentsAnimationTest extends ActivityTestsBase {
 
     private Context mContext = InstrumentationRegistry.getContext();
+    private TestActivityTaskManagerService mTestService;
     private ComponentName mRecentsComponent;
 
     @Before
     public void setUp() throws Exception {
         mRecentsComponent = new ComponentName(mContext.getPackageName(), "RecentsActivity");
-        mService = new TestActivityTaskManagerService(mContext);
-
-        final RecentTasks recentTasks = mService.getRecentTasks();
-        spyOn(recentTasks);
-        mRecentsComponent = new ComponentName(mContext.getPackageName(), "RecentsActivity");
-        doReturn(mRecentsComponent).when(recentTasks).getRecentsComponent();
+        mTestService = spy(new MyTestActivityTaskManagerService(mContext));
+        setupActivityManagerService(mTestService);
     }
 
     @Test
     public void testCancelAnimationOnStackOrderChange() {
         ActivityStack fullscreenStack =
-                mService.mStackSupervisor.getDefaultDisplay().createStack(
+                mTestService.mStackSupervisor.getDefaultDisplay().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        ActivityStack recentsStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+        ActivityStack recentsStack = mTestService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_RECENTS, true /* onTop */);
-        ActivityRecord recentsActivity = new ActivityBuilder(mService)
+        ActivityRecord recentsActivity = new ActivityBuilder(mTestService)
                 .setComponent(mRecentsComponent)
                 .setCreateTask(true)
                 .setStack(recentsStack)
                 .build();
         ActivityStack fullscreenStack2 =
-                mService.mStackSupervisor.getDefaultDisplay().createStack(
+                mTestService.mStackSupervisor.getDefaultDisplay().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        ActivityRecord fsActivity = new ActivityBuilder(mService)
+        ActivityRecord fsActivity = new ActivityBuilder(mTestService)
                 .setComponent(new ComponentName(mContext.getPackageName(), "App1"))
                 .setCreateTask(true)
                 .setStack(fullscreenStack2)
                 .build();
-        doReturn(true).when(mService.mWindowManager).canStartRecentsAnimation();
+        doReturn(true).when(mTestService.mWindowManager).canStartRecentsAnimation();
 
         // Start the recents animation
         Intent recentsIntent = new Intent();
         recentsIntent.setComponent(mRecentsComponent);
-        mService.startRecentsActivity(recentsIntent, null, mock(IRecentsAnimationRunner.class));
+        mTestService.startRecentsActivity(recentsIntent, null, mock(IRecentsAnimationRunner.class));
 
         fullscreenStack.moveToFront("Activity start");
 
         // Ensure that the recents animation was canceled
-        verify(mService.mWindowManager, times(1)).cancelRecentsAnimationSynchronously(
+        verify(mTestService.mWindowManager, times(1)).cancelRecentsAnimationSynchronously(
                 eq(REORDER_KEEP_IN_PLACE), any());
+    }
+
+    private class MyTestActivityTaskManagerService extends TestActivityTaskManagerService {
+        MyTestActivityTaskManagerService(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected RecentTasks createRecentTasks() {
+            RecentTasks recents = mock(RecentTasks.class);
+            doReturn(mRecentsComponent).when(recents).getRecentsComponent();
+            System.out.println(mRecentsComponent);
+            return recents;
+        }
     }
 }
