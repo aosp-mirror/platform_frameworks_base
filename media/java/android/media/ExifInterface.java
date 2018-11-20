@@ -16,7 +16,10 @@
 
 package android.media;
 
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -26,12 +29,14 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.util.Log;
 import android.util.Pair;
-import android.annotation.IntDef;
+
+import libcore.io.IoUtils;
+import libcore.io.Streams;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -42,14 +47,14 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,11 +63,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-import libcore.io.IoUtils;
-import libcore.io.Streams;
 
 /**
  * This is a class for reading and writing Exif tags in a JPEG file or a RAW image file.
@@ -583,11 +583,19 @@ public class ExifInterface {
     private static class ExifAttribute {
         public final int format;
         public final int numberOfComponents;
+        public final long bytesOffset;
         public final byte[] bytes;
 
+        public static final long BYTES_OFFSET_UNKNOWN = -1;
+
         private ExifAttribute(int format, int numberOfComponents, byte[] bytes) {
+            this(format, numberOfComponents, BYTES_OFFSET_UNKNOWN, bytes);
+        }
+
+        private ExifAttribute(int format, int numberOfComponents, long bytesOffset, byte[] bytes) {
             this.format = format;
             this.numberOfComponents = numberOfComponents;
+            this.bytesOffset = bytesOffset;
             this.bytes = bytes;
         }
 
@@ -1318,6 +1326,7 @@ public class ExifInterface {
     private int mOrfThumbnailLength;
     private int mRw2JpgFromRawOffset;
     private boolean mIsSupportedFile;
+    private boolean mModified;
 
     // Pattern to check non zero timestamp
     private static final Pattern sNonZeroTimePattern = Pattern.compile(".*[1-9].*");
@@ -1328,7 +1337,14 @@ public class ExifInterface {
     /**
      * Reads Exif tags from the specified image file.
      */
-    public ExifInterface(String filename) throws IOException {
+    public ExifInterface(@NonNull File file) throws IOException {
+        this(file.getAbsolutePath());
+    }
+
+    /**
+     * Reads Exif tags from the specified image file.
+     */
+    public ExifInterface(@NonNull String filename) throws IOException {
         if (filename == null) {
             throw new IllegalArgumentException("filename cannot be null");
         }
@@ -1354,7 +1370,7 @@ public class ExifInterface {
      * for writable and seekable file descriptors only. This constructor will not rewind the offset
      * of the given file descriptor. Developers should close the file descriptor after use.
      */
-    public ExifInterface(FileDescriptor fileDescriptor) throws IOException {
+    public ExifInterface(@NonNull FileDescriptor fileDescriptor) throws IOException {
         if (fileDescriptor == null) {
             throw new IllegalArgumentException("fileDescriptor cannot be null");
         }
@@ -1388,7 +1404,7 @@ public class ExifInterface {
      * for input streams. The given input stream will proceed its current position. Developers
      * should close the input stream after use.
      */
-    public ExifInterface(InputStream inputStream) throws IOException {
+    public ExifInterface(@NonNull InputStream inputStream) throws IOException {
         if (inputStream == null) {
             throw new IllegalArgumentException("inputStream cannot be null");
         }
@@ -1414,7 +1430,7 @@ public class ExifInterface {
      *
      * @param tag the name of the tag.
      */
-    private ExifAttribute getExifAttribute(String tag) {
+    private @Nullable ExifAttribute getExifAttribute(@NonNull String tag) {
         // Retrieves all tag groups. The value from primary image tag group has a higher priority
         // than the value from the thumbnail tag group if there are more than one candidates.
         for (int i = 0; i < EXIF_TAGS.length; ++i) {
@@ -1432,7 +1448,7 @@ public class ExifInterface {
      *
      * @param tag the name of the tag.
      */
-    public String getAttribute(String tag) {
+    public @Nullable String getAttribute(@NonNull String tag) {
         ExifAttribute attribute = getExifAttribute(tag);
         if (attribute != null) {
             if (!sTagSetForCompatibility.contains(tag)) {
@@ -1470,7 +1486,7 @@ public class ExifInterface {
      * @param tag the name of the tag.
      * @param defaultValue the value to return if the tag is not available.
      */
-    public int getAttributeInt(String tag, int defaultValue) {
+    public int getAttributeInt(@NonNull String tag, int defaultValue) {
         ExifAttribute exifAttribute = getExifAttribute(tag);
         if (exifAttribute == null) {
             return defaultValue;
@@ -1491,7 +1507,7 @@ public class ExifInterface {
      * @param tag the name of the tag.
      * @param defaultValue the value to return if the tag is not available.
      */
-    public double getAttributeDouble(String tag, double defaultValue) {
+    public double getAttributeDouble(@NonNull String tag, double defaultValue) {
         ExifAttribute exifAttribute = getExifAttribute(tag);
         if (exifAttribute == null) {
             return defaultValue;
@@ -1510,7 +1526,7 @@ public class ExifInterface {
      * @param tag the name of the tag.
      * @param value the value of the tag.
      */
-    public void setAttribute(String tag, String value) {
+    public void setAttribute(@NonNull String tag, @Nullable String value) {
         // Convert the given value to rational values for backwards compatibility.
         if (value != null && sTagSetForCompatibility.contains(tag)) {
             if (tag.equals(TAG_GPS_TIMESTAMP)) {
@@ -1772,12 +1788,18 @@ public class ExifInterface {
     }
 
     /**
-     * Save the tag data into the original image file. This is expensive because it involves
-     * copying all the data from one file to another and deleting the old file and renaming the
-     * other. It's best to use {@link #setAttribute(String,String)} to set all attributes to write
-     * and make a single call rather than multiple calls for each attribute.
+     * Save the tag data into the original image file. This is expensive because
+     * it involves copying all the data from one file to another and deleting
+     * the old file and renaming the other. It's best to use
+     * {@link #setAttribute(String,String)} to set all attributes to write and
+     * make a single call rather than multiple calls for each attribute.
      * <p>
      * This method is only supported for JPEG files.
+     * <p class="note">
+     * Note: after calling this method, any attempts to obtain range information
+     * from {@link #getAttributeRange(String)} or {@link #getThumbnailRange()}
+     * will throw {@link IllegalStateException}, since the offsets may have
+     * changed in the newly written file.
      * </p>
      */
     public void saveAttributes() throws IOException {
@@ -1788,6 +1810,10 @@ public class ExifInterface {
             throw new IOException(
                     "ExifInterface does not support saving attributes for the current input.");
         }
+
+        // Remember the fact that we've changed the file on disk from what was
+        // originally parsed, meaning we can't answer range questions
+        mModified = true;
 
         // Keep the thumbnail in memory
         mThumbnailBytes = getThumbnail();
@@ -1846,6 +1872,15 @@ public class ExifInterface {
      */
     public boolean hasThumbnail() {
         return mHasThumbnail;
+    }
+
+    /**
+     * Returns true if the image file has the given attribute defined.
+     *
+     * @param tag the name of the tag.
+     */
+    public boolean hasAttribute(String tag) {
+        return (getExifAttribute(tag) != null);
     }
 
     /**
@@ -1968,17 +2003,45 @@ public class ExifInterface {
      *
      * @return two-element array, the offset in the first value, and length in
      *         the second, or {@code null} if no thumbnail was found.
+     * @throws IllegalStateException if {@link #saveAttributes()} has been
+     *             called since the underlying file was initially parsed, since
+     *             that means offsets may have changed.
      */
-    public long[] getThumbnailRange() {
-        if (!mHasThumbnail) {
-            return null;
+    public @Nullable long[] getThumbnailRange() {
+        if (mModified) {
+            throw new IllegalStateException(
+                    "The underlying file has been modified since being parsed");
         }
 
-        long[] range = new long[2];
-        range[0] = mThumbnailOffset;
-        range[1] = mThumbnailLength;
+        if (mHasThumbnail) {
+            return new long[] { mThumbnailOffset, mThumbnailLength };
+        } else {
+            return null;
+        }
+    }
 
-        return range;
+    /**
+     * Returns the offset and length of the requested tag inside the image file,
+     * or {@code null} if the tag is not contained.
+     *
+     * @return two-element array, the offset in the first value, and length in
+     *         the second, or {@code null} if no tag was found.
+     * @throws IllegalStateException if {@link #saveAttributes()} has been
+     *             called since the underlying file was initially parsed, since
+     *             that means offsets may have changed.
+     */
+    public @Nullable long[] getAttributeRange(@NonNull String tag) {
+        if (mModified) {
+            throw new IllegalStateException(
+                    "The underlying file has been modified since being parsed");
+        }
+
+        final ExifAttribute attribute = getExifAttribute(tag);
+        if (attribute != null) {
+            return new long[] { attribute.bytesOffset, attribute.bytes.length };
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -2023,13 +2086,41 @@ public class ExifInterface {
     }
 
     /**
-     * Returns number of milliseconds since Jan. 1, 1970, midnight local time.
-     * Returns -1 if the date time information if not available.
+     * Returns parsed {@code DateTime} value, or -1 if unavailable or invalid.
+     * 
      * @hide
      */
     @UnsupportedAppUsage
-    public long getDateTime() {
-        String dateTimeString = getAttribute(TAG_DATETIME);
+    public @CurrentTimeMillisLong long getDateTime() {
+        return parseDateTime(getAttribute(TAG_DATETIME),
+                getAttribute(TAG_SUBSEC_TIME));
+    }
+
+    /**
+     * Returns parsed {@code DateTimeDigitized} value, or -1 if unavailable or
+     * invalid.
+     *
+     * @hide
+     */
+    public @CurrentTimeMillisLong long getDateTimeDigitized() {
+        return parseDateTime(getAttribute(TAG_DATETIME_DIGITIZED),
+                getAttribute(TAG_SUBSEC_TIME_DIGITIZED));
+    }
+
+    /**
+     * Returns parsed {@code DateTimeOriginal} value, or -1 if unavailable or
+     * invalid.
+     *
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public @CurrentTimeMillisLong long getDateTimeOriginal() {
+        return parseDateTime(getAttribute(TAG_DATETIME_ORIGINAL),
+                getAttribute(TAG_SUBSEC_TIME_ORIGINAL));
+    }
+
+    private static @CurrentTimeMillisLong long parseDateTime(@Nullable String dateTimeString,
+            @Nullable String subSecs) {
         if (dateTimeString == null
                 || !sNonZeroTimePattern.matcher(dateTimeString).matches()) return -1;
 
@@ -2041,7 +2132,6 @@ public class ExifInterface {
             if (datetime == null) return -1;
             long msecs = datetime.getTime();
 
-            String subSecs = getAttribute(TAG_SUBSEC_TIME);
             if (subSecs != null) {
                 try {
                     long sub = Long.parseLong(subSecs);
@@ -3125,9 +3215,11 @@ public class ExifInterface {
                 continue;
             }
 
-            byte[] bytes = new byte[(int) byteCount];
+            final int bytesOffset = dataInputStream.peek();
+            final byte[] bytes = new byte[(int) byteCount];
             dataInputStream.readFully(bytes);
-            ExifAttribute attribute = new ExifAttribute(dataFormat, numberOfComponents, bytes);
+            ExifAttribute attribute = new ExifAttribute(dataFormat, numberOfComponents,
+                    bytesOffset, bytes);
             mAttributes[ifdType].put(tag.name, attribute);
 
             // DNG files have a DNG Version tag specifying the version of specifications that the
