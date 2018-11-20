@@ -250,6 +250,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     final ArraySet<AppWindowToken> mOpeningApps = new ArraySet<>();
     final ArraySet<AppWindowToken> mClosingApps = new ArraySet<>();
+    final ArraySet<AppWindowToken> mChangingApps = new ArraySet<>();
     final UnknownAppVisibilityController mUnknownAppVisibilityController;
     BoundsAnimationController mBoundsAnimationController;
 
@@ -2454,6 +2455,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // Clear all transitions & screen frozen states when removing display.
             mOpeningApps.clear();
             mClosingApps.clear();
+            mChangingApps.clear();
             mUnknownAppVisibilityController.clear();
             mAppTransition.removeAppTransitionTimeoutCallbacks();
             handleAnimatingStoppedAndTransition();
@@ -3284,13 +3286,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        if (!mOpeningApps.isEmpty() || !mClosingApps.isEmpty()) {
+        if (!mOpeningApps.isEmpty() || !mClosingApps.isEmpty() || !mChangingApps.isEmpty()) {
             pw.println();
             if (mOpeningApps.size() > 0) {
                 pw.print("  mOpeningApps="); pw.println(mOpeningApps);
             }
             if (mClosingApps.size() > 0) {
                 pw.print("  mClosingApps="); pw.println(mClosingApps);
+            }
+            if (mChangingApps.size() > 0) {
+                pw.print("  mChangingApps="); pw.println(mChangingApps);
             }
         }
 

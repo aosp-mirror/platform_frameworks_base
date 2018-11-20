@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -33,6 +34,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
+import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_UNSET;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
 
@@ -97,6 +99,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
@@ -117,6 +120,7 @@ import com.android.server.LocalServices;
 import com.android.server.display.ColorDisplayService;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
+import com.android.server.wm.RemoteAnimationController.RemoteAnimationRecord;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
@@ -261,7 +265,18 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     /** Whether our surface was set to be showing in the last call to {@link #prepareSurfaces} */
     private boolean mLastSurfaceShowing = true;
 
+    /**
+     * This gets used during some open/close transitions as well as during a change transition
+     * where it represents the starting-state snapshot.
+     */
     private AppWindowThumbnail mThumbnail;
+    private final Rect mTransitStartRect = new Rect();
+
+    /**
+     * This leash is used to "freeze" the app surface in place after the state change, but before
+     * the animation is ready to start.
+     */
+    private SurfaceControl mTransitChangeLeash = null;
 
     /** Have we been asked to have this token keep the screen frozen? */
     private boolean mFreezingScreen;
@@ -272,6 +287,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     private final Point mTmpPoint = new Point();
     private final Rect mTmpRect = new Rect();
+    private final Rect mTmpPrevBounds = new Rect();
     private RemoteAnimationDefinition mRemoteAnimationDefinition;
     private AnimatingAppWindowTokenRegistry mAnimatingAppWindowTokenRegistry;
 
@@ -810,6 +826,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         boolean delayed = commitVisibility(null, false, TRANSIT_UNSET, true, mVoiceInteraction);
 
         getDisplayContent().mOpeningApps.remove(this);
+        getDisplayContent().mChangingApps.remove(this);
         getDisplayContent().mUnknownAppVisibilityController.appRemovedOrHidden(this);
         mWmService.mTaskSnapshotController.onAppRemoved(this);
         waitingToShow = false;
@@ -1528,6 +1545,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         final int prevWinMode = getWindowingMode();
+        mTmpPrevBounds.set(getBounds());
         super.onConfigurationChanged(newParentConfig);
         final int winMode = getWindowingMode();
 
@@ -1559,7 +1577,66 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 mDisplayContent.mPinnedStackControllerLocked.saveReentrySnapFraction(this,
                         stackBounds);
             }
+        } else if (shouldStartChangeTransition(prevWinMode, winMode)) {
+            initializeChangeTransition(mTmpPrevBounds);
         }
+    }
+
+    private boolean shouldStartChangeTransition(int prevWinMode, int newWinMode) {
+        if (!isVisible() || getDisplayContent().mAppTransition.isTransitionSet()) {
+            return false;
+        }
+        // Only do an animation into and out-of freeform mode for now. Other mode
+        // transition animations are currently handled by system-ui.
+        return (prevWinMode == WINDOWING_MODE_FREEFORM) != (newWinMode == WINDOWING_MODE_FREEFORM);
+    }
+
+    /**
+     * Initializes a change transition. Because the app is visible already, there is a small period
+     * of time where the user can see the app content/window update before the transition starts.
+     * To prevent this, we immediately take a snapshot and place the app/snapshot into a leash which
+     * "freezes" the location/crop until the transition starts.
+     * <p>
+     * Here's a walk-through of the process:
+     * 1. Create a temporary leash ("interim-change-leash") and reparent the app to it.
+     * 2. Set the temporary leash's position/crop to the current state.
+     * 3. Create a snapshot and place that at the top of the leash to cover up content changes.
+     * 4. Once the transition is ready, it will reparent the app to the animation leash.
+     * 5. Detach the interim-change-leash.
+     */
+    private void initializeChangeTransition(Rect startBounds) {
+        mDisplayContent.prepareAppTransition(TRANSIT_TASK_CHANGE_WINDOWING_MODE,
+                false /* alwaysKeepCurrent */, 0, false /* forceOverride */);
+        mDisplayContent.mChangingApps.add(this);
+        mTransitStartRect.set(startBounds);
+
+        final SurfaceControl.Builder builder = makeAnimationLeash()
+                .setParent(getAnimationLeashParent())
+                .setName(getSurfaceControl() + " - interim-change-leash");
+        mTransitChangeLeash = builder.build();
+        Transaction t = getPendingTransaction();
+        t.setWindowCrop(mTransitChangeLeash, startBounds.width(), startBounds.height());
+        t.setPosition(mTransitChangeLeash, startBounds.left, startBounds.top);
+        t.show(mTransitChangeLeash);
+        t.reparent(getSurfaceControl(), mTransitChangeLeash);
+        onAnimationLeashCreated(t, mTransitChangeLeash);
+
+        if (mThumbnail == null && getTask() != null) {
+            final TaskSnapshotController snapshotCtrl = mWmService.mTaskSnapshotController;
+            final ArraySet<Task> tasks = new ArraySet<>();
+            tasks.add(getTask());
+            snapshotCtrl.snapshotTasks(tasks);
+            snapshotCtrl.addSkipClosingAppSnapshotTasks(tasks);
+            final ActivityManager.TaskSnapshot snapshot = snapshotCtrl.getSnapshot(
+                    getTask().mTaskId, getTask().mUserId, false /* restoreFromDisk */,
+                    false /* reducedResolution */);
+            mThumbnail = new AppWindowThumbnail(t, this, snapshot.getSnapshot(),
+                    true /* relative */);
+        }
+    }
+
+    boolean isInChangeTransition() {
+        return mTransitChangeLeash != null || isChangeTransition(mTransit);
     }
 
     @Override
@@ -2242,6 +2319,15 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return getBounds();
     }
 
+    private static boolean isChangeTransition(int transit) {
+        return transit == TRANSIT_TASK_CHANGE_WINDOWING_MODE;
+    }
+
+    private int getDefaultChangeTransitionDuration() {
+        return (int) (AppTransition.DEFAULT_APP_TRANSITION_DURATION
+                        * mWmService.getTransitionAnimationScaleLocked());
+    }
+
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,
             boolean isVoiceInteraction) {
 
@@ -2260,13 +2346,35 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AWT#applyAnimationLocked");
         if (okToAnimate()) {
             final AnimationAdapter adapter;
+            AnimationAdapter thumbnailAdapter = null;
             getAnimationBounds(mTmpPoint, mTmpRect);
+
+            boolean isChanging = isChangeTransition(transit) && mThumbnail != null;
 
             // Delaying animation start isn't compatible with remote animations at all.
             if (getDisplayContent().mAppTransition.getRemoteAnimationController() != null
                     && !mSurfaceAnimator.isAnimationStartDelayed()) {
-                adapter = getDisplayContent().mAppTransition.getRemoteAnimationController()
-                        .createAnimationAdapter(this, mTmpPoint, mTmpRect);
+                RemoteAnimationRecord adapters =
+                        getDisplayContent().mAppTransition.getRemoteAnimationController()
+                                .createRemoteAnimationRecord(this, mTmpPoint, mTmpRect,
+                                        (isChanging ? mTransitStartRect : null));
+                adapter = adapters.mAdapter;
+                thumbnailAdapter = adapters.mThumbnailAdapter;
+            } else if (isChanging) {
+                int duration = getDefaultChangeTransitionDuration();
+                mTmpRect.offsetTo(mTmpPoint.x, mTmpPoint.y);
+                adapter = new LocalAnimationAdapter(
+                        new WindowChangeAnimationSpec(mTransitStartRect, mTmpRect,
+                                getDisplayContent().getDisplayInfo(), duration,
+                                true /* isAppAnimation */, false /* isThumbnail */),
+                        mWmService.mSurfaceAnimationRunner);
+                thumbnailAdapter = new LocalAnimationAdapter(
+                        new WindowChangeAnimationSpec(mTransitStartRect, mTmpRect,
+                                getDisplayContent().getDisplayInfo(), duration,
+                                true /* isAppAnimation */, true /* isThumbnail */),
+                        mWmService.mSurfaceAnimationRunner);
+                mTransit = transit;
+                mTransitFlags = getDisplayContent().mAppTransition.getTransitFlags();
             } else {
                 final int appStackClipMode =
                         getDisplayContent().mAppTransition.getAppStackClipMode();
@@ -2293,6 +2401,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 startAnimation(getPendingTransaction(), adapter, !isVisible());
                 if (adapter.getShowWallpaper()) {
                     mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+                }
+                if (thumbnailAdapter != null) {
+                    mThumbnail.startAnimation(
+                            getPendingTransaction(), thumbnailAdapter, !isVisible());
                 }
             }
         } else {
@@ -2429,6 +2541,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         final DisplayContent dc = getDisplayContent();
         dc.assignStackOrdering();
+
+        if (leash == mTransitChangeLeash) {
+            // This is a temporary state so skip any animation notifications
+            return;
+        } else if (mTransitChangeLeash != null) {
+            // unparent mTransitChangeLeash for clean-up
+            t.hide(mTransitChangeLeash);
+            t.reparent(mTransitChangeLeash, null);
+            mTransitChangeLeash = null;
+        }
+
         if (mAnimatingAppWindowTokenRegistry != null) {
             mAnimatingAppWindowTokenRegistry.notifyStarting(this);
         }
@@ -2487,6 +2610,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 + " okToAnimate=" + okToAnimate()
                 + " startingDisplayed=" + startingDisplayed);
 
+        // clean up thumbnail window
+        if (mThumbnail != null) {
+            mThumbnail.destroy();
+            mThumbnail = null;
+        }
+
         // WindowState.onExitAnimationDone might modify the children list, so make a copy and then
         // traverse the copy.
         final ArrayList<WindowState> children = new ArrayList<>(mChildren);
@@ -2518,14 +2647,30 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     @Override
     void cancelAnimation() {
-        super.cancelAnimation();
+        cancelAnimationOnly();
         clearThumbnail();
+        if (mTransitChangeLeash != null) {
+            getPendingTransaction().hide(mTransitChangeLeash);
+            getPendingTransaction().reparent(mTransitChangeLeash, null);
+            mTransitChangeLeash = null;
+        }
+    }
+
+    /**
+     * This only cancels the animation. It doesn't do other teardown like cleaning-up thumbnail
+     * or interim leashes.
+     * <p>
+     * Used when canceling in preparation for starting a new animation.
+     */
+    void cancelAnimationOnly() {
+        super.cancelAnimation();
     }
 
     boolean isWaitingForTransitionStart() {
         return getDisplayContent().mAppTransition.isTransitionSet()
                 && (getDisplayContent().mOpeningApps.contains(this)
-                    || getDisplayContent().mClosingApps.contains(this));
+                    || getDisplayContent().mClosingApps.contains(this)
+                    || getDisplayContent().mChangingApps.contains(this));
     }
 
     public int getTransit() {
@@ -2835,6 +2980,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     void removeFromPendingTransition() {
         if (isWaitingForTransitionStart() && mDisplayContent != null) {
             mDisplayContent.mOpeningApps.remove(this);
+            mDisplayContent.mChangingApps.remove(this);
             mDisplayContent.mClosingApps.remove(this);
         }
     }
