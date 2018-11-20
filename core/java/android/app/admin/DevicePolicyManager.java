@@ -49,6 +49,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
+import android.net.NetworkUtils;
+import android.net.PrivateDnsConnectivityChecker;
 import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.Binder;
@@ -79,6 +81,7 @@ import android.security.keystore.StrongBoxUnavailableException;
 import android.service.restrictions.RestrictionsReceiver;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -1972,6 +1975,35 @@ public class DevicePolicyManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallUpdateCallbackErrorConstants {}
+
+    /**
+     * The selected mode has been set successfully. If the mode is
+     * {@code PRIVATE_DNS_MODE_PROVIDER_HOSTNAME} then it implies the supplied host is valid
+     * and reachable.
+     */
+    public static final int PRIVATE_DNS_SET_SUCCESS = 0;
+
+    /**
+     * If the {@code privateDnsHost} provided was of a valid hostname but that host was found
+     * to not support DNS-over-TLS.
+     */
+    public static final int PRIVATE_DNS_SET_ERROR_HOST_NOT_SERVING = 1;
+
+    /**
+     * General failure to set the Private DNS mode, not due to one of the reasons listed above.
+     */
+    public static final int PRIVATE_DNS_SET_ERROR_FAILURE_SETTING = 2;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = {"PRIVATE_DNS_SET_"}, value = {
+            PRIVATE_DNS_SET_SUCCESS,
+            PRIVATE_DNS_SET_ERROR_HOST_NOT_SERVING,
+            PRIVATE_DNS_SET_ERROR_FAILURE_SETTING
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SetPrivateDnsModeResultConstants {}
 
     /**
      * Return true if the given administrator component is currently active (enabled) in the system.
@@ -9839,6 +9871,16 @@ public class DevicePolicyManager {
      * Sets the global Private DNS mode and host to be used.
      * May only be called by the device owner.
      *
+     * <p>Note that in case a Private DNS resolver is specified, the method is blocking as it
+     * will perform a connectivity check to the resolver, to ensure it is valid. Because of that,
+     * the method should not be called on any thread that relates to user interaction, such as the
+     * UI thread.
+     *
+     * <p>In case a VPN is used in conjunction with Private DNS resolver, the Private DNS resolver
+     * must be reachable both from within and outside the VPN. Otherwise, the device may lose
+     * the ability to resolve hostnames as system traffic to the resolver may not go through the
+     * VPN.
+     *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      * @param mode Which mode to set - either {@code PRIVATE_DNS_MODE_OPPORTUNISTIC} or
      *             {@code PRIVATE_DNS_MODE_PROVIDER_HOSTNAME}.
@@ -9848,6 +9890,9 @@ public class DevicePolicyManager {
      * @param privateDnsHost The hostname of a server that implements DNS over TLS (RFC7858), if
      *                       {@code PRIVATE_DNS_MODE_PROVIDER_HOSTNAME} was specified as the mode,
      *                       null otherwise.
+     *
+     * @return One of the values in {@link SetPrivateDnsModeResultConstants}.
+     *
      * @throws IllegalArgumentException in the following cases: if a {@code privateDnsHost} was
      * provided but the mode was not {@code PRIVATE_DNS_MODE_PROVIDER_HOSTNAME}, if the mode
      * specified was {@code PRIVATE_DNS_MODE_PROVIDER_HOSTNAME} but {@code privateDnsHost} does
@@ -9855,15 +9900,23 @@ public class DevicePolicyManager {
      *
      * @throws SecurityException if the caller is not the device owner.
      */
-    public void setGlobalPrivateDns(@NonNull ComponentName admin,
+    public int setGlobalPrivateDns(@NonNull ComponentName admin,
             @PrivateDnsMode int mode, @Nullable String privateDnsHost) {
         throwIfParentInstance("setGlobalPrivateDns");
+
         if (mService == null) {
-            return;
+            return PRIVATE_DNS_SET_ERROR_FAILURE_SETTING;
+        }
+
+        if (mode == PRIVATE_DNS_MODE_PROVIDER_HOSTNAME && !TextUtils.isEmpty(privateDnsHost)
+                && NetworkUtils.isWeaklyValidatedHostname(privateDnsHost)) {
+            if (!PrivateDnsConnectivityChecker.canConnectToPrivateDnsServer(privateDnsHost)) {
+                return PRIVATE_DNS_SET_ERROR_HOST_NOT_SERVING;
+            }
         }
 
         try {
-            mService.setGlobalPrivateDns(admin, mode, privateDnsHost);
+            return mService.setGlobalPrivateDns(admin, mode, privateDnsHost);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
