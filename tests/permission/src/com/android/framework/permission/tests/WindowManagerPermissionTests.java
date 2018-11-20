@@ -20,6 +20,7 @@ import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.IWindowManager;
 import junit.framework.TestCase;
@@ -107,7 +108,7 @@ public class WindowManagerPermissionTests extends TestCase {
     public void testDISABLE_KEYGUARD() {
         Binder token = new Binder();
         try {
-            mWm.disableKeyguard(token, "foo");
+            mWm.disableKeyguard(token, "foo", UserHandle.myUserId());
             fail("IWindowManager.disableKeyguard did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -117,7 +118,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.reenableKeyguard(token);
+            mWm.reenableKeyguard(token, UserHandle.myUserId());
             fail("IWindowManager.reenableKeyguard did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
