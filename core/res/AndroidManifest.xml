@@ -3823,6 +3823,11 @@
     <permission android:name="android.permission.CONTROL_KEYGUARD"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows an application to control keyguard features like secure notifications.
+         @hide -->
+    <permission android:name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows an application to listen to trust changes.  Only allowed for system processes.
         @hide -->
     <permission android:name="android.permission.TRUST_LISTENER"
