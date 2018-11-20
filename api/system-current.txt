@@ -5022,6 +5022,10 @@ package android.telecom {
     field public static final int CAPABILITY_MULTI_USER = 32; // 0x20
   }
 
+  public final class PhoneAccountSuggestion implements android.os.Parcelable {
+    ctor public PhoneAccountSuggestion(android.telecom.PhoneAccountHandle, int, boolean);
+  }
+
   public final class RemoteConference {
     method public deprecated void setAudioState(android.telecom.AudioState);
   }
