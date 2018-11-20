@@ -375,20 +375,30 @@ public class InputMethodSubtypeSwitchingControllerTest {
         final ComponentName imeZ1 = new ComponentName("com.example.imeZ", "Ime1");
         {
             final List<ImeSubtypeListItem> items = Arrays.asList(
-                    // Subtypes of IME "X".
+                    // Subtypes of two IMEs that have the same display name "X".
                     // Subtypes that has the same locale of the system's.
                     createDummyItem(imeX1, "X", "E", "en_US", 0, "en_US"),
+                    createDummyItem(imeX2, "X", "E", "en_US", 0, "en_US"),
                     createDummyItem(imeX1, "X", "Z", "en_US", 3, "en_US"),
+                    createDummyItem(imeX2, "X", "Z", "en_US", 3, "en_US"),
                     createDummyItem(imeX1, "X", "", "en_US", 6, "en_US"),
+                    createDummyItem(imeX2, "X", "", "en_US", 6, "en_US"),
                     // Subtypes that has the same language of the system's.
                     createDummyItem(imeX1, "X", "E", "en", 1, "en_US"),
+                    createDummyItem(imeX2, "X", "E", "en", 1, "en_US"),
                     createDummyItem(imeX1, "X", "Z", "en", 4, "en_US"),
+                    createDummyItem(imeX2, "X", "Z", "en", 4, "en_US"),
                     createDummyItem(imeX1, "X", "", "en", 7, "en_US"),
+                    createDummyItem(imeX2, "X", "", "en", 7, "en_US"),
                     // Subtypes that has different language than the system's.
                     createDummyItem(imeX1, "X", "A", "hi_IN", 27, "en_US"),
+                    createDummyItem(imeX2, "X", "A", "hi_IN", 27, "en_US"),
                     createDummyItem(imeX1, "X", "E", "ja", 2, "en_US"),
+                    createDummyItem(imeX2, "X", "E", "ja", 2, "en_US"),
                     createDummyItem(imeX1, "X", "Z", "ja", 5, "en_US"),
+                    createDummyItem(imeX2, "X", "Z", "ja", 5, "en_US"),
                     createDummyItem(imeX1, "X", "", "ja", 8, "en_US"),
+                    createDummyItem(imeX2, "X", "", "ja", 8, "en_US"),
 
                     // Subtypes of IME "Y".
                     // Subtypes that has the same locale of the system's.
@@ -449,11 +459,11 @@ public class InputMethodSubtypeSwitchingControllerTest {
         }
 
         {
-            // Currently ComponentName is not used for sorting.
+            // Check if ComponentName is also taken into account when comparing two items.
             final ImeSubtypeListItem ime1 = createDummyItem(imeX1, "X", "A", "ja_JP", 0, "en_US");
             final ImeSubtypeListItem ime2 = createDummyItem(imeX2, "X", "A", "ja_JP", 0, "en_US");
-            assertTrue(ime1.compareTo(ime2) == 0);
-            assertTrue(ime2.compareTo(ime1) == 0);
+            assertTrue(ime1.compareTo(ime2) < 0);
+            assertTrue(ime2.compareTo(ime1) > 0);
             // But those aren't equal to each other.
             assertFalse(ime1.equals(ime2));
             assertFalse(ime2.equals(ime1));
