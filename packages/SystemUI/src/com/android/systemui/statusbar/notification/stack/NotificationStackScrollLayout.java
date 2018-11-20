@@ -2770,6 +2770,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private void updateFirstAndLastBackgroundViews() {
         NotificationSection firstSection = getFirstVisibleSection();
         NotificationSection lastSection = getLastVisibleSection();
+        ActivatableNotificationView previousFirstChild =
+                firstSection == null ? null : firstSection.getFirstVisibleChild();
+        ActivatableNotificationView previousLastChild =
+                lastSection == null ? null : lastSection.getLastVisibleChild();
 
         ActivatableNotificationView firstChild = getFirstChildWithBackground();
         ActivatableNotificationView lastChild = getLastChildWithBackground();
@@ -2777,10 +2781,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 mSections[0], mSections[1], firstChild, lastChild);
 
         if (mAnimationsEnabled && mIsExpanded) {
-            mAnimateNextBackgroundTop =
-                    firstSection == null || firstChild != firstSection.getFirstVisibleChild();
-            mAnimateNextBackgroundBottom =
-                    lastSection == null || lastChild != lastSection.getLastVisibleChild();
+            mAnimateNextBackgroundTop = firstChild != previousFirstChild;
+            mAnimateNextBackgroundBottom = lastChild != previousLastChild;
             mAnimateNextSectionBoundsChange = sectionViewsChanged;
         } else {
             mAnimateNextBackgroundTop = false;
