@@ -129,8 +129,8 @@ import java.util.Set;
  * TODO: This class is mostly temporary to separate things out of ActivityStackSupervisor.java. The
  * intention is to have this merged with RootWindowContainer.java as part of unifying the hierarchy.
  */
-class RootActivityContainer extends ConfigurationContainer implements
-        DisplayManager.DisplayListener, RootWindowContainerListener {
+class RootActivityContainer extends ConfigurationContainer
+        implements DisplayManager.DisplayListener {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RootActivityContainer" : TAG_ATM;
     static final String TAG_TASKS = TAG + POSTFIX_TASKS;
@@ -162,7 +162,8 @@ class RootActivityContainer extends ConfigurationContainer implements
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
     private DisplayManagerInternal mDisplayManagerInternal;
-    private RootWindowContainerController mWindowContainerController;
+    // TODO: Remove after object merge with RootWindowContainer.
+    private RootWindowContainer mRootWindowContainer;
 
     /**
      * List of displays which contain activities, sorted by z-order.
@@ -224,13 +225,14 @@ class RootActivityContainer extends ConfigurationContainer implements
     }
 
     @VisibleForTesting
-    void setWindowContainerController(RootWindowContainerController controller) {
-        mWindowContainerController = controller;
+    void setWindowContainer(RootWindowContainer container) {
+        mRootWindowContainer = container;
+        mRootWindowContainer.setRootActivityContainer(this);
     }
 
     void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
-        setWindowContainerController(new RootWindowContainerController(this));
+        setWindowContainer(mWindowManager.mRoot);
         mDisplayManager = mService.mContext.getSystemService(DisplayManager.class);
         mDisplayManager.registerDisplayListener(this, mService.mH);
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
@@ -1251,8 +1253,8 @@ class RootActivityContainer extends ConfigurationContainer implements
         return null;
     }
 
-    @Override
-    public void onChildPositionChanged(DisplayWindowController childController, int position) {
+    // TODO: remove after object merge with RootWindowContainer
+    void onChildPositionChanged(DisplayWindowController childController, int position) {
         // Assume AM lock is held from positionChildAt of controller in each hierarchy.
         final ActivityDisplay display = getActivityDisplay(childController.getDisplayId());
         if (display != null) {
@@ -1279,8 +1281,8 @@ class RootActivityContainer extends ConfigurationContainer implements
     @VisibleForTesting
     void addChild(ActivityDisplay activityDisplay, int position) {
         positionChildAt(activityDisplay, position);
-        mWindowContainerController.positionChildAt(
-                activityDisplay.getWindowContainerController(), position);
+        mRootWindowContainer.positionChildAt(position,
+                activityDisplay.getWindowContainerController().mContainer);
     }
 
     void removeChild(ActivityDisplay activityDisplay) {

@@ -82,11 +82,15 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 
 /** Root {@link WindowContainer} for the device. */
-class RootWindowContainer extends WindowContainer<DisplayContent> {
+class RootWindowContainer extends WindowContainer<DisplayContent>
+        implements ConfigurationContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RootWindowContainer" : TAG_WM;
 
     private static final int SET_SCREEN_BRIGHTNESS_OVERRIDE = 1;
     private static final int SET_USER_ACTIVITY_TIMEOUT = 2;
+
+    // TODO: Remove after object merge with RootActivityContainer.
+    private RootActivityContainer mRootActivityContainer;
 
     private Object mLastWindowFreezeSource = null;
     private Session mHoldScreen = null;
@@ -143,6 +147,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     RootWindowContainer(WindowManagerService service) {
         super(service);
         mHandler = new MyHandler(service.mH.getLooper());
+    }
+
+    void setRootActivityContainer(RootActivityContainer container) {
+        mRootActivityContainer = container;
+        if (container != null) {
+            container.registerConfigurationChangeListener(this);
+        }
     }
 
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
@@ -1015,20 +1026,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     @Override
     void positionChildAt(int position, DisplayContent child, boolean includingParents) {
         super.positionChildAt(position, child, includingParents);
-        final RootWindowContainerController controller = getController();
-        if (controller != null) {
-            controller.onChildPositionChanged(child, position);
+        if (mRootActivityContainer != null) {
+            mRootActivityContainer.onChildPositionChanged(child.getController(), position);
         }
     }
 
     void positionChildAt(int position, DisplayContent child) {
         // Only called from controller so no need to notify the change to controller.
         super.positionChildAt(position, child, false /* includingParents */);
-    }
-
-    @Override
-    RootWindowContainerController getController() {
-        return (RootWindowContainerController) super.getController();
     }
 
     @Override
