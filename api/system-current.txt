@@ -4935,6 +4935,7 @@ package android.service.intelligence {
 
   public abstract class IntelligenceService extends android.app.Service {
     ctor public IntelligenceService();
+    method public void onActivitySnapshot(android.service.intelligence.InteractionSessionId, android.service.intelligence.SnapshotData);
     method public abstract void onContentCaptureEvent(android.service.intelligence.InteractionSessionId, java.util.List<android.view.intelligence.ContentCaptureEvent>);
     method public void onCreateInteractionSession(android.service.intelligence.InteractionContext, android.service.intelligence.InteractionSessionId);
     method public void onDestroyInteractionSession(android.service.intelligence.InteractionSessionId);
@@ -4957,6 +4958,15 @@ package android.service.intelligence {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.intelligence.InteractionSessionId> CREATOR;
+  }
+
+  public final class SnapshotData implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.app.assist.AssistContent getAssistContent();
+    method public android.os.Bundle getAssistData();
+    method public android.app.assist.AssistStructure getAssistStructure();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.intelligence.SnapshotData> CREATOR;
   }
 
 }

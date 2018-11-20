@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.ActivityManager.ASSIST_CONTEXT_FULL;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_NONE;
+
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 
 import android.app.ActivityTaskManager;
@@ -82,7 +83,9 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
          * is true.
          */
         @GuardedBy("mCallbacksLock")
-        void onAssistDataReceivedLocked(Bundle data, int activityIndex, int activityCount);
+        default void onAssistDataReceivedLocked(Bundle data, int activityIndex, int activityCount) {
+            // Do nothing
+        }
 
         /**
          * Called when we receive asynchronous assist screenshot. This call is only made if
@@ -92,7 +95,9 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
          * {@link #canHandleReceivedAssistDataLocked()} is true.
          */
         @GuardedBy("mCallbacksLock")
-        void onAssistScreenshotReceivedLocked(Bitmap screenshot);
+        default void onAssistScreenshotReceivedLocked(Bitmap screenshot) {
+            // Do nothing
+        }
 
         /**
          * Called when there is no more pending assist data or screenshots for the last request.

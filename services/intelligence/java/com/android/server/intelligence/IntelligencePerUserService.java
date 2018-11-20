@@ -16,16 +16,24 @@
 
 package com.android.server.intelligence;
 
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.app.AppGlobals;
+import android.app.assist.AssistContent;
+import android.app.assist.AssistStructure;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.intelligence.InteractionSessionId;
+import android.service.intelligence.SnapshotData;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.intelligence.ContentCaptureEvent;
@@ -174,6 +182,25 @@ final class IntelligencePerUserService
     }
 
     @GuardedBy("mLock")
+    public boolean sendActivityAssistDataLocked(@NonNull IBinder activityToken,
+            @NonNull Bundle data) {
+        final InteractionSessionId id = getInteractionSessionId(activityToken);
+        if (id != null) {
+            final ContentCaptureSession session = mSessions.get(id);
+            final Bundle assistData = data.getBundle(ASSIST_KEY_DATA);
+            final AssistStructure assistStructure = data.getParcelable(ASSIST_KEY_STRUCTURE);
+            final AssistContent assistContent = data.getParcelable(ASSIST_KEY_CONTENT);
+            final SnapshotData snapshotData = new SnapshotData(assistData,
+                    assistStructure, assistContent);
+            session.sendActivitySnapshotLocked(snapshotData);
+            return true;
+        } else {
+            Slog.e(TAG, "Failed to notify activity assist data for activity: " + activityToken);
+        }
+        return false;
+    }
+
+    @GuardedBy("mLock")
     public void removeSessionLocked(@NonNull InteractionSessionId sessionId) {
         mSessions.remove(sessionId);
     }
@@ -214,6 +241,20 @@ final class IntelligencePerUserService
                 session.dumpLocked(prefix2, pw);
             }
         }
+    }
+
+    /**
+     * Returns the InteractionSessionId associated with the given activity.
+     */
+    @GuardedBy("mLock")
+    private InteractionSessionId getInteractionSessionId(@NonNull IBinder activityToken) {
+        for (int i = 0; i < mSessions.size(); i++) {
+            ContentCaptureSession session = mSessions.valueAt(i);
+            if (session.isActivitySession(activityToken)) {
+                return mSessions.keyAt(i);
+            }
+        }
+        return null;
     }
 
     private static void sendToClient(@NonNull IResultReceiver resultReceiver, int value) {
