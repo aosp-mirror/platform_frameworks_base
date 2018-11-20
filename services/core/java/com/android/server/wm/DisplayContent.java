@@ -980,11 +980,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (prevDc == this) {
             return;
         }
-        if (prevDc != null && prevDc.mTokenMap.remove(token.token) != null
-                && token.asAppWindowToken() == null) {
-            // Removed the token from the map, but made sure it's not an app token before removing
-            // from parent.
-            token.getParent().removeChild(token);
+        if (prevDc != null) {
+            if (prevDc.mTokenMap.remove(token.token) != null && token.asAppWindowToken() == null) {
+                // Removed the token from the map, but made sure it's not an app token before
+                // removing from parent.
+                token.getParent().removeChild(token);
+            }
+            if (prevDc.mLastFocus == mCurrentFocus) {
+                // The window has become the focus of this display, so it should not be notified
+                // that it lost focus from the previous display.
+                prevDc.mLastFocus = null;
+            }
         }
 
         addWindowToken(token.token, token);
