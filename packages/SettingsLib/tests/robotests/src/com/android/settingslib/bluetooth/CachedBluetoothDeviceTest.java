@@ -17,15 +17,14 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Shadows.shadowOf;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -40,7 +39,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.shadows.ShadowAudioManager;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 public class CachedBluetoothDeviceTest {
@@ -67,7 +65,7 @@ public class CachedBluetoothDeviceTest {
     @Mock
     private BluetoothDevice mSubDevice;
     private CachedBluetoothDevice mCachedDevice;
-    private ShadowAudioManager mShadowAudioManager;
+    private AudioManager mAudioManager;
     private Context mContext;
     private int mBatteryLevel = BluetoothDevice.BATTERY_LEVEL_UNKNOWN;
 
@@ -75,7 +73,7 @@ public class CachedBluetoothDeviceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
-        mShadowAudioManager = shadowOf(mContext.getSystemService(AudioManager.class));
+        mAudioManager = mContext.getSystemService(AudioManager.class);
         when(mDevice.getAddress()).thenReturn(DEVICE_ADDRESS);
         when(mHfpProfile.isProfileReady()).thenReturn(true);
         when(mA2dpProfile.isProfileReady()).thenReturn(true);
@@ -212,7 +210,7 @@ public class CachedBluetoothDeviceTest {
         //   2. Audio Manager: In Call
         updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
-        mShadowAudioManager.setMode(AudioManager.MODE_IN_CALL);
+        mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 
         // Act & Assert:
         //   Get null result without Battery Level.
@@ -228,7 +226,7 @@ public class CachedBluetoothDeviceTest {
         updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
         mBatteryLevel = 10;
-        mShadowAudioManager.setMode(AudioManager.MODE_IN_CALL);
+        mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 
         // Act & Assert:
         //   Get "10% battery" result with Battery Level 10.
@@ -244,14 +242,13 @@ public class CachedBluetoothDeviceTest {
 
         // Set device as Active for HFP and test connection state summary
         mCachedDevice.onAudioModeChanged();
-        mShadowAudioManager.setMode(AudioManager.MODE_IN_CALL);
+        mAudioManager.setMode(AudioManager.MODE_IN_CALL);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEADSET);
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active");
 
         // Test with battery level
         mBatteryLevel = 10;
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
-                "Active, 10% battery");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, 10% battery");
 
         // Set HFP profile to be disconnected and test connection state summary
         updateProfileStatus(mHfpProfile, BluetoothProfile.STATE_DISCONNECTED);
@@ -363,7 +360,7 @@ public class CachedBluetoothDeviceTest {
         //   2. Audio Manager: In Call
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
-        mShadowAudioManager.setMode(AudioManager.MODE_IN_CALL);
+        mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 
         // Act & Assert:
         //   Get "Active" result without Battery Level.
@@ -378,8 +375,8 @@ public class CachedBluetoothDeviceTest {
         //   3. Audio Manager: In Call
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
+        mAudioManager.setMode(AudioManager.MODE_IN_CALL);
         mBatteryLevel = 10;
-        mShadowAudioManager.setMode(AudioManager.MODE_IN_CALL);
 
         // Act & Assert:
         //   Get "Active, 10% battery" result with Battery Level 10.
