@@ -3908,6 +3908,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mStatusBar.resetUserExpandedStates();
             clearTemporaryViews();
             clearUserLockedViews();
+            ArrayList<View> draggedViews = mAmbientState.getDraggedViews();
+            if (draggedViews.size() > 0) {
+                draggedViews.clear();
+                updateContinuousShadowDrawing();
+            }
         }
     }
 
@@ -4938,10 +4943,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 }
             }
         }
-        pw.println("  Transient Views: " + childCount);
         int transientViewCount = getTransientViewCount();
+        pw.println("  Transient Views: " + transientViewCount);
         for (int i = 0; i < transientViewCount; i++) {
             ExpandableView child = (ExpandableView) getTransientView(i);
+            child.dump(fd, pw, args);
+        }
+        ArrayList<View> draggedViews = mAmbientState.getDraggedViews();
+        int draggedCount = draggedViews.size();
+        pw.println("  Dragged Views: " + draggedCount);
+        for (int i = 0; i < draggedCount; i++) {
+            ExpandableView child = (ExpandableView) draggedViews.get(i);
             child.dump(fd, pw, args);
         }
     }
