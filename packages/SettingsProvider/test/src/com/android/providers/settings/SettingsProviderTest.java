@@ -32,8 +32,10 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
-import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Test;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Tests for the SettingContentProvider.
@@ -258,7 +260,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
                     FAKE_SETTING_VALUE, false);
 
             // Reset the changes made by the "shell/root" package
-            resetToDefaultsViaShell(type, "shell");
+            resetToDefaultsViaShell(type, "com.android.shell");
             resetToDefaultsViaShell(type, "root");
 
             // Make sure the old APIs don't set defaults
@@ -272,7 +274,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
                     FAKE_SETTING_VALUE_2, false);
 
             // Reset the changes made by this package
-            resetToDefaultsViaShell(type, "shell");
+            resetToDefaultsViaShell(type, "com.android.shell");
             resetToDefaultsViaShell(type, "root");
 
             // Make sure the old APIs don't set defaults
@@ -313,7 +315,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
                     FAKE_SETTING_VALUE_2, "TOKEN2", false);
 
             // Reset settings associated with TOKEN1
-            resetToDefaultsViaShell(type, "shell", "TOKEN1");
+            resetToDefaultsViaShell(type, "com.android.shell", "TOKEN1");
             resetToDefaultsViaShell(type, "root", "TOKEN1");
 
             // Make sure TOKEN1 settings are reset
@@ -325,7 +327,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
                     FAKE_SETTING_NAME_1));
 
             // Reset settings associated with TOKEN2
-            resetToDefaultsViaShell(type, "shell", "TOKEN2");
+            resetToDefaultsViaShell(type, "com.android.shell", "TOKEN2");
             resetToDefaultsViaShell(type, "root", "TOKEN2");
 
             // Make sure TOKEN2 settings are reset
