@@ -220,7 +220,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
             mShelfState.clipTopAmount = 0;
             mShelfState.alpha = mAmbientState.hasPulsingNotifications() ? 0 : 1;
             mShelfState.belowSpeedBump = mAmbientState.getSpeedBumpIndex() == 0;
-            mShelfState.shadowAlpha = 1.0f;
             mShelfState.hideSensitive = false;
             mShelfState.xTranslation = getTranslationX();
             if (mNotGoneIndex != -1) {

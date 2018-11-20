@@ -34,13 +34,10 @@ public class ExpandableViewState extends ViewState {
 
     private static final int TAG_ANIMATOR_HEIGHT = R.id.height_animator_tag;
     private static final int TAG_ANIMATOR_TOP_INSET = R.id.top_inset_animator_tag;
-    private static final int TAG_ANIMATOR_SHADOW_ALPHA = R.id.shadow_alpha_animator_tag;
     private static final int TAG_END_HEIGHT = R.id.height_animator_end_value_tag;
     private static final int TAG_END_TOP_INSET = R.id.top_inset_animator_end_value_tag;
-    private static final int TAG_END_SHADOW_ALPHA = R.id.shadow_alpha_animator_end_value_tag;
     private static final int TAG_START_HEIGHT = R.id.height_animator_start_value_tag;
     private static final int TAG_START_TOP_INSET = R.id.top_inset_animator_start_value_tag;
-    private static final int TAG_START_SHADOW_ALPHA = R.id.shadow_alpha_animator_start_value_tag;
 
     // These are flags such that we can create masks for filtering.
 
@@ -91,7 +88,6 @@ public class ExpandableViewState extends ViewState {
     public boolean dark;
     public boolean hideSensitive;
     public boolean belowSpeedBump;
-    public float shadowAlpha;
     public boolean inShelf;
 
     /**
@@ -125,7 +121,6 @@ public class ExpandableViewState extends ViewState {
             ExpandableViewState svs = (ExpandableViewState) viewState;
             height = svs.height;
             dimmed = svs.dimmed;
-            shadowAlpha = svs.shadowAlpha;
             dark = svs.dark;
             hideSensitive = svs.hideSensitive;
             belowSpeedBump = svs.belowSpeedBump;
@@ -151,14 +146,6 @@ public class ExpandableViewState extends ViewState {
             // apply height
             if (height != newHeight) {
                 expandableView.setActualHeight(newHeight, false /* notifyListeners */);
-            }
-
-            float shadowAlpha = expandableView.getShadowAlpha();
-            float newShadowAlpha = this.shadowAlpha;
-
-            // apply shadowAlpha
-            if (shadowAlpha != newShadowAlpha) {
-                expandableView.setShadowAlpha(newShadowAlpha);
             }
 
             // apply dimming
@@ -203,13 +190,6 @@ public class ExpandableViewState extends ViewState {
             startHeightAnimation(expandableView, properties);
         }  else {
             abortAnimation(child, TAG_ANIMATOR_HEIGHT);
-        }
-
-        // start shadow alpha animation
-        if (this.shadowAlpha != expandableView.getShadowAlpha()) {
-            startShadowAlphaAnimation(expandableView, properties);
-        } else {
-            abortAnimation(child, TAG_ANIMATOR_SHADOW_ALPHA);
         }
 
         // start top inset animation
@@ -328,69 +308,6 @@ public class ExpandableViewState extends ViewState {
         child.setActualHeightAnimating(true);
     }
 
-    private void startShadowAlphaAnimation(final ExpandableView child,
-            AnimationProperties properties) {
-        Float previousStartValue = getChildTag(child, TAG_START_SHADOW_ALPHA);
-        Float previousEndValue = getChildTag(child, TAG_END_SHADOW_ALPHA);
-        float newEndValue = this.shadowAlpha;
-        if (previousEndValue != null && previousEndValue == newEndValue) {
-            return;
-        }
-        ValueAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_SHADOW_ALPHA);
-        AnimationFilter filter = properties.getAnimationFilter();
-        if (!filter.animateShadowAlpha) {
-            // just a local update was performed
-            if (previousAnimator != null) {
-                // we need to increase all animation keyframes of the previous animator by the
-                // relative change to the end value
-                PropertyValuesHolder[] values = previousAnimator.getValues();
-                float relativeDiff = newEndValue - previousEndValue;
-                float newStartValue = previousStartValue + relativeDiff;
-                values[0].setFloatValues(newStartValue, newEndValue);
-                child.setTag(TAG_START_SHADOW_ALPHA, newStartValue);
-                child.setTag(TAG_END_SHADOW_ALPHA, newEndValue);
-                previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
-                return;
-            } else {
-                // no new animation needed, let's just apply the value
-                child.setShadowAlpha(newEndValue);
-                return;
-            }
-        }
-
-        ValueAnimator animator = ValueAnimator.ofFloat(child.getShadowAlpha(), newEndValue);
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                child.setShadowAlpha((float) animation.getAnimatedValue());
-            }
-        });
-        animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
-        long newDuration = cancelAnimatorAndGetNewDuration(properties.duration, previousAnimator);
-        animator.setDuration(newDuration);
-        if (properties.delay > 0 && (previousAnimator == null
-                || previousAnimator.getAnimatedFraction() == 0)) {
-            animator.setStartDelay(properties.delay);
-        }
-        AnimatorListenerAdapter listener = properties.getAnimationFinishListener();
-        if (listener != null) {
-            animator.addListener(listener);
-        }
-        // remove the tag when the animation is finished
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                child.setTag(TAG_ANIMATOR_SHADOW_ALPHA, null);
-                child.setTag(TAG_START_SHADOW_ALPHA, null);
-                child.setTag(TAG_END_SHADOW_ALPHA, null);
-            }
-        });
-        startAnimator(animator, listener);
-        child.setTag(TAG_ANIMATOR_SHADOW_ALPHA, animator);
-        child.setTag(TAG_START_SHADOW_ALPHA, child.getShadowAlpha());
-        child.setTag(TAG_END_SHADOW_ALPHA, newEndValue);
-    }
-
     private void startInsetAnimation(final ExpandableView child, AnimationProperties properties) {
         Integer previousStartValue = getChildTag(child, TAG_START_TOP_INSET);
         Integer previousEndValue = getChildTag(child, TAG_END_TOP_INSET);
@@ -473,10 +390,6 @@ public class ExpandableViewState extends ViewState {
     public void cancelAnimations(View view) {
         super.cancelAnimations(view);
         Animator animator = getChildTag(view, TAG_ANIMATOR_HEIGHT);
-        if (animator != null) {
-            animator.cancel();
-        }
-        animator = getChildTag(view, TAG_ANIMATOR_SHADOW_ALPHA);
         if (animator != null) {
             animator.cancel();
         }

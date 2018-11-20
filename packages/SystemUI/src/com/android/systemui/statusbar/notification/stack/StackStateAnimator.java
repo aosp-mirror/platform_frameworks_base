@@ -171,8 +171,7 @@ public class StackStateAnimator {
                         || viewState.alpha != child.getAlpha()
                         || viewState.height != child.getActualHeight()
                         || viewState.clipTopAmount != child.getClipTopAmount()
-                        || viewState.dark != child.isDark()
-                        || viewState.shadowAlpha != child.getShadowAlpha())) {
+                        || viewState.dark != child.isDark())) {
             mAnimationProperties.delay = mCurrentAdditionalDelay
                     + calculateChildAnimationDelay(viewState, finalState);
         }

@@ -95,7 +95,6 @@ public class StackScrollAlgorithm {
 
         updateHeadsUpStates(resultState, algorithmState, ambientState);
 
-        handleDraggedViews(ambientState, resultState, algorithmState);
         updateDimmedActivatedHideSensitive(ambientState, resultState, algorithmState);
         updateClipping(resultState, algorithmState, ambientState);
         updateSpeedBumpState(resultState, algorithmState, ambientState);
@@ -206,36 +205,6 @@ public class StackScrollAlgorithm {
             boolean isActivatedChild = activatedChild == child;
             if (dimmed && isActivatedChild) {
                 childViewState.zTranslation += 2.0f * ambientState.getZDistanceBetweenElements();
-            }
-        }
-    }
-
-    /**
-     * Handle the special state when views are being dragged
-     */
-    private void handleDraggedViews(AmbientState ambientState, StackScrollState resultState,
-            StackScrollAlgorithmState algorithmState) {
-        ArrayList<View> draggedViews = ambientState.getDraggedViews();
-        for (View draggedView : draggedViews) {
-            int childIndex = algorithmState.visibleChildren.indexOf(draggedView);
-            if (childIndex >= 0 && childIndex < algorithmState.visibleChildren.size() - 1) {
-                View nextChild = algorithmState.visibleChildren.get(childIndex + 1);
-                if (!draggedViews.contains(nextChild)) {
-                    // only if the view is not dragged itself we modify its state to be fully
-                    // visible
-                    ExpandableViewState viewState = resultState.getViewStateForView(
-                            nextChild);
-                    // The child below the dragged one must be fully visible
-                    if (ambientState.isShadeExpanded()) {
-                        viewState.shadowAlpha = 1;
-                        viewState.hidden = false;
-                    }
-                }
-
-                // Lets set the alpha to the one it currently has, as its currently being dragged
-                ExpandableViewState viewState = resultState.getViewStateForView(draggedView);
-                // The dragged child should keep the set alpha
-                viewState.alpha = draggedView.getAlpha();
             }
         }
     }
