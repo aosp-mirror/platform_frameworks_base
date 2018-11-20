@@ -18912,7 +18912,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (memoryStat == null) {
                         continue;
                     }
-                    // TODO(rslawik): Delete RSS high-water mark field.
                     ProcessMemoryState processMemoryState =
                             new ProcessMemoryState(uid,
                                     r.processName,
@@ -18922,7 +18921,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     memoryStat.rssInBytes,
                                     memoryStat.cacheInBytes,
                                     memoryStat.swapInBytes,
-                                    memoryStat.rssHighWatermarkInBytes,
                                     memoryStat.startTimeNanos);
                     processMemoryStates.add(processMemoryState);
                 }
