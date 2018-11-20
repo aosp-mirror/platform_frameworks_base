@@ -54,7 +54,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Slog;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1912,7 +1911,7 @@ public class AudioManager {
      *   system failed to generate a new session, a condition in which audio playback or recording
      *   will subsequently fail as well.
      */
-    public int generateAudioSessionId() {
+    public static int generateAudioSessionId() {
         int session = AudioSystem.newAudioSessionId();
         if (session > 0) {
             return session;
