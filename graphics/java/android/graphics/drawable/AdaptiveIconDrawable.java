@@ -108,10 +108,9 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      * Scaled mask based on the view bounds.
      */
     private final Path mMask;
+    private final Path mMaskScaleOnly;
     private final Matrix mMaskMatrix;
     private final Region mTransparentRegion;
-
-    private Bitmap mMaskBitmap;
 
     /**
      * Indices used to access {@link #mLayerState.mChildDrawable} array for foreground and
@@ -156,8 +155,8 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
             sMask = PathParser.createPathFromPathData(
                 Resources.getSystem().getString(R.string.config_icon_mask));
         }
-        mMask = PathParser.createPathFromPathData(
-            Resources.getSystem().getString(R.string.config_icon_mask));
+        mMask = new Path(sMask);
+        mMaskScaleOnly = new Path(mMask);
         mMaskMatrix = new Matrix();
         mCanvas = new Canvas();
         mTransparentRegion = new Region();
@@ -329,24 +328,19 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     }
 
     private void updateMaskBoundsInternal(Rect b) {
+        // reset everything that depends on the view bounds
         mMaskMatrix.setScale(b.width() / MASK_SIZE, b.height() / MASK_SIZE);
+        sMask.transform(mMaskMatrix, mMaskScaleOnly);
+
+        mMaskMatrix.postTranslate(b.left, b.top);
         sMask.transform(mMaskMatrix, mMask);
 
-        if (mMaskBitmap == null || mMaskBitmap.getWidth() != b.width() ||
-            mMaskBitmap.getHeight() != b.height()) {
-            mMaskBitmap = Bitmap.createBitmap(b.width(), b.height(), Bitmap.Config.ALPHA_8);
+        if (mLayersBitmap == null || mLayersBitmap.getWidth() != b.width()
+                || mLayersBitmap.getHeight() != b.height()) {
             mLayersBitmap = Bitmap.createBitmap(b.width(), b.height(), Bitmap.Config.ARGB_8888);
         }
-        // mMaskBitmap bound [0, w] x [0, h]
-        mCanvas.setBitmap(mMaskBitmap);
-        mPaint.setShader(null);
-        mCanvas.drawPath(mMask, mPaint);
 
-        // mMask bound [left, top, right, bottom]
-        mMaskMatrix.postTranslate(b.left, b.top);
-        mMask.reset();
-        sMask.transform(mMaskMatrix, mMask);
-        // reset everything that depends on the view bounds
+        mPaint.setShader(null);
         mTransparentRegion.setEmpty();
         mLayersShader = null;
     }
@@ -371,9 +365,11 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
             mLayersShader = new BitmapShader(mLayersBitmap, TileMode.CLAMP, TileMode.CLAMP);
             mPaint.setShader(mLayersShader);
         }
-        if (mMaskBitmap != null) {
+        if (mMaskScaleOnly != null) {
             Rect bounds = getBounds();
-            canvas.drawBitmap(mMaskBitmap, bounds.left, bounds.top, mPaint);
+            canvas.translate(bounds.left, bounds.top);
+            canvas.drawPath(mMaskScaleOnly, mPaint);
+            canvas.translate(-bounds.left, -bounds.top);
         }
     }
 
@@ -549,7 +545,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
         final ChildDrawable[] layers = mLayerState.mChildren;
         for (int i = 0; i < mLayerState.N_CHILDREN; i++) {
-            if (layers[i].mDrawable.isProjected()) {
+            if (layers[i].mDrawable != null && layers[i].mDrawable.isProjected()) {
                 return true;
             }
         }
