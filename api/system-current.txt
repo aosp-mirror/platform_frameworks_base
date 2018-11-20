@@ -7310,6 +7310,7 @@ package android.view {
 package android.view.accessibility {
 
   public final class AccessibilityManager {
+    method public int getAccessibilityWindowId(android.os.IBinder);
     method public void performAccessibilityShortcut();
   }
 
