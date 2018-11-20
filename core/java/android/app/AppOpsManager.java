@@ -464,9 +464,21 @@ public class AppOpsManager {
     public static final int OP_ACTIVITY_RECOGNITION = 79;
     /** @hide Financial app sms read. */
     public static final int OP_SMS_FINANCIAL_TRANSACTIONS = 80;
+    /** @hide Read media of audio type. */
+    public static final int OP_READ_MEDIA_AUDIO = 81;
+    /** @hide Write media of audio type. */
+    public static final int OP_WRITE_MEDIA_AUDIO = 82;
+    /** @hide Read media of video type. */
+    public static final int OP_READ_MEDIA_VIDEO = 83;
+    /** @hide Write media of video type. */
+    public static final int OP_WRITE_MEDIA_VIDEO = 84;
+    /** @hide Read media of image type. */
+    public static final int OP_READ_MEDIA_IMAGES = 85;
+    /** @hide Write media of image type. */
+    public static final int OP_WRITE_MEDIA_IMAGES = 86;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 81;
+    public static final int _NUM_OP = 87;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -721,6 +733,19 @@ public class AppOpsManager {
     public static final String OPSTR_SMS_FINANCIAL_TRANSACTIONS =
             "android:sms_financial_transactions";
 
+    /** @hide Read media of audio type. */
+    public static final String OPSTR_READ_MEDIA_AUDIO = "android:read_media_audio";
+    /** @hide Write media of audio type. */
+    public static final String OPSTR_WRITE_MEDIA_AUDIO = "android:write_media_audio";
+    /** @hide Read media of video type. */
+    public static final String OPSTR_READ_MEDIA_VIDEO = "android:read_media_video";
+    /** @hide Write media of video type. */
+    public static final String OPSTR_WRITE_MEDIA_VIDEO = "android:write_media_video";
+    /** @hide Read media of image type. */
+    public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
+    /** @hide Write media of image type. */
+    public static final String OPSTR_WRITE_MEDIA_IMAGES = "android:write_media_images";
+
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
     private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
@@ -764,6 +789,14 @@ public class AppOpsManager {
             OP_BODY_SENSORS,
             // Activity recognition
             OP_ACTIVITY_RECOGNITION,
+            // Aural
+            OP_READ_MEDIA_AUDIO,
+            OP_WRITE_MEDIA_AUDIO,
+            // Visual
+            OP_READ_MEDIA_VIDEO,
+            OP_WRITE_MEDIA_VIDEO,
+            OP_READ_MEDIA_IMAGES,
+            OP_WRITE_MEDIA_IMAGES,
 
             // APPOP PERMISSIONS
             OP_ACCESS_NOTIFICATIONS,
@@ -864,6 +897,12 @@ public class AppOpsManager {
             OP_USE_BIOMETRIC,                   // BIOMETRIC
             OP_ACTIVITY_RECOGNITION,            // ACTIVITY_RECOGNITION
             OP_SMS_FINANCIAL_TRANSACTIONS,      // SMS_FINANCIAL_TRANSACTIONS
+            OP_READ_MEDIA_AUDIO,                // READ_MEDIA_AUDIO
+            OP_WRITE_MEDIA_AUDIO,               // WRITE_MEDIA_AUDIO
+            OP_READ_MEDIA_VIDEO,                // READ_MEDIA_VIDEO
+            OP_WRITE_MEDIA_VIDEO,               // WRITE_MEDIA_VIDEO
+            OP_READ_MEDIA_IMAGES,               // READ_MEDIA_IMAGES
+            OP_WRITE_MEDIA_IMAGES,              // WRITE_MEDIA_IMAGES
     };
 
     /**
@@ -951,6 +990,12 @@ public class AppOpsManager {
             OPSTR_USE_BIOMETRIC,
             OPSTR_ACTIVITY_RECOGNITION,
             OPSTR_SMS_FINANCIAL_TRANSACTIONS,
+            OPSTR_READ_MEDIA_AUDIO,
+            OPSTR_WRITE_MEDIA_AUDIO,
+            OPSTR_READ_MEDIA_VIDEO,
+            OPSTR_WRITE_MEDIA_VIDEO,
+            OPSTR_READ_MEDIA_IMAGES,
+            OPSTR_WRITE_MEDIA_IMAGES,
     };
 
     /**
@@ -1039,6 +1084,12 @@ public class AppOpsManager {
             "USE_BIOMETRIC",
             "ACTIVITY_RECOGNITION",
             "SMS_FINANCIAL_TRANSACTIONS",
+            "READ_MEDIA_AUDIO",
+            "WRITE_MEDIA_AUDIO",
+            "READ_MEDIA_VIDEO",
+            "WRITE_MEDIA_VIDEO",
+            "READ_MEDIA_IMAGES",
+            "WRITE_MEDIA_IMAGES",
     };
 
     /**
@@ -1128,6 +1179,12 @@ public class AppOpsManager {
             Manifest.permission.USE_BIOMETRIC,
             Manifest.permission.ACTIVITY_RECOGNITION,
             Manifest.permission.SMS_FINANCIAL_TRANSACTIONS,
+            Manifest.permission.READ_MEDIA_AUDIO,
+            Manifest.permission.WRITE_MEDIA_AUDIO,
+            Manifest.permission.READ_MEDIA_VIDEO,
+            Manifest.permission.WRITE_MEDIA_VIDEO,
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.WRITE_MEDIA_IMAGES,
     };
 
     /**
@@ -1217,6 +1274,12 @@ public class AppOpsManager {
             null, // USE_BIOMETRIC
             null, // ACTIVITY_RECOGNITION
             UserManager.DISALLOW_SMS, // SMS_FINANCIAL_TRANSACTIONS
+            null, // READ_MEDIA_AUDIO
+            null, // WRITE_MEDIA_AUDIO
+            null, // READ_MEDIA_VIDEO
+            null, // WRITE_MEDIA_VIDEO
+            null, // READ_MEDIA_IMAGES
+            null, // WRITE_MEDIA_IMAGES
     };
 
     /**
@@ -1305,6 +1368,12 @@ public class AppOpsManager {
             false, // USE_BIOMETRIC
             false, // ACTIVITY_RECOGNITION
             false, // SMS_FINANCIAL_TRANSACTIONS
+            false, // READ_MEDIA_AUDIO
+            false, // WRITE_MEDIA_AUDIO
+            false, // READ_MEDIA_VIDEO
+            false, // WRITE_MEDIA_VIDEO
+            false, // READ_MEDIA_IMAGES
+            false, // WRITE_MEDIA_IMAGES
     };
 
     /**
@@ -1392,6 +1461,12 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // USE_BIOMETRIC
             AppOpsManager.MODE_ALLOWED, // ACTIVITY_RECOGNITION
             AppOpsManager.MODE_DEFAULT, // SMS_FINANCIAL_TRANSACTIONS
+            AppOpsManager.MODE_ALLOWED, // READ_MEDIA_AUDIO
+            AppOpsManager.MODE_ALLOWED, // WRITE_MEDIA_AUDIO
+            AppOpsManager.MODE_ALLOWED, // READ_MEDIA_VIDEO
+            AppOpsManager.MODE_ALLOWED, // WRITE_MEDIA_VIDEO
+            AppOpsManager.MODE_ALLOWED, // READ_MEDIA_IMAGES
+            AppOpsManager.MODE_ALLOWED, // WRITE_MEDIA_IMAGES
     };
 
     /**
@@ -1483,6 +1558,12 @@ public class AppOpsManager {
             false, // USE_BIOMETRIC
             false, // ACTIVITY_RECOGNITION
             false, // SMS_FINANCIAL_TRANSACTIONS
+            false, // READ_MEDIA_AUDIO
+            false, // WRITE_MEDIA_AUDIO
+            false, // READ_MEDIA_VIDEO
+            false, // WRITE_MEDIA_VIDEO
+            false, // READ_MEDIA_IMAGES
+            false, // WRITE_MEDIA_IMAGES
     };
 
     /**
