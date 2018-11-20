@@ -789,6 +789,11 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     final ArrayList<ProcessRecord> mPendingPssProcesses = new ArrayList<ProcessRecord>();
 
+    /**
+     * Processes to compact.
+     */
+    final ArrayList<ProcessRecord> mPendingCompactionProcesses = new ArrayList<ProcessRecord>();
+
     private boolean mBinderTransactionTrackingEnabled = false;
 
     /**
@@ -1446,6 +1451,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final Handler mUiHandler;
     final ServiceThread mProcStartHandlerThread;
     final Handler mProcStartHandler;
+    final ServiceThread mCompactionThread;
 
     final ActivityManagerConstants mConstants;
 
@@ -1782,6 +1788,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
     };
+
+    static final int COMPACT_PROCESS_SOME = 1;
+    static final int COMPACT_PROCESS_FULL = 2;
+    static final int COMPACT_PROCESS_MSG = 1;
+    final Handler mCompactionHandler;
 
     static final int COLLECT_PSS_BG_MSG = 1;
 
@@ -2218,6 +2229,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ? new PendingIntentController(handlerThread.getLooper(), mUserController) : null;
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
+        mCompactionThread = null;
+        mCompactionHandler = null;
         mHiddenApiBlacklist = null;
         mFactoryTest = FACTORY_TEST_OFF;
     }
@@ -2245,6 +2258,88 @@ public class ActivityManagerService extends IActivityManager.Stub
                 THREAD_PRIORITY_FOREGROUND, false /* allowIo */);
         mProcStartHandlerThread.start();
         mProcStartHandler = new Handler(mProcStartHandlerThread.getLooper());
+
+        mCompactionThread = new ServiceThread("CompactionThread",
+                THREAD_PRIORITY_FOREGROUND, true);
+        mCompactionThread.start();
+        mCompactionHandler = new Handler(mCompactionThread.getLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case COMPACT_PROCESS_MSG: {
+                long start = SystemClock.uptimeMillis();
+                ProcessRecord proc;
+                int pid;
+                String action;
+                final String name;
+                int pendingAction, lastCompactAction;
+                long lastCompactTime;
+                synchronized(ActivityManagerService.this) {
+                    proc = mPendingCompactionProcesses.remove(0);
+
+                    // don't compact if the process has returned to perceptible
+                    if (proc.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ) {
+                        return;
+                    }
+
+                    pid = proc.pid;
+                    name = proc.processName;
+                    pendingAction = proc.reqCompactAction;
+                    lastCompactAction = proc.lastCompactAction;
+                    lastCompactTime = proc.lastCompactTime;
+                }
+                if (pid == 0) {
+                    // not a real process, either one being launched or one being killed
+                    return;
+                }
+
+                // basic throttling
+                if (pendingAction == COMPACT_PROCESS_SOME) {
+                    // if we're compacting some, then compact if >10s after last full
+                    // or >5s after last some
+                    if ((lastCompactAction == COMPACT_PROCESS_SOME && (start - lastCompactTime < 5000)) ||
+                        (lastCompactAction == COMPACT_PROCESS_FULL && (start - lastCompactTime < 10000)))
+                        return;
+                } else {
+                    // if we're compacting full, then compact if >10s after last full
+                    // or >.5s after last some
+                    if ((lastCompactAction == COMPACT_PROCESS_SOME && (start - lastCompactTime < 500)) ||
+                        (lastCompactAction == COMPACT_PROCESS_FULL && (start - lastCompactTime < 10000)))
+                        return;
+                }
+
+                try {
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Compact " +
+                                     ((pendingAction == COMPACT_PROCESS_SOME) ? "some" : "full") +
+                                     ": " + name);
+                    long[] rssBefore = Process.getRss(pid);
+                    FileOutputStream fos = new FileOutputStream("/proc/" + pid + "/reclaim");
+                    if (pendingAction == COMPACT_PROCESS_SOME) {
+                        action = "file";
+                    } else {
+                        action = "all";
+                    }
+                    fos.write(action.getBytes());
+                    fos.close();
+                    long[] rssAfter = Process.getRss(pid);
+                    long end = SystemClock.uptimeMillis();
+                    EventLog.writeEvent(EventLogTags.AM_COMPACT, pid, name, action,
+                            rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
+                            rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], end-start);
+                    synchronized(ActivityManagerService.this) {
+                        proc.lastCompactTime = end;
+                        proc.lastCompactAction = pendingAction;
+                    }
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                } catch (Exception e) {
+                    // nothing to do, presumably the process died
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                }
+            }
+            }
+        }
+        };
+
 
         mConstants = new ActivityManagerConstants(this, mHandler);
 
@@ -2339,13 +2434,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
 
-        // bind background thread to little cores
+        // bind background threads to little cores
         // this is expected to fail inside of framework tests because apps can't touch cpusets directly
         // make sure we've already adjusted system_server's internal view of itself first
         updateOomAdjLocked();
         try {
             Process.setThreadGroupAndCpuset(BackgroundThread.get().getThreadId(),
-                    Process.THREAD_GROUP_BG_NONINTERACTIVE);
+                    Process.THREAD_GROUP_SYSTEM);
+            Process.setThreadGroupAndCpuset(mCompactionThread.getThreadId(),
+                    Process.THREAD_GROUP_SYSTEM);
         } catch (Exception e) {
             Slog.w(TAG, "Setting background thread cpuset failed");
         }
@@ -16805,6 +16902,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         int changes = 0;
 
         if (app.curAdj != app.setAdj) {
+            // don't compact during bootup
+            if (mConstants.USE_COMPACTION && mBooted) {
+                // Perform a minor compaction when a perceptible app becomes the prev/home app
+                // Perform a major compaction when any app enters cached
+                // reminder: here, setAdj is previous state, curAdj is upcoming state
+                if (app.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ &&
+                    (app.curAdj == ProcessList.PREVIOUS_APP_ADJ ||
+                     app.curAdj == ProcessList.HOME_APP_ADJ)) {
+                    app.reqCompactAction = COMPACT_PROCESS_SOME;
+                    mPendingCompactionProcesses.add(app);
+                    mCompactionHandler.sendEmptyMessage(COMPACT_PROCESS_MSG);
+                } else if (app.setAdj < ProcessList.CACHED_APP_MIN_ADJ &&
+                           app.curAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
+                    app.reqCompactAction = COMPACT_PROCESS_FULL;
+                    mPendingCompactionProcesses.add(app);
+                    mCompactionHandler.sendEmptyMessage(COMPACT_PROCESS_MSG);
+                }
+            }
             ProcessList.setOomAdj(app.pid, app.uid, app.curAdj);
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mCurOomAdjUid == app.info.uid) {
                 String msg = "Set " + app.pid + " " + app.processName + " adj "

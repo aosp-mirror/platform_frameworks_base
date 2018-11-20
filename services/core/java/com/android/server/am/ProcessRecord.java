@@ -145,6 +145,9 @@ final class ProcessRecord implements WindowProcessListener {
     int curAdj;                 // Current OOM adjustment for this process
     int setAdj;                 // Last set OOM adjustment for this process
     int verifiedAdj;            // The last adjustment that was verified as actually being set
+    long lastCompactTime;       // The last time that this process was compacted
+    int reqCompactAction;       // The most recent compaction action requested for this app.
+    int lastCompactAction;      // The most recent compaction action performed for this app.
     private int mCurSchedGroup; // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
     int trimMemoryLevel;        // Last selected memory trimming level
@@ -382,6 +385,8 @@ final class ProcessRecord implements WindowProcessListener {
                 pw.print(" setRaw="); pw.print(setRawAdj);
                 pw.print(" cur="); pw.print(curAdj);
                 pw.print(" set="); pw.println(setAdj);
+        pw.print(prefix); pw.print("lastCompactTime="); pw.print(lastCompactTime);
+                pw.print(" lastCompactAction="); pw.print(lastCompactAction);
         pw.print(prefix); pw.print("mCurSchedGroup="); pw.print(mCurSchedGroup);
                 pw.print(" setSchedGroup="); pw.print(setSchedGroup);
                 pw.print(" systemNoUi="); pw.print(systemNoUi);
