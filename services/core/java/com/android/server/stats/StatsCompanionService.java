@@ -51,6 +51,7 @@ import android.net.wifi.WifiActivityEnergyInfo;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -1517,6 +1518,21 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
+    private void pullBuildInformation(int tagId,
+            long elapsedNanos, long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeString(Build.FINGERPRINT);
+        e.writeString(Build.BRAND);
+        e.writeString(Build.PRODUCT);
+        e.writeString(Build.DEVICE);
+        e.writeString(Build.VERSION.RELEASE);
+        e.writeString(Build.ID);
+        e.writeString(Build.VERSION.INCREMENTAL);
+        e.writeString(Build.TYPE);
+        e.writeString(Build.TAGS);
+        pulledData.add(e);
+    }
+
     private BatteryStatsHelper getBatteryStatsHelper() {
         if (mBatteryStatsHelper == null) {
             final long callingToken = Binder.clearCallingIdentity();
@@ -1808,6 +1824,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.POWER_PROFILE: {
                 pullPowerProfile(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.BUILD_INFORMATION: {
+                pullBuildInformation(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.PROCESS_CPU_TIME: {
