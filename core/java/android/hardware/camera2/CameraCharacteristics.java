@@ -3722,12 +3722,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>String containing the ids of the underlying physical cameras.</p>
-     * <p>For a logical camera, this is concatenation of all underlying physical camera ids.
-     * The null terminator for physical camera id must be preserved so that the whole string
-     * can be tokenized using '\0' to generate list of physical camera ids.</p>
-     * <p>For example, if the physical camera ids of the logical camera are "2" and "3", the
+     * <p>For a logical camera, this is concatenation of all underlying physical camera IDs.
+     * The null terminator for physical camera ID must be preserved so that the whole string
+     * can be tokenized using '\0' to generate list of physical camera IDs.</p>
+     * <p>For example, if the physical camera IDs of the logical camera are "2" and "3", the
      * value of this tag will be ['2', '\0', '3', '\0'].</p>
-     * <p>The number of physical camera ids must be no less than 2.</p>
+     * <p>The number of physical camera IDs must be no less than 2.</p>
      * <p><b>Units</b>: UTF-8 null-terminated string</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
