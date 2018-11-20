@@ -181,4 +181,9 @@ public abstract class PermissionManagerInternal {
 
     /** HACK HACK methods to allow for partial migration of data to the PermissionManager class */
     public abstract @Nullable BasePermission getPermissionTEMP(@NonNull String permName);
+
+    /**
+     * Returns {@code true} if {@code permName} has {@code usageInfoRequired} set.
+     */
+    public abstract boolean isPermissionUsageInfoRequired(@NonNull String permName);
 }
