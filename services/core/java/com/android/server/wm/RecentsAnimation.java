@@ -259,9 +259,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
         mAssistDataRequester = new AssistDataRequester(mService.mContext, mWindowManager,
                 appOpsManager, assistDataCallbacks, this, OP_ASSIST_STRUCTURE, OP_NONE);
-        mAssistDataRequester.requestAssistData(topActivities,
-                true /* fetchData */, false /* fetchScreenshots */,
-                true /* allowFetchData */, false /* allowFetchScreenshots */,
+        mAssistDataRequester.requestAutofillData(topActivities,
                 recentsUid, recentsComponent.getPackageName());
     }
 
