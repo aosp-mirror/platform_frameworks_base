@@ -155,6 +155,9 @@ final class ProcessRecord implements WindowProcessListener {
     int pssStatType;            // The type of stat collection that we are currently requesting
     int savedPriority;          // Previous priority value if we're switching to non-SCHED_OTHER
     int renderThreadTid;        // TID for RenderThread
+    ServiceRecord connectionService; // Service that applied current connectionGroup/Importance
+    int connectionGroup;        // Last group set by a connection
+    int connectionImportance;   // Last importance set by a connection
     boolean serviceb;           // Process currently is on the service B list
     boolean serviceHighRam;     // We are forcing to service B list due to its RAM use
     boolean notCachedSinceIdle; // Has this process not been in a cached state since last idle?
@@ -395,6 +398,11 @@ final class ProcessRecord implements WindowProcessListener {
                     pw.print(" pendingUiClean="); pw.print(mPendingUiClean);
                     pw.print(" hasAboveClient="); pw.print(hasAboveClient);
                     pw.print(" treatLikeActivity="); pw.println(treatLikeActivity);
+        }
+        if (connectionService != null || connectionGroup != 0) {
+            pw.print(prefix); pw.print("connectionGroup="); pw.print(connectionGroup);
+            pw.print(" Importance="); pw.print(connectionImportance);
+            pw.print(" Service="); pw.println(connectionService);
         }
         if (hasTopUi() || hasOverlayUi() || runningRemoteAnimation) {
             pw.print(prefix); pw.print("hasTopUi="); pw.print(hasTopUi());

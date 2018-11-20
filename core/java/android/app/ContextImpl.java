@@ -1724,6 +1724,24 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public void updateServiceGroup(@NonNull ServiceConnection conn, int group, int importance) {
+        if (conn == null) {
+            throw new IllegalArgumentException("connection is null");
+        }
+        if (mPackageInfo != null) {
+            IServiceConnection sd = mPackageInfo.forgetServiceDispatcher(
+                    getOuterContext(), conn);
+            try {
+                ActivityManager.getService().updateServiceGroup(sd, group, importance);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            throw new RuntimeException("Not supported in system context");
+        }
+    }
+
+    @Override
     public void unbindService(ServiceConnection conn) {
         if (conn == null) {
             throw new IllegalArgumentException("connection is null");
