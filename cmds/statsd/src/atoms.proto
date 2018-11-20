@@ -1310,8 +1310,9 @@ message PhysicalDropDetected {
  * Log bucketed battery charge cycles.
  *
  * Each bucket represents cycles of the battery past
- * a given charge point.  For example, bucket 1 is the
- * lowest 1/8th of the battery, and bucket 8 is 100%.
+ * a given charge point.  For example, if 10 cycle buckets are
+ * initialized, bucket 1 is the lowest 1/10th of the battery,
+ * and bucket 10 is 100%.
  *
  * Logged from:
  * /sys/class/power_supply/bms/cycle_count, via Vendor.
@@ -1325,6 +1326,8 @@ message ChargeCyclesReported {
     optional int32 cycle_bucket_6 = 6;
     optional int32 cycle_bucket_7 = 7;
     optional int32 cycle_bucket_8 = 8;
+    optional int32 cycle_bucket_9 = 9;
+    optional int32 cycle_bucket_10 = 10;
 }
 
 /**
