@@ -442,13 +442,13 @@ public abstract class AbstractWifiService extends IWifiManager.Stub {
     }
 
     @Override
-    public boolean addNetworkSuggestions(
+    public int addNetworkSuggestions(
             List<WifiNetworkSuggestion> networkSuggestions, String callingPackageName) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean removeNetworkSuggestions(
+    public int removeNetworkSuggestions(
             List<WifiNetworkSuggestion> networkSuggestions, String callingPackageName) {
         throw new UnsupportedOperationException();
     }
