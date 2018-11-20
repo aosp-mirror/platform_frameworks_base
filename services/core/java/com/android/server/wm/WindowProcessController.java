@@ -898,6 +898,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
+    @Override
+    public String toString() {
+        return mOwner.toString();
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         synchronized (mAtm.mGlobalLock) {
             if (mActivities.size() > 0) {
