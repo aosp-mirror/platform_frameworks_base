@@ -25,7 +25,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManagerInternal;
 import android.app.KeyguardManager;

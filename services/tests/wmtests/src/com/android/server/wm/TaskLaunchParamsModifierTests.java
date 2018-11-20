@@ -32,7 +32,7 @@ import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityOptions;
 import android.content.pm.ActivityInfo;

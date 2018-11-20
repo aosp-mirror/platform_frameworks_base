@@ -38,8 +38,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -109,7 +109,9 @@ public class RecentTasksTest extends ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
-        mTestService = new MyTestActivityTaskManagerService(mContext);
+        mTestService = spy(new MyTestActivityTaskManagerService(mContext));
+        final TestActivityManagerService am = spy(new MyTestActivityManagerService());
+        setupActivityManagerService(am, mTestService);
         mRecentTasks = (TestRecentTasks) mTestService.getRecentTasks();
         mRecentTasks.loadParametersFromResources(mContext.getResources());
         mHomeStack = mTestService.mStackSupervisor.getDefaultDisplay().getOrCreateStack(
@@ -865,11 +867,20 @@ public class RecentTasksTest extends ActivityTestsBase {
         }
 
         @Override
-        protected ActivityStackSupervisor createStackSupervisor() {
-            if (mTestStackSupervisor == null) {
-                mTestStackSupervisor = new MyTestActivityStackSupervisor(this, mH.getLooper());
-            }
-            return mTestStackSupervisor;
+        protected ActivityStackSupervisor createTestSupervisor() {
+            return new MyTestActivityStackSupervisor(this, mH.getLooper());
+        }
+
+    }
+
+    private class MyTestActivityManagerService extends TestActivityManagerService {
+        MyTestActivityManagerService() {
+            super(mTestInjector);
+        }
+
+        @Override
+        public boolean isUserRunning(int userId, int flags) {
+            return true;
         }
     }
 

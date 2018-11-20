@@ -315,7 +315,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /** The number of distinct task ids that can be assigned to the tasks of a single user */
     private static final int MAX_TASK_IDS_PER_USER = UserHandle.PER_USER_RANGE;
 
-    final ActivityTaskManagerService mService;
+    ActivityTaskManagerService mService;
 
     /** The historial list of recent tasks including inactive tasks */
     RecentTasks mRecentTasks;
@@ -615,6 +615,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mService = service;
         mLooper = looper;
         mHandler = new ActivityStackSupervisorHandler(looper);
+    }
+
+    @VisibleForTesting
+    void setService(ActivityTaskManagerService service) {
+        mService = service;
     }
 
     @VisibleForTesting
