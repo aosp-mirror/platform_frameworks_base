@@ -31,7 +31,6 @@ import com.android.server.inputmethod.InputMethodUtils.InputMethodSettings;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -184,11 +183,8 @@ final class InputMethodSubtypeSwitchingController {
 
         public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList(
                 boolean includeAuxiliarySubtypes, boolean isScreenLocked) {
-            final ArrayList<ImeSubtypeListItem> imList = new ArrayList<>();
-            final HashMap<InputMethodInfo, List<InputMethodSubtype>> immis =
-                    mSettings.getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked(
-                            mContext);
-            if (immis == null || immis.size() == 0) {
+            final ArrayList<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
+            if (imis.isEmpty()) {
                 return Collections.emptyList();
             }
             if (isScreenLocked && includeAuxiliarySubtypes) {
@@ -197,11 +193,12 @@ final class InputMethodSubtypeSwitchingController {
                 }
                 includeAuxiliarySubtypes = false;
             }
-            for (InputMethodInfo imi : immis.keySet()) {
-                if (imi == null) {
-                    continue;
-                }
-                List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList = immis.get(imi);
+            final ArrayList<ImeSubtypeListItem> imList = new ArrayList<>();
+            final int numImes = imis.size();
+            for (int i = 0; i < numImes; ++i) {
+                final InputMethodInfo imi = imis.get(i);
+                final List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList =
+                        mSettings.getEnabledInputMethodSubtypeListLocked(mContext, imi, true);
                 HashSet<String> enabledSubtypeSet = new HashSet<>();
                 for (InputMethodSubtype subtype : explicitlyOrImplicitlyEnabledSubtypeList) {
                     enabledSubtypeSet.add(String.valueOf(subtype.hashCode()));
