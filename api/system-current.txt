@@ -1219,6 +1219,7 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.InstantAppInfo> getInstantApps();
     method public abstract java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(java.lang.String);
     method public abstract int getIntentVerificationStatusAsUser(java.lang.String, int);
+    method public android.content.pm.PackageInfo getPackageInfoAsUser(java.lang.String, int, android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int getPermissionFlags(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract void grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract int installExistingPackage(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;

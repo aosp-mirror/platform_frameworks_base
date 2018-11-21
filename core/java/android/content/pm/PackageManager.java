@@ -3131,6 +3131,33 @@ public abstract class PackageManager {
             @PackageInfoFlags int flags, @UserIdInt int userId) throws NameNotFoundException;
 
     /**
+     * Retrieve overall information about an application package that is
+     * installed on the system.
+     *
+     * @param packageName The full name (i.e. com.google.apps.contacts) of the
+     *            desired package.
+     * @param flags Additional option flags to modify the data returned.
+     * @param userHandle The user.
+     * @return A PackageInfo object containing information about the package. If
+     *         flag {@code MATCH_UNINSTALLED_PACKAGES} is set and if the package
+     *         is not found in the list of installed applications, the package
+     *         information is retrieved from the list of uninstalled
+     *         applications (which includes installed applications as well as
+     *         applications with data directory i.e. applications which had been
+     *         deleted with {@code DONT_DELETE_DATA} flag set).
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    @SystemApi
+    public @NonNull PackageInfo getPackageInfoAsUser(@NonNull String packageName,
+            @PackageInfoFlags int flags,
+            @NonNull UserHandle userHandle) throws NameNotFoundException {
+        return getPackageInfoAsUser(packageName, flags, userHandle.getIdentifier());
+    }
+
+    /**
      * Map from the current package names in use on the device to whatever
      * the current canonical name of that package is.
      * @param names Array of current names to be mapped.
