@@ -3422,6 +3422,8 @@ public class AudioTrack extends PlayerBase
     private native @Nullable VolumeShaper.State native_getVolumeShaperState(int id);
     private native final int native_setPresentation(int presentationId, int programId);
 
+    private native int native_getPortId();
+
     //---------------------------------------------------------
     // Utility methods
     //------------------
