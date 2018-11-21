@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Printer;
 import android.util.Slog;
@@ -31,7 +32,6 @@ import com.android.server.inputmethod.InputMethodUtils.InputMethodSettings;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -199,7 +199,7 @@ final class InputMethodSubtypeSwitchingController {
                 final InputMethodInfo imi = imis.get(i);
                 final List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList =
                         mSettings.getEnabledInputMethodSubtypeListLocked(mContext, imi, true);
-                HashSet<String> enabledSubtypeSet = new HashSet<>();
+                final ArraySet<String> enabledSubtypeSet = new ArraySet<>();
                 for (InputMethodSubtype subtype : explicitlyOrImplicitlyEnabledSubtypeList) {
                     enabledSubtypeSet.add(String.valueOf(subtype.hashCode()));
                 }
