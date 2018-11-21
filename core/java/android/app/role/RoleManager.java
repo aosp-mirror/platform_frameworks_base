@@ -67,8 +67,31 @@ public final class RoleManager {
 
     /**
      * The name of the SMS role.
+     *
+     * @see Intent#CATEGORY_APP_MESSAGING
      */
     public static final String ROLE_SMS = "android.app.role.SMS";
+
+    /**
+     * The name of the browser role.
+     *
+     * @see Intent#CATEGORY_APP_BROWSER
+     */
+    public static final String ROLE_BROWSER = "android.app.role.BROWSER";
+
+    /**
+     * The name of the gallery role.
+     *
+     * @see Intent#CATEGORY_APP_GALLERY
+     */
+    public static final String ROLE_GALLERY = "android.app.role.GALLERY";
+
+    /**
+     * The name of the music player role.
+     *
+     * @see Intent#CATEGORY_APP_MUSIC
+     */
+    public static final String ROLE_MUSIC = "android.app.role.MUSIC";
 
     /**
      * The action used to request user approval of a role for an application.
