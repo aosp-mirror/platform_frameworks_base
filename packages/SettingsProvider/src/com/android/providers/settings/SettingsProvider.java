@@ -186,6 +186,7 @@ public class SettingsProvider extends ContentProvider {
             Settings.NameValueTable.VALUE, null);
 
     public static final String RESULT_ROWS_DELETED = "result_rows_deleted";
+    public static final String RESULT_SETTINGS_LIST = "result_settings_list";
 
     // Overlay specified settings whitelisted for Instant Apps
     private static final Set<String> OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS = new ArraySet<>();
@@ -483,6 +484,27 @@ public class SettingsProvider extends ContentProvider {
                 return result;
             }
 
+            case Settings.CALL_METHOD_LIST_SYSTEM: {
+                Bundle result = new Bundle();
+                result.putStringArrayList(RESULT_SETTINGS_LIST,
+                        buildSettingsList(getAllSystemSettings(requestingUserId, null)));
+                return result;
+            }
+
+            case Settings.CALL_METHOD_LIST_SECURE: {
+                Bundle result = new Bundle();
+                result.putStringArrayList(RESULT_SETTINGS_LIST,
+                        buildSettingsList(getAllSecureSettings(requestingUserId, null)));
+                return result;
+            }
+
+            case Settings.CALL_METHOD_LIST_GLOBAL: {
+                Bundle result = new Bundle();
+                result.putStringArrayList(RESULT_SETTINGS_LIST,
+                        buildSettingsList(getAllGlobalSettings(null)));
+                return result;
+            }
+
             default: {
                 Slog.w(LOG_TAG, "call() with invalid method: " + method);
             } break;
@@ -550,6 +572,20 @@ public class SettingsProvider extends ContentProvider {
                 throw new IllegalArgumentException("Invalid Uri path:" + uri);
             }
         }
+    }
+
+    private ArrayList<String> buildSettingsList(Cursor cursor) {
+        final ArrayList<String> lines = new ArrayList<String>();
+        try {
+            while (cursor != null && cursor.moveToNext()) {
+                lines.add(cursor.getString(1) + "=" + cursor.getString(2));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return lines;
     }
 
     @Override
