@@ -1328,40 +1328,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         modifyInterfaceForward(false, fromIface, toIface);
     }
 
-    private void modifyNat(String action, String internalInterface, String externalInterface)
-            throws SocketException {
-        final Command cmd = new Command("nat", action, internalInterface, externalInterface);
-
-        final NetworkInterface internalNetworkInterface = NetworkInterface.getByName(
-                internalInterface);
-        if (internalNetworkInterface == null) {
-            cmd.appendArg("0");
-        } else {
-            // Don't touch link-local routes, as link-local addresses aren't routable,
-            // kernel creates link-local routes on all interfaces automatically
-            List<InterfaceAddress> interfaceAddresses = excludeLinkLocal(
-                    internalNetworkInterface.getInterfaceAddresses());
-            cmd.appendArg(interfaceAddresses.size());
-            for (InterfaceAddress ia : interfaceAddresses) {
-                InetAddress addr = NetworkUtils.getNetworkPart(
-                        ia.getAddress(), ia.getNetworkPrefixLength());
-                cmd.appendArg(addr.getHostAddress() + "/" + ia.getNetworkPrefixLength());
-            }
-        }
-
-        try {
-            mConnector.execute(cmd);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
     @Override
     public void enableNat(String internalInterface, String externalInterface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            modifyNat("enable", internalInterface, externalInterface);
-        } catch (SocketException e) {
+            mNetdService.tetherAddForward(internalInterface, externalInterface);
+        } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -1370,8 +1342,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void disableNat(String internalInterface, String externalInterface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            modifyNat("disable", internalInterface, externalInterface);
-        } catch (SocketException e) {
+            mNetdService.tetherRemoveForward(internalInterface, externalInterface);
+        } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
     }
