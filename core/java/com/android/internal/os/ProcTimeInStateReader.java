@@ -19,9 +19,15 @@ package com.android.internal.os;
 import android.annotation.Nullable;
 import android.os.Process;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Reads and parses {@code time_in_state} files in the {@code proc} filesystem.
@@ -43,6 +49,17 @@ import java.nio.file.Path;
  *
  * This file would indicate that the CPU has spent 30 milliseconds at frequency 300,000KHz (300Mhz)
  * and 10 milliseconds at frequency 1,900,800KHz (1.9GHz).
+ *
+ * <p>This class will also read {@code time_in_state} files with headers, such as:
+ * <pre>
+ *   cpu0
+ *   300000 3
+ *   364800 0
+ *   ...
+ *   cpu4
+ *   300000 1
+ *   364800 4
+ * </pre>
  */
 public class ProcTimeInStateReader {
     private static final String TAG = "ProcTimeInStateReader";
@@ -51,24 +68,28 @@ public class ProcTimeInStateReader {
      * The format of a single line of the {@code time_in_state} file that exports the frequency
      * values
      */
-    private static final int[] TIME_IN_STATE_LINE_FREQUENCY_FORMAT = {
+    private static final List<Integer> TIME_IN_STATE_LINE_FREQUENCY_FORMAT = Arrays.asList(
             Process.PROC_OUT_LONG | Process.PROC_SPACE_TERM,
-            Process.PROC_NEWLINE_TERM,
-    };
+            Process.PROC_NEWLINE_TERM
+    );
 
     /**
      * The format of a single line of the {@code time_in_state} file that exports the time values
      */
-    private static final int[] TIME_IN_STATE_LINE_TIME_FORMAT = {
+    private static final List<Integer> TIME_IN_STATE_LINE_TIME_FORMAT = Arrays.asList(
             Process.PROC_SPACE_TERM,
-            Process.PROC_OUT_LONG | Process.PROC_NEWLINE_TERM,
-    };
+            Process.PROC_OUT_LONG | Process.PROC_NEWLINE_TERM
+    );
 
     /**
-     * The format of the {@code time_in_state} file, defined using {@link Process}'s {@code
-     * PROC_OUT_LONG} and related variables
-     *
-     * Defined on first successful read of {@code time_in_state} file.
+     * The format of a header line of the {@code time_in_state} file
+     */
+    private static final List<Integer> TIME_IN_STATE_HEADER_LINE_FORMAT =
+            Collections.singletonList(Process.PROC_NEWLINE_TERM);
+
+    /**
+     * The format of the {@code time_in_state} file to extract times, defined using {@link
+     * Process}'s {@code PROC_OUT_LONG} and related variables
      */
     private int[] mTimeInStateTimeFormat;
 
@@ -141,46 +162,44 @@ public class ProcTimeInStateReader {
         // Read the bytes of the `time_in_state` file
         byte[] timeInStateBytes = Files.readAllBytes(timeInStatePath);
 
-        // The number of lines in the `time_in_state` file is the number of frequencies available
+        // Iterate over the lines of the time_in_state file, for each one adding a line to the
+        // formats. These formats are used to extract either the frequencies or the times from a
+        // time_in_state file
+        // Also check if each line is a header, and handle this in the created format arrays
+        ArrayList<Integer> timeInStateFrequencyFormat = new ArrayList<>();
+        ArrayList<Integer> timeInStateTimeFormat = new ArrayList<>();
         int numFrequencies = 0;
         for (int i = 0; i < timeInStateBytes.length; i++) {
-            if (timeInStateBytes[i] == '\n') {
+            // If the first character of the line is not a digit, we treat it as a header
+            if (!Character.isDigit(timeInStateBytes[i])) {
+                timeInStateFrequencyFormat.addAll(TIME_IN_STATE_HEADER_LINE_FORMAT);
+                timeInStateTimeFormat.addAll(TIME_IN_STATE_HEADER_LINE_FORMAT);
+            } else {
+                timeInStateFrequencyFormat.addAll(TIME_IN_STATE_LINE_FREQUENCY_FORMAT);
+                timeInStateTimeFormat.addAll(TIME_IN_STATE_LINE_TIME_FORMAT);
                 numFrequencies++;
             }
-        }
-        if (numFrequencies == 0) {
-            throw new IOException("Empty time_in_state file");
+            // Go to the next line
+            while (i < timeInStateBytes.length && timeInStateBytes[i] != '\n') {
+                i++;
+            }
         }
 
-        // Set `mTimeInStateTimeFormat` and `timeInStateFrequencyFormat` to the correct length, and
-        // then copy in the `TIME_IN_STATE_{FREQUENCY,TIME}_LINE_FORMAT` until it's full. As we only
-        // use the frequency format in this method, it is not an member variable.
-        final int[] timeInStateTimeFormat =
-                new int[numFrequencies * TIME_IN_STATE_LINE_TIME_FORMAT.length];
-        final int[] timeInStateFrequencyFormat =
-                new int[numFrequencies * TIME_IN_STATE_LINE_FREQUENCY_FORMAT.length];
-        for (int i = 0; i < numFrequencies; i++) {
-            System.arraycopy(
-                    TIME_IN_STATE_LINE_FREQUENCY_FORMAT, 0, timeInStateFrequencyFormat,
-                    i * TIME_IN_STATE_LINE_FREQUENCY_FORMAT.length,
-                    TIME_IN_STATE_LINE_FREQUENCY_FORMAT.length);
-            System.arraycopy(
-                    TIME_IN_STATE_LINE_TIME_FORMAT, 0, timeInStateTimeFormat,
-                    i * TIME_IN_STATE_LINE_TIME_FORMAT.length,
-                    TIME_IN_STATE_LINE_TIME_FORMAT.length);
+        if (numFrequencies == 0) {
+            throw new IOException("Empty time_in_state file");
         }
 
         // Read the frequencies from the `time_in_state` file and store them, as they will be the
         // same for every `time_in_state` file
         final long[] readLongs = new long[numFrequencies];
         final boolean readSuccess = Process.parseProcLine(
-                timeInStateBytes, 0, timeInStateBytes.length, timeInStateFrequencyFormat,
-                null, readLongs, null);
+                timeInStateBytes, 0, timeInStateBytes.length,
+                ArrayUtils.convertToIntArray(timeInStateFrequencyFormat), null, readLongs, null);
         if (!readSuccess) {
             throw new IOException("Failed to parse time_in_state file");
         }
 
-        mTimeInStateTimeFormat = timeInStateTimeFormat;
+        mTimeInStateTimeFormat = ArrayUtils.convertToIntArray(timeInStateTimeFormat);
         mFrequenciesKhz = readLongs;
     }
 }
