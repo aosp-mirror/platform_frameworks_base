@@ -22,6 +22,7 @@ import android.util.Log;
 
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.qs.tiles.DndTile;
 
 import java.io.FileDescriptor;
@@ -43,7 +44,9 @@ public class VolumeUI extends SystemUI {
             mContext.getResources().getBoolean(R.bool.enable_safety_warning);
         mEnabled = enableVolumeUi || enableSafetyWarning;
         if (!mEnabled) return;
-        mVolumeComponent = new VolumeDialogComponent(this, mContext, null);
+
+        mVolumeComponent = SystemUIFactory.getInstance()
+                .createVolumeDialogComponent(this, mContext);
         mVolumeComponent.setEnableDialogs(enableVolumeUi, enableSafetyWarning);
         putComponent(VolumeComponent.class, getVolumeComponent());
         setDefaultVolumeController();

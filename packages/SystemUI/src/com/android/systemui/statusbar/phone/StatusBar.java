@@ -161,7 +161,6 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.Snoo
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTileHost;
-import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -918,8 +917,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     Dependency.get(ExtensionController.class)
                             .newExtension(QS.class)
                             .withPlugin(QS.class)
-                            .withFeature(PackageManager.FEATURE_AUTOMOTIVE, CarQSFragment::new)
-                            .withDefault(QSFragment::new)
+                            .withDefault(this::createDefaultQSFragment)
                             .build());
             final QSTileHost qsh = SystemUIFactory.getInstance().createQSTileHost(mContext, this,
                     mIconController);
@@ -1005,6 +1003,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Private API call to make the shadows look better for Recents
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
+    }
+
+    protected QS createDefaultQSFragment() {
+        return new QSFragment();
     }
 
     protected void setUpPresenter() {
