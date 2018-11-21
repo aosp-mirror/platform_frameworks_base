@@ -352,6 +352,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     int pendingLayoutChanges;
     int mDeferredRotationPauseCount;
 
+    /**
+     * Used to gate application window layout until we have sent the complete configuration.
+     * TODO: There are still scenarios where we may be out of sync with the client. Ideally
+     *       we want to replace this flag with a mechanism that will confirm the configuration
+     *       applied by the client is the one expected by the system server.
+     */
+    boolean mWaitingForConfig;
+
     // TODO(multi-display): remove some of the usages.
     @VisibleForTesting
     boolean isDefaultDisplay;
@@ -1284,7 +1292,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 + (oldAltOrientation ? " (alt)" : "") + ", lastOrientation=" + lastOrientation);
 
         if (DisplayContent.deltaRotation(rotation, oldRotation) != 2) {
-            mService.mWaitingForConfig = true;
+            mWaitingForConfig = true;
         }
 
         mRotation = rotation;
@@ -3675,6 +3683,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
             mTmpWindow = w;
             w.setDisplayLayoutNeeded();
+            w.finishSeamlessRotation(true /* timeout */);
             mService.markForSeamlessRotation(w, false);
         }, true /* traverseTopToBottom */);
 
