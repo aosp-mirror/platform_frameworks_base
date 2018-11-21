@@ -692,14 +692,8 @@ static jlong android_os_Debug_getPss(JNIEnv *env, jobject clazz)
 
 static long get_allocated_vmalloc_memory() {
     char line[1024];
-    // Ignored tags that don't actually consume memory (ie remappings)
-    static const char* const ignored_tags[] = {
-            "ioremap",
-            "map_lowmem",
-            "vm_map_ram",
-            NULL
-    };
-    long size, vmalloc_allocated_size = 0;
+
+    long vmalloc_allocated_size = 0;
 
     UniqueFile fp = MakeUniqueFile("/proc/vmallocinfo", "re");
     if (fp == nullptr) {
@@ -710,17 +704,15 @@ static long get_allocated_vmalloc_memory() {
         if (fgets(line, 1024, fp.get()) == NULL) {
             break;
         }
-        bool valid_line = true;
-        int i = 0;
-        while (ignored_tags[i]) {
-            if (strstr(line, ignored_tags[i]) != NULL) {
-                valid_line = false;
-                break;
-            }
-            i++;
+
+        // check to see if there are pages mapped in vmalloc area
+        if (!strstr(line, "pages=")) {
+            continue;
         }
-        if (valid_line && (sscanf(line, "%*x-%*x %ld", &size) == 1)) {
-            vmalloc_allocated_size += size;
+
+        long nr_pages;
+        if (sscanf(line, "%*x-%*x %*ld %*s pages=%ld", &nr_pages) == 1) {
+            vmalloc_allocated_size += (nr_pages * getpagesize());
         }
     }
     return vmalloc_allocated_size;
