@@ -24,7 +24,6 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowManager;
-import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -165,23 +164,4 @@ public final class NavigationBarTransitions extends BarTransitions {
         }
         mView.onDarkIntensityChange(darkIntensity);
     }
-
-    private final View.OnTouchListener mLightsOutListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View v, MotionEvent ev) {
-            if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-                // even though setting the systemUI visibility below will turn these views
-                // on, we need them to come up faster so that they can catch this motion
-                // event
-                applyLightsOut(false, false, false);
-
-                try {
-                    mBarService.setSystemUiVisibility(0, View.SYSTEM_UI_FLAG_LOW_PROFILE,
-                            "LightsOutListener");
-                } catch (android.os.RemoteException ex) {
-                }
-            }
-            return false;
-        }
-    };
 }
