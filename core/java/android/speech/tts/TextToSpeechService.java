@@ -1609,7 +1609,7 @@ public abstract class TextToSpeechService extends Service {
             synchronized (mCallerToCallback) {
                 mCallerToCallback.remove(caller);
             }
-            //mSynthHandler.stopForApp(caller);
+            mSynthHandler.stopForApp(caller);
         }
 
         @Override
