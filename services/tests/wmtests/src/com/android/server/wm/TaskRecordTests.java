@@ -47,12 +47,10 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 
@@ -79,15 +77,10 @@ public class TaskRecordTests extends ActivityTestsBase {
         final TaskRecord expected = createTaskRecord(64);
         expected.mLastNonFullscreenBounds = new Rect(50, 50, 100, 100);
 
-        final File serializedFile = serializeToFile(expected);
-
-        try {
-            final TaskRecord actual = restoreFromFile(serializedFile);
-            assertEquals(expected.taskId, actual.taskId);
-            assertEquals(expected.mLastNonFullscreenBounds, actual.mLastNonFullscreenBounds);
-        } finally {
-            serializedFile.delete();
-        }
+        final byte[] serializedBytes = serializeToBytes(expected);
+        final TaskRecord actual = restoreFromBytes(serializedBytes);
+        assertEquals(expected.taskId, actual.taskId);
+        assertEquals(expected.mLastNonFullscreenBounds, actual.mLastNonFullscreenBounds);
     }
 
     @Test
@@ -131,10 +124,8 @@ public class TaskRecordTests extends ActivityTestsBase {
         assertTrue(task.returnsToHomeStack());
     }
 
-    private File serializeToFile(TaskRecord r) throws IOException, XmlPullParserException {
-        final File tmpFile = File.createTempFile(r.taskId + "_task_", "xml");
-
-        try (OutputStream os = new FileOutputStream(tmpFile)) {
+    private byte[] serializeToBytes(TaskRecord r) throws IOException, XmlPullParserException {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             final XmlSerializer serializer = Xml.newSerializer();
             serializer.setOutput(os, "UTF-8");
             serializer.startDocument(null, true);
@@ -142,13 +133,14 @@ public class TaskRecordTests extends ActivityTestsBase {
             r.saveToXml(serializer);
             serializer.endTag(null, TASK_TAG);
             serializer.endDocument();
-        }
 
-        return tmpFile;
+            os.flush();
+            return os.toByteArray();
+        }
     }
 
-    private TaskRecord restoreFromFile(File file) throws IOException, XmlPullParserException {
-        try (Reader reader = new BufferedReader(new FileReader(file))) {
+    private TaskRecord restoreFromBytes(byte[] in) throws IOException, XmlPullParserException {
+        try (Reader reader = new InputStreamReader(new ByteArrayInputStream(in))) {
             final XmlPullParser parser = Xml.newPullParser();
             parser.setInput(reader);
             assertEquals(XmlPullParser.START_TAG, parser.next());
