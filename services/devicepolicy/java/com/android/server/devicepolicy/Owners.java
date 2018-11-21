@@ -969,8 +969,10 @@ class Owners {
             if (remoteBugreportHash != null) {
                 out.attribute(null, ATTR_REMOTE_BUGREPORT_HASH, remoteBugreportHash);
             }
-            out.attribute(null, ATTR_CAN_ACCESS_DEVICE_IDS,
-                    String.valueOf(canAccessDeviceIds));
+            if (canAccessDeviceIds) {
+                out.attribute(null, ATTR_CAN_ACCESS_DEVICE_IDS,
+                        String.valueOf(canAccessDeviceIds));
+            }
             out.endTag(null, tag);
         }
 
