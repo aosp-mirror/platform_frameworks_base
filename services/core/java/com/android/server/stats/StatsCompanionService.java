@@ -19,14 +19,15 @@ import static android.os.Process.getPidsForCommands;
 import static android.os.Process.getUidForPid;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.server.am.MemoryStatUtil.MEMORY_STAT_INTERESTING_NATIVE_PROCESSES;
 import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
+import static com.android.server.am.MemoryStatUtil.readRssHighWaterMarkFromProcfs;
 
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
+import android.app.ProcessMemoryHighWaterMark;
 import android.app.ProcessMemoryState;
 import android.app.StatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -165,6 +166,37 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
      */
     public static final String EXTRA_LAST_REPORT_TIME = "android.app.extra.LAST_REPORT_TIME";
     public static final int DEATH_THRESHOLD = 10;
+    /**
+     * Which native processes to snapshot memory for.
+     *
+     * <p>Processes are matched by their cmdline in procfs. Example: cat /proc/pid/cmdline returns
+     * /system/bin/statsd for the stats daemon.
+     */
+    private static final String[] MEMORY_INTERESTING_NATIVE_PROCESSES = new String[]{
+            "/system/bin/statsd",  // Stats daemon.
+            "/system/bin/surfaceflinger",
+            "/system/bin/apexd",  // APEX daemon.
+            "/system/bin/audioserver",
+            "/system/bin/cameraserver",
+            "/system/bin/drmserver",
+            "/system/bin/healthd",
+            "/system/bin/incidentd",
+            "/system/bin/installd",
+            "/system/bin/lmkd",  // Low memory killer daemon.
+            "/system/bin/logd",
+            "media.codec",
+            "media.extractor",
+            "media.metrics",
+            "/system/bin/mediadrmserver",
+            "/system/bin/mediaserver",
+            "/system/bin/performanced",
+            "/system/bin/tombstoned",
+            "/system/bin/traced",  // Perfetto.
+            "/system/bin/traced_probes",  // Perfetto.
+            "webview_zygote",
+            "zygote",
+            "zygote64",
+    };
 
 
     static final class CompanionHandler extends Handler {
@@ -1054,7 +1086,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullNativeProcessMemoryState(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        int[] pids = getPidsForCommands(MEMORY_STAT_INTERESTING_NATIVE_PROCESSES);
+        int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
         for (int i = 0; i < pids.length; i++) {
             int pid = pids[i];
             MemoryStat memoryStat = readMemoryStatFromProcfs(pid);
@@ -1073,6 +1105,33 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(memoryStat.startTimeNanos);
             pulledData.add(e);
         }
+    }
+
+    private void pullProcessMemoryHighWaterMark(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        List<ProcessMemoryHighWaterMark> results = LocalServices.getService(
+                ActivityManagerInternal.class).getMemoryHighWaterMarkForProcesses();
+        for (ProcessMemoryHighWaterMark processMemoryHighWaterMark : results) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(processMemoryHighWaterMark.uid);
+            e.writeString(processMemoryHighWaterMark.processName);
+            e.writeLong(processMemoryHighWaterMark.rssHighWaterMarkInBytes);
+            pulledData.add(e);
+        }
+        int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
+        for (int i = 0; i < pids.length; i++) {
+            final int pid = pids[i];
+            final int uid = getUidForPid(pid);
+            final String processName = readCmdlineFromProcfs(pid);
+            final long rssHighWaterMarkInBytes = readRssHighWaterMarkFromProcfs(pid);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(uid);
+            e.writeString(processName);
+            e.writeLong(rssHighWaterMarkInBytes);
+            pulledData.add(e);
+        }
+        // TODO(b/119598534): Reset HWM counters here.
     }
 
     private void pullBinderCallsStats(
@@ -1689,6 +1748,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.NATIVE_PROCESS_MEMORY_STATE: {
                 pullNativeProcessMemoryState(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.PROCESS_MEMORY_HIGH_WATER_MARK: {
+                pullProcessMemoryHighWaterMark(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.BINDER_CALLS: {

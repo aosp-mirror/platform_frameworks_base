@@ -22,6 +22,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -343,7 +344,7 @@ public class PhoneStateListener {
      * using a particular non-null Looper.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public PhoneStateListener(Looper looper) {
         this(null, looper);
     }
@@ -354,7 +355,7 @@ public class PhoneStateListener {
      * own non-null Looper use PhoneStateListener(int subId, Looper looper) below.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public PhoneStateListener(Integer subId) {
         this(subId, Looper.myLooper());
     }
@@ -364,7 +365,7 @@ public class PhoneStateListener {
      * and non-null Looper.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public PhoneStateListener(Integer subId, Looper looper) {
         this(subId, new HandlerExecutor(new Handler(looper)));
     }

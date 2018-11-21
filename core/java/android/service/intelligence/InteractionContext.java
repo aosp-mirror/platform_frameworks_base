@@ -37,7 +37,7 @@ public final class InteractionContext implements Parcelable {
     /**
      * Flag used to indicate that the app explicitly disabled content capture for the activity
      * (using
-     * {@link android.view.intelligence.IntelligenceManager#disableContentCapture()}),
+     * {@link android.view.intelligence.IntelligenceManager#setContentCaptureEnabled()}),
      * in which case the service will just receive activity-level events.
      */
     public static final int FLAG_DISABLED_BY_APP = 0x1;

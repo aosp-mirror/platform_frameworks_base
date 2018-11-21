@@ -305,7 +305,7 @@ class SurfaceAnimator {
                 .setName(surface + " - animation-leash")
                 .setSize(width, height);
         final SurfaceControl leash = builder.build();
-        t.setWindowCrop(surface, width, height);
+        t.setWindowCrop(leash, width, height);
         if (!hidden) {
             t.show(leash);
         }

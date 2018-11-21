@@ -25,6 +25,7 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -91,8 +92,8 @@ public final class RoleManager {
      *
      * @hide
      */
-    public static final String PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER =
-            "com.android.permissioncontroller.permission.MANAGE_ROLE_HOLDERS_FROM_CONTROLLER";
+    public static final String PERMISSION_MANAGE_ROLES_FROM_CONTROLLER =
+            "com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER";
 
     @NonNull
     private final Context mContext;
@@ -189,7 +190,7 @@ public final class RoleManager {
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
     @SystemApi
     public List<String> getRoleHolders(@NonNull String roleName) {
-        return getRoleHoldersAsUser(roleName, UserHandle.of(UserHandle.getCallingUserId()));
+        return getRoleHoldersAsUser(roleName, Process.myUserHandle());
     }
 
     /**
@@ -341,12 +342,36 @@ public final class RoleManager {
     }
 
     /**
+     * Set the names of all the available roles. Should only be called from
+     * {@link android.rolecontrollerservice.RoleControllerService}.
+     * <p>
+     * <strong>Note:</strong> Using this API requires holding
+     * {@link #PERMISSION_MANAGE_ROLES_FROM_CONTROLLER}.
+     *
+     * @param roleNames the names of all the available roles
+     *
+     * @throws IllegalArgumentException if the list of role names is {@code null}.
+     *
+     * @hide
+     */
+    @RequiresPermission(PERMISSION_MANAGE_ROLES_FROM_CONTROLLER)
+    @SystemApi
+    public void setRoleNamesFromController(@NonNull List<String> roleNames) {
+        Preconditions.checkNotNull(roleNames, "roleNames cannot be null");
+        try {
+            mService.setRoleNamesFromController(roleNames);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Add a specific application to the holders of a role, only modifying records inside
      * {@link RoleManager}. Should only be called from
      * {@link android.rolecontrollerservice.RoleControllerService}.
      * <p>
      * <strong>Note:</strong> Using this API requires holding
-     * {@link #PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER}.
+     * {@link #PERMISSION_MANAGE_ROLES_FROM_CONTROLLER}.
      *
      * @param roleName the name of the role to add the role holder for
      * @param packageName the package name of the application to add to the role holders
@@ -361,7 +386,7 @@ public final class RoleManager {
      *
      * @hide
      */
-    @RequiresPermission(PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER)
+    @RequiresPermission(PERMISSION_MANAGE_ROLES_FROM_CONTROLLER)
     @SystemApi
     public boolean addRoleHolderFromController(@NonNull String roleName,
             @NonNull String packageName) {
@@ -380,7 +405,7 @@ public final class RoleManager {
      * {@link android.rolecontrollerservice.RoleControllerService}.
      * <p>
      * <strong>Note:</strong> Using this API requires holding
-     * {@link #PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER}.
+     * {@link #PERMISSION_MANAGE_ROLES_FROM_CONTROLLER}.
      *
      * @param roleName the name of the role to remove the role holder for
      * @param packageName the package name of the application to remove from the role holders
@@ -395,7 +420,7 @@ public final class RoleManager {
      *
      * @hide
      */
-    @RequiresPermission(PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER)
+    @RequiresPermission(PERMISSION_MANAGE_ROLES_FROM_CONTROLLER)
     @SystemApi
     public boolean removeRoleHolderFromController(@NonNull String roleName,
             @NonNull String packageName) {

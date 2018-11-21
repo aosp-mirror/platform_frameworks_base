@@ -18,12 +18,12 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doNothing;
 
 import android.app.Notification;
 import android.service.notification.StatusBarNotification;
@@ -43,7 +43,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper()
 @SmallTest
 public class NotificationMenuRowTest extends LeakCheckedTest {
 

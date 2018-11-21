@@ -164,6 +164,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public static final int SECURITY_OWE = 4;
     public static final int SECURITY_SAE = 5;
     public static final int SECURITY_EAP_SUITE_B = 6;
+    public static final int SECURITY_MAX_VAL = 7; // Has to be the last
 
     private static final int PSK_UNKNOWN = 0;
     private static final int PSK_WPA = 1;

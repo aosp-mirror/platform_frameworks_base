@@ -41,17 +41,19 @@ import java.io.PrintWriter;
  * Companion for {@link AbstractMasterSystemService}, it's the base class for the "real" service
  * implementation.
  *
- * @param <S> itself
+ * @param <M> "master" service class.
+ * @param <S> "real" service class.
  *
  * @hide
  */
-public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSystemService<S>> {
+public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSystemService<S, M>,
+        M extends AbstractMasterSystemService<M, S>> {
 
     protected final @UserIdInt int mUserId;
     protected final Object mLock;
     protected final String mTag = getClass().getSimpleName();
 
-    protected final AbstractMasterSystemService<S> mMaster;
+    protected final M mMaster;
 
     /**
      * Whether service was disabled for user due to {@link UserManager} restrictions.
@@ -68,8 +70,8 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     @GuardedBy("mLock")
     private ServiceInfo mServiceInfo;
 
-    protected AbstractPerUserSystemService(@NonNull AbstractMasterSystemService<S> master,
-            @NonNull Object lock, @UserIdInt int userId) {
+    protected AbstractPerUserSystemService(@NonNull M master, @NonNull Object lock,
+            @UserIdInt int userId) {
         mMaster = master;
         mLock = lock;
         mUserId = userId;

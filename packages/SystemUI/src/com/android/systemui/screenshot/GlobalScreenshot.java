@@ -40,7 +40,6 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -64,7 +63,6 @@ import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -85,8 +83,9 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.NotificationChannels;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import libcore.io.IoUtils;
+
+import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -121,16 +120,13 @@ class SaveImageInBackgroundData {
 class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private static final String TAG = "SaveImageInBackgroundTask";
 
-    private static final String SCREENSHOTS_DIR_NAME = "Screenshots";
     private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
 
     private final SaveImageInBackgroundData mParams;
     private final NotificationManager mNotificationManager;
     private final Notification.Builder mNotificationBuilder, mPublicNotificationBuilder;
-    private final File mScreenshotDir;
     private final String mImageFileName;
-    private final String mImageFilePath;
     private final long mImageTime;
     private final BigPictureStyle mNotificationStyle;
     private final int mImageWidth;
@@ -145,10 +141,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         mImageTime = System.currentTimeMillis();
         String imageDate = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(mImageTime));
         mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
-
-        mScreenshotDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), SCREENSHOTS_DIR_NAME);
-        mImageFilePath = new File(mScreenshotDir, mImageFileName).getAbsolutePath();
 
         // Create the large notification icon
         mImageWidth = data.image.getWidth();
@@ -238,7 +230,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(Void... params) {
+    protected Void doInBackground(Void... paramsUnused) {
         if (isCancelled()) {
             return null;
         }
@@ -252,36 +244,27 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         Resources r = context.getResources();
 
         try {
-            // Create screenshot directory if it doesn't exist
-            boolean madeDirs = mScreenshotDir.mkdirs();
-            if (madeDirs == false) {
-                Log.e(TAG, "Couldn't create screenshot directory: " + mScreenshotDir);
-            }
-
-            // media provider uses seconds for DATE_MODIFIED and DATE_ADDED, but milliseconds
-            // for DATE_TAKEN
-            long dateSeconds = mImageTime / 1000;
-
-            // Save
-            OutputStream out = new FileOutputStream(mImageFilePath);
-            image.compress(Bitmap.CompressFormat.PNG, 100, out);
-            out.flush();
-            out.close();
-
             // Save the screenshot to the MediaStore
-            ContentValues values = new ContentValues();
-            ContentResolver resolver = context.getContentResolver();
-            values.put(MediaStore.Images.ImageColumns.DATA, mImageFilePath);
-            values.put(MediaStore.Images.ImageColumns.TITLE, mImageFileName);
-            values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, mImageFileName);
-            values.put(MediaStore.Images.ImageColumns.DATE_TAKEN, mImageTime);
-            values.put(MediaStore.Images.ImageColumns.DATE_ADDED, dateSeconds);
-            values.put(MediaStore.Images.ImageColumns.DATE_MODIFIED, dateSeconds);
-            values.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png");
-            values.put(MediaStore.Images.ImageColumns.WIDTH, mImageWidth);
-            values.put(MediaStore.Images.ImageColumns.HEIGHT, mImageHeight);
-            values.put(MediaStore.Images.ImageColumns.SIZE, new File(mImageFilePath).length());
-            Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            final MediaStore.PendingParams params = new MediaStore.PendingParams(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mImageFileName, "image/png");
+            params.setPrimaryDirectory(Environment.DIRECTORY_PICTURES);
+            params.setSecondaryDirectory(Environment.DIRECTORY_SCREENSHOTS);
+
+            final Uri uri = MediaStore.createPending(context, params);
+            final MediaStore.PendingSession session = MediaStore.openPending(context, uri);
+            try {
+                try (OutputStream out = session.openOutputStream()) {
+                    if (!image.compress(Bitmap.CompressFormat.PNG, 100, out)) {
+                        throw new IOException("Failed to compress");
+                    }
+                }
+                session.publish();
+            } catch (Exception e) {
+                session.abandon();
+                throw e;
+            } finally {
+                IoUtils.closeQuietly(session);
+            }
 
             // Note: Both the share and edit actions are proxied through ActionProxyReceiver in
             // order to do some common work like dismissing the keyguard and sending

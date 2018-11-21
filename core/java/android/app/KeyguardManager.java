@@ -62,6 +62,7 @@ public class KeyguardManager {
     private final IWindowManager mWM;
     private final IActivityManager mAm;
     private final ITrustManager mTrustManager;
+    private final INotificationManager mNotificationManager;
 
     /**
      * Intent used to prompt user for device credentials.
@@ -219,6 +220,45 @@ public class KeyguardManager {
         return intent;
     }
 
+    /**
+     * Controls whether notifications can be shown atop a securely locked screen in their full
+     * private form (same as when the device is unlocked).
+     *
+     * <p>Other sources like the DevicePolicyManger and Settings app can modify this configuration.
+     * The result is that private notifications are only shown if all sources allow it.
+     *
+     * @param allow secure notifications can be shown if {@code true},
+     * secure notifications cannot be shown if {@code false}
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS)
+    @SystemApi
+    public void setPrivateNotificationsAllowed(boolean allow) {
+        try {
+            mNotificationManager.setPrivateNotificationsAllowed(allow);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether notifications can be shown atop a securely locked screen in their full
+     * private form (same as when the device is unlocked).
+     *
+     * @return {@code true} if secure notifications can be shown, {@code false} otherwise.
+     * By default, private notifications are allowed.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS)
+    @SystemApi
+    public boolean getPrivateNotificationsAllowed() {
+        try {
+            return mNotificationManager.getPrivateNotificationsAllowed();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private String getSettingsPackageForIntent(Intent intent) {
         List<ResolveInfo> resolveInfos = mContext.getPackageManager()
                 .queryIntentActivities(intent, PackageManager.MATCH_SYSTEM_ONLY);
@@ -335,6 +375,8 @@ public class KeyguardManager {
         mAm = ActivityManager.getService();
         mTrustManager = ITrustManager.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TRUST_SERVICE));
+        mNotificationManager = INotificationManager.Stub.asInterface(
+                ServiceManager.getServiceOrThrow(Context.NOTIFICATION_SERVICE));
     }
 
     /**

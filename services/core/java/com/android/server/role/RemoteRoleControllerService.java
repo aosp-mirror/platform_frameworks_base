@@ -48,6 +48,7 @@ public class RemoteRoleControllerService {
     static final boolean DEBUG = false;
     private static final String LOG_TAG = RemoteRoleControllerService.class.getSimpleName();
 
+    // TODO: STOPSHIP: This isn't the right thread, as we are also using it to write to disk.
     @NonNull
     private static final Handler sCallbackHandler = BackgroundThread.getHandler();
 
@@ -219,7 +220,7 @@ public class RemoteRoleControllerService {
             private final IRoleManagerCallback mCallback;
 
             @NonNull
-            private final Runnable mTimeoutRunnable = () -> notifyCallback(false);
+            private final Runnable mTimeoutRunnable = this::notifyTimeout;
 
             private boolean mCallbackNotified;
 
@@ -241,6 +242,12 @@ public class RemoteRoleControllerService {
                     Slog.e(LOG_TAG, "Error calling RoleControllerService", e);
                     notifyCallback(false);
                 }
+            }
+
+            @WorkerThread
+            private void notifyTimeout() {
+                Slog.e(LOG_TAG, "Call timed out, calling onFailure()");
+                notifyCallback(false);
             }
 
             @WorkerThread

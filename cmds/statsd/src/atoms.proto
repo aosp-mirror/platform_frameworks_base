@@ -159,7 +159,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10038
+    // Next: 10043
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -203,6 +203,8 @@ message Atom {
         DeviceCalculatedPowerUse device_calculated_power_use = 10039;
         DeviceCalculatedPowerBlameUid device_calculated_power_blame_uid = 10040;
         DeviceCalculatedPowerBlameOther device_calculated_power_blame_other = 10041;
+        ProcessMemoryHighWaterMark process_memory_high_water_mark = 10042;
+        BatteryLevel battery_level = 10043;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -1594,6 +1596,8 @@ message AppCrashOccurred {
         FOREGROUND = 2;
     }
     optional ForegroundState foreground_state = 7;
+
+    optional android.server.ErrorSource error_source = 8;
 }
 
 /**
@@ -1612,6 +1616,8 @@ message WTFOccurred {
 
     // The pid if available. -1 means not available.
     optional sint32 pid = 4;
+
+    optional android.server.ErrorSource error_source = 5;
 }
 
 /**
@@ -1649,6 +1655,10 @@ message ANROccurred {
         FOREGROUND = 2;
     }
     optional ForegroundState foreground_state = 6;
+
+    optional android.server.ErrorSource error_source = 7;
+
+    optional string package_name = 8;
 }
 
 /**
@@ -2529,7 +2539,8 @@ message ProcessMemoryState {
     // RSS high watermark.
     // Peak RSS usage of the process. Value is read from the VmHWM field in /proc/PID/status or
     // from memory.max_usage_in_bytes under /dev/memcg if the device uses per-app memory cgroups.
-    optional int64 rss_high_watermark_in_bytes = 9;
+    // Deprecated: use ProcessMemoryHighWaterMark atom instead.
+    optional int64 rss_high_watermark_in_bytes = 9 [deprecated = true];
 
     // Elapsed real time when the process started.
     // Value is read from /proc/PID/stat, field 22. 0 if read from per-app memory cgroups.
@@ -2557,11 +2568,28 @@ message NativeProcessMemoryState {
 
     // RSS high watermark.
     // Peak RSS usage of the process. Value is read from the VmHWM field in /proc/PID/status.
-    optional int64 rss_high_watermark_in_bytes = 6;
+    // Deprecated: use ProcessMemoryHighWaterMark atom instead.
+    optional int64 rss_high_watermark_in_bytes = 6 [deprecated = true];
 
     // Elapsed real time when the process started.
     // Value is read from /proc/PID/stat, field 22.
     optional int64 start_time_nanos = 7;
+}
+
+/*
+ * Logs the memory high-water mark for a process.
+ * Recorded in ActivityManagerService.
+ */
+message ProcessMemoryHighWaterMark {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The process name. Provided by ActivityManagerService or read from /proc/PID/cmdline.
+    optional string process_name = 2;
+
+    // RSS high-water mark. Peak RSS usage of the process. Read from the VmHWM field in
+    // /proc/PID/status.
+    optional int64 rss_high_water_mark_in_bytes = 3;
 }
 
 /*
@@ -2649,6 +2677,17 @@ message FullBatteryCapacity {
 message BatteryVoltage {
     // The voltage of the battery, in millivolts.
     optional int32 voltage_millivolt = 1;
+}
+
+/**
+ * Pulls battery level (percent full, from 0 to 100).
+ *
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ */
+message BatteryLevel {
+    // Battery level. Should be in [0, 100].
+    optional int32 battery_level = 1;
 }
 
 /**
@@ -3278,17 +3317,17 @@ message CpuTimePerThreadFreq {
     // UID that owns the process.
     optional int32 uid = 1 [(is_uid) = true];
     // ID of the process.
-    optional uint32 process_id = 2;
+    optional int32 process_id = 2;
     // ID of the thread.
-    optional uint32 thread_id = 3;
+    optional int32 thread_id = 3;
     // Name of the process taken from `/proc/$PID/cmdline`.
     optional string process_name = 4;
     // Name of the thread taken from `/proc/$PID/task/$TID/comm`
     optional string thread_name = 5;
     // What frequency the CPU was running at, in KHz
-    optional uint32 frequency_khz = 6;
+    optional int32 frequency_khz = 6;
     // Time spent in frequency in milliseconds, since thread start.
-    optional uint32 time_millis = 7;
+    optional int32 time_millis = 7;
 }
 
 /**

@@ -174,4 +174,7 @@ interface INotificationManager
     void revokeNotificationDelegate(String callingPkg);
     String getNotificationDelegate(String callingPkg);
     boolean canNotifyAsPackage(String callingPkg, String targetPkg);
+
+    void setPrivateNotificationsAllowed(boolean allow);
+    boolean getPrivateNotificationsAllowed();
 }

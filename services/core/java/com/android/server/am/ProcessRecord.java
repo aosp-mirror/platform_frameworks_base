@@ -42,6 +42,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.server.ServerProtoEnums;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -1224,6 +1225,17 @@ final class ProcessRecord implements WindowProcessListener {
         return mWindowProcessController.getInputDispatchingTimeout();
     }
 
+    public int getProcessClassEnum() {
+        if (pid == MY_PID) {
+            return ServerProtoEnums.SYSTEM_SERVER;
+        }
+        if (info == null) {
+            return ServerProtoEnums.ERROR_SOURCE_UNKNOWN;
+        }
+        return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0 ? ServerProtoEnums.SYSTEM_APP :
+            ServerProtoEnums.DATA_APP;
+    }
+
     void appNotResponding(String activityShortComponentName, ApplicationInfo aInfo,
             String parentShortComponentName, WindowProcessController parentProcess,
             boolean aboveSystem, String annotation) {
@@ -1380,7 +1392,9 @@ final class ProcessRecord implements WindowProcessListener {
                         : StatsLog.ANROCCURRED__IS_INSTANT_APP__UNAVAILABLE,
                 isInterestingToUserLocked()
                         ? StatsLog.ANROCCURRED__FOREGROUND_STATE__FOREGROUND
-                        : StatsLog.ANROCCURRED__FOREGROUND_STATE__BACKGROUND);
+                        : StatsLog.ANROCCURRED__FOREGROUND_STATE__BACKGROUND,
+                getProcessClassEnum(),
+                (this.info != null) ? this.info.packageName : "");
         final ProcessRecord parentPr = parentProcess != null
                 ? (ProcessRecord) parentProcess.mOwner : null;
         mService.addErrorToDropBox("anr", this, processName, activityShortComponentName,

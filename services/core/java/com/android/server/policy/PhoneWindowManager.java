@@ -275,6 +275,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.widget.PointerLocationView;
+import com.android.server.ExtconStateObserver;
+import com.android.server.ExtconUEventObserver;
 import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
 import com.android.server.SystemServiceManager;
@@ -296,6 +298,7 @@ import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -2258,8 +2261,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /**
-     * @return whether the navigation bar can be hidden, e.g. the device has a
-     *         navigation bar and touch exploration is not enabled
+     * @return whether the navigation bar can be hidden, e.g. the device has a navigation bar
      */
     private boolean canHideNavigationBar() {
         return mDefaultDisplayPolicy.hasNavigationBar();
@@ -4305,8 +4307,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean screenDecor = (pfl & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0;
 
         if (layoutInScreenAndInsetDecor && !screenDecor) {
-            if (canHideNavigationBar() &&
-                    (sysUiVis & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
+            if ((sysUiVis & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
                 outFrame.set(displayFrames.mUnrestricted);
             } else {
                 outFrame.set(displayFrames.mRestricted);
@@ -4965,8 +4966,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         of.set(displayFrames.mOverscan);
                         df.set(displayFrames.mOverscan);
                         pf.set(displayFrames.mOverscan);
-                    } else if (canHideNavigationBar()
-                            && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+                    } else if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                             && (type >= FIRST_APPLICATION_WINDOW && type <= LAST_SUB_WINDOW
                             || type == TYPE_VOLUME_OVERLAY)) {
                         // Asking for layout as if the nav bar is hidden, lets the application
@@ -5062,8 +5062,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     of.set(displayFrames.mOverscan);
                     df.set(displayFrames.mOverscan);
                     pf.set(displayFrames.mOverscan);
-                } else if (canHideNavigationBar()
-                        && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+                } else if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                         && (type == TYPE_STATUS_BAR
                             || type == TYPE_TOAST
                             || type == TYPE_DOCK_DIVIDER
@@ -5711,7 +5710,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 char[] buf = new char[15];
                 int n = reader.read(buf);
                 if (n > 1) {
-                    plugged = 0 != Integer.parseInt(new String(buf, 0, n-1));
+                    plugged = 0 != Integer.parseInt(new String(buf, 0, n - 1));
                 }
             } catch (IOException ex) {
                 Slog.w(TAG, "Couldn't read hdmi state from " + filename + ": " + ex);
@@ -5725,6 +5724,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             }
+        } else if (ExtconUEventObserver.extconExists()) {
+            HdmiVideoExtconUEventObserver observer = new HdmiVideoExtconUEventObserver();
+            plugged = observer.init();
+            mHDMIObserver = observer;
         }
         // This dance forces the code in setHdmiPlugged to run.
         // Always do this so the sticky intent is stuck (to false) if there is no hdmi.
@@ -8319,4 +8322,40 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         return false;
     }
+
+    private class HdmiVideoExtconUEventObserver extends ExtconStateObserver<Boolean> {
+        private static final String HDMI_EXIST = "HDMI=1";
+        private final ExtconInfo mHdmi = new ExtconInfo("hdmi");
+
+        private boolean init() {
+            boolean plugged = false;
+            try {
+                plugged = parseStateFromFile(mHdmi);
+            } catch (FileNotFoundException e) {
+                Slog.w(TAG, mHdmi.getStatePath()
+                        + " not found while attempting to determine initial state", e);
+            } catch (IOException e) {
+                Slog.e(
+                        TAG,
+                        "Error reading " + mHdmi.getStatePath()
+                                + " while attempting to determine initial state",
+                        e);
+            }
+            startObserving(mHdmi);
+            return plugged;
+        }
+
+        @Override
+        public void updateState(ExtconInfo extconInfo, String eventName, Boolean state) {
+            mDefaultDisplayPolicy.setHdmiPlugged(state);
+        }
+
+        @Override
+        public Boolean parseState(ExtconInfo extconIfno, String state) {
+            // extcon event state changes from kernel4.9
+            // new state will be like STATE=HDMI=1
+            return state.contains(HDMI_EXIST);
+        }
+    }
+
 }

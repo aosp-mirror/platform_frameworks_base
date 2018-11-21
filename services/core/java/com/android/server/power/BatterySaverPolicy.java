@@ -492,7 +492,7 @@ public class BatterySaverPolicy extends ContentObserver {
         public final boolean forceAllAppsStandby;
 
         /**
-         * Whether to put all apps in the stand-by mode.
+         * Whether to force background check.
          */
         public final boolean forceBackgroundCheck;
 

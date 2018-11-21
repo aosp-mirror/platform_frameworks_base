@@ -209,4 +209,8 @@
     <!-- FloatingToolbar -->
     <color name="floating_popup_divider_dark">#2F2F2F</color>
     <color name="floating_popup_divider_light">#E9E9E9</color>
+
+    <!-- Magnifier -->
+    <color name="magnifier_color_overlay">#0EFFFFFF</color>
+
 </resources>

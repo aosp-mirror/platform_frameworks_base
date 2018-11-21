@@ -6171,6 +6171,7 @@ libcore.reflect.ParameterizedTypeImpl
 libcore.reflect.TypeVariableImpl
 libcore.reflect.Types
 libcore.reflect.WildcardTypeImpl
+libcore.timezone.TimeZoneDataFiles
 libcore.util.BasicLruCache
 libcore.util.CharsetUtils
 libcore.util.CollectionUtils
@@ -6180,7 +6181,6 @@ libcore.util.NativeAllocationRegistry$CleanerRunner
 libcore.util.NativeAllocationRegistry$CleanerThunk
 libcore.util.Objects
 libcore.util.SneakyThrow
-libcore.util.TimeZoneDataFiles
 libcore.util.ZoneInfo
 libcore.util.ZoneInfo$CheckedArithmeticException
 libcore.util.ZoneInfo$WallTime

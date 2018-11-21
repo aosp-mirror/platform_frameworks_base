@@ -267,6 +267,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             mWindowContainerController.positionChildAt(stack.getWindowContainerController(),
                     insertPosition, includingParents);
         }
+        if (!wasContained) {
+            stack.setParent(this);
+        }
         onStackOrderChanged();
     }
 
@@ -692,7 +695,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 }
                 otherStack.setWindowingMode(WINDOWING_MODE_UNDEFINED, false /* animate */,
                         false /* showRecents */, false /* enteringSplitScreenMode */,
-                        true /* deferEnsuringVisibility */);
+                        true /* deferEnsuringVisibility */, false /* creating */);
             }
         } finally {
             final ActivityStack topFullscreenStack =
@@ -722,7 +725,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 }
                 otherStack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
                         false /* animate */, false /* showRecents */,
-                        true /* enteringSplitScreenMode */, true /* deferEnsuringVisibility */);
+                        true /* enteringSplitScreenMode */, true /* deferEnsuringVisibility */,
+                        false /* creating */);
             }
         } finally {
             mSupervisor.mWindowManager.continueSurfaceLayout();

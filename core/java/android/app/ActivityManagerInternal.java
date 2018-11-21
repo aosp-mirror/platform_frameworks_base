@@ -161,6 +161,13 @@ public abstract class ActivityManagerInternal {
     public abstract List<ProcessMemoryState> getMemoryStateForProcesses();
 
     /**
+     * Returns a list that contains the memory high-water mark for currently running processes.
+     *
+     * Only processes managed by ActivityManagerService are included.
+     */
+    public abstract List<ProcessMemoryHighWaterMark> getMemoryHighWaterMarkForProcesses();
+
+    /**
      * Checks to see if the calling pid is allowed to handle the user. Returns adjusted user id as
      * needed.
      */

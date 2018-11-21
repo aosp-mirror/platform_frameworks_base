@@ -27,6 +27,7 @@ import com.android.internal.util.function.TriConsumer;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dependency.DependencyProvider;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.qs.QSTileHost;
@@ -51,6 +52,7 @@ import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
+import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -137,6 +139,8 @@ public class SystemUIFactory {
                 () -> new NotificationLockscreenUserManagerImpl(context));
         providers.put(VisualStabilityManager.class, VisualStabilityManager::new);
         providers.put(NotificationGroupManager.class, NotificationGroupManager::new);
+        providers.put(NotificationGroupAlertTransferHelper.class,
+                NotificationGroupAlertTransferHelper::new);
         providers.put(NotificationMediaManager.class, () -> new NotificationMediaManager(context));
         providers.put(NotificationGutsManager.class, () -> new NotificationGutsManager(context));
         providers.put(AmbientPulseManager.class, () -> new AmbientPulseManager(context));
@@ -155,5 +159,6 @@ public class SystemUIFactory {
         providers.put(SmartReplyController.class, () -> new SmartReplyController());
         providers.put(RemoteInputQuickSettingsDisabler.class,
                 () -> new RemoteInputQuickSettingsDisabler(context));
+        providers.put(BubbleController.class, () -> new BubbleController(context));
     }
 }

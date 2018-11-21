@@ -38,7 +38,6 @@ public class AnimationFilter {
     boolean animateDimmed;
     boolean animateDark;
     boolean animateHideSensitive;
-    public boolean animateShadowAlpha;
     boolean hasDelays;
     boolean hasGoToFullShadeEvent;
     long customDelay;
@@ -100,11 +99,6 @@ public class AnimationFilter {
         return this;
     }
 
-    public AnimationFilter animateShadowAlpha() {
-        animateShadowAlpha = true;
-        return this;
-    }
-
     public AnimationFilter animateY(View view) {
         animateYViews.add(view);
         return this;
@@ -157,7 +151,6 @@ public class AnimationFilter {
         animateDimmed |= filter.animateDimmed;
         animateDark |= filter.animateDark;
         animateHideSensitive |= filter.animateHideSensitive;
-        animateShadowAlpha |= filter.animateShadowAlpha;
         hasDelays |= filter.hasDelays;
         mAnimatedProperties.addAll(filter.mAnimatedProperties);
     }
@@ -169,7 +162,6 @@ public class AnimationFilter {
         animateYViews.clear();
         animateZ = false;
         animateHeight = false;
-        animateShadowAlpha = false;
         animateTopInset = false;
         animateDimmed = false;
         animateDark = false;

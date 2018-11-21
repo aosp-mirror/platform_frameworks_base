@@ -18,6 +18,7 @@ package android.service.intelligence;
 
 import android.service.intelligence.InteractionSessionId;
 import android.service.intelligence.InteractionContext;
+import android.service.intelligence.SnapshotData;
 
 import android.view.intelligence.ContentCaptureEvent;
 
@@ -36,4 +37,7 @@ oneway interface IIntelligenceService {
 
     void onContentCaptureEvents(in InteractionSessionId sessionId,
                                 in List<ContentCaptureEvent> events);
+
+    void onActivitySnapshot(in InteractionSessionId sessionId,
+                            in SnapshotData snapshotData);
 }

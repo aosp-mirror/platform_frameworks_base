@@ -970,4 +970,17 @@
     <dimen name="ongoing_appops_dialog_title_size">24sp</dimen>
     <!-- Text size for Ongoing App Ops dialog items -->
     <dimen name="ongoing_appops_dialog_item_size">20sp</dimen>
+
+    <!-- How much a bubble is elevated -->
+    <dimen name="bubble_elevation">8dp</dimen>
+    <!-- Padding between bubbles when displayed in expanded state -->
+    <dimen name="bubble_padding">8dp</dimen>
+    <!-- Padding around the view displayed when the bubble is expanded -->
+    <dimen name="bubble_expanded_view_padding">8dp</dimen>
+    <!-- Size of the collapsed bubble -->
+    <dimen name="bubble_size">56dp</dimen>
+    <!-- Size of an icon displayed within the bubble -->
+    <dimen name="bubble_icon_size">24dp</dimen>
+    <!-- Default height of the expanded view shown when the bubble is expanded -->
+    <dimen name="bubble_expanded_default_height">400dp</dimen>
 </resources>

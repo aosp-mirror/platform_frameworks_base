@@ -26,13 +26,13 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityOptions;
 import android.content.pm.ActivityInfo;

@@ -89,7 +89,7 @@ std::unique_ptr<LogEvent> CreateAppStartOccurredEvent(
 
 TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
     for (const auto& sampling_type :
-            { GaugeMetric::ALL_CONDITION_CHANGES, GaugeMetric:: RANDOM_ONE_SAMPLE }) {
+            { GaugeMetric::FIRST_N_SAMPLES, GaugeMetric:: RANDOM_ONE_SAMPLE }) {
         auto config = CreateStatsdConfigForPushedEvent(sampling_type);
         int64_t bucketStartTimeNs = 10000000000;
         int64_t bucketSizeNs =
@@ -170,7 +170,7 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
                   data.dimensions_in_what().value_tuple().dimensions_value(0).field());
         EXPECT_EQ(appUid1, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
         EXPECT_EQ(3, data.bucket_info_size());
-        if (sampling_type == GaugeMetric::ALL_CONDITION_CHANGES) {
+        if (sampling_type == GaugeMetric::FIRST_N_SAMPLES) {
             EXPECT_EQ(2, data.bucket_info(0).atom_size());
             EXPECT_EQ(2, data.bucket_info(0).elapsed_timestamp_nanos_size());
             EXPECT_EQ(0, data.bucket_info(0).wall_clock_timestamp_nanos_size());

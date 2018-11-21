@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import static org.junit.Assert.assertEquals;
@@ -25,7 +26,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityManagerInternal;
 import android.app.KeyguardManager;

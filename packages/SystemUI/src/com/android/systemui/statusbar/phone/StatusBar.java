@@ -141,6 +141,7 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
@@ -456,6 +457,13 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NotificationMediaManager mMediaManager;
     protected NotificationLockscreenUserManager mLockscreenUserManager;
     protected NotificationRemoteInputManager mRemoteInputManager;
+    protected BubbleController mBubbleController;
+    private final BubbleController.BubbleExpandListener mBubbleExpandListener =
+            (isExpanding, amount) -> {
+                if (amount == 1) {
+                    updateScrimController();
+                }
+            };
 
     private final BroadcastReceiver mWallpaperChangedReceiver = new BroadcastReceiver() {
         @Override
@@ -588,6 +596,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void start() {
         mGroupManager = Dependency.get(NotificationGroupManager.class);
+        mGroupAlertTransferHelper = Dependency.get(NotificationGroupAlertTransferHelper.class);
         mVisualStabilityManager = Dependency.get(VisualStabilityManager.class);
         mNotificationLogger = Dependency.get(NotificationLogger.class);
         mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
@@ -613,6 +622,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mNavigationBarController = Dependency.get(DisplayNavigationBarController.class);
+        mBubbleController = Dependency.get(BubbleController.class);
+        mBubbleController.setExpandListener(mBubbleExpandListener);
 
         mColorExtractor.addOnColorsChangedListener(this);
         mStatusBarStateController.addListener(this, StatusBarStateController.RANK_STATUS_BAR);
@@ -822,11 +833,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanel);
         mHeadsUpManager.addListener(mGroupManager);
+        mHeadsUpManager.addListener(mGroupAlertTransferHelper);
         mHeadsUpManager.addListener(mVisualStabilityManager);
         mAmbientPulseManager.addListener(this);
         mAmbientPulseManager.addListener(mGroupManager);
+        mAmbientPulseManager.addListener(mGroupAlertTransferHelper);
         mNotificationPanel.setHeadsUpManager(mHeadsUpManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
+        mGroupAlertTransferHelper.setHeadsUpManager(mHeadsUpManager);
         putComponent(HeadsUpManager.class, mHeadsUpManager);
 
 
@@ -3849,6 +3863,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else if (mIsKeyguard && !wakeAndUnlocking) {
             mScrimController.transitionTo(mNotificationPanel.isSemiAwake()
                     ? ScrimState.DARK_KEYGUARD : ScrimState.KEYGUARD);
+        } else if (mBubbleController.isStackExpanded()) {
+            mScrimController.transitionTo(ScrimState.BUBBLE_EXPANDED);
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }
@@ -4092,6 +4108,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected ViewGroup mStackScroller;
 
     protected NotificationGroupManager mGroupManager;
+
+    protected NotificationGroupAlertTransferHelper mGroupAlertTransferHelper;
 
 
     // for heads up notifications

@@ -16,14 +16,13 @@
 
 package com.android.server.wm;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.anyFloat;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyFloat;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -47,6 +46,14 @@ public class WindowTestUtils {
             super(display, service, wallpaperController, controller);
         }
 
+        /**
+         * Stubbing method of non-public parent class isn't supported, so here explicitly overrides.
+         */
+        @Override
+        public DisplayRotation getDisplayRotation() {
+            return null;
+        }
+
         /** Create a mocked default {@link DisplayContent}. */
         public static TestDisplayContent create(Context context) {
             final TestDisplayContent displayContent = mock(TestDisplayContent.class);
@@ -68,6 +75,15 @@ public class WindowTestUtils {
 
             return displayContent;
         }
+    }
+
+    /** Create a mocked default {@link DisplayContent}. */
+    public static TestDisplayContent createTestDisplayContent() {
+        final TestDisplayContent displayContent = mock(TestDisplayContent.class);
+        DockedStackDividerController divider = mock(DockedStackDividerController.class);
+        when(displayContent.getDockedDividerController()).thenReturn(divider);
+
+        return displayContent;
     }
 
     /**

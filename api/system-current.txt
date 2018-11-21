@@ -58,6 +58,7 @@ package android {
     field public static final java.lang.String CONNECTIVITY_USE_RESTRICTED_NETWORKS = "android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS";
     field public static final java.lang.String CONTROL_DISPLAY_SATURATION = "android.permission.CONTROL_DISPLAY_SATURATION";
     field public static final java.lang.String CONTROL_INCALL_EXPERIENCE = "android.permission.CONTROL_INCALL_EXPERIENCE";
+    field public static final java.lang.String CONTROL_KEYGUARD_SECURE_NOTIFICATIONS = "android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS";
     field public static final java.lang.String CONTROL_LOCATION_UPDATES = "android.permission.CONTROL_LOCATION_UPDATES";
     field public static final java.lang.String CONTROL_VPN = "android.permission.CONTROL_VPN";
     field public static final java.lang.String CRYPT_KEEPER = "android.permission.CRYPT_KEEPER";
@@ -123,6 +124,7 @@ package android {
     field public static final java.lang.String MOUNT_FORMAT_FILESYSTEMS = "android.permission.MOUNT_FORMAT_FILESYSTEMS";
     field public static final java.lang.String MOUNT_UNMOUNT_FILESYSTEMS = "android.permission.MOUNT_UNMOUNT_FILESYSTEMS";
     field public static final java.lang.String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
+    field public static final java.lang.String NETWORK_MANAGED_PROVISIONING = "android.permission.NETWORK_MANAGED_PROVISIONING";
     field public static final java.lang.String NETWORK_SETUP_WIZARD = "android.permission.NETWORK_SETUP_WIZARD";
     field public static final java.lang.String NOTIFICATION_DURING_SETUP = "android.permission.NOTIFICATION_DURING_SETUP";
     field public static final java.lang.String NOTIFY_TV_INPUTS = "android.permission.NOTIFY_TV_INPUTS";
@@ -438,6 +440,8 @@ package android.app {
   }
 
   public class KeyguardManager {
+    method public void setPrivateNotificationsAllowed(boolean);
+    method public boolean getPrivateNotificationsAllowed();
     method public android.content.Intent createConfirmFactoryResetCredentialIntent(java.lang.CharSequence, java.lang.CharSequence, java.lang.CharSequence);
     method public void requestDismissKeyguard(android.app.Activity, java.lang.CharSequence, android.app.KeyguardManager.KeyguardDismissCallback);
   }
@@ -863,6 +867,7 @@ package android.app.role {
     method public java.util.List<java.lang.String> getRoleHoldersAsUser(java.lang.String, android.os.UserHandle);
     method public void removeRoleHolderAsUser(java.lang.String, java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
     method public boolean removeRoleHolderFromController(java.lang.String, java.lang.String);
+    method public void setRoleNamesFromController(java.util.List<java.lang.String>);
     field public static final java.lang.String EXTRA_REQUEST_ROLE_NAME = "android.app.role.extra.REQUEST_ROLE_NAME";
   }
 
@@ -3324,6 +3329,11 @@ package android.net {
     field public static final int ERROR_INVALID_NETWORK = 1; // 0x1
   }
 
+  public class LinkAddress implements android.os.Parcelable {
+    ctor public LinkAddress(java.net.InetAddress, int);
+    ctor public LinkAddress(java.lang.String);
+  }
+
   public final class NetworkCapabilities implements android.os.Parcelable {
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
   }
@@ -3683,7 +3693,8 @@ package android.net.wifi {
   }
 
   public static abstract interface WifiManager.NetworkRequestMatchCallback {
-    method public abstract void onMatch(java.util.List<android.net.wifi.WifiConfiguration>);
+    method public abstract void onAbort();
+    method public abstract void onMatch(java.util.List<android.net.wifi.ScanResult>);
     method public abstract void onUserSelectionCallbackRegistration(android.net.wifi.WifiManager.NetworkRequestUserSelectionCallback);
     method public abstract void onUserSelectionConnectFailure(android.net.wifi.WifiConfiguration);
     method public abstract void onUserSelectionConnectSuccess(android.net.wifi.WifiConfiguration);
@@ -4640,6 +4651,7 @@ package android.rolecontrollerservice {
     method public abstract void onAddRoleHolder(java.lang.String, java.lang.String, android.app.role.RoleManagerCallback);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void onClearRoleHolders(java.lang.String, android.app.role.RoleManagerCallback);
+    method public abstract void onGrantDefaultRoles(android.app.role.RoleManagerCallback);
     method public abstract void onRemoveRoleHolder(java.lang.String, java.lang.String, android.app.role.RoleManagerCallback);
     field public static final java.lang.String SERVICE_INTERFACE = "android.rolecontrollerservice.RoleControllerService";
   }
@@ -4653,6 +4665,11 @@ package android.security.keystore {
     field public static final int ID_TYPE_IMEI = 2; // 0x2
     field public static final int ID_TYPE_MEID = 3; // 0x3
     field public static final int ID_TYPE_SERIAL = 1; // 0x1
+  }
+
+  public class DeviceIdAttestationException extends java.lang.Exception {
+    ctor public DeviceIdAttestationException(java.lang.String);
+    ctor public DeviceIdAttestationException(java.lang.String, java.lang.Throwable);
   }
 
 }
@@ -4789,8 +4806,8 @@ package android.service.carrier {
 
   public abstract class ApnService extends android.app.Service {
     ctor public ApnService();
-    method public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
     method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
   }
 
 }
@@ -4862,6 +4879,7 @@ package android.service.euicc {
     method public abstract void onStartOtaIfNecessary(int, android.service.euicc.EuiccService.OtaStatusChangedCallback);
     method public abstract int onSwitchToSubscription(int, java.lang.String, boolean);
     method public abstract int onUpdateSubscriptionNickname(int, java.lang.String, java.lang.String);
+    field public static final java.lang.String ACTION_BIND_CARRIER_PROVISIONING_SERVICE = "android.service.euicc.action.BIND_CARRIER_PROVISIONING_SERVICE";
     field public static final java.lang.String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS = "android.service.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
     field public static final java.lang.String ACTION_PROVISION_EMBEDDED_SUBSCRIPTION = "android.service.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION";
     field public static final java.lang.String ACTION_RESOLVE_CONFIRMATION_CODE = "android.service.euicc.action.RESOLVE_CONFIRMATION_CODE";
@@ -4918,6 +4936,7 @@ package android.service.intelligence {
 
   public abstract class IntelligenceService extends android.app.Service {
     ctor public IntelligenceService();
+    method public void onActivitySnapshot(android.service.intelligence.InteractionSessionId, android.service.intelligence.SnapshotData);
     method public abstract void onContentCaptureEvent(android.service.intelligence.InteractionSessionId, java.util.List<android.view.intelligence.ContentCaptureEvent>);
     method public void onCreateInteractionSession(android.service.intelligence.InteractionContext, android.service.intelligence.InteractionSessionId);
     method public void onDestroyInteractionSession(android.service.intelligence.InteractionSessionId);
@@ -4940,6 +4959,15 @@ package android.service.intelligence {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.intelligence.InteractionSessionId> CREATOR;
+  }
+
+  public final class SnapshotData implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.app.assist.AssistContent getAssistContent();
+    method public android.os.Bundle getAssistData();
+    method public android.app.assist.AssistStructure getAssistStructure();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.intelligence.SnapshotData> CREATOR;
   }
 
 }
@@ -6003,6 +6031,7 @@ package android.telephony.euicc {
     field public static final int EUICC_OTA_STATUS_UNAVAILABLE = 5; // 0x5
     field public static final int EUICC_OTA_SUCCEEDED = 3; // 0x3
     field public static final java.lang.String EXTRA_EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTIONS = "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTIONS";
+    field public static final java.lang.String EXTRA_FORCE_PROVISION = "android.telephony.euicc.extra.FORCE_PROVISION";
   }
 
   public static abstract class EuiccManager.OtaStatus implements java.lang.annotation.Annotation {
@@ -6699,7 +6728,7 @@ package android.telephony.ims.feature {
     field public static final int PROCESS_CALL_IMS = 0; // 0x0
   }
 
-  public static class MmTelFeature.MmTelCapabilities {
+  public static class MmTelFeature.MmTelCapabilities extends android.telephony.ims.feature.ImsFeature.Capabilities {
     ctor public MmTelFeature.MmTelCapabilities();
     ctor public deprecated MmTelFeature.MmTelCapabilities(android.telephony.ims.feature.ImsFeature.Capabilities);
     ctor public MmTelFeature.MmTelCapabilities(int);
@@ -7050,6 +7079,7 @@ package android.view.intelligence {
     method public java.util.Set<android.content.ComponentName> getContentCaptureDisabledActivities();
     method public java.util.Set<java.lang.String> getContentCaptureDisabledPackages();
     method public void setActivityContentCaptureEnabled(android.content.ComponentName, boolean);
+    method public void setContentCaptureWhitelist(java.util.List<java.lang.String>, java.util.List<android.content.ComponentName>);
     method public void setPackageContentCaptureEnabled(java.lang.String, boolean);
   }
 

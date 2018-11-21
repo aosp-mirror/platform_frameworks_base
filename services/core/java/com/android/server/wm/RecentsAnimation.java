@@ -26,6 +26,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.WindowManager.TRANSIT_NONE;
+
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
@@ -37,13 +38,19 @@ import android.app.IAssistDataReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.IRecentsAnimationRunner;
 
+import com.android.server.LocalServices;
 import com.android.server.am.AssistDataRequester;
+import com.android.server.intelligence.IntelligenceManagerInternal;
 import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallbacks;
+
+import java.util.List;
 
 /**
  * Manages the recents animation, including the reordering of the stacks for the transition and
@@ -80,7 +87,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
     void startRecentsActivity(Intent intent, IRecentsAnimationRunner recentsAnimationRunner,
             ComponentName recentsComponent, int recentsUid,
-            IAssistDataReceiver assistDataReceiver) {
+            @Deprecated IAssistDataReceiver assistDataReceiver) {
         if (DEBUG) Slog.d(TAG, "startRecentsActivity(): intent=" + intent
                 + " assistDataReceiver=" + assistDataReceiver);
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "RecentsAnimation#startRecentsActivity");
@@ -127,19 +134,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
         mWindowManager.deferSurfaceLayout();
         try {
+            final int userId = mService.getCurrentUserId();
+
             // Kick off the assist data request in the background before showing the target activity
-            if (assistDataReceiver != null) {
-                final AppOpsManager appOpsManager = (AppOpsManager)
-                        mService.mContext.getSystemService(Context.APP_OPS_SERVICE);
-                final AssistDataReceiverProxy proxy = new AssistDataReceiverProxy(
-                        assistDataReceiver, recentsComponent.getPackageName());
-                mAssistDataRequester = new AssistDataRequester(mService.mContext,
-                        mWindowManager, appOpsManager, proxy, this, OP_ASSIST_STRUCTURE, OP_NONE);
-                mAssistDataRequester.requestAssistData(mStackSupervisor.getTopVisibleActivities(),
-                        true /* fetchData */, false /* fetchScreenshots */,
-                        true /* allowFetchData */, false /* allowFetchScreenshots */,
-                        recentsUid, recentsComponent.getPackageName());
-            }
+            requestAssistData(recentsComponent, recentsUid, assistDataReceiver, userId);
 
             if (hasExistingActivity) {
                 // Move the recents activity into place for the animation if it is not top most
@@ -166,7 +164,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         .setCallingUid(recentsUid)
                         .setCallingPackage(recentsComponent.getPackageName())
                         .setActivityOptions(SafeActivityOptions.fromBundle(options.toBundle()))
-                        .setMayWait(mService.getCurrentUserId())
+                        .setMayWait(userId)
                         .execute();
                 mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
                 mWindowManager.executeAppTransition();
@@ -208,6 +206,61 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             mWindowManager.continueSurfaceLayout();
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
         }
+    }
+
+    /**
+     * Requests assist data for the top visible activities.
+     */
+    private void requestAssistData(ComponentName recentsComponent, int recentsUid,
+            @Deprecated IAssistDataReceiver assistDataReceiver, int userId) {
+        final AppOpsManager appOpsManager = (AppOpsManager)
+                mService.mContext.getSystemService(Context.APP_OPS_SERVICE);
+        final List<IBinder> topActivities = mStackSupervisor.getTopVisibleActivities();
+        final AssistDataRequester.AssistDataRequesterCallbacks assistDataCallbacks;
+        if (assistDataReceiver != null) {
+            assistDataCallbacks = new AssistDataReceiverProxy(assistDataReceiver,
+                    recentsComponent.getPackageName()) {
+                @Override
+                public void onAssistDataReceivedLocked(Bundle data, int activityIndex,
+                        int activityCount) {
+                    // Try to notify the intelligence service first
+                    final IntelligenceManagerInternal imService =
+                            LocalServices.getService(IntelligenceManagerInternal.class);
+                    final IBinder activityToken = topActivities.get(activityIndex);
+                    if (imService == null
+                            || !imService.sendActivityAssistData(userId, activityToken, data)) {
+                        // Otherwise, use the provided assist data receiver
+                        super.onAssistDataReceivedLocked(data, activityIndex, activityCount);
+                    }
+                }
+            };
+        } else {
+            final IntelligenceManagerInternal imService =
+                    LocalServices.getService(IntelligenceManagerInternal.class);
+            if (imService == null) {
+                // There is no intelligence service, so there is no point requesting assist data
+                return;
+            }
+
+            assistDataCallbacks = new AssistDataRequester.AssistDataRequesterCallbacks() {
+                @Override
+                public boolean canHandleReceivedAssistDataLocked() {
+                    return true;
+                }
+
+                @Override
+                public void onAssistDataReceivedLocked(Bundle data, int activityIndex,
+                        int activityCount) {
+                    // Try to notify the intelligence service
+                    final IBinder activityToken = topActivities.get(activityIndex);
+                    imService.sendActivityAssistData(userId, activityToken, data);
+                }
+            };
+        }
+        mAssistDataRequester = new AssistDataRequester(mService.mContext, mWindowManager,
+                appOpsManager, assistDataCallbacks, this, OP_ASSIST_STRUCTURE, OP_NONE);
+        mAssistDataRequester.requestAutofillData(topActivities,
+                recentsUid, recentsComponent.getPackageName());
     }
 
     private void finishAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {

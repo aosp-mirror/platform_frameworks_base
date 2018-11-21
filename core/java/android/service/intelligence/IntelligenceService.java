@@ -70,6 +70,7 @@ public abstract class IntelligenceService extends Service {
                                 IntelligenceService.this, sessionId));
             }
         }
+
         @Override
         public void onContentCaptureEvents(InteractionSessionId sessionId,
                 List<ContentCaptureEvent> events) {
@@ -77,6 +78,14 @@ public abstract class IntelligenceService extends Service {
                     obtainMessage(IntelligenceService::onContentCaptureEvent,
                             IntelligenceService.this, sessionId, events));
 
+        }
+
+        @Override
+        public void onActivitySnapshot(InteractionSessionId sessionId,
+                SnapshotData snapshotData) {
+            mHandler.sendMessage(
+                    obtainMessage(IntelligenceService::onActivitySnapshot,
+                            IntelligenceService.this, sessionId, snapshotData));
         }
     };
 
@@ -116,6 +125,16 @@ public abstract class IntelligenceService extends Service {
      // TODO(b/111276913): rename to onContentCaptureEvents
     public abstract void onContentCaptureEvent(@NonNull InteractionSessionId sessionId,
             @NonNull List<ContentCaptureEvent> events);
+
+    /**
+     * Notifies the service of {@link IntelligenceSnapshotData snapshot data} associated with a
+     * session.
+     *
+     * @param sessionId the session's Id
+     * @param snapshotData the data
+     */
+    public void onActivitySnapshot(@NonNull InteractionSessionId sessionId,
+            @NonNull SnapshotData snapshotData) {}
 
     /**
      * Destroys the interaction session.

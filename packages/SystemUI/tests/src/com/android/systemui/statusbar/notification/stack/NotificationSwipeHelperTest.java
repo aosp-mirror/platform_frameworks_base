@@ -32,8 +32,8 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.os.Handler;
 import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-import android.testing.UiThreadTest;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -44,7 +44,6 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.Snoo
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,9 +55,8 @@ import org.mockito.stubbing.Answer;
  * Tests for {@link NotificationSwipeHelper}.
  */
 @SmallTest
-@Ignore
-@RunWith(AndroidJUnit4.class)
-@UiThreadTest
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper()
 public class NotificationSwipeHelperTest extends SysuiTestCase {
 
     private NotificationSwipeHelper mSwipeHelper;

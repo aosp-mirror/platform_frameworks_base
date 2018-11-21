@@ -249,6 +249,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             dc.configureDisplayPolicy();
         }
 
+        mService.reconfigureDisplayLocked(dc);
+
         return dc;
     }
 

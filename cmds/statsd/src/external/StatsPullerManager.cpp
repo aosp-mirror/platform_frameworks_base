@@ -168,6 +168,9 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // battery_voltage
         {android::util::BATTERY_VOLTAGE,
          {{}, {}, 1 * NS_PER_SEC, new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)}},
+         // battery_voltage
+        {android::util::BATTERY_LEVEL,
+         {{}, {}, 1 * NS_PER_SEC, new ResourceHealthManagerPuller(android::util::BATTERY_LEVEL)}},
         // process_memory_state
         {android::util::PROCESS_MEMORY_STATE,
          {{4, 5, 6, 7, 8, 9},
@@ -180,6 +183,11 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           {2, 7},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::NATIVE_PROCESS_MEMORY_STATE)}},
+        {android::util::PROCESS_MEMORY_HIGH_WATER_MARK,
+         {{3},
+          {2},
+          1 * NS_PER_SEC,
+          new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_HIGH_WATER_MARK)}},
         // temperature
         {android::util::TEMPERATURE, {{}, {}, 1 * NS_PER_SEC, new ResourceThermalManagerPuller()}},
         // binder_calls

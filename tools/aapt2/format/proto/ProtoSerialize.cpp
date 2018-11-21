@@ -621,7 +621,8 @@ static void SerializeXmlCommon(const xml::Node& node, pb::XmlNode* out_node) {
   pb_src->set_column_number(node.column_number);
 }
 
-void SerializeXmlToPb(const xml::Element& el, pb::XmlNode* out_node) {
+void SerializeXmlToPb(const xml::Element& el, pb::XmlNode* out_node,
+                      const SerializeXmlOptions options) {
   SerializeXmlCommon(el, out_node);
 
   pb::XmlElement* pb_element = out_node->mutable_element();
@@ -657,7 +658,12 @@ void SerializeXmlToPb(const xml::Element& el, pb::XmlNode* out_node) {
     if (const xml::Element* child_el = xml::NodeCast<xml::Element>(child.get())) {
       SerializeXmlToPb(*child_el, pb_element->add_child());
     } else if (const xml::Text* text_el = xml::NodeCast<xml::Text>(child.get())) {
-      pb::XmlNode* pb_child_node = pb_element->add_child();
+      if (options.remove_empty_text_nodes && util::TrimWhitespace(text_el->text).empty()) {
+        // Do not serialize whitespace text nodes if told not to
+        continue;
+      }
+
+      pb::XmlNode *pb_child_node = pb_element->add_child();
       SerializeXmlCommon(*text_el, pb_child_node);
       pb_child_node->set_text(text_el->text);
     } else {
@@ -666,8 +672,9 @@ void SerializeXmlToPb(const xml::Element& el, pb::XmlNode* out_node) {
   }
 }
 
-void SerializeXmlResourceToPb(const xml::XmlResource& resource, pb::XmlNode* out_node) {
-  SerializeXmlToPb(*resource.root, out_node);
+void SerializeXmlResourceToPb(const xml::XmlResource& resource, pb::XmlNode* out_node,
+                              const SerializeXmlOptions options) {
+  SerializeXmlToPb(*resource.root, out_node, options);
 }
 
 }  // namespace aapt

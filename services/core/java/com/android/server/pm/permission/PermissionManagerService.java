@@ -1242,6 +1242,9 @@ public class PermissionManagerService {
                         && ps.getRuntimePermissionState(sourcePerm, userId).isGranted()) {
                     isGranted = true;
                     break;
+                } else if (ps.hasInstallPermission(sourcePerm)) {
+                    isGranted = true;
+                    break;
                 }
             }
 
@@ -1348,8 +1351,18 @@ public class PermissionManagerService {
                                 }
                             }
                         } else {
-                            if (!origPs.hasRequestedPermission(sourcePerms)) {
-                                // Both permissions are new, do nothing
+                            boolean inheritsFromInstallPerm = false;
+                            for (int sourcePermNum = 0; sourcePermNum < sourcePerms.size();
+                                    sourcePermNum++) {
+                                if (ps.hasInstallPermission(sourcePerms.valueAt(sourcePermNum))) {
+                                    inheritsFromInstallPerm = true;
+                                    break;
+                                }
+                            }
+
+                            if (!origPs.hasRequestedPermission(sourcePerms)
+                                    && !inheritsFromInstallPerm) {
+                                // Both permissions are new so nothing to inherit.
                                 if (DEBUG_PERMISSIONS) {
                                     Slog.i(TAG, newPerm + " does not inherit from " + sourcePerms
                                             + " for " + pkgName
@@ -1358,6 +1371,7 @@ public class PermissionManagerService {
 
                                 break;
                             } else {
+                                // Inherit from new install or existing runtime permissions
                                 inheritPermissionStateToNewImplicitPermissionLocked(sourcePerms,
                                         newPerm, ps, pkg, userId);
                             }
