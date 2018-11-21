@@ -3824,18 +3824,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (DEBUG) Slog.v(TAG, "Current IME: " + lastInputMethodId);
 
         synchronized (mMethodMap) {
-            final HashMap<InputMethodInfo, List<InputMethodSubtype>> immis =
-                    mSettings.getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked(
-                            mContext);
-            if (immis == null || immis.size() == 0) {
+            final List<ImeSubtypeListItem> imList =
+                    mSwitchingController.getSortedInputMethodAndSubtypeListLocked(
+                            showAuxSubtypes, isScreenLocked);
+            if (imList.isEmpty()) {
                 return;
             }
 
             hideInputMethodMenuLocked();
-
-            final List<ImeSubtypeListItem> imList =
-                    mSwitchingController.getSortedInputMethodAndSubtypeListLocked(
-                            showAuxSubtypes, isScreenLocked);
 
             if (lastInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
                 final InputMethodSubtype currentSubtype = getCurrentInputMethodSubtypeLocked();
