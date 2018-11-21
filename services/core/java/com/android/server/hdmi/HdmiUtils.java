@@ -69,6 +69,12 @@ final class HdmiUtils {
         "Secondary_TV",
     };
 
+    /**
+     * Return value of {@link #getLocalPortFromPhysicalAddress(int, int)}
+     */
+    static final int TARGET_NOT_UNDER_LOCAL_DEVICE = -1;
+    static final int TARGET_SAME_PHYSICAL_ADDRESS = 0;
+
     private HdmiUtils() { /* cannot be instantiated */ }
 
     /**
@@ -390,6 +396,53 @@ final class HdmiUtils {
             pw.println(value);
         }
         pw.decreaseIndent();
+    }
+
+    /**
+     * Method to parse target physical address to the port number on the current device.
+     *
+     * <p>This check assumes target address is valid.
+     *
+     * @param targetPhysicalAddress is the physical address of the target device
+     * @param myPhysicalAddress is the physical address of the current device
+     * @return
+     * If the target device is under the current device, return the port number of current device
+     * that the target device is connected to. This also applies to the devices that are indirectly
+     * connected to the current device.
+     *
+     * <p>If the target device has the same physical address as the current device, return
+     * {@link #TARGET_SAME_PHYSICAL_ADDRESS}.
+     *
+     * <p>If the target device is not under the current device, return
+     * {@link #TARGET_NOT_UNDER_LOCAL_DEVICE}.
+     */
+    public static int getLocalPortFromPhysicalAddress(
+            int targetPhysicalAddress, int myPhysicalAddress) {
+        if (myPhysicalAddress == targetPhysicalAddress) {
+            return TARGET_SAME_PHYSICAL_ADDRESS;
+        }
+
+        int mask = 0xF000;
+        int finalMask = 0xF000;
+        int maskedAddress = myPhysicalAddress;
+
+        while (maskedAddress != 0) {
+            maskedAddress = myPhysicalAddress & mask;
+            finalMask |= mask;
+            mask >>= 4;
+        }
+
+        int portAddress = targetPhysicalAddress & finalMask;
+        if ((portAddress & (finalMask << 4)) != myPhysicalAddress) {
+            return TARGET_NOT_UNDER_LOCAL_DEVICE;
+        }
+
+        mask <<= 4;
+        int port = portAddress & mask;
+        while ((port >> 4) != 0) {
+            port >>= 4;
+        }
+        return port;
     }
 
     // Device configuration of its supported Codecs and their Short Audio Descriptors.

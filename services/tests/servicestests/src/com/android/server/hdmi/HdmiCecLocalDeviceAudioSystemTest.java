@@ -414,51 +414,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
-    public void pathToPort_isMe() throws Exception {
-        int targetPhysicalAddress = 0x1000;
-        mNativeWrapper.setPhysicalAddress(0x1000);
-        assertThat(mHdmiCecLocalDeviceAudioSystem
-                .getLocalPortFromPhysicalAddress(targetPhysicalAddress))
-                .isEqualTo(0);
-    }
-
-    @Test
-    public void pathToPort_isBelow() throws Exception {
-        int targetPhysicalAddress = 0x1100;
-        mNativeWrapper.setPhysicalAddress(0x1000);
-        assertThat(mHdmiCecLocalDeviceAudioSystem
-                .getLocalPortFromPhysicalAddress(targetPhysicalAddress))
-                .isEqualTo(1);
-    }
-
-    @Test
-    public void pathToPort_neitherMeNorBelow() throws Exception {
-        int targetPhysicalAddress = 0x3000;
-        mNativeWrapper.setPhysicalAddress(0x2000);
-        assertThat(mHdmiCecLocalDeviceAudioSystem
-                .getLocalPortFromPhysicalAddress(targetPhysicalAddress))
-                .isEqualTo(-1);
-
-        targetPhysicalAddress = 0x2200;
-        mNativeWrapper.setPhysicalAddress(0x3300);
-        assertThat(mHdmiCecLocalDeviceAudioSystem
-                .getLocalPortFromPhysicalAddress(targetPhysicalAddress))
-                .isEqualTo(-1);
-
-        targetPhysicalAddress = 0x2213;
-        mNativeWrapper.setPhysicalAddress(0x2212);
-        assertThat(mHdmiCecLocalDeviceAudioSystem
-                .getLocalPortFromPhysicalAddress(targetPhysicalAddress))
-                .isEqualTo(-1);
-
-        targetPhysicalAddress = 0x2340;
-        mNativeWrapper.setPhysicalAddress(0x2310);
-        assertThat(mHdmiCecLocalDeviceAudioSystem
-                .getLocalPortFromPhysicalAddress(targetPhysicalAddress))
-                .isEqualTo(-1);
-    }
-
-    @Test
     public void handleRequestArcInitiate_isNotDirectConnectedToTv() throws Exception {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildRequestArcInitiation(ADDR_TV, ADDR_AUDIO_SYSTEM);
