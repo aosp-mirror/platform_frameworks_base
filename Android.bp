@@ -254,6 +254,7 @@ java_defaults {
         ":statsd_aidl",
         "core/java/android/os/ISystemUpdateManager.aidl",
         "core/java/android/os/IThermalEventListener.aidl",
+        "core/java/android/os/IThermalStatusListener.aidl",
         "core/java/android/os/IThermalService.aidl",
         "core/java/android/os/IUpdateLock.aidl",
         "core/java/android/os/IUserManager.aidl",
