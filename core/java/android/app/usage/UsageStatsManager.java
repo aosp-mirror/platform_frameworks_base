@@ -193,10 +193,6 @@ public final class UsageStatsManager {
     /** @hide */
     public static final int REASON_SUB_USAGE_EXEMPTED_SYNC_START = 0x000D;
     /** @hide */
-    public static final int REASON_SUB_USAGE_FOREGROUND_SERVICE_START = 0x000E;
-    /** @hide */
-    public static final int REASON_SUB_USAGE_FOREGROUND_SERVICE_STOP = 0x000F;
-    /** @hide */
     public static final int REASON_SUB_PREDICTED_RESTORED       = 0x0001;
 
 
