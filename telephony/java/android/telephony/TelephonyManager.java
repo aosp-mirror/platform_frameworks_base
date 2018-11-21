@@ -7477,7 +7477,7 @@ public class TelephonyManager {
         try {
             return getITelephony().isAvailable(getSubId(),
                     MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
-                    ImsRegistrationImplBase.REGISTRATION_TECH_LTE, getOpPackageName());
+                    ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
         } catch (RemoteException | NullPointerException ex) {
             return false;
         }

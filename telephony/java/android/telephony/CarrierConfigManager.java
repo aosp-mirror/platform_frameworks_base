@@ -1023,9 +1023,9 @@ public class CarrierConfigManager {
     public static final String KEY_HIDE_ENHANCED_4G_LTE_BOOL = "hide_enhanced_4g_lte_bool";
 
     /**
-     * Default Enhanced 4G LTE mode enabled. When this is {@code true}, Enhanced 4G LTE mode by
-     * default is on, otherwise if {@code false}, Enhanced 4G LTE mode by default is off.
-     * @hide
+     * Sets the default state for the "Enhanced 4G LTE" or "Advanced Calling" mode toggle set by the
+     * user. When this is {@code true}, this mode by default is on, otherwise if {@code false},
+     * this mode by default is off.
      */
     public static final String KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL =
             "enhanced_4g_lte_on_by_default_bool";
