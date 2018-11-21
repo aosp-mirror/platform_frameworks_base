@@ -981,14 +981,16 @@
 
     <!-- How much a bubble is elevated -->
     <dimen name="bubble_elevation">8dp</dimen>
+    <!-- Padding around a collapsed bubble -->
+    <dimen name="bubble_view_padding">0dp</dimen>
     <!-- Padding between bubbles when displayed in expanded state -->
     <dimen name="bubble_padding">8dp</dimen>
-    <!-- Padding around the view displayed when the bubble is expanded -->
-    <dimen name="bubble_expanded_view_padding">8dp</dimen>
     <!-- Size of the collapsed bubble -->
     <dimen name="bubble_size">56dp</dimen>
-    <!-- Size of an icon displayed within the bubble -->
-    <dimen name="bubble_icon_size">24dp</dimen>
+    <!-- How much to inset the icon in the circle -->
+    <dimen name="bubble_icon_inset">16dp</dimen>
+    <!-- Padding around the view displayed when the bubble is expanded -->
+    <dimen name="bubble_expanded_view_padding">8dp</dimen>
     <!-- Default height of the expanded view shown when the bubble is expanded -->
     <dimen name="bubble_expanded_default_height">400dp</dimen>
     <!-- Height of the triangle that points to the expanded bubble -->
@@ -1001,4 +1003,10 @@
     <dimen name="bubble_expanded_header_height">48dp</dimen>
     <!-- Left and right padding applied to the header. -->
     <dimen name="bubble_expanded_header_horizontal_padding">24dp</dimen>
+    <!-- Max width of the message bubble-->
+    <dimen name="bubble_message_max_width">144dp</dimen>
+    <!-- Min width of the message bubble -->
+    <dimen name="bubble_message_min_width">32dp</dimen>
+    <!-- Interior padding of the message bubble -->
+    <dimen name="bubble_message_padding">4dp</dimen>
 </resources>

@@ -64,9 +64,9 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
 
     private boolean mIsExpanded;
     private int mExpandedBubbleHeight;
+    private BubbleTouchHandler mTouchHandler;
     private BubbleView mExpandedBubble;
     private Point mCollapsedPosition;
-    private BubbleTouchHandler mTouchHandler;
     private BubbleController.BubbleExpandListener mExpandListener;
 
     private boolean mViewUpdatedRequested = false;
@@ -211,13 +211,24 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
      */
     public void setExpandedBubble(BubbleView bubbleToExpand) {
         mExpandedBubble = bubbleToExpand;
+        boolean prevExpanded = mIsExpanded;
         mIsExpanded = true;
-        updateExpandedBubble();
-        requestUpdate();
+        if (!prevExpanded) {
+            // If we weren't previously expanded we should animate open.
+            animateExpansion(true /* expand */);
+        } else {
+            // If we were expanded just update the views
+            updateExpandedBubble();
+            requestUpdate();
+        }
+        mExpandedBubble.getEntry().setShowInShadeWhenBubble(false);
+        notifyExpansionChanged(mExpandedBubble, true /* expanded */);
     }
 
     /**
-     * Adds a bubble to the stack.
+     * Adds a bubble to the top of the stack.
+     *
+     * @param bubbleView the view to add to the stack.
      */
     public void addBubble(BubbleView bubbleView) {
         mBubbleContainer.addView(bubbleView, 0,
@@ -234,17 +245,26 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         mBubbleContainer.removeView(bubbleView);
         boolean wasExpanded = mIsExpanded;
         int bubbleCount = mBubbleContainer.getChildCount();
-        if (bubbleView.equals(mExpandedBubble) && bubbleCount > 0) {
+        if (mIsExpanded && bubbleView.equals(mExpandedBubble) && bubbleCount > 0) {
             // If we have other bubbles and are expanded go to the next one or previous
             // if the bubble removed was last
             int nextIndex = bubbleCount > removedIndex ? removedIndex : bubbleCount - 1;
-            mExpandedBubble = (BubbleView) mBubbleContainer.getChildAt(nextIndex);
+            BubbleView expandedBubble = (BubbleView) mBubbleContainer.getChildAt(nextIndex);
+            setExpandedBubble(expandedBubble);
         }
         mIsExpanded = wasExpanded && mBubbleContainer.getChildCount() > 0;
-        requestUpdate();
-        if (wasExpanded && !mIsExpanded && mExpandListener != null) {
-            mExpandListener.onBubbleExpandChanged(mIsExpanded, 1 /* amount */);
+        if (wasExpanded != mIsExpanded) {
+            notifyExpansionChanged(mExpandedBubble, mIsExpanded);
         }
+        requestUpdate();
+    }
+
+    /**
+     * Dismiss the stack of bubbles.
+     */
+    public void stackDismissed() {
+        collapseStack();
+        mBubbleContainer.removeAllViews();
     }
 
     /**
@@ -252,11 +272,19 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
      *
      * @param bubbleView the view to update in the stack.
      * @param entry the entry to update it with.
+     * @param updatePosition whether this bubble should be moved to top of the stack.
      */
-    public void updateBubble(BubbleView bubbleView, NotificationEntry entry) {
-        // TODO - move to top of bubble stack, make it show its update if it makes sense
+    public void updateBubble(BubbleView bubbleView, NotificationEntry entry,
+            boolean updatePosition) {
         bubbleView.update(entry);
-        if (bubbleView.equals(mExpandedBubble)) {
+        if (updatePosition && !mIsExpanded) {
+            // If alerting it gets promoted to top of the stack
+            mBubbleContainer.removeView(bubbleView);
+            mBubbleContainer.addView(bubbleView, 0);
+            requestUpdate();
+        }
+        if (mIsExpanded && bubbleView.equals(mExpandedBubble)) {
+            entry.setShowInShadeWhenBubble(false);
             requestUpdate();
         }
     }
@@ -287,17 +315,36 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     }
 
     /**
+     * Collapses the stack of bubbles.
+     */
+    public void collapseStack() {
+        if (mIsExpanded) {
+            // TODO: Save opened bubble & move it to top of stack
+            animateExpansion(false /* shouldExpand */);
+            notifyExpansionChanged(mExpandedBubble, mIsExpanded);
+        }
+    }
+
+    /**
+     * Expands the stack fo bubbles.
+     */
+    public void expandStack() {
+        if (!mIsExpanded) {
+            mExpandedBubble = getTopBubble();
+            mExpandedBubble.getEntry().setShowInShadeWhenBubble(false);
+            animateExpansion(true /* shouldExpand */);
+            notifyExpansionChanged(mExpandedBubble, true /* expanded */);
+        }
+    }
+
+    /**
      * Tell the stack to animate to collapsed or expanded state.
      */
-    public void animateExpansion(boolean shouldExpand) {
+    private void animateExpansion(boolean shouldExpand) {
         if (mIsExpanded != shouldExpand) {
             mIsExpanded = shouldExpand;
-            mExpandedBubble = shouldExpand ? getTopBubble() : null;
             updateExpandedBubble();
 
-            if (mExpandListener != null) {
-                mExpandListener.onBubbleExpandChanged(mIsExpanded, 1 /* amount */);
-            }
             if (shouldExpand) {
                 // Save current position so that we might return there
                 savePosition();
@@ -345,6 +392,13 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
      */
     private void savePosition() {
         mCollapsedPosition = getPosition();
+    }
+
+    private void notifyExpansionChanged(BubbleView bubbleView, boolean expanded) {
+        if (mExpandListener != null) {
+            NotificationEntry entry = bubbleView != null ? bubbleView.getEntry() : null;
+            mExpandListener.onBubbleExpandChanged(expanded, entry != null ? entry.key : null);
+        }
     }
 
     private BubbleView getTopBubble() {
@@ -400,6 +454,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         }
 
         if (mExpandedBubble.hasAppOverlayIntent()) {
+            // Bubble with activity view expanded state
             ActivityView expandedView = mExpandedBubble.getActivityView();
             expandedView.setLayoutParams(new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, mExpandedBubbleHeight));
@@ -423,13 +478,20 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
                 }
             });
         } else {
+            // Bubble with notification view expanded state
             ExpandableNotificationRow row = mExpandedBubble.getRowView();
-            if (!row.equals(mExpandedViewContainer.getExpandedView())) {
-                // Different expanded view than what we have
+            if (row.getParent() != null) {
+                // Row might still be in the shade when we expand
+                ((ViewGroup) row.getParent()).removeView(row);
+            }
+            if (mIsExpanded) {
+                mExpandedViewContainer.setExpandedView(row);
+            } else {
                 mExpandedViewContainer.setExpandedView(null);
             }
-            mExpandedViewContainer.setExpandedView(row);
+            // Bubble with notification as expanded state doesn't need a header / title
             mExpandedViewContainer.setHeaderText(null);
+
         }
         int pointerPosition = mExpandedBubble.getPosition().x
                 + (mExpandedBubble.getWidth() / 2);
@@ -456,7 +518,8 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         int bubbsCount = mBubbleContainer.getChildCount();
         for (int i = 0; i < bubbsCount; i++) {
             BubbleView bv = (BubbleView) mBubbleContainer.getChildAt(i);
-            bv.setZ(bubbsCount - 1);
+            bv.updateDotVisibility();
+            bv.setZ(bubbsCount - i);
 
             int transX = mIsExpanded ? (bv.getWidth() + mBubblePadding) * i : mBubblePadding * i;
             ViewState viewState = new ViewState();
@@ -510,6 +573,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     private void applyRowState(ExpandableNotificationRow view) {
         view.reset();
         view.setHeadsUp(false);
+        view.resetTranslation();
         view.setOnKeyguard(false);
         view.setOnAmbient(false);
         view.setClipBottomAmount(0);

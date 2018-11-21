@@ -461,13 +461,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NotificationMediaManager mMediaManager;
     protected NotificationLockscreenUserManager mLockscreenUserManager;
     protected NotificationRemoteInputManager mRemoteInputManager;
-    protected BubbleController mBubbleController;
-    private final BubbleController.BubbleExpandListener mBubbleExpandListener =
-            (isExpanding, amount) -> {
-                if (amount == 1) {
-                    updateScrimController();
-                }
-            };
 
     private final BroadcastReceiver mWallpaperChangedReceiver = new BroadcastReceiver() {
         @Override
@@ -589,6 +582,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NotificationActivityStarter mNotificationActivityStarter;
     private boolean mPulsing;
     private ContentObserver mFeatureFlagObserver;
+    protected BubbleController mBubbleController;
+    private final BubbleController.BubbleExpandListener mBubbleExpandListener =
+            (isExpanding, key) -> {
+                mEntryManager.updateNotifications();
+                updateScrimController();
+            };
 
     @Override
     public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {

@@ -135,6 +135,29 @@ public class NotificationInterruptionStateProvider {
     }
 
     /**
+     * Whether the notification should appear as a bubble with a fly-out on top of the screen.
+     *
+     * @param entry the entry to check
+     * @return true if the entry should bubble up, false otherwise
+     */
+    public boolean shouldBubbleUp(NotificationEntry entry) {
+        StatusBarNotification sbn = entry.notification;
+        if (!entry.isBubble()) {
+            if (DEBUG) {
+                Log.d(TAG, "No bubble up: notification " + sbn.getKey()
+                        + " is bubble? " + entry.isBubble());
+            }
+            return false;
+        }
+
+        if (!canHeadsUpCommon(entry)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Whether the notification should peek in from the top and alert the user.
      *
      * @param entry the entry to check
@@ -150,10 +173,12 @@ public class NotificationInterruptionStateProvider {
             return false;
         }
 
-        // TODO: need to changes this, e.g. should still heads up in expanded shade, might want
-        // message bubble from the bubble to go through heads up path
         boolean inShade = mStatusBarStateController.getState() == SHADE;
-        if (entry.isBubble() && !entry.isBubbleDismissed() && inShade) {
+        if (entry.isBubble() && inShade) {
+            if (DEBUG) {
+                Log.d(TAG, "No heads up: in unlocked shade where notification is shown as a "
+                        + "bubble: " + sbn.getKey());
+            }
             return false;
         }
 
@@ -164,9 +189,13 @@ public class NotificationInterruptionStateProvider {
             return false;
         }
 
-        if (!mUseHeadsUp || mPresenter.isDeviceInVrMode()) {
+        if (!canHeadsUpCommon(entry)) {
+            return false;
+        }
+
+        if (entry.importance < NotificationManager.IMPORTANCE_HIGH) {
             if (DEBUG) {
-                Log.d(TAG, "No heads up: no huns or vr mode");
+                Log.d(TAG, "No heads up: unimportant notification: " + sbn.getKey());
             }
             return false;
         }
@@ -182,34 +211,6 @@ public class NotificationInterruptionStateProvider {
         if (!inUse) {
             if (DEBUG) {
                 Log.d(TAG, "No heads up: not in use: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (entry.shouldSuppressPeek()) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: suppressed by DND: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (isSnoozedPackage(sbn)) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: snoozed package: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (entry.hasJustLaunchedFullScreenIntent()) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: recent fullscreen: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (entry.importance < NotificationManager.IMPORTANCE_HIGH) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: unimportant notification: " + sbn.getKey());
             }
             return false;
         }
@@ -295,6 +296,49 @@ public class NotificationInterruptionStateProvider {
         if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
             if (DEBUG) {
                 Log.d(TAG, "No alerting: suppressed due to group alert behavior");
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Common checks between heads up alerting and bubble fly out alerting. See
+     * {@link #shouldHeadsUp(NotificationEntry)} and
+     * {@link #shouldBubbleUp(NotificationEntry)}. Notifications that fail any of these
+     * checks should not interrupt the user on screen.
+     *
+     * @param entry the entry to check
+     * @return true if these checks pass, false if the notification should not interrupt on screen
+     */
+    public boolean canHeadsUpCommon(NotificationEntry entry) {
+        StatusBarNotification sbn = entry.notification;
+
+        if (!mUseHeadsUp || mPresenter.isDeviceInVrMode()) {
+            if (DEBUG) {
+                Log.d(TAG, "No heads up: no huns or vr mode");
+            }
+            return false;
+        }
+
+        if (entry.shouldSuppressPeek()) {
+            if (DEBUG) {
+                Log.d(TAG, "No heads up: suppressed by DND: " + sbn.getKey());
+            }
+            return false;
+        }
+
+        if (isSnoozedPackage(sbn)) {
+            if (DEBUG) {
+                Log.d(TAG, "No heads up: snoozed package: " + sbn.getKey());
+            }
+            return false;
+        }
+
+        if (entry.hasJustLaunchedFullScreenIntent()) {
+            if (DEBUG) {
+                Log.d(TAG, "No heads up: recent fullscreen: " + sbn.getKey());
             }
             return false;
         }

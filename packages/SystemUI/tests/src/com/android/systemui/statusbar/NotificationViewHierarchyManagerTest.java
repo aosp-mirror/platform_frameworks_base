@@ -36,7 +36,6 @@ import android.widget.LinearLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -96,7 +95,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
 
         mViewHierarchyManager = new NotificationViewHierarchyManager(mContext,
                 mLockscreenUserManager, mGroupManager, mVisualStabilityManager,
-                mock(StatusBarStateController.class), mEntryManager, mock(BubbleController.class),
+                mock(StatusBarStateController.class), mEntryManager,
                 () -> mShadeController);
         Dependency.get(InitController.class).executePostInitTasks();
         mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
