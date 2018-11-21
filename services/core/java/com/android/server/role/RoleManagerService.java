@@ -284,12 +284,26 @@ public class RoleManagerService extends SystemService {
         }
 
         @Override
+        public void setRoleNamesFromController(@NonNull List<String> roleNames) {
+            Preconditions.checkNotNull(roleNames, "roleNames cannot be null");
+            getContext().enforceCallingOrSelfPermission(
+                    RoleManager.PERMISSION_MANAGE_ROLES_FROM_CONTROLLER,
+                    "setRoleNamesFromController");
+
+            int userId = UserHandle.getCallingUserId();
+            synchronized (mLock) {
+                RoleUserState userState = getUserStateLocked(userId);
+                userState.setRoleNamesLocked(roleNames);
+            }
+        }
+
+        @Override
         public boolean addRoleHolderFromController(@NonNull String roleName,
                 @NonNull String packageName) {
             Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
             Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
             getContext().enforceCallingOrSelfPermission(
-                    RoleManager.PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER,
+                    RoleManager.PERMISSION_MANAGE_ROLES_FROM_CONTROLLER,
                     "addRoleHolderFromController");
 
             int userId = UserHandle.getCallingUserId();
@@ -305,7 +319,7 @@ public class RoleManagerService extends SystemService {
             Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
             Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
             getContext().enforceCallingOrSelfPermission(
-                    RoleManager.PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER,
+                    RoleManager.PERMISSION_MANAGE_ROLES_FROM_CONTROLLER,
                     "removeRoleHolderFromController");
 
             int userId = UserHandle.getCallingUserId();
