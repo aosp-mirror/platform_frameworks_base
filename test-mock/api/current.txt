@@ -135,6 +135,7 @@ package android.test.mock {
     method public boolean stopService(android.content.Intent);
     method public void unbindService(android.content.ServiceConnection);
     method public void unregisterReceiver(android.content.BroadcastReceiver);
+    method public void updateServiceGroup(android.content.ServiceConnection, int, int);
   }
 
   public deprecated class MockCursor implements android.database.Cursor {

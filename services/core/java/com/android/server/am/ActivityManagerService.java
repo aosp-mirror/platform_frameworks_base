@@ -9207,26 +9207,33 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 dumpAssociationsLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
             }
+            if (dumpPackage == null) {
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                mOomAdjProfiler.dump(pw);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpBinderProxies(pw);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpLmkLocked(pw);
+            }
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpLruLocked(pw, dumpPackage);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage, dumpAppId);
-            pw.println();
-            if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-            }
-            mOomAdjProfiler.dump(pw);
-            pw.println();
-            if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-            }
-            dumpBinderProxies(pw);
-            pw.println();
-            if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-            }
-            dumpLmkLocked(pw);
         }
     }
 
@@ -9420,6 +9427,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("lmk".equals(cmd)) {
                 synchronized (this) {
                     dumpLmkLocked(pw);
+                }
+            } else if ("lru".equals(cmd)) {
+                synchronized (this) {
+                    dumpLruLocked(pw, null);
                 }
             } else if ("permissions".equals(cmd) || "perm".equals(cmd)) {
                 synchronized (this) {
@@ -9698,17 +9709,102 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 pw.println();
             }
-            pw.println();
             return true;
         }
         return false;
     }
 
     void dumpBinderProxies(PrintWriter pw) {
+        pw.println("ACTIVITY MANAGER BINDER PROXY STATE (dumpsys activity binder-proxies)");
         dumpBinderProxyInterfaceCounts(pw,
-                "Top proxy interface names held by SYSTEM");
+                "  Top proxy interface names held by SYSTEM");
         dumpBinderProxiesCounts(pw,
-                "Counts of Binder Proxies held by SYSTEM");
+                "  Counts of Binder Proxies held by SYSTEM");
+    }
+
+    void dumpLruEntryLocked(PrintWriter pw, int index, ProcessRecord proc) {
+        pw.print("    #");
+        pw.print(index);
+        pw.print(": ");
+        pw.print(ProcessList.makeOomAdjString(proc.setAdj));
+        pw.print(" ");
+        pw.print(ProcessList.makeProcStateString(proc.getCurProcState()));
+        pw.print(" ");
+        pw.print(proc.toShortString());
+        pw.print(" ");
+        if (proc.hasActivitiesOrRecentTasks() || proc.hasClientActivities()
+                || proc.treatLikeActivity) {
+            pw.print(" activity=");
+            boolean printed = false;
+            if (proc.hasActivities()) {
+                pw.print("activities");
+                printed = true;
+            }
+            if (proc.hasRecentTasks()) {
+                if (printed) {
+                    pw.print("|");
+                }
+                pw.print("recents");
+                printed = true;
+            }
+            if (proc.hasClientActivities()) {
+                if (printed) {
+                    pw.print("|");
+                }
+                pw.print("client");
+                printed = true;
+            }
+            if (proc.treatLikeActivity) {
+                if (printed) {
+                    pw.print("|");
+                }
+                pw.print("treated");
+            }
+        }
+        pw.println();
+    }
+
+    // TODO: Move to ProcessList?
+    void dumpLruLocked(PrintWriter pw, String dumpPackage) {
+        pw.println("ACTIVITY MANAGER LRU PROCESSES (dumpsys activity lru)");
+        final int N = mProcessList.mLruProcesses.size();
+        int i;
+        boolean first = true;
+        for (i = N - 1; i >= mProcessList.mLruProcessActivityStart; i--) {
+            final ProcessRecord r = mProcessList.mLruProcesses.get(i);
+            if (dumpPackage != null && !r.pkgList.containsKey(dumpPackage)) {
+                continue;
+            }
+            if (first) {
+                pw.println("  Activities:");
+                first = false;
+            }
+            dumpLruEntryLocked(pw, i, r);
+        }
+        first = true;
+        for (; i >= mProcessList.mLruProcessServiceStart; i--) {
+            final ProcessRecord r = mProcessList.mLruProcesses.get(i);
+            if (dumpPackage != null && !r.pkgList.containsKey(dumpPackage)) {
+                continue;
+            }
+            if (first) {
+                pw.println("  Services:");
+                first = false;
+            }
+            dumpLruEntryLocked(pw, i, r);
+        }
+        first = true;
+        for (; i >= 0; i--) {
+            final ProcessRecord r = mProcessList.mLruProcesses.get(i);
+            if (dumpPackage != null && !r.pkgList.containsKey(dumpPackage)) {
+                continue;
+            }
+            if (first) {
+                pw.println("  Other:");
+                first = false;
+            }
+            dumpLruEntryLocked(pw, i, r);
+        }
     }
 
     // TODO: Move to ProcessList?
@@ -13211,6 +13307,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized(this) {
             return mServices.bindServiceLocked(caller, token, service,
                     resolvedType, connection, flags, instanceName, callingPackage, userId);
+        }
+    }
+
+    public void updateServiceGroup(IServiceConnection connection, int group, int importance) {
+        synchronized (this) {
+            mServices.updateServiceGroupLocked(connection, group, importance);
         }
     }
 
@@ -17398,8 +17500,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         int stepCached = 0;
         int stepEmpty = 0;
         int numCached = 0;
+        int numCachedExtraGroup = 0;
         int numEmpty = 0;
         int numTrimming = 0;
+        int lastCachedGroup = 0;
+        int lastCachedGroupUid = 0;
 
         mNumNonCachedProcs = 0;
         mNumCachedHiddenProcs = 0;
@@ -17523,7 +17628,21 @@ public class ActivityManagerService extends IActivityManager.Stub
                     case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
                         mNumCachedHiddenProcs++;
                         numCached++;
-                        if (numCached > cachedProcessLimit) {
+                        if (app.connectionGroup != 0) {
+                            if (lastCachedGroupUid == app.uid
+                                    && lastCachedGroup == app.connectionGroup) {
+                                // If this process is the next in the same group, we don't
+                                // want it to count against our limit of the number of cached
+                                // processes, so bump up the group count to account for it.
+                                numCachedExtraGroup++;
+                            } else {
+                                lastCachedGroupUid = app.uid;
+                                lastCachedGroup = app.connectionGroup;
+                            }
+                        } else {
+                            lastCachedGroupUid = lastCachedGroup = 0;
+                        }
+                        if ((numCached - numCachedExtraGroup) > cachedProcessLimit) {
                             app.kill("cached #" + numCached, true);
                         }
                         break;

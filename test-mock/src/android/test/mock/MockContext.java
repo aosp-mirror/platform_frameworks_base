@@ -591,6 +591,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public void updateServiceGroup(ServiceConnection conn, int group, int importance) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void unbindService(ServiceConnection conn) {
         throw new UnsupportedOperationException();
     }

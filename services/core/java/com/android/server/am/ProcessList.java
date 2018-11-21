@@ -50,6 +50,7 @@ import android.app.AppGlobals;
 import android.app.AppProtoEnums;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -2204,7 +2205,7 @@ public final class ProcessList {
 
     @GuardedBy("mService")
     int updateLruProcessInternalLocked(ProcessRecord app, long now, int index,
-            String what, Object obj, ProcessRecord srcApp) {
+            int lruSeq, String what, Object obj, ProcessRecord srcApp) {
         app.lastActivityTime = now;
 
         if (app.hasActivitiesOrRecentTasks()) {
@@ -2225,7 +2226,7 @@ public final class ProcessList {
             return index;
         }
 
-        if (lrui >= mLruProcessActivityStart) {
+        if (lrui >= mLruProcessActivityStart && index < mLruProcessActivityStart) {
             // Don't want to touch dependent processes that are hosting activities.
             return index;
         }
@@ -2237,6 +2238,7 @@ public final class ProcessList {
         if (DEBUG_LRU) Slog.d(TAG_LRU, "Moving dep from " + lrui + " to " + index
                 + " in LRU list: " + app);
         mLruProcesses.add(index, app);
+        app.lruSeq = lruSeq;
         return index;
     }
 
@@ -2345,9 +2347,11 @@ public final class ProcessList {
         */
 
         int nextIndex;
+        int nextActivityIndex = -1;
         if (hasActivity) {
             final int N = mLruProcesses.size();
-            if ((!app.hasActivities() || app.hasRecentTasks())
+            nextIndex = mLruProcessServiceStart;
+            if (!app.hasActivitiesOrRecentTasks() && !app.treatLikeActivity
                     && mLruProcessActivityStart < (N - 1)) {
                 // Process doesn't have activities, but has clients with
                 // activities...  move it up, but one below the top (the top
@@ -2355,36 +2359,92 @@ public final class ProcessList {
                 if (DEBUG_LRU) Slog.d(TAG_LRU,
                         "Adding to second-top of LRU activity list: " + app);
                 mLruProcesses.add(N - 1, app);
-                // To keep it from spamming the LRU list (by making a bunch of clients),
-                // we will push down any other entries owned by the app.
+                // If this process is part of a group, need to pull up any other processes
+                // in that group to be with it.
                 final int uid = app.info.uid;
-                for (int i = N - 2; i > mLruProcessActivityStart; i--) {
-                    ProcessRecord subProc = mLruProcesses.get(i);
-                    if (subProc.info.uid == uid) {
-                        // We want to push this one down the list.  If the process after
-                        // it is for the same uid, however, don't do so, because we don't
-                        // want them internally to be re-ordered.
-                        if (mLruProcesses.get(i - 1).info.uid != uid) {
-                            if (DEBUG_LRU) Slog.d(TAG_LRU,
-                                    "Pushing uid " + uid + " swapping at " + i + ": "
-                                            + mLruProcesses.get(i) + " : "
-                                            + mLruProcesses.get(i - 1));
-                            ProcessRecord tmp = mLruProcesses.get(i);
-                            mLruProcesses.set(i, mLruProcesses.get(i - 1));
-                            mLruProcesses.set(i - 1, tmp);
-                            i--;
+                int endIndex = N - 2;
+                nextActivityIndex = N - 2;
+                if (app.connectionGroup > 0) {
+                    int endImportance = app.connectionImportance;
+                    for (int i = endIndex; i >= mLruProcessActivityStart; i--) {
+                        final ProcessRecord subProc = mLruProcesses.get(i);
+                        if (subProc.info.uid == uid
+                                && subProc.connectionGroup == subProc.connectionGroup) {
+                            if (i == endIndex && subProc.connectionImportance >= endImportance) {
+                                // This process is already in the group, and its importance
+                                // is not as strong as the process before it, so it keep it
+                                // correctly positioned in the group.
+                                endIndex--;
+                                endImportance = subProc.connectionImportance;
+                            } else {
+                                // We want to pull this up to be with the rest of the group,
+                                // and order within the group by importance.
+                                boolean moved = false;
+                                for (int pos = N - 1; pos > endIndex; pos--) {
+                                    final ProcessRecord posProc = mLruProcesses.get(pos);
+                                    if (subProc.connectionImportance
+                                            <= posProc.connectionImportance) {
+                                        mLruProcesses.remove(i);
+                                        mLruProcesses.add(pos, subProc);
+                                        moved = true;
+                                        endIndex--;
+                                        break;
+                                    }
+                                }
+                                if (!moved) {
+                                    // Goes to the end of the group.
+                                    mLruProcesses.remove(i);
+                                    mLruProcesses.add(endIndex - 1, subProc);
+                                    endIndex--;
+                                    endImportance = subProc.connectionImportance;
+                                }
+                            }
                         }
-                    } else {
-                        // A gap, we can stop here.
-                        break;
+                    }
+
+                }
+                // To keep it from spamming the LRU list (by making a bunch of clients),
+                // we will distribute other entries owned by it to be in-between other apps.
+                for (int i = endIndex; i >= mLruProcessActivityStart; i--) {
+                    final ProcessRecord subProc = mLruProcesses.get(i);
+                    if (subProc.info.uid != uid) {
+                        // This is a different app...  if we have gone through some of the
+                        // target app, pull this up to be before them.
+                        if (i < endIndex) {
+                            mLruProcesses.remove(i);
+                            mLruProcesses.add(endIndex, subProc);
+                        }
+                        // Find the end of the next group of processes for target app.  This
+                        // is after any entries of different apps (so we don't change the existing
+                        // relative order of apps) and then after the next last group of processes
+                        // of the target app.
+                        for (endIndex--; endIndex >= mLruProcessActivityStart; endIndex--) {
+                            final ProcessRecord endProc = mLruProcesses.get(endIndex);
+                            if (endProc.info.uid == uid) {
+                                break;
+                            }
+                        }
+                        if (endIndex >= mLruProcessActivityStart) {
+                            final ProcessRecord endProc = mLruProcesses.get(endIndex);
+                            for (endIndex--; endIndex >= mLruProcessActivityStart; endIndex--) {
+                                final ProcessRecord nextEndProc = mLruProcesses.get(endIndex);
+                                if (nextEndProc.info.uid != uid
+                                        || nextEndProc.connectionGroup != endProc.connectionGroup) {
+                                    break;
+                                }
+                            }
+                        }
+                        if (i > endIndex) {
+                            i = endIndex;
+                        }
                     }
                 }
             } else {
                 // Process has activities, put it at the very tipsy-top.
                 if (DEBUG_LRU) Slog.d(TAG_LRU, "Adding to top of LRU activity list: " + app);
                 mLruProcesses.add(app);
+                nextActivityIndex = mLruProcesses.size() - 1;
             }
-            nextIndex = mLruProcessServiceStart;
         } else if (hasService) {
             // Process has services, put it at the top of the service list.
             if (DEBUG_LRU) Slog.d(TAG_LRU, "Adding to top of LRU service list: " + app);
@@ -2416,6 +2476,8 @@ public final class ProcessList {
             mLruProcessServiceStart++;
         }
 
+        app.lruSeq = mLruSeq;
+
         // If the app is currently using a content provider or service,
         // bump those processes as well.
         for (int j = app.connections.size() - 1; j >= 0; j--) {
@@ -2423,17 +2485,27 @@ public final class ProcessList {
             if (cr.binding != null && !cr.serviceDead && cr.binding.service != null
                     && cr.binding.service.app != null
                     && cr.binding.service.app.lruSeq != mLruSeq
+                    && (cr.flags & Context.BIND_REDUCTION_FLAGS) == 0
                     && !cr.binding.service.app.isPersistent()) {
-                nextIndex = updateLruProcessInternalLocked(cr.binding.service.app,
-                        now,
-                        nextIndex,
-                        "service connection", cr, app);
+                if (cr.binding.service.app.hasClientActivities()) {
+                    if (nextActivityIndex >= 0) {
+                        nextActivityIndex = updateLruProcessInternalLocked(cr.binding.service.app,
+                                now,
+                                nextActivityIndex, mLruSeq,
+                                "service connection", cr, app);
+                    }
+                } else {
+                    nextIndex = updateLruProcessInternalLocked(cr.binding.service.app,
+                            now,
+                            nextIndex, mLruSeq,
+                            "service connection", cr, app);
+                }
             }
         }
         for (int j = app.conProviders.size() - 1; j >= 0; j--) {
             ContentProviderRecord cpr = app.conProviders.get(j).provider;
             if (cpr.proc != null && cpr.proc.lruSeq != mLruSeq && !cpr.proc.isPersistent()) {
-                nextIndex = updateLruProcessInternalLocked(cpr.proc, now, nextIndex,
+                nextIndex = updateLruProcessInternalLocked(cpr.proc, now, nextIndex, mLruSeq,
                         "provider reference", cpr, app);
             }
         }
