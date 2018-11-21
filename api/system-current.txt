@@ -4357,7 +4357,7 @@ package android.permissionpresenterservice {
 
 package android.preference {
 
-  public class PreferenceManager {
+  public deprecated class PreferenceManager {
     method public boolean isStorageCredentialProtected();
     method public void setStorageCredentialProtected();
   }
