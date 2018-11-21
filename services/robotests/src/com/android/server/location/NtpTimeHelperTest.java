@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 
 import android.os.Looper;
+import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.NtpTrustedTime;
 
@@ -18,7 +19,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.shadows.ShadowLooper;
-import org.robolectric.shadows.ShadowSystemClock;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -74,7 +74,7 @@ public class NtpTimeHelperTest {
         doReturn(true).when(mMockNtpTrustedTime).forceRefresh();
         doReturn(1L).when(mMockNtpTrustedTime).getCacheAge();
         doReturn(MOCK_NTP_TIME).when(mMockNtpTrustedTime).getCachedNtpTime();
-        ShadowSystemClock.sleep(NtpTimeHelper.RETRY_INTERVAL);
+        SystemClock.sleep(NtpTimeHelper.RETRY_INTERVAL);
 
         waitForTasksToBePostedOnHandlerAndRunThem();
         assertThat(mCountDownLatch.await(2, TimeUnit.SECONDS)).isTrue();

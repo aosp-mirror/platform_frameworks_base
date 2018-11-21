@@ -18,9 +18,7 @@ package com.android.server.backup.testing;
 
 import static com.android.server.backup.testing.TestUtils.runToEndOfTasks;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -36,18 +34,16 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Process;
-import android.util.SparseArray;
+import android.util.Log;
 
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.Trampoline;
 import com.android.server.backup.TransportManager;
-import com.android.server.backup.internal.Operation;
 
 import org.mockito.stubbing.Answer;
 import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowBinder;
-import org.robolectric.shadows.ShadowLog;
 
 import java.io.File;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -192,8 +188,7 @@ public class BackupManagerServiceTestUtils {
     public static HandlerThread startSilentBackupThread(String tag) {
         return startBackupThread(
                 (thread, e) ->
-                        ShadowLog.e(
-                                tag, "Uncaught exception in test thread " + thread.getName(), e));
+                        Log.e(tag, "Uncaught exception in test thread " + thread.getName(), e));
     }
 
     private BackupManagerServiceTestUtils() {}

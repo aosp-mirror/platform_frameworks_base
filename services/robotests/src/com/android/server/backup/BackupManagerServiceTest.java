@@ -42,6 +42,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.HandlerThread;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
@@ -139,7 +140,7 @@ public class BackupManagerServiceTest {
      * specifically to prevent overloading the logs in production.
      */
     @Test
-    public void testMoreDebug_isFalse() throws Exception {
+    public void testMoreDebug_isFalse() {
         boolean moreDebug = BackupManagerService.MORE_DEBUG;
 
         assertThat(moreDebug).isFalse();
@@ -943,7 +944,7 @@ public class BackupManagerServiceTest {
         backupManagerService.backupNow();
 
         assertThat(ShadowKeyValueBackupJob.getCallingUid()).isEqualTo(ShadowBinder.LOCAL_UID);
-        assertThat(ShadowBinder.getCallingUid()).isEqualTo(1);
+        assertThat(Binder.getCallingUid()).isEqualTo(1);
     }
 
     /**
@@ -961,7 +962,7 @@ public class BackupManagerServiceTest {
         expectThrows(IllegalArgumentException.class, backupManagerService::backupNow);
         assertThat(ShadowKeyValueBackupJobException.getCallingUid())
                 .isEqualTo(ShadowBinder.LOCAL_UID);
-        assertThat(ShadowBinder.getCallingUid()).isEqualTo(1);
+        assertThat(Binder.getCallingUid()).isEqualTo(1);
     }
 
     private BackupManagerService createBackupManagerServiceForRequestBackup() {

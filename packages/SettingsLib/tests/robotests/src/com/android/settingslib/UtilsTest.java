@@ -22,12 +22,11 @@ import static com.android.settingslib.Utils.STORAGE_MANAGER_SHOW_OPT_IN_PROPERTY
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Shadows.shadowOf;
 
 import android.app.ActivityManager;
 import android.content.ContentResolver;
@@ -54,7 +53,6 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowAudioManager;
 import org.robolectric.shadows.ShadowSettings;
 
 import java.util.HashMap;
@@ -72,7 +70,7 @@ public class UtilsTest {
     private static final String PERCENTAGE_50 = "50%";
     private static final String PERCENTAGE_100 = "100%";
 
-    private ShadowAudioManager mShadowAudioManager;
+    private AudioManager mAudioManager;
     private Context mContext;
     @Mock
     private LocationManager mLocationManager;
@@ -85,7 +83,7 @@ public class UtilsTest {
         mContext = spy(RuntimeEnvironment.application);
         when(mContext.getSystemService(Context.LOCATION_SERVICE)).thenReturn(mLocationManager);
         ShadowSecure.reset();
-        mShadowAudioManager = shadowOf(mContext.getSystemService(AudioManager.class));
+        mAudioManager = mContext.getSystemService(AudioManager.class);
     }
 
     @Test
@@ -205,28 +203,28 @@ public class UtilsTest {
 
     @Test
     public void isAudioModeOngoingCall_modeInCommunication_returnTrue() {
-        mShadowAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 
         assertThat(Utils.isAudioModeOngoingCall(mContext)).isTrue();
     }
 
     @Test
     public void isAudioModeOngoingCall_modeInCall_returnTrue() {
-        mShadowAudioManager.setMode(AudioManager.MODE_IN_CALL);
+        mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 
         assertThat(Utils.isAudioModeOngoingCall(mContext)).isTrue();
     }
 
     @Test
     public void isAudioModeOngoingCall_modeRingtone_returnTrue() {
-        mShadowAudioManager.setMode(AudioManager.MODE_RINGTONE);
+        mAudioManager.setMode(AudioManager.MODE_RINGTONE);
 
         assertThat(Utils.isAudioModeOngoingCall(mContext)).isTrue();
     }
 
     @Test
     public void isAudioModeOngoingCall_modeNormal_returnFalse() {
-        mShadowAudioManager.setMode(AudioManager.MODE_NORMAL);
+        mAudioManager.setMode(AudioManager.MODE_NORMAL);
 
         assertThat(Utils.isAudioModeOngoingCall(mContext)).isFalse();
     }
