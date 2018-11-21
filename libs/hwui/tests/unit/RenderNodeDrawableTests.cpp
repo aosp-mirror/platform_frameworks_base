@@ -461,7 +461,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, projectionHwLayer) {
         ProjectionLayer(int* drawCounter)
                 : SkSurface_Base(SkImageInfo::MakeN32Premul(LAYER_WIDTH, LAYER_HEIGHT), nullptr)
                 , mDrawCounter(drawCounter) {}
-        virtual sk_sp<SkImage> onNewImageSnapshot() override {
+        virtual sk_sp<SkImage> onNewImageSnapshot(const SkIRect* bounds) override {
             EXPECT_EQ(3, (*mDrawCounter)++);
             EXPECT_EQ(SkRect::MakeLTRB(100 - SCROLL_X, 100 - SCROLL_Y, 300 - SCROLL_X,
                                        300 - SCROLL_Y),
