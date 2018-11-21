@@ -90,7 +90,7 @@ public class PowerUI extends SystemUI {
     private float[] mRecentTemps = new float[MAX_RECENT_TEMPS];
     private int mNumTemps;
     private long mNextLogTime;
-    private IThermalService mThermalService;
+    @VisibleForTesting IThermalService mThermalService;
 
     @VisibleForTesting int mBatteryLevel = 100;
     @VisibleForTesting int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
@@ -394,7 +394,7 @@ public class PowerUI extends SystemUI {
             // Enable push notifications of throttling from vendor thermal
             // management subsystem via thermalservice, in addition to our
             // usual polling, to react to temperature jumps more quickly.
-            IBinder b = ServiceManager.getService("thermalservice");
+            IBinder b = ServiceManager.getService(Context.THERMAL_SERVICE);
 
             if (b != null) {
                 mThermalService = IThermalService.Stub.asInterface(b);
