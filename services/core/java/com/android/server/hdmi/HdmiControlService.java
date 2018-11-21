@@ -1965,6 +1965,10 @@ public class HdmiControlService extends SystemService {
                         Slog.e(TAG, "Not an audio system device. Won't set system audio mode on");
                         return;
                     }
+                    if (audioSystem() == null) {
+                        Slog.e(TAG, "Audio System local device is not registered");
+                        return;
+                    }
                     if (!audioSystem().checkSupportAndSetSystemAudioMode(true)) {
                         Slog.e(TAG, "System Audio Mode is not supported.");
                         return;
