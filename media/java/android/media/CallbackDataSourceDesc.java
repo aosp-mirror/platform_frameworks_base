@@ -19,7 +19,6 @@ package android.media;
 import android.annotation.NonNull;
 
 /**
- * @hide
  * Structure of data source descriptor for sources using callback.
  *
  * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)},

@@ -18,8 +18,6 @@ package android.media;
 
 /**
  * Immutable class for describing width and height dimensions.
- *
- * @hide
  */
 public final class VideoSize {
     /**
@@ -28,7 +26,7 @@ public final class VideoSize {
      * @param width The width of the video size
      * @param height The height of the video size
      */
-    public VideoSize(int width, int height) {
+    VideoSize(int width, int height) {
         mWidth = width;
         mHeight = height;
     }

@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @hide
  * Structure of data source descriptor for sources using URI.
  *
  * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)},

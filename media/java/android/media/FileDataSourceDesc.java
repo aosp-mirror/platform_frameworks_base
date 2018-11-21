@@ -23,7 +23,6 @@ import android.util.Log;
 import java.io.IOException;
 
 /**
- * @hide
  * Structure of data source descriptor for sources using file descriptor.
  *
  * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)},
