@@ -55,6 +55,8 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.SmartReplyView;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 
@@ -1932,5 +1934,24 @@ public class NotificationContentView extends FrameLayout {
         if (mExpandedWrapper != null) {
             mExpandedWrapper.setHeaderVisibleAmount(headerVisibleAmount);
         }
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print("    ");
+        pw.print("contentView visibility: " + getVisibility());
+        pw.print(", alpha: " + getAlpha());
+        pw.print(", clipBounds: " + getClipBounds());
+        pw.print(", contentHeight: " + mContentHeight);
+        pw.print(", visibleType: " + mVisibleType);
+        View view = getViewForVisibleType(mVisibleType);
+        pw.print(", visibleView ");
+        if (view != null) {
+            pw.print(" visibility: " + view.getVisibility());
+            pw.print(", alpha: " + view.getAlpha());
+            pw.print(", clipBounds: " + view.getClipBounds());
+        } else {
+            pw.print("null");
+        }
+        pw.println();
     }
 }
