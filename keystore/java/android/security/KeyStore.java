@@ -255,14 +255,18 @@ public class KeyStore {
         }
     }
 
-    public boolean delete(String key, int uid) {
+    int delete2(String key, int uid) {
         try {
-            int ret = mBinder.del(key, uid);
-            return (ret == NO_ERROR || ret == KEY_NOT_FOUND);
+            return mBinder.del(key, uid);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
+            return SYSTEM_ERROR;
         }
+    }
+
+    public boolean delete(String key, int uid) {
+        int ret = delete2(key, uid);
+        return ret == NO_ERROR || ret == KEY_NOT_FOUND;
     }
 
     @UnsupportedAppUsage
