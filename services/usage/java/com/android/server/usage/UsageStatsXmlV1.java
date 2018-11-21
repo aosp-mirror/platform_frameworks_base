@@ -20,6 +20,7 @@ import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import com.android.internal.util.XmlUtils;
 
@@ -89,11 +90,23 @@ final class UsageStatsXmlV1 {
         // Apply the offset to the beginTime to find the absolute time.
         stats.mLastTimeUsed = statsOut.beginTime + XmlUtils.readLongAttribute(
                 parser, LAST_TIME_ACTIVE_ATTR);
-        stats.mLastTimeForegroundServiceUsed = statsOut.beginTime + XmlUtils.readLongAttribute(
-                parser, LAST_TIME_SERVICE_USED_ATTR);
+
+        try {
+            stats.mLastTimeForegroundServiceUsed = statsOut.beginTime + XmlUtils.readLongAttribute(
+                    parser, LAST_TIME_SERVICE_USED_ATTR);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to parse mLastTimeForegroundServiceUsed", e);
+        }
+
         stats.mTotalTimeInForeground = XmlUtils.readLongAttribute(parser, TOTAL_TIME_ACTIVE_ATTR);
-        stats.mTotalTimeForegroundServiceUsed = XmlUtils.readLongAttribute(parser,
+
+        try {
+            stats.mTotalTimeForegroundServiceUsed = XmlUtils.readLongAttribute(parser,
                 TOTAL_TIME_SERVICE_USED_ATTR);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to parse mTotalTimeForegroundServiceUsed", e);
+        }
+
         stats.mLastEvent = XmlUtils.readIntAttribute(parser, LAST_EVENT_ATTR);
         stats.mAppLaunchCount = XmlUtils.readIntAttribute(parser, APP_LAUNCH_COUNT_ATTR,
                 0);
@@ -350,8 +363,17 @@ final class UsageStatsXmlV1 {
         }
 
         statsOut.endTime = statsOut.beginTime + XmlUtils.readLongAttribute(parser, END_TIME_ATTR);
-        statsOut.majorVersion = XmlUtils.readIntAttribute(parser, MAJOR_VERSION_ATTR);
-        statsOut.minorVersion = XmlUtils.readIntAttribute(parser, MINOR_VERSION_ATTR);
+        try {
+            statsOut.majorVersion = XmlUtils.readIntAttribute(parser, MAJOR_VERSION_ATTR);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to parse majorVersion", e);
+        }
+
+        try {
+            statsOut.minorVersion = XmlUtils.readIntAttribute(parser, MINOR_VERSION_ATTR);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to parse minorVersion", e);
+        }
 
         int eventCode;
         int outerDepth = parser.getDepth();
