@@ -1306,6 +1306,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.WARNING_TEMPERATURE,
                 GlobalSettingsProto.TemperatureWarning.WARNING_TEMPERATURE_LEVEL);
+        dumpSetting(s, p,
+                Settings.Global.USB_ALARM_TEMPERATURE,
+                GlobalSettingsProto.TemperatureWarning.USB_ALARM_TEMPERATURE_LEVEL);
         p.end(tempWarningToken);
 
         final long tetherToken = p.start(GlobalSettingsProto.TETHER);
