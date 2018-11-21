@@ -20,7 +20,6 @@
 #include "android_media_AudioTrack.h"
 
 #include <nativehelper/JNIHelp.h>
-#include <nativehelper/JniConstants.h>
 #include "core_jni_helpers.h"
 
 #include <utils/Log.h>
