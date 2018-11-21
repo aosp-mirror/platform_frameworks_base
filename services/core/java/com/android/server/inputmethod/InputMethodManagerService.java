@@ -94,6 +94,7 @@ import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.EventLog;
@@ -457,7 +458,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    final HashMap<IBinder, ClientState> mClients = new HashMap<>();
+    final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
 
     /**
      * Set once the system is ready to run third party code.
@@ -1781,7 +1782,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final int callerPid = Binder.getCallingPid();
         synchronized (mMethodMap) {
             // TODO: Optimize this linear search.
-            for (ClientState state : mClients.values()) {
+            final int numClients = mClients.size();
+            for (int i = 0; i < numClients; ++i) {
+                final ClientState state = mClients.valueAt(i);
                 if (state.uid == callerUid && state.pid == callerPid
                         && state.selfReportedDisplayId == selfReportedDisplayId) {
                     throw new SecurityException("uid=" + callerUid + "/pid=" + callerPid
@@ -2192,8 +2195,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     void clearCurMethodLocked() {
         if (mCurMethod != null) {
-            for (ClientState cs : mClients.values()) {
-                clearClientSessionLocked(cs);
+            final int numClients = mClients.size();
+            for (int i = 0; i < numClients; ++i) {
+                clearClientSessionLocked(mClients.valueAt(i));
             }
 
             finishSessionLocked(mEnabledSession);
@@ -4621,7 +4625,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 info.dump(p, "    ");
             }
             p.println("  Clients:");
-            for (ClientState ci : mClients.values()) {
+            final int numClients = mClients.size();
+            for (int i = 0; i < numClients; ++i) {
+                final ClientState ci = mClients.valueAt(i);
                 p.println("  Client " + ci + ":");
                 p.println("    client=" + ci.client);
                 p.println("    inputContext=" + ci.inputContext);
