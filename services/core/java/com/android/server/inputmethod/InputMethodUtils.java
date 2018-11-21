@@ -1277,17 +1277,6 @@ final class InputMethodUtils {
             }
         }
 
-        public HashMap<InputMethodInfo, List<InputMethodSubtype>>
-                getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked(Context context) {
-            HashMap<InputMethodInfo, List<InputMethodSubtype>> enabledInputMethodAndSubtypes =
-                    new HashMap<>();
-            for (InputMethodInfo imi: getEnabledInputMethodListLocked()) {
-                enabledInputMethodAndSubtypes.put(
-                        imi, getEnabledInputMethodSubtypeListLocked(context, imi, true));
-            }
-            return enabledInputMethodAndSubtypes;
-        }
-
         public void dumpLocked(final Printer pw, final String prefix) {
             pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
             pw.println(prefix + "mCurrentProfileIds=" + Arrays.toString(mCurrentProfileIds));
