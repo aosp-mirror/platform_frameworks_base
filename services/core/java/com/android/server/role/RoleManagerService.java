@@ -18,6 +18,7 @@ package com.android.server.role;
 
 import android.Manifest;
 import android.annotation.CheckResult;
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -119,12 +120,35 @@ public class RoleManagerService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.ROLE_SERVICE, new Stub());
+
         //TODO add watch for new user creation and run default grants for them
-        //TODO add package update watch to detect PermissionController upgrade and run def. grants
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        intentFilter.addDataScheme("package");
+        intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        getContext().registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int userId = UserHandle.getUserId(intent.getIntExtra(Intent.EXTRA_UID, -1));
+                if (RemoteRoleControllerService.DEBUG) {
+                    Slog.i(LOG_TAG,
+                            "Packages changed - re-running initial grants for user " + userId);
+                }
+                performInitialGrantsIfNecessary(userId);
+            }
+        }, UserHandle.SYSTEM, intentFilter, null /* broadcastPermission */, null /* handler */);
     }
 
     @Override
     public void onStartUser(@UserIdInt int userId) {
+        performInitialGrantsIfNecessary(userId);
+    }
+
+    @MainThread
+    private void performInitialGrantsIfNecessary(@UserIdInt int userId) {
         RoleUserState userState;
         synchronized (mLock) {
             userState = getUserStateLocked(userId);
