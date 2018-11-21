@@ -1640,6 +1640,9 @@ message LmkKillOccurred {
 
     // SWAP
     optional int64 swap_in_bytes = 8;
+
+    // The elapsed real time of start of the process.
+    optional int64 process_start_time_nanos = 9;
 }
 
 /*
