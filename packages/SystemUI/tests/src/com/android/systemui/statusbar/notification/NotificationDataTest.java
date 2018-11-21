@@ -39,6 +39,7 @@ import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
+import android.app.Person;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -419,6 +420,33 @@ public class NotificationDataTest extends SysuiTestCase {
         assertEquals(NOTIFICATION_CHANNEL, entry.channel);
         assertEquals(Ranking.USER_SENTIMENT_NEGATIVE, entry.userSentiment);
         assertEquals(snoozeCriterions, entry.snoozeCriteria);
+    }
+
+    @Test
+    public void notificationDataEntry_testIsLastMessageFromReply() {
+        Person.Builder person = new Person.Builder()
+                .setName("name")
+                .setKey("abc")
+                .setUri("uri")
+                .setBot(true);
+
+        // EXTRA_MESSAGING_PERSON is the same Person as the sender in last message in EXTRA_MESSAGES
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(Notification.EXTRA_MESSAGING_PERSON, person.build());
+        Bundle[] messagesBundle = new Bundle[]{ new Notification.MessagingStyle.Message(
+                "text", 0, person.build()).toBundle() };
+        bundle.putParcelableArray(Notification.EXTRA_MESSAGES, messagesBundle);
+
+        Notification notification = new Notification.Builder(mContext, "test")
+                .addExtras(bundle)
+                .build();
+        StatusBarNotification sbn = new StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
+                notification, mContext.getUser(), "", 0);
+
+        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        entry.setHasSentReply();
+
+        assertTrue(entry.isLastMessageFromReply());
     }
 
     private void initStatusBarNotification(boolean allowDuringSetup) {

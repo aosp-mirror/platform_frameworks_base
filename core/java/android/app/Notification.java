@@ -7461,7 +7461,11 @@ public class Notification implements Parcelable
                 return mRemoteInputHistory;
             }
 
-            private Bundle toBundle() {
+            /**
+             * @hide
+             */
+            @VisibleForTesting
+            public Bundle toBundle() {
                 Bundle bundle = new Bundle();
                 if (mText != null) {
                     bundle.putCharSequence(KEY_TEXT, mText);
