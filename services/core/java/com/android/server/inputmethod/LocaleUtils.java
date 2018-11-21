@@ -22,10 +22,10 @@ import android.annotation.Nullable;
 import android.icu.util.ULocale;
 import android.os.LocaleList;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -155,7 +155,7 @@ final class LocaleUtils {
         }
 
         final int numPreferredLocales = preferredLocales.size();
-        final HashMap<String, ScoreEntry> scoreboard = new HashMap<>();
+        final ArrayMap<String, ScoreEntry> scoreboard = new ArrayMap<>();
         final byte[] score = new byte[numPreferredLocales];
         final ULocale[] preferredULocaleCache = new ULocale[numPreferredLocales];
 
@@ -197,7 +197,11 @@ final class LocaleUtils {
             }
         }
 
-        final ScoreEntry[] result = scoreboard.values().toArray(new ScoreEntry[scoreboard.size()]);
+        final int numEntries = scoreboard.size();
+        final ScoreEntry[] result = new ScoreEntry[numEntries];
+        for (int i = 0; i < numEntries; ++i) {
+            result[i] = scoreboard.valueAt(i);
+        }
         Arrays.sort(result);
         for (final ScoreEntry entry : result) {
             dest.add(sources.get(entry.mIndex));
