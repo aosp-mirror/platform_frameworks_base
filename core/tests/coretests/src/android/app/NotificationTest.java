@@ -106,9 +106,9 @@ public class NotificationTest {
         int backgroundColor = 0xff585868;
         int initialForegroundColor = 0xff505868;
         builder.setColorPalette(backgroundColor, initialForegroundColor);
-        int primaryTextColor = builder.getPrimaryTextColor();
+        int primaryTextColor = builder.getPrimaryTextColor(builder.mParams);
         assertTrue(satisfiesTextContrast(primaryTextColor, backgroundColor));
-        int secondaryTextColor = builder.getSecondaryTextColor();
+        int secondaryTextColor = builder.getSecondaryTextColor(builder.mParams);
         assertTrue(satisfiesTextContrast(secondaryTextColor, backgroundColor));
     }
 
