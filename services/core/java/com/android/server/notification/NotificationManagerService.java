@@ -411,7 +411,7 @@ public class NotificationManagerService extends SystemService {
     private NotificationAssistants mAssistants;
     private ConditionProviders mConditionProviders;
     private NotificationUsageStats mUsageStats;
-    private boolean mLockScreenAllowSecureNotifications;
+    private boolean mLockScreenAllowSecureNotifications = true;
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
