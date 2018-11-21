@@ -367,6 +367,9 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     public void onSnapOpen() {
         mMenuSnapped = true;
         mMenuSnappedOnLeft = isMenuOnLeft();
+        if (mAlpha == 0f && mParent != null) {
+            fadeInMenu(mParent.getWidth());
+        }
         if (mMenuListener != null) {
             mMenuListener.onMenuShown(getParent());
         }
