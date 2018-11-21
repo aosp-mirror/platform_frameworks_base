@@ -1692,6 +1692,15 @@ public final class Settings {
     /** @hide - Private call() method to write to 'configuration' table */
     public static final String CALL_METHOD_PUT_CONFIG = "PUT_config";
 
+    /** @hide - Private call() method to delete from the 'system' table */
+    public static final String CALL_METHOD_DELETE_SYSTEM = "DELETE_system";
+
+    /** @hide - Private call() method to delete from the 'secure' table */
+    public static final String CALL_METHOD_DELETE_SECURE = "DELETE_secure";
+
+    /** @hide - Private call() method to delete from the 'global' table */
+    public static final String CALL_METHOD_DELETE_GLOBAL = "DELETE_global";
+
     /** @hide - Private call() method to reset to defaults the 'global' table */
     public static final String CALL_METHOD_RESET_GLOBAL = "RESET_global";
 
