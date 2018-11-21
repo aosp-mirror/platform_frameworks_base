@@ -366,9 +366,9 @@ interface IDevicePolicyManager {
     void setBackupServiceEnabled(in ComponentName admin, boolean enabled);
     boolean isBackupServiceEnabled(in ComponentName admin);
 
-    void setNetworkLoggingEnabled(in ComponentName admin, boolean enabled);
-    boolean isNetworkLoggingEnabled(in ComponentName admin);
-    List<NetworkEvent> retrieveNetworkLogs(in ComponentName admin, long batchToken);
+    void setNetworkLoggingEnabled(in ComponentName admin, in String packageName, boolean enabled);
+    boolean isNetworkLoggingEnabled(in ComponentName admin, in String packageName);
+    List<NetworkEvent> retrieveNetworkLogs(in ComponentName admin, in String packageName, long batchToken);
 
     boolean bindDeviceAdminServiceAsUser(in ComponentName admin,
         IApplicationThread caller, IBinder token, in Intent service,

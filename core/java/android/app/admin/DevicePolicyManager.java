@@ -1485,10 +1485,44 @@ public class DevicePolicyManager {
 
     /**
      * Delegation of management of uninstalled packages. This scope grants access to the
-     * {@code #setKeepUninstalledPackages} and {@code #getKeepUninstalledPackages} APIs.
+     * {@link #setKeepUninstalledPackages} and {@link #getKeepUninstalledPackages} APIs.
      */
     public static final String DELEGATION_KEEP_UNINSTALLED_PACKAGES =
             "delegation-keep-uninstalled-packages";
+
+    /**
+     * Grants access to {@link #setNetworkLoggingEnabled}, {@link #isNetworkLoggingEnabled} and
+     * {@link #retrieveNetworkLogs}. Once granted the delegated app will start receiving
+     * DelegatedAdminReceiver.onNetworkLogsAvailable() callback, and Device owner will no longer
+     * receive the DeviceAdminReceiver.onNetworkLogsAvailable() callback.
+     * There can be at most one app that has this delegation.
+     * If another app already had delegated network logging access,
+     * it will lose the delegation when a new app is delegated.
+     *
+     * <p> Can only be granted by Device Owner.
+     */
+    public static final String DELEGATION_NETWORK_LOGGING = "delegation-network-logging";
+
+    /**
+     * Grants access to selection of KeyChain certificates on behalf of requesting apps.
+     * Once granted the app will start receiving
+     * DelegatedAdminReceiver.onChoosePrivateKeyAlias. The caller (PO/DO) will
+     * no longer receive {@link DeviceAdminReceiver#onChoosePrivateKeyAlias()}.
+     * There can be at most one app that has this delegation.
+     * If another app already had delegated certificate selection access,
+     * it will lose the delegation when a new app is delegated.
+     *
+     * <p> Can be granted by Device Owner or Profile Owner.
+     */
+    public static final String DELEGATION_CERT_SELECTION = "delegation-cert-selection";
+
+
+    /**
+     * Delegation of silent APK installation via {@link android.content.pm.PackageInstaller} APIs.
+     *
+     * <p> Can only be delegated by Device Owner.
+     */
+    public static final String DELEGATION_PACKAGE_INSTALLATION = "delegation-package-installation";
 
     /**
      * No management for current user in-effect. This is the default.
@@ -9148,7 +9182,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner to control the network logging feature.
+     * Called by a device owner or delegated app with {@link #DELEGATION_NETWORK_LOGGING} to
+     * control the network logging feature.
      *
      * <p> Network logs contain DNS lookup and connect() library call events. The following library
      *     functions are recorded while network logging is active:
@@ -9185,16 +9220,17 @@ public class DevicePolicyManager {
      * all users to become affiliated. Therefore it's recommended that affiliation ids are set for
      * new users as soon as possible after provisioning via {@link #setAffiliationIds}.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
+     *        {@code null} if called by a delegated app.
      * @param enabled whether network logging should be enabled or not.
      * @throws SecurityException if {@code admin} is not a device owner.
      * @see #setAffiliationIds
      * @see #retrieveNetworkLogs
      */
-    public void setNetworkLoggingEnabled(@NonNull ComponentName admin, boolean enabled) {
+    public void setNetworkLoggingEnabled(@Nullable ComponentName admin, boolean enabled) {
         throwIfParentInstance("setNetworkLoggingEnabled");
         try {
-            mService.setNetworkLoggingEnabled(admin, enabled);
+            mService.setNetworkLoggingEnabled(admin, mContext.getPackageName(), enabled);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -9204,7 +9240,8 @@ public class DevicePolicyManager {
      * Return whether network logging is enabled by a device owner.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Can only
-     * be {@code null} if the caller has MANAGE_USERS permission.
+     * be {@code null} if the caller is a delegated app with {@link #DELEGATION_NETWORK_LOGGING}
+     * or has MANAGE_USERS permission.
      * @return {@code true} if network logging is enabled by device owner, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not a device owner and caller has
      * no MANAGE_USERS permission
@@ -9212,14 +9249,15 @@ public class DevicePolicyManager {
     public boolean isNetworkLoggingEnabled(@Nullable ComponentName admin) {
         throwIfParentInstance("isNetworkLoggingEnabled");
         try {
-            return mService.isNetworkLoggingEnabled(admin);
+            return mService.isNetworkLoggingEnabled(admin, mContext.getPackageName());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Called by device owner to retrieve the most recent batch of network logging events.
+     * Called by device owner or delegated app with {@link #DELEGATION_NETWORK_LOGGING} to retrieve
+     * the most recent batch of network logging events.
      * A device owner has to provide a batchToken provided as part of
      * {@link DeviceAdminReceiver#onNetworkLogsAvailable} callback. If the token doesn't match the
      * token of the most recent available batch of logs, {@code null} will be returned.
@@ -9238,7 +9276,8 @@ public class DevicePolicyManager {
      * by {@link DeviceAdminReceiver#onNetworkLogsAvailable}. See
      * {@link DevicePolicyManager#setAffiliationIds}.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
+     *        {@code null} if called by a delegated app.
      * @param batchToken A token of the batch to retrieve
      * @return A new batch of network logs which is a list of {@link NetworkEvent}. Returns
      *        {@code null} if the batch represented by batchToken is no longer available or if
@@ -9248,11 +9287,11 @@ public class DevicePolicyManager {
      * @see #setAffiliationIds
      * @see DeviceAdminReceiver#onNetworkLogsAvailable
      */
-    public @Nullable List<NetworkEvent> retrieveNetworkLogs(@NonNull ComponentName admin,
+    public @Nullable List<NetworkEvent> retrieveNetworkLogs(@Nullable ComponentName admin,
             long batchToken) {
         throwIfParentInstance("retrieveNetworkLogs");
         try {
-            return mService.retrieveNetworkLogs(admin, batchToken);
+            return mService.retrieveNetworkLogs(admin, mContext.getPackageName(), batchToken);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

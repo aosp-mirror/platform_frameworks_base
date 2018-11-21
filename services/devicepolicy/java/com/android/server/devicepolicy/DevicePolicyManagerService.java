@@ -40,10 +40,13 @@ import static android.app.admin.DevicePolicyManager.CODE_USER_SETUP_COMPLETED;
 import static android.app.admin.DevicePolicyManager.DELEGATION_APP_RESTRICTIONS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_BLOCK_UNINSTALL;
 import static android.app.admin.DevicePolicyManager.DELEGATION_CERT_INSTALL;
+import static android.app.admin.DevicePolicyManager.DELEGATION_CERT_SELECTION;
 import static android.app.admin.DevicePolicyManager.DELEGATION_ENABLE_SYSTEM_APP;
 import static android.app.admin.DevicePolicyManager.DELEGATION_INSTALL_EXISTING_PACKAGE;
 import static android.app.admin.DevicePolicyManager.DELEGATION_KEEP_UNINSTALLED_PACKAGES;
+import static android.app.admin.DevicePolicyManager.DELEGATION_NETWORK_LOGGING;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
+import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_INSTALLATION;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_BASE_INFO;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_IMEI;
@@ -358,8 +361,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         DELEGATION_PACKAGE_ACCESS,
         DELEGATION_PERMISSION_GRANT,
         DELEGATION_INSTALL_EXISTING_PACKAGE,
-        DELEGATION_KEEP_UNINSTALLED_PACKAGES
+        DELEGATION_KEEP_UNINSTALLED_PACKAGES,
+        DELEGATION_NETWORK_LOGGING,
+        DELEGATION_CERT_SELECTION,
+        DELEGATION_PACKAGE_INSTALLATION
     };
+
+    // Subset of delegations that can only be delegated by Device Owner.
+    private static final List<String> DEVICE_OWNER_DELEGATIONS = Arrays.asList(new String[] {
+            DELEGATION_NETWORK_LOGGING,
+            DELEGATION_PACKAGE_INSTALLATION
+    });
+
+    // Subset of delegations that only one single package within a given user can hold
+    private static final List<String> EXCLUSIVE_DELEGATIONS = Arrays.asList(new String[] {
+            DELEGATION_NETWORK_LOGGING,
+            DELEGATION_CERT_SELECTION,
+    });
 
     /**
      *  System property whose value is either "true" or "false", indicating whether
@@ -5699,12 +5717,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         Intent intent = new Intent(DeviceAdminReceiver.ACTION_CHOOSE_PRIVATE_KEY_ALIAS);
-        intent.setComponent(aliasChooser);
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID, uid);
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_URI, uri);
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_ALIAS, alias);
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_RESPONSE, response);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+
+        final ComponentName delegateReceiver;
+        delegateReceiver = resolveDelegateReceiver(DELEGATION_CERT_SELECTION,
+                DeviceAdminReceiver.ACTION_CHOOSE_PRIVATE_KEY_ALIAS, caller.getIdentifier());
+
+        if (delegateReceiver != null) {
+            intent.setComponent(delegateReceiver);
+        } else {
+            intent.setComponent(aliasChooser);
+        }
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
@@ -5765,22 +5792,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     @Override
     public void setDelegatedScopes(ComponentName who, String delegatePackage,
-            List<String> scopes) throws SecurityException {
+            List<String> scopeList) throws SecurityException {
         Preconditions.checkNotNull(who, "ComponentName is null");
         Preconditions.checkStringNotEmpty(delegatePackage, "Delegate package is null or empty");
-        Preconditions.checkCollectionElementsNotNull(scopes, "Scopes");
+        Preconditions.checkCollectionElementsNotNull(scopeList, "Scopes");
         // Remove possible duplicates.
-        scopes = new ArrayList(new ArraySet(scopes));
+        final ArrayList<String> scopes = new ArrayList(new ArraySet(scopeList));
         // Ensure given scopes are valid.
         if (scopes.retainAll(Arrays.asList(DELEGATIONS))) {
             throw new IllegalArgumentException("Unexpected delegation scopes");
         }
-
+        final boolean hasDoDelegation = !Collections.disjoint(scopes, DEVICE_OWNER_DELEGATIONS);
         // Retrieve the user ID of the calling process.
         final int userId = mInjector.userHandleGetCallingUserId();
         synchronized (getLockObject()) {
             // Ensure calling process is device/profile owner.
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (hasDoDelegation) {
+                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            } else {
+                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            }
             // Ensure the delegate is installed (skip this for DELEGATION_CERT_INSTALL in pre-N).
             if (shouldCheckIfDelegatePackageIsInstalled(delegatePackage,
                         getTargetSdk(who.getPackageName(), userId), scopes)) {
@@ -5793,29 +5824,55 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             // Set the new delegate in user policies.
             final DevicePolicyData policy = getUserData(userId);
+            List<String> exclusiveScopes = null;
             if (!scopes.isEmpty()) {
                 policy.mDelegationMap.put(delegatePackage, new ArrayList<>(scopes));
+                exclusiveScopes = new ArrayList<>(scopes);
+                exclusiveScopes.retainAll(EXCLUSIVE_DELEGATIONS);
             } else {
                 // Remove any delegation info if the given scopes list is empty.
                 policy.mDelegationMap.remove(delegatePackage);
             }
+            sendDelegationChangedBroadcast(delegatePackage, scopes, userId);
 
-            // Notify delegate package of updates.
-            final Intent intent = new Intent(
-                    DevicePolicyManager.ACTION_APPLICATION_DELEGATION_SCOPES_CHANGED);
-            // Only call receivers registered with Context#registerReceiver (don’t wake delegate).
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            // Limit components this intent resolves to to the delegate package.
-            intent.setPackage(delegatePackage);
-            // Include the list of delegated scopes as an extra.
-            intent.putStringArrayListExtra(DevicePolicyManager.EXTRA_DELEGATION_SCOPES,
-                    (ArrayList<String>) scopes);
-            // Send the broadcast.
-            mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+            // If set, remove exclusive scopes from all other delegates
+            if (exclusiveScopes != null && !exclusiveScopes.isEmpty()) {
+                for (Map.Entry<String, List<String>> entry : policy.mDelegationMap.entrySet()) {
+                    final String currentPackage = entry.getKey();
+                    final List<String> currentScopes = entry.getValue();
 
+                    if (!currentPackage.equals(delegatePackage)) {
+                        // Iterate through all other delegates
+                        if (currentScopes.removeAll(exclusiveScopes)) {
+                            // And if this delegate had some exclusive scopes which are now moved
+                            // to the new delegate, notify about its delegation changes.
+                            if (currentScopes.isEmpty()) {
+                                policy.mDelegationMap.remove(currentPackage);
+                            }
+                            sendDelegationChangedBroadcast(currentPackage,
+                                    new ArrayList<>(currentScopes), userId);
+                        }
+                    }
+                }
+            }
             // Persist updates.
             saveSettingsLocked(userId);
         }
+    }
+
+    private void sendDelegationChangedBroadcast(String delegatePackage, ArrayList<String> scopes,
+            int userId) {
+        // Notify delegate package of updates.
+        final Intent intent = new Intent(
+                DevicePolicyManager.ACTION_APPLICATION_DELEGATION_SCOPES_CHANGED);
+        // Only call receivers registered with Context#registerReceiver (don’t wake delegate).
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        // Limit components this intent resolves to to the delegate package.
+        intent.setPackage(delegatePackage);
+        // Include the list of delegated scopes as an extra.
+        intent.putStringArrayListExtra(DevicePolicyManager.EXTRA_DELEGATION_SCOPES, scopes);
+        // Send the broadcast.
+        mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
     }
 
     /**
@@ -5885,17 +5942,59 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             // Ensure calling process is device/profile owner.
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            final DevicePolicyData policy = getUserData(userId);
+            return getDelegatePackagesInternalLocked(scope, userId);
+        }
+    }
 
-            // Create a list to hold the resulting delegate packages.
-            final List<String> delegatePackagesWithScope = new ArrayList<>();
-            // Add all delegations containing scope to the result list.
-            for (int i = 0; i < policy.mDelegationMap.size(); i++) {
-                if (policy.mDelegationMap.valueAt(i).contains(scope)) {
-                    delegatePackagesWithScope.add(policy.mDelegationMap.keyAt(i));
-                }
+    private List<String> getDelegatePackagesInternalLocked(String scope, int userId) {
+        final DevicePolicyData policy = getUserData(userId);
+
+        // Create a list to hold the resulting delegate packages.
+        final List<String> delegatePackagesWithScope = new ArrayList<>();
+        // Add all delegations containing scope to the result list.
+        for (int i = 0; i < policy.mDelegationMap.size(); i++) {
+            if (policy.mDelegationMap.valueAt(i).contains(scope)) {
+                delegatePackagesWithScope.add(policy.mDelegationMap.keyAt(i));
             }
-            return delegatePackagesWithScope;
+        }
+        return delegatePackagesWithScope;
+    }
+
+    /**
+     * Return the ComponentName of the receiver that handles the given broadcast action, from
+     * the app that holds the given delegation capability. If the app defines multiple receivers
+     * with the same intent action filter, will return any one of them nondeterministically.
+     *
+     * @return ComponentName of the receiver or {@null} if none exists.
+     */
+    private ComponentName resolveDelegateReceiver(String scope, String action, int userId) {
+
+        final List<String> delegates;
+        synchronized (getLockObject()) {
+            delegates = getDelegatePackagesInternalLocked(scope, userId);
+        }
+        if (delegates.size() != 1) {
+            Slog.wtf(LOG_TAG, "More than one delegate holds " + scope);
+            return null;
+        }
+        final String pkg = delegates.get(0);
+        Intent intent = new Intent(action);
+        intent.setPackage(pkg);
+        final List<ResolveInfo> receivers;
+        try {
+            receivers = mIPackageManager.queryIntentReceivers(
+                    intent, null, 0, userId).getList();
+        } catch (RemoteException e) {
+            return null;
+        }
+        final int count = receivers.size();
+        if (count >= 1) {
+            if (count > 1) {
+                Slog.w(LOG_TAG, pkg + " defines more than one delegate receiver for " + action);
+            }
+            return receivers.get(0).activityInfo.getComponentName();
+        } else {
+            return null;
         }
     }
 
@@ -5958,15 +6057,34 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     private void enforceCanManageScope(ComponentName who, String callerPackage, int reqPolicy,
             String scope) {
+        enforceCanManageScopeOrCheckPermission(who, callerPackage, reqPolicy, scope, null);
+    }
+
+    /**
+     * Throw a security exception if a ComponentName is given and it is not a device/profile owner
+     * OR if the calling process is not a delegate of the given scope and does not hold the
+     * required permission.
+     */
+    private void enforceCanManageScopeOrCheckPermission(@Nullable ComponentName who,
+            @NonNull String callerPackage, int reqPolicy, @NonNull String scope,
+            @Nullable String permission) {
         // If a ComponentName is given ensure it is a device or profile owner according to policy.
         if (who != null) {
             synchronized (getLockObject()) {
                 getActiveAdminForCallerLocked(who, reqPolicy);
             }
-        // If no ComponentName is given ensure calling process has scope delegation.
-        } else if (!isCallerDelegate(callerPackage, scope)) {
-            throw new SecurityException("Caller with uid " + mInjector.binderGetCallingUid()
-                    + " is not a delegate of scope " + scope + ".");
+        } else {
+            // If no ComponentName is given ensure calling process has scope delegation or required
+            // permission
+            if (isCallerDelegate(callerPackage, scope)) {
+                return;
+            }
+            if (permission == null) {
+                throw new SecurityException("Caller with uid " + mInjector.binderGetCallingUid()
+                        + " is not a delegate of scope " + scope + ".");
+            } else {
+                mContext.enforceCallingOrSelfPermission(permission, null);
+            }
         }
     }
 
@@ -6900,9 +7018,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void ensureDeviceOwnerAndAllUsersAffiliated(ComponentName who) throws SecurityException {
+    private void ensureDeviceOwnerAndAllUsersAffiliated(ComponentName who)
+            throws SecurityException {
         synchronized (getLockObject()) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+        ensureAllUsersAffiliated();
+    }
+
+    private void ensureAllUsersAffiliated() throws SecurityException {
+        synchronized (getLockObject()) {
             if (!areAllUsersAffiliatedWithDeviceLocked()) {
                 throw new SecurityException("Not all users are affiliated.");
             }
@@ -6961,14 +7086,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     void sendDeviceOwnerCommand(String action, Bundle extras) {
-        int deviceOwnerUserId;
-        ComponentName deviceOwnerComponent;
+        final int deviceOwnerUserId;
         synchronized (getLockObject()) {
             deviceOwnerUserId = mOwners.getDeviceOwnerUserId();
-            deviceOwnerComponent = mOwners.getDeviceOwnerComponent();
         }
-        sendActiveAdminCommand(action, extras, deviceOwnerUserId,
-                deviceOwnerComponent);
+
+        ComponentName receiverComponent = null;
+        if (action.equals(DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE)) {
+            receiverComponent = resolveDelegateReceiver(DELEGATION_NETWORK_LOGGING, action,
+                    deviceOwnerUserId);
+        }
+        if (receiverComponent == null) {
+            synchronized (getLockObject()) {
+                receiverComponent = mOwners.getDeviceOwnerComponent();
+            }
+        }
+        sendActiveAdminCommand(action, extras, deviceOwnerUserId, receiverComponent);
     }
 
     private void sendProfileOwnerCommand(String action, Bundle extras, int userHandle) {
@@ -12381,13 +12514,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setNetworkLoggingEnabled(ComponentName admin, boolean enabled) {
+    public void setNetworkLoggingEnabled(@Nullable ComponentName admin,
+            @NonNull String packageName, boolean enabled) {
         if (!mHasFeature) {
             return;
         }
         synchronized (getLockObject()) {
-            Preconditions.checkNotNull(admin);
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            enforceCanManageScope(admin, packageName, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER,
+                    DELEGATION_NETWORK_LOGGING);
 
             if (enabled == isNetworkLoggingEnabledInternalLocked()) {
                 // already in the requested state
@@ -12488,12 +12622,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean isNetworkLoggingEnabled(ComponentName admin) {
+    public boolean isNetworkLoggingEnabled(@Nullable ComponentName admin,
+            @NonNull String packageName) {
         if (!mHasFeature) {
             return false;
         }
         synchronized (getLockObject()) {
-            enforceDeviceOwnerOrManageUsers();
+            enforceCanManageScopeOrCheckPermission(admin, packageName,
+                    DeviceAdminInfo.USES_POLICY_DEVICE_OWNER, DELEGATION_NETWORK_LOGGING,
+                    android.Manifest.permission.MANAGE_USERS);
             return isNetworkLoggingEnabledInternalLocked();
         }
     }
@@ -12511,12 +12648,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * @see NetworkLoggingHandler#MAX_EVENTS_PER_BATCH
      */
     @Override
-    public List<NetworkEvent> retrieveNetworkLogs(ComponentName admin, long batchToken) {
+    public List<NetworkEvent> retrieveNetworkLogs(@Nullable ComponentName admin,
+            @NonNull String packageName, long batchToken) {
         if (!mHasFeature) {
             return null;
         }
-        Preconditions.checkNotNull(admin);
-        ensureDeviceOwnerAndAllUsersAffiliated(admin);
+        enforceCanManageScope(admin, packageName, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER,
+                DELEGATION_NETWORK_LOGGING);
+        ensureAllUsersAffiliated();
 
         synchronized (getLockObject()) {
             if (mNetworkLogger == null
