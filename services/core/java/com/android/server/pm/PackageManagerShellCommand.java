@@ -2821,7 +2821,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--install-reason 0/1/2/3/4] [--originating-uri URI]");
         pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
         pw.println("       [--preload] [--instantapp] [--full] [--dont-kill]");
-        pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES] [PATH|-]");
+        pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES] [--apex]");
+        pw.println("       [PATH|-]");
         pw.println("    Install an application.  Must provide the apk data to install, either as a");
         pw.println("    file path or '-' to read from stdin.  Options are:");
         pw.println("      -l: forward lock application");
@@ -2850,13 +2851,14 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --force-uuid: force install on to disk volume with given UUID");
         pw.println("      --force-sdk: allow install even when existing app targets platform");
         pw.println("          codename but new one targets a final API level");
+        pw.println("      --apex: install an .apex file, not an .apk");
         pw.println("");
         pw.println("  install-create [-lrtsfdg] [-i PACKAGE] [--user USER_ID|all|current]");
         pw.println("       [-p INHERIT_PACKAGE] [--install-location 0/1/2]");
         pw.println("       [--install-reason 0/1/2/3/4] [--originating-uri URI]");
         pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
         pw.println("       [--preload] [--instantapp] [--full] [--dont-kill]");
-        pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES]");
+        pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [--apex] [-S BYTES]");
         pw.println("       [--multi-package]");
         pw.println("    Like \"install\", but starts an install session.  Use \"install-write\"");
         pw.println("    to push data into the session, and \"install-commit\" to finish.");
