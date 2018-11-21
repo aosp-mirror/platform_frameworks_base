@@ -16,8 +16,12 @@
 
 package com.android.systemui.privacy
 
+import android.app.ActivityManager
 import android.app.AppOpsManager
+import android.content.Intent
 import android.os.Handler
+import android.os.UserHandle
+import android.os.UserManager
 import android.support.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -34,9 +38,11 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyList
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.never
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
-
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -44,10 +50,18 @@ import org.mockito.MockitoAnnotations
 @RunWithLooper
 class PrivacyItemControllerTest : SysuiTestCase() {
 
+    companion object {
+        val CURRENT_USER_ID = ActivityManager.getCurrentUser()
+        val OTHER_USER = UserHandle(CURRENT_USER_ID + 1)
+        const val TAG = "PrivacyItemControllerTest"
+    }
+
     @Mock
     private lateinit var appOpsController: AppOpsController
     @Mock
     private lateinit var callback: PrivacyItemController.Callback
+    @Mock
+    private lateinit var userManager: UserManager
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var privacyItemController: PrivacyItemController
@@ -57,15 +71,17 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
 
-        appOpsController = mDependency.injectMockDependency(AppOpsController:: class.java)
+        appOpsController = mDependency.injectMockDependency(AppOpsController::class.java)
         mDependency.injectTestDependency(Dependency.BG_LOOPER, testableLooper.looper)
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER, Handler(testableLooper.looper))
+        mContext.addMockSystemService(UserManager::class.java, userManager)
 
         doReturn(listOf(AppOpItem(AppOpsManager.OP_CAMERA, 0, "", 0)))
                 .`when`(appOpsController).getActiveAppOpsForUser(anyInt())
 
         privacyItemController = PrivacyItemController(mContext, callback)
     }
+
     @Test
     fun testSetListeningTrue() {
         privacyItemController.setListening(true)
@@ -80,6 +96,38 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         privacyItemController.setListening(true)
         privacyItemController.setListening(false)
         verify(appOpsController).removeCallback(eq(PrivacyItemController.OPS),
-                any(AppOpsController.Callback:: class.java))
+                any(AppOpsController.Callback::class.java))
+    }
+
+    @Test
+    fun testRegisterReceiver_allUsers() {
+        val spiedContext = spy(mContext)
+        val itemController = PrivacyItemController(spiedContext, callback)
+
+        verify(spiedContext, atLeastOnce()).registerReceiverAsUser(
+                eq(itemController.userSwitcherReceiver), eq(UserHandle.ALL), any(), eq(null),
+                eq(null))
+        verify(spiedContext, never()).unregisterReceiver(eq(itemController.userSwitcherReceiver))
+    }
+
+    @Test
+    fun testReceiver_ACTION_USER_FOREGROUND() {
+        privacyItemController.userSwitcherReceiver.onReceive(context,
+                Intent(Intent.ACTION_USER_FOREGROUND))
+        verify(userManager).getProfiles(anyInt())
+    }
+
+    @Test
+    fun testReceiver_ACTION_MANAGED_PROFILE_ADDED() {
+        privacyItemController.userSwitcherReceiver.onReceive(context,
+                Intent(Intent.ACTION_MANAGED_PROFILE_ADDED))
+        verify(userManager).getProfiles(anyInt())
+    }
+
+    @Test
+    fun testReceiver_ACTION_MANAGED_PROFILE_REMOVED() {
+        privacyItemController.userSwitcherReceiver.onReceive(context,
+                Intent(Intent.ACTION_MANAGED_PROFILE_REMOVED))
+        verify(userManager).getProfiles(anyInt())
     }
 }
