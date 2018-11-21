@@ -59,6 +59,12 @@ public class DpmMockContext extends MockContext {
     public static final int CALLER_UID = UserHandle.getUid(CALLER_USER_HANDLE, 20123);
 
     /**
+     * UID corresponding to {@link #CALLER_USER_HANDLE}.
+     */
+    public static final int CALLER_MANAGED_PROVISIONING_UID = UserHandle.getUid(CALLER_USER_HANDLE,
+            20125);
+
+    /**
      * UID used when a caller is on the system user.
      */
     public static final int CALLER_SYSTEM_USER_UID = 20321;
@@ -80,6 +86,10 @@ public class DpmMockContext extends MockContext {
 
     public static final String ANOTHER_PACKAGE_NAME = "com.another.package.name";
     public static final int ANOTHER_UID = UserHandle.getUid(UserHandle.USER_SYSTEM, 18434);
+
+    public static final String DELEGATE_PACKAGE_NAME = "com.delegate.package.name";
+    public static final int DELEGATE_CERT_INSTALLER_UID = UserHandle.getUid(UserHandle.USER_SYSTEM,
+            18437);
 
     private final MockSystemServices mMockSystemServices;
 
@@ -426,5 +436,10 @@ public class DpmMockContext extends MockContext {
     @Override
     public int getUserId() {
         return UserHandle.getUserId(binder.getCallingUid());
+    }
+
+    @Override
+    public int checkCallingPermission(String permission) {
+        return spiedContext.checkCallingPermission(permission);
     }
 }

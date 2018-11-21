@@ -48,6 +48,8 @@ public final class Dpm extends BaseCommand {
     private static final String COMMAND_CLEAR_FREEZE_PERIOD_RECORD = "clear-freeze-period-record";
     private static final String COMMAND_FORCE_NETWORK_LOGS = "force-network-logs";
     private static final String COMMAND_FORCE_SECURITY_LOGS = "force-security-logs";
+    private static final String COMMAND_GRANT_PO_DEVICE_ID_ACCESS =
+            "grant-profile-owner-device-ids-access";
 
     private IDevicePolicyManager mDevicePolicyManager;
     private int mUserId = UserHandle.USER_SYSTEM;
@@ -89,7 +91,10 @@ public final class Dpm extends BaseCommand {
                 "the DPC and triggers DeviceAdminReceiver.onNetworkLogsAvailable() if needed.\n" +
                 "\n" +
                 "dpm " + COMMAND_FORCE_SECURITY_LOGS + ": makes all security logs available to " +
-                "the DPC and triggers DeviceAdminReceiver.onSecurityLogsAvailable() if needed.");
+                "the DPC and triggers DeviceAdminReceiver.onSecurityLogsAvailable() if needed."
+                + "\n"
+                + "usage: dpm " + COMMAND_GRANT_PO_DEVICE_ID_ACCESS + ": "
+                + "[ --user <USER_ID> | current ] <COMPONENT>\n");
     }
 
     @Override
@@ -123,6 +128,9 @@ public final class Dpm extends BaseCommand {
                 break;
             case COMMAND_FORCE_SECURITY_LOGS:
                 runForceSecurityLogs();
+                break;
+            case COMMAND_GRANT_PO_DEVICE_ID_ACCESS:
+                runGrantProfileOwnerDeviceIdsAccess();
                 break;
             default:
                 throw new IllegalArgumentException ("unknown command '" + command + "'");
@@ -239,6 +247,13 @@ public final class Dpm extends BaseCommand {
 
     private void runClearFreezePeriodRecord() throws RemoteException {
         mDevicePolicyManager.clearSystemUpdatePolicyFreezePeriodRecord();
+        System.out.println("Success");
+    }
+
+
+    private void runGrantProfileOwnerDeviceIdsAccess() throws RemoteException {
+        parseArgs(/*canHaveName=*/ false);
+        mDevicePolicyManager.grantDeviceIdsAccessToProfileOwner(mComponent, mUserId);
         System.out.println("Success");
     }
 
