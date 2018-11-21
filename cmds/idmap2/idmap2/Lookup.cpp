@@ -48,8 +48,6 @@ using android::kInvalidCookie;
 using android::Res_value;
 using android::ResStringPool;
 using android::ResTable_config;
-using android::String16;
-using android::String8;
 using android::StringPiece16;
 using android::base::StringPrintf;
 using android::idmap2::CommandLineOptions;
