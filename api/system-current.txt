@@ -5849,6 +5849,45 @@ package android.telephony.ims {
     field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsExternalCallState> CREATOR;
   }
 
+  public class ImsMmTelManager {
+    method public static android.telephony.ims.ImsMmTelManager createForSubscriptionId(android.content.Context, int);
+    method public int getVoWiFiModeSetting();
+    method public boolean isAdvancedCallingSettingEnabled();
+    method public boolean isAvailable(int, int);
+    method public boolean isCapable(int, int);
+    method public boolean isVoWiFiRoamingSettingEnabled();
+    method public boolean isVoWiFiSettingEnabled();
+    method public boolean isVtSettingEnabled();
+    method public void registerImsRegistrationCallback(java.util.concurrent.Executor, android.telephony.ims.ImsMmTelManager.RegistrationCallback);
+    method public void registerMmTelCapabilityCallback(java.util.concurrent.Executor, android.telephony.ims.ImsMmTelManager.CapabilityCallback);
+    method public void setAdvancedCallingSetting(boolean);
+    method public void setRttCapabilitySetting(boolean);
+    method public void setVoWiFiModeSetting(int);
+    method public void setVoWiFiNonPersistent(boolean, int);
+    method public void setVoWiFiRoamingModeSetting(int);
+    method public void setVoWiFiRoamingSetting(boolean);
+    method public void setVoWiFiSetting(boolean);
+    method public void setVtSetting(boolean);
+    method public void unregisterImsRegistrationCallback(android.telephony.ims.ImsMmTelManager.RegistrationCallback);
+    method public void unregisterMmTelCapabilityCallback(android.telephony.ims.ImsMmTelManager.CapabilityCallback);
+    field public static final int WIFI_MODE_CELLULAR_PREFERRED = 1; // 0x1
+    field public static final int WIFI_MODE_WIFI_ONLY = 0; // 0x0
+    field public static final int WIFI_MODE_WIFI_PREFERRED = 2; // 0x2
+  }
+
+  public static class ImsMmTelManager.CapabilityCallback {
+    ctor public ImsMmTelManager.CapabilityCallback();
+    method public void onCapabilitiesStatusChanged(android.telephony.ims.feature.MmTelFeature.MmTelCapabilities);
+  }
+
+  public static class ImsMmTelManager.RegistrationCallback {
+    ctor public ImsMmTelManager.RegistrationCallback();
+    method public void onDeregistered(android.telephony.ims.ImsReasonInfo);
+    method public void onRegistered(int);
+    method public void onRegistering(int);
+    method public void onTechnologyChangeFailed(int, android.telephony.ims.ImsReasonInfo);
+  }
+
   public final class ImsReasonInfo implements android.os.Parcelable {
     ctor public ImsReasonInfo(int, int, java.lang.String);
     method public int describeContents();
