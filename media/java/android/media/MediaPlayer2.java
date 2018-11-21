@@ -1763,10 +1763,13 @@ public class MediaPlayer2 implements AutoCloseable
      */
     // This is an asynchronous call.
     public Object setAudioSessionId(int sessionId) {
-        keepAudioSessionIdAlive(sessionId);
+        final AudioTrack dummyAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
+                    AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, 2,
+                    AudioTrack.MODE_STATIC, sessionId);
         return addTask(new Task(CALL_COMPLETED_SET_AUDIO_SESSION_ID, false) {
             @Override
             void process() {
+                keepAudioSessionIdAlive(dummyAudioTrack);
                 native_setAudioSessionId(sessionId);
             }
         });
@@ -4619,6 +4622,19 @@ public class MediaPlayer2 implements AutoCloseable
             mDummyAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
                     AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, 2,
                     AudioTrack.MODE_STATIC, sessionId);
+        }
+    }
+
+    private void keepAudioSessionIdAlive(AudioTrack at) {
+        synchronized (mSessionIdLock) {
+            if (mDummyAudioTrack != null) {
+                if (mDummyAudioTrack.getAudioSessionId() == at.getAudioSessionId()) {
+                    at.release();
+                    return;
+                }
+                mDummyAudioTrack.release();
+            }
+            mDummyAudioTrack = at;
         }
     }
 }
