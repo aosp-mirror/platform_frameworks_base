@@ -261,11 +261,12 @@ public class StackWindowController
             final DisplayContent displayContent = stack.getDisplayContent();
             final DisplayInfo di = displayContent.getDisplayInfo();
             final DisplayCutout displayCutout = di.displayCutout;
+            final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
 
             // Get the insets and display bounds
-            mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
+            displayPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
                     displayCutout, mTmpStableInsets);
-            mService.mPolicy.getNonDecorInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
+            displayPolicy.getNonDecorInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
                     displayCutout, mTmpNonDecorInsets);
             mTmpDisplayBounds.set(0, 0, di.logicalWidth, di.logicalHeight);
 

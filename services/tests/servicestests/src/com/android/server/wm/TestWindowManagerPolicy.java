@@ -26,12 +26,10 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.proto.ProtoOutputStream;
-import android.view.DisplayCutout;
 import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
@@ -48,7 +46,6 @@ import java.util.function.Supplier;
 class TestWindowManagerPolicy implements WindowManagerPolicy {
     private final Supplier<WindowManagerService> mWmSupplier;
 
-    int rotationToReport = 0;
     boolean keyguardShowingAndNotOccluded = false;
 
     private Runnable mRunnableWhenAddingSplashScreen;
@@ -81,41 +78,12 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void adjustWindowParamsLw(WindowState win, WindowManager.LayoutParams attrs,
-            boolean hasStatusBarServicePermission) {
-    }
-
-    @Override
     public void adjustConfigurationLw(Configuration config, int keyboardPresence,
             int navigationPresence) {
     }
 
     @Override
     public int getMaxWallpaperLayer() {
-        return 0;
-    }
-
-    @Override
-    public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
-            int displayId, DisplayCutout displayCutout) {
-        return 0;
-    }
-
-    @Override
-    public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
-            int displayId, DisplayCutout displayCutout) {
-        return 0;
-    }
-
-    @Override
-    public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
-            int displayId, DisplayCutout displayCutout) {
-        return 0;
-    }
-
-    @Override
-    public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
-            int displayId, DisplayCutout displayCutout) {
         return 0;
     }
 
@@ -166,28 +134,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int prepareAddWindowLw(WindowState win,
-            WindowManager.LayoutParams attrs) {
-        return 0;
-    }
-
-    @Override
-    public void removeWindowLw(WindowState win) {
-    }
-
-    @Override
-    public int selectAnimationLw(WindowState win, int transit) {
-        return 0;
-    }
-
-    @Override
-    public void selectRotationAnimationLw(int[] anim) {
-    }
-
-    @Override
-    public boolean validateRotationAnimationLw(int exitAnimId, int enterAnimId,
-            boolean forceDefault) {
-        return false;
+    public void setKeyguardCandidateLw(WindowState win) {
     }
 
     @Override
@@ -222,32 +169,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int getSystemDecorLayerLw() {
-        return 0;
+    public void applyKeyguardPolicyLw(WindowState win, WindowState imeTarget) {
     }
 
     @Override
-    public void beginPostLayoutPolicyLw(int displayWidth, int displayHeight) {
-    }
-
-    @Override
-    public void applyPostLayoutPolicyLw(WindowState win, WindowManager.LayoutParams attrs,
-            WindowState attached, WindowState imeTarget) {
-    }
-
-    @Override
-    public int finishPostLayoutPolicyLw() {
-        return 0;
-    }
-
-    @Override
-    public boolean allowAppAnimationsLw() {
-        return false;
-    }
-
-    @Override
-    public int focusChangedLw(WindowState lastFocus, WindowState newFocus) {
-        return 0;
+    public void setAllowLockscreenWhenOn(int displayId, boolean allow) {
     }
 
     @Override
@@ -349,11 +275,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean isShowingDreamLw() {
-        return false;
-    }
-
-    @Override
     public void onKeyguardOccludedChangedLw(boolean occluded) {
     }
 
@@ -399,11 +320,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int adjustSystemUiVisibilityLw(int visibility) {
-        return 0;
-    }
-
-    @Override
     public boolean hasNavigationBar() {
         return false;
     }
@@ -418,6 +334,16 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void showGlobalActions() {
+    }
+
+    @Override
+    public boolean isUserSetupComplete() {
+        return false;
+    }
+
+    @Override
+    public int getUiMode() {
+        return 0;
     }
 
     @Override
@@ -446,43 +372,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void getStableInsetsLw(int displayRotation, int displayWidth, int displayHeight,
-            DisplayCutout cutout, Rect outInsets) {
-    }
-
-    @Override
-    public boolean isNavBarForcedShownLw(WindowState win) {
-        return false;
-    }
-
-    @NavigationBarPosition
-    @Override
-    public int getNavBarPosition() {
-        return NAV_BAR_BOTTOM;
-    }
-
-    @Override
-    public void getNonDecorInsetsLw(int displayRotation, int displayWidth, int displayHeight,
-            DisplayCutout cutout, Rect outInsets) {
-    }
-
-    @Override
-    public boolean isDockSideAllowed(int dockSide, int originalDockSide, int displayWidth,
-            int displayHeight, int displayRotation) {
-        return false;
-    }
-
-    @Override
-    public void onConfigurationChanged(DisplayContentInfo displayContentInfo) {
-    }
-
-    @Override
-    public boolean shouldRotateSeamlessly(DisplayRotation displayRotation, int oldRotation,
-            int newRotation) {
-        return false;
-    }
-
-    @Override
     public void setPipVisibilityLw(boolean visible) {
     }
 
@@ -505,10 +394,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void requestUserActivityNotification() {
-    }
-
-    @Override
-    public void onLockTaskStateChangedLw(int lockTaskState) {
     }
 
     @Override

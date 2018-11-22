@@ -39,6 +39,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
+import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.statusbar.IStatusBar;
@@ -237,14 +238,22 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
-        public void topAppWindowChanged(boolean menuVisible) {
+        public void topAppWindowChanged(int displayId, boolean menuVisible) {
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                // TODO (b/117478341): Resolve one status bar/ navigation bar assumption
+                return;
+            }
             StatusBarManagerService.this.topAppWindowChanged(menuVisible);
         }
 
         @Override
-        public void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis,
-                int mask,
-                Rect fullscreenBounds, Rect dockedBounds, String cause) {
+        public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
+                int dockedStackVis, int mask, Rect fullscreenBounds, Rect dockedBounds,
+                String cause) {
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                // TODO (b/117478341): Resolve one status bar/ navigation bar assumption
+                return;
+            }
             StatusBarManagerService.this.setSystemUiVisibility(vis, fullscreenStackVis,
                     dockedStackVis, mask, fullscreenBounds, dockedBounds, cause);
         }
@@ -259,8 +268,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             }
         }
 
-        public void appTransitionFinished() {
+        @Override
+        public void appTransitionFinished(int displayId) {
             enforceStatusBarService();
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                // TODO (b/117478341): Resolve one status bar/ navigation bar assumption
+                return;
+            }
             if (mBar != null) {
                 try {
                     mBar.appTransitionFinished();
@@ -358,7 +372,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
-        public void setWindowState(int window, int state) {
+        public void setWindowState(int displayId, int window, int state) {
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                // TODO (b/117478341): Resolve one status bar/ navigation bar assumption
+                return;
+            }
             if (mBar != null) {
                 try {
                     mBar.setWindowState(window, state);
@@ -367,7 +385,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
-        public void appTransitionPending() {
+        public void appTransitionPending(int displayId) {
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                // TODO (b/117478341): Resolve one status bar/ navigation bar assumption
+                return;
+            }
             if (mBar != null) {
                 try {
                     mBar.appTransitionPending();
@@ -376,7 +398,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
-        public void appTransitionCancelled() {
+        public void appTransitionCancelled(int displayId) {
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                // TODO (b/117478341): Resolve one status bar/ navigation bar assumption
+                return;
+            }
             if (mBar != null) {
                 try {
                     mBar.appTransitionCancelled();
@@ -385,8 +411,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
-        public void appTransitionStarting(long statusBarAnimationsStartTime,
+        public void appTransitionStarting(int displayId, long statusBarAnimationsStartTime,
                 long statusBarAnimationsDuration) {
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                // TODO (b/117478341): Resolve one status bar/ navigation bar assumption
+                return;
+            }
             if (mBar != null) {
                 try {
                     mBar.appTransitionStarting(

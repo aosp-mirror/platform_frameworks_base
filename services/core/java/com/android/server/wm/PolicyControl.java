@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.policy;
+package com.android.server.wm;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -25,8 +25,6 @@ import android.util.Slog;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-
-import com.android.server.policy.WindowManagerPolicy.WindowState;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -49,9 +47,9 @@ import java.io.StringWriter;
  * Separate multiple name-value pairs with ':'
  *   e.g. "immersive.status=apps:immersive.preconfirms=*"
  */
-public class PolicyControl {
-    private static String TAG = "PolicyControl";
-    private static boolean DEBUG = false;
+class PolicyControl {
+    private static final String TAG = "PolicyControl";
+    private static final boolean DEBUG = false;
 
     private static final String NAME_IMMERSIVE_FULL = "immersive.full";
     private static final String NAME_IMMERSIVE_STATUS = "immersive.status";
@@ -63,7 +61,7 @@ public class PolicyControl {
     private static Filter sImmersiveStatusFilter;
     private static Filter sImmersiveNavigationFilter;
 
-    public static int getSystemUiVisibility(WindowState win, LayoutParams attrs) {
+    static int getSystemUiVisibility(WindowState win, LayoutParams attrs) {
         attrs = attrs != null ? attrs : win.getAttrs();
         int vis = win != null ? win.getSystemUiVisibility()
                 : (attrs.systemUiVisibility | attrs.subtreeSystemUiVisibility);
@@ -84,7 +82,7 @@ public class PolicyControl {
         return vis;
     }
 
-    public static int getWindowFlags(WindowState win, LayoutParams attrs) {
+    static int getWindowFlags(WindowState win, LayoutParams attrs) {
         attrs = attrs != null ? attrs : win.getAttrs();
         int flags = attrs.flags;
         if (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(attrs)) {
@@ -98,7 +96,7 @@ public class PolicyControl {
         return flags;
     }
 
-    public static int adjustClearableFlags(WindowState win, int clearableFlags) {
+    static int adjustClearableFlags(WindowState win, int clearableFlags) {
         final LayoutParams attrs = win != null ? win.getAttrs() : null;
         if (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(attrs)) {
             clearableFlags &= ~View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -106,28 +104,32 @@ public class PolicyControl {
         return clearableFlags;
     }
 
-    public static boolean disableImmersiveConfirmation(String pkg) {
+    static boolean disableImmersiveConfirmation(String pkg) {
         return (sImmersivePreconfirmationsFilter != null
                 && sImmersivePreconfirmationsFilter.matches(pkg))
                 || ActivityManager.isRunningInTestHarness();
     }
 
-    public static void reloadFromSetting(Context context) {
+    static boolean reloadFromSetting(Context context) {
         if (DEBUG) Slog.d(TAG, "reloadFromSetting()");
         String value = null;
         try {
             value = Settings.Global.getStringForUser(context.getContentResolver(),
                     Settings.Global.POLICY_CONTROL,
                     UserHandle.USER_CURRENT);
-            if (sSettingValue != null && sSettingValue.equals(value)) return;
+            if (sSettingValue == value || sSettingValue != null && sSettingValue.equals(value)) {
+                return false;
+            }
             setFilters(value);
             sSettingValue = value;
         } catch (Throwable t) {
             Slog.w(TAG, "Error loading policy control, value=" + value, t);
+            return false;
         }
+        return true;
     }
 
-    public static void dump(String prefix, PrintWriter pw) {
+    static void dump(String prefix, PrintWriter pw) {
         dump("sImmersiveStatusFilter", sImmersiveStatusFilter, prefix, pw);
         dump("sImmersiveNavigationFilter", sImmersiveNavigationFilter, prefix, pw);
         dump("sImmersivePreconfirmationsFilter", sImmersivePreconfirmationsFilter, prefix, pw);

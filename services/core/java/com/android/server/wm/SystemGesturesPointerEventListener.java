@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.server.policy;
+package com.android.server.wm;
 
 import android.content.Context;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.GestureDetector;
@@ -27,11 +26,11 @@ import android.view.MotionEvent;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.widget.OverScroller;
 
-/*
+/**
  * Listens for system-wide input gestures, firing callbacks when detected.
  * @hide
  */
-public class SystemGesturesPointerEventListener implements PointerEventListener {
+class SystemGesturesPointerEventListener implements PointerEventListener {
     private static final String TAG = "SystemGestures";
     private static final boolean DEBUG = false;
     private static final long SWIPE_TIMEOUT_MS = 500;
@@ -46,6 +45,7 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
     private static final int SWIPE_FROM_LEFT = 4;
 
     private final Context mContext;
+    private final Handler mHandler;
     private final int mSwipeStartThreshold;
     private final int mSwipeDistanceThreshold;
     private final Callbacks mCallbacks;
@@ -55,7 +55,6 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
     private final long[] mDownTime = new long[MAX_TRACKED_POINTERS];
 
     private GestureDetector mGestureDetector;
-    private OverScroller mOverscroller;
 
     int screenHeight;
     int screenWidth;
@@ -65,8 +64,9 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
     private boolean mMouseHoveringAtEdge;
     private long mLastFlingTime;
 
-    public SystemGesturesPointerEventListener(Context context, Callbacks callbacks) {
+    SystemGesturesPointerEventListener(Context context, Handler handler, Callbacks callbacks) {
         mContext = context;
+        mHandler = handler;
         mCallbacks = checkNull("callbacks", callbacks);
         mSwipeStartThreshold = checkNull("context", context).getResources()
                 .getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
@@ -83,9 +83,7 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
     }
 
     public void systemReady() {
-        Handler h = new Handler(Looper.myLooper());
-        mGestureDetector = new GestureDetector(mContext, new FlingGestureDetector(), h);
-        mOverscroller = new OverScroller(mContext);
+        mGestureDetector = new GestureDetector(mContext, new FlingGestureDetector(), mHandler);
     }
 
     @Override
@@ -163,14 +161,14 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
     private void captureDown(MotionEvent event, int pointerIndex) {
         final int pointerId = event.getPointerId(pointerIndex);
         final int i = findIndex(pointerId);
-        if (DEBUG) Slog.d(TAG, "pointer " + pointerId +
-                " down pointerIndex=" + pointerIndex + " trackingIndex=" + i);
+        if (DEBUG) Slog.d(TAG, "pointer " + pointerId
+                + " down pointerIndex=" + pointerIndex + " trackingIndex=" + i);
         if (i != UNTRACKED_POINTER) {
             mDownX[i] = event.getX(pointerIndex);
             mDownY[i] = event.getY(pointerIndex);
             mDownTime[i] = event.getEventTime();
-            if (DEBUG) Slog.d(TAG, "pointer " + pointerId +
-                    " down x=" + mDownX[i] + " y=" + mDownY[i]);
+            if (DEBUG) Slog.d(TAG, "pointer " + pointerId
+                    + " down x=" + mDownX[i] + " y=" + mDownY[i]);
         }
     }
 
@@ -242,6 +240,13 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
     }
 
     private final class FlingGestureDetector extends GestureDetector.SimpleOnGestureListener {
+
+        private OverScroller mOverscroller;
+
+        FlingGestureDetector() {
+            mOverscroller = new OverScroller(mContext);
+        }
+
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
             if (!mOverscroller.isFinished()) {

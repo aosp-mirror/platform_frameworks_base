@@ -392,11 +392,6 @@ public abstract class WindowManagerInternal {
     public abstract boolean isStackVisible(int windowingMode);
 
     /**
-     * @return True if and only if the docked divider is currently in resize mode.
-     */
-    public abstract boolean isDockedDividerResizing();
-
-    /**
      * Requests the window manager to resend the windows for accessibility.
      */
     public abstract void computeWindowsForAccessibility();

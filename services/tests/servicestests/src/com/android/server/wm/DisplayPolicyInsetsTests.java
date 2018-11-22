@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.policy;
+package com.android.server.wm;
 
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
@@ -25,36 +25,27 @@ import static org.hamcrest.Matchers.equalTo;
 
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.view.Display;
 import android.view.DisplayInfo;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+import org.junit.runner.RunWith;
 
-/**
- * Build/Install/Run:
- *  atest WmTests:PhoneWindowManagerInsetsTest
- */
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit
-public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
+public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
 
     @Rule
     public final ErrorCollector mErrorCollector = new ErrorCollector();
 
-    @Before
-    public void setUp() throws Exception {
-        addStatusBar();
-        addNavigationBar();
-    }
-
     @Test
     public void portrait() {
-        DisplayInfo di = displayInfoForRotation(ROTATION_0, false /* withCutout */);
+        final DisplayInfo di = displayInfoForRotation(ROTATION_0, false /* withCutout */);
 
         verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
         verifyNonDecorInsets(di, 0, 0, 0, NAV_BAR_HEIGHT);
@@ -63,7 +54,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
 
     @Test
     public void portrait_withCutout() {
-        DisplayInfo di = displayInfoForRotation(ROTATION_0, true /* withCutout */);
+        final DisplayInfo di = displayInfoForRotation(ROTATION_0, true /* withCutout */);
 
         verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
         verifyNonDecorInsets(di, 0, DISPLAY_CUTOUT_HEIGHT, 0, NAV_BAR_HEIGHT);
@@ -72,7 +63,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
 
     @Test
     public void landscape() {
-        DisplayInfo di = displayInfoForRotation(ROTATION_90, false /* withCutout */);
+        final DisplayInfo di = displayInfoForRotation(ROTATION_90, false /* withCutout */);
 
         verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
         verifyNonDecorInsets(di, 0, 0, NAV_BAR_HEIGHT, 0);
@@ -81,7 +72,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
 
     @Test
     public void landscape_withCutout() {
-        DisplayInfo di = displayInfoForRotation(ROTATION_90, true /* withCutout */);
+        final DisplayInfo di = displayInfoForRotation(ROTATION_90, true /* withCutout */);
 
         verifyStableInsets(di, DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
         verifyNonDecorInsets(di, DISPLAY_CUTOUT_HEIGHT, 0, NAV_BAR_HEIGHT, 0);
@@ -90,7 +81,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
 
     @Test
     public void seascape() {
-        DisplayInfo di = displayInfoForRotation(ROTATION_270, false /* withCutout */);
+        final DisplayInfo di = displayInfoForRotation(ROTATION_270, false /* withCutout */);
 
         verifyStableInsets(di, NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, 0, 0);
         verifyNonDecorInsets(di, NAV_BAR_HEIGHT, 0, 0, 0);
@@ -99,7 +90,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
 
     @Test
     public void seascape_withCutout() {
-        DisplayInfo di = displayInfoForRotation(ROTATION_270, true /* withCutout */);
+        final DisplayInfo di = displayInfoForRotation(ROTATION_270, true /* withCutout */);
 
         verifyStableInsets(di, NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, DISPLAY_CUTOUT_HEIGHT, 0);
         verifyNonDecorInsets(di, NAV_BAR_HEIGHT, 0, DISPLAY_CUTOUT_HEIGHT, 0);
@@ -108,7 +99,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
 
     @Test
     public void upsideDown() {
-        DisplayInfo di = displayInfoForRotation(ROTATION_180, false /* withCutout */);
+        final DisplayInfo di = displayInfoForRotation(ROTATION_180, false /* withCutout */);
 
         verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
         verifyNonDecorInsets(di, 0, 0, 0, NAV_BAR_HEIGHT);
@@ -117,7 +108,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
 
     @Test
     public void upsideDown_withCutout() {
-        DisplayInfo di = displayInfoForRotation(ROTATION_180, true /* withCutout */);
+        final DisplayInfo di = displayInfoForRotation(ROTATION_180, true /* withCutout */);
 
         verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT + DISPLAY_CUTOUT_HEIGHT);
         verifyNonDecorInsets(di, 0, 0, 0, NAV_BAR_HEIGHT + DISPLAY_CUTOUT_HEIGHT);
@@ -151,35 +142,39 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
 
     private Rect getStableInsetsLw(DisplayInfo di) {
         Rect result = new Rect();
-        mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
+        mDisplayPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
                 di.displayCutout, result);
         return result;
     }
 
     private Rect getNonDecorInsetsLw(DisplayInfo di) {
         Rect result = new Rect();
-        mPolicy.getNonDecorInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
+        mDisplayPolicy.getNonDecorInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
                 di.displayCutout, result);
         return result;
     }
 
     private int getNonDecorDisplayWidth(DisplayInfo di) {
-        return mPolicy.getNonDecorDisplayWidth(di.logicalWidth, di.logicalHeight, di.rotation,
-                0 /* ui */, Display.DEFAULT_DISPLAY, di.displayCutout);
+        return mDisplayPolicy.getNonDecorDisplayWidth(di.logicalWidth, di.logicalHeight,
+                di.rotation, 0 /* ui */, di.displayCutout);
     }
 
     private int getNonDecorDisplayHeight(DisplayInfo di) {
-        return mPolicy.getNonDecorDisplayHeight(di.logicalWidth, di.logicalHeight, di.rotation,
-                0 /* ui */, Display.DEFAULT_DISPLAY, di.displayCutout);
+        return mDisplayPolicy.getNonDecorDisplayHeight(di.logicalWidth, di.logicalHeight,
+                di.rotation, 0 /* ui */, di.displayCutout);
     }
 
     private int getConfigDisplayWidth(DisplayInfo di) {
-        return mPolicy.getConfigDisplayWidth(di.logicalWidth, di.logicalHeight, di.rotation,
-                0 /* ui */, Display.DEFAULT_DISPLAY, di.displayCutout);
+        return mDisplayPolicy.getConfigDisplayWidth(di.logicalWidth, di.logicalHeight,
+                di.rotation, 0 /* ui */, di.displayCutout);
     }
 
     private int getConfigDisplayHeight(DisplayInfo di) {
-        return mPolicy.getConfigDisplayHeight(di.logicalWidth, di.logicalHeight, di.rotation,
-                0 /* ui */, Display.DEFAULT_DISPLAY, di.displayCutout);
+        return mDisplayPolicy.getConfigDisplayHeight(di.logicalWidth, di.logicalHeight,
+                di.rotation, 0 /* ui */, di.displayCutout);
+    }
+
+    private static DisplayInfo displayInfoForRotation(int rotation, boolean withDisplayCutout) {
+        return displayInfoAndCutoutForRotation(rotation, withDisplayCutout).first;
     }
 }

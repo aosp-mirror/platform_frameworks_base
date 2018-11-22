@@ -123,6 +123,8 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         final AppWindowToken hiddenAppWindow = createAppWindowToken(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         hiddenAppWindow.setHidden(true);
+        mDisplayContent.getConfiguration().windowConfiguration.setRotation(
+                mDisplayContent.getRotation());
         mController.initialize(mDisplayContent, ACTIVITY_TYPE_HOME, new SparseBooleanArray());
 
         // Ensure that we are animating the target activity as well

@@ -17,6 +17,9 @@
 package com.android.systemui.shared.system;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
 
 import android.app.WindowConfiguration;
 import android.graphics.Rect;
@@ -25,10 +28,6 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 
 import com.android.systemui.shared.recents.view.AppTransitionAnimationSpecsFuture;
 import com.android.systemui.shared.recents.view.RecentsTransition;
@@ -179,6 +178,7 @@ public class WindowManagerWrapper {
      */
     public int getNavBarPosition() {
         try {
+            // TODO: Use WindowManagerService.getNavBarPosition(int displayId)
             return WindowManagerGlobal.getWindowManagerService().getNavBarPosition();
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to get nav bar position");
