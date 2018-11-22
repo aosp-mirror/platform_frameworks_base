@@ -1372,6 +1372,15 @@ interface ITelephony {
     String getSubscriptionPreciseCarrierName(int subId);
 
     /**
+     * Returns carrier id based on MCCMNC only. This will return a MNO carrier id used for fallback
+     * check when exact carrier id {@link #getSimCarrierId()} configurations are not found
+     *
+     * @return carrier id from passing mccmnc.
+     * @hide
+     */
+    int getCarrierIdFromMccMnc(int slotIndex, String mccmnc);
+
+    /**
      * Action set from carrier signalling broadcast receivers to enable/disable metered apns
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
      * @param subId the subscription ID that this action applies to.
@@ -1700,7 +1709,7 @@ interface ITelephony {
      * Identify if the number is emergency number, based on all the active subscriptions.
      */
     boolean isCurrentEmergencyNumber(String number);
-    
+
     /**
      * Return a list of certs in hex string from loaded carrier privileges access rules.
      */
