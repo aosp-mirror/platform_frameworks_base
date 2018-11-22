@@ -117,6 +117,7 @@ public final class LoadedApk {
     private File mCredentialProtectedDataDirFile;
     @UnsupportedAppUsage
     private final ClassLoader mBaseClassLoader;
+    private ClassLoader mDefaultClassLoader;
     private final boolean mSecurityViolation;
     private final boolean mIncludeCode;
     private final boolean mRegisterPackage;
@@ -224,9 +225,10 @@ public final class LoadedApk {
         mSecurityViolation = false;
         mIncludeCode = true;
         mRegisterPackage = false;
-        mClassLoader = ClassLoader.getSystemClassLoader();
         mResources = Resources.getSystem();
-        mAppComponentFactory = createAppFactory(mApplicationInfo, mClassLoader);
+        mDefaultClassLoader = ClassLoader.getSystemClassLoader();
+        mAppComponentFactory = createAppFactory(mApplicationInfo, mDefaultClassLoader);
+        mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
     }
 
     /**
@@ -235,15 +237,21 @@ public final class LoadedApk {
     void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
         assert info.packageName.equals("android");
         mApplicationInfo = info;
-        mClassLoader = classLoader;
-        mAppComponentFactory = createAppFactory(info, classLoader);
+        mDefaultClassLoader = classLoader;
+        mAppComponentFactory = createAppFactory(info, mDefaultClassLoader);
+        mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
     }
 
     private AppComponentFactory createAppFactory(ApplicationInfo appInfo, ClassLoader cl) {
         if (appInfo.appComponentFactory != null && cl != null) {
             try {
-                return (AppComponentFactory) cl.loadClass(appInfo.appComponentFactory)
-                        .newInstance();
+                AppComponentFactory factory = (AppComponentFactory) cl.loadClass(
+                        appInfo.appComponentFactory).newInstance();
+                // Pass a copy of ApplicationInfo to the factory. Copying protects the framework
+                // from apps which would override the factory and change ApplicationInfo contents.
+                // ApplicationInfo is used to set up the default class loader.
+                factory.setApplicationInfo(new ApplicationInfo(appInfo));
+                return factory;
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 Slog.e(TAG, "Unable to instantiate appComponentFactory", e);
             }
@@ -357,7 +365,7 @@ public final class LoadedApk {
                         getClassLoader());
             }
         }
-        mAppComponentFactory = createAppFactory(aInfo, mClassLoader);
+        mAppComponentFactory = createAppFactory(aInfo, mDefaultClassLoader);
     }
 
     private void setApplicationInfo(ApplicationInfo aInfo) {
@@ -633,11 +641,12 @@ public final class LoadedApk {
             }
 
             if (mBaseClassLoader != null) {
-                mClassLoader = mBaseClassLoader;
+                mDefaultClassLoader = mBaseClassLoader;
             } else {
-                mClassLoader = ClassLoader.getSystemClassLoader();
+                mDefaultClassLoader = ClassLoader.getSystemClassLoader();
             }
-            mAppComponentFactory = createAppFactory(mApplicationInfo, mClassLoader);
+            mAppComponentFactory = createAppFactory(mApplicationInfo, mDefaultClassLoader);
+            mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
 
             return;
         }
@@ -715,14 +724,18 @@ public final class LoadedApk {
         // call System.loadLibrary() on a classloader from a LoadedApk with
         // mIncludeCode == false).
         if (!mIncludeCode) {
-            if (mClassLoader == null) {
+            if (mDefaultClassLoader == null) {
                 StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
-                mClassLoader = ApplicationLoaders.getDefault().getClassLoader(
+                mDefaultClassLoader = ApplicationLoaders.getDefault().getClassLoader(
                         "" /* codePath */, mApplicationInfo.targetSdkVersion, isBundledApp,
                         librarySearchPath, libraryPermittedPath, mBaseClassLoader,
                         null /* classLoaderName */);
                 StrictMode.setThreadPolicy(oldPolicy);
                 mAppComponentFactory = AppComponentFactory.DEFAULT;
+            }
+
+            if (mClassLoader == null) {
+                mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
             }
 
             return;
@@ -741,16 +754,16 @@ public final class LoadedApk {
                     ", JNI path: " + librarySearchPath);
 
         boolean needToSetupJitProfiles = false;
-        if (mClassLoader == null) {
+        if (mDefaultClassLoader == null) {
             // Temporarily disable logging of disk reads on the Looper thread
             // as this is early and necessary.
             StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
 
-            mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip,
+            mDefaultClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip,
                     mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
                     libraryPermittedPath, mBaseClassLoader,
                     mApplicationInfo.classLoaderName);
-            mAppComponentFactory = createAppFactory(mApplicationInfo, mClassLoader);
+            mAppComponentFactory = createAppFactory(mApplicationInfo, mDefaultClassLoader);
 
             StrictMode.setThreadPolicy(oldPolicy);
             // Setup the class loader paths for profiling.
@@ -761,7 +774,7 @@ public final class LoadedApk {
             // Temporarily disable logging of disk reads on the Looper thread as this is necessary
             StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
             try {
-                ApplicationLoaders.getDefault().addNative(mClassLoader, libPaths);
+                ApplicationLoaders.getDefault().addNative(mDefaultClassLoader, libPaths);
             } finally {
                 StrictMode.setThreadPolicy(oldPolicy);
             }
@@ -799,7 +812,7 @@ public final class LoadedApk {
         if (!extraLibPaths.isEmpty()) {
             StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
             try {
-                ApplicationLoaders.getDefault().addNative(mClassLoader, extraLibPaths);
+                ApplicationLoaders.getDefault().addNative(mDefaultClassLoader, extraLibPaths);
             } finally {
                 StrictMode.setThreadPolicy(oldPolicy);
             }
@@ -807,7 +820,7 @@ public final class LoadedApk {
 
         if (addedPaths != null && addedPaths.size() > 0) {
             final String add = TextUtils.join(File.pathSeparator, addedPaths);
-            ApplicationLoaders.getDefault().addPath(mClassLoader, add);
+            ApplicationLoaders.getDefault().addPath(mDefaultClassLoader, add);
             // Setup the new code paths for profiling.
             needToSetupJitProfiles = true;
         }
@@ -823,6 +836,13 @@ public final class LoadedApk {
         // loads code from) so we explicitly disallow it there.
         if (needToSetupJitProfiles && !ActivityThread.isSystem()) {
             setupJitProfileSupport();
+        }
+
+        // Call AppComponentFactory to select/create the main class loader of this app.
+        // Since this may call code in the app, mDefaultClassLoader must be fully set up
+        // before invoking the factory.
+        if (mClassLoader == null) {
+            mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
         }
     }
 
