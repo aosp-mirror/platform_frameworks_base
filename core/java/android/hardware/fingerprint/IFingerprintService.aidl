@@ -16,7 +16,6 @@
 package android.hardware.fingerprint;
 
 import android.os.Bundle;
-import android.hardware.biometrics.IBiometricPromptReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
@@ -40,9 +39,9 @@ interface IFingerprintService {
     // called from BiometricPromptService. The additional uid, pid, userId arguments should be
     // determined by BiometricPromptService.
     void authenticateFromService(IBinder token, long sessionId, int userId,
-            IBiometricServiceReceiver receiver, int flags, String opPackageName,
-            in Bundle bundle, IBiometricPromptReceiver dialogReceiver,
-            int callingUid, int callingPid, int callingUserId);
+            IBiometricServiceReceiver clientReceiver, IBiometricServiceReceiver wrapperReceiver,
+            int flags, String opPackageName, in Bundle bundle, int callingUid, int callingPid,
+            int callingUserId);
 
     // Cancel authentication for the given sessionId
     void cancelAuthentication(IBinder token, String opPackageName);
@@ -50,7 +49,7 @@ interface IFingerprintService {
     // Same as above, except this is protected by the MANAGE_BIOMETRIC signature permission. Takes
     // an additional uid, pid, userid.
     void cancelAuthenticationFromService(IBinder token, String opPackageName,
-            int callingUid, int callingPid, int callingUserId);
+            int callingUid, int callingPid, int callingUserId, boolean fromClient);
 
     // Start fingerprint enrollment
     void enroll(IBinder token, in byte [] cryptoToken, int groupId, IFingerprintServiceReceiver receiver,

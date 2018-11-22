@@ -32,7 +32,6 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
-import android.hardware.biometrics.IBiometricPromptReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.face.FaceManager;
@@ -50,10 +49,12 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.security.KeyStore;
 import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
@@ -242,10 +243,141 @@ public class BiometricService extends SystemService {
      */
     private final class BiometricServiceWrapper extends IBiometricService.Stub {
 
+        private static final int STATE_AUTH_IDLE = 0;
+        private static final int STATE_AUTH_CALLED = 1;
+        private static final int STATE_AUTH_STARTED = 2;
+
+        private final IStatusBarService mStatusBarService = IStatusBarService.Stub.asInterface(
+                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+
+        // Originally from the client. These are forwarded to BiometricService from
+        // BiometricServiceBase
+        private IBiometricServiceReceiver mClientReceiver;
+        // The current state, which can be either idle, called, or started
+        private int mState;
+        // For explicit confirmation, do not send to keystore until the user has confirmed
+        // the authentication
+        private byte[] mTokenEscrow;
+
+        // Wrap the client's receiver so we can do things with the BiometricDialog first
+        private final IBiometricServiceReceiver mWrapperReceiver =
+                new IBiometricServiceReceiver.Stub() {
+            @Override
+            public void onAuthenticationSucceeded() throws RemoteException {
+                throw new UnsupportedOperationException("Operation not supported");
+            }
+
+            @Override
+            public void onAuthenticationSucceededInternal(boolean requireConfirmation,
+                    byte[] token) throws RemoteException {
+                try {
+                    if (!requireConfirmation) {
+                        KeyStore.getInstance().addAuthToken(token);
+                        mClientReceiver.onAuthenticationSucceeded();
+                        mState = STATE_AUTH_IDLE;
+                    } else {
+                        // Store the auth token and submit it to keystore after the confirmation
+                        // button has been pressed.
+                        mTokenEscrow = token;
+                    }
+
+                    // Notify SysUI that the biometric has been authenticated. SysUI already knows
+                    // the implicit/explicit state and will react accordingly.
+                    mStatusBarService.onBiometricAuthenticated();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception", e);
+                }
+            }
+
+            @Override
+            public void onAuthenticationFailed() throws RemoteException {
+                try {
+                    mStatusBarService.onBiometricHelp(getContext().getResources().getString(
+                            com.android.internal.R.string.biometric_not_recognized));
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception", e);
+                }
+            }
+
+            @Override
+            public void onError(int error, String message) throws RemoteException {
+                try {
+                    mStatusBarService.onBiometricError(message);
+                    if (mState == STATE_AUTH_STARTED) {
+                        // Send errors after the dialog is dismissed.
+                        mHandler.postDelayed(() -> {
+                            try {
+                                mClientReceiver.onError(error, message);
+                            } catch (RemoteException e) {
+                                Slog.e(TAG, "Remote exception", e);
+                            }
+                        }, BiometricPrompt.HIDE_DIALOG_DELAY);
+                    } else if (mState == STATE_AUTH_CALLED) {
+                        // Show the error without delay if authentication was called but not
+                        // yet showing (e.g. too many attempts, not available, etc)
+                        mClientReceiver.onError(error, message);
+                    }
+                    mState = STATE_AUTH_IDLE;
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception", e);
+                }
+            }
+
+            @Override
+            public void onAcquired(int acquiredInfo, String message)
+                    throws RemoteException {
+                if (acquiredInfo != BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {
+                    try {
+                        mStatusBarService.onBiometricHelp(message);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Remote exception", e);
+                    }
+                }
+            }
+
+            @Override
+            public void onDialogDismissed(int reason) throws RemoteException {
+                mState = STATE_AUTH_IDLE;
+
+                if (reason != BiometricPrompt.DISMISSED_REASON_POSITIVE) {
+                    // Positive button is used by passive modalities as a "confirm" button,
+                    // do not send to client
+                    mClientReceiver.onDialogDismissed(reason);
+                    // Cancel authentication. Skip the token/package check since we are cancelling
+                    // from system server. The interface is permission protected so this is fine.
+                    cancelInternal(null /* token */, null /* package */, false /* fromClient */);
+                }
+                if (reason == BiometricPrompt.DISMISSED_REASON_USER_CANCEL) {
+                    mClientReceiver.onError(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED,
+                            getContext().getString(
+                                    com.android.internal.R.string.biometric_error_user_canceled));
+                } else if (reason == BiometricPrompt.DISMISSED_REASON_POSITIVE) {
+                    // Have the service send the token to KeyStore, and send onAuthenticated
+                    // to the application
+                    KeyStore.getInstance().addAuthToken(mTokenEscrow);
+                    mClientReceiver.onAuthenticationSucceeded();
+                }
+            }
+        };
+
+        @Override // Binder call
+        public void onAuthenticationStarted(Bundle bundle, IBiometricServiceReceiver receiver,
+                int type, boolean requireConfirmation, int userId) {
+            checkInternalPermission();
+            mClientReceiver = receiver;
+            mState = STATE_AUTH_STARTED;
+            try {
+                mStatusBarService.showBiometricDialog(bundle, mWrapperReceiver, type,
+                        requireConfirmation, userId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+            }
+        }
+
         @Override // Binder call
         public void authenticate(IBinder token, long sessionId, int userId,
                 IBiometricServiceReceiver receiver, int flags, String opPackageName,
-                Bundle bundle, IBiometricPromptReceiver dialogReceiver) throws RemoteException {
+                Bundle bundle) throws RemoteException {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
@@ -261,8 +393,7 @@ public class BiometricService extends SystemService {
                 checkInternalPermission();
             }
 
-            if (token == null || receiver == null || opPackageName == null || bundle == null
-                    || dialogReceiver == null) {
+            if (token == null || receiver == null || opPackageName == null || bundle == null) {
                 Slog.e(TAG, "Unable to authenticate, one or more null arguments");
                 return;
             }
@@ -285,13 +416,13 @@ public class BiometricService extends SystemService {
                                 getContext().getString(R.string.biometric_error_hw_unavailable);
                         switch (error) {
                             case BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT:
-                                receiver.onError(0 /* deviceId */, error, hardwareUnavailable);
+                                receiver.onError(error, hardwareUnavailable);
                                 break;
                             case BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE:
-                                receiver.onError(0 /* deviceId */, error, hardwareUnavailable);
+                                receiver.onError(error, hardwareUnavailable);
                                 break;
                             case BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS:
-                                receiver.onError(0 /* deviceId */, error,
+                                receiver.onError(error,
                                         getErrorString(modality, error, 0 /* vendorCode */));
                                 break;
                             default:
@@ -310,20 +441,21 @@ public class BiometricService extends SystemService {
                     // No polymorphism :(
                     if (mCurrentModality == BIOMETRIC_FINGERPRINT) {
                         mFingerprintService.authenticateFromService(token, sessionId, userId,
-                                receiver, flags, opPackageName, bundle, dialogReceiver,
+                                receiver, mWrapperReceiver, flags, opPackageName, bundle,
                                 callingUid, callingPid, callingUserId);
                     } else if (mCurrentModality == BIOMETRIC_IRIS) {
                         Slog.w(TAG, "Unsupported modality");
                     } else if (mCurrentModality == BIOMETRIC_FACE) {
                         mFaceService.authenticateFromService(true /* requireConfirmation */,
-                                token, sessionId, userId, receiver, flags, opPackageName,
-                                bundle, dialogReceiver, callingUid, callingPid, callingUserId);
+                                token, sessionId, userId, receiver, mWrapperReceiver, flags,
+                                opPackageName, bundle, callingUid, callingPid, callingUserId);
                     } else {
                         Slog.w(TAG, "Unsupported modality");
                     }
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to start authentication", e);
                 }
+                mState = STATE_AUTH_CALLED;
             });
         }
 
@@ -336,28 +468,7 @@ public class BiometricService extends SystemService {
                 Slog.e(TAG, "Unable to cancel, one or more null arguments");
                 return;
             }
-
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            final int callingUserId = UserHandle.getCallingUserId();
-
-            mHandler.post(() -> {
-                try {
-                    if (mCurrentModality == BIOMETRIC_FINGERPRINT) {
-                        mFingerprintService.cancelAuthenticationFromService(token, opPackageName,
-                                callingUid, callingPid, callingUserId);
-                    } else if (mCurrentModality == BIOMETRIC_IRIS) {
-                        Slog.w(TAG, "Unsupported modality");
-                    } else if (mCurrentModality == BIOMETRIC_FACE) {
-                        mFaceService.cancelAuthenticationFromService(token, opPackageName,
-                                callingUid, callingPid, callingUserId);
-                    } else {
-                        Slog.w(TAG, "Unsupported modality");
-                    }
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Unable to cancel authentication");
-                }
-            });
+            cancelInternal(token, opPackageName, true /* fromClient */);
         }
 
         @Override // Binder call
@@ -402,6 +513,29 @@ public class BiometricService extends SystemService {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        void cancelInternal(IBinder token, String opPackageName, boolean fromClient) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int callingUserId = UserHandle.getCallingUserId();
+            mHandler.post(() -> {
+                try {
+                    if (mCurrentModality == BIOMETRIC_FINGERPRINT) {
+                        mFingerprintService.cancelAuthenticationFromService(token, opPackageName,
+                                callingUid, callingPid, callingUserId, fromClient);
+                    } else if (mCurrentModality == BIOMETRIC_IRIS) {
+                        Slog.w(TAG, "Unsupported modality");
+                    } else if (mCurrentModality == BIOMETRIC_FACE) {
+                        mFaceService.cancelAuthenticationFromService(token, opPackageName,
+                                callingUid, callingPid, callingUserId, fromClient);
+                    } else {
+                        Slog.w(TAG, "Unsupported modality");
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to cancel authentication");
+                }
+            });
+        }
     }
 
     private void checkAppOp(String opPackageName, int callingUid) {
@@ -413,7 +547,7 @@ public class BiometricService extends SystemService {
     }
 
     private void checkInternalPermission() {
-        getContext().enforceCallingPermission(USE_BIOMETRIC_INTERNAL,
+        getContext().enforceCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL,
                 "Must have USE_BIOMETRIC_INTERNAL permission");
     }
 

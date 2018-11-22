@@ -23,7 +23,7 @@ import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Rect;
-import android.hardware.biometrics.IBiometricPromptReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -567,7 +567,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver, int type,
+    public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiver receiver, int type,
             boolean requireConfirmation, int userId) {
         enforceBiometricDialog();
         if (mBar != null) {

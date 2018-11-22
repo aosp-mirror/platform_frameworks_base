@@ -21,7 +21,7 @@ import static com.android.systemui.statusbar.phone.StatusBar.ONLY_CORE_APPS;
 import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.graphics.Rect;
-import android.hardware.biometrics.IBiometricPromptReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -163,7 +163,7 @@ public class CommandQueue extends IStatusBar.Stub {
 
         default void onRotationProposal(int rotation, boolean isValid) { }
 
-        default void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver,
+        default void showBiometricDialog(Bundle bundle, IBiometricServiceReceiver receiver,
                 int type, boolean requireConfirmation, int userId) { }
         default void onBiometricAuthenticated() { }
         default void onBiometricHelp(String message) { }
@@ -523,7 +523,7 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver, int type,
+    public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiver receiver, int type,
             boolean requireConfirmation, int userId) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
@@ -774,7 +774,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showBiometricDialog(
                                 (Bundle) someArgs.arg1,
-                                (IBiometricPromptReceiver) someArgs.arg2,
+                                (IBiometricServiceReceiver) someArgs.arg2,
                                 someArgs.argi1 /* type */,
                                 (boolean) someArgs.arg3 /* requireConfirmation */,
                                 someArgs.argi2 /* userId */);

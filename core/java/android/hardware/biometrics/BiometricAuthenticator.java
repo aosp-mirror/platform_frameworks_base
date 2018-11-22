@@ -32,17 +32,17 @@ public interface BiometricAuthenticator {
     /**
      * @hide
      */
-    int TYPE_FINGERPRINT = 1;
+    int TYPE_FINGERPRINT = 1 << 0;
 
     /**
      * @hide
      */
-    int TYPE_IRIS = 2;
+    int TYPE_IRIS = 1 << 1;
 
     /**
      * @hide
      */
-    int TYPE_FACE = 3;
+    int TYPE_FACE = 1 << 2;
 
     /**
      * Container for biometric data

@@ -21,7 +21,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricPrompt;
-import android.hardware.biometrics.IBiometricPromptReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -57,7 +57,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     private SomeArgs mCurrentDialogArgs;
     private BiometricDialogView mCurrentDialog;
     private WindowManager mWindowManager;
-    private IBiometricPromptReceiver mReceiver;
+    private IBiometricServiceReceiver mReceiver;
     private boolean mDialogShowing;
     private Callback mCallback = new Callback();
 
@@ -139,7 +139,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver, int type,
+    public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiver receiver, int type,
             boolean requireConfirmation, int userId) {
         if (DEBUG) Log.d(TAG, "showBiometricDialog, type: " + type);
         // Remove these messages as they are part of the previous client
@@ -193,7 +193,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
             Log.w(TAG, "Dialog already showing");
             return;
         }
-        mReceiver = (IBiometricPromptReceiver) args.arg2;
+        mReceiver = (IBiometricServiceReceiver) args.arg2;
         mCurrentDialog.setBundle((Bundle)args.arg1);
         mCurrentDialog.setRequireConfirmation((boolean) args.arg3);
         mCurrentDialog.setUserId(args.argi2);

@@ -251,7 +251,45 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     private Executor mExecutor;
     private AuthenticationCallback mAuthenticationCallback;
 
-    IBiometricPromptReceiver mDialogReceiver = new IBiometricPromptReceiver.Stub() {
+    private final IBiometricServiceReceiver mBiometricServiceReceiver =
+            new IBiometricServiceReceiver.Stub() {
+
+        @Override
+        public void onAuthenticationSucceeded() throws RemoteException {
+            mExecutor.execute(() -> {
+                final AuthenticationResult result = new AuthenticationResult(mCryptoObject);
+                mAuthenticationCallback.onAuthenticationSucceeded(result);
+            });
+        }
+
+        @Override
+        public void onAuthenticationSucceededInternal(boolean requireConfirmation, byte[] bytes)
+                throws RemoteException {
+            throw new UnsupportedOperationException("Operation not supported!");
+        }
+
+        @Override
+        public void onAuthenticationFailed() throws RemoteException {
+            mExecutor.execute(() -> {
+                mAuthenticationCallback.onAuthenticationFailed();
+            });
+        }
+
+        @Override
+        public void onError(int error, String message)
+                throws RemoteException {
+            mExecutor.execute(() -> {
+                mAuthenticationCallback.onAuthenticationError(error, message);
+            });
+        }
+
+        @Override
+        public void onAcquired(int acquireInfo, String message) {
+            mExecutor.execute(() -> {
+                mAuthenticationCallback.onAuthenticationHelp(acquireInfo, message);
+            });
+        }
+
         @Override
         public void onDialogDismissed(int reason) {
             // Check the reason and invoke OnClickListener(s) if necessary
@@ -264,40 +302,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                     mNegativeButtonInfo.listener.onClick(null, DialogInterface.BUTTON_NEGATIVE);
                 });
             }
-        }
-    };
-
-    IBiometricServiceReceiver mBiometricServiceReceiver =
-            new IBiometricServiceReceiver.Stub() {
-
-        @Override
-        public void onAuthenticationSucceeded(long deviceId) throws RemoteException {
-            mExecutor.execute(() -> {
-                final AuthenticationResult result = new AuthenticationResult(mCryptoObject);
-                mAuthenticationCallback.onAuthenticationSucceeded(result);
-            });
-        }
-
-        @Override
-        public void onAuthenticationFailed(long deviceId) throws RemoteException {
-            mExecutor.execute(() -> {
-                mAuthenticationCallback.onAuthenticationFailed();
-            });
-        }
-
-        @Override
-        public void onError(long deviceId, int error, String message)
-                throws RemoteException {
-            mExecutor.execute(() -> {
-                mAuthenticationCallback.onAuthenticationError(error, message);
-            });
-        }
-
-        @Override
-        public void onAcquired(long deviceId, int acquireInfo, String message) {
-            mExecutor.execute(() -> {
-                mAuthenticationCallback.onAuthenticationHelp(acquireInfo, message);
-            });
         }
     };
 
@@ -557,9 +561,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             mExecutor = executor;
             mAuthenticationCallback = callback;
             final long sessionId = crypto != null ? crypto.getOpId() : 0;
-            mService.authenticate(mToken, sessionId, userId,
-                    mBiometricServiceReceiver, 0 /* flags */, mContext.getOpPackageName(),
-                    mBundle, mDialogReceiver);
+            mService.authenticate(mToken, sessionId, userId, mBiometricServiceReceiver,
+                    0 /* flags */, mContext.getOpPackageName(), mBundle);
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception while authenticating", e);
             mExecutor.execute(() -> {
