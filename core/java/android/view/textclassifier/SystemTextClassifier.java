@@ -23,8 +23,10 @@ import android.content.Context;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.service.textclassifier.IConversationActionsCallback;
 import android.service.textclassifier.ITextClassificationCallback;
 import android.service.textclassifier.ITextClassifierService;
+import android.service.textclassifier.ITextLanguageCallback;
 import android.service.textclassifier.ITextLinksCallback;
 import android.service.textclassifier.ITextSelectionCallback;
 
@@ -76,7 +78,7 @@ public final class SystemTextClassifier implements TextClassifier {
             if (selection != null) {
                 return selection;
             }
-        } catch (RemoteException | InterruptedException e) {
+        } catch (RemoteException e) {
             Log.e(LOG_TAG, "Error suggesting selection for text. Using fallback.", e);
         }
         return mFallback.suggestSelection(request);
@@ -97,7 +99,7 @@ public final class SystemTextClassifier implements TextClassifier {
             if (classification != null) {
                 return classification;
             }
-        } catch (RemoteException | InterruptedException e) {
+        } catch (RemoteException e) {
             Log.e(LOG_TAG, "Error classifying text. Using fallback.", e);
         }
         return mFallback.classifyText(request);
@@ -124,7 +126,7 @@ public final class SystemTextClassifier implements TextClassifier {
             if (links != null) {
                 return links;
             }
-        } catch (RemoteException | InterruptedException e) {
+        } catch (RemoteException e) {
             Log.e(LOG_TAG, "Error generating links. Using fallback.", e);
         }
         return mFallback.generateLinks(request);
@@ -140,6 +142,42 @@ public final class SystemTextClassifier implements TextClassifier {
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Error reporting selection event.", e);
         }
+    }
+
+    @Override
+    public TextLanguage detectLanguage(TextLanguage.Request request) {
+        Preconditions.checkNotNull(request);
+        Utils.checkMainThread();
+
+        try {
+            final TextLanguageCallback callback = new TextLanguageCallback();
+            mManagerService.onDetectLanguage(mSessionId, request, callback);
+            final TextLanguage textLanguage = callback.mReceiver.get();
+            if (textLanguage != null) {
+                return textLanguage;
+            }
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Error detecting language.", e);
+        }
+        return mFallback.detectLanguage(request);
+    }
+
+    @Override
+    public ConversationActions suggestConversationActions(ConversationActions.Request request) {
+        Preconditions.checkNotNull(request);
+        Utils.checkMainThread();
+
+        try {
+            final ConversationActionsCallback callback = new ConversationActionsCallback();
+            mManagerService.onSuggestConversationActions(mSessionId, request, callback);
+            final ConversationActions conversationActions = callback.mReceiver.get();
+            if (conversationActions != null) {
+                return conversationActions;
+            }
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Error reporting selection event.", e);
+        }
+        return mFallback.suggestConversationActions(request);
     }
 
     /**
@@ -193,7 +231,7 @@ public final class SystemTextClassifier implements TextClassifier {
 
     private static final class TextSelectionCallback extends ITextSelectionCallback.Stub {
 
-        final ResponseReceiver<TextSelection> mReceiver = new ResponseReceiver<>();
+        final ResponseReceiver<TextSelection> mReceiver = new ResponseReceiver<>("textselection");
 
         @Override
         public void onSuccess(TextSelection selection) {
@@ -208,7 +246,8 @@ public final class SystemTextClassifier implements TextClassifier {
 
     private static final class TextClassificationCallback extends ITextClassificationCallback.Stub {
 
-        final ResponseReceiver<TextClassification> mReceiver = new ResponseReceiver<>();
+        final ResponseReceiver<TextClassification> mReceiver =
+                new ResponseReceiver<>("textclassification");
 
         @Override
         public void onSuccess(TextClassification classification) {
@@ -223,7 +262,7 @@ public final class SystemTextClassifier implements TextClassifier {
 
     private static final class TextLinksCallback extends ITextLinksCallback.Stub {
 
-        final ResponseReceiver<TextLinks> mReceiver = new ResponseReceiver<>();
+        final ResponseReceiver<TextLinks> mReceiver = new ResponseReceiver<>("textlinks");
 
         @Override
         public void onSuccess(TextLinks links) {
@@ -236,11 +275,47 @@ public final class SystemTextClassifier implements TextClassifier {
         }
     }
 
+    private static final class TextLanguageCallback extends ITextLanguageCallback.Stub {
+
+        final ResponseReceiver<TextLanguage> mReceiver = new ResponseReceiver<>("textlanguage");
+
+        @Override
+        public void onSuccess(TextLanguage textLanguage) {
+            mReceiver.onSuccess(textLanguage);
+        }
+
+        @Override
+        public void onFailure() {
+            mReceiver.onFailure();
+        }
+    }
+
+    private static final class ConversationActionsCallback
+            extends IConversationActionsCallback.Stub {
+
+        final ResponseReceiver<ConversationActions> mReceiver =
+                new ResponseReceiver<>("conversationaction");
+
+        @Override
+        public void onSuccess(ConversationActions conversationActions) {
+            mReceiver.onSuccess(conversationActions);
+        }
+
+        @Override
+        public void onFailure() {
+            mReceiver.onFailure();
+        }
+    }
+
     private static final class ResponseReceiver<T> {
 
         private final CountDownLatch mLatch = new CountDownLatch(1);
-
+        private final String mName;
         private T mResponse;
+
+        private ResponseReceiver(String name) {
+            mName = name;
+        }
 
         public void onSuccess(T response) {
             mResponse = response;
@@ -253,13 +328,21 @@ public final class SystemTextClassifier implements TextClassifier {
         }
 
         @Nullable
-        public T get() throws InterruptedException {
+        public T get() {
             // If this is running on the main thread, do not block for a response.
             // The response will unfortunately be null and the TextClassifier should depend on its
             // fallback.
             // NOTE that TextClassifier calls should preferably always be called on a worker thread.
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                mLatch.await(2, TimeUnit.SECONDS);
+                try {
+                    boolean success = mLatch.await(2, TimeUnit.SECONDS);
+                    if (!success) {
+                        Log.w(LOG_TAG, "Timeout in ResponseReceiver.get(): " + mName);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    Log.e(LOG_TAG, "Interrupted during ResponseReceiver.get(): " + mName, e);
+                }
             }
             return mResponse;
         }

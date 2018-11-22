@@ -5191,8 +5191,10 @@ package android.service.textclassifier {
     method public abstract void onClassifyText(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.TextClassification.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextClassification>);
     method public void onCreateTextClassificationSession(android.view.textclassifier.TextClassificationContext, android.view.textclassifier.TextClassificationSessionId);
     method public void onDestroyTextClassificationSession(android.view.textclassifier.TextClassificationSessionId);
+    method public void onDetectLanguage(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.TextLanguage.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLanguage>);
     method public abstract void onGenerateLinks(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.TextLinks.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLinks>);
     method public void onSelectionEvent(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.SelectionEvent);
+    method public void onSuggestConversationActions(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.ConversationActions.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.ConversationActions>);
     method public abstract void onSuggestSelection(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.TextSelection.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextSelection>);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.textclassifier.TextClassifierService";
   }
