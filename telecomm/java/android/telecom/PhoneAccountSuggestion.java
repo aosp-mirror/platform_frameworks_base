@@ -1,7 +1,24 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package android.telecom;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -16,10 +33,33 @@ public final class PhoneAccountSuggestion implements Parcelable {
             REASON_USER_SET, REASON_OTHER}, prefix = { "REASON_" })
     public @interface SuggestionReason {}
 
+    /**
+     * Indicates that this account is not suggested for use, but is still available.
+     */
     public static final int REASON_NONE = 0;
+
+    /**
+     * Indicates that the {@link PhoneAccountHandle} is suggested because the number we're calling
+     * is on the same carrier, and therefore may have lower rates.
+     */
     public static final int REASON_INTRA_CARRIER = 1;
+
+    /**
+     * Indicates that the {@link PhoneAccountHandle} is suggested because the user uses it
+     * frequently for the number that we are calling.
+     */
     public static final int REASON_FREQUENT = 2;
+
+    /**
+     * Indicates that the {@link PhoneAccountHandle} is suggested because the user explicitly
+     * specified that it be used for the number we are calling.
+     */
     public static final int REASON_USER_SET = 3;
+
+    /**
+     * Indicates that the {@link PhoneAccountHandle} is suggested for a reason not otherwise
+     * enumerated here.
+     */
     public static final int REASON_OTHER = 4;
 
     private PhoneAccountHandle mHandle;
@@ -30,6 +70,7 @@ public final class PhoneAccountSuggestion implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public PhoneAccountSuggestion(PhoneAccountHandle handle, @SuggestionReason int reason,
             boolean shouldAutoSelect) {
         this.mHandle = handle;
@@ -56,14 +97,26 @@ public final class PhoneAccountSuggestion implements Parcelable {
                 }
             };
 
-    public PhoneAccountHandle getHandle() {
+    /**
+     * @return The {@link PhoneAccountHandle} for this suggestion.
+     */
+    public PhoneAccountHandle getPhoneAccountHandle() {
         return mHandle;
     }
 
+    /**
+     * @return The reason for this suggestion
+     */
     public @SuggestionReason int getReason() {
         return mReason;
     }
 
+    /**
+     * Suggests whether the dialer should automatically place the call using this account without
+     * user interaction. This may be set on multiple {@link PhoneAccountSuggestion}s, and the dialer
+     * is free to choose which one to use.
+     * @return {@code true} if the hint is to auto-select, {@code false} otherwise.
+     */
     public boolean shouldAutoSelect() {
         return mShouldAutoSelect;
     }
