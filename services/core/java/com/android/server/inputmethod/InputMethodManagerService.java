@@ -180,7 +180,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.WeakHashMap;
@@ -322,7 +321,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     // All known input methods.  mMethodMap also serves as the global
     // lock for this class.
     final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
-    final HashMap<String, InputMethodInfo> mMethodMap = new HashMap<>();
+    final ArrayMap<String, InputMethodInfo> mMethodMap = new ArrayMap<>();
     private final LruCache<SuggestionSpan, InputMethodInfo> mSecureSuggestionSpans =
             new LruCache<>(SECURE_SUGGESTION_SPANS_MAX_SIZE);
     private final InputMethodSubtypeSwitchingController mSwitchingController;
@@ -554,8 +553,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private InputMethodSubtype mCurrentSubtype;
 
     // This list contains the pairs of InputMethodInfo and InputMethodSubtype.
-    private final HashMap<InputMethodInfo, ArrayList<InputMethodSubtype>>
-            mShortcutInputMethodsAndSubtypes = new HashMap<>();
+    private final ArrayMap<InputMethodInfo, ArrayList<InputMethodSubtype>>
+            mShortcutInputMethodsAndSubtypes = new ArrayMap<>();
 
     // Was the keyguard locked when this client became current?
     private boolean mCurClientInKeyguard;
@@ -3674,7 +3673,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS),
                 mSettings.getCurrentUserId());
 
-        final HashMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
+        final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
                 mFileManager.getAllAdditionalInputMethodSubtypes();
         for (int i = 0; i < services.size(); ++i) {
             ResolveInfo ri = services.get(i);
@@ -4310,10 +4309,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private static final String ATTR_IS_AUXILIARY = "isAuxiliary";
         private static final String ATTR_IS_ASCII_CAPABLE = "isAsciiCapable";
         private final AtomicFile mAdditionalInputMethodSubtypeFile;
-        private final HashMap<String, InputMethodInfo> mMethodMap;
-        private final HashMap<String, List<InputMethodSubtype>> mAdditionalSubtypesMap =
-                new HashMap<>();
-        public InputMethodFileManager(HashMap<String, InputMethodInfo> methodMap, int userId) {
+        private final ArrayMap<String, InputMethodInfo> mMethodMap;
+        private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypesMap =
+                new ArrayMap<>();
+        InputMethodFileManager(ArrayMap<String, InputMethodInfo> methodMap, int userId) {
             if (methodMap == null) {
                 throw new NullPointerException("methodMap is null");
             }
@@ -4365,15 +4364,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
 
-        public HashMap<String, List<InputMethodSubtype>> getAllAdditionalInputMethodSubtypes() {
+        public ArrayMap<String, List<InputMethodSubtype>> getAllAdditionalInputMethodSubtypes() {
             synchronized (mMethodMap) {
                 return mAdditionalSubtypesMap;
             }
         }
 
         private static void writeAdditionalInputMethodSubtypes(
-                HashMap<String, List<InputMethodSubtype>> allSubtypes, AtomicFile subtypesFile,
-                HashMap<String, InputMethodInfo> methodMap) {
+                ArrayMap<String, List<InputMethodSubtype>> allSubtypes, AtomicFile subtypesFile,
+                ArrayMap<String, InputMethodInfo> methodMap) {
             // Safety net for the case that this function is called before methodMap is set.
             final boolean isSetMethodMap = methodMap != null && methodMap.size() > 0;
             FileOutputStream fos = null;
@@ -4427,7 +4426,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         private static void readAdditionalInputMethodSubtypes(
-                HashMap<String, List<InputMethodSubtype>> allSubtypes, AtomicFile subtypesFile) {
+                ArrayMap<String, List<InputMethodSubtype>> allSubtypes, AtomicFile subtypesFile) {
             if (allSubtypes == null || subtypesFile == null) return;
             allSubtypes.clear();
             try (final FileInputStream fis = subtypesFile.openRead()) {

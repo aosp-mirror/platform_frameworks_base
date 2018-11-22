@@ -31,6 +31,7 @@ import android.os.LocaleList;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Pair;
 import android.util.Printer;
 import android.util.Slog;
@@ -45,7 +46,6 @@ import com.android.internal.inputmethod.StartInputFlags;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -473,7 +473,7 @@ final class InputMethodUtils {
         final int numSubtypes = subtypes.size();
 
         // Handle overridesImplicitlyEnabledSubtype mechanism.
-        final HashMap<String, InputMethodSubtype> applicableModeAndSubtypesMap = new HashMap<>();
+        final ArrayMap<String, InputMethodSubtype> applicableModeAndSubtypesMap = new ArrayMap<>();
         for (int i = 0; i < numSubtypes; ++i) {
             // scan overriding implicitly enabled subtypes.
             final InputMethodSubtype subtype = subtypes.get(i);
@@ -488,8 +488,8 @@ final class InputMethodUtils {
             return new ArrayList<>(applicableModeAndSubtypesMap.values());
         }
 
-        final HashMap<String, ArrayList<InputMethodSubtype>> nonKeyboardSubtypesMap =
-                new HashMap<>();
+        final ArrayMap<String, ArrayList<InputMethodSubtype>> nonKeyboardSubtypesMap =
+                new ArrayMap<>();
         final ArrayList<InputMethodSubtype> keyboardSubtypes = new ArrayList<>();
 
         for (int i = 0; i < numSubtypes; ++i) {
@@ -761,12 +761,12 @@ final class InputMethodUtils {
 
         private final Resources mRes;
         private final ContentResolver mResolver;
-        private final HashMap<String, InputMethodInfo> mMethodMap;
+        private final ArrayMap<String, InputMethodInfo> mMethodMap;
 
         /**
          * On-memory data store to emulate when {@link #mCopyOnWrite} is {@code true}.
          */
-        private final HashMap<String, String> mCopyOnWriteDataStore = new HashMap<>();
+        private final ArrayMap<String, String> mCopyOnWriteDataStore = new ArrayMap<>();
 
         private boolean mCopyOnWrite = false;
         @NonNull
@@ -812,7 +812,7 @@ final class InputMethodUtils {
 
         public InputMethodSettings(
                 Resources res, ContentResolver resolver,
-                HashMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
+                ArrayMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
                 @UserIdInt int userId, boolean copyOnWrite) {
             mRes = res;
             mResolver = resolver;
