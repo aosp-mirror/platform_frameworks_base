@@ -109,6 +109,7 @@ import android.app.StatusBarManager;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyCache;
+import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.NetworkEvent;
@@ -195,6 +196,7 @@ import android.security.keystore.AttestationUtils;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.service.persistentdata.PersistentDataBlockManager;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.text.TextUtils;
@@ -205,7 +207,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.StatsLog;
 import android.util.Xml;
 import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -4051,6 +4052,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PASSWORD_QUALITY)
+                .setAdmin(who)
+                .setInt(quality)
+                .setBoolean(parent)
+                .write();
     }
 
     /**
@@ -4164,6 +4171,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_LENGTH)
+                .setAdmin(who)
+                .setInt(length)
+                .write();
     }
 
     @Override
@@ -4391,6 +4403,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_UPPER_CASE)
+                .setAdmin(who)
+                .setInt(length)
+                .write();
     }
 
     @Override
@@ -4414,6 +4431,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_LOWER_CASE)
+                .setAdmin(who)
+                .setInt(length)
+                .write();
     }
 
     @Override
@@ -4440,6 +4462,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_LETTERS)
+                .setAdmin(who)
+                .setInt(length)
+                .write();
     }
 
     @Override
@@ -4466,6 +4493,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_NUMERIC)
+                .setAdmin(who)
+                .setInt(length)
+                .write();
     }
 
     @Override
@@ -4492,6 +4524,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_SYMBOLS)
+                .setAdmin(who)
+                .setInt(length)
+                .write();
     }
 
     @Override
@@ -4518,6 +4555,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_NON_LETTER)
+                .setAdmin(who)
+                .setInt(length)
+                .write();
     }
 
     @Override
@@ -5285,6 +5327,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.LOCK_NOW)
+                .setInt(flags)
+                .write();
     }
 
     @Override
@@ -5363,6 +5409,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final long id = mInjector.binderClearCallingIdentity();
         try {
             alias = mCertificateMonitor.installCaCert(userHandle, certBuffer);
+            final boolean isDelegate = (admin == null);
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.INSTALL_CA_CERT)
+                    .setAdmin(callerPackage)
+                    .setBoolean(isDelegate)
+                    .write();
             if (alias == null) {
                 Log.w(LOG_TAG, "Problem installing cert");
                 return false;
@@ -5422,6 +5474,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     keyChain.setGrant(callingUid, alias, true);
                 }
                 keyChain.setUserSelectable(alias, isUserSelectable);
+                final boolean isDelegate = (who == null);
+                DevicePolicyEventLogger
+                        .createEvent(DevicePolicyEnums.INSTALL_KEY_PAIR)
+                        .setAdmin(callerPackage)
+                        .setBoolean(isDelegate)
+                        .write();
                 return true;
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "Installing certificate", e);
@@ -6116,6 +6174,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             admin = getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_WIPE_DATA);
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.WIPE_DATA_WITH_REASON)
+                .setAdmin(admin.info.getComponent())
+                .setInt(flags)
+                .write();
         String internalReason = "DevicePolicyManager.wipeDataWithReason() from "
                 + admin.info.getComponent().flattenToShortString();
         wipeDataNoLock(
@@ -7220,6 +7283,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISABLED_FEATURES_SET,
                     who.getPackageName(), userHandle, affectedUserId, which);
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_KEYGUARD_DISABLED_FEATURES)
+                .setAdmin(who)
+                .setInt(which)
+                .setBoolean(parent)
+                .write();
     }
 
     /**
@@ -9466,7 +9535,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             saveUserRestrictionsLocked(userHandle);
         }
-        StatsLog.write(StatsLog.USER_RESTRICTION_CHANGED, key, enabledFromThisOwner);
+        final int eventId = enabledFromThisOwner
+                ? DevicePolicyEnums.ADD_USER_RESTRICTION
+                : DevicePolicyEnums.REMOVE_USER_RESTRICTION;
+        DevicePolicyEventLogger
+                .createEvent(eventId)
+                .setAdmin(who)
+                .setStrings(key)
+                .write();
         if (SecurityLog.isLoggingEnabled()) {
             final int eventTag = enabledFromThisOwner
                     ? SecurityLog.TAG_USER_RESTRICTION_ADDED
@@ -10238,6 +10314,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     try {
                         setUserRestriction(who, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
                                 (Integer.parseInt(value) == 0) ? true : false);
+                        DevicePolicyEventLogger
+                                .createEvent(DevicePolicyEnums.SET_SECURE_SETTING)
+                                .setAdmin(who)
+                                .setStrings(setting, value)
+                                .write();
                     } catch (NumberFormatException exc) {
                         Slog.e(LOG_TAG, "Invalid value: " + value + " for setting " + setting);
                     }
@@ -10265,6 +10346,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderRestoreCallingIdentity(id);
             }
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_SECURE_SETTING)
+                .setAdmin(who)
+                .setStrings(setting, value)
+                .write();
     }
 
     @Override
@@ -10623,6 +10709,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             synchronized (getLockObject()) {
                 updateMaximumTimeToLockLocked(userId);
             }
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.SEPARATE_PROFILE_CHALLENGE_CHANGED)
+                    .setBoolean(isSeparateProfileChallengeEnabled(userId))
+                    .write();
         }
 
         @Override
@@ -10963,6 +11053,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 saveSettingsLocked(userId);
             }
         }
+        final boolean isDelegate = (admin == null);
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PERMISSION_POLICY)
+                .setAdmin(callerPackage)
+                .setInt(policy)
+                .setBoolean(isDelegate)
+                .write();
     }
 
     @Override
@@ -11014,7 +11111,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                                 PackageManager.FLAG_PERMISSION_POLICY_FIXED, 0, user);
                     } break;
                 }
-                return true;
             } catch (SecurityException se) {
                 return false;
             } catch (NameNotFoundException e) {
@@ -11023,6 +11119,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
         }
+        final boolean isDelegate = (admin == null);
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PERMISSION_GRANT_STATE)
+                .setAdmin(callerPackage)
+                .setStrings(permission)
+                .setInt(grantState)
+                .setBoolean(isDelegate)
+                .write();
+        return true;
     }
 
     @Override
@@ -11848,6 +11953,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mSecurityLogMonitor.stop();
             }
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_SECURITY_LOGGING_ENABLED)
+                .setAdmin(admin)
+                .setBoolean(enabled)
+                .write();
     }
 
     @Override
@@ -11885,13 +11995,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkNotNull(admin);
         ensureDeviceOwnerAndAllUsersAffiliated(admin);
 
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.RETRIEVE_PRE_REBOOT_SECURITY_LOGS)
+                .setAdmin(admin)
+                .write();
+
         if (!mContext.getResources().getBoolean(R.bool.config_supportPreRebootSecurityLogs)
                 || !mInjector.securityLogGetLoggingEnabledProperty()) {
             return null;
         }
 
         recordSecurityLogRetrievalTime();
-
         ArrayList<SecurityEvent> output = new ArrayList<SecurityEvent>();
         try {
             SecurityLog.readPreviousEvents(output);
@@ -11918,6 +12032,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         recordSecurityLogRetrievalTime();
 
         List<SecurityEvent> logs = mSecurityLogMonitor.retrieveLogs();
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.RETRIEVE_SECURITY_LOGS)
+                .setAdmin(admin)
+                .write();
         return logs != null ? new ParceledListSlice<SecurityEvent>(logs) : null;
     }
 
