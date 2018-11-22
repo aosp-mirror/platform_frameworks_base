@@ -1770,6 +1770,11 @@ public class IpSecService extends IIpSecService.Stub {
             //     and SPs have matching marks (as VTI are meant to be built).
             // Currently update does nothing with marks. Leave empty (defaulting to 0) to ensure the
             //     config matches the actual allocated resources in the kernel.
+            // All SAs will have zero marks (from creation time), and any policy that matches the
+            //     same src/dst could match these SAs. Non-IpSecService governed processes that
+            //     establish floating policies with the same src/dst may result in undefined
+            //     behavior. This is generally limited to vendor code due to the permissions
+            //     (CAP_NET_ADMIN) required.
             //
             // c.setMarkValue(mark);
             // c.setMarkMask(0xffffffff);
