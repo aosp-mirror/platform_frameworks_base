@@ -51,7 +51,6 @@ import static com.android.server.wm.WindowManagerService.logSurface;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
-import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
@@ -106,15 +105,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     private boolean mSustainedPerformanceModeEnabled = false;
     private boolean mSustainedPerformanceModeCurrent = false;
 
-    boolean mWallpaperMayChange = false;
     // During an orientation change, we track whether all windows have rendered
     // at the new orientation, and this will be false from changing orientation until that occurs.
     // For seamless rotation cases this always stays true, as the windows complete their orientation
     // changes 1 by 1 without disturbing global state.
     boolean mOrientationChangeComplete = true;
     boolean mWallpaperActionPending = false;
-
-    final WallpaperController mWallpaperController;
 
     private final Handler mHandler;
 
@@ -150,7 +146,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     RootWindowContainer(WindowManagerService service) {
         super(service);
         mHandler = new MyHandler(service.mH.getLooper());
-        mWallpaperController = new WallpaperController(mService);
     }
 
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
@@ -236,8 +231,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             return existing;
         }
 
-        final DisplayContent dc =
-                new DisplayContent(display, mService, mWallpaperController, controller);
+        final DisplayContent dc = new DisplayContent(display, mService, controller);
 
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
 
@@ -579,14 +573,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         final RecentsAnimationController recentsAnimationController =
                 mService.getRecentsAnimationController();
         if (recentsAnimationController != null) {
-            recentsAnimationController.checkAnimationReady(mWallpaperController);
+            recentsAnimationController.checkAnimationReady(defaultDisplay.mWallpaperController);
         }
 
-        if (mWallpaperMayChange) {
-            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Wallpaper may change!  Adjusting");
-            defaultDisplay.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-            if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats("WallpaperMayChange",
-                    defaultDisplay.pendingLayoutChanges);
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final DisplayContent displayContent = mChildren.get(displayNdx);
+            if (displayContent.mWallpaperMayChange) {
+                if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Wallpaper may change!  Adjusting");
+                displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+                if (DEBUG_LAYOUT_REPEATS) {
+                    surfacePlacer.debugLayoutRepeats("WallpaperMayChange",
+                            displayContent.pendingLayoutChanges);
+                }
+            }
         }
 
         if (mService.mFocusMayChange) {
@@ -617,7 +616,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
 
         // Destroy the surface of any windows that are no longer visible.
-        boolean wallpaperDestroyed = false;
         i = mService.mDestroySurface.size();
         if (i > 0) {
             do {
@@ -629,7 +627,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     displayContent.setInputMethodWindowLocked(null);
                 }
                 if (displayContent.mWallpaperController.isWallpaperTarget(win)) {
-                    wallpaperDestroyed = true;
+                    displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                 }
                 win.destroySurfaceUnchecked();
                 win.mWinAnimator.destroyPreservedSurfaceLocked();
@@ -641,11 +639,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
             displayContent.removeExistingTokensIfPossible();
-        }
-
-        if (wallpaperDestroyed) {
-            defaultDisplay.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-            defaultDisplay.setLayoutNeeded();
         }
 
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
@@ -903,10 +896,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         final int bulkUpdateParams = mService.mAnimator.mBulkUpdateParams;
         if ((bulkUpdateParams & SET_UPDATE_ROTATION) != 0) {
             mUpdateRotation = true;
-            doRequest = true;
-        }
-        if ((bulkUpdateParams & SET_WALLPAPER_MAY_CHANGE) != 0) {
-            mWallpaperMayChange = true;
             doRequest = true;
         }
         if ((bulkUpdateParams & SET_ORIENTATION_CHANGE_COMPLETE) == 0) {

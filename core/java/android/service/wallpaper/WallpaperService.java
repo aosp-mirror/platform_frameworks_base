@@ -24,7 +24,6 @@ import android.app.Service;
 import android.app.WallpaperColors;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -806,7 +805,7 @@ public abstract class WallpaperService extends Service {
                                 com.android.internal.R.style.Animation_Wallpaper;
                         mInputChannel = new InputChannel();
                         if (mSession.addToDisplay(mWindow, mWindow.mSeq, mLayout, View.VISIBLE,
-                                Display.DEFAULT_DISPLAY, mWinFrame, mContentInsets, mStableInsets,
+                                mDisplay.getDisplayId(), mWinFrame, mContentInsets, mStableInsets,
                                 mOutsets, mDisplayCutout, mInputChannel) < 0) {
                             Log.w(TAG, "Failed to add window while updating wallpaper surface.");
                             return;
@@ -1015,7 +1014,15 @@ public abstract class WallpaperService extends Service {
             if (mDestroyed) {
                 return;
             }
-            
+
+            mDisplayManager = getSystemService(DisplayManager.class);
+            mDisplay = mDisplayManager.getDisplay(wrapper.mDisplayId);
+            if (mDisplay == null) {
+                // TODO(b/115486823) Ignore this engine.
+                Log.e(TAG, "Attaching to a non-existent display: " + wrapper.mDisplayId);
+                return;
+            }
+
             mIWallpaperEngine = wrapper;
             mCaller = wrapper.mCaller;
             mConnection = wrapper.mConnection;
@@ -1027,10 +1034,7 @@ public abstract class WallpaperService extends Service {
             mWindow.setSession(mSession);
 
             mLayout.packageName = getPackageName();
-
-            mDisplayManager = (DisplayManager)getSystemService(Context.DISPLAY_SERVICE);
             mDisplayManager.registerDisplayListener(mDisplayListener, mCaller.getHandler());
-            mDisplay = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
             mDisplayState = mDisplay.getState();
 
             if (DEBUG) Log.v(TAG, "onCreate(): " + this);
@@ -1268,12 +1272,14 @@ public abstract class WallpaperService extends Service {
         int mReqWidth;
         int mReqHeight;
         final Rect mDisplayPadding = new Rect();
+        int mDisplayId;
 
         Engine mEngine;
 
         IWallpaperEngineWrapper(WallpaperService context,
                 IWallpaperConnection conn, IBinder windowToken,
-                int windowType, boolean isPreview, int reqWidth, int reqHeight, Rect padding) {
+                int windowType, boolean isPreview, int reqWidth, int reqHeight, Rect padding,
+                int displayId) {
             mCaller = new HandlerCaller(context, context.getMainLooper(), this, true);
             mConnection = conn;
             mWindowToken = windowToken;
@@ -1282,6 +1288,7 @@ public abstract class WallpaperService extends Service {
             mReqWidth = reqWidth;
             mReqHeight = reqHeight;
             mDisplayPadding.set(padding);
+            mDisplayId = displayId;
             
             Message msg = mCaller.obtainMessage(DO_ATTACH);
             mCaller.sendMessage(msg);
@@ -1353,7 +1360,7 @@ public abstract class WallpaperService extends Service {
             switch (message.what) {
                 case DO_ATTACH: {
                     try {
-                        mConnection.attachEngine(this);
+                        mConnection.attachEngine(this, mDisplayId);
                     } catch (RemoteException e) {
                         Log.w(TAG, "Wallpaper host disappeared", e);
                         return;
@@ -1453,9 +1460,10 @@ public abstract class WallpaperService extends Service {
 
         @Override
         public void attach(IWallpaperConnection conn, IBinder windowToken,
-                int windowType, boolean isPreview, int reqWidth, int reqHeight, Rect padding) {
+                int windowType, boolean isPreview, int reqWidth, int reqHeight, Rect padding,
+                int displayId) {
             new IWallpaperEngineWrapper(mTarget, conn, windowToken,
-                    windowType, isPreview, reqWidth, reqHeight, padding);
+                    windowType, isPreview, reqWidth, reqHeight, padding, displayId);
         }
     }
 

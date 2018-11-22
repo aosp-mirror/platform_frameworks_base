@@ -48,7 +48,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         synchronized (mWm.mGlobalLock) {
             // No wallpaper
             final DisplayContent dc = createNewDisplay();
-            Bitmap wallpaperBitmap = mWm.mRoot.mWallpaperController.screenshotWallpaperLocked();
+            Bitmap wallpaperBitmap = dc.mWallpaperController.screenshotWallpaperLocked();
             assertNull(wallpaperBitmap);
 
             // No wallpaper WSA Surface
@@ -56,25 +56,25 @@ public class WallpaperControllerTests extends WindowTestsBase {
                     true, dc, true /* ownerCanManageAppTokens */);
             WindowState wallpaperWindow = createWindow(null /* parent */, TYPE_WALLPAPER,
                     wallpaperWindowToken, "wallpaperWindow");
-            wallpaperBitmap = mWallpaperController.screenshotWallpaperLocked();
+            wallpaperBitmap = dc.mWallpaperController.screenshotWallpaperLocked();
             assertNull(wallpaperBitmap);
 
             // Wallpaper with not visible WSA surface.
             wallpaperWindow.mWinAnimator.mSurfaceController = windowSurfaceController;
             wallpaperWindow.mWinAnimator.mLastAlpha = 1;
-            wallpaperBitmap = mWallpaperController.screenshotWallpaperLocked();
+            wallpaperBitmap = dc.mWallpaperController.screenshotWallpaperLocked();
             assertNull(wallpaperBitmap);
 
             when(windowSurfaceController.getShown()).thenReturn(true);
 
             // Wallpaper with WSA alpha set to 0.
             wallpaperWindow.mWinAnimator.mLastAlpha = 0;
-            wallpaperBitmap = mWallpaperController.screenshotWallpaperLocked();
+            wallpaperBitmap = dc.mWallpaperController.screenshotWallpaperLocked();
             assertNull(wallpaperBitmap);
 
             // Wallpaper window with WSA Surface
             wallpaperWindow.mWinAnimator.mLastAlpha = 1;
-            wallpaperBitmap = mWallpaperController.screenshotWallpaperLocked();
+            wallpaperBitmap = dc.mWallpaperController.screenshotWallpaperLocked();
             assertNotNull(wallpaperBitmap);
         }
     }

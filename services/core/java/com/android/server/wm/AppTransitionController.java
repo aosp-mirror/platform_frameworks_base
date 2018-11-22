@@ -51,7 +51,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_APP_TRANSITION_STARTING;
 
-import android.app.WindowConfiguration;
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -83,7 +82,7 @@ public class AppTransitionController {
     AppTransitionController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
-        mWallpaperControllerLocked = new WallpaperController(mService);
+        mWallpaperControllerLocked = mDisplayContent.mWallpaperController;
     }
 
     /**
@@ -106,7 +105,7 @@ public class AppTransitionController {
 
         mDisplayContent.mAppTransition.removeAppTransitionTimeoutCallbacks();
 
-        mService.mRoot.mWallpaperMayChange = false;
+        mDisplayContent.mWallpaperMayChange = false;
 
         int i;
         for (i = 0; i < appsCount; i++) {
@@ -121,7 +120,7 @@ public class AppTransitionController {
         // Adjust wallpaper before we pull the lower/upper target, since pending changes
         // (like the clearAnimatingFlags() above) might affect wallpaper target result.
         // Or, the opening app window should be a wallpaper target.
-        mWallpaperControllerLocked.adjustWallpaperWindowsForAppTransitionIfNeeded(mDisplayContent,
+        mWallpaperControllerLocked.adjustWallpaperWindowsForAppTransitionIfNeeded(
                 mDisplayContent.mOpeningApps);
 
         // Determine if closing and opening app token sets are wallpaper targets, in which case
