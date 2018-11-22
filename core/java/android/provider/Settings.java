@@ -1710,6 +1710,15 @@ public final class Settings {
     /** @hide - Private call() method to reset to defaults the 'secure' table */
     public static final String CALL_METHOD_RESET_SECURE = "RESET_secure";
 
+    /** @hide - Private call() method to query the 'system' table */
+    public static final String CALL_METHOD_LIST_SYSTEM = "LIST_system";
+
+    /** @hide - Private call() method to query the 'secure' table */
+    public static final String CALL_METHOD_LIST_SECURE = "LIST_secure";
+
+    /** @hide - Private call() method to query the 'global' table */
+    public static final String CALL_METHOD_LIST_GLOBAL = "LIST_global";
+
     /**
      * Activity Extra: Limit available options in launched activity based on the given authority.
      * <p>
