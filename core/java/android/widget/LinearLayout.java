@@ -189,7 +189,7 @@ public class LinearLayout extends ViewGroup {
             @ViewDebug.FlagToString(mask = Gravity.RELATIVE_LAYOUT_DIRECTION,
                 equals = Gravity.RELATIVE_LAYOUT_DIRECTION, name = "RELATIVE")
         }, formatToHexString = true)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mGravity = Gravity.START | Gravity.TOP;
 
     @ViewDebug.ExportedProperty(category = "measurement")

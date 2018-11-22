@@ -204,7 +204,7 @@ public class RelativeLayout extends ViewGroup {
 
     private View mBaselineView = null;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mGravity = Gravity.START | Gravity.TOP;
     private final Rect mContentBounds = new Rect();
     private final Rect mSelfBounds = new Rect();
