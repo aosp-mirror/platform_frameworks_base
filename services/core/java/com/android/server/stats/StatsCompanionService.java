@@ -1668,11 +1668,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 }
 
                 for (int k = 0; k < threadCpuUsage.usageTimesMillis.length; k++) {
-                    // Do not report CPU usage at a frequency when it's zero
-                    if (threadCpuUsage.usageTimesMillis[k] == 0) {
-                        continue;
-                    }
-
                     StatsLogEventWrapper e =
                             new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
                     e.writeInt(processCpuUsage.uid);
