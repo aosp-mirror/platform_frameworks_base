@@ -194,8 +194,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             "/system/bin/traced",  // Perfetto.
             "/system/bin/traced_probes",  // Perfetto.
             "webview_zygote",
-            "zygote",
-            "zygote64",
+            // Temporarily excluded zygote to investigate its forking consequences in
+            // NativeProcessMemoryState.
+            // "zygote",
+            // "zygote64",
     };
 
 
