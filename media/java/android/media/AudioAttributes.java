@@ -595,10 +595,10 @@ public final class AudioAttributes implements Parcelable {
                 case CONTENT_TYPE_MUSIC:
                 case CONTENT_TYPE_SONIFICATION:
                 case CONTENT_TYPE_SPEECH:
-                     mContentType = contentType;
-                     break;
+                    mContentType = contentType;
+                    break;
                 default:
-                     mUsage = CONTENT_TYPE_UNKNOWN;
+                    mContentType = CONTENT_TYPE_UNKNOWN;
             }
             return this;
         }
