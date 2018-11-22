@@ -34,7 +34,7 @@ import androidx.core.text.TextDirectionHeuristicsCompat;
 
 import com.android.settingslib.R;
 
-import libcore.util.TimeZoneFinder;
+import libcore.timezone.TimeZoneFinder;
 
 import org.xmlpull.v1.XmlPullParserException;
 
