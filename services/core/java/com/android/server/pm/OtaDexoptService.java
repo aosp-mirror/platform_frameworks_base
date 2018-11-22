@@ -333,9 +333,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         PackageDexOptimizer optimizer = new OTADexoptPackageDexOptimizer(
                 collectingInstaller, mPackageManagerService.mInstallLock, mContext);
 
-        String[] libraryDependencies = pkg.usesLibraryFiles;
-
-        optimizer.performDexOpt(pkg, libraryDependencies,
+        optimizer.performDexOpt(pkg, pkg.usesLibraryInfos,
                 null /* ISAs */,
                 null /* CompilerStats.PackageStats */,
                 mPackageManagerService.getDexManager().getPackageUseInfoOrDefault(pkg.packageName),
