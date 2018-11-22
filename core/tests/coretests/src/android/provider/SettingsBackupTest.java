@@ -181,6 +181,8 @@ public class SettingsBackupTest {
                     Settings.Global.CONNECTIVITY_METRICS_BUFFER_SIZE,
                     Settings.Global.CONNECTIVITY_SAMPLING_INTERVAL_IN_SECONDS,
                     Settings.Global.CONTACT_METADATA_SYNC_ENABLED,
+                    Settings.Global.CONVERSATION_ACTIONS_UPDATE_CONTENT_URL,
+                    Settings.Global.CONVERSATION_ACTIONS_UPDATE_METADATA_URL,
                     Settings.Global.CONTACTS_DATABASE_WAL_ENABLED,
                     Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
                     Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,

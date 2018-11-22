@@ -12138,6 +12138,20 @@ public final class Settings {
                 "smart_selection_metadata_url";
 
         /**
+         * URL for conversation actions model updates
+         * @hide
+         */
+        public static final String CONVERSATION_ACTIONS_UPDATE_CONTENT_URL =
+                "conversation_actions_content_url";
+
+        /**
+         * URL for conversation actions model update metadata
+         * @hide
+         */
+        public static final String CONVERSATION_ACTIONS_UPDATE_METADATA_URL =
+                "conversation_actions_metadata_url";
+
+        /**
          * SELinux enforcement status. If 0, permissive; if 1, enforcing.
          * @hide
          */

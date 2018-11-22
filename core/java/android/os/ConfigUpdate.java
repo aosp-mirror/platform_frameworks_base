@@ -83,6 +83,14 @@ public final class ConfigUpdate {
             = "android.intent.action.UPDATE_SMART_SELECTION";
 
     /**
+     * Update conversation actions model file.
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_UPDATE_CONVERSATION_ACTIONS
+            = "android.intent.action.UPDATE_CONVERSATION_ACTIONS";
+
+    /**
      * Update network watchlist config file.
      * @hide
      */
