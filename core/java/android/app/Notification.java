@@ -3193,6 +3193,25 @@ public class Notification implements Parcelable
     }
 
     /**
+     * Returns the actions that are contextual (marked as SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION) out
+     * of the actions in this notification.
+     *
+     * @hide
+     */
+    public List<Notification.Action> getContextualActions() {
+        if (actions == null) return Collections.emptyList();
+
+        List<Notification.Action> contextualActions = new ArrayList<>();
+        for (Notification.Action action : actions) {
+            if (action.getSemanticAction()
+                    == Notification.Action.SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION) {
+                contextualActions.add(action);
+            }
+        }
+        return contextualActions;
+    }
+
+    /**
      * Builder class for {@link Notification} objects.
      *
      * Provides a convenient way to set the various fields of a {@link Notification} and generate
