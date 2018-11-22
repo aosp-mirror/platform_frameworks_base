@@ -8338,6 +8338,26 @@ public class TelephonyManager {
         return UNKNOWN_CARRIER_ID;
     }
 
+     /**
+      * Returns carrier id based on MCCMNC only. This is for fallback when exact carrier id
+      * {@link #getSimCarrierId()} configurations are not found
+      *
+      * @return matching carrier id from passing mccmnc.
+      * @hide
+      */
+     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+     public int getCarrierIdFromMccMnc(String mccmnc) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getCarrierIdFromMccMnc(getSlotIndex(), mccmnc);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return UNKNOWN_CARRIER_ID;
+    }
+
     /**
      * Return the application ID for the uicc application type like {@link #APPTYPE_CSIM}.
      * All uicc applications are uniquely identified by application ID. See ETSI 102.221 and 101.220
