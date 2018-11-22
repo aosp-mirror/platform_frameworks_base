@@ -1372,6 +1372,15 @@ interface ITelephony {
     String getSubscriptionPreciseCarrierName(int subId);
 
     /**
+     * Returns carrier id based on MCCMNC only. This will return a MNO carrier id used for fallback
+     * check when exact carrier id {@link #getSimCarrierId()} configurations are not found
+     *
+     * @return carrier id from passing mccmnc.
+     * @hide
+     */
+    int getCarrierIdFromMccMnc(int slotIndex, String mccmnc);
+
+    /**
      * Action set from carrier signalling broadcast receivers to enable/disable metered apns
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
      * @param subId the subscription ID that this action applies to.
@@ -1587,35 +1596,31 @@ interface ITelephony {
     /**
      * Adds an IMS registration status callback for the subscription id specified.
      */
-    void addImsRegistrationCallback(int subId, IImsRegistrationCallback c,
-            String callingPackage);
+    void registerImsRegistrationCallback(int subId, IImsRegistrationCallback c);
      /**
       * Removes an existing IMS registration status callback for the subscription specified.
       */
-    void removeImsRegistrationCallback(int subId, IImsRegistrationCallback c,
-            String callingPackage);
+    void unregisterImsRegistrationCallback(int subId, IImsRegistrationCallback c);
 
     /**
      * Adds an IMS MmTel capabilities callback for the subscription specified.
      */
-    void addMmTelCapabilityCallback(int subId, IImsCapabilityCallback c,
-            String callingPackage);
+    void registerMmTelCapabilityCallback(int subId, IImsCapabilityCallback c);
 
     /**
      * Removes an existing IMS MmTel capabilities callback for the subscription specified.
      */
-    void removeMmTelCapabilityCallback(int subId, IImsCapabilityCallback c,
-            String callingPackage);
+    void unregisterMmTelCapabilityCallback(int subId, IImsCapabilityCallback c);
 
     /**
      * return true if the IMS MmTel capability for the given registration tech is capable.
      */
-    boolean isCapable(int subId, int capability, int regTech, String callingPackage);
+    boolean isCapable(int subId, int capability, int regTech);
 
     /**
      * return true if the IMS MmTel capability for the given registration tech is available.
      */
-    boolean isAvailable(int subId, int capability, int regTech, String callingPackage);
+    boolean isAvailable(int subId, int capability, int regTech);
 
     /**
      * Returns true if the user's setting for 4G LTE is enabled, for the subscription specified.
@@ -1630,7 +1635,7 @@ interface ITelephony {
     /**
      * return true if the user's setting for VT is enabled for the subscription.
      */
-    boolean isVtSettingEnabled(int subId, String callingPackage);
+    boolean isVtSettingEnabled(int subId);
 
     /**
      * Modify the user's setting for whether or not VT is available for the subscrption specified.
@@ -1704,7 +1709,7 @@ interface ITelephony {
      * Identify if the number is emergency number, based on all the active subscriptions.
      */
     boolean isCurrentEmergencyNumber(String number);
-    
+
     /**
      * Return a list of certs in hex string from loaded carrier privileges access rules.
      */

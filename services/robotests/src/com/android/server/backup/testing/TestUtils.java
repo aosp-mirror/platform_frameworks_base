@@ -25,12 +25,12 @@ import static java.util.stream.Collectors.toSet;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
+import android.os.SystemClock;
 
 import com.android.server.testing.shadows.ShadowEventLog;
 
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowLooper;
-import org.robolectric.shadows.ShadowSystemClock;
 
 import java.util.Arrays;
 import java.util.concurrent.Callable;
@@ -87,7 +87,7 @@ public class TestUtils {
         // specific time to the looper the time of those messages will be before the looper's time.
         // To fix this we advance SystemClock as well since that is from where the handlers read
         // time.
-        ShadowSystemClock.setCurrentTimeMillis(shadowLooper.getScheduler().getCurrentTime());
+        SystemClock.setCurrentTimeMillis(shadowLooper.getScheduler().getCurrentTime());
     }
 
     /**

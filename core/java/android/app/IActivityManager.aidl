@@ -140,6 +140,7 @@ interface IActivityManager {
     int bindIsolatedService(in IApplicationThread caller, in IBinder token, in Intent service,
             in String resolvedType, in IServiceConnection connection, int flags,
             in String instanceName, in String callingPackage, int userId);
+    void updateServiceGroup(in IServiceConnection connection, int group, int importance);
     boolean unbindService(in IServiceConnection connection);
     void publishService(in IBinder token, in Intent intent, in IBinder service);
     void setDebugApp(in String packageName, boolean waitForDebugger, boolean persistent);

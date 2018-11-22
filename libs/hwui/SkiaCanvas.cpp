@@ -30,6 +30,7 @@
 #include <SkColorSpaceXformCanvas.h>
 #include <SkDeque.h>
 #include <SkDrawable.h>
+#include <SkFont.h>
 #include <SkGraphics.h>
 #include <SkImage.h>
 #include <SkImagePriv.h>
@@ -732,6 +733,7 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& p
                             float y, float boundsLeft, float boundsTop, float boundsRight,
                             float boundsBottom, float totalAdvance) {
     if (count <= 0 || paint.nothingToDraw()) return;
+    SkFont font = SkFont::LEGACY_ExtractFromPaint(paint);
     SkPaint paintCopy(paint);
     if (mPaintFilter) {
         mPaintFilter->filter(&paintCopy);
@@ -748,7 +750,7 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& p
             SkRect::MakeLTRB(boundsLeft + x, boundsTop + y, boundsRight + x, boundsBottom + y);
 
     SkTextBlobBuilder builder;
-    const SkTextBlobBuilder::RunBuffer& buffer = builder.allocRunPos(paintCopy, count, &bounds);
+    const SkTextBlobBuilder::RunBuffer& buffer = builder.allocRunPos(font, count, &bounds);
     glyphFunc(buffer.glyphs, buffer.pos);
 
     sk_sp<SkTextBlob> textBlob(builder.make());

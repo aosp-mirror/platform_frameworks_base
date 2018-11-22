@@ -55,16 +55,15 @@ import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATI
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
-import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_UNKNOWN;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_OFF;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
+import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_UNKNOWN;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
-
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Telephony.Carriers.DPC_URI;
@@ -75,11 +74,8 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent
         .PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker
         .STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
-
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER;
-
-
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -228,19 +224,19 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.StatLogger;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
-import com.android.internal.util.StatLogger;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.UserRestrictionsUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
-
 import com.android.server.uri.UriGrantsManagerInternal;
+
 import com.google.android.collect.Sets;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -267,7 +263,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -2701,7 +2696,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final DevicePolicyData policy = getUserData(userId);
         ActiveAdmin admin = policy.mAdminMap.get(who);
         if (admin == null) {
-            throw new SecurityException("No active admin " + who);
+            throw new SecurityException("No active admin " + who + " for UID " + uid);
         }
         if (admin.getUid() != uid) {
             throw new SecurityException("Admin " + who + " is not owned by uid " + uid);
@@ -2709,6 +2704,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return admin;
     }
 
+    /**
+     * Returns the active admin for the user of the caller as denoted by uid, which implements
+     * the {@code reqPolicy}.
+     *
+     * The {@code who} parameter is used as a hint:
+     * If provided, it must be the component name of the active admin for that user and the caller
+     * uid must match the uid of the admin.
+     * If not provided, iterate over all of the active admins in the DevicePolicyData for that user
+     * and return the one with the uid specified as parameter, and has the policy specified.
+     */
     private ActiveAdmin getActiveAdminWithPolicyForUidLocked(ComponentName who, int reqPolicy,
             int uid) {
         ensureLocked();
@@ -5435,23 +5440,54 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return false;
     }
 
-    private void enforceIsDeviceOwnerOrCertInstallerOfDeviceOwner(
+    /**
+     * Enforce one the following conditions are met:
+     * (1) The device has a Device Owner, and one of the following holds:
+     *   (1.1) The caller is the Device Owner
+     *   (1.2) The caller is another app in the same user as the device owner, AND
+     *         The caller is the delegated certificate installer.
+     * (2) The user has a profile owner, AND:
+     *   (2.1) The profile owner has been granted access to Device IDs and one of the following
+     *         holds:
+     *     (2.1.1) The caller is the profile owner.
+     *     (2.1.2) The caller is from another app in the same user as the profile owner, AND
+     *       (2.1.2.1) The caller is the delegated cert installer.
+     *
+     *  For the device owner case, simply check that the caller is the device owner or the
+     *  delegated certificate installer.
+     *
+     *  For the profile owner case, first check that the caller is the profile owner or can
+     *  manage the DELEGATION_CERT_INSTALL scope.
+     *  If that check succeeds, ensure the profile owner was granted access to device
+     *  identifiers. The grant is transitive: The delegated cert installer is implicitly allowed
+     *  access to device identifiers in this case as part of the delegation.
+     */
+    @VisibleForTesting
+    public void enforceCallerCanRequestDeviceIdAttestation(
             ComponentName who, String callerPackage, int callerUid) throws SecurityException {
-        if (who == null) {
-            if (!mOwners.hasDeviceOwner()) {
-                throw new SecurityException("Not in Device Owner mode.");
+        final int userId = UserHandle.getUserId(callerUid);
+
+        /**
+         *  First check if there's a profile owner because the device could be in COMP mode (where
+         *  there's a device owner and profile owner on the same device).
+         *  If the caller is from the work profile, then it must be the PO or the delegate, and
+         *  it must have the right permission to access device identifiers.
+         */
+        if (hasProfileOwner(userId)) {
+            // Make sure that the caller is the profile owner or delegate.
+            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
+                    DELEGATION_CERT_INSTALL);
+            // Verify that the profile owner was granted access to Device IDs.
+            if (canProfileOwnerAccessDeviceIds(userId)) {
+                return;
             }
-            if (UserHandle.getUserId(callerUid) != mOwners.getDeviceOwnerUserId()) {
-                throw new SecurityException("Caller not from device owner user");
-            }
-            if (!isCallerDelegate(callerPackage, DELEGATION_CERT_INSTALL)) {
-                throw new SecurityException("Caller with uid " + mInjector.binderGetCallingUid() +
-                        "has no permission to generate keys.");
-            }
-        } else {
-            // Caller provided - check it is the device owner.
-            enforceDeviceOwner(who);
+            throw new SecurityException(
+                    "Profile Owner is not allowed to access Device IDs.");
         }
+
+        // If not, fall back to the device owner check.
+        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER,
+                DELEGATION_CERT_INSTALL);
     }
 
     @VisibleForTesting
@@ -5499,7 +5535,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int callingUid = mInjector.binderGetCallingUid();
 
         if (deviceIdAttestationRequired && attestationUtilsFlags.length > 0) {
-            enforceIsDeviceOwnerOrCertInstallerOfDeviceOwner(who, callerPackage, callingUid);
+            enforceCallerCanRequestDeviceIdAttestation(who, callerPackage, callingUid);
         } else {
             enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
                     DELEGATION_CERT_INSTALL);
@@ -7363,6 +7399,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public boolean isProfileOwner(ComponentName who, int userId) {
         final ComponentName profileOwner = getProfileOwner(userId);
         return who != null && who.equals(profileOwner);
+    }
+
+    private boolean hasProfileOwner(int userId) {
+        synchronized (getLockObject()) {
+            return mOwners.hasProfileOwner(userId);
+        }
+    }
+
+    private boolean canProfileOwnerAccessDeviceIds(int userId) {
+        synchronized (getLockObject()) {
+            return mOwners.canProfileOwnerAccessDeviceIds(userId);
+        }
     }
 
     @Override
@@ -11581,6 +11629,53 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
         return false;
+    }
+
+    private boolean hasGrantProfileOwnerDevcieIdAccessPermission() {
+        return mContext.checkCallingPermission(
+                android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void grantDeviceIdsAccessToProfileOwner(ComponentName who, int userId) {
+        // As the caller is the system, it must specify the component name of the profile owner
+        // as a sanity / safety check.
+        Preconditions.checkNotNull(who);
+
+        if (!mHasFeature) {
+            return;
+        }
+
+        // Only privileged system apps can grant the Profile Owner access to Device IDs.
+        if (!(isCallerWithSystemUid() || isAdb()
+                || hasGrantProfileOwnerDevcieIdAccessPermission())) {
+            throw new SecurityException(
+                    "Only the system can grant Device IDs access for a profile owner.");
+        }
+
+        if (isAdb() && hasIncompatibleAccountsOrNonAdbNoLock(userId, who)) {
+            throw new SecurityException(
+                    "Can only be called from ADB if the device has no accounts.");
+        }
+
+        // Grant access under lock.
+        synchronized (getLockObject()) {
+            // Sanity check: Make sure that the user has a profile owner and that the specified
+            // component is the profile owner of that user.
+            if (!isProfileOwner(who, userId)) {
+                throw new IllegalArgumentException(String.format(
+                        "Component %s is not a Profile Owner of user %d",
+                        who.flattenToString(), userId));
+            }
+
+            Slog.i(LOG_TAG, String.format("Granting Device ID access to %s, for user %d",
+                        who.flattenToString(), userId));
+
+            // setProfileOwnerCanAccessDeviceIds will trigger writing of the profile owner
+            // data, no need to do it manually.
+            mOwners.setProfileOwnerCanAccessDeviceIds(userId);
+        }
     }
 
     private void pushMeteredDisabledPackagesLocked(int userId) {

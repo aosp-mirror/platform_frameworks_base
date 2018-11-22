@@ -185,6 +185,8 @@ public class SettingsProvider extends ContentProvider {
     private static final Bundle NULL_SETTING_BUNDLE = Bundle.forPair(
             Settings.NameValueTable.VALUE, null);
 
+    public static final String RESULT_ROWS_DELETED = "result_rows_deleted";
+
     // Overlay specified settings whitelisted for Instant Apps
     private static final Set<String> OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS = new ArraySet<>();
     private static final Set<String> OVERLAY_ALLOWED_SYSTEM_INSTANT_APP_SETTINGS = new ArraySet<>();
@@ -458,6 +460,27 @@ public class SettingsProvider extends ContentProvider {
                 String tag = getSettingTag(args);
                 resetSecureSetting(requestingUserId, mode, tag);
                 break;
+            }
+
+            case Settings.CALL_METHOD_DELETE_SYSTEM: {
+                int rows = deleteSystemSetting(name, requestingUserId) ? 1 : 0;
+                Bundle result = new Bundle();
+                result.putInt(RESULT_ROWS_DELETED, rows);
+                return result;
+            }
+
+            case Settings.CALL_METHOD_DELETE_SECURE: {
+                int rows = deleteSecureSetting(name, requestingUserId, false) ? 1 : 0;
+                Bundle result = new Bundle();
+                result.putInt(RESULT_ROWS_DELETED, rows);
+                return result;
+            }
+
+            case Settings.CALL_METHOD_DELETE_GLOBAL: {
+                int rows = deleteGlobalSetting(name, requestingUserId, false) ? 1 : 0;
+                Bundle result = new Bundle();
+                result.putInt(RESULT_ROWS_DELETED, rows);
+                return result;
             }
 
             default: {

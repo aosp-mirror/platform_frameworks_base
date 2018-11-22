@@ -32,7 +32,14 @@ import android.widget.TextView;
  * Common base class for preferences that have two selectable states, persist a
  * boolean value in SharedPreferences, and may have dependent preferences that are
  * enabled/disabled based on the current state.
+ *
+ * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+ *      Preference Library</a> for consistent behavior across all devices. For more information on
+ *      using the AndroidX Preference Library see
+ *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
  */
+@Deprecated
 public abstract class TwoStatePreference extends Preference {
 
     private CharSequence mSummaryOn;

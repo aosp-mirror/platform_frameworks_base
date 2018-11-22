@@ -16,8 +16,6 @@
 
 package android.preference;
 
-import java.util.Arrays;
-
 import android.annotation.ArrayRes;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
@@ -27,6 +25,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 
+import java.util.Arrays;
+
 /**
  * @hide
  * A {@link Preference} that displays a list of entries as
@@ -34,7 +34,14 @@ import android.util.AttributeSet;
  * 
  * @attr ref android.R.styleable#ListPreference_entries
  * @attr ref android.R.styleable#ListPreference_entryValues
+ *
+ * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+ *      Preference Library</a> for consistent behavior across all devices. For more information on
+ *      using the AndroidX Preference Library see
+ *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
  */
+@Deprecated
 public class MultiCheckPreference extends DialogPreference {
     private CharSequence[] mEntries;
     private String[] mEntryValues;

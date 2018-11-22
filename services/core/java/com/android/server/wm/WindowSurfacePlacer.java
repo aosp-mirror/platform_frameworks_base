@@ -38,7 +38,6 @@ import java.io.PrintWriter;
 class WindowSurfacePlacer {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowSurfacePlacer" : TAG_WM;
     private final WindowManagerService mService;
-    private final WallpaperController mWallpaperControllerLocked;
 
     private boolean mInLayout = false;
 
@@ -46,7 +45,6 @@ class WindowSurfacePlacer {
     private int mLayoutRepeatCount;
 
     static final int SET_UPDATE_ROTATION                = 1 << 0;
-    static final int SET_WALLPAPER_MAY_CHANGE           = 1 << 1;
     static final int SET_ORIENTATION_CHANGE_COMPLETE    = 1 << 2;
     static final int SET_WALLPAPER_ACTION_PENDING       = 1 << 3;
 
@@ -59,7 +57,6 @@ class WindowSurfacePlacer {
 
     public WindowSurfacePlacer(WindowManagerService service) {
         mService = service;
-        mWallpaperControllerLocked = mService.mRoot.mWallpaperController;
         mPerformSurfacePlacement = () -> {
             synchronized (mService.mGlobalLock) {
                 performSurfacePlacement();

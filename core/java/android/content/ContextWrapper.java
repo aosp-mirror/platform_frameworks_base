@@ -726,6 +726,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public void updateServiceGroup(ServiceConnection conn, int group, int importance) {
+        mBase.updateServiceGroup(conn, group, importance);
+    }
+
+    @Override
     public void unbindService(ServiceConnection conn) {
         mBase.unbindService(conn);
     }

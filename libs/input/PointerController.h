@@ -24,7 +24,7 @@
 
 #include <ui/DisplayInfo.h>
 #include <input/Input.h>
-#include <inputflinger/PointerControllerInterface.h>
+#include <PointerControllerInterface.h>
 #include <utils/BitSet.h>
 #include <utils/RefBase.h>
 #include <utils/Looper.h>

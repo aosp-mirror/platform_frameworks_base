@@ -28,8 +28,11 @@ cc_library_shared {
         "libgui",
         "libui",
         "libinput",
-        "libinputflinger",
         "libnativewindow",
+    ],
+
+    header_libs: [
+        "libinputflinger_headers",
     ],
 
     include_dirs: ["frameworks/native/services"],

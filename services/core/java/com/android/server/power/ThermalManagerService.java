@@ -16,6 +16,7 @@
 
 package com.android.server.power;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.thermal.V1_0.ThermalStatus;
 import android.hardware.thermal.V1_0.ThermalStatusCode;
@@ -26,12 +27,16 @@ import android.os.Binder;
 import android.os.HwBinder;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
+import android.os.IThermalStatusListener;
 import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.Temperature;
+import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
@@ -39,6 +44,7 @@ import com.android.server.SystemService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -51,210 +57,154 @@ import java.util.NoSuchElementException;
 public class ThermalManagerService extends SystemService {
     private static final String TAG = ThermalManagerService.class.getSimpleName();
 
-    /** Registered observers of the thermal changed events. Cookie is used to store type */
+    /** Lock to protect listen list. */
+    private final Object mLock = new Object();
+
+    /**
+     * Registered observers of the thermal events. Cookie is used to store type as Integer, null
+     * means no filter.
+     */
     @GuardedBy("mLock")
     private final RemoteCallbackList<IThermalEventListener> mThermalEventListeners =
             new RemoteCallbackList<>();
 
-    /** Lock to protect HAL handles and listen list. */
-    private final Object mLock = new Object();
-
-    /** Newly registered callback. */
+    /** Registered observers of the thermal status. */
     @GuardedBy("mLock")
-    private IThermalEventListener mNewListenerCallback = null;
+    private final RemoteCallbackList<IThermalStatusListener> mThermalStatusListeners =
+            new RemoteCallbackList<>();
 
-    /** Newly registered callback type, null means not filter type. */
+    /** Current thermal status */
     @GuardedBy("mLock")
-    private Integer mNewListenerType = null;
+    private int mStatus;
+
+    /** Current thermal map, key as name */
+    @GuardedBy("mLock")
+    private ArrayMap<String, Temperature> mTemperatureMap = new ArrayMap<>();
 
     /** Local PMS handle. */
     private final PowerManager mPowerManager;
 
-    /** Proxy object for the Thermal HAL 2.0 service. */
+    /** HAL wrapper. */
+    private ThermalHalWrapper mHalWrapper;
+
+    /** Hal ready. */
     @GuardedBy("mLock")
-    private android.hardware.thermal.V2_0.IThermal mThermalHal20 = null;
+    private boolean mHalReady;
 
-    /** Proxy object for the Thermal HAL 1.1 service. */
-    @GuardedBy("mLock")
-    private android.hardware.thermal.V1_1.IThermal mThermalHal11 = null;
-
-    /** Cookie for matching the right end point. */
-    private static final int THERMAL_HAL_DEATH_COOKIE = 5612;
-
-    /** HWbinder callback for Thermal HAL 2.0. */
-    private final IThermalChangedCallback.Stub mThermalCallback20 =
-            new IThermalChangedCallback.Stub() {
-                @Override
-                public void notifyThrottling(
-                        android.hardware.thermal.V2_0.Temperature temperature) {
-                    android.os.Temperature thermalSvcTemp = new android.os.Temperature(
-                            temperature.value, temperature.type, temperature.name,
-                            temperature.throttlingStatus);
-                    final long token = Binder.clearCallingIdentity();
-                    try {
-                        notifyThrottlingImpl(thermalSvcTemp);
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
-                }
-            };
-
-    /** HWbinder callback for Thermal HAL 1.1. */
-    private final IThermalCallback.Stub mThermalCallback11 =
-            new IThermalCallback.Stub() {
-                @Override
-                public void notifyThrottling(boolean isThrottling,
-                        android.hardware.thermal.V1_0.Temperature temperature) {
-                    android.os.Temperature thermalSvcTemp = new android.os.Temperature(
-                            temperature.currentValue, temperature.type, temperature.name,
-                            isThrottling ? ThrottlingSeverity.SEVERE : ThrottlingSeverity.NONE);
-                    final long token = Binder.clearCallingIdentity();
-                    try {
-                        notifyThrottlingImpl(thermalSvcTemp);
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
-                }
-            };
+    /** Invalid throttling status */
+    private static final int INVALID_THROTTLING = Integer.MIN_VALUE;
 
     public ThermalManagerService(Context context) {
+        this(context, null);
+    }
+
+    @VisibleForTesting
+    ThermalManagerService(Context context, @Nullable ThermalHalWrapper halWrapper) {
         super(context);
         mPowerManager = context.getSystemService(PowerManager.class);
+        mHalWrapper = halWrapper;
+        // Initialize to invalid to send status onActivityManagerReady
+        mStatus = INVALID_THROTTLING;
     }
 
-    private void setNewListener(IThermalEventListener listener, Integer type) {
-        synchronized (mLock) {
-            mNewListenerCallback = listener;
-            mNewListenerType = type;
+    @Override
+    public void onStart() {
+        publishBinderService(Context.THERMAL_SERVICE, mService);
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            onActivityManagerReady();
         }
     }
 
-    private void clearNewListener() {
+    private void onActivityManagerReady() {
         synchronized (mLock) {
-            mNewListenerCallback = null;
-            mNewListenerType = null;
-        }
-    }
-
-    private final IThermalService.Stub mService = new IThermalService.Stub() {
-        @Override
-        public void registerThermalEventListener(IThermalEventListener listener) {
-            synchronized (mLock) {
-                mThermalEventListeners.register(listener, null);
-                // Notify its callback after new client registered.
-                setNewListener(listener, null);
-                long token = Binder.clearCallingIdentity();
-                try {
-                    notifyCurrentTemperaturesLocked();
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                    clearNewListener();
+            // Connect to HAL and post to listeners.
+            boolean halConnected = (mHalWrapper != null);
+            if (!halConnected) {
+                mHalWrapper = new ThermalHal20Wrapper();
+                halConnected = mHalWrapper.connectToHal();
+                if (!halConnected) {
+                    mHalWrapper = new ThermalHal11Wrapper();
+                    halConnected = mHalWrapper.connectToHal();
                 }
             }
-        }
-
-        @Override
-        public void registerThermalEventListenerWithType(IThermalEventListener listener, int type) {
-            synchronized (mLock) {
-                mThermalEventListeners.register(listener, new Integer(type));
-                setNewListener(listener, new Integer(type));
-                // Notify its callback after new client registered.
-                long token = Binder.clearCallingIdentity();
-                try {
-                    notifyCurrentTemperaturesLocked();
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                    clearNewListener();
-                }
+            mHalWrapper.setCallback(this::onTemperatureChangedCallback);
+            if (!halConnected) {
+                return;
             }
-        }
-
-        @Override
-        public void unregisterThermalEventListener(IThermalEventListener listener) {
-            synchronized (mLock) {
-                long token = Binder.clearCallingIdentity();
-                try {
-                    mThermalEventListeners.unregister(listener);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
+            List<Temperature> temperatures = mHalWrapper.getCurrentTemperatures(false,
+                    0);
+            final int count = temperatures.size();
+            for (int i = 0; i < count; i++) {
+                onTemperatureChanged(temperatures.get(i), false);
             }
+            onTemperatureMapChangedLocked();
+            mHalReady = halConnected /* true */;
         }
-
-        @Override
-        public List<android.os.Temperature> getCurrentTemperatures() {
-            List<android.os.Temperature> ret;
-            long token = Binder.clearCallingIdentity();
-            try {
-                ret = getCurrentTemperaturesInternal(false, 0 /* not used */);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-            return ret;
-        }
-
-        @Override
-        public List<android.os.Temperature> getCurrentTemperaturesWithType(int type) {
-            List<android.os.Temperature> ret;
-            long token = Binder.clearCallingIdentity();
-            try {
-                ret = getCurrentTemperaturesInternal(true, type);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-            return ret;
-        }
-
-        @Override
-        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
-            pw.println("ThermalEventListeners dump:");
-            synchronized (mLock) {
-                mThermalEventListeners.dump(pw, "\t");
-                pw.println("ThermalHAL 1.1 connected: " + (mThermalHal11 != null ? "yes" : "no"));
-                pw.println("ThermalHAL 2.0 connected: " + (mThermalHal20 != null ? "yes" : "no"));
-            }
-        }
-    };
-
-    private List<android.os.Temperature> getCurrentTemperaturesInternal(boolean shouldFilter,
-            int type) {
-        List<android.os.Temperature> ret = new ArrayList<>();
-        synchronized (mLock) {
-            if (mThermalHal20 == null) {
-                return ret;
-            }
-            try {
-                mThermalHal20.getCurrentTemperatures(shouldFilter, type,
-                        (ThermalStatus status,
-                                ArrayList<android.hardware.thermal.V2_0.Temperature>
-                                        temperatures) -> {
-                            if (ThermalStatusCode.SUCCESS == status.code) {
-                                for (android.hardware.thermal.V2_0.Temperature
-                                        temperature : temperatures) {
-                                    ret.add(new android.os.Temperature(
-                                            temperature.value, temperature.type, temperature.name,
-                                            temperature.throttlingStatus));
-                                }
-                            } else {
-                                Slog.e(TAG,
-                                        "Couldn't get temperatures because of HAL error: "
-                                                + status.debugMessage);
-                            }
-
-                        });
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Couldn't getCurrentTemperatures, reconnecting...", e);
-                connectToHalLocked();
-                // Post to listeners after reconnect to HAL.
-                notifyCurrentTemperaturesLocked();
-            }
-        }
-        return ret;
     }
 
-    private void notifyListener(android.os.Temperature temperature, IThermalEventListener listener,
-            Integer type) {
+    private void postStatusListener(IThermalStatusListener listener) {
+        final boolean thermalCallbackQueued = FgThread.getHandler().post(() -> {
+            try {
+                listener.onStatusChange(mStatus);
+            } catch (RemoteException | RuntimeException e) {
+                Slog.e(TAG, "Thermal callback failed to call", e);
+            }
+        });
+        if (!thermalCallbackQueued) {
+            Slog.e(TAG, "Thermal callback failed to queue");
+        }
+    }
+
+    private void notifyStatusListenersLocked() {
+        if (!Temperature.isValidStatus(mStatus)) {
+            return;
+        }
+        final int length = mThermalStatusListeners.beginBroadcast();
+        try {
+            for (int i = 0; i < length; i++) {
+                final IThermalStatusListener listener =
+                        mThermalStatusListeners.getBroadcastItem(i);
+                postStatusListener(listener);
+            }
+        } finally {
+            mThermalStatusListeners.finishBroadcast();
+        }
+    }
+
+    private void onTemperatureMapChangedLocked() {
+        int newStatus = INVALID_THROTTLING;
+        final int count = mTemperatureMap.size();
+        for (int i = 0; i < count; i++) {
+            Temperature t = mTemperatureMap.valueAt(i);
+            if (t.getStatus() >= newStatus) {
+                newStatus = t.getStatus();
+            }
+        }
+        if (newStatus != mStatus) {
+            mStatus = newStatus;
+            notifyStatusListenersLocked();
+        }
+    }
+
+
+    private void postEventListenerCurrentTemperatures(IThermalEventListener listener,
+            @Nullable Integer type) {
+        synchronized (mLock) {
+            final int count = mTemperatureMap.size();
+            for (int i = 0; i < count; i++) {
+                postEventListener(mTemperatureMap.valueAt(i), listener,
+                        type);
+            }
+        }
+    }
+
+    private void postEventListener(Temperature temperature,
+            IThermalEventListener listener,
+            @Nullable Integer type) {
         // Skip if listener registered with a different type
         if (type != null && type != temperature.getType()) {
             return;
@@ -271,11 +221,26 @@ public class ThermalManagerService extends SystemService {
         }
     }
 
-    private void notifyThrottlingImpl(android.os.Temperature temperature) {
+    private void notifyEventListenersLocked(Temperature temperature) {
+        final int length = mThermalEventListeners.beginBroadcast();
+        try {
+            for (int i = 0; i < length; i++) {
+                final IThermalEventListener listener =
+                        mThermalEventListeners.getBroadcastItem(i);
+                final Integer type =
+                        (Integer) mThermalEventListeners.getBroadcastCookie(i);
+                postEventListener(temperature, listener, type);
+            }
+        } finally {
+            mThermalEventListeners.finishBroadcast();
+        }
+    }
+
+    private void onTemperatureChanged(Temperature temperature, boolean sendStatus) {
         synchronized (mLock) {
             // Thermal Shutdown for Skin temperature
-            if (temperature.getStatus() == android.os.Temperature.THROTTLING_SHUTDOWN
-                    && temperature.getType() == android.os.Temperature.TYPE_SKIN) {
+            if (temperature.getStatus() == Temperature.THROTTLING_SHUTDOWN
+                    && temperature.getType() == Temperature.TYPE_SKIN) {
                 final long token = Binder.clearCallingIdentity();
                 try {
                     mPowerManager.shutdown(false, PowerManager.SHUTDOWN_THERMAL_STATE, false);
@@ -284,107 +249,420 @@ public class ThermalManagerService extends SystemService {
                 }
             }
 
-            if (mNewListenerCallback != null) {
-                // Only notify current newly added callback.
-                notifyListener(temperature, mNewListenerCallback, mNewListenerType);
+            Temperature old = mTemperatureMap.put(temperature.getName(), temperature);
+            if (old != null) {
+                if (old.getStatus() != temperature.getStatus()) {
+                    notifyEventListenersLocked(temperature);
+                }
             } else {
-                final int length = mThermalEventListeners.beginBroadcast();
-                try {
-                    for (int i = 0; i < length; i++) {
-                        final IThermalEventListener listener =
-                                mThermalEventListeners.getBroadcastItem(i);
-                        final Integer type = (Integer) mThermalEventListeners.getBroadcastCookie(i);
-                        notifyListener(temperature, listener, type);
-                    }
-                } finally {
-                    mThermalEventListeners.finishBroadcast();
-                }
+                notifyEventListenersLocked(temperature);
+            }
+            if (sendStatus) {
+                onTemperatureMapChangedLocked();
             }
         }
     }
 
-    @Override
-    public void onStart() {
-        publishBinderService(Context.THERMAL_SERVICE, mService);
+    private void onTemperatureChangedCallback(Temperature temperature) {
+        onTemperatureChanged(temperature, true);
     }
 
-    @Override
-    public void onBootPhase(int phase) {
-        if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-            onActivityManagerReady();
-        }
-    }
-
-    private void notifyCurrentTemperaturesCallbackLocked(ThermalStatus status,
-            ArrayList<android.hardware.thermal.V2_0.Temperature> temperatures) {
-        if (ThermalStatusCode.SUCCESS != status.code) {
-            Slog.e(TAG, "Couldn't get temperatures because of HAL error: "
-                    + status.debugMessage);
-            return;
-        }
-        for (android.hardware.thermal.V2_0.Temperature temperature : temperatures) {
-            android.os.Temperature thermal_svc_temp =
-                    new android.os.Temperature(
-                            temperature.value, temperature.type,
-                            temperature.name,
-                            temperature.throttlingStatus);
-            notifyThrottlingImpl(thermal_svc_temp);
+    private void dumpTemperaturesLocked(PrintWriter pw, String prefix,
+            Collection<Temperature> temperatures) {
+        for (Temperature t : temperatures) {
+            pw.print(prefix);
+            String out = String.format("Name: %s, Type: %d, Status: %d, Value: %f",
+                    t.getName(),
+                    t.getType(),
+                    t.getStatus(),
+                    t.getValue()
+            );
+            pw.println(out);
         }
     }
 
-    private void notifyCurrentTemperaturesLocked() {
-        if (mThermalHal20 == null) {
-            return;
-        }
-        try {
-            mThermalHal20.getCurrentTemperatures(false, 0,
-                    this::notifyCurrentTemperaturesCallbackLocked);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Couldn't get temperatures, reconnecting...", e);
-            connectToHalLocked();
-        }
-    }
-
-    private void onActivityManagerReady() {
-        synchronized (mLock) {
-            connectToHalLocked();
-            // Post to listeners after connect to HAL.
-            notifyCurrentTemperaturesLocked();
-        }
-    }
-
-    final class DeathRecipient implements HwBinder.DeathRecipient {
+    @VisibleForTesting
+    final IThermalService.Stub mService = new IThermalService.Stub() {
         @Override
-        public void serviceDied(long cookie) {
-            if (cookie == THERMAL_HAL_DEATH_COOKIE) {
-                Slog.e(TAG, "Thermal HAL service died cookie: " + cookie);
+        public boolean registerThermalEventListener(IThermalEventListener listener) {
+            synchronized (mLock) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    if (!mThermalEventListeners.register(listener, null)) {
+                        return false;
+                    }
+                    if (mHalReady) {
+                        // Notify its callback after new client registered.
+                        postEventListenerCurrentTemperatures(listener, null);
+                    }
+                    return true;
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }
+
+        @Override
+        public boolean registerThermalEventListenerWithType(IThermalEventListener listener,
+                int type) {
+            synchronized (mLock) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    if (!mThermalEventListeners.register(listener, new Integer(type))) {
+                        return false;
+                    }
+                    if (mHalReady) {
+                        // Notify its callback after new client registered.
+                        postEventListenerCurrentTemperatures(listener, new Integer(type));
+                    }
+                    return true;
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }
+
+        @Override
+        public boolean unregisterThermalEventListener(IThermalEventListener listener) {
+            synchronized (mLock) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    return mThermalEventListeners.unregister(listener);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }
+
+        @Override
+        public List<Temperature> getCurrentTemperatures() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (!mHalReady) {
+                    return new ArrayList<>();
+                }
+                return mHalWrapper.getCurrentTemperatures(false, 0 /* not used */);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public List<Temperature> getCurrentTemperaturesWithType(int type) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (!mHalReady) {
+                    return new ArrayList<>();
+                }
+                return mHalWrapper.getCurrentTemperatures(true, type);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public boolean registerThermalStatusListener(IThermalStatusListener listener) {
+            synchronized (mLock) {
+                // Notify its callback after new client registered.
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    if (!mThermalStatusListeners.register(listener)) {
+                        return false;
+                    }
+                    if (mHalReady) {
+                        // Notify its callback after new client registered.
+                        postStatusListener(listener);
+                    }
+                    return true;
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }
+
+        @Override
+        public boolean unregisterThermalStatusListener(IThermalStatusListener listener) {
+            synchronized (mLock) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    return mThermalStatusListeners.unregister(listener);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }
+
+        @Override
+        public int getCurrentStatus() {
+            synchronized (mLock) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    return Temperature.isValidStatus(mStatus) ? mStatus
+                            : Temperature.THROTTLING_NONE;
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }
+
+        @Override
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
                 synchronized (mLock) {
-                    connectToHalLocked();
-                    // Post to listeners after reconnect to HAL.
-                    notifyCurrentTemperaturesLocked();
+                    pw.println("ThermalEventListeners:");
+                    mThermalEventListeners.dump(pw, "\t");
+                    pw.println("ThermalStatusListeners:");
+                    mThermalStatusListeners.dump(pw, "\t");
+                    pw.println("Thermal Status: " + Integer.toString(mStatus));
+                    pw.println("Cached temperatures:");
+                    dumpTemperaturesLocked(pw, "\t", mTemperatureMap.values());
+                    pw.println("HAL Ready: " + Boolean.toString(mHalReady));
+                    if (mHalReady) {
+                        pw.println("HAL connection:");
+                        mHalWrapper.dump(pw, "\t");
+                        pw.println("Current temperatures from HAL:");
+                        dumpTemperaturesLocked(pw, "\t",
+                                mHalWrapper.getCurrentTemperatures(false, 0));
+                    }
+                }
+
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    };
+
+    abstract static class ThermalHalWrapper {
+        protected static final String TAG = ThermalHalWrapper.class.getSimpleName();
+
+        /** Lock to protect HAL handle. */
+        protected final Object mHalLock = new Object();
+
+        @FunctionalInterface
+        interface TemperatureChangedCallback {
+            void onValues(Temperature temperature);
+        }
+
+        /** Temperature callback. */
+        protected TemperatureChangedCallback mCallback;
+
+        /** Cookie for matching the right end point. */
+        protected static final int THERMAL_HAL_DEATH_COOKIE = 5612;
+
+        @VisibleForTesting
+        protected void setCallback(TemperatureChangedCallback cb) {
+            mCallback = cb;
+        }
+
+        protected abstract List<Temperature> getCurrentTemperatures(boolean shouldFilter,
+                int type);
+
+        protected abstract boolean connectToHal();
+
+        protected abstract void dump(PrintWriter pw, String prefix);
+
+        protected void resendCurrentTemperatures() {
+            synchronized (mHalLock) {
+                List<Temperature> temperatures = getCurrentTemperatures(false, 0);
+                final int count = temperatures.size();
+                for (int i = 0; i < count; i++) {
+                    mCallback.onValues(temperatures.get(i));
+                }
+            }
+        }
+
+        final class DeathRecipient implements HwBinder.DeathRecipient {
+            @Override
+            public void serviceDied(long cookie) {
+                if (cookie == THERMAL_HAL_DEATH_COOKIE) {
+                    Slog.e(TAG, "Thermal HAL service died cookie: " + cookie);
+                    synchronized (mHalLock) {
+                        connectToHal();
+                        // Post to listeners after reconnect to HAL.
+                        resendCurrentTemperatures();
+                    }
                 }
             }
         }
     }
 
-    private void connectToHalLocked() {
-        try {
-            mThermalHal20 = android.hardware.thermal.V2_0.IThermal.getService();
-            mThermalHal20.linkToDeath(new DeathRecipient(), THERMAL_HAL_DEATH_COOKIE);
-            mThermalHal20.registerThermalChangedCallback(mThermalCallback20, false,
-                    0 /* not used */);
-        } catch (NoSuchElementException | RemoteException e) {
-            Slog.e(TAG, "Thermal HAL 2.0 service not connected, trying 1.1.");
-            mThermalHal20 = null;
-            try {
-                mThermalHal11 = android.hardware.thermal.V1_1.IThermal.getService();
-                mThermalHal11.linkToDeath(new DeathRecipient(), THERMAL_HAL_DEATH_COOKIE);
-                mThermalHal11.registerThermalCallback(mThermalCallback11);
-            } catch (NoSuchElementException | RemoteException e2) {
-                Slog.e(TAG,
-                        "Thermal HAL 1.1 service not connected, no thermal call back "
-                                + "will be called.");
-                mThermalHal11 = null;
+    static class ThermalHal11Wrapper extends ThermalHalWrapper {
+        /** Proxy object for the Thermal HAL 1.1 service. */
+        @GuardedBy("mHalLock")
+        private android.hardware.thermal.V1_1.IThermal mThermalHal11 = null;
+
+        /** HWbinder callback for Thermal HAL 1.1. */
+        private final IThermalCallback.Stub mThermalCallback11 =
+                new IThermalCallback.Stub() {
+                    @Override
+                    public void notifyThrottling(boolean isThrottling,
+                            android.hardware.thermal.V1_0.Temperature temperature) {
+                        Temperature thermalSvcTemp = new Temperature(
+                                temperature.currentValue, temperature.type, temperature.name,
+                                isThrottling ? ThrottlingSeverity.SEVERE
+                                        : ThrottlingSeverity.NONE);
+                        final long token = Binder.clearCallingIdentity();
+                        try {
+                            mCallback.onValues(thermalSvcTemp);
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
+                    }
+                };
+
+        @Override
+        protected List<Temperature> getCurrentTemperatures(boolean shouldFilter,
+                int type) {
+            synchronized (mHalLock) {
+                List<Temperature> ret = new ArrayList<>();
+                if (mThermalHal11 == null) {
+                    return ret;
+                }
+                try {
+                    mThermalHal11.getTemperatures(
+                            (ThermalStatus status,
+                                    ArrayList<android.hardware.thermal.V1_0.Temperature>
+                                            temperatures) -> {
+                                if (ThermalStatusCode.SUCCESS == status.code) {
+                                    for (android.hardware.thermal.V1_0.Temperature
+                                            temperature : temperatures) {
+                                        if (shouldFilter && type != temperature.type) {
+                                            continue;
+                                        }
+                                        // Thermal HAL 1.1 doesn't report current throttling status
+                                        ret.add(new Temperature(
+                                                temperature.currentValue, temperature.type,
+                                                temperature.name,
+                                                Temperature.THROTTLING_NONE));
+                                    }
+                                } else {
+                                    Slog.e(TAG,
+                                            "Couldn't get temperatures because of HAL error: "
+                                                    + status.debugMessage);
+                                }
+
+                            });
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Couldn't getCurrentTemperatures, reconnecting...", e);
+                    connectToHal();
+                }
+                return ret;
+            }
+        }
+
+        @Override
+        protected boolean connectToHal() {
+            synchronized (mHalLock) {
+                try {
+                    mThermalHal11 = android.hardware.thermal.V1_1.IThermal.getService();
+                    mThermalHal11.linkToDeath(new DeathRecipient(),
+                            THERMAL_HAL_DEATH_COOKIE);
+                    mThermalHal11.registerThermalCallback(mThermalCallback11);
+                } catch (NoSuchElementException | RemoteException e) {
+                    Slog.e(TAG,
+                            "Thermal HAL 1.1 service not connected, no thermal call back will be "
+                                    + "called.");
+                    mThermalHal11 = null;
+                }
+                return (mThermalHal11 != null);
+            }
+        }
+
+        @Override
+        protected void dump(PrintWriter pw, String prefix) {
+            synchronized (mHalLock) {
+                pw.print(prefix);
+                pw.println("ThermalHAL 1.1 connected: " + (mThermalHal11 != null ? "yes"
+                        : "no"));
+            }
+        }
+    }
+
+    static class ThermalHal20Wrapper extends ThermalHalWrapper {
+        /** Proxy object for the Thermal HAL 2.0 service. */
+        @GuardedBy("mHalLock")
+        private android.hardware.thermal.V2_0.IThermal mThermalHal20 = null;
+
+        /** HWbinder callback for Thermal HAL 2.0. */
+        private final IThermalChangedCallback.Stub mThermalCallback20 =
+                new IThermalChangedCallback.Stub() {
+                    @Override
+                    public void notifyThrottling(
+                            android.hardware.thermal.V2_0.Temperature temperature) {
+                        Temperature thermalSvcTemp = new Temperature(
+                                temperature.value, temperature.type, temperature.name,
+                                temperature.throttlingStatus);
+                        final long token = Binder.clearCallingIdentity();
+                        try {
+                            mCallback.onValues(thermalSvcTemp);
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
+                    }
+                };
+
+        @Override
+        protected List<Temperature> getCurrentTemperatures(boolean shouldFilter,
+                int type) {
+            synchronized (mHalLock) {
+                List<Temperature> ret = new ArrayList<>();
+                if (mThermalHal20 == null) {
+                    return ret;
+                }
+                try {
+                    mThermalHal20.getCurrentTemperatures(shouldFilter, type,
+                            (ThermalStatus status,
+                                    ArrayList<android.hardware.thermal.V2_0.Temperature>
+                                            temperatures) -> {
+                                if (ThermalStatusCode.SUCCESS == status.code) {
+                                    for (android.hardware.thermal.V2_0.Temperature
+                                            temperature : temperatures) {
+                                        ret.add(new Temperature(
+                                                temperature.value, temperature.type,
+                                                temperature.name,
+                                                temperature.throttlingStatus));
+                                    }
+                                } else {
+                                    Slog.e(TAG,
+                                            "Couldn't get temperatures because of HAL error: "
+                                                    + status.debugMessage);
+                                }
+
+                            });
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Couldn't getCurrentTemperatures, reconnecting...", e);
+                    connectToHal();
+                }
+                return ret;
+            }
+        }
+
+        @Override
+        protected boolean connectToHal() {
+            synchronized (mHalLock) {
+                try {
+                    mThermalHal20 = android.hardware.thermal.V2_0.IThermal.getService();
+                    mThermalHal20.linkToDeath(new DeathRecipient(), THERMAL_HAL_DEATH_COOKIE);
+                    mThermalHal20.registerThermalChangedCallback(mThermalCallback20, false,
+                            0 /* not used */);
+                } catch (NoSuchElementException | RemoteException e) {
+                    Slog.e(TAG, "Thermal HAL 2.0 service not connected, trying 1.1.");
+                    mThermalHal20 = null;
+                }
+                return (mThermalHal20 != null);
+            }
+        }
+
+        @Override
+        protected void dump(PrintWriter pw, String prefix) {
+            synchronized (mHalLock) {
+                pw.print(prefix);
+                pw.println("ThermalHAL 2.0 connected: " + (mThermalHal20 != null ? "yes"
+                        : "no"));
             }
         }
     }

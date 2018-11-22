@@ -1702,8 +1702,11 @@ public final class ActiveServices {
                     s.app.whitelistManager = true;
                 }
                 // This could have made the service more important.
-                mAm.updateLruProcessLocked(s.app, s.app.hasClientActivities()
-                        || s.app.treatLikeActivity, b.client);
+                mAm.updateLruProcessLocked(s.app,
+                        (callerApp.hasActivitiesOrRecentTasks() && s.app.hasClientActivities())
+                                || (callerApp.getCurProcState() <= ActivityManager.PROCESS_STATE_TOP
+                                        && (flags & Context.BIND_TREAT_LIKE_ACTIVITY) != 0),
+                        b.client);
                 mAm.updateOomAdjLocked(s.app, true);
             }
 
@@ -1784,6 +1787,32 @@ public final class ActiveServices {
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    void updateServiceGroupLocked(IServiceConnection connection, int group, int importance) {
+        final IBinder binder = connection.asBinder();
+        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "updateServiceGroup: conn=" + binder);
+        final ArrayList<ConnectionRecord> clist = mServiceConnections.get(binder);
+        if (clist == null) {
+            throw new IllegalArgumentException("Could not find connection for "
+                    + connection.asBinder());
+        }
+        for (int i = clist.size() - 1; i >= 0; i--) {
+            final ConnectionRecord crec = clist.get(i);
+            final ServiceRecord srec = crec.binding.service;
+            if (srec != null && srec.app != null
+                    && (srec.serviceInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
+                if (group > 0) {
+                    srec.app.connectionService = srec;
+                    srec.app.connectionGroup = group;
+                    srec.app.connectionImportance = importance;
+                } else {
+                    srec.app.connectionService = null;
+                    srec.app.connectionGroup = 0;
+                    srec.app.connectionImportance = 0;
+                }
+            }
         }
     }
 

@@ -48,7 +48,7 @@ final class ConnectionRecord {
     boolean serviceDead;            // Well is it?
 
     // Please keep the following two enum list synced.
-    private static int[] BIND_ORIG_ENUMS = new int[] {
+    private static final int[] BIND_ORIG_ENUMS = new int[] {
             Context.BIND_AUTO_CREATE,
             Context.BIND_DEBUG_UNBIND,
             Context.BIND_NOT_FOREGROUND,
@@ -65,7 +65,7 @@ final class ConnectionRecord {
             Context.BIND_SHOWING_UI,
             Context.BIND_NOT_VISIBLE,
     };
-    private static int[] BIND_PROTO_ENUMS = new int[] {
+    private static final int[] BIND_PROTO_ENUMS = new int[] {
             ConnectionRecordProto.AUTO_CREATE,
             ConnectionRecordProto.DEBUG_UNBIND,
             ConnectionRecordProto.NOT_FG,

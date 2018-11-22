@@ -211,6 +211,6 @@
     <color name="floating_popup_divider_light">#E9E9E9</color>
 
     <!-- Magnifier -->
-    <color name="magnifier_color_overlay">#0EFFFFFF</color>
+    <color name="default_magnifier_color_overlay">#00FFFFFF</color>
 
 </resources>

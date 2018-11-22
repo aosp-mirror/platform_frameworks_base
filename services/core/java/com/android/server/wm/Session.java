@@ -29,7 +29,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.content.ClipData;
-import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
@@ -42,7 +41,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.util.MergedConfiguration;
 import android.util.Slog;
-import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.IWindow;
 import android.view.IWindowId;
@@ -60,6 +58,7 @@ import com.android.server.wm.WindowManagerService.H;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 /**
  * This class represents an active client session.  There is generally one
@@ -315,14 +314,19 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
     }
 
+    private void actionOnWallpaper(IBinder window,
+            BiConsumer<WallpaperController, WindowState> action) {
+        final WindowState windowState = mService.windowForClientLocked(this, window, true);
+        action.accept(windowState.getDisplayContent().mWallpaperController, windowState);
+    }
+
     @Override
     public void setWallpaperPosition(IBinder window, float x, float y, float xStep, float yStep) {
         synchronized (mService.mGlobalLock) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mService.mRoot.mWallpaperController.setWindowWallpaperPosition(
-                        mService.windowForClientLocked(this, window, true),
-                        x, y, xStep, yStep);
+                actionOnWallpaper(window, (wpController, windowState) ->
+                        wpController.setWindowWallpaperPosition(windowState, x, y, xStep, yStep));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -332,7 +336,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public void wallpaperOffsetsComplete(IBinder window) {
         synchronized (mService.mGlobalLock) {
-            mService.mRoot.mWallpaperController.wallpaperOffsetsComplete(window);
+            actionOnWallpaper(window, (wpController, windowState) ->
+                    wpController.wallpaperOffsetsComplete(window));
         }
     }
 
@@ -341,8 +346,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         synchronized (mService.mGlobalLock) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mService.mRoot.mWallpaperController.setWindowWallpaperDisplayOffset(
-                        mService.windowForClientLocked(this, window, true), x, y);
+                actionOnWallpaper(window, (wpController, windowState) ->
+                        wpController.setWindowWallpaperDisplayOffset(windowState, x, y));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -355,9 +360,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         synchronized (mService.mGlobalLock) {
             long ident = Binder.clearCallingIdentity();
             try {
-                return mService.mRoot.mWallpaperController.sendWindowWallpaperCommand(
-                        mService.windowForClientLocked(this, window, true),
-                        action, x, y, z, extras, sync);
+                final WindowState windowState = mService.windowForClientLocked(this, window, true);
+                return windowState.getDisplayContent().mWallpaperController
+                        .sendWindowWallpaperCommand(windowState, action, x, y, z, extras, sync);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -367,7 +372,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public void wallpaperCommandComplete(IBinder window, Bundle result) {
         synchronized (mService.mGlobalLock) {
-            mService.mRoot.mWallpaperController.wallpaperCommandComplete(window);
+            actionOnWallpaper(window, (wpController, windowState) ->
+                    wpController.wallpaperCommandComplete(window));
         }
     }
 

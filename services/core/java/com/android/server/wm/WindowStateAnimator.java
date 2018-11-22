@@ -245,7 +245,7 @@ class WindowStateAnimator {
         mSession = win.mSession;
         mAttrType = win.mAttrs.type;
         mIsWallpaper = win.mIsWallpaper;
-        mWallpaperControllerLocked = mService.mRoot.mWallpaperController;
+        mWallpaperControllerLocked = win.getDisplayContent().mWallpaperController;
     }
 
     void cancelExitAnimationForNextAnimationLocked() {

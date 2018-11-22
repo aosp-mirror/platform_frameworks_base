@@ -32,12 +32,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.BatteryManager;
 import android.os.HardwarePropertiesManager;
+import android.os.IThermalService;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestableResources;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
@@ -45,14 +46,15 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.power.PowerUI.WarningsUI;
 import com.android.systemui.statusbar.phone.StatusBar;
 
-import java.time.Duration;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -76,6 +78,7 @@ public class PowerUITest extends SysuiTestCase {
     private PowerUI mPowerUI;
     private EnhancedEstimates mEnhancedEstimates;
     @Mock private PowerManager mPowerManager;
+    @Mock private IThermalService mThermalServiceMock;
 
     @Before
     public void setup() {
@@ -541,5 +544,6 @@ public class PowerUITest extends SysuiTestCase {
         mPowerUI = new PowerUI();
         mPowerUI.mContext = mContext;
         mPowerUI.mComponents = mContext.getComponents();
+        mPowerUI.mThermalService = mThermalServiceMock;
     }
 }

@@ -1832,8 +1832,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         updateMagnificationLocked(userState);
         scheduleUpdateFingerprintGestureHandling(userState);
         scheduleUpdateInputFilter(userState);
-        scheduleUpdateClientsIfNeededLocked(userState);
         updateRelevantEventsLocked(userState);
+        scheduleUpdateClientsIfNeededLocked(userState);
         updateAccessibilityButtonTargetsLocked(userState);
     }
 

@@ -800,13 +800,13 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Magnifier">
-        <item name="magnifierWidth">@dimen/magnifier_width</item>
-        <item name="magnifierHeight">@dimen/magnifier_height</item>
-        <item name="magnifierZoom">@dimen/magnifier_zoom</item>
-        <item name="magnifierElevation">@dimen/magnifier_elevation</item>
-        <item name="magnifierVerticalOffset">@dimen/magnifier_vertical_offset</item>
-        <item name="magnifierHorizontalOffset">@dimen/magnifier_horizontal_offset</item>
-        <item name="magnifierColorOverlay">@color/magnifier_color_overlay</item>
+        <item name="magnifierWidth">100dp</item>
+        <item name="magnifierHeight">48dp</item>
+        <item name="magnifierZoom">1.25</item>
+        <item name="magnifierElevation">4dp</item>
+        <item name="magnifierVerticalOffset">-42dp</item>
+        <item name="magnifierHorizontalOffset">0dp</item>
+        <item name="magnifierColorOverlay">#0EFFFFFF</item>
     </style>
 
     <!-- Text Appearances -->

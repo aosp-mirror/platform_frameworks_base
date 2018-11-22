@@ -4973,6 +4973,176 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertProfileOwnershipRevertedWithFakeTransferMetadata();
     }
 
+    public void testGrantDeviceIdsAccess_notToProfileOwner() throws Exception {
+        setupProfileOwner();
+        configureContextForAccess(mContext, false);
+
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setProfileOwnerCanAccessDeviceIdsForUser(admin2,
+                        UserHandle.of(DpmMockContext.CALLER_UID)));
+    }
+
+    public void testGrantDeviceIdsAccess_notByAuthorizedCaller() throws Exception {
+        setupProfileOwner();
+        configureContextForAccess(mContext, false);
+
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setProfileOwnerCanAccessDeviceIdsForUser(admin1,
+                        UserHandle.of(DpmMockContext.CALLER_UID)));
+    }
+
+    public void testGrantDeviceIdsAccess_byAuthorizedSystemCaller() throws Exception {
+        setupProfileOwner();
+
+        // This method will throw if the system context could not call
+        // setProfileOwnerCanAccessDeviceIds successfully.
+        configureProfileOwnerForDeviceIdAccess(admin1, DpmMockContext.CALLER_USER_HANDLE);
+    }
+
+    private static void configureContextForAccess(DpmMockContext context, boolean granted) {
+        when(context.spiedContext.checkCallingPermission(
+                android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS))
+                .thenReturn(granted ? PackageManager.PERMISSION_GRANTED
+                        : PackageManager.PERMISSION_DENIED);
+    }
+
+    public void testGrantDeviceIdsAccess_byAuthorizedManagedProvisioning() throws Exception {
+        setupProfileOwner();
+
+        final long ident = mServiceContext.binder.clearCallingIdentity();
+        configureContextForAccess(mServiceContext, true);
+
+        mServiceContext.binder.callingUid =
+                UserHandle.getUid(DpmMockContext.CALLER_USER_HANDLE,
+                        DpmMockContext.CALLER_MANAGED_PROVISIONING_UID);
+        try {
+            runAsCaller(mServiceContext, dpms, dpm -> {
+                dpm.setProfileOwnerCanAccessDeviceIdsForUser(admin1,
+                        UserHandle.of(DpmMockContext.CALLER_USER_HANDLE));
+            });
+        } finally {
+            mServiceContext.binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    public void testEnforceCallerCanRequestDeviceIdAttestation_deviceOwnerCaller()
+            throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        configureContextForAccess(mContext, false);
+
+        // Device owner should be allowed to request Device ID attestation.
+        dpms.enforceCallerCanRequestDeviceIdAttestation(admin1, admin1.getPackageName(),
+                DpmMockContext.CALLER_SYSTEM_USER_UID);
+
+        // Another package must not be allowed to request Device ID attestation.
+        assertExpectException(SecurityException.class, null,
+                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(null,
+                        admin2.getPackageName(), DpmMockContext.CALLER_UID));
+        // Another component that is not the admin must not be allowed to request Device ID
+        // attestation.
+        assertExpectException(SecurityException.class, null,
+                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(admin2,
+                        admin1.getPackageName(), DpmMockContext.CALLER_UID));
+    }
+
+    public void testEnforceCallerCanRequestDeviceIdAttestation_profileOwnerCaller()
+            throws Exception {
+        configureContextForAccess(mContext, false);
+
+        // Make sure a security exception is thrown if the device has no profile owner.
+        assertExpectException(SecurityException.class, null,
+                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(admin1,
+                        admin1.getPackageName(), DpmMockContext.CALLER_SYSTEM_USER_UID));
+
+        setupProfileOwner();
+        configureProfileOwnerForDeviceIdAccess(admin1, DpmMockContext.CALLER_USER_HANDLE);
+
+        // The profile owner is allowed to request Device ID attestation.
+        mServiceContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        dpms.enforceCallerCanRequestDeviceIdAttestation(admin1, admin1.getPackageName(),
+                DpmMockContext.CALLER_UID);
+        // But not another package.
+        assertExpectException(SecurityException.class, null,
+                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(null,
+                        admin2.getPackageName(), DpmMockContext.CALLER_UID));
+        // Or another component which is not the admin.
+        assertExpectException(SecurityException.class, null,
+                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(admin2,
+                        admin2.getPackageName(), DpmMockContext.CALLER_UID));
+    }
+
+    public void runAsDelegatedCertInstaller(DpmRunnable action) throws Exception {
+        final long ident = mServiceContext.binder.clearCallingIdentity();
+
+        mServiceContext.binder.callingUid = UserHandle.getUid(DpmMockContext.CALLER_USER_HANDLE,
+                DpmMockContext.DELEGATE_CERT_INSTALLER_UID);
+        try {
+            runAsCaller(mServiceContext, dpms, action);
+        } finally {
+            mServiceContext.binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    public void testEnforceCallerCanRequestDeviceIdAttestation_delegateCaller() throws Exception {
+        setupProfileOwner();
+        markDelegatedCertInstallerAsInstalled();
+
+        // Configure a delegated cert installer.
+        runAsCaller(mServiceContext, dpms,
+                dpm -> dpm.setDelegatedScopes(admin1, DpmMockContext.DELEGATE_PACKAGE_NAME,
+                        Arrays.asList(DELEGATION_CERT_INSTALL)));
+
+        configureProfileOwnerForDeviceIdAccess(admin1, DpmMockContext.CALLER_USER_HANDLE);
+
+        // Make sure that the profile owner can still request Device ID attestation.
+        mServiceContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        dpms.enforceCallerCanRequestDeviceIdAttestation(admin1, admin1.getPackageName(),
+                DpmMockContext.CALLER_UID);
+
+        runAsDelegatedCertInstaller(dpm -> {
+            dpms.enforceCallerCanRequestDeviceIdAttestation(null,
+                    DpmMockContext.DELEGATE_PACKAGE_NAME,
+                    UserHandle.getUid(DpmMockContext.CALLER_USER_HANDLE,
+                            DpmMockContext.DELEGATE_CERT_INSTALLER_UID));
+        });
+    }
+
+    public void testEnforceCallerCanRequestDeviceIdAttestation_delegateCallerWithoutPermissions()
+            throws Exception {
+        setupProfileOwner();
+        markDelegatedCertInstallerAsInstalled();
+
+        // Configure a delegated cert installer.
+        runAsCaller(mServiceContext, dpms,
+                dpm -> dpm.setDelegatedScopes(admin1, DpmMockContext.DELEGATE_PACKAGE_NAME,
+                        Arrays.asList(DELEGATION_CERT_INSTALL)));
+
+
+        assertExpectException(SecurityException.class, null,
+                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(admin1,
+                        admin1.getPackageName(),
+                        DpmMockContext.CALLER_UID));
+
+        runAsDelegatedCertInstaller(dpm -> {
+            assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                    () -> dpms.enforceCallerCanRequestDeviceIdAttestation(null,
+                            DpmMockContext.DELEGATE_PACKAGE_NAME,
+                            UserHandle.getUid(DpmMockContext.CALLER_USER_HANDLE,
+                                    DpmMockContext.DELEGATE_CERT_INSTALLER_UID)));
+        });
+    }
+
+    private void configureProfileOwnerForDeviceIdAccess(ComponentName who, int userId) {
+        final long ident = mServiceContext.binder.clearCallingIdentity();
+        mServiceContext.binder.callingUid =
+                UserHandle.getUid(DpmMockContext.CALLER_USER_HANDLE, DpmMockContext.SYSTEM_UID);
+        runAsCaller(mServiceContext, dpms, dpm -> {
+            dpm.setProfileOwnerCanAccessDeviceIdsForUser(who, UserHandle.of(userId));
+        });
+        mServiceContext.binder.restoreCallingIdentity(ident);
+    }
+
     // admin1 is the outgoing DPC, adminAnotherPakcage is the incoming one.
     private void assertDeviceOwnershipRevertedWithFakeTransferMetadata() throws Exception {
         writeFakeTransferMetadataFile(UserHandle.USER_SYSTEM,

@@ -341,8 +341,7 @@ NativeInputManager::NativeInputManager(jobject contextObj,
     }
     mInteractive = true;
 
-    sp<EventHub> eventHub = new EventHub();
-    mInputManager = new InputManager(eventHub, this, this);
+    mInputManager = new InputManager(this, this);
 }
 
 NativeInputManager::~NativeInputManager() {

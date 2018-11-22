@@ -1869,8 +1869,8 @@ public final class ImageDecoder implements AutoCloseable {
         }
 
         float scale = (float) dstDensity / srcDensity;
-        int scaledWidth = (int) (mWidth * scale + 0.5f);
-        int scaledHeight = (int) (mHeight * scale + 0.5f);
+        int scaledWidth = Math.max((int) (mWidth * scale + 0.5f), 1);
+        int scaledHeight = Math.max((int) (mHeight * scale + 0.5f), 1);
         this.setTargetSize(scaledWidth, scaledHeight);
         return dstDensity;
     }

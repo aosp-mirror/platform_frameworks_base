@@ -390,7 +390,8 @@ public class Editor {
                 com.android.internal.R.bool.config_enableHapticTextHandle);
 
         if (FLAG_USE_MAGNIFIER) {
-            final Magnifier magnifier = new Magnifier.Builder(mTextView).build();
+            final Magnifier magnifier =
+                    Magnifier.createBuilderWithOldMagnifierDefaults(mTextView).build();
             mMagnifierAnimator = new MagnifierMotionAnimator(magnifier);
         }
     }

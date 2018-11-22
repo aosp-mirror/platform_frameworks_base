@@ -88,4 +88,7 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public String getGlobalPrivateDnsHost(ComponentName who) {
         return null;
     }
+
+    @Override
+    public void grantDeviceIdsAccessToProfileOwner(ComponentName who, int userId) { }
 }

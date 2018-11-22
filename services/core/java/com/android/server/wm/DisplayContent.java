@@ -414,6 +414,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     WallpaperController mWallpaperController;
 
+    boolean mWallpaperMayChange = false;
+
     private final SurfaceSession mSession = new SurfaceSession();
 
     /**
@@ -751,8 +753,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        if (isDefaultDisplay && obscuredChanged && w.isVisibleLw()
-                && mWallpaperController.isWallpaperTarget(w)) {
+        if (obscuredChanged && w.isVisibleLw() && mWallpaperController.isWallpaperTarget(w)) {
             // This is the wallpaper target and its obscured state changed... make sure the
             // current wallpaper's visibility has been updated accordingly.
             mWallpaperController.updateWallpaperVisibility();
@@ -784,7 +785,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 if ((w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
                     if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                             "First draw done in potential wallpaper target " + w);
-                    root.mWallpaperMayChange = true;
+                    mWallpaperMayChange = true;
                     pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                     if (DEBUG_LAYOUT_REPEATS) {
                         surfacePlacer.debugLayoutRepeats(
@@ -816,11 +817,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * initialize direct children.
      * @param display May not be null.
      * @param service You know.
-     * @param wallpaperController wallpaper windows controller used to adjust the positioning of the
-     *                            wallpaper windows in the window list.
+     * @param controller The controller for the display container.
      */
     DisplayContent(Display display, WindowManagerService service,
-            WallpaperController wallpaperController, DisplayWindowController controller) {
+            DisplayWindowController controller) {
         super(service);
         setController(controller);
         if (service.mRoot.getDisplayContent(display.getDisplayId()) != null) {
@@ -831,7 +831,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mDisplay = display;
         mDisplayId = display.getDisplayId();
-        mWallpaperController = wallpaperController;
+        mWallpaperController = new WallpaperController(mService, this);
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
@@ -2661,6 +2661,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         pw.print("  mFocusedApp="); pw.println(mFocusedApp);
 
         pw.println();
+        mWallpaperController.dump(pw, "  ");
+
+        pw.println();
         pw.println(prefix + "Application tokens in top down Z order:");
         for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.getChildAt(stackNdx);
@@ -3388,12 +3391,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats("On entry to LockedInner",
                     pendingLayoutChanges);
 
-            // TODO(multi-display): For now adjusting wallpaper only on primary display to avoid
-            // the wallpaper window jumping across displays.
-            // Remove check for default display when there will be support for multiple wallpaper
-            // targets (on different displays).
-            if (isDefaultDisplay && (pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
-                mWallpaperController.adjustWallpaperWindows(this);
+            if ((pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
+                mWallpaperController.adjustWallpaperWindows();
             }
 
             if ((pendingLayoutChanges & FINISH_LAYOUT_REDO_CONFIG) != 0) {
@@ -4673,7 +4672,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             Slog.v(TAG_WM, "Wallpaper layer changed: assigning layers + relayout");
         }
         computeImeTarget(true /* updateImeTarget */);
-        mService.mRoot.mWallpaperMayChange = true;
+        mWallpaperMayChange = true;
         // Since the window list has been rebuilt, focus might have to be recomputed since the
         // actual order of windows might have changed again.
         mService.mFocusMayChange = true;

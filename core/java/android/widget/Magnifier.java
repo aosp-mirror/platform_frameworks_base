@@ -145,7 +145,47 @@ public final class Magnifier {
      */
     @Deprecated
     public Magnifier(@NonNull View view) {
-        this(new Builder(view));
+        this(createBuilderWithOldMagnifierDefaults(view));
+    }
+
+    static Builder createBuilderWithOldMagnifierDefaults(final View view) {
+        final Builder params = new Builder(view);
+        final Context context = view.getContext();
+        final TypedArray a = context.obtainStyledAttributes(null, R.styleable.Magnifier,
+                R.attr.magnifierStyle, 0);
+        params.mWidth = a.getDimensionPixelSize(R.styleable.Magnifier_magnifierWidth, 0);
+        params.mHeight = a.getDimensionPixelSize(R.styleable.Magnifier_magnifierHeight, 0);
+        params.mElevation = a.getDimension(R.styleable.Magnifier_magnifierElevation, 0);
+        params.mCornerRadius = getDeviceDefaultDialogCornerRadius(context);
+        params.mZoom = a.getFloat(R.styleable.Magnifier_magnifierZoom, 0);
+        params.mHorizontalDefaultSourceToMagnifierOffset =
+                a.getDimensionPixelSize(R.styleable.Magnifier_magnifierHorizontalOffset, 0);
+        params.mVerticalDefaultSourceToMagnifierOffset =
+                a.getDimensionPixelSize(R.styleable.Magnifier_magnifierVerticalOffset, 0);
+        params.mOverlay = new ColorDrawable(a.getColor(
+                R.styleable.Magnifier_magnifierColorOverlay, Color.TRANSPARENT));
+        a.recycle();
+        params.mForcePositionWithinWindowSystemInsetsBounds = true;
+        params.mLeftContentBound = SOURCE_BOUND_MAX_VISIBLE;
+        params.mTopContentBound = SOURCE_BOUND_MAX_IN_SURFACE;
+        params.mRightContentBound = SOURCE_BOUND_MAX_VISIBLE;
+        params.mBottomContentBound = SOURCE_BOUND_MAX_IN_SURFACE;
+        return params;
+    }
+
+    /**
+     * Returns the device default theme dialog corner radius attribute.
+     * We retrieve this from the device default theme to avoid
+     * using the values set in the custom application themes.
+     */
+    private static float getDeviceDefaultDialogCornerRadius(final Context context) {
+        final Context deviceDefaultContext =
+                new ContextThemeWrapper(context, R.style.Theme_DeviceDefault);
+        final TypedArray ta = deviceDefaultContext.obtainStyledAttributes(
+                new int[]{android.R.attr.dialogCornerRadius});
+        final float dialogCornerRadius = ta.getDimension(0, 0);
+        ta.recycle();
+        return dialogCornerRadius;
     }
 
     private Magnifier(@NonNull Builder params) {
@@ -1105,41 +1145,23 @@ public final class Magnifier {
         }
 
         private void applyDefaults() {
-            final Context context = mView.getContext();
-            final TypedArray a = context.obtainStyledAttributes(null, R.styleable.Magnifier,
-                    R.attr.magnifierStyle, 0);
-            mWidth = a.getDimensionPixelSize(R.styleable.Magnifier_magnifierWidth, 0);
-            mHeight = a.getDimensionPixelSize(R.styleable.Magnifier_magnifierHeight, 0);
-            mElevation = a.getDimension(R.styleable.Magnifier_magnifierElevation, 0);
-            mCornerRadius = getDeviceDefaultDialogCornerRadius();
-            mZoom = a.getFloat(R.styleable.Magnifier_magnifierZoom, 0);
+            final Resources resources = mView.getContext().getResources();
+            mWidth = resources.getDimensionPixelSize(R.dimen.default_magnifier_width);
+            mHeight = resources.getDimensionPixelSize(R.dimen.default_magnifier_height);
+            mElevation = resources.getDimension(R.dimen.default_magnifier_elevation);
+            mCornerRadius = resources.getDimension(R.dimen.default_magnifier_corner_radius);
+            mZoom = resources.getFloat(R.dimen.default_magnifier_zoom);
             mHorizontalDefaultSourceToMagnifierOffset =
-                    a.getDimensionPixelSize(R.styleable.Magnifier_magnifierHorizontalOffset, 0);
+                    resources.getDimensionPixelSize(R.dimen.default_magnifier_horizontal_offset);
             mVerticalDefaultSourceToMagnifierOffset =
-                    a.getDimensionPixelSize(R.styleable.Magnifier_magnifierVerticalOffset, 0);
-            mOverlay = new ColorDrawable(a.getColor(
-                    R.styleable.Magnifier_magnifierColorOverlay, Color.TRANSPARENT));
-            a.recycle();
+                    resources.getDimensionPixelSize(R.dimen.default_magnifier_vertical_offset);
+            mOverlay = new ColorDrawable(resources.getColor(
+                    R.color.default_magnifier_color_overlay, null));
             mForcePositionWithinWindowSystemInsetsBounds = true;
             mLeftContentBound = SOURCE_BOUND_MAX_VISIBLE;
-            mTopContentBound = SOURCE_BOUND_MAX_IN_SURFACE;
+            mTopContentBound = SOURCE_BOUND_MAX_VISIBLE;
             mRightContentBound = SOURCE_BOUND_MAX_VISIBLE;
-            mBottomContentBound = SOURCE_BOUND_MAX_IN_SURFACE;
-        }
-
-        /**
-         * Returns the device default theme dialog corner radius attribute.
-         * We retrieve this from the device default theme to avoid
-         * using the values set in the custom application themes.
-         */
-        private float getDeviceDefaultDialogCornerRadius() {
-            final Context deviceDefaultContext =
-                    new ContextThemeWrapper(mView.getContext(), R.style.Theme_DeviceDefault);
-            final TypedArray ta = deviceDefaultContext.obtainStyledAttributes(
-                    new int[]{android.R.attr.dialogCornerRadius});
-            final float dialogCornerRadius = ta.getDimension(0, 0);
-            ta.recycle();
-            return dialogCornerRadius;
+            mBottomContentBound = SOURCE_BOUND_MAX_VISIBLE;
         }
 
         /**
@@ -1186,8 +1208,7 @@ public final class Magnifier {
         }
 
         /**
-         * Sets the corner radius of the magnifier window, in pixels.
-         * Defaults to the corner radius defined in the device default theme.
+         * Sets the corner radius of the magnifier window, in pixels. Defaults to 2dp.
          * @param cornerRadius the corner radius to be set
          */
         @NonNull
@@ -1201,10 +1222,11 @@ public final class Magnifier {
         /**
          * Sets an overlay that will be drawn on the top of the magnifier content.
          * In general, the overlay should not be opaque, in order to let the expected magnifier
-         * content be partially visible. The default overlay is a white {@link ColorDrawable},
-         * with 5% alpha, aiming to make the magnifier distinguishable when shown in dark
-         * application regions. To disable this default (or in general to have no overlay), the
-         * parameter should be set to {@code null}. The overlay will be automatically redrawn
+         * content be partially visible. The default overlay is {@code null} (no overlay).
+         * As an example, TextView applies a white {@link ColorDrawable} overlay with
+         * 5% alpha, aiming to make the magnifier distinguishable when shown in dark
+         * application regions. To disable the overlay, the parameter should be set
+         * to {@code null}. If not null, the overlay will be automatically redrawn
          * when the drawable is invalidated. To achieve this, the magnifier will set a new
          * {@link android.graphics.drawable.Drawable.Callback} for the overlay drawable,
          * so keep in mind that any existing one set by the application will be lost.
@@ -1220,7 +1242,7 @@ public final class Magnifier {
          * Sets an offset that should be added to the content source center to obtain
          * the position of the magnifier window, when the {@link #show(float, float)}
          * method is called. The offset is ignored when {@link #show(float, float, float, float)}
-         * is used. The offset can be negative, and it defaults to (0dp, -42dp).
+         * is used. The offset can be negative. It defaults to (0dp, 0dp).
          * @param horizontalOffset the horizontal component of the offset
          * @param verticalOffset the vertical component of the offset
          */
@@ -1406,8 +1428,8 @@ public final class Magnifier {
         final Resources resources = Resources.getSystem();
         final float density = resources.getDisplayMetrics().density;
         final PointF size = new PointF();
-        size.x = resources.getDimension(R.dimen.magnifier_width) / density;
-        size.y = resources.getDimension(R.dimen.magnifier_height) / density;
+        size.x = resources.getDimension(R.dimen.default_magnifier_width) / density;
+        size.y = resources.getDimension(R.dimen.default_magnifier_height) / density;
         return size;
     }
 
