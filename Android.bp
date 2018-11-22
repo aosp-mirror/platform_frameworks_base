@@ -456,7 +456,6 @@ java_defaults {
         "media/java/android/media/IMediaScannerListener.aidl",
         "media/java/android/media/IMediaScannerService.aidl",
         "media/java/android/media/IPlaybackConfigDispatcher.aidl",
-        "media/java/android/media/ISessionTokensListener.aidl",
         ":libaudioclient_aidl",
         "media/java/android/media/IRecordingConfigDispatcher.aidl",
         "media/java/android/media/IRemoteDisplayCallback.aidl",
