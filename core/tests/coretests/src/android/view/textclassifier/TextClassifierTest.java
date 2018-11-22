@@ -26,6 +26,8 @@ import android.content.Context;
 import android.os.LocaleList;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
+import android.text.Spannable;
+import android.text.SpannableString;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -52,7 +54,11 @@ public class TextClassifierTest {
 
     @Parameterized.Parameters(name = "{0}")
     public static Iterable<Object> textClassifierTypes() {
-        return Arrays.asList(LOCAL, SYSTEM);
+        return Arrays.asList(LOCAL);
+
+        // TODO: The following will fail on any device that specifies a no-op TextClassifierService.
+        // Enable when we can set a specified TextClassifierService for testing.
+        // return Arrays.asList(LOCAL, SYSTEM);
     }
 
     @Parameterized.Parameter
@@ -295,6 +301,17 @@ public class TextClassifierTest {
         TextLinks links = mClassifier.generateLinks(request);
         assertTrue(links.getLinks().isEmpty());
     }
+
+    @Test
+    public void testApplyLinks_unsupportedCharacter() {
+        if (isTextClassifierDisabled()) return;
+        Spannable url = new SpannableString("\u202Emoc.diordna.com");
+        TextLinks.Request request = new TextLinks.Request.Builder(url).build();
+        assertEquals(
+                TextLinks.STATUS_UNSUPPORTED_CHARACTER,
+                mClassifier.generateLinks(request).apply(url, 0, null));
+    }
+
 
     @Test(expected = IllegalArgumentException.class)
     public void testGenerateLinks_tooLong() {
