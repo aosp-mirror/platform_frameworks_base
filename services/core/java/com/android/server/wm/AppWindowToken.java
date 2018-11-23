@@ -1081,8 +1081,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         super.onDisplayChanged(dc);
         if (prevDc != null && prevDc.mFocusedApp == this) {
             prevDc.setFocusedApp(null);
-            if (dc.getTopStack().getTopChild().getTopChild() == this) {
-                dc.setFocusedApp(this);
+            final TaskStack stack = dc.getTopStack();
+            if (stack != null) {
+                final Task task = stack.getTopChild();
+                if (task != null && task.getTopChild() == this) {
+                    dc.setFocusedApp(this);
+                }
             }
         }
     }
