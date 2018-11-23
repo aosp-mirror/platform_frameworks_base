@@ -1693,11 +1693,30 @@ public class Notification implements Parcelable
             }
 
             /**
+             * Throws an NPE if we are building a contextual action missing one of the fields
+             * necessary to display the action.
+             */
+            private void checkContextualActionNullFields() {
+                if (mSemanticAction != SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION) return;
+
+                if (mIcon == null) {
+                    throw new NullPointerException("Contextual Actions must contain a valid icon");
+                }
+
+                if (mIntent == null) {
+                    throw new NullPointerException(
+                            "Contextual Actions must contain a valid PendingIntent");
+                }
+            }
+
+            /**
              * Combine all of the options that have been set and return a new {@link Action}
              * object.
              * @return the built action
              */
             public Action build() {
+                checkContextualActionNullFields();
+
                 ArrayList<RemoteInput> dataOnlyInputs = new ArrayList<>();
                 RemoteInput[] previousDataInputs =
                     (RemoteInput[]) mExtras.getParcelableArray(EXTRA_DATA_ONLY_INPUTS);
