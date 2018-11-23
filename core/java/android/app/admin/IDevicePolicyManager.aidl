@@ -20,6 +20,7 @@ package android.app.admin;
 import android.app.admin.NetworkEvent;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
+import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.PasswordMetrics;
@@ -419,4 +420,6 @@ interface IDevicePolicyManager {
     String getGlobalPrivateDnsHost(in ComponentName admin);
 
     void grantDeviceIdsAccessToProfileOwner(in ComponentName who, int userId);
+
+    void installUpdateFromFile(in ComponentName admin, in ParcelFileDescriptor updateFileDescriptor, in StartInstallingUpdateCallback listener);
 }
