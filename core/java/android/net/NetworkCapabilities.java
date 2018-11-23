@@ -1421,7 +1421,7 @@ public final class NetworkCapabilities implements Parcelable {
             appendStringRepresentationOfBitMaskToStringBuilder(sb, mNetworkCapabilities,
                     NetworkCapabilities::capabilityNameOf, "&");
         }
-        if (0 != mNetworkCapabilities) {
+        if (0 != mUnwantedNetworkCapabilities) {
             sb.append(" Unwanted: ");
             appendStringRepresentationOfBitMaskToStringBuilder(sb, mUnwantedNetworkCapabilities,
                     NetworkCapabilities::capabilityNameOf, "&");
