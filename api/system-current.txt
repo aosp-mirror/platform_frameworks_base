@@ -441,10 +441,10 @@ package android.app {
   }
 
   public class KeyguardManager {
-    method public void setPrivateNotificationsAllowed(boolean);
-    method public boolean getPrivateNotificationsAllowed();
     method public android.content.Intent createConfirmFactoryResetCredentialIntent(java.lang.CharSequence, java.lang.CharSequence, java.lang.CharSequence);
+    method public boolean getPrivateNotificationsAllowed();
     method public void requestDismissKeyguard(android.app.Activity, java.lang.CharSequence, android.app.KeyguardManager.KeyguardDismissCallback);
+    method public void setPrivateNotificationsAllowed(boolean);
   }
 
   public class Notification implements android.os.Parcelable {
