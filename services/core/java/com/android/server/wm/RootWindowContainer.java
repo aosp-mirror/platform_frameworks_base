@@ -224,6 +224,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         final DisplayContent existing = getDisplayContent(displayId);
 
         if (existing != null) {
+            initializeDisplayOverrideConfiguration(controller, existing);
             existing.setController(controller);
             return existing;
         }
@@ -233,6 +234,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
 
         mService.mDisplayWindowSettings.applySettingsToDisplayLocked(dc);
+        initializeDisplayOverrideConfiguration(controller, dc);
 
         if (mService.mDisplayManagerInternal != null) {
             mService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
@@ -243,6 +245,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         mService.reconfigureDisplayLocked(dc);
 
         return dc;
+    }
+
+    /**
+     * The display content may have configuration set from {@link #DisplayWindowSettings}. This
+     * callback let the owner of container know there is existing configuration to prevent the
+     * values from being replaced by the initializing {@link #ActivityDisplay}.
+     */
+    private void initializeDisplayOverrideConfiguration(DisplayWindowController controller,
+            DisplayContent displayContent) {
+        if (controller != null && controller.mListener != null) {
+            controller.mListener.onInitializeOverrideConfiguration(
+                    displayContent.getOverrideConfiguration());
+        }
     }
 
     boolean isLayoutNeeded() {

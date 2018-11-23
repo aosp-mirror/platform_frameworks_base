@@ -179,6 +179,11 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         mWindowContainerController.onDisplayChanged();
     }
 
+    @Override
+    public void onInitializeOverrideConfiguration(Configuration config) {
+        getOverrideConfiguration().updateFrom(config);
+    }
+
     void addChild(ActivityStack stack, int position) {
         if (position == POSITION_BOTTOM) {
             position = 0;
