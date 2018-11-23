@@ -51,7 +51,6 @@ LOCAL_JNI_SHARED_LIBRARIES := \
     liblog \
     liblzma \
     libnativehelper \
-    libnetdaidl \
     libpackagelistparser \
     libpcre2 \
     libselinux \
@@ -93,7 +92,6 @@ LOCAL_SHARED_LIBRARIES := \
   liblog \
   libcutils \
   libnativehelper \
-  libnetdaidl \
   netd_aidl_interface-cpp
 
 LOCAL_STATIC_LIBRARIES := \

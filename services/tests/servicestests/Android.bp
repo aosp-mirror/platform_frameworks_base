@@ -66,10 +66,10 @@ android_test {
         "liblog",
         "liblzma",
         "libnativehelper",
-        "libnetdaidl",
         "libui",
         "libunwind",
         "libutils",
+        "netd_aidl_interface-cpp",
     ],
 
     dxflags: ["--multi-dex"],
