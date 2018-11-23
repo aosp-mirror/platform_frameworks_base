@@ -491,6 +491,9 @@ message WifiLog {
 
   // List of PNO scan stats, one element for each mobility state
   repeated DeviceMobilityStatePnoScanStats mobility_state_pno_stats_list = 128;
+
+  // Wifi p2p statistics
+  optional WifiP2pStats wifi_p2p_stats = 129;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -1848,4 +1851,136 @@ message DeviceMobilityStatePnoScanStats {
 
   // the total duration elapsed while in this mobility state with PNO scans running, in ms
   optional int64 pno_duration_ms = 4;
+}
+
+// The information about the Wifi P2p events.
+message WifiP2pStats {
+
+  // Group event list tracking sessions and client counts in tethered mode.
+  repeated GroupEvent group_event = 1;
+
+  // Session information that gets logged for every Wifi P2p connection.
+  repeated P2pConnectionEvent connection_event = 2;
+
+  // Number of persistent group in the user profile.
+  optional int32 num_persistent_group = 3;
+
+  // Number of peer scan.
+  optional int32 num_total_peer_scans = 4;
+
+  // Number of service scan.
+  optional int32 num_total_service_scans = 5;
+}
+
+message P2pConnectionEvent {
+
+  enum ConnectionType {
+
+    // fresh new connection.
+    CONNECTION_FRESH = 0;
+
+    // reinvoke a group.
+    CONNECTION_REINVOKE = 1;
+
+    // create a group with the current device as the group owner locally.
+    CONNECTION_LOCAL = 2;
+
+    // create a group or join a group with config.
+    CONNECTION_FAST = 3;
+  }
+
+  enum ConnectivityLevelFailure {
+
+    // Failure is unknown.
+    CLF_UNKNOWN = 0;
+
+    // No failure.
+    CLF_NONE = 1;
+
+    // Timeout for current connecting request.
+    CLF_TIMEOUT = 2;
+
+    // The connecting request is canceled by the user.
+    CLF_CANCEL = 3;
+
+    // Provision discovery failure, e.g. no pin code, timeout, rejected by the peer.
+    CLF_PROV_DISC_FAIL = 4;
+
+    // Invitation failure, e.g. rejected by the peer.
+    CLF_INVITATION_FAIL = 5;
+
+    // Incoming request is rejected by the user.
+    CLF_USER_REJECT = 6;
+
+    // New connection request is issued before ending previous connecting request.
+    CLF_NEW_CONNECTION_ATTEMPT = 7;
+  }
+
+  // WPS method.
+  enum WpsMethod {
+    // WPS is skipped for Group Reinvoke.
+    WPS_NA = -1;
+
+    // Push button configuration.
+    WPS_PBC = 0;
+
+    // Display pin method configuration - pin is generated and displayed on device.
+    WPS_DISPLAY = 1;
+
+    // Keypad pin method configuration - pin is entered on device.
+    WPS_KEYPAD = 2;
+
+    // Label pin method configuration - pin is labelled on device.
+    WPS_LABEL = 3;
+  }
+
+  // Start time of the connection.
+  optional int64 start_time_millis = 1;
+
+  // Type of the connection.
+  optional ConnectionType connection_type = 2;
+
+  // WPS method.
+  optional WpsMethod wps_method = 3 [default = WPS_NA];
+
+  // Duration to connect.
+  optional int32 duration_taken_to_connect_millis = 4;
+
+  // Failures that happen at the connectivity layer.
+  optional ConnectivityLevelFailure connectivity_level_failure_code = 5;
+}
+
+// GroupEvent tracking group information from GroupStarted to GroupRemoved.
+message GroupEvent {
+
+  enum GroupRole {
+
+    GROUP_OWNER = 0;
+
+    GROUP_CLIENT = 1;
+  }
+
+  // The ID of network in supplicant for this group.
+  optional int32 net_id = 1;
+
+  // Start time of the group.
+  optional int64 start_time_millis = 2;
+
+  // Channel frequency used for Group.
+  optional int32 channel_frequency = 3;
+
+  // Is group owner or group client.
+  optional GroupRole group_role = 5;
+
+  // Number of connected clients.
+  optional int32 num_connected_clients = 6;
+
+  // Cumulative number of connected clients.
+  optional int32 num_cumulative_clients = 7;
+
+  // The session duration.
+  optional int32 session_duration_millis = 8;
+
+  // The idle duration. A group without any client is in idle.
+  optional int32 idle_duration_millis = 9;
 }
