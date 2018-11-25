@@ -95,6 +95,7 @@ import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.wm.SurfaceAnimationThread;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.server.display.ColorDisplayService.ColorDisplayServiceInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -1459,6 +1460,13 @@ public final class DisplayManagerService extends SystemService {
 
             pw.println();
             mPersistentDataStore.dump(pw);
+
+            final ColorDisplayServiceInternal cds = LocalServices.getService(
+                    ColorDisplayServiceInternal.class);
+            if (cds != null) {
+                pw.println();
+                cds.dump(pw);
+            }
         }
     }
 
