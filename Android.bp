@@ -724,6 +724,7 @@ java_defaults {
         "android.hardware.wifi-V1.0-java-constants",
         "android.hardware.radio-V1.0-java",
         "android.hardware.radio-V1.3-java",
+        "android.hardware.radio-V1.4-java",
         "android.hardware.usb.gadget-V1.0-java",
         "netd_aidl_interface-java",
     ],

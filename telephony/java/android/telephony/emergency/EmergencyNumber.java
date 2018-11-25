@@ -17,8 +17,8 @@
 package android.telephony.emergency;
 
 import android.annotation.IntDef;
-import android.hardware.radio.V1_3.EmergencyNumberSource;
-import android.hardware.radio.V1_3.EmergencyServiceCategory;
+import android.hardware.radio.V1_4.EmergencyNumberSource;
+import android.hardware.radio.V1_4.EmergencyServiceCategory;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -138,7 +138,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
     }
 
     /**
-     * The source to tell where the corresponding @1.3::EmergencyNumber comes from.
+     * The source to tell where the corresponding @1.4::EmergencyNumber comes from.
      *
      * The emergency number has one or more defined emergency number sources.
      *
