@@ -29,6 +29,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.split.SplitDependencyLoader;
 import android.content.res.AssetManager;
@@ -70,8 +71,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 final class IntentReceiverLeaked extends AndroidRuntimeException {
     @UnsupportedAppUsage
@@ -397,6 +400,24 @@ public final class LoadedApk {
         makePaths(activityThread, false, aInfo, outZipPaths, null);
     }
 
+    private static void appendSharedLibrariesLibPathsIfNeeded(
+            List<SharedLibraryInfo> sharedLibraries, ApplicationInfo aInfo,
+            Set<String> outSeenPaths,
+            List<String> outLibPaths) {
+        if (sharedLibraries == null) {
+            return;
+        }
+        for (SharedLibraryInfo lib : sharedLibraries) {
+            List<String> paths = lib.getAllCodePaths();
+            outSeenPaths.addAll(paths);
+            for (String path : paths) {
+                appendApkLibPathIfNeeded(path, aInfo, outLibPaths);
+            }
+            appendSharedLibrariesLibPathsIfNeeded(
+                    lib.getDependencies(), aInfo, outSeenPaths, outLibPaths);
+        }
+    }
+
     public static void makePaths(ActivityThread activityThread,
                                  boolean isBundledApp,
                                  ApplicationInfo aInfo,
@@ -404,7 +425,6 @@ public final class LoadedApk {
                                  List<String> outLibPaths) {
         final String appDir = aInfo.sourceDir;
         final String libDir = aInfo.nativeLibraryDir;
-        final String[] sharedLibraries = aInfo.sharedLibraryFiles;
 
         outZipPaths.clear();
         outZipPaths.add(appDir);
@@ -499,11 +519,19 @@ public final class LoadedApk {
             }
         }
 
-        // Prepend the shared libraries, maintaining their original order where possible.
-        if (sharedLibraries != null) {
+        // Add the shared libraries native paths. The dex files in shared libraries will
+        // be resolved through shared library loaders, which are setup later.
+        Set<String> outSeenPaths = new LinkedHashSet<>();
+        appendSharedLibrariesLibPathsIfNeeded(
+                aInfo.sharedLibraryInfos, aInfo, outSeenPaths, outLibPaths);
+
+        // ApplicationInfo.sharedLibraryFiles is a public API, so anyone can change it.
+        // We prepend shared libraries that the package manager hasn't seen, maintaining their
+        // original order where possible.
+        if (aInfo.sharedLibraryFiles != null) {
             int index = 0;
-            for (String lib : sharedLibraries) {
-                if (!outZipPaths.contains(lib)) {
+            for (String lib : aInfo.sharedLibraryFiles) {
+                if (!outSeenPaths.contains(lib) && !outZipPaths.contains(lib)) {
                     outZipPaths.add(index, lib);
                     index++;
                     appendApkLibPathIfNeeded(lib, aInfo, outLibPaths);
@@ -629,6 +657,43 @@ public final class LoadedApk {
             return mSplitResDirs;
         }
         return mSplitLoader.getSplitPathsForSplit(splitName);
+    }
+
+    /**
+     * Create a class loader for the {@code sharedLibrary}. Shared libraries are canonicalized,
+     * so if we already created a class loader with that shared library, we return it.
+     *
+     * Implementation notes: the canonicalization of shared libraries is something dex2oat
+     * also does.
+     */
+    ClassLoader createSharedLibraryLoader(SharedLibraryInfo sharedLibrary,
+            boolean isBundledApp, String librarySearchPath, String libraryPermittedPath) {
+        List<String> paths = sharedLibrary.getAllCodePaths();
+        List<ClassLoader> sharedLibraries = createSharedLibrariesLoaders(
+                sharedLibrary.getDependencies(), isBundledApp, librarySearchPath,
+                libraryPermittedPath);
+        final String jars = (paths.size() == 1) ? paths.get(0) :
+                TextUtils.join(File.pathSeparator, paths);
+
+        // Shared libraries get a null parent: this has the side effect of having canonicalized
+        // shared libraries using ApplicationLoaders cache, which is the behavior we want.
+        return ApplicationLoaders.getDefault().getClassLoaderWithSharedLibraries(jars,
+                    mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
+                    libraryPermittedPath, /* parent */ null,
+                    /* classLoaderName */ null, sharedLibraries);
+    }
+
+    private List<ClassLoader> createSharedLibrariesLoaders(List<SharedLibraryInfo> sharedLibraries,
+            boolean isBundledApp, String librarySearchPath, String libraryPermittedPath) {
+        if (sharedLibraries == null) {
+            return null;
+        }
+        List<ClassLoader> loaders = new ArrayList<>();
+        for (SharedLibraryInfo info : sharedLibraries) {
+            loaders.add(createSharedLibraryLoader(
+                    info, isBundledApp, librarySearchPath, libraryPermittedPath));
+        }
+        return loaders;
     }
 
     private void createOrUpdateClassLoaderLocked(List<String> addedPaths) {
@@ -759,10 +824,14 @@ public final class LoadedApk {
             // as this is early and necessary.
             StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
 
-            mDefaultClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip,
-                    mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
+            List<ClassLoader> sharedLibraries = createSharedLibrariesLoaders(
+                    mApplicationInfo.sharedLibraryInfos, isBundledApp, librarySearchPath,
+                    libraryPermittedPath);
+
+            mDefaultClassLoader = ApplicationLoaders.getDefault().getClassLoaderWithSharedLibraries(
+                    zip, mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
                     libraryPermittedPath, mBaseClassLoader,
-                    mApplicationInfo.classLoaderName);
+                    mApplicationInfo.classLoaderName, sharedLibraries);
             mAppComponentFactory = createAppFactory(mApplicationInfo, mDefaultClassLoader);
 
             StrictMode.setThreadPolicy(oldPolicy);

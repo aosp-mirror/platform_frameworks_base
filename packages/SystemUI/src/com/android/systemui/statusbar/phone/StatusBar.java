@@ -2251,7 +2251,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void notifyUiVisibilityChanged(int vis) {
         try {
             if (mLastDispatchedSystemUiVisibility != vis) {
-                mWindowManagerService.statusBarVisibilityChanged(vis);
+                // TODO (b/117478341): Resolve one status bar/ navigation bar assumption
+                mWindowManagerService.statusBarVisibilityChanged(Display.DEFAULT_DISPLAY, vis);
                 mLastDispatchedSystemUiVisibility = vis;
             }
         } catch (RemoteException ex) {

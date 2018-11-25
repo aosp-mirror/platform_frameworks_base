@@ -113,9 +113,6 @@ public class WindowFrameTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        // Just any non zero value.
-        mWm.mSystemDecorLayer = 10000;
-
         mWindowToken = WindowTestUtils.createTestAppWindowToken(
                 mWm.getDefaultDisplayContentLocked());
         mStubStack = new TaskStack(mWm, 0, null);

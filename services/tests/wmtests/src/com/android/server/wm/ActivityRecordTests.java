@@ -163,7 +163,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
     private void verifyPositionWithLimitedAspectRatio(int navBarPosition, Rect taskBounds,
             float aspectRatio, Rect expectedActivityBounds) {
         // Verify with nav bar on the right.
-        when(mService.mWindowManager.getNavBarPosition()).thenReturn(navBarPosition);
+        when(mService.mWindowManager.getNavBarPosition(mActivity.getDisplayId()))
+                .thenReturn(navBarPosition);
         mTask.getConfiguration().windowConfiguration.setAppBounds(taskBounds);
         mActivity.info.maxAspectRatio = aspectRatio;
         mActivity.ensureActivityConfiguration(

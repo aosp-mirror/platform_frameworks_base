@@ -141,6 +141,7 @@ public class LooperStatsService extends Binder {
         if (mEnabled != enabled) {
             mEnabled = enabled;
             mStats.reset();
+            mStats.setAddDebugEntries(enabled);
             Looper.setObserver(enabled ? mStats : null);
         }
     }

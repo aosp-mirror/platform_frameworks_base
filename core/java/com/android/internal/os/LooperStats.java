@@ -50,6 +50,7 @@ public class LooperStats implements Looper.Observer {
     private int mSamplingInterval;
     private CachedDeviceState.Readonly mDeviceState;
     private long mStartTime = System.currentTimeMillis();
+    private boolean mAddDebugEntries = false;
 
     public LooperStats(int samplingInterval, int entriesSizeCap) {
         this.mSamplingInterval = samplingInterval;
@@ -58,6 +59,10 @@ public class LooperStats implements Looper.Observer {
 
     public void setDeviceState(@NonNull CachedDeviceState.Readonly deviceState) {
         mDeviceState = deviceState;
+    }
+
+    public void setAddDebugEntries(boolean addDebugEntries) {
+        mAddDebugEntries = addDebugEntries;
     }
 
     @Override
@@ -142,7 +147,20 @@ public class LooperStats implements Looper.Observer {
         // Add the overflow and collision entries only if they have any data.
         maybeAddSpecialEntry(exportedEntries, mOverflowEntry);
         maybeAddSpecialEntry(exportedEntries, mHashCollisionEntry);
+        // Debug entries added to help validate the data.
+        if (mAddDebugEntries) {
+            exportedEntries.add(createDebugEntry("start_time_millis", mStartTime));
+            exportedEntries.add(createDebugEntry("end_time_millis", System.currentTimeMillis()));
+        }
         return exportedEntries;
+    }
+
+    private ExportedEntry createDebugEntry(String variableName, long value) {
+        final Entry entry = new Entry("__DEBUG_" + variableName);
+        entry.messageCount = 1;
+        entry.recordedMessageCount = 1;
+        entry.maxDelayMillis = value;
+        return new ExportedEntry(entry);
     }
 
     /** Returns a timestamp indicating when the statistics were last reset. */

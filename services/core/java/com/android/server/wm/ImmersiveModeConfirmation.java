@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.server.policy;
+package com.android.server.wm;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
@@ -32,16 +33,14 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.service.vr.IVrManager;
-import android.service.vr.IVrStateCallbacks;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -55,7 +54,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
-import com.android.server.vr.VrManagerService;
 
 /**
  *  Helper to manage showing/hiding a confirmation prompt when the navigation bar is hidden
@@ -67,30 +65,34 @@ public class ImmersiveModeConfirmation {
     private static final boolean DEBUG_SHOW_EVERY_TIME = false; // super annoying, use with caution
     private static final String CONFIRMED = "confirmed";
 
+    private static boolean sConfirmed;
+
     private final Context mContext;
     private final H mHandler;
     private final long mShowDelayMs;
     private final long mPanicThresholdMs;
     private final IBinder mWindowToken = new Binder();
 
-    private boolean mConfirmed;
     private ClingWindowView mClingWindow;
     private long mPanicTime;
     private WindowManager mWindowManager;
-    private int mCurrentUserId;
     // Local copy of vr mode enabled state, to avoid calling into VrManager with
     // the lock held.
-    boolean mVrModeEnabled = false;
+    private boolean mVrModeEnabled;
     private int mLockTaskState = LOCK_TASK_MODE_NONE;
 
-    public ImmersiveModeConfirmation(Context context) {
-        mContext = ActivityThread.currentActivityThread().getSystemUiContext();
-        mHandler = new H();
+    ImmersiveModeConfirmation(Context context, Looper looper, boolean vrModeEnabled) {
+        final Display display = context.getDisplay();
+        final Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
+        mContext = display.getDisplayId() == DEFAULT_DISPLAY
+                ? uiContext : uiContext.createDisplayContext(display);
+        mHandler = new H(looper);
         mShowDelayMs = getNavBarExitDuration() * 3;
         mPanicThresholdMs = context.getResources()
                 .getInteger(R.integer.config_immersive_mode_confirmation_panic);
         mWindowManager = (WindowManager)
                 mContext.getSystemService(Context.WINDOW_SERVICE);
+        mVrModeEnabled = vrModeEnabled;
     }
 
     private long getNavBarExitDuration() {
@@ -98,57 +100,46 @@ public class ImmersiveModeConfirmation {
         return exit != null ? exit.getDuration() : 0;
     }
 
-    public void loadSetting(int currentUserId) {
-        mConfirmed = false;
-        mCurrentUserId = currentUserId;
-        if (DEBUG) Slog.d(TAG, String.format("loadSetting() mCurrentUserId=%d", mCurrentUserId));
+    static boolean loadSetting(int currentUserId, Context context) {
+        final boolean wasConfirmed = sConfirmed;
+        sConfirmed = false;
+        if (DEBUG) Slog.d(TAG, String.format("loadSetting() currentUserId=%d", currentUserId));
         String value = null;
         try {
-            value = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+            value = Settings.Secure.getStringForUser(context.getContentResolver(),
                     Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
                     UserHandle.USER_CURRENT);
-            mConfirmed = CONFIRMED.equals(value);
-            if (DEBUG) Slog.d(TAG, "Loaded mConfirmed=" + mConfirmed);
+            sConfirmed = CONFIRMED.equals(value);
+            if (DEBUG) Slog.d(TAG, "Loaded sConfirmed=" + sConfirmed);
         } catch (Throwable t) {
             Slog.w(TAG, "Error loading confirmations, value=" + value, t);
         }
+        return sConfirmed != wasConfirmed;
     }
 
-    private void saveSetting() {
+    private static void saveSetting(Context context) {
         if (DEBUG) Slog.d(TAG, "saveSetting()");
         try {
-            final String value = mConfirmed ? CONFIRMED : null;
-            Settings.Secure.putStringForUser(mContext.getContentResolver(),
+            final String value = sConfirmed ? CONFIRMED : null;
+            Settings.Secure.putStringForUser(context.getContentResolver(),
                     Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
                     value,
                     UserHandle.USER_CURRENT);
             if (DEBUG) Slog.d(TAG, "Saved value=" + value);
         } catch (Throwable t) {
-            Slog.w(TAG, "Error saving confirmations, mConfirmed=" + mConfirmed, t);
+            Slog.w(TAG, "Error saving confirmations, sConfirmed=" + sConfirmed, t);
         }
     }
 
-    void systemReady() {
-        IVrManager vrManager = IVrManager.Stub.asInterface(
-                ServiceManager.getService(Context.VR_SERVICE));
-        if (vrManager != null) {
-            try {
-                vrManager.registerListener(mVrStateCallbacks);
-                mVrModeEnabled = vrManager.getVrModeState();
-            } catch (RemoteException re) {
-            }
-        }
-    }
-
-    public void immersiveModeChangedLw(String pkg, boolean isImmersiveMode,
+    void immersiveModeChangedLw(String pkg, boolean isImmersiveMode,
             boolean userSetupComplete, boolean navBarEmpty) {
         mHandler.removeMessages(H.SHOW);
         if (isImmersiveMode) {
             final boolean disabled = PolicyControl.disableImmersiveConfirmation(pkg);
-            if (DEBUG) Slog.d(TAG, String.format("immersiveModeChanged() disabled=%s mConfirmed=%s",
-                    disabled, mConfirmed));
+            if (DEBUG) Slog.d(TAG, String.format("immersiveModeChanged() disabled=%s sConfirmed=%s",
+                    disabled, sConfirmed));
             if (!disabled
-                    && (DEBUG_SHOW_EVERY_TIME || !mConfirmed)
+                    && (DEBUG_SHOW_EVERY_TIME || !sConfirmed)
                     && userSetupComplete
                     && !mVrModeEnabled
                     && !navBarEmpty
@@ -161,7 +152,7 @@ public class ImmersiveModeConfirmation {
         }
     }
 
-    public boolean onPowerKeyDown(boolean isScreenOn, long time, boolean inImmersiveMode,
+    boolean onPowerKeyDown(boolean isScreenOn, long time, boolean inImmersiveMode,
             boolean navBarEmpty) {
         if (!isScreenOn && (time - mPanicTime < mPanicThresholdMs)) {
             // turning the screen back on within the panic threshold
@@ -176,7 +167,7 @@ public class ImmersiveModeConfirmation {
         return false;
     }
 
-    public void confirmCurrentPrompt() {
+    void confirmCurrentPrompt() {
         if (mClingWindow != null) {
             if (DEBUG) Slog.d(TAG, "confirmCurrentPrompt()");
             mHandler.post(mConfirm);
@@ -191,16 +182,14 @@ public class ImmersiveModeConfirmation {
         }
     }
 
-    public WindowManager.LayoutParams getClingWindowLayoutParams() {
+    private WindowManager.LayoutParams getClingWindowLayoutParams() {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-                0
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                ,
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("ImmersiveModeConfirmation");
@@ -209,7 +198,7 @@ public class ImmersiveModeConfirmation {
         return lp;
     }
 
-    public FrameLayout.LayoutParams getBubbleLayoutParams() {
+    private FrameLayout.LayoutParams getBubbleLayoutParams() {
         return new FrameLayout.LayoutParams(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.immersive_mode_cling_width),
@@ -220,7 +209,7 @@ public class ImmersiveModeConfirmation {
     /**
      * @return the window token that's used by all ImmersiveModeConfirmation windows.
      */
-    public IBinder getWindowToken() {
+    IBinder getWindowToken() {
         return mWindowToken;
     }
 
@@ -272,7 +261,7 @@ public class ImmersiveModeConfirmation {
             }
         };
 
-        public ClingWindowView(Context context, Runnable confirm) {
+        ClingWindowView(Context context, Runnable confirm) {
             super(context);
             mConfirm = confirm;
             setBackground(mColor);
@@ -295,7 +284,7 @@ public class ImmersiveModeConfirmation {
             mClingLayout = (ViewGroup)
                     View.inflate(getContext(), R.layout.immersive_mode_cling, null);
 
-            final Button ok = (Button) mClingLayout.findViewById(R.id.ok);
+            final Button ok = mClingLayout.findViewById(R.id.ok);
             ok.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -359,8 +348,7 @@ public class ImmersiveModeConfirmation {
 
         // we will be hiding the nav bar, so layout as if it's already hidden
         mClingWindow.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
 
         // show the confirmation
         WindowManager.LayoutParams lp = getClingWindowLayoutParams();
@@ -371,9 +359,9 @@ public class ImmersiveModeConfirmation {
         @Override
         public void run() {
             if (DEBUG) Slog.d(TAG, "mConfirm.run()");
-            if (!mConfirmed) {
-                mConfirmed = true;
-                saveSetting();
+            if (!sConfirmed) {
+                sConfirmed = true;
+                saveSetting(mContext);
             }
             handleHide();
         }
@@ -382,6 +370,10 @@ public class ImmersiveModeConfirmation {
     private final class H extends Handler {
         private static final int SHOW = 1;
         private static final int HIDE = 2;
+
+        H(Looper looper) {
+            super(looper);
+        }
 
         @Override
         public void handleMessage(Message msg) {
@@ -396,16 +388,13 @@ public class ImmersiveModeConfirmation {
         }
     }
 
-    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
-        @Override
-        public void onVrStateChanged(boolean enabled) throws RemoteException {
-            mVrModeEnabled = enabled;
-            if (mVrModeEnabled) {
-                mHandler.removeMessages(H.SHOW);
-                mHandler.sendEmptyMessage(H.HIDE);
-            }
+    void onVrStateChangedLw(boolean enabled) {
+        mVrModeEnabled = enabled;
+        if (mVrModeEnabled) {
+            mHandler.removeMessages(H.SHOW);
+            mHandler.sendEmptyMessage(H.HIDE);
         }
-    };
+    }
 
     void onLockTaskModeChangedLw(int lockTaskState) {
         mLockTaskState = lockTaskState;

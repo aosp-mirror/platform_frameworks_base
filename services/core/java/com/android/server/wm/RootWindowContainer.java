@@ -120,12 +120,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     // events.
     int mTopFocusedDisplayId = INVALID_DISPLAY;
 
-    // Only a seperate transaction until we seperate the apply surface changes
+    // Only a separate transaction until we separate the apply surface changes
     // transaction from the global transaction.
     private final SurfaceControl.Transaction mDisplayTransaction = new SurfaceControl.Transaction();
-
-    private final Consumer<DisplayContent> mDisplayContentConfigChangesConsumer =
-            mService.mPolicy::onConfigurationChanged;
 
     private final Consumer<WindowState> mCloseSystemDialogsConsumer = w -> {
         if (w.mHasSurface) {
@@ -362,8 +359,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     public void onConfigurationChanged(Configuration newParentConfig) {
         prepareFreezingTaskBounds();
         super.onConfigurationChanged(newParentConfig);
-
-        forAllDisplays(mDisplayContentConfigChangesConsumer);
     }
 
     private void prepareFreezingTaskBounds() {
@@ -1049,6 +1044,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     void forAllDisplays(Consumer<DisplayContent> callback) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             callback.accept(mChildren.get(i));
+        }
+    }
+
+    void forAllDisplayPolicies(Consumer<DisplayPolicy> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            callback.accept(mChildren.get(i).getDisplayPolicy());
         }
     }
 

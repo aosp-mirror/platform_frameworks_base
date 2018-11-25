@@ -44,36 +44,42 @@ public interface StatusBarManagerInternal {
      */
     void showPictureInPictureMenu();
 
-    void setWindowState(int window, int state);
+    void setWindowState(int displayId, int window, int state);
 
     /**
      * Notifies the status bar that an app transition is pending to delay applying some flags with
      * visual impact until {@link #appTransitionReady} is called.
+     *
+     * @param displayId the ID of the display which has this event.
      */
-    void appTransitionPending();
+    void appTransitionPending(int displayId);
 
     /**
      * Notifies the status bar that a pending app transition has been cancelled.
+     *
+     * @param displayId the ID of the display which has this event.
      */
-    void appTransitionCancelled();
+    void appTransitionCancelled(int displayId);
 
     /**
      * Notifies the status bar that an app transition is now being executed.
      *
+     * @param displayId the ID of the display which has this event.
      * @param statusBarAnimationsStartTime the desired start time for all visual animations in the
      *        status bar caused by this app transition in uptime millis
      * @param statusBarAnimationsDuration the duration for all visual animations in the status
      *        bar caused by this app transition in millis
      */
-    void appTransitionStarting(long statusBarAnimationsStartTime, long statusBarAnimationsDuration);
+    void appTransitionStarting(int displayId, long statusBarAnimationsStartTime,
+            long statusBarAnimationsDuration);
 
     void startAssist(Bundle args);
     void onCameraLaunchGestureDetected(int source);
-    void topAppWindowChanged(boolean menuVisible);
-    void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis, int mask,
-            Rect fullscreenBounds, Rect dockedBounds, String cause);
+    void topAppWindowChanged(int displayId, boolean menuVisible);
+    void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis, int dockedStackVis,
+            int mask, Rect fullscreenBounds, Rect dockedBounds, String cause);
     void toggleSplitScreen();
-    void appTransitionFinished();
+    void appTransitionFinished(int displayId);
 
     void toggleRecentApps();
 

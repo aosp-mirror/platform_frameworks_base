@@ -113,6 +113,7 @@ import android.app.admin.NetworkEvent;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
@@ -379,6 +380,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final Set<String> GLOBAL_SETTINGS_DEPRECATED;
     private static final Set<String> SYSTEM_SETTINGS_WHITELIST;
     private static final Set<Integer> DA_DISALLOWED_POLICIES;
+    private static final String AB_DEVICE_KEY = "ro.build.ab_update";
+
     static {
         SECURE_SETTINGS_WHITELIST = new ArraySet<>();
         SECURE_SETTINGS_WHITELIST.add(Settings.Secure.DEFAULT_INPUT_METHOD);
@@ -13314,5 +13317,31 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         enforceDeviceOwner(who);
 
         return mInjector.settingsGlobalGetString(PRIVATE_DNS_SPECIFIER);
+    }
+
+    @Override
+    public void installUpdateFromFile(ComponentName admin,
+            ParcelFileDescriptor updateFileDescriptor, StartInstallingUpdateCallback callback) {
+        enforceDeviceOwner(admin);
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            UpdateInstaller updateInstaller;
+            if (isDeviceAB()) {
+                updateInstaller = new AbUpdateInstaller(
+                        mContext, updateFileDescriptor, callback, mInjector, mConstants);
+            } else {
+                updateInstaller = new NonAbUpdateInstaller(
+                        mContext, updateFileDescriptor, callback, mInjector, mConstants);
+            }
+            updateInstaller.startInstallUpdate();
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+
+    private boolean isDeviceAB() {
+        return "true".equalsIgnoreCase(android.os.SystemProperties
+                .get(AB_DEVICE_KEY, ""));
     }
 }

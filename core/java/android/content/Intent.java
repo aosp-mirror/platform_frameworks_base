@@ -1767,6 +1767,9 @@ public class Intent implements Parcelable, Cloneable {
      * that should be managed by the launched UI.
      * </p>
      * <p>
+     * <li> {@link #EXTRA_USER} specifies the UserHandle of the user that owns the app.
+     * </p>
+     * <p>
      * Output: Nothing.
      * </p>
      *

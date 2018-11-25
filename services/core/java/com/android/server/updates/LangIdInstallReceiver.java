@@ -21,8 +21,8 @@ public class LangIdInstallReceiver extends ConfigUpdateInstallReceiver {
     public LangIdInstallReceiver() {
         super(
             "/data/misc/textclassifier/",
-            "textclassifier.langid.model",
-            "metadata/langid",
+            "lang_id.model",
+            "metadata/lang_id",
             "version");
     }
 }

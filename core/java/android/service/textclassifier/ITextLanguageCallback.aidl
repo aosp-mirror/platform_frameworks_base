@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package android.media.update;
+package android.service.textclassifier;
 
-import android.annotation.SystemApi;
-import android.os.Bundle;
+import android.view.textclassifier.TextLanguage;
 
 /**
+ * Callback for a TextLanguage request.
  * @hide
  */
-public interface Rating2Provider {
-    String toString_impl();
-    boolean equals_impl(Object obj);
-    int hashCode_impl();
-    Bundle toBundle_impl();
-    boolean isRated_impl();
-    int getRatingStyle_impl();
-    boolean hasHeart_impl();
-    boolean isThumbUp_impl();
-    float getStarRating_impl();
-    float getPercentRating_impl();
+oneway interface ITextLanguageCallback {
+    void onSuccess(in TextLanguage textLanguage);
+    void onFailure();
 }

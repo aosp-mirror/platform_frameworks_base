@@ -521,7 +521,7 @@ public class TaskStack extends WindowContainer<Task> implements
         // Snap the position to a target.
         final int rotation = parentConfig.windowConfiguration.getRotation();
         final int orientation = parentConfig.orientation;
-        mService.mPolicy.getStableInsetsLw(rotation, displayWidth, displayHeight,
+        mDisplayContent.getDisplayPolicy().getStableInsetsLw(rotation, displayWidth, displayHeight,
                 displayCutout, outBounds);
         final DividerSnapAlgorithm algorithm = new DividerSnapAlgorithm(
                 mService.mContext.getResources(), displayWidth, displayHeight,
@@ -867,7 +867,8 @@ public class TaskStack extends WindowContainer<Task> implements
             // and its bounds can be adjusted after that. The bounds of all other stacks are
             // adjusted to occupy whatever screen space the docked stack isn't occupying.
             final DisplayCutout displayCutout = mDisplayContent.getDisplayInfo().displayCutout;
-            mService.mPolicy.getStableInsetsLw(parentConfig.windowConfiguration.getRotation(),
+            mDisplayContent.getDisplayPolicy().getStableInsetsLw(
+                    parentConfig.windowConfiguration.getRotation(),
                     displayRect.width(), displayRect.height(), displayCutout, mTmpRect2);
             final int position = new DividerSnapAlgorithm(mService.mContext.getResources(),
                     displayRect.width(),

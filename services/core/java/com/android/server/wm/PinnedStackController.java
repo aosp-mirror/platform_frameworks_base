@@ -514,8 +514,9 @@ class PinnedStackController {
      */
     private void getInsetBounds(Rect outRect) {
         synchronized (mService.mGlobalLock) {
-            mService.mPolicy.getStableInsetsLw(mDisplayInfo.rotation, mDisplayInfo.logicalWidth,
-                    mDisplayInfo.logicalHeight, mDisplayInfo.displayCutout, mTmpInsets);
+            mDisplayContent.getDisplayPolicy().getStableInsetsLw(mDisplayInfo.rotation,
+                    mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight,
+                    mDisplayInfo.displayCutout, mTmpInsets);
             outRect.set(mTmpInsets.left + mScreenEdgeInsets.x, mTmpInsets.top + mScreenEdgeInsets.y,
                     mDisplayInfo.logicalWidth - mTmpInsets.right - mScreenEdgeInsets.x,
                     mDisplayInfo.logicalHeight - mTmpInsets.bottom - mScreenEdgeInsets.y);

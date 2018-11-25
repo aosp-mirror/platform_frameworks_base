@@ -441,10 +441,10 @@ package android.app {
   }
 
   public class KeyguardManager {
-    method public void setPrivateNotificationsAllowed(boolean);
-    method public boolean getPrivateNotificationsAllowed();
     method public android.content.Intent createConfirmFactoryResetCredentialIntent(java.lang.CharSequence, java.lang.CharSequence, java.lang.CharSequence);
+    method public boolean getPrivateNotificationsAllowed();
     method public void requestDismissKeyguard(android.app.Activity, java.lang.CharSequence, android.app.KeyguardManager.KeyguardDismissCallback);
+    method public void setPrivateNotificationsAllowed(boolean);
   }
 
   public class Notification implements android.os.Parcelable {
@@ -1225,6 +1225,7 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.InstantAppInfo> getInstantApps();
     method public abstract java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(java.lang.String);
     method public abstract int getIntentVerificationStatusAsUser(java.lang.String, int);
+    method public android.content.pm.PackageInfo getPackageInfoAsUser(java.lang.String, int, android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int getPermissionFlags(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract void grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract int installExistingPackage(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -3938,6 +3939,7 @@ package android.os {
   public final class ConfigUpdate {
     field public static final java.lang.String ACTION_UPDATE_CARRIER_ID_DB = "android.os.action.UPDATE_CARRIER_ID_DB";
     field public static final java.lang.String ACTION_UPDATE_CARRIER_PROVISIONING_URLS = "android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS";
+    field public static final java.lang.String ACTION_UPDATE_CONVERSATION_ACTIONS = "android.intent.action.UPDATE_CONVERSATION_ACTIONS";
     field public static final java.lang.String ACTION_UPDATE_CT_LOGS = "android.intent.action.UPDATE_CT_LOGS";
     field public static final java.lang.String ACTION_UPDATE_INTENT_FIREWALL = "android.intent.action.UPDATE_INTENT_FIREWALL";
     field public static final java.lang.String ACTION_UPDATE_LANG_ID = "android.intent.action.UPDATE_LANG_ID";
@@ -5191,8 +5193,10 @@ package android.service.textclassifier {
     method public abstract void onClassifyText(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.TextClassification.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextClassification>);
     method public void onCreateTextClassificationSession(android.view.textclassifier.TextClassificationContext, android.view.textclassifier.TextClassificationSessionId);
     method public void onDestroyTextClassificationSession(android.view.textclassifier.TextClassificationSessionId);
+    method public void onDetectLanguage(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.TextLanguage.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLanguage>);
     method public abstract void onGenerateLinks(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.TextLinks.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLinks>);
     method public void onSelectionEvent(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.SelectionEvent);
+    method public void onSuggestConversationActions(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.ConversationActions.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.ConversationActions>);
     method public abstract void onSuggestSelection(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.TextSelection.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextSelection>);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.textclassifier.TextClassifierService";
   }

@@ -179,6 +179,7 @@ import android.view.IWindowId;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
+import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
@@ -191,7 +192,6 @@ import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
-import android.view.InputWindowHandle;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.utils.InsetUtils;
@@ -1800,7 +1800,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // also been registered in display.
             dc.mTapExcludeProvidingWindows.remove(this);
         }
-        mPolicy.removeWindowLw(this);
+        dc.getDisplayPolicy().removeWindowLw(this);
 
         disposeInputChannel();
 
@@ -2982,7 +2982,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets, outsets,
                 reportDraw, mergedConfiguration, getBackdropFrame(frame), forceRelayout,
-                mPolicy.isNavBarForcedShownLw(this), displayId,
+                getDisplayContent().getDisplayPolicy().isNavBarForcedShownLw(this), displayId,
                 new DisplayCutout.ParcelableWrapper(displayCutout));
         mDragResizingChangeReported = true;
     }

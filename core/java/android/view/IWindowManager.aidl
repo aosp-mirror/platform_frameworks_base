@@ -271,7 +271,7 @@ interface IWindowManager
     /**
      * Called by the status bar to notify Views of changes to System UI visiblity.
      */
-    oneway void statusBarVisibilityChanged(int visibility);
+    oneway void statusBarVisibilityChanged(int displayId, int visibility);
 
     /**
      * Called by System UI to notify of changes to the visibility of Recents.

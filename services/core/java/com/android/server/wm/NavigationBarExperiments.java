@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.policy;
+package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -24,9 +24,6 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
 
 import android.content.Context;
 import android.graphics.Rect;
-
-import com.android.server.policy.WindowManagerPolicy.WindowState;
-import com.android.server.wm.WindowFrames;
 
 /**
  * This class acts as a proxy for Navigation Bar experiments enabled with custom overlays

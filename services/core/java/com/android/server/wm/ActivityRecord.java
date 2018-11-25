@@ -2354,7 +2354,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // bounds would end up too small.
         outBounds.set(0, 0, maxActivityWidth + appBounds.left, maxActivityHeight + appBounds.top);
 
-        if (service.mWindowManager.getNavBarPosition() == NAV_BAR_LEFT) {
+        if (service.mWindowManager.getNavBarPosition(getDisplayId()) == NAV_BAR_LEFT) {
             // Position the activity frame on the opposite side of the nav bar.
             outBounds.left = appBounds.right - maxActivityWidth;
             outBounds.right = appBounds.right;

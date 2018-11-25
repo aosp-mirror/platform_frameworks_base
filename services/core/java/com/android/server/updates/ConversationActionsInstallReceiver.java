@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package android.media.update;
+package com.android.server.updates;
 
-import android.os.Bundle;
+public class ConversationActionsInstallReceiver extends ConfigUpdateInstallReceiver {
 
-/**
- * @hide
- */
-public interface SessionToken2Provider {
-    String getPackageName_impl();
-    String getId_imp();
-    int getType_impl();
-    int getUid_impl();
-    Bundle toBundle_impl();
-
-    int hashCode_impl();
-    boolean equals_impl(Object obj);
-    String toString_impl();
+    public ConversationActionsInstallReceiver() {
+        super(
+                "/data/misc/textclassifier/",
+                "actions_suggestions.model",
+                "metadata/actions_suggestions",
+                "version");
+    }
 }
