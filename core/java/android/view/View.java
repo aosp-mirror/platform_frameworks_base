@@ -3993,7 +3993,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #getParent()
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected ViewParent mParent;
 
     /**
@@ -4199,7 +4199,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "layout")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mLeft;
     /**
      * The distance in pixels from the left edge of this view's parent
@@ -4207,7 +4207,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "layout")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mRight;
     /**
      * The distance in pixels from the top edge of this view's parent
@@ -4215,7 +4215,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "layout")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mTop;
     /**
      * The distance in pixels from the top edge of this view's parent
@@ -4223,7 +4223,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "layout")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mBottom;
 
     /**
