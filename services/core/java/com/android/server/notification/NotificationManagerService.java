@@ -144,7 +144,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
-import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -3852,7 +3851,8 @@ public class NotificationManagerService extends SystemService {
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
-            new ShellCmd().exec(this, in, out, err, args, callback, resultReceiver);
+            new NotificationShellCmd(NotificationManagerService.this)
+                    .exec(this, in, out, err, args, callback, resultReceiver);
         }
     };
 
@@ -7712,110 +7712,6 @@ public class NotificationManagerService extends SystemService {
             StatusBarNotification value = mValue;
             mValue = null;
             return value;
-        }
-    }
-
-    private class ShellCmd extends ShellCommand {
-        public static final String USAGE = "help\n"
-                + "allow_listener COMPONENT [user_id]\n"
-                + "disallow_listener COMPONENT [user_id]\n"
-                + "allow_assistant COMPONENT\n"
-                + "remove_assistant COMPONENT\n"
-                + "allow_dnd PACKAGE\n"
-                + "disallow_dnd PACKAGE\n"
-                + "suspend_package PACKAGE\n"
-                + "unsuspend_package PACKAGE";
-
-        @Override
-        public int onCommand(String cmd) {
-            if (cmd == null) {
-                return handleDefaultCommands(cmd);
-            }
-            final PrintWriter pw = getOutPrintWriter();
-            try {
-                switch (cmd) {
-                    case "allow_dnd": {
-                        getBinderService().setNotificationPolicyAccessGranted(
-                                getNextArgRequired(), true);
-                    }
-                    break;
-
-                    case "disallow_dnd": {
-                        getBinderService().setNotificationPolicyAccessGranted(
-                                getNextArgRequired(), false);
-                    }
-                    break;
-                    case "allow_listener": {
-                        ComponentName cn = ComponentName.unflattenFromString(getNextArgRequired());
-                        if (cn == null) {
-                            pw.println("Invalid listener - must be a ComponentName");
-                            return -1;
-                        }
-                        String userId = getNextArg();
-                        if (userId == null) {
-                            getBinderService().setNotificationListenerAccessGranted(cn, true);
-                        } else {
-                            getBinderService().setNotificationListenerAccessGrantedForUser(
-                                    cn, Integer.parseInt(userId), true);
-                        }
-                    }
-                    break;
-                    case "disallow_listener": {
-                        ComponentName cn = ComponentName.unflattenFromString(getNextArgRequired());
-                        if (cn == null) {
-                            pw.println("Invalid listener - must be a ComponentName");
-                            return -1;
-                        }
-                        String userId = getNextArg();
-                        if (userId == null) {
-                            getBinderService().setNotificationListenerAccessGranted(cn, false);
-                        } else {
-                            getBinderService().setNotificationListenerAccessGrantedForUser(
-                                    cn, Integer.parseInt(userId), false);
-                        }
-                    }
-                    break;
-                    case "allow_assistant": {
-                        ComponentName cn = ComponentName.unflattenFromString(getNextArgRequired());
-                        if (cn == null) {
-                            pw.println("Invalid assistant - must be a ComponentName");
-                            return -1;
-                        }
-                        getBinderService().setNotificationAssistantAccessGranted(cn, true);
-                    }
-                    break;
-                    case "disallow_assistant": {
-                        ComponentName cn = ComponentName.unflattenFromString(getNextArgRequired());
-                        if (cn == null) {
-                            pw.println("Invalid assistant - must be a ComponentName");
-                            return -1;
-                        }
-                        getBinderService().setNotificationAssistantAccessGranted(cn, false);
-                    }
-                    break;
-                    case "suspend_package": {
-                        // only use for testing
-                        simulatePackageSuspendBroadcast(true, getNextArgRequired());
-                    }
-                    break;
-                    case "unsuspend_package": {
-                        // only use for testing
-                        simulatePackageSuspendBroadcast(false, getNextArgRequired());
-                    }
-                    break;
-                    default:
-                        return handleDefaultCommands(cmd);
-                }
-            } catch (Exception e) {
-                pw.println("Error occurred. Check logcat for details. " + e.getMessage());
-                Slog.e(TAG, "Error running shell command", e);
-            }
-            return 0;
-        }
-
-        @Override
-        public void onHelp() {
-            getOutPrintWriter().println(USAGE);
         }
     }
 
