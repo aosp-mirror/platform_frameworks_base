@@ -57,8 +57,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -1224,6 +1227,30 @@ public class WifiManager {
     public List<OsuProvider> getMatchingOsuProviders(List<ScanResult> scanResults) {
         try {
             return mService.getMatchingOsuProviders(scanResults);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the matching Passpoint R2 configurations for given OSU (Online Sign-Up) providers.
+     *
+     * Given a list of OSU providers, this only returns OSU providers that already have Passpoint R2
+     * configurations in the device.
+     * An empty map will be returned when there is no matching Passpoint R2 configuration for the
+     * given OsuProviders.
+     *
+     * @param osuProviders a set of {@link OsuProvider}
+     * @return Map that consists of {@link OsuProvider} and matching {@link PasspointConfiguration}.
+     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public Map<OsuProvider, PasspointConfiguration> getMatchingPasspointConfigsForOsuProviders(
+            @NonNull Set<OsuProvider> osuProviders) {
+        try {
+            return mService.getMatchingPasspointConfigsForOsuProviders(
+                    new ArrayList<>(osuProviders));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
