@@ -120,7 +120,7 @@ bool NativeInputWindowHandle::updateInfo() {
             gInputWindowHandleClassInfo.frameBottom);
     mInfo.surfaceInset = env->GetIntField(obj,
             gInputWindowHandleClassInfo.surfaceInset);
-    mInfo.scaleFactor = env->GetFloatField(obj,
+    mInfo.globalScaleFactor = env->GetFloatField(obj,
             gInputWindowHandleClassInfo.scaleFactor);
 
     jobject regionObj = env->GetObjectField(obj,

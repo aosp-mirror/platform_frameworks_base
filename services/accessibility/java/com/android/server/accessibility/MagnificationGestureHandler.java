@@ -273,33 +273,6 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
     private void dispatchTransformedEvent(MotionEvent event, MotionEvent rawEvent,
             int policyFlags) {
-        if (DEBUG_ALL) Slog.i(LOG_TAG, "dispatchTransformedEvent(event = " + event + ")");
-
-        // If the touchscreen event is within the magnified portion of the screen we have
-        // to change its location to be where the user thinks he is poking the
-        // UI which may have been magnified and panned.
-        if (mMagnificationController.isMagnifying()
-                && event.isFromSource(SOURCE_TOUCHSCREEN)
-                && mMagnificationController.magnificationRegionContains(
-                        event.getX(), event.getY())) {
-            final float scale = mMagnificationController.getScale();
-            final float scaledOffsetX = mMagnificationController.getOffsetX();
-            final float scaledOffsetY = mMagnificationController.getOffsetY();
-            final int pointerCount = event.getPointerCount();
-            PointerCoords[] coords = getTempPointerCoordsWithMinSize(pointerCount);
-            PointerProperties[] properties = getTempPointerPropertiesWithMinSize(
-                    pointerCount);
-            for (int i = 0; i < pointerCount; i++) {
-                event.getPointerCoords(i, coords[i]);
-                coords[i].x = (coords[i].x - scaledOffsetX) / scale;
-                coords[i].y = (coords[i].y - scaledOffsetY) / scale;
-                event.getPointerProperties(i, properties[i]);
-            }
-            event = MotionEvent.obtain(event.getDownTime(),
-                    event.getEventTime(), event.getAction(), pointerCount, properties,
-                    coords, 0, 0, 1.0f, 1.0f, event.getDeviceId(), 0, event.getSource(),
-                    event.getFlags());
-        }
         if (DEBUG_EVENT_STREAM) {
             storeEventInto(mDebugOutputEventHistory, event);
             try {
