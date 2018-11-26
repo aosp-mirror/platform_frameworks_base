@@ -18,7 +18,7 @@ cc_library {
     tidy: true,
     tidy_flags: [
         "-system-headers",
-        "-warnings-as-errors=*",
+// b/120024673       "-warnings-as-errors=*",
     ],
     srcs: [
         "libidmap2/BinaryStreamVisitor.cpp",
@@ -64,7 +64,7 @@ cc_test {
     tidy: true,
     tidy_flags: [
         "-system-headers",
-        "-warnings-as-errors=*",
+// b/120024673        "-warnings-as-errors=*",
     ],
     srcs: [
         "tests/BinaryStreamVisitorTests.cpp",
@@ -118,7 +118,7 @@ cc_binary {
     tidy: true,
     tidy_flags: [
         "-system-headers",
-        "-warnings-as-errors=*",
+// b/120024673        "-warnings-as-errors=*",
     ],
     srcs: [
         "idmap2/Create.cpp",
@@ -165,7 +165,7 @@ cc_binary {
     ],
     tidy_flags: [
         "-system-headers",
-        "-warnings-as-errors=*",
+// b/120024673        "-warnings-as-errors=*",
     ],
     srcs: [
         ":idmap2_aidl",
