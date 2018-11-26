@@ -48,7 +48,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import libcore.icu.ICU;
 import libcore.timezone.TzDataSetVersion;
-import libcore.util.TimeZoneFinder;
+import libcore.timezone.TimeZoneFinder;
 import libcore.util.ZoneInfoDB;
 
 import static android.app.timezone.RulesState.DISTRO_STATUS_INSTALLED;
