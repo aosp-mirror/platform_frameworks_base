@@ -37,6 +37,7 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestableResources;
 
@@ -127,6 +128,8 @@ public class PowerUITest extends SysuiTestCase {
         resources.addOverride(R.integer.config_warningTemperature, 55);
 
         mPowerUI.start();
+        // Guarantees mHandler has processed all messages.
+        TestableLooper.get(this).processAllMessages();
         verify(mMockWarnings).showHighTemperatureWarning();
     }
 
@@ -139,6 +142,8 @@ public class PowerUITest extends SysuiTestCase {
         resources.addOverride(R.integer.config_warningTemperature, 55);
 
         mPowerUI.start();
+        // Guarantees mHandler has processed all messages.
+        TestableLooper.get(this).processAllMessages();
         verify(mMockWarnings).showHighTemperatureWarning();
     }
 
