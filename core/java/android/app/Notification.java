@@ -1338,6 +1338,11 @@ public class Notification implements Parcelable
     private int mBadgeIcon = BADGE_ICON_NONE;
 
     /**
+     * Determines whether the platform can generate contextual actions for a notification.
+     */
+    private boolean mAllowSystemGeneratedContextualActions = true;
+
+    /**
      * Structure to encapsulate a named action that can be shown as part of this notification.
      * It must include an icon, a label, and a {@link PendingIntent} to be fired when the action is
      * selected by the user.
@@ -2238,6 +2243,8 @@ public class Notification implements Parcelable
         if (parcel.readInt() != 0) {
             mAppOverlayIntent = PendingIntent.CREATOR.createFromParcel(parcel);
         }
+
+        mAllowSystemGeneratedContextualActions = parcel.readBoolean();
     }
 
     @Override
@@ -2353,6 +2360,7 @@ public class Notification implements Parcelable
         that.mSettingsText = this.mSettingsText;
         that.mGroupAlertBehavior = this.mGroupAlertBehavior;
         that.mAppOverlayIntent = this.mAppOverlayIntent;
+        that.mAllowSystemGeneratedContextualActions = this.mAllowSystemGeneratedContextualActions;
 
         if (!heavy) {
             that.lightenPayload(); // will clean out extras
@@ -2680,6 +2688,8 @@ public class Notification implements Parcelable
         } else {
             parcel.writeInt(0);
         }
+
+        parcel.writeBoolean(mAllowSystemGeneratedContextualActions);
 
         // mUsesStandardHeader is not written because it should be recomputed in listeners
     }
@@ -3099,6 +3109,10 @@ public class Notification implements Parcelable
      */
     public PendingIntent getAppOverlayIntent() {
         return mAppOverlayIntent;
+    }
+
+    public boolean getAllowSystemGeneratedContextualActions() {
+        return mAllowSystemGeneratedContextualActions;
     }
 
     /**
@@ -5654,6 +5668,15 @@ public class Notification implements Parcelable
             }
 
             return new Builder(builderContext, n);
+        }
+
+        /**
+         * Determines whether the platform can generate contextual actions for a notification.
+         * By default this is true.
+         */
+        public Builder setAllowSystemGeneratedContextualActions(boolean allowed) {
+            mN.mAllowSystemGeneratedContextualActions = allowed;
+            return this;
         }
 
         /**

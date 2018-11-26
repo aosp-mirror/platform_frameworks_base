@@ -106,7 +106,8 @@ public class NotificationContentViewTest extends SysuiTestCase {
         mView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
 
-        // Smart replies
+        // Smart replies and actions
+        when(mNotification.getAllowSystemGeneratedContextualActions()).thenReturn(true);
         when(mStatusBarNotification.getNotification()).thenReturn(mNotification);
         mEntry = new NotificationData.Entry(mStatusBarNotification);
         when(mSmartReplyConstants.isEnabled()).thenReturn(true);
@@ -297,6 +298,23 @@ public class NotificationContentViewTest extends SysuiTestCase {
 
         assertThat(repliesAndActions.smartReplies, equalTo(appGenSmartReplies));
         assertThat(repliesAndActions.smartActions, equalTo(appGenSmartActions));
+    }
+
+    @Test
+    public void chooseSmartRepliesAndActions_disallowSysGenSmartActions() {
+        // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
+        // actions.
+        setupAppGeneratedReplies(null);
+
+        when(mNotification.getAllowSystemGeneratedContextualActions()).thenReturn(false);
+
+        mEntry.systemGeneratedSmartActions =
+                createActions(new String[] {"Sys Smart Action 1", "Sys Smart Action 2"});
+        NotificationContentView.SmartRepliesAndActions repliesAndActions =
+                NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+
+        assertThat(repliesAndActions.smartReplies, equalTo(null));
+        assertThat(repliesAndActions.smartActions, is(empty()));
     }
 
     private Notification.Action.Builder createActionBuilder(String actionTitle) {
