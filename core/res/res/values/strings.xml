@@ -1397,6 +1397,16 @@
       re-enables the keylock when the call is finished.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_getAndRequestScreenLockComplexity">get and request screen lock complexity</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_getAndRequestScreenLockComplexity">Allows the app to learn the screen
+        lock complexity level (high, medium, low or none), which indicates the possible range of
+        length and type of the screen lock. The app can also suggest to users that they update the
+        screen lock to a certain level but users can freely ignore and navigate away. Note that the
+        screen lock is not stored in plaintext so the app does not know the exact password.
+    </string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
     <string name="permlab_useBiometric">use biometric hardware</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
     <string name="permdesc_useBiometric">Allows the app to use biometric hardware for authentication</string>
