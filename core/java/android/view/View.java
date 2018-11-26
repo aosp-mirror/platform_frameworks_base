@@ -8152,6 +8152,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * the user, and the activity rendering the view is enabled for Content Capture) is laid out and
      * is visible.
      *
+     * <p>The populated structure is then passed to the service through
+     * {@link IntelligenceManager#notifyViewAppeared(ViewStructure)}.
+     *
      * <p><b>Note: </b>the following methods of the {@code structure} will be ignored:
      * <ul>
      *   <li>{@link ViewStructure#setChildCount(int)}
@@ -8165,16 +8168,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *   <li>{@link ViewStructure#setHtmlInfo(android.view.ViewStructure.HtmlInfo)}
      *   <li>{@link ViewStructure#setDataIsSensitive(boolean)}
      * </ul>
-     *
-     * @return whether the IntelligenceService should be notified that the view was added (through
-     * the {@link IntelligenceManager#notifyViewAppeared(ViewStructure)} method) to the view
-     * hierarchy. Most views should return {@code true} here, but views that contains virtual
-     * hierarchy might opt to return {@code false} and notify the manager independently, as the
-     * virtual views are rendered.
      */
-    public boolean onProvideContentCaptureStructure(@NonNull ViewStructure structure, int flags) {
+    public void onProvideContentCaptureStructure(@NonNull ViewStructure structure, int flags) {
         onProvideStructure(structure, VIEW_STRUCTURE_FOR_CONTENT_CAPTURE, flags);
-        return true;
     }
 
     /** @hide */
@@ -8986,10 +8982,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (type == CONTENT_CAPTURE_NOTIFICATION_TYPE_APPEARED) {
             final ViewStructure structure = im.newViewStructure(this);
-            boolean notifyMgr = onProvideContentCaptureStructure(structure, /* flags= */ 0);
-            if (notifyMgr) {
-                im.notifyViewAppeared(structure);
-            }
+            onProvideContentCaptureStructure(structure, /* flags= */ 0);
+            im.notifyViewAppeared(structure);
             mPrivateFlags4 |= PFLAG4_NOTIFIED_CONTENT_CAPTURE_ADDED;
         } else {
             if ((mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_ADDED) == 0) {

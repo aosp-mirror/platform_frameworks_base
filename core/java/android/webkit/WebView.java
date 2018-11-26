@@ -2695,8 +2695,8 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
-    public boolean onProvideContentCaptureStructure(ViewStructure structure, int flags) {
-        return mProvider.getViewDelegate().onProvideContentCaptureStructure(structure, flags);
+    public void onProvideContentCaptureStructure(ViewStructure structure, int flags) {
+        mProvider.getViewDelegate().onProvideContentCaptureStructure(structure, flags);
     }
 
     @Override
