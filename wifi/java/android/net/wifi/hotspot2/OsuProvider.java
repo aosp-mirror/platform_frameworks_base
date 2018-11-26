@@ -49,7 +49,7 @@ public final class OsuProvider implements Parcelable {
     /**
      * SSID of the network to connect for service sign-up.
      */
-    private final WifiSsid mOsuSsid;
+    private WifiSsid mOsuSsid;
 
     /**
      * Friendly name of the OSU provider.
@@ -128,6 +128,10 @@ public final class OsuProvider implements Parcelable {
 
     public WifiSsid getOsuSsid() {
         return mOsuSsid;
+    }
+
+    public void setOsuSsid(WifiSsid osuSsid) {
+        mOsuSsid = osuSsid;
     }
 
     public String getFriendlyName() {
