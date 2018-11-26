@@ -17,19 +17,13 @@
 package com.android.server.connectivity.tethering;
 
 import android.content.Context;
-import android.net.INetd;
 import android.net.NetworkRequest;
-import android.net.dhcp.DhcpServer;
-import android.net.dhcp.DhcpServingParams;
 import android.net.ip.IpServer;
-import android.net.ip.RouterAdvertisementDaemon;
-import android.net.util.InterfaceParams;
-import android.net.util.NetdService;
-import android.os.Handler;
 import android.net.util.SharedLog;
-import android.os.Looper;
+import android.os.Handler;
 
 import com.android.internal.util.StateMachine;
+import com.android.server.connectivity.MockableSystemProperties;
 
 import java.util.ArrayList;
 
@@ -64,5 +58,10 @@ public class TetheringDependencies {
 
     public NetworkRequest getDefaultNetworkRequest() {
         return null;
+    }
+
+    public EntitlementManager getEntitlementManager(Context ctx, SharedLog log,
+            MockableSystemProperties systemProperties) {
+        return new EntitlementManager(ctx, log, systemProperties);
     }
 }
