@@ -49,4 +49,5 @@ oneway interface INotificationListener
     void onNotificationsSeen(in List<String> keys);
     void onNotificationExpansionChanged(String key, boolean userAction, boolean expanded);
     void onNotificationDirectReply(String key);
+    void onSuggestedReplySent(String key, in CharSequence reply, int source);
 }

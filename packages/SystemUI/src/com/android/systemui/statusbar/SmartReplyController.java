@@ -41,12 +41,16 @@ public class SmartReplyController {
         mCallback = callback;
     }
 
-    public void smartReplySent(NotificationData.Entry entry, int replyIndex, CharSequence reply) {
+    /**
+     * Notifies StatusBarService a smart reply is sent.
+     */
+    public void smartReplySent(NotificationData.Entry entry, int replyIndex, CharSequence reply,
+            boolean generatedByAssistant) {
         mCallback.onSmartReplySent(entry, reply);
         mSendingKeys.add(entry.key);
         try {
-            mBarService.onNotificationSmartReplySent(entry.notification.getKey(),
-                    replyIndex);
+            mBarService.onNotificationSmartReplySent(
+                    entry.notification.getKey(), replyIndex, reply, generatedByAssistant);
         } catch (RemoteException e) {
             // Nothing to do, system going down
         }

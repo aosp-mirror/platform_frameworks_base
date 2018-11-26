@@ -3696,4 +3696,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 new TestableToastCallback(), 2000, 0);
         assertEquals(1, mService.mToastQueue.size());
     }
+
+    @Test
+    public void testOnNotificationSmartReplySent() {
+        final int replyIndex = 2;
+        final String reply = "Hello";
+        final boolean generatedByAssistant = true;
+
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationSmartReplySent(
+                r.getKey(), replyIndex, reply, generatedByAssistant);
+        verify(mAssistants).notifyAssistantSuggestedReplySent(
+                eq(r.sbn), eq(reply), eq(generatedByAssistant));
+    }
 }

@@ -181,7 +181,16 @@ public class SmartReplyViewTest extends SysuiTestCase {
     public void testSendSmartReply_controllerCalled() {
         setSmartReplies(TEST_CHOICES);
         mView.getChildAt(2).performClick();
-        verify(mLogger).smartReplySent(mEntry, 2, TEST_CHOICES[2]);
+        verify(mLogger).smartReplySent(mEntry, 2, TEST_CHOICES[2],
+                false /* generatedByAsssitant */);
+    }
+
+    @Test
+    public void testSendSmartReply_controllerCalled_generatedByAssistant() {
+        setSmartReplies(TEST_CHOICES, true);
+        mView.getChildAt(2).performClick();
+        verify(mLogger).smartReplySent(mEntry, 2, TEST_CHOICES[2],
+                true /* generatedByAsssitant */);
     }
 
     @Test
@@ -392,11 +401,17 @@ public class SmartReplyViewTest extends SysuiTestCase {
     }
 
     private void setSmartReplies(CharSequence[] choices) {
+        setSmartReplies(choices, false);
+    }
+
+    private void setSmartReplies(CharSequence[] choices, boolean fromAssistant) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(TEST_ACTION), 0);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).setChoices(choices).build();
+        SmartReplyView.SmartReplies smartReplies =
+                new SmartReplyView.SmartReplies(choices, input, pendingIntent, fromAssistant);
         mView.resetSmartSuggestions(mContainer);
-        mView.addRepliesFromRemoteInput(input, pendingIntent, mLogger, mEntry, choices);
+        mView.addRepliesFromRemoteInput(smartReplies, mLogger, mEntry);
     }
 
     private Notification.Action createAction(String actionTitle) {
@@ -415,12 +430,12 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     private void setSmartActions(String[] actionTitles) {
         mView.resetSmartSuggestions(mContainer);
-        mView.addSmartActions(createActions(actionTitles));
+        mView.addSmartActions(new SmartReplyView.SmartActions(createActions(actionTitles), false));
     }
 
     private void setSmartRepliesAndActions(CharSequence[] choices, String[] actionTitles) {
         setSmartReplies(choices);
-        mView.addSmartActions(createActions(actionTitles));
+        mView.addSmartActions(new SmartReplyView.SmartActions(createActions(actionTitles), false));
     }
 
     private ViewGroup buildExpectedView(CharSequence[] choices, int lineCount) {
@@ -453,9 +468,11 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
         // Add smart replies
         Button previous = null;
+        SmartReplyView.SmartReplies smartReplies =
+                new SmartReplyView.SmartReplies(choices, null, null, false);
         for (int i = 0; i < choices.length; ++i) {
-            Button current = mView.inflateReplyButton(mContext, mView, i, choices[i],
-                    null, null, null, null);
+            Button current = mView.inflateReplyButton(mContext, mView, i, smartReplies,
+                    null, null);
             current.setPadding(paddingHorizontal, current.getPaddingTop(), paddingHorizontal,
                     current.getPaddingBottom());
             if (previous != null) {

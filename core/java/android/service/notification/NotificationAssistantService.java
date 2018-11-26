@@ -16,6 +16,9 @@
 
 package android.service.notification;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -33,6 +36,7 @@ import android.util.Log;
 
 import com.android.internal.os.SomeArgs;
 
+import java.lang.annotation.Retention;
 import java.util.List;
 
 /**
@@ -62,6 +66,13 @@ import java.util.List;
 @TestApi
 public abstract class NotificationAssistantService extends NotificationListenerService {
     private static final String TAG = "NotificationAssistants";
+
+    /** @hide */
+    @Retention(SOURCE)
+    @IntDef({SOURCE_FROM_APP, SOURCE_FROM_ASSISTANT})
+    public @interface Source {}
+    public static final int SOURCE_FROM_APP = 0;
+    public static final int SOURCE_FROM_ASSISTANT = 1;
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -173,6 +184,14 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param key the notification key
      */
     public void onNotificationDirectReply(String key) {}
+
+    /**
+     * Implement this to know when a suggested reply is sent.
+     * @param key the notification key
+     * @param reply the reply that is just sent
+     * @param source the source of the reply, e.g. SOURCE_FROM_APP
+     */
+    public void onSuggestedReplySent(String key, CharSequence reply, @Source int source) {}
 
     /**
      * Updates a notification.  N.B. this won’t cause
@@ -289,6 +308,15 @@ public abstract class NotificationAssistantService extends NotificationListenerS
             mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_DIRECT_REPLY_SENT, args)
                     .sendToTarget();
         }
+
+        @Override
+        public void onSuggestedReplySent(String key, CharSequence reply, int source) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = key;
+            args.arg2 = reply;
+            args.argi2 = source;
+            mHandler.obtainMessage(MyHandler.MSG_ON_SUGGESTED_REPLY_SENT, args).sendToTarget();
+        }
     }
 
     private final class MyHandler extends Handler {
@@ -297,6 +325,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         public static final int MSG_ON_NOTIFICATIONS_SEEN = 3;
         public static final int MSG_ON_NOTIFICATION_EXPANSION_CHANGED = 4;
         public static final int MSG_ON_NOTIFICATION_DIRECT_REPLY_SENT = 5;
+        public static final int MSG_ON_SUGGESTED_REPLY_SENT = 6;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -355,6 +384,15 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                     String key = (String) args.arg1;
                     args.recycle();
                     onNotificationDirectReply(key);
+                    break;
+                }
+                case MSG_ON_SUGGESTED_REPLY_SENT: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String key = (String) args.arg1;
+                    CharSequence reply = (CharSequence) args.arg2;
+                    int source = args.argi2;
+                    args.recycle();
+                    onSuggestedReplySent(key, reply, source);
                     break;
                 }
             }

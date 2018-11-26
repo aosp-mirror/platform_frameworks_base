@@ -1177,12 +1177,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void onNotificationSmartReplySent(String key, int replyIndex)
+    public void onNotificationSmartReplySent(
+            String key, int replyIndex, CharSequence reply, boolean generatedByAssistant)
             throws RemoteException {
         enforceStatusBarService();
         long identity = Binder.clearCallingIdentity();
         try {
-            mNotificationDelegate.onNotificationSmartReplySent(key, replyIndex);
+            mNotificationDelegate.onNotificationSmartReplySent(key, replyIndex, reply,
+                    generatedByAssistant);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

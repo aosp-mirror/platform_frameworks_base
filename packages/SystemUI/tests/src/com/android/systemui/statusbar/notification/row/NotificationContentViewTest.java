@@ -16,11 +16,10 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Mockito.doNothing;
@@ -170,8 +169,10 @@ public class NotificationContentViewTest extends SysuiTestCase {
     private void setupAppGeneratedReplies(
             CharSequence[] smartReplyTitles,
             Notification.Action freeFormRemoteInputAction) {
+        PendingIntent pendingIntent =
+                PendingIntent.getBroadcast(mContext, 0, new Intent(TEST_ACTION), 0);
         Notification.Action action =
-                new Notification.Action.Builder(null, "Test Action", null).build();
+                new Notification.Action.Builder(null, "Test Action", pendingIntent).build();
         when(mRemoteInput.getChoices()).thenReturn(smartReplyTitles);
         Pair<RemoteInput, Notification.Action> remoteInputActionPair =
                 Pair.create(mRemoteInput, action);
@@ -191,7 +192,7 @@ public class NotificationContentViewTest extends SysuiTestCase {
         NotificationContentView.SmartRepliesAndActions repliesAndActions =
                 NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
-        assertFalse(repliesAndActions.smartRepliesExist());
+        assertThat(repliesAndActions.smartReplies).isNull();
     }
 
     @Test
@@ -203,7 +204,9 @@ public class NotificationContentViewTest extends SysuiTestCase {
         NotificationContentView.SmartRepliesAndActions repliesAndActions =
                 NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
-        assertThat(repliesAndActions.smartReplies, equalTo(smartReplies));
+        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(smartReplies);
+        assertThat(repliesAndActions.smartReplies.fromAssistant).isFalse();
+        assertThat(repliesAndActions.smartActions).isNull();
     }
 
     @Test
@@ -219,8 +222,10 @@ public class NotificationContentViewTest extends SysuiTestCase {
         NotificationContentView.SmartRepliesAndActions repliesAndActions =
                 NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
-        assertThat(repliesAndActions.smartReplies, equalTo(smartReplies));
-        assertThat(repliesAndActions.smartActions, equalTo(smartActions));
+        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(smartReplies);
+        assertThat(repliesAndActions.smartReplies.fromAssistant).isFalse();
+        assertThat(repliesAndActions.smartActions.actions).isEqualTo(smartActions);
+        assertThat(repliesAndActions.smartActions.fromAssistant).isFalse();
     }
 
     @Test
@@ -237,8 +242,9 @@ public class NotificationContentViewTest extends SysuiTestCase {
         NotificationContentView.SmartRepliesAndActions repliesAndActions =
                 NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
-        assertThat(repliesAndActions.smartReplies, equalTo(mEntry.smartReplies));
-        assertThat(repliesAndActions.smartActions, is(empty()));
+        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(mEntry.smartReplies);
+        assertThat(repliesAndActions.smartReplies.fromAssistant).isTrue();
+        assertThat(repliesAndActions.smartActions).isNull();
     }
 
     @Test
@@ -255,8 +261,8 @@ public class NotificationContentViewTest extends SysuiTestCase {
         NotificationContentView.SmartRepliesAndActions repliesAndActions =
                 NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
-        assertThat(repliesAndActions.smartReplies, equalTo(null));
-        assertThat(repliesAndActions.smartActions, is(empty()));
+        assertThat(repliesAndActions.smartReplies).isNull();
+        assertThat(repliesAndActions.smartActions).isNull();
     }
 
     @Test
@@ -270,8 +276,10 @@ public class NotificationContentViewTest extends SysuiTestCase {
         NotificationContentView.SmartRepliesAndActions repliesAndActions =
                 NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
-        assertThat(repliesAndActions.smartReplies, equalTo(null));
-        assertThat(repliesAndActions.smartActions, equalTo(mEntry.systemGeneratedSmartActions));
+        assertThat(repliesAndActions.smartReplies).isNull();
+        assertThat(repliesAndActions.smartActions.actions)
+                .isEqualTo(mEntry.systemGeneratedSmartActions);
+        assertThat(repliesAndActions.smartActions.fromAssistant).isTrue();
     }
 
     @Test
@@ -296,8 +304,10 @@ public class NotificationContentViewTest extends SysuiTestCase {
         NotificationContentView.SmartRepliesAndActions repliesAndActions =
                 NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
-        assertThat(repliesAndActions.smartReplies, equalTo(appGenSmartReplies));
-        assertThat(repliesAndActions.smartActions, equalTo(appGenSmartActions));
+        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(appGenSmartReplies);
+        assertThat(repliesAndActions.smartReplies.fromAssistant).isFalse();
+        assertThat(repliesAndActions.smartActions.actions).isEqualTo(appGenSmartActions);
+        assertThat(repliesAndActions.smartActions.fromAssistant).isFalse();
     }
 
     @Test
@@ -313,8 +323,8 @@ public class NotificationContentViewTest extends SysuiTestCase {
         NotificationContentView.SmartRepliesAndActions repliesAndActions =
                 NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
 
-        assertThat(repliesAndActions.smartReplies, equalTo(null));
-        assertThat(repliesAndActions.smartActions, is(empty()));
+        assertThat(repliesAndActions.smartActions).isNull();
+        assertThat(repliesAndActions.smartReplies).isNull();
     }
 
     private Notification.Action.Builder createActionBuilder(String actionTitle) {
