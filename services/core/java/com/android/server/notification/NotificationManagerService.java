@@ -198,6 +198,7 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -270,6 +271,7 @@ public class NotificationManagerService extends SystemService {
     static final int MESSAGE_LISTENER_HINTS_CHANGED = 5;
     static final int MESSAGE_LISTENER_NOTIFICATION_FILTER_CHANGED = 6;
     static final int MESSAGE_FINISH_TOKEN_TIMEOUT = 7;
+    static final int MESSAGE_ON_PACKAGE_CHANGED = 8;
 
     // ranking thread messages
     private static final int MESSAGE_RECONSIDER_RANKING = 1000;
@@ -1131,12 +1133,7 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
 
-                mListeners.onPackagesChanged(removingPackage, pkgList, uidList);
-                mAssistants.onPackagesChanged(removingPackage, pkgList, uidList);
-                mConditionProviders.onPackagesChanged(removingPackage, pkgList, uidList);
-                mPreferencesHelper.onPackagesChanged(
-                        removingPackage, changeUserId, pkgList, uidList);
-                handleSavePolicyFile();
+                mHandler.scheduleOnPackageChanged(removingPackage, changeUserId, pkgList, uidList);
             }
         }
     };
@@ -5705,6 +5702,16 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    private void handleOnPackageChanged(boolean removingPackage, int changeUserId,
+            String[] pkgList, int[] uidList) {
+        mListeners.onPackagesChanged(removingPackage, pkgList, uidList);
+        mAssistants.onPackagesChanged(removingPackage, pkgList, uidList);
+        mConditionProviders.onPackagesChanged(removingPackage, pkgList, uidList);
+        mPreferencesHelper.onPackagesChanged(
+                removingPackage, changeUserId, pkgList, uidList);
+        handleSavePolicyFile();
+    }
+
     protected class WorkerHandler extends Handler
     {
         public WorkerHandler(Looper looper) {
@@ -5717,10 +5724,10 @@ public class NotificationManagerService extends SystemService {
             switch (msg.what)
             {
                 case MESSAGE_DURATION_REACHED:
-                    handleDurationReached((ToastRecord)msg.obj);
+                    handleDurationReached((ToastRecord) msg.obj);
                     break;
                 case MESSAGE_FINISH_TOKEN_TIMEOUT:
-                    handleKillTokenTimeout((ToastRecord)msg.obj);
+                    handleKillTokenTimeout((ToastRecord) msg.obj);
                     break;
                 case MESSAGE_SEND_RANKING_UPDATE:
                     handleSendRankingUpdate();
@@ -5730,6 +5737,12 @@ public class NotificationManagerService extends SystemService {
                     break;
                 case MESSAGE_LISTENER_NOTIFICATION_FILTER_CHANGED:
                     handleListenerInterruptionFilterChanged(msg.arg1);
+                    break;
+                case MESSAGE_ON_PACKAGE_CHANGED:
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    handleOnPackageChanged((boolean) args.arg1, args.argi1, (String[]) args.arg2,
+                            (int[]) args.arg3);
+                    args.recycle();
                     break;
             }
         }
@@ -5745,6 +5758,16 @@ public class NotificationManagerService extends SystemService {
             if (!hasCallbacks(cancelRunnable)) {
                 sendMessage(Message.obtain(this, cancelRunnable));
             }
+        }
+
+        protected void scheduleOnPackageChanged(boolean removingPackage, int changeUserId,
+                String[] pkgList, int[] uidList) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = removingPackage;
+            args.argi1 = changeUserId;
+            args.arg2 = pkgList;
+            args.arg3 = uidList;
+            sendMessage(Message.obtain(this, MESSAGE_ON_PACKAGE_CHANGED, args));
         }
     }
 
