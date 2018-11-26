@@ -145,6 +145,13 @@ def lint(path):
             if "translatable" in child.attrib and child.attrib["translatable"].lower() == "false":
                 continue
 
+            misspelled_attributes = [
+              ("translateable", "translatable"),
+            ]
+            for misspelling, expected in misspelled_attributes:
+                if misspelling in child.attrib:
+                    error(child, "Misspelled <string> attribute.", misspelling, expected)
+
             limit = re.search("CHAR[ _-]LIMIT=(\d+|NONE|none)", comment.text)
             if limit is None:
                 info(child, "Missing CHAR LIMIT to aid translation",
