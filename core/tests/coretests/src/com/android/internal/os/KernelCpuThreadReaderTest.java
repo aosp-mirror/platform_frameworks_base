@@ -39,7 +39,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -56,8 +58,8 @@ public class KernelCpuThreadReaderTest {
             1000, 2000, 3000, 4000,
     };
     private static final int[][] THREAD_CPU_TIMES = {
-            {1, 0, 0, 1},
-            {0, 0, 0, 0},
+            {100, 0, 0, 100},
+            {0, 0, 9999999, 0},
             {1000, 1000, 1000, 1000},
             {0, 1, 2, 3},
     };
@@ -108,6 +110,42 @@ public class KernelCpuThreadReaderTest {
     }
 
     @Test
+    public void testReader_filtersLowTotalCpuUsage() throws IOException {
+        KernelCpuThreadReader.Injector processUtils =
+                new KernelCpuThreadReader.Injector() {
+                    @Override
+                    public int myPid() {
+                        return PROCESS_ID;
+                    }
+
+                    @Override
+                    public int myUid() {
+                        return UID;
+                    }
+
+                    @Override
+                    public int getUidForPid(int pid) {
+                        return 0;
+                    }
+                };
+        setupDirectory(mProcDirectory.toPath().resolve("self"), new int[]{1, 2}, PROCESS_NAME,
+                THREAD_NAMES, new int[]{1000, 2000}, new int[][]{{0, 1}, {100, 0}});
+
+        final KernelCpuThreadReader kernelCpuThreadReader = new KernelCpuThreadReader(
+                mProcDirectory.toPath(),
+                mProcDirectory.toPath().resolve("self/task/1/time_in_state"),
+                processUtils);
+        final KernelCpuThreadReader.ProcessCpuUsage processCpuUsage =
+                kernelCpuThreadReader.getCurrentProcessCpuUsage();
+
+        List<Integer> threadIds = processCpuUsage.threadCpuUsages.stream()
+                .map(t -> t.threadId)
+                .collect(Collectors.toList());
+        assertEquals(1, threadIds.size());
+        assertEquals(2, (long) threadIds.get(0));
+    }
+
+    @Test
     public void testReader_byUids() throws IOException {
         int[] uids = new int[]{0, 2, 3, 4, 5, 6000};
         Predicate<Integer> uidPredicate = uid -> uid == 0 || uid >= 4;
@@ -134,7 +172,7 @@ public class KernelCpuThreadReaderTest {
             setupDirectory(mProcDirectory.toPath().resolve(String.valueOf(uid)),
                     new int[]{uid * 10},
                     "process" + uid, new String[]{"thread" + uid}, new int[]{1000},
-                    new int[][]{{uid}});
+                    new int[][]{{uid + 100}});
         }
         final KernelCpuThreadReader kernelCpuThreadReader = new KernelCpuThreadReader(
                 mProcDirectory.toPath(),
@@ -151,7 +189,7 @@ public class KernelCpuThreadReaderTest {
             int uid = expectedUids[i];
             checkResults(processCpuUsage, kernelCpuThreadReader.getCpuFrequenciesKhz(),
                     uid, uid, new int[]{uid * 10}, "process" + uid, new String[]{"thread" + uid},
-                    new int[]{1000}, new int[][]{{uid}});
+                    new int[]{1000}, new int[][]{{uid + 100}});
         }
     }
 
