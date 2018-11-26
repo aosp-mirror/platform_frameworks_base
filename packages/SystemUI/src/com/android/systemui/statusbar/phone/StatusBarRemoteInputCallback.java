@@ -206,7 +206,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks {
     }
 
     @Override
-    public boolean handleRemoteViewClick(PendingIntent pendingIntent,
+    public boolean handleRemoteViewClick(View view, PendingIntent pendingIntent,
             NotificationRemoteInputManager.ClickHandler defaultHandler) {
         final boolean isActivity = pendingIntent.isActivity();
         if (isActivity) {
