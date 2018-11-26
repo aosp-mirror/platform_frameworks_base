@@ -1911,7 +1911,7 @@ public class AudioManager {
      *   system failed to generate a new session, a condition in which audio playback or recording
      *   will subsequently fail as well.
      */
-    public static int generateAudioSessionId() {
+    public int generateAudioSessionId() {
         int session = AudioSystem.newAudioSessionId();
         if (session > 0) {
             return session;
