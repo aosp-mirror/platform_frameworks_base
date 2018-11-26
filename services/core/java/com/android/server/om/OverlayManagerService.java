@@ -22,14 +22,11 @@ import static android.content.Intent.ACTION_PACKAGE_CHANGED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
-import static android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES;
-import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.SIGNATURE_MATCH;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityThread;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -37,7 +34,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManagerInternal;
@@ -59,11 +55,9 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 
-import com.android.internal.util.ConcurrentUtils;
 import com.android.server.FgThread;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
-import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.UserManagerService;
@@ -84,8 +78,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -228,8 +220,6 @@ public final class OverlayManagerService extends SystemService {
 
     private final AtomicBoolean mPersistSettingsScheduled = new AtomicBoolean(false);
 
-    private Future<?> mInitCompleteSignal;
-
     public OverlayManagerService(@NonNull final Context context,
             @NonNull final Installer installer) {
         super(context);
@@ -241,60 +231,33 @@ public final class OverlayManagerService extends SystemService {
         mSettings = new OverlayManagerSettings();
         mImpl = new OverlayManagerServiceImpl(mPackageManager, im, mSettings,
                 getDefaultOverlayPackages(), new OverlayChangeListener());
-        mInitCompleteSignal = SystemServerInitThreadPool.get().submit(() -> {
-            final IntentFilter packageFilter = new IntentFilter();
-            packageFilter.addAction(ACTION_PACKAGE_ADDED);
-            packageFilter.addAction(ACTION_PACKAGE_CHANGED);
-            packageFilter.addAction(ACTION_PACKAGE_REMOVED);
-            packageFilter.addDataScheme("package");
-            getContext().registerReceiverAsUser(new PackageReceiver(), UserHandle.ALL,
-                    packageFilter, null, null);
 
-            final IntentFilter userFilter = new IntentFilter();
-            userFilter.addAction(ACTION_USER_ADDED);
-            userFilter.addAction(ACTION_USER_REMOVED);
-            getContext().registerReceiverAsUser(new UserReceiver(), UserHandle.ALL,
-                    userFilter, null, null);
+        final IntentFilter packageFilter = new IntentFilter();
+        packageFilter.addAction(ACTION_PACKAGE_ADDED);
+        packageFilter.addAction(ACTION_PACKAGE_CHANGED);
+        packageFilter.addAction(ACTION_PACKAGE_REMOVED);
+        packageFilter.addDataScheme("package");
+        getContext().registerReceiverAsUser(new PackageReceiver(), UserHandle.ALL,
+                packageFilter, null, null);
 
-            restoreSettings();
+        final IntentFilter userFilter = new IntentFilter();
+        userFilter.addAction(ACTION_USER_ADDED);
+        userFilter.addAction(ACTION_USER_REMOVED);
+        getContext().registerReceiverAsUser(new UserReceiver(), UserHandle.ALL,
+                userFilter, null, null);
 
-            initIfNeeded();
-            onSwitchUser(UserHandle.USER_SYSTEM);
+        restoreSettings();
 
-            publishBinderService(Context.OVERLAY_SERVICE, mService);
-            publishLocalService(OverlayManagerService.class, this);
-        }, "Init OverlayManagerService");
+        initIfNeeded();
+        onSwitchUser(UserHandle.USER_SYSTEM);
+
+        publishBinderService(Context.OVERLAY_SERVICE, mService);
+        publishLocalService(OverlayManagerService.class, this);
     }
 
     @Override
     public void onStart() {
         // Intentionally left empty.
-    }
-
-    @Override
-    public void onBootPhase(int phase) {
-        if (phase == PHASE_SYSTEM_SERVICES_READY && mInitCompleteSignal != null) {
-            ConcurrentUtils.waitForFutureNoInterrupt(mInitCompleteSignal,
-                    "Wait for OverlayManagerService init");
-            mInitCompleteSignal = null;
-        }
-    }
-
-    public void updateSystemUiContext() {
-        if (mInitCompleteSignal != null) {
-            ConcurrentUtils.waitForFutureNoInterrupt(mInitCompleteSignal,
-                    "Wait for OverlayManagerService init");
-            mInitCompleteSignal = null;
-        }
-
-        final ApplicationInfo ai;
-        try {
-            ai = mPackageManager.mPackageManager.getApplicationInfo("android",
-                    GET_SHARED_LIBRARY_FILES, UserHandle.USER_SYSTEM);
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
-        ActivityThread.currentActivityThread().handleSystemApplicationInfoChanged(ai);
     }
 
     private void initIfNeeded() {
