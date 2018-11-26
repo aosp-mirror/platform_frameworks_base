@@ -20,5 +20,5 @@ import android.content.ContentValues;
 
 interface IApnSourceService {
     /** Retreive APNs. */
-    ContentValues[] getApns();
+    ContentValues[] getApns(int subId);
 }

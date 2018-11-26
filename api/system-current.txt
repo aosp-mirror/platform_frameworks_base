@@ -4462,6 +4462,16 @@ package android.service.autofill {
 
 }
 
+package android.service.carrier {
+
+  public abstract class ApnService extends android.app.Service {
+    ctor public ApnService();
+    method public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
+    method public android.os.IBinder onBind(android.content.Intent);
+  }
+
+}
+
 package android.service.euicc {
 
   public final class EuiccProfileInfo implements android.os.Parcelable {
