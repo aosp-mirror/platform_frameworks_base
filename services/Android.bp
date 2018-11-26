@@ -28,6 +28,7 @@ java_library {
         "services.net",
         "services.print",
         "services.restrictions",
+        "services.startop",
         "services.usage",
         "services.usb",
         "services.voiceinteraction",
