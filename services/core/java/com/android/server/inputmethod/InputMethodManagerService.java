@@ -984,9 +984,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 // {@link #canShowInputMethodPickerLocked(IInputMethodClient)}.
                 mHandler.obtainMessage(
                         MSG_SHOW_IM_SUBTYPE_PICKER,
+                        // TODO(b/120076400): Design and implement IME switcher for heterogeneous
+                        // navbar configuration.
                         InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES,
-                        0 /* arg2 */)
-                        .sendToTarget();
+                        DEFAULT_DISPLAY).sendToTarget();
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
             }
@@ -3034,9 +3035,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private boolean canShowInputMethodPickerLocked(IInputMethodClient client) {
         // TODO(yukawa): multi-display support.
         final int uid = Binder.getCallingUid();
-        if (UserHandle.getAppId(uid) == Process.SYSTEM_UID) {
-            return true;
-        } else if (mCurFocusedWindowClient != null && client != null
+        if (mCurFocusedWindowClient != null && client != null
                 && mCurFocusedWindowClient.client.asBinder() == client.asBinder()) {
             return true;
         } else if (mCurIntent != null && InputMethodUtils.checkIfPackageBelongsToUid(
@@ -3044,12 +3043,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 uid,
                 mCurIntent.getComponent().getPackageName())) {
             return true;
-        } else if (mContext.checkCallingPermission(
-                android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                == PackageManager.PERMISSION_GRANTED) {
-            return true;
         }
-
         return false;
     }
 
@@ -3068,9 +3062,24 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // Always call subtype picker, because subtype picker is a superset of input method
             // picker.
-            mHandler.sendMessage(mCaller.obtainMessageI(
-                    MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode));
+            mHandler.sendMessage(mCaller.obtainMessageII(
+                    MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode,
+                    (mCurClient != null) ? mCurClient.selfReportedDisplayId : DEFAULT_DISPLAY));
         }
+    }
+
+    @Override
+    public void showInputMethodPickerFromSystem(IInputMethodClient client, int auxiliarySubtypeMode,
+            int displayId) {
+        if (mContext.checkCallingPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    "showInputMethodPickerFromSystem requires WRITE_SECURE_SETTINGS permission");
+        }
+        // Always call subtype picker, because subtype picker is a superset of input method
+        // picker.
+        mHandler.sendMessage(mCaller.obtainMessageII(
+                MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode, displayId));
     }
 
     public boolean isInputMethodPickerShownForTest() {
@@ -3421,6 +3430,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         switch (msg.what) {
             case MSG_SHOW_IM_SUBTYPE_PICKER:
                 final boolean showAuxSubtypes;
+                final int displayId = msg.arg2;
                 switch (msg.arg1) {
                     case InputMethodManager.SHOW_IM_PICKER_MODE_AUTO:
                         // This is undocumented so far, but IMM#showInputMethodPicker() has been
@@ -3438,7 +3448,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         Slog.e(TAG, "Unknown subtype picker mode = " + msg.arg1);
                         return false;
                 }
-                showInputMethodMenu(showAuxSubtypes);
+                showInputMethodMenu(showAuxSubtypes, displayId);
                 return true;
 
             case MSG_SHOW_IM_SUBTYPE_ENABLER:
@@ -3818,7 +3828,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 && mKeyguardManager.isKeyguardLocked() && mKeyguardManager.isKeyguardSecure();
     }
 
-    private void showInputMethodMenu(boolean showAuxSubtypes) {
+    private void showInputMethodMenu(boolean showAuxSubtypes, int displayId) {
         if (DEBUG) Slog.v(TAG, "Show switching menu. showAuxSubtypes=" + showAuxSubtypes);
 
         final boolean isScreenLocked = isScreenLocked();
@@ -3864,8 +3874,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
 
+            final ActivityThread currentThread = ActivityThread.currentActivityThread();
             final Context settingsContext = new ContextThemeWrapper(
-                    ActivityThread.currentActivityThread().getSystemUiContext(),
+                    displayId == DEFAULT_DISPLAY ? currentThread.getSystemUiContext()
+                            : currentThread.createSystemUiContext(displayId),
                     com.android.internal.R.style.Theme_DeviceDefault_Settings);
 
             mDialogBuilder = new AlertDialog.Builder(settingsContext);

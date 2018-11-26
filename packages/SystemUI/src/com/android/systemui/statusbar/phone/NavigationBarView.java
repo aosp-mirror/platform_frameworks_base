@@ -212,8 +212,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private final OnClickListener mImeSwitcherClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
-            mContext.getSystemService(InputMethodManager.class)
-                    .showInputMethodPicker(true /* showAuxiliarySubtypes */);
+            mContext.getSystemService(InputMethodManager.class).showInputMethodPickerFromSystem(
+                    true /* showAuxiliarySubtypes */, getContext().getDisplayId());
         }
     };
 
