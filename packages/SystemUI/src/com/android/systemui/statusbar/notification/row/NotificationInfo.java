@@ -187,14 +187,13 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean isDeviceProvisioned,
             boolean isNonblockable,
             boolean isNoisy,
-            int importance,
-            @NotificationInfoAction int action)
+            int importance)
             throws RemoteException {
         bindNotification(pm, iNotificationManager, pkg, notificationChannel,
                 numUniqueChannelsInRow, sbn, checkSaveListener, onSettingsClick,
                 onAppSettingsClick, isDeviceProvisioned, isNonblockable,
                 false /* isBlockingHelper */, false /* isUserSentimentNegative */, isNoisy,
-                importance, action);
+                importance);
     }
 
     public void bindNotification(
@@ -212,8 +211,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean isForBlockingHelper,
             boolean isUserSentimentNegative,
             boolean isNoisy,
-            int importance,
-            @NotificationInfoAction int action)
+            int importance)
             throws RemoteException {
         mINotificationManager = iNotificationManager;
         mMetricsLogger = Dependency.get(MetricsLogger.class);
@@ -255,10 +253,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         bindHeader();
         bindPrompt();
         bindButtons();
-
-        if (action != ACTION_NONE) {
-            swapContent(action, false /* don't animate */);
-        }
     }
 
     private void bindHeader() throws RemoteException {
