@@ -1821,9 +1821,19 @@ package android.hardware.location {
     field public static final android.os.Parcelable.Creator<android.hardware.location.ContextHubInfo> CREATOR;
   }
 
+  public class ContextHubIntentEvent {
+    method public static android.hardware.location.ContextHubIntentEvent fromIntent(android.content.Intent);
+    method public android.hardware.location.ContextHubInfo getContextHubInfo();
+    method public int getEventType();
+    method public int getNanoAppAbortCode();
+    method public long getNanoAppId();
+    method public android.hardware.location.NanoAppMessage getNanoAppMessage();
+  }
+
   public final class ContextHubManager {
     method public android.hardware.location.ContextHubClient createClient(android.hardware.location.ContextHubInfo, android.hardware.location.ContextHubClientCallback, java.util.concurrent.Executor);
     method public android.hardware.location.ContextHubClient createClient(android.hardware.location.ContextHubInfo, android.hardware.location.ContextHubClientCallback);
+    method public android.hardware.location.ContextHubClient createClient(android.hardware.location.ContextHubInfo, android.app.PendingIntent, long);
     method public android.hardware.location.ContextHubTransaction<java.lang.Void> disableNanoApp(android.hardware.location.ContextHubInfo, long);
     method public android.hardware.location.ContextHubTransaction<java.lang.Void> enableNanoApp(android.hardware.location.ContextHubInfo, long);
     method public deprecated int[] findNanoAppOnHub(int, android.hardware.location.NanoAppFilter);
@@ -1840,6 +1850,18 @@ package android.hardware.location {
     method public deprecated int unloadNanoApp(int);
     method public android.hardware.location.ContextHubTransaction<java.lang.Void> unloadNanoApp(android.hardware.location.ContextHubInfo, long);
     method public deprecated int unregisterCallback(android.hardware.location.ContextHubManager.Callback);
+    field public static final int EVENT_HUB_RESET = 6; // 0x6
+    field public static final int EVENT_NANOAPP_ABORTED = 4; // 0x4
+    field public static final int EVENT_NANOAPP_DISABLED = 3; // 0x3
+    field public static final int EVENT_NANOAPP_ENABLED = 2; // 0x2
+    field public static final int EVENT_NANOAPP_LOADED = 0; // 0x0
+    field public static final int EVENT_NANOAPP_MESSAGE = 5; // 0x5
+    field public static final int EVENT_NANOAPP_UNLOADED = 1; // 0x1
+    field public static final java.lang.String EXTRA_CONTEXT_HUB_INFO = "android.hardware.location.extra.CONTEXT_HUB_INFO";
+    field public static final java.lang.String EXTRA_EVENT_TYPE = "android.hardware.location.extra.EVENT_TYPE";
+    field public static final java.lang.String EXTRA_MESSAGE = "android.hardware.location.extra.MESSAGE";
+    field public static final java.lang.String EXTRA_NANOAPP_ABORT_CODE = "android.hardware.location.extra.NANOAPP_ABORT_CODE";
+    field public static final java.lang.String EXTRA_NANOAPP_ID = "android.hardware.location.extra.NANOAPP_ID";
   }
 
   public static abstract deprecated class ContextHubManager.Callback {
