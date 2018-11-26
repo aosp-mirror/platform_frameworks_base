@@ -222,11 +222,11 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
                         receiverExtras.putInt(KEY_RECEIVER_EXTRA_INDEX, i);
                         receiverExtras.putInt(KEY_RECEIVER_EXTRA_COUNT, numActivities);
                         boolean result = requestAutofillData
-                                ? ActivityTaskManager.getService().requestAssistContextExtras(
+                                ? ActivityTaskManager.getService().requestAutofillData(this,
+                                        receiverExtras, topActivity, 0 /* flags */)
+                                : ActivityTaskManager.getService().requestAssistContextExtras(
                                         ASSIST_CONTEXT_FULL, this, receiverExtras, topActivity,
-                                                /* focused= */ i == 0, /* newSessionId= */ i == 0)
-                                : ActivityTaskManager.getService().requestAutofillData(this,
-                                        receiverExtras, topActivity, 0 /* flags */);
+                                        /* focused= */ i == 0, /* newSessionId= */ i == 0);
                         if (result) {
                             mPendingDataCount++;
                         } else if (i == 0) {
