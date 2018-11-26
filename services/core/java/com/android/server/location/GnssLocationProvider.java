@@ -97,8 +97,8 @@ import java.util.Properties;
  *
  * {@hide}
  */
-public class GnssLocationProvider implements LocationProviderInterface, InjectNtpTimeCallback,
-        GnssSatelliteBlacklistCallback {
+public class GnssLocationProvider extends LocationProviderInterface
+        implements InjectNtpTimeCallback, GnssSatelliteBlacklistCallback {
 
     private static final String TAG = "GnssLocationProvider";
 

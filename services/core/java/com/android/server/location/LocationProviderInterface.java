@@ -16,33 +16,63 @@
 
 package com.android.server.location;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
+import android.location.LocationProvider;
+import android.os.Bundle;
+import android.os.WorkSource;
 
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 
-
-import android.os.Bundle;
-import android.os.WorkSource;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * Location Manager's interface for location providers.
  * @hide
  */
-public interface LocationProviderInterface {
-    public String getName();
+public abstract class LocationProviderInterface {
 
-    public void enable();
-    public void disable();
-    public boolean isEnabled();
-    public void setRequest(ProviderRequest request, WorkSource source);
+    /** Get name. */
+    public abstract String getName();
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args);
+    /** Enable. */
+    public abstract void enable();
 
-    // --- deprecated (but still supported) ---
-    public ProviderProperties getProperties();
-    public int getStatus(Bundle extras);
-    public long getStatusUpdateTime();
-    public boolean sendExtraCommand(String command, Bundle extras);
+    /** Disable. */
+    public abstract void disable();
+
+    /** Is enabled. */
+    public abstract boolean isEnabled();
+
+    /** Set request. */
+    public abstract void setRequest(ProviderRequest request, WorkSource source);
+
+    /** dump. */
+    public abstract void dump(FileDescriptor fd, PrintWriter pw, String[] args);
+
+    /** Get properties. */
+    public abstract ProviderProperties getProperties();
+
+    /**
+     * Get status.
+     *
+     * @deprecated Will be removed in a future release.
+     */
+    @Deprecated
+    public int getStatus(Bundle extras) {
+        return LocationProvider.AVAILABLE;
+    }
+
+    /**
+     * Get status update time.
+     *
+     * @deprecated Will be removed in a future release.
+     */
+    @Deprecated
+    public long getStatusUpdateTime() {
+        return 0;
+    }
+
+    /** Send extra command. */
+    public abstract boolean sendExtraCommand(String command, Bundle extras);
 }

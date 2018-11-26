@@ -16,14 +16,11 @@
 
 package com.android.location.provider;
 
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-
 import android.content.Context;
 import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -35,6 +32,10 @@ import com.android.internal.location.ILocationProvider;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.util.FastPrintWriter;
+
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 
 /**
  * Base class for location providers implemented as unbundled services.
@@ -173,6 +174,8 @@ public abstract class LocationProviderBase {
     }
 
     /**
+     * This method will no longer be invoked.
+     *
      * Returns a information on the status of this provider.
      * <p>{@link android.location.LocationProvider#OUT_OF_SERVICE} is returned if the provider is
      * out of service, and this is not expected to change in the near
@@ -183,10 +186,17 @@ public abstract class LocationProviderBase {
      *
      * <p>If extras is non-null, additional status information may be
      * added to it in the form of provider-specific key/value pairs.
+     *
+     * @deprecated This method will no longer be invoked.
      */
-    public abstract int onGetStatus(Bundle extras);
+    @Deprecated
+    public int onGetStatus(Bundle extras) {
+        return LocationProvider.AVAILABLE;
+    }
 
     /**
+     * This method will no longer be invoked.
+     *
      * Returns the time at which the status was last updated. It is the
      * responsibility of the provider to appropriately set this value using
      * {@link android.os.SystemClock#elapsedRealtime SystemClock.elapsedRealtime()}.
@@ -195,8 +205,13 @@ public abstract class LocationProviderBase {
      * the same status again.
      *
      * @return time of last status update in millis since last reboot
+     *
+     * @deprecated This method will no longer be invoked.
      */
-    public abstract long onGetStatusUpdateTime();
+    @Deprecated
+    public long onGetStatusUpdateTime() {
+        return 0;
+    }
 
     /**
      * Implements addditional location provider specific additional commands.

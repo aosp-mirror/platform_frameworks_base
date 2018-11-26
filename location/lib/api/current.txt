@@ -11,8 +11,8 @@ package com.android.location.provider {
     method public abstract void onDisable();
     method public void onDump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
     method public abstract void onEnable();
-    method public abstract int onGetStatus(android.os.Bundle);
-    method public abstract long onGetStatusUpdateTime();
+    method public deprecated int onGetStatus(android.os.Bundle);
+    method public deprecated long onGetStatusUpdateTime();
     method public boolean onSendExtraCommand(java.lang.String, android.os.Bundle);
     method public abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
     method public final void reportLocation(android.location.Location);

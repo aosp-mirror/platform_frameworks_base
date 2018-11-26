@@ -41,7 +41,7 @@ import java.io.PrintWriter;
 /**
  * Proxy for ILocationProvider implementations.
  */
-public class LocationProviderProxy implements LocationProviderInterface {
+public class LocationProviderProxy extends LocationProviderInterface {
     private static final String TAG = "LocationProviderProxy";
     private static final boolean D = LocationManagerService.D;
 
