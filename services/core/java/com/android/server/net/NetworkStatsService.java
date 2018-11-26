@@ -1622,8 +1622,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // fold tethering stats and operations into uid snapshot
         final NetworkStats tetherSnapshot = getNetworkStatsTethering(STATS_PER_UID);
         tetherSnapshot.filter(UID_ALL, ifaces, TAG_ALL);
-        NetworkStatsFactory.apply464xlatAdjustments(uidSnapshot, tetherSnapshot,
-                mUseBpfTrafficStats);
+        NetworkStatsFactory.apply464xlatAdjustments(uidSnapshot, tetherSnapshot);
         uidSnapshot.combineAllValues(tetherSnapshot);
 
         final TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(
@@ -1633,8 +1632,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStats vtStats = telephonyManager.getVtDataUsage(STATS_PER_UID);
         if (vtStats != null) {
             vtStats.filter(UID_ALL, ifaces, TAG_ALL);
-            NetworkStatsFactory.apply464xlatAdjustments(uidSnapshot, vtStats,
-                    mUseBpfTrafficStats);
+            NetworkStatsFactory.apply464xlatAdjustments(uidSnapshot, vtStats);
             uidSnapshot.combineAllValues(vtStats);
         }
 
