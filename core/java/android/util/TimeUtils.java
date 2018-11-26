@@ -21,9 +21,9 @@ import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.SystemClock;
 
-import libcore.util.CountryTimeZones;
-import libcore.util.CountryTimeZones.TimeZoneMapping;
-import libcore.util.TimeZoneFinder;
+import libcore.timezone.CountryTimeZones;
+import libcore.timezone.CountryTimeZones.TimeZoneMapping;
+import libcore.timezone.TimeZoneFinder;
 import libcore.util.ZoneInfoDB;
 
 import java.io.PrintWriter;
