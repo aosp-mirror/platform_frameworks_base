@@ -31,6 +31,8 @@
 
 #include <string>
 #include <vector>
+#include <system/window.h>
+#include <gui/Surface.h>
 
 #define GLES_VERSION 2
 
@@ -106,7 +108,7 @@ void EglManager::initialize() {
     LOG_ALWAYS_FATAL_IF(eglInitialize(mEglDisplay, &major, &minor) == EGL_FALSE,
                         "Failed to initialize display %p! err=%s", mEglDisplay, eglErrorString());
 
-    ALOGI("Initialized EGL, version %d.%d", (int)major, (int)minor);
+    ALOGV("Initialized EGL, version %d.%d", (int)major, (int)minor);
 
     initExtensions();
 

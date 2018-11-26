@@ -155,7 +155,7 @@ void SkiaOpenGLPipeline::onStop() {
     }
 }
 
-bool SkiaOpenGLPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior,
+bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehavior,
                                     ColorMode colorMode) {
     if (mEglSurface != EGL_NO_SURFACE) {
         mEglManager.destroySurface(mEglSurface);
