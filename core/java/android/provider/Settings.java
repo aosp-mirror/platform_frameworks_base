@@ -13671,6 +13671,22 @@ public final class Settings {
                 "smart_replies_in_notifications_flags";
 
         /**
+         * Configuration flags for the automatic generation of smart replies and smart actions in
+         * notifications. This is encoded as a key=value list, separated by commas. Ex:
+         * "generate_replies=false,generate_actions=true".
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * generate_replies                 (boolean)
+         * generate_actions                 (boolean)
+         * </pre>
+         * @hide
+         */
+        public static final String SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS =
+                "smart_suggestions_in_notifications_flags";
+
+        /**
          * If nonzero, crashes in foreground processes will bring up a dialog.
          * Otherwise, the process will be silently killed.
          * @hide

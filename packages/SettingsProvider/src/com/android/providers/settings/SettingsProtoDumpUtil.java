@@ -998,6 +998,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
                 GlobalSettingsProto.Notification.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS);
+        dumpSetting(s, p,
+                Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
+                GlobalSettingsProto.Notification.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS);
         p.end(notificationToken);
 
         dumpSetting(s, p,
