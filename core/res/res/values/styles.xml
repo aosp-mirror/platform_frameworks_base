@@ -1526,10 +1526,22 @@ please see styles_device_defaults.xml.
         <item name="gravity">top</item>
     </style>
 
-    <!-- Colored bordered ink button -->
+    <!-- The style for normal action button on notification -->
+    <style name="NotificationAction" parent="Widget.Material.Light.Button.Borderless.Small">
+      <item name="textColor">@color/notification_action_button_text_color</item>
+      <item name="background">@drawable/notification_material_action_background</item>
+    </style>
+
+    <!-- The style for emphasized action button on notification: Colored bordered ink button -->
     <style name="NotificationEmphasizedAction" parent="Widget.Material.Button">
         <item name="background">@drawable/btn_notification_emphasized</item>
         <item name="stateListAnimator">@anim/flat_button_state_list_anim_material</item>
     </style>
+
+    <!-- The style for disabled action button on notification -->
+    <style name="NotificationTombstoneAction" parent="NotificationAction">
+      <item name="textColor">#555555</item>
+    </style>
+
 
 </resources>
