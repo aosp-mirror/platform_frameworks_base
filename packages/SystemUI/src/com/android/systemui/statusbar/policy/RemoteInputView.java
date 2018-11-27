@@ -245,7 +245,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (mEntry.row.isChangingPosition()) {
+        if (mEntry.getRow().isChangingPosition()) {
             if (getVisibility() == VISIBLE && mEditText.isFocusable()) {
                 mEditText.requestFocus();
             }
@@ -255,7 +255,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mEntry.row.isChangingPosition() || isTemporarilyDetached()) {
+        if (mEntry.getRow().isChangingPosition() || isTemporarilyDetached()) {
             return;
         }
         mController.removeRemoteInput(mEntry, mToken);
@@ -495,7 +495,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         }
 
         private void defocusIfNeeded(boolean animate) {
-            if (mRemoteInputView != null && mRemoteInputView.mEntry.row.isChangingPosition()
+            if (mRemoteInputView != null && mRemoteInputView.mEntry.getRow().isChangingPosition()
                     || isTemporarilyDetached()) {
                 if (isTemporarilyDetached()) {
                     // We might get reattached but then the other one of HUN / expanded might steal

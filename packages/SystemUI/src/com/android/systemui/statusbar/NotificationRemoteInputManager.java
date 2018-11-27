@@ -393,7 +393,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     }
 
     public boolean shouldKeepForRemoteInputHistory(NotificationData.Entry entry) {
-        if (entry.row == null || entry.row.isDismissed()) {
+        if (entry.isDismissed()) {
             return false;
         }
         if (!FORCE_REMOTE_INPUT_HISTORY) {
@@ -403,7 +403,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     }
 
     public boolean shouldKeepForSmartReplyHistory(NotificationData.Entry entry) {
-        if (entry.row == null || entry.row.isDismissed()) {
+        if (entry.isDismissed()) {
             return false;
         }
         if (!FORCE_REMOTE_INPUT_HISTORY) {
@@ -532,7 +532,7 @@ public class NotificationRemoteInputManager implements Dumpable {
 
                 // Ensure the entry hasn't already been removed. This can happen if there is an
                 // inflation exception while updating the remote history
-                if (entry.row == null || entry.row.isRemoved()) {
+                if (entry.isRemoved()) {
                     return;
                 }
 
@@ -570,7 +570,7 @@ public class NotificationRemoteInputManager implements Dumpable {
 
                 mEntryManager.updateNotification(newSbn, null);
 
-                if (entry.row == null || entry.row.isRemoved()) {
+                if (entry.isRemoved()) {
                     return;
                 }
 
@@ -593,7 +593,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     protected class RemoteInputActiveExtender extends RemoteInputExtender {
         @Override
         public boolean shouldExtendLifetime(@NonNull NotificationData.Entry entry) {
-            if (entry.row == null || entry.row.isDismissed()) {
+            if (entry.isDismissed()) {
                 return false;
             }
             return mRemoteInputController.isRemoteInputActive(entry);

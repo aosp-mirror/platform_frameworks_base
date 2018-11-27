@@ -149,7 +149,8 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         Entry summaryEntry = mGroupTestHelper.createSummaryNotification();
         mHeadsUpManager.showNotification(summaryEntry);
         Entry childEntry = mGroupTestHelper.createChildNotification();
-        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(false);
+        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
+            .thenReturn(false);
 
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
@@ -166,12 +167,14 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         Entry summaryEntry = mGroupTestHelper.createSummaryNotification();
         mHeadsUpManager.showNotification(summaryEntry);
         Entry childEntry = mGroupTestHelper.createChildNotification();
-        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(false);
+        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
+            .thenReturn(false);
 
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
 
-        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(true);
+        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
+            .thenReturn(true);
         mGroupAlertTransferHelper.onInflationFinished(childEntry);
 
         // Alert is immediately removed from summary, and we show child as its content is inflated.
@@ -185,7 +188,8 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationData.Entry childEntry =
                 mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
-        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(false);
+        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
+            .thenReturn(false);
         NotificationData.Entry childEntry2 =
                 mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
         mHeadsUpManager.showNotification(summaryEntry);
@@ -199,10 +203,12 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(childEntry2);
 
         // Child entry finishes its inflation.
-        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(true);
+        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
+            .thenReturn(true);
         mGroupAlertTransferHelper.onInflationFinished(childEntry);
 
-        verify(childEntry.row, times(1)).freeContentViewWhenSafe(mHeadsUpManager.getContentFlag());
+        verify(childEntry.getRow(), times(1)).freeContentViewWhenSafe(mHeadsUpManager
+            .getContentFlag());
         assertFalse(mHeadsUpManager.isAlerting(childEntry.key));
     }
 
@@ -212,7 +218,8 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationData.Entry childEntry =
                 mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
-        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(false);
+        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
+            .thenReturn(false);
         mHeadsUpManager.showNotification(summaryEntry);
         // Trigger a transfer of alert state from summary to child.
         mGroupManager.onEntryAdded(summaryEntry);
@@ -229,7 +236,8 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationData.Entry childEntry =
                 mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
-        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(false);
+        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
+            .thenReturn(false);
         mHeadsUpManager.showNotification(summaryEntry);
         // Trigger a transfer of alert state from summary to child.
         mGroupManager.onEntryAdded(summaryEntry);
@@ -251,7 +259,8 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationData.Entry childEntry =
                 mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
-        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(false);
+        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
+            .thenReturn(false);
         mHeadsUpManager.showNotification(summaryEntry);
         // Trigger a transfer of alert state from summary to child.
         mGroupManager.onEntryAdded(summaryEntry);

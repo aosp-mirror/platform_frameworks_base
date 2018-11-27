@@ -2500,25 +2500,26 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public void onHeadsUpPinned(ExpandableNotificationRow headsUp) {
-        mNotificationStackScroller.generateHeadsUpAnimation(headsUp, true);
+    public void onHeadsUpPinned(NotificationData.Entry entry) {
+        mNotificationStackScroller.generateHeadsUpAnimation(entry.getHeadsUpAnimationView(), true);
     }
 
     @Override
-    public void onHeadsUpUnPinned(ExpandableNotificationRow headsUp) {
+    public void onHeadsUpUnPinned(NotificationData.Entry entry) {
 
         // When we're unpinning the notification via active edge they remain heads-upped,
         // we need to make sure that an animation happens in this case, otherwise the notification
         // will stick to the top without any interaction.
-        if (isFullyCollapsed() && headsUp.isHeadsUp()) {
-            mNotificationStackScroller.generateHeadsUpAnimation(headsUp, false);
-            headsUp.setHeadsUpIsVisible();
+        if (isFullyCollapsed() && entry.isRowHeadsUp()) {
+            mNotificationStackScroller.generateHeadsUpAnimation(
+                    entry.getHeadsUpAnimationView(), false);
+            entry.setHeadsUpIsVisible();
         }
     }
 
     @Override
     public void onHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp) {
-        mNotificationStackScroller.generateHeadsUpAnimation(entry.row, isHeadsUp);
+        mNotificationStackScroller.generateHeadsUpAnimation(entry, isHeadsUp);
     }
 
     @Override

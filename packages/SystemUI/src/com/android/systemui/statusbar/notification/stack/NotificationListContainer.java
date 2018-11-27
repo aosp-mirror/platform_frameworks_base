@@ -118,9 +118,9 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
     /**
      * Handle snapping a non-dismissable row back if the user tried to dismiss it.
      *
-     * @param row row to snap back
+     * @param entry the entry whose row needs to snap back
      */
-    void snapViewIfNeeded(ExpandableNotificationRow row);
+    void snapViewIfNeeded(NotificationData.Entry entry);
 
     /**
      * Get the view parent for a notification entry. For example, NotificationStackScrollLayout.
@@ -149,9 +149,9 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
      * Called when a notification is removed from the shade. This cleans up the state for a
      * given view.
      *
-     * @param view view to clean up view state for
+     * @param entry the entry whose view's view state needs to be cleaned up (say that 5 times fast)
      */
-    void cleanUpViewState(View view);
+    void cleanUpViewStateForEntry(NotificationData.Entry entry);
 
 
     /**

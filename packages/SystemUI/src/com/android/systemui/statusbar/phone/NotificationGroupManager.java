@@ -87,8 +87,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         group.expanded = expanded;
         if (group.summary != null) {
             for (OnGroupChangeListener listener : mListeners) {
-                listener.onGroupExpansionChanged(group.summary.row,
-                        expanded);
+                listener.onGroupExpansionChanged(group.summary.getRow(), expanded);
             }
         }
     }
@@ -133,7 +132,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     }
 
     public void onEntryAdded(final NotificationData.Entry added) {
-        if (added.row.isRemoved()) {
+        if (added.isRowRemoved()) {
             added.setDebugThrowable(new Throwable());
         }
         final StatusBarNotification sbn = added.notification;
@@ -152,17 +151,17 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
             if (existing != null && existing != added) {
                 Throwable existingThrowable = existing.getDebugThrowable();
                 Log.wtf(TAG, "Inconsistent entries found with the same key " + added.key
-                        + "existing removed: " + existing.row.isRemoved()
+                        + "existing removed: " + existing.isRowRemoved()
                         + (existingThrowable != null
                                 ? Log.getStackTraceString(existingThrowable) + "\n": "")
-                        + " added removed" + added.row.isRemoved()
+                        + " added removed" + added.isRowRemoved()
                         , new Throwable());
             }
             group.children.put(added.key, added);
             updateSuppression(group);
         } else {
             group.summary = added;
-            group.expanded = added.row.areChildrenExpanded();
+            group.expanded = added.areChildrenExpanded();
             updateSuppression(group);
             if (!group.children.isEmpty()) {
                 ArrayList<NotificationData.Entry> childrenCopy
@@ -263,9 +262,9 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         if (!isOnlyChild(sbn)) {
             return false;
         }
-        ExpandableNotificationRow logicalGroupSummary = getLogicalGroupSummary(sbn);
+        NotificationData.Entry logicalGroupSummary = getLogicalGroupSummary(sbn);
         return logicalGroupSummary != null
-                && !logicalGroupSummary.getStatusBarNotification().equals(sbn);
+                && !logicalGroupSummary.notification.equals(sbn);
     }
 
     private int getTotalNumberOfChildren(StatusBarNotification sbn) {
@@ -339,7 +338,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
      * Get the summary of a specified status bar notification. For isolated notification this return
      * itself.
      */
-    public ExpandableNotificationRow getGroupSummary(StatusBarNotification sbn) {
+    public NotificationData.Entry getGroupSummary(StatusBarNotification sbn) {
         return getGroupSummary(getGroupKey(sbn));
     }
 
@@ -348,16 +347,17 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
      * but the logical summary, i.e when a child is isolated, it still returns the summary as if
      * it wasn't isolated.
      */
-    public ExpandableNotificationRow getLogicalGroupSummary(StatusBarNotification sbn) {
+    public NotificationData.Entry getLogicalGroupSummary(StatusBarNotification sbn) {
         return getGroupSummary(sbn.getGroupKey());
     }
 
     @Nullable
-    private ExpandableNotificationRow getGroupSummary(String groupKey) {
+    private NotificationData.Entry getGroupSummary(String groupKey) {
         NotificationGroup group = mGroupMap.get(groupKey);
+        //TODO: see if this can become an Entry
         return group == null ? null
                 : group.summary == null ? null
-                        : group.summary.row;
+                        : group.summary;
     }
 
     /**
@@ -438,11 +438,11 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     }
 
     @Override
-    public void onHeadsUpPinned(ExpandableNotificationRow headsUp) {
+    public void onHeadsUpPinned(NotificationData.Entry entry) {
     }
 
     @Override
-    public void onHeadsUpUnPinned(ExpandableNotificationRow headsUp) {
+    public void onHeadsUpUnPinned(NotificationData.Entry entry) {
     }
 
     @Override
@@ -533,8 +533,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
 
     private boolean isGroupNotFullyVisible(NotificationGroup notificationGroup) {
         return notificationGroup.summary == null
-                || notificationGroup.summary.row.getClipTopAmount() > 0
-                || notificationGroup.summary.row.getTranslationY() < 0;
+                || notificationGroup.summary.isGroupNotFullyVisible();
     }
 
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {

@@ -81,12 +81,12 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mFirst.setPinned(true);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         when(mHeadsUpManager.getTopEntry()).thenReturn(mFirst.getEntry());
-        mHeadsUpAppearanceController.onHeadsUpPinned(mFirst);
+        mHeadsUpAppearanceController.onHeadsUpPinned(mFirst.getEntry());
         Assert.assertEquals(mFirst.getEntry(), mHeadsUpStatusBarView.getShowingEntry());
 
         mFirst.setPinned(false);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
-        mHeadsUpAppearanceController.onHeadsUpUnPinned(mFirst);
+        mHeadsUpAppearanceController.onHeadsUpUnPinned(mFirst.getEntry());
         Assert.assertEquals(null, mHeadsUpStatusBarView.getShowingEntry());
     }
 
@@ -95,12 +95,12 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mFirst.setPinned(true);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         when(mHeadsUpManager.getTopEntry()).thenReturn(mFirst.getEntry());
-        mHeadsUpAppearanceController.onHeadsUpPinned(mFirst);
+        mHeadsUpAppearanceController.onHeadsUpPinned(mFirst.getEntry());
         Assert.assertTrue(mHeadsUpAppearanceController.isShown());
 
         mFirst.setPinned(false);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
-        mHeadsUpAppearanceController.onHeadsUpUnPinned(mFirst);
+        mHeadsUpAppearanceController.onHeadsUpUnPinned(mFirst.getEntry());
         Assert.assertFalse(mHeadsUpAppearanceController.isShown());
     }
 
@@ -109,12 +109,12 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mFirst.setPinned(true);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         when(mHeadsUpManager.getTopEntry()).thenReturn(mFirst.getEntry());
-        mHeadsUpAppearanceController.onHeadsUpPinned(mFirst);
+        mHeadsUpAppearanceController.onHeadsUpPinned(mFirst.getEntry());
         Assert.assertEquals(mFirst.getHeaderVisibleAmount(), 0.0f, 0.0f);
 
         mFirst.setPinned(false);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
-        mHeadsUpAppearanceController.onHeadsUpUnPinned(mFirst);
+        mHeadsUpAppearanceController.onHeadsUpUnPinned(mFirst.getEntry());
         Assert.assertEquals(mFirst.getHeaderVisibleAmount(), 1.0f, 0.0f);
     }
 
@@ -125,12 +125,12 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mFirst.setPinned(true);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         when(mHeadsUpManager.getTopEntry()).thenReturn(mFirst.getEntry());
-        mHeadsUpAppearanceController.onHeadsUpPinned(mFirst);
+        mHeadsUpAppearanceController.onHeadsUpPinned(mFirst.getEntry());
         Assert.assertEquals(View.INVISIBLE, mOperatorNameView.getVisibility());
 
         mFirst.setPinned(false);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
-        mHeadsUpAppearanceController.onHeadsUpUnPinned(mFirst);
+        mHeadsUpAppearanceController.onHeadsUpUnPinned(mFirst.getEntry());
         Assert.assertEquals(View.VISIBLE, mOperatorNameView.getVisibility());
     }
 

@@ -143,9 +143,9 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     }
 
     @Override
-    public void onHeadsUpPinned(ExpandableNotificationRow headsUp) {
+    public void onHeadsUpPinned(NotificationData.Entry entry) {
         updateTopEntry();
-        updateHeader(headsUp.getEntry());
+        updateHeader(entry);
     }
 
     /** To count the distance from the window right boundary to scroller right boundary. The
@@ -298,9 +298,9 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     }
 
     @Override
-    public void onHeadsUpUnPinned(ExpandableNotificationRow headsUp) {
+    public void onHeadsUpUnPinned(NotificationData.Entry entry) {
         updateTopEntry();
-        updateHeader(headsUp.getEntry());
+        updateHeader(entry);
     }
 
     public void setExpandedHeight(float expandedHeight, float appearFraction) {
@@ -339,7 +339,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     }
 
     public void updateHeader(NotificationData.Entry entry) {
-        ExpandableNotificationRow row = entry.row;
+        ExpandableNotificationRow row = entry.getRow();
         float headerVisibleAmount = 1.0f;
         if (row.isPinned() || row.isHeadsUpAnimatingAway() || row == mTrackedChild) {
             headerVisibleAmount = mExpandFraction;

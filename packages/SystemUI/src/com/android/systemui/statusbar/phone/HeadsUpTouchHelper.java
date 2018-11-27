@@ -84,8 +84,8 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                     // We might touch above the visible heads up child, but then we still would
                     // like to capture it.
                     NotificationData.Entry topEntry = mHeadsUpManager.getTopEntry();
-                    if (topEntry != null && topEntry.row.isPinned()) {
-                        mPickedChild = topEntry.row;
+                    if (topEntry != null && topEntry.isRowPinned()) {
+                        mPickedChild = topEntry.getRow();
                         mTouchingHeadsUpView = true;
                     }
                 }

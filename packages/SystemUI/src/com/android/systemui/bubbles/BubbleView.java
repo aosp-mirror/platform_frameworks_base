@@ -120,7 +120,7 @@ public class BubbleView extends LinearLayout implements BubbleTouchHandler.Float
      * @return the view to display when the bubble is expanded.
      */
     public ExpandableNotificationRow getRowView() {
-        return mEntry.row;
+        return mEntry.getRow();
     }
 
     @Override

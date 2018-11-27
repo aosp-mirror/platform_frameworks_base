@@ -227,7 +227,7 @@ public class NotificationTestHelper {
                 null /* overrideGroupKey */,
                 System.currentTimeMillis());
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
-        entry.row = row;
+        entry.setRow(row);
         entry.createIcons(mContext, sbn);
         entry.channel = new NotificationChannel(
                 notification.getChannelId(), notification.getChannelId(), IMPORTANCE_DEFAULT);

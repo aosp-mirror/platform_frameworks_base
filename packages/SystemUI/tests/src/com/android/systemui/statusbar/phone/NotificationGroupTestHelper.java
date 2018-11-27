@@ -81,7 +81,7 @@ public final class NotificationGroupTestHelper {
                 0 /* postTime */);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
-        entry.row = row;
+        entry.setRow(row);
         when(row.getEntry()).thenReturn(entry);
         when(row.getStatusBarNotification()).thenReturn(sbn);
         when(row.isInflationFlagSet(anyInt())).thenReturn(true);

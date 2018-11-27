@@ -33,12 +33,12 @@ public interface OnHeadsUpChangedListener {
     /**
      * A notification was just pinned to the top.
      */
-    default void onHeadsUpPinned(ExpandableNotificationRow headsUp) {}
+    default void onHeadsUpPinned(NotificationData.Entry entry) {}
 
     /**
      * A notification was just unpinned from the top.
      */
-    default void onHeadsUpUnPinned(ExpandableNotificationRow headsUp) {}
+    default void onHeadsUpUnPinned(NotificationData.Entry entry) {}
 
     /**
      * A notification just became a heads up or turned back to its normal state.

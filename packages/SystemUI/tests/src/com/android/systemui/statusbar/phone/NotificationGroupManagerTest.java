@@ -100,7 +100,7 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(mGroupTestHelper.createChildNotification());
 
         assertTrue(mGroupManager.isSummaryOfGroup(summaryEntry.notification));
-        assertEquals(summaryEntry.row, mGroupManager.getGroupSummary(childEntry.notification));
+        assertEquals(summaryEntry, mGroupManager.getGroupSummary(childEntry.notification));
     }
 
     @Test
@@ -143,9 +143,8 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
         // Child entries that are heads upped should be considered separate groups visually even if
         // they are the same group logically
-        assertEquals(childEntry.row, mGroupManager.getGroupSummary(childEntry.notification));
-        assertEquals(summaryEntry.row,
-                mGroupManager.getLogicalGroupSummary(childEntry.notification));
+        assertEquals(childEntry, mGroupManager.getGroupSummary(childEntry.notification));
+        assertEquals(summaryEntry, mGroupManager.getLogicalGroupSummary(childEntry.notification));
     }
 
     @Test
@@ -161,8 +160,7 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
         // Child entries that are heads upped should be considered separate groups visually even if
         // they are the same group logically
-        assertEquals(childEntry.row, mGroupManager.getGroupSummary(childEntry.notification));
-        assertEquals(summaryEntry.row,
-                mGroupManager.getLogicalGroupSummary(childEntry.notification));
+        assertEquals(childEntry, mGroupManager.getGroupSummary(childEntry.notification));
+        assertEquals(summaryEntry, mGroupManager.getLogicalGroupSummary(childEntry.notification));
     }
 }

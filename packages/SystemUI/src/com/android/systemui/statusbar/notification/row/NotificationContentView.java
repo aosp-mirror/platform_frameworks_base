@@ -1230,17 +1230,18 @@ public class NotificationContentView extends FrameLayout {
         mOnContentViewInactiveListeners.clear();
         mBeforeN = entry.targetSdk < Build.VERSION_CODES.N;
         updateAllSingleLineViews();
+        ExpandableNotificationRow row = entry.getRow();
         if (mContractedChild != null) {
-            mContractedWrapper.onContentUpdated(entry.row);
+            mContractedWrapper.onContentUpdated(row);
         }
         if (mExpandedChild != null) {
-            mExpandedWrapper.onContentUpdated(entry.row);
+            mExpandedWrapper.onContentUpdated(row);
         }
         if (mHeadsUpChild != null) {
-            mHeadsUpWrapper.onContentUpdated(entry.row);
+            mHeadsUpWrapper.onContentUpdated(row);
         }
         if (mAmbientChild != null) {
-            mAmbientWrapper.onContentUpdated(entry.row);
+            mAmbientWrapper.onContentUpdated(row);
         }
         applyRemoteInputAndSmartReply(entry);
         updateLegacy();

@@ -325,7 +325,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         // add notification
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
-        when(row.isClearable()).thenReturn(true);
+        NotificationData.Entry entry = mock(NotificationData.Entry.class);
+        when(row.getEntry()).thenReturn(entry);
+        when(entry.isClearable()).thenReturn(true);
         mStackScroller.addContainerView(row);
 
         mStackScroller.onUpdateRowStates();

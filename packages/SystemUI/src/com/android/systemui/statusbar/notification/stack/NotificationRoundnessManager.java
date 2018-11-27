@@ -21,6 +21,7 @@ import static com.android.systemui.statusbar.notification.stack.NotificationStac
 
 import android.view.View;
 
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -50,13 +51,13 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
     }
 
     @Override
-    public void onHeadsUpPinned(ExpandableNotificationRow headsUp) {
-        updateView(headsUp, false /* animate */);
+    public void onHeadsUpPinned(NotificationData.Entry headsUp) {
+        updateView(headsUp.getRow(), false /* animate */);
     }
 
     @Override
-    public void onHeadsUpUnPinned(ExpandableNotificationRow headsUp) {
-        updateView(headsUp, true /* animate */);
+    public void onHeadsUpUnPinned(NotificationData.Entry headsUp) {
+        updateView(headsUp.getRow(), true /* animate */);
     }
 
     public void onHeadsupAnimatingAwayChanged(ExpandableNotificationRow row,
