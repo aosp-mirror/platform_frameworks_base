@@ -177,9 +177,22 @@ public class DozeLog {
         log("state " + state);
     }
 
-    public static void traceWakeLockScreenWakeUp() {
+    /**
+     * Appends lock screen wake up event to the logs.
+     * @param wake if we're waking up or sleeping.
+     */
+    public static void traceLockScreenWakeUp(boolean wake) {
         if (!ENABLED) return;
-        log("wakeLockScreenWakeUp");
+        log("wakeLockScreenWakeUp " + wake);
+    }
+
+    /**
+     * Appends wake-display event to the logs.
+     * @param wake if we're waking up or sleeping.
+     */
+    public static void traceWakeDisplay(boolean wake) {
+        if (!ENABLED) return;
+        log("wakeLockScreenWakeUp " + wake);
     }
 
     public static void traceProximityResult(Context context, boolean near, long millis,

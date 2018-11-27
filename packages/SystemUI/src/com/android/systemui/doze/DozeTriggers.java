@@ -84,7 +84,7 @@ public class DozeTriggers implements DozeMachine.Part {
         mWakeLock = wakeLock;
         mAllowPulseTriggers = allowPulseTriggers;
         mDozeSensors = new DozeSensors(context, alarmManager, mSensorManager, dozeParameters,
-                config, wakeLock, this::onSensor, this::onProximityFar, this::onWakeScreen,
+                config, wakeLock, this::onSensor, this::onProximityFar,
                 dozeParameters.getPolicy());
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
     }
@@ -124,13 +124,17 @@ public class DozeTriggers implements DozeMachine.Part {
     }
 
     private void onSensor(int pulseReason, boolean sensorPerformedProxCheck,
-            float screenX, float screenY) {
+            float screenX, float screenY, float[] rawValues) {
         boolean isDoubleTap = pulseReason == DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP;
         boolean isPickup = pulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP;
         boolean isLongPress = pulseReason == DozeLog.PULSE_REASON_SENSOR_LONG_PRESS;
         boolean isWakeLockScreen = pulseReason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN;
+        boolean isWakeDisplay = pulseReason == DozeLog.REASON_SENSOR_WAKE_UP;
+        boolean wakeEvent = rawValues != null && rawValues.length > 0 && rawValues[0] != 0;
 
-        if (isLongPress) {
+        if (isWakeDisplay) {
+            onWakeScreen(wakeEvent);
+        } else if (isLongPress) {
             requestPulse(pulseReason, sensorPerformedProxCheck);
         } else {
             proximityCheckThenCall((result) -> {
@@ -141,7 +145,15 @@ public class DozeTriggers implements DozeMachine.Part {
                 if (isDoubleTap) {
                     mDozeHost.onDoubleTap(screenX, screenY);
                     mMachine.wakeUp();
-                } else if (isPickup || isWakeLockScreen) {
+                } else if (isWakeLockScreen) {
+                    if (wakeEvent) {
+                        mDozeHost.setPassiveInterrupt(true);
+                        mMachine.wakeUp();
+                        DozeLog.traceLockScreenWakeUp(wakeEvent);
+                    } else {
+                        if (DEBUG) Log.d(TAG, "Unpulsing");
+                    }
+                } else if (isPickup) {
                     mDozeHost.setPassiveInterrupt(true);
                     mMachine.wakeUp();
                 } else {
@@ -157,8 +169,6 @@ public class DozeTriggers implements DozeMachine.Part {
             final boolean withinVibrationThreshold =
                     timeSinceNotification < mDozeParameters.getPickupVibrationThreshold();
             DozeLog.tracePickupWakeUp(mContext, withinVibrationThreshold);
-        } else if (isWakeLockScreen) {
-            DozeLog.traceWakeLockScreenWakeUp();
         }
     }
 
@@ -184,6 +194,7 @@ public class DozeTriggers implements DozeMachine.Part {
     }
 
     private void onWakeScreen(boolean wake) {
+        DozeLog.traceWakeDisplay(wake);
         DozeMachine.State state = mMachine.getState();
         boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
         boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
