@@ -1180,11 +1180,11 @@ public class AppOpsManager {
             Manifest.permission.ACTIVITY_RECOGNITION,
             Manifest.permission.SMS_FINANCIAL_TRANSACTIONS,
             Manifest.permission.READ_MEDIA_AUDIO,
-            Manifest.permission.WRITE_MEDIA_AUDIO,
+            null, // no permission for OP_WRITE_MEDIA_AUDIO
             Manifest.permission.READ_MEDIA_VIDEO,
-            Manifest.permission.WRITE_MEDIA_VIDEO,
+            null, // no permission for OP_WRITE_MEDIA_VIDEO
             Manifest.permission.READ_MEDIA_IMAGES,
-            Manifest.permission.WRITE_MEDIA_IMAGES,
+            null, // no permission for OP_WRITE_MEDIA_IMAGES
     };
 
     /**
@@ -1462,11 +1462,11 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // ACTIVITY_RECOGNITION
             AppOpsManager.MODE_DEFAULT, // SMS_FINANCIAL_TRANSACTIONS
             AppOpsManager.MODE_ALLOWED, // READ_MEDIA_AUDIO
-            AppOpsManager.MODE_ALLOWED, // WRITE_MEDIA_AUDIO
+            AppOpsManager.MODE_ERRORED, // WRITE_MEDIA_AUDIO
             AppOpsManager.MODE_ALLOWED, // READ_MEDIA_VIDEO
-            AppOpsManager.MODE_ALLOWED, // WRITE_MEDIA_VIDEO
+            AppOpsManager.MODE_ERRORED, // WRITE_MEDIA_VIDEO
             AppOpsManager.MODE_ALLOWED, // READ_MEDIA_IMAGES
-            AppOpsManager.MODE_ALLOWED, // WRITE_MEDIA_IMAGES
+            AppOpsManager.MODE_ERRORED, // WRITE_MEDIA_IMAGES
     };
 
     /**

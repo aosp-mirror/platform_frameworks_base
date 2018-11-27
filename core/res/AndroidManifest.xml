@@ -794,7 +794,8 @@
     <permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:label="@string/permlab_sdcardRead"
         android:description="@string/permdesc_sdcardRead"
-        android:protectionLevel="normal" />
+        android:protectionLevel="dangerous"
+        android:permissionFlags="removed" />
 
     <!-- Allows an application to write to external storage.
          <p class="note"><strong>Note:</strong> If <em>both</em> your <a
@@ -814,7 +815,8 @@
     <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:label="@string/permlab_sdcardWrite"
         android:description="@string/permdesc_sdcardWrite"
-        android:protectionLevel="normal" />
+        android:protectionLevel="dangerous"
+        android:permissionFlags="removed" />
 
     <!-- Runtime permission controlling access to the user's shared aural media
          collection. -->
@@ -829,12 +831,6 @@
     <permission android:name="android.permission.READ_MEDIA_AUDIO"
         android:label="@string/permlab_audioRead"
         android:description="@string/permdesc_audioRead"
-        android:protectionLevel="dangerous" />
-
-    <!-- Allows an application to modify the user's shared audio collection. -->
-    <permission android:name="android.permission.WRITE_MEDIA_AUDIO"
-        android:label="@string/permlab_audioWrite"
-        android:description="@string/permdesc_audioWrite"
         android:protectionLevel="dangerous" />
 
     <!-- Runtime permission controlling access to the user's shared visual media
@@ -852,22 +848,10 @@
         android:description="@string/permdesc_imagesRead"
         android:protectionLevel="dangerous" />
 
-    <!-- Allows an application to modify the user's shared images collection. -->
-    <permission android:name="android.permission.WRITE_MEDIA_IMAGES"
-        android:label="@string/permlab_imagesWrite"
-        android:description="@string/permdesc_imagesWrite"
-        android:protectionLevel="dangerous" />
-
     <!-- Allows an application to read the user's shared video collection. -->
     <permission android:name="android.permission.READ_MEDIA_VIDEO"
         android:label="@string/permlab_videoRead"
         android:description="@string/permdesc_videoRead"
-        android:protectionLevel="dangerous" />
-
-    <!-- Allows an application to modify the user's shared video collection. -->
-    <permission android:name="android.permission.WRITE_MEDIA_VIDEO"
-        android:label="@string/permlab_videoWrite"
-        android:description="@string/permdesc_videoWrite"
         android:protectionLevel="dangerous" />
 
     <!-- Allows an application to access any geographic locations persisted in the
