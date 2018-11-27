@@ -22,7 +22,6 @@ import static android.Manifest.permission.LOCATION_HARDWARE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 import android.Manifest;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
@@ -2396,31 +2395,6 @@ public class LocationManager {
     public @Nullable String getNetworkProviderPackage() {
         try {
             return mService.getNetworkProviderPackage();
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return null;
-        }
-    }
-
-    /**
-     * Allow the {@link android.location.LocationManager#getNetworkProviderPackage location
-     * provider} to start the UI to modify the location permission for a package.
-     *
-     * <p>Can only be called by the location provider.
-     *
-     * @param packageName The package the permission belongs to
-     * @param permission The (individual) location permission to switch
-     *
-     * @return A one-shot pending intent that starts the permission management UI or {@code null} if
-     *         the intent cannot be created
-     *
-     * @hide
-     */
-    @SystemApi
-    public @Nullable PendingIntent createManageLocationPermissionIntent(@NonNull String packageName,
-            @NonNull String permission) {
-        try {
-            return mService.createManageLocationPermissionIntent(packageName, permission);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return null;

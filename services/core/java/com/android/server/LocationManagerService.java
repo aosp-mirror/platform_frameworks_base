@@ -19,7 +19,6 @@ package com.android.server;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.provider.Settings.Global.LOCATION_DISABLE_STATUS_CALLBACKS;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -85,7 +84,6 @@ import com.android.internal.location.ProviderRequest;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.Preconditions;
 import com.android.server.location.ActivityRecognitionProxy;
 import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceManager;
@@ -114,7 +112,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -3410,48 +3407,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
             mockProvider.setStatus(status, extras, updateTime);
-        }
-    }
-
-    @Override
-    public PendingIntent createManageLocationPermissionIntent(String packageName,
-            String permission) {
-        Preconditions.checkNotNull(packageName);
-        Preconditions.checkArgument(permission.equals(Manifest.permission.ACCESS_FINE_LOCATION)
-                || permission.equals(Manifest.permission.ACCESS_COARSE_LOCATION)
-                || permission.equals(Manifest.permission.ACCESS_BACKGROUND_LOCATION));
-
-        int callingUid = Binder.getCallingUid();
-        long token = Binder.clearCallingIdentity();
-        try {
-            String locProvider = getNetworkProviderPackage();
-            if (locProvider == null) {
-                return null;
-            }
-
-            PackageInfo locProviderInfo;
-            try {
-                locProviderInfo = mContext.getPackageManager().getPackageInfo(
-                        locProvider, PackageManager.MATCH_DIRECT_BOOT_AUTO);
-            } catch (NameNotFoundException e) {
-                Log.e(TAG, "Could not resolve " + locProvider, e);
-                return null;
-            }
-
-            if (locProviderInfo.applicationInfo.uid != callingUid) {
-                throw new SecurityException("Only " + locProvider + " can call this API");
-            }
-
-            Intent intent = new Intent(Intent.ACTION_MANAGE_APP_PERMISSION);
-            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
-            intent.putExtra(Intent.EXTRA_PERMISSION_NAME, permission);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            return PendingIntent.getActivity(mContext,
-                    Objects.hash(packageName, permission), intent,
-                    PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
-        } finally {
-            Binder.restoreCallingIdentity(token);
         }
     }
 
