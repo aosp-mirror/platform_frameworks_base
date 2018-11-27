@@ -59,7 +59,7 @@ public final class TextLinks implements Parcelable {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({STATUS_LINKS_APPLIED, STATUS_NO_LINKS_FOUND, STATUS_NO_LINKS_APPLIED,
-            STATUS_DIFFERENT_TEXT})
+            STATUS_DIFFERENT_TEXT, STATUS_UNSUPPORTED_CHARACTER})
     public @interface Status {}
 
     /** Links were successfully applied to the text. */
@@ -73,6 +73,9 @@ public final class TextLinks implements Parcelable {
 
     /** The specified text does not match the text used to generate the links. */
     public static final int STATUS_DIFFERENT_TEXT = 3;
+
+    /** The specified text contains unsupported characters. */
+    public static final int STATUS_UNSUPPORTED_CHARACTER = 4;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
