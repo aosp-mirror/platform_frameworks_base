@@ -60,14 +60,27 @@ public class WifiNetworkConfigBuilder {
      */
     private @Nullable Pair<MacAddress, MacAddress> mBssidPatternMatcher;
     /**
+     * Whether this is an OWE network or not.
+     */
+    private boolean mIsEnhancedOpen;
+    /**
      * Pre-shared key for use with WPA-PSK networks.
      */
-    private @Nullable String mPskPassphrase;
+    private @Nullable String mWpa2PskPassphrase;
+    /**
+     * Pre-shared key for use with WPA3-SAE networks.
+     */
+    private @Nullable String mWpa3SaePassphrase;
     /**
      * The enterprise configuration details specifying the EAP method,
-     * certificates and other settings associated with the EAP.
+     * certificates and other settings associated with the WPA-EAP networks.
      */
-    private @Nullable WifiEnterpriseConfig mEnterpriseConfig;
+    private @Nullable WifiEnterpriseConfig mWpa2EnterpriseConfig;
+    /**
+     * The enterprise configuration details specifying the EAP method,
+     * certificates and other settings associated with the SuiteB networks.
+     */
+    private @Nullable WifiEnterpriseConfig mWpa3EnterpriseConfig;
     /**
      * This is a network that does not broadcast its SSID, so an
      * SSID-specific probe request must be used for scans.
@@ -94,8 +107,11 @@ public class WifiNetworkConfigBuilder {
     public WifiNetworkConfigBuilder() {
         mSsidPatternMatcher = null;
         mBssidPatternMatcher = null;
-        mPskPassphrase = null;
-        mEnterpriseConfig = null;
+        mIsEnhancedOpen = false;
+        mWpa2PskPassphrase = null;
+        mWpa3SaePassphrase = null;
+        mWpa2EnterpriseConfig = null;
+        mWpa3EnterpriseConfig = null;
         mIsHiddenSSID = false;
         mIsAppInteractionRequired = false;
         mIsUserInteractionRequired = false;
@@ -188,36 +204,81 @@ public class WifiNetworkConfigBuilder {
     }
 
     /**
-     * Set the ASCII PSK passphrase for this network. Needed for authenticating to
-     * WPA_PSK networks.
+     * Specifies whether this represents an Enhanced Open (OWE) network.
      *
-     * @param pskPassphrase PSK passphrase of the network.
+     * @return Instance of {@link WifiNetworkConfigBuilder} to enable chaining of the builder
+     * method.
+     */
+    public WifiNetworkConfigBuilder setIsEnhancedOpen() {
+        mIsEnhancedOpen = true;
+        return this;
+    }
+
+    /**
+     * Set the ASCII WPA2 passphrase for this network. Needed for authenticating to
+     * WPA2-PSK networks.
+     *
+     * @param passphrase passphrase of the network.
      * @return Instance of {@link WifiNetworkConfigBuilder} to enable chaining of the builder
      * method.
      * @throws IllegalArgumentException if the passphrase is not ASCII encodable.
      */
-    public WifiNetworkConfigBuilder setPskPassphrase(@NonNull String pskPassphrase) {
-        checkNotNull(pskPassphrase);
+    public WifiNetworkConfigBuilder setWpa2Passphrase(@NonNull String passphrase) {
+        checkNotNull(passphrase);
         final CharsetEncoder asciiEncoder = StandardCharsets.US_ASCII.newEncoder();
-        if (!asciiEncoder.canEncode(pskPassphrase)) {
+        if (!asciiEncoder.canEncode(passphrase)) {
             throw new IllegalArgumentException("passphrase not ASCII encodable");
         }
-        mPskPassphrase = pskPassphrase;
+        mWpa2PskPassphrase = passphrase;
+        return this;
+    }
+
+    /**
+     * Set the ASCII WPA3 passphrase for this network. Needed for authenticating to
+     * WPA3-SAE networks.
+     *
+     * @param passphrase passphrase of the network.
+     * @return Instance of {@link WifiNetworkConfigBuilder} to enable chaining of the builder
+     * method.
+     * @throws IllegalArgumentException if the passphrase is not ASCII encodable.
+     */
+    public WifiNetworkConfigBuilder setWpa3Passphrase(@NonNull String passphrase) {
+        checkNotNull(passphrase);
+        final CharsetEncoder asciiEncoder = StandardCharsets.US_ASCII.newEncoder();
+        if (!asciiEncoder.canEncode(passphrase)) {
+            throw new IllegalArgumentException("passphrase not ASCII encodable");
+        }
+        mWpa3SaePassphrase = passphrase;
         return this;
     }
 
     /**
      * Set the associated enterprise configuration for this network. Needed for authenticating to
-     * WPA_EAP networks. See {@link WifiEnterpriseConfig} for description.
+     * WPA2-EAP networks. See {@link WifiEnterpriseConfig} for description.
      *
      * @param enterpriseConfig Instance of {@link WifiEnterpriseConfig}.
      * @return Instance of {@link WifiNetworkConfigBuilder} to enable chaining of the builder
      * method.
      */
-    public WifiNetworkConfigBuilder setEnterpriseConfig(
+    public WifiNetworkConfigBuilder setWpa2EnterpriseConfig(
             @NonNull WifiEnterpriseConfig enterpriseConfig) {
         checkNotNull(enterpriseConfig);
-        mEnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
+        mWpa2EnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
+        return this;
+    }
+
+    /**
+     * Set the associated enterprise configuration for this network. Needed for authenticating to
+     * WPA3-SuiteB networks. See {@link WifiEnterpriseConfig} for description.
+     *
+     * @param enterpriseConfig Instance of {@link WifiEnterpriseConfig}.
+     * @return Instance of {@link WifiNetworkConfigBuilder} to enable chaining of the builder
+     * method.
+     */
+    public WifiNetworkConfigBuilder setWpa3EnterpriseConfig(
+            @NonNull WifiEnterpriseConfig enterpriseConfig) {
+        checkNotNull(enterpriseConfig);
+        mWpa3EnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
         return this;
     }
 
@@ -324,16 +385,38 @@ public class WifiNetworkConfigBuilder {
         configuration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
     }
 
-    private void setKeyMgmtInWifiConfiguration(@NonNull WifiConfiguration configuration) {
-        if (!TextUtils.isEmpty(mPskPassphrase)) {
-            // WPA_PSK network.
+    private void setSecurityParamsInWifiConfiguration(@NonNull WifiConfiguration configuration) {
+        if (!TextUtils.isEmpty(mWpa2PskPassphrase)) { // WPA-PSK network.
             configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-        } else if (mEnterpriseConfig != null) {
-            // WPA_EAP network
+            // WifiConfiguration.preSharedKey needs quotes around ASCII password.
+            configuration.preSharedKey = "\"" + mWpa2PskPassphrase + "\"";
+        } else if (!TextUtils.isEmpty(mWpa3SaePassphrase)) { // WPA3-SAE network.
+            configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SAE);
+            // PMF mandatory for SAE.
+            configuration.requirePMF = true;
+            // WifiConfiguration.preSharedKey needs quotes around ASCII password.
+            configuration.preSharedKey = "\"" + mWpa3SaePassphrase + "\"";
+        } else if (mWpa2EnterpriseConfig != null) { // WPA-EAP network
             configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
             configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
-        } else {
-            // Open network
+            configuration.enterpriseConfig = mWpa2EnterpriseConfig;
+        } else if (mWpa3EnterpriseConfig != null) { // WPA3-SuiteB network
+            configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SUITE_B_192);
+            configuration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
+            // TODO (b/113878056): Verify these params once we verify SuiteB configuration.
+            configuration.allowedGroupMgmtCiphers.set(
+                    WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256);
+            configuration.allowedSuiteBCiphers.set(
+                    WifiConfiguration.SuiteBCipher.ECDHE_ECDSA);
+            configuration.allowedSuiteBCiphers.set(
+                    WifiConfiguration.SuiteBCipher.ECDHE_RSA);
+            configuration.requirePMF = true;
+            configuration.enterpriseConfig = mWpa3EnterpriseConfig;
+        } else if (mIsEnhancedOpen) { // OWE network
+            configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.OWE);
+            // PMF mandatory.
+            configuration.requirePMF = true;
+        } else { // Open network
             configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         }
     }
@@ -349,12 +432,7 @@ public class WifiNetworkConfigBuilder {
         if (mSsidPatternMatcher.getType() == PatternMatcher.PATTERN_LITERAL) {
             wifiConfiguration.SSID = "\"" + mSsidPatternMatcher.getPath() + "\"";
         }
-        setKeyMgmtInWifiConfiguration(wifiConfiguration);
-        // WifiConfiguration.preSharedKey needs quotes around ASCII password.
-        if (mPskPassphrase != null) {
-            wifiConfiguration.preSharedKey = "\"" + mPskPassphrase + "\"";
-        }
-        wifiConfiguration.enterpriseConfig = mEnterpriseConfig;
+        setSecurityParamsInWifiConfiguration(wifiConfiguration);
         wifiConfiguration.hiddenSSID = mIsHiddenSSID;
         wifiConfiguration.priority = mPriority;
         wifiConfiguration.meteredOverride =
@@ -394,6 +472,20 @@ public class WifiNetworkConfigBuilder {
             return true;
         }
         return false;
+    }
+
+    private void validateSecurityParams() {
+        int numSecurityTypes = 0;
+        numSecurityTypes += mIsEnhancedOpen ? 1 : 0;
+        numSecurityTypes += !TextUtils.isEmpty(mWpa2PskPassphrase) ? 1 : 0;
+        numSecurityTypes += !TextUtils.isEmpty(mWpa3SaePassphrase) ? 1 : 0;
+        numSecurityTypes += mWpa2EnterpriseConfig != null ? 1 : 0;
+        numSecurityTypes += mWpa3EnterpriseConfig != null ? 1 : 0;
+        if (numSecurityTypes > 1) {
+            throw new IllegalStateException("only one of setIsEnhancedOpen, setWpa2Passphrase,"
+                    + "setWpa3Passphrase, setWpa2EnterpriseConfig or setWpa3EnterpriseConfig"
+                    + " can be invoked for network specifier");
+        }
     }
 
     /**
@@ -464,10 +556,7 @@ public class WifiNetworkConfigBuilder {
                     + "setIsUserInteractionRequired/setPriority/setIsMetered are allowed for "
                     + "specifier");
         }
-        if (!TextUtils.isEmpty(mPskPassphrase) && mEnterpriseConfig != null) {
-            throw new IllegalStateException("only one of setPreSharedKey or setEnterpriseConfig can"
-                    + " be invoked for network specifier");
-        }
+        validateSecurityParams();
 
         return new WifiNetworkSpecifier(
                 mSsidPatternMatcher,
@@ -493,10 +582,7 @@ public class WifiNetworkConfigBuilder {
             throw new IllegalStateException("none of setSsidPattern/setBssidPattern/setBssid are"
                     + " allowed for suggestion");
         }
-        if (!TextUtils.isEmpty(mPskPassphrase) && mEnterpriseConfig != null) {
-            throw new IllegalStateException("only one of setPreSharedKey or setEnterpriseConfig can"
-                    + "be invoked for suggestion");
-        }
+        validateSecurityParams();
 
         return new WifiNetworkSuggestion(
                 buildWifiConfiguration(),
