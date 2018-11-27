@@ -33,8 +33,6 @@
 #include <iomanip>
 #include <string>
 
-#include <android-base/stringprintf.h>
-#include <android-base/unique_fd.h>
 #include <debuggerd/client.h>
 #include <log/log.h>
 #include <utils/misc.h>
@@ -49,10 +47,6 @@
 
 namespace android
 {
-
-static inline UniqueFile MakeUniqueFile(const char* path, const char* mode) {
-    return UniqueFile(fopen(path, mode), safeFclose);
-}
 
 enum {
     HEAP_UNKNOWN,

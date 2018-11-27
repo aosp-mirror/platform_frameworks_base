@@ -1055,6 +1055,9 @@ public class Process {
      */
     public static final native long getPss(int pid);
 
+    /** @hide */
+    public static final native long[] getRss(int pid);
+
     /**
      * Specifies the outcome of having started a process.
      * @hide

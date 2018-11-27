@@ -19,6 +19,8 @@
 
 #include <memory>
 #include <stdio.h>
+#include <android-base/stringprintf.h>
+#include <android-base/unique_fd.h>
 
 namespace android {
 
@@ -27,6 +29,11 @@ inline void safeFclose(FILE* fp) {
 }
 
 using UniqueFile = std::unique_ptr<FILE, decltype(&safeFclose)>;
+
+inline UniqueFile MakeUniqueFile(const char* path, const char* mode) {
+    return UniqueFile(fopen(path, mode), safeFclose);
+}
+
 UniqueFile OpenSmapsOrRollup(int pid);
 
 }  // namespace android
