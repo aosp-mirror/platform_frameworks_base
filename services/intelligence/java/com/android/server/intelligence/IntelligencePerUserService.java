@@ -22,6 +22,7 @@ import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUC
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.assist.AssistContent;
@@ -146,7 +147,8 @@ final class IntelligencePerUserService
 
     // TODO(b/111276913): log metrics
     @GuardedBy("mLock")
-    public void finishSessionLocked(@NonNull InteractionSessionId sessionId) {
+    public void finishSessionLocked(@NonNull InteractionSessionId sessionId,
+            @Nullable List<ContentCaptureEvent> events) {
         if (!isEnabledLocked()) {
             return;
         }
@@ -158,8 +160,18 @@ final class IntelligencePerUserService
             }
             return;
         }
+        if (events != null && !events.isEmpty()) {
+            // TODO(b/111276913): for now we're sending the events and the onDestroy() in 2 separate
+            // calls because it's not clear yet whether we'll change the manager to send events
+            // to the service directly (i.e., without passing through system server). Once we
+            // decide, we might need to split IIntelligenceService.onSessionLifecycle() in 2
+            // methods, one for start and another for finish (and passing the events to finish),
+            // otherwise the service might receive the 2 calls out of order.
+            session.sendEventsLocked(events);
+        }
         if (mMaster.verbose) {
-            Slog.v(TAG, "finishSession(): " + session);
+            Slog.v(TAG, "finishSession(" + (events == null ? 0 : events.size()) + " events): "
+                    + session);
         }
         session.removeSelfLocked(true);
     }
