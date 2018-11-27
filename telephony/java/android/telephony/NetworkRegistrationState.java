@@ -151,7 +151,7 @@ public class NetworkRegistrationState implements Parcelable {
     private final int[] mAvailableServices;
 
     @Nullable
-    private final CellIdentity mCellIdentity;
+    private CellIdentity mCellIdentity;
 
     @Nullable
     private VoiceSpecificRegistrationStates mVoiceSpecificStates;
@@ -490,4 +490,22 @@ public class NetworkRegistrationState implements Parcelable {
             return new NetworkRegistrationState[size];
         }
     };
+
+    /**
+     * @hide
+     */
+    public NetworkRegistrationState sanitizeLocationInfo() {
+        NetworkRegistrationState result = copy();
+        result.mCellIdentity = null;
+        return result;
+    }
+
+    private NetworkRegistrationState copy() {
+        Parcel p = Parcel.obtain();
+        this.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        NetworkRegistrationState result = new NetworkRegistrationState(p);
+        p.recycle();
+        return result;
+    }
 }

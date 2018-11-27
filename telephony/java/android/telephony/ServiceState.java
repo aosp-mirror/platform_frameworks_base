@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Contains phone state and service related information.
@@ -1866,5 +1867,30 @@ public class ServiceState implements Parcelable {
         return FREQUENCY_RANGE_ORDER.indexOf(range1) > FREQUENCY_RANGE_ORDER.indexOf(range2)
                 ? range1
                 : range2;
+    }
+
+    /**
+     * Returns a copy of self with location-identifying information removed.
+     * Always clears the NetworkRegistrationState's CellIdentity fields, but if removeCoarseLocation
+     * is true, clears other info as well.
+     * @hide
+     */
+    public ServiceState sanitizeLocationInfo(boolean removeCoarseLocation) {
+        ServiceState state = new ServiceState(this);
+        if (state.mNetworkRegistrationStates != null) {
+            state.mNetworkRegistrationStates = state.mNetworkRegistrationStates.stream()
+                    .map(NetworkRegistrationState::sanitizeLocationInfo)
+                    .collect(Collectors.toList());
+        }
+        if (!removeCoarseLocation) return state;
+
+        state.mDataOperatorAlphaLong = null;
+        state.mDataOperatorAlphaShort = null;
+        state.mDataOperatorNumeric = null;
+        state.mVoiceOperatorAlphaLong = null;
+        state.mVoiceOperatorAlphaShort = null;
+        state.mVoiceOperatorNumeric = null;
+
+        return state;
     }
 }
