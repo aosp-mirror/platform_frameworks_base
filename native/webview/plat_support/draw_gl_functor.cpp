@@ -42,10 +42,10 @@ AwDrawGLFunction* g_aw_drawgl_function = NULL;
 class DrawGLFunctor : public Functor {
  public:
   explicit DrawGLFunctor(jlong view_context) : view_context_(view_context) {}
-  virtual ~DrawGLFunctor() {}
+  ~DrawGLFunctor() override {}
 
   // Functor
-  virtual status_t operator ()(int what, void* data) {
+  status_t operator ()(int what, void* data) override {
     using uirenderer::DrawGlInfo;
     if (!g_aw_drawgl_function) {
       ALOGE("Cannot draw: no DrawGL Function installed");
