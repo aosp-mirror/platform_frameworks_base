@@ -1485,7 +1485,7 @@ public class WallpaperManager {
             throw new RuntimeException(new DeadSystemException());
         }
         try {
-            return sGlobals.mService.getWidthHint();
+            return sGlobals.mService.getWidthHint(mContext.getDisplayId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1511,7 +1511,7 @@ public class WallpaperManager {
             throw new RuntimeException(new DeadSystemException());
         }
         try {
-            return sGlobals.mService.getHeightHint();
+            return sGlobals.mService.getHeightHint(mContext.getDisplayId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1572,7 +1572,7 @@ public class WallpaperManager {
                 throw new RuntimeException(new DeadSystemException());
             } else {
                 sGlobals.mService.setDimensionHints(minimumWidth, minimumHeight,
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), mContext.getDisplayId());
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1597,7 +1597,8 @@ public class WallpaperManager {
                 Log.w(TAG, "WallpaperService not running");
                 throw new RuntimeException(new DeadSystemException());
             } else {
-                sGlobals.mService.setDisplayPadding(padding, mContext.getOpPackageName());
+                sGlobals.mService.setDisplayPadding(padding, mContext.getOpPackageName(),
+                        mContext.getDisplayId());
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

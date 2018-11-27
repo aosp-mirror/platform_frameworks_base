@@ -189,10 +189,10 @@ Landroid/app/IUiModeManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/app
 Landroid/app/IUiModeManager;->disableCarMode(I)V
 Landroid/app/IUserSwitchObserver$Stub;-><init>()V
 Landroid/app/IWallpaperManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/app/IWallpaperManager;
-Landroid/app/IWallpaperManager;->getHeightHint()I
+Landroid/app/IWallpaperManager;->getHeightHint(I)I
 Landroid/app/IWallpaperManager;->getWallpaper(Ljava/lang/String;Landroid/app/IWallpaperManagerCallback;ILandroid/os/Bundle;I)Landroid/os/ParcelFileDescriptor;
 Landroid/app/IWallpaperManager;->getWallpaperInfo(I)Landroid/app/WallpaperInfo;
-Landroid/app/IWallpaperManager;->getWidthHint()I
+Landroid/app/IWallpaperManager;->getWidthHint(I)I
 Landroid/app/IWallpaperManager;->hasNamedWallpaper(Ljava/lang/String;)Z
 Landroid/app/IWallpaperManager;->setWallpaperComponent(Landroid/content/ComponentName;)V
 Landroid/app/IWallpaperManagerCallback$Stub;-><init>()V

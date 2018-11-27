@@ -87,24 +87,24 @@ interface IWallpaperManager {
 
     /**
      * Sets the dimension hint for the wallpaper. These hints indicate the desired
-     * minimum width and height for the wallpaper.
+     * minimum width and height for the wallpaper in a particular display.
      */
-    void setDimensionHints(in int width, in int height, in String callingPackage);
+    void setDimensionHints(in int width, in int height, in String callingPackage, int displayId);
 
     /**
-     * Returns the desired minimum width for the wallpaper.
+     * Returns the desired minimum width for the wallpaper in a particular display.
      */
-    int getWidthHint();
+    int getWidthHint(int displayId);
 
     /**
-     * Returns the desired minimum height for the wallpaper.
+     * Returns the desired minimum height for the wallpaper in a particular display.
      */
-    int getHeightHint();
+    int getHeightHint(int displayId);
 
     /**
      * Sets extra padding that we would like the wallpaper to have outside of the display.
      */
-    void setDisplayPadding(in Rect padding, in String callingPackage);
+    void setDisplayPadding(in Rect padding, in String callingPackage, int displayId);
 
     /**
      * Returns the name of the wallpaper. Private API.
