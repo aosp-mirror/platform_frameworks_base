@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <utils/MathUtils.h>
 #include "LayerDrawable.h"
 
 #include "GrBackendSurface.h"
@@ -30,6 +31,24 @@ void LayerDrawable::onDraw(SkCanvas* canvas) {
     if (layer) {
         DrawLayer(canvas->getGrContext(), canvas, layer, nullptr, nullptr, true);
     }
+}
+
+// This is a less-strict matrix.isTranslate() that will still report being translate-only
+// on imperceptibly small scaleX & scaleY values.
+static bool isBasicallyTranslate(const SkMatrix& matrix) {
+    if (!matrix.isScaleTranslate()) return false;
+    return MathUtils::isOne(matrix.getScaleX()) && MathUtils::isOne(matrix.getScaleY());
+}
+
+static bool shouldFilter(const SkMatrix& matrix) {
+    if (!matrix.isScaleTranslate()) return true;
+
+    // We only care about meaningful scale here
+    bool noScale = MathUtils::isOne(matrix.getScaleX())
+            && MathUtils::isOne(matrix.getScaleY());
+    bool pixelAligned = SkScalarIsInt(matrix.getTranslateX())
+            && SkScalarIsInt(matrix.getTranslateY());
+    return !(noScale && pixelAligned);
 }
 
 bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer,
@@ -101,7 +120,7 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
             // Integer translation is defined as when src rect and dst rect align fractionally.
             // Skia TextureOp has the above logic build-in, but not NonAAFillRectOp. TextureOp works
             // only for SrcOver blending and without color filter (readback uses Src blending).
-            bool isIntegerTranslate = totalMatrix.isTranslate()
+            bool isIntegerTranslate = isBasicallyTranslate(totalMatrix)
                     && SkScalarFraction(skiaDestRect.fLeft + totalMatrix[SkMatrix::kMTransX])
                     == SkScalarFraction(skiaSrcRect.fLeft)
                     && SkScalarFraction(skiaDestRect.fTop + totalMatrix[SkMatrix::kMTransY])
@@ -112,10 +131,7 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
             canvas->drawImageRect(layerImage.get(), skiaSrcRect, skiaDestRect, &paint,
                                   SkCanvas::kFast_SrcRectConstraint);
         } else {
-            bool isIntegerTranslate = totalMatrix.isTranslate()
-                    && SkScalarIsInt(totalMatrix[SkMatrix::kMTransX])
-                    && SkScalarIsInt(totalMatrix[SkMatrix::kMTransY]);
-            if (layer->getForceFilter() || !isIntegerTranslate) {
+            if (layer->getForceFilter() || shouldFilter(totalMatrix)) {
                 paint.setFilterQuality(kLow_SkFilterQuality);
             }
             canvas->drawImage(layerImage.get(), 0, 0, &paint);
