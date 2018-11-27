@@ -20,9 +20,11 @@ import android.annotation.NonNull;
 
 /**
  * @hide
- * Structure for file data source descriptor.
+ * Structure of data source descriptor for sources using callback.
  *
- * Used by {@link MediaPlayer2#setDataSource(CallbackDataSourceDesc)}
+ * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)},
+ * {@link MediaPlayer2#setNextDataSource(DataSourceDesc)} and
+ * {@link MediaPlayer2#setNextDataSources(List<DataSourceDesc>)}
  * to set data source for playback.
  *
  * <p>Users should use {@link Builder} to create {@link CallbackDataSourceDesc}.

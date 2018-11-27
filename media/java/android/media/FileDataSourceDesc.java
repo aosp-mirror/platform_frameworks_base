@@ -17,20 +17,26 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
-import java.io.FileDescriptor;
+import java.io.IOException;
 
 /**
  * @hide
- * Structure for data source descriptor.
+ * Structure of data source descriptor for sources using file descriptor.
  *
- * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)}
+ * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)},
+ * {@link MediaPlayer2#setNextDataSource(DataSourceDesc)} and
+ * {@link MediaPlayer2#setNextDataSources(List<DataSourceDesc>)}
  * to set data source for playback.
  *
  * <p>Users should use {@link Builder} to create {@link FileDataSourceDesc}.
  *
  */
 public class FileDataSourceDesc extends DataSourceDesc {
+    private static final String TAG = "FileDataSourceDesc";
+
     /**
      * Used when the length of file descriptor is unknown.
      *
@@ -38,34 +44,61 @@ public class FileDataSourceDesc extends DataSourceDesc {
      */
     public static final long FD_LENGTH_UNKNOWN = LONG_MAX;
 
-    private FileDescriptor mFD;
+    private ParcelFileDescriptor mPFD;
     private long mOffset = 0;
     private long mLength = FD_LENGTH_UNKNOWN;
 
     private FileDataSourceDesc() {
+        super();
     }
 
     /**
-     * Return the FileDescriptor of this data source.
-     * @return the FileDescriptor of this data source
+     * Releases the resources held by this {@code FileDataSourceDesc} object.
      */
-    public FileDescriptor getFileDescriptor() {
-        return mFD;
+    @Override
+    void close() {
+        super.close();
+        closeFD();
     }
 
     /**
-     * Return the offset associated with the FileDescriptor of this data source.
+     * Releases the file descriptor held by this {@code FileDataSourceDesc} object.
+     */
+    void closeFD() {
+        synchronized (this) {
+            if (mPFD != null) {
+                try {
+                    mPFD.close();
+                } catch (IOException e) {
+                    Log.e(TAG, "failed to close pfd: " + e);
+                }
+
+                mPFD = null;
+            }
+        }
+    }
+
+    /**
+     * Return the ParcelFileDescriptor of this data source.
+     * @return the ParcelFileDescriptor of this data source
+     */
+    public ParcelFileDescriptor getParcelFileDescriptor() {
+        return mPFD;
+    }
+
+    /**
+     * Return the offset associated with the ParcelFileDescriptor of this data source.
      * It's meaningful only when it has been set by the {@link Builder}.
-     * @return the offset associated with the FileDescriptor of this data source
+     * @return the offset associated with the ParcelFileDescriptor of this data source
      */
     public long getOffset() {
         return mOffset;
     }
 
     /**
-     * Return the content length associated with the FileDescriptor of this data source.
+     * Return the content length associated with the ParcelFileDescriptor of this data source.
      * {@link #FD_LENGTH_UNKNOWN} means same as the length of source content.
-     * @return the content length associated with the FileDescriptor of this data source
+     * @return the content length associated with the ParcelFileDescriptor of this data source
      */
     public long getLength() {
         return mLength;
@@ -78,7 +111,7 @@ public class FileDataSourceDesc extends DataSourceDesc {
      *
      * <pre class="prettyprint">
      * FileDataSourceDesc newDSD = new FileDataSourceDesc.Builder()
-     *         .setDataSource(fd, 0, srcLength)
+     *         .setDataSource(pfd, 0, srcLength)
      *         .setStartPosition(1000)
      *         .setEndPosition(15000)
      *         .build();
@@ -86,7 +119,7 @@ public class FileDataSourceDesc extends DataSourceDesc {
      * </pre>
      */
     public static class Builder extends BuilderBase<Builder> {
-        private FileDescriptor mFD;
+        private ParcelFileDescriptor mPFD;
         private long mOffset = 0;
         private long mLength = FD_LENGTH_UNKNOWN;
 
@@ -107,7 +140,7 @@ public class FileDataSourceDesc extends DataSourceDesc {
             if (dsd == null) {
                 return;  // use default
             }
-            mFD = dsd.mFD;
+            mPFD = dsd.mPFD;
             mOffset = dsd.mOffset;
             mLength = dsd.mLength;
         }
@@ -122,7 +155,7 @@ public class FileDataSourceDesc extends DataSourceDesc {
         public @NonNull FileDataSourceDesc build() {
             FileDataSourceDesc dsd = new FileDataSourceDesc();
             super.build(dsd);
-            dsd.mFD = mFD;
+            dsd.mPFD = mPFD;
             dsd.mOffset = mOffset;
             dsd.mLength = mLength;
 
@@ -130,38 +163,46 @@ public class FileDataSourceDesc extends DataSourceDesc {
         }
 
         /**
-         * Sets the data source (FileDescriptor) to use. The FileDescriptor must be
-         * seekable (N.B. a LocalSocket is not seekable). It is the caller's responsibility
-         * to close the file descriptor after the source has been used.
+         * Sets the data source (ParcelFileDescriptor) to use. The ParcelFileDescriptor must be
+         * seekable (N.B. a LocalSocket is not seekable). When the {@link FileDataSourceDesc}
+         * created by this builder is passed to {@link MediaPlayer2} via
+         * {@link MediaPlayer2#setDataSource(DataSourceDesc)},
+         * {@link MediaPlayer2#setNextDataSource(DataSourceDesc)} or
+         * {@link MediaPlayer2#setNextDataSources(List<DataSourceDesc>)}, MediaPlayer2 will
+         * close the ParcelFileDescriptor.
          *
-         * @param fd the FileDescriptor for the file to play
+         * @param pfd the ParcelFileDescriptor for the file to play
          * @return the same Builder instance.
-         * @throws NullPointerException if fd is null.
+         * @throws NullPointerException if pfd is null.
          */
-        public @NonNull Builder setDataSource(@NonNull FileDescriptor fd) {
-            Media2Utils.checkArgument(fd != null, "fd cannot be null.");
+        public @NonNull Builder setDataSource(@NonNull ParcelFileDescriptor pfd) {
+            Media2Utils.checkArgument(pfd != null, "pfd cannot be null.");
             resetDataSource();
-            mFD = fd;
+            mPFD = pfd;
             return this;
         }
 
         /**
-         * Sets the data source (FileDescriptor) to use. The FileDescriptor must be
-         * seekable (N.B. a LocalSocket is not seekable). It is the caller's responsibility
-         * to close the file descriptor after the source has been used.
+         * Sets the data source (ParcelFileDescriptor) to use. The ParcelFileDescriptor must be
+         * seekable (N.B. a LocalSocket is not seekable). When the {@link FileDataSourceDesc}
+         * created by this builder is passed to {@link MediaPlayer2} via
+         * {@link MediaPlayer2#setDataSource(DataSourceDesc)},
+         * {@link MediaPlayer2#setNextDataSource(DataSourceDesc)} or
+         * {@link MediaPlayer2#setNextDataSources(List<DataSourceDesc>)}, MediaPlayer2 will
+         * close the ParcelFileDescriptor.
          *
          * Any negative number for offset is treated as 0.
          * Any negative number for length is treated as maximum length of the data source.
          *
-         * @param fd the FileDescriptor for the file to play
+         * @param pfd the ParcelFileDescriptor for the file to play
          * @param offset the offset into the file where the data to be played starts, in bytes
          * @param length the length in bytes of the data to be played
          * @return the same Builder instance.
-         * @throws NullPointerException if fd is null.
+         * @throws NullPointerException if pfd is null.
          */
         public @NonNull Builder setDataSource(
-                @NonNull FileDescriptor fd, long offset, long length) {
-            Media2Utils.checkArgument(fd != null, "fd cannot be null.");
+                @NonNull ParcelFileDescriptor pfd, long offset, long length) {
+            Media2Utils.checkArgument(pfd != null, "pfd cannot be null.");
             if (offset < 0) {
                 offset = 0;
             }
@@ -169,14 +210,14 @@ public class FileDataSourceDesc extends DataSourceDesc {
                 length = FD_LENGTH_UNKNOWN;
             }
             resetDataSource();
-            mFD = fd;
+            mPFD = pfd;
             mOffset = offset;
             mLength = length;
             return this;
         }
 
         private void resetDataSource() {
-            mFD = null;
+            mPFD = null;
             mOffset = 0;
             mLength = FD_LENGTH_UNKNOWN;
         }
