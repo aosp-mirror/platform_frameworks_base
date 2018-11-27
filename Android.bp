@@ -816,7 +816,7 @@ gensrcs {
 java_library {
     name: "ext",
     installable: true,
-    sdk_version: "core_current",
+    no_framework_libs: true,
     static_libs: [
         "libphonenumber-platform",
         "nist-sip",
