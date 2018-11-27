@@ -1586,22 +1586,14 @@
     <string name="permdesc_readSyncStats">Allows an app to read the sync stats for an account, including the history of sync events and how much data is synced. </string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permlab_sdcardRead" product="nosdcard">read the contents of your USB storage</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_sdcardRead" product="default">read the contents of your SD card</string>
+    <string name="permlab_sdcardRead">read the contents of your shared storage</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permdesc_sdcardRead" product="nosdcard">Allows the app to read the contents of your USB storage.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_sdcardRead" product="default">Allows the app to read the contents of your SD card.</string>
+    <string name="permdesc_sdcardRead">Allows the app to read the contents of your shared storage.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permlab_sdcardWrite" product="nosdcard">modify or delete the contents of your USB storage</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_sdcardWrite" product="default">modify or delete the contents of your SD card</string>
+    <string name="permlab_sdcardWrite">modify or delete the contents of your shared storage</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permdesc_sdcardWrite" product="nosdcard">Allows the app to write to the USB storage.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_sdcardWrite" product="default">Allows the app to write to the SD card.</string>
+    <string name="permdesc_sdcardWrite">Allows the app to write the contents of your shared storage.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_use_sip">make/receive SIP calls</string>
