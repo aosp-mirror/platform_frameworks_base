@@ -2381,7 +2381,7 @@ public class SubscriptionManager {
      * Being in the same group means they might be activated or deactivated
      * together, some of them may be invisible to the users, etc.
      *
-     * Caller will either have {@link android.Manifest.permission.MODIFY_PHONE_STATE}
+     * Caller will either have {@link android.Manifest.permission#MODIFY_PHONE_STATE}
      * permission or can manage all subscriptions in the list, according to their
      * acess rules.
      *
