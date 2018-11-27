@@ -54,9 +54,12 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
             mSetTrackingHeadsUp = this::setTrackingHeadsUp;
     private final Runnable mUpdatePanelTranslation = this::updatePanelTranslation;
     private final BiConsumer<Float, Float> mSetExpandedHeight = this::setExpandedHeight;
-    private float mExpandedHeight;
-    private boolean mIsExpanded;
-    private float mExpandFraction;
+    @VisibleForTesting
+    float mExpandedHeight;
+    @VisibleForTesting
+    boolean mIsExpanded;
+    @VisibleForTesting
+    float mExpandFraction;
     private ExpandableNotificationRow mTrackedChild;
     private boolean mShown;
     private final View.OnLayoutChangeListener mStackScrollLayoutChangeListener =
@@ -100,6 +103,20 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         mClockView = clockView;
         mDarkIconDispatcher = Dependency.get(DarkIconDispatcher.class);
         mDarkIconDispatcher.addDarkReceiver(this);
+
+        mHeadsUpStatusBarView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                    int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                if (shouldBeVisible()) {
+                    updateTopEntry();
+
+                    // trigger scroller to notify the latest panel translation
+                    mStackScroller.requestLayout();
+                }
+                mHeadsUpStatusBarView.removeOnLayoutChangeListener(this);
+            }
+        });
     }
 
 
@@ -300,5 +317,14 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     public void setPublicMode(boolean publicMode) {
         mHeadsUpStatusBarView.setPublicMode(publicMode);
         updateTopEntry();
+    }
+
+    void readFrom(HeadsUpAppearanceController oldController) {
+        if (oldController != null) {
+            mTrackedChild = oldController.mTrackedChild;
+            mExpandedHeight = oldController.mExpandedHeight;
+            mIsExpanded = oldController.mIsExpanded;
+            mExpandFraction = oldController.mExpandFraction;
+        }
     }
 }
