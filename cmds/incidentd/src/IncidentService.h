@@ -112,6 +112,7 @@ public:
     virtual status_t onTransact(uint32_t code, const Parcel& data, Parcel* reply,
                                 uint32_t flags) override;
     virtual status_t command(FILE* in, FILE* out, FILE* err, Vector<String8>& args);
+    virtual status_t dump(int fd, const Vector<String16>& args);
 
 private:
     sp<ReportRequestQueue> mQueue;
