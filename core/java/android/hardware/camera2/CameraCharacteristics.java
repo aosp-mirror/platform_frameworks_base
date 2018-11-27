@@ -393,7 +393,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *         doesn't have any recommendation for this use case or the recommended configurations
      *         are invalid.
      */
-    public RecommendedStreamConfigurationMap getRecommendedStreamConfigurationMap(
+    public @Nullable RecommendedStreamConfigurationMap getRecommendedStreamConfigurationMap(
             @RecommendedStreamConfigurationMap.RecommendedUsecase int usecase) {
         if (((usecase >= RecommendedStreamConfigurationMap.USECASE_PREVIEW) &&
                 (usecase <= RecommendedStreamConfigurationMap.USECASE_RAW)) ||
