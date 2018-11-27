@@ -21,8 +21,4 @@
     <dimen name="navigation_bar_height">0dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
     <dimen name="navigation_bar_width">0dp</dimen>
-    <!-- Height of the bottom navigation / system bar frame; navigation buttons height. -->
-    <dimen name="navigation_bar_frame_height">48dp</dimen>
-    <!-- Width of the navigation bar frame when it is placed vertically on the screen -->
-    <dimen name="navigation_bar_frame_width">48dp</dimen>
 </resources>
