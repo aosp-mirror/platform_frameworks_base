@@ -30,9 +30,9 @@ import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Log;
@@ -100,6 +100,7 @@ public class QuickStepController implements GestureHelper {
     private NavigationGestureAction mCurrentAction;
     private NavigationGestureAction[] mGestureActions = new NavigationGestureAction[MAX_GESTURES];
 
+    private final Rect mLastLayoutRect = new Rect();
     private final OverviewProxyService mOverviewEventSender;
     private final Context mContext;
     private final StatusBar mStatusBar;
@@ -107,7 +108,6 @@ public class QuickStepController implements GestureHelper {
     private final Matrix mTransformLocalMatrix = new Matrix();
 
     public QuickStepController(Context context) {
-        final Resources res = context.getResources();
         mContext = context;
         mStatusBar = SysUiServiceProvider.getComponent(context, StatusBar.class);
         mOverviewEventSender = Dependency.get(OverviewProxyService.class);
@@ -142,6 +142,8 @@ public class QuickStepController implements GestureHelper {
             if (action != null) {
                 action.setBarState(true, mNavBarPosition, mDragHPositive, mDragVPositive);
                 action.onDarkIntensityChange(mDarkIntensity);
+                action.onLayout(true /* changed */, mLastLayoutRect.left, mLastLayoutRect.top,
+                        mLastLayoutRect.right, mLastLayoutRect.bottom);
             }
         }
     }
@@ -382,6 +384,7 @@ public class QuickStepController implements GestureHelper {
                 action.onLayout(changed, left, top, right, bottom);
             }
         }
+        mLastLayoutRect.set(left, top, right, bottom);
     }
 
     @Override
