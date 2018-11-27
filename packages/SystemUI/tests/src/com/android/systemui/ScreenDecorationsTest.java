@@ -16,13 +16,13 @@ package com.android.systemui;
 
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 
-import  static com.android.systemui.ScreenDecorations.rectsToRegion;
+import static com.android.systemui.ScreenDecorations.rectsToRegion;
 import static com.android.systemui.tuner.TunablePadding.FLAG_END;
 import static com.android.systemui.tuner.TunablePadding.FLAG_START;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -87,7 +87,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mWindowManager = mock(WindowManager.class);
         mView = spy(new StatusBarWindowView(mContext, null));
         when(mStatusBar.getStatusBarWindow()).thenReturn(mView);
-        when(mStatusBar.getNavigationBarWindow()).thenReturn(mView);
         mContext.putComponent(StatusBar.class, mStatusBar);
 
         Display display = mContext.getSystemService(WindowManager.class).getDefaultDisplay();

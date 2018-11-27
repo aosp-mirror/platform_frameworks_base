@@ -82,6 +82,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -196,6 +197,7 @@ public class StatusBarTest extends SysuiTestCase {
                         mDreamManager);
         mDependency.injectTestDependency(NotificationInterruptionStateProvider.class,
                 mNotificationInterruptionStateProvider);
+        mDependency.injectMockDependency(NavigationBarController.class);
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
@@ -245,7 +247,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mock(StatusBarWindowController.class), mock(NotificationIconAreaController.class),
                 mDozeScrimController, mock(NotificationShelf.class),
                 mLockscreenUserManager, mCommandQueue, mNotificationPresenter,
-                mock(BubbleController.class));
+                mock(BubbleController.class), mock(NavigationBarController.class));
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         SystemUIFactory.getInstance().getRootComponent()
@@ -695,7 +697,8 @@ public class StatusBarTest extends SysuiTestCase {
                 NotificationLockscreenUserManager notificationLockscreenUserManager,
                 CommandQueue commandQueue,
                 NotificationPresenter notificationPresenter,
-                BubbleController bubbleController) {
+                BubbleController bubbleController,
+                NavigationBarController navBarController) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -726,6 +729,7 @@ public class StatusBarTest extends SysuiTestCase {
             mPresenter = notificationPresenter;
             mGestureWakeLock = mock(PowerManager.WakeLock.class);
             mBubbleController = bubbleController;
+            mNavigationBarController = navBarController;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {

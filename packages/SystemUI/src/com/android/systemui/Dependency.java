@@ -46,7 +46,7 @@ import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
-import com.android.systemui.statusbar.DisplayNavigationBarController;
+import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -244,7 +244,7 @@ public class Dependency extends SystemUI {
     @Inject Lazy<NotificationRemoteInputManager.Callback> mNotificationRemoteInputManagerCallback;
     @Inject Lazy<InitController> mInitController;
     @Inject Lazy<AppOpsController> mAppOpsController;
-    @Inject Lazy<DisplayNavigationBarController> mDisplayNavigationBarController;
+    @Inject Lazy<NavigationBarController> mNavigationBarController;
     @Inject Lazy<StatusBarStateController> mStatusBarStateController;
     @Inject Lazy<NotificationLockscreenUserManager> mNotificationLockscreenUserManager;
     @Inject Lazy<NotificationGroupAlertTransferHelper> mNotificationGroupAlertTransferHelper;
@@ -410,8 +410,7 @@ public class Dependency extends SystemUI {
 
         mProviders.put(AppOpsController.class, mAppOpsController::get);
 
-        mProviders.put(DisplayNavigationBarController.class,
-                mDisplayNavigationBarController::get);
+        mProviders.put(NavigationBarController.class, mNavigationBarController::get);
 
         mProviders.put(StatusBarStateController.class, mStatusBarStateController::get);
         mProviders.put(NotificationLockscreenUserManager.class,
