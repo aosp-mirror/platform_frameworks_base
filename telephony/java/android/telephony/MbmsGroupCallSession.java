@@ -37,6 +37,7 @@ import android.telephony.mbms.vendor.IMbmsGroupCallService;
 import android.util.ArraySet;
 import android.util.Log;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -107,14 +108,14 @@ public class MbmsGroupCallSession implements AutoCloseable {
      * {@link MbmsGroupCallSession} that you received before calling this method again.
      *
      * @param context The {@link Context} to use.
-     * @param executor The executor on which you wish to execute callbacks.
      * @param subscriptionId The subscription ID to use.
+     * @param executor The executor on which you wish to execute callbacks.
      * @param callback A callback object on which you wish to receive results of asynchronous
      *                 operations.
      * @return An instance of {@link MbmsGroupCallSession}, or null if an error occurred.
      */
     public static @Nullable MbmsGroupCallSession create(@NonNull Context context,
-            @NonNull Executor executor, int subscriptionId,
+            int subscriptionId, @NonNull Executor executor,
             final @NonNull MbmsGroupCallSessionCallback callback) {
         if (!sIsInitialized.compareAndSet(false, true)) {
             throw new IllegalStateException("Cannot create two instances of MbmsGroupCallSession");
@@ -138,11 +139,11 @@ public class MbmsGroupCallSession implements AutoCloseable {
 
     /**
      * Create a new {@link MbmsGroupCallSession} using the system default data subscription ID.
-     * See {@link #create(Context, Executor, int, MbmsGroupCallSessionCallback)}.
+     * See {@link #create(Context, int, Executor, MbmsGroupCallSessionCallback)}.
      */
     public static MbmsGroupCallSession create(@NonNull Context context,
             @NonNull Executor executor, @NonNull MbmsGroupCallSessionCallback callback) {
-        return create(context, executor, SubscriptionManager.getDefaultSubscriptionId(), callback);
+        return create(context, SubscriptionManager.getDefaultSubscriptionId(), executor, callback);
     }
 
     /**
@@ -153,7 +154,7 @@ public class MbmsGroupCallSession implements AutoCloseable {
      * instance of {@link MbmsGroupCallSessionCallback}, but callbacks that have already been
      * enqueued will still be delivered.
      *
-     * It is safe to call {@link #create(Context, Executor, int, MbmsGroupCallSessionCallback)} to
+     * It is safe to call {@link #create(Context, int, Executor, MbmsGroupCallSessionCallback)} to
      * obtain another instance of {@link MbmsGroupCallSession} immediately after this method
      * returns.
      *
@@ -189,18 +190,19 @@ public class MbmsGroupCallSession implements AutoCloseable {
      * Asynchronous errors through the callback include any of the errors in
      * {@link MbmsErrors.GeneralErrors}.
      *
-     * @param executor The executor on which you wish to execute callbacks for this stream.
      * @param tmgi The TMGI, an identifier for the group call you want to join.
-     * @param saiArray An array of SAIs for the group call that should be negotiated separately with
+     * @param saiList A list of SAIs for the group call that should be negotiated separately with
      *                the carrier.
-     * @param frequencyArray An array of frequencies for the group call that should be negotiated
+     * @param frequencyList A lost of frequencies for the group call that should be negotiated
      *                separately with the carrier.
+     * @param executor The executor on which you wish to execute callbacks for this stream.
      * @param callback The callback that you want to receive information about the call on.
      * @return An instance of {@link GroupCall} through which the call can be controlled.
      *         May be {@code null} if an error occurred.
      */
-    public @Nullable GroupCall startGroupCall(@NonNull Executor executor, long tmgi, int[] saiArray,
-            int[] frequencyArray, @NonNull GroupCallCallback callback) {
+    public @Nullable GroupCall startGroupCall(long tmgi, @NonNull List<Integer> saiList,
+            @NonNull List<Integer> frequencyList, @NonNull Executor executor,
+            @NonNull GroupCallCallback callback) {
         IMbmsGroupCallService groupCallService = mService.get();
         if (groupCallService == null) {
             throw new IllegalStateException("Middleware not yet bound");
@@ -215,7 +217,7 @@ public class MbmsGroupCallSession implements AutoCloseable {
 
         try {
             int returnCode = groupCallService.startGroupCall(
-                    mSubscriptionId, tmgi, saiArray, frequencyArray, serviceCallback);
+                    mSubscriptionId, tmgi, saiList, frequencyList, serviceCallback);
             if (returnCode == MbmsErrors.UNKNOWN) {
                 // Unbind and throw an obvious error
                 close();
