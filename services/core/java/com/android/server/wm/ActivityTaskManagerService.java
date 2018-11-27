@@ -4508,6 +4508,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mKeyguardController.isKeyguardLocked();
     }
 
+    /**
+     * Clears launch params for the given package.
+     * @param packageNames the names of the packages of which the launch params are to be cleared
+     */
+    @Override
+    public void clearLaunchParamsForPackages(List<String> packageNames) {
+        mAmInternal.enforceCallingPermission(Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "clearLaunchParamsForPackages");
+        synchronized (mGlobalLock) {
+            for (int i = 0; i < packageNames.size(); ++i) {
+                mStackSupervisor.mLaunchParamsPersister.removeRecordForPackage(packageNames.get(i));
+            }
+        }
+    }
+
     void dumpLastANRLocked(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER LAST ANR (dumpsys activity lastanr)");
         if (mLastANRState == null) {

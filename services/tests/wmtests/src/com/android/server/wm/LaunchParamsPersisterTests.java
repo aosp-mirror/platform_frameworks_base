@@ -271,6 +271,51 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testClearsRecordInMemory() {
+        mTarget.saveTask(mTestTask);
+
+        mTarget.removeRecordForPackage(TEST_COMPONENT.getPackageName());
+
+        mTarget.getLaunchParams(mTestTask, null, mResult);
+
+        assertTrue("Result should be empty.", mResult.isEmpty());
+    }
+
+    @Test
+    public void testClearsWriteQueueItem() {
+        mTarget.saveTask(mTestTask);
+
+        mTarget.removeRecordForPackage(TEST_COMPONENT.getPackageName());
+
+        final LaunchParamsPersister target = new LaunchParamsPersister(mPersisterQueue, mSupervisor,
+                mUserFolderGetter);
+        target.onSystemReady();
+        target.onUnlockUser(TEST_USER_ID);
+
+        target.getLaunchParams(mTestTask, null, mResult);
+
+        assertTrue("Result should be empty.", mResult.isEmpty());
+    }
+
+    @Test
+    public void testClearsFile() {
+        mTarget.saveTask(mTestTask);
+        mPersisterQueue.flush();
+
+        mTarget.removeRecordForPackage(TEST_COMPONENT.getPackageName());
+
+        final LaunchParamsPersister target = new LaunchParamsPersister(mPersisterQueue, mSupervisor,
+                mUserFolderGetter);
+        target.onSystemReady();
+        target.onUnlockUser(TEST_USER_ID);
+
+        target.getLaunchParams(mTestTask, null, mResult);
+
+        assertTrue("Result should be empty.", mResult.isEmpty());
+    }
+
+
+    @Test
     public void testClearsRecordInMemoryOnPackageUninstalled() {
         mTarget.saveTask(mTestTask);
 
