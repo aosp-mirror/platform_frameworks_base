@@ -963,6 +963,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return getInstrumentation().getContext();
     }
 
+    protected Context getClientContext() {
+        return mClientContext;
+    }
+
     protected ShortcutManager getManager() {
         return mManager;
     }
