@@ -27,20 +27,15 @@ import android.app.ActivityThread;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.IPackageManager;
-import android.database.ContentObserver;
 import android.ext.services.notification.AgingHelper.Callback;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
-import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationAssistantService;
 import android.service.notification.NotificationStats;
@@ -92,8 +87,6 @@ public class Assistant extends NotificationAssistantService {
         PREJUDICAL_DISMISSALS.add(REASON_LISTENER_CANCEL);
     }
 
-    private float mDismissToViewRatioLimit;
-    private int mStreakLimit;
     private SmartActionsHelper mSmartActionsHelper;
     private NotificationCategorizer mNotificationCategorizer;
     private AgingHelper mAgingHelper;
@@ -107,7 +100,11 @@ public class Assistant extends NotificationAssistantService {
     private Ranking mFakeRanking = null;
     private AtomicFile mFile = null;
     private IPackageManager mPackageManager;
-    protected SettingsObserver mSettingsObserver;
+
+    @VisibleForTesting
+    protected AssistantSettings.Factory mSettingsFactory = AssistantSettings.FACTORY;
+    @VisibleForTesting
+    protected AssistantSettings mSettings;
 
     public Assistant() {
     }
@@ -118,7 +115,8 @@ public class Assistant extends NotificationAssistantService {
         // Contexts are correctly hooked up by the creation step, which is required for the observer
         // to be hooked up/initialized.
         mPackageManager = ActivityThread.getPackageManager();
-        mSettingsObserver = new SettingsObserver(mHandler);
+        mSettings = mSettingsFactory.createAndRegister(mHandler,
+                getApplicationContext().getContentResolver(), getUserId(), this::updateThresholds);
         mSmartActionsHelper = new SmartActionsHelper();
         mNotificationCategorizer = new NotificationCategorizer();
         mAgingHelper = new AgingHelper(getContext(),
@@ -216,11 +214,11 @@ public class Assistant extends NotificationAssistantService {
         if (!isForCurrentUser(sbn)) {
             return null;
         }
-        NotificationEntry entry = new NotificationEntry(
-                ActivityThread.getPackageManager(), sbn, channel);
+        NotificationEntry entry = new NotificationEntry(mPackageManager, sbn, channel);
         ArrayList<Notification.Action> actions =
-                mSmartActionsHelper.suggestActions(this, entry);
-        ArrayList<CharSequence> replies = mSmartActionsHelper.suggestReplies(this, entry);
+                mSmartActionsHelper.suggestActions(this, entry, mSettings);
+        ArrayList<CharSequence> replies =
+                mSmartActionsHelper.suggestReplies(this, entry, mSettings);
         return createEnqueuedNotificationAdjustment(entry, actions, replies);
     }
 
@@ -239,8 +237,7 @@ public class Assistant extends NotificationAssistantService {
         if (!smartReplies.isEmpty()) {
             signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
         }
-        if (Settings.Secure.getInt(getContentResolver(),
-                Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL, 1) == 1) {
+        if (mSettings.mNewInterruptionModel) {
             if (mNotificationCategorizer.shouldSilence(entry)) {
                 final int importance = entry.getImportance() < IMPORTANCE_LOW
                         ? entry.getImportance() : IMPORTANCE_LOW;
@@ -460,6 +457,11 @@ public class Assistant extends NotificationAssistantService {
     }
 
     @VisibleForTesting
+    public void setSmartActionsHelper(SmartActionsHelper smartActionsHelper) {
+        mSmartActionsHelper = smartActionsHelper;
+    }
+
+    @VisibleForTesting
     public ChannelImpressions getImpressions(String key) {
         synchronized (mkeyToImpressions) {
             return mkeyToImpressions.get(key);
@@ -475,8 +477,18 @@ public class Assistant extends NotificationAssistantService {
 
     private ChannelImpressions createChannelImpressionsWithThresholds() {
         ChannelImpressions impressions = new ChannelImpressions();
-        impressions.updateThresholds(mDismissToViewRatioLimit, mStreakLimit);
+        impressions.updateThresholds(mSettings.mDismissToViewRatioLimit, mSettings.mStreakLimit);
         return impressions;
+    }
+
+    private void updateThresholds() {
+        // Update all existing channel impression objects with any new limits/thresholds.
+        synchronized (mkeyToImpressions) {
+            for (ChannelImpressions channelImpressions: mkeyToImpressions.values()) {
+                channelImpressions.updateThresholds(
+                        mSettings.mDismissToViewRatioLimit, mSettings.mStreakLimit);
+            }
+        }
     }
 
     protected final class AgingCallback implements Callback {
@@ -495,51 +507,4 @@ public class Assistant extends NotificationAssistantService {
         }
     }
 
-    /**
-     * Observer for updates on blocking helper threshold values.
-     */
-    protected final class SettingsObserver extends ContentObserver {
-        private final Uri STREAK_LIMIT_URI =
-                Settings.Global.getUriFor(Settings.Global.BLOCKING_HELPER_STREAK_LIMIT);
-        private final Uri DISMISS_TO_VIEW_RATIO_LIMIT_URI =
-                Settings.Global.getUriFor(
-                        Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT);
-
-        public SettingsObserver(Handler handler) {
-            super(handler);
-            ContentResolver resolver = getApplicationContext().getContentResolver();
-            resolver.registerContentObserver(
-                    DISMISS_TO_VIEW_RATIO_LIMIT_URI, false, this, getUserId());
-            resolver.registerContentObserver(STREAK_LIMIT_URI, false, this, getUserId());
-
-            // Update all uris on creation.
-            update(null);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            update(uri);
-        }
-
-        private void update(Uri uri) {
-            ContentResolver resolver = getApplicationContext().getContentResolver();
-            if (uri == null || DISMISS_TO_VIEW_RATIO_LIMIT_URI.equals(uri)) {
-                mDismissToViewRatioLimit = Settings.Global.getFloat(
-                        resolver, Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT,
-                        ChannelImpressions.DEFAULT_DISMISS_TO_VIEW_RATIO_LIMIT);
-            }
-            if (uri == null || STREAK_LIMIT_URI.equals(uri)) {
-                mStreakLimit = Settings.Global.getInt(
-                        resolver, Settings.Global.BLOCKING_HELPER_STREAK_LIMIT,
-                        ChannelImpressions.DEFAULT_STREAK_LIMIT);
-            }
-
-            // Update all existing channel impression objects with any new limits/thresholds.
-            synchronized (mkeyToImpressions) {
-                for (ChannelImpressions channelImpressions: mkeyToImpressions.values()) {
-                    channelImpressions.updateThresholds(mDismissToViewRatioLimit, mStreakLimit);
-                }
-            }
-        }
-    }
 }
