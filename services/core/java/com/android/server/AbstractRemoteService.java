@@ -253,7 +253,7 @@ public abstract class AbstractRemoteService implements DeathRecipient {
         }
 
         final boolean willBind = mContext.bindServiceAsUser(mIntent, mServiceConnection, flags,
-                new UserHandle(mUserId));
+                mHandler, new UserHandle(mUserId));
 
         if (!willBind) {
             Slog.w(mTag, "could not bind to " + mIntent + " using flags " + flags);
