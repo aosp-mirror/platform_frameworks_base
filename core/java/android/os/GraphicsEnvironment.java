@@ -54,7 +54,7 @@ public class GraphicsEnvironment {
     private static final String TAG = "GraphicsEnvironment";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
     private static final String PROPERTY_GFX_DRIVER_WHITELIST = "ro.gfx.driver.whitelist.0";
-    private static final String ANGLE_PACKAGE_NAME = "com.android.angle";
+    private static final String ANGLE_PACKAGE_NAME = "com.google.android.angle";
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
 
