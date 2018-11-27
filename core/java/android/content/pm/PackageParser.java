@@ -829,9 +829,6 @@ public class PackageParser {
 
     public static final int PARSE_MUST_BE_APK = 1 << 0;
     public static final int PARSE_IGNORE_PROCESSES = 1 << 1;
-    /** @deprecated forward lock no longer functional. remove. */
-    @Deprecated
-    public static final int PARSE_FORWARD_LOCK = 1 << 2;
     public static final int PARSE_EXTERNAL_STORAGE = 1 << 3;
     public static final int PARSE_IS_SYSTEM_DIR = 1 << 4;
     public static final int PARSE_COLLECT_CERTIFICATES = 1 << 5;
@@ -845,7 +842,6 @@ public class PackageParser {
             PARSE_ENFORCE_CODE,
             PARSE_EXTERNAL_STORAGE,
             PARSE_FORCE_SDK,
-            PARSE_FORWARD_LOCK,
             PARSE_IGNORE_PROCESSES,
             PARSE_IS_SYSTEM_DIR,
             PARSE_MUST_BE_APK,
@@ -2005,11 +2001,6 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifest_targetSandboxVersion,
                 PARSE_DEFAULT_TARGET_SANDBOX);
         pkg.applicationInfo.targetSandboxVersion = targetSandboxVersion;
-
-        /* Set the global "forward lock" flag */
-        if ((flags & PARSE_FORWARD_LOCK) != 0) {
-            pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK;
-        }
 
         /* Set the global "on SD card" flag */
         if ((flags & PARSE_EXTERNAL_STORAGE) != 0) {
@@ -6779,7 +6770,7 @@ public class PackageParser {
 
         /** @hide */
         public boolean isForwardLocked() {
-            return applicationInfo.isForwardLocked();
+            return false;
         }
 
         /** @hide */
@@ -6821,9 +6812,7 @@ public class PackageParser {
         public boolean canHaveOatDir() {
             // The following app types CANNOT have oat directory
             // - non-updated system apps
-            // - forward-locked apps or apps installed in ASEC containers
-            return (!isSystem() || isUpdatedSystemApp())
-                    && !isForwardLocked() && !applicationInfo.isExternalAsec();
+            return !isSystem() || isUpdatedSystemApp();
         }
 
         public boolean isMatch(int flags) {

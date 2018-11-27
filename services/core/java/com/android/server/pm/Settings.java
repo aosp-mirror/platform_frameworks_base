@@ -3656,7 +3656,6 @@ public final class Settings {
 
     private static int PRE_M_APP_INFO_FLAG_HIDDEN = 1<<27;
     private static int PRE_M_APP_INFO_FLAG_CANT_SAVE_STATE = 1<<28;
-    private static int PRE_M_APP_INFO_FLAG_FORWARD_LOCK = 1<<29;
     private static int PRE_M_APP_INFO_FLAG_PRIVILEGED = 1<<30;
 
     private void readPackageLPw(XmlPullParser parser) throws XmlPullParserException, IOException {
@@ -3756,15 +3755,11 @@ public final class Settings {
                     if ((pkgFlags & PRE_M_APP_INFO_FLAG_CANT_SAVE_STATE) != 0) {
                         pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE;
                     }
-                    if ((pkgFlags & PRE_M_APP_INFO_FLAG_FORWARD_LOCK) != 0) {
-                        pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK;
-                    }
                     if ((pkgFlags & PRE_M_APP_INFO_FLAG_PRIVILEGED) != 0) {
                         pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
                     }
                     pkgFlags &= ~(PRE_M_APP_INFO_FLAG_HIDDEN
                             | PRE_M_APP_INFO_FLAG_CANT_SAVE_STATE
-                            | PRE_M_APP_INFO_FLAG_FORWARD_LOCK
                             | PRE_M_APP_INFO_FLAG_PRIVILEGED);
                 } else {
                     // For backward compatibility
@@ -4428,7 +4423,6 @@ public final class Settings {
             ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE, "CANT_SAVE_STATE",
             ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE, "DEFAULT_TO_DEVICE_PROTECTED_STORAGE",
             ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE, "DIRECT_BOOT_AWARE",
-            ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK, "FORWARD_LOCK",
             ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS, "HAS_DOMAIN_URLS",
             ApplicationInfo.PRIVATE_FLAG_HIDDEN, "HIDDEN",
             ApplicationInfo.PRIVATE_FLAG_INSTANT, "EPHEMERAL",

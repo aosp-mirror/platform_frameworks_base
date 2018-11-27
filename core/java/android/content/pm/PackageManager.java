@@ -700,10 +700,8 @@ public abstract class PackageManager {
 
     /** @hide */
     @IntDef(flag = true, prefix = { "INSTALL_" }, value = {
-            INSTALL_FORWARD_LOCK,
             INSTALL_REPLACE_EXISTING,
             INSTALL_ALLOW_TEST,
-            INSTALL_EXTERNAL,
             INSTALL_INTERNAL,
             INSTALL_FROM_ADB,
             INSTALL_ALL_USERS,
@@ -721,17 +719,6 @@ public abstract class PackageManager {
     public @interface InstallFlags {}
 
     /**
-     * Flag parameter for {@link #installPackage} to indicate that this package
-     * should be installed as forward locked, i.e. only the app itself should
-     * have access to its code and non-resource assets.
-     *
-     * @deprecated new installs into ASEC containers are no longer supported.
-     * @hide
-     */
-    @Deprecated
-    public static final int INSTALL_FORWARD_LOCK = 0x00000001;
-
-    /**
      * Flag parameter for {@link #installPackage} to indicate that you want to
      * replace an already installed package, if one exists.
      *
@@ -747,17 +734,6 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_ALLOW_TEST = 0x00000004;
-
-    /**
-     * Flag parameter for {@link #installPackage} to indicate that this package
-     * must be installed to an ASEC on a {@link VolumeInfo#TYPE_PUBLIC}.
-     *
-     * @deprecated new installs into ASEC containers are no longer supported;
-     *             use adoptable storage instead.
-     * @hide
-     */
-    @Deprecated
-    public static final int INSTALL_EXTERNAL = 0x00000008;
 
     /**
      * Flag parameter for {@link #installPackage} to indicate that this package
@@ -1518,14 +1494,6 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int MOVE_FAILED_SYSTEM_PACKAGE = -3;
-
-    /**
-     * Error code that is passed to the {@link IPackageMoveObserver} if the
-     * specified package cannot be moved since its forward locked.
-     *
-     * @hide
-     */
-    public static final int MOVE_FAILED_FORWARD_LOCKED = -4;
 
     /**
      * Error code that is passed to the {@link IPackageMoveObserver} if the

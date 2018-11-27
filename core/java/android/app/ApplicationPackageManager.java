@@ -2046,8 +2046,6 @@ public class ApplicationPackageManager extends PackageManager {
             StorageManager storage) {
         if (app.isInternal()) {
             return storage.findVolumeById(VolumeInfo.ID_PRIVATE_INTERNAL);
-        } else if (app.isExternalAsec()) {
-            return storage.getPrimaryPhysicalVolume();
         } else {
             return storage.findVolumeByUuid(app.volumeUuid);
         }

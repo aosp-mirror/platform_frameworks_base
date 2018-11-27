@@ -1374,12 +1374,6 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
-        public void setInstallFlagsInternal() {
-            installFlags |= PackageManager.INSTALL_INTERNAL;
-            installFlags &= ~PackageManager.INSTALL_EXTERNAL;
-        }
-
-        /** {@hide} */
         @SystemApi
         public void setAllowDowngrade(boolean allowDowngrade) {
             if (allowDowngrade) {
@@ -1387,12 +1381,6 @@ public class PackageInstaller {
             } else {
                 installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
             }
-        }
-
-        /** {@hide} */
-        public void setInstallFlagsExternal() {
-            installFlags |= PackageManager.INSTALL_EXTERNAL;
-            installFlags &= ~PackageManager.INSTALL_INTERNAL;
         }
 
         /** {@hide} */
