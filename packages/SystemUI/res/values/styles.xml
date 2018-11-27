@@ -262,7 +262,7 @@
 
     <style name="TextAppearance.AppOpsDialog.Item">
         <item name="android:textSize">@dimen/ongoing_appops_dialog_item_size</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
 
     <style name="BaseBrightnessDialogContainer" parent="@style/Theme.SystemUI">

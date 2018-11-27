@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
@@ -34,13 +35,13 @@ class OngoingPrivacyDialog constructor(
     val dialogBuilder: PrivacyDialogBuilder
 ) {
 
-    val iconSize = context.resources.getDimensionPixelSize(
-            R.dimen.ongoing_appops_dialog_icon_height)
-    val iconColor = context.resources.getColor(
+    private val iconSize = context.resources.getDimensionPixelSize(
+            R.dimen.ongoing_appops_dialog_icon_size)
+    private val iconColor = context.resources.getColor(
             com.android.internal.R.color.text_color_primary, context.theme)
-    companion object {
-        private const val MAX_ITEMS = 10
-    }
+    private val iconMargin = context.resources.getDimensionPixelSize(
+            R.dimen.ongoing_appops_dialog_icon_margin)
+    private val MAX_ITEMS = context.resources.getInteger(R.integer.ongoing_appops_dialog_max_apps)
 
     fun createDialog(): Dialog {
         val builder = AlertDialog.Builder(context).apply {
@@ -105,6 +106,11 @@ class OngoingPrivacyDialog constructor(
         val appName = item.findViewById(R.id.app_name) as TextView
         val icons = item.findViewById(R.id.icons) as LinearLayout
 
+        var lp = LinearLayout.LayoutParams(iconSize, iconSize).apply {
+            gravity = Gravity.CENTER_VERTICAL
+            marginStart = iconMargin
+        }
+
         app.icon?.let {
             appIcon.setImageDrawable(it)
         }
@@ -117,7 +123,7 @@ class OngoingPrivacyDialog constructor(
                     imageTintList = ColorStateList.valueOf(iconColor)
                     setImageDrawable(it)
                 }
-                icons.addView(image, iconSize, LinearLayout.LayoutParams.WRAP_CONTENT)
+                icons.addView(image, lp)
             }
             icons.visibility = View.VISIBLE
         } else {
