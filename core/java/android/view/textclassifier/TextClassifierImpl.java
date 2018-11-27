@@ -40,7 +40,6 @@ import android.os.UserManager;
 import android.provider.Browser;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
-import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
@@ -268,17 +267,17 @@ public final class TextClassifierImpl implements TextClassifier {
             final ZonedDateTime refTime = ZonedDateTime.now();
             final Collection<String> entitiesToIdentify = request.getEntityConfig() != null
                     ? request.getEntityConfig().resolveEntityListModifications(
-                            getEntitiesForHints(request.getEntityConfig().getHints()))
+                    getEntitiesForHints(request.getEntityConfig().getHints()))
                     : mSettings.getEntityListDefault();
             final AnnotatorModel annotatorImpl =
                     getAnnotatorImpl(request.getDefaultLocales());
             final AnnotatorModel.AnnotatedSpan[] annotations =
                     annotatorImpl.annotate(
-                        textString,
-                        new AnnotatorModel.AnnotationOptions(
-                                refTime.toInstant().toEpochMilli(),
-                                        refTime.getZone().getId(),
-                                concatenateLocales(request.getDefaultLocales())));
+                            textString,
+                            new AnnotatorModel.AnnotationOptions(
+                                    refTime.toInstant().toEpochMilli(),
+                                    refTime.getZone().getId(),
+                                    concatenateLocales(request.getDefaultLocales())));
             for (AnnotatorModel.AnnotatedSpan span : annotations) {
                 final AnnotatorModel.ClassificationResult[] results =
                         span.getClassification();
@@ -372,20 +371,13 @@ public final class TextClassifierImpl implements TextClassifier {
                 // Actions model is optional, fallback if it is not available.
                 return mFallback.suggestConversationActions(request);
             }
-            List<ActionsSuggestionsModel.ConversationMessage> nativeMessages = new ArrayList<>();
-            for (ConversationActions.Message message : request.getConversation()) {
-                if (TextUtils.isEmpty(message.getText())) {
-                    continue;
-                }
-                // TODO: We need to map the Person object to user id.
-                int userId = 1;
-                nativeMessages.add(
-                        new ActionsSuggestionsModel.ConversationMessage(
-                                userId, message.getText().toString()));
+            ActionsSuggestionsModel.ConversationMessage[] nativeMessages =
+                    ActionsSuggestionsHelper.toNativeMessages(request.getConversation());
+            if (nativeMessages.length == 0) {
+                return mFallback.suggestConversationActions(request);
             }
             ActionsSuggestionsModel.Conversation nativeConversation =
-                    new ActionsSuggestionsModel.Conversation(nativeMessages.toArray(
-                            new ActionsSuggestionsModel.ConversationMessage[0]));
+                    new ActionsSuggestionsModel.Conversation(nativeMessages);
 
             ActionsSuggestionsModel.ActionSuggestion[] nativeSuggestions =
                     actionsImpl.suggestActions(nativeConversation, null);

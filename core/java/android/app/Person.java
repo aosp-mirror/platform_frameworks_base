@@ -127,8 +127,8 @@ public final class Person implements Parcelable {
         if (obj instanceof Person) {
             final Person other = (Person) obj;
             return Objects.equals(mName, other.mName)
-                    && mIcon == null ? other.mIcon == null :
-                    (other.mIcon != null && mIcon.sameAs(other.mIcon))
+                    && (mIcon == null ? other.mIcon == null :
+                    (other.mIcon != null && mIcon.sameAs(other.mIcon)))
                     && Objects.equals(mUri, other.mUri)
                     && Objects.equals(mKey, other.mKey)
                     && mIsBot == other.mIsBot
