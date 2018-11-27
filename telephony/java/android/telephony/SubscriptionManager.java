@@ -2299,7 +2299,7 @@ public class SubscriptionManager {
      * subscription dynamically in multi-SIM devices.
      *
      * @param subId which subscription is preferred to for cellular data. If it's
-     *              {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}, it means
+     *              {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}, it means
      *              it's unset and {@link SubscriptionManager#getDefaultDataSubscriptionId()}
      *              is used to determine which modem is preferred.
      * @hide
