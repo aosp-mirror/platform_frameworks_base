@@ -174,7 +174,7 @@ public abstract class PresentationParams {
          *
          * @param bounds boundaries relative to this Area.
          *
-         * @throw {@link IllegalArgumentException} if the {@code bounds} is not fully-contained
+         * @throws {@link IllegalArgumentException} if the {@code bounds} is not fully-contained
          * inside this full Area.
          *
          * @return new subarea, or {@code null} if the Smart Suggestion host does not support such
