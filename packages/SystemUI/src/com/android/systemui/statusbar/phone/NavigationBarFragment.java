@@ -56,7 +56,6 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -863,16 +862,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     public static View create(Context context, FragmentListener listener) {
         final int displayId = context.getDisplay().getDisplayId();
-        final boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
-        final int height = isDefaultDisplay
-                ? LayoutParams.MATCH_PARENT
-                : context.getResources().getDimensionPixelSize(R.dimen.navigation_bar_height);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                LayoutParams.MATCH_PARENT, height,
-                // TODO(b/117478341): Resolve one status bar/ navigation bar assumption
-                isDefaultDisplay
-                        ? WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
-                        : WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
                 WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -884,10 +876,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         lp.setTitle("NavigationBar" + displayId);
         lp.accessibilityTitle = context.getString(R.string.nav_bar);
         lp.windowAnimations = 0;
-        if (!isDefaultDisplay) {
-            lp.flags |= LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
-            lp.gravity = Gravity.BOTTOM;
-        }
 
         View navigationBarView = LayoutInflater.from(context).inflate(
                 R.layout.navigation_bar_window, null);
