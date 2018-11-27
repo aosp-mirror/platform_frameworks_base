@@ -63,7 +63,7 @@ public class XmlUtils {
     public static final int
     convertValueToList(CharSequence value, String[] options, int defaultValue)
     {
-        if (null != value) {
+        if (!TextUtils.isEmpty(value)) {
             for (int i = 0; i < options.length; i++) {
                 if (value.equals(options[i]))
                     return i;
@@ -79,8 +79,9 @@ public class XmlUtils {
     {
         boolean result = false;
 
-        if (null == value)
+        if (TextUtils.isEmpty(value)) {
             return defaultValue;
+        }
 
         if (value.equals("1")
         ||  value.equals("true")
@@ -94,8 +95,9 @@ public class XmlUtils {
     public static final int
     convertValueToInt(CharSequence charSeq, int defaultValue)
     {
-        if (null == charSeq)
+        if (TextUtils.isEmpty(charSeq)) {
             return defaultValue;
+        }
 
         String nm = charSeq.toString();
 
@@ -138,7 +140,7 @@ public class XmlUtils {
     }
 
     public static int convertValueToUnsignedInt(String value, int defaultValue) {
-        if (null == value) {
+        if (TextUtils.isEmpty(value)) {
             return defaultValue;
         }
 
@@ -1674,7 +1676,7 @@ public class XmlUtils {
     public static boolean readBooleanAttribute(XmlPullParser in, String name,
             boolean defaultValue) {
         final String value = in.getAttributeValue(null, name);
-        if (value == null) {
+        if (TextUtils.isEmpty(value)) {
             return defaultValue;
         } else {
             return Boolean.parseBoolean(value);
@@ -1711,7 +1713,7 @@ public class XmlUtils {
 
     public static byte[] readByteArrayAttribute(XmlPullParser in, String name) {
         final String value = in.getAttributeValue(null, name);
-        if (value != null) {
+        if (!TextUtils.isEmpty(value)) {
             return Base64.decode(value, Base64.DEFAULT);
         } else {
             return null;
