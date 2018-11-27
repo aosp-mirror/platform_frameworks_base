@@ -238,6 +238,8 @@ public final class ViewNode extends AssistStructure.ViewNode {
 
         @Override
         public void setText(CharSequence text, int selectionStart, int selectionEnd) {
+            // TODO(b/111276913): temporarily setting directly; should be done on superclass instead
+            mNode.mText = text;
             // TODO(b/111276913): implement or move to superclass
         }
 
