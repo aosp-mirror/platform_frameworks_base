@@ -38,10 +38,8 @@ import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Build.VERSION_CODES.P;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEGATIVE;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEUTRAL;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -2508,6 +2506,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.mNotificationDelegate.onNotificationDirectReplied(r.getKey());
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasDirectReplied());
+        verify(mAssistants).notifyAssistantNotificationDirectReplyLocked(eq(r.sbn));
     }
 
     @Test
@@ -2516,8 +2515,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(r);
 
         mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), true, true);
+        verify(mAssistants).notifyAssistantExpansionChangedLocked(eq(r.sbn), eq(true), eq((true)));
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
+
         mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), true, false);
+        verify(mAssistants).notifyAssistantExpansionChangedLocked(eq(r.sbn), eq(true), eq((false)));
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
     }
 
@@ -2528,8 +2530,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, true);
         assertFalse(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
+        verify(mAssistants).notifyAssistantExpansionChangedLocked(eq(r.sbn), eq(false), eq((true)));
+
         mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, false);
         assertFalse(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
+        verify(mAssistants).notifyAssistantExpansionChangedLocked(
+                eq(r.sbn), eq(false), eq((false)));
     }
 
     @Test

@@ -246,6 +246,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 /** {@hide} */
@@ -887,6 +888,7 @@ public class NotificationManagerService extends SystemService {
                     EventLogTags.writeNotificationExpansion(key,
                             userAction ? 1 : 0, expanded ? 1 : 0,
                             r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
+                    mAssistants.notifyAssistantExpansionChangedLocked(r.sbn, userAction, expanded);
                 }
             }
         }
@@ -902,6 +904,7 @@ public class NotificationManagerService extends SystemService {
                             .setCategory(MetricsEvent.NOTIFICATION_DIRECT_REPLY_ACTION)
                             .setType(MetricsEvent.TYPE_ACTION));
                     reportUserInteraction(r);
+                    mAssistants.notifyAssistantNotificationDirectReplyLocked(r.sbn);
                 }
             }
         }
@@ -4730,7 +4733,7 @@ public class NotificationManagerService extends SystemService {
                 mRankingHelper.extractSignals(r);
                 // tell the assistant service about the notification
                 if (mAssistants.isEnabled()) {
-                    mAssistants.onNotificationEnqueued(r);
+                    mAssistants.onNotificationEnqueuedLocked(r);
                     mHandler.postDelayed(new PostNotificationRunnable(r.getKey()),
                             DELAY_FOR_ASSISTANT_TIME);
                 } else {
@@ -6847,69 +6850,104 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        public void onNotificationEnqueued(final NotificationRecord r) {
+        @GuardedBy("mNotificationLock")
+        private void onNotificationEnqueuedLocked(final NotificationRecord r) {
             final StatusBarNotification sbn = r.sbn;
-            TrimCache trimCache = new TrimCache(sbn);
-
-            // There should be only one, but it's a list, so while we enforce
-            // singularity elsewhere, we keep it general here, to avoid surprises.
-            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
-                boolean sbnVisible = isVisibleToListener(sbn, info)
-                        && info.isSameUser(r.getUserId());
-                if (!sbnVisible) {
-                    continue;
-                }
-
-                final StatusBarNotification sbnToPost =  trimCache.ForListener(info);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        notifyEnqueued(info, sbnToPost, r.getChannel());
-                    }
-                });
-            }
+            notifyAssistantLocked(
+                    sbn,
+                    true /* sameUserOnly */,
+                    (assistant, sbnHolder) -> {
+                        try {
+                            assistant.onNotificationEnqueuedWithChannel(sbnHolder, r.getChannel());
+                        } catch (RemoteException ex) {
+                            Log.e(TAG, "unable to notify assistant (enqueued): " + assistant, ex);
+                        }
+                    });
         }
 
-        private void notifyEnqueued(final ManagedServiceInfo info,
-                final StatusBarNotification sbn, final NotificationChannel channel) {
-            final INotificationListener assistant = (INotificationListener) info.service;
-            StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
-            try {
-                assistant.onNotificationEnqueuedWithChannel(sbnHolder, channel);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "unable to notify assistant (enqueued): " + assistant, ex);
-            }
+        @GuardedBy("mNotificationLock")
+        void notifyAssistantExpansionChangedLocked(
+                final StatusBarNotification sbn,
+                final boolean isUserAction,
+                final boolean isExpanded) {
+            final String key = sbn.getKey();
+            notifyAssistantLocked(
+                    sbn,
+                    false /* sameUserOnly */,
+                    (assistant, sbnHolder) -> {
+                        try {
+                            assistant.onNotificationExpansionChanged(key, isUserAction, isExpanded);
+                        } catch (RemoteException ex) {
+                            Log.e(TAG, "unable to notify assistant (expanded): " + assistant, ex);
+                        }
+                    });
         }
+
+        @GuardedBy("mNotificationLock")
+        void notifyAssistantNotificationDirectReplyLocked(
+                final StatusBarNotification sbn) {
+            final String key = sbn.getKey();
+            notifyAssistantLocked(
+                    sbn,
+                    false /* sameUserOnly */,
+                    (assistant, sbnHolder) -> {
+                        try {
+                            assistant.onNotificationDirectReply(key);
+                        } catch (RemoteException ex) {
+                            Log.e(TAG, "unable to notify assistant (expanded): " + assistant, ex);
+                        }
+                    });
+        }
+
 
         /**
          * asynchronously notify the assistant that a notification has been snoozed until a
          * context
          */
         @GuardedBy("mNotificationLock")
-        public void notifyAssistantSnoozedLocked(final StatusBarNotification sbn,
-                final String snoozeCriterionId) {
-            TrimCache trimCache = new TrimCache(sbn);
-            for (final ManagedServiceInfo info : getServices()) {
-                boolean sbnVisible = isVisibleToListener(sbn, info);
-                if (!sbnVisible) {
-                    continue;
-                }
-                final StatusBarNotification sbnToPost =  trimCache.ForListener(info);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        final INotificationListener assistant =
-                                (INotificationListener) info.service;
-                        StatusBarNotificationHolder sbnHolder
-                                = new StatusBarNotificationHolder(sbnToPost);
+        private void notifyAssistantSnoozedLocked(
+                final StatusBarNotification sbn, final String snoozeCriterionId) {
+            notifyAssistantLocked(
+                    sbn,
+                    false /* sameUserOnly */,
+                    (assistant, sbnHolder) -> {
                         try {
                             assistant.onNotificationSnoozedUntilContext(
                                     sbnHolder, snoozeCriterionId);
                         } catch (RemoteException ex) {
                             Log.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
                         }
-                    }
-                });
+                    });
+        }
+
+        /**
+         * Notifies the assistant something about the specified notification, only assistant
+         * that is visible to the notification will be notified.
+         *
+         * @param sbn          the notification object that the update is about.
+         * @param sameUserOnly should the update  be sent to the assistant in the same user only.
+         * @param callback     the callback that provides the assistant to be notified, executed
+         *                     in WorkerHandler.
+         */
+        @GuardedBy("mNotificationLock")
+        private void notifyAssistantLocked(
+                final StatusBarNotification sbn,
+                boolean sameUserOnly,
+                BiConsumer<INotificationListener, StatusBarNotificationHolder> callback) {
+            TrimCache trimCache = new TrimCache(sbn);
+            // There should be only one, but it's a list, so while we enforce
+            // singularity elsewhere, we keep it general here, to avoid surprises.
+            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
+                boolean sbnVisible = isVisibleToListener(sbn, info)
+                        && (!sameUserOnly || info.isSameUser(sbn.getUserId()));
+                if (!sbnVisible) {
+                    continue;
+                }
+                final INotificationListener assistant = (INotificationListener) info.service;
+                final StatusBarNotification sbnToPost = trimCache.ForListener(info);
+                final StatusBarNotificationHolder sbnHolder =
+                        new StatusBarNotificationHolder(sbnToPost);
+                mHandler.post(() -> callback.accept(assistant, sbnHolder));
             }
         }
 
