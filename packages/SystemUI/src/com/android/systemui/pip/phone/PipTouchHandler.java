@@ -368,7 +368,7 @@ public class PipTouchHandler {
 
     private void onAccessibilityShowMenu() {
         mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
-                mMovementBounds, false /* allowMenuTimeout */, willResizeMenu());
+                mMovementBounds, true /* allowMenuTimeout */, willResizeMenu());
     }
 
     private boolean handleTouchEvent(MotionEvent ev) {
