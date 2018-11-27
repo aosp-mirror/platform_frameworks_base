@@ -24,7 +24,6 @@ import static com.android.systemui.statusbar.notification.row.NotificationInflat
 
 import android.annotation.Nullable;
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -759,7 +758,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         }
 
         NotificationData.Entry entry = new NotificationData.Entry(sbn, ranking);
-        if (shouldAutoBubble(entry)) {
+        if (BubbleController.shouldAutoBubble(getContext(), entry)) {
             entry.setIsBubble(true);
         }
 
@@ -1198,17 +1197,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             // This notification was updated to be alerting, show it!
             alertManager.showNotification(entry);
         }
-    }
-
-
-    /**
-     * Whether a bubble is appropriate to auto-bubble or not.
-     */
-    private boolean shouldAutoBubble(NotificationData.Entry entry) {
-        int priority = mNotificationData.getImportance(entry.key);
-        NotificationChannel channel = mNotificationData.getChannel(entry.key);
-        boolean canAppOverlay = channel != null && channel.canOverlayApps();
-        return BubbleController.shouldAutoBubble(entry, priority, canAppOverlay);
     }
 
     /**
