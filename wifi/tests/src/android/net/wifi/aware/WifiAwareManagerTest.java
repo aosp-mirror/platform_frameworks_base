@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.MacAddress;
 import android.net.wifi.RttManager;
 import android.os.Build;
 import android.os.Handler;
@@ -50,6 +51,8 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.net.Inet6Address;
+import java.net.UnknownHostException;
 import java.util.List;
 
 /**
@@ -1244,5 +1247,32 @@ public class WifiAwareManagerTest {
         } else {
             sessionCaptor.getValue().createNetworkSpecifierPassphrase(role, someMac, passphrase);
         }
+    }
+
+    // WifiAwareNetworkInfo tests
+
+    @Test
+    public void testWifiAwareNetworkCapabilitiesParcel() throws UnknownHostException {
+        final Inet6Address inet6 = MacAddress.fromString(
+                "11:22:33:44:55:66").getLinkLocalIpv6FromEui48Mac();
+        // note: dummy scope = 5
+        final Inet6Address inet6Scoped = Inet6Address.getByAddress(null, inet6.getAddress(), 5);
+
+        assertEquals(inet6Scoped.toString(), "/fe80::1322:33ff:fe44:5566%5");
+        WifiAwareNetworkInfo cap = new WifiAwareNetworkInfo(inet6Scoped);
+
+        Parcel parcelW = Parcel.obtain();
+        cap.writeToParcel(parcelW, 0);
+        byte[] bytes = parcelW.marshall();
+        parcelW.recycle();
+
+        Parcel parcelR = Parcel.obtain();
+        parcelR.unmarshall(bytes, 0, bytes.length);
+        parcelR.setDataPosition(0);
+        WifiAwareNetworkInfo rereadCap =
+                WifiAwareNetworkInfo.CREATOR.createFromParcel(parcelR);
+
+        assertEquals(cap.getPeerIpv6Addr().toString(), "/fe80::1322:33ff:fe44:5566%5");
+        assertEquals(cap.hashCode(), rereadCap.hashCode());
     }
 }
