@@ -18,8 +18,6 @@ package android.media;
 
 import android.annotation.NonNull;
 
-import com.android.internal.util.Preconditions;
-
 /**
  * @hide
  * Base class of data source descriptor.
@@ -118,7 +116,7 @@ public class DataSourceDesc {
          * @return the same instance of subclass of {@link DataSourceDesc}
          */
         void build(@NonNull DataSourceDesc dsd) {
-            Preconditions.checkNotNull(dsd);
+            Media2Utils.checkArgument(dsd != null,  "dsd cannot be null.");
 
             if (mStartPositionMs > mEndPositionMs) {
                 throw new IllegalStateException("Illegal start/end position: "

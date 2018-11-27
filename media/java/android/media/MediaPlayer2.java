@@ -693,7 +693,7 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_SET_DATA_SOURCE, false) {
             @Override
             void process() throws IOException {
-                checkArgument(dsd != null, "the DataSourceDesc cannot be null");
+                Media2Utils.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
                 int state = getState();
                 if (state != PLAYER_STATE_ERROR && state != PLAYER_STATE_IDLE) {
                     throw new IllegalStateException("called in wrong state " + state);
@@ -719,7 +719,7 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCE, false) {
             @Override
             void process() {
-                checkArgument(dsd != null, "the DataSourceDesc cannot be null");
+                Media2Utils.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
                 synchronized (mSrcLock) {
                     mNextSourceInfos.clear();
                     mNextSourceInfos.add(new SourceInfo(dsd));
@@ -788,7 +788,7 @@ public class MediaPlayer2 implements AutoCloseable
 
     private void handleDataSource(boolean isCurrent, @NonNull DataSourceDesc dsd, long srcId)
             throws IOException {
-        checkArgument(dsd != null, "the DataSourceDesc cannot be null");
+        Media2Utils.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
 
         if (dsd instanceof CallbackDataSourceDesc) {
             CallbackDataSourceDesc cbDSD = (CallbackDataSourceDesc) dsd;
@@ -1513,7 +1513,7 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_SET_BUFFERING_PARAMS, false) {
             @Override
             void process() {
-                checkArgument(params != null, "the BufferingParams cannot be null");
+                Media2Utils.checkArgument(params != null, "the BufferingParams cannot be null");
                 native_setBufferingParams(params);
             }
         });
@@ -1536,7 +1536,7 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_SET_PLAYBACK_PARAMS, false) {
             @Override
             void process() {
-                checkArgument(params != null, "the PlaybackParams cannot be null");
+                Media2Utils.checkArgument(params != null, "the PlaybackParams cannot be null");
                 native_setPlaybackParams(params);
             }
         });
@@ -1564,7 +1564,7 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_SET_SYNC_PARAMS, false) {
             @Override
             void process() {
-                checkArgument(params != null, "the SyncParams cannot be null");
+                Media2Utils.checkArgument(params != null, "the SyncParams cannot be null");
                 native_setSyncParams(params);
             }
         });
@@ -2687,12 +2687,6 @@ public class MediaPlayer2 implements AutoCloseable
                     mEventCallbackRecords.remove(cb);
                 }
             }
-        }
-    }
-
-    private static void checkArgument(boolean expression, String errorMessage) {
-        if (!expression) {
-            throw new IllegalArgumentException(errorMessage);
         }
     }
 
