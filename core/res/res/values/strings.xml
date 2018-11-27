@@ -2989,6 +2989,12 @@
     <!-- Accessibility description for an item in the text selection menu to track a flight [CHAR LIMIT=NONE] -->
     <string name="view_flight_desc">Track selected flight</string>
 
+    <!-- Label for item in the text selection menu to translate selected text with a translation app. Should be a verb. [CHAR LIMIT=30] -->
+    <string name="translate">Translate</string>
+
+    <!-- Accessibility description for an item in the text selection menu to translate selected text with a translation app. [CHAR LIMIT=NONE] -->
+    <string name="translate_desc">Translate selected text</string>
+
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification. -->
     <string name="low_internal_storage_view_title">Storage space running out</string>
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the message of that notification. -->
