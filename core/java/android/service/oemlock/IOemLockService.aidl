@@ -22,6 +22,8 @@ package android.service.oemlock;
  * @hide
  */
 interface IOemLockService {
+    String getLockName();
+
     void setOemUnlockAllowedByCarrier(boolean allowed, in byte[] signature);
     boolean isOemUnlockAllowedByCarrier();
 
