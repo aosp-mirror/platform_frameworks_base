@@ -15,7 +15,7 @@
  */
 package android.service.intelligence;
 
-import static android.service.intelligence.IntelligenceService.DEBUG;
+import static android.service.intelligence.SmartSuggestionsService.DEBUG;
 
 import android.annotation.LongDef;
 import android.annotation.NonNull;

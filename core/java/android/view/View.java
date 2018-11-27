@@ -112,7 +112,7 @@ import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.intelligence.IntelligenceManager;
+import android.view.intelligence.ContentCaptureManager;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
@@ -8138,7 +8138,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * is visible.
      *
      * <p>The populated structure is then passed to the service through
-     * {@link IntelligenceManager#notifyViewAppeared(ViewStructure)}.
+     * {@link ContentCaptureManager#notifyViewAppeared(ViewStructure)}.
      *
      * <p><b>Note: </b>the following methods of the {@code structure} will be ignored:
      * <ul>
@@ -8915,7 +8915,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Helper used to notify the {@link IntelligenceManager} when the view is removed or
+     * Helper used to notify the {@link ContentCaptureManager} when the view is removed or
      * added, based on whether it's laid out and visible, and without knowing if the parent removed
      * it from the view hierarchy.
      *
@@ -8931,11 +8931,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </ol>
      */
     private void notifyAppearedOrDisappearedForContentCaptureIfNeeded(boolean appeared) {
+        // First check if context has client, so it saves a service lookup when it doesn't
+        if (!mContext.isContentCaptureSupported()) return;
 
-        final IntelligenceManager im = mContext.getSystemService(IntelligenceManager.class);
-        if (im == null || !im.isContentCaptureEnabled()) return;
+        // Then check if it's enabled in the context...
+        final ContentCaptureManager cm = mContext.getSystemService(ContentCaptureManager.class);
+        if (cm == null || !cm.isContentCaptureEnabled()) return;
 
-        // NOTE: isImportantForContentCapture() is more expensive than im.isContentCaptureEnabled()
+        // ... and finally at the view level
+        // NOTE: isImportantForContentCapture() is more expensive than cm.isContentCaptureEnabled()
         if (!isImportantForContentCapture()) return;
 
         if (appeared) {
@@ -8950,9 +8954,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return;
             }
             // All good: notify the manager...
-            final ViewStructure structure = im.newViewStructure(this);
+            final ViewStructure structure = cm.newViewStructure(this);
             onProvideContentCaptureStructure(structure, /* flags= */ 0);
-            im.notifyViewAppeared(structure);
+            cm.notifyViewAppeared(structure);
             // ...and set the flags
             mPrivateFlags4 |= PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED;
             mPrivateFlags4 &= ~PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED;
@@ -8969,7 +8973,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return;
             }
             // All good: notify the manager...
-            im.notifyViewDisappeared(getAutofillId());
+            cm.notifyViewDisappeared(getAutofillId());
             // ...and set the flags
             mPrivateFlags4 |= PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED;
             mPrivateFlags4 &= ~PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED;

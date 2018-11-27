@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.RemoteException;
+import android.service.intelligence.ContentCaptureEventsRequest;
 import android.service.intelligence.IIntelligenceService;
 import android.service.intelligence.InteractionContext;
 import android.service.intelligence.InteractionSessionId;
@@ -39,6 +40,7 @@ import com.android.server.AbstractRemoteService;
 
 import java.util.List;
 
+//TODO(b/111276913): rename once the final name is defined
 final class RemoteIntelligenceService extends AbstractRemoteService {
 
     private static final String TAG = "RemoteIntelligenceService";
@@ -194,7 +196,8 @@ final class RemoteIntelligenceService extends AbstractRemoteService {
 
         @Override // from MyPendingRequest
         public void myRun(@NonNull RemoteIntelligenceService remoteService) throws RemoteException {
-            remoteService.mService.onContentCaptureEvents(mSessionId, mEvents);
+            remoteService.mService.onContentCaptureEventsRequest(mSessionId,
+                    new ContentCaptureEventsRequest(mEvents));
         }
     }
 

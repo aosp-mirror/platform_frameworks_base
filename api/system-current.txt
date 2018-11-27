@@ -25,7 +25,6 @@ package android {
     field public static final java.lang.String BIND_DIRECTORY_SEARCH = "android.permission.BIND_DIRECTORY_SEARCH";
     field public static final java.lang.String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
     field public static final java.lang.String BIND_IMS_SERVICE = "android.permission.BIND_IMS_SERVICE";
-    field public static final java.lang.String BIND_INTELLIGENCE_SERVICE = "android.permission.BIND_INTELLIGENCE_SERVICE";
     field public static final java.lang.String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
     field public static final java.lang.String BIND_NETWORK_RECOMMENDATION_SERVICE = "android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE";
     field public static final java.lang.String BIND_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE";
@@ -34,6 +33,7 @@ package android {
     field public static final java.lang.String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final java.lang.String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final java.lang.String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
+    field public static final java.lang.String BIND_SMART_SUGGESTIONS_SERVICE = "android.permission.BIND_SMART_SUGGESTIONS_SERVICE";
     field public static final java.lang.String BIND_SOUND_TRIGGER_DETECTION_SERVICE = "android.permission.BIND_SOUND_TRIGGER_DETECTION_SERVICE";
     field public static final java.lang.String BIND_TELEPHONY_DATA_SERVICE = "android.permission.BIND_TELEPHONY_DATA_SERVICE";
     field public static final java.lang.String BIND_TELEPHONY_NETWORK_SERVICE = "android.permission.BIND_TELEPHONY_NETWORK_SERVICE";
@@ -4980,6 +4980,13 @@ package android.service.euicc {
 
 package android.service.intelligence {
 
+  public final class ContentCaptureEventsRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.util.List<android.view.intelligence.ContentCaptureEvent> getEvents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.intelligence.ContentCaptureEventsRequest> CREATOR;
+  }
+
   public final class FillCallback {
     method public void onSuccess(android.service.intelligence.FillResponse);
   }
@@ -5012,16 +5019,6 @@ package android.service.intelligence {
     method public void destroy();
     method public boolean update(android.service.intelligence.PresentationParams.Area, android.view.View, long);
     field public static final long FLAG_METADATA_ADDRESS = 1L; // 0x1L
-  }
-
-  public abstract class IntelligenceService extends android.app.Service {
-    ctor public IntelligenceService();
-    method public void onActivitySnapshot(android.service.intelligence.InteractionSessionId, android.service.intelligence.SnapshotData);
-    method public abstract void onContentCaptureEvent(android.service.intelligence.InteractionSessionId, java.util.List<android.view.intelligence.ContentCaptureEvent>);
-    method public void onCreateInteractionSession(android.service.intelligence.InteractionContext, android.service.intelligence.InteractionSessionId);
-    method public void onDestroyInteractionSession(android.service.intelligence.InteractionSessionId);
-    method public void onFillRequest(android.service.intelligence.InteractionSessionId, android.service.intelligence.FillRequest, android.os.CancellationSignal, android.service.intelligence.FillController, android.service.intelligence.FillCallback);
-    field public static final java.lang.String SERVICE_INTERFACE = "android.service.intelligence.IntelligenceService";
   }
 
   public final class InteractionContext implements android.os.Parcelable {
@@ -5057,6 +5054,21 @@ package android.service.intelligence {
   public static abstract class PresentationParams.Area {
     method public android.graphics.Rect getBounds();
     method public android.service.intelligence.PresentationParams.Area getSubArea(android.graphics.Rect);
+  }
+
+  public abstract class SmartSuggestionsService extends android.app.Service {
+    ctor public SmartSuggestionsService();
+    method public final java.util.Set<android.content.ComponentName> getContentCaptureDisabledActivities();
+    method public final java.util.Set<java.lang.String> getContentCaptureDisabledPackages();
+    method public void onActivitySnapshot(android.service.intelligence.InteractionSessionId, android.service.intelligence.SnapshotData);
+    method public abstract void onContentCaptureEventsRequest(android.service.intelligence.InteractionSessionId, android.service.intelligence.ContentCaptureEventsRequest);
+    method public void onCreateInteractionSession(android.service.intelligence.InteractionContext, android.service.intelligence.InteractionSessionId);
+    method public void onDestroyInteractionSession(android.service.intelligence.InteractionSessionId);
+    method public void onFillRequest(android.service.intelligence.InteractionSessionId, android.service.intelligence.FillRequest, android.os.CancellationSignal, android.service.intelligence.FillController, android.service.intelligence.FillCallback);
+    method public final void setActivityContentCaptureEnabled(android.content.ComponentName, boolean);
+    method public final void setContentCaptureWhitelist(java.util.List<java.lang.String>, java.util.List<android.content.ComponentName>);
+    method public final void setPackageContentCaptureEnabled(java.lang.String, boolean);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.intelligence.SmartSuggestionsService";
   }
 
   public final class SnapshotData implements android.os.Parcelable {
@@ -7241,14 +7253,6 @@ package android.view.intelligence {
     field public static final int TYPE_VIEW_APPEARED = 5; // 0x5
     field public static final int TYPE_VIEW_DISAPPEARED = 6; // 0x6
     field public static final int TYPE_VIEW_TEXT_CHANGED = 7; // 0x7
-  }
-
-  public final class IntelligenceManager {
-    method public java.util.Set<android.content.ComponentName> getContentCaptureDisabledActivities();
-    method public java.util.Set<java.lang.String> getContentCaptureDisabledPackages();
-    method public void setActivityContentCaptureEnabled(android.content.ComponentName, boolean);
-    method public void setContentCaptureWhitelist(java.util.List<java.lang.String>, java.util.List<android.content.ComponentName>);
-    method public void setPackageContentCaptureEnabled(java.lang.String, boolean);
   }
 
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {

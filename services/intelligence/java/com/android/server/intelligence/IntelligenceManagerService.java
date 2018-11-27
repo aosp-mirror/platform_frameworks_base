@@ -16,7 +16,7 @@
 
 package com.android.server.intelligence;
 
-import static android.content.Context.INTELLIGENCE_MANAGER_SERVICE;
+import static android.content.Context.CONTENT_CAPTURE_MANAGER_SERVICE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -50,6 +50,7 @@ import java.util.List;
  * <p>The data collected by this service can be analyzed and combined with other sources to provide
  * contextual data in other areas of the system such as Autofill.
  */
+//TODO(b/111276913): rename once the final name is defined
 public final class IntelligenceManagerService extends
         AbstractMasterSystemService<IntelligenceManagerService, IntelligencePerUserService> {
 
@@ -67,7 +68,7 @@ public final class IntelligenceManagerService extends
     @Override // from AbstractMasterSystemService
     protected String getServiceSettingsProperty() {
         // TODO(b/111276913): STOPSHIP temporary settings, until it's set by resourcs + cmd
-        return "intel_service";
+        return "smart_suggestions_service";
     }
 
     @Override // from AbstractMasterSystemService
@@ -78,7 +79,7 @@ public final class IntelligenceManagerService extends
 
     @Override // from SystemService
     public void onStart() {
-        publishBinderService(INTELLIGENCE_MANAGER_SERVICE,
+        publishBinderService(CONTENT_CAPTURE_MANAGER_SERVICE,
                 new IntelligenceManagerServiceStub());
         publishLocalService(IntelligenceManagerInternal.class, mLocalService);
     }
