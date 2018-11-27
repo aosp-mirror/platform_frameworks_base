@@ -208,12 +208,14 @@ public class SmartReplyView extends ViewGroup {
      * Add smart actions to be shown next to smart replies. Only the actions that fit into the
      * notification are shown.
      */
-    public void addSmartActions(SmartActions smartActions) {
+    public void addSmartActions(SmartActions smartActions,
+            SmartReplyController smartReplyController, NotificationData.Entry entry) {
         int numSmartActions = smartActions.actions.size();
         for (int n = 0; n < numSmartActions; n++) {
             Notification.Action action = smartActions.actions.get(n);
             if (action.actionIntent != null) {
-                Button actionButton = inflateActionButton(getContext(), this, action);
+                Button actionButton = inflateActionButton(
+                        getContext(), this, n, smartActions, smartReplyController, entry);
                 addView(actionButton);
             }
         }
@@ -270,7 +272,10 @@ public class SmartReplyView extends ViewGroup {
     }
 
     @VisibleForTesting
-    Button inflateActionButton(Context context, ViewGroup root, Notification.Action action) {
+    Button inflateActionButton(Context context, ViewGroup root, int actionIndex,
+            SmartActions smartActions, SmartReplyController smartReplyController,
+            NotificationData.Entry entry) {
+        Notification.Action action = smartActions.actions.get(actionIndex);
         Button button = (Button) LayoutInflater.from(context).inflate(
                 R.layout.smart_action_button, root, false);
         button.setText(action.title);
@@ -283,7 +288,10 @@ public class SmartReplyView extends ViewGroup {
         button.setCompoundDrawables(iconDrawable, null, null, null);
 
         button.setOnClickListener(view ->
-                getActivityStarter().startPendingIntentDismissingKeyguard(action.actionIntent));
+                getActivityStarter().startPendingIntentDismissingKeyguard(
+                        action.actionIntent,
+                        () -> smartReplyController.smartActionClicked(
+                                entry, actionIndex, action, smartActions.fromAssistant)));
 
         // TODO(b/119010281): handle accessibility
 

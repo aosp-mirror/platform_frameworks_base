@@ -19,9 +19,11 @@ package android.service.notification;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -189,9 +191,18 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * Implement this to know when a suggested reply is sent.
      * @param key the notification key
      * @param reply the reply that is just sent
-     * @param source the source of the reply, e.g. SOURCE_FROM_APP
+     * @param source the source that provided the reply, e.g. SOURCE_FROM_APP
      */
     public void onSuggestedReplySent(String key, CharSequence reply, @Source int source) {}
+
+    /**
+     * Implement this to know when an action is clicked.
+     * @param key the notification key
+     * @param action the action that is just clicked
+     * @param source the source that provided the action, e.g. SOURCE_FROM_APP
+     */
+    public void onActionClicked(String key, @Nullable Notification.Action action, int source) {
+    }
 
     /**
      * Updates a notification.  N.B. this won’t cause
@@ -317,6 +328,15 @@ public abstract class NotificationAssistantService extends NotificationListenerS
             args.argi2 = source;
             mHandler.obtainMessage(MyHandler.MSG_ON_SUGGESTED_REPLY_SENT, args).sendToTarget();
         }
+
+        @Override
+        public void onActionClicked(String key, Notification.Action action, int source) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = key;
+            args.arg2 = action;
+            args.argi2 = source;
+            mHandler.obtainMessage(MyHandler.MSG_ON_ACTION_CLICKED, args).sendToTarget();
+        }
     }
 
     private final class MyHandler extends Handler {
@@ -326,6 +346,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         public static final int MSG_ON_NOTIFICATION_EXPANSION_CHANGED = 4;
         public static final int MSG_ON_NOTIFICATION_DIRECT_REPLY_SENT = 5;
         public static final int MSG_ON_SUGGESTED_REPLY_SENT = 6;
+        public static final int MSG_ON_ACTION_CLICKED = 7;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -393,6 +414,15 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                     int source = args.argi2;
                     args.recycle();
                     onSuggestedReplySent(key, reply, source);
+                    break;
+                }
+                case MSG_ON_ACTION_CLICKED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String key = (String) args.arg1;
+                    Notification.Action action = (Notification.Action) args.arg2;
+                    int source = args.argi2;
+                    args.recycle();
+                    onActionClicked(key, action, source);
                     break;
                 }
             }

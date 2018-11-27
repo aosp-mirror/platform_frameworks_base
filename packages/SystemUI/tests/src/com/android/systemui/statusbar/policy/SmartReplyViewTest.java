@@ -62,6 +62,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -430,12 +431,18 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     private void setSmartActions(String[] actionTitles) {
         mView.resetSmartSuggestions(mContainer);
-        mView.addSmartActions(new SmartReplyView.SmartActions(createActions(actionTitles), false));
+        mView.addSmartActions(
+                new SmartReplyView.SmartActions(createActions(actionTitles), false),
+                mLogger,
+                mEntry);
     }
 
     private void setSmartRepliesAndActions(CharSequence[] choices, String[] actionTitles) {
         setSmartReplies(choices);
-        mView.addSmartActions(new SmartReplyView.SmartActions(createActions(actionTitles), false));
+        mView.addSmartActions(
+                new SmartReplyView.SmartActions(createActions(actionTitles), false),
+                mLogger,
+                mEntry);
     }
 
     private ViewGroup buildExpectedView(CharSequence[] choices, int lineCount) {
@@ -553,7 +560,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
         mView.getChildAt(2).performClick();
 
-        verify(mActivityStarter, times(1)).startPendingIntentDismissingKeyguard(any());
+        verify(mActivityStarter, times(1)).startPendingIntentDismissingKeyguard(any(), any());
     }
 
     @Test
@@ -738,7 +745,9 @@ public class SmartReplyViewTest extends SysuiTestCase {
     }
 
     private Button inflateActionButton(Notification.Action action) {
-        return mView.inflateActionButton(getContext(), mView, action);
+        return mView.inflateActionButton(getContext(), mView, 0,
+                new SmartReplyView.SmartActions(Collections.singletonList(action), false),
+                mLogger, mEntry);
     }
 
     @Test

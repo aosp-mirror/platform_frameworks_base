@@ -3711,4 +3711,23 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mAssistants).notifyAssistantSuggestedReplySent(
                 eq(r.sbn), eq(reply), eq(generatedByAssistant));
     }
+
+    @Test
+    public void testOnNotificationActionClick() {
+        final int actionIndex = 2;
+        final Notification.Action action =
+                new Notification.Action.Builder(null, "text", null).build();
+        final boolean generatedByAssistant = false;
+
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        NotificationVisibility notificationVisibility =
+                NotificationVisibility.obtain(r.getKey(), 1, 2, true);
+        mService.mNotificationDelegate.onNotificationActionClick(
+                10, 10, r.getKey(), actionIndex, action, notificationVisibility,
+                generatedByAssistant);
+        verify(mAssistants).notifyAssistantActionClicked(
+                eq(r.sbn), eq(actionIndex), eq(action), eq(generatedByAssistant));
+    }
 }

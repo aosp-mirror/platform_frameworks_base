@@ -195,7 +195,6 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -4321,7 +4320,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         }, afterKeyguardGone);
     }
 
+    @Override
     public void startPendingIntentDismissingKeyguard(final PendingIntent intent) {
+        startPendingIntentDismissingKeyguard(intent, null);
+    }
+
+    @Override
+    public void startPendingIntentDismissingKeyguard(
+            final PendingIntent intent, @Nullable final Runnable intentSentCallback) {
         final boolean afterKeyguardGone = intent.isActivity()
                 && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
@@ -4339,6 +4345,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             if (intent.isActivity()) {
                 mAssistManager.hideAssist();
+            }
+            if (intentSentCallback != null) {
+                intentSentCallback.run();
             }
         }, afterKeyguardGone);
     }

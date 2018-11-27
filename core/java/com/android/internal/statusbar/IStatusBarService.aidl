@@ -16,6 +16,7 @@
 
 package com.android.internal.statusbar;
 
+import android.app.Notification;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -55,7 +56,7 @@ interface IStatusBarService
     // Mark current notifications as "seen" and stop ringing, vibrating, blinking.
     void clearNotificationEffects();
     void onNotificationClick(String key, in NotificationVisibility nv);
-    void onNotificationActionClick(String key, int actionIndex, in NotificationVisibility nv);
+    void onNotificationActionClick(String key, int actionIndex, in Notification.Action action, in NotificationVisibility nv, boolean generatedByAssistant);
     void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
     void onClearAllNotifications(int userId);

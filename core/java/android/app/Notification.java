@@ -5434,6 +5434,8 @@ public class Notification implements Parcelable
                             ambient ? resolveAmbientColor() : resolveContrastColor());
                 }
             }
+            button.setIntTag(R.id.action0, R.id.notification_action_index_tag,
+                    mActions.indexOf(action));
             return button;
         }
 

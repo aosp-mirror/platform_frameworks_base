@@ -36,6 +36,15 @@ public class ActivityStarterDelegate implements ActivityStarter {
     }
 
     @Override
+    public void startPendingIntentDismissingKeyguard(PendingIntent intent,
+            Runnable intentSentCallback) {
+        if (mActualStarter == null) {
+            return;
+        }
+        mActualStarter.startPendingIntentDismissingKeyguard(intent, intentSentCallback);
+    }
+
+    @Override
     public void startActivity(Intent intent, boolean dismissShade) {
         if (mActualStarter == null) {
             return;

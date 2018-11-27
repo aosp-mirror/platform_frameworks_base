@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import android.app.Notification;
 import android.service.notification.NotificationStats;
 
 import com.android.internal.statusbar.NotificationVisibility;
@@ -26,7 +27,7 @@ public interface NotificationDelegate {
     void onNotificationClick(int callingUid, int callingPid, String key,
             NotificationVisibility nv);
     void onNotificationActionClick(int callingUid, int callingPid, String key, int actionIndex,
-            NotificationVisibility nv);
+            Notification.Action action, NotificationVisibility nv, boolean generatedByAssistant);
     void onNotificationClear(int callingUid, int callingPid,
             String pkg, String tag, int id, int userId, String key,
             @NotificationStats.DismissalSurface int dismissalSurface,

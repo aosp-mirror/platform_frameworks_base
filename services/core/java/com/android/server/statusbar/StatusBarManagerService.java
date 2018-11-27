@@ -19,6 +19,7 @@ package com.android.server.statusbar;
 import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
 
 import android.app.ActivityThread;
+import android.app.Notification;
 import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1080,14 +1081,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void onNotificationActionClick(String key, int actionIndex, NotificationVisibility nv) {
+    public void onNotificationActionClick(
+            String key, int actionIndex, Notification.Action action, NotificationVisibility nv,
+            boolean generatedByAssistant) {
         enforceStatusBarService();
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationActionClick(callingUid, callingPid, key,
-                    actionIndex, nv);
+                    actionIndex, action, nv, generatedByAssistant);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
