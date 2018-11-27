@@ -1779,6 +1779,40 @@ public abstract class ColorSpace {
     }
 
     /**
+     * <p>Computes the chromatic adaptation transform from the specified
+     * source white point to the specified destination white point.</p>
+     *
+     * <p>The transform is computed using the von Kries method, described
+     * in more details in the documentation of {@link Adaptation}. The
+     * {@link Adaptation} enum provides different matrices that can be
+     * used to perform the adaptation.</p>
+     *
+     * @param adaptation The adaptation method
+     * @param srcWhitePoint The white point to adapt from
+     * @param dstWhitePoint The white point to adapt to
+     * @return A 3x3 matrix as a non-null array of 9 floats
+     */
+    @NonNull
+    @Size(9)
+    public static float[] chromaticAdaptation(@NonNull Adaptation adaptation,
+            @NonNull @Size(min = 2, max = 3) float[] srcWhitePoint,
+            @NonNull @Size(min = 2, max = 3) float[] dstWhitePoint) {
+        float[] srcXyz = srcWhitePoint.length == 3 ?
+            Arrays.copyOf(srcWhitePoint, 3) : xyYToXyz(srcWhitePoint);
+        float[] dstXyz = dstWhitePoint.length == 3 ?
+            Arrays.copyOf(dstWhitePoint, 3) : xyYToXyz(dstWhitePoint);
+
+        if (compare(srcXyz, dstXyz)) {
+            return new float[] {
+                1.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 1.0f
+            };
+        }
+        return chromaticAdaptation(adaptation.mTransform, srcXyz, dstXyz);
+    }
+
+    /**
      * Implementation of the CIE XYZ color space. Assumes the white point is D50.
      */
     @AnyThread
