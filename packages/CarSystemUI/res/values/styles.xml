@@ -41,15 +41,16 @@
         <item name="android:colorControlHighlight">@color/nav_bar_ripple_background_color</item>
     </style>
 
-    <style name="Theme.Car.DialogListView" parent="@style/Theme.Car.NoActionBar">
-        <item name="android:colorControlActivated">@color/car_accent</item>
-        <item name="listItemBackgroundColor">@android:color/black</item>
-    </style>
-
     <style name="NavigationBarButton">
         <item name="android:layout_height">96dp</item>
         <item name="android:layout_width">96dp</item>
         <item name="android:background">@drawable/nav_button_background</item>
     </style>
 
+    <style name="PagedListViewTheme" parent="@style/Theme.CarSupportWrapper.NoActionBar">
+        <item name="android:background">@*android:color/car_background</item>
+        <item name="listItemBackgroundColor">@*android:color/car_background</item>
+        <item name="dividerEndMargin">@dimen/car_keyline_1</item>
+        <item name="dividerStartMargin">@dimen/car_keyline_1</item>
+    </style>
 </resources>

@@ -20,11 +20,9 @@
     android:id="@+id/volume_list"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/black"
     android:minWidth="@dimen/volume_dialog_panel_width"
-    android:theme="@style/Theme.Car.DialogListView"
-    app:dividerEndMargin="@dimen/car_keyline_1"
-    app:dividerStartMargin="@dimen/car_keyline_1"
+    android:theme="@style/PagedListViewTheme"
     app:gutter="none"
     app:scrollBarEnabled="false"
+    app:listDividerColor="@color/list_divider_color"
     app:showPagedListViewDivider="true"/>
