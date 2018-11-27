@@ -664,7 +664,9 @@ public class SettingsBackupTest {
                  Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE,
                  Settings.Secure.FLASHLIGHT_AVAILABLE,
                  Settings.Secure.FLASHLIGHT_ENABLED,
-                 Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED);
+                 Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED,
+                 Settings.Secure.LOCATION_ACCESS_CHECK_INTERVAL_MILLIS,
+                 Settings.Secure.LOCATION_ACCESS_CHECK_DELAY_MILLIS);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {

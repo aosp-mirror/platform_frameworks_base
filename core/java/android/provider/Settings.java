@@ -5075,6 +5075,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
         public static void resetToDefaults(@NonNull ContentResolver resolver,
                 @Nullable String tag) {
@@ -8230,6 +8231,24 @@ public final class Settings {
          * @hide
          */
         public static final String NOTIFICATION_NEW_INTERRUPTION_MODEL = "new_interruption_model";
+
+        /**
+         * How often to check for location access.
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public static final String LOCATION_ACCESS_CHECK_INTERVAL_MILLIS =
+                "location_access_check_interval_millis";
+
+        /**
+         * Delay between granting location access and checking it.
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS =
+                "location_access_check_delay_millis";
 
         /**
          * This are the settings to be backed up.
