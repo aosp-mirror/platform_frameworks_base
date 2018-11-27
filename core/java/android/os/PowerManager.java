@@ -1008,7 +1008,8 @@ public final class PowerManager {
      * progress, does nothing. Unlike {@link #nap(long)}, this does not put device to sleep when
      * dream ends.
      * </p><p>
-     * Requires the {@link android.Manifest.permission#WRITE_DREAM_STATE} permission.
+     * Requires the {@link android.Manifest.permission#READ_DREAM_STATE} and
+     * {@link android.Manifest.permission#WRITE_DREAM_STATE} permissions.
      * </p>
      *
      * @param time The time when the request to nap was issued, in the
@@ -1019,7 +1020,9 @@ public final class PowerManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.READ_DREAM_STATE,
+            android.Manifest.permission.WRITE_DREAM_STATE })
     public void dream(long time) {
         Sandman.startDreamByUserRequest(mContext);
     }
