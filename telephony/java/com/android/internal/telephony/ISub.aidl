@@ -165,13 +165,23 @@ interface ISub {
     int setOpportunistic(boolean opportunistic, int subId);
 
     /**
-     * Set parent subId by simInfo index
+     * Inform SubscriptionManager that subscriptions in the list are bundled
+     * as a group. Typically it's a primary subscription and an opportunistic
+     * subscription. It should only affect multi-SIM scenarios where primary
+     * and opportunistic subscriptions can be activated together.
+     * Being in the same group means they might be activated or deactivated
+     * together, some of them may be invisible to the users, etc.
      *
-     * @param parentSubId: subId of its parent subscription.
-     * @param subId the unique SubscriptionInfo index in database
-     * @return the number of records updated
+     * Caller will either have {@link android.Manifest.permission.MODIFY_PHONE_STATE}
+     * permission or can manage all subscriptions in the list, according to their
+     * acess rules.
+     *
+     * @param subIdList list of subId that will be in the same group
+     * @return groupUUID a UUID assigned to the subscription group. It returns
+     * null if fails.
+     *
      */
-    int setParentSubId(int parentSubId, int subId);
+    String setSubscriptionGroup(in int[] subIdList, String callingPackage);
 
     /**
      * Set which subscription is preferred for cellular data. It's
