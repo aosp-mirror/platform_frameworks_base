@@ -7035,40 +7035,70 @@ status_t DynamicRefTable::lookupResourceValue(Res_value* value) const {
     return NO_ERROR;
 }
 
-struct IdmapMatchingResources {
-    void Add(uint32_t targetResId, uint32_t overlayResId) {
-        uint8_t targetTypeid = Res_GETTYPE(targetResId);
-        if (typeMappings.find(targetTypeid) == typeMappings.end()) {
-            typeMappings.emplace(targetTypeid, std::set<std::pair<uint32_t, uint32_t>>());
+class IdmapMatchingResources;
+
+class IdmapTypeMapping {
+public:
+    void add(uint32_t targetResId, uint32_t overlayResId) {
+        uint8_t targetTypeId = Res_GETTYPE(targetResId);
+        if (mData.find(targetTypeId) == mData.end()) {
+            mData.emplace(targetTypeId, std::set<std::pair<uint32_t, uint32_t>>());
         }
-        auto& entries = typeMappings[targetTypeid];
+        auto& entries = mData[targetTypeId];
         entries.insert(std::make_pair(targetResId, overlayResId));
     }
 
-    void FixPadding() {
-        for (auto ti = typeMappings.cbegin(); ti != typeMappings.cend(); ++ti) {
-            uint32_t last_seen = 0xffffffff;
-            size_t total_entries = 0;
+    bool empty() const {
+        return mData.empty();
+    }
+
+private:
+    // resource type ID in context of target -> set of resource entries mapping target -> overlay
+    std::map<uint8_t, std::set<std::pair<uint32_t, uint32_t>>> mData;
+
+    friend IdmapMatchingResources;
+};
+
+class IdmapMatchingResources {
+public:
+    IdmapMatchingResources(std::unique_ptr<IdmapTypeMapping> tm) : mTypeMapping(std::move(tm)) {
+        assert(mTypeMapping);
+        for (auto ti = mTypeMapping->mData.cbegin(); ti != mTypeMapping->mData.cend(); ++ti) {
+            uint32_t lastSeen = 0xffffffff;
+            size_t totalEntries = 0;
             for (auto ei = ti->second.cbegin(); ei != ti->second.cend(); ++ei) {
-                assert(last_seen == 0xffffffff || last_seen < ei->first);
-                entryPadding[ei->first] = (last_seen == 0xffffffff) ? 0 : ei->first - last_seen - 1;
-                last_seen = ei->first;
-                total_entries += 1 + entryPadding[ei->first];
+                assert(lastSeen == 0xffffffff || lastSeen < ei->first);
+                mEntryPadding[ei->first] = (lastSeen == 0xffffffff) ? 0 : ei->first - lastSeen - 1;
+                lastSeen = ei->first;
+                totalEntries += 1 + mEntryPadding[ei->first];
             }
-            numberOfEntriesIncludingPadding[ti->first] = total_entries;
+            mNumberOfEntriesIncludingPadding[ti->first] = totalEntries;
         }
     }
 
+    const auto& getTypeMapping() const {
+        return mTypeMapping->mData;
+    }
+
+    size_t getNumberOfEntriesIncludingPadding(uint8_t type) const {
+        return mNumberOfEntriesIncludingPadding.at(type);
+    }
+
+    size_t getPadding(uint32_t resid) const {
+        return mEntryPadding.at(resid);
+    }
+
+private:
     // resource type ID in context of target -> set of resource entries mapping target -> overlay
-    std::map<uint8_t, std::set<std::pair<uint32_t, uint32_t>>> typeMappings;
+    const std::unique_ptr<IdmapTypeMapping> mTypeMapping;
 
     // resource ID in context of target -> trailing padding for that resource (call FixPadding
     // before use)
-    std::map<uint32_t, size_t> entryPadding;
+    std::map<uint32_t, size_t> mEntryPadding;
 
     // resource type ID in context of target -> total number of entries, including padding entries,
     // for that type (call FixPadding before use)
-    std::map<uint8_t, size_t> numberOfEntriesIncludingPadding;
+    std::map<uint8_t, size_t> mNumberOfEntriesIncludingPadding;
 };
 
 status_t ResTable::createIdmap(const ResTable& targetResTable,
@@ -7098,7 +7128,8 @@ status_t ResTable::createIdmap(const ResTable& targetResTable,
         return UNKNOWN_ERROR;
     }
 
-    const ResTable_package* targetPackageStruct = targetResTable.mPackageGroups[0]->packages[0]->package;
+    const ResTable_package* targetPackageStruct =
+        targetResTable.mPackageGroups[0]->packages[0]->package;
     const size_t tmpNameSize = arraysize(targetPackageStruct->name);
     char16_t tmpName[tmpNameSize];
     strcpy16_dtoh(tmpName, targetPackageStruct->name, tmpNameSize);
@@ -7110,7 +7141,7 @@ status_t ResTable::createIdmap(const ResTable& targetResTable,
     size_t forcedOverlayCount = 0u;
 
     // find the resources that exist in both packages
-    IdmapMatchingResources matchingResources;
+    auto typeMapping = std::make_unique<IdmapTypeMapping>();
     for (size_t typeIndex = 0; typeIndex < packageGroup->types.size(); ++typeIndex) {
         const TypeList& typeList = packageGroup->types[typeIndex];
         if (typeList.isEmpty()) {
@@ -7144,24 +7175,25 @@ status_t ResTable::createIdmap(const ResTable& targetResTable,
                 ++forcedOverlayCount;
             }
 
-            matchingResources.Add(target_resid, overlay_resid);
+            typeMapping->add(target_resid, overlay_resid);
         }
     }
 
-    if (matchingResources.typeMappings.empty()) {
+    if (typeMapping->empty()) {
         ALOGE("idmap: no matching resources");
         return UNKNOWN_ERROR;
     }
 
-    matchingResources.FixPadding();
+    const IdmapMatchingResources matchingResources(std::move(typeMapping));
 
     // write idmap
     *outSize = ResTable::IDMAP_HEADER_SIZE_BYTES; // magic, version, target and overlay crc
     *outSize += 2 * sizeof(uint16_t); // target package id, type count
-    const auto typesEnd = matchingResources.typeMappings.cend();
-    for (auto ti = matchingResources.typeMappings.cbegin(); ti != typesEnd; ++ti) {
+    auto fixedTypeMapping = matchingResources.getTypeMapping();
+    const auto typesEnd = fixedTypeMapping.cend();
+    for (auto ti = fixedTypeMapping.cbegin(); ti != typesEnd; ++ti) {
         *outSize += 4 * sizeof(uint16_t); // target type, overlay type, entry count, entry offset
-        *outSize += matchingResources.numberOfEntriesIncludingPadding[ti->first] *
+        *outSize += matchingResources.getNumberOfEntriesIncludingPadding(ti->first) *
             sizeof(uint32_t); // entries
     }
     if ((*outData = malloc(*outSize)) == NULL) {
@@ -7190,11 +7222,11 @@ status_t ResTable::createIdmap(const ResTable& targetResTable,
     uint16_t* typeData = reinterpret_cast<uint16_t*>(data);
     *typeData++ = htods(targetPackageStruct->id); // write: target package id
     *typeData++ =
-        htods(static_cast<uint16_t>(matchingResources.typeMappings.size())); // write: type count
+        htods(static_cast<uint16_t>(fixedTypeMapping.size())); // write: type count
 
     // write idmap data
-    for (auto ti = matchingResources.typeMappings.cbegin(); ti != typesEnd; ++ti) {
-        const size_t entryCount = matchingResources.numberOfEntriesIncludingPadding[ti->first];
+    for (auto ti = fixedTypeMapping.cbegin(); ti != typesEnd; ++ti) {
+        const size_t entryCount = matchingResources.getNumberOfEntriesIncludingPadding(ti->first);
         auto ei = ti->second.cbegin();
         *typeData++ = htods(Res_GETTYPE(ei->first) + 1); // write: target type id
         *typeData++ = htods(Res_GETTYPE(ei->second) + 1); // write: overlay type id
@@ -7202,7 +7234,7 @@ status_t ResTable::createIdmap(const ResTable& targetResTable,
         *typeData++ = htods(Res_GETENTRY(ei->first)); // write: (target) entry offset
         uint32_t *entryData = reinterpret_cast<uint32_t*>(typeData);
         for (; ei != ti->second.cend(); ++ei) {
-            const size_t padding = matchingResources.entryPadding[ei->first];
+            const size_t padding = matchingResources.getPadding(ei->first);
             for (size_t i = 0; i < padding; ++i) {
                 *entryData++ = htodl(0xffffffff); // write: padding
             }
