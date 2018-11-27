@@ -3873,10 +3873,8 @@
     <string name="action_mode_done">Done</string>
 
     <!-- Strings for MasterClearReceiver. -->
-    <!-- Text for progress dialog while erasing USB storage volume [CHAR LIMIT=NONE] -->
-    <string name="progress_erasing" product="nosdcard">Erasing USB storage\u2026</string>
-    <!-- Text for progress dialog while erasing SD card [CHAR LIMIT=NONE] -->
-    <string name="progress_erasing" product="default">Erasing SD card\u2026</string>
+    <!-- Text for progress dialog while erasing the shared storage volume [CHAR LIMIT=NONE] -->
+    <string name="progress_erasing">Erasing shared storage\u2026</string>
 
     <!-- Text for WebView's text selection Action Mode -->
     <!-- ActionBar action to share the current selection [CHAR LIMIT=10] -->
