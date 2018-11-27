@@ -247,9 +247,6 @@ public final class DisplayManagerService extends SystemService {
     // device).
     private Point mStableDisplaySize = new Point();
 
-    // Whether the system has finished booting or not.
-    private boolean mSystemReady;
-
     // The top inset of the default display.
     // This gets persisted so that the boot animation knows how to transition from the display's
     // full size to the size configured by the user. Right now we only persist and animate the top
@@ -322,8 +319,6 @@ public final class DisplayManagerService extends SystemService {
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
         mCurrentUserId = UserHandle.USER_SYSTEM;
-
-        mSystemReady = false;
     }
 
     public void setupSchedulerPolicies() {
@@ -413,10 +408,6 @@ public final class DisplayManagerService extends SystemService {
         synchronized (mSyncRoot) {
             mSafeMode = safeMode;
             mOnlyCore = onlyCore;
-            mSystemReady = true;
-            // Just in case the top inset changed before the system was ready. At this point, any
-            // relevant configuration should be in place.
-            recordTopInsetLocked(mLogicalDisplays.get(Display.DEFAULT_DISPLAY));
         }
 
         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
@@ -1065,10 +1056,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void recordTopInsetLocked(@Nullable LogicalDisplay d) {
-        // We must only persist the inset after boot has completed, otherwise we will end up
-        // overwriting the persisted value before the masking flag has been loaded from the
-        // resource overlay.
-        if (!mSystemReady || d == null) {
+        if (d == null) {
             return;
         }
         int topInset = d.getInsets().top;

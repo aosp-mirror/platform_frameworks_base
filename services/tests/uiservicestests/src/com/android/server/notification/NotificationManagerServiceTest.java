@@ -68,16 +68,15 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
-import android.app.Application;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
+import android.app.ITransientNotification;
+import android.app.IUriGrantsManager;
 import android.app.Notification;
 import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
-import android.app.ITransientNotification;
-import android.app.IUriGrantsManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
@@ -100,7 +99,6 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.service.notification.Adjustment;
@@ -116,7 +114,6 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.text.Html;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
-import android.util.Log;
 
 import com.android.internal.R;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -288,6 +285,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(false);
         when(mUgmInternal.newUriPermissionOwner(anyString())).thenReturn(mPermOwner);
+        when(mPackageManager.getPackagesForUid(mUid)).thenReturn(new String[]{PKG});
 
         // write to a test file; the system file isn't readable from tests
         mFile = new File(mContext.getCacheDir(), "test.xml");
@@ -1735,7 +1733,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testGetNotificationChannelFromPrivilegedListener_assistant_noAccess() throws Exception {
+    public void testGetNotificationChannelFromPrivilegedListener_assistant_noAccess()
+            throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(new ArrayList<>());
         when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(false);
@@ -3459,11 +3458,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ApplicationInfo info = new ApplicationInfo();
         info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
         when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(info);
+        when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(new String[]{"any"});
 
-        assertTrue(mService.isCallerInstantApp("any", 45770, 0));
+        assertTrue(mService.isCallerInstantApp(45770, 0));
 
         info.privateFlags = 0;
-        assertFalse(mService.isCallerInstantApp("any", 575370, 0));
+        assertFalse(mService.isCallerInstantApp(575370, 0));
     }
 
     @Test
@@ -3472,8 +3472,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
         when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(10))).thenReturn(info);
         when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(null);
+        when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(new String[]{"any"});
 
-        assertTrue(mService.isCallerInstantApp("any", 68638450, 10));
+        assertTrue(mService.isCallerInstantApp(68638450, 10));
     }
 
     @Test

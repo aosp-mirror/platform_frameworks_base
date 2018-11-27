@@ -42,7 +42,6 @@ import android.graphics.ImageDecoder.Source;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.DeadObjectException;
@@ -3244,18 +3243,8 @@ public abstract class ContentResolver {
         Objects.requireNonNull(uri);
         Objects.requireNonNull(size);
 
-        // Older apps might be relying on mutable results, so only consider
-        // giving them hardware bitmaps once they target Q or higher. If modern
-        // apps need mutable thumbnails, they can always roll their own logic.
-        final int allocator;
-        if (getTargetSdkVersion() >= Build.VERSION_CODES.Q) {
-            allocator = ImageDecoder.ALLOCATOR_DEFAULT;
-        } else {
-            allocator = ImageDecoder.ALLOCATOR_SOFTWARE;
-        }
-
         try (ContentProviderClient client = acquireContentProviderClient(uri)) {
-            return loadThumbnail(client, uri, size, signal, allocator);
+            return loadThumbnail(client, uri, size, signal, ImageDecoder.ALLOCATOR_SOFTWARE);
         }
     }
 

@@ -227,6 +227,7 @@ public class KeyguardBouncer {
             mShowingSoon = false;
             if (mExpansion == EXPANSION_VISIBLE) {
                 mKeyguardView.onResume();
+                mKeyguardView.resetSecurityContainer();
             }
             StatsLog.write(StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
                 StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN);

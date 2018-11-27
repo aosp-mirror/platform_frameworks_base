@@ -150,6 +150,12 @@ public abstract class ProvisioningCallback {
     public static final int OSU_FAILURE_ADD_PASSPOINT_CONFIGURATION = 22;
 
     /**
+     * The reason code for provisioning failure when an {@link OsuProvider} is not found for
+     * provisioning.
+     */
+    public static final int OSU_FAILURE_OSU_PROVIDER_NOT_FOUND = 23;
+
+    /**
      * The status code for provisioning flow to indicate connecting to OSU AP
      */
     public static final int OSU_STATUS_AP_CONNECTING = 1;

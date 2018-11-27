@@ -1009,7 +1009,7 @@ public abstract class TextToSpeechService extends Service {
                 Log.e(TAG, "null synthesis text");
                 return false;
             }
-            if (mText.length() >= TextToSpeech.getMaxSpeechInputLength()) {
+            if (mText.length() > TextToSpeech.getMaxSpeechInputLength()) {
                 Log.w(TAG, "Text too long: " + mText.length() + " chars");
                 return false;
             }
@@ -1609,7 +1609,7 @@ public abstract class TextToSpeechService extends Service {
             synchronized (mCallerToCallback) {
                 mCallerToCallback.remove(caller);
             }
-            //mSynthHandler.stopForApp(caller);
+            mSynthHandler.stopForApp(caller);
         }
 
         @Override

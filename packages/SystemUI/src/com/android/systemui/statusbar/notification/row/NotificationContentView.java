@@ -55,6 +55,7 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.SmartReplyView;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -1322,6 +1323,10 @@ public class NotificationContentView extends FrameLayout {
         List<Notification.Action> appGeneratedSmartActions = notification.getContextualActions();
         boolean appGeneratedSmartActionsExist = !appGeneratedSmartActions.isEmpty();
 
+        List<Notification.Action> sysGeneratedSmartActions =
+                notification.getAllowSystemGeneratedContextualActions()
+                        ? entry.systemGeneratedSmartActions : Collections.emptyList();
+
         if (appGeneratedSmartRepliesExist) {
             return new SmartRepliesAndActions(remoteInputActionPair.first,
                     remoteInputActionPair.second.actionIntent,
@@ -1338,11 +1343,11 @@ public class NotificationContentView extends FrameLayout {
             return new SmartRepliesAndActions(freeformRemoteInputActionPair.first,
                     freeformRemoteInputActionPair.second.actionIntent,
                     entry.smartReplies,
-                    entry.systemGeneratedSmartActions,
+                    sysGeneratedSmartActions,
                     freeformRemoteInputActionPair);
         }
         // App didn't generate anything, and there are no NAS-generated smart replies.
-        return new SmartRepliesAndActions(null, null, null, entry.systemGeneratedSmartActions,
+        return new SmartRepliesAndActions(null, null, null, sysGeneratedSmartActions,
                 freeformRemoteInputActionPair);
     }
 

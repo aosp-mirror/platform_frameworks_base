@@ -40,7 +40,7 @@ class IdmapTest : public ::testing::Test {
     ASSERT_EQ(NO_ERROR, overlay_table.add(overlay_data_.data(), overlay_data_.size()));
 
     char target_name[256] = "com.android.basic";
-    ASSERT_EQ(NO_ERROR, target_table_.createIdmap(overlay_table, 0, 0, target_name, target_name,
+    ASSERT_EQ(NO_ERROR, overlay_table.createIdmap(target_table_, 0, 0, target_name, target_name,
                                                   &data_, &data_size_));
   }
 

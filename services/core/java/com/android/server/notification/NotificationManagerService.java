@@ -4398,19 +4398,20 @@ public class NotificationManagerService extends SystemService {
      *
      * Has side effects.
      */
-    private boolean checkDisqualifyingFeatures(int userId, int callingUid, int id, String tag,
+    private boolean checkDisqualifyingFeatures(int userId, int uid, int id, String tag,
             NotificationRecord r, boolean isAutogroup) {
         final String pkg = r.sbn.getPackageName();
         final boolean isSystemNotification =
-                isUidSystemOrPhone(callingUid) || ("android".equals(pkg));
+                isUidSystemOrPhone(uid) || ("android".equals(pkg));
         final boolean isNotificationFromListener = mListeners.isListenerPackage(pkg);
 
         // Limit the number of notifications that any given package except the android
         // package or a registered listener can enqueue.  Prevents DOS attacks and deals with leaks.
         if (!isSystemNotification && !isNotificationFromListener) {
             synchronized (mNotificationLock) {
+                final int callingUid = Binder.getCallingUid();
                 if (mNotificationsByKey.get(r.sbn.getKey()) == null
-                        && isCallerInstantApp(pkg, Binder.getCallingUid(), userId)) {
+                        && isCallerInstantApp(callingUid, userId)) {
                     // Ephemeral apps have some special constraints for notifications.
                     // They are not allowed to create new notifications however they are allowed to
                     // update notifications created by the system (e.g. a foreground service
@@ -6521,24 +6522,28 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    boolean isCallerInstantApp(String pkg, int callingUid, int userId) {
+    boolean isCallerInstantApp(int callingUid, int userId) {
         // System is always allowed to act for ephemeral apps.
         if (isUidSystemOrPhone(callingUid)) {
             return false;
         }
 
-        mAppOps.checkPackage(callingUid, pkg);
-
         try {
+            final String[] pkgs = mPackageManager.getPackagesForUid(callingUid);
+            if (pkgs == null) {
+                throw new SecurityException("Unknown uid " + callingUid);
+            }
+            final String pkg = pkgs[0];
+            mAppOps.checkPackage(callingUid, pkg);
+
             ApplicationInfo ai = mPackageManager.getApplicationInfo(pkg, 0, userId);
             if (ai == null) {
                 throw new SecurityException("Unknown package " + pkg);
             }
             return ai.isInstantApp();
         } catch (RemoteException re) {
-            throw new SecurityException("Unknown package " + pkg, re);
+            throw new SecurityException("Unknown uid " + callingUid, re);
         }
-
     }
 
     private void checkCallerIsSameApp(String pkg) {

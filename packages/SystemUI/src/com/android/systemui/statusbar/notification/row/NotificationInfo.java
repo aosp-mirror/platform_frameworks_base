@@ -92,6 +92,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private String mPackageName;
     private String mAppName;
     private int mAppUid;
+    private String mDelegatePkg;
     private int mNumUniqueChannelsInRow;
     private NotificationChannel mSingleNotificationChannel;
     private int mStartingChannelImportance;
@@ -235,6 +236,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 (mSbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
         mIsForBlockingHelper = isForBlockingHelper;
         mAppUid = mSbn.getUid();
+        mDelegatePkg = mSbn.getOpPkg();
         mIsDeviceProvisioned = isDeviceProvisioned;
         mIsNoisy = isNoisy;
 
@@ -281,26 +283,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         ((ImageView) findViewById(R.id.pkgicon)).setImageDrawable(pkgicon);
         ((TextView) findViewById(R.id.pkgname)).setText(mAppName);
 
-        // Set group information if this channel has an associated group.
-        CharSequence groupName = null;
-        if (mSingleNotificationChannel != null && mSingleNotificationChannel.getGroup() != null) {
-            final NotificationChannelGroup notificationChannelGroup =
-                    mINotificationManager.getNotificationChannelGroupForPackage(
-                            mSingleNotificationChannel.getGroup(), mPackageName, mAppUid);
-            if (notificationChannelGroup != null) {
-                groupName = notificationChannelGroup.getName();
-            }
-        }
-        TextView groupNameView = findViewById(R.id.group_name);
-        TextView groupDividerView = findViewById(R.id.pkg_group_divider);
-        if (groupName != null) {
-            groupNameView.setText(groupName);
-            groupNameView.setVisibility(View.VISIBLE);
-            groupDividerView.setVisibility(View.VISIBLE);
-        } else {
-            groupNameView.setVisibility(View.GONE);
-            groupDividerView.setVisibility(View.GONE);
-        }
+        // Delegate
+        bindDelegate();
 
         // Settings button.
         final View settingsButton = findViewById(R.id.info);
@@ -320,9 +304,10 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         }
     }
 
-    private void bindPrompt() {
+    private void bindPrompt() throws RemoteException {
         final TextView blockPrompt = findViewById(R.id.block_prompt);
         bindName();
+        bindGroup();
         if (mIsNonblockable) {
             blockPrompt.setText(R.string.notification_unblockable_desc);
         } else {
@@ -342,6 +327,60 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             channelName.setVisibility(View.GONE);
         } else {
             channelName.setText(mSingleNotificationChannel.getName());
+        }
+    }
+
+    private void bindDelegate() {
+        TextView delegateView = findViewById(R.id.delegate_name);
+        TextView dividerView = findViewById(R.id.pkg_divider);
+
+        CharSequence delegatePkg = null;
+        if (!TextUtils.equals(mPackageName, mDelegatePkg)) {
+            // this notification was posted by a delegate!
+            ApplicationInfo info;
+            try {
+                info = mPm.getApplicationInfo(
+                        mDelegatePkg,
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                | PackageManager.MATCH_DISABLED_COMPONENTS
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                                | PackageManager.MATCH_DIRECT_BOOT_AWARE);
+                if (info != null) {
+                    delegatePkg = String.valueOf(mPm.getApplicationLabel(info));
+                }
+            } catch (PackageManager.NameNotFoundException e) { }
+        }
+        if (delegatePkg != null) {
+            delegateView.setText(mContext.getResources().getString(
+                    R.string.notification_delegate_header, delegatePkg));
+            delegateView.setVisibility(View.VISIBLE);
+            dividerView.setVisibility(View.VISIBLE);
+        } else {
+            delegateView.setVisibility(View.GONE);
+            dividerView.setVisibility(View.GONE);
+        }
+    }
+
+    private void bindGroup() throws RemoteException {
+        // Set group information if this channel has an associated group.
+        CharSequence groupName = null;
+        if (mSingleNotificationChannel != null && mSingleNotificationChannel.getGroup() != null) {
+            final NotificationChannelGroup notificationChannelGroup =
+                    mINotificationManager.getNotificationChannelGroupForPackage(
+                            mSingleNotificationChannel.getGroup(), mPackageName, mAppUid);
+            if (notificationChannelGroup != null) {
+                groupName = notificationChannelGroup.getName();
+            }
+        }
+        TextView groupNameView = findViewById(R.id.group_name);
+        TextView groupDividerView = findViewById(R.id.pkg_group_divider);
+        if (groupName != null) {
+            groupNameView.setText(groupName);
+            groupNameView.setVisibility(View.VISIBLE);
+            groupDividerView.setVisibility(View.VISIBLE);
+        } else {
+            groupNameView.setVisibility(View.GONE);
+            groupDividerView.setVisibility(View.GONE);
         }
     }
 
