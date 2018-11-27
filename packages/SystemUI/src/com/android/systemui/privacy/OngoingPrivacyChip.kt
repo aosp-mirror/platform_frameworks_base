@@ -78,8 +78,9 @@ class OngoingPrivacyChip @JvmOverloads constructor(
                 if (builder.app != null) {
                     text.setText(builder.app?.applicationName)
                 } else {
-                    text.text = context.getString(R.string.ongoing_privacy_chip_multiple_apps,
-                            builder.appsAndTypes.size)
+                    text.text = context.resources.getQuantityString(
+                            R.plurals.ongoing_privacy_chip_multiple_apps,
+                            builder.appsAndTypes.size, builder.appsAndTypes.size)
                 }
             }
         } else {
@@ -100,9 +101,9 @@ class OngoingPrivacyChip @JvmOverloads constructor(
                         context.getString(R.string.ongoing_privacy_chip_content_single_app,
                                 builder.app?.applicationName, typesText)
             } else {
-                contentDescription = context.getString(
-                        R.string.ongoing_privacy_chip_content_multiple_apps_single_op,
-                        builder.appsAndTypes.size, typesText)
+                contentDescription = context.resources.getQuantityString(
+                        R.plurals.ongoing_privacy_chip_content_multiple_apps_single_op,
+                        builder.appsAndTypes.size, builder.appsAndTypes.size, typesText)
             }
         }
     }

@@ -2254,7 +2254,10 @@
     <string name="heap_dump_tile_name">Dump SysUI Heap</string>
 
     <!-- Text on chip for multiple apps using a single app op [CHAR LIMIT=10] -->
-    <string name="ongoing_privacy_chip_multiple_apps"><xliff:g id="num_apps" example="3">%d</xliff:g> apps</string>
+    <plurals name="ongoing_privacy_chip_multiple_apps">
+        <item quantity="few"><xliff:g id="num_apps" example="3">%d</xliff:g> apps</item>
+        <item quantity="other"><xliff:g id="num_apps" example="3">%d</xliff:g> apps</item>
+    </plurals>
 
     <!-- Content description for ongoing privacy chip. Use with a single app [CHAR LIMIT=NONE]-->
     <string name="ongoing_privacy_chip_content_single_app"><xliff:g id="app" example="Example App">%1$s</xliff:g> is using your <xliff:g id="types_list" example="camera, location">%2$s</xliff:g>.</string>
@@ -2263,12 +2266,15 @@
     <string name="ongoing_privacy_chip_content_multiple_apps">Applications are using your <xliff:g id="types_list" example="camera, location">%s</xliff:g>.</string>
 
     <!-- Content description for ongoing privacy chip. Use with multiple apps using same app op[CHAR LIMIT=NONE]-->
-    <string name="ongoing_privacy_chip_content_multiple_apps_single_op"><xliff:g id="num_apps" example="3">%1$d</xliff:g> applications are using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</string>
+    <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op">
+        <item quantity="few"><xliff:g id="num_apps" example="3">%1$d</xliff:g> applications are using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</item>
+        <item quantity="other"><xliff:g id="num_apps" example="3">%1$d</xliff:g> applications are using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</item>
+    </plurals>
 
     <!-- Action on Ongoing Privacy Dialog to dismiss [CHAR LIMIT=10]-->
     <string name="ongoing_privacy_dialog_cancel">Cancel</string>
 
-    <!-- Action on Ongoing Privacy Dialog to open privacy hub [CHAR LIMIT=15]-->
+    <!-- Action on Ongoing Privacy Dialog to open privacy hub [CHAR LIMIT=20]-->
     <string name="ongoing_privacy_dialog_open_settings">View details</string>
 
     <!-- Text for item in Ongoing Privacy Dialog title when only one app is using app ops [CHAR LIMIT=NONE] -->
