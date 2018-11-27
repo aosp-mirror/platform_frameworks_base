@@ -265,6 +265,11 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
          {{}, {},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER)}},
+        // BuildInformation.
+        {android::util::BUILD_INFORMATION,
+         {{}, {},
+          1 * NS_PER_SEC,
+          new StatsCompanionServicePuller(android::util::BUILD_INFORMATION)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
