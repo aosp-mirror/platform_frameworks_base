@@ -29,11 +29,11 @@ interface IMbmsGroupCallService
 
     void stopGroupCall(int subId, long tmgi);
 
-    void updateGroupCall(int subscriptionId, long tmgi, in int[] saiArray,
-        in int[] frequencyArray);
+    void updateGroupCall(int subscriptionId, long tmgi, in List saiList,
+        in List frequencyList);
 
-    int startGroupCall(int subscriptionId, long tmgi, in int[] saiArray,
-        in int[] frequencyArray, IGroupCallCallback callback);
+    int startGroupCall(int subscriptionId, long tmgi, in List saiList,
+        in List frequencyList, IGroupCallCallback callback);
 
     void dispose(int subId);
 }
