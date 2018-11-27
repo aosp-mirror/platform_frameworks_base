@@ -1859,7 +1859,8 @@ class ActivityStarter {
             }
         }
 
-        if (mStartActivity.isActivityTypeHome() && intentActivity != null
+        if (intentActivity != null
+                && (mStartActivity.isActivityTypeHome() || intentActivity.isActivityTypeHome())
                 && intentActivity.getDisplayId() != mPreferredDisplayId) {
             // Do not reuse home activity on other displays.
             intentActivity = null;

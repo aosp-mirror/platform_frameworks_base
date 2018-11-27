@@ -1039,11 +1039,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         boolean didSomething = false;
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                if (!isTopDisplayFocusedStack(stack)) {
-                    continue;
-                }
+            final ActivityStack stack = display.getFocusedStack();
+            if (stack != null) {
                 stack.getAllRunningVisibleActivitiesLocked(mTmpActivityList);
                 final ActivityRecord top = stack.topRunningActivityLocked();
                 final int size = mTmpActivityList.size();
@@ -2567,10 +2564,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 windowingMode = options != null ? options.getLaunchWindowingMode()
                         : r.getWindowingMode();
             }
-            return activityDisplay.createStack(
-                    windowingMode,
-                    options != null ? options.getLaunchActivityType() : r.getActivityType(),
-                    true /*onTop*/);
+            final int activityType =
+                    options != null && options.getLaunchActivityType() != ACTIVITY_TYPE_UNDEFINED
+                            ? options.getLaunchActivityType() : r.getActivityType();
+            return activityDisplay.createStack(windowingMode, activityType, true /*onTop*/);
         }
 
         Slog.w(TAG, "getValidLaunchStackOnDisplay: can't launch on displayId " + displayId);
