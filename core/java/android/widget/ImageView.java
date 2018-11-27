@@ -106,9 +106,9 @@ public class ImageView extends View {
     private boolean mHaveFrame = false;
     @UnsupportedAppUsage
     private boolean mAdjustViewBounds = false;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mMaxWidth = Integer.MAX_VALUE;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mMaxHeight = Integer.MAX_VALUE;
 
     // these are applied to the drawable
