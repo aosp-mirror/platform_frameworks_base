@@ -42,6 +42,7 @@ import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
@@ -57,6 +58,7 @@ import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -638,7 +640,8 @@ public final class TextClassifierImpl implements TextClassifier {
     /**
      * Helper class to store the information from which RemoteActions are built.
      */
-    private static final class LabeledIntent {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    public static final class LabeledIntent {
 
         static final int DEFAULT_REQUEST_CODE = 0;
 
@@ -673,7 +676,8 @@ public final class TextClassifierImpl implements TextClassifier {
             return mDescription;
         }
 
-        Intent getIntent() {
+        @VisibleForTesting
+        public Intent getIntent() {
             return mIntent;
         }
 
@@ -717,7 +721,8 @@ public final class TextClassifierImpl implements TextClassifier {
     /**
      * Creates intents based on the classification type.
      */
-    static final class IntentFactory {
+    @VisibleForTesting
+    public static final class IntentFactory {
 
         private static final long MIN_EVENT_FUTURE_MILLIS = TimeUnit.MINUTES.toMillis(5);
         private static final long DEFAULT_EVENT_DURATION = TimeUnit.HOURS.toMillis(1);
@@ -761,6 +766,9 @@ public final class TextClassifierImpl implements TextClassifier {
                     break;
                 case TextClassifier.TYPE_FLIGHT_NUMBER:
                     actions = createForFlight(context, text);
+                    break;
+                case TextClassifier.TYPE_DICTIONARY:
+                    actions = createForDictionary(context, text);
                     break;
                 default:
                     actions = new ArrayList<>();
@@ -921,6 +929,16 @@ public final class TextClassifierImpl implements TextClassifier {
                     new Intent(Intent.ACTION_TRANSLATE)
                             // TODO: Probably better to introduce a "translate" scheme instead of
                             // using EXTRA_TEXT.
+                            .putExtra(Intent.EXTRA_TEXT, text),
+                    text.hashCode()));
+        }
+
+        @NonNull
+        private static List<LabeledIntent> createForDictionary(Context context, String text) {
+            return Arrays.asList(new LabeledIntent(
+                    context.getString(com.android.internal.R.string.define),
+                    context.getString(com.android.internal.R.string.define_desc),
+                    new Intent(Intent.ACTION_DEFINE)
                             .putExtra(Intent.EXTRA_TEXT, text),
                     text.hashCode()));
         }
