@@ -5240,6 +5240,16 @@ package android.service.settings.suggestions {
 
 }
 
+package android.service.sms {
+
+  public abstract class FinancialSmsService extends android.app.Service {
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract android.database.CursorWindow onGetSmsMessages(android.os.Bundle);
+    field public static final java.lang.String ACTION_FINANCIAL_SERVICE_INTENT = "android.service.sms.action.FINANCIAL_SERVICE_INTENT";
+  }
+
+}
+
 package android.service.textclassifier {
 
   public abstract class TextClassifierService extends android.app.Service {
