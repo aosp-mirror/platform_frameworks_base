@@ -23,8 +23,13 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManagerInternal;
+import android.os.Handler;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 import android.view.DisplayInfo;
+import android.view.IDisplayFoldListener;
 
+import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -40,16 +45,24 @@ class DisplayFoldController {
 
     /** The display area while device is folded. */
     private final Rect mFoldedArea;
+    private final Handler mHandler;
 
     private final DisplayInfo mNonOverrideDisplayInfo = new DisplayInfo();
+    private final RemoteCallbackList<IDisplayFoldListener> mListeners = new RemoteCallbackList<>();
     private Boolean mFolded;
 
     DisplayFoldController(WindowManagerInternal windowManagerInternal,
-            DisplayManagerInternal displayManagerInternal, int displayId, Rect foldedArea) {
+            DisplayManagerInternal displayManagerInternal, int displayId, Rect foldedArea,
+            Handler handler) {
         mWindowManagerInternal = windowManagerInternal;
         mDisplayManagerInternal = displayManagerInternal;
         mDisplayId = displayId;
         mFoldedArea = new Rect(foldedArea);
+        mHandler = handler;
+    }
+
+    void requestDeviceFolded(boolean folded) {
+        mHandler.post(() -> setDeviceFolded(folded));
     }
 
     void setDeviceFolded(boolean folded) {
@@ -71,6 +84,34 @@ class DisplayFoldController {
             mDisplayManagerInternal.setDisplayOffsets(mDisplayId, 0, 0);
         }
         mFolded = folded;
+
+        final int n = mListeners.beginBroadcast();
+        for (int i = 0; i < n; i++) {
+            try {
+                mListeners.getBroadcastItem(i).onDisplayFoldChanged(mDisplayId, folded);
+            } catch (RemoteException e) {
+                // Listener died.
+            }
+        }
+        mListeners.finishBroadcast();
+    }
+
+    void registerDisplayFoldListener(IDisplayFoldListener listener) {
+        mListeners.register(listener);
+        if (mFolded == null) {
+            return;
+        }
+        mHandler.post(() -> {
+            try {
+                listener.onDisplayFoldChanged(mDisplayId, mFolded);
+            } catch (RemoteException e) {
+                // Listener died.
+            }
+        });
+    }
+
+    void unregisterDisplayFoldListener(IDisplayFoldListener listener) {
+        mListeners.unregister(listener);
     }
 
     /**
@@ -88,7 +129,7 @@ class DisplayFoldController {
         sensorManager.registerListener(new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
-                result.setDeviceFolded(event.values[0] < 1f);
+                result.requestDeviceFolded(event.values[0] < 1f);
             }
 
             @Override
@@ -109,6 +150,6 @@ class DisplayFoldController {
                 displayInfo.logicalWidth, displayInfo.logicalHeight);
 
         return new DisplayFoldController(LocalServices.getService(WindowManagerInternal.class),
-                displayService, displayId, foldedArea);
+                displayService, displayId, foldedArea, DisplayThread.getHandler());
     }
 }

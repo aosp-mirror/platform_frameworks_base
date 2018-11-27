@@ -376,6 +376,7 @@ java_defaults {
         "core/java/android/view/IApplicationToken.aidl",
         "core/java/android/view/IAppTransitionAnimationSpecsFuture.aidl",
         "core/java/android/view/IDockedStackListener.aidl",
+        "core/java/android/view/IDisplayFoldListener.aidl",
         "core/java/android/view/IGraphicsStats.aidl",
         "core/java/android/view/IGraphicsStatsCallback.aidl",
         "core/java/android/view/IInputFilter.aidl",

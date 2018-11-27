@@ -192,6 +192,7 @@ import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IAppTransitionAnimationSpecsFuture;
+import android.view.IDisplayFoldListener;
 import android.view.IDockedStackListener;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
@@ -3745,6 +3746,16 @@ public class WindowManagerService extends IWindowManager.Stub
             mWallpaperVisibilityListeners
                     .unregisterWallpaperVisibilityListener(listener, displayId);
         }
+    }
+
+    @Override
+    public void registerDisplayFoldListener(IDisplayFoldListener listener) {
+        mPolicy.registerDisplayFoldListener(listener);
+    }
+
+    @Override
+    public void unregisterDisplayFoldListener(IDisplayFoldListener listener) {
+        mPolicy.unregisterDisplayFoldListener(listener);
     }
 
     @Override

@@ -177,6 +177,7 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.HapticFeedbackConstants;
+import android.view.IDisplayFoldListener;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
@@ -3205,6 +3206,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
+    public void registerDisplayFoldListener(IDisplayFoldListener listener) {
+        if (mDisplayFoldController != null) {
+            mDisplayFoldController.registerDisplayFoldListener(listener);
+        }
+    }
+
+    @Override
+    public void unregisterDisplayFoldListener(IDisplayFoldListener listener) {
+        if (mDisplayFoldController != null) {
+            mDisplayFoldController.unregisterDisplayFoldListener(listener);
+        }
+    }
+
+    @Override
     public void registerShortcutKey(long shortcutCode, IShortcutService shortcutService)
             throws RemoteException {
         synchronized (mLock) {
@@ -4984,7 +4999,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void applyLidSwitchState() {
         final int lidState = mDefaultDisplayPolicy.getLidState();
         if (mLidControlsDisplayFold && mDisplayFoldController != null) {
-            mDisplayFoldController.setDeviceFolded(lidState == LID_CLOSED);
+            mDisplayFoldController.requestDeviceFolded(lidState == LID_CLOSED);
         } else if (lidState == LID_CLOSED && mLidControlsSleep) {
             goToSleep(SystemClock.uptimeMillis(), PowerManager.GO_TO_SLEEP_REASON_LID_SWITCH,
                     PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
