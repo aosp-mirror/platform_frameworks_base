@@ -202,6 +202,14 @@ public final class AutofillManager {
     public static final String EXTRA_RESTORE_SESSION_TOKEN =
             "android.view.autofill.extra.RESTORE_SESSION_TOKEN";
 
+    /**
+     * Internal extra used to pass a binder to the {@link IAugmentedAutofillManagerClient}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_AUGMENTED_AUTOFILL_CLIENT =
+            "android.view.autofill.extra.AUGMENTED_AUTOFILL_CLIENT";
+
     private static final String SESSION_ID_TAG = "android:sessionId";
     private static final String STATE_TAG = "android:state";
     private static final String LAST_AUTOFILLED_DATA_TAG = "android:lastAutoFilledData";
@@ -368,6 +376,9 @@ public final class AutofillManager {
 
     @GuardedBy("mLock")
     private Cleaner mServiceClientCleaner;
+
+    @GuardedBy("mLock")
+    private IAugmentedAutofillManagerClient mAugmentedAutofillServiceClient;
 
     @GuardedBy("mLock")
     private AutofillCallback mCallback;
@@ -1664,6 +1675,8 @@ public final class AutofillManager {
                 final IAutoFillManager service = mService;
                 final IAutoFillManagerClient serviceClient = mServiceClient;
                 mServiceClientCleaner = Cleaner.create(this, () -> {
+                    // TODO(b/111330312): call service to also remove reference to
+                    // mAugmentedAutofillServiceClient
                     try {
                         service.removeClient(serviceClient, userId);
                     } catch (RemoteException e) {
@@ -1808,6 +1821,7 @@ public final class AutofillManager {
             if ((flags & SET_STATE_FLAG_RESET_CLIENT) != 0) {
                 // Reset connection to system
                 mServiceClient = null;
+                mAugmentedAutofillServiceClient = null;
                 if (mServiceClientCleaner != null) {
                     mServiceClientCleaner.clean();
                     mServiceClientCleaner = null;
@@ -2050,6 +2064,29 @@ public final class AutofillManager {
             } else {
                 resetSessionLocked(/* resetEnteredIds= */ false);
                 mState = newState;
+            }
+        }
+    }
+
+    /**
+     * Gets a {@link AugmentedAutofillManagerClient} for this {@link AutofillManagerClient}.
+     *
+     * <p>These are 2 distinct objects because we need to restrict what the Augmented Autofill
+     * service can do (which is defined by {@code IAugmentedAutofillManagerClient.aidl}).
+     */
+    private void getAugmentedAutofillClient(@NonNull IResultReceiver result) {
+        synchronized (mLock) {
+            if (mAugmentedAutofillServiceClient == null) {
+                mAugmentedAutofillServiceClient = new AugmentedAutofillManagerClient(this);
+            }
+            final Bundle resultData = new Bundle();
+            resultData.putBinder(EXTRA_AUGMENTED_AUTOFILL_CLIENT,
+                    mAugmentedAutofillServiceClient.asBinder());
+
+            try {
+                result.send(0, resultData);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Could not send AugmentedAutofillClient back: " + e);
             }
         }
     }
@@ -2801,7 +2838,7 @@ public final class AutofillManager {
     private static final class AutofillManagerClient extends IAutoFillManagerClient.Stub {
         private final WeakReference<AutofillManager> mAfm;
 
-        AutofillManagerClient(AutofillManager autofillManager) {
+        private AutofillManagerClient(AutofillManager autofillManager) {
             mAfm = new WeakReference<>(autofillManager);
         }
 
@@ -2902,6 +2939,50 @@ public final class AutofillManager {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
                 afm.post(() -> afm.setSessionFinished(newState));
+            }
+        }
+
+        @Override
+        public void getAugmentedAutofillClient(IResultReceiver result) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.getAugmentedAutofillClient(result));
+            }
+        }
+    }
+
+    private static final class AugmentedAutofillManagerClient
+            extends IAugmentedAutofillManagerClient.Stub {
+        private final WeakReference<AutofillManager> mAfm;
+
+        private AugmentedAutofillManagerClient(AutofillManager autofillManager) {
+            mAfm = new WeakReference<>(autofillManager);
+        }
+
+        @Override
+        public Rect getViewCoordinates(@NonNull AutofillId id) {
+            // TODO(b/111330312): use handler / callback?
+            final AutofillManager afm = mAfm.get();
+            if (afm == null) return null;
+
+            final View view = afm.getClient().autofillClientFindViewByAutofillIdTraversal(id);
+            // TODO(b/111330312): optimize (for example, use temp rect from attach info) and
+            // fix (for example, take system status bar height into account) logic below
+            final int[] location = new int[2];
+            view.getLocationOnScreen(location);
+            final Rect rect = new Rect(location[0], location[1], location[0] + view.getWidth(),
+                    location[1] + view.getHeight());
+            if (sVerbose) {
+                Log.v(TAG, "Coordinates for " + id + ": " + rect);
+            }
+            return rect;
+        }
+
+        @Override
+        public void autofill(int sessionId, List<AutofillId> ids, List<AutofillValue> values) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.autofill(sessionId, ids, values));
             }
         }
     }

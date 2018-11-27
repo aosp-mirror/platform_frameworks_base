@@ -25,6 +25,9 @@ import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+import static com.android.server.autofill.AutofillManagerService.FLAG_SMART_SUGGESTION_IME;
+import static com.android.server.autofill.AutofillManagerService.FLAG_SMART_SUGGESTION_SYSTEM;
+import static com.android.server.autofill.AutofillManagerService.smartSuggestionFlagsToString;
 import static com.android.server.autofill.Helper.getNumericValue;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
@@ -93,8 +96,11 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.AbstractRemoteService;
+import com.android.server.autofill.AutofillManagerService.SmartSuggestionMode;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
+import com.android.server.intelligence.IntelligenceManagerInternal;
+import com.android.server.intelligence.IntelligenceManagerInternal.AugmentedAutofillCallback;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -241,6 +247,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     private final SparseArray<LogMaker> mRequestLogs = new SparseArray<>(1);
+
+    @GuardedBy("mLock")
+    @Nullable
+    private AugmentedAutofillCallback mAugmentedAutofillCallback;
 
     /**
      * Receiver of assist data from the app's {@link Activity}.
@@ -2497,15 +2507,83 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         processResponseLocked(newResponse, newClientState, 0);
     }
 
+    @GuardedBy("mLock")
     private void processNullResponseLocked(int flags) {
-        if (sVerbose) Slog.v(TAG, "canceling session " + id + " when server returned null");
         if ((flags & FLAG_MANUAL_REQUEST) != 0) {
             getUiForShowing().showError(R.string.autofill_error_cannot_autofill, this);
         }
         mService.resetLastResponse();
-        // Nothing to be done, but need to notify client.
-        notifyUnavailableToClient(AutofillManager.STATE_FINISHED);
-        removeSelf();
+
+        // The default autofill service cannot fullfill the request, let's check if the intelligence
+        // service can.
+        mAugmentedAutofillCallback = triggerAugmentedAutofillLocked();
+        if (mAugmentedAutofillCallback == null) {
+            if (sVerbose) {
+                Slog.v(TAG, "canceling session " + id + " when server returned null and there is no"
+                        + " AugmentedAutofill for user");
+            }
+            // Nothing to be done, but need to notify client.
+            notifyUnavailableToClient(AutofillManager.STATE_FINISHED);
+            removeSelf();
+        } else {
+            // TODO(b/111330312, b/119638958): must set internal state so when user focus other
+            // fields it does not generate a new call to the standard autofill service (right now
+            // it does). Must also add CTS tests to exercise this scenario.
+            if (sVerbose) {
+                Slog.v(TAG, "keeping session " + id + " when server returned null but "
+                        + "there is an AugmentedAutofill for user");
+            }
+        }
+    }
+
+    /**
+     * Tries to trigger Augmented Autofill when the standard service could not fulfill a request.
+     *
+     * @return callback to the Augmented Autofill service, or {@code null} if not supported.
+     */
+    // TODO(b/111330312): might need to call it in other places, like when the service returns a
+    // non-null response but without datasets (for example, just SaveInfo)
+    @GuardedBy("mLock")
+    private AugmentedAutofillCallback triggerAugmentedAutofillLocked() {
+        // Check if Smart Suggestions is supported...
+        final @SmartSuggestionMode int supportedModes = mService
+                .getSupportedSmartSuggestionModesLocked();
+        if (supportedModes == 0) return null;
+
+        // ...then if the service is set for the user
+        final IntelligenceManagerInternal intelligenceManagerInternal = mService
+                .getMaster().mIntelligenceManagerInternal;
+        if (intelligenceManagerInternal == null) return null;
+
+        // Define which mode will be used
+        final int mode;
+        if ((supportedModes & FLAG_SMART_SUGGESTION_IME) != 0) {
+            // TODO(b/111330312): support it :-)
+            Slog.w(TAG, "Smart Suggestions on IME not supported yet");
+            return null;
+        } else if ((supportedModes & FLAG_SMART_SUGGESTION_SYSTEM) != 0) {
+            mode = FLAG_SMART_SUGGESTION_SYSTEM;
+        } else {
+            Slog.w(TAG, "Unsupported Smart Suggestion Mode: " + supportedModes);
+            return null;
+        }
+
+        if (mCurrentViewId == null) {
+            Slog.w(TAG, "triggerAugmentedAutofillLocked(): no view currently focused");
+            return null;
+        }
+
+        if (sVerbose) {
+            Slog.v(TAG, "calling IntelligenseService on view " + mCurrentViewId
+                    + " using suggestion mode " + smartSuggestionFlagsToString(mode)
+                    + " when server returned null for session " + this.id);
+        }
+
+        // TODO(b/111330312): we might need to add a new state in the AutofillManager to optimize
+        // furgher AFM -> AFMS calls.
+        // TODO(b/119638958): add CTS tests
+        return intelligenceManagerInternal.requestAutofill(mService.getUserId(), mClient,
+                mActivityToken, this.id, mCurrentViewId);
     }
 
     @GuardedBy("mLock")
@@ -2786,6 +2864,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("mSaveOnAllViewsInvisible: "); pw.println(
                 mSaveOnAllViewsInvisible);
         pw.print(prefix); pw.print("mSelectedDatasetIds: "); pw.println(mSelectedDatasetIds);
+        if (mAugmentedAutofillCallback != null) {
+            pw.print(prefix); pw.println("has AugmentedAutofillCallback");
+        }
         mRemoteFillService.dump(prefix, pw);
     }
 
@@ -2956,6 +3037,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client to finish session", e);
             }
+        }
+        destroyAugmentedAutofillWindowsLocked();
+    }
+
+    @GuardedBy("mLock")
+    void destroyAugmentedAutofillWindowsLocked() {
+        if (mAugmentedAutofillCallback != null) {
+            mAugmentedAutofillCallback.destroy();
         }
     }
 

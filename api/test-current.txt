@@ -985,6 +985,7 @@ package android.provider {
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field public static final java.lang.String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
+    field public static final java.lang.String AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS = "autofill_smart_suggestion_emulation_flags";
     field public static final java.lang.String AUTOMATIC_POWER_SAVER_MODE = "automatic_power_saver_mode";
     field public static final java.lang.String DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD = "dynamic_power_savings_disable_threshold";
     field public static final java.lang.String DYNAMIC_POWER_SAVINGS_ENABLED = "dynamic_power_savings_enabled";

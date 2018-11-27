@@ -348,6 +348,7 @@ java_defaults {
         "core/java/android/view/accessibility/IAccessibilityManagerClient.aidl",
         "core/java/android/view/autofill/IAutoFillManager.aidl",
         "core/java/android/view/autofill/IAutoFillManagerClient.aidl",
+        "core/java/android/view/autofill/IAugmentedAutofillManagerClient.aidl",
         "core/java/android/view/autofill/IAutofillWindowPresenter.aidl",
         "core/java/android/view/intelligence/IIntelligenceManager.aidl",
         "core/java/android/view/IApplicationToken.aidl",

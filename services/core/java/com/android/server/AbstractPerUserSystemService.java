@@ -163,6 +163,20 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     }
 
     /**
+     * Gets the user associated with this service.
+     */
+    public final @UserIdInt int getUserId() {
+        return mUserId;
+    }
+
+    /**
+     * Gets the master service.
+     */
+    public final M getMaster() {
+        return mMaster;
+    }
+
+    /**
      * Gets this UID of the remote service this service binds to, or {@code -1} if the service is
      * disabled.
      */
