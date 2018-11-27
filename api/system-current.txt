@@ -5082,8 +5082,11 @@ package android.service.notification {
     method public void onNotificationRemoved(android.service.notification.StatusBarNotification, android.service.notification.NotificationListenerService.RankingMap, android.service.notification.NotificationStats, int);
     method public abstract void onNotificationSnoozedUntilContext(android.service.notification.StatusBarNotification, java.lang.String);
     method public void onNotificationsSeen(java.util.List<java.lang.String>);
+    method public void onSuggestedReplySent(java.lang.String, java.lang.CharSequence, int);
     method public final void unsnoozeNotification(java.lang.String);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.NotificationAssistantService";
+    field public static final int SOURCE_FROM_APP = 0; // 0x0
+    field public static final int SOURCE_FROM_ASSISTANT = 1; // 0x1
   }
 
   public final class NotificationStats implements android.os.Parcelable {

@@ -920,7 +920,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onNotificationSmartReplySent(String key, int replyIndex) {
+        public void onNotificationSmartReplySent(String key, int replyIndex, CharSequence reply,
+                boolean generatedByAssistant) {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
@@ -930,6 +931,8 @@ public class NotificationManagerService extends SystemService {
                     mMetricsLogger.write(logMaker);
                     // Treat clicking on a smart reply as a user interaction.
                     reportUserInteraction(r);
+                    mAssistants.notifyAssistantSuggestedReplySent(
+                            r.sbn, reply, generatedByAssistant);
                 }
             }
         }
@@ -6895,6 +6898,27 @@ public class NotificationManagerService extends SystemService {
                             assistant.onNotificationDirectReply(key);
                         } catch (RemoteException ex) {
                             Log.e(TAG, "unable to notify assistant (expanded): " + assistant, ex);
+                        }
+                    });
+        }
+
+        @GuardedBy("mNotificationLock")
+        void notifyAssistantSuggestedReplySent(
+                final StatusBarNotification sbn, CharSequence reply, boolean generatedByAssistant) {
+            final String key = sbn.getKey();
+            notifyAssistantLocked(
+                    sbn,
+                    false /* sameUserOnly */,
+                    (assistant, sbnHolder) -> {
+                        try {
+                            assistant.onSuggestedReplySent(
+                                    key,
+                                    reply,
+                                    generatedByAssistant
+                                            ? NotificationAssistantService.SOURCE_FROM_ASSISTANT
+                                            : NotificationAssistantService.SOURCE_FROM_APP);
+                        } catch (RemoteException ex) {
+                            Log.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
                         }
                     });
         }

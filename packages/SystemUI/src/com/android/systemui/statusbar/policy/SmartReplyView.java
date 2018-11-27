@@ -1,6 +1,7 @@
 package com.android.systemui.statusbar.policy;
 
 import android.annotation.ColorInt;
+import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
@@ -189,15 +190,13 @@ public class SmartReplyView extends ViewGroup {
      * into the notification are shown.
      */
     public void addRepliesFromRemoteInput(
-            RemoteInput remoteInput, PendingIntent pendingIntent,
-            SmartReplyController smartReplyController, NotificationData.Entry entry,
-            CharSequence[] choices) {
-        if (remoteInput != null && pendingIntent != null) {
-            if (choices != null) {
-                for (int i = 0; i < choices.length; ++i) {
+            SmartReplies smartReplies,
+            SmartReplyController smartReplyController, NotificationData.Entry entry) {
+        if (smartReplies.remoteInput != null && smartReplies.pendingIntent != null) {
+            if (smartReplies.choices != null) {
+                for (int i = 0; i < smartReplies.choices.length; ++i) {
                     Button replyButton = inflateReplyButton(
-                            getContext(), this, i, choices[i], remoteInput, pendingIntent,
-                            smartReplyController, entry);
+                            getContext(), this, i, smartReplies, smartReplyController, entry);
                     addView(replyButton);
                 }
             }
@@ -209,10 +208,10 @@ public class SmartReplyView extends ViewGroup {
      * Add smart actions to be shown next to smart replies. Only the actions that fit into the
      * notification are shown.
      */
-    public void addSmartActions(List<Notification.Action> smartActions) {
-        int numSmartActions = smartActions.size();
+    public void addSmartActions(SmartActions smartActions) {
+        int numSmartActions = smartActions.actions.size();
         for (int n = 0; n < numSmartActions; n++) {
-            Notification.Action action = smartActions.get(n);
+            Notification.Action action = smartActions.actions.get(n);
             if (action.actionIntent != null) {
                 Button actionButton = inflateActionButton(getContext(), this, action);
                 addView(actionButton);
@@ -228,22 +227,25 @@ public class SmartReplyView extends ViewGroup {
 
     @VisibleForTesting
     Button inflateReplyButton(Context context, ViewGroup root, int replyIndex,
-            CharSequence choice, RemoteInput remoteInput, PendingIntent pendingIntent,
-            SmartReplyController smartReplyController, NotificationData.Entry entry) {
+            SmartReplies smartReplies, SmartReplyController smartReplyController,
+            NotificationData.Entry entry) {
         Button b = (Button) LayoutInflater.from(context).inflate(
                 R.layout.smart_reply_button, root, false);
+        CharSequence choice = smartReplies.choices[replyIndex];
         b.setText(choice);
 
         OnDismissAction action = () -> {
-            smartReplyController.smartReplySent(entry, replyIndex, b.getText());
+            smartReplyController.smartReplySent(
+                    entry, replyIndex, b.getText(), smartReplies.fromAssistant);
             Bundle results = new Bundle();
-            results.putString(remoteInput.getResultKey(), choice.toString());
+            results.putString(smartReplies.remoteInput.getResultKey(), choice.toString());
             Intent intent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-            RemoteInput.addResultsToIntent(new RemoteInput[]{remoteInput}, intent, results);
+            RemoteInput.addResultsToIntent(new RemoteInput[]{smartReplies.remoteInput}, intent,
+                    results);
             RemoteInput.setResultsSource(intent, RemoteInput.SOURCE_CHOICE);
             entry.setHasSentReply();
             try {
-                pendingIntent.send(context, 0, intent);
+                smartReplies.pendingIntent.send(context, 0, intent);
             } catch (PendingIntent.CanceledException e) {
                 Log.w(TAG, "Unable to send smart reply", e);
             }
@@ -739,6 +741,42 @@ public class SmartReplyView extends ViewGroup {
         @VisibleForTesting
         boolean isShown() {
             return show;
+        }
+    }
+
+    /**
+     * Data class for smart replies.
+     */
+    public static class SmartReplies {
+        @NonNull
+        public final RemoteInput remoteInput;
+        @NonNull
+        public final PendingIntent pendingIntent;
+        @NonNull
+        public final CharSequence[] choices;
+        public final boolean fromAssistant;
+
+        public SmartReplies(CharSequence[] choices, RemoteInput remoteInput,
+                PendingIntent pendingIntent, boolean fromAssistant) {
+            this.choices = choices;
+            this.remoteInput = remoteInput;
+            this.pendingIntent = pendingIntent;
+            this.fromAssistant = fromAssistant;
+        }
+    }
+
+
+    /**
+     * Data class for smart actions.
+     */
+    public static class SmartActions {
+        @NonNull
+        public final List<Notification.Action> actions;
+        public final boolean fromAssistant;
+
+        public SmartActions(List<Notification.Action> actions, boolean fromAssistant) {
+            this.actions = actions;
+            this.fromAssistant = fromAssistant;
         }
     }
 }
