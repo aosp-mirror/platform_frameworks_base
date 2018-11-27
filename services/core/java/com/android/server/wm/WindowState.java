@@ -180,6 +180,7 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
+import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
@@ -579,8 +580,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
 
-    void seamlesslyRotateIfAllowed(Transaction transaction, int oldRotation, int rotation,
-            boolean requested) {
+    void seamlesslyRotateIfAllowed(Transaction transaction, @Rotation int oldRotation,
+            @Rotation int rotation, boolean requested) {
         // Invisible windows and the wallpaper do not participate in the seamless rotation animation
         if (!isVisibleNow() || mIsWallpaper) {
             return;
@@ -597,9 +598,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    void finishSeamlessRotation() {
+    void finishSeamlessRotation(boolean timeout) {
         if (mPendingSeamlessRotate != null) {
-            mPendingSeamlessRotate.finish(this);
+            mPendingSeamlessRotate.finish(this, timeout);
             mFinishSeamlessRotateFrameNumber = getFrameNumber();
             mPendingSeamlessRotate = null;
             mService.markForSeamlessRotation(this, false);

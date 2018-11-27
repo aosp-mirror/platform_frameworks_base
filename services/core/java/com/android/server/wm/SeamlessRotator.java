@@ -89,13 +89,16 @@ public class SeamlessRotator {
      * Removing the transform and the result of the {@link WindowState} layout are both tied to the
      * {@link WindowState} next frame, such that they apply at the same time the client draws the
      * window in the new orientation.
+     *
+     * In the case of a rotation timeout, we want to remove the transform immediately and not defer
+     * it.
      */
-    public void finish(WindowState win) {
+    public void finish(WindowState win, boolean timeout) {
         mTransform.reset();
         final Transaction t = win.getPendingTransaction();
         t.setMatrix(win.mSurfaceControl, mTransform, mFloat9);
         t.setPosition(win.mSurfaceControl, win.mLastSurfacePosition.x, win.mLastSurfacePosition.y);
-        if (win.mWinAnimator.mSurfaceController != null) {
+        if (win.mWinAnimator.mSurfaceController != null && !timeout) {
             t.deferTransactionUntil(win.mSurfaceControl,
                     win.mWinAnimator.mSurfaceController.getHandle(), win.getFrameNumber());
             t.deferTransactionUntil(win.mWinAnimator.mSurfaceController.mSurfaceControl,
