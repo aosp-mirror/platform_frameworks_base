@@ -22,6 +22,7 @@ import static com.android.systemui.statusbar.notification.NotificationUtils.inte
 import android.content.res.Resources;
 import android.util.MathUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -227,6 +228,11 @@ public class KeyguardClockPositionAlgorithm {
     private float burnInPreventionOffsetX() {
         return getBurnInOffset(mBurnInPreventionOffsetX * 2, true /* xAxis */)
                 - mBurnInPreventionOffsetX;
+    }
+
+    @VisibleForTesting
+    void setPulsingPadding(int padding) {
+        mPulsingPadding = padding;
     }
 
     public static class Result {
