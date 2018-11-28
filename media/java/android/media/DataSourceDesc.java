@@ -22,7 +22,9 @@ import android.annotation.NonNull;
  * @hide
  * Base class of data source descriptor.
  *
- * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)}
+ * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)},
+ * {@link MediaPlayer2#setNextDataSource(DataSourceDesc)} and
+ * {@link MediaPlayer2#setNextDataSources(List<DataSourceDesc>)}
  * to set data source for playback.
  *
  * <p>Users should use subclasses' builder to change {@link DataSourceDesc}.
@@ -30,7 +32,7 @@ import android.annotation.NonNull;
  */
 public class DataSourceDesc {
     // intentionally less than long.MAX_VALUE
-    public static final long LONG_MAX = 0x7ffffffffffffffL;
+    static final long LONG_MAX = 0x7ffffffffffffffL;
 
     // keep consistent with native code
     public static final long LONG_MAX_TIME_MS = LONG_MAX / 1000;
@@ -43,6 +45,19 @@ public class DataSourceDesc {
     private long mEndPositionMs = POSITION_UNKNOWN;
 
     DataSourceDesc() {
+    }
+
+    /**
+     * Releases the resources held by this {@code DataSourceDesc} object.
+     */
+    void close() {
+    }
+
+    // Have to declare protected for finalize() since it is protected
+    // in the base class Object.
+    @Override
+    protected void finalize() throws Throwable {
+        close();
     }
 
     /**
