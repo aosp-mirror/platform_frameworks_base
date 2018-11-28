@@ -1426,7 +1426,7 @@ public class SubscriptionManager {
      * subscriptions in the slot.
      */
     @Nullable
-    public static int[] getSubscriptionIds(int slotIndex) {
+    public int[] getSubscriptionIds(int slotIndex) {
         return getSubId(slotIndex);
     }
 
