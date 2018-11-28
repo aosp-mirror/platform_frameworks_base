@@ -24,20 +24,21 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Build;
 import android.os.Handler;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
 
 /**
  * Controls the screen brightness when dozing.
  */
 public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachine.Part,
         SensorEventListener {
+    private static final boolean DEBUG_AOD_BRIGHTNESS = SystemProperties
+            .getBoolean("debug.aod_brightness", false);
     protected static final String ACTION_AOD_BRIGHTNESS =
             "com.android.systemui.doze.AOD_BRIGHTNESS";
     protected static final String BRIGHTNESS_BUCKET = "brightness_bucket";
@@ -83,11 +84,9 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         mSensorToScrimOpacity = sensorToScrimOpacity;
 
         if (mDebuggable) {
-            Dependency.get(Dependency.BG_HANDLER).post(()-> {
-                IntentFilter filter = new IntentFilter();
-                filter.addAction(ACTION_AOD_BRIGHTNESS);
-                mContext.registerReceiverAsUser(this, UserHandle.ALL, filter, null, handler);
-            });
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(ACTION_AOD_BRIGHTNESS);
+            mContext.registerReceiverAsUser(this, UserHandle.ALL, filter, null, handler);
         }
     }
 
@@ -97,7 +96,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         this(context, service, sensorManager, lightSensor, host, handler,
                 context.getResources().getInteger(
                         com.android.internal.R.integer.config_screenBrightnessDoze),
-                policy.screenBrightnessArray, policy.dimmingScrimArray, Build.IS_DEBUGGABLE);
+                policy.screenBrightnessArray, policy.dimmingScrimArray, DEBUG_AOD_BRIGHTNESS);
     }
 
     @Override
@@ -126,9 +125,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     private void onDestroy() {
         setLightSensorEnabled(false);
         if (mDebuggable) {
-            Dependency.get(Dependency.BG_HANDLER).post(()-> {
-                mContext.unregisterReceiver(this);
-            });
+            mContext.unregisterReceiver(this);
         }
     }
 
