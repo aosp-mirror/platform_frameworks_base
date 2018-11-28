@@ -89,6 +89,7 @@ package android {
     field public static final java.lang.String INSTALL_PACKAGE_UPDATES = "android.permission.INSTALL_PACKAGE_UPDATES";
     field public static final java.lang.String INSTALL_SELF_UPDATES = "android.permission.INSTALL_SELF_UPDATES";
     field public static final java.lang.String INTENT_FILTER_VERIFICATION_AGENT = "android.permission.INTENT_FILTER_VERIFICATION_AGENT";
+    field public static final java.lang.String INTERACT_ACROSS_PROFILES = "android.permission.INTERACT_ACROSS_PROFILES";
     field public static final java.lang.String INTERACT_ACROSS_USERS = "android.permission.INTERACT_ACROSS_USERS";
     field public static final java.lang.String INTERACT_ACROSS_USERS_FULL = "android.permission.INTERACT_ACROSS_USERS_FULL";
     field public static final java.lang.String INTERNAL_SYSTEM_WINDOW = "android.permission.INTERNAL_SYSTEM_WINDOW";
@@ -1126,6 +1127,10 @@ package android.content.pm {
     method public boolean isInstantApp();
     field public java.lang.String credentialProtectedDataDir;
     field public int targetSandboxVersion;
+  }
+
+  public class CrossProfileApps {
+    method public void startAnyActivity(android.content.ComponentName, android.os.UserHandle);
   }
 
   public final class InstantAppInfo implements android.os.Parcelable {
