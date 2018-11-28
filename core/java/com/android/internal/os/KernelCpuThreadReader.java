@@ -103,10 +103,9 @@ public class KernelCpuThreadReader {
 
     /**
      * Default predicate for what UIDs to check for when getting processes. This filters to only
-     * select system UIDs (1000-1999)
+     * select UID 1000 (the {@code system} user)
      */
-    private static final Predicate<Integer> DEFAULT_UID_PREDICATE =
-            uid -> 1000 <= uid && uid < 2000;
+    private static final Predicate<Integer> DEFAULT_UID_PREDICATE = uid -> uid == 1000;
 
     /**
      * Do not report any threads that have a total CPU usage (across all frequencies) less than or
