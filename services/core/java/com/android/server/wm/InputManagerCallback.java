@@ -72,8 +72,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      * Called by the InputManager.
      */
     @Override
-    public long notifyANR(InputApplicationHandle inputApplicationHandle,
-            IBinder token, String reason) {
+    public long notifyANR(IBinder token, String reason) {
         AppWindowToken appWindowToken = null;
         WindowState windowState = null;
         boolean aboveSystem = false;
@@ -83,9 +82,6 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                 if (windowState != null) {
                     appWindowToken = windowState.mAppToken;
                 }
-            }
-            if (appWindowToken == null && inputApplicationHandle != null) {
-                appWindowToken = (AppWindowToken)inputApplicationHandle.appWindowToken;
             }
 
             if (windowState != null) {

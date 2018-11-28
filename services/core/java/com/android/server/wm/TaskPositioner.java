@@ -33,6 +33,7 @@ import android.annotation.IntDef;
 import android.app.IActivityTaskManager;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
@@ -261,7 +262,7 @@ class TaskPositioner {
                 mClientChannel, mService.mAnimationHandler.getLooper(),
                 mService.mAnimator.getChoreographer());
 
-        mDragApplicationHandle = new InputApplicationHandle(null);
+        mDragApplicationHandle = new InputApplicationHandle(new Binder());
         mDragApplicationHandle.name = TAG;
         mDragApplicationHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
@@ -269,7 +270,7 @@ class TaskPositioner {
         mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null,
                 display.getDisplayId());
         mDragWindowHandle.name = TAG;
-        mDragWindowHandle.inputChannel = mServerChannel;
+        mDragWindowHandle.token = mServerChannel.getToken();
         mDragWindowHandle.layer = mService.getDragLayerLocked();
         mDragWindowHandle.layoutParamsFlags = 0;
         mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;

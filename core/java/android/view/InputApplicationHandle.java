@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.os.IBinder;
+
 /**
  * Functions as a handle for an application that can receive input.
  * Enables the native input dispatcher to refer indirectly to the window manager's
@@ -28,19 +30,18 @@ public final class InputApplicationHandle {
     @SuppressWarnings("unused")
     private long ptr;
 
-    // The window manager's application window token.
-    public final Object appWindowToken;
-
     // Application name.
     public String name;
 
     // Dispatching timeout.
     public long dispatchingTimeoutNanos;
 
+    public IBinder token;
+
     private native void nativeDispose();
 
-    public InputApplicationHandle(Object appWindowToken) {
-        this.appWindowToken = appWindowToken;
+    public InputApplicationHandle(IBinder token) {
+        this.token = token;
     }
 
     @Override

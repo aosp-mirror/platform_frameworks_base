@@ -74,8 +74,15 @@ class DragDropController {
         return mDragState != null;
     }
 
-    InputWindowHandle getInputWindowHandleLocked() {
-        return mDragState.getInputWindowHandle();
+    void showInputSurface(SurfaceControl.Transaction t, int displayId) {
+        mDragState.showInputSurface(t, displayId);
+    }
+
+    void hideInputSurface(SurfaceControl.Transaction t, int displayId) {
+        if (mDragState != null) {
+            // TODO: Are we guaranteed to get here?
+            mDragState.hideInputSurface(t, displayId);
+        }
     }
 
     void registerCallback(IDragDropCallback callback) {

@@ -2037,7 +2037,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
         mInputChannel = inputChannels[0];
         mClientChannel = inputChannels[1];
-        mInputWindowHandle.inputChannel = inputChannels[0];
+        mInputWindowHandle.token = mClient.asBinder();
         if (outInputChannel != null) {
             mClientChannel.transferTo(outInputChannel);
             mClientChannel.dispose();
@@ -2068,7 +2068,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mClientChannel.dispose();
             mClientChannel = null;
         }
-        mInputWindowHandle.inputChannel = null;
+        mInputWindowHandle.token = null;
     }
 
     /** Returns true if the replacement window was removed. */
@@ -2167,11 +2167,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mTmpRect.inset(-delta, -delta);
             }
             region.set(mTmpRect);
-            cropRegionToStackBoundsIfNeeded(region);
+            region.translate(-mWindowFrames.mFrame.left, -mWindowFrames.mFrame.top);
         } else {
             // Not modal or full screen modal
             getTouchableRegion(region);
         }
+
+        // The area containing the shadows is not touchable.
+        region.translate(mAttrs.surfaceInsets.left, mAttrs.surfaceInsets.top);
+
         return flags;
     }
 
@@ -2392,11 +2396,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && (mViewVisibility == View.VISIBLE) && !mRemoveOnExit
                 && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0)
                 && (mAppToken == null || mAppToken.windowsAreFocusable())
-                && !canReceiveTouchInput();
+                && !cantReceiveTouchInput();
     }
 
-    /** @return true if this window desires touch events. */
-    boolean canReceiveTouchInput() {
+    /** @return false if this window desires touch events. */
+    boolean cantReceiveTouchInput() {
         return mAppToken != null && mAppToken.getTask() != null
                 && mAppToken.getTask().mStack.shouldIgnoreInput();
     }
@@ -2803,25 +2807,32 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void getTouchableRegion(Region outRegion) {
+        if (inPinnedWindowingMode() && !isFocused()) {
+            outRegion.setEmpty();
+            return;
+        }
+
         final Rect frame = mWindowFrames.mFrame;
         switch (mTouchableInsets) {
             default:
             case TOUCHABLE_INSETS_FRAME:
                 outRegion.set(frame);
+                outRegion.translate(-frame.left, -frame.top);
                 break;
             case TOUCHABLE_INSETS_CONTENT:
                 applyInsets(outRegion, frame, mGivenContentInsets);
+                outRegion.translate(-frame.left, -frame.top);
                 break;
             case TOUCHABLE_INSETS_VISIBLE:
                 applyInsets(outRegion, frame, mGivenVisibleInsets);
+                outRegion.translate(-frame.left, -frame.top);
                 break;
             case TOUCHABLE_INSETS_REGION: {
                 outRegion.set(mGivenTouchableRegion);
-                outRegion.translate(frame.left, frame.top);
                 break;
             }
         }
-        cropRegionToStackBoundsIfNeeded(outRegion);
+        outRegion.translate(mAttrs.surfaceInsets.left, mAttrs.surfaceInsets.top);
     }
 
     private void cropRegionToStackBoundsIfNeeded(Region region) {

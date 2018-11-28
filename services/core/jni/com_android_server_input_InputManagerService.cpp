@@ -86,6 +86,7 @@ static struct {
     jmethodID notifySwitch;
     jmethodID notifyInputChannelBroken;
     jmethodID notifyANR;
+    jmethodID notifyFocusChanged;
     jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
     jmethodID interceptMotionBeforeQueueingNonInteractive;
@@ -145,15 +146,6 @@ inline static T max(const T& a, const T& b) {
 
 static inline const char* toString(bool value) {
     return value ? "true" : "false";
-}
-
-static jobject getInputApplicationHandleObjLocalRef(JNIEnv* env,
-        const sp<InputApplicationHandle>& inputApplicationHandle) {
-    if (inputApplicationHandle == nullptr) {
-        return nullptr;
-    }
-    return static_cast<NativeInputApplicationHandle*>(inputApplicationHandle.get())->
-            getInputApplicationHandleObjLocalRef(env);
 }
 
 static void loadSystemIconAsSpriteWithPointerIcon(JNIEnv* env, jobject contextObj, int32_t style,
@@ -249,6 +241,7 @@ public:
             const sp<IBinder>& token,
             const std::string& reason);
     virtual void notifyInputChannelBroken(const sp<IBinder>& token);
+    virtual void notifyFocusChanged(const sp<IBinder>& token);
     virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags);
     virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig);
     virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags);
@@ -342,6 +335,8 @@ NativeInputManager::NativeInputManager(jobject contextObj,
     mInteractive = true;
 
     mInputManager = new InputManager(this, this);
+    defaultServiceManager()->addService(String16("inputflinger"),
+            mInputManager, false);
 }
 
 NativeInputManager::~NativeInputManager() {
@@ -656,13 +651,11 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
 
     JNIEnv* env = jniEnv();
 
-    jobject inputApplicationHandleObj =
-            getInputApplicationHandleObjLocalRef(env, inputApplicationHandle);
     jobject tokenObj = javaObjectForIBinder(env, token);
     jstring reasonObj = env->NewStringUTF(reason.c_str());
 
     jlong newTimeout = env->CallLongMethod(mServiceObj,
-                gServiceClassInfo.notifyANR, inputApplicationHandleObj, tokenObj,
+                gServiceClassInfo.notifyANR, tokenObj,
                 reasonObj);
     if (checkAndClearExceptionFromCallback(env, "notifyANR")) {
         newTimeout = 0; // abort dispatch
@@ -671,7 +664,6 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
     }
 
     env->DeleteLocalRef(reasonObj);
-    env->DeleteLocalRef(inputApplicationHandleObj);
     return newTimeout;
 }
 
@@ -688,6 +680,22 @@ void NativeInputManager::notifyInputChannelBroken(const sp<IBinder>& token) {
         env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyInputChannelBroken,
                 tokenObj);
         checkAndClearExceptionFromCallback(env, "notifyInputChannelBroken");
+    }
+}
+
+void NativeInputManager::notifyFocusChanged(const sp<IBinder>& token) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    ALOGD("notifyFocusChanged");
+#endif
+    ATRACE_CALL();
+
+    JNIEnv* env = jniEnv();
+
+    jobject tokenObj = javaObjectForIBinder(env, token);
+    if (tokenObj) {
+        env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyFocusChanged,
+                tokenObj);
+        checkAndClearExceptionFromCallback(env, "notifyFocusChanged");
     }
 }
 
@@ -1715,10 +1723,13 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.notifyInputChannelBroken, clazz,
             "notifyInputChannelBroken", "(Landroid/os/IBinder;)V");
+    
+    GET_METHOD_ID(gServiceClassInfo.notifyFocusChanged, clazz,
+            "notifyFocusChanged", "(Landroid/os/IBinder;)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyANR, clazz,
             "notifyANR",
-            "(Landroid/view/InputApplicationHandle;Landroid/os/IBinder;Ljava/lang/String;)J");
+            "(Landroid/os/IBinder;Ljava/lang/String;)J");
 
     GET_METHOD_ID(gServiceClassInfo.filterInputEvent, clazz,
             "filterInputEvent", "(Landroid/view/InputEvent;I)Z");

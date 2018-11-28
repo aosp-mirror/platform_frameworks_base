@@ -304,7 +304,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mActivityComponent = activityComponent;
         mVoiceInteraction = voiceInteraction;
         mFillsParent = fillsParent;
-        mInputApplicationHandle = new InputApplicationHandle(this);
+        mInputApplicationHandle = new InputApplicationHandle(appToken.asBinder());
     }
 
     void onFirstWindowDrawn(WindowState win, WindowStateAnimator winAnimator) {

@@ -21,10 +21,14 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
 import android.app.IActivityTaskManager;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.Display;
+import android.view.SurfaceControl;
 import android.view.IWindow;
 
 import com.android.internal.annotations.GuardedBy;
@@ -39,9 +43,13 @@ class TaskPositioningController {
     private final InputManagerService mInputManager;
     private final IActivityTaskManager mActivityManager;
     private final Handler mHandler;
+    private SurfaceControl mInputSurface;
+    private DisplayContent mPositioningDisplay;
 
     @GuardedBy("WindowManagerSerivce.mWindowMap")
     private @Nullable TaskPositioner mTaskPositioner;
+
+    private final Rect mTmpClipRect = new Rect();
 
     boolean isPositioningLocked() {
         return mTaskPositioner != null;
@@ -57,6 +65,43 @@ class TaskPositioningController {
         mInputManager = inputManager;
         mActivityManager = activityManager;
         mHandler = new Handler(looper);
+    }
+
+    void hideInputSurface(SurfaceControl.Transaction t, int displayId) {
+        if (mPositioningDisplay != null && mPositioningDisplay.getDisplayId() == displayId
+                && mInputSurface != null) {
+            t.hide(mInputSurface);
+        }
+    }
+
+    void showInputSurface(SurfaceControl.Transaction t, int displayId) {
+        if (mPositioningDisplay == null || mPositioningDisplay.getDisplayId() != displayId) {
+            return;
+        }
+        final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
+        if (mInputSurface == null) {
+            mInputSurface = mService.makeSurfaceBuilder(dc.getSession())
+                    .setContainerLayer(true)
+                    .setName("Drag and Drop Input Consumer").setSize(1, 1).build();
+        }
+
+        final InputWindowHandle h = getDragWindowHandleLocked();
+        if (h == null) {
+            Slog.w(TAG_WM, "Drag is in progress but there is no "
+                    + "drag window handle.");
+            return;
+        }
+
+        t.show(mInputSurface);
+        t.setInputWindowInfo(mInputSurface, h);
+        t.setLayer(mInputSurface, Integer.MAX_VALUE);
+
+        final Display display = dc.getDisplay();
+        final Point p = new Point();
+        display.getRealSize(p);
+
+        mTmpClipRect.set(0, 0, p.x, p.y);
+        t.setWindowCrop(mInputSurface, mTmpClipRect);
     }
 
     boolean startMovingTask(IWindow window, float startX, float startY) {
@@ -122,6 +167,7 @@ class TaskPositioningController {
             Slog.w(TAG_WM, "startPositioningLocked: Invalid display content " + win);
             return false;
         }
+        mPositioningDisplay = displayContent;
 
         mTaskPositioner = TaskPositioner.create(mService);
         mTaskPositioner.register(displayContent);
@@ -157,6 +203,7 @@ class TaskPositioningController {
                     mTaskPositioner.unregister();
                     mTaskPositioner = null;
                 }
+                mPositioningDisplay = null;
             }
         });
     }
