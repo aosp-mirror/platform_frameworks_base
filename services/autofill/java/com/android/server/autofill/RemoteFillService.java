@@ -270,7 +270,7 @@ final class RemoteFillService implements DeathRecipient {
         }
 
         final boolean willBind = mContext.bindServiceAsUser(mIntent, mServiceConnection, flags,
-                new UserHandle(mUserId));
+            mHandler,new UserHandle(mUserId));
 
         if (!willBind) {
             Slog.w(LOG_TAG, "[user: " + mUserId + "] could not bind to " + mIntent + " using flags "
