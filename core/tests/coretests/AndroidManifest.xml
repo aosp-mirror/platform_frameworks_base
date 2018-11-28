@@ -1316,6 +1316,12 @@
         <service android:name="android.os.BinderThreadPriorityService"
                 android:process=":BinderThreadPriorityService" />
 
+        <!-- Used by BinderWorkSourceTest -->
+        <service android:name="android.os.BinderWorkSourceService"
+                android:process=":BinderWorkSourceService" />
+        <service android:name="android.os.BinderWorkSourceNestedService"
+                android:process=":BinderWorkSourceNestedService" />
+
         <!-- Application components used for search manager tests -->
 
         <activity android:name="android.app.activity.SearchableActivity"
