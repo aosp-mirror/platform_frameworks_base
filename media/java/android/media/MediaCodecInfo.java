@@ -1135,6 +1135,10 @@ public final class MediaCodecInfo {
                 maxChannels = 6;
             } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_EAC3)) {
                 maxChannels = 16;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_EAC3_JOC)) {
+                sampleRates = new int[] { 48000 };
+                bitRates = Range.create(32000, 6144000);
+                maxChannels = 16;
             } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AC4)) {
                 sampleRates = new int[] { 44100, 48000, 96000, 192000 };
                 bitRates = Range.create(16000, 2688000);
