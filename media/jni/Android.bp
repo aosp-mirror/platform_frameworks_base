@@ -88,7 +88,7 @@ cc_library_shared {
     name: "libmedia2_jni",
 
     srcs: [
-        "android_media_Media2DataSource.cpp",
+        "android_media_DataSourceCallback.cpp",
         "android_media_MediaMetricsJNI.cpp",
         "android_media_MediaPlayer2.cpp",
         "android_media_SyncParams.cpp",

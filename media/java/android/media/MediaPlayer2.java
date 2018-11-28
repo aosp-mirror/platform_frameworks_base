@@ -805,7 +805,7 @@ public class MediaPlayer2 implements AutoCloseable
             CallbackDataSourceDesc cbDSD = (CallbackDataSourceDesc) dsd;
             handleDataSource(isCurrent,
                              srcId,
-                             cbDSD.getMedia2DataSource(),
+                             cbDSD.getDataSourceCallback(),
                              cbDSD.getStartPosition(),
                              cbDSD.getEndPosition());
         } else if (dsd instanceof FileDataSourceDesc) {
@@ -1007,15 +1007,15 @@ public class MediaPlayer2 implements AutoCloseable
 
     /**
      * @throws IllegalStateException if it is called in an invalid state
-     * @throws IllegalArgumentException if dataSource is not a valid Media2DataSource
+     * @throws IllegalArgumentException if dataSource is not a valid DataSourceCallback
      */
-    private void handleDataSource(boolean isCurrent, long srcId, Media2DataSource dataSource,
+    private void handleDataSource(boolean isCurrent, long srcId, DataSourceCallback dataSource,
             long startPos, long endPos) {
         nativeHandleDataSourceCallback(isCurrent, srcId, dataSource, startPos, endPos);
     }
 
     private native void nativeHandleDataSourceCallback(
-            boolean isCurrent, long srcId, Media2DataSource dataSource,
+            boolean isCurrent, long srcId, DataSourceCallback dataSource,
             long startPos, long endPos);
 
     // return true if there is a next data source, false otherwise.

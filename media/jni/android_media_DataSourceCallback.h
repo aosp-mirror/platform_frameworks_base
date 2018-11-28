@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_MEDIA_MEDIA2DATASOURCE_H_
-#define _ANDROID_MEDIA_MEDIA2DATASOURCE_H_
+#ifndef _ANDROID_MEDIA_DATASOURCECALLBACK_H_
+#define _ANDROID_MEDIA_DATASOURCECALLBACK_H_
 
 #include "jni.h"
 
@@ -26,16 +26,16 @@
 
 namespace android {
 
-// The native counterpart to a Java android.media.Media2DataSource. It inherits from
+// The native counterpart to a Java android.media.DataSourceCallback. It inherits from
 // DataSource.
 //
 // If the java DataSource returns an error or throws an exception it
 // will be considered to be in a broken state, and the only further call this
 // will make is to close().
-class JMedia2DataSource : public DataSource {
+class JDataSourceCallback : public DataSource {
 public:
-    JMedia2DataSource(JNIEnv *env, jobject source);
-    virtual ~JMedia2DataSource();
+    JDataSourceCallback(JNIEnv *env, jobject source);
+    virtual ~JDataSourceCallback();
 
     virtual status_t initCheck() const override;
     virtual ssize_t readAt(off64_t offset, void *data, size_t size) override;
@@ -56,15 +56,15 @@ private:
     bool mSizeIsCached;
     off64_t mCachedSize;
 
-    jobject mMedia2DataSourceObj;
+    jobject mDataSourceCallbackObj;
     jmethodID mReadAtMethod;
     jmethodID mGetSizeMethod;
     jmethodID mCloseMethod;
     jbyteArray mByteArrayObj;
 
-    DISALLOW_EVIL_CONSTRUCTORS(JMedia2DataSource);
+    DISALLOW_EVIL_CONSTRUCTORS(JDataSourceCallback);
 };
 
 }  // namespace android
 
-#endif  // _ANDROID_MEDIA_MEDIA2DATASOURCE_H_
+#endif  // _ANDROID_MEDIA_DATASOURCECALLBACK_H_

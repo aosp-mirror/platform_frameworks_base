@@ -15,10 +15,10 @@
  */
 
 //#define LOG_NDEBUG 0
-#define LOG_TAG "JMedia2DataSource-JNI"
+#define LOG_TAG "JDataSourceCallback-JNI"
 #include <utils/Log.h>
 
-#include "android_media_Media2DataSource.h"
+#include "android_media_DataSourceCallback.h"
 
 #include "log/log.h"
 #include "jni.h"
@@ -33,14 +33,14 @@ namespace android {
 
 static const size_t kBufferSize = 64 * 1024;
 
-JMedia2DataSource::JMedia2DataSource(JNIEnv* env, jobject source)
+JDataSourceCallback::JDataSourceCallback(JNIEnv* env, jobject source)
     : mJavaObjStatus(OK),
       mSizeIsCached(false),
       mCachedSize(0) {
-    mMedia2DataSourceObj = env->NewGlobalRef(source);
-    CHECK(mMedia2DataSourceObj != NULL);
+    mDataSourceCallbackObj = env->NewGlobalRef(source);
+    CHECK(mDataSourceCallbackObj != NULL);
 
-    ScopedLocalRef<jclass> media2DataSourceClass(env, env->GetObjectClass(mMedia2DataSourceObj));
+    ScopedLocalRef<jclass> media2DataSourceClass(env, env->GetObjectClass(mDataSourceCallbackObj));
     CHECK(media2DataSourceClass.get() != NULL);
 
     mReadAtMethod = env->GetMethodID(media2DataSourceClass.get(), "readAt", "(J[BII)I");
@@ -55,17 +55,17 @@ JMedia2DataSource::JMedia2DataSource(JNIEnv* env, jobject source)
     CHECK(mByteArrayObj != NULL);
 }
 
-JMedia2DataSource::~JMedia2DataSource() {
+JDataSourceCallback::~JDataSourceCallback() {
     JNIEnv* env = JavaVMHelper::getJNIEnv();
-    env->DeleteGlobalRef(mMedia2DataSourceObj);
+    env->DeleteGlobalRef(mDataSourceCallbackObj);
     env->DeleteGlobalRef(mByteArrayObj);
 }
 
-status_t JMedia2DataSource::initCheck() const {
+status_t JDataSourceCallback::initCheck() const {
     return OK;
 }
 
-ssize_t JMedia2DataSource::readAt(off64_t offset, void *data, size_t size) {
+ssize_t JDataSourceCallback::readAt(off64_t offset, void *data, size_t size) {
     Mutex::Autolock lock(mLock);
 
     if (mJavaObjStatus != OK) {
@@ -76,7 +76,7 @@ ssize_t JMedia2DataSource::readAt(off64_t offset, void *data, size_t size) {
     }
 
     JNIEnv* env = JavaVMHelper::getJNIEnv();
-    jint numread = env->CallIntMethod(mMedia2DataSourceObj, mReadAtMethod,
+    jint numread = env->CallIntMethod(mDataSourceCallbackObj, mReadAtMethod,
             (jlong)offset, mByteArrayObj, (jint)0, (jint)size);
     if (env->ExceptionCheck()) {
         ALOGW("An exception occurred in readAt()");
@@ -106,7 +106,7 @@ ssize_t JMedia2DataSource::readAt(off64_t offset, void *data, size_t size) {
     return numread;
 }
 
-status_t JMedia2DataSource::getSize(off64_t* size) {
+status_t JDataSourceCallback::getSize(off64_t* size) {
     Mutex::Autolock lock(mLock);
 
     if (mJavaObjStatus != OK) {
@@ -118,7 +118,7 @@ status_t JMedia2DataSource::getSize(off64_t* size) {
     }
 
     JNIEnv* env = JavaVMHelper::getJNIEnv();
-    *size = env->CallLongMethod(mMedia2DataSourceObj, mGetSizeMethod);
+    *size = env->CallLongMethod(mDataSourceCallbackObj, mGetSizeMethod);
     if (env->ExceptionCheck()) {
         ALOGW("An exception occurred in getSize()");
         jniLogException(env, ANDROID_LOG_WARN, LOG_TAG);
@@ -139,20 +139,20 @@ status_t JMedia2DataSource::getSize(off64_t* size) {
     return OK;
 }
 
-void JMedia2DataSource::close() {
+void JDataSourceCallback::close() {
     Mutex::Autolock lock(mLock);
 
     JNIEnv* env = JavaVMHelper::getJNIEnv();
-    env->CallVoidMethod(mMedia2DataSourceObj, mCloseMethod);
+    env->CallVoidMethod(mDataSourceCallbackObj, mCloseMethod);
     // The closed state is effectively the same as an error state.
     mJavaObjStatus = UNKNOWN_ERROR;
 }
 
-String8 JMedia2DataSource::toString() {
-    return String8::format("JMedia2DataSource(pid %d, uid %d)", getpid(), getuid());
+String8 JDataSourceCallback::toString() {
+    return String8::format("JDataSourceCallback(pid %d, uid %d)", getpid(), getuid());
 }
 
-String8 JMedia2DataSource::getMIMEType() const {
+String8 JDataSourceCallback::getMIMEType() const {
     return String8("application/octet-stream");
 }
 
