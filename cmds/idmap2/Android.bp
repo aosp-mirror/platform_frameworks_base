@@ -181,6 +181,7 @@ cc_binary {
         "libutils",
         "libziparchive",
     ],
+    init_rc: ["idmap2d/idmap2d.rc"],
 }
 
 filegroup {

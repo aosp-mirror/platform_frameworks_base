@@ -58,7 +58,7 @@ import java.util.HashMap;
 public final class AssetManager implements AutoCloseable {
     private static final String TAG = "AssetManager";
     private static final boolean DEBUG_REFS = false;
-    private static final boolean FEATURE_FLAG_IDMAP2 = false;
+    private static final boolean FEATURE_FLAG_IDMAP2 = true;
 
     private static final String FRAMEWORK_APK_PATH = "/system/framework/framework-res.apk";
 
