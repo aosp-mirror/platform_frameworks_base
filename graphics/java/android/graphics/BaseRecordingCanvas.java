@@ -20,6 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.graphics.text.MeasuredText;
 import android.text.GraphicsOperations;
 import android.text.MeasuredParagraph;
 import android.text.PrecomputedText;
@@ -513,14 +514,12 @@ public class BaseRecordingCanvas extends Canvas {
                     final int paraStart = pt.getParagraphStart(paraIndex);
                     final MeasuredParagraph mp = pt.getMeasuredParagraph(paraIndex);
                     // Only support if the target is in the same paragraph.
-                    nDrawTextRun(mNativeCanvasWrapper,
-                            mp.getChars(),
+                    drawTextRun(mp.getMeasuredText(),
                             start - paraStart,
-                            end - start,
+                            end - paraStart,
                             contextStart - paraStart,
-                            contextEnd - contextStart,
-                            x, y, isRtl, paint.getNativeInstance(),
-                            mp.getMeasuredText().getNativePtr());
+                            contextEnd - paraStart,
+                            x, y, isRtl, paint);
                     return;
                 }
             }
@@ -533,6 +532,15 @@ public class BaseRecordingCanvas extends Canvas {
                     0 /* measured paragraph pointer */);
             TemporaryBuffer.recycle(buf);
         }
+    }
+
+    @Override
+    public void drawTextRun(@NonNull MeasuredText measuredText, int start, int end,
+            int contextStart, int contextEnd, float x, float y, boolean isRtl,
+            @NonNull Paint paint) {
+        nDrawTextRun(mNativeCanvasWrapper, measuredText.getChars(), start, end - start,
+                contextStart, contextEnd - contextStart, x, y, isRtl, paint.getNativeInstance(),
+                measuredText.getNativePtr());
     }
 
     @Override
