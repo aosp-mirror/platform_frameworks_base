@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -3315,6 +3316,25 @@ public class MediaPlayer2 implements AutoCloseable
     @Retention(RetentionPolicy.SOURCE)
     public @interface PrepareDrmStatusCode {}
 
+    /** @hide */
+    @IntDef({
+        MediaDrm.KEY_TYPE_STREAMING,
+        MediaDrm.KEY_TYPE_OFFLINE,
+        MediaDrm.KEY_TYPE_RELEASE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MediaDrmKeyType {}
+
+    /** @hide */
+    @StringDef({
+        MediaDrm.PROPERTY_VENDOR,
+        MediaDrm.PROPERTY_VERSION,
+        MediaDrm.PROPERTY_DESCRIPTION,
+        MediaDrm.PROPERTY_ALGORITHMS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MediaDrmStringProperty {}
+
     /**
      * Retrieves the DRM Info associated with the given source
      *
@@ -3622,7 +3642,7 @@ public class MediaPlayer2 implements AutoCloseable
     public MediaDrm.KeyRequest getDrmKeyRequest(
             @NonNull DataSourceDesc dsd,
             @Nullable byte[] keySetId, @Nullable byte[] initData,
-            @Nullable String mimeType, @MediaDrm.KeyType int keyType,
+            @Nullable String mimeType, @MediaDrmKeyType int keyType,
             @Nullable Map<String, String> optionalParameters)
             throws NoDrmSchemeException {
         // TODO: this implementation only works when dsd is the only data source
@@ -3780,7 +3800,7 @@ public class MediaPlayer2 implements AutoCloseable
     @NonNull
     public String getDrmPropertyString(
             @NonNull DataSourceDesc dsd,
-            @NonNull @MediaDrm.StringProperty String propertyName)
+            @NonNull @MediaDrmStringProperty String propertyName)
             throws NoDrmSchemeException {
         // TODO: this implementation only works when dsd is the only data source
         Log.v(TAG, "getDrmPropertyString: propertyName: " + propertyName);
@@ -3823,7 +3843,7 @@ public class MediaPlayer2 implements AutoCloseable
     // This is a synchronous call.
     public void setDrmPropertyString(
             @NonNull DataSourceDesc dsd,
-            @NonNull @MediaDrm.StringProperty String propertyName, @NonNull String value)
+            @NonNull @MediaDrmStringProperty String propertyName, @NonNull String value)
             throws NoDrmSchemeException {
         // TODO: this implementation only works when dsd is the only data source
         Log.v(TAG, "setDrmPropertyString: propertyName: " + propertyName + " value: " + value);
