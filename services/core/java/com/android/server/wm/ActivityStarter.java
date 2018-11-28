@@ -783,7 +783,7 @@ class ActivityStarter {
             // they will just get a cancel result.
             ActivityOptions.abort(checkedOptions);
             maybeLogActivityStart(callingUid, callingPackage, realCallingUid, intent, callerApp,
-                    /* r= */ null, originatingPendingIntent, /* abortedStart= */ true);
+                    null /*r*/, originatingPendingIntent, true /*abortedStart*/);
             return START_ABORTED;
         }
 
@@ -876,7 +876,7 @@ class ActivityStarter {
         mController.doPendingActivityLaunches(false);
 
         maybeLogActivityStart(callingUid, callingPackage, realCallingUid, intent, callerApp, r,
-                originatingPendingIntent, /* abortedStart= */ false);
+                originatingPendingIntent, false /*abortedStart*/);
 
         return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
                 true /* doResume */, checkedOptions, inTask, outActivity);
@@ -901,6 +901,10 @@ class ActivityStarter {
         }
         // don't abort if the callingUid has any visible window
         if (mService.mWindowManager.isAnyWindowVisibleForUid(callingUid)) {
+            return false;
+        }
+        // don't abort if the caller has the same uid as the recents component
+        if (mSupervisor.mRecentTasks.isCallerRecents(callingUid)) {
             return false;
         }
         // anything that has fallen through will currently be aborted

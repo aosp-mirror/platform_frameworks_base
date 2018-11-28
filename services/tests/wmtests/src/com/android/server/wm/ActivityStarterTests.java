@@ -562,7 +562,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         doReturn(true).when(mService).isBackgroundActivityStartsEnabled();
 
         runAndVerifyBackgroundActivityStartsSubtest("allowed_noStartsAborted",
-                false, UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1, false);
+                false, UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1, false, false);
     }
 
     /**
@@ -574,7 +574,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         doReturn(false).when(mService).isBackgroundActivityStartsEnabled();
 
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_unsupportedUsecase_aborted",
-                true, UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1, false);
+                true, UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1, false, false);
     }
 
     /**
@@ -587,20 +587,22 @@ public class ActivityStarterTests extends ActivityTestsBase {
         doReturn(false).when(mService).isBackgroundActivityStartsEnabled();
 
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_rootUid_notAborted",
-                false, Process.ROOT_UID, false, PROCESS_STATE_TOP + 1, false);
+                false, Process.ROOT_UID, false, PROCESS_STATE_TOP + 1, false, false);
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_systemUid_notAborted",
-                false, Process.SYSTEM_UID, false, PROCESS_STATE_TOP + 1, false);
+                false, Process.SYSTEM_UID, false, PROCESS_STATE_TOP + 1, false, false);
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_hasVisibleWindow_notAborted",
-                false, UNIMPORTANT_UID, true, PROCESS_STATE_TOP + 1, false);
+                false, UNIMPORTANT_UID, true, PROCESS_STATE_TOP + 1, false, false);
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_processStateTop_notAborted",
-                false, UNIMPORTANT_UID, false, PROCESS_STATE_TOP, false);
+                false, UNIMPORTANT_UID, false, PROCESS_STATE_TOP, false, false);
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_hasForegroundActivities_notAborted",
-                false, UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1, true);
+                false, UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1, true, false);
+        runAndVerifyBackgroundActivityStartsSubtest("disallowed_callerIsRecents_notAborted",
+                false, UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1, false, true);
     }
 
     private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
             int testCallingUid, boolean hasVisibleWindow, int procState,
-            boolean hasForegroundActivities) {
+            boolean hasForegroundActivities, boolean callerIsRecents) {
         // window visibility
         doReturn(hasVisibleWindow).when(mService.mWindowManager).isAnyWindowVisibleForUid(
                 testCallingUid);
@@ -614,6 +616,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 new WindowProcessController(mService, ai, null, testCallingUid, -1, null, null);
         callerApp.setHasForegroundActivities(hasForegroundActivities);
         doReturn(callerApp).when(mService).getProcessController(caller);
+        // caller is recents
+        RecentTasks recentTasks = mock(RecentTasks.class);
+        mService.mStackSupervisor.setRecentTasks(recentTasks);
+        doReturn(callerIsRecents).when(recentTasks).isCallerRecents(testCallingUid);
 
         final ActivityOptions options = spy(ActivityOptions.makeBasic());
         ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK).setCaller(caller)
