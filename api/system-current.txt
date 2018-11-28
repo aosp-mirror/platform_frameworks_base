@@ -5177,6 +5177,7 @@ package android.telephony {
 
   public class SubscriptionInfo implements android.os.Parcelable {
     method public java.util.List<android.telephony.UiccAccessRule> getAccessRules();
+    method public int getCardId();
   }
 
   public class SubscriptionManager {
