@@ -4255,9 +4255,46 @@ public final class Settings {
         return false;
     }
 
+    /**
+     * Returns the disabled {@link PackageSetting} for the provided package name if one exists,
+     * {@code null} otherwise.
+     */
+    @Nullable
     public PackageSetting getDisabledSystemPkgLPr(String name) {
         PackageSetting ps = mDisabledSysPackages.get(name);
         return ps;
+    }
+
+    /**
+     * Returns the disabled {@link PackageSetting} for the provided enabled {@link PackageSetting}
+     * if one exists, {@code null} otherwise.
+     */
+    @Nullable
+    public PackageSetting getDisabledSystemPkgLPr(PackageSetting enabledPackageSetting) {
+        if (enabledPackageSetting == null) {
+            return null;
+        }
+        return getDisabledSystemPkgLPr(enabledPackageSetting.name);
+    }
+
+    /**
+     * Fetches an array of the child {@link PackageSetting}s for all child package names referenced
+     * by the provided parent {@link PackageSetting} or {@code null} if no children are referenced.
+     *
+     * Note: Any child packages not found will be null in the returned array.
+     */
+    @Nullable
+    public PackageSetting[] getChildSettingsLPr(PackageSetting parentPackageSetting) {
+        if (parentPackageSetting == null || !parentPackageSetting.hasChildPackages()) {
+            return null;
+        }
+        final int childCount = parentPackageSetting.childPackageNames.size();
+        PackageSetting[] children =
+                new PackageSetting[childCount];
+        for (int i = 0; i < childCount; i++) {
+            children[i] = mPackages.get(parentPackageSetting.childPackageNames.get(i));
+        }
+        return children;
     }
 
     boolean isEnabledAndMatchLPr(ComponentInfo componentInfo, int flags, int userId) {
