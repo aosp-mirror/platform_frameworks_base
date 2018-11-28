@@ -175,6 +175,17 @@ static struct {
     jmethodID postRecordConfigEventFromNative;
 } gAudioPolicyEventHandlerMethods;
 
+//
+// JNI Initialization for OpenSLES routing
+//
+jmethodID gMidAudioTrackRoutingProxy_ctor;
+jmethodID gMidAudioTrackRoutingProxy_release;
+jmethodID gMidAudioRecordRoutingProxy_ctor;
+jmethodID gMidAudioRecordRoutingProxy_release;
+
+jclass gClsAudioTrackRoutingProxy;
+jclass gClsAudioRecordRoutingProxy;
+
 static Mutex gLock;
 
 enum AudioError {
@@ -2017,6 +2028,10 @@ android_media_AudioSystem_setSurroundFormatEnabled(JNIEnv *env, jobject thiz,
     return (jint)nativeToJavaStatus(status);
 }
 
+static jint android_media_AudioSystem_get_FCC_8(JNIEnv *env, jobject thiz) {
+    return FCC_8;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -2079,7 +2094,6 @@ static const JNINativeMethod gMethods[] = {
     {"setSurroundFormatEnabled", "(IZ)I", (void *)android_media_AudioSystem_setSurroundFormatEnabled},
 };
 
-
 static const JNINativeMethod gEventHandlerMethods[] = {
     {"native_setup",
         "(Ljava/lang/Object;)V",
@@ -2089,8 +2103,15 @@ static const JNINativeMethod gEventHandlerMethods[] = {
         (void *)android_media_AudioSystem_eventHandlerFinalize},
 };
 
+static const JNINativeMethod gGetFCC8Methods[] = {
+    {"native_get_FCC_8", "()I", (void *)android_media_AudioSystem_get_FCC_8},
+};
+
 int register_android_media_AudioSystem(JNIEnv *env)
 {
+    // This needs to be done before hooking up methods AudioTrackRoutingProxy (below)
+    RegisterMethodsOrDie(env, kClassPathName, gGetFCC8Methods, NELEM(gGetFCC8Methods));
+
     jclass arrayListClass = FindClassOrDie(env, "java/util/ArrayList");
     gArrayListClass = MakeGlobalRefOrDie(env, arrayListClass);
     gArrayListMethods.add = GetMethodIDOrDie(env, arrayListClass, "add", "(Ljava/lang/Object;)Z");
@@ -2246,6 +2267,28 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gAudioAttributesFields.mFlags = GetFieldIDOrDie(env, audioAttributesClass, "mFlags", "I");
     gAudioAttributesFields.mFormattedTags = GetFieldIDOrDie(env,
             audioAttributesClass, "mFormattedTags", "Ljava/lang/String;");
+
+    // AudioTrackRoutingProxy methods
+    gClsAudioTrackRoutingProxy =
+            android::FindClassOrDie(env, "android/media/AudioTrackRoutingProxy");
+    // make sure this reference doesn't get deleted
+    gClsAudioTrackRoutingProxy = (jclass)env->NewGlobalRef(gClsAudioTrackRoutingProxy);
+
+    gMidAudioTrackRoutingProxy_ctor =
+            android::GetMethodIDOrDie(env, gClsAudioTrackRoutingProxy, "<init>", "(J)V");
+    gMidAudioTrackRoutingProxy_release =
+            android::GetMethodIDOrDie(env, gClsAudioTrackRoutingProxy, "native_release", "()V");
+
+    // AudioRecordRoutingProxy
+    gClsAudioRecordRoutingProxy =
+            android::FindClassOrDie(env, "android/media/AudioRecordRoutingProxy");
+    // make sure this reference doesn't get deleted
+    gClsAudioRecordRoutingProxy = (jclass)env->NewGlobalRef(gClsAudioRecordRoutingProxy);
+
+    gMidAudioRecordRoutingProxy_ctor =
+            android::GetMethodIDOrDie(env, gClsAudioRecordRoutingProxy, "<init>", "(J)V");
+    gMidAudioRecordRoutingProxy_release =
+            android::GetMethodIDOrDie(env, gClsAudioRecordRoutingProxy, "native_release", "()V");
 
     AudioSystem::setErrorCallback(android_media_AudioSystem_error_callback);
 
