@@ -22,6 +22,7 @@ import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -97,8 +98,15 @@ public final class DocumentsContract {
     @Deprecated
     public static final String EXTRA_PACKAGE_NAME = Intent.EXTRA_PACKAGE_NAME;
 
-    /** {@hide} */
-    public static final String EXTRA_SHOW_ADVANCED = "android.content.extra.SHOW_ADVANCED";
+    /**
+     * The value is decide whether to show advance mode or not.
+     * If the value is true, the local/device storage root must be
+     * visible in DocumentsUI.
+     *
+     * {@hide}
+     */
+    @SystemApi
+    public static final String EXTRA_SHOW_ADVANCED = "android.provider.extra.SHOW_ADVANCED";
 
     /** {@hide} */
     public static final String EXTRA_TARGET_URI = "android.content.extra.TARGET_URI";
@@ -111,7 +119,6 @@ public final class DocumentsContract {
      *
      * @see DocumentsProvider#querySearchDocuments(String, String[],
      *      Bundle)
-     * {@hide}
      */
     public static final String QUERY_ARG_DISPLAY_NAME = "android:query-arg-display-name";
 
@@ -124,7 +131,6 @@ public final class DocumentsContract {
      *
      * @see DocumentsProvider#querySearchDocuments(String, String[],
      *      Bundle)
-     * {@hide}
      */
     public static final String QUERY_ARG_MIME_TYPES = "android:query-arg-mime-types";
 
@@ -134,7 +140,6 @@ public final class DocumentsContract {
      *
      * @see DocumentsProvider#querySearchDocuments(String, String[],
      *      Bundle)
-     * {@hide}
      */
     public static final String QUERY_ARG_FILE_SIZE_OVER = "android:query-arg-file-size-over";
 
@@ -146,7 +151,6 @@ public final class DocumentsContract {
      * @see DocumentsProvider#querySearchDocuments(String, String[],
      *      Bundle)
      * @see Document#COLUMN_LAST_MODIFIED
-     * {@hide}
      */
     public static final String QUERY_ARG_LAST_MODIFIED_AFTER =
             "android:query-arg-last-modified-after";
@@ -158,7 +162,6 @@ public final class DocumentsContract {
      *
      * @see DocumentsProvider#querySearchDocuments(String, String[],
      *      Bundle)
-     * {@hide}
      */
     public static final String QUERY_ARG_EXCLUDE_MEDIA = "android:query-arg-exclude-media";
 
@@ -216,10 +219,18 @@ public final class DocumentsContract {
     public static final String
             ACTION_DOCUMENT_SETTINGS = "android.provider.action.DOCUMENT_SETTINGS";
 
-    /** {@hide} */
+    /**
+     * The action to manage document in Downloads root in DocumentsUI.
+     *  {@hide}
+     */
+    @SystemApi
     public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
 
-    /** {@hide} */
+    /**
+     * The action to launch the settings of this root.
+     * {@hide}
+     */
+    @SystemApi
     public static final String
             ACTION_DOCUMENT_ROOT_SETTINGS = "android.provider.action.DOCUMENT_ROOT_SETTINGS";
 
@@ -235,10 +246,19 @@ public final class DocumentsContract {
     /** {@hide} */
     public static final String PACKAGE_DOCUMENTS_UI = "com.android.documentsui";
 
-    /** {@hide} */
-    public static final String METADATA_TYPES = "android:documentMetadataType";
+    /**
+     * Get string array identifies the type or types of metadata returned
+     * using DocumentsContract#getDocumentMetadata.
+     *
+     * @see #getDocumentMetadata(ContentResolver, Uri)
+     */
+    public static final String METADATA_TYPES = "android:documentMetadataTypes";
 
-    /** {@hide} */
+    /**
+     * Get Exif information using DocumentsContract#getDocumentMetadata.
+     *
+     * @see #getDocumentMetadata(ContentResolver, Uri)
+     */
     public static final String METADATA_EXIF = "android:documentExif";
 
     /**
@@ -498,16 +518,17 @@ public final class DocumentsContract {
          * if they represent a failed download.
          *
          * @see #COLUMN_FLAGS
-         * @hide
          */
-        public static final int FLAG_PARTIAL = 1 << 16;
+        public static final int FLAG_PARTIAL = 1 << 13;
 
         /**
          * Flag indicating that a document has available metadata that can be read
          * using DocumentsContract#getDocumentMetadata
-         * @hide
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#getDocumentMetadata(ContentResolver, Uri)
          */
-        public static final int FLAG_SUPPORTS_METADATA = 1 << 17;
+        public static final int FLAG_SUPPORTS_METADATA = 1 << 14;
     }
 
     /**
@@ -679,44 +700,46 @@ public final class DocumentsContract {
          * @see #COLUMN_FLAGS
          * @see ContentResolver#notifyChange(Uri,
          *      android.database.ContentObserver, boolean)
-         * @hide
          */
-        public static final int FLAG_EMPTY = 1 << 16;
+        public static final int FLAG_EMPTY = 1 << 6;
 
         /**
          * Flag indicating that this root should only be visible to advanced
          * users.
          *
          * @see #COLUMN_FLAGS
-         * @hide
+         * {@hide}
          */
-        @UnsupportedAppUsage
-        public static final int FLAG_ADVANCED = 1 << 17;
+        @SystemApi
+        public static final int FLAG_ADVANCED = 1 << 16;
 
         /**
          * Flag indicating that this root has settings.
          *
          * @see #COLUMN_FLAGS
          * @see DocumentsContract#ACTION_DOCUMENT_ROOT_SETTINGS
-         * @hide
+         * {@hide}
          */
-        public static final int FLAG_HAS_SETTINGS = 1 << 18;
+        @SystemApi
+        public static final int FLAG_HAS_SETTINGS = 1 << 17;
 
         /**
          * Flag indicating that this root is on removable SD card storage.
          *
          * @see #COLUMN_FLAGS
-         * @hide
+         * {@hide}
          */
-        public static final int FLAG_REMOVABLE_SD = 1 << 19;
+        @SystemApi
+        public static final int FLAG_REMOVABLE_SD = 1 << 18;
 
         /**
          * Flag indicating that this root is on removable USB storage.
          *
          * @see #COLUMN_FLAGS
-         * @hide
+         * {@hide}
          */
-        public static final int FLAG_REMOVABLE_USB = 1 << 20;
+        @SystemApi
+        public static final int FLAG_REMOVABLE_USB = 1 << 19;
     }
 
     /**
@@ -1090,8 +1113,6 @@ public final class DocumentsContract {
      * Test if the given URI represents roots backed by {@link DocumentsProvider}.
      *
      * @see #buildRootsUri(String)
-     *
-     * {@hide}
      */
     public static boolean isRootsUri(Context context, @Nullable Uri uri) {
         return isRootUri(context, uri, 1 /* pathSize */);
@@ -1101,8 +1122,6 @@ public final class DocumentsContract {
      * Test if the given URI represents specific root backed by {@link DocumentsProvider}.
      *
      * @see #buildRootUri(String, String)
-     *
-     * {@hide}
      */
     public static boolean isRootUri(Context context, @Nullable Uri uri) {
         return isRootUri(context, uri, 2 /* pathSize */);
@@ -1200,13 +1219,23 @@ public final class DocumentsContract {
         return bundle.getString(QUERY_ARG_DISPLAY_NAME, "" /* defaultValue */);
     }
 
-    /** {@hide} */
-    @UnsupportedAppUsage
+    /**
+     * Build URI that append the query parameter {@link PARAM_MANAGE} to
+     * enable the manage mode.
+     * @see DocumentsProvider#queryChildDocumentsForManage(String parentDocId, String[], String)
+     * {@hide}
+     */
+    @SystemApi
     public static Uri setManageMode(Uri uri) {
         return uri.buildUpon().appendQueryParameter(PARAM_MANAGE, "true").build();
     }
 
-    /** {@hide} */
+    /**
+     * Extract the manage mode from a URI built by
+     * {@link #setManageMode(Uri)}.
+     * {@hide}
+     */
+    @SystemApi
     public static boolean isManageMode(Uri uri) {
         return uri.getBooleanQueryParameter(PARAM_MANAGE, false);
     }
@@ -1287,6 +1316,31 @@ public final class DocumentsContract {
         return out.getParcelable(DocumentsContract.EXTRA_URI);
     }
 
+
+    /**
+     * Test if a document is descendant (child, grandchild, etc) from the given
+     * parent.
+     *
+     * @param parentDocumentUri parent to verify against.
+     * @param childDocumentUri child to verify.
+     * @return if given document is a descendant of the given parent.
+     * @see Root#FLAG_SUPPORTS_IS_CHILD
+     */
+    public static boolean isChildDocument(ContentResolver resolver, Uri parentDocumentUri,
+            Uri childDocumentUri) throws FileNotFoundException {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                parentDocumentUri.getAuthority());
+        try {
+            return isChildDocument(client, parentDocumentUri, childDocumentUri);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to query isChildDocument", e);
+            rethrowIfNecessary(resolver, e);
+            return false;
+        } finally {
+            ContentProviderClient.releaseQuietly(client);
+        }
+    }
+
     /** {@hide} */
     public static boolean isChildDocument(ContentProviderClient client, Uri parentDocumentUri,
             Uri childDocumentUri) throws RemoteException {
@@ -1297,7 +1351,7 @@ public final class DocumentsContract {
 
         final Bundle out = client.call(METHOD_IS_CHILD_DOCUMENT, null, in);
         if (out == null) {
-            throw new RemoteException("Failed to get a reponse from isChildDocument query.");
+            throw new RemoteException("Failed to get a response from isChildDocument query.");
         }
         if (!out.containsKey(DocumentsContract.EXTRA_RESULT)) {
             throw new RemoteException("Response did not include result field..");
@@ -1513,13 +1567,13 @@ public final class DocumentsContract {
     /**
      * Returns metadata associated with the document. The type of metadata returned
      * is specific to the document type. For example the data returned for an image
-     * file will likely consist primarily or soley of EXIF metadata.
+     * file will likely consist primarily or solely of EXIF metadata.
      *
      * <p>The returned {@link Bundle} will contain zero or more entries depending
      * on the type of data supported by the document provider.
      *
      * <ol>
-     * <li>A {@link DocumentsContract.METADATA_TYPES} containing a {@code String[]} value.
+     * <li>A {@link DocumentsContract#METADATA_TYPES} containing a {@code String[]} value.
      *     The string array identifies the type or types of metadata returned. Each
      *     value in the can be used to access a {@link Bundle} of data
      *     containing that type of data.
@@ -1539,7 +1593,6 @@ public final class DocumentsContract {
      *
      * @param documentUri a Document URI
      * @return a Bundle of Bundles.
-     * {@hide}
      */
     public static Bundle getDocumentMetadata(ContentResolver resolver, Uri documentUri)
             throws FileNotFoundException {
