@@ -1285,10 +1285,19 @@ def verify_user_handle(clazz):
     if clazz.fullname == "android.os.UserManager": return
 
     for m in clazz.methods:
-        if m.name.endswith("AsUser") or m.name.endswith("ForUser"): continue
         if re.match("on[A-Z]+", m.name): continue
-        if "android.os.UserHandle" in m.args:
-            warn(clazz, m, None, "Method taking UserHandle should be named 'doFooAsUser' or 'queryFooForUser'")
+
+        has_arg = "android.os.UserHandle" in m.args
+        has_name = m.name.endswith("AsUser") or m.name.endswith("ForUser")
+
+        if clazz.fullname.endswith("Manager") and has_arg:
+            warn(clazz, m, None, "When a method overload is needed to target a specific "
+                 "UserHandle, callers should be directed to use "
+                 "Context.createPackageContextAsUser() and re-obtain the relevant "
+                 "Manager, and no new API should be added")
+        elif has_arg and not has_name:
+            warn(clazz, m, None, "Method taking UserHandle should be named 'doFooAsUser' "
+                 "or 'queryFooForUser'")
 
 
 def verify_params(clazz):
