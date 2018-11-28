@@ -16,8 +16,8 @@
 
 package com.android.server.backup.utils;
 
-import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
-import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.app.backup.BackupProgress;
 import android.app.backup.IBackupObserver;

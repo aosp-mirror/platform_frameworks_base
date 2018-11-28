@@ -16,8 +16,8 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
-import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.RUN_INITIALIZE_ACTION;
 
 import android.content.BroadcastReceiver;

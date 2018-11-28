@@ -62,7 +62,7 @@ import java.util.Set;
  * incoming calls to the appropriate per-user {@link UserBackupManagerService} to handle the
  * corresponding backup/restore operation.
  */
-public class GlobalBackupManagerService {
+public class BackupManagerService {
     public static final String TAG = "BackupManagerService";
     public static final boolean DEBUG = true;
     public static final boolean MORE_DEBUG = false;
@@ -82,8 +82,8 @@ public class GlobalBackupManagerService {
         return sInstance;
     }
 
-    /** Helper to create the {@link GlobalBackupManagerService} instance. */
-    public static GlobalBackupManagerService create(
+    /** Helper to create the {@link BackupManagerService} instance. */
+    public static BackupManagerService create(
             Context context,
             Trampoline parent,
             HandlerThread backupThread) {
@@ -116,7 +116,7 @@ public class GlobalBackupManagerService {
         // This dir on /cache is managed directly in init.rc
         File dataDir = new File(Environment.getDownloadCacheDirectory(), "backup_stage");
 
-        return new GlobalBackupManagerService(
+        return new BackupManagerService(
                 context,
                 parent,
                 backupThread,
@@ -127,8 +127,8 @@ public class GlobalBackupManagerService {
 
     private UserBackupManagerService mUserBackupManagerService;
 
-    /** Instantiate a new instance of {@link GlobalBackupManagerService}. */
-    public GlobalBackupManagerService(
+    /** Instantiate a new instance of {@link BackupManagerService}. */
+    public BackupManagerService(
             Context context,
             Trampoline trampoline,
             HandlerThread backupThread,

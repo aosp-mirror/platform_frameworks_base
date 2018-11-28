@@ -16,8 +16,8 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.database.ContentObserver;
 import android.os.Handler;

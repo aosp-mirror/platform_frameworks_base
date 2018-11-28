@@ -28,8 +28,8 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.EventLogTags;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.DataChangedJournal;
-import com.android.server.backup.GlobalBackupManagerService;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.remote.RemoteResult;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
@@ -54,8 +54,8 @@ import java.util.List;
 @VisibleForTesting
 public class KeyValueBackupReporter {
     @VisibleForTesting static final String TAG = "KeyValueBackupTask";
-    private static final boolean DEBUG = GlobalBackupManagerService.DEBUG;
-    @VisibleForTesting static final boolean MORE_DEBUG = GlobalBackupManagerService.MORE_DEBUG;
+    private static final boolean DEBUG = BackupManagerService.DEBUG;
+    @VisibleForTesting static final boolean MORE_DEBUG = BackupManagerService.MORE_DEBUG;
 
     static void onNewThread(String threadName) {
         if (DEBUG) {

@@ -16,7 +16,7 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.content.pm.PackageInfo;
 import android.util.Slog;

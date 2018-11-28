@@ -16,10 +16,10 @@
 
 package com.android.server.backup.fullbackup;
 
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.BackupPasswordManager.PBKDF_CURRENT;
-import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
-import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.GlobalBackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_FILE_HEADER_MAGIC;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_FILE_VERSION;
 import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;

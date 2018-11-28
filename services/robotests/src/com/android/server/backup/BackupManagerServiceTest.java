@@ -49,43 +49,43 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-/** Tests for the user-aware backup/restore system service {@link GlobalBackupManagerService}. */
+/** Tests for the user-aware backup/restore system service {@link BackupManagerService}. */
 @RunWith(RobolectricTestRunner.class)
 @Presubmit
-public class GlobalBackupManagerServiceTest {
+public class BackupManagerServiceTest {
     private static final String TEST_PACKAGE = "package";
     private static final String TEST_TRANSPORT = "transport";
 
     @Mock private UserBackupManagerService mUserBackupManagerService;
     @Mock private TransportManager mTransportManager;
-    private GlobalBackupManagerService mGlobalBackupManagerService;
+    private BackupManagerService mBackupManagerService;
     private Context mContext;
 
-    /** Initialize {@link GlobalBackupManagerService}. */
+    /** Initialize {@link BackupManagerService}. */
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         Application application = RuntimeEnvironment.application;
         mContext = application;
-        mGlobalBackupManagerService =
-                new GlobalBackupManagerService(
+        mBackupManagerService =
+                new BackupManagerService(
                         application,
                         new Trampoline(application),
                         BackupManagerServiceTestUtils.startBackupThread(null),
                         new File(application.getCacheDir(), "base_state"),
                         new File(application.getCacheDir(), "data"),
                         mTransportManager);
-        mGlobalBackupManagerService.setUserBackupManagerService(mUserBackupManagerService);
+        mBackupManagerService.setUserBackupManagerService(mUserBackupManagerService);
     }
 
     /**
-     * Test verifying that {@link GlobalBackupManagerService#MORE_DEBUG} is set to {@code false}.
+     * Test verifying that {@link BackupManagerService#MORE_DEBUG} is set to {@code false}.
      * This is specifically to prevent overloading the logs in production.
      */
     @Test
     public void testMoreDebug_isFalse() throws Exception {
-        boolean moreDebug = GlobalBackupManagerService.MORE_DEBUG;
+        boolean moreDebug = BackupManagerService.MORE_DEBUG;
 
         assertThat(moreDebug).isFalse();
     }
@@ -101,7 +101,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testDataChanged_callsDataChangedForUser() throws Exception {
-        mGlobalBackupManagerService.dataChanged(TEST_PACKAGE);
+        mBackupManagerService.dataChanged(TEST_PACKAGE);
 
         verify(mUserBackupManagerService).dataChanged(TEST_PACKAGE);
     }
@@ -111,7 +111,7 @@ public class GlobalBackupManagerServiceTest {
     public void testAgentConnected_callsAgentConnectedForUser() throws Exception {
         IBinder agentBinder = mock(IBinder.class);
 
-        mGlobalBackupManagerService.agentConnected(TEST_PACKAGE, agentBinder);
+        mBackupManagerService.agentConnected(TEST_PACKAGE, agentBinder);
 
         verify(mUserBackupManagerService).agentConnected(TEST_PACKAGE, agentBinder);
     }
@@ -119,7 +119,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testAgentDisconnected_callsAgentDisconnectedForUser() throws Exception {
-        mGlobalBackupManagerService.agentDisconnected(TEST_PACKAGE);
+        mBackupManagerService.agentDisconnected(TEST_PACKAGE);
 
         verify(mUserBackupManagerService).agentDisconnected(TEST_PACKAGE);
     }
@@ -127,7 +127,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testOpComplete_callsOpCompleteForUser() throws Exception {
-        mGlobalBackupManagerService.opComplete(/* token */ 0, /* result */ 0L);
+        mBackupManagerService.opComplete(/* token */ 0, /* result */ 0L);
 
         verify(mUserBackupManagerService).opComplete(/* token */ 0, /* result */ 0L);
     }
@@ -141,7 +141,7 @@ public class GlobalBackupManagerServiceTest {
     public void testInitializeTransports_callsInitializeTransportsForUser() throws Exception {
         String[] transports = {TEST_TRANSPORT};
 
-        mGlobalBackupManagerService.initializeTransports(transports, /* observer */ null);
+        mBackupManagerService.initializeTransports(transports, /* observer */ null);
 
         verify(mUserBackupManagerService).initializeTransports(transports, /* observer */ null);
     }
@@ -149,7 +149,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testClearBackupData_callsClearBackupDataForUser() throws Exception {
-        mGlobalBackupManagerService.clearBackupData(TEST_TRANSPORT, TEST_PACKAGE);
+        mBackupManagerService.clearBackupData(TEST_TRANSPORT, TEST_PACKAGE);
 
         verify(mUserBackupManagerService).clearBackupData(TEST_TRANSPORT, TEST_PACKAGE);
     }
@@ -157,7 +157,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testGetCurrentTransport_callsGetCurrentTransportForUser() throws Exception {
-        mGlobalBackupManagerService.getCurrentTransport();
+        mBackupManagerService.getCurrentTransport();
 
         verify(mUserBackupManagerService).getCurrentTransport();
     }
@@ -166,7 +166,7 @@ public class GlobalBackupManagerServiceTest {
     @Test
     public void testGetCurrentTransportComponent_callsGetCurrentTransportComponentForUser()
             throws Exception {
-        mGlobalBackupManagerService.getCurrentTransportComponent();
+        mBackupManagerService.getCurrentTransportComponent();
 
         verify(mUserBackupManagerService).getCurrentTransportComponent();
     }
@@ -174,7 +174,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testListAllTransports_callsListAllTransportsForUser() throws Exception {
-        mGlobalBackupManagerService.listAllTransports();
+        mBackupManagerService.listAllTransports();
 
         verify(mUserBackupManagerService).listAllTransports();
     }
@@ -183,7 +183,7 @@ public class GlobalBackupManagerServiceTest {
     @Test
     public void testListAllTransportComponents_callsListAllTransportComponentsForUser()
             throws Exception {
-        mGlobalBackupManagerService.listAllTransportComponents();
+        mBackupManagerService.listAllTransportComponents();
 
         verify(mUserBackupManagerService).listAllTransportComponents();
     }
@@ -191,7 +191,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testGetTransportWhitelist_callsGetTransportWhitelistForUser() throws Exception {
-        mGlobalBackupManagerService.getTransportWhitelist();
+        mBackupManagerService.getTransportWhitelist();
 
         verify(mUserBackupManagerService).getTransportWhitelist();
     }
@@ -204,7 +204,7 @@ public class GlobalBackupManagerServiceTest {
         Intent configurationIntent = new Intent();
         Intent dataManagementIntent = new Intent();
 
-        mGlobalBackupManagerService.updateTransportAttributes(
+        mBackupManagerService.updateTransportAttributes(
                 transport.getTransportComponent(),
                 transport.transportName,
                 configurationIntent,
@@ -225,7 +225,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testSelectBackupTransport_callsSelectBackupTransportForUser() throws Exception {
-        mGlobalBackupManagerService.selectBackupTransport(TEST_TRANSPORT);
+        mBackupManagerService.selectBackupTransport(TEST_TRANSPORT);
 
         verify(mUserBackupManagerService).selectBackupTransport(TEST_TRANSPORT);
     }
@@ -236,7 +236,7 @@ public class GlobalBackupManagerServiceTest {
         TransportData transport = backupTransport();
         ISelectBackupTransportCallback callback = mock(ISelectBackupTransportCallback.class);
 
-        mGlobalBackupManagerService.selectBackupTransportAsync(
+        mBackupManagerService.selectBackupTransportAsync(
                 transport.getTransportComponent(), callback);
 
         verify(mUserBackupManagerService)
@@ -246,7 +246,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testGetConfigurationIntent_callsGetConfigurationIntentForUser() throws Exception {
-        mGlobalBackupManagerService.getConfigurationIntent(TEST_TRANSPORT);
+        mBackupManagerService.getConfigurationIntent(TEST_TRANSPORT);
 
         verify(mUserBackupManagerService).getConfigurationIntent(TEST_TRANSPORT);
     }
@@ -254,7 +254,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testGetDestinationString_callsGetDestinationStringForUser() throws Exception {
-        mGlobalBackupManagerService.getDestinationString(TEST_TRANSPORT);
+        mBackupManagerService.getDestinationString(TEST_TRANSPORT);
 
         verify(mUserBackupManagerService).getDestinationString(TEST_TRANSPORT);
     }
@@ -262,7 +262,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testGetDataManagementIntent_callsGetDataManagementIntentForUser() throws Exception {
-        mGlobalBackupManagerService.getDataManagementIntent(TEST_TRANSPORT);
+        mBackupManagerService.getDataManagementIntent(TEST_TRANSPORT);
 
         verify(mUserBackupManagerService).getDataManagementIntent(TEST_TRANSPORT);
     }
@@ -270,7 +270,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testGetDataManagementLabel_callsGetDataManagementLabelForUser() throws Exception {
-        mGlobalBackupManagerService.getDataManagementLabel(TEST_TRANSPORT);
+        mBackupManagerService.getDataManagementLabel(TEST_TRANSPORT);
 
         verify(mUserBackupManagerService).getDataManagementLabel(TEST_TRANSPORT);
     }
@@ -282,7 +282,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void setBackupEnabled_callsSetBackupEnabledForUser() throws Exception {
-        mGlobalBackupManagerService.setBackupEnabled(true);
+        mBackupManagerService.setBackupEnabled(true);
 
         verify(mUserBackupManagerService).setBackupEnabled(true);
     }
@@ -290,7 +290,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void setAutoRestore_callsSetAutoRestoreForUser() throws Exception {
-        mGlobalBackupManagerService.setAutoRestore(true);
+        mBackupManagerService.setAutoRestore(true);
 
         verify(mUserBackupManagerService).setAutoRestore(true);
     }
@@ -298,7 +298,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testSetBackupProvisioned_callsSetBackupProvisionedForUser() throws Exception {
-        mGlobalBackupManagerService.setBackupProvisioned(true);
+        mBackupManagerService.setBackupProvisioned(true);
 
         verify(mUserBackupManagerService).setBackupProvisioned(true);
     }
@@ -306,7 +306,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testIsBackupEnabled_callsIsBackupEnabledForUser() throws Exception {
-        mGlobalBackupManagerService.isBackupEnabled();
+        mBackupManagerService.isBackupEnabled();
 
         verify(mUserBackupManagerService).isBackupEnabled();
     }
@@ -318,7 +318,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testIsAppEligibleForBackup_callsIsAppEligibleForBackupForUser() throws Exception {
-        mGlobalBackupManagerService.isAppEligibleForBackup(TEST_PACKAGE);
+        mBackupManagerService.isAppEligibleForBackup(TEST_PACKAGE);
 
         verify(mUserBackupManagerService).isAppEligibleForBackup(TEST_PACKAGE);
     }
@@ -329,7 +329,7 @@ public class GlobalBackupManagerServiceTest {
             throws Exception {
         String[] packages = {TEST_PACKAGE};
 
-        mGlobalBackupManagerService.filterAppsEligibleForBackup(packages);
+        mBackupManagerService.filterAppsEligibleForBackup(packages);
 
         verify(mUserBackupManagerService).filterAppsEligibleForBackup(packages);
     }
@@ -337,7 +337,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testBackupNow_callsBackupNowForUser() throws Exception {
-        mGlobalBackupManagerService.backupNow();
+        mBackupManagerService.backupNow();
 
         verify(mUserBackupManagerService).backupNow();
     }
@@ -349,7 +349,7 @@ public class GlobalBackupManagerServiceTest {
         IBackupObserver observer = mock(IBackupObserver.class);
         IBackupManagerMonitor monitor = mock(IBackupManagerMonitor.class);
 
-        mGlobalBackupManagerService.requestBackup(packages, observer, monitor, /* flags */ 0);
+        mBackupManagerService.requestBackup(packages, observer, monitor, /* flags */ 0);
 
         verify(mUserBackupManagerService).requestBackup(packages, observer, monitor, /* flags */ 0);
     }
@@ -357,7 +357,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testCancelBackups_callsCancelBackupsForUser() throws Exception {
-        mGlobalBackupManagerService.cancelBackups();
+        mBackupManagerService.cancelBackups();
 
         verify(mUserBackupManagerService).cancelBackups();
     }
@@ -367,7 +367,7 @@ public class GlobalBackupManagerServiceTest {
     public void testBeginFullBackup_callsBeginFullBackupForUser() throws Exception {
         FullBackupJob job = new FullBackupJob();
 
-        mGlobalBackupManagerService.beginFullBackup(job);
+        mBackupManagerService.beginFullBackup(job);
 
         verify(mUserBackupManagerService).beginFullBackup(job);
     }
@@ -375,7 +375,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testEndFullBackup_callsEndFullBackupForUser() throws Exception {
-        mGlobalBackupManagerService.endFullBackup();
+        mBackupManagerService.endFullBackup();
 
         verify(mUserBackupManagerService).endFullBackup();
     }
@@ -385,7 +385,7 @@ public class GlobalBackupManagerServiceTest {
     public void testFullTransportBackup_callsFullTransportBackupForUser() throws Exception {
         String[] packages = {TEST_PACKAGE};
 
-        mGlobalBackupManagerService.fullTransportBackup(packages);
+        mBackupManagerService.fullTransportBackup(packages);
 
         verify(mUserBackupManagerService).fullTransportBackup(packages);
     }
@@ -397,7 +397,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testRestoreAtInstall_callsRestoreAtInstallForUser() throws Exception {
-        mGlobalBackupManagerService.restoreAtInstall(TEST_PACKAGE, /* token */ 0);
+        mBackupManagerService.restoreAtInstall(TEST_PACKAGE, /* token */ 0);
 
         verify(mUserBackupManagerService).restoreAtInstall(TEST_PACKAGE, /* token */ 0);
     }
@@ -405,7 +405,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testBeginRestoreSession_callsBeginRestoreSessionForUser() throws Exception {
-        mGlobalBackupManagerService.beginRestoreSession(TEST_PACKAGE, TEST_TRANSPORT);
+        mBackupManagerService.beginRestoreSession(TEST_PACKAGE, TEST_TRANSPORT);
 
         verify(mUserBackupManagerService).beginRestoreSession(TEST_PACKAGE, TEST_TRANSPORT);
     }
@@ -414,7 +414,7 @@ public class GlobalBackupManagerServiceTest {
     @Test
     public void testGetAvailableRestoreToken_callsGetAvailableRestoreTokenForUser()
             throws Exception {
-        mGlobalBackupManagerService.getAvailableRestoreToken(TEST_PACKAGE);
+        mBackupManagerService.getAvailableRestoreToken(TEST_PACKAGE);
 
         verify(mUserBackupManagerService).getAvailableRestoreToken(TEST_PACKAGE);
     }
@@ -426,7 +426,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testSetBackupPassword_callsSetBackupPasswordForUser() throws Exception {
-        mGlobalBackupManagerService.setBackupPassword("currentPassword", "newPassword");
+        mBackupManagerService.setBackupPassword("currentPassword", "newPassword");
 
         verify(mUserBackupManagerService).setBackupPassword("currentPassword", "newPassword");
     }
@@ -434,7 +434,7 @@ public class GlobalBackupManagerServiceTest {
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testHasBackupPassword_callsHasBackupPasswordForUser() throws Exception {
-        mGlobalBackupManagerService.hasBackupPassword();
+        mBackupManagerService.hasBackupPassword();
 
         verify(mUserBackupManagerService).hasBackupPassword();
     }
@@ -448,7 +448,7 @@ public class GlobalBackupManagerServiceTest {
                 ParcelFileDescriptor.open(testFile, ParcelFileDescriptor.MODE_READ_WRITE);
         String[] packages = {TEST_PACKAGE};
 
-        mGlobalBackupManagerService.adbBackup(
+        mBackupManagerService.adbBackup(
                 parcelFileDescriptor,
                 /* includeApks */ true,
                 /* includeObbs */ true,
@@ -482,7 +482,7 @@ public class GlobalBackupManagerServiceTest {
         ParcelFileDescriptor parcelFileDescriptor =
                 ParcelFileDescriptor.open(testFile, ParcelFileDescriptor.MODE_READ_WRITE);
 
-        mGlobalBackupManagerService.adbRestore(parcelFileDescriptor);
+        mBackupManagerService.adbRestore(parcelFileDescriptor);
 
         verify(mUserBackupManagerService).adbRestore(parcelFileDescriptor);
     }
@@ -493,7 +493,7 @@ public class GlobalBackupManagerServiceTest {
             throws Exception {
         IFullBackupRestoreObserver observer = mock(IFullBackupRestoreObserver.class);
 
-        mGlobalBackupManagerService.acknowledgeAdbBackupOrRestore(
+        mBackupManagerService.acknowledgeAdbBackupOrRestore(
                 /* token */ 0, /* allow */ true, "currentPassword", "encryptionPassword", observer);
 
         verify(mUserBackupManagerService)
@@ -518,7 +518,7 @@ public class GlobalBackupManagerServiceTest {
         PrintWriter printWriter = new PrintWriter(testFile);
         String[] args = {"1", "2"};
 
-        mGlobalBackupManagerService.dump(fileDescriptor, printWriter, args);
+        mBackupManagerService.dump(fileDescriptor, printWriter, args);
 
         verify(mUserBackupManagerService).dump(fileDescriptor, printWriter, args);
     }

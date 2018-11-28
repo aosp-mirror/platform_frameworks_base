@@ -16,7 +16,7 @@
 
 package com.android.server.backup;
 
-import static com.android.server.backup.GlobalBackupManagerService.DEBUG_SCHEDULING;
+import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
 
 import android.content.ContentResolver;
 import android.os.Handler;
