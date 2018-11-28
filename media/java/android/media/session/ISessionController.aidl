@@ -47,9 +47,9 @@ interface ISessionController {
     PendingIntent getLaunchPendingIntent();
     long getFlags();
     ParcelableVolumeInfo getVolumeAttributes();
-    void adjustVolume(String packageName, in ControllerCallbackLink caller,
+    void adjustVolume(String packageName, String opPackageName, in ControllerCallbackLink caller,
             boolean asSystemService, int direction, int flags);
-    void setVolumeTo(String packageName, in ControllerCallbackLink caller,
+    void setVolumeTo(String packageName, String opPackageName, in ControllerCallbackLink caller,
             int value, int flags);
 
     // These commands are for the TransportControls
