@@ -18,10 +18,7 @@ package com.android.systemui.statusbar.notification.row;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEGATIVE;
-
-import static com.android.systemui.statusbar.notification.row.NotificationInfo.ACTION_NONE;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 
 import android.app.INotificationManager;
 import android.app.NotificationChannel;
@@ -43,7 +40,6 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.plugins.ActivityStarter;
@@ -188,13 +184,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             } else if (gutsView instanceof AppOpsInfo) {
                 initializeAppOpsInfo(row, (AppOpsInfo) gutsView);
             } else if (gutsView instanceof NotificationInfo) {
-                int action;
-                if (item instanceof NotificationMenuRow.NotificationInfoMenuItem) {
-                    action = ((NotificationMenuRow.NotificationInfoMenuItem) item).mAction;
-                } else {
-                    action = ACTION_NONE;
-                }
-                initializeNotificationInfo(row, (NotificationInfo) gutsView, action);
+                initializeNotificationInfo(row, (NotificationInfo) gutsView);
             }
             return true;
         } catch (Exception e) {
@@ -253,13 +243,11 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
      * Sets up the {@link NotificationInfo} inside the notification row's guts.
      * @param row view to set up the guts for
      * @param notificationInfoView view to set up/bind within {@code row}
-     * @param action The action to take immediately upon binding, if any.
      */
     @VisibleForTesting
     void initializeNotificationInfo(
             final ExpandableNotificationRow row,
-            NotificationInfo notificationInfoView,
-            @NotificationInfo.NotificationInfoAction int action) throws Exception {
+            NotificationInfo notificationInfoView) throws Exception {
         NotificationGuts guts = row.getGuts();
         StatusBarNotification sbn = row.getStatusBarNotification();
         String packageName = sbn.getPackageName();
@@ -303,8 +291,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 isForBlockingHelper,
                 row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE,
                 row.getEntry().noisy,
-                row.getEntry().importance,
-                action);
+                row.getEntry().importance);
 
     }
 
