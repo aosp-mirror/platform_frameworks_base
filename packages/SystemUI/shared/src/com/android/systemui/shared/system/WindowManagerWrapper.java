@@ -159,11 +159,13 @@ public class WindowManagerWrapper {
     }
 
     /**
-     * @return whether there is a soft nav bar.
+     * @param displayId the id of display to check if there is a software navigation bar.
+     *
+     * @return whether there is a soft nav bar on specific display.
      */
-    public boolean hasSoftNavigationBar() {
+    public boolean hasSoftNavigationBar(int displayId) {
         try {
-            return WindowManagerGlobal.getWindowManagerService().hasNavigationBar();
+            return WindowManagerGlobal.getWindowManagerService().hasNavigationBar(displayId);
         } catch (RemoteException e) {
             return false;
         }

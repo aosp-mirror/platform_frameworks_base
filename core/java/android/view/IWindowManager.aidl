@@ -294,9 +294,11 @@ interface IWindowManager
     void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled);
 
     /**
-     * Device has a software navigation bar (separate from the status bar).
+     * Device has a software navigation bar (separate from the status bar) on specific display.
+     *
+     * @param displayId the id of display to check if there is a software navigation bar.
      */
-    boolean hasNavigationBar();
+    boolean hasNavigationBar(int displayId);
 
     /**
      * Get the position of the nav bar
