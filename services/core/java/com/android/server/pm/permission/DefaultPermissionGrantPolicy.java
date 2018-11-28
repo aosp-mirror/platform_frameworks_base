@@ -184,7 +184,7 @@ public final class DefaultPermissionGrantPolicy {
     private static final Set<String> STORAGE_PERMISSIONS = new ArraySet<>();
     static {
         // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (!SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+        if (!StorageManager.hasIsolatedStorage()) {
             STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
             STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
@@ -193,7 +193,7 @@ public final class DefaultPermissionGrantPolicy {
     private static final Set<String> MEDIA_AURAL_PERMISSIONS = new ArraySet<>();
     static {
         // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+        if (StorageManager.hasIsolatedStorage()) {
             MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
         }
     }
@@ -201,7 +201,7 @@ public final class DefaultPermissionGrantPolicy {
     private static final Set<String> MEDIA_VISUAL_PERMISSIONS = new ArraySet<>();
     static {
         // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+        if (StorageManager.hasIsolatedStorage()) {
             MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
             MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
         }

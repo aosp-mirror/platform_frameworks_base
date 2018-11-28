@@ -2517,7 +2517,7 @@ public class PackageParser {
         // If the storage model feature flag is disabled, we need to fiddle
         // around with permission definitions to return us to pre-Q behavior.
         // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (!SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+        if (!StorageManager.hasIsolatedStorage()) {
             if ("android".equals(pkg.packageName)) {
                 final ArraySet<String> newGroups = new ArraySet<>();
                 newGroups.add(android.Manifest.permission_group.MEDIA_AURAL);

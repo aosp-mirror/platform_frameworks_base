@@ -20096,7 +20096,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (Process.isIsolated(uid)) {
                     return Zygote.MOUNT_EXTERNAL_NONE;
                 }
-                if (SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+                if (StorageManager.hasIsolatedStorage()) {
                     return checkUidPermission(WRITE_MEDIA_STORAGE, uid) == PERMISSION_GRANTED
                             ? Zygote.MOUNT_EXTERNAL_FULL
                             : Zygote.MOUNT_EXTERNAL_WRITE;
