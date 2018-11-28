@@ -4247,18 +4247,7 @@ public class NotificationManagerService extends SystemService {
 
         // Fix the notification as best we can.
         try {
-            final ApplicationInfo ai = mPackageManagerClient.getApplicationInfoAsUser(
-                    pkg, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                    (userId == UserHandle.USER_ALL) ? USER_SYSTEM : userId);
-            Notification.addFieldsFromContext(ai, notification);
-
-            int canColorize = mPackageManagerClient.checkPermission(
-                    android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, pkg);
-            if (canColorize == PERMISSION_GRANTED) {
-                notification.flags |= Notification.FLAG_CAN_COLORIZE;
-            } else {
-                notification.flags &= ~Notification.FLAG_CAN_COLORIZE;
-            }
+            fixNotification(notification, pkg, userId);
 
         } catch (NameNotFoundException e) {
             Slog.e(TAG, "Cannot create a context for sending app", e);
@@ -4357,6 +4346,33 @@ public class NotificationManagerService extends SystemService {
         }
 
         mHandler.post(new EnqueueNotificationRunnable(userId, r));
+    }
+
+    @VisibleForTesting
+    protected void fixNotification(Notification notification, String pkg, int userId)
+            throws NameNotFoundException {
+        final ApplicationInfo ai = mPackageManagerClient.getApplicationInfoAsUser(
+                pkg, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                (userId == UserHandle.USER_ALL) ? USER_SYSTEM : userId);
+        Notification.addFieldsFromContext(ai, notification);
+
+        int canColorize = mPackageManagerClient.checkPermission(
+                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, pkg);
+        if (canColorize == PERMISSION_GRANTED) {
+            notification.flags |= Notification.FLAG_CAN_COLORIZE;
+        } else {
+            notification.flags &= ~Notification.FLAG_CAN_COLORIZE;
+        }
+
+        if (ai.targetSdkVersion >= Build.VERSION_CODES.Q) {
+            int fullscreenIntentPermission = mPackageManagerClient.checkPermission(
+                    android.Manifest.permission.USE_FULL_SCREEN_INTENT, pkg);
+            if (fullscreenIntentPermission != PERMISSION_GRANTED) {
+                notification.fullScreenIntent = null;
+                Log.w(TAG, "Package " + pkg +
+                        ": Use of fullScreenIntent requires the USE_FULL_SCREEN_INTENT permission");
+            }
+        }
     }
 
     private void doChannelWarningToast(CharSequence toastText) {
