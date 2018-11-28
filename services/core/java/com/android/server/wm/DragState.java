@@ -169,7 +169,7 @@ class DragState {
         t.setLayer(mInputSurface, Integer.MAX_VALUE);
 
         mTmpClipRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
-        t.setWindowCrop(mSurfaceControl, mTmpClipRect);
+        t.setWindowCrop(mInputSurface, mTmpClipRect);
     }
 
     /**

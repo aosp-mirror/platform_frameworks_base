@@ -435,10 +435,10 @@ final class InputMonitor {
                 if (mAddPipInputConsumerHandle) {
                     // Update the bounds of the Pip input consumer to match the window bounds.
                     w.getBounds(mTmpRect);
-                    // The touchable region is relative to the surface top-left
-                    mTmpRect.top = mTmpRect.left = 0;
-
                     pipInputConsumer.layout(mInputTransaction, mTmpRect);
+
+                    // The touchable region is relative to the surface top-left
+                    mTmpRect.offsetTo(0, 0);
                     pipInputConsumer.mWindowHandle.touchableRegion.set(mTmpRect);
                     pipInputConsumer.show(mInputTransaction, w);
                     mAddPipInputConsumerHandle = false;
