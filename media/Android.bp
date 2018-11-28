@@ -1,0 +1,36 @@
+java_library {
+    // TODO: include media2.jar in the media apex and add it to the bootclasspath.
+    name: "media2",
+
+    srcs: [
+        ":media2-srcs",
+        ":framework-media-annotation-srcs",
+    ],
+
+    static_libs: [
+        "mediaplayer2-protos",
+    ],
+
+    // Make sure that the implementaion only relies on SDK or system APIs.
+    sdk_version: "system_current",
+}
+
+filegroup {
+    name: "media2-srcs",
+    srcs: [
+        "java/android/media/CloseGuard.java",
+        "java/android/media/DataSourceCallback.java",
+        "java/android/media/DataSourceDesc.java",
+        "java/android/media/UriDataSourceDesc.java",
+        "java/android/media/FileDataSourceDesc.java",
+        "java/android/media/CallbackDataSourceDesc.java",
+        "java/android/media/VideoSize.java",
+        "java/android/media/Media2Utils.java",
+        "java/android/media/MediaPlayer2Utils.java",
+        "java/android/media/MediaPlayer2.java",
+        "java/android/media/Media2HTTPService.java",
+        "java/android/media/Media2HTTPConnection.java",
+        "java/android/media/RoutingDelegate.java",
+        "java/android/media/BufferingParams.java",
+    ],
+}
