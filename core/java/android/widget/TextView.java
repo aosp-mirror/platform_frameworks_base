@@ -6254,8 +6254,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mHint;
     }
 
-    @UnsupportedAppUsage
-    boolean isSingleLine() {
+    /**
+     * Returns if the text is constrained to a single horizontally scrolling line ignoring new
+     * line characters instead of letting it wrap onto multiple lines.
+     *
+     * @attr ref android.R.styleable#TextView_singleLine
+     */
+    public boolean isSingleLine() {
         return mSingleLine;
     }
 
