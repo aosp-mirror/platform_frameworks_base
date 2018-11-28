@@ -454,16 +454,6 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             ALOGW("cannot find \"what\" in ValueMetric \"%lld\"", (long long)metric.id());
             return false;
         }
-        if (!metric.has_value_field()) {
-            ALOGW("cannot find \"value_field\" in ValueMetric \"%lld\"", (long long)metric.id());
-            return false;
-        }
-        std::vector<Matcher> fieldMatchers;
-        translateFieldMatcher(metric.value_field(), &fieldMatchers);
-        if (fieldMatchers.size() < 1) {
-            ALOGW("incorrect \"value_field\" in ValueMetric \"%lld\"", (long long)metric.id());
-            return false;
-        }
 
         int metricIndex = allMetricProducers.size();
         metricMap.insert({metric.id(), metricIndex});

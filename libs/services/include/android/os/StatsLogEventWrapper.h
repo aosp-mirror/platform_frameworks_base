@@ -82,11 +82,6 @@ struct StatsLogValue {
   STATS_LOG_VALUE_TYPE type;
 };
 
-struct WorkChain {
-  std::vector<int32_t> uids;
-  std::vector<std::string> tags;
-};
-
 // Represents a parcelable object. Only used to send data from Android OS to statsd.
 class StatsLogEventWrapper : public android::Parcelable {
  public:
@@ -104,9 +99,7 @@ class StatsLogEventWrapper : public android::Parcelable {
 
   int64_t getWallClockTimeNs() const { return mWallClockTimeNs; }
 
-  const std::vector<StatsLogValue>& getElements() const { return mElements; }
-
-  const std::vector<WorkChain>& getWorkChains() const { return mWorkChains; }
+  std::vector<StatsLogValue> getElements() const { return mElements; }
 
  private:
   int mTagId;
@@ -116,8 +109,6 @@ class StatsLogEventWrapper : public android::Parcelable {
   int64_t mWallClockTimeNs;
 
   std::vector<StatsLogValue> mElements;
-
-  std::vector<WorkChain> mWorkChains;
 };
 } // Namespace os
 } // Namespace android

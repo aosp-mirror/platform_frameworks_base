@@ -59,7 +59,7 @@ bool StatsCompanionServicePuller::PullInternal(vector<shared_ptr<LogEvent> >* da
         }
         data->clear();
         for (const StatsLogEventWrapper& it : returned_value) {
-            LogEvent::createLogEvents(it, *data);
+            data->push_back(make_shared<LogEvent>(it));
         }
         VLOG("StatsCompanionServicePuller::pull succeeded for %d", mTagId);
         return true;
