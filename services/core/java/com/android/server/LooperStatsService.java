@@ -94,6 +94,8 @@ public class LooperStatsService extends Binder {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         pw.print("Start time: ");
         pw.println(DateFormat.format("yyyy-MM-dd HH:mm:ss", mStats.getStartTimeMillis()));
+        pw.print("On battery time (ms): ");
+        pw.println(mStats.getBatteryTimeMillis());
         final List<LooperStats.ExportedEntry> entries = mStats.getEntries();
         entries.sort(Comparator
                 .comparing((LooperStats.ExportedEntry entry) -> entry.workSourceUid)

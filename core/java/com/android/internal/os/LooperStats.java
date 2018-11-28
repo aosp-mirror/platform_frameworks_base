@@ -49,6 +49,7 @@ public class LooperStats implements Looper.Observer {
     private final int mEntriesSizeCap;
     private int mSamplingInterval;
     private CachedDeviceState.Readonly mDeviceState;
+    private CachedDeviceState.TimeInStateStopwatch mBatteryStopwatch;
     private long mStartTime = System.currentTimeMillis();
     private boolean mAddDebugEntries = false;
 
@@ -58,7 +59,12 @@ public class LooperStats implements Looper.Observer {
     }
 
     public void setDeviceState(@NonNull CachedDeviceState.Readonly deviceState) {
+        if (mBatteryStopwatch != null) {
+            mBatteryStopwatch.close();
+        }
+
         mDeviceState = deviceState;
+        mBatteryStopwatch = deviceState.createTimeOnBatteryStopwatch();
     }
 
     public void setAddDebugEntries(boolean addDebugEntries) {
@@ -148,9 +154,11 @@ public class LooperStats implements Looper.Observer {
         maybeAddSpecialEntry(exportedEntries, mOverflowEntry);
         maybeAddSpecialEntry(exportedEntries, mHashCollisionEntry);
         // Debug entries added to help validate the data.
-        if (mAddDebugEntries) {
+        if (mAddDebugEntries && mBatteryStopwatch != null) {
             exportedEntries.add(createDebugEntry("start_time_millis", mStartTime));
             exportedEntries.add(createDebugEntry("end_time_millis", System.currentTimeMillis()));
+            exportedEntries.add(
+                    createDebugEntry("battery_time_millis", mBatteryStopwatch.getMillis()));
         }
         return exportedEntries;
     }
@@ -166,6 +174,10 @@ public class LooperStats implements Looper.Observer {
     /** Returns a timestamp indicating when the statistics were last reset. */
     public long getStartTimeMillis() {
         return mStartTime;
+    }
+
+    public long getBatteryTimeMillis() {
+        return mBatteryStopwatch != null ? mBatteryStopwatch.getMillis() : 0;
     }
 
     private void maybeAddSpecialEntry(List<ExportedEntry> exportedEntries, Entry specialEntry) {
@@ -188,6 +200,9 @@ public class LooperStats implements Looper.Observer {
             mOverflowEntry.reset();
         }
         mStartTime = System.currentTimeMillis();
+        if (mBatteryStopwatch != null) {
+            mBatteryStopwatch.reset();
+        }
     }
 
     public void setSamplingInterval(int samplingInterval) {

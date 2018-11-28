@@ -82,6 +82,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     private boolean mAddDebugEntries = false;
 
     private CachedDeviceState.Readonly mDeviceState;
+    private CachedDeviceState.TimeInStateStopwatch mBatteryStopwatch;
 
     /** Injector for {@link BinderCallsStats}. */
     public static class Injector {
@@ -95,7 +96,11 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     public void setDeviceState(@NonNull CachedDeviceState.Readonly deviceState) {
+        if (mBatteryStopwatch != null) {
+            mBatteryStopwatch.close();
+        }
         mDeviceState = deviceState;
+        mBatteryStopwatch = deviceState.createTimeOnBatteryStopwatch();
     }
 
     @Override
@@ -320,9 +325,11 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
 
         // Debug entries added to help validate the data.
-        if (mAddDebugEntries) {
+        if (mAddDebugEntries && mBatteryStopwatch != null) {
             resultCallStats.add(createDebugEntry("start_time_millis", mStartTime));
             resultCallStats.add(createDebugEntry("end_time_millis", System.currentTimeMillis()));
+            resultCallStats.add(
+                    createDebugEntry("battery_time_millis", mBatteryStopwatch.getMillis()));
         }
 
         return resultCallStats;
@@ -362,6 +369,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
         long totalCpuTime = 0;
         pw.print("Start time: ");
         pw.println(DateFormat.format("yyyy-MM-dd HH:mm:ss", mStartTime));
+        pw.print("On battery time (ms): ");
+        pw.println(mBatteryStopwatch != null ? mBatteryStopwatch.getMillis() : 0);
         pw.println("Sampling interval period: " + mPeriodicSamplingInterval);
         final List<UidEntry> entries = new ArrayList<>();
 
@@ -521,6 +530,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
             mUidEntries.clear();
             mExceptionCounts.clear();
             mStartTime = System.currentTimeMillis();
+            if (mBatteryStopwatch != null) {
+                mBatteryStopwatch.reset();
+            }
         }
     }
 
