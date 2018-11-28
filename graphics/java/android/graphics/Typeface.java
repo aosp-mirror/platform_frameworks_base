@@ -655,10 +655,11 @@ public class Typeface {
          * Returns the maximum capacity of custom fallback families.
          *
          * This includes the the first font family passed to the constructor.
+         * It is guaranteed that the value will be greater than or equal to 64.
          *
          * @return the maximum number of font families for the custom fallback
          */
-        public static @IntRange(from = 1) int getMaxCustomFallbackCount() {
+        public static @IntRange(from = 64) int getMaxCustomFallbackCount() {
             return MAX_CUSTOM_FALLBACK;
         }
 
