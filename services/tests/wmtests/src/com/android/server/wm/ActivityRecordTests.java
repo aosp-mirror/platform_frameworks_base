@@ -65,7 +65,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         setupActivityTaskManagerService();
-        mStack = new StackBuilder(mSupervisor).build();
+        mStack = new StackBuilder(mRootActivityContainer).build();
         mTask = mStack.getChildAt(0);
         mActivity = mTask.getTopActivity();
     }
@@ -86,7 +86,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testStackCleanupOnTaskRemoval() {
         mStack.removeTask(mTask, null /*reason*/, REMOVE_TASK_MODE_MOVING);
         // Stack should be gone on task removal.
-        assertNull(mService.mStackSupervisor.getStack(mStack.mStackId));
+        assertNull(mService.mRootActivityContainer.getStack(mStack.mStackId));
     }
 
     @Test
@@ -116,7 +116,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertFalse(pauseFound.value);
 
         // Clear focused stack
-        final ActivityDisplay display = mActivity.mStackSupervisor.getDefaultDisplay();
+        final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
         when(display.getFocusedStack()).thenReturn(null);
 
         // In the unfocused stack, the activity should move to paused.

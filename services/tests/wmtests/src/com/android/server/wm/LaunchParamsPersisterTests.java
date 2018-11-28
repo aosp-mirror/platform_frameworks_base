@@ -110,8 +110,9 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
         final DisplayInfo info = new DisplayInfo();
         info.uniqueId = mDisplayUniqueId;
         mTestDisplay = createNewActivityDisplay(info);
-        mSupervisor.addChild(mTestDisplay, ActivityDisplay.POSITION_TOP);
-        when(mSupervisor.getActivityDisplay(eq(mDisplayUniqueId))).thenReturn(mTestDisplay);
+        mRootActivityContainer.addChild(mTestDisplay, ActivityDisplay.POSITION_TOP);
+        when(mRootActivityContainer.getActivityDisplay(eq(mDisplayUniqueId)))
+                .thenReturn(mTestDisplay);
 
         ActivityStack stack = mTestDisplay.createStack(TEST_WINDOWING_MODE,
                 ACTIVITY_TYPE_STANDARD, /* onTop */ true);
@@ -184,7 +185,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
     public void testReturnsEmptyDisplayIfDisplayIsNotFound() {
         mTarget.saveTask(mTestTask);
 
-        when(mSupervisor.getActivityDisplay(eq(mDisplayUniqueId))).thenReturn(null);
+        when(mRootActivityContainer.getActivityDisplay(eq(mDisplayUniqueId))).thenReturn(null);
 
         mTarget.getLaunchParams(mTestTask, null, mResult);
 

@@ -113,9 +113,10 @@ public class RecentTasksTest extends ActivityTestsBase {
         mTestService = new MyTestActivityTaskManagerService(mContext);
         mRecentTasks = (TestRecentTasks) mTestService.getRecentTasks();
         mRecentTasks.loadParametersFromResources(mContext.getResources());
-        mHomeStack = mTestService.mStackSupervisor.getDefaultDisplay().getOrCreateStack(
+        mRunningTasks = (TestRunningTasks) mTestService.mStackSupervisor.mRunningTasks;
+        mHomeStack = mTestService.mRootActivityContainer.getDefaultDisplay().getOrCreateStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
-        mStack = mTestService.mStackSupervisor.getDefaultDisplay().createStack(
+        mStack = mTestService.mRootActivityContainer.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         mCallbacksRecorder = new CallbacksRecorder();
         mRecentTasks.registerCallback(mCallbacksRecorder);
@@ -872,20 +873,20 @@ public class RecentTasksTest extends ActivityTestsBase {
             }
             return mTestStackSupervisor;
         }
+
+        @Override
+        void initRootActivityContainerMocks(WindowManagerService wm) {
+            super.initRootActivityContainerMocks(wm);
+            mDisplay = mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY);
+            mOtherDisplay = TestActivityDisplay.create(mTestStackSupervisor, DEFAULT_DISPLAY + 1);
+            mRootActivityContainer.addChild(mOtherDisplay, ActivityDisplay.POSITION_TOP);
+            mRootActivityContainer.addChild(mDisplay, ActivityDisplay.POSITION_TOP);
+        }
     }
 
     private class MyTestActivityStackSupervisor extends TestActivityStackSupervisor {
         MyTestActivityStackSupervisor(ActivityTaskManagerService service, Looper looper) {
             super(service, looper);
-        }
-
-        @Override
-        public void initialize() {
-            super.initialize();
-            mDisplay = getActivityDisplay(DEFAULT_DISPLAY);
-            mOtherDisplay = TestActivityDisplay.create(this, DEFAULT_DISPLAY + 1);
-            addChild(mOtherDisplay, ActivityDisplay.POSITION_TOP);
-            addChild(mDisplay, ActivityDisplay.POSITION_TOP);
         }
 
         @Override

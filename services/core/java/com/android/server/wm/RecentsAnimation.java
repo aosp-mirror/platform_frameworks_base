@@ -79,7 +79,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             int callingPid) {
         mService = atm;
         mStackSupervisor = stackSupervisor;
-        mDefaultDisplay = stackSupervisor.getDefaultDisplay();
+        mDefaultDisplay = mService.mRootActivityContainer.getDefaultDisplay();
         mActivityStartController = activityStartController;
         mWindowManager = wm;
         mCallingPid = callingPid;
@@ -94,7 +94,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
         // TODO(multi-display) currently only support recents animation in default display.
         final DisplayWindowController dwc =
-                mStackSupervisor.getDefaultDisplay().getWindowContainerController();
+                mService.mRootActivityContainer.getDefaultDisplay().getWindowContainerController();
         if (!mWindowManager.canStartRecentsAnimation()) {
             notifyAnimationCancelBeforeStart(recentsAnimationRunner);
             if (DEBUG) Slog.d(TAG, "Can't start recents animation, nextAppTransition="
@@ -124,8 +124,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         // Send launch hint if we are actually launching the target. If it's already visible
         // (shouldn't happen in general) we don't need to send it.
         if (targetActivity == null || !targetActivity.visible) {
-            mStackSupervisor.sendPowerHintForLaunchStartIfNeeded(true /* forceSend */,
-                    targetActivity);
+            mService.mRootActivityContainer.sendPowerHintForLaunchStartIfNeeded(
+                    true /* forceSend */, targetActivity);
         }
 
         mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching(intent);
@@ -192,7 +192,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
             // If we updated the launch-behind state, update the visibility of the activities after
             // we fetch the visible tasks to be controlled by the animation
-            mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, PRESERVE_WINDOWS);
+            mService.mRootActivityContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
 
             mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunched(START_TASK_TO_FRONT,
                     targetActivity);
@@ -215,7 +215,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             @Deprecated IAssistDataReceiver assistDataReceiver, int userId) {
         final AppOpsManager appOpsManager = (AppOpsManager)
                 mService.mContext.getSystemService(Context.APP_OPS_SERVICE);
-        final List<IBinder> topActivities = mStackSupervisor.getTopVisibleActivities();
+        final List<IBinder> topActivities =
+                mService.mRootActivityContainer.getTopVisibleActivities();
         final AssistDataRequester.AssistDataRequesterCallbacks assistDataCallbacks;
         if (assistDataReceiver != null) {
             assistDataCallbacks = new AssistDataReceiverProxy(assistDataReceiver,
@@ -283,7 +284,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // Just to be sure end the launch hint in case the target activity was never launched.
             // However, if we're keeping the activity and making it visible, we can leave it on.
             if (reorderMode != REORDER_KEEP_IN_PLACE) {
-                mStackSupervisor.sendPowerHintForLaunchEndIfNeeded();
+                mService.mRootActivityContainer.sendPowerHintForLaunchEndIfNeeded();
             }
 
             mService.mH.post(
@@ -343,8 +344,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     }
 
                     mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
-                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, false);
-                    mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
+                    mService.mRootActivityContainer.ensureActivitiesVisible(null, 0, false);
+                    mService.mRootActivityContainer.resumeFocusedStacksTopActivities();
 
                     // No reason to wait for the pausing activity in this case, as the hiding of
                     // surfaces needs to be done immediately.

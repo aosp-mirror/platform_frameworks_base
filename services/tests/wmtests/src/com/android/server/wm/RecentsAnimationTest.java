@@ -67,9 +67,9 @@ public class RecentsAnimationTest extends ActivityTestsBase {
     @Test
     public void testCancelAnimationOnStackOrderChange() {
         ActivityStack fullscreenStack =
-                mService.mStackSupervisor.getDefaultDisplay().createStack(
+                mService.mRootActivityContainer.getDefaultDisplay().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        ActivityStack recentsStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+        ActivityStack recentsStack = mService.mRootActivityContainer.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_RECENTS, true /* onTop */);
         ActivityRecord recentsActivity = new ActivityBuilder(mService)
                 .setComponent(mRecentsComponent)
@@ -77,7 +77,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
                 .setStack(recentsStack)
                 .build();
         ActivityStack fullscreenStack2 =
-                mService.mStackSupervisor.getDefaultDisplay().createStack(
+                mService.mRootActivityContainer.getDefaultDisplay().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         ActivityRecord fsActivity = new ActivityBuilder(mService)
                 .setComponent(new ComponentName(mContext.getPackageName(), "App1"))
