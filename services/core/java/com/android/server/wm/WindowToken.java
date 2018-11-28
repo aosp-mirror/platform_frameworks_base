@@ -265,7 +265,6 @@ class WindowToken extends WindowContainer<WindowState> {
         // to another display before the window behind
         // it is ready.
 
-        updateSurfaceSize(dc);
         super.onDisplayChanged(dc);
     }
 

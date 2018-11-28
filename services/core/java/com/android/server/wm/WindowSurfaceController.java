@@ -19,34 +19,28 @@ package com.android.server.wm;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Surface.SCALING_MODE_SCALE_TO_WINDOW;
 
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowSurfaceControllerProto.LAYER;
 import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
 
-import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.IBinder;
 import android.os.Debug;
+import android.os.IBinder;
 import android.os.Trace;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowContentFrameStats;
-import android.view.Surface.OutOfResourcesException;
 
-import android.util.Slog;
-
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 class WindowSurfaceController {
     static final String TAG = TAG_WITH_CLASS_NAME ? "WindowSurfaceController" : TAG_WM;
@@ -106,7 +100,7 @@ class WindowSurfaceController {
         final SurfaceControl.Builder b = win.makeSurface()
                 .setParent(win.getSurfaceControl())
                 .setName(name)
-                .setSize(w, h)
+                .setBufferSize(w, h)
                 .setFormat(format)
                 .setFlags(flags)
                 .setMetadata(windowType, ownerUid);
@@ -303,7 +297,7 @@ class WindowSurfaceController {
         }
     }
 
-    boolean setSizeInTransaction(int width, int height, boolean recoveringMemory) {
+    boolean setBufferSizeInTransaction(int width, int height, boolean recoveringMemory) {
         final boolean surfaceResized = mSurfaceW != width || mSurfaceH != height;
         if (surfaceResized) {
             mSurfaceW = width;
@@ -312,7 +306,7 @@ class WindowSurfaceController {
             try {
                 if (SHOW_TRANSACTIONS) logSurface(
                         "SIZE " + width + "x" + height, null);
-                mSurfaceControl.setSize(width, height);
+                mSurfaceControl.setBufferSize(width, height);
             } catch (RuntimeException e) {
                 // If something goes wrong with the surface (such
                 // as running out of memory), don't take down the

@@ -302,7 +302,6 @@ class Task extends WindowContainer<AppWindowToken> {
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
-        updateSurfaceSize(dc);
         adjustBoundsForDisplayChangeIfNeeded(dc);
         super.onDisplayChanged(dc);
     }

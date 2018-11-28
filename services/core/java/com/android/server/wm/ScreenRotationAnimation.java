@@ -261,7 +261,7 @@ class ScreenRotationAnimation {
         try {
             mSurfaceControl = displayContent.makeOverlay()
                     .setName("ScreenshotSurface")
-                    .setSize(mWidth, mHeight)
+                    .setBufferSize(mWidth, mHeight)
                     .setSecure(isSecure)
                     .build();
 

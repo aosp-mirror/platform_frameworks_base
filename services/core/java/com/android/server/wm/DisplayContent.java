@@ -78,7 +78,6 @@ import static com.android.server.wm.DisplayContentProto.PINNED_STACK_CONTROLLER;
 import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.STACKS;
-import static com.android.server.wm.DisplayContentProto.SURFACE_SIZE;
 import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
@@ -468,14 +467,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * See {@link #mOverlayLayer}
      */
     private SurfaceControl mWindowingLayer;
-
-    /**
-     * Specifies the size of the surfaces in {@link #mOverlayLayer} and {@link #mWindowingLayer}.
-     * <p>
-     * For these surfaces currently we use a surface based on the larger of width or height so we
-     * don't have to resize when rotating the display.
-     */
-    private int mSurfaceSize;
 
     /**
      * Sequence number for the current layout pass.
@@ -884,18 +875,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDividerControllerLocked = new DockedStackDividerController(service, this);
         mPinnedStackControllerLocked = new PinnedStackController(service, this);
 
-        // We use this as our arbitrary surface size for buffer-less parents
-        // that don't impose cropping on their children. It may need to be larger
-        // than the display size because fullscreen windows can be shifted offscreen
-        // due to surfaceInsets. 2 times the largest display dimension feels like an
-        // appropriately arbitrary number. Eventually we would like to give SurfaceFlinger
-        // layers the ability to match their parent sizes and be able to skip
-        // such arbitrary size settings.
-        mSurfaceSize = Math.max(mBaseDisplayHeight, mBaseDisplayWidth) * 2;
-
-        final SurfaceControl.Builder b = mService.makeSurfaceBuilder(mSession)
-                .setSize(mSurfaceSize, mSurfaceSize)
-                .setOpaque(true);
+        final SurfaceControl.Builder b = mService.makeSurfaceBuilder(mSession).setOpaque(true);
         mWindowingLayer = b.setName("Display Root").build();
         mOverlayLayer = b.setName("Display Overlays").build();
 
@@ -2612,7 +2592,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         mDisplayFrames.writeToProto(proto, DISPLAY_FRAMES);
         mAppTransition.writeToProto(proto, APP_TRANSITION);
-        proto.write(SURFACE_SIZE, mSurfaceSize);
         if (mFocusedApp != null) {
             mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
         }
@@ -3535,10 +3514,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mTmpMatrix.mapRect(mTmpRectF);
             mTmpRectF.round(out);
         }
-    }
-
-    int getSurfaceSize() {
-        return mSurfaceSize;
     }
 
     void performLayout(boolean initial, boolean updateInputWindows) {
@@ -4483,8 +4458,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     SurfaceControl.Builder makeChildSurface(WindowContainer child) {
         SurfaceSession s = child != null ? child.getSession() : getSession();
         final SurfaceControl.Builder b = mService.makeSurfaceBuilder(s);
-        b.setSize(mSurfaceSize, mSurfaceSize);
-
         if (child == null) {
             return b;
         }

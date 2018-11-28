@@ -186,7 +186,6 @@ public class Letterbox {
                     createSurface();
                 }
                 t.setPosition(mSurface, mSurfaceFrame.left, mSurfaceFrame.top);
-                t.setSize(mSurface, mSurfaceFrame.width(), mSurfaceFrame.height());
                 t.setWindowCrop(mSurface, mSurfaceFrame.width(), mSurfaceFrame.height());
                 t.show(mSurface);
             } else if (mSurface != null) {

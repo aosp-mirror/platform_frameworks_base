@@ -16,9 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -706,7 +706,7 @@ final class AccessibilityController {
                         mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
                         surfaceControl = mService.getDefaultDisplayContentLocked().makeOverlay()
                                 .setName(SURFACE_TITLE)
-                                .setSize(mTempPoint.x, mTempPoint.y) // not a typo
+                                .setBufferSize(mTempPoint.x, mTempPoint.y) // not a typo
                                 .setFormat(PixelFormat.TRANSLUCENT)
                                 .build();
                     } catch (OutOfResourcesException oore) {
@@ -784,7 +784,7 @@ final class AccessibilityController {
                 public void updateSize() {
                     synchronized (mService.mGlobalLock) {
                         mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
-                        mSurfaceControl.setSize(mTempPoint.x, mTempPoint.y);
+                        mSurfaceControl.setBufferSize(mTempPoint.x, mTempPoint.y);
                         invalidate(mDirtyRect);
                     }
                 }

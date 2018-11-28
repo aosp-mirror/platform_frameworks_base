@@ -225,11 +225,9 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
             mTransaction = transaction;
             mParent = wm.makeSurfaceBuilder(mSession)
                     .setName("test surface parent")
-                    .setSize(3000, 3000)
                     .build();
             mSurface = wm.makeSurfaceBuilder(mSession)
                     .setName("test surface")
-                    .setSize(1, 1)
                     .build();
             mFinishedCallbackCalled = false;
             mLeash = null;
