@@ -201,6 +201,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             // "zygote64",
     };
 
+    private static final int CPU_TIME_PER_THREAD_FREQ_NUM_FREQUENCIES = 8;
 
     static final class CompanionHandler extends Handler {
         CompanionHandler(Looper looper) {
@@ -1654,6 +1655,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             return;
         }
         int[] cpuFrequencies = mKernelCpuThreadReader.getCpuFrequenciesKhz();
+        if (cpuFrequencies.length != CPU_TIME_PER_THREAD_FREQ_NUM_FREQUENCIES) {
+            Slog.w(TAG, "Expected " + CPU_TIME_PER_THREAD_FREQ_NUM_FREQUENCIES
+                    + " frequencies, but got " + cpuFrequencies.length);
+            return;
+        }
         for (int i = 0; i < processCpuUsages.size(); i++) {
             KernelCpuThreadReader.ProcessCpuUsage processCpuUsage = processCpuUsages.get(i);
             ArrayList<KernelCpuThreadReader.ThreadCpuUsage> threadCpuUsages =
@@ -1667,18 +1673,18 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     continue;
                 }
 
-                for (int k = 0; k < threadCpuUsage.usageTimesMillis.length; k++) {
-                    StatsLogEventWrapper e =
-                            new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                    e.writeInt(processCpuUsage.uid);
-                    e.writeInt(processCpuUsage.processId);
-                    e.writeInt(threadCpuUsage.threadId);
-                    e.writeString(processCpuUsage.processName);
-                    e.writeString(threadCpuUsage.threadName);
+                StatsLogEventWrapper e =
+                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                e.writeInt(processCpuUsage.uid);
+                e.writeInt(processCpuUsage.processId);
+                e.writeInt(threadCpuUsage.threadId);
+                e.writeString(processCpuUsage.processName);
+                e.writeString(threadCpuUsage.threadName);
+                for (int k = 0; k < CPU_TIME_PER_THREAD_FREQ_NUM_FREQUENCIES; k++) {
                     e.writeInt(cpuFrequencies[k]);
                     e.writeInt(threadCpuUsage.usageTimesMillis[k]);
-                    pulledData.add(e);
                 }
+                pulledData.add(e);
             }
         }
     }

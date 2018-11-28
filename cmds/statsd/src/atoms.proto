@@ -3331,10 +3331,27 @@ message CpuTimePerThreadFreq {
     optional string process_name = 4;
     // Name of the thread taken from `/proc/$PID/task/$TID/comm`
     optional string thread_name = 5;
-    // What frequency the CPU was running at, in KHz
-    optional int32 frequency_khz = 6;
-    // Time spent in frequency in milliseconds, since thread start.
-    optional int32 time_millis = 7;
+
+    // Report eight different frequencies, and how much time is spent in each frequency. Frequencies
+    // are given in KHz, and time is given in milliseconds since the thread started. All eight
+    // frequencies are given here as the alternative is sending eight separate atoms. This method
+    // significantly reduces the amount of data created
+    optional int32 frequency1_khz = 6;
+    optional int32 time1_millis = 7;
+    optional int32 frequency2_khz = 8;
+    optional int32 time2_millis = 9;
+    optional int32 frequency3_khz = 10;
+    optional int32 time3_millis = 11;
+    optional int32 frequency4_khz = 12;
+    optional int32 time4_millis = 13;
+    optional int32 frequency5_khz = 14;
+    optional int32 time5_millis = 15;
+    optional int32 frequency6_khz = 16;
+    optional int32 time6_millis = 17;
+    optional int32 frequency7_khz = 18;
+    optional int32 time7_millis = 19;
+    optional int32 frequency8_khz = 20;
+    optional int32 time8_millis = 21;
 }
 
 /**

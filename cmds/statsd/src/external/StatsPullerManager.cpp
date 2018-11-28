@@ -210,7 +210,7 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           5 * NS_PER_SEC /* min cool-down in seconds*/,
           new StatsCompanionServicePuller(android::util::PROCESS_CPU_TIME)}},
         {android::util::CPU_TIME_PER_THREAD_FREQ,
-         {{7},
+         {{7, 9, 11, 13, 15, 17, 19, 21},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::CPU_TIME_PER_THREAD_FREQ)}},
         // DeviceCalculatedPowerUse.
