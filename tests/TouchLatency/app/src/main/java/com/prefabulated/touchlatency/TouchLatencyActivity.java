@@ -19,11 +19,9 @@ package com.prefabulated.touchlatency;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.CountDownTimer;
+import android.graphics.Paint.Align;
 import android.os.Bundle;
-import android.text.method.Touch;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Menu;
@@ -31,15 +29,17 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.os.Trace;
-
-import java.util.ArrayList;
-import java.util.Collections;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 
 class TouchLatencyView extends View implements View.OnTouchListener {
     private static final String LOG_TAG = "TouchLatency";
     private static final int BACKGROUND_COLOR = 0xFF400080;
     private static final int INNER_RADIUS = 70;
-    private static final int BALL_RADIUS = 100;
+    private static final int BALL_DIAMETER = 200;
+    private static final int SEC_TO_NANOS = 1000000000;
+    private static final float FPS_UPDATE_THRESHOLD = 20;
+    private static final long BALL_VELOCITY = 420;
 
     public TouchLatencyView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -58,13 +58,17 @@ class TouchLatencyView extends View implements View.OnTouchListener {
         mRedPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mRedPaint.setColor(0xFFFF0000);
         mRedPaint.setStyle(Paint.Style.FILL);
+        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mTextPaint.setColor(0xFFFFFFFF);
+        mTextPaint.setTextSize(100);
+        mTextPaint.setTextAlign(Align.RIGHT);
 
         mTouching = false;
 
-        mBallX = 100.0f;
-        mBallY = 100.0f;
-        mVelocityX = 7.0f;
-        mVelocityY = 7.0f;
+        mLastDrawNano = 0;
+        mFps = 0;
+        mLastFpsUpdate = 0;
+        mFrameCount = 0;
         Trace.endSection();
     }
 
@@ -113,43 +117,70 @@ class TouchLatencyView extends View implements View.OnTouchListener {
         }
     }
 
+    private Paint getBallColor() {
+        if (mFps > 75)
+            return mGreenPaint;
+        else if (mFps > 45)
+            return mYellowPaint;
+        else
+            return mRedPaint;
+    }
+
     private void drawBall(Canvas canvas) {
         Trace.beginSection("TouchLatencyView drawBall");
         int width = canvas.getWidth();
         int height = canvas.getHeight();
+        float fps = 0f;
 
-        // Update position
-        mBallX += mVelocityX;
-        mBallY += mVelocityY;
+        long t = System.nanoTime();
+        long tDiff = t - mLastDrawNano;
+        mLastDrawNano = t;
+        mFrameCount++;
 
-        // Clamp and change velocity if necessary
-        float left = mBallX - BALL_RADIUS;
-        if (left < 0) {
-            left = 0;
-            mVelocityX *= -1;
+        if (tDiff < SEC_TO_NANOS) {
+            fps = 1f * SEC_TO_NANOS / tDiff;
         }
 
-        float top = mBallY - BALL_RADIUS;
-        if (top < 0) {
-            top = 0;
-            mVelocityY *= -1;
+        long fDiff = t - mLastFpsUpdate;
+        if (Math.abs(mFps - fps) > FPS_UPDATE_THRESHOLD) {
+            mFps = fps;
+            mLastFpsUpdate = t;
+            mFrameCount = 0;
+        } else if (fDiff > SEC_TO_NANOS) {
+            mFps = 1f * mFrameCount * SEC_TO_NANOS / fDiff;
+            mLastFpsUpdate = t;
+            mFrameCount = 0;
         }
 
-        float right = mBallX + BALL_RADIUS;
-        if (right > width) {
-            right = width;
-            mVelocityX *= -1;
-        }
+        final long pos = t * BALL_VELOCITY / SEC_TO_NANOS;
+        final long xMax = width - BALL_DIAMETER;
+        final long yMax = height - BALL_DIAMETER;
+        long xOffset = pos % xMax;
+        long yOffset = pos % yMax;
 
-        float bottom = mBallY + BALL_RADIUS;
-        if (bottom > height) {
-            bottom = height;
-            mVelocityY *= -1;
+        float left, right, top, bottom;
+
+        if (((pos / xMax) & 1) == 0) {
+            left = xMax - xOffset;
+        } else {
+            left = xOffset;
         }
+        right = left + BALL_DIAMETER;
+
+        if (((pos / yMax) & 1) == 0) {
+            top = yMax - yOffset;
+        } else {
+            top = yOffset;
+        }
+        bottom = top + BALL_DIAMETER;
 
         // Draw the ball
         canvas.drawColor(BACKGROUND_COLOR);
-        canvas.drawOval(left, top, right, bottom, mYellowPaint);
+        canvas.drawOval(left, top, right, bottom, getBallColor());
+        DecimalFormat df = new DecimalFormat("fps: #.##");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        canvas.drawText(df.format(mFps), width, 100, mTextPaint);
+
         invalidate();
         Trace.endSection();
     }
@@ -176,15 +207,15 @@ class TouchLatencyView extends View implements View.OnTouchListener {
         Trace.endSection();
     }
 
-    private Paint mBluePaint, mGreenPaint, mYellowPaint, mRedPaint;
+    private final Paint mBluePaint, mGreenPaint, mYellowPaint, mRedPaint, mTextPaint;
     private int mMode;
 
     private boolean mTouching;
     private float mTouchX, mTouchY;
     private float mLastDrawnX, mLastDrawnY;
 
-    private float mBallX, mBallY;
-    private float mVelocityX, mVelocityY;
+    private long mLastDrawNano, mLastFpsUpdate, mFrameCount;
+    private float mFps;
 }
 
 public class TouchLatencyActivity extends Activity {

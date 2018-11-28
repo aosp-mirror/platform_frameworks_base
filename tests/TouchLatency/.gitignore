@@ -3,4 +3,5 @@
 /.idea
 .DS_Store
 /build
+/gen
 .iml
