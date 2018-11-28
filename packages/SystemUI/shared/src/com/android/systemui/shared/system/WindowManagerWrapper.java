@@ -100,23 +100,23 @@ public class WindowManagerWrapper {
      * Overrides a pending app transition.
      */
     public void overridePendingAppTransitionMultiThumbFuture(
-            AppTransitionAnimationSpecsFuture animationSpecFuture,
-            Runnable animStartedCallback, Handler animStartedCallbackHandler, boolean scaleUp) {
+            AppTransitionAnimationSpecsFuture animationSpecFuture, Runnable animStartedCallback,
+            Handler animStartedCallbackHandler, boolean scaleUp, int displayId) {
         try {
             WindowManagerGlobal.getWindowManagerService()
                     .overridePendingAppTransitionMultiThumbFuture(animationSpecFuture.getFuture(),
                             RecentsTransition.wrapStartedListener(animStartedCallbackHandler,
-                                    animStartedCallback), scaleUp);
+                                    animStartedCallback), scaleUp, displayId);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to override pending app transition (multi-thumbnail future): ", e);
         }
     }
 
     public void overridePendingAppTransitionRemote(
-            RemoteAnimationAdapterCompat remoteAnimationAdapter) {
+            RemoteAnimationAdapterCompat remoteAnimationAdapter, int displayId) {
         try {
             WindowManagerGlobal.getWindowManagerService().overridePendingAppTransitionRemote(
-                    remoteAnimationAdapter.getWrapped());
+                    remoteAnimationAdapter.getWrapped(), displayId);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to override pending app transition (remote): ", e);
         }

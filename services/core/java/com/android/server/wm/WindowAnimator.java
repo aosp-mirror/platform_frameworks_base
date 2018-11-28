@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -260,8 +258,7 @@ public class WindowAnimator {
             if (DEBUG_WINDOW_TRACE) {
                 Slog.i(TAG, "!!! animate: exit mAnimating=" + mAnimating
                         + " mBulkUpdateParams=" + Integer.toHexString(mBulkUpdateParams)
-                        + " mPendingLayoutChanges(DEFAULT_DISPLAY)="
-                        + Integer.toHexString(getPendingLayoutChanges(DEFAULT_DISPLAY)));
+                        + " hasPendingLayoutChanges=" + hasPendingLayoutChanges);
             }
         }
     }

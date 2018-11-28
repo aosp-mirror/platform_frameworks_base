@@ -96,8 +96,9 @@ interface IWindowManager
      */
     void overridePendingAppTransitionMultiThumbFuture(
             IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback startedCallback,
-            boolean scaleUp);
-    void overridePendingAppTransitionRemote(in RemoteAnimationAdapter remoteAnimationAdapter);
+            boolean scaleUp, int displayId);
+    void overridePendingAppTransitionRemote(in RemoteAnimationAdapter remoteAnimationAdapter,
+            int displayId);
     void executeAppTransition();
 
     /**

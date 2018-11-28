@@ -147,8 +147,8 @@ Landroid/view/IWindowManager;->createInputConsumer(Landroid/os/IBinder;Ljava/lan
 Landroid/view/IWindowManager;->destroyInputConsumer(Ljava/lang/String;I)Z
 Landroid/view/IWindowManager;->endProlongedAnimations()V
 Landroid/view/IWindowManager;->getStableInsets(ILandroid/graphics/Rect;)V
-Landroid/view/IWindowManager;->overridePendingAppTransitionMultiThumbFuture(Landroid/view/IAppTransitionAnimationSpecsFuture;Landroid/os/IRemoteCallback;Z)V
-Landroid/view/IWindowManager;->overridePendingAppTransitionRemote(Landroid/view/RemoteAnimationAdapter;)V
+Landroid/view/IWindowManager;->overridePendingAppTransitionMultiThumbFuture(Landroid/view/IAppTransitionAnimationSpecsFuture;Landroid/os/IRemoteCallback;ZI)V
+Landroid/view/IWindowManager;->overridePendingAppTransitionRemote(Landroid/view/RemoteAnimationAdapter;I)V
 Landroid/view/IWindowManager;->setNavBarVirtualKeyHapticFeedbackEnabled(Z)V
 Lcom/android/ims/ImsConfigListener;->onSetFeatureResponse(IIII)V
 Lcom/android/ims/internal/IImsCallSessionListener;->callSessionConferenceStateUpdated(Lcom/android/ims/internal/IImsCallSession;Landroid/telephony/ims/ImsConferenceState;)V

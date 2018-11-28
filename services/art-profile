@@ -18849,7 +18849,7 @@ PLcom/android/server/wm/WindowManagerService;->onRectangleOnScreenRequested(Land
 PLcom/android/server/wm/WindowManagerService;->onSystemUiStarted()V
 PLcom/android/server/wm/WindowManagerService;->openSession(Landroid/view/IWindowSessionCallback;Lcom/android/internal/view/IInputMethodClient;Lcom/android/internal/view/IInputContext;)Landroid/view/IWindowSession;
 PLcom/android/server/wm/WindowManagerService;->overridePendingAppTransition(Ljava/lang/String;IILandroid/os/IRemoteCallback;)V
-PLcom/android/server/wm/WindowManagerService;->overridePendingAppTransitionRemote(Landroid/view/RemoteAnimationAdapter;)V
+PLcom/android/server/wm/WindowManagerService;->overridePendingAppTransitionRemote(Landroid/view/RemoteAnimationAdapter;I)V
 PLcom/android/server/wm/WindowManagerService;->performBootTimeout()V
 PLcom/android/server/wm/WindowManagerService;->performEnableScreen()V
 PLcom/android/server/wm/WindowManagerService;->postWindowRemoveCleanupLocked(Lcom/android/server/wm/WindowState;)V

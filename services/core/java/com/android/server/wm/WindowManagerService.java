@@ -2475,26 +2475,36 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void overridePendingAppTransitionMultiThumbFuture(
             IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback callback,
-            boolean scaleUp) {
+            boolean scaleUp, int displayId) {
         synchronized (mGlobalLock) {
-            // TODO(multi-display): sysui using this api only support default display.
-            mRoot.getDisplayContent(DEFAULT_DISPLAY)
-                    .mAppTransition.overridePendingAppTransitionMultiThumbFuture(specsFuture,
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                Slog.w(TAG, "Attempted to call overridePendingAppTransitionMultiThumbFuture"
+                        + " for the display " + displayId + " that does not exist.");
+                return;
+            }
+            displayContent.mAppTransition.overridePendingAppTransitionMultiThumbFuture(specsFuture,
                     callback, scaleUp);
         }
     }
 
     @Override
-    public void overridePendingAppTransitionRemote(RemoteAnimationAdapter remoteAnimationAdapter) {
+    public void overridePendingAppTransitionRemote(RemoteAnimationAdapter remoteAnimationAdapter,
+            int displayId) {
         if (!checkCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "overridePendingAppTransitionRemote()")) {
             throw new SecurityException(
                     "Requires CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS permission");
         }
         synchronized (mGlobalLock) {
-            // TODO(multi-display): sysui using this api only support default display.
-            mRoot.getDisplayContent(DEFAULT_DISPLAY)
-                    .mAppTransition.overridePendingAppTransitionRemote(remoteAnimationAdapter);
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                Slog.w(TAG, "Attempted to call overridePendingAppTransitionRemote"
+                        + " for the display " + displayId + " that does not exist.");
+                return;
+            }
+            displayContent.mAppTransition.overridePendingAppTransitionRemote(
+                    remoteAnimationAdapter);
         }
     }
 

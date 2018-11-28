@@ -41,8 +41,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
-import android.content.Intent;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.GraphicBuffer;
@@ -846,7 +846,6 @@ public class AppWindowContainerController
                     final IAppTransitionAnimationSpecsFuture specsFuture =
                             pendingOptions.getSpecsFuture();
                     if (specsFuture != null) {
-                        // TODO(multidisplay): Shouldn't be really used anymore from next CL.
                         displayContent.mAppTransition.overridePendingAppTransitionMultiThumbFuture(
                                 specsFuture, pendingOptions.getOnAnimationStartListener(),
                                 animationType == ANIM_THUMBNAIL_ASPECT_SCALE_UP);
@@ -875,7 +874,6 @@ public class AppWindowContainerController
                             .overridePendingAppTransitionStartCrossProfileApps();
                     break;
                 case ANIM_REMOTE_ANIMATION:
-                    // TODO(multidisplay): Will pass displayId and adjust dependencies from next CL.
                     displayContent.mAppTransition.overridePendingAppTransitionRemote(
                             pendingOptions.getRemoteAnimationAdapter());
                     break;
