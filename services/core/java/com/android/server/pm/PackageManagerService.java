@@ -5397,7 +5397,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             Signature[] s1;
             Signature[] s2;
-            Object obj = mSettings.getUserIdLPr(uid1);
+            Object obj = mSettings.getSettingLPr(uid1);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     if (isCallerInstantApp) {
@@ -5416,7 +5416,7 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
             }
-            obj = mSettings.getUserIdLPr(uid2);
+            obj = mSettings.getSettingLPr(uid2);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     if (isCallerInstantApp) {
@@ -5475,7 +5475,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // reader
         synchronized (mPackages) {
             final PackageParser.SigningDetails signingDetails;
-            final Object obj = mSettings.getUserIdLPr(uid);
+            final Object obj = mSettings.getSettingLPr(uid);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
@@ -5588,7 +5588,7 @@ public class PackageManagerService extends IPackageManager.Stub
         uid = UserHandle.getAppId(uid);
         // reader
         synchronized (mPackages) {
-            Object obj = mSettings.getUserIdLPr(uid);
+            Object obj = mSettings.getSettingLPr(uid);
             if (obj instanceof SharedUserSetting) {
                 if (isCallerInstantApp) {
                     return null;
@@ -5624,7 +5624,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         synchronized (mPackages) {
-            Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
+            Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 return sus.name + ":" + sus.userId;
@@ -5652,7 +5652,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             for (int i = uids.length - 1; i >= 0; i--) {
                 final int uid = uids[i];
-                Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
+                Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
                 if (obj instanceof SharedUserSetting) {
                     final SharedUserSetting sus = (SharedUserSetting) obj;
                     names[i] = "shared:" + sus.name;
@@ -5701,7 +5701,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return 0;
         }
         synchronized (mPackages) {
-            Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
+            Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 return sus.pkgFlags;
@@ -5723,7 +5723,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return 0;
         }
         synchronized (mPackages) {
-            Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
+            Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 return sus.pkgPrivateFlags;
@@ -5746,7 +5746,7 @@ public class PackageManagerService extends IPackageManager.Stub
         uid = UserHandle.getAppId(uid);
         // reader
         synchronized (mPackages) {
-            Object obj = mSettings.getUserIdLPr(uid);
+            Object obj = mSettings.getSettingLPr(uid);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 final Iterator<PackageSetting> it = sus.packages.iterator();
@@ -6386,7 +6386,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 callingUid = mIsolatedOwners.get(callingUid);
             }
             final int appId = UserHandle.getAppId(callingUid);
-            final Object obj = mSettings.getUserIdLPr(appId);
+            final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
                 final boolean isInstantApp = ps.getInstantApp(UserHandle.getUserId(callingUid));
@@ -8716,7 +8716,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 | SCAN_UPDATE_SIGNATURE, currentTime, user);
         if (scanResult.success) {
             synchronized (mPackages) {
-                commitScanResultLocked(scanResult);
+                try {
+                    prepareScanResultLocked(scanResult);
+                    commitScanResultLocked(scanResult);
+                } catch (PackageManagerException e) {
+                    unprepareScanResultLocked(scanResult);
+                    throw e;
+                }
             }
         }
 
@@ -10115,7 +10121,37 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             for (ScanResult result : results) {
-                commitScanResultLocked(result);
+                try {
+                    prepareScanResultLocked(result);
+                    commitScanResultLocked(result);
+                } catch (PackageManagerException e) {
+                    unprepareScanResultLocked(result);
+                    throw e;
+                }
+            }
+        }
+    }
+
+    /** Prepares the system to commit a {@link ScanResult} in a way that will not fail. */
+    private void prepareScanResultLocked(@NonNull ScanResult result)
+            throws PackageManagerException {
+        if (!result.existingSettingCopied) {
+            // THROWS: when we can't allocate a user id. add call to check if there's
+            // enough space to ensure we won't throw; otherwise, don't modify state
+            mSettings.registerAppIdLPw(result.pkgSetting);
+        }
+    }
+
+    /**
+     * Reverts any changes to the system that were made by
+     * {@link #prepareScanResultLocked(ScanResult)}
+     */
+    private void unprepareScanResultLocked(@NonNull ScanResult result) {
+        if (!result.existingSettingCopied) {
+            // iff we've acquired an app ID for a new package setting, remove it so that it can be
+            // acquired by another request.
+            if (result.pkgSetting.appId > 0) {
+                mSettings.removeAppIdLPw(result.pkgSetting.appId);
             }
         }
     }
@@ -10154,10 +10190,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (originalPkgSetting != null) {
                 mSettings.addRenamedPackageLPw(pkg.packageName, originalPkgSetting.name);
             }
-            // THROWS: when we can't allocate a user id. add call to check if there's
-            // enough space to ensure we won't throw; otherwise, don't modify state
-            mSettings.addUserToSettingLPw(pkgSetting);
-
             if (originalPkgSetting != null && (scanFlags & SCAN_CHECK_ONLY) == 0) {
                 mTransferedPackages.add(originalPkgSetting.name);
             }
@@ -13479,7 +13511,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             Signature[] callerSignature;
-            Object obj = mSettings.getUserIdLPr(callingUid);
+            Object obj = mSettings.getSettingLPr(callingUid);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     callerSignature =
@@ -15358,8 +15390,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
 
             try {
+                prepareScanResultLocked(scanResult);
                 commitScanResultLocked(scanResult);
             } catch (PackageManagerException e) {
+                unprepareScanResultLocked(scanResult);
                 res.setReturnCode(INSTALL_FAILED_INTERNAL_ERROR);
                 res.setError("Package couldn't be installed in " + pkg.codePath, e);
                 return false;
@@ -18395,7 +18429,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mPackages")
     private int getUidTargetSdkVersionLockedLPr(int uid) {
-        Object obj = mSettings.getUserIdLPr(uid);
+        Object obj = mSettings.getSettingLPr(uid);
         if (obj instanceof SharedUserSetting) {
             final SharedUserSetting sus = (SharedUserSetting) obj;
             int vers = Build.VERSION_CODES.CUR_DEVELOPMENT;
@@ -22492,7 +22526,7 @@ public class PackageManagerService extends IPackageManager.Stub
         private SigningDetails getSigningDetails(int uid) {
             synchronized (mPackages) {
                 final int appId = UserHandle.getAppId(uid);
-                final Object obj = mSettings.getUserIdLPr(appId);
+                final Object obj = mSettings.getSettingLPr(appId);
                 if (obj != null) {
                     if (obj instanceof SharedUserSetting) {
                         return ((SharedUserSetting) obj).signatures.mSigningDetails;
