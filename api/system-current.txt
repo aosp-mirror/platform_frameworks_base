@@ -1240,7 +1240,7 @@ package android.content.pm {
     method public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceiversAsUser(android.content.Intent, int, android.os.UserHandle);
     method public abstract void registerDexModule(java.lang.String, android.content.pm.PackageManager.DexModuleRegisterCallback);
     method public abstract void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
-    method public void replacePreferredActivity(android.content.IntentFilter, int, java.util.List<android.content.ComponentName>, android.content.ComponentName);
+    method public deprecated void replacePreferredActivity(android.content.IntentFilter, int, java.util.List<android.content.ComponentName>, android.content.ComponentName);
     method public abstract void revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public void sendDeviceCustomizationReadyBroadcast();
     method public abstract boolean setDefaultBrowserPackageNameAsUser(java.lang.String, int);
