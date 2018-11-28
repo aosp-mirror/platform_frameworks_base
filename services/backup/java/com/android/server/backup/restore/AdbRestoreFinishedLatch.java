@@ -16,15 +16,15 @@
 
 package com.android.server.backup.restore;
 
-import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
 
 import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.backup.BackupAgentTimeoutParameters;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
+import com.android.server.backup.UserBackupManagerService;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -35,12 +35,12 @@ import java.util.concurrent.TimeUnit;
 public class AdbRestoreFinishedLatch implements BackupRestoreTask {
 
     private static final String TAG = "AdbRestoreFinishedLatch";
-    private BackupManagerService backupManagerService;
+    private UserBackupManagerService backupManagerService;
     final CountDownLatch mLatch;
     private final int mCurrentOpToken;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
-    public AdbRestoreFinishedLatch(BackupManagerService backupManagerService,
+    public AdbRestoreFinishedLatch(UserBackupManagerService backupManagerService,
             int currentOpToken) {
         this.backupManagerService = backupManagerService;
         mLatch = new CountDownLatch(1);

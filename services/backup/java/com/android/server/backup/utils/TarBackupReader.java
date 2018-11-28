@@ -34,14 +34,14 @@ import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_SYSTEM_APP_NO
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSIONS_MATCH;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER;
 
-import static com.android.server.backup.BackupManagerService.BACKUP_MANIFEST_FILENAME;
-import static com.android.server.backup.BackupManagerService.BACKUP_MANIFEST_VERSION;
-import static com.android.server.backup.BackupManagerService.BACKUP_METADATA_FILENAME;
-import static com.android.server.backup.BackupManagerService.BACKUP_WIDGET_METADATA_TOKEN;
-import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
-import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_FILENAME;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_VERSION;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA_FILENAME;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_WIDGET_METADATA_TOKEN;
+import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupManagerMonitor;

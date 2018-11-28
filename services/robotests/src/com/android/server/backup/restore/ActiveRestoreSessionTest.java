@@ -51,8 +51,8 @@ import android.platform.test.annotations.Presubmit;
 
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.BackupHandler;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils;
@@ -85,7 +85,7 @@ public class ActiveRestoreSessionTest {
     private static final long TOKEN_1 = 1L;
     private static final long TOKEN_2 = 2L;
 
-    @Mock private BackupManagerService mBackupManagerService;
+    @Mock private UserBackupManagerService mBackupManagerService;
     @Mock private TransportManager mTransportManager;
     @Mock private IRestoreObserver mObserver;
     @Mock private IBackupManagerMonitor mMonitor;

@@ -16,13 +16,13 @@
 
 package com.android.server.backup.restore;
 
-import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.KEY_WIDGET_STATE;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.BackupManagerService.OP_TYPE_RESTORE_WAIT;
-import static com.android.server.backup.BackupManagerService.PACKAGE_MANAGER_SENTINEL;
-import static com.android.server.backup.BackupManagerService.SETTINGS_PACKAGE;
-import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.UserBackupManagerService.KEY_WIDGET_STATE;
+import static com.android.server.backup.UserBackupManagerService.OP_TYPE_RESTORE_WAIT;
+import static com.android.server.backup.UserBackupManagerService.PACKAGE_MANAGER_SENTINEL;
+import static com.android.server.backup.UserBackupManagerService.SETTINGS_PACKAGE;
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_RESTORE_STEP;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
@@ -40,8 +40,8 @@ import android.app.backup.RestoreDescription;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -62,8 +62,8 @@ import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.BackupUtils;
 import com.android.server.backup.PackageManagerBackupAgent;
 import com.android.server.backup.PackageManagerBackupAgent.Metadata;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.utils.AppBackupUtils;
@@ -80,7 +80,7 @@ import java.util.List;
 
 public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
-    private BackupManagerService backupManagerService;
+    private UserBackupManagerService backupManagerService;
     private final TransportManager mTransportManager;
     // Transport client we're working with to do the restore
     private final TransportClient mTransportClient;
@@ -164,7 +164,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // This task can assume that the wakelock is properly held for it and doesn't have to worry
     // about releasing it.
     public PerformUnifiedRestoreTask(
-            BackupManagerService backupManagerService,
+            UserBackupManagerService backupManagerService,
             TransportClient transportClient,
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,

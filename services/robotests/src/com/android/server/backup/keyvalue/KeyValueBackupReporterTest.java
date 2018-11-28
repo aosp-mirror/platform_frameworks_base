@@ -26,7 +26,7 @@ import android.app.backup.IBackupObserver;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
-import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.testing.shadows.ShadowEventLog;
 import com.android.server.testing.shadows.ShadowSlog;
 
@@ -41,7 +41,7 @@ import org.robolectric.annotation.Config;
 @Config(shadows = {ShadowEventLog.class, ShadowSlog.class})
 @Presubmit
 public class KeyValueBackupReporterTest {
-    @Mock private BackupManagerService mBackupManagerService;
+    @Mock private UserBackupManagerService mBackupManagerService;
     @Mock private IBackupObserver mObserver;
     @Mock private IBackupManagerMonitor mMonitor;
 

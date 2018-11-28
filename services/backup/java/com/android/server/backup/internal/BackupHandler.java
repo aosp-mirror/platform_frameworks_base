@@ -16,9 +16,9 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.TAG;
 
 import android.app.backup.RestoreSet;
 import android.content.Intent;
@@ -35,10 +35,10 @@ import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.TransportManager;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.PerformAdbBackupTask;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
 import com.android.server.backup.keyvalue.BackupRequest;
@@ -84,10 +84,10 @@ public class BackupHandler extends Handler {
     public static final int MSG_BACKUP_RESTORE_STEP = 20;
     public static final int MSG_OP_COMPLETE = 21;
 
-    private final BackupManagerService backupManagerService;
+    private final UserBackupManagerService backupManagerService;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
-    public BackupHandler(BackupManagerService backupManagerService, Looper looper) {
+    public BackupHandler(UserBackupManagerService backupManagerService, Looper looper) {
         super(looper);
         this.backupManagerService = backupManagerService;
         mAgentTimeoutParameters = Preconditions.checkNotNull(

@@ -18,6 +18,10 @@ package com.android.server.backup;
 
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND;
 
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG_SCHEDULING;
+import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.TAG;
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_FULL_CONFIRMATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_OP_COMPLETE;
@@ -64,7 +68,6 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -78,13 +81,11 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.EventLog;
@@ -99,8 +100,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
-import com.android.server.SystemConfig;
-import com.android.server.SystemService;
 import com.android.server.backup.fullbackup.FullBackupEntry;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
 import com.android.server.backup.internal.BackupHandler;
@@ -160,12 +159,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** System service that performs backup/restore operations. */
-public class BackupManagerService {
-    public static final String TAG = "BackupManagerService";
-    public static final boolean DEBUG = true;
-    public static final boolean MORE_DEBUG = false;
-    public static final boolean DEBUG_SCHEDULING = true;
-
+public class UserBackupManagerService {
     // File containing backup-enabled state.  Contains a single byte;
     // nonzero == enabled.  File missing or contains a zero byte == disabled.
     private static final String BACKUP_ENABLE_FILE = "backup_enabled";
@@ -248,59 +242,6 @@ public class BackupManagerService {
     // This is fuzzed, so there are two parameters; backoff_min + Rand[0, backoff_fuzz)
     private static final long BUSY_BACKOFF_MIN_MILLIS = 1000 * 60 * 60;  // one hour
     private static final int BUSY_BACKOFF_FUZZ = 1000 * 60 * 60 * 2;  // two hours
-
-    // The published binder is a singleton Trampoline object that calls through to the proper code.
-    // This indirection lets us turn down the heavy implementation object on the fly without
-    // disturbing binders that have been cached elsewhere in the system.
-    private static Trampoline sInstance;
-
-    static Trampoline getInstance() {
-        // Always constructed during system bring up, so no need to lazy-init.
-        return sInstance;
-    }
-
-    /** Helper to create the {@link BackupManagerService} instance. */
-    public static BackupManagerService create(
-            Context context,
-            Trampoline parent,
-            HandlerThread backupThread) {
-        // Set up our transport options and initialize the default transport
-        SystemConfig systemConfig = SystemConfig.getInstance();
-        Set<ComponentName> transportWhitelist = systemConfig.getBackupTransportWhitelist();
-        if (transportWhitelist == null) {
-            transportWhitelist = Collections.emptySet();
-        }
-
-        String transport =
-                Settings.Secure.getString(
-                        context.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT);
-        if (TextUtils.isEmpty(transport)) {
-            transport = null;
-        }
-        if (DEBUG) {
-            Slog.v(TAG, "Starting with transport " + transport);
-        }
-        TransportManager transportManager =
-                new TransportManager(
-                        context,
-                        transportWhitelist,
-                        transport);
-
-        // If encrypted file systems is enabled or disabled, this call will return the
-        // correct directory.
-        File baseStateDir = new File(Environment.getDataDirectory(), "backup");
-
-        // This dir on /cache is managed directly in init.rc
-        File dataDir = new File(Environment.getDownloadCacheDirectory(), "backup_stage");
-
-        return new BackupManagerService(
-                context,
-                parent,
-                backupThread,
-                baseStateDir,
-                dataDir,
-                transportManager);
-    }
 
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final TransportManager mTransportManager;
@@ -386,7 +327,7 @@ public class BackupManagerService {
      * A BackupRestore task gets notified of ack/timeout for the operation via
      * BackupRestoreTask#handleCancel, BackupRestoreTask#operationComplete and notifyAll called
      * on the mCurrentOpLock.
-     * {@link BackupManagerService#waitUntilOperationComplete(int)} is
+     * {@link UserBackupManagerService#waitUntilOperationComplete(int)} is
      * used in various places to 'wait' for notifyAll and detect change of pending state of an
      * operation. So typically, an operation will be removed from this array by:
      * - BackupRestoreTask#handleCancel and
@@ -420,7 +361,7 @@ public class BackupManagerService {
     private long mCurrentToken = 0;
 
     @VisibleForTesting
-    public BackupManagerService(
+    public UserBackupManagerService(
             Context context,
             Trampoline parent,
             HandlerThread backupThread,
@@ -779,44 +720,6 @@ public class BackupManagerService {
     public void setRunningFullBackupTask(
             PerformFullTransportBackupTask runningFullBackupTask) {
         mRunningFullBackupTask = runningFullBackupTask;
-    }
-
-    /**
-     * Called through Trampoline from {@link Lifecycle#onUnlockUser(int)}. We run the heavy work on
-     * a background thread to keep the unlock time down.
-     */
-    public void unlockSystemUser() {
-        // Migrate legacy setting
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup migrate");
-        if (!backupSettingMigrated(UserHandle.USER_SYSTEM)) {
-            if (DEBUG) {
-                Slog.i(TAG, "Backup enable apparently not migrated");
-            }
-            ContentResolver resolver = sInstance.getContext().getContentResolver();
-            int enableState = Settings.Secure.getIntForUser(resolver,
-                    Settings.Secure.BACKUP_ENABLED, -1, UserHandle.USER_SYSTEM);
-            if (enableState >= 0) {
-                if (DEBUG) {
-                    Slog.i(TAG, "Migrating enable state " + (enableState != 0));
-                }
-                writeBackupEnableState(enableState != 0, UserHandle.USER_SYSTEM);
-                Settings.Secure.putStringForUser(resolver,
-                        Settings.Secure.BACKUP_ENABLED, null, UserHandle.USER_SYSTEM);
-            } else {
-                if (DEBUG) {
-                    Slog.i(TAG, "Backup not yet configured; retaining null enable state");
-                }
-            }
-        }
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup enable");
-        try {
-            sInstance.setBackupEnabled(readBackupEnableState(UserHandle.USER_SYSTEM));
-        } catch (RemoteException e) {
-            // can't happen; it's a local object
-        }
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     /**
@@ -2761,7 +2664,8 @@ public class BackupManagerService {
         try {
             boolean wasEnabled = mEnabled;
             synchronized (this) {
-                writeBackupEnableState(enable, UserHandle.USER_SYSTEM);
+                // TODO(b/118520567): Clean up writing backup enabled logic.
+                GlobalBackupManagerService.writeBackupEnableState(enable, UserHandle.USER_SYSTEM);
                 mEnabled = enable;
             }
 
@@ -3593,73 +3497,5 @@ public class BackupManagerService {
 
     public IBackupManager getBackupManagerBinder() {
         return mBackupManagerBinder;
-    }
-
-    private static boolean backupSettingMigrated(int userId) {
-        File base = new File(Environment.getDataDirectory(), "backup");
-        File enableFile = new File(base, BACKUP_ENABLE_FILE);
-        return enableFile.exists();
-    }
-
-    private static boolean readBackupEnableState(int userId) {
-        File base = new File(Environment.getDataDirectory(), "backup");
-        File enableFile = new File(base, BACKUP_ENABLE_FILE);
-        if (enableFile.exists()) {
-            try (FileInputStream fin = new FileInputStream(enableFile)) {
-                int state = fin.read();
-                return state != 0;
-            } catch (IOException e) {
-                // can't read the file; fall through to assume disabled
-                Slog.e(TAG, "Cannot read enable state; assuming disabled");
-            }
-        } else {
-            if (DEBUG) {
-                Slog.i(TAG, "isBackupEnabled() => false due to absent settings file");
-            }
-        }
-        return false;
-    }
-
-    private static void writeBackupEnableState(boolean enable, int userId) {
-        File base = new File(Environment.getDataDirectory(), "backup");
-        File enableFile = new File(base, BACKUP_ENABLE_FILE);
-        File stage = new File(base, BACKUP_ENABLE_FILE + "-stage");
-        try (FileOutputStream fout = new FileOutputStream(stage)) {
-            fout.write(enable ? 1 : 0);
-            fout.close();
-            stage.renameTo(enableFile);
-            // will be synced immediately by the try-with-resources call to close()
-        } catch (IOException | RuntimeException e) {
-            // Whoops; looks like we're doomed.  Roll everything out, disabled,
-            // including the legacy state.
-            Slog.e(TAG, "Unable to record backup enable state; reverting to disabled: "
-                    + e.getMessage());
-
-            ContentResolver resolver = sInstance.getContext().getContentResolver();
-            Settings.Secure.putStringForUser(resolver,
-                    Settings.Secure.BACKUP_ENABLED, null, userId);
-            enableFile.delete();
-            stage.delete();
-        }
-    }
-
-    /** Implementation to receive lifecycle event callbacks for system services. */
-    public static final class Lifecycle extends SystemService {
-        public Lifecycle(Context context) {
-            super(context);
-            sInstance = new Trampoline(context);
-        }
-
-        @Override
-        public void onStart() {
-            publishBinderService(Context.BACKUP_SERVICE, sInstance);
-        }
-
-        @Override
-        public void onUnlockUser(int userId) {
-            if (userId == UserHandle.USER_SYSTEM) {
-                sInstance.unlockSystemUser();
-            }
-        }
     }
 }

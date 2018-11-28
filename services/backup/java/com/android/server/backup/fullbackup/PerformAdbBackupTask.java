@@ -17,12 +17,12 @@
 package com.android.server.backup.fullbackup;
 
 import static com.android.server.backup.BackupPasswordManager.PBKDF_CURRENT;
-import static com.android.server.backup.BackupManagerService.BACKUP_FILE_HEADER_MAGIC;
-import static com.android.server.backup.BackupManagerService.BACKUP_FILE_VERSION;
-import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
-import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_FILE_HEADER_MAGIC;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_FILE_VERSION;
+import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
 import android.app.backup.IFullBackupRestoreObserver;
 import android.content.pm.ApplicationInfo;
@@ -37,7 +37,7 @@ import android.util.Slog;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.KeyValueAdbBackupEngine;
-import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.PasswordUtils;
 
@@ -66,7 +66,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class PerformAdbBackupTask extends FullBackupTask implements BackupRestoreTask {
 
-    private BackupManagerService backupManagerService;
+    private UserBackupManagerService backupManagerService;
     FullBackupEngine mBackupEngine;
     final AtomicBoolean mLatch;
 
@@ -86,7 +86,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
     String mEncryptPassword;
     private final int mCurrentOpToken;
 
-    public PerformAdbBackupTask(BackupManagerService backupManagerService,
+    public PerformAdbBackupTask(UserBackupManagerService backupManagerService,
             ParcelFileDescriptor fd, IFullBackupRestoreObserver observer,
             boolean includeApks, boolean includeObbs, boolean includeShared, boolean doWidgets,
             String curPassword, String encryptPassword, boolean doAllApps, boolean doSystem,

@@ -16,13 +16,13 @@
 
 package com.android.server.backup.fullbackup;
 
-import static com.android.server.backup.BackupManagerService.BACKUP_MANIFEST_FILENAME;
-import static com.android.server.backup.BackupManagerService.BACKUP_METADATA_FILENAME;
-import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
-import static com.android.server.backup.BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
-import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_FILENAME;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA_FILENAME;
+import static com.android.server.backup.UserBackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
@@ -39,8 +39,8 @@ import android.util.Slog;
 import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupAgentTimeoutParameters;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.utils.FullBackupUtils;
 
@@ -53,7 +53,7 @@ import java.io.OutputStream;
  * and emitting it to the designated OutputStream.
  */
 public class FullBackupEngine {
-    private BackupManagerService backupManagerService;
+    private UserBackupManagerService backupManagerService;
     OutputStream mOutput;
     FullBackupPreflight mPreflightHook;
     BackupRestoreTask mTimeoutMonitor;
@@ -178,7 +178,7 @@ public class FullBackupEngine {
     }
 
     public FullBackupEngine(
-            BackupManagerService backupManagerService,
+            UserBackupManagerService backupManagerService,
             OutputStream output,
             FullBackupPreflight preflightHook,
             PackageInfo pkg,

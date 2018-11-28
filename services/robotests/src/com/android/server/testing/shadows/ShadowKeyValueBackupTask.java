@@ -18,8 +18,8 @@ package com.android.server.testing.shadows;
 
 import android.annotation.Nullable;
 
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.DataChangedJournal;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.keyvalue.KeyValueBackupReporter;
 import com.android.server.backup.keyvalue.KeyValueBackupTask;
@@ -54,7 +54,7 @@ public class ShadowKeyValueBackupTask {
 
     @Implementation
     protected void __constructor__(
-            BackupManagerService backupManagerService,
+            UserBackupManagerService backupManagerService,
             TransportClient transportClient,
             String transportDirName,
             List<String> queue,
