@@ -18,8 +18,8 @@ package android.text.format;
 
 import android.util.TimeFormatException;
 
+import libcore.timezone.ZoneInfoDB;
 import libcore.util.ZoneInfo;
-import libcore.util.ZoneInfoDB;
 
 import java.io.IOException;
 import java.util.Locale;
