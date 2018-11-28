@@ -712,6 +712,15 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public float maxAspectRatio;
 
+    /**
+     * Value indicating the minimum aspect ratio the application supports.
+     * <p>
+     * 0 means unset.
+     * @see {@link android.R.attr#minAspectRatio}.
+     * @hide
+     */
+    public float minAspectRatio;
+
     /** @removed */
     @Deprecated
     public String volumeUuid;

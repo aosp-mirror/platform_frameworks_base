@@ -1294,6 +1294,20 @@
          supports any size. -->
     <attr name="maxAspectRatio" format="float" />
 
+    <!-- This value indicates the minimum aspect ratio the activity supports. If the app runs on a
+         device with a narrower aspect ratio, the system automatically letterboxes the app, leaving
+         portions of the screen unused so the app can run at its specified minimum aspect ratio.
+         <p>
+         Minimum aspect ratio, expressed as (longer dimension / shorter dimension) in decimal
+         form. For example, if the minimum aspect ratio is 4:3, set value to 1.33.
+         <p>
+         Value needs to be greater or equal to 1.0, otherwise it is ignored.
+         <p>
+         NOTE: This attribute is ignored if the activity has
+         {@link android.R.attr#resizeableActivity} set to true, since that means your activity
+         supports any size. -->
+    <attr name="minAspectRatio" format="float" />
+
     <!-- This value indicates how tasks rooted at this activity will behave in lockTask mode.
          While in lockTask mode the system will not launch non-permitted tasks until
          lockTask mode is disabled.
@@ -1571,6 +1585,7 @@
         <attr name="directBootAware" />
         <attr name="resizeableActivity" />
         <attr name="maxAspectRatio" />
+        <attr name="minAspectRatio" />
         <attr name="networkSecurityConfig" />
         <!-- Declare the category of this app. Categories are used to cluster multiple apps
              together into meaningful groups, such as when summarizing battery, network, or
@@ -2386,6 +2401,7 @@
         <attr name="resizeableActivity" />
         <attr name="supportsPictureInPicture" />
         <attr name="maxAspectRatio" />
+        <attr name="minAspectRatio" />
         <attr name="lockTaskMode" />
         <attr name="showForAllUsers" />
 
