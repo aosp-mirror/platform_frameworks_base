@@ -6102,6 +6102,7 @@ package android.telephony.ims {
   }
 
   public class ImsCallSessionListener {
+    method public void callQualityChanged(android.telephony.CallQuality);
     method public void callSessionConferenceExtendFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionConferenceExtendReceived(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
     method public void callSessionConferenceExtended(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
