@@ -33,7 +33,6 @@ Layer::Layer(RenderState& renderState, sk_sp<SkColorFilter> colorFilter, int alp
     // TODO: This is a violation of Android's typical ref counting, but it
     // preserves the old inc/dec ref locations. This should be changed...
     incStrong(nullptr);
-    buildColorSpaceWithFilter();
     renderState.registerLayer(this);
     texTransform.setIdentity();
     transform.setIdentity();
@@ -41,36 +40,6 @@ Layer::Layer(RenderState& renderState, sk_sp<SkColorFilter> colorFilter, int alp
 
 Layer::~Layer() {
     mRenderState.unregisterLayer(this);
-}
-
-void Layer::setColorFilter(sk_sp<SkColorFilter> filter) {
-    if (filter != mColorFilter) {
-        mColorFilter = filter;
-        buildColorSpaceWithFilter();
-    }
-}
-
-void Layer::setDataSpace(android_dataspace dataspace) {
-    if (dataspace != mCurrentDataspace) {
-        mCurrentDataspace = dataspace;
-        buildColorSpaceWithFilter();
-    }
-}
-
-void Layer::buildColorSpaceWithFilter() {
-    sk_sp<SkColorFilter> colorSpaceFilter;
-    sk_sp<SkColorSpace> colorSpace = DataSpaceToColorSpace(mCurrentDataspace);
-    if (colorSpace && !colorSpace->isSRGB()) {
-        colorSpaceFilter = SkToSRGBColorFilter::Make(colorSpace);
-    }
-
-    if (mColorFilter && colorSpaceFilter) {
-        mColorSpaceWithFilter = mColorFilter->makeComposed(colorSpaceFilter);
-    } else if (colorSpaceFilter) {
-        mColorSpaceWithFilter = colorSpaceFilter;
-    } else {
-        mColorSpaceWithFilter = mColorFilter;
-    }
 }
 
 void Layer::postDecStrong() {

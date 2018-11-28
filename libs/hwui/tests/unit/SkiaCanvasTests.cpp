@@ -53,12 +53,12 @@ TEST(SkiaCanvas, colorSpaceXform) {
     adobeBitmap->getSkBitmap(&adobeSkBitmap);
     *adobeSkBitmap.getAddr32(0, 0) = 0xFF0000F0;  // Opaque, almost fully-red
 
-    SkImageInfo info = adobeInfo.makeColorSpace(nullptr);
+    SkImageInfo info = adobeInfo.makeColorSpace(SkColorSpace::MakeSRGB());
     sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(info);
     SkBitmap skBitmap;
     bitmap->getSkBitmap(&skBitmap);
 
-    // Create a software canvas.
+    // Create a software sRGB canvas.
     SkiaCanvas canvas(skBitmap);
     canvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
     // The result should be fully red, since we convert to sRGB at draw time.
@@ -77,7 +77,7 @@ TEST(SkiaCanvas, colorSpaceXform) {
     picCanvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
     sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
 
-    // Playback to an software canvas.  The result should be fully red.
+    // Playback to a software sRGB canvas.  The result should be fully red.
     canvas.asSkCanvas()->drawPicture(picture);
     ASSERT_EQ(0xFF0000FF, *skBitmap.getAddr32(0, 0));
 }

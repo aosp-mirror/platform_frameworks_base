@@ -68,10 +68,13 @@ private:
      * ImageConsumer maintains about a BufferQueue buffer slot.
      */
     struct ImageSlot {
-        ImageSlot() : mEglFence(EGL_NO_SYNC_KHR) {}
+        ImageSlot() : mDataspace(HAL_DATASPACE_UNKNOWN), mEglFence(EGL_NO_SYNC_KHR) {}
 
         // mImage is the SkImage created from mGraphicBuffer.
         sk_sp<SkImage> mImage;
+
+        // the dataspace associated with the current image
+        android_dataspace mDataspace;
 
         /**
          * mEglFence is the EGL sync object that must signal before the buffer
@@ -79,7 +82,7 @@ private:
          */
         EGLSyncKHR mEglFence;
 
-        void createIfNeeded(sp<GraphicBuffer> graphicBuffer);
+        void createIfNeeded(sp<GraphicBuffer> graphicBuffer, android_dataspace dataspace);
     };
 
     /**

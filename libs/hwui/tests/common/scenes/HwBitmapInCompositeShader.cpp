@@ -72,8 +72,7 @@ public:
     void doFrame(int frameNr) override {}
 
     sk_sp<SkShader> createBitmapShader(Bitmap& bitmap) {
-        sk_sp<SkColorFilter> colorFilter;
-        sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
+        sk_sp<SkImage> image = bitmap.makeImage();
         return image->makeShader(SkShader::TileMode::kClamp_TileMode,
                                  SkShader::TileMode::kClamp_TileMode);
     }

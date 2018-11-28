@@ -85,19 +85,18 @@ void DeferredLayerUpdater::apply() {
             mUpdateTexImage = false;
             sk_sp<SkImage> layerImage;
             SkMatrix textureTransform;
-            android_dataspace dataSpace;
             bool queueEmpty = true;
             // If the SurfaceTexture queue is in synchronous mode, need to discard all
             // but latest frame. Since we can't tell which mode it is in,
             // do this unconditionally.
             do {
-                layerImage = mSurfaceTexture->dequeueImage(textureTransform, dataSpace, &queueEmpty,
+                layerImage = mSurfaceTexture->dequeueImage(textureTransform, &queueEmpty,
                         mRenderState);
             } while (layerImage.get() && (!queueEmpty));
             if (layerImage.get()) {
                 // force filtration if buffer size != layer size
                 bool forceFilter = mWidth != layerImage->width() || mHeight != layerImage->height();
-                updateLayer(forceFilter, textureTransform, dataSpace, layerImage);
+                updateLayer(forceFilter, textureTransform, layerImage);
             }
         }
 
@@ -109,12 +108,11 @@ void DeferredLayerUpdater::apply() {
 }
 
 void DeferredLayerUpdater::updateLayer(bool forceFilter, const SkMatrix& textureTransform,
-        android_dataspace dataspace, const sk_sp<SkImage>& layerImage) {
+        const sk_sp<SkImage>& layerImage) {
     mLayer->setBlend(mBlend);
     mLayer->setForceFilter(forceFilter);
     mLayer->setSize(mWidth, mHeight);
     mLayer->getTexTransform() = textureTransform;
-    mLayer->setDataSpace(dataspace);
     mLayer->setImage(layerImage);
 }
 

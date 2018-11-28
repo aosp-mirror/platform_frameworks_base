@@ -179,9 +179,8 @@ SkiaCanvas::PaintCoW&& SkiaRecordingCanvas::filterBitmap(PaintCoW&& paint,
 }
 
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
-    sk_sp<SkColorFilter> colorFilter;
-    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
-    mRecorder.drawImage(image, left, top, filterBitmap(paint, std::move(colorFilter)), bitmap.palette());
+    sk_sp<SkImage> image = bitmap.makeImage();
+    mRecorder.drawImage(image, left, top, filterPaint(paint), bitmap.palette());
     // if image->unique() is true, then mRecorder.drawImage failed for some reason. It also means
     // it is not safe to store a raw SkImage pointer, because the image object will be destroyed
     // when this function ends.
@@ -194,9 +193,8 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, con
     SkAutoCanvasRestore acr(&mRecorder, true);
     concat(matrix);
 
-    sk_sp<SkColorFilter> colorFilter;
-    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
-    mRecorder.drawImage(image, 0, 0, filterBitmap(paint, std::move(colorFilter)), bitmap.palette());
+    sk_sp<SkImage> image = bitmap.makeImage();
+    mRecorder.drawImage(image, 0, 0, filterPaint(paint), bitmap.palette());
     if (!bitmap.isImmutable() && image.get() && !image->unique()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
@@ -208,9 +206,8 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
 
-    sk_sp<SkColorFilter> colorFilter;
-    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
-    mRecorder.drawImageRect(image, srcRect, dstRect, filterBitmap(paint, std::move(colorFilter)),
+    sk_sp<SkImage> image = bitmap.makeImage();
+    mRecorder.drawImageRect(image, srcRect, dstRect, filterPaint(paint),
                             SkCanvas::kFast_SrcRectConstraint, bitmap.palette());
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty() &&
         !dstRect.isEmpty()) {
@@ -247,10 +244,9 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
     if (!filteredPaint || filteredPaint->getFilterQuality() != kLow_SkFilterQuality) {
         filteredPaint.writeable().setFilterQuality(kLow_SkFilterQuality);
     }
-    sk_sp<SkColorFilter> colorFilter;
-    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
+    sk_sp<SkImage> image = bitmap.makeImage();
     mRecorder.drawImageLattice(image, lattice, dst,
-                               filterBitmap(std::move(filteredPaint), std::move(colorFilter)),
+                               filterPaint(std::move(filteredPaint)),
                                bitmap.palette());
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
