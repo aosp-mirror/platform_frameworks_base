@@ -21,23 +21,27 @@ import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.notification.stack.StackScrollState;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An abstract view for expandable views.
  */
 public abstract class ExpandableView extends FrameLayout implements Dumpable {
+    private static final String TAG = "ExpandableView";
 
     public static final float NO_ROUNDNESS = -1;
     protected OnHeightChangedListener mOnHeightChangedListener;
@@ -54,6 +58,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     private ViewGroup mTransientContainer;
     private boolean mInShelf;
     private boolean mTransformingInShelf;
+    @Nullable private ExpandableViewState mViewState;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -511,8 +516,54 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     public void setActualHeightAnimating(boolean animating) {}
 
-    public ExpandableViewState createNewViewState(StackScrollState stackScrollState) {
+    protected ExpandableViewState createExpandableViewState() {
         return new ExpandableViewState();
+    }
+
+    /** Sets {@link ExpandableViewState} to default state. */
+    public ExpandableViewState resetViewState() {
+        // TODO(http://b/119762423): Move the null check to getViewState().
+        if (mViewState == null) {
+            mViewState = createExpandableViewState();
+        }
+
+        // initialize with the default values of the view
+        mViewState.height = getIntrinsicHeight();
+        mViewState.gone = getVisibility() == View.GONE;
+        mViewState.alpha = 1f;
+        mViewState.notGoneIndex = -1;
+        mViewState.xTranslation = getTranslationX();
+        mViewState.hidden = false;
+        mViewState.scaleX = getScaleX();
+        mViewState.scaleY = getScaleY();
+        mViewState.inShelf = false;
+        mViewState.headsUpIsVisible = false;
+
+        // handling reset for child notifications
+        if (this instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) this;
+            List<ExpandableNotificationRow> children = row.getNotificationChildren();
+            if (row.isSummaryWithChildren() && children != null) {
+                for (ExpandableNotificationRow childRow : children) {
+                    childRow.resetViewState();
+                }
+            }
+        }
+
+        return mViewState;
+    }
+
+    @Nullable public ExpandableViewState getViewState() {
+        return mViewState;
+    }
+
+    /** Applies internal {@link ExpandableViewState} to this view. */
+    public void applyViewState() {
+        if (mViewState == null) {
+            Log.wtf(TAG, "No child state was found when applying this state to the hostView");
+        } else if (!mViewState.gone) {
+            mViewState.applyToView(this);
+        }
     }
 
     /**

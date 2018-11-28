@@ -40,7 +40,7 @@ public class AmbientState {
 
     private static final int NO_SECTION_BOUNDARY = -1;
 
-    private ArrayList<View> mDraggedViews = new ArrayList<>();
+    private ArrayList<ExpandableView> mDraggedViews = new ArrayList<>();
     private int mScrollY;
     private boolean mDimmed;
     private ActivatableNotificationView mActivatedChild;
@@ -131,7 +131,8 @@ public class AmbientState {
         this.mScrollY = scrollY;
     }
 
-    public void onBeginDrag(View view) {
+    /** Call when dragging begins. */
+    public void onBeginDrag(ExpandableView view) {
         mDraggedViews.add(view);
     }
 
@@ -139,7 +140,7 @@ public class AmbientState {
         mDraggedViews.remove(view);
     }
 
-    public ArrayList<View> getDraggedViews() {
+    public ArrayList<ExpandableView> getDraggedViews() {
         return mDraggedViews;
     }
 

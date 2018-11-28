@@ -128,25 +128,25 @@ public class StackStateAnimator {
 
     public void startAnimationForEvents(
             ArrayList<NotificationStackScrollLayout.AnimationEvent> mAnimationEvents,
-            StackScrollState finalState, long additionalDelay) {
+            long additionalDelay) {
 
-        processAnimationEvents(mAnimationEvents, finalState);
+        processAnimationEvents(mAnimationEvents);
 
         int childCount = mHostLayout.getChildCount();
         mAnimationFilter.applyCombination(mNewEvents);
         mCurrentAdditionalDelay = additionalDelay;
         mCurrentLength = NotificationStackScrollLayout.AnimationEvent.combineLength(mNewEvents);
-        mCurrentLastNotAddedIndex = findLastNotAddedIndex(finalState);
+        mCurrentLastNotAddedIndex = findLastNotAddedIndex();
         for (int i = 0; i < childCount; i++) {
             final ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
 
-            ExpandableViewState viewState = finalState.getViewStateForView(child);
+            ExpandableViewState viewState = child.getViewState();
             if (viewState == null || child.getVisibility() == View.GONE
-                    || applyWithoutAnimation(child, viewState, finalState)) {
+                    || applyWithoutAnimation(child, viewState)) {
                 continue;
             }
 
-            initAnimationProperties(finalState, child, viewState);
+            initAnimationProperties(child, viewState);
             viewState.animateTo(child, mAnimationProperties);
         }
         if (!isRunning()) {
@@ -159,7 +159,7 @@ public class StackStateAnimator {
         mNewAddChildren.clear();
     }
 
-    private void initAnimationProperties(StackScrollState finalState, ExpandableView child,
+    private void initAnimationProperties(ExpandableView child,
             ExpandableViewState viewState) {
         boolean wasAdded = mAnimationProperties.wasAdded(child);
         mAnimationProperties.duration = mCurrentLength;
@@ -173,7 +173,7 @@ public class StackStateAnimator {
                         || viewState.clipTopAmount != child.getClipTopAmount()
                         || viewState.dark != child.isDark())) {
             mAnimationProperties.delay = mCurrentAdditionalDelay
-                    + calculateChildAnimationDelay(viewState, finalState);
+                    + calculateChildAnimationDelay(viewState);
         }
     }
 
@@ -193,8 +193,7 @@ public class StackStateAnimator {
      *
      * @return true if no animation should be performed
      */
-    private boolean applyWithoutAnimation(ExpandableView child, ExpandableViewState viewState,
-            StackScrollState finalState) {
+    private boolean applyWithoutAnimation(ExpandableView child, ExpandableViewState viewState) {
         if (mShadeExpanded) {
             return false;
         }
@@ -214,12 +213,12 @@ public class StackStateAnimator {
         return true;
     }
 
-    private int findLastNotAddedIndex(StackScrollState finalState) {
+    private int findLastNotAddedIndex() {
         int childCount = mHostLayout.getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
             final ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
 
-            ExpandableViewState viewState = finalState.getViewStateForView(child);
+            ExpandableViewState viewState = child.getViewState();
             if (viewState == null || child.getVisibility() == View.GONE) {
                 continue;
             }
@@ -230,8 +229,7 @@ public class StackStateAnimator {
         return -1;
     }
 
-    private long calculateChildAnimationDelay(ExpandableViewState viewState,
-            StackScrollState finalState) {
+    private long calculateChildAnimationDelay(ExpandableViewState viewState) {
         if (mAnimationFilter.hasGoToFullShadeEvent) {
             return calculateDelayGoToFullShade(viewState);
         }
@@ -244,8 +242,8 @@ public class StackStateAnimator {
             switch (event.animationType) {
                 case NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_ADD: {
                     int ownIndex = viewState.notGoneIndex;
-                    int changingIndex = finalState
-                            .getViewStateForView(event.changingView).notGoneIndex;
+                    int changingIndex =
+                            ((ExpandableView) (event.mChangingView)).getViewState().notGoneIndex;
                     int difference = Math.abs(ownIndex - changingIndex);
                     difference = Math.max(0, Math.min(DELAY_EFFECT_MAX_INDEX_DIFFERENCE,
                             difference - 1));
@@ -258,9 +256,9 @@ public class StackStateAnimator {
                 case NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE: {
                     int ownIndex = viewState.notGoneIndex;
                     boolean noNextView = event.viewAfterChangingView == null;
-                    View viewAfterChangingView = noNextView
+                    ExpandableView viewAfterChangingView = noNextView
                             ? mHostLayout.getLastChildNotGone()
-                            : event.viewAfterChangingView;
+                            : (ExpandableView) event.viewAfterChangingView;
                     if (viewAfterChangingView == null) {
                         // This can happen when the last view in the list is removed.
                         // Since the shelf is still around and the only view, the code still goes
@@ -268,8 +266,7 @@ public class StackStateAnimator {
                         // have changed.
                         continue;
                     }
-                    int nextIndex = finalState
-                            .getViewStateForView(viewAfterChangingView).notGoneIndex;
+                    int nextIndex = viewAfterChangingView.getViewState().notGoneIndex;
                     if (ownIndex >= nextIndex) {
                         // we only have the view afterwards
                         ownIndex++;
@@ -351,20 +348,17 @@ public class StackStateAnimator {
     /**
      * Process the animationEvents for a new animation
      *
-     * @param animationEvents the animation events for the animation to perform
-     * @param finalState the final state to animate to
+     *  @param animationEvents the animation events for the animation to perform
      */
     private void processAnimationEvents(
-            ArrayList<NotificationStackScrollLayout.AnimationEvent> animationEvents,
-            StackScrollState finalState) {
+            ArrayList<NotificationStackScrollLayout.AnimationEvent> animationEvents) {
         for (NotificationStackScrollLayout.AnimationEvent event : animationEvents) {
-            final ExpandableView changingView = (ExpandableView) event.changingView;
+            final ExpandableView changingView = (ExpandableView) event.mChangingView;
             if (event.animationType ==
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_ADD) {
 
                 // This item is added, initialize it's properties.
-                ExpandableViewState viewState = finalState
-                        .getViewStateForView(changingView);
+                ExpandableViewState viewState = changingView.getViewState();
                 if (viewState == null || viewState.gone) {
                     // The position for this child was never generated, let's continue.
                     continue;
@@ -381,8 +375,8 @@ public class StackStateAnimator {
 
                 // Find the amount to translate up. This is needed in order to understand the
                 // direction of the remove animation (either downwards or upwards)
-                ExpandableViewState viewState = finalState
-                        .getViewStateForView(event.viewAfterChangingView);
+                ExpandableViewState viewState =
+                        ((ExpandableView) event.viewAfterChangingView).getViewState();
                 int actualHeight = changingView.getActualHeight();
                 // upwards by default
                 float translationDirection = -1.0f;
@@ -426,11 +420,11 @@ public class StackStateAnimator {
                 }
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_GROUP_EXPANSION_CHANGED) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) event.changingView;
-                row.prepareExpansionChanged(finalState);
+                ExpandableNotificationRow row = (ExpandableNotificationRow) event.mChangingView;
+                row.prepareExpansionChanged();
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_PULSE_APPEAR) {
-                ExpandableViewState viewState = finalState.getViewStateForView(changingView);
+                ExpandableViewState viewState = changingView.getViewState();
                 if (viewState != null) {
                     mTmpState.copyFrom(viewState);
                     mTmpState.yTranslation += mPulsingAppearingTranslation;
@@ -439,7 +433,7 @@ public class StackStateAnimator {
                 }
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_PULSE_DISAPPEAR) {
-                ExpandableViewState viewState = finalState.getViewStateForView(changingView);
+                ExpandableViewState viewState = changingView.getViewState();
                 if (viewState != null) {
                     viewState.alpha = 0;
                     // We want to animate the alpha away before the view starts translating,
@@ -454,7 +448,7 @@ public class StackStateAnimator {
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR) {
                 // This item is added, initialize it's properties.
-                ExpandableViewState viewState = finalState.getViewStateForView(changingView);
+                ExpandableViewState viewState = changingView.getViewState();
                 mTmpState.copyFrom(viewState);
                 if (event.headsUpFromBottom) {
                     mTmpState.yTranslation = mHeadsUpAppearHeightBottom;
