@@ -126,7 +126,6 @@
         android:visibility="gone"
         android:contentDescription="@string/notification_alerted_content_description"
         android:src="@drawable/ic_notifications_alerted"
-        android:tint="@color/notification_secondary_text_color_light"
     />
     <ImageView
         android:id="@+id/profile_badge"

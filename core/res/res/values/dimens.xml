@@ -430,7 +430,7 @@
     <dimen name="notification_badge_size">12dp</dimen>
 
     <!-- Size of the alerted icon for notifications -->
-    <dimen name="notification_alerted_size">18dp</dimen>
+    <dimen name="notification_alerted_size">12dp</dimen>
 
     <!-- Keyguard dimensions -->
     <!-- TEMP -->
