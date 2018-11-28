@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import libcore.icu.ICU;
 import libcore.timezone.TzDataSetVersion;
 import libcore.timezone.TimeZoneFinder;
-import libcore.util.ZoneInfoDB;
+import libcore.timezone.ZoneInfoDB;
 
 import static android.app.timezone.RulesState.DISTRO_STATUS_INSTALLED;
 import static android.app.timezone.RulesState.DISTRO_STATUS_NONE;
