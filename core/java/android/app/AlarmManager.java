@@ -35,7 +35,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
-import libcore.util.ZoneInfoDB;
+import libcore.timezone.ZoneInfoDB;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
