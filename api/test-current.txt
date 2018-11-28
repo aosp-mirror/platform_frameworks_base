@@ -300,14 +300,9 @@ package android.content {
 
   public abstract class Context {
     method public android.content.Context createPackageContextAsUser(java.lang.String, int, android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public abstract java.lang.String getOpPackageName();
     method public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillCompatibilityEnabled(boolean);
-  }
-
-  public class ContextWrapper extends android.content.Context {
-    method public java.lang.String getOpPackageName();
   }
 
 }
