@@ -52,6 +52,9 @@ public class DrivingStateHelper {
      * is idling or moving, {@code false} otherwise.
      */
     public boolean isCurrentlyDriving() {
+        if (mDrivingStateManager == null) {
+            return false;
+        }
         try {
             CarDrivingStateEvent currentState = mDrivingStateManager.getCurrentCarDrivingState();
             if (currentState != null) {
