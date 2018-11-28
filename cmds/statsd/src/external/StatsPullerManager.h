@@ -36,6 +36,9 @@ typedef struct {
     // The field numbers of the fields that need to be summed when merging
     // isolated uid with host uid.
     std::vector<int> additiveFields;
+    // The field numbers of the fields that can't be merged when merging
+    // data belong to isolated uid and host uid.
+    std::vector<int> nonAdditiveFields;
     // How long should the puller wait before doing an actual pull again. Default
     // 1 sec. Set this to 0 if this is handled elsewhere.
     int64_t coolDownNs = 1 * NS_PER_SEC;

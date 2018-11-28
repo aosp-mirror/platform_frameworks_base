@@ -65,16 +65,7 @@ public:
      */
     explicit LogEvent(log_msg& msg);
 
-    /**
-     * Creates LogEvent from StatsLogEventWrapper.
-     */
-    static void createLogEvents(const StatsLogEventWrapper& statsLogEventWrapper,
-                                std::vector<std::shared_ptr<LogEvent>>& logEvents);
-
-    /**
-     * Construct one LogEvent from a StatsLogEventWrapper with the i-th work chain. -1 if no chain.
-     */
-    explicit LogEvent(const StatsLogEventWrapper& statsLogEventWrapper, int workChainIndex);
+    explicit LogEvent(const StatsLogEventWrapper& statsLogEventWrapper);
 
     /**
      * Constructs a LogEvent with synthetic data for testing. Must call init() before reading.
