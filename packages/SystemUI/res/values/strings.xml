@@ -2255,6 +2255,7 @@
 
     <!-- Text on chip for multiple apps using a single app op [CHAR LIMIT=10] -->
     <plurals name="ongoing_privacy_chip_multiple_apps">
+        <item quantity="one"><xliff:g id="num_apps" example="1">%d</xliff:g> app</item>
         <item quantity="few"><xliff:g id="num_apps" example="3">%d</xliff:g> apps</item>
         <item quantity="other"><xliff:g id="num_apps" example="3">%d</xliff:g> apps</item>
     </plurals>
@@ -2267,6 +2268,7 @@
 
     <!-- Content description for ongoing privacy chip. Use with multiple apps using same app op[CHAR LIMIT=NONE]-->
     <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op">
+        <item quantity="one"><xliff:g id="num_apps" example="1">%1$d</xliff:g> application is using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</item>
         <item quantity="few"><xliff:g id="num_apps" example="3">%1$d</xliff:g> applications are using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</item>
         <item quantity="other"><xliff:g id="num_apps" example="3">%1$d</xliff:g> applications are using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</item>
     </plurals>
