@@ -27,7 +27,6 @@
 
 #include "TestHelpers.h"
 
-using ::testing::IsNull;
 using ::testing::NotNull;
 
 namespace android {
