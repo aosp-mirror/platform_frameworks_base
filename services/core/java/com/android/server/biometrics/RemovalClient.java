@@ -37,7 +37,7 @@ public abstract class RemovalClient extends ClientMonitor {
             BiometricServiceBase.ServiceListener listener, int biometricId, int groupId, int userId,
             boolean restricted, String owner, BiometricUtils utils) {
         super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
-                owner);
+                owner, 0 /* cookie */);
         mBiometricId = biometricId;
         mBiometricUtils = utils;
     }

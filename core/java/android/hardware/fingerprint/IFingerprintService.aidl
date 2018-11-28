@@ -15,7 +15,6 @@
  */
 package android.hardware.fingerprint;
 
-import android.os.Bundle;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
@@ -34,14 +33,17 @@ interface IFingerprintService {
     void authenticate(IBinder token, long sessionId, int userId,
             IFingerprintServiceReceiver receiver, int flags, String opPackageName);
 
-    // This method invokes the BiometricDialog. The arguments are almost the same as above, except
-    // this is protected by the MANAGE_BIOMETRIC signature permission. This method should only be
-    // called from BiometricPromptService. The additional uid, pid, userId arguments should be
-    // determined by BiometricPromptService.
-    void authenticateFromService(IBinder token, long sessionId, int userId,
-            IBiometricServiceReceiver clientReceiver, IBiometricServiceReceiver wrapperReceiver,
-            int flags, String opPackageName, in Bundle bundle, int callingUid, int callingPid,
-            int callingUserId);
+    // This method prepares the service to start authenticating, but doesn't start authentication.
+    // This is protected by the MANAGE_BIOMETRIC signatuer permission. This method should only be
+    // called from BiometricService. The additional uid, pid, userId arguments should be determined
+    // by BiometricService. To start authentication after the clients are ready, use
+    // startPreparedClient().
+    void prepareForAuthentication(IBinder token, long sessionId, int userId,
+            IBiometricServiceReceiver wrapperReceiver, String opPackageName, int cookie,
+            int callingUid, int callingPid, int callingUserId);
+
+    // Starts authentication with the previously prepared client.
+    void startPreparedClient(int cookie);
 
     // Cancel authentication for the given sessionId
     void cancelAuthentication(IBinder token, String opPackageName);

@@ -30,16 +30,26 @@ import java.util.concurrent.Executor;
 public interface BiometricAuthenticator {
 
     /**
+     * No biometric methods or nothing has been enrolled.
+     * Move/expose these in BiometricPrompt if we ever want to allow applications to "blacklist"
+     * modalities when calling authenticate().
+     * @hide
+     */
+    int TYPE_NONE = 0;
+    /**
+     * Constant representing fingerprint.
      * @hide
      */
     int TYPE_FINGERPRINT = 1 << 0;
 
     /**
+     * Constant representing iris.
      * @hide
      */
     int TYPE_IRIS = 1 << 1;
 
     /**
+     * Constant representing face.
      * @hide
      */
     int TYPE_FACE = 1 << 2;

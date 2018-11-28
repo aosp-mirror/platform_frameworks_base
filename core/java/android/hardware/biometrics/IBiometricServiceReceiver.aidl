@@ -33,8 +33,11 @@ oneway interface IBiometricServiceReceiver {
     void onAuthenticationSucceededInternal(boolean requireConfirmation, in byte[] token);
     // Noties that authentication failed.
     void onAuthenticationFailed();
-    // Notifies that an error has occurred.
+    // Notify BiometricPrompt that an error has occurred.
     void onError(int error, String message);
+    // Notify BiometricService than an error has occured. Forward to the correct receiver depending
+    // on the cookie.
+    void onErrorInternal(int error, String message, int cookie);
     // Notifies that a biometric has been acquired.
     void onAcquired(int acquiredInfo, String message);
     // Notifies that the SystemUI dialog has been dismissed.

@@ -15,7 +15,6 @@
  */
 package android.hardware.face;
 
-import android.os.Bundle;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.face.IFaceServiceReceiver;
@@ -31,12 +30,17 @@ interface IFaceService {
     void authenticate(IBinder token, long sessionId,
             IFaceServiceReceiver receiver, int flags, String opPackageName);
 
-    // This method invokes the BiometricDialog. The arguments are almost the same as above,
-    // but should only be called from (BiometricPromptService).
-    void authenticateFromService(boolean requireConfirmation, IBinder token, long sessionId,
-            int userId, IBiometricServiceReceiver clientRceiver,
-            IBiometricServiceReceiver wrapperReceiver, int flags, String opPackageName,
-            in Bundle bundle, int callingUid, int callingPid, int callingUserId);
+    // This method prepares the service to start authenticating, but doesn't start authentication.
+    // This is protected by the MANAGE_BIOMETRIC signatuer permission. This method should only be
+    // called from BiometricService. The additional uid, pid, userId arguments should be determined
+    // by BiometricService. To start authentication after the clients are ready, use
+    // startPreparedClient().
+    void prepareForAuthentication(boolean requireConfirmation, IBinder token, long sessionId,
+            int userId, IBiometricServiceReceiver wrapperReceiver, String opPackageName,
+            int cookie, int callingUid, int callingPid, int callingUserId);
+
+    // Starts authentication with the previously prepared client.
+    void startPreparedClient(int cookie);
 
     // Cancel authentication for the given sessionId
     void cancelAuthentication(IBinder token, String opPackageName);

@@ -19,12 +19,9 @@ package com.android.server.biometrics;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
-import android.hardware.biometrics.BiometricPrompt;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.security.KeyStore;
-import android.text.TextUtils;
 import android.util.Slog;
 
 import java.util.ArrayList;
@@ -38,16 +35,10 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public abstract int handleFailedAttempt();
     public abstract void resetFailedAttempts();
 
-    /**
-      * @return one of {@link #TYPE_FINGERPRINT} {@link #TYPE_IRIS} or {@link #TYPE_FACE}
-      */
-    public abstract int getBiometricType();
-
     public static final int LOCKOUT_NONE = 0;
     public static final int LOCKOUT_TIMED = 1;
     public static final int LOCKOUT_PERMANENT = 2;
 
-    private Bundle mBundle;
     private final boolean mRequireConfirmation;
 
     /**
@@ -64,12 +55,10 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public AuthenticationClient(Context context, Metrics metrics,
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricServiceBase.ServiceListener listener, int targetUserId, int groupId, long opId,
-            boolean restricted, String owner, Bundle bundle,
-            boolean requireConfirmation) {
+            boolean restricted, String owner, int cookie, boolean requireConfirmation) {
         super(context, metrics, daemon, halDeviceId, token, listener, targetUserId, groupId,
-                restricted, owner);
+                restricted, owner, cookie);
         mOpId = opId;
-        mBundle = bundle;
         mRequireConfirmation = requireConfirmation;
     }
 
@@ -82,21 +71,11 @@ public abstract class AuthenticationClient extends ClientMonitor {
         stop(false /* initiatedByClient */);
     }
 
-    public void setTitleIfEmpty(CharSequence title) {
-        if (TextUtils.isEmpty(mBundle.getCharSequence(BiometricPrompt.KEY_TITLE))) {
-            mBundle.putCharSequence(BiometricPrompt.KEY_TITLE, title);
-        }
-    }
-
     public boolean isBiometricPrompt() {
-        return mBundle != null;
+        return getCookie() != 0;
     }
 
-    public Bundle getBundle() {
-        return mBundle;
-    }
-
-    public boolean requireConfirmation() {
+    public boolean getRequireConfirmation() {
         return mRequireConfirmation;
     }
 
@@ -166,7 +145,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
                             ? BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
                             : BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
                     if (listener != null) {
-                        listener.onError(getHalDeviceId(), errorCode, 0 /* vendorCode */);
+                        listener.onError(getHalDeviceId(), errorCode, 0 /* vendorCode */,
+                                getCookie());
                     }
                 }
                 result |= lockoutMode != LOCKOUT_NONE; // in a lockout mode

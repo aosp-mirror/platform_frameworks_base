@@ -146,6 +146,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         mHandler.removeMessages(MSG_BIOMETRIC_ERROR);
         mHandler.removeMessages(MSG_BIOMETRIC_HELP);
         mHandler.removeMessages(MSG_BIOMETRIC_AUTHENTICATED);
+        mHandler.removeMessages(MSG_HIDE_DIALOG);
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = bundle;
         args.arg2 = receiver;

@@ -16,7 +16,6 @@
 
 package com.android.server.biometrics;
 
-import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 
 import android.app.ActivityManager;
@@ -57,7 +56,6 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
-import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.SystemService;
@@ -225,9 +223,9 @@ public abstract class BiometricServiceBase extends SystemService
 
         public AuthenticationClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
                 IBinder token, ServiceListener listener, int targetUserId, int groupId, long opId,
-                boolean restricted, String owner, Bundle bundle, boolean requireConfirmation) {
+                boolean restricted, String owner, int cookie, boolean requireConfirmation) {
             super(context, getMetrics(), daemon, halDeviceId, token, listener, targetUserId,
-                    groupId, opId, restricted, owner, bundle, requireConfirmation);
+                    groupId, opId, restricted, owner, cookie, requireConfirmation);
         }
 
         @Override
@@ -354,8 +352,7 @@ public abstract class BiometricServiceBase extends SystemService
         void onAuthenticationFailed(long deviceId)
                 throws RemoteException;
 
-        void onError(long deviceId, int error, int vendorCode)
-                throws RemoteException;
+        void onError(long deviceId, int error, int vendorCode, int cookie) throws RemoteException;
 
         default void onRemoved(BiometricAuthenticator.Identifier identifier,
                 int remaining) throws RemoteException {};
@@ -368,24 +365,15 @@ public abstract class BiometricServiceBase extends SystemService
      * Wraps the callback interface from Service -> BiometricPrompt
      */
     protected abstract class BiometricServiceListener implements ServiceListener {
-        // Hold the client receiver here and send it back to BiometricService when the client's
-        // lifecycle begins.
-        private IBiometricServiceReceiver mClientReceiver;
         // We should send results using the wrapper receiver.
         private IBiometricServiceReceiver mWrapperReceiver;
 
-        public BiometricServiceListener(IBiometricServiceReceiver clientReceiver,
-                IBiometricServiceReceiver wrapperReceiver) {
-            mClientReceiver = clientReceiver;
+        public BiometricServiceListener(IBiometricServiceReceiver wrapperReceiver) {
             mWrapperReceiver = wrapperReceiver;
         }
 
         public IBiometricServiceReceiver getWrapperReceiver() {
             return mWrapperReceiver;
-        }
-
-        public IBiometricServiceReceiver getClientReceiver() {
-            return mClientReceiver;
         }
 
         @Override
@@ -745,30 +733,6 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         mHandler.post(() -> {
-            if (client.isBiometricPrompt()) {
-                try {
-                    final List<ActivityManager.RunningAppProcessInfo> procs =
-                            ActivityManager.getService().getRunningAppProcesses();
-                    for (int i = 0; i < procs.size(); i++) {
-                        final ActivityManager.RunningAppProcessInfo info = procs.get(i);
-                        if (info.uid == callingUid && info.importance == IMPORTANCE_FOREGROUND) {
-                            PackageManager pm = getContext().getPackageManager();
-                            final CharSequence label = pm.getApplicationLabel(
-                                    pm.getApplicationInfo(info.processName,
-                                            PackageManager.GET_META_DATA));
-                            final String title = getContext()
-                                    .getString(R.string.biometric_dialog_default_title, label);
-                            client.setTitleIfEmpty(title);
-                            break;
-                        }
-                    }
-                } catch (RemoteException e) {
-                    Slog.e(getTag(), "Unable to get application name", e);
-                } catch (PackageManager.NameNotFoundException e) {
-                    Slog.e(getTag(), "Unable to get application name", e);
-                }
-            }
-
             mMetricsLogger.histogram(getMetrics().tagAuthToken(), opId != 0L ? 1 : 0);
 
             // Get performance stats object for this user.
@@ -852,8 +816,7 @@ public abstract class BiometricServiceBase extends SystemService
 
         int lockoutMode = getLockoutMode();
         if (lockoutMode != AuthenticationClient.LOCKOUT_NONE) {
-            Slog.v(getTag(), "In lockout mode(" + lockoutMode +
-                    ") ; disallowing authentication");
+            Slog.v(getTag(), "In lockout mode(" + lockoutMode + ") ; disallowing authentication");
             int errorCode = lockoutMode == AuthenticationClient.LOCKOUT_TIMED ?
                     BiometricConstants.BIOMETRIC_ERROR_LOCKOUT :
                     BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
@@ -966,7 +929,6 @@ public abstract class BiometricServiceBase extends SystemService
         if (currentClient != null) {
             if (DEBUG) Slog.v(getTag(), "request stop current client " +
                     currentClient.getOwnerString());
-
             // This check only matters for FingerprintService, since enumerate may call back
             // multiple times.
             if (currentClient instanceof FingerprintService.EnumerateClientImpl ||
@@ -987,37 +949,49 @@ public abstract class BiometricServiceBase extends SystemService
             mHandler.removeCallbacks(mResetClientState);
             mHandler.postDelayed(mResetClientState, CANCEL_TIMEOUT_LIMIT);
         } else if (newClient != null) {
-            mCurrentClient = newClient;
-            if (DEBUG) Slog.v(getTag(), "starting client "
-                    + newClient.getClass().getSuperclass().getSimpleName()
-                    + "(" + newClient.getOwnerString() + ")"
-                    + ", initiatedByClient = " + initiatedByClient);
-            notifyClientActiveCallbacks(true);
-
-            if (mBiometricService == null) {
-                mBiometricService = IBiometricService.Stub.asInterface(
-                        ServiceManager.getService(Context.BIOMETRIC_SERVICE));
-            }
-
-            if (newClient.getListener() instanceof BiometricServiceListener) {
-                // BiometricPrompt authentication client. Notify the service that an authentication
-                // is actually starting now, so the dialog can be shown.
-                try {
-                    AuthenticationClient client = (AuthenticationClient) newClient;
-                    mBiometricService.onAuthenticationStarted(
-                            client.getBundle(),
-                            ((BiometricServiceListener) newClient.getListener())
-                                    .getClientReceiver(),
-                            client.getBiometricType(),
-                            client.requireConfirmation(),
-                            client.getTargetUserId());
-                } catch (RemoteException e) {
-                    Slog.e(getTag(), "Remote exception", e);
+            // For BiometricPrompt clients, do not start until
+            // <Biometric>Service#startPreparedClient is called. BiometricService waits until all
+            // modalities are ready before initiating authentication.
+            if (newClient instanceof AuthenticationClient) {
+                AuthenticationClient client = (AuthenticationClient) newClient;
+                if (client.isBiometricPrompt()) {
+                    if (DEBUG) Slog.v(getTag(), "Returning cookie: " + client.getCookie());
+                    mCurrentClient = newClient;
+                    if (mBiometricService == null) {
+                        mBiometricService = IBiometricService.Stub.asInterface(
+                                ServiceManager.getService(Context.BIOMETRIC_SERVICE));
+                    }
+                    try {
+                        mBiometricService.onReadyForAuthentication(client.getCookie(),
+                                client.getRequireConfirmation(), client.getTargetUserId());
+                    } catch (RemoteException e) {
+                        Slog.e(getTag(), "Remote exception", e);
+                    }
+                    return;
                 }
             }
 
-            newClient.start();
+            // We are not a BiometricPrompt client, start the client immediately
+            mCurrentClient = newClient;
+            startCurrentClient(mCurrentClient.getCookie());
         }
+    }
+
+    protected void startCurrentClient(int cookie) {
+        if (mCurrentClient == null) {
+            Slog.e(getTag(), "Trying to start null client!");
+            return;
+        }
+        if (DEBUG) Slog.v(getTag(), "starting client "
+                + mCurrentClient.getClass().getSuperclass().getSimpleName()
+                + "(" + mCurrentClient.getOwnerString() + ")"
+                + " cookie: " + cookie + "/" + mCurrentClient.getCookie());
+        if (cookie != mCurrentClient.getCookie()) {
+            Slog.e(getTag(), "Mismatched cookie");
+            return;
+        }
+        notifyClientActiveCallbacks(true);
+        mCurrentClient.start();
     }
 
     protected void removeClient(ClientMonitor client) {

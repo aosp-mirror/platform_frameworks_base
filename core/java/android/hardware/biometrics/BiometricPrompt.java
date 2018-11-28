@@ -276,22 +276,26 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         @Override
-        public void onError(int error, String message)
-                throws RemoteException {
+        public void onError(int error, String message) throws RemoteException {
             mExecutor.execute(() -> {
                 mAuthenticationCallback.onAuthenticationError(error, message);
             });
         }
 
         @Override
-        public void onAcquired(int acquireInfo, String message) {
+        public void onErrorInternal(int error, String message, int cookie) throws RemoteException {
+            throw new UnsupportedOperationException("Operation not supported!");
+        }
+
+        @Override
+        public void onAcquired(int acquireInfo, String message) throws RemoteException {
             mExecutor.execute(() -> {
                 mAuthenticationCallback.onAuthenticationHelp(acquireInfo, message);
             });
         }
 
         @Override
-        public void onDialogDismissed(int reason) {
+        public void onDialogDismissed(int reason) throws RemoteException {
             // Check the reason and invoke OnClickListener(s) if necessary
             if (reason == DISMISSED_REASON_POSITIVE) {
                 mPositiveButtonInfo.executor.execute(() -> {
@@ -562,7 +566,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             mAuthenticationCallback = callback;
             final long sessionId = crypto != null ? crypto.getOpId() : 0;
             mService.authenticate(mToken, sessionId, userId, mBiometricServiceReceiver,
-                    0 /* flags */, mContext.getOpPackageName(), mBundle);
+                    mContext.getOpPackageName(), mBundle);
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception while authenticating", e);
             mExecutor.execute(() -> {

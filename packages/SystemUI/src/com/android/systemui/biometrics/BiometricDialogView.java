@@ -286,6 +286,8 @@ public abstract class BiometricDialogView extends LinearLayout {
             public void run() {
                 mWindowManager.removeView(BiometricDialogView.this);
                 mAnimatingAway = false;
+                // Set the icons / text back to normal state
+                handleClearMessage();
             }
         };
 

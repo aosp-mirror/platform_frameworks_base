@@ -31,7 +31,7 @@ interface IBiometricService {
     // Requests authentication. The service choose the appropriate biometric to use, and show
     // the corresponding BiometricDialog.
     void authenticate(IBinder token, long sessionId, int userId,
-            IBiometricServiceReceiver receiver, int flags, String opPackageName, in Bundle bundle);
+            IBiometricServiceReceiver receiver, String opPackageName, in Bundle bundle);
 
     // Cancel authentication for the given sessionId
     void cancelAuthentication(IBinder token, String opPackageName);
@@ -45,8 +45,7 @@ interface IBiometricService {
     // Explicitly set the active user.
     void setActiveUser(int userId);
 
-    // Notify BiometricService when <Biometric>Service starts a new client. Client lifecycle
-    // is still managed in <Biometric>Service.
-    void onAuthenticationStarted(in Bundle bundle, IBiometricServiceReceiver receiver, int type,
-            boolean requireConfirmation, int userId);
+    // Notify BiometricService when <Biometric>Service is ready to start the prepared client.
+    // Client lifecycle is still managed in <Biometric>Service.
+    void onReadyForAuthentication(int cookie, boolean requireConfirmation, int userId);
 }
