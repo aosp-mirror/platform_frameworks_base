@@ -1556,17 +1556,26 @@
     <!-- Notification inline controls: block notifications button -->
     <string name="inline_stop_button">Stop notifications</string>
 
+    <!-- Notification inline controls: button to block notifications from this channel [CHAR_LIMIT=35] -->
+    <string name="inline_block_button">Block</string>
+
     <!-- Notification inline controls: keep getting notifications button -->
     <string name="inline_keep_button">Keep showing</string>
 
     <!-- Notification inline controls: minimize notifications button -->
     <string name="inline_minimize_button">Minimize</string>
 
-    <!-- Notification inline controls: show notifications silently button [CHAR_LIMIT=25] -->
+    <!-- Notification inline controls: button to show notifications silently, without alerting the user [CHAR_LIMIT=35] -->
     <string name="inline_silent_button_silent">Show silently</string>
 
-    <!-- Notification inline controls: show and alert button [CHAR_LIMIT=25] -->
-    <string name="inline_silent_button_alert">Show and alert</string>
+    <!-- Notification inline controls: button to continue showing notifications silently [CHAR_LIMIT=35] -->
+    <string name="inline_silent_button_stay_silent">Stay silent</string>
+
+    <!-- Notification inline controls: button to make notifications alert the user [CHAR_LIMIT=35] -->
+    <string name="inline_silent_button_alert">Alert me</string>
+
+    <!-- Notification inline controls: button to continue alerting the user when notifications arrive [CHAR_LIMIT=35] -->
+    <string name="inline_silent_button_keep_alerting">Keep alerting</string>
 
     <!-- Notification Inline controls: continue receiving notifications prompt, app level -->
     <string name="inline_keep_showing_app">Keep showing notifications from this app?</string>

@@ -311,7 +311,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(true) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
-                eq(false) /*isNoisy */,
                 eq(0));
     }
 
@@ -340,37 +339,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
-                eq(false) /*isNoisy */,
-                eq(0));
-    }
-
-    @Test
-    public void testInitializeNotificationInfoView_noisy() throws Exception {
-        NotificationInfo notificationInfoView = mock(NotificationInfo.class);
-        ExpandableNotificationRow row = spy(mHelper.createRow());
-        row.setBlockingHelperShowing(true);
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
-        row.getEntry().noisy = true;
-        when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getStatusBarNotification();
-
-        mGutsManager.initializeNotificationInfo(row, notificationInfoView);
-
-        verify(notificationInfoView).bindNotification(
-                any(PackageManager.class),
-                any(INotificationManager.class),
-                eq(statusBarNotification.getPackageName()),
-                any(NotificationChannel.class),
-                anyInt(),
-                eq(statusBarNotification),
-                any(NotificationInfo.CheckSaveListener.class),
-                any(NotificationInfo.OnSettingsClickListener.class),
-                any(NotificationInfo.OnAppSettingsClickListener.class),
-                eq(false),
-                eq(false),
-                eq(true) /* isForBlockingHelper */,
-                eq(true) /* isUserSentimentNegative */,
-                eq(true) /*isNoisy */,
                 eq(0));
     }
 
@@ -400,7 +368,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(true) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
-                eq(false) /*isNoisy */,
                 eq(IMPORTANCE_DEFAULT));
     }
 
@@ -430,7 +397,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
-                eq(false) /*isNoisy */,
                 eq(0));
     }
 
@@ -459,7 +425,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(true) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
-                eq(false) /*isNoisy */,
                 eq(0));
     }
 

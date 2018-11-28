@@ -144,6 +144,7 @@
 
         <!-- Settings and Done buttons -->
         <LinearLayout
+            android:id="@+id/block_or_minimize"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/notification_guts_button_spacing"
@@ -178,19 +179,50 @@
                 android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
                 style="@style/TextAppearance.NotificationInfo.Button" />
             <TextView
-                android:id="@+id/toggle_silent"
-                android:text="@string/inline_silent_button_silent"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
-                style="@style/TextAppearance.NotificationInfo.Button" />
-            <TextView
                 android:id="@+id/keep"
                 android:minWidth="48dp"
                 android:text="@string/inline_keep_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
+                style="@style/TextAppearance.NotificationInfo.Button"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/interruptiveness_settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/notification_guts_button_spacing"
+            android:layout_marginStart="@dimen/notification_guts_button_side_margin"
+            android:layout_marginEnd="@dimen/notification_guts_button_side_margin"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/int_block"
+                android:text="@string/inline_block_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/ic_notification_block"
+                android:drawableTint="?android:attr/colorAccent"
+                android:layout_weight="1"
+                style="@style/TextAppearance.NotificationInfo.Button"/>
+            <TextView
+                android:id="@+id/int_silent"
+                android:text="@string/inline_minimize_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/ic_notifications_silence"
+                android:drawableTint="?android:attr/colorAccent"
+                android:layout_weight="1"
+                style="@style/TextAppearance.NotificationInfo.Button"/>
+            <TextView
+                android:id="@+id/int_alert"
+                android:text="@string/inline_keep_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/ic_notifications_alert"
+                android:drawableTint="?android:attr/colorAccent"
+                android:layout_weight="1"
                 style="@style/TextAppearance.NotificationInfo.Button"/>
         </LinearLayout>
     </LinearLayout>

@@ -66,7 +66,6 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -174,7 +173,6 @@ public class NotificationData {
         public void populateFromRanking(@NonNull Ranking ranking) {
             channel = ranking.getChannel();
             audiblyAlerted = ranking.audiblyAlerted();
-            noisy = ranking.isNoisy();
             importance = ranking.getImportance();
             snoozeCriteria = ranking.getSnoozeCriteria();
             userSentiment = ranking.getUserSentiment();

@@ -290,7 +290,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 row.getIsNonblockable(),
                 isForBlockingHelper,
                 row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE,
-                row.getEntry().noisy,
                 row.getEntry().importance);
 
     }
