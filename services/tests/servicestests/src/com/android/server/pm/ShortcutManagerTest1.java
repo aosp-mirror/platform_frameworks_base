@@ -106,6 +106,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.BiConsumer;
@@ -398,7 +399,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(3, mManager.getRemainingCallCount());
     }
 
-   public void testPublishWithNoActivity() {
+    public void testPublishWithNoActivity() {
         // If activity is not explicitly set, use the default one.
 
         mRunningUsers.put(USER_10, true);
@@ -8014,5 +8015,57 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         makeUidForeground(uid);
 
         assertFalse(mInternal.isForegroundDefaultLauncher("another", uid));
+    }
+
+    public void testParseShareTargetsFromManifest() {
+        // These values must exactly match the content of shortcuts_share_targets.xml resource
+        List<ShareTargetInfo> expectedValues = new ArrayList<>();
+        expectedValues.add(new ShareTargetInfo(
+                new ShareTargetInfo.TargetData[]{new ShareTargetInfo.TargetData(
+                        "http", "www.google.com", "1234", "somePath", "somePathPattern",
+                        "somePathPrefix", "text/plain")}, "com.test.directshare.TestActivity1",
+                new String[]{"com.test.category.CATEGORY1", "com.test.category.CATEGORY2"}));
+        expectedValues.add(new ShareTargetInfo(new ShareTargetInfo.TargetData[]{
+                new ShareTargetInfo.TargetData(null, null, null, null, null, null, "video/mp4"),
+                new ShareTargetInfo.TargetData("content", null, null, null, null, null, "video/*")},
+                "com.test.directshare.TestActivity5",
+                new String[]{"com.test.category.CATEGORY5", "com.test.category.CATEGORY6"}));
+
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_share_targets);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        List<ShareTargetInfo> shareTargets = getCallerShareTargets();
+
+        assertNotNull(shareTargets);
+        assertEquals(expectedValues.size(), shareTargets.size());
+
+        for (int i = 0; i < expectedValues.size(); i++) {
+            ShareTargetInfo expected = expectedValues.get(i);
+            ShareTargetInfo actual = shareTargets.get(i);
+
+            assertEquals(expected.mTargetData.length, actual.mTargetData.length);
+            for (int j = 0; j < expected.mTargetData.length; j++) {
+                assertEquals(expected.mTargetData[j].mScheme, actual.mTargetData[j].mScheme);
+                assertEquals(expected.mTargetData[j].mHost, actual.mTargetData[j].mHost);
+                assertEquals(expected.mTargetData[j].mPort, actual.mTargetData[j].mPort);
+                assertEquals(expected.mTargetData[j].mPath, actual.mTargetData[j].mPath);
+                assertEquals(expected.mTargetData[j].mPathPrefix,
+                        actual.mTargetData[j].mPathPrefix);
+                assertEquals(expected.mTargetData[j].mPathPattern,
+                        actual.mTargetData[j].mPathPattern);
+                assertEquals(expected.mTargetData[j].mMimeType, actual.mTargetData[j].mMimeType);
+            }
+
+            assertEquals(expected.mTargetClass, actual.mTargetClass);
+
+            assertEquals(expected.mCategories.length, actual.mCategories.length);
+            for (int j = 0; j < expected.mCategories.length; j++) {
+                assertEquals(expected.mCategories[j], actual.mCategories[j]);
+            }
+        }
     }
 }

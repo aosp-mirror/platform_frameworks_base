@@ -144,8 +144,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         assertExpectException(
                 IllegalArgumentException.class, "Short label must be provided", () -> {
-            ShortcutInfo si = new ShortcutInfo.Builder(getTestContext(), "id")
-                    .setActivity(new ComponentName(getTestContext().getPackageName(), "s"))
+            ShortcutInfo si = new ShortcutInfo.Builder(getClientContext(), "id")
+                    .setActivity(new ComponentName(getClientContext().getPackageName(), "s"))
                     .build();
             assertTrue(getManager().setDynamicShortcuts(list(si)));
         });
@@ -153,15 +153,15 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // same for add.
         assertExpectException(
                 IllegalArgumentException.class, "Short label must be provided", () -> {
-            ShortcutInfo si = new ShortcutInfo.Builder(getTestContext(), "id")
-                    .setActivity(new ComponentName(getTestContext().getPackageName(), "s"))
+            ShortcutInfo si = new ShortcutInfo.Builder(getClientContext(), "id")
+                    .setActivity(new ComponentName(getClientContext().getPackageName(), "s"))
                     .build();
             assertTrue(getManager().addDynamicShortcuts(list(si)));
         });
 
         assertExpectException(NullPointerException.class, "Intent must be provided", () -> {
-            ShortcutInfo si = new ShortcutInfo.Builder(getTestContext(), "id")
-                    .setActivity(new ComponentName(getTestContext().getPackageName(), "s"))
+            ShortcutInfo si = new ShortcutInfo.Builder(getClientContext(), "id")
+                    .setActivity(new ComponentName(getClientContext().getPackageName(), "s"))
                     .setShortLabel("x")
                     .build();
             assertTrue(getManager().setDynamicShortcuts(list(si)));
@@ -169,8 +169,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         // same for add.
         assertExpectException(NullPointerException.class, "Intent must be provided", () -> {
-            ShortcutInfo si = new ShortcutInfo.Builder(getTestContext(), "id")
-                    .setActivity(new ComponentName(getTestContext().getPackageName(), "s"))
+            ShortcutInfo si = new ShortcutInfo.Builder(getClientContext(), "id")
+                    .setActivity(new ComponentName(getClientContext().getPackageName(), "s"))
                     .setShortLabel("x")
                     .build();
             assertTrue(getManager().addDynamicShortcuts(list(si)));
@@ -178,7 +178,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         assertExpectException(
                 IllegalStateException.class, "does not belong to package", () -> {
-            ShortcutInfo si = new ShortcutInfo.Builder(getTestContext(), "id")
+            ShortcutInfo si = new ShortcutInfo.Builder(getClientContext(), "id")
                     .setActivity(new ComponentName("xxx", "s"))
                     .build();
             assertTrue(getManager().setDynamicShortcuts(list(si)));
@@ -187,7 +187,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // same for add.
         assertExpectException(
                 IllegalStateException.class, "does not belong to package", () -> {
-            ShortcutInfo si = new ShortcutInfo.Builder(getTestContext(), "id")
+            ShortcutInfo si = new ShortcutInfo.Builder(getClientContext(), "id")
                     .setActivity(new ComponentName("xxx", "s"))
                     .build();
             assertTrue(getManager().addDynamicShortcuts(list(si)));
@@ -198,24 +198,24 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         assertExpectException(
                 IllegalStateException.class, "is not main", () -> {
-                    ShortcutInfo si = new ShortcutInfo.Builder(getTestContext(), "id")
-                            .setActivity(new ComponentName(getTestContext(), "s"))
+                    ShortcutInfo si = new ShortcutInfo.Builder(getClientContext(), "id")
+                            .setActivity(new ComponentName(getClientContext(), "s"))
                             .build();
                     assertTrue(getManager().setDynamicShortcuts(list(si)));
                 });
         // For add
         assertExpectException(
                 IllegalStateException.class, "is not main", () -> {
-                    ShortcutInfo si = new ShortcutInfo.Builder(getTestContext(), "id")
-                            .setActivity(new ComponentName(getTestContext(), "s"))
+                    ShortcutInfo si = new ShortcutInfo.Builder(getClientContext(), "id")
+                            .setActivity(new ComponentName(getClientContext(), "s"))
                             .build();
                     assertTrue(getManager().addDynamicShortcuts(list(si)));
                 });
         // For update
         assertExpectException(
                 IllegalStateException.class, "is not main", () -> {
-                    ShortcutInfo si = new ShortcutInfo.Builder(getTestContext(), "id")
-                            .setActivity(new ComponentName(getTestContext(), "s"))
+                    ShortcutInfo si = new ShortcutInfo.Builder(getClientContext(), "id")
+                            .setActivity(new ComponentName(getClientContext(), "s"))
                             .build();
                     assertTrue(getManager().updateShortcuts(list(si)));
                 });
