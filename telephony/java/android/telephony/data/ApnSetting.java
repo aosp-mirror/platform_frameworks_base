@@ -693,7 +693,7 @@ public class ApnSetting implements Parcelable {
             mmsc, mmsProxyAddress, mmsProxyPort, user, password, authType, mApnTypeBitmask,
             protocol, roamingProtocol, carrierEnabled, networkTypeBitmask, profileId,
             modemCognitive, maxConns, waitTime, maxConnsTime, mtu, mvnoType, mvnoMatchData,
-            Carriers.NO_SET_SET, TelephonyManager.UNKNOWN_CARRIER_ID);
+            Carriers.NO_APN_SET_ID, TelephonyManager.UNKNOWN_CARRIER_ID);
     }
 
     /**
@@ -740,11 +740,11 @@ public class ApnSetting implements Parcelable {
             networkTypeBitmask,
             cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.PROFILE_ID)),
             cursor.getInt(cursor.getColumnIndexOrThrow(
-                Telephony.Carriers.MODEM_COGNITIVE)) == 1,
-            cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.MAX_CONNS)),
-            cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.WAIT_TIME)),
+                Telephony.Carriers.MODEM_PERSIST)) == 1,
+            cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.MAX_CONNECTIONS)),
+            cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.WAIT_TIME_RETRY)),
             cursor.getInt(cursor.getColumnIndexOrThrow(
-                Telephony.Carriers.MAX_CONNS_TIME)),
+                Telephony.Carriers.TIME_LIMIT_FOR_MAX_CONNECTIONS)),
             cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.MTU)),
             getMvnoTypeIntFromString(
                 cursor.getString(cursor.getColumnIndexOrThrow(
@@ -870,7 +870,7 @@ public class ApnSetting implements Parcelable {
         int mtu = UNSET_MTU;
         String mvnoType = "";
         String mvnoMatchData = "";
-        int apnSetId = Carriers.NO_SET_SET;
+        int apnSetId = Carriers.NO_APN_SET_ID;
         int carrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
         if (version == 1) {
             typeArray = new String[a.length - 13];
