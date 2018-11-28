@@ -309,6 +309,7 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
             ZenRule rule = new ZenRule();
             populateZenRule(automaticZenRule, rule, true);
+            newConfig.automaticRules.put(rule.id, rule);
             if (setConfigLocked(newConfig, reason, rule.component, true)) {
                 return rule.id;
             } else {
