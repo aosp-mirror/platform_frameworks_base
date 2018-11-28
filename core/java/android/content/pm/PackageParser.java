@@ -5338,6 +5338,11 @@ public class PackageParser {
             s.info.flags |= ServiceInfo.FLAG_EXTERNAL_SERVICE;
         }
         if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestService_useAppZygote,
+                false)) {
+            s.info.flags |= ServiceInfo.FLAG_USE_APP_ZYGOTE;
+        }
+        if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestService_singleUser,
                 false)) {
             s.info.flags |= ServiceInfo.FLAG_SINGLE_USER;
