@@ -22,6 +22,7 @@ import static android.os.PatternMatcher.PATTERN_SIMPLE_GLOB;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
@@ -81,11 +82,11 @@ public class WifiNetworkConfigBuilderTest {
      * pattern.
      */
     @Test
-    public void testWifiNetworkSpecifierBuilderForWpaPskNetworkWithBssidPattern() {
+    public void testWifiNetworkSpecifierBuilderForWpa2PskNetworkWithBssidPattern() {
         NetworkSpecifier specifier = new WifiNetworkConfigBuilder()
                 .setBssidPattern(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
                         MacAddress.fromString(TEST_BSSID_OUI_MASK))
-                .setPskPassphrase(TEST_PRESHARED_KEY)
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
                 .buildNetworkSpecifier();
 
         assertTrue(specifier instanceof WifiNetworkSpecifier);
@@ -119,7 +120,7 @@ public class WifiNetworkConfigBuilderTest {
      * SSID and BSSID pattern.
      */
     @Test
-    public void testWifiNetworkSpecifierBuilderForEnterpriseHiddenNetworkWithSsidAndBssid() {
+    public void testWifiNetworkSpecifierBuilderForWpa2EapHiddenNetworkWithSsidAndBssid() {
         WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
         enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
         enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.GTC);
@@ -127,7 +128,7 @@ public class WifiNetworkConfigBuilderTest {
         NetworkSpecifier specifier = new WifiNetworkConfigBuilder()
                 .setSsid(TEST_SSID)
                 .setBssid(MacAddress.fromString(TEST_BSSID))
-                .setEnterpriseConfig(enterpriseConfig)
+                .setWpa2EnterpriseConfig(enterpriseConfig)
                 .setIsHiddenSsid()
                 .buildNetworkSpecifier();
 
@@ -174,14 +175,14 @@ public class WifiNetworkConfigBuilderTest {
     }
 
     /**
-     * Ensure {@link WifiNetworkConfigBuilder#setPskPassphrase(String)} throws an exception
+     * Ensure {@link WifiNetworkConfigBuilder#setWpa2Passphrase(String)} throws an exception
      * when the string is not ASCII encodable.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testSetPskPassphraseWithNonAsciiString() {
+    public void testSetWpa2PasphraseWithNonAsciiString() {
         new WifiNetworkConfigBuilder()
                 .setSsid(TEST_SSID)
-                .setPskPassphrase("salvē")
+                .setWpa2Passphrase("salvē")
                 .buildNetworkSpecifier();
     }
 
@@ -275,15 +276,15 @@ public class WifiNetworkConfigBuilderTest {
 
     /**
      * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} throws an exception
-     * when both {@link WifiNetworkConfigBuilder#setPskPassphrase(String)} and
-     * {@link WifiNetworkConfigBuilder#setEnterpriseConfig(WifiEnterpriseConfig)} are invoked.
+     * when both {@link WifiNetworkConfigBuilder#setWpa2Passphrase(String)} and
+     * {@link WifiNetworkConfigBuilder#setWpa2EnterpriseConfig(WifiEnterpriseConfig)} are invoked.
      */
     @Test(expected = IllegalStateException.class)
-    public void testWifiNetworkSpecifierBuilderWithBothPskPassphraseAndEnterpriseConfig() {
+    public void testWifiNetworkSpecifierBuilderWithBothWpa2PasphraseAndEnterpriseConfig() {
         new WifiNetworkConfigBuilder()
                 .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_LITERAL))
-                .setPskPassphrase(TEST_PRESHARED_KEY)
-                .setEnterpriseConfig(new WifiEnterpriseConfig())
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
+                .setWpa2EnterpriseConfig(new WifiEnterpriseConfig())
                 .buildNetworkSpecifier();
     }
 
@@ -375,10 +376,11 @@ public class WifiNetworkConfigBuilderTest {
      * app interaction and has a priority of zero set.
      */
     @Test
-    public void testWifiNetworkSuggestionBuilderForWpaEapNetworkWithPriorityAndReqAppInteraction() {
+    public void
+            testWifiNetworkSuggestionBuilderForWpa2EapNetworkWithPriorityAndReqAppInteraction() {
         WifiNetworkSuggestion suggestion = new WifiNetworkConfigBuilder()
                 .setSsid(TEST_SSID)
-                .setPskPassphrase(TEST_PRESHARED_KEY)
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
                 .setIsAppInteractionRequired()
                 .setPriority(0)
                 .buildNetworkSuggestion();
@@ -401,10 +403,11 @@ public class WifiNetworkConfigBuilderTest {
      * user interaction and is metered.
      */
     @Test
-    public void testWifiNetworkSuggestionBuilderForWpaPskNetworkWithMeteredAndReqUserInteraction() {
+    public void
+            testWifiNetworkSuggestionBuilderForWpa2PskNetworkWithMeteredAndReqUserInteraction() {
         WifiNetworkSuggestion suggestion = new WifiNetworkConfigBuilder()
                 .setSsid(TEST_SSID)
-                .setPskPassphrase(TEST_PRESHARED_KEY)
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
                 .setIsUserInteractionRequired()
                 .setIsMetered()
                 .buildNetworkSuggestion();
@@ -419,6 +422,74 @@ public class WifiNetworkConfigBuilderTest {
         assertEquals(WifiConfiguration.METERED_OVERRIDE_METERED,
                 suggestion.wifiConfiguration.meteredOverride);
         assertEquals(-1, suggestion.wifiConfiguration.priority);
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} for OWE network.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForEnhancedOpenNetwork() {
+        WifiNetworkSuggestion suggestion = new WifiNetworkConfigBuilder()
+                .setSsid(TEST_SSID)
+                .setIsEnhancedOpen()
+                .buildNetworkSuggestion();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.OWE));
+        assertNull(suggestion.wifiConfiguration.preSharedKey);
+        assertTrue(suggestion.wifiConfiguration.requirePMF);
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} for SAE network.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForWpa3PskNetwork() {
+        WifiNetworkSuggestion suggestion = new WifiNetworkConfigBuilder()
+                .setSsid(TEST_SSID)
+                .setWpa3Passphrase(TEST_PRESHARED_KEY)
+                .buildNetworkSuggestion();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.SAE));
+        assertEquals("\"" + TEST_PRESHARED_KEY + "\"",
+                suggestion.wifiConfiguration.preSharedKey);
+        assertTrue(suggestion.wifiConfiguration.requirePMF);
+    }
+
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} for SuiteB network.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForWpa3EapNetwork() {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
+        enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.GTC);
+
+        WifiNetworkSuggestion suggestion = new WifiNetworkConfigBuilder()
+                .setSsid(TEST_SSID)
+                .setWpa3EnterpriseConfig(enterpriseConfig)
+                .buildNetworkSuggestion();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.SUITE_B_192));
+        assertTrue(suggestion.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.GCMP_256));
+        assertTrue(suggestion.wifiConfiguration.allowedGroupMgmtCiphers
+                .get(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256));
+        assertTrue(suggestion.wifiConfiguration.allowedSuiteBCiphers
+                .get(WifiConfiguration.SuiteBCipher.ECDHE_ECDSA));
+        assertTrue(suggestion.wifiConfiguration.allowedSuiteBCiphers
+                .get(WifiConfiguration.SuiteBCipher.ECDHE_RSA));
+        assertTrue(suggestion.wifiConfiguration.requirePMF);
+        assertNull(suggestion.wifiConfiguration.preSharedKey);
     }
 
     /**
@@ -477,5 +548,47 @@ public class WifiNetworkConfigBuilderTest {
                 .setSsid(TEST_SSID)
                 .setPriority(-1)
                 .buildNetworkSuggestion();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} throws an exception
+     * when both {@link WifiNetworkConfigBuilder#setWpa2Passphrase(String)} and
+     * {@link WifiNetworkConfigBuilder#setWpa3Passphrase(String)} are invoked.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithBothWpa2PasphraseAndWpa3Passphrase() {
+        new WifiNetworkConfigBuilder()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_LITERAL))
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
+                .setWpa3Passphrase(TEST_PRESHARED_KEY)
+                .buildNetworkSpecifier();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} throws an exception
+     * when both {@link WifiNetworkConfigBuilder#setWpa3Passphrase(String)} and
+     * {@link WifiNetworkConfigBuilder#setWpa3EnterpriseConfig(WifiEnterpriseConfig)} are invoked.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithBothWpa3PasphraseAndEnterprise() {
+        new WifiNetworkConfigBuilder()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_LITERAL))
+                .setWpa3Passphrase(TEST_PRESHARED_KEY)
+                .setWpa3EnterpriseConfig(new WifiEnterpriseConfig())
+                .buildNetworkSpecifier();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} throws an exception
+     * when both {@link WifiNetworkConfigBuilder#setWpa3Passphrase(String)} and
+     * {@link WifiNetworkConfigBuilder#setIsEnhancedOpen(} are invoked.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithBothWpa3PasphraseAndEnhancedOpen() {
+        new WifiNetworkConfigBuilder()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_LITERAL))
+                .setWpa3Passphrase(TEST_PRESHARED_KEY)
+                .setIsEnhancedOpen()
+                .buildNetworkSpecifier();
     }
 }

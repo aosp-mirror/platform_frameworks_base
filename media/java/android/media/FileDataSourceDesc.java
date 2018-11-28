@@ -18,8 +18,6 @@ package android.media;
 
 import android.annotation.NonNull;
 
-import com.android.internal.util.Preconditions;
-
 import java.io.FileDescriptor;
 
 /**
@@ -141,7 +139,7 @@ public class FileDataSourceDesc extends DataSourceDesc {
          * @throws NullPointerException if fd is null.
          */
         public @NonNull Builder setDataSource(@NonNull FileDescriptor fd) {
-            Preconditions.checkNotNull(fd);
+            Media2Utils.checkArgument(fd != null, "fd cannot be null.");
             resetDataSource();
             mFD = fd;
             return this;
@@ -163,7 +161,7 @@ public class FileDataSourceDesc extends DataSourceDesc {
          */
         public @NonNull Builder setDataSource(
                 @NonNull FileDescriptor fd, long offset, long length) {
-            Preconditions.checkNotNull(fd);
+            Media2Utils.checkArgument(fd != null, "fd cannot be null.");
             if (offset < 0) {
                 offset = 0;
             }

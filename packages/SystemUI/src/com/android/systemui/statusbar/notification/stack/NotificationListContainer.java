@@ -45,34 +45,31 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
 
     /**
      * Change the position of child to a new location
-     *
-     * @param child the view to change the position for
+     *  @param child the view to change the position for
      * @param newIndex the new index
      */
-    void changeViewPosition(View child, int newIndex);
+    void changeViewPosition(ExpandableView child, int newIndex);
 
     /**
      * Called when a child was added to a group.
      *
      * @param row row of the group child that was added
      */
-    void notifyGroupChildAdded(View row);
+    void notifyGroupChildAdded(ExpandableView row);
 
     /**
      * Called when a child was removed from a group.
-     *
-     * @param row row of the child that was removed
+     *  @param row row of the child that was removed
      * @param childrenContainer ViewGroup of the group that the child was removed from
      */
-    void notifyGroupChildRemoved(View row, ViewGroup childrenContainer);
+    void notifyGroupChildRemoved(ExpandableView row, ViewGroup childrenContainer);
 
     /**
      * Generate an animation for an added child view.
-     *
-     * @param child The view to be added.
+     *  @param child The view to be added.
      * @param fromMoreCard Whether this add is coming from the "more" card on lockscreen.
      */
-    void generateAddAnimation(View child, boolean fromMoreCard);
+    void generateAddAnimation(ExpandableView child, boolean fromMoreCard);
 
     /**
      * Generate a child order changed event.
@@ -118,9 +115,9 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
     /**
      * Handle snapping a non-dismissable row back if the user tried to dismiss it.
      *
-     * @param row row to snap back
+     * @param entry the entry whose row needs to snap back
      */
-    void snapViewIfNeeded(ExpandableNotificationRow row);
+    void snapViewIfNeeded(NotificationData.Entry entry);
 
     /**
      * Get the view parent for a notification entry. For example, NotificationStackScrollLayout.
@@ -149,9 +146,9 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
      * Called when a notification is removed from the shade. This cleans up the state for a
      * given view.
      *
-     * @param view view to clean up view state for
+     * @param entry the entry whose view's view state needs to be cleaned up (say that 5 times fast)
      */
-    void cleanUpViewState(View view);
+    void cleanUpViewStateForEntry(NotificationData.Entry entry);
 
 
     /**

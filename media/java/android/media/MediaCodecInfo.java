@@ -16,6 +16,9 @@
 
 package android.media;
 
+import static android.media.Utils.intersectSortedDistinctRanges;
+import static android.media.Utils.sortDistinctRanges;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
@@ -31,9 +34,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import static android.media.Utils.intersectSortedDistinctRanges;
-import static android.media.Utils.sortDistinctRanges;
 
 /**
  * Provides information about a given media codec available on the device. You can
@@ -1117,7 +1117,7 @@ public final class MediaCodecInfo {
             } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_RAW)) {
                 sampleRateRange = Range.create(1, 96000);
                 bitRates = Range.create(1, 10000000);
-                maxChannels = AudioTrack.CHANNEL_COUNT_MAX;
+                maxChannels = AudioSystem.OUT_CHANNEL_COUNT_MAX;
             } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_FLAC)) {
                 sampleRateRange = Range.create(1, 655350);
                 // lossless codec, so bitrate is ignored

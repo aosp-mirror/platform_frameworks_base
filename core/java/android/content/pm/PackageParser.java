@@ -829,9 +829,6 @@ public class PackageParser {
 
     public static final int PARSE_MUST_BE_APK = 1 << 0;
     public static final int PARSE_IGNORE_PROCESSES = 1 << 1;
-    /** @deprecated forward lock no longer functional. remove. */
-    @Deprecated
-    public static final int PARSE_FORWARD_LOCK = 1 << 2;
     public static final int PARSE_EXTERNAL_STORAGE = 1 << 3;
     public static final int PARSE_IS_SYSTEM_DIR = 1 << 4;
     public static final int PARSE_COLLECT_CERTIFICATES = 1 << 5;
@@ -845,7 +842,6 @@ public class PackageParser {
             PARSE_ENFORCE_CODE,
             PARSE_EXTERNAL_STORAGE,
             PARSE_FORCE_SDK,
-            PARSE_FORWARD_LOCK,
             PARSE_IGNORE_PROCESSES,
             PARSE_IS_SYSTEM_DIR,
             PARSE_MUST_BE_APK,
@@ -2006,11 +2002,6 @@ public class PackageParser {
                 PARSE_DEFAULT_TARGET_SANDBOX);
         pkg.applicationInfo.targetSandboxVersion = targetSandboxVersion;
 
-        /* Set the global "forward lock" flag */
-        if ((flags & PARSE_FORWARD_LOCK) != 0) {
-            pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK;
-        }
-
         /* Set the global "on SD card" flag */
         if ((flags & PARSE_EXTERNAL_STORAGE) != 0) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_EXTERNAL_STORAGE;
@@ -2532,55 +2523,33 @@ public class PackageParser {
 
                 final ArraySet<String> newPermissions = new ArraySet<>();
                 newPermissions.add(android.Manifest.permission.READ_MEDIA_AUDIO);
-                newPermissions.add(android.Manifest.permission.WRITE_MEDIA_AUDIO);
                 newPermissions.add(android.Manifest.permission.READ_MEDIA_VIDEO);
-                newPermissions.add(android.Manifest.permission.WRITE_MEDIA_VIDEO);
                 newPermissions.add(android.Manifest.permission.READ_MEDIA_IMAGES);
-                newPermissions.add(android.Manifest.permission.WRITE_MEDIA_IMAGES);
                 newPermissions.add(android.Manifest.permission.ACCESS_MEDIA_LOCATION);
                 newPermissions.add(android.Manifest.permission.WRITE_OBB);
 
-                final ArraySet<String> dangerousPermissions = new ArraySet<>();
-                dangerousPermissions.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
-                dangerousPermissions.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                final ArraySet<String> removedPermissions = new ArraySet<>();
+                removedPermissions.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
+                removedPermissions.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
                 for (int i = pkg.permissions.size() - 1; i >= 0; i--) {
                     final Permission p = pkg.permissions.get(i);
                     if (newPermissions.contains(p.info.name)) {
                         pkg.permissions.remove(i);
-                    } else if (dangerousPermissions.contains(p.info.name)) {
-                        p.info.protectionLevel &= ~PermissionInfo.PROTECTION_MASK_BASE;
-                        p.info.protectionLevel |= PermissionInfo.PROTECTION_DANGEROUS;
+                    } else if (removedPermissions.contains(p.info.name)) {
+                        p.info.flags &= ~PermissionInfo.FLAG_REMOVED;
                     }
                 }
             }
         } else {
             if (FORCE_AUDIO_PACKAGES.contains(pkg.packageName)) {
                 pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_AUDIO);
-                pkg.requestedPermissions.add(android.Manifest.permission.WRITE_MEDIA_AUDIO);
             }
             if (FORCE_VIDEO_PACKAGES.contains(pkg.packageName)) {
                 pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_VIDEO);
-                pkg.requestedPermissions.add(android.Manifest.permission.WRITE_MEDIA_VIDEO);
             }
             if (FORCE_IMAGES_PACKAGES.contains(pkg.packageName)) {
                 pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_IMAGES);
-                pkg.requestedPermissions.add(android.Manifest.permission.WRITE_MEDIA_IMAGES);
-            }
-
-            if (SystemProperties.getBoolean(StorageManager.PROP_FORCE_LEGACY, false)) {
-                if (pkg.requestedPermissions
-                        .contains(android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_AUDIO);
-                    pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_VIDEO);
-                    pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_IMAGES);
-                }
-                if (pkg.requestedPermissions
-                        .contains(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    pkg.requestedPermissions.add(android.Manifest.permission.WRITE_MEDIA_AUDIO);
-                    pkg.requestedPermissions.add(android.Manifest.permission.WRITE_MEDIA_VIDEO);
-                    pkg.requestedPermissions.add(android.Manifest.permission.WRITE_MEDIA_IMAGES);
-                }
             }
         }
 
@@ -6801,7 +6770,7 @@ public class PackageParser {
 
         /** @hide */
         public boolean isForwardLocked() {
-            return applicationInfo.isForwardLocked();
+            return false;
         }
 
         /** @hide */
@@ -6843,9 +6812,7 @@ public class PackageParser {
         public boolean canHaveOatDir() {
             // The following app types CANNOT have oat directory
             // - non-updated system apps
-            // - forward-locked apps or apps installed in ASEC containers
-            return (!isSystem() || isUpdatedSystemApp())
-                    && !isForwardLocked() && !applicationInfo.isExternalAsec();
+            return !isSystem() || isUpdatedSystemApp();
         }
 
         public boolean isMatch(int flags) {

@@ -20,7 +20,10 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Px;
 import android.graphics.Paint;
+import android.os.Parcel;
+import android.text.ParcelableSpan;
 import android.text.TextPaint;
+import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
 
@@ -71,7 +74,7 @@ public interface LineHeightSpan extends ParagraphStyle, WrapTogetherSpan {
      * covers only part of the paragraph.
      * </p>
      */
-    class Standard implements LineHeightSpan {
+    class Standard implements LineHeightSpan, ParcelableSpan {
 
         private final @Px int mHeight;
         /**
@@ -80,6 +83,48 @@ public interface LineHeightSpan extends ParagraphStyle, WrapTogetherSpan {
         public Standard(@Px @IntRange(from = 1) int height) {
             Preconditions.checkArgument(height > 0, "Height:" + height + "must be positive");
             mHeight = height;
+        }
+
+        /**
+         * Constructor called from {@link TextUtils} to restore the span from a parcel
+         */
+        public Standard(Parcel src) {
+            mHeight = src.readInt();
+        }
+
+        /**
+         * Returns the line height specified by this span.
+         */
+        @Px
+        public int getHeight() {
+            return mHeight;
+        }
+
+        @Override
+        public int getSpanTypeId() {
+            return getSpanTypeIdInternal();
+        }
+
+        /** @hide */
+        @Override
+        public int getSpanTypeIdInternal() {
+            return TextUtils.LINE_HEIGHT_SPAN;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            writeToParcelInternal(dest, flags);
+        }
+
+        /** @hide */
+        @Override
+        public void writeToParcelInternal(@NonNull Parcel dest, int flags) {
+            dest.writeInt(mHeight);
         }
 
         @Override

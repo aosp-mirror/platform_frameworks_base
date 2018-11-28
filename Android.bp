@@ -296,6 +296,7 @@ java_defaults {
         "core/java/android/service/notification/IConditionListener.aidl",
         "core/java/android/service/notification/IConditionProvider.aidl",
         "core/java/android/service/settings/suggestions/ISuggestionService.aidl",
+        "core/java/android/service/sms/IFinancialSmsService.aidl",
         "core/java/android/service/vr/IPersistentVrStateCallbacks.aidl",
         "core/java/android/service/vr/IVrListener.aidl",
         "core/java/android/service/vr/IVrManager.aidl",
@@ -348,6 +349,7 @@ java_defaults {
         "core/java/android/view/accessibility/IAccessibilityManagerClient.aidl",
         "core/java/android/view/autofill/IAutoFillManager.aidl",
         "core/java/android/view/autofill/IAutoFillManagerClient.aidl",
+        "core/java/android/view/autofill/IAugmentedAutofillManagerClient.aidl",
         "core/java/android/view/autofill/IAutofillWindowPresenter.aidl",
         "core/java/android/view/intelligence/IIntelligenceManager.aidl",
         "core/java/android/view/IApplicationToken.aidl",
@@ -724,6 +726,7 @@ java_defaults {
         "android.hardware.wifi-V1.0-java-constants",
         "android.hardware.radio-V1.0-java",
         "android.hardware.radio-V1.3-java",
+        "android.hardware.radio-V1.4-java",
         "android.hardware.usb.gadget-V1.0-java",
         "netd_aidl_interface-java",
     ],
@@ -859,7 +862,7 @@ gensrcs {
 java_library {
     name: "ext",
     installable: true,
-    sdk_version: "core_current",
+    no_framework_libs: true,
     static_libs: [
         "libphonenumber-platform",
         "nist-sip",

@@ -112,8 +112,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
             return;
         }
 
-        alertEntry.mEntry.row.sendAccessibilityEvent(
-                AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        alertEntry.mEntry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         if (alert) {
             alertEntry.updateEntry(true /* updatePostTime */);
         }
@@ -186,7 +185,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
         alertEntry.setEntry(entry);
         mAlertEntries.put(entry.key, alertEntry);
         onAlertEntryAdded(alertEntry);
-        entry.row.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
     }
 
     /**
@@ -207,7 +206,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
         Entry entry = alertEntry.mEntry;
         mAlertEntries.remove(key);
         onAlertEntryRemoved(alertEntry);
-        entry.row.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         alertEntry.reset();
         if (mExtendedLifetimeAlertEntries.contains(entry)) {
             if (mNotificationLifetimeFinishedCallback != null) {

@@ -22,6 +22,7 @@ import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUC
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
@@ -36,12 +37,15 @@ import android.service.intelligence.InteractionSessionId;
 import android.service.intelligence.SnapshotData;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.view.autofill.AutofillId;
+import android.view.autofill.IAutoFillManagerClient;
 import android.view.intelligence.ContentCaptureEvent;
 import android.view.intelligence.IntelligenceManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.server.AbstractPerUserSystemService;
+import com.android.server.intelligence.IntelligenceManagerInternal.AugmentedAutofillCallback;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -62,7 +66,7 @@ final class IntelligencePerUserService
     // TODO(b/111276913): add mechanism to prune stale sessions, similar to Autofill's
 
     protected IntelligencePerUserService(
-            IntelligenceManagerService master, Object lock, int userId) {
+            IntelligenceManagerService master, Object lock, @UserIdInt int userId) {
         super(master, lock, userId);
     }
 
@@ -210,6 +214,17 @@ final class IntelligencePerUserService
         return uid == getServiceUidLocked();
     }
 
+    @GuardedBy("mLock")
+    private ContentCaptureSession getSession(@NonNull IBinder activityToken) {
+        for (int i = 0; i < mSessions.size(); i++) {
+            final ContentCaptureSession session = mSessions.valueAt(i);
+            if (session.mActivityToken.equals(activityToken)) {
+                return session;
+            }
+        }
+        return null;
+    }
+
     /**
      * Destroys the service and all state associated with it.
      *
@@ -224,6 +239,22 @@ final class IntelligencePerUserService
             session.destroyLocked(true);
         }
         mSessions.clear();
+    }
+
+    public AugmentedAutofillCallback requestAutofill(@NonNull IAutoFillManagerClient client,
+            @NonNull IBinder activityToken, int autofillSessionId, @NonNull AutofillId focusedId) {
+        synchronized (mLock) {
+            final ContentCaptureSession session = getSession(activityToken);
+            if (session != null) {
+                // TODO(b/111330312): log metrics
+                if (mMaster.verbose) Slog.v(TAG, "requestAugmentedAutofill()");
+                return session.requestAutofillLocked(client, autofillSessionId, focusedId);
+            }
+            if (mMaster.debug) {
+                Slog.d(TAG, "requestAutofill(): no session for " + activityToken);
+            }
+            return null;
+        }
     }
 
     @Override

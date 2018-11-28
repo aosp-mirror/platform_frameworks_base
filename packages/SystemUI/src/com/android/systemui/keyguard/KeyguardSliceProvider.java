@@ -18,7 +18,6 @@ package com.android.systemui.keyguard;
 
 import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -175,7 +174,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
      * @param builder The slice builder.
      */
     protected void addZenMode(ListBuilder builder) {
-        if (!isDndSuppressingNotifications()) {
+        if (!isDndOn()) {
             return;
         }
         RowBuilder dndBuilder = new RowBuilder(mDndUri)
@@ -187,13 +186,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
     }
 
     /**
-     * Return true if DND is enabled suppressing notifications.
+     * Return true if DND is enabled.
      */
-    protected boolean isDndSuppressingNotifications() {
-        boolean suppressingNotifications = (mZenModeController.getConfig().suppressedVisualEffects
-                & NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST) != 0;
-        return mZenModeController.getZen() != Settings.Global.ZEN_MODE_OFF
-                && suppressingNotifications;
+    protected boolean isDndOn() {
+        return mZenModeController.getZen() != Settings.Global.ZEN_MODE_OFF;
     }
 
     @Override

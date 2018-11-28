@@ -10942,6 +10942,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (!isPassword || viewFor == VIEW_STRUCTURE_FOR_AUTOFILL
                 || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
             if (mLayout == null) {
+                if (viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
+                    Log.w(LOG_TAG, "onProvideContentCaptureStructure(): calling assumeLayout()");
+                }
                 assumeLayout();
             }
             Layout layout = mLayout;

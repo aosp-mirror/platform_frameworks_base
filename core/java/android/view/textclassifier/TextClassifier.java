@@ -90,6 +90,11 @@ public interface TextClassifier {
     String TYPE_DATE_TIME = "datetime";
     /** Flight number in IATA format. */
     String TYPE_FLIGHT_NUMBER = "flight";
+    /**
+     * Word that users may be interested to look up for meaning.
+     * @hide
+     */
+    String TYPE_DICTIONARY = "dictionary";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -103,6 +108,7 @@ public interface TextClassifier {
             TYPE_DATE,
             TYPE_DATE_TIME,
             TYPE_FLIGHT_NUMBER,
+            TYPE_DICTIONARY
     })
     @interface EntityType {}
 

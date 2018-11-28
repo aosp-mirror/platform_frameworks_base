@@ -1225,7 +1225,6 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.InstantAppInfo> getInstantApps();
     method public abstract java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(java.lang.String);
     method public abstract int getIntentVerificationStatusAsUser(java.lang.String, int);
-    method public android.content.pm.PackageInfo getPackageInfoAsUser(java.lang.String, int, android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int getPermissionFlags(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract void grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract int installExistingPackage(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -4938,12 +4937,47 @@ package android.service.euicc {
 
 package android.service.intelligence {
 
+  public final class FillCallback {
+    method public void onSuccess(android.service.intelligence.FillResponse);
+  }
+
+  public final class FillController {
+    method public void autofill(java.util.List<android.util.Pair<android.view.autofill.AutofillId, android.view.autofill.AutofillValue>>);
+  }
+
+  public final class FillRequest {
+    method public android.view.autofill.AutofillId getFocusedId();
+    method public android.service.intelligence.PresentationParams getPresentationParams();
+    method public android.service.intelligence.InteractionSessionId getSessionId();
+  }
+
+  public final class FillResponse implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.intelligence.FillResponse> CREATOR;
+  }
+
+  public static class FillResponse.Builder {
+    ctor public FillResponse.Builder();
+    method public android.service.intelligence.FillResponse build();
+    method public android.service.intelligence.FillResponse.Builder setFillWindow(android.service.intelligence.FillWindow);
+    method public android.service.intelligence.FillResponse.Builder setIgnoredIds(java.util.List<android.view.autofill.AutofillId>);
+  }
+
+  public final class FillWindow {
+    ctor public FillWindow();
+    method public void destroy();
+    method public boolean update(android.service.intelligence.PresentationParams.Area, android.view.View, long);
+    field public static final long FLAG_METADATA_ADDRESS = 1L; // 0x1L
+  }
+
   public abstract class IntelligenceService extends android.app.Service {
     ctor public IntelligenceService();
     method public void onActivitySnapshot(android.service.intelligence.InteractionSessionId, android.service.intelligence.SnapshotData);
     method public abstract void onContentCaptureEvent(android.service.intelligence.InteractionSessionId, java.util.List<android.view.intelligence.ContentCaptureEvent>);
     method public void onCreateInteractionSession(android.service.intelligence.InteractionContext, android.service.intelligence.InteractionSessionId);
     method public void onDestroyInteractionSession(android.service.intelligence.InteractionSessionId);
+    method public void onFillRequest(android.service.intelligence.InteractionSessionId, android.service.intelligence.FillRequest, android.os.CancellationSignal, android.service.intelligence.FillController, android.service.intelligence.FillCallback);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.intelligence.IntelligenceService";
   }
 
@@ -4963,6 +4997,23 @@ package android.service.intelligence {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.intelligence.InteractionSessionId> CREATOR;
+  }
+
+  public abstract class PresentationParams {
+    method public int getFlags();
+    method public android.service.intelligence.PresentationParams.Area getFullArea();
+    method public android.service.intelligence.PresentationParams.Area getSuggestionArea();
+    field public static final int FLAG_HINT_GRAVITY_BOTTOM = 2; // 0x2
+    field public static final int FLAG_HINT_GRAVITY_LEFT = 4; // 0x4
+    field public static final int FLAG_HINT_GRAVITY_RIGHT = 8; // 0x8
+    field public static final int FLAG_HINT_GRAVITY_TOP = 1; // 0x1
+    field public static final int FLAG_HOST_IME = 16; // 0x10
+    field public static final int FLAG_HOST_SYSTEM = 32; // 0x20
+  }
+
+  public static abstract class PresentationParams.Area {
+    method public android.graphics.Rect getBounds();
+    method public android.service.intelligence.PresentationParams.Area getSubArea(android.graphics.Rect);
   }
 
   public final class SnapshotData implements android.os.Parcelable {
@@ -5024,13 +5075,18 @@ package android.service.notification {
     method public final void adjustNotification(android.service.notification.Adjustment);
     method public final void adjustNotifications(java.util.List<android.service.notification.Adjustment>);
     method public final android.os.IBinder onBind(android.content.Intent);
+    method public void onNotificationDirectReply(java.lang.String);
     method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification);
     method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification, android.app.NotificationChannel);
+    method public void onNotificationExpansionChanged(java.lang.String, boolean, boolean);
     method public void onNotificationRemoved(android.service.notification.StatusBarNotification, android.service.notification.NotificationListenerService.RankingMap, android.service.notification.NotificationStats, int);
     method public abstract void onNotificationSnoozedUntilContext(android.service.notification.StatusBarNotification, java.lang.String);
     method public void onNotificationsSeen(java.util.List<java.lang.String>);
+    method public void onSuggestedReplySent(java.lang.String, java.lang.CharSequence, int);
     method public final void unsnoozeNotification(java.lang.String);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.NotificationAssistantService";
+    field public static final int SOURCE_FROM_APP = 0; // 0x0
+    field public static final int SOURCE_FROM_ASSISTANT = 1; // 0x1
   }
 
   public final class NotificationStats implements android.os.Parcelable {
@@ -5180,6 +5236,16 @@ package android.service.settings.suggestions {
     method public abstract java.util.List<android.service.settings.suggestions.Suggestion> onGetSuggestions();
     method public abstract void onSuggestionDismissed(android.service.settings.suggestions.Suggestion);
     method public abstract void onSuggestionLaunched(android.service.settings.suggestions.Suggestion);
+  }
+
+}
+
+package android.service.sms {
+
+  public abstract class FinancialSmsService extends android.app.Service {
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract android.database.CursorWindow onGetSmsMessages(android.os.Bundle);
+    field public static final java.lang.String ACTION_FINANCIAL_SERVICE_INTENT = "android.service.sms.action.FINANCIAL_SERVICE_INTENT";
   }
 
 }
@@ -7023,9 +7089,9 @@ package android.telephony.mbms.vendor {
     method public int initialize(android.telephony.mbms.MbmsGroupCallSessionCallback, int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
     method public android.os.IBinder onBind(android.content.Intent);
-    method public int startGroupCall(int, long, int[], int[], android.telephony.mbms.GroupCallCallback);
+    method public int startGroupCall(int, long, java.util.List<java.lang.Integer>, java.util.List<java.lang.Integer>, android.telephony.mbms.GroupCallCallback);
     method public void stopGroupCall(int, long);
-    method public void updateGroupCall(int, long, int[], int[]);
+    method public void updateGroupCall(int, long, java.util.List<java.lang.Integer>, java.util.List<java.lang.Integer>);
   }
 
   public class MbmsStreamingServiceBase extends android.os.Binder {

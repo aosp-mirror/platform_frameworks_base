@@ -411,13 +411,8 @@ public class PowerUI extends SystemUI {
 
         setNextLogTime();
 
-        // This initialization method may be called on a configuration change. Only one set of
-        // ongoing callbacks should be occurring, so remove any now. updateTemperatureWarning will
-        // schedule an ongoing callback.
-        mHandler.removeCallbacks(mUpdateTempCallback);
-
         // We have passed all of the checks, start checking the temp
-        updateTemperatureWarning();
+        mHandler.post(mUpdateTempCallback);
     }
 
     private void showThermalShutdownDialog() {
@@ -448,6 +443,8 @@ public class PowerUI extends SystemUI {
 
         logTemperatureStats();
 
+        // Remove any pending callbacks as we only want to enable one
+        mHandler.removeCallbacks(mUpdateTempCallback);
         mHandler.postDelayed(mUpdateTempCallback, TEMPERATURE_INTERVAL);
     }
 
@@ -553,11 +550,7 @@ public class PowerUI extends SystemUI {
     // Thermal event received from vendor thermal management subsystem
     private final class ThermalEventListener extends IThermalEventListener.Stub {
         @Override public void notifyThrottling(Temperature temp) {
-            // Trigger an update of the temperature warning.  Only one
-            // callback can be enabled at a time, so remove any existing
-            // callback; updateTemperatureWarning will schedule another one.
-            mHandler.removeCallbacks(mUpdateTempCallback);
-            updateTemperatureWarning();
+            mHandler.post(mUpdateTempCallback);
         }
     }
 }

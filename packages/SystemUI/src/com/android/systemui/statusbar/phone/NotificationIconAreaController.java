@@ -192,13 +192,13 @@ public class NotificationIconAreaController implements DarkReceiver {
                 && !mEntryManager.getNotificationData().isHighPriority(entry.notification)) {
             return false;
         }
-        if (!StatusBar.isTopLevelChild(entry)) {
+        if (!entry.isTopLevelChild()) {
             return false;
         }
-        if (entry.row.getVisibility() == View.GONE) {
+        if (entry.getRow().getVisibility() == View.GONE) {
             return false;
         }
-        if (entry.row.isDismissed() && hideDismissed) {
+        if (entry.isRowDismissed() && hideDismissed) {
             return false;
         }
 

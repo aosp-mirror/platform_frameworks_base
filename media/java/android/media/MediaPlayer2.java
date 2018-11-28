@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -693,7 +694,7 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_SET_DATA_SOURCE, false) {
             @Override
             void process() throws IOException {
-                checkArgument(dsd != null, "the DataSourceDesc cannot be null");
+                Media2Utils.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
                 int state = getState();
                 if (state != PLAYER_STATE_ERROR && state != PLAYER_STATE_IDLE) {
                     throw new IllegalStateException("called in wrong state " + state);
@@ -719,7 +720,7 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCE, false) {
             @Override
             void process() {
-                checkArgument(dsd != null, "the DataSourceDesc cannot be null");
+                Media2Utils.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
                 synchronized (mSrcLock) {
                     mNextSourceInfos.clear();
                     mNextSourceInfos.add(new SourceInfo(dsd));
@@ -788,7 +789,7 @@ public class MediaPlayer2 implements AutoCloseable
 
     private void handleDataSource(boolean isCurrent, @NonNull DataSourceDesc dsd, long srcId)
             throws IOException {
-        checkArgument(dsd != null, "the DataSourceDesc cannot be null");
+        Media2Utils.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
 
         if (dsd instanceof CallbackDataSourceDesc) {
             CallbackDataSourceDesc cbDSD = (CallbackDataSourceDesc) dsd;
@@ -1513,7 +1514,7 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_SET_BUFFERING_PARAMS, false) {
             @Override
             void process() {
-                checkArgument(params != null, "the BufferingParams cannot be null");
+                Media2Utils.checkArgument(params != null, "the BufferingParams cannot be null");
                 native_setBufferingParams(params);
             }
         });
@@ -1536,7 +1537,7 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_SET_PLAYBACK_PARAMS, false) {
             @Override
             void process() {
-                checkArgument(params != null, "the PlaybackParams cannot be null");
+                Media2Utils.checkArgument(params != null, "the PlaybackParams cannot be null");
                 native_setPlaybackParams(params);
             }
         });
@@ -1564,7 +1565,7 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_SET_SYNC_PARAMS, false) {
             @Override
             void process() {
-                checkArgument(params != null, "the SyncParams cannot be null");
+                Media2Utils.checkArgument(params != null, "the SyncParams cannot be null");
                 native_setSyncParams(params);
             }
         });
@@ -2690,12 +2691,6 @@ public class MediaPlayer2 implements AutoCloseable
         }
     }
 
-    private static void checkArgument(boolean expression, String errorMessage) {
-        if (!expression) {
-            throw new IllegalArgumentException(errorMessage);
-        }
-    }
-
     private void sendEvent(final EventNotifier notifier) {
         synchronized (mEventCbLock) {
             try {
@@ -3321,6 +3316,25 @@ public class MediaPlayer2 implements AutoCloseable
     @Retention(RetentionPolicy.SOURCE)
     public @interface PrepareDrmStatusCode {}
 
+    /** @hide */
+    @IntDef({
+        MediaDrm.KEY_TYPE_STREAMING,
+        MediaDrm.KEY_TYPE_OFFLINE,
+        MediaDrm.KEY_TYPE_RELEASE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MediaDrmKeyType {}
+
+    /** @hide */
+    @StringDef({
+        MediaDrm.PROPERTY_VENDOR,
+        MediaDrm.PROPERTY_VERSION,
+        MediaDrm.PROPERTY_DESCRIPTION,
+        MediaDrm.PROPERTY_ALGORITHMS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MediaDrmStringProperty {}
+
     /**
      * Retrieves the DRM Info associated with the given source
      *
@@ -3628,7 +3642,7 @@ public class MediaPlayer2 implements AutoCloseable
     public MediaDrm.KeyRequest getDrmKeyRequest(
             @NonNull DataSourceDesc dsd,
             @Nullable byte[] keySetId, @Nullable byte[] initData,
-            @Nullable String mimeType, @MediaDrm.KeyType int keyType,
+            @Nullable String mimeType, @MediaDrmKeyType int keyType,
             @Nullable Map<String, String> optionalParameters)
             throws NoDrmSchemeException {
         // TODO: this implementation only works when dsd is the only data source
@@ -3786,7 +3800,7 @@ public class MediaPlayer2 implements AutoCloseable
     @NonNull
     public String getDrmPropertyString(
             @NonNull DataSourceDesc dsd,
-            @NonNull @MediaDrm.StringProperty String propertyName)
+            @NonNull @MediaDrmStringProperty String propertyName)
             throws NoDrmSchemeException {
         // TODO: this implementation only works when dsd is the only data source
         Log.v(TAG, "getDrmPropertyString: propertyName: " + propertyName);
@@ -3829,7 +3843,7 @@ public class MediaPlayer2 implements AutoCloseable
     // This is a synchronous call.
     public void setDrmPropertyString(
             @NonNull DataSourceDesc dsd,
-            @NonNull @MediaDrm.StringProperty String propertyName, @NonNull String value)
+            @NonNull @MediaDrmStringProperty String propertyName, @NonNull String value)
             throws NoDrmSchemeException {
         // TODO: this implementation only works when dsd is the only data source
         Log.v(TAG, "setDrmPropertyString: propertyName: " + propertyName + " value: " + value);

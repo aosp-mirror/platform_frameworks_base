@@ -418,7 +418,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter {
             StatusBarNotification parentToCancel = null;
             if (shouldAutoCancel(sbn) && mGroupManager.isOnlyChildInGroup(sbn)) {
                 StatusBarNotification summarySbn =
-                        mGroupManager.getLogicalGroupSummary(sbn).getStatusBarNotification();
+                        mGroupManager.getLogicalGroupSummary(sbn).notification;
                 if (shouldAutoCancel(summarySbn)) {
                     parentToCancel = summarySbn;
                 }
@@ -591,7 +591,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter {
     public void onExpandClicked(Entry clickedEntry, boolean nowExpanded) {
         mHeadsUpManager.setExpanded(clickedEntry, nowExpanded);
         if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD && nowExpanded) {
-            mShadeController.goToLockedShade(clickedEntry.row);
+            mShadeController.goToLockedShade(clickedEntry.getRow());
         }
     }
 

@@ -20,7 +20,7 @@
         <!-- Color palette -->
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
-        <item name="colorAccent">@color/white</item>
+        <item name="colorAccent">@color/accent_device_default_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
         <item name="colorControlNormal">?attr/textColorPrimary</item>
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Dialog.Alert</item>

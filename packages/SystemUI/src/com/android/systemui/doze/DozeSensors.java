@@ -16,6 +16,7 @@
 
 package com.android.systemui.doze;
 
+import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_DISPLAY;
 import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_LOCK_SCREEN;
 
 import android.annotation.AnyThread;
@@ -67,7 +68,6 @@ public class DozeSensors {
     private final AmbientDisplayConfiguration mConfig;
     private final WakeLock mWakeLock;
     private final Consumer<Boolean> mProxCallback;
-    private final Consumer<Boolean> mWakeScreenCallback;
     private final Callback mCallback;
 
     private final Handler mHandler = new Handler();
@@ -76,8 +76,7 @@ public class DozeSensors {
 
     public DozeSensors(Context context, AlarmManager alarmManager, SensorManager sensorManager,
             DozeParameters dozeParameters, AmbientDisplayConfiguration config, WakeLock wakeLock,
-            Callback callback, Consumer<Boolean> proxCallback,
-            Consumer<Boolean> wakeScreenCallback, AlwaysOnDisplayPolicy policy) {
+            Callback callback, Consumer<Boolean> proxCallback, AlwaysOnDisplayPolicy policy) {
         mContext = context;
         mAlarmManager = alarmManager;
         mSensorManager = sensorManager;
@@ -85,7 +84,6 @@ public class DozeSensors {
         mConfig = config;
         mWakeLock = wakeLock;
         mProxCallback = proxCallback;
-        mWakeScreenCallback = wakeScreenCallback;
         mResolver = mContext.getContentResolver();
 
         mSensors = new TriggerSensor[] {
@@ -123,7 +121,13 @@ public class DozeSensors {
                         DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN,
                         false /* reports touch coordinates */,
                         false /* touchscreen */),
-                new WakeScreenSensor(),
+                new PluginTriggerSensor(
+                        new SensorManagerPlugin.Sensor(TYPE_WAKE_DISPLAY),
+                        Settings.Secure.DOZE_WAKE_SCREEN_GESTURE,
+                        true /* configured */,
+                        DozeLog.REASON_SENSOR_WAKE_UP,
+                        false /* reports touch coordinates */,
+                        false /* touchscreen */),
         };
 
         mProxSensor = new ProxSensor(policy);
@@ -395,7 +399,8 @@ public class DozeSensors {
                     screenX = event.values[0];
                     screenY = event.values[1];
                 }
-                mCallback.onSensorPulse(mPulseReason, sensorPerformsProxCheck, screenX, screenY);
+                mCallback.onSensorPulse(mPulseReason, sensorPerformsProxCheck, screenX, screenY,
+                        event.values);
                 updateListener();  // reregister, this sensor only fires once
             }));
         }
@@ -429,7 +434,14 @@ public class DozeSensors {
 
         private final SensorManagerPlugin.Sensor mPluginSensor;
         private final SensorManagerPlugin.TriggerEventListener mTriggerEventListener = (event) -> {
-            onTrigger(null);
+            DozeLog.traceSensor(mContext, mPulseReason);
+            mHandler.post(mWakeLock.wrap(() -> {
+                if (DEBUG) Log.d(TAG, "onTrigger: " + triggerEventToString(event));
+                mRegistered = false;
+                mCallback.onSensorPulse(mPulseReason, true /* sensorPerformsProxCheck */, -1, -1,
+                        event.getValues());
+                updateListener();  // reregister, this sensor only fires once
+            }));
         };
 
         PluginTriggerSensor(SensorManagerPlugin.Sensor sensor, String setting, boolean configured,
@@ -463,28 +475,19 @@ public class DozeSensors {
                     .append(", mSensor=").append(mPluginSensor).append("}").toString();
         }
 
-    }
-
-    private class WakeScreenSensor extends TriggerSensor {
-
-        WakeScreenSensor() {
-            super(findSensorWithType(mConfig.wakeScreenSensorType()),
-                    Settings.Secure.DOZE_WAKE_SCREEN_GESTURE, true /* configured */,
-                    DozeLog.REASON_SENSOR_WAKE_UP, false /* reportsTouchCoordinates */,
-                    false /* requiresTouchscreen */);
+        private String triggerEventToString(SensorManagerPlugin.TriggerEvent event) {
+            if (event == null) return null;
+            final StringBuilder sb = new StringBuilder("PluginTriggerEvent[")
+                    .append(event.getSensor()).append(',')
+                    .append(event.getVendorType());
+            if (event.getValues() != null) {
+                for (int i = 0; i < event.getValues().length; i++) {
+                    sb.append(',').append(event.getValues()[i]);
+                }
+            }
+            return sb.append(']').toString();
         }
 
-        @Override
-        @AnyThread
-        public void onTrigger(TriggerEvent event) {
-            DozeLog.traceSensor(mContext, mPulseReason);
-            mHandler.post(mWakeLock.wrap(() -> {
-                if (DEBUG) Log.d(TAG, "onTrigger: " + triggerEventToString(event));
-                mRegistered = false;
-                mWakeScreenCallback.accept(event.values[0] > 0);
-                updateListener();  // reregister, this sensor only fires once
-            }));
-        }
     }
 
     public interface Callback {
@@ -494,11 +497,11 @@ public class DozeSensors {
          * @param pulseReason Requesting sensor, e.g. {@link DozeLog#PULSE_REASON_SENSOR_PICKUP}
          * @param sensorPerformedProxCheck true if the sensor already checked for FAR proximity.
          * @param screenX the location on the screen where the sensor fired or -1
-         *                if the sensor doesn't support reporting screen locations.
+ *                if the sensor doesn't support reporting screen locations.
          * @param screenY the location on the screen where the sensor fired or -1
-         *                if the sensor doesn't support reporting screen locations.
+         * @param rawValues raw values array from the event.
          */
         void onSensorPulse(int pulseReason, boolean sensorPerformedProxCheck,
-                float screenX, float screenY);
+                float screenX, float screenY, float[] rawValues);
     }
 }

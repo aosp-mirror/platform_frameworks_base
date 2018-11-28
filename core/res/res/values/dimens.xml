@@ -200,6 +200,9 @@
     <!-- The height of the notification action list -->
     <dimen name="notification_action_list_height">60dp</dimen>
 
+    <!-- The margin of the notification action list at the top -->
+    <dimen name="notification_action_list_margin_top">0dp</dimen>
+
     <!-- The height of the notification action list -->
     <dimen name="notification_action_emphasized_height">48dp</dimen>
 

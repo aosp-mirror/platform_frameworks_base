@@ -199,7 +199,7 @@ public class NotificationMediaManager implements Dumpable {
             for (int i = 0; i < N; i++) {
                 final NotificationData.Entry entry = activeNotifications.get(i);
 
-                if (isMediaNotification(entry)) {
+                if (entry.isMediaNotification()) {
                     final MediaSession.Token token =
                             entry.notification.getNotification().extras.getParcelable(
                                     Notification.EXTRA_MEDIA_SESSION);
@@ -334,13 +334,6 @@ public class NotificationMediaManager implements Dumpable {
             }
         }
         return PlaybackState.STATE_NONE;
-    }
-
-    private boolean isMediaNotification(NotificationData.Entry entry) {
-        // TODO: confirm that there's a valid media key
-        return entry.row.getExpandedContentView() != null
-                && entry.row.getExpandedContentView().findViewById(
-                        com.android.internal.R.id.media_actions) != null;
     }
 
     private void clearCurrentMediaNotificationSession() {

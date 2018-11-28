@@ -54,6 +54,7 @@ import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArraySet;
+import android.util.Log;
 import android.view.View;
 
 import com.android.systemui.SysuiTestCase;
@@ -177,9 +178,16 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         NotificationMenuRowPlugin.MenuItem menuItem = createTestMenuItem(realRow);
 
         ExpandableNotificationRow row = spy(realRow);
+
         when(row.getWindowToken()).thenReturn(new Binder());
         when(row.getGuts()).thenReturn(guts);
         doNothing().when(row).inflateGuts();
+
+        NotificationData.Entry realEntry = realRow.getEntry();
+        NotificationData.Entry entry = spy(realEntry);
+
+        when(entry.getRow()).thenReturn(row);
+        when(entry.getGuts()).thenReturn(guts);
 
         mGutsManager.openGuts(row, 0, 0, menuItem);
         mTestableLooper.processAllMessages();
@@ -190,13 +198,19 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 anyBoolean(),
                 any(Runnable.class));
 
+        // called once by mGutsManager.bindGuts() in mGutsManager.openGuts()
+        verify(row).setGutsView(any());
+
         row.onDensityOrFontScaleChanged();
-        mGutsManager.onDensityOrFontScaleChanged(row);
+        mGutsManager.onDensityOrFontScaleChanged(entry);
+
         mTestableLooper.processAllMessages();
 
         mGutsManager.closeAndSaveGuts(false, false, false, 0, 0, false);
 
         verify(guts).closeControls(anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyBoolean());
+
+        // called again by mGutsManager.bindGuts(), in mGutsManager.onDensityOrFontScaleChanged()
         verify(row, times(2)).setGutsView(any());
     }
 
@@ -470,7 +484,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         ExpandableNotificationRow row = spy(createTestNotificationRow());
         doReturn(guts).when(row).getGuts();
         NotificationData.Entry entry = row.getEntry();
-        entry.row = row;
+        entry.setRow(row);
         mGutsManager.setExposedGuts(guts);
 
         assertTrue(mGutsManager.shouldExtendLifetime(entry));

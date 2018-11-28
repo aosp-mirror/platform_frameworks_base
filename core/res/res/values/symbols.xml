@@ -574,6 +574,10 @@
   <java-symbol type="string" name="add_calendar_event_desc" />
   <java-symbol type="string" name="view_flight" />
   <java-symbol type="string" name="view_flight_desc" />
+  <java-symbol type="string" name="translate" />
+  <java-symbol type="string" name="translate_desc" />
+  <java-symbol type="string" name="define" />
+  <java-symbol type="string" name="define_desc" />
   <java-symbol type="string" name="textSelectionCABTitle" />
   <java-symbol type="string" name="BaMmi" />
   <java-symbol type="string" name="CLIRDefaultOffNextCallOff" />

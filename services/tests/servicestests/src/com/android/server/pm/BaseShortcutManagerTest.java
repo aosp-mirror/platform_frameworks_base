@@ -91,8 +91,8 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.LauncherAppsService.LauncherAppsImpl;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
-
 import com.android.server.wm.ActivityTaskManagerInternal;
+
 import org.junit.Assert;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
@@ -105,8 +105,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -762,6 +760,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         LocalServices.addService(UsageStatsManagerInternal.class, mMockUsageStatsManagerInternal);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, mMockActivityManagerInternal);
+        LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
         LocalServices.addService(ActivityTaskManagerInternal.class, mMockActivityTaskManagerInternal);
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         LocalServices.addService(UserManagerInternal.class, mMockUserManagerInternal);
@@ -961,6 +960,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected Context getTestContext() {
         return getInstrumentation().getContext();
+    }
+
+    protected Context getClientContext() {
+        return mClientContext;
     }
 
     protected ShortcutManager getManager() {
@@ -1789,6 +1792,15 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         final ShortcutPackage p = mService.getPackageShortcutForTest(
                 getCallingPackage(), getCallingUserId());
         return p == null ? null : p.getAllShortcutsForTest();
+    }
+
+    /**
+     * @return all share targets stored internally for the caller.
+     */
+    protected List<ShareTargetInfo> getCallerShareTargets() {
+        final ShortcutPackage p = mService.getPackageShortcutForTest(
+                getCallingPackage(), getCallingUserId());
+        return p == null ? null : p.getAllShareTargetsForTest();
     }
 
     /**

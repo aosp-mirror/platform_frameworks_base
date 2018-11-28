@@ -18,6 +18,7 @@
 #define _ANDROID_MEDIA_MEDIAEXTRACTOR_H_
 
 #include <media/stagefright/foundation/ABase.h>
+#include <media/stagefright/foundation/AudioPresentationInfo.h>
 #include <media/MediaSource.h>
 #include <media/DataSource.h>
 #include <utils/Errors.h>
@@ -66,6 +67,8 @@ struct JMediaExtractor : public RefBase {
     status_t getMetrics(Parcel *reply) const;
 
     bool getCachedDuration(int64_t *durationUs, bool *eos) const;
+    status_t getAudioPresentations(size_t trackIdx,
+            AudioPresentationCollection *presentations) const;
 
 protected:
     virtual ~JMediaExtractor();

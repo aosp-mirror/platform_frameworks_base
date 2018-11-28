@@ -18,8 +18,6 @@ package android.media;
 
 import android.annotation.NonNull;
 
-import com.android.internal.util.Preconditions;
-
 /**
  * @hide
  * Structure for file data source descriptor.
@@ -105,7 +103,7 @@ public class CallbackDataSourceDesc extends DataSourceDesc {
          * @throws NullPointerException if m2ds is null.
          */
         public @NonNull Builder setDataSource(@NonNull Media2DataSource m2ds) {
-            Preconditions.checkNotNull(m2ds);
+            Media2Utils.checkArgument(m2ds != null, "data source cannot be null.");
             mMedia2DataSource = m2ds;
             return this;
         }

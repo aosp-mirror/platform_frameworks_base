@@ -205,6 +205,9 @@ public abstract class AbstractRemoteService implements DeathRecipient {
 
     protected void scheduleUnbind() {
         cancelScheduledUnbind();
+        // TODO(b/111276913): implement "permanent binding"
+        // TODO(b/117779333): make sure it's unbound if the service settings changing (right now
+        // it's not)
         mHandler.sendMessageDelayed(obtainMessage(AbstractRemoteService::handleUnbind, this)
                 .setWhat(MSG_UNBIND), getTimeoutIdleBindMillis());
     }
@@ -250,7 +253,7 @@ public abstract class AbstractRemoteService implements DeathRecipient {
         }
 
         final boolean willBind = mContext.bindServiceAsUser(mIntent, mServiceConnection, flags,
-                new UserHandle(mUserId));
+                mHandler, new UserHandle(mUserId));
 
         if (!willBind) {
             Slog.w(mTag, "could not bind to " + mIntent + " using flags " + flags);

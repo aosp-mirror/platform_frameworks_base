@@ -93,11 +93,6 @@ public class AudioTrack extends PlayerBase
      */
     private static final float GAIN_MAX = 1.0f;
 
-    /** Maximum value for AudioTrack channel count
-     * @hide public for MediaCode only, do not un-hide or change to a numeric literal
-     */
-    public static final int CHANNEL_COUNT_MAX = native_get_FCC_8();
-
     /** indicates AudioTrack state is stopped */
     public static final int PLAYSTATE_STOPPED = 1;  // matches SL_PLAYSTATE_STOPPED
     /** indicates AudioTrack state is paused */
@@ -1001,7 +996,8 @@ public class AudioTrack extends PlayerBase
     }
 
     // mask of all the positional channels supported, however the allowed combinations
-    // are further restricted by the matching left/right rule and CHANNEL_COUNT_MAX
+    // are further restricted by the matching left/right rule and
+    // AudioSystem.OUT_CHANNEL_COUNT_MAX
     private static final int SUPPORTED_OUT_CHANNELS =
             AudioFormat.CHANNEL_OUT_FRONT_LEFT |
             AudioFormat.CHANNEL_OUT_FRONT_RIGHT |
@@ -1124,7 +1120,7 @@ public class AudioTrack extends PlayerBase
         mChannelIndexMask = channelIndexMask;
         if (mChannelIndexMask != 0) {
             // restrictive: indexMask could allow up to AUDIO_CHANNEL_BITS_LOG2
-            final int indexMask = (1 << CHANNEL_COUNT_MAX) - 1;
+            final int indexMask = (1 << AudioSystem.OUT_CHANNEL_COUNT_MAX) - 1;
             if ((channelIndexMask & ~indexMask) != 0) {
                 throw new IllegalArgumentException("Unsupported channel index configuration "
                         + channelIndexMask);
@@ -1169,9 +1165,9 @@ public class AudioTrack extends PlayerBase
             return false;
         }
         final int channelCount = AudioFormat.channelCountFromOutChannelMask(channelConfig);
-        if (channelCount > CHANNEL_COUNT_MAX) {
+        if (channelCount > AudioSystem.OUT_CHANNEL_COUNT_MAX) {
             loge("Channel configuration contains too many channels " +
-                    channelCount + ">" + CHANNEL_COUNT_MAX);
+                    channelCount + ">" + AudioSystem.OUT_CHANNEL_COUNT_MAX);
             return false;
         }
         // check for unsupported multichannel combinations:
@@ -3418,7 +3414,6 @@ public class AudioTrack extends PlayerBase
     private native final int native_getRoutedDeviceId();
     private native final void native_enableDeviceCallback();
     private native final void native_disableDeviceCallback();
-    static private native int native_get_FCC_8();
 
     private native int native_applyVolumeShaper(
             @NonNull VolumeShaper.Configuration configuration,

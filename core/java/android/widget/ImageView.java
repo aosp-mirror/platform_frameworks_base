@@ -106,9 +106,9 @@ public class ImageView extends View {
     private boolean mHaveFrame = false;
     @UnsupportedAppUsage
     private boolean mAdjustViewBounds = false;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mMaxWidth = Integer.MAX_VALUE;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mMaxHeight = Integer.MAX_VALUE;
 
     // these are applied to the drawable
@@ -1331,9 +1331,17 @@ public class ImageView extends View {
         }
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
-    public void animateTransform(Matrix matrix) {
+    /**
+     * Applies a temporary transformation {@link Matrix} to the view's drawable when it is drawn.
+     * Allows custom scaling, translation, and perspective distortion during an animation.
+     *
+     * This method is a lightweight analogue of {@link ImageView#setImageMatrix(Matrix)} to use
+     * only during animations as this matrix will be cleared after the next drawable
+     * update or view's bounds change.
+     *
+     * @param matrix The transformation parameters in matrix form.
+     */
+    public void animateTransform(@Nullable Matrix matrix) {
         if (mDrawable == null) {
             return;
         }
@@ -1341,6 +1349,7 @@ public class ImageView extends View {
             final int vwidth = getWidth() - mPaddingLeft - mPaddingRight;
             final int vheight = getHeight() - mPaddingTop - mPaddingBottom;
             mDrawable.setBounds(0, 0, vwidth, vheight);
+            mDrawMatrix = null;
         } else {
             mDrawable.setBounds(0, 0, mDrawableWidth, mDrawableHeight);
             if (mDrawMatrix == null) {

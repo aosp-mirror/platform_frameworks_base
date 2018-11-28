@@ -113,7 +113,9 @@ class WindowSurfacePlacer {
             return;
         }
 
-        if (mService.mWaitingForConfig) {
+        // TODO(multi-display):
+        final DisplayContent defaultDisplay = mService.getDefaultDisplayContentLocked();
+        if (defaultDisplay.mWaitingForConfig) {
             // Our configuration has changed (most likely rotation), but we
             // don't yet have the complete configuration to report to
             // applications.  Don't do any window layout until we have it.

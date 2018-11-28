@@ -99,9 +99,10 @@ interface ILocationManager
     void clearTestProviderLocation(String provider, String opPackageName);
     void setTestProviderEnabled(String provider, boolean enabled, String opPackageName);
     void clearTestProviderEnabled(String provider, String opPackageName);
+
+    // --- deprecated ---
     void setTestProviderStatus(String provider, int status, in Bundle extras, long updateTime,
             String opPackageName);
-    void clearTestProviderStatus(String provider, String opPackageName);
 
     boolean sendExtraCommand(String provider, String command, inout Bundle extras);
 

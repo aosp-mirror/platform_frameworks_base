@@ -309,9 +309,6 @@ public class PackageHelper {
         } else if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
             prefer = RECOMMEND_INSTALL_INTERNAL;
             checkBoth = false;
-        } else if ((params.installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
-            prefer = RECOMMEND_INSTALL_EXTERNAL;
-            checkBoth = false;
         } else if (params.installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
             prefer = RECOMMEND_INSTALL_INTERNAL;
             checkBoth = false;

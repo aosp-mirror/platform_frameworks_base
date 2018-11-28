@@ -17,6 +17,7 @@
 package android.telephony.mbms;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.RemoteException;
 import android.telephony.MbmsGroupCallSession;
 import android.telephony.mbms.vendor.IMbmsGroupCallService;
@@ -24,6 +25,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * Class used to represent a single MBMS group call. After a call has been started with
@@ -41,8 +43,26 @@ public class GroupCall implements AutoCloseable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "STATE_" }, value = {STATE_STOPPED, STATE_STARTED, STATE_STALLED})
     public @interface GroupCallState {}
+
+    /**
+     * Indicates that the group call is in a stopped state
+     *
+     * This can be reported after network action or after calling {@link #close}.
+     */
     public static final int STATE_STOPPED = 1;
+
+    /**
+     * Indicates that the group call is started.
+     *
+     * Data can be transmitted and received in this state.
+     */
     public static final int STATE_STARTED = 2;
+
+    /**
+     * Indicates that the group call is stalled.
+     *
+     * This may be due to a network issue or the device being temporarily out of range.
+     */
     public static final int STATE_STALLED = 3;
 
     /**
@@ -122,16 +142,17 @@ public class GroupCall implements AutoCloseable {
      * Send an update to the middleware when the SAI (Service Area Identifier) list and frequency
      * information of the group call has * changed. Callers must obtain this information from the
      * wireless carrier independently.
-     * @param saiArray New array of SAIs that the call is available on.
-     * @param frequencyArray New array of frequencies that the call is available on.
+     * @param saiList New list of SAIs that the call is available on.
+     * @param frequencyList New list of frequencies that the call is available on.
      */
-    public void updateGroupCall(int[] saiArray, int[] frequencyArray) {
+    public void updateGroupCall(@NonNull List<Integer> saiList,
+            @NonNull List<Integer> frequencyList) {
         if (mService == null) {
             throw new IllegalStateException("No group call service attached");
         }
 
         try {
-            mService.updateGroupCall(mSubscriptionId, mTmgi, saiArray, frequencyArray);
+            mService.updateGroupCall(mSubscriptionId, mTmgi, saiList, frequencyList);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService = null;

@@ -2920,6 +2920,7 @@
         <public name="shell" />
         <public name="interactiveUiTimeout" />
         <public name="importantForContentCapture" />
+        <public name="supportsMultipleDisplays" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">

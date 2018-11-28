@@ -599,7 +599,6 @@ public class WindowManagerService extends IWindowManager.Stub
     long mDisplayFreezeTime = 0;
     int mLastDisplayFreezeDuration = 0;
     Object mLastFinishedFreezeSource = null;
-    boolean mWaitingForConfig = false;
     boolean mSwitchingUser = false;
 
     final static int WINDOWS_FREEZING_SCREENS_NONE = 0;
@@ -1870,7 +1869,7 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId = Binder.clearCallingIdentity();
         final int displayId;
         synchronized (mGlobalLock) {
-            WindowState win = windowForClientLocked(session, client, false);
+            final WindowState win = windowForClientLocked(session, client, false);
             if (win == null) {
                 return 0;
             }
@@ -1885,8 +1884,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.setFrameNumber(frameNumber);
 
-            if (!mWaitingForConfig) {
-                win.finishSeamlessRotation();
+            final DisplayContent dc = win.getDisplayContent();
+            if (!dc.mWaitingForConfig) {
+                win.finishSeamlessRotation(false /* timeout */);
             }
 
             int attrChanges = 0;
@@ -2438,7 +2438,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
             displayContent.computeScreenConfiguration(mTempConfiguration);
             if (currentConfig.diff(mTempConfiguration) != 0) {
-                mWaitingForConfig = true;
+                displayContent.mWaitingForConfig = true;
                 displayContent.setLayoutNeeded();
                 int anim[] = new int[2];
                 displayContent.getDisplayPolicy().selectRotationAnimationLw(anim);
@@ -2451,9 +2451,10 @@ public class WindowManagerService extends IWindowManager.Stub
         return config;
     }
 
-    void setNewDisplayOverrideConfiguration(Configuration overrideConfig, DisplayContent dc) {
-        if (mWaitingForConfig) {
-            mWaitingForConfig = false;
+    void setNewDisplayOverrideConfiguration(Configuration overrideConfig,
+            @NonNull DisplayContent dc) {
+        if (dc.mWaitingForConfig) {
+            dc.mWaitingForConfig = false;
             mLastFinishedFreezeSource = "new-config";
         }
 
@@ -4181,13 +4182,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 // placement to unfreeze the display since we froze it when the rotation was updated
                 // in DisplayContent#updateRotationUnchecked.
                 synchronized (mGlobalLock) {
-                    if (mWaitingForConfig) {
-                        mWaitingForConfig = false;
+                    final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                    if (dc != null && dc.mWaitingForConfig) {
+                        dc.mWaitingForConfig = false;
                         mLastFinishedFreezeSource = "config-unchanged";
-                        final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                        if (dc != null) {
-                            dc.setLayoutNeeded();
-                        }
+                        dc.setLayoutNeeded();
                         mWindowPlacerLocked.performSurfacePlacement();
                     }
                 }
@@ -5136,7 +5135,7 @@ public class WindowManagerService extends IWindowManager.Stub
         configChanged |= currentDisplayConfig.diff(mTempConfiguration) != 0;
 
         if (configChanged) {
-            mWaitingForConfig = true;
+            displayContent.mWaitingForConfig = true;
             startFreezingDisplayLocked(0 /* exitAnim */,
                     0 /* enterAnim */, displayContent);
             displayContent.sendNewConfiguration();
@@ -5396,23 +5395,24 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        final DisplayContent dc = mRoot.getDisplayContent(mFrozenDisplayId);
-        if (mWaitingForConfig || mAppsFreezingScreen > 0
+        final DisplayContent displayContent = mRoot.getDisplayContent(mFrozenDisplayId);
+        final boolean waitingForConfig = displayContent != null && displayContent.mWaitingForConfig;
+        final int numOpeningApps = displayContent != null ? displayContent.mOpeningApps.size() : 0;
+        if (waitingForConfig || mAppsFreezingScreen > 0
                 || mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_ACTIVE
-                || mClientFreezingScreen || (dc != null && !dc.mOpeningApps.isEmpty())) {
+                || mClientFreezingScreen || numOpeningApps > 0) {
             if (DEBUG_ORIENTATION) Slog.d(TAG_WM,
-                "stopFreezingDisplayLocked: Returning mWaitingForConfig=" + mWaitingForConfig
+                "stopFreezingDisplayLocked: Returning mWaitingForConfig=" + waitingForConfig
                 + ", mAppsFreezingScreen=" + mAppsFreezingScreen
                 + ", mWindowsFreezingScreen=" + mWindowsFreezingScreen
                 + ", mClientFreezingScreen=" + mClientFreezingScreen
-                + ", mOpeningApps.size()=" + (dc != null ? dc.mOpeningApps.size() : 0));
+                + ", mOpeningApps.size()=" + numOpeningApps);
             return;
         }
 
         if (DEBUG_ORIENTATION) Slog.d(TAG_WM,
                 "stopFreezingDisplayLocked: Unfreezing now");
 
-        final DisplayContent displayContent = mRoot.getDisplayContent(mFrozenDisplayId);
 
         // We must make a local copy of the displayId as it can be potentially overwritten later on
         // in this method. For example, {@link startFreezingDisplayLocked} may be called as a result
@@ -6033,7 +6033,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" windows="); pw.print(mWindowsFreezingScreen);
                     pw.print(" client="); pw.print(mClientFreezingScreen);
                     pw.print(" apps="); pw.print(mAppsFreezingScreen);
-                    pw.print(" waitingForConfig="); pw.println(mWaitingForConfig);
             final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
             pw.print("  mRotation="); pw.print(defaultDisplayContent.getRotation());
                     pw.print(" mAltOrientation=");
@@ -6042,6 +6041,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(defaultDisplayContent.getLastWindowForcedOrientation());
                     pw.print(" mLastOrientation=");
                             pw.println(defaultDisplayContent.getLastOrientation());
+                    pw.print(" waitingForConfig=");
+                            pw.println(defaultDisplayContent.mWaitingForConfig);
+
             pw.print("  Animation settings: disabled="); pw.print(mAnimationsDisabled);
                     pw.print(" window="); pw.print(mWindowAnimationScaleSetting);
                     pw.print(" transition="); pw.print(mTransitionAnimationScaleSetting);

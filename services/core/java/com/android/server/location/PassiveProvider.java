@@ -16,22 +16,20 @@
 
 package com.android.server.location;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-
-import com.android.internal.location.ProviderProperties;
-import com.android.internal.location.ProviderRequest;
-
 import android.location.Criteria;
 import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.util.Log;
 
+import com.android.internal.location.ProviderProperties;
+import com.android.internal.location.ProviderRequest;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * A passive location provider reports locations received from other providers
@@ -40,7 +38,7 @@ import android.util.Log;
  *
  * {@hide}
  */
-public class PassiveProvider implements LocationProviderInterface {
+public class PassiveProvider extends LocationProviderInterface {
     private static final String TAG = "PassiveProvider";
 
     private static final ProviderProperties PROPERTIES = new ProviderProperties(
@@ -75,20 +73,6 @@ public class PassiveProvider implements LocationProviderInterface {
 
     @Override
     public void disable() {
-    }
-
-    @Override
-    public int getStatus(Bundle extras) {
-        if (mReportLocation) {
-            return LocationProvider.AVAILABLE;
-        } else {
-            return LocationProvider.TEMPORARILY_UNAVAILABLE;
-        }
-    }
-
-    @Override
-    public long getStatusUpdateTime() {
-        return -1;
     }
 
     @Override

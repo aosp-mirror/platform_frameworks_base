@@ -1531,10 +1531,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
         mHandler.removeCallbacks(mRetryFingerprintAuthentication);
         boolean shouldListenForFingerprint = shouldListenForFingerprint();
-        if (mFingerprintRunningState == BIOMETRIC_STATE_RUNNING && !shouldListenForFingerprint) {
+        boolean runningOrRestarting = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING
+                || mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING;
+        if (runningOrRestarting && !shouldListenForFingerprint) {
             stopListeningForFingerprint();
-        } else if (mFingerprintRunningState != BIOMETRIC_STATE_RUNNING
-                && shouldListenForFingerprint) {
+        } else if (!runningOrRestarting && shouldListenForFingerprint) {
             startListeningForFingerprint();
         }
     }
@@ -1587,6 +1588,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private void startListeningForFingerprint() {
         if (mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING) {
             setFingerprintRunningState(BIOMETRIC_STATE_CANCELLING_RESTARTING);
+            return;
+        }
+        if (mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING) {
+            // Waiting for restart via handleFingerprintError().
             return;
         }
         if (DEBUG) Log.v(TAG, "startListeningForFingerprint()");
@@ -2418,6 +2423,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     + getStrongAuthTracker().hasUserAuthenticatedSinceBoot());
             pw.println("    disabled(DPM)=" + isFingerprintDisabled(userId));
             pw.println("    possible=" + isUnlockWithFingerprintPossible(userId));
+            pw.println("    listening: actual=" + mFingerprintRunningState
+                    + " expected=" + (shouldListenForFingerprint() ? 1 : 0));
             pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
         }

@@ -129,7 +129,7 @@ public abstract class WallpaperService extends Service {
         Bundle extras;
         boolean sync;
     }
-    
+
     /**
      * The actual implementation of a wallpaper.  A wallpaper service may
      * have multiple instances running (for example as a real wallpaper
@@ -144,7 +144,7 @@ public abstract class WallpaperService extends Service {
         HandlerCaller mCaller;
         IWallpaperConnection mConnection;
         IBinder mWindowToken;
-        
+
         boolean mInitializing = true;
         boolean mVisible;
         boolean mReportedVisible;
@@ -208,7 +208,6 @@ public abstract class WallpaperService extends Service {
         private final Supplier<Long> mClockFunction;
         private final Handler mHandler;
 
-        DisplayManager mDisplayManager;
         Display mDisplay;
         private int mDisplayState;
 
@@ -419,7 +418,7 @@ public abstract class WallpaperService extends Service {
         public int getDesiredMinimumHeight() {
             return mIWallpaperEngine.mReqHeight;
         }
-        
+
         /**
          * Return whether the wallpaper is currently visible to the user,
          * this is the last value supplied to
@@ -1015,14 +1014,6 @@ public abstract class WallpaperService extends Service {
                 return;
             }
 
-            mDisplayManager = getSystemService(DisplayManager.class);
-            mDisplay = mDisplayManager.getDisplay(wrapper.mDisplayId);
-            if (mDisplay == null) {
-                // TODO(b/115486823) Ignore this engine.
-                Log.e(TAG, "Attaching to a non-existent display: " + wrapper.mDisplayId);
-                return;
-            }
-
             mIWallpaperEngine = wrapper;
             mCaller = wrapper.mCaller;
             mConnection = wrapper.mConnection;
@@ -1034,13 +1025,16 @@ public abstract class WallpaperService extends Service {
             mWindow.setSession(mSession);
 
             mLayout.packageName = getPackageName();
-            mDisplayManager.registerDisplayListener(mDisplayListener, mCaller.getHandler());
+            mIWallpaperEngine.mDisplayManager.registerDisplayListener(mDisplayListener,
+                    mCaller.getHandler());
+            mDisplay = mIWallpaperEngine.mDisplay;
             mDisplayState = mDisplay.getState();
 
             if (DEBUG) Log.v(TAG, "onCreate(): " + this);
             onCreate(mSurfaceHolder);
-            
+
             mInitializing = false;
+
             mReportedVisible = false;
             updateSurface(false, false, false);
         }
@@ -1202,8 +1196,8 @@ public abstract class WallpaperService extends Service {
             
             mDestroyed = true;
 
-            if (mDisplayManager != null) {
-                mDisplayManager.unregisterDisplayListener(mDisplayListener);
+            if (mIWallpaperEngine.mDisplayManager != null) {
+                mIWallpaperEngine.mDisplayManager.unregisterDisplayListener(mDisplayListener);
             }
 
             if (mVisible) {
@@ -1272,7 +1266,9 @@ public abstract class WallpaperService extends Service {
         int mReqWidth;
         int mReqHeight;
         final Rect mDisplayPadding = new Rect();
-        int mDisplayId;
+        final int mDisplayId;
+        final DisplayManager mDisplayManager;
+        final Display mDisplay;
 
         Engine mEngine;
 
@@ -1289,7 +1285,15 @@ public abstract class WallpaperService extends Service {
             mReqHeight = reqHeight;
             mDisplayPadding.set(padding);
             mDisplayId = displayId;
-            
+
+            // Create a display context before onCreateEngine.
+            mDisplayManager = getSystemService(DisplayManager.class);
+            mDisplay = mDisplayManager.getDisplay(mDisplayId);
+
+            if (mDisplay == null) {
+                // Ignore this engine.
+                throw new IllegalArgumentException("Cannot find display with id" + mDisplayId);
+            }
             Message msg = mCaller.obtainMessage(DO_ATTACH);
             mCaller.sendMessage(msg);
         }

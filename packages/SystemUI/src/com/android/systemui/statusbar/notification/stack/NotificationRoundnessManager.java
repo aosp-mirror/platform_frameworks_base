@@ -16,13 +16,12 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
-        .NUM_SECTIONS;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.NUM_SECTIONS;
 
-import android.view.View;
-
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.HashSet;
@@ -37,7 +36,7 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
     private ActivatableNotificationView[] mLastInSectionViews;
     private ActivatableNotificationView[] mTmpFirstInSectionViews;
     private ActivatableNotificationView[] mTmpLastInSectionViews;
-    private HashSet<View> mAnimatedChildren;
+    private HashSet<ExpandableView> mAnimatedChildren;
     private Runnable mRoundingChangedCallback;
     private ExpandableNotificationRow mTrackedHeadsUp;
     private float mAppearFraction;
@@ -50,13 +49,13 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
     }
 
     @Override
-    public void onHeadsUpPinned(ExpandableNotificationRow headsUp) {
-        updateView(headsUp, false /* animate */);
+    public void onHeadsUpPinned(NotificationData.Entry headsUp) {
+        updateView(headsUp.getRow(), false /* animate */);
     }
 
     @Override
-    public void onHeadsUpUnPinned(ExpandableNotificationRow headsUp) {
-        updateView(headsUp, true /* animate */);
+    public void onHeadsUpUnPinned(NotificationData.Entry headsUp) {
+        updateView(headsUp.getRow(), true /* animate */);
     }
 
     public void onHeadsupAnimatingAwayChanged(ExpandableNotificationRow row,
@@ -211,7 +210,7 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
         return anyChanged;
     }
 
-    public void setAnimatedChildren(HashSet<View> animatedChildren) {
+    public void setAnimatedChildren(HashSet<ExpandableView> animatedChildren) {
         mAnimatedChildren = animatedChildren;
     }
 

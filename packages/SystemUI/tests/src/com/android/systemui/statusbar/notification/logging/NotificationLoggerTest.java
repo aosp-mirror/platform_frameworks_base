@@ -89,7 +89,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, new Notification(), UserHandle.CURRENT, null, 0);
         mEntry = new NotificationData.Entry(mSbn);
-        mEntry.row = mRow;
+        mEntry.setRow(mRow);
 
         mLogger = new TestableNotificationLogger(mBarService);
         mLogger.setUpWithContainer(mListContainer);

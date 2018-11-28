@@ -385,9 +385,9 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 entry.notification.getUser().getIdentifier());
 
         final StatusBarNotification sbn = entry.notification;
-        if (entry.row != null) {
+        if (entry.rowExists()) {
             entry.reset();
-            updateNotification(entry, pmUser, sbn, entry.row);
+            updateNotification(entry, pmUser, sbn, entry.getRow());
         } else {
             new RowInflaterTask().inflate(mContext, parent, entry,
                     row -> {
@@ -543,14 +543,14 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 // Mark as seen immediately
                 setNotificationShown(entry.notification);
             } else {
-                entry.row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
+                entry.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
             }
         }
         if ((inflatedFlags & FLAG_CONTENT_VIEW_AMBIENT) != 0) {
             if (shouldPulse(entry)) {
                 mAmbientPulseManager.showNotification(entry);
             } else {
-                entry.row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_AMBIENT);
+                entry.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_AMBIENT);
             }
         }
     }
@@ -561,20 +561,20 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mPendingNotifications.remove(entry.key);
         // If there was an async task started after the removal, we don't want to add it back to
         // the list, otherwise we might get leaks.
-        if (!entry.row.isRemoved()) {
+        if (!entry.isRowRemoved()) {
             boolean isNew = mNotificationData.get(entry.key) == null;
             if (isNew) {
                 showAlertingView(entry, inflatedFlags);
                 addEntry(entry);
             } else {
-                if (entry.row.hasLowPriorityStateUpdated()) {
+                if (entry.getRow().hasLowPriorityStateUpdated()) {
                     mVisualStabilityManager.onLowPriorityUpdated(entry);
                     mPresenter.updateNotificationViews();
                 }
                 mGroupAlertTransferHelper.onInflationFinished(entry);
             }
         }
-        entry.row.setLowPriorityStateUpdated(false);
+        entry.setLowPriorityStateUpdated(false);
     }
 
     @Override
@@ -633,9 +633,9 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         getMediaManager().onNotificationRemoved(key);
         mForegroundServiceController.removeNotification(entry.notification);
 
-        if (entry.row != null) {
-            entry.row.setRemoved();
-            mListContainer.cleanUpViewState(entry.row);
+        if (entry.rowExists()) {
+            entry.removeRow();
+            mListContainer.cleanUpViewStateForEntry(entry);
         }
 
         // Let's remove the children if this was a summary
@@ -670,19 +670,19 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
      */
     private void handleGroupSummaryRemoved(String key) {
         NotificationData.Entry entry = mNotificationData.get(key);
-        if (entry != null && entry.row != null
-                && entry.row.isSummaryWithChildren()) {
-            if (entry.notification.getOverrideGroupKey() != null && !entry.row.isDismissed()) {
+        if (entry != null && entry.rowExists() && entry.isSummaryWithChildren()) {
+            if (entry.notification.getOverrideGroupKey() != null && !entry.isRowDismissed()) {
                 // We don't want to remove children for autobundled notifications as they are not
                 // always cancelled. We only remove them if they were dismissed by the user.
                 return;
             }
-            List<ExpandableNotificationRow> notificationChildren =
-                    entry.row.getNotificationChildren();
-            for (int i = 0; i < notificationChildren.size(); i++) {
-                ExpandableNotificationRow row = notificationChildren.get(i);
-                NotificationData.Entry childEntry = row.getEntry();
-                boolean isForeground = (row.getStatusBarNotification().getNotification().flags
+            List<NotificationData.Entry> childEntries = entry.getChildren();
+            if (childEntries == null) {
+                return;
+            }
+            for (int i = 0; i < childEntries.size(); i++) {
+                NotificationData.Entry childEntry = childEntries.get(i);
+                boolean isForeground = (entry.notification.getNotification().flags
                         & Notification.FLAG_FOREGROUND_SERVICE) != 0;
                 boolean keepForReply =
                         getRemoteInputManager().shouldKeepForRemoteInputHistory(childEntry)
@@ -692,10 +692,10 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                     // a child we're keeping around for reply!
                     continue;
                 }
-                row.setKeepInParent(true);
+                entry.setKeepInParent(true);
                 // we need to set this state earlier as otherwise we might generate some weird
                 // animations
-                row.setRemoved();
+                entry.removeRow();
             }
         }
     }
@@ -705,15 +705,15 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 mNotificationData.getNotificationsForCurrentUser();
         for (int i = 0; i < userNotifications.size(); i++) {
             NotificationData.Entry entry = userNotifications.get(i);
-            boolean exposedGuts = mGutsManager.getExposedGuts() != null
-                    && entry.row.getGuts() == mGutsManager.getExposedGuts();
-            entry.row.onDensityOrFontScaleChanged();
+            entry.onDensityOrFontScaleChanged();
+            boolean exposedGuts = entry.areGutsExposed();
             if (exposedGuts) {
-                mGutsManager.onDensityOrFontScaleChanged(entry.row);
+                mGutsManager.onDensityOrFontScaleChanged(entry);
             }
         }
     }
 
+    //TODO: This method associates a row with an entry, but eventually needs to not do that
     protected void updateNotification(NotificationData.Entry entry, PackageManager pmUser,
             StatusBarNotification sbn, ExpandableNotificationRow row) {
         boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
@@ -736,8 +736,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         entry.setIconTag(R.id.icon_is_pre_L, entry.targetSdk < Build.VERSION_CODES.LOLLIPOP);
         entry.autoRedacted = entry.notification.getNotification().publicVersion == null;
 
-        entry.row = row;
-        entry.row.setOnActivatedListener(mPresenter);
+        entry.setRow(row);
+        row.setOnActivatedListener(mPresenter);
 
         boolean useIncreasedCollapsedHeight = mMessagingUtil.isImportantMessaging(sbn,
                 mNotificationData.getImportance(sbn.getKey()));
@@ -910,7 +910,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         if (!notification.isClearable()) {
             // The user may have performed a dismiss action on the notification, since it's
             // not clearable we should snap it back.
-            mListContainer.snapViewIfNeeded(entry.row);
+            mListContainer.snapViewIfNeeded(entry);
         }
 
         if (DEBUG) {
@@ -963,11 +963,11 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
             if (NotificationUiAdjustment.needReinflate(
                     oldAdjustments.get(entry.key), newAdjustment)) {
-                if (entry.row != null) {
+                if (entry.rowExists()) {
                     entry.reset();
                     PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
                             entry.notification.getUser().getIdentifier());
-                    updateNotification(entry, pmUser, entry.notification, entry.row);
+                    updateNotification(entry, pmUser, entry.notification, entry.getRow());
                 } else {
                     // Once the RowInflaterTask is done, it will pick up the updated entry, so
                     // no-op here.

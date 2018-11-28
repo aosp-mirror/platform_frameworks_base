@@ -43,7 +43,6 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRAD
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
-import static android.content.pm.PackageManager.INSTALL_EXTERNAL;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
@@ -646,9 +645,6 @@ public class PackageManagerService extends IPackageManager.Stub
     /** Directory where installed application's 32-bit native libraries are copied. */
     private static final File sAppLib32InstallDir =
             new File(Environment.getDataDirectory(), "app-lib");
-    /** Directory where code and non-resource assets of forward-locked applications are stored */
-    private static final File sDrmAppPrivateInstallDir =
-            new File(Environment.getDataDirectory(), "app-private");
 
     // ----------------------------------------------------------------
 
@@ -1811,12 +1807,10 @@ public class PackageManagerService extends IPackageManager.Stub
                             firstUserIds, firstInstantUserIds);
                 }
 
-                // Send broadcast package appeared if forward locked/external for all users
-                // treat asec-hosted packages like removable media on upgrade
-                if (res.pkg.isForwardLocked() || isExternal(res.pkg)) {
+                // Send broadcast package appeared if external for all users
+                if (isExternal(res.pkg)) {
                     if (DEBUG_INSTALL) {
-                        Slog.i(TAG, "upgrading pkg " + res.pkg
-                                + " is ASEC-hosted -> AVAILABLE");
+                        Slog.i(TAG, "upgrading pkg " + res.pkg + " is external");
                     }
                     final int[] uidArray = new int[]{res.pkg.applicationInfo.uid};
                     ArrayList<String> pkgList = new ArrayList<>(1);
@@ -2628,10 +2622,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
                         SystemClock.uptimeMillis());
                 scanDirTracedLI(sAppInstallDir, 0, scanFlags | SCAN_REQUIRE_KNOWN, 0);
-
-                scanDirTracedLI(sDrmAppPrivateInstallDir, mDefParseFlags
-                        | PackageParser.PARSE_FORWARD_LOCK,
-                        scanFlags | SCAN_REQUIRE_KNOWN, 0);
 
                 // Remove disable package settings for updated system apps that were
                 // removed via an OTA. If the update is no longer present, remove the
@@ -8631,7 +8621,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     + "; " + pkgSetting.codePathString + " --> " + pkg.codePath);
 
             final InstallArgs args = createInstallArgsForExisting(
-                    packageFlagsToInstallFlags(pkgSetting), pkgSetting.codePathString,
+                    pkgSetting.codePathString,
                     pkgSetting.resourcePathString, getAppDexInstructionSets(pkgSetting));
             args.cleanUpResourcesLI();
             synchronized (mPackages) {
@@ -8704,7 +8694,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         + "; " + pkgSetting.versionCode + " --> " + pkg.getLongVersionCode()
                         + "; " + pkgSetting.codePathString + " --> " + pkg.codePath);
                 InstallArgs args = createInstallArgsForExisting(
-                        packageFlagsToInstallFlags(pkgSetting), pkgSetting.codePathString,
+                        pkgSetting.codePathString,
                         pkgSetting.resourcePathString, getAppDexInstructionSets(pkgSetting));
                 synchronized (mInstallLock) {
                     args.cleanUpResourcesLI();
@@ -11536,11 +11526,8 @@ public class PackageManagerService extends IPackageManager.Stub
         // pass once we've determined ABI below.
         setNativeLibraryPaths(pkg, sAppLib32InstallDir);
 
-        // We would never need to extract libs for forward-locked and external packages,
-        // since the container service will do it for us. We shouldn't attempt to
-        // extract libs from system app when it was not updated.
-        if (pkg.isForwardLocked() || pkg.applicationInfo.isExternalAsec() ||
-                (isSystemApp(pkg) && !pkg.isUpdatedSystemApp())) {
+        // We shouldn't attempt to extract libs from system app when it was not updated.
+        if (isSystemApp(pkg) && !pkg.isUpdatedSystemApp()) {
             extractLibs = false;
         }
 
@@ -11881,7 +11868,6 @@ public class PackageManagerService extends IPackageManager.Stub
         final String codePath = pkg.codePath;
         final File codeFile = new File(codePath);
         final boolean bundledApp = info.isSystemApp() && !info.isUpdatedSystemApp();
-        final boolean asecApp = info.isForwardLocked() || info.isExternalAsec();
 
         info.nativeLibraryRootDir = null;
         info.nativeLibraryRootRequiresIsa = false;
@@ -11910,9 +11896,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     info.secondaryNativeLibraryDir = Environment.buildPath(new File(apkRoot),
                             secondaryLibDir, apkName).getAbsolutePath();
                 }
-            } else if (asecApp) {
-                info.nativeLibraryRootDir = new File(codeFile.getParentFile(), LIB_DIR_NAME)
-                        .getAbsolutePath();
             } else {
                 final String apkName = deriveCodePathName(codePath);
                 info.nativeLibraryRootDir = new File(appLib32InstallDir, apkName)
@@ -14021,7 +14004,6 @@ public class PackageManagerService extends IPackageManager.Stub
         private int installLocationPolicy(PackageInfoLite pkgLite) {
             String packageName = pkgLite.packageName;
             int installLocation = pkgLite.installLocation;
-            boolean onSd = (installFlags & PackageManager.INSTALL_EXTERNAL) != 0;
             // reader
             synchronized (mPackages) {
                 // Currently installed package which the new package is attempting to replace or
@@ -14074,16 +14056,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
                         // Check for updated system application.
                         if ((installedPkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                            if (onSd) {
-                                Slog.w(TAG, "Cannot install update to system app on sdcard");
-                                return PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION;
-                            }
                             return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
                         } else {
-                            if (onSd) {
-                                // Install flag overrides everything.
-                                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
-                            }
                             // If current upgrade specifies particular preference
                             if (installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
                                 // Application explicitly specified internal.
@@ -14104,11 +14078,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
             }
-            // All the special cases have been taken care of.
-            // Return result based on recommended install location.
-            if (onSd) {
-                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
-            }
             return pkgLite.recommendedInstallLocation;
         }
 
@@ -14125,69 +14094,58 @@ public class PackageManagerService extends IPackageManager.Stub
             if (origin.staged) {
                 if (origin.file != null) {
                     installFlags |= PackageManager.INSTALL_INTERNAL;
-                    installFlags &= ~PackageManager.INSTALL_EXTERNAL;
                 } else {
                     throw new IllegalStateException("Invalid stage location");
                 }
             }
 
-            final boolean onSd = (installFlags & PackageManager.INSTALL_EXTERNAL) != 0;
             final boolean onInt = (installFlags & PackageManager.INSTALL_INTERNAL) != 0;
             final boolean ephemeral = (installFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
             PackageInfoLite pkgLite = null;
 
-            if (onInt && onSd) {
-                // Check if both bits are set.
-                Slog.w(TAG, "Conflicting flags specified for installing on both internal and external");
-                ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
-            } else if (onSd && ephemeral) {
-                Slog.w(TAG,  "Conflicting flags specified for installing ephemeral on external");
-                ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
-            } else {
-                pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
-                        origin.resolvedPath, installFlags, packageAbiOverride);
 
-                if (DEBUG_INSTANT && ephemeral) {
-                    Slog.v(TAG, "pkgLite for install: " + pkgLite);
+            pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
+                    origin.resolvedPath, installFlags, packageAbiOverride);
+
+            if (DEBUG_INSTANT && ephemeral) {
+                Slog.v(TAG, "pkgLite for install: " + pkgLite);
+            }
+
+            /*
+             * If we have too little free space, try to free cache
+             * before giving up.
+             */
+            if (!origin.staged && pkgLite.recommendedInstallLocation
+                    == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
+                // TODO: focus freeing disk space on the target device
+                final StorageManager storage = StorageManager.from(mContext);
+                final long lowThreshold = storage.getStorageLowBytes(
+                        Environment.getDataDirectory());
+
+                final long sizeBytes = PackageManagerServiceUtils.calculateInstalledSize(
+                        origin.resolvedPath, packageAbiOverride);
+                if (sizeBytes >= 0) {
+                    try {
+                        mInstaller.freeCache(null, sizeBytes + lowThreshold, 0, 0);
+                        pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
+                                origin.resolvedPath, installFlags, packageAbiOverride);
+                    } catch (InstallerException e) {
+                        Slog.w(TAG, "Failed to free cache", e);
+                    }
                 }
 
                 /*
-                 * If we have too little free space, try to free cache
-                 * before giving up.
+                 * The cache free must have deleted the file we downloaded to install.
+                 *
+                 * TODO: fix the "freeCache" call to not delete the file we care about.
                  */
-                if (!origin.staged && pkgLite.recommendedInstallLocation
-                        == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
-                    // TODO: focus freeing disk space on the target device
-                    final StorageManager storage = StorageManager.from(mContext);
-                    final long lowThreshold = storage.getStorageLowBytes(
-                            Environment.getDataDirectory());
-
-                    final long sizeBytes = PackageManagerServiceUtils.calculateInstalledSize(
-                            origin.resolvedPath, packageAbiOverride);
-                    if (sizeBytes >= 0) {
-                        try {
-                            mInstaller.freeCache(null, sizeBytes + lowThreshold, 0, 0);
-                            pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
-                                    origin.resolvedPath, installFlags, packageAbiOverride);
-                        } catch (InstallerException e) {
-                            Slog.w(TAG, "Failed to free cache", e);
-                        }
-                    }
-
-                    /*
-                     * The cache free must have deleted the file we
-                     * downloaded to install.
-                     *
-                     * TODO: fix the "freeCache" call to not delete
-                     *       the file we care about.
-                     */
-                    if (pkgLite.recommendedInstallLocation
-                            == PackageHelper.RECOMMEND_FAILED_INVALID_URI) {
-                        pkgLite.recommendedInstallLocation
+                if (pkgLite.recommendedInstallLocation
+                        == PackageHelper.RECOMMEND_FAILED_INVALID_URI) {
+                    pkgLite.recommendedInstallLocation
                             = PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
-                    }
                 }
             }
+
 
             if (ret == PackageManager.INSTALL_SUCCEEDED) {
                 int loc = pkgLite.recommendedInstallLocation;
@@ -14208,24 +14166,21 @@ public class PackageManagerService extends IPackageManager.Stub
                     loc = installLocationPolicy(pkgLite);
                     if (loc == PackageHelper.RECOMMEND_FAILED_VERSION_DOWNGRADE) {
                         ret = PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
-                    } else if (!onSd && !onInt) {
+                    } else if (!onInt) {
                         // Override install location with flags
                         if (loc == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
                             // Set the flag to install on external media.
-                            installFlags |= PackageManager.INSTALL_EXTERNAL;
                             installFlags &= ~PackageManager.INSTALL_INTERNAL;
                         } else if (loc == PackageHelper.RECOMMEND_INSTALL_EPHEMERAL) {
                             if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "...setting INSTALL_EPHEMERAL install flag");
                             }
                             installFlags |= PackageManager.INSTALL_INSTANT_APP;
-                            installFlags &= ~(PackageManager.INSTALL_EXTERNAL
-                                    |PackageManager.INSTALL_INTERNAL);
+                            installFlags &= ~PackageManager.INSTALL_INTERNAL;
                         } else {
                             // Make sure the flag for installing on external
                             // media is unset
                             installFlags |= PackageManager.INSTALL_INTERNAL;
-                            installFlags &= ~PackageManager.INSTALL_EXTERNAL;
                         }
                     }
                 }
@@ -14409,7 +14364,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * Create args that describe an existing installed package. Typically used
      * when cleaning up old installs, or used as a move source.
      */
-    private InstallArgs createInstallArgsForExisting(int installFlags, String codePath,
+    private InstallArgs createInstallArgsForExisting(String codePath,
             String resourcePath, String[] instructionSets) {
         return new FileInstallArgs(codePath, resourcePath, instructionSets);
     }
@@ -14501,14 +14456,6 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManager.INSTALL_SUCCEEDED;
         }
 
-        protected boolean isFwdLocked() {
-            return (installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
-        }
-
-        protected boolean isExternalAsec() {
-            return (installFlags & PackageManager.INSTALL_EXTERNAL) != 0;
-        }
-
         protected boolean isEphemeral() {
             return (installFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
         }
@@ -14536,7 +14483,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
-     * Logic to handle installation of non-ASEC applications, including copying
+     * Logic to handle installation of new applications, including copying
      * and renaming logic.
      */
     class FileInstallArgs extends InstallArgs {
@@ -14558,9 +14505,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     params.grantedRuntimePermissions,
                     params.traceMethod, params.traceCookie, params.signingDetails,
                     params.installReason, params.mParentInstallParams);
-            if (isFwdLocked()) {
-                throw new IllegalArgumentException("Forward locking only supported in ASEC");
-            }
         }
 
         /** Existing install */
@@ -15291,7 +15235,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         // We didn't need to disable the .apk as a current system package,
                         // which means we are replacing another update that is already
                         // installed.  We need to make sure to delete the older one's .apk.
-                        res.removedInfo.args = createInstallArgsForExisting(0,
+                        res.removedInfo.args = createInstallArgsForExisting(
                                 oldPackage.applicationInfo.getCodePath(),
                                 oldPackage.applicationInfo.getResourcePath(),
                                 getAppDexInstructionSets(oldPackage.applicationInfo));
@@ -15570,8 +15514,6 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private void executePostCommitSteps(CommitRequest commitRequest) {
         for (ReconciledPackage reconciledPkg : commitRequest.reconciledPackages.values()) {
-            final boolean forwardLocked =
-                    ((reconciledPkg.installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0);
             final boolean instantApp =
                     ((reconciledPkg.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0);
             final PackageParser.Package pkg = reconciledPkg.pkgSetting.pkg;
@@ -15604,10 +15546,8 @@ public class PackageManagerService extends IPackageManager.Stub
             //     This update happens in place!
             //
             // We only need to dexopt if the package meets ALL of the following conditions:
-            //   1) it is not forward locked.
-            //   2) it is not on on an external ASEC container.
-            //   3) it is not an instant app or if it is then dexopt is enabled via gservices.
-            //   4) it is not debuggable.
+            //   1) it is not an instant app or if it is then dexopt is enabled via gservices.
+            //   2) it is not debuggable.
             //
             // Note that we do not dexopt instant apps by default. dexopt can take some time to
             // complete, so we skip this step during installation. Instead, we'll take extra time
@@ -15615,9 +15555,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // continuous progress to the useur instead of mysteriously blocking somewhere in the
             // middle of running an instant app. The default behaviour can be overridden
             // via gservices.
-            final boolean performDexopt = !forwardLocked
-                    && !pkg.applicationInfo.isExternalAsec()
-                    && (!instantApp || Global.getInt(mContext.getContentResolver(),
+            final boolean performDexopt =
+                    (!instantApp || Global.getInt(mContext.getContentResolver(),
                     Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0)
                     && ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0);
 
@@ -15712,7 +15651,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     // Parse old package
                     boolean oldExternal = isExternal(oldPackage);
                     int oldParseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
-                            | (oldPackage.isForwardLocked() ? PackageParser.PARSE_FORWARD_LOCK : 0)
                             | (oldExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0);
                     int oldScanFlags = SCAN_UPDATE_SIGNATURE | SCAN_UPDATE_TIME;
                     try {
@@ -15830,9 +15768,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final String installerPackageName = args.installerPackageName;
         final String volumeUuid = args.volumeUuid;
         final File tmpPackageFile = new File(args.getCodePath());
-        final boolean forwardLocked = ((installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0);
-        final boolean onExternal = (((installFlags & PackageManager.INSTALL_EXTERNAL) != 0)
-                || (args.volumeUuid != null));
+        final boolean onExternal = args.volumeUuid != null;
         final boolean instantApp = ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0);
         final boolean fullApp = ((installFlags & PackageManager.INSTALL_FULL_APP) != 0);
         final boolean forceSdk = ((installFlags & PackageManager.INSTALL_FORCE_SDK) != 0);
@@ -15859,16 +15795,14 @@ public class PackageManagerService extends IPackageManager.Stub
         if (DEBUG_INSTALL) Slog.d(TAG, "installPackageLI: path=" + tmpPackageFile);
 
         // Sanity check
-        if (instantApp && (forwardLocked || onExternal)) {
-            Slog.i(TAG, "Incompatible ephemeral install; fwdLocked=" + forwardLocked
-                    + " external=" + onExternal);
+        if (instantApp && onExternal) {
+            Slog.i(TAG, "Incompatible ephemeral install; external=" + onExternal);
             throw new PrepareFailure(PackageManager.INSTALL_FAILED_INSTANT_APP_INVALID);
         }
 
         // Retrieve PackageSettings and parse package
         @ParseFlags final int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
                 | PackageParser.PARSE_ENFORCE_CODE
-                | (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0)
                 | (onExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0)
                 | (forceSdk ? PackageParser.PARSE_FORCE_SDK : 0);
 
@@ -16213,7 +16147,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkg.applicationInfo.secondaryCpuAbi = ps.secondaryCpuAbiString;
             }
 
-        } else if (!forwardLocked && !pkg.applicationInfo.isExternalAsec()) {
+        } else {
             // Enable SCAN_NO_DEX flag to skip dexopt at a later stage
             scanFlags |= SCAN_NO_DEX;
 
@@ -16745,19 +16679,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return (ps.pkgFlags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
-    private int packageFlagsToInstallFlags(PackageSetting ps) {
-        int installFlags = 0;
-        if (isExternal(ps) && TextUtils.isEmpty(ps.volumeUuid)) {
-            // This existing package was an external ASEC install when we have
-            // the external flag without a UUID
-            installFlags |= PackageManager.INSTALL_EXTERNAL;
-        }
-        if (ps.isForwardLocked()) {
-            installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
-        }
-        return installFlags;
-    }
-
     private VersionInfo getSettingsVersionForPackage(PackageParser.Package pkg) {
         if (isExternal(pkg)) {
             if (TextUtils.isEmpty(pkg.volumeUuid)) {
@@ -16773,9 +16694,6 @@ public class PackageManagerService extends IPackageManager.Stub
     private void deleteTempPackageFiles() {
         final FilenameFilter filter =
                 (dir, name) -> name.startsWith("vmdl") && name.endsWith(".tmp");
-        for (File file : sDrmAppPrivateInstallDir.listFiles(filter)) {
-            file.delete();
-        }
     }
 
     @Override
@@ -17766,7 +17684,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Delete application code and resources only for parent packages
         if (ps.parentPackageName == null) {
             if (deleteCodeAndResources && (outInfo != null)) {
-                outInfo.args = createInstallArgsForExisting(packageFlagsToInstallFlags(ps),
+                outInfo.args = createInstallArgsForExisting(
                         ps.codePathString, ps.resourcePathString, getAppDexInstructionSets(ps));
                 if (DEBUG_SD_INSTALL) Slog.i(TAG, "args=" + outInfo.args);
             }
@@ -21698,7 +21616,6 @@ public class PackageManagerService extends IPackageManager.Stub
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
         final PackageManager pm = mContext.getPackageManager();
 
-        final boolean currentAsec;
         final String currentVolumeUuid;
         final File codeFile;
         final String installerPackageName;
@@ -21732,22 +21649,13 @@ public class PackageManagerService extends IPackageManager.Stub
                         "3rd party apps are not allowed on internal storage");
             }
 
-            if (pkg.applicationInfo.isExternalAsec()) {
-                currentAsec = true;
-                currentVolumeUuid = StorageManager.UUID_PRIMARY_PHYSICAL;
-            } else if (pkg.applicationInfo.isForwardLocked()) {
-                currentAsec = true;
-                currentVolumeUuid = "forward_locked";
-            } else {
-                currentAsec = false;
-                currentVolumeUuid = ps.volumeUuid;
+            currentVolumeUuid = ps.volumeUuid;
 
-                final File probe = new File(pkg.codePath);
-                final File probeOat = new File(probe, "oat");
-                if (!probe.isDirectory() || !probeOat.isDirectory()) {
-                    throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
-                            "Move only supported for modern cluster style installs");
-                }
+            final File probe = new File(pkg.codePath);
+            final File probeOat = new File(probe, "oat");
+            if (!probe.isDirectory() || !probeOat.isDirectory()) {
+                throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
+                        "Move only supported for modern cluster style installs");
             }
 
             if (Objects.equals(currentVolumeUuid, volumeUuid)) {
@@ -21784,12 +21692,11 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean moveCompleteApp;
         final File measurePath;
 
+        installFlags = INSTALL_INTERNAL;
         if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, volumeUuid)) {
-            installFlags = INSTALL_INTERNAL;
-            moveCompleteApp = !currentAsec;
+            moveCompleteApp = true;
             measurePath = Environment.getDataAppDirectory(volumeUuid);
         } else if (Objects.equals(StorageManager.UUID_PRIMARY_PHYSICAL, volumeUuid)) {
-            installFlags = INSTALL_EXTERNAL;
             moveCompleteApp = false;
             measurePath = storage.getPrimaryPhysicalVolume().getPath();
         } else {
@@ -21801,9 +21708,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         "Move location not mounted private volume");
             }
 
-            Preconditions.checkState(!currentAsec);
-
-            installFlags = INSTALL_INTERNAL;
             moveCompleteApp = true;
             measurePath = Environment.getDataAppDirectory(volumeUuid);
         }

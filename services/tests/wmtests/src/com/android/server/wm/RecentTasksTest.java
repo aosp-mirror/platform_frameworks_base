@@ -110,9 +110,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
-        mTestService = spy(new MyTestActivityTaskManagerService(mContext));
-        final TestActivityManagerService am = spy(new MyTestActivityManagerService());
-        setupActivityManagerService(am, mTestService);
+        mTestService = new MyTestActivityTaskManagerService(mContext);
         mRecentTasks = (TestRecentTasks) mTestService.getRecentTasks();
         mRecentTasks.loadParametersFromResources(mContext.getResources());
         mHomeStack = mTestService.mStackSupervisor.getDefaultDisplay().getOrCreateStack(
@@ -868,20 +866,11 @@ public class RecentTasksTest extends ActivityTestsBase {
         }
 
         @Override
-        protected ActivityStackSupervisor createTestSupervisor() {
-            return new MyTestActivityStackSupervisor(this, mH.getLooper());
-        }
-
-    }
-
-    private class MyTestActivityManagerService extends TestActivityManagerService {
-        MyTestActivityManagerService() {
-            super(mTestInjector);
-        }
-
-        @Override
-        public boolean isUserRunning(int userId, int flags) {
-            return true;
+        protected ActivityStackSupervisor createStackSupervisor() {
+            if (mTestStackSupervisor == null) {
+                mTestStackSupervisor = new MyTestActivityStackSupervisor(this, mH.getLooper());
+            }
+            return mTestStackSupervisor;
         }
     }
 

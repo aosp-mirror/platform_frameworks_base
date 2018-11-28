@@ -79,7 +79,7 @@ public final class AmbientPulseManager extends AlertingNotificationManager {
     @Override
     protected void onAlertEntryAdded(AlertEntry alertEntry) {
         NotificationData.Entry entry = alertEntry.mEntry;
-        entry.row.setAmbientPulsing(true);
+        entry.setAmbientPulsing(true);
         for (OnAmbientChangedListener listener : mListeners) {
             listener.onAmbientStateChanged(entry, true);
         }
@@ -88,11 +88,11 @@ public final class AmbientPulseManager extends AlertingNotificationManager {
     @Override
     protected void onAlertEntryRemoved(AlertEntry alertEntry) {
         NotificationData.Entry entry = alertEntry.mEntry;
-        entry.row.setAmbientPulsing(false);
+        entry.setAmbientPulsing(false);
         for (OnAmbientChangedListener listener : mListeners) {
             listener.onAmbientStateChanged(entry, false);
         }
-        entry.row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_AMBIENT);
+        entry.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_AMBIENT);
     }
 
     @Override

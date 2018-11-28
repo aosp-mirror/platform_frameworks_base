@@ -27,10 +27,7 @@ import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 
 import android.annotation.NonNull;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -42,7 +39,6 @@ import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -64,15 +60,14 @@ import java.util.Set;
 public class PermissionMonitor {
     private static final String TAG = "PermissionMonitor";
     private static final boolean DBG = true;
-    private static final Boolean SYSTEM = Boolean.TRUE;
-    private static final Boolean NETWORK = Boolean.FALSE;
+    protected static final Boolean SYSTEM = Boolean.TRUE;
+    protected static final Boolean NETWORK = Boolean.FALSE;
     private static final int VERSION_Q = Build.VERSION_CODES.Q;
 
     private final Context mContext;
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
     private final INetworkManagementService mNetd;
-    private final BroadcastReceiver mIntentReceiver;
 
     // Values are User IDs.
     private final Set<Integer> mUsers = new HashSet<>();
@@ -85,43 +80,12 @@ public class PermissionMonitor {
         mPackageManager = context.getPackageManager();
         mUserManager = UserManager.get(context);
         mNetd = netd;
-        mIntentReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
-                int appUid = intent.getIntExtra(Intent.EXTRA_UID, INVALID_UID);
-                Uri appData = intent.getData();
-                String appName = appData != null ? appData.getSchemeSpecificPart() : null;
-
-                if (Intent.ACTION_USER_ADDED.equals(action)) {
-                    onUserAdded(user);
-                } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                    onUserRemoved(user);
-                } else if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
-                    onAppAdded(appName, appUid);
-                } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
-                    onAppRemoved(appUid);
-                }
-            }
-        };
     }
 
     // Intended to be called only once at startup, after the system is ready. Installs a broadcast
     // receiver to monitor ongoing UID changes, so this shouldn't/needn't be called again.
     public synchronized void startMonitoring() {
         log("Monitoring");
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_USER_ADDED);
-        intentFilter.addAction(Intent.ACTION_USER_REMOVED);
-        mContext.registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, intentFilter, null, null);
-
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        intentFilter.addDataScheme("package");
-        mContext.registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, intentFilter, null, null);
 
         List<PackageInfo> apps = mPackageManager.getInstalledPackages(GET_PERMISSIONS);
         if (apps == null) {
@@ -260,7 +224,14 @@ public class PermissionMonitor {
         }
     }
 
-    private synchronized void onUserAdded(int user) {
+    /**
+     * Called when a user is added. See {link #ACTION_USER_ADDED}.
+     *
+     * @param user The integer userHandle of the added user. See {@link #EXTRA_USER_HANDLE}.
+     *
+     * @hide
+     */
+    public synchronized void onUserAdded(int user) {
         if (user < 0) {
             loge("Invalid user in onUserAdded: " + user);
             return;
@@ -272,7 +243,14 @@ public class PermissionMonitor {
         update(users, mApps, true);
     }
 
-    private synchronized void onUserRemoved(int user) {
+    /**
+     * Called when an user is removed. See {link #ACTION_USER_REMOVED}.
+     *
+     * @param user The integer userHandle of the removed user. See {@link #EXTRA_USER_HANDLE}.
+     *
+     * @hide
+     */
+    public synchronized void onUserRemoved(int user) {
         if (user < 0) {
             loge("Invalid user in onUserRemoved: " + user);
             return;
@@ -284,8 +262,8 @@ public class PermissionMonitor {
         update(users, mApps, false);
     }
 
-
-    private Boolean highestPermissionForUid(Boolean currentPermission, String name) {
+    @VisibleForTesting
+    protected Boolean highestPermissionForUid(Boolean currentPermission, String name) {
         if (currentPermission == SYSTEM) {
             return currentPermission;
         }
@@ -303,33 +281,39 @@ public class PermissionMonitor {
         return currentPermission;
     }
 
-    private synchronized void onAppAdded(String appName, int appUid) {
-        if (TextUtils.isEmpty(appName) || appUid < 0) {
-            loge("Invalid app in onAppAdded: " + appName + " | " + appUid);
-            return;
-        }
-
+    /**
+     * Called when a package is added. See {link #ACTION_PACKAGE_ADDED}.
+     *
+     * @param packageName The name of the new package.
+     * @param uid The uid of the new package.
+     *
+     * @hide
+     */
+    public synchronized void onPackageAdded(String packageName, int uid) {
         // If multiple packages share a UID (cf: android:sharedUserId) and ask for different
         // permissions, don't downgrade (i.e., if it's already SYSTEM, leave it as is).
-        final Boolean permission = highestPermissionForUid(mApps.get(appUid), appName);
-        if (permission != mApps.get(appUid)) {
-            mApps.put(appUid, permission);
+        final Boolean permission = highestPermissionForUid(mApps.get(uid), packageName);
+        if (permission != mApps.get(uid)) {
+            mApps.put(uid, permission);
 
             Map<Integer, Boolean> apps = new HashMap<>();
-            apps.put(appUid, permission);
+            apps.put(uid, permission);
             update(mUsers, apps, true);
         }
     }
 
-    private synchronized void onAppRemoved(int appUid) {
-        if (appUid < 0) {
-            loge("Invalid app in onAppRemoved: " + appUid);
-            return;
-        }
+    /**
+     * Called when a package is removed. See {link #ACTION_PACKAGE_REMOVED}.
+     *
+     * @param uid containing the integer uid previously assigned to the package.
+     *
+     * @hide
+     */
+    public synchronized void onPackageRemoved(int uid) {
         Map<Integer, Boolean> apps = new HashMap<>();
 
         Boolean permission = null;
-        String[] packages = mPackageManager.getPackagesForUid(appUid);
+        String[] packages = mPackageManager.getPackagesForUid(uid);
         if (packages != null && packages.length > 0) {
             for (String name : packages) {
                 permission = highestPermissionForUid(permission, name);
@@ -341,16 +325,16 @@ public class PermissionMonitor {
                 }
             }
         }
-        if (permission == mApps.get(appUid)) {
+        if (permission == mApps.get(uid)) {
             // The permissions of this UID have not changed. Nothing to do.
             return;
         } else if (permission != null) {
-            mApps.put(appUid, permission);
-            apps.put(appUid, permission);
+            mApps.put(uid, permission);
+            apps.put(uid, permission);
             update(mUsers, apps, true);
         } else {
-            mApps.remove(appUid);
-            apps.put(appUid, NETWORK);  // doesn't matter which permission we pick here
+            mApps.remove(uid);
+            apps.put(uid, NETWORK);  // doesn't matter which permission we pick here
             update(mUsers, apps, false);
         }
     }

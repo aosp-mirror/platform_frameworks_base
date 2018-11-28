@@ -51,6 +51,7 @@ import java.util.Stack;
 public class NotificationViewHierarchyManager {
     private static final String TAG = "NotificationViewHierarchyManager";
 
+    //TODO: change this top <Entry, List<Entry>>?
     private final HashMap<ExpandableNotificationRow, List<ExpandableNotificationRow>>
             mTmpChildOrderMap = new HashMap<>();
 
@@ -140,6 +141,7 @@ public class NotificationViewHierarchyManager {
     /**
      * Updates the visual representation of the notifications.
      */
+    //TODO: Rewrite this to focus on Entries, or some other data object instead of views
     public void updateNotificationViews() {
         ArrayList<NotificationData.Entry> activeNotifications = mEntryManager.getNotificationData()
                 .getActiveNotifications();
@@ -148,12 +150,12 @@ public class NotificationViewHierarchyManager {
         final int N = activeNotifications.size();
         for (int i = 0; i < N; i++) {
             NotificationData.Entry ent = activeNotifications.get(i);
-            if (ent.row.isDismissed() || ent.row.isRemoved()) {
+            if (ent.isRowDismissed() || ent.isRowRemoved()) {
                 // we don't want to update removed notifications because they could
                 // temporarily become children if they were isolated before.
                 continue;
             }
-            ent.row.setStatusBarState(mStatusBarStateListener.getCurrentState());
+            ent.getRow().setStatusBarState(mStatusBarStateListener.getCurrentState());
             boolean showAsBubble = ent.isBubble() && !ent.isBubbleDismissed()
                     && mStatusBarStateListener.getCurrentState() == SHADE;
             if (showAsBubble) {
@@ -175,20 +177,19 @@ public class NotificationViewHierarchyManager {
             boolean deviceSensitive = devicePublic
                     && !mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(
                     mLockscreenUserManager.getCurrentUserId());
-            ent.row.setSensitive(sensitive, deviceSensitive);
-            ent.row.setNeedsRedaction(needsRedaction);
-            if (mGroupManager.isChildInGroupWithSummary(ent.row.getStatusBarNotification())) {
-                ExpandableNotificationRow summary = mGroupManager.getGroupSummary(
-                        ent.row.getStatusBarNotification());
+            ent.getRow().setSensitive(sensitive, deviceSensitive);
+            ent.getRow().setNeedsRedaction(needsRedaction);
+            if (mGroupManager.isChildInGroupWithSummary(ent.notification)) {
+                NotificationData.Entry summary = mGroupManager.getGroupSummary(ent.notification);
                 List<ExpandableNotificationRow> orderedChildren =
-                        mTmpChildOrderMap.get(summary);
+                        mTmpChildOrderMap.get(summary.getRow());
                 if (orderedChildren == null) {
                     orderedChildren = new ArrayList<>();
-                    mTmpChildOrderMap.put(summary, orderedChildren);
+                    mTmpChildOrderMap.put(summary.getRow(), orderedChildren);
                 }
-                orderedChildren.add(ent.row);
+                orderedChildren.add(ent.getRow());
             } else {
-                toShow.add(ent.row);
+                toShow.add(ent.getRow());
             }
 
         }
@@ -391,19 +392,19 @@ public class NotificationViewHierarchyManager {
                         && !row.isLowPriority()));
             }
 
-            entry.row.setOnAmbient(getShadeController().isDozing());
+            entry.getRow().setOnAmbient(getShadeController().isDozing());
             int userId = entry.notification.getUserId();
             boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
-                    entry.notification) && !entry.row.isRemoved();
+                    entry.notification) && !entry.isRowRemoved();
             boolean showOnKeyguard = mLockscreenUserManager.shouldShowOnKeyguard(entry
                     .notification);
             if (!showOnKeyguard) {
                 // min priority notifications should show if their summary is showing
                 if (mGroupManager.isChildInGroupWithSummary(entry.notification)) {
-                    ExpandableNotificationRow summary = mGroupManager.getLogicalGroupSummary(
+                    NotificationData.Entry summary = mGroupManager.getLogicalGroupSummary(
                             entry.notification);
                     if (summary != null && mLockscreenUserManager.shouldShowOnKeyguard(
-                            summary.getStatusBarNotification()))         {
+                            summary.notification))         {
                         showOnKeyguard = true;
                     }
                 }
@@ -411,16 +412,16 @@ public class NotificationViewHierarchyManager {
             if (suppressedSummary
                     || mLockscreenUserManager.shouldHideNotifications(userId)
                     || (onKeyguard && !showOnKeyguard)) {
-                entry.row.setVisibility(View.GONE);
+                entry.getRow().setVisibility(View.GONE);
             } else {
-                boolean wasGone = entry.row.getVisibility() == View.GONE;
+                boolean wasGone = entry.getRow().getVisibility() == View.GONE;
                 if (wasGone) {
-                    entry.row.setVisibility(View.VISIBLE);
+                    entry.getRow().setVisibility(View.VISIBLE);
                 }
-                if (!isChildNotification && !entry.row.isRemoved()) {
+                if (!isChildNotification && !entry.getRow().isRemoved()) {
                     if (wasGone) {
                         // notify the scroller of a child addition
-                        mListContainer.generateAddAnimation(entry.row,
+                        mListContainer.generateAddAnimation(entry.getRow(),
                                 !showOnKeyguard /* fromMoreCard */);
                     }
                     visibleNotifications++;

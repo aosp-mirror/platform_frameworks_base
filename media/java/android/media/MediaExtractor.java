@@ -434,8 +434,11 @@ final public class MediaExtractor {
      */
     @NonNull
     public List<AudioPresentation> getAudioPresentations(int trackIndex) {
-        return new ArrayList<AudioPresentation>();
+        return native_getAudioPresentations(trackIndex);
     }
+
+    @NonNull
+    private native List<AudioPresentation> native_getAudioPresentations(int trackIndex);
 
     /**
      * Get the PSSH info if present.

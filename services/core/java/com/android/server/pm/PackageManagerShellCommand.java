@@ -2193,9 +2193,6 @@ class PackageManagerShellCommand extends ShellCommand {
         boolean replaceExisting = true;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
-                case "-l":
-                    sessionParams.installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
-                    break;
                 case "-r": // ignore
                     break;
                 case "-R":
@@ -2209,9 +2206,6 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "-t":
                     sessionParams.installFlags |= PackageManager.INSTALL_ALLOW_TEST;
-                    break;
-                case "-s":
-                    sessionParams.installFlags |= PackageManager.INSTALL_EXTERNAL;
                     break;
                 case "-f":
                     sessionParams.installFlags |= PackageManager.INSTALL_INTERNAL;

@@ -18,11 +18,13 @@ package com.android.server.autofill;
 
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
+import static android.util.DebugUtils.flagsToString;
 
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sFullScreenMode;
 import static com.android.server.autofill.Helper.sVerbose;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -72,9 +74,12 @@ import com.android.server.AbstractMasterSystemService;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.autofill.ui.AutoFillUI;
+import com.android.server.intelligence.IntelligenceManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -95,13 +100,33 @@ public final class AutofillManagerService
 
     private static final Object sLock = AutofillManagerService.class;
 
+
+    /**
+     * IME supports Smart Suggestions.
+     */
+    // NOTE: must be public because of flagsToString()
+    public static final int FLAG_SMART_SUGGESTION_IME = 0x1;
+
+    /**
+     * System supports Smarts Suggestions (as a popup-window similar to standard Autofill).
+     */
+    // NOTE: must be public because of flagsToString()
+    public static final int FLAG_SMART_SUGGESTION_SYSTEM = 0x2;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_SMART_SUGGESTION_" }, value = {
+            FLAG_SMART_SUGGESTION_IME,
+            FLAG_SMART_SUGGESTION_SYSTEM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface SmartSuggestionMode {}
+
     static final String RECEIVER_BUNDLE_EXTRA_SESSIONS = "sessions";
 
     private static final char COMPAT_PACKAGE_DELIMITER = ':';
     private static final char COMPAT_PACKAGE_URL_IDS_DELIMITER = ',';
     private static final char COMPAT_PACKAGE_URL_IDS_BLOCK_BEGIN = '[';
     private static final char COMPAT_PACKAGE_URL_IDS_BLOCK_END = ']';
-
 
     /**
      * Maximum number of partitions that can be allowed in a session.
@@ -130,6 +155,7 @@ public final class AutofillManagerService
 
     private final AutofillCompatState mAutofillCompatState = new AutofillCompatState();
     private final LocalService mLocalService = new LocalService();
+    final IntelligenceManagerInternal mIntelligenceManagerInternal;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -153,13 +179,21 @@ public final class AutofillManagerService
     @GuardedBy("mLock")
     private boolean mAllowInstantService;
 
+    /**
+     * Supported modes for Augmented Autofill Smart Suggestions.
+     */
+    @GuardedBy("mLock")
+    private int mSupportedSmartSuggestionModes;
+
     public AutofillManagerService(Context context) {
         super(context, UserManager.DISALLOW_AUTOFILL);
         mUi = new AutoFillUI(ActivityThread.currentActivityThread().getSystemUiContext());
+        mIntelligenceManagerInternal = LocalServices.getService(IntelligenceManagerInternal.class);
 
         setLogLevelFromSettings();
         setMaxPartitionsFromSettings();
         setMaxVisibleDatasetsFromSettings();
+        setSmartSuggestionEmulationFromSettings();
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -186,6 +220,9 @@ public final class AutofillManagerService
         resolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS), false, observer,
                 UserHandle.USER_ALL);
+        resolver.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS), false, observer,
+                UserHandle.USER_ALL);
     }
 
     @Override // from AbstractMasterSystemService
@@ -199,6 +236,9 @@ public final class AutofillManagerService
                 break;
             case Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS:
                 setMaxVisibleDatasetsFromSettings();
+                break;
+            case Settings.Global.AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS:
+                setSmartSuggestionEmulationFromSettings();
                 break;
             default:
                 Slog.w(TAG, "Unexpected property (" + property + "); updating cache instead");
@@ -241,6 +281,10 @@ public final class AutofillManagerService
     public void onSwitchUser(int userHandle) {
         if (sDebug) Slog.d(TAG, "Hiding UI when user switched");
         mUi.hideAll(null);
+    }
+
+    @SmartSuggestionMode int getSupportedSmartSuggestionModesLocked() {
+        return mSupportedSmartSuggestionModes;
     }
 
     // Called by Shell command.
@@ -417,6 +461,19 @@ public final class AutofillManagerService
         if (sDebug) Slog.d(TAG, "setMaxVisibleDatasetsFromSettings(): " + max);
         synchronized (sLock) {
             sVisibleDatasetsMaxCount = max;
+        }
+    }
+
+    private void setSmartSuggestionEmulationFromSettings() {
+        final int flags = Settings.Global.getInt(getContext().getContentResolver(),
+                Settings.Global.AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS, 0);
+        if (sDebug) {
+            Slog.d(TAG, "setSmartSuggestionEmulationFromSettings(): "
+                    + smartSuggestionFlagsToString(flags));
+        }
+
+        synchronized (mLock) {
+            mSupportedSmartSuggestionModes = flags;
         }
     }
 
@@ -608,6 +665,10 @@ public final class AutofillManagerService
         synchronized (sLock) {
             return sVisibleDatasetsMaxCount;
         }
+    }
+
+    static String smartSuggestionFlagsToString(int flags) {
+        return flagsToString(AutofillManagerService.class, "FLAG_SMART_SUGGESTION_", flags);
     }
 
     private final class LocalService extends AutofillManagerInternal {
@@ -1158,6 +1219,10 @@ public final class AutofillManagerService
                     pw.print("from settings: ");
                     pw.println(getWhitelistedCompatModePackagesFromSettings());
                     pw.print("Allow instant service: "); pw.println(mAllowInstantService);
+                    if (mSupportedSmartSuggestionModes != 0) {
+                        pw.print("Smart Suggestion modes: ");
+                        pw.println(smartSuggestionFlagsToString(mSupportedSmartSuggestionModes));
+                    }
                     if (showHistory) {
                         pw.println(); pw.println("Requests history:"); pw.println();
                         mRequestsHistory.reverseDump(fd, pw, args);

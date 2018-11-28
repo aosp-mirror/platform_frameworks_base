@@ -31,6 +31,20 @@ public class Media2Utils {
     private Media2Utils() {
     }
 
+    /**
+     * Ensures that an expression checking an argument is true.
+     *
+     * @param expression the expression to check
+     * @param errorMessage the exception message to use if the check fails; will
+     *     be converted to a string using {@link String#valueOf(Object)}
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(boolean expression, String errorMessage) {
+        if (!expression) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
     public static synchronized void storeCookies(List<HttpCookie> cookies) {
         CookieHandler cookieHandler = CookieHandler.getDefault();
         if (cookieHandler == null) {

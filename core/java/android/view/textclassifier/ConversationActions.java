@@ -345,6 +345,16 @@ public final class ConversationActions implements Parcelable {
 
     /** Represents a message in the conversation. */
     public static final class Message implements Parcelable {
+        /**
+         * Represents the local user.
+         *
+         * @see Builder#setAuthor(Person)
+         */
+        public static final Person PERSON_USER_LOCAL =
+                new Person.Builder()
+                        .setKey("text-classifier-conversation-actions-local-user")
+                        .build();
+
         @Nullable
         private final Person mAuthor;
         @Nullable
@@ -446,7 +456,11 @@ public final class ConversationActions implements Parcelable {
             @Nullable
             private Bundle mExtras;
 
-            /** Sets the person who composed this message. */
+            /**
+             * Sets the person who composed this message.
+             * <p>
+             * Use {@link #PERSON_USER_LOCAL} to represent the local user.
+             */
             @NonNull
             public Builder setAuthor(@Nullable Person author) {
                 mAuthor = author;

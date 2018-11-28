@@ -195,7 +195,6 @@ public final class DefaultPermissionGrantPolicy {
         // STOPSHIP(b/112545973): remove once feature enabled by default
         if (SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
             MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
-            MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.WRITE_MEDIA_AUDIO);
         }
     }
 
@@ -203,10 +202,8 @@ public final class DefaultPermissionGrantPolicy {
     static {
         // STOPSHIP(b/112545973): remove once feature enabled by default
         if (SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
-            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
-            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.WRITE_MEDIA_IMAGES);
             MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
-            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.WRITE_MEDIA_VIDEO);
+            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
         }
     }
 

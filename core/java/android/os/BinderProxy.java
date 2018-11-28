@@ -360,6 +360,16 @@ public final class BinderProxy implements IBinder {
     }
 
     /**
+     * Returns the number of binder proxies held in this process.
+     * @return number of binder proxies in this process
+     */
+    public static int getProxyCount() {
+        synchronized (sProxyMap) {
+            return sProxyMap.size();
+        }
+    }
+
+    /**
      * Dump proxy debug information.
      *
      * @hide

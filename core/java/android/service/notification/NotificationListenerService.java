@@ -1366,6 +1366,22 @@ public abstract class NotificationListenerService extends Service {
         }
 
         @Override
+        public void onNotificationExpansionChanged(
+                String key, boolean isUserAction, boolean isExpanded) {
+            // no-op in the listener
+        }
+
+        @Override
+        public void onNotificationDirectReply(String key) {
+            // no-op in the listener
+        }
+
+        @Override
+        public void onSuggestedReplySent(String key, CharSequence reply, int source) {
+            // no-op in the listener
+        }
+
+        @Override
         public void onNotificationChannelModification(String pkgName, UserHandle user,
                 NotificationChannel channel,
                 @ChannelOrGroupModificationTypes int modificationType) {

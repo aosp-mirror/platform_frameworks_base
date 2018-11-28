@@ -51,4 +51,6 @@
     <color name="car_grey_900">#ff212121</color>
 
     <color name="keyguard_button_text_color">@android:color/black</color>
+
+    <color name="list_divider_color">@*android:color/car_list_divider_light</color>
 </resources>

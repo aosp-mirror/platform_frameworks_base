@@ -464,4 +464,6 @@
     <string-array name="config_pluginWhitelist" translatable="false">
         <item>com.android.systemui</item>
     </string-array>
+
+    <integer name="ongoing_appops_dialog_max_apps">5</integer>
 </resources>

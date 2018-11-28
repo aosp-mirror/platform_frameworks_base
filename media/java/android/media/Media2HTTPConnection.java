@@ -16,26 +16,26 @@
 
 package android.media;
 
-import android.net.NetworkUtils;
+import static android.media.MediaPlayer2.MEDIA_ERROR_UNSUPPORTED;
+
 import android.os.StrictMode;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.Proxy;
-import java.net.URL;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.ProtocolException;
+import java.net.Proxy;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.net.UnknownServiceException;
 import java.util.HashMap;
 import java.util.Map;
-
-import static android.media.MediaPlayer2.MEDIA_ERROR_UNSUPPORTED;
 
 /** @hide */
 public class Media2HTTPConnection {
@@ -161,10 +161,10 @@ public class Media2HTTPConnection {
             if (host.equalsIgnoreCase("localhost")) {
                 return true;
             }
-            if (NetworkUtils.numericToInetAddress(host).isLoopbackAddress()) {
+            if (InetAddress.getByName(host).isLoopbackAddress()) {
                 return true;
             }
-        } catch (IllegalArgumentException iex) {
+        } catch (IllegalArgumentException | UnknownHostException e) {
         }
         return false;
     }

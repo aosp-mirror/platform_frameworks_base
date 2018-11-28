@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Process;
+import android.os.SystemProperties;
 import android.os.storage.StorageManager;
 import android.permission.PermissionManager.SplitPermissionInfo;
 import android.text.TextUtils;
@@ -928,6 +929,16 @@ public class SystemConfig {
                 newPermissions.add(newName);
             } else {
                 XmlUtils.skipCurrentTag(parser);
+            }
+        }
+        // If the storage model feature flag is disabled, we need to fiddle
+        // around with permission definitions to return us to pre-Q behavior.
+        // STOPSHIP(b/112545973): remove once feature enabled by default
+        if (!SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+            if (newPermissions.contains(android.Manifest.permission.READ_MEDIA_AUDIO) ||
+                    newPermissions.contains(android.Manifest.permission.READ_MEDIA_VIDEO) ||
+                    newPermissions.contains(android.Manifest.permission.READ_MEDIA_IMAGES)) {
+                return;
             }
         }
         if (!newPermissions.isEmpty()) {

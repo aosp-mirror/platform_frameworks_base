@@ -120,7 +120,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
             return true;
         }
         if (mAllowedReorderViews.contains(row)
-                && !mVisibilityLocationProvider.isInVisibleLocation(row)) {
+                && !mVisibilityLocationProvider.isInVisibleLocation(row.getEntry())) {
             return true;
         }
         return false;
@@ -142,12 +142,12 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
         if (isHeadsUp) {
             // Heads up notifications should in general be allowed to reorder if they are out of
             // view and stay at the current location if they aren't.
-            mAllowedReorderViews.add(entry.row);
+            mAllowedReorderViews.add(entry.getRow());
         }
     }
 
     public void onLowPriorityUpdated(NotificationData.Entry entry) {
-        mLowPriorityReorderingViews.add(entry.row);
+        mLowPriorityReorderingViews.add(entry.getRow());
     }
 
     /**

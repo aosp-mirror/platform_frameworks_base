@@ -21,8 +21,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.net.Uri;
 
-import com.android.internal.util.Preconditions;
-
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpCookie;
@@ -158,8 +156,8 @@ public class UriDataSourceDesc extends DataSourceDesc {
          * @throws NullPointerException if context or uri is null.
          */
         public @NonNull Builder setDataSource(@NonNull Context context, @NonNull Uri uri) {
-            Preconditions.checkNotNull(context, "context cannot be null");
-            Preconditions.checkNotNull(uri, "uri cannot be null");
+            Media2Utils.checkArgument(context != null, "context cannot be null");
+            Media2Utils.checkArgument(uri != null, "uri cannot be null");
             resetDataSource();
             mUri = uri;
             mContext = context;
@@ -195,8 +193,8 @@ public class UriDataSourceDesc extends DataSourceDesc {
          */
         public @NonNull Builder setDataSource(@NonNull Context context, @NonNull Uri uri,
                 @Nullable Map<String, String> headers, @Nullable List<HttpCookie> cookies) {
-            Preconditions.checkNotNull(context, "context cannot be null");
-            Preconditions.checkNotNull(uri);
+            Media2Utils.checkArgument(context != null, "context cannot be null");
+            Media2Utils.checkArgument(uri != null, "uri cannot be null");
             if (cookies != null) {
                 CookieHandler cookieHandler = CookieHandler.getDefault();
                 if (cookieHandler != null && !(cookieHandler instanceof CookieManager)) {
