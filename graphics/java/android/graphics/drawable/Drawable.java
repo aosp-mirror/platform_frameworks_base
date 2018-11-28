@@ -713,11 +713,12 @@ public abstract class Drawable {
     }
 
     /**
-     * Whether this drawable requests projection.
+     * Whether this drawable requests projection. Indicates that the
+     * {@link android.graphics.RenderNode} this Drawable will draw into should be drawn immediately
+     * after the closest ancestor RenderNode containing a projection receiver.
      *
-     * @hide magic!
+     * @see android.graphics.RenderNode#setProjectBackwards(boolean)
      */
-    @UnsupportedAppUsage
     public boolean isProjected() {
         return false;
     }
