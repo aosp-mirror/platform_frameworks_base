@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
+import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -128,6 +129,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
+import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
@@ -804,6 +806,11 @@ public class DisplayPolicy {
                 if (mDisplayContent.isDefaultDisplay) {
                     mService.mPolicy.setKeyguardCandidateLw(win);
                 }
+                mDisplayContent.setInsetProvider(TYPE_TOP_BAR, win,
+                        (displayFrames, windowState, rect) -> {
+                            rect.top = 0;
+                            rect.bottom = getStatusBarHeight(displayFrames);
+                        });
                 break;
             case TYPE_NAVIGATION_BAR:
                 mContext.enforceCallingOrSelfPermission(
@@ -818,6 +825,8 @@ public class DisplayPolicy {
                 mNavigationBarController.setWindow(win);
                 mNavigationBarController.setOnBarVisibilityChangedListener(
                         mNavBarVisibilityListener, true);
+                mDisplayContent.setInsetProvider(InsetsState.TYPE_NAVIGATION_BAR,
+                        win, null /* frameProvider */);
                 if (DEBUG_LAYOUT) Slog.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
@@ -845,14 +854,21 @@ public class DisplayPolicy {
             if (mDisplayContent.isDefaultDisplay) {
                 mService.mPolicy.setKeyguardCandidateLw(null);
             }
+            mDisplayContent.setInsetProvider(TYPE_TOP_BAR, null, null);
         } else if (mNavigationBar == win) {
             mNavigationBar = null;
             mNavigationBarController.setWindow(null);
+            mDisplayContent.setInsetProvider(InsetsState.TYPE_NAVIGATION_BAR, null, null);
         }
         if (mLastFocusedWindow == win) {
             mLastFocusedWindow = null;
         }
         mScreenDecorWindows.remove(win);
+    }
+
+    private int getStatusBarHeight(DisplayFrames displayFrames) {
+        return Math.max(mStatusBarHeightForRotation[displayFrames.mRotation],
+                displayFrames.mDisplayCutoutSafe.top);
     }
 
     /**

@@ -1461,7 +1461,6 @@ Landroid/view/IWindowManager;->setShelfHeight(ZI)V
 Landroid/view/IWindowManager;->setStrictModeVisualIndicatorPreference(Ljava/lang/String;)V
 Landroid/view/IWindowManager;->showStrictModeViolation(Z)V
 Landroid/view/IWindowManager;->thawRotation()V
-Landroid/view/IWindowSession$Stub$Proxy;->relayout(Landroid/view/IWindow;ILandroid/view/WindowManager$LayoutParams;IIIIJLandroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/view/DisplayCutout$ParcelableWrapper;Landroid/util/MergedConfiguration;Landroid/view/Surface;)I
 Landroid/view/IWindowSession$Stub;->asInterface(Landroid/os/IBinder;)Landroid/view/IWindowSession;
 Landroid/view/IWindowSession;->finishDrawing(Landroid/view/IWindow;)V
 Landroid/view/IWindowSession;->getInTouchMode()Z

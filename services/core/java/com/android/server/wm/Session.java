@@ -50,6 +50,7 @@ import android.view.InputChannel;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.view.InsetsState;
 import android.view.WindowManager;
 
 import com.android.internal.os.logging.MetricsLoggerWrapper;
@@ -153,17 +154,21 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public int addToDisplay(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, Rect outFrame, Rect outContentInsets,
             Rect outStableInsets, Rect outOutsets,
-            DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel) {
+            DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
+            InsetsState outInsetsState) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId, outFrame,
-                outContentInsets, outStableInsets, outOutsets, outDisplayCutout, outInputChannel);
+                outContentInsets, outStableInsets, outOutsets, outDisplayCutout, outInputChannel,
+                outInsetsState);
     }
 
     @Override
     public int addToDisplayWithoutInputChannel(IWindow window, int seq, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets) {
+            int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets,
+            InsetsState outInsetsState) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
                 new Rect() /* outFrame */, outContentInsets, outStableInsets, null /* outOutsets */,
-                new DisplayCutout.ParcelableWrapper() /* cutout */, null /* outInputChannel */);
+                new DisplayCutout.ParcelableWrapper() /* cutout */, null /* outInputChannel */,
+                outInsetsState);
     }
 
     @Override
@@ -182,7 +187,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             Rect outFrame, Rect outOverscanInsets, Rect outContentInsets, Rect outVisibleInsets,
             Rect outStableInsets, Rect outsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
-            Surface outSurface) {
+            Surface outSurface, InsetsState outInsetsState) {
         if (false) Slog.d(TAG_WM, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
@@ -190,7 +195,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 requestedWidth, requestedHeight, viewFlags, flags, frameNumber,
                 outFrame, outOverscanInsets, outContentInsets, outVisibleInsets,
                 outStableInsets, outsets, outBackdropFrame, cutout,
-                mergedConfiguration, outSurface);
+                mergedConfiguration, outSurface, outInsetsState);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());

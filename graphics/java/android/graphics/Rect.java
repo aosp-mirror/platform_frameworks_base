@@ -106,6 +106,20 @@ public final class Rect implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public Rect(@Nullable Insets r) {
+        if (r == null) {
+            left = top = right = bottom = 0;
+        } else {
+            left = r.left;
+            top = r.top;
+            right = r.right;
+            bottom = r.bottom;
+        }
+    }
+
+    /**
      * Returns a copy of {@code r} if {@code r} is not {@code null}, or {@code null} otherwise.
      *
      * @hide
@@ -411,6 +425,18 @@ public final class Rect implements Parcelable {
      * @param insets The rectangle specifying the insets on all side.
      */
     public void inset(@NonNull Rect insets) {
+        left += insets.left;
+        top += insets.top;
+        right -= insets.right;
+        bottom -= insets.bottom;
+    }
+
+    /**
+     * Insets the rectangle on all sides specified by the dimensions of {@code insets}.
+     * @hide
+     * @param insets The insets to inset the rect by.
+     */
+    public void inset(Insets insets) {
         left += insets.left;
         top += insets.top;
         right -= insets.right;

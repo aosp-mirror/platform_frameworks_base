@@ -34,6 +34,7 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
+import static android.view.InsetsState.TYPE_IME;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -123,6 +124,7 @@ import android.animation.AnimationHandler;
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -150,6 +152,7 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.InputChannel;
 import android.view.InputDevice;
+import android.view.InsetsState.InternalInsetType;
 import android.view.MagnificationSpec;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -161,6 +164,7 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
+import com.android.internal.util.function.TriConsumer;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.DisplayRotationUtil;
 import com.android.server.wm.utils.RotationCache;
@@ -505,6 +509,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     boolean mInputMethodTargetWaitingAnim;
 
     private final PointerEventDispatcher mPointerEventDispatcher;
+
+    private final InsetsStateController mInsetsStateController;
 
     // Last systemUiVisibility we received from status bar.
     private int mLastStatusBarVisibility = 0;
@@ -902,6 +908,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mService.mAnimator.addDisplayLocked(mDisplayId);
         mInputMonitor = new InputMonitor(service, mDisplayId);
+        mInsetsStateController = new InsetsStateController(this);
     }
 
     boolean isReady() {
@@ -1036,6 +1043,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @Override
     public DisplayRotation getDisplayRotation() {
         return mDisplayRotation;
+    }
+
+    /**
+     * Marks a window as providing insets for the rest of the windows in the system.
+     *
+     * @param type The type of inset this window provides.
+     * @param win The window.
+     * @param frameProvider Function to compute the frame, or {@code null} if the just the frame of
+     *                      the window should be taken.
+     */
+    void setInsetProvider(@InternalInsetType int type, WindowState win,
+            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider) {
+        mInsetsStateController.getSourceProvider(type).setWindow(win, frameProvider);
+    }
+
+    InsetsStateController getInsetsStateController() {
+        return mInsetsStateController;
     }
 
     @VisibleForTesting
@@ -2712,6 +2736,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDisplayRotation.dump(prefix, pw);
         pw.println();
         mInputMonitor.dump(pw, "  ");
+        pw.println();
+        mInsetsStateController.dump(prefix, pw);
     }
 
     @Override
@@ -2994,6 +3020,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     mInputMethodWindow.getDisplayId());
         }
         computeImeTarget(true /* updateImeTarget */);
+        mInsetsStateController.getSourceProvider(TYPE_IME).setWindow(win,
+                null /* frameProvider */);
     }
 
     /**
@@ -3449,6 +3477,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             pendingLayoutChanges |= mDisplayPolicy.finishPostLayoutPolicyLw();
             if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats(
                     "after finishPostLayoutPolicyLw", pendingLayoutChanges);
+                mInsetsStateController.onPostLayout();
         } while (pendingLayoutChanges != 0);
 
         mTmpApplySurfaceChangesTransactionState.reset();

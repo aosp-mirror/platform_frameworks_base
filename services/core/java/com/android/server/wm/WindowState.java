@@ -143,6 +143,7 @@ import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
 
 import android.annotation.CallSuper;
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -194,6 +195,7 @@ import android.view.animation.Interpolator;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.policy.WindowManagerPolicy.DisplayContentInfo;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.utils.InsetUtils;
 import com.android.server.wm.utils.WmDisplayCutout;
@@ -577,6 +579,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * container.
      */
     private boolean mIsDimming = false;
+
+    private @Nullable InsetsSourceProvider mInsetProvider;
 
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
 
@@ -2955,6 +2959,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
+    /**
+     * Called when the insets state changed.
+     */
+    void notifyInsetsChanged() {
+        try {
+            mClient.insetsChanged(
+                    getDisplayContent().getInsetsStateController().getInsetsForDispatch(this));
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to deliver inset state change", e);
+        }
+    }
+
     Rect getBackdropFrame(Rect frame) {
         // When the task is docked, we send fullscreen sized backDropFrame as soon as resizing
         // start even if we haven't received the relayout window, so that the client requests
@@ -4774,6 +4790,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void resetContentChanged() {
         mWindowFrames.setContentChanged(false);
+    }
+
+    void setInsetProvider(InsetsSourceProvider insetProvider) {
+        mInsetProvider = insetProvider;
+    }
+
+    InsetsSourceProvider getInsetProvider() {
+        return mInsetProvider;
     }
 
     private final class MoveAnimationSpec implements AnimationSpec {

@@ -82,6 +82,17 @@ public final class Insets {
     }
 
     /**
+     * Add two Insets.
+     *
+     * @param a The first Insets to add.
+     * @param b The second Insets to add.
+     * @return a + b, i. e. all insets on every side are added together.
+     */
+    public static @NonNull Insets add(@NonNull Insets a, @NonNull Insets b) {
+        return Insets.of(a.left + b.left, a.top + b.top, a.right + b.right, a.bottom + b.bottom);
+    }
+
+    /**
      * Two Insets instances are equal iff they belong to the same class and their fields are
      * pairwise equal.
      *

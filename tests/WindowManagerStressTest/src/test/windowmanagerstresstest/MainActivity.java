@@ -26,6 +26,7 @@ import android.util.MergedConfiguration;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.IWindowSession;
+import android.view.InsetsState;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
@@ -105,7 +106,7 @@ public class MainActivity extends Activity {
                                 window.mSeq, mLayoutParams, -1, -1, View.VISIBLE, 0, -1, mTmpRect,
                                 mTmpRect, mTmpRect, mTmpRect, mTmpRect, mTmpRect, mTmpRect,
                                 new DisplayCutout.ParcelableWrapper(), new MergedConfiguration(),
-                                new Surface());
+                                new Surface(), new InsetsState());
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -131,8 +132,9 @@ public class MainActivity extends Activity {
             final IWindowSession session = WindowManagerGlobal.getWindowSession();
             final Rect tmpRect = new Rect();
             try {
-                final int res = session.addToDisplayWithoutInputChannel(window, window.mSeq, layoutParams,
-                        View.VISIBLE, Display.DEFAULT_DISPLAY, tmpRect, tmpRect);
+                final int res = session.addToDisplayWithoutInputChannel(window, window.mSeq,
+                        layoutParams, View.VISIBLE, Display.DEFAULT_DISPLAY, tmpRect, tmpRect,
+                        new InsetsState());
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
