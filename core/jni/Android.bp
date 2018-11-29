@@ -162,6 +162,7 @@ cc_library_shared {
         "android/graphics/pdf/PdfUtils.cpp",
         "android/graphics/text/LineBreaker.cpp",
         "android/graphics/text/MeasuredText.cpp",
+        "android_media_AudioEffectDescriptor.cpp",
         "android_media_AudioRecord.cpp",
         "android_media_AudioSystem.cpp",
         "android_media_AudioTrack.cpp",
