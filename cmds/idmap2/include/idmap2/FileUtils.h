@@ -25,6 +25,9 @@
 namespace android {
 namespace idmap2 {
 namespace utils {
+
+constexpr const mode_t kIdmapFilePermissionMask = 0133;  // u=rw,g=r,o=r
+
 typedef std::function<bool(unsigned char type /* DT_* from dirent.h */, const std::string& path)>
     FindFilesPredicate;
 std::unique_ptr<std::vector<std::string>> FindFiles(const std::string& root, bool recurse,

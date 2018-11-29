@@ -63,10 +63,12 @@ namespace {
 
 Result<ResourceId> WARN_UNUSED ParseResReference(const AssetManager2& am, const std::string& res,
                                                  const std::string& fallback_package) {
+  static constexpr const int kBaseHex = 16;
+
   // first, try to parse as a hex number
   char* endptr = nullptr;
   ResourceId resid;
-  resid = strtol(res.c_str(), &endptr, 16);
+  resid = strtol(res.c_str(), &endptr, kBaseHex);
   if (*endptr == '\0') {
     return {resid};
   }
@@ -155,7 +157,9 @@ Result<std::string> GetTargetPackageNameFromManifest(const std::string& apk_path
 
 bool Lookup(const std::vector<std::string>& args, std::ostream& out_error) {
   std::vector<std::string> idmap_paths;
-  std::string config_str, resid_str;
+  std::string config_str;
+  std::string resid_str;
+
   const CommandLineOptions opts =
       CommandLineOptions("idmap2 lookup")
           .MandatoryOption("--idmap-path", "input: path to idmap file to load", &idmap_paths)

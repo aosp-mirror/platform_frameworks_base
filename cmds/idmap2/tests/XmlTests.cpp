@@ -58,11 +58,11 @@ TEST(XmlTests, FindTag) {
 
   auto attrs = xml->FindTag("c");
   ASSERT_THAT(attrs, NotNull());
-  ASSERT_EQ(attrs->size(), 4u);
+  ASSERT_EQ(attrs->size(), 4U);
   ASSERT_EQ(attrs->at("type_string"), "fortytwo");
   ASSERT_EQ(std::stoi(attrs->at("type_int_dec")), 42);
   ASSERT_EQ(std::stoi(attrs->at("type_int_hex")), 42);
-  ASSERT_NE(std::stoul(attrs->at("type_int_boolean")), 0u);
+  ASSERT_NE(std::stoul(attrs->at("type_int_boolean")), 0U);
 
   auto fail = xml->FindTag("does-not-exist");
   ASSERT_THAT(fail, IsNull());

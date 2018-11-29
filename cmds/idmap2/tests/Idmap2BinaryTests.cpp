@@ -59,7 +59,7 @@ static void AssertIdmap(const Idmap& idmap, const std::string& target_apk_path,
   ASSERT_EQ(idmap.GetHeader()->GetVersion(), kIdmapCurrentVersion);
   ASSERT_EQ(idmap.GetHeader()->GetTargetPath(), target_apk_path);
   ASSERT_EQ(idmap.GetHeader()->GetOverlayPath(), overlay_apk_path);
-  ASSERT_EQ(idmap.GetData().size(), 1u);
+  ASSERT_EQ(idmap.GetData().size(), 1U);
 }
 
 #define ASSERT_IDMAP(idmap_ref, target_apk_path, overlay_apk_path)                      \

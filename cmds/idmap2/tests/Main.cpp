@@ -25,7 +25,7 @@
 namespace android {
 namespace idmap2 {
 
-const std::string GetTestDataPath() {
+std::string GetTestDataPath() {
   return base::GetExecutableDirectory() + "/tests/data";
 }
 

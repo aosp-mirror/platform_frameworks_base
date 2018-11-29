@@ -37,7 +37,7 @@ using android::status_t;
 using android::os::Idmap2Service;
 
 int main(int argc ATTRIBUTE_UNUSED, char** argv ATTRIBUTE_UNUSED) {
-  IPCThreadState::self()->disableBackgroundScheduling(true);
+  IPCThreadState::disableBackgroundScheduling(true);
   status_t ret = BinderService<Idmap2Service>::publish();
   if (ret != android::OK) {
     return EXIT_FAILURE;

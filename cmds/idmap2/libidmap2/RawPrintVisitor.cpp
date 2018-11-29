@@ -59,22 +59,23 @@ void RawPrintVisitor::visit(const IdmapData::Header& header) {
   last_seen_package_id_ = header.GetTargetPackageId();
 }
 
-void RawPrintVisitor::visit(const IdmapData::TypeEntry& te) {
+void RawPrintVisitor::visit(const IdmapData::TypeEntry& type_entry) {
   const bool target_package_loaded = !target_am_.GetApkAssets().empty();
 
-  print(static_cast<uint16_t>(te.GetTargetTypeId()), "target type");
-  print(static_cast<uint16_t>(te.GetOverlayTypeId()), "overlay type");
-  print(static_cast<uint16_t>(te.GetEntryCount()), "entry count");
-  print(static_cast<uint16_t>(te.GetEntryOffset()), "entry offset");
+  print(static_cast<uint16_t>(type_entry.GetTargetTypeId()), "target type");
+  print(static_cast<uint16_t>(type_entry.GetOverlayTypeId()), "overlay type");
+  print(static_cast<uint16_t>(type_entry.GetEntryCount()), "entry count");
+  print(static_cast<uint16_t>(type_entry.GetEntryOffset()), "entry offset");
 
-  for (uint16_t i = 0; i < te.GetEntryCount(); i++) {
-    const EntryId entry = te.GetEntry(i);
+  for (uint16_t i = 0; i < type_entry.GetEntryCount(); i++) {
+    const EntryId entry = type_entry.GetEntry(i);
     if (entry == kNoEntry) {
       print(kPadding, "no entry");
     } else {
-      const ResourceId target_resid =
-          RESID(last_seen_package_id_, te.GetTargetTypeId(), te.GetEntryOffset() + i);
-      const ResourceId overlay_resid = RESID(last_seen_package_id_, te.GetOverlayTypeId(), entry);
+      const ResourceId target_resid = RESID(last_seen_package_id_, type_entry.GetTargetTypeId(),
+                                            type_entry.GetEntryOffset() + i);
+      const ResourceId overlay_resid =
+          RESID(last_seen_package_id_, type_entry.GetOverlayTypeId(), entry);
       Result<std::string> name;
       if (target_package_loaded) {
         name = utils::ResToTypeEntryName(target_am_, target_resid);
