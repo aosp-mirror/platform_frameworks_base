@@ -41,6 +41,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.AutomaticZenRule;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
@@ -1095,6 +1096,25 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertEquals(customDefaultRule.id, ruleAfterUpdating.id);
         assertEquals(customDefaultRule.conditionId, ruleAfterUpdating.conditionId);
         assertFalse(Objects.equals(defaultRuleName, ruleAfterUpdating.name)); // update name
+    }
+
+    @Test
+    public void testAddAutomaticZenRule() {
+        AutomaticZenRule zenRule = new AutomaticZenRule("name",
+                new ComponentName("android", "ScheduleConditionProvider"),
+                ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
+                NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+        String id = mZenModeHelperSpy.addAutomaticZenRule(zenRule, "test");
+
+        assertTrue(id != null);
+        ZenModeConfig.ZenRule ruleInConfig = mZenModeHelperSpy.mConfig.automaticRules.get(id);
+        assertTrue(ruleInConfig != null);
+        assertEquals(zenRule.isEnabled(), ruleInConfig.enabled);
+        assertEquals(zenRule.isModified(), ruleInConfig.modified);
+        assertEquals(zenRule.getConditionId(), ruleInConfig.conditionId);
+        assertEquals(NotificationManager.zenModeFromInterruptionFilter(
+                zenRule.getInterruptionFilter(), -1), ruleInConfig.zenMode);
+        assertEquals(zenRule.getName(), ruleInConfig.name);
     }
 
     private void setupZenConfig() {
