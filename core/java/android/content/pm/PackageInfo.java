@@ -22,6 +22,9 @@ import android.apex.ApexInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Overall information about the contents of a package.  This corresponds
  * to all of the information collected from AndroidManifest.xml.
@@ -204,7 +207,10 @@ public class PackageInfo implements Parcelable {
      * {@link PackageManager#GET_PERMISSIONS} was set.  This list includes
      * all permissions requested, even those that were not granted or known
      * by the system at install time.
+     *
+     * @deprecated Use {@link #usesPermissions}
      */
+    @Deprecated
     public String[] requestedPermissions;
 
     /**
@@ -214,8 +220,21 @@ public class PackageInfo implements Parcelable {
      * {@link PackageManager#GET_PERMISSIONS} was set.  Each value matches
      * the corresponding entry in {@link #requestedPermissions}, and will have
      * the flag {@link #REQUESTED_PERMISSION_GRANTED} set as appropriate.
+     *
+     * @deprecated Use {@link #usesPermissions}
      */
+    @Deprecated
     public int[] requestedPermissionsFlags;
+
+    /**
+     * Array of all {@link android.R.styleable#AndroidManifestUsesPermission
+     * &lt;uses-permission&gt;} tags included under &lt;manifest&gt;,
+     * or null if there were none.  This is only filled in if the flag
+     * {@link PackageManager#GET_PERMISSIONS} was set.  This list includes
+     * all permissions requested, even those that were not granted or known
+     * by the system at install time.
+     */
+    public UsesPermissionInfo[] usesPermissions;
 
     /**
      * Flag for {@link #requestedPermissionsFlags}: the requested permission
@@ -456,6 +475,7 @@ public class PackageInfo implements Parcelable {
         dest.writeTypedArray(permissions, parcelableFlags);
         dest.writeStringArray(requestedPermissions);
         dest.writeIntArray(requestedPermissionsFlags);
+        dest.writeTypedArray(usesPermissions, parcelableFlags);
         dest.writeTypedArray(signatures, parcelableFlags);
         dest.writeTypedArray(configPreferences, parcelableFlags);
         dest.writeTypedArray(reqFeatures, parcelableFlags);
@@ -520,6 +540,7 @@ public class PackageInfo implements Parcelable {
         permissions = source.createTypedArray(PermissionInfo.CREATOR);
         requestedPermissions = source.createStringArray();
         requestedPermissionsFlags = source.createIntArray();
+        usesPermissions = source.createTypedArray(UsesPermissionInfo.CREATOR);
         signatures = source.createTypedArray(Signature.CREATOR);
         configPreferences = source.createTypedArray(ConfigurationInfo.CREATOR);
         reqFeatures = source.createTypedArray(FeatureInfo.CREATOR);
