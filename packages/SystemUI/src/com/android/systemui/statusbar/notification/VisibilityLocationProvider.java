@@ -16,15 +16,13 @@
 
 package com.android.systemui.statusbar.notification;
 
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-
 /**
  * An object that can determine the visibility of a Notification.
  */
 public interface VisibilityLocationProvider {
 
     /**
-     * Returns whether an ExpandableNotificationRow is in a visible location or not.
+     * Returns whether an Entry is in a visible location or not.
      *
      * @param entry
      * @return true if row is in a visible location
