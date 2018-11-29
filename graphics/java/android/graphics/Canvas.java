@@ -64,7 +64,7 @@ public class Canvas extends BaseCanvas {
     public boolean isRecordingFor(Object o) { return false; }
 
     // may be null
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 117521088)
     private Bitmap mBitmap;
 
     // optional field set by the caller
