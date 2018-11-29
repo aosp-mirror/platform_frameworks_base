@@ -2067,6 +2067,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private void setChildIsExpanding(boolean isExpanding) {
         mChildIsExpanding = isExpanding;
+        updateClipping();
+        invalidate();
     }
 
     @Override
@@ -2968,7 +2970,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 return true;
             }
         } else if (child == mChildrenContainer) {
-            if (!mChildIsExpanding && (isClippingNeeded() || !hasNoRounding())) {
+            if (isClippingNeeded() || !hasNoRounding()) {
                 return true;
             }
         } else if (child instanceof NotificationGuts) {
