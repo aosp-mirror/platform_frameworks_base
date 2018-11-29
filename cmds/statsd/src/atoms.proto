@@ -890,7 +890,7 @@ message WifiLockStateChanged {
  * Logs wifi signal strength changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/ClientModeImpl.java
  */
 message WifiSignalStrengthChanged {
     // Signal strength, from frameworks/base/core/proto/android/telephony/enums.proto.
@@ -901,7 +901,7 @@ message WifiSignalStrengthChanged {
  * Logs wifi scans performed by an app.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/scanner/WifiScanningServiceImpl.java
  */
 message WifiScanStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -917,7 +917,7 @@ message WifiScanStateChanged {
  * Logs wifi multicast locks held by an app
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/WifiMulticastLockManager.java
  */
 message WifiMulticastLockStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -927,6 +927,8 @@ message WifiMulticastLockStateChanged {
         ON = 1;
     }
     optional State state = 2;
+
+    optional string tag = 3;
 }
 
 /**
