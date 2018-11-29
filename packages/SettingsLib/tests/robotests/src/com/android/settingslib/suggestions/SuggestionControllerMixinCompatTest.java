@@ -31,7 +31,6 @@ import android.content.Context;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.loader.app.LoaderManager;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 
 import org.junit.After;
@@ -40,10 +39,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(shadows = ShadowSuggestionController.class)
 public class SuggestionControllerMixinCompatTest {
 

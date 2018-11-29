@@ -24,17 +24,16 @@ import android.net.ConnectivityManager;
 import android.os.UserManager;
 import android.util.SparseBooleanArray;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(shadows = {SimStatusImeiInfoPreferenceControllerTest.ShadowUserManager.class,
                 SimStatusImeiInfoPreferenceControllerTest.ShadowConnectivityManager.class})
 public class SimStatusImeiInfoPreferenceControllerTest {
@@ -106,7 +105,7 @@ public class SimStatusImeiInfoPreferenceControllerTest {
 
         private final SparseBooleanArray mSupportedNetworkTypes = new SparseBooleanArray();
 
-        public void setNetworkSupported(int networkType, boolean supported) {
+        private void setNetworkSupported(int networkType, boolean supported) {
             mSupportedNetworkTypes.put(networkType, supported);
         }
 

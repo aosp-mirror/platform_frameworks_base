@@ -30,14 +30,13 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class IconCacheTest {
     private Icon mIcon;
     private Context mContext;

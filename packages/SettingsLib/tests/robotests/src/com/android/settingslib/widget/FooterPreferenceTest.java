@@ -26,14 +26,14 @@ import android.widget.TextView;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.R;
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class FooterPreferenceTest {
 
     private Context mContext;

@@ -26,14 +26,13 @@ import static org.mockito.Mockito.verify;
 import android.content.ComponentName;
 import android.provider.Settings;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class ServiceListingTest {
 
     private static final String TEST_SETTING = "testSetting";

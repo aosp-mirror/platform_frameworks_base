@@ -22,31 +22,30 @@ import static org.mockito.Mockito.spy;
 
 import android.content.Context;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 import java.time.Duration;
 import java.util.regex.Pattern;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class PowerUtilTest {
-    public static final String TEST_BATTERY_LEVEL_10 = "10%";
-    public static final long SEVENTEEN_MIN_MILLIS = Duration.ofMinutes(17).toMillis();
-    public static final long FIVE_MINUTES_MILLIS = Duration.ofMinutes(5).toMillis();
-    public static final long TEN_MINUTES_MILLIS = Duration.ofMinutes(10).toMillis();
-    public static final long THREE_DAYS_MILLIS = Duration.ofDays(3).toMillis();
-    public static final long THIRTY_HOURS_MILLIS = Duration.ofHours(30).toMillis();
-    public static final String NORMAL_CASE_EXPECTED_PREFIX = "Should last until about";
-    public static final String ENHANCED_SUFFIX = " based on your usage";
+    private static final String TEST_BATTERY_LEVEL_10 = "10%";
+    private static final long SEVENTEEN_MIN_MILLIS = Duration.ofMinutes(17).toMillis();
+    private static final long FIVE_MINUTES_MILLIS = Duration.ofMinutes(5).toMillis();
+    private static final long TEN_MINUTES_MILLIS = Duration.ofMinutes(10).toMillis();
+    private static final long THREE_DAYS_MILLIS = Duration.ofDays(3).toMillis();
+    private static final long THIRTY_HOURS_MILLIS = Duration.ofHours(30).toMillis();
+    private static final String NORMAL_CASE_EXPECTED_PREFIX = "Should last until about";
+    private static final String ENHANCED_SUFFIX = " based on your usage";
     // matches a time (ex: '1:15 PM', '2 AM', '23:00')
-    public static final String TIME_OF_DAY_REGEX = " (\\d)+:?(\\d)* ((AM)*)|((PM)*)";
+    private static final String TIME_OF_DAY_REGEX = " (\\d)+:?(\\d)* ((AM)*)|((PM)*)";
     // matches a percentage with parenthesis (ex: '(10%)')
-    public static final String PERCENTAGE_REGEX = " \\(\\d?\\d%\\)";
+    private static final String PERCENTAGE_REGEX = " \\(\\d?\\d%\\)";
 
     private Context mContext;
 
@@ -107,7 +106,6 @@ public class PowerUtilTest {
                         + TIME_OF_DAY_REGEX
                         + "(" + PERCENTAGE_REGEX + "){0}")); // no percentage
     }
-
 
     @Test
     public void testGetBatteryRemainingStringFormatted_lessThanSevenMinutes_usesCorrectString() {

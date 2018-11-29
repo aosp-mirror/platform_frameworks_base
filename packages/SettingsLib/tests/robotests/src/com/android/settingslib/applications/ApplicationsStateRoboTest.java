@@ -41,7 +41,6 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.util.IconDrawableFactory;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.applications.ApplicationsState.AppEntry;
 import com.android.settingslib.applications.ApplicationsState.Callbacks;
 import com.android.settingslib.applications.ApplicationsState.Session;
@@ -55,6 +54,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
@@ -67,7 +67,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowUserManager.class,
         ApplicationsStateRoboTest.ShadowIconDrawableFactory.class,
         ApplicationsStateRoboTest.ShadowPackageManager.class})

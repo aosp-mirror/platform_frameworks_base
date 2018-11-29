@@ -37,7 +37,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.ParcelUuid;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.testutils.shadow.ShadowBluetoothAdapter;
 
 import org.junit.Before;
@@ -45,6 +44,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
@@ -52,7 +52,7 @@ import org.robolectric.shadow.api.Shadow;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowBluetoothAdapter.class})
 public class LocalBluetoothProfileManagerTest {
     private final static long HISYNCID = 10;
@@ -270,13 +270,13 @@ public class LocalBluetoothProfileManagerTest {
         verify(mCachedBluetoothDevice).refresh();
     }
 
-    private List<Integer> generateList(int[] profile) {
-        if (profile == null) {
+    private List<Integer> generateList(int[] profiles) {
+        if (profiles == null) {
             return null;
         }
-        final List<Integer> profileList = new ArrayList<>(profile.length);
-        for(int i = 0; i < profile.length; i++) {
-            profileList.add(profile[i]);
+        final List<Integer> profileList = new ArrayList<>(profiles.length);
+        for (int profile : profiles) {
+            profileList.add(profile);
         }
         return profileList;
     }

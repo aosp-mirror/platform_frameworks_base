@@ -32,12 +32,13 @@ include frameworks/base/packages/SettingsLib/common.mk
 
 include $(BUILD_PACKAGE)
 
-#############################################
-# SettingsLib Robolectric test target.      #
-#############################################
+############################################################
+# SettingsLib Robolectric test target.                     #
+############################################################
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := SettingsLibRoboTests
+LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
@@ -52,6 +53,9 @@ LOCAL_JAVA_LIBRARIES := \
 LOCAL_INSTRUMENTATION_FOR := SettingsLibShell
 
 LOCAL_MODULE_TAGS := optional
+
+# Generate test_config.properties
+include external/robolectric-shadows/gen_test_config.mk
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 

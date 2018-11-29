@@ -17,8 +17,8 @@ package com.android.settingslib.core.instrumentation;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_SETTINGS_PREFERENCE_CHANGE;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -26,16 +26,15 @@ import android.app.settings.SettingsEnums;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class SharedPreferenceLoggerTest {
 
     private static final String TEST_TAG = "tag";

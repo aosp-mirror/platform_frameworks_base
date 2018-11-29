@@ -25,12 +25,10 @@ import static org.mockito.Mockito.mock;
 import android.content.Context;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
-import android.telephony.SubscriptionManager;
 
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 
 import org.junit.Before;
@@ -38,11 +36,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowSubscriptionManager;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class ImsStatusPreferenceControllerTest {
     @Mock
     private Context mContext;
@@ -61,8 +58,9 @@ public class ImsStatusPreferenceControllerTest {
     }
 
     @Test
-    @Config(shadows = ShadowSubscriptionManager.class)
     public void testIsAvailable() {
+        ShadowSubscriptionManager.setDefaultDataSubscriptionId(1234);
+
         CarrierConfigManager carrierConfigManager = mock(CarrierConfigManager.class);
         doReturn(carrierConfigManager).when(mContext).getSystemService(CarrierConfigManager.class);
 
@@ -92,18 +90,10 @@ public class ImsStatusPreferenceControllerTest {
                 .that(imsStatusPreferenceController.isAvailable()).isFalse();
     }
 
-    @Implements(SubscriptionManager.class)
-    public static class ShadowSubscriptionManager {
-        @Implementation
-        public static int getDefaultDataSubscriptionId() {
-            return 1234;
-        }
-    }
-
     private static class ConcreteImsStatusPreferenceController
             extends AbstractImsStatusPreferenceController {
 
-        public ConcreteImsStatusPreferenceController(Context context,
+        private ConcreteImsStatusPreferenceController(Context context,
                 Lifecycle lifecycle) {
             super(context, lifecycle);
         }

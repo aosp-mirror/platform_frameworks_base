@@ -28,7 +28,6 @@ import android.widget.LinearLayout;
 
 import androidx.lifecycle.LifecycleOwner;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.events.OnAttach;
 import com.android.settingslib.core.lifecycle.events.OnCreateOptionsMenu;
 import com.android.settingslib.core.lifecycle.events.OnDestroy;
@@ -43,10 +42,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.shadows.androidx.fragment.FragmentController;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class LifecycleTest {
 
     private LifecycleOwner mLifecycleOwner;
@@ -56,7 +56,7 @@ public class LifecycleTest {
 
         final TestObserver mFragObserver;
 
-        public TestDialogFragment() {
+        private TestDialogFragment() {
             mFragObserver = new TestObserver();
             mLifecycle.addObserver(mFragObserver);
         }
@@ -236,11 +236,11 @@ public class LifecycleTest {
     }
 
     private static class OptionItemAccepter implements LifecycleObserver, OnOptionsItemSelected {
-        public boolean wasCalled = false;
+        private boolean mWasCalled = false;
 
         @Override
         public boolean onOptionsItemSelected(MenuItem menuItem) {
-            wasCalled = true;
+            mWasCalled = true;
             return false;
         }
     }
@@ -258,14 +258,14 @@ public class LifecycleTest {
         fragment.onPrepareOptionsMenu(null);
         fragment.onOptionsItemSelected(null);
 
-        assertThat(accepter.wasCalled).isFalse();
+        assertThat(accepter.mWasCalled).isFalse();
     }
 
     private class OnStartObserver implements LifecycleObserver, OnStart {
 
         private final Lifecycle mLifecycle;
 
-        public OnStartObserver(Lifecycle lifecycle) {
+        private OnStartObserver(Lifecycle lifecycle) {
             mLifecycle = lifecycle;
         }
 

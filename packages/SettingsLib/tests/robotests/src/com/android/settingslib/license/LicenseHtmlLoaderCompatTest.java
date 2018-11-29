@@ -20,14 +20,13 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -37,7 +36,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(shadows = LicenseHtmlLoaderCompatTest.ShadowLicenseHtmlLoaderCompat.class)
 public class LicenseHtmlLoaderCompatTest {
 
@@ -58,7 +57,7 @@ public class LicenseHtmlLoaderCompatTest {
 
     @Test
     public void testLoadInBackground() {
-        ArrayList<File> xmlFiles = new ArrayList();
+        ArrayList<File> xmlFiles = new ArrayList<>();
         xmlFiles.add(new File("test.xml"));
         File cachedHtmlFile = new File("test.html");
 
@@ -69,7 +68,7 @@ public class LicenseHtmlLoaderCompatTest {
 
     @Test
     public void testLoadInBackgroundWithNoVaildXmlFiles() {
-        ArrayList<File> xmlFiles = new ArrayList();
+        ArrayList<File> xmlFiles = new ArrayList<>();
         File cachedHtmlFile = new File("test.html");
 
         setupFakeData(xmlFiles, cachedHtmlFile, true, true);
@@ -79,7 +78,7 @@ public class LicenseHtmlLoaderCompatTest {
 
     @Test
     public void testLoadInBackgroundWithNonOutdatedCachedHtmlFile() {
-        ArrayList<File> xmlFiles = new ArrayList();
+        ArrayList<File> xmlFiles = new ArrayList<>();
         xmlFiles.add(new File("test.xml"));
         File cachedHtmlFile = new File("test.html");
 
@@ -90,7 +89,7 @@ public class LicenseHtmlLoaderCompatTest {
 
     @Test
     public void testLoadInBackgroundWithGenerateHtmlFileFailed() {
-        ArrayList<File> xmlFiles = new ArrayList();
+        ArrayList<File> xmlFiles = new ArrayList<>();
         xmlFiles.add(new File("test.xml"));
         File cachedHtmlFile = new File("test.html");
 
@@ -112,10 +111,10 @@ public class LicenseHtmlLoaderCompatTest {
     @Implements(LicenseHtmlLoaderCompat.class)
     public static class ShadowLicenseHtmlLoaderCompat {
 
-        public static List<File> sValidXmlFiles;
-        public static File sCachedHtmlFile;
-        public static boolean sIsCachedHtmlFileOutdated;
-        public static boolean sGenerateHtmlFileSucceeded;
+        private static List<File> sValidXmlFiles;
+        private static File sCachedHtmlFile;
+        private static boolean sIsCachedHtmlFileOutdated;
+        private static boolean sGenerateHtmlFileSucceeded;
 
         @Resetter
         public static void reset() {

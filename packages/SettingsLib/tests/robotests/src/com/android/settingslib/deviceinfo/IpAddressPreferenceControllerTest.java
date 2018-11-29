@@ -27,7 +27,6 @@ import android.net.wifi.WifiManager;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 
 import org.junit.Before;
@@ -35,11 +34,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.Arrays;
 import java.util.List;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class IpAddressPreferenceControllerTest {
     @Mock
     private Context mContext;
@@ -75,8 +75,7 @@ public class IpAddressPreferenceControllerTest {
     private static class ConcreteIpAddressPreferenceController extends
             AbstractIpAddressPreferenceController {
 
-        public ConcreteIpAddressPreferenceController(Context context,
-                Lifecycle lifecycle) {
+        private ConcreteIpAddressPreferenceController(Context context, Lifecycle lifecycle) {
             super(context, lifecycle);
         }
     }
