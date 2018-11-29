@@ -16,8 +16,14 @@
 
 package android.app.admin;
 
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_LOW;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -35,6 +41,8 @@ public class PasswordMetrics implements Parcelable {
     // consider it a complex PIN/password.
     public static final int MAX_ALLOWED_SEQUENCE = 3;
 
+    // TODO(b/120536847): refactor isActivePasswordSufficient logic so that the actual password
+    // quality is not overwritten
     public int quality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
     public int length = 0;
     public int letters = 0;
@@ -45,6 +53,10 @@ public class PasswordMetrics implements Parcelable {
     public int nonLetter = 0;
 
     public PasswordMetrics() {}
+
+    public PasswordMetrics(int quality) {
+        this.quality = quality;
+    }
 
     public PasswordMetrics(int quality, int length) {
         this.quality = quality;
@@ -173,6 +185,15 @@ public class PasswordMetrics implements Parcelable {
                 && this.nonLetter == o.nonLetter;
     }
 
+    private boolean satisfiesBucket(PasswordMetrics... bucket) {
+        for (PasswordMetrics metrics : bucket) {
+            if (this.quality == metrics.quality) {
+                return this.length >= metrics.length;
+            }
+        }
+        return false;
+    }
+
     /*
      * Returns the maximum length of a sequential characters. A sequence is defined as
      * monotonically increasing characters with a constant interval or the same character repeated.
@@ -252,6 +273,101 @@ public class PasswordMetrics implements Parcelable {
                 return 10;
             default:
                 return 0;
+        }
+    }
+
+    /** Determines the {@link PasswordComplexity} of this {@link PasswordMetrics}. */
+    @PasswordComplexity
+    public int determineComplexity() {
+        for (PasswordComplexityBucket bucket : PasswordComplexityBucket.BUCKETS) {
+            if (satisfiesBucket(bucket.getMetrics())) {
+                return bucket.mComplexityLevel;
+            }
+        }
+        return PASSWORD_COMPLEXITY_NONE;
+    }
+
+    /**
+     * Requirements in terms of {@link PasswordMetrics} for each {@link PasswordComplexity}.
+     */
+    public static class PasswordComplexityBucket {
+        /**
+         * Definition of {@link DevicePolicyManager#PASSWORD_COMPLEXITY_HIGH} in terms of
+         * {@link PasswordMetrics}.
+         */
+        private static final PasswordComplexityBucket HIGH =
+                new PasswordComplexityBucket(
+                        PASSWORD_COMPLEXITY_HIGH,
+                        new PasswordMetrics(
+                                DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC, /* length= */ 6),
+                        new PasswordMetrics(
+                                DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC, /* length= */ 6),
+                        new PasswordMetrics(
+                                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX, /* length= */
+                                8));
+
+        /**
+         * Definition of {@link DevicePolicyManager#PASSWORD_COMPLEXITY_MEDIUM} in terms of
+         * {@link PasswordMetrics}.
+         */
+        private static final PasswordComplexityBucket MEDIUM =
+                new PasswordComplexityBucket(
+                        PASSWORD_COMPLEXITY_MEDIUM,
+                        new PasswordMetrics(
+                                DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC, /* length= */ 4),
+                        new PasswordMetrics(
+                                DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC, /* length= */ 4),
+                        new PasswordMetrics(
+                                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX, /* length= */
+                                4));
+
+        /**
+         * Definition of {@link DevicePolicyManager#PASSWORD_COMPLEXITY_LOW} in terms of
+         * {@link PasswordMetrics}.
+         */
+        private static final PasswordComplexityBucket LOW =
+                new PasswordComplexityBucket(
+                        PASSWORD_COMPLEXITY_LOW,
+                        new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC),
+                        new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC),
+                        new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX),
+                        new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC),
+                        new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING));
+
+        /**
+         * A special bucket to represent {@link DevicePolicyManager#PASSWORD_COMPLEXITY_NONE}.
+         */
+        private static final PasswordComplexityBucket NONE =
+                new PasswordComplexityBucket(PASSWORD_COMPLEXITY_NONE, new PasswordMetrics());
+
+        /** Array containing all buckets from high to low. */
+        private static final PasswordComplexityBucket[] BUCKETS =
+                new PasswordComplexityBucket[] {HIGH, MEDIUM, LOW};
+
+        @PasswordComplexity
+        private final int mComplexityLevel;
+        private final PasswordMetrics[] mMetrics;
+
+        private PasswordComplexityBucket(@PasswordComplexity int complexityLevel,
+                PasswordMetrics... metrics) {
+            this.mComplexityLevel = complexityLevel;
+            this.mMetrics = metrics;
+        }
+
+        /** Returns the {@link PasswordMetrics} that meet the min requirements of this bucket. */
+        public PasswordMetrics[] getMetrics() {
+            return mMetrics;
+        }
+
+        /** Returns the bucket that {@code complexityLevel} represents. */
+        public static PasswordComplexityBucket complexityLevelToBucket(
+                @PasswordComplexity int complexityLevel) {
+            for (PasswordComplexityBucket bucket : BUCKETS) {
+                if (bucket.mComplexityLevel == complexityLevel) {
+                    return bucket;
+                }
+            }
+            return NONE;
         }
     }
 }

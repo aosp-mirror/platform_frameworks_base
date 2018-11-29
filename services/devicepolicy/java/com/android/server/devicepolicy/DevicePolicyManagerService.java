@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.BIND_DEVICE_ADMIN;
+import static android.Manifest.permission.GET_AND_REQUEST_SCREEN_LOCK_COMPLEXITY;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
@@ -53,6 +54,7 @@ import static android.app.admin.DevicePolicyManager.LEAVE_ALL_SYSTEM_APPS_ENABLE
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_OFF;
@@ -108,6 +110,7 @@ import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.NetworkEvent;
 import android.app.admin.PasswordMetrics;
@@ -4641,6 +4644,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         null, userHandle, parent)
                 && passwordMetrics.nonLetter >= getPasswordMinimumNonLetter(
                         null, userHandle, parent);
+    }
+
+    @Override
+    @PasswordComplexity
+    public int getPasswordComplexity() {
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        enforceUserUnlocked(callingUserId);
+        mContext.enforceCallingOrSelfPermission(
+                GET_AND_REQUEST_SCREEN_LOCK_COMPLEXITY,
+                "Must have " + GET_AND_REQUEST_SCREEN_LOCK_COMPLEXITY + " permission.");
+
+        synchronized (getLockObject()) {
+            int targetUserId = getCredentialOwner(callingUserId, /* parent= */ false);
+            PasswordMetrics metrics = getUserPasswordMetricsLocked(targetUserId);
+            return metrics == null ? PASSWORD_COMPLEXITY_NONE : metrics.determineComplexity();
+        }
     }
 
     @Override
