@@ -107,6 +107,13 @@ public final class TextLinksParams {
         Preconditions.checkNotNull(textLinks);
 
         final String textString = text.toString();
+
+        if (Linkify.containsUnsupportedCharacters(textString)) {
+            // Do not apply links to text containing unsupported characters.
+            android.util.EventLog.writeEvent(0x534e4554, "116321860", -1, "");
+            return TextLinks.STATUS_NO_LINKS_APPLIED;
+        }
+
         if (!textString.startsWith(textLinks.getText())) {
             return TextLinks.STATUS_DIFFERENT_TEXT;
         }
