@@ -467,6 +467,21 @@ public class RemoteViewsTest {
         assertArrayEquals(container.mSharedViewNames, new String[] {"e0", "e1", "e2"});
     }
 
+    @Test
+    public void setIntTag() {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        int index = 10;
+        views.setIntTag(
+                R.id.layout, com.android.internal.R.id.notification_action_index_tag, index);
+
+        RemoteViews recovered = parcelAndRecreate(views);
+        RemoteViews cloned = new RemoteViews(recovered);
+        View inflated = cloned.apply(mContext, mContainer);
+
+        assertEquals(
+                index, inflated.getTag(com.android.internal.R.id.notification_action_index_tag));
+    }
+
     private class WidgetContainer extends AppWidgetHostView {
         int[] mSharedViewIds;
         String[] mSharedViewNames;

@@ -190,4 +190,7 @@
 
   <!-- A tag used to save the view added to a transition overlay -->
   <item type="id" name="transition_overlay_view_tag" />
+
+  <!-- A tag used to save the notification action object -->
+  <item type="id" name="notification_action_index_tag" />
 </resources>

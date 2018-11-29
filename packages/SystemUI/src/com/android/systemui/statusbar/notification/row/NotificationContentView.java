@@ -57,7 +57,6 @@ import com.android.systemui.statusbar.policy.SmartReplyView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -1520,7 +1519,8 @@ public class NotificationContentView extends FrameLayout {
                         smartRepliesAndActions.smartReplies, mSmartReplyController, entry);
             }
             if (smartRepliesAndActions.smartActions != null) {
-                smartReplyView.addSmartActions(smartRepliesAndActions.smartActions);
+                smartReplyView.addSmartActions(
+                        smartRepliesAndActions.smartActions, mSmartReplyController, entry);
             }
             smartReplyContainer.setVisibility(View.VISIBLE);
         }

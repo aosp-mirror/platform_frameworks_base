@@ -378,6 +378,14 @@ public class Assistant extends NotificationAssistantService {
     }
 
     @Override
+    public void onActionClicked(String key, Notification.Action action, int source) {
+        if (DEBUG) {
+            Log.d(TAG, "onActionClicked() called with: key = [" + key + "], action = [" + action.title
+                    + "], source = [" + source + "]");
+        }
+    }
+
+    @Override
     public void onListenerConnected() {
         if (DEBUG) Log.i(TAG, "CONNECTED");
         try {
