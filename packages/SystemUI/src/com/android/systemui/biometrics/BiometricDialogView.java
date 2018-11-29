@@ -87,6 +87,9 @@ public abstract class BiometricDialogView extends LinearLayout {
     protected boolean mRequireConfirmation;
     private int mUserId; // used to determine if we should show work background
 
+    private boolean mPendingShowTryAgain;
+    private boolean mPendingShowConfirm;
+
     protected abstract void updateIcon(int lastState, int newState);
     protected abstract int getHintStringResourceId();
     protected abstract int getAuthenticatedAccessibilityResourceId();
@@ -178,6 +181,7 @@ public abstract class BiometricDialogView extends LinearLayout {
         final Button negative = mLayout.findViewById(R.id.button2);
         final Button positive = mLayout.findViewById(R.id.button1);
         final ImageView icon = mLayout.findViewById(R.id.biometric_icon);
+        final Button tryAgain = mLayout.findViewById(R.id.button_try_again);
 
         icon.setContentDescription(getResources().getString(getIconDescriptionResourceId()));
 
@@ -191,6 +195,11 @@ public abstract class BiometricDialogView extends LinearLayout {
 
         positive.setOnClickListener((View v) -> {
             mCallback.onPositivePressed();
+        });
+
+        tryAgain.setOnClickListener((View v) -> {
+            showTryAgainButton(false /* show */);
+            mCallback.onTryAgainPressed();
         });
 
         mLayout.setFocusableInTouchMode(true);
@@ -207,7 +216,6 @@ public abstract class BiometricDialogView extends LinearLayout {
         final TextView subtitle = mLayout.findViewById(R.id.subtitle);
         final TextView description = mLayout.findViewById(R.id.description);
         final Button negative = mLayout.findViewById(R.id.button2);
-        final Button positive = mLayout.findViewById(R.id.button1);
         final ImageView backgroundView = mLayout.findViewById(R.id.background);
 
         if (mUserManager.isManagedProfile(mUserId)) {
@@ -233,8 +241,6 @@ public abstract class BiometricDialogView extends LinearLayout {
         title.setText(titleText);
         title.setSelected(true);
 
-        positive.setVisibility(View.INVISIBLE);
-
         final CharSequence subtitleText = mBundle.getCharSequence(BiometricPrompt.KEY_SUBTITLE);
         if (TextUtils.isEmpty(subtitleText)) {
             subtitle.setVisibility(View.GONE);
@@ -243,7 +249,8 @@ public abstract class BiometricDialogView extends LinearLayout {
             subtitle.setText(subtitleText);
         }
 
-        final CharSequence descriptionText = mBundle.getCharSequence(BiometricPrompt.KEY_DESCRIPTION);
+        final CharSequence descriptionText =
+                mBundle.getCharSequence(BiometricPrompt.KEY_DESCRIPTION);
         if (TextUtils.isEmpty(descriptionText)) {
             description.setVisibility(View.GONE);
         } else {
@@ -252,6 +259,9 @@ public abstract class BiometricDialogView extends LinearLayout {
         }
 
         negative.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
+
+        showTryAgainButton(mPendingShowTryAgain);
+        showConfirmationButton(mPendingShowConfirm);
 
         if (mWasForceRemoved || mSkipIntro) {
             // Show the dialog immediately
@@ -281,6 +291,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     public void startDismiss() {
         mAnimatingAway = true;
 
+        // This is where final cleanup should occur.
         final Runnable endActionRunnable = new Runnable() {
             @Override
             public void run() {
@@ -288,6 +299,9 @@ public abstract class BiometricDialogView extends LinearLayout {
                 mAnimatingAway = false;
                 // Set the icons / text back to normal state
                 handleClearMessage();
+                showTryAgainButton(false /* show */);
+                mPendingShowTryAgain = false;
+                mPendingShowConfirm = false;
             }
         };
 
@@ -347,9 +361,13 @@ public abstract class BiometricDialogView extends LinearLayout {
         return mRequireConfirmation;
     }
 
-    public void showConfirmationButton() {
+    public void showConfirmationButton(boolean show) {
         final Button positive = mLayout.findViewById(R.id.button1);
-        positive.setVisibility(View.VISIBLE);
+        if (show) {
+            positive.setVisibility(View.VISIBLE);
+        } else {
+            positive.setVisibility(View.GONE);
+        }
     }
 
     public void setUserId(int userId) {
@@ -378,18 +396,43 @@ public abstract class BiometricDialogView extends LinearLayout {
                 BiometricPrompt.HIDE_DIALOG_DELAY);
     }
 
+    public void clearTemporaryMessage() {
+        mHandler.removeMessages(MSG_CLEAR_MESSAGE);
+        mHandler.obtainMessage(MSG_CLEAR_MESSAGE).sendToTarget();
+    }
+
     public void showHelpMessage(String message) {
         showTemporaryMessage(message);
     }
 
     public void showErrorMessage(String error) {
         showTemporaryMessage(error);
+        showTryAgainButton(false /* show */);
         mCallback.onErrorShown();
     }
 
     private void updateState(int newState) {
         updateIcon(mLastState, newState);
         mLastState = newState;
+    }
+
+    public void showTryAgainButton(boolean show) {
+        final Button tryAgain = mLayout.findViewById(R.id.button_try_again);
+        if (show) {
+            tryAgain.setVisibility(View.VISIBLE);
+        } else {
+            tryAgain.setVisibility(View.GONE);
+        }
+    }
+
+    // Set the state before the window is attached, so we know if the dialog should be started
+    // with or without the button. This is because there's no good onPause signal
+    public void setPendingTryAgain(boolean show) {
+        mPendingShowTryAgain = show;
+    }
+
+    public void setPendingConfirm(boolean show) {
+        mPendingShowConfirm = show;
     }
 
     public WindowManager.LayoutParams getLayoutParams() {

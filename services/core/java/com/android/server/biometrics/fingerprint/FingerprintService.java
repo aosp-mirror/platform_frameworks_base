@@ -31,7 +31,7 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
-import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
@@ -169,7 +169,7 @@ public class FingerprintService extends BiometricServiceBase {
 
         @Override // Binder call
         public void prepareForAuthentication(IBinder token, long opId, int groupId,
-                IBiometricServiceReceiver wrapperReceiver, String opPackageName,
+                IBiometricServiceReceiverInternal wrapperReceiver, String opPackageName,
                 int cookie, int callingUid, int callingPid, int callingUserId) {
             checkPermission(MANAGE_BIOMETRIC);
             final boolean restricted = true; // BiometricPrompt is always restricted
@@ -375,7 +375,7 @@ public class FingerprintService extends BiometricServiceBase {
      * BiometricPrompt.
      */
     private class BiometricPromptServiceListenerImpl extends BiometricServiceListener {
-        BiometricPromptServiceListenerImpl(IBiometricServiceReceiver wrapperReceiver) {
+        BiometricPromptServiceListenerImpl(IBiometricServiceReceiverInternal wrapperReceiver) {
             super(wrapperReceiver);
         }
 
@@ -392,9 +392,8 @@ public class FingerprintService extends BiometricServiceBase {
         public void onError(long deviceId, int error, int vendorCode, int cookie)
                 throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onErrorInternal(error,
-                        FingerprintManager.getErrorString(getContext(), error, vendorCode),
-                        cookie);
+                getWrapperReceiver().onError(cookie, error,
+                        FingerprintManager.getErrorString(getContext(), error, vendorCode));
             }
         }
     }

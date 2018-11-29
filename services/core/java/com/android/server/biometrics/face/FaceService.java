@@ -28,7 +28,7 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
-import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.biometrics.face.V1_0.Status;
@@ -147,8 +147,9 @@ public class FaceService extends BiometricServiceBase {
 
         @Override // Binder call
         public void prepareForAuthentication(boolean requireConfirmation, IBinder token, long opId,
-                int groupId, IBiometricServiceReceiver wrapperReceiver, String opPackageName,
-                int cookie, int callingUid, int callingPid, int callingUserId) {
+                int groupId, IBiometricServiceReceiverInternal wrapperReceiver,
+                String opPackageName, int cookie, int callingUid, int callingPid,
+                int callingUserId) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
             final boolean restricted = true; // BiometricPrompt is always restricted
             final AuthenticationClientImpl client = new FaceAuthClient(getContext(),
@@ -389,7 +390,7 @@ public class FaceService extends BiometricServiceBase {
      * BiometricPrompt.
      */
     private class BiometricPromptServiceListenerImpl extends BiometricServiceListener {
-        BiometricPromptServiceListenerImpl(IBiometricServiceReceiver wrapperReceiver) {
+        BiometricPromptServiceListenerImpl(IBiometricServiceReceiverInternal wrapperReceiver) {
             super(wrapperReceiver);
         }
 
@@ -410,9 +411,8 @@ public class FaceService extends BiometricServiceBase {
         public void onError(long deviceId, int error, int vendorCode, int cookie)
                 throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onErrorInternal(error,
-                        FaceManager.getErrorString(getContext(), error, vendorCode),
-                        cookie);
+                getWrapperReceiver().onError(cookie, error,
+                        FaceManager.getErrorString(getContext(), error, vendorCode));
             }
         }
     }

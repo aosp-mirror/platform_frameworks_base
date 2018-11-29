@@ -131,10 +131,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 }
             } else {
                 if (listener != null) {
-                    listener.onAuthenticationFailed(getHalDeviceId());
                     vibrateError();
                 }
-
                 // Allow system-defined limit of number of attempts before giving up
                 final int lockoutMode = handleFailedAttempt();
                 if (lockoutMode != LOCKOUT_NONE) {
@@ -147,6 +145,18 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     if (listener != null) {
                         listener.onError(getHalDeviceId(), errorCode, 0 /* vendorCode */,
                                 getCookie());
+                    }
+                } else {
+                    // Don't send onAuthenticationFailed if we're in lockout, it causes a
+                    // janky UI on Keyguard/BiometricPrompt since "authentication failed"
+                    // will show briefly and be replaced by "device locked out" message.
+                    if (listener != null) {
+                        if (isBiometricPrompt()) {
+                            listener.onAuthenticationFailedInternal(getCookie(),
+                                    getRequireConfirmation());
+                        } else {
+                            listener.onAuthenticationFailed(getHalDeviceId());
+                        }
                     }
                 }
                 result |= lockoutMode != LOCKOUT_NONE; // in a lockout mode

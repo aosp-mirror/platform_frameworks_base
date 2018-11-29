@@ -37,7 +37,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
-import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.Binder;
 import android.os.Bundle;
@@ -349,8 +349,14 @@ public abstract class BiometricServiceBase extends SystemService
             throw new UnsupportedOperationException("Stub!");
         }
 
-        void onAuthenticationFailed(long deviceId)
-                throws RemoteException;
+        default void onAuthenticationFailed(long deviceId) throws RemoteException {
+            throw new UnsupportedOperationException("Stub!");
+        }
+
+        default void onAuthenticationFailedInternal(int cookie, boolean requireConfirmation)
+                throws RemoteException {
+            throw new UnsupportedOperationException("Stub!");
+        }
 
         void onError(long deviceId, int error, int vendorCode, int cookie) throws RemoteException;
 
@@ -365,14 +371,13 @@ public abstract class BiometricServiceBase extends SystemService
      * Wraps the callback interface from Service -> BiometricPrompt
      */
     protected abstract class BiometricServiceListener implements ServiceListener {
-        // We should send results using the wrapper receiver.
-        private IBiometricServiceReceiver mWrapperReceiver;
+        private IBiometricServiceReceiverInternal mWrapperReceiver;
 
-        public BiometricServiceListener(IBiometricServiceReceiver wrapperReceiver) {
+        public BiometricServiceListener(IBiometricServiceReceiverInternal wrapperReceiver) {
             mWrapperReceiver = wrapperReceiver;
         }
 
-        public IBiometricServiceReceiver getWrapperReceiver() {
+        public IBiometricServiceReceiverInternal getWrapperReceiver() {
             return mWrapperReceiver;
         }
 
@@ -380,14 +385,15 @@ public abstract class BiometricServiceBase extends SystemService
         public void onAuthenticationSucceededInternal(boolean requireConfirmation, byte[] token)
                 throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAuthenticationSucceededInternal(requireConfirmation, token);
+                getWrapperReceiver().onAuthenticationSucceeded(requireConfirmation, token);
             }
         }
 
         @Override
-        public void onAuthenticationFailed(long deviceId) throws RemoteException {
+        public void onAuthenticationFailedInternal(int cookie, boolean requireConfirmation)
+                throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAuthenticationFailed();
+                getWrapperReceiver().onAuthenticationFailed(cookie, requireConfirmation);
             }
         }
     }

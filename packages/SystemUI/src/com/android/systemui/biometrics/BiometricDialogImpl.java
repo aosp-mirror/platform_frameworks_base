@@ -21,7 +21,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricPrompt;
-import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -52,14 +52,19 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     private static final int MSG_BUTTON_NEGATIVE = 6;
     private static final int MSG_USER_CANCELED = 7;
     private static final int MSG_BUTTON_POSITIVE = 8;
+    private static final int MSG_BIOMETRIC_SHOW_TRY_AGAIN = 9;
+    private static final int MSG_TRY_AGAIN_PRESSED = 10;
 
     private Map<Integer, BiometricDialogView> mDialogs; // BiometricAuthenticator type, view
     private SomeArgs mCurrentDialogArgs;
     private BiometricDialogView mCurrentDialog;
     private WindowManager mWindowManager;
-    private IBiometricServiceReceiver mReceiver;
+    private IBiometricServiceReceiverInternal mReceiver;
     private boolean mDialogShowing;
     private Callback mCallback = new Callback();
+
+    private boolean mTryAgainShowing; // No good place to save state before config change :/
+    private boolean mConfirmShowing; // No good place to save state before config change :/
 
     private Handler mHandler = new Handler() {
         @Override
@@ -89,6 +94,15 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
                 case MSG_BUTTON_POSITIVE:
                     handleButtonPositive();
                     break;
+                case MSG_BIOMETRIC_SHOW_TRY_AGAIN:
+                    handleShowTryAgain();
+                    break;
+                case MSG_TRY_AGAIN_PRESSED:
+                    handleTryAgainPressed();
+                    break;
+                default:
+                    Log.w(TAG, "Unknown message: " + msg.what);
+                    break;
             }
         }
     };
@@ -96,7 +110,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     private class Callback implements DialogViewCallback {
         @Override
         public void onUserCanceled() {
-            mHandler.obtainMessage(BiometricDialogImpl.MSG_USER_CANCELED).sendToTarget();
+            mHandler.obtainMessage(MSG_USER_CANCELED).sendToTarget();
         }
 
         @Override
@@ -107,12 +121,17 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
 
         @Override
         public void onNegativePressed() {
-            mHandler.obtainMessage(BiometricDialogImpl.MSG_BUTTON_NEGATIVE).sendToTarget();
+            mHandler.obtainMessage(MSG_BUTTON_NEGATIVE).sendToTarget();
         }
 
         @Override
         public void onPositivePressed() {
-            mHandler.obtainMessage(BiometricDialogImpl.MSG_BUTTON_POSITIVE).sendToTarget();
+            mHandler.obtainMessage(MSG_BUTTON_POSITIVE).sendToTarget();
+        }
+
+        @Override
+        public void onTryAgainPressed() {
+            mHandler.obtainMessage(MSG_TRY_AGAIN_PRESSED).sendToTarget();
         }
     }
 
@@ -139,8 +158,8 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiver receiver, int type,
-            boolean requireConfirmation, int userId) {
+    public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
+            int type, boolean requireConfirmation, int userId) {
         if (DEBUG) Log.d(TAG, "showBiometricDialog, type: " + type);
         // Remove these messages as they are part of the previous client
         mHandler.removeMessages(MSG_BIOMETRIC_ERROR);
@@ -180,6 +199,12 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         mHandler.obtainMessage(MSG_HIDE_DIALOG, false /* userCanceled */).sendToTarget();
     }
 
+    @Override
+    public void showBiometricTryAgain() {
+        if (DEBUG) Log.d(TAG, "showBiometricTryAgain");
+        mHandler.obtainMessage(MSG_BIOMETRIC_SHOW_TRY_AGAIN).sendToTarget();
+    }
+
     private void handleShowDialog(SomeArgs args, boolean skipAnimation) {
         mCurrentDialogArgs = args;
         final int type = args.argi1;
@@ -194,11 +219,13 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
             Log.w(TAG, "Dialog already showing");
             return;
         }
-        mReceiver = (IBiometricServiceReceiver) args.arg2;
+        mReceiver = (IBiometricServiceReceiverInternal) args.arg2;
         mCurrentDialog.setBundle((Bundle)args.arg1);
         mCurrentDialog.setRequireConfirmation((boolean) args.arg3);
         mCurrentDialog.setUserId(args.argi2);
         mCurrentDialog.setSkipIntro(skipAnimation);
+        mCurrentDialog.setPendingTryAgain(mTryAgainShowing);
+        mCurrentDialog.setPendingConfirm(mConfirmShowing);
         mWindowManager.addView(mCurrentDialog, mCurrentDialog.getLayoutParams());
         mDialogShowing = true;
     }
@@ -210,7 +237,8 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
                 mContext.getResources()
                         .getText(mCurrentDialog.getAuthenticatedAccessibilityResourceId()));
         if (mCurrentDialog.requiresConfirmation()) {
-            mCurrentDialog.showConfirmationButton();
+            mConfirmShowing = true;
+            mCurrentDialog.showConfirmationButton(true /* show */);
         } else {
             handleHideDialog(false /* userCanceled */);
         }
@@ -227,6 +255,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
             if (DEBUG) Log.d(TAG, "Dialog already dismissed");
             return;
         }
+        mTryAgainShowing = false;
         mCurrentDialog.showErrorMessage(error);
     }
 
@@ -247,6 +276,8 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         }
         mReceiver = null;
         mDialogShowing = false;
+        mConfirmShowing = false;
+        mTryAgainShowing = false;
         mCurrentDialog.startDismiss();
     }
 
@@ -260,6 +291,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception when handling negative button", e);
         }
+        mTryAgainShowing = false;
         handleHideDialog(false /* userCanceled */);
     }
 
@@ -273,11 +305,29 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception when handling positive button", e);
         }
+        mConfirmShowing = false;
         handleHideDialog(false /* userCanceled */);
     }
 
     private void handleUserCanceled() {
+        mTryAgainShowing = false;
+        mConfirmShowing = false;
         handleHideDialog(true /* userCanceled */);
+    }
+
+    private void handleShowTryAgain() {
+        mCurrentDialog.showTryAgainButton(true /* show */);
+        mTryAgainShowing = true;
+    }
+
+    private void handleTryAgainPressed() {
+        try {
+            mCurrentDialog.clearTemporaryMessage();
+            mTryAgainShowing = false;
+            mReceiver.onTryAgainPressed();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException when handling try again", e);
+        }
     }
 
     @Override

@@ -21,7 +21,7 @@ import static com.android.systemui.statusbar.phone.StatusBar.ONLY_CORE_APPS;
 import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.graphics.Rect;
-import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -96,6 +96,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_SHOW_CHARGING_ANIMATION       = 44 << MSG_SHIFT;
     private static final int MSG_SHOW_PINNING_TOAST_ENTER_EXIT = 45 << MSG_SHIFT;
     private static final int MSG_SHOW_PINNING_TOAST_ESCAPE     = 46 << MSG_SHIFT;
+    private static final int MSG_BIOMETRIC_TRY_AGAIN           = 47 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -163,12 +164,13 @@ public class CommandQueue extends IStatusBar.Stub {
 
         default void onRotationProposal(int rotation, boolean isValid) { }
 
-        default void showBiometricDialog(Bundle bundle, IBiometricServiceReceiver receiver,
+        default void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
                 int type, boolean requireConfirmation, int userId) { }
         default void onBiometricAuthenticated() { }
         default void onBiometricHelp(String message) { }
         default void onBiometricError(String error) { }
         default void hideBiometricDialog() { }
+        default void showBiometricTryAgain() { }
     }
 
     @VisibleForTesting
@@ -523,8 +525,8 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiver receiver, int type,
-            boolean requireConfirmation, int userId) {
+    public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
+            int type, boolean requireConfirmation, int userId) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = bundle;
@@ -562,6 +564,13 @@ public class CommandQueue extends IStatusBar.Stub {
     public void hideBiometricDialog() {
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_BIOMETRIC_HIDE).sendToTarget();
+        }
+    }
+
+    @Override
+    public void showBiometricTryAgain() {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_BIOMETRIC_TRY_AGAIN).sendToTarget();
         }
     }
 
@@ -774,7 +783,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showBiometricDialog(
                                 (Bundle) someArgs.arg1,
-                                (IBiometricServiceReceiver) someArgs.arg2,
+                                (IBiometricServiceReceiverInternal) someArgs.arg2,
                                 someArgs.argi1 /* type */,
                                 (boolean) someArgs.arg3 /* requireConfirmation */,
                                 someArgs.argi2 /* userId */);
@@ -814,6 +823,11 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_SHOW_PINNING_TOAST_ESCAPE:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showPinningEscapeToast();
+                    }
+                    break;
+                case MSG_BIOMETRIC_TRY_AGAIN:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showBiometricTryAgain();
                     }
                     break;
             }

@@ -263,12 +263,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         @Override
-        public void onAuthenticationSucceededInternal(boolean requireConfirmation, byte[] bytes)
-                throws RemoteException {
-            throw new UnsupportedOperationException("Operation not supported!");
-        }
-
-        @Override
         public void onAuthenticationFailed() throws RemoteException {
             mExecutor.execute(() -> {
                 mAuthenticationCallback.onAuthenticationFailed();
@@ -280,11 +274,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             mExecutor.execute(() -> {
                 mAuthenticationCallback.onAuthenticationError(error, message);
             });
-        }
-
-        @Override
-        public void onErrorInternal(int error, String message, int cookie) throws RemoteException {
-            throw new UnsupportedOperationException("Operation not supported!");
         }
 
         @Override

@@ -160,6 +160,15 @@
                         android:maxLines="2"
                         android:text="@string/biometric_dialog_confirm"
                         android:visibility="gone"/>
+                    <!-- Try Again Button -->
+                    <Button android:id="@+id/button_try_again"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        style="@*android:style/Widget.DeviceDefault.Button.Colored"
+                        android:gravity="center"
+                        android:maxLines="2"
+                        android:text="@string/biometric_dialog_try_again"
+                        android:visibility="gone"/>
                     <Space android:id="@+id/rightSpacer"
                         android:layout_width="12dip"
                         android:layout_height="match_parent"
