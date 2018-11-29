@@ -36,12 +36,13 @@ import android.view.autofill.IAutoFillManagerClient;
 import android.view.intelligence.ContentCaptureEvent;
 
 import com.android.internal.os.IResultReceiver;
-import com.android.server.AbstractRemoteService;
+import com.android.server.AbstractMultiplePendingRequestsRemoteService;
 
 import java.util.List;
 
 //TODO(b/111276913): rename once the final name is defined
-final class RemoteIntelligenceService extends AbstractRemoteService {
+final class RemoteIntelligenceService
+        extends AbstractMultiplePendingRequestsRemoteService<RemoteIntelligenceService> {
 
     private static final String TAG = "RemoteIntelligenceService";
 
@@ -56,7 +57,7 @@ final class RemoteIntelligenceService extends AbstractRemoteService {
             RemoteIntelligenceServiceCallbacks callbacks, boolean bindInstantServiceAllowed,
             boolean verbose) {
         super(context, serviceInterface, componentName, userId, callbacks,
-                bindInstantServiceAllowed, verbose);
+                bindInstantServiceAllowed, verbose, /* initialCapacity= */ 2);
         mCallbacks = callbacks;
     }
 

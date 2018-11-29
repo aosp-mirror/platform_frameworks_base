@@ -40,9 +40,9 @@ import android.service.autofill.SaveRequest;
 import android.text.format.DateUtils;
 import android.util.Slog;
 
-import com.android.server.AbstractRemoteService;
+import com.android.server.AbstractSinglePendingRequestRemoteService;
 
-final class RemoteFillService extends AbstractRemoteService {
+final class RemoteFillService extends AbstractSinglePendingRequestRemoteService<RemoteFillService> {
 
     private static final long TIMEOUT_IDLE_BIND_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
@@ -69,8 +69,8 @@ final class RemoteFillService extends AbstractRemoteService {
         mCallbacks = callbacks;
     }
 
-    @Override
-    protected void onConnectedStateChanged(boolean state) {
+    @Override // from AbstractRemoteService
+    protected void handleOnConnectedStateChanged(boolean state) {
         if (mAutoFillService == null) {
             Slog.w(mTag, "onConnectedStateChanged(): null service");
             return;
@@ -82,18 +82,18 @@ final class RemoteFillService extends AbstractRemoteService {
         }
     }
 
-    @Override
+    @Override // from AbstractRemoteService
     protected IInterface getServiceInterface(IBinder service) {
         mAutoFillService = IAutoFillService.Stub.asInterface(service);
         return mAutoFillService;
     }
 
-    @Override
+    @Override // from AbstractRemoteService
     protected long getTimeoutIdleBindMillis() {
         return TIMEOUT_IDLE_BIND_MILLIS;
     }
 
-    @Override
+    @Override // from AbstractRemoteService
     protected long getRemoteRequestMillis() {
         return TIMEOUT_REMOTE_REQUEST_MILLIS;
     }
@@ -134,6 +134,19 @@ final class RemoteFillService extends AbstractRemoteService {
     public void onSaveRequest(@NonNull SaveRequest request) {
         cancelScheduledUnbind();
         scheduleRequest(new PendingSaveRequest(request, this));
+    }
+
+    private boolean handleResponseCallbackCommon(
+            @NonNull PendingRequest<RemoteFillService> pendingRequest) {
+        if (isDestroyed()) return false;
+
+        if (mPendingRequest == pendingRequest) {
+            mPendingRequest = null;
+        }
+        if (mPendingRequest == null) {
+            scheduleUnbind();
+        }
+        return true;
     }
 
     private void dispatchOnFillRequestSuccess(@NonNull PendingFillRequest pendingRequest,

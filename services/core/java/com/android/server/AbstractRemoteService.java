@@ -45,13 +45,20 @@ import java.lang.ref.WeakReference;
  *
  * <p>All state of this class is modified on a handler thread.
  *
+ * <p><b>NOTE: </b>this class should not be extended directly, you should extend either
+ * {@link AbstractSinglePendingRequestRemoteService} or
+ * {@link AbstractMultiplePendingRequestsRemoteService}.
+ *
  * <p>See {@code com.android.server.autofill.RemoteFillService} for a concrete
  * (no pun intended) example of how to use it.
+ *
+ * @param <S> the concrete remote service class
  *
  * @hide
  */
 //TODO(b/117779333): improve javadoc above instead of using Autofill as an example
-public abstract class AbstractRemoteService implements DeathRecipient {
+public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
+        implements DeathRecipient {
 
     private static final int MSG_UNBIND = 1;
 
@@ -63,8 +70,6 @@ public abstract class AbstractRemoteService implements DeathRecipient {
     protected final String mTag = getClass().getSimpleName();
     protected final Handler mHandler;
     protected final ComponentName mComponentName;
-
-    protected PendingRequest<? extends AbstractRemoteService> mPendingRequest;
 
     private final Context mContext;
     private final Intent mIntent;
@@ -88,10 +93,11 @@ public abstract class AbstractRemoteService implements DeathRecipient {
          *
          * @param service service that died!
          */
-        void onServiceDied(AbstractRemoteService service);
+        void onServiceDied(AbstractRemoteService<? extends AbstractRemoteService<?>> service);
     }
 
-    public AbstractRemoteService(@NonNull Context context, @NonNull String serviceInterface,
+    // NOTE: must be package-protected so this class is not extend outside
+    AbstractRemoteService(@NonNull Context context, @NonNull String serviceInterface,
             @NonNull ComponentName componentName, int userId, @NonNull VultureCallback callback,
             boolean bindInstantServiceAllowed, boolean verbose) {
         mContext = context;
@@ -118,12 +124,25 @@ public abstract class AbstractRemoteService implements DeathRecipient {
         return mDestroyed;
     }
 
+    private void handleOnConnectedStateChangedInternal(boolean connected) {
+        if (connected) {
+            handlePendingRequests();
+        }
+        handleOnConnectedStateChanged(connected);
+    }
+
     /**
-     * Callback called when the system connected / disconnected to the service.
+     * Handles the pending requests when the connection it bounds to the remote service.
+     */
+    abstract void handlePendingRequests();
+
+    /**
+     * Callback called when the system connected / disconnected to the service and the pending
+     * requests have been handled.
      *
      * @param state {@code true} when connected, {@code false} when disconnected.
      */
-    protected void onConnectedStateChanged(boolean state) {
+    protected void handleOnConnectedStateChanged(boolean state) {
     }
 
     /**
@@ -144,13 +163,17 @@ public abstract class AbstractRemoteService implements DeathRecipient {
 
     private void handleDestroy() {
         if (checkIfDestroyed()) return;
-        if (mPendingRequest != null) {
-            mPendingRequest.cancel();
-            mPendingRequest = null;
-        }
-        ensureUnbound();
+        handleOnDestroy();
+        handleEnsureUnbound();
         mDestroyed = true;
     }
+
+    /**
+     * Clears the state when this object is destroyed.
+     *
+     * <p>Typically used to cancel the pending requests.
+     */
+    protected abstract void handleOnDestroy();
 
     @Override // from DeathRecipient
     public void binderDied() {
@@ -183,9 +206,7 @@ public abstract class AbstractRemoteService implements DeathRecipient {
         pw.append(prefix).append(tab).append("destroyed=")
                 .append(String.valueOf(mDestroyed)).println();
         pw.append(prefix).append(tab).append("bound=")
-                .append(String.valueOf(isBound())).println();
-        pw.append(prefix).append(tab).append("hasPendingRequest=")
-                .append(String.valueOf(mPendingRequest != null)).println();
+                .append(String.valueOf(handleIsBound())).println();
         pw.append(prefix).append("mBindInstantServiceAllowed=").println(mBindInstantServiceAllowed);
         pw.append(prefix).append("idleTimeout=")
             .append(Long.toString(getTimeoutIdleBindMillis() / 1000)).append("s").println();
@@ -194,7 +215,7 @@ public abstract class AbstractRemoteService implements DeathRecipient {
         pw.println();
     }
 
-    protected void scheduleRequest(PendingRequest<? extends AbstractRemoteService> pendingRequest) {
+    protected void scheduleRequest(@NonNull PendingRequest<S> pendingRequest) {
         mHandler.sendMessage(obtainMessage(
                 AbstractRemoteService::handlePendingRequest, this, pendingRequest));
     }
@@ -215,19 +236,20 @@ public abstract class AbstractRemoteService implements DeathRecipient {
     private void handleUnbind() {
         if (checkIfDestroyed()) return;
 
-        ensureUnbound();
+        handleEnsureUnbound();
     }
 
-    private void handlePendingRequest(
-            PendingRequest<? extends AbstractRemoteService> pendingRequest) {
+    /**
+     * Handles a request, either processing it right now when bound, or saving it to be handled when
+     * bound.
+     */
+    protected final void handlePendingRequest(@NonNull PendingRequest<S> pendingRequest) {
         if (checkIfDestroyed() || mCompleted) return;
 
-        if (!isBound()) {
-            if (mPendingRequest != null) {
-                mPendingRequest.cancel();
-            }
-            mPendingRequest = pendingRequest;
-            ensureBound();
+        if (!handleIsBound()) {
+            if (mVerbose) Slog.v(mTag, "handlePendingRequest(): queuing" + pendingRequest);
+            handlePendingRequestWhileUnBound(pendingRequest);
+            handleEnsureBound();
         } else {
             if (mVerbose) Slog.v(mTag, "handlePendingRequest(): " + pendingRequest);
             pendingRequest.run();
@@ -237,12 +259,17 @@ public abstract class AbstractRemoteService implements DeathRecipient {
         }
     }
 
-    private boolean isBound() {
+    /**
+     * Defines what to do with a request that arrives while not bound to the service.
+     */
+    abstract void handlePendingRequestWhileUnBound(@NonNull PendingRequest<S> pendingRequest);
+
+    private boolean handleIsBound() {
         return mServiceInterface != null;
     }
 
-    private void ensureBound() {
-        if (isBound() || mBinding) return;
+    private void handleEnsureBound() {
+        if (handleIsBound() || mBinding) return;
 
         if (mVerbose) Slog.v(mTag, "ensureBound()");
         mBinding = true;
@@ -265,13 +292,13 @@ public abstract class AbstractRemoteService implements DeathRecipient {
         }
     }
 
-    private void ensureUnbound() {
-        if (!isBound() && !mBinding) return;
+    private void handleEnsureUnbound() {
+        if (!handleIsBound() && !mBinding) return;
 
         if (mVerbose) Slog.v(mTag, "ensureUnbound()");
         mBinding = false;
-        if (isBound()) {
-            onConnectedStateChanged(false);
+        if (handleIsBound()) {
+            handleOnConnectedStateChangedInternal(false);
             if (mServiceInterface != null) {
                 mServiceInterface.asBinder().unlinkToDeath(this, 0);
                 mServiceInterface = null;
@@ -283,6 +310,7 @@ public abstract class AbstractRemoteService implements DeathRecipient {
     private class RemoteServiceConnection implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            if (mVerbose) Slog.v(mTag, "onServiceConnected()");
             if (mDestroyed || !mBinding) {
                 // This is abnormal. Unbinding the connection has been requested already.
                 Slog.wtf(mTag, "onServiceConnected() was dispatched after unbindService.");
@@ -296,15 +324,7 @@ public abstract class AbstractRemoteService implements DeathRecipient {
                 handleBinderDied();
                 return;
             }
-            onConnectedStateChanged(true);
-
-            if (mPendingRequest != null) {
-                final PendingRequest<? extends AbstractRemoteService> pendingRequest =
-                        mPendingRequest;
-                mPendingRequest = null;
-                handlePendingRequest(pendingRequest);
-            }
-
+            handleOnConnectedStateChangedInternal(true);
             mServiceDied = false;
         }
 
@@ -325,25 +345,12 @@ public abstract class AbstractRemoteService implements DeathRecipient {
         return mDestroyed;
     }
 
-    protected boolean handleResponseCallbackCommon(
-            PendingRequest<? extends AbstractRemoteService> pendingRequest) {
-        if (isDestroyed()) return false;
-
-        if (mPendingRequest == pendingRequest) {
-            mPendingRequest = null;
-        }
-        if (mPendingRequest == null) {
-            scheduleUnbind();
-        }
-        return true;
-    }
-
     /**
      * Base class for the requests serviced by the remote service.
      *
      * @param <S> the remote service class
      */
-    public abstract static class PendingRequest<S extends AbstractRemoteService>
+    public abstract static class PendingRequest<S extends AbstractRemoteService<S>>
             implements Runnable {
         protected final String mTag = getClass().getSimpleName();
         protected final Object mLock = new Object();
