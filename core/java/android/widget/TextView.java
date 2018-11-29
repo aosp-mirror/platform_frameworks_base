@@ -719,7 +719,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @ViewDebug.ExportedProperty(category = "text")
     @UnsupportedAppUsage
     private int mGravity = Gravity.TOP | Gravity.START;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private boolean mHorizontallyScrolling;
 
     private int mAutoLinkMask;
@@ -5095,13 +5095,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Returns whether the text is allowed to be wider than the View is.
+     * Returns whether the text is allowed to be wider than the View.
+     * If false, the text will be wrapped to the width of the View.
+     *
+     * @attr ref android.R.styleable#TextView_scrollHorizontally
+     * @see #setHorizontallyScrolling(boolean)
+     */
+    public final boolean isHorizontallyScrolling() {
+        return mHorizontallyScrolling;
+    }
+
+    /**
+     * Returns whether the text is allowed to be wider than the View.
      * If false, the text will be wrapped to the width of the View.
      *
      * @attr ref android.R.styleable#TextView_scrollHorizontally
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public boolean getHorizontallyScrolling() {
         return mHorizontallyScrolling;
     }
