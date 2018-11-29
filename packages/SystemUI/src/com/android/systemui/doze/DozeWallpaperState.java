@@ -23,6 +23,7 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
 
 import java.io.PrintWriter;
@@ -80,11 +81,12 @@ public class DozeWallpaperState implements DozeMachine.Part {
         if (isAmbientMode != mIsAmbientMode) {
             mIsAmbientMode = isAmbientMode;
             try {
+                long duration = animated ? StackStateAnimator.ANIMATION_DURATION_WAKEUP : 0L;
                 if (DEBUG) {
                     Log.i(TAG, "AOD wallpaper state changed to: " + mIsAmbientMode
-                            + ", animated: " + animated);
+                            + ", animationDuration: " + duration);
                 }
-                mWallpaperManagerService.setInAmbientMode(mIsAmbientMode, animated);
+                mWallpaperManagerService.setInAmbientMode(mIsAmbientMode, duration);
             } catch (RemoteException e) {
                 // Cannot notify wallpaper manager service, but it's fine, let's just skip it.
                 Log.w(TAG, "Cannot notify state to WallpaperManagerService: " + mIsAmbientMode);

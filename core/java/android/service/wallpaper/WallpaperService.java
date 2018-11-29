@@ -19,6 +19,7 @@ package android.service.wallpaper;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Service;
 import android.app.WallpaperColors;
@@ -442,7 +443,9 @@ public abstract class WallpaperService extends Service {
         /**
          * Returns true if this engine is running in ambient mode -- that is,
          * it is being shown in low power mode, on always on display.
+         * @hide
          */
+        @SystemApi
         public boolean isInAmbientMode() {
             return mIsInAmbientMode;
         }
@@ -568,14 +571,16 @@ public abstract class WallpaperService extends Service {
          * Called when the device enters or exits ambient mode.
          *
          * @param inAmbientMode {@code true} if in ambient mode.
-         * @param animated {@code true} if you'll have the opportunity of animating your transition
-         *                 {@code false} when the wallpaper should present its ambient version
-         *                 immediately.
+         * @param animationDuration How long the transition animation to change the ambient state
+         *                          should run, in milliseconds. If 0 is passed as the argument
+         *                          here, the state should be switched immediately.
          *
          * @see #isInAmbientMode()
          * @see WallpaperInfo#supportsAmbientMode()
+         * @hide
          */
-        public void onAmbientModeChanged(boolean inAmbientMode, boolean animated) {
+        @SystemApi
+        public void onAmbientModeChanged(boolean inAmbientMode, long animationDuration) {
         }
 
         /**
@@ -1049,19 +1054,19 @@ public abstract class WallpaperService extends Service {
          * message sent from handler.
          *
          * @param inAmbientMode {@code true} if in ambient mode.
-         * @param animated {@code true} if the transition will be animated.
+         * @param animationDuration For how long the transition will last, in ms.
          * @hide
          */
         @VisibleForTesting
-        public void doAmbientModeChanged(boolean inAmbientMode, boolean animated) {
+        public void doAmbientModeChanged(boolean inAmbientMode, long animationDuration) {
             if (!mDestroyed) {
                 if (DEBUG) {
                     Log.v(TAG, "onAmbientModeChanged(" + inAmbientMode + ", "
-                            + animated + "): " + this);
+                            + animationDuration + "): " + this);
                 }
                 mIsInAmbientMode = inAmbientMode;
                 if (mCreated) {
-                    onAmbientModeChanged(inAmbientMode, animated);
+                    onAmbientModeChanged(inAmbientMode, animationDuration);
                 }
             }
         }
@@ -1320,10 +1325,10 @@ public abstract class WallpaperService extends Service {
         }
 
         @Override
-        public void setInAmbientMode(boolean inAmbientDisplay, boolean animated)
+        public void setInAmbientMode(boolean inAmbientDisplay, long animationDuration)
                 throws RemoteException {
-            Message msg = mCaller.obtainMessageII(DO_IN_AMBIENT_MODE, inAmbientDisplay ? 1 : 0,
-                    animated ? 1 : 0);
+            Message msg = mCaller.obtainMessageIO(DO_IN_AMBIENT_MODE, inAmbientDisplay ? 1 : 0,
+                    animationDuration);
             mCaller.sendMessage(msg);
         }
 
@@ -1394,7 +1399,7 @@ public abstract class WallpaperService extends Service {
                     return;
                 }
                 case DO_IN_AMBIENT_MODE: {
-                    mEngine.doAmbientModeChanged(message.arg1 != 0, message.arg2 != 0);
+                    mEngine.doAmbientModeChanged(message.arg1 != 0, (Long) message.obj);
                     return;
                 }
                 case MSG_UPDATE_SURFACE:

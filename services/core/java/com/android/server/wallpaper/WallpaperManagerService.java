@@ -1181,7 +1181,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 // TODO(multi-display) TBD.
                 if (mInfo != null && mInfo.supportsAmbientMode() && displayId == DEFAULT_DISPLAY) {
                     try {
-                        connector.mEngine.setInAmbientMode(mInAmbientMode, false /* animated */);
+                        connector.mEngine.setInAmbientMode(mInAmbientMode, 0L /* duration */);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to set ambient mode state", e);
                     }
@@ -2023,11 +2023,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    // TODO(b/115486823) Extends this method with specific display.
-    public void setInAmbientMode(boolean inAmbienMode, boolean animated) {
+    /**
+     * TODO(b/115486823) Extends this method with specific display.
+     * Propagate ambient state to wallpaper engine.
+     *
+     * @param inAmbientMode {@code true} when in ambient mode, {@code false} otherwise.
+     * @param animationDuration Duration of the animation, or 0 when immediate.
+     */
+    public void setInAmbientMode(boolean inAmbientMode, long animationDuration) {
         final IWallpaperEngine engine;
         synchronized (mLock) {
-            mInAmbientMode = inAmbienMode;
+            mInAmbientMode = inAmbientMode;
             final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
             if (data != null && data.connection != null && data.connection.mInfo != null
                     && data.connection.mInfo.supportsAmbientMode()) {
@@ -2040,7 +2046,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         if (engine != null) {
             try {
-                engine.setInAmbientMode(inAmbienMode, animated);
+                engine.setInAmbientMode(inAmbientMode, animationDuration);
             } catch (RemoteException e) {
                 // Cannot talk to wallpaper engine.
             }
@@ -2344,7 +2350,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 return false;
             }
             if (!android.Manifest.permission.BIND_WALLPAPER.equals(si.permission)) {
-                String msg = "Selected service does not require "
+                String msg = "Selected service does not have "
                         + android.Manifest.permission.BIND_WALLPAPER
                         + ": " + componentName;
                 if (fromUser) {
@@ -2388,6 +2394,22 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 if (wi == null) {
                     String msg = "Selected service is not a wallpaper: "
                             + componentName;
+                    if (fromUser) {
+                        throw new SecurityException(msg);
+                    }
+                    Slog.w(TAG, msg);
+                    return false;
+                }
+            }
+
+            if (wi != null && wi.supportsAmbientMode()) {
+                final int hasPrivilege = mIPackageManager.checkPermission(
+                        android.Manifest.permission.AMBIENT_WALLPAPER, wi.getPackageName(),
+                        serviceUserId);
+                if (hasPrivilege != PackageManager.PERMISSION_GRANTED) {
+                    String msg = "Selected service does not have "
+                            + android.Manifest.permission.AMBIENT_WALLPAPER
+                            + ": " + componentName;
                     if (fromUser) {
                         throw new SecurityException(msg);
                     }

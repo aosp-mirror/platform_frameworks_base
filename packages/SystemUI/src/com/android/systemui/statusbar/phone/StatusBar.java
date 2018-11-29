@@ -721,7 +721,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         IWallpaperManager wallpaperManager = IWallpaperManager.Stub.asInterface(
                 ServiceManager.getService(Context.WALLPAPER_SERVICE));
         try {
-            wallpaperManager.setInAmbientMode(false /* ambientMode */, false /* animated */);
+            wallpaperManager.setInAmbientMode(false /* ambientMode */, 0L /* duration */);
         } catch (RemoteException e) {
             // Just pass, nothing critical.
         }

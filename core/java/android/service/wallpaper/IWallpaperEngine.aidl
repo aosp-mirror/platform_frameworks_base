@@ -27,7 +27,7 @@ oneway interface IWallpaperEngine {
     void setDesiredSize(int width, int height);
     void setDisplayPadding(in Rect padding);
     void setVisibility(boolean visible);
-    void setInAmbientMode(boolean inAmbientDisplay, boolean animated);
+    void setInAmbientMode(boolean inAmbientDisplay, long animationDuration);
     void dispatchPointer(in MotionEvent event);
     void dispatchWallpaperCommand(String action, int x, int y,
             int z, in Bundle extras);
