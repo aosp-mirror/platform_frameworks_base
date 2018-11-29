@@ -15246,7 +15246,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         "inputs not balanced; missing argument for " + installPackageName);
             }
             final DeletePackageAction deletePackageAction;
-            if (prepareResult.replace) {
+            // we only want to try to delete for non system apps
+            if (prepareResult.replace && !prepareResult.system) {
                 deletePackageAction = mayDeletePackageLocked(res.removedInfo,
                         prepareResult.originalPs, prepareResult.disabledPs,
                         prepareResult.childPackageSettings);
@@ -17818,7 +17819,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         if (isSystemApp(ps)) {
-            if (ps.parentPackageName == null) {
+            if (ps.parentPackageName != null) {
                 Slog.w(TAG, "Attempt to delete child system package " + ps.pkg.packageName);
                 return null;
             }
