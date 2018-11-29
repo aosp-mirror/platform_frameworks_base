@@ -3932,6 +3932,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      */
     @VisibleForTesting
     void setAppIdleWhitelist(int uid, boolean shouldWhitelist) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
         synchronized (mUidRulesFirstLock) {
             if (mAppIdleTempWhitelistAppIds.get(uid) == shouldWhitelist) {
                 // No change.
