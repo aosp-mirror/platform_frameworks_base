@@ -18,11 +18,14 @@ package android.bluetooth;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.EventLog;
 
 import java.util.Random;
 
 /** @hide */
 public final class BluetoothHidDeviceAppSdpSettings implements Parcelable {
+
+    private static final int MAX_DESCRIPTOR_SIZE = 2048;
 
     final public String name;
     final public String description;
@@ -36,6 +39,12 @@ public final class BluetoothHidDeviceAppSdpSettings implements Parcelable {
         this.description = description;
         this.provider = provider;
         this.subclass = subclass;
+
+        if (descriptors == null || descriptors.length > MAX_DESCRIPTOR_SIZE) {
+            EventLog.writeEvent(0x534e4554, "119819889", -1, "");
+            throw new IllegalArgumentException("descriptors must be not null and shorter than "
+                    + MAX_DESCRIPTOR_SIZE);
+        }
         this.descriptors = descriptors.clone();
     }
 
