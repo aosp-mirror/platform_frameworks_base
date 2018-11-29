@@ -35,7 +35,7 @@
             android:id="@+id/entity_header_icon"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:scaleType="fitXY"
+            android:scaleType="fitCenter"
             android:antialias="true"/>
 
         <TextView
