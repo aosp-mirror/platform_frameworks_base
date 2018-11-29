@@ -12821,6 +12821,13 @@ public final class Settings {
         public static final String HIDDEN_API_POLICY = "hidden_api_policy";
 
         /**
+         * Current version of signed configuration applied.
+         *
+         * @hide
+         */
+        public static final String SIGNED_CONFIG_VERSION = "signed_config_version";
+
+        /**
          * Timeout for a single {@link android.media.soundtrigger.SoundTriggerDetectionService}
          * operation (in ms).
          *

@@ -414,6 +414,7 @@ public class SettingsBackupTest {
                     Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS,
                     Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
                     Settings.Global.SHOW_TEMPERATURE_WARNING,
+                    Settings.Global.SIGNED_CONFIG_VERSION,
                     Settings.Global.SMART_SELECTION_UPDATE_CONTENT_URL,
                     Settings.Global.SMART_SELECTION_UPDATE_METADATA_URL,
                     Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED,
