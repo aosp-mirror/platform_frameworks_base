@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * This annotation does not inherit. If a class extends an annotated parent class, but does not
  * annotate itself, its node name will be inferred from its Java name.
  *
- * @see InspectionHelper#getNodeName()
+ * @see InspectionCompanion#getNodeName()
  * @hide
  */
 @Target({TYPE})

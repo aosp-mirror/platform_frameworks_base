@@ -777,9 +777,11 @@ java_library {
 java_library_host {
     name: "inspector-annotation",
     srcs: [
-        "core/java/android/view/inspector/InspectableChildren.java",
         "core/java/android/view/inspector/InspectableNodeName.java",
         "core/java/android/view/inspector/InspectableProperty.java",
+        // Needed for the ResourceId.ID_NULL constant
+        "core/java/android/content/res/ResourceId.java",
+        "core/java/android/annotation/AnyRes.java",
     ],
 }
 
