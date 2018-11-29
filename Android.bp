@@ -695,9 +695,11 @@ java_defaults {
         "netd_aidl_interface-java",
     ],
 
-    // Loaded with System.loadLibrary by android.view.textclassifier
     required: [
+        // TODO: remove gps_debug when the build system propagates "required" properly.
+        "gps_debug.conf",
         "libtextclassifier",
+        // Loaded with System.loadLibrary by android.view.textclassifier
         "libmedia2_jni",
     ],
 
