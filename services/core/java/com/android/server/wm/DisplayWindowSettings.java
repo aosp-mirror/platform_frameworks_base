@@ -80,6 +80,7 @@ class DisplayWindowSettings {
         private boolean mShouldShowWithInsecureKeyguard = false;
         private boolean mShouldShowSystemDecors = false;
         private boolean mShouldShowIme = false;
+        private boolean mFixedToUserRotation;
 
         private Entry(String name) {
             mName = name;
@@ -97,7 +98,8 @@ class DisplayWindowSettings {
                     && mRemoveContentMode == REMOVE_CONTENT_MODE_UNDEFINED
                     && !mShouldShowWithInsecureKeyguard
                     && !mShouldShowSystemDecors
-                    && !mShouldShowIme;
+                    && !mShouldShowIme
+                    && !mFixedToUserRotation;
         }
     }
 
@@ -183,6 +185,13 @@ class DisplayWindowSettings {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final Entry entry = getOrCreateEntry(displayInfo);
         entry.mForcedScalingMode = mode;
+        writeSettingsIfNeeded(entry, displayInfo);
+    }
+
+    void setFixedToUserRotation(DisplayContent displayContent, boolean fixedToUserRotation) {
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        final Entry entry = getOrCreateEntry(displayInfo);
+        entry.mFixedToUserRotation = fixedToUserRotation;
         writeSettingsIfNeeded(entry, displayInfo);
     }
 
@@ -331,7 +340,8 @@ class DisplayWindowSettings {
         displayInfo.overscanRight = entry.mOverscanRight;
         displayInfo.overscanBottom = entry.mOverscanBottom;
 
-        dc.getDisplayRotation().restoreUserRotation(entry.mUserRotationMode, entry.mUserRotation);
+        dc.getDisplayRotation().restoreSettings(entry.mUserRotationMode,
+                entry.mUserRotation, entry.mFixedToUserRotation);
 
         if (entry.mForcedDensity != 0) {
             dc.mBaseDisplayDensity = entry.mForcedDensity;
@@ -458,6 +468,8 @@ class DisplayWindowSettings {
                     "shouldShowWithInsecureKeyguard");
             entry.mShouldShowSystemDecors = getBooleanAttribute(parser, "shouldShowSystemDecors");
             entry.mShouldShowIme = getBooleanAttribute(parser, "shouldShowIme");
+            entry.mFixedToUserRotation = getBooleanAttribute(parser,
+                    "fixedToUserRotation");
             mEntries.put(name, entry);
         }
         XmlUtils.skipCurrentTag(parser);
@@ -540,6 +552,10 @@ class DisplayWindowSettings {
                 }
                 if (entry.mShouldShowIme) {
                     out.attribute(null, "shouldShowIme", Boolean.toString(entry.mShouldShowIme));
+                }
+                if (entry.mFixedToUserRotation) {
+                    out.attribute(null, "fixedToUserRotation",
+                            Boolean.toString(entry.mFixedToUserRotation));
                 }
                 out.endTag(null, "display");
             }

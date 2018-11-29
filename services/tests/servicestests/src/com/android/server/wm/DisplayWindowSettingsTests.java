@@ -27,7 +27,12 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.WindowConfiguration;
 import android.platform.test.annotations.Presubmit;
@@ -376,6 +381,33 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
         assertEquals(Surface.ROTATION_270,
                 mSecondaryDisplay.getDisplayRotation().getUserRotation());
+    }
+
+    @Test
+    public void testNotFixedToUserRotationByDefault() {
+        mTarget.setUserRotation(mPrimaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
+                Surface.ROTATION_0);
+
+        final DisplayRotation displayRotation = mock(DisplayRotation.class);
+        mPrimaryDisplay = spy(mPrimaryDisplay);
+        when(mPrimaryDisplay.getDisplayRotation()).thenReturn(displayRotation);
+
+        mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
+
+        verify(displayRotation).restoreSettings(anyInt(), anyInt(), eq(false));
+    }
+
+    @Test
+    public void testSetFixedToUserRotation() {
+        mTarget.setFixedToUserRotation(mPrimaryDisplay, true);
+
+        final DisplayRotation displayRotation = mock(DisplayRotation.class);
+        mPrimaryDisplay = spy(mPrimaryDisplay);
+        when(mPrimaryDisplay.getDisplayRotation()).thenReturn(displayRotation);
+
+        applySettingsToDisplayByNewInstance(mPrimaryDisplay);
+
+        verify(displayRotation).restoreSettings(anyInt(), anyInt(), eq(true));
     }
 
     private static void assertOverscan(DisplayContent display, int left, int top, int right,

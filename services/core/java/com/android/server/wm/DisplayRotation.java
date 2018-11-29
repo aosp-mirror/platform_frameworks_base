@@ -21,6 +21,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,6 +31,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.power.V1_0.PowerHint;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -57,6 +59,7 @@ public class DisplayRotation {
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
     private final DisplayPolicy mDisplayPolicy;
+    private final DisplayWindowSettings mDisplayWindowSettings;
     private final Context mContext;
     private final Object mLock;
 
@@ -70,10 +73,6 @@ public class DisplayRotation {
     private OrientationListener mOrientationListener;
     private StatusBarManagerInternal mStatusBarManagerInternal;
     private SettingsObserver mSettingsObserver;
-
-    // Default display does not rotate, apps that require non-default orientation will have to
-    // have the orientation emulated.
-    private boolean mForceDefaultOrientation;
 
     private int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
@@ -93,6 +92,13 @@ public class DisplayRotation {
     private int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
     private int mUserRotation = Surface.ROTATION_0;
 
+    /**
+     * A flag to indicate if the display rotation should be fixed to user specified rotation
+     * regardless of all other states (including app requrested orientation). {@code true} the
+     * display rotation should be fixed to user specified rotation, {@code false} otherwise.
+     */
+    private boolean mFixedToUserRotation;
+
     private int mDemoHdmiRotation;
     private int mDemoRotation;
     private boolean mDemoHdmiRotationLock;
@@ -100,15 +106,17 @@ public class DisplayRotation {
 
     DisplayRotation(WindowManagerService service, DisplayContent displayContent) {
         this(service, displayContent, displayContent.getDisplayPolicy(),
-                service.mContext, service.getWindowManagerLock());
+                service.mDisplayWindowSettings, service.mContext, service.getWindowManagerLock());
     }
 
     @VisibleForTesting
     DisplayRotation(WindowManagerService service, DisplayContent displayContent,
-            DisplayPolicy displayPolicy, Context context, Object lock) {
+            DisplayPolicy displayPolicy, DisplayWindowSettings displayWindowSettings,
+            Context context, Object lock) {
         mService = service;
         mDisplayContent = displayContent;
         mDisplayPolicy = displayPolicy;
+        mDisplayWindowSettings = displayWindowSettings;
         mContext = context;
         mLock = lock;
         isDefaultDisplay = displayContent.isDefaultDisplay;
@@ -204,12 +212,19 @@ public class DisplayRotation {
         // so if the orientation is forced, we need to respect that no matter what.
         final boolean isTv = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
-        mForceDefaultOrientation = ((longSizeDp >= 960 && shortSizeDp >= 720) || isCar || isTv) &&
-                res.getBoolean(com.android.internal.R.bool.config_forceDefaultOrientation) &&
-                // For debug purposes the next line turns this feature off with:
-                // $ adb shell setprop config.override_forced_orient true
-                // $ adb shell wm size reset
-                !"true".equals(SystemProperties.get("config.override_forced_orient"));
+        final boolean forceDefaultOrientationInRes =
+                res.getBoolean(com.android.internal.R.bool.config_forceDefaultOrientation);
+        final boolean forceDefaultOrienation =
+                ((longSizeDp >= 960 && shortSizeDp >= 720) || isCar || isTv)
+                        && forceDefaultOrientationInRes
+                        // For debug purposes the next line turns this feature off with:
+                        // $ adb shell setprop config.override_forced_orient true
+                        // $ adb shell wm size reset
+                        && !"true".equals(SystemProperties.get("config.override_forced_orient"));
+        // Configuration says we force to use the default orientation. We can fall back to fix
+        // rotation to only user rotation. As long as OEM doesn't change user rotation then the
+        // rotation of this display is effectively stuck at 0 deg.
+        setFixedToUserRotation(forceDefaultOrienation);
     }
 
     void setRotation(int rotation) {
@@ -227,7 +242,14 @@ public class DisplayRotation {
         }
     }
 
-    void restoreUserRotation(int userRotationMode, int userRotation) {
+    void restoreSettings(int userRotationMode, int userRotation,
+            boolean fixedToUserRotation) {
+        mFixedToUserRotation = fixedToUserRotation;
+
+        // We will retrieve user rotation and user rotation mode from settings for default display.
+        if (isDefaultDisplay) {
+            return;
+        }
         if (userRotationMode != WindowManagerPolicy.USER_ROTATION_FREE
                 && userRotationMode != WindowManagerPolicy.USER_ROTATION_LOCKED) {
             Slog.w(TAG, "Trying to restore an invalid user rotation mode " + userRotationMode
@@ -241,6 +263,18 @@ public class DisplayRotation {
         }
         mUserRotationMode = userRotationMode;
         mUserRotation = userRotation;
+    }
+
+    void setFixedToUserRotation(boolean fixedToUserRotation) {
+        if (mFixedToUserRotation == fixedToUserRotation) {
+            return;
+        }
+
+        mFixedToUserRotation = fixedToUserRotation;
+        mDisplayWindowSettings.setFixedToUserRotation(mDisplayContent,
+                fixedToUserRotation);
+        mService.updateRotation(true /* alwaysSendConfiguration */,
+                false /* forceRelayout */);
     }
 
     private void setUserRotation(int userRotationMode, int userRotation) {
@@ -265,7 +299,7 @@ public class DisplayRotation {
             mUserRotation = userRotation;
             changed = true;
         }
-        mService.mDisplayWindowSettings.setUserRotation(mDisplayContent, userRotationMode,
+        mDisplayWindowSettings.setUserRotation(mDisplayContent, userRotationMode,
                 userRotation);
         if (changed) {
             mService.updateRotation(true /* alwaysSendConfiguration */,
@@ -291,9 +325,8 @@ public class DisplayRotation {
                 Settings.System.ACCELEROMETER_ROTATION, 0, UserHandle.USER_CURRENT) == 0;
     }
 
-    /** @return true if com.android.internal.R.bool#config_forceDefaultOrientation is true. */
-    boolean isDefaultOrientationForced() {
-        return mForceDefaultOrientation;
+    boolean isFixedToUserRotation() {
+        return mFixedToUserRotation;
     }
 
     public int getLandscapeRotation() {
@@ -399,6 +432,12 @@ public class DisplayRotation {
      * screen is switched off.
      */
     private boolean needSensorRunning() {
+        if (mFixedToUserRotation) {
+            // We are sure we only respect user rotation settings, so we are sure we will not
+            // support sensor rotation.
+            return false;
+        }
+
         if (mSupportAutoRotation) {
             if (mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR
                     || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
@@ -459,8 +498,8 @@ public class DisplayRotation {
                         );
         }
 
-        if (mForceDefaultOrientation) {
-            return Surface.ROTATION_0;
+        if (mFixedToUserRotation) {
+            return mUserRotation;
         }
 
         int sensorRotation = mOrientationListener != null
@@ -701,8 +740,8 @@ public class DisplayRotation {
         // demo, hdmi, vr, etc mode.
 
         // Determine if the rotation is currently forced.
-        if (mForceDefaultOrientation) {
-            return false; // Rotation is forced to default orientation.
+        if (mFixedToUserRotation) {
+            return false; // Rotation is forced to user settings.
         }
 
         final int lidState = mDisplayPolicy.getLidState();
@@ -861,6 +900,7 @@ public class DisplayRotation {
         pw.print(" mDemoHdmiRotationLock=" + mDemoHdmiRotationLock);
         pw.println(" mUndockedHdmiRotation=" + Surface.rotationToString(mUndockedHdmiRotation));
         pw.println(prefix + "  mLidOpenRotation=" + Surface.rotationToString(mLidOpenRotation));
+        pw.println(prefix + "  mFixedToUserRotation=" + mFixedToUserRotation);
     }
 
     private class OrientationListener extends WindowOrientationListener {
@@ -944,5 +984,11 @@ public class DisplayRotation {
                         false /* forceRelayout */);
             }
         }
+    }
+
+    @VisibleForTesting
+    interface ContentObserverRegister {
+        void registerContentObserver(Uri uri, boolean notifyForDescendants,
+                ContentObserver observer, @UserIdInt int userHandle);
     }
 }

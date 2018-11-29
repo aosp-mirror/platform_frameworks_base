@@ -65,7 +65,7 @@ public class WindowTestUtils {
 
             final DisplayRotation displayRotation = new DisplayRotation(
                     mock(WindowManagerService.class), displayContent, displayPolicy,
-                    context, new Object());
+                    mock(DisplayWindowSettings.class), context, new Object());
             displayRotation.mPortraitRotation = Surface.ROTATION_0;
             displayRotation.mLandscapeRotation = Surface.ROTATION_90;
             displayRotation.mUpsideDownRotation = Surface.ROTATION_180;

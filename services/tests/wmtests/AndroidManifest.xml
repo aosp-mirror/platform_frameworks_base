@@ -37,6 +37,8 @@
 
     <application android:debuggable="true"
                  android:testOnly="true">
+        <uses-library android:name="android.test.mock" android:required="true" />
+
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityA" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityB" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityRequestedOrientationChange" />
