@@ -27,7 +27,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,13 +34,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.util.ReflectionHelpers;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class MetricsFeatureProviderTest {
     @Mock
     private LogWriter mLogWriter;

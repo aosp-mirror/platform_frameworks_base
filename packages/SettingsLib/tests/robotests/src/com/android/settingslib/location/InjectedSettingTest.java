@@ -18,12 +18,11 @@ package com.android.settingslib.location;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public final class InjectedSettingTest {
 
     private static final String TEST_STRING = "test";

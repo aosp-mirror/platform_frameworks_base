@@ -27,14 +27,13 @@ import android.view.LayoutInflater;
 import androidx.preference.Preference.OnPreferenceClickListener;
 import androidx.preference.PreferenceViewHolder;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class LayoutPreferenceTest {
 
     private LayoutPreference mPreference;

@@ -25,14 +25,13 @@ import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.style.TtsSpan;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class StringUtilTest {
     private Context mContext;
 

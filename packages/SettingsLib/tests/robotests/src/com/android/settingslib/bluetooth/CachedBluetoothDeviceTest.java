@@ -31,16 +31,15 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.media.AudioManager;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class CachedBluetoothDeviceTest {
     private final static String DEVICE_NAME = "TestName";
     private final static String DEVICE_ALIAS = "TestAlias";

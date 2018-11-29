@@ -27,7 +27,6 @@ import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.testutils.shadow.ShadowActivityManager;
 
 import org.junit.After;
@@ -36,6 +35,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
@@ -45,7 +45,7 @@ import org.robolectric.annotation.Resetter;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(shadows = { ShadowActivityManager.class, UserManagerHelperRoboTest.ShadowUserHandle.class})
 public class UserManagerHelperRoboTest {
     @Mock

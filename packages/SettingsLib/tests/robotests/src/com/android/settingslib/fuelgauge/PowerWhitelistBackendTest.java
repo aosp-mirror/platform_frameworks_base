@@ -31,7 +31,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.IDeviceIdleController;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.testutils.shadow.ShadowDefaultDialerManager;
 import com.android.settingslib.testutils.shadow.ShadowSmsApplication;
 
@@ -40,12 +39,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowPackageManager;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowDefaultDialerManager.class, ShadowSmsApplication.class})
 public class PowerWhitelistBackendTest {
 

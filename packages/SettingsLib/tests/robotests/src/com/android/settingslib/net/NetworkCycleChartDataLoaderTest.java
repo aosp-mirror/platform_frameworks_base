@@ -27,15 +27,14 @@ import android.net.NetworkPolicyManager;
 import android.os.RemoteException;
 import android.text.format.DateUtils;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class NetworkCycleChartDataLoaderTest {
 
     @Mock

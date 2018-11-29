@@ -17,10 +17,10 @@ package com.android.settingslib.core.instrumentation;
 
 import static com.android.settingslib.core.instrumentation.Instrumentable.METRICS_CATEGORY_UNKNOWN;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -35,7 +35,6 @@ import android.os.Bundle;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,10 +42,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
 
-
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class VisibilityLoggerMixinTest {
 
     @Mock
@@ -139,7 +138,7 @@ public class VisibilityLoggerMixinTest {
 
     private final class TestInstrumentable implements Instrumentable {
 
-        public static final int TEST_METRIC = 12345;
+        private static final int TEST_METRIC = 12345;
 
         @Override
         public int getMetricsCategory() {

@@ -25,27 +25,23 @@ import static org.mockito.Mockito.spy;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.provider.Settings;
-import android.service.notification.Condition;
 import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.appcompat.app.AlertDialog;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class ZenDurationDialogTest {
     private ZenDurationDialog mController;
 
     private Context mContext;
     private LayoutInflater mLayoutInflater;
-    private Condition mCountdownCondition;
-    private Condition mAlarmCondition;
     private ContentResolver mContentResolver;
     private AlertDialog.Builder mBuilder;
 
@@ -101,7 +97,6 @@ public class ZenDurationDialogTest {
         assertFalse(mController.getConditionTagAt(
                 ZenDurationDialog.ALWAYS_ASK_CONDITION_INDEX).rb.isChecked());
     }
-
 
     @Test
     public void testChooseAlwaysPromptSetting() {

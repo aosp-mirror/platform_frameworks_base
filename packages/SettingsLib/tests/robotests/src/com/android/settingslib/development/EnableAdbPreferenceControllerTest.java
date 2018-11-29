@@ -32,17 +32,16 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.shadows.ShadowApplication;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class EnableAdbPreferenceControllerTest {
     @Mock(answer = RETURNS_DEEP_STUBS)
     private PreferenceScreen mScreen;
@@ -150,7 +149,7 @@ public class EnableAdbPreferenceControllerTest {
     }
 
     class ConcreteEnableAdbPreferenceController extends AbstractEnableAdbPreferenceController {
-        public ConcreteEnableAdbPreferenceController(Context context) {
+        private ConcreteEnableAdbPreferenceController(Context context) {
             super(context);
         }
 

@@ -16,8 +16,8 @@
 
 package com.android.settingslib.net;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.nullable;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -37,20 +37,19 @@ import android.os.RemoteException;
 import android.text.format.DateUtils;
 import android.util.Range;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.util.ReflectionHelpers;
 
 import java.time.ZonedDateTime;
 import java.util.Iterator;
 import java.util.List;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class NetworkCycleDataLoaderTest {
 
     @Mock

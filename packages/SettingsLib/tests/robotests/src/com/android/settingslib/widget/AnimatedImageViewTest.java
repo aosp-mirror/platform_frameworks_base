@@ -22,14 +22,13 @@ import android.app.Activity;
 import android.graphics.drawable.AnimatedRotateDrawable;
 import android.view.View;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class AnimatedImageViewTest {
     private AnimatedImageView mAnimatedImageView;
 
@@ -47,5 +46,4 @@ public class AnimatedImageViewTest {
         AnimatedRotateDrawable drawable = (AnimatedRotateDrawable) mAnimatedImageView.getDrawable();
         assertThat(drawable.isRunning()).isTrue();
     }
-
 }

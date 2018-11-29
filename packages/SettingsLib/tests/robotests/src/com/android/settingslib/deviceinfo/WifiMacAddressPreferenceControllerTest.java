@@ -33,7 +33,6 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 
 import com.android.settingslib.R;
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 
 import org.junit.Before;
@@ -41,13 +40,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.Arrays;
 import java.util.List;
 
 @SuppressLint("HardwareIds")
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class WifiMacAddressPreferenceControllerTest {
     @Mock
     private Lifecycle mLifecycle;
@@ -197,7 +197,7 @@ public class WifiMacAddressPreferenceControllerTest {
     private static class ConcreteWifiMacAddressPreferenceController
             extends AbstractWifiMacAddressPreferenceController {
 
-        public ConcreteWifiMacAddressPreferenceController(Context context,
+        private ConcreteWifiMacAddressPreferenceController(Context context,
                 Lifecycle lifecycle) {
             super(context, lifecycle);
         }

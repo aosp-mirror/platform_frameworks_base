@@ -16,8 +16,8 @@
 
 package com.android.settingslib.graph;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -25,17 +25,16 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.util.ReflectionHelpers;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class BatteryMeterDrawableBaseTest {
     private static final int CRITICAL_LEVEL = 5;
     private static final int PADDING = 5;
