@@ -4159,7 +4159,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         float mAlpha = 1f;
 
         /**
-         * The opacity of the view as manipulated by the Fade transition. This is a hidden
+         * The opacity of the view as manipulated by the Fade transition. This is a
          * property only used by transitions, which is composited with the other alpha
          * values to calculate the final visual alpha value.
          */
@@ -15729,15 +15729,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * This property is hidden and intended only for use by the Fade transition, which
-     * animates it to produce a visual translucency that does not side-effect (or get
-     * affected by) the real alpha property. This value is composited with the other
-     * alpha value (and the AlphaAnimation value, when that is present) to produce
-     * a final visual translucency result, which is what is passed into the DisplayList.
-     *
-     * @hide
+     * This property is intended only for use by the Fade transition, which animates it
+     * to produce a visual translucency that does not side-effect (or get affected by)
+     * the real alpha property. This value is composited with the other alpha value
+     * (and the AlphaAnimation value, when that is present) to produce a final visual
+     * translucency result, which is what is passed into the DisplayList.
      */
-    @UnsupportedAppUsage
     public void setTransitionAlpha(float alpha) {
         ensureTransformationInfo();
         if (mTransformationInfo.mTransitionAlpha != alpha) {
@@ -15760,16 +15757,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * This property is hidden and intended only for use by the Fade transition, which
-     * animates it to produce a visual translucency that does not side-effect (or get
-     * affected by) the real alpha property. This value is composited with the other
-     * alpha value (and the AlphaAnimation value, when that is present) to produce
-     * a final visual translucency result, which is what is passed into the DisplayList.
-     *
-     * @hide
+     * This property is intended only for use by the Fade transition, which animates
+     * it to produce a visual translucency that does not side-effect (or get affected
+     * by) the real alpha property. This value is composited with the other alpha
+     * value (and the AlphaAnimation value, when that is present) to produce a final
+     * visual translucency result, which is what is passed into the DisplayList.
      */
     @ViewDebug.ExportedProperty(category = "drawing")
-    @UnsupportedAppUsage
     public float getTransitionAlpha() {
         return mTransformationInfo != null ? mTransformationInfo.mTransitionAlpha : 1;
     }
