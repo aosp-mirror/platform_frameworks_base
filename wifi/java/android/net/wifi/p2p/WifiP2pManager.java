@@ -1713,7 +1713,7 @@ public class WifiP2pManager {
      * <p> This state indicates whether Wi-Fi p2p is enabled or disabled.
      * The valid value is one of {@link #WIFI_P2P_STATE_DISABLED} or
      * {@link #WIFI_P2P_STATE_ENABLED}. The state is returned using the
-     * {@link #P2pStateListener} listener.
+     * {@link P2pStateListener} listener.
      *
      * <p> This state is also included in the {@link #WIFI_P2P_STATE_CHANGED_ACTION}
      * broadcast event with extra {@link #EXTRA_WIFI_STATE}.
@@ -1734,7 +1734,7 @@ public class WifiP2pManager {
      * <p> This state indicates whether p2p discovery has started or stopped.
      * The valid value is one of {@link #WIFI_P2P_DISCOVERY_STARTED} or
      * {@link #WIFI_P2P_DISCOVERY_STOPPED}. The state is returned using the
-     * {@link #DiscoveryStateListener} listener.
+     * {@link DiscoveryStateListener} listener.
      *
      * <p> This state is also included in the {@link #WIFI_P2P_DISCOVERY_CHANGED_ACTION}
      * broadcast event with extra {@link #EXTRA_DISCOVERY_STATE}.
@@ -1756,7 +1756,7 @@ public class WifiP2pManager {
      * {@link android.net.NetworkInfo#isAvailable()} indicates the p2p availability and
      * {@link android.net.NetworkInfo#getDetailedState()} reports the current fine-grained state
      * of the network. This {@link android.net.NetworkInfo} is returned using the
-     * {@link #NetworkInfoListener} listener.
+     * {@link NetworkInfoListener} listener.
      *
      * <p> This information is also included in the {@link #WIFI_P2P_CONNECTION_CHANGED_ACTION}
      * broadcast event with extra {@link #EXTRA_NETWORK_INFO}.
