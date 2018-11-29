@@ -338,9 +338,11 @@ void writeFieldValueTreeToStreamHelper(int tagId, const std::vector<FieldValue>&
                         }
                     }
                     if (isBytesField) {
-                        protoOutput->write(FIELD_TYPE_MESSAGE | fieldNum,
-                                           (const char*)dim.mValue.str_value.c_str(),
-                                           dim.mValue.str_value.length());
+                        if (dim.mValue.str_value.length() > 0) {
+                            protoOutput->write(FIELD_TYPE_MESSAGE | fieldNum,
+                                               (const char*)dim.mValue.str_value.c_str(),
+                                               dim.mValue.str_value.length());
+                        }
                     } else {
                         protoOutput->write(FIELD_TYPE_STRING | fieldNum, dim.mValue.str_value);
                     }

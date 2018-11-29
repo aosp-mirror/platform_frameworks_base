@@ -213,7 +213,44 @@ TEST(LogEventTest, TestBinaryFieldAtom) {
     EXPECT_EQ(orig_str, result_str);
 }
 
+TEST(LogEventTest, TestBinaryFieldAtom_empty) {
+    Atom launcherAtom;
+    auto launcher_event = launcherAtom.mutable_launcher_event();
+    launcher_event->set_action(stats::launcher::LauncherAction::LONGPRESS);
+    launcher_event->set_src_state(stats::launcher::LauncherState::OVERVIEW);
+    launcher_event->set_dst_state(stats::launcher::LauncherState::ALLAPPS);
 
+    // empty string.
+    string extension_str;
+
+    LogEvent event1(Atom::kLauncherEventFieldNumber, 1000);
+
+    event1.write((int32_t)stats::launcher::LauncherAction::LONGPRESS);
+    event1.write((int32_t)stats::launcher::LauncherState::OVERVIEW);
+    event1.write((int64_t)stats::launcher::LauncherState::ALLAPPS);
+    event1.write(extension_str);
+    event1.init();
+
+    ProtoOutputStream proto;
+    event1.ToProto(proto);
+
+    std::vector<uint8_t> outData;
+    outData.resize(proto.size());
+    size_t pos = 0;
+    auto iter = proto.data();
+    while (iter.readBuffer() != NULL) {
+        size_t toRead = iter.currentToRead();
+        std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+        pos += toRead;
+        iter.rp()->move(toRead);
+    }
+
+    std::string result_str(outData.begin(), outData.end());
+    std::string orig_str;
+    launcherAtom.SerializeToString(&orig_str);
+
+    EXPECT_EQ(orig_str, result_str);
+}
 
 }  // namespace statsd
 }  // namespace os

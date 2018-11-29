@@ -1007,7 +1007,10 @@ write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp
                 hadStringOrChain = true;
                 fprintf(out, "    jbyte* jbyte_array%d;\n", argIndex);
                 fprintf(out, "    const char* str%d;\n", argIndex);
-                fprintf(out, "    if (arg%d != NULL) {\n", argIndex);
+                fprintf(out,
+                        "    if (arg%d != NULL && env->GetArrayLength(arg%d) > "
+                        "0) {\n",
+                        argIndex, argIndex);
                 fprintf(out,
                         "        jbyte_array%d = "
                         "env->GetByteArrayElements(arg%d, NULL);\n",
