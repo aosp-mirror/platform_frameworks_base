@@ -464,6 +464,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mUidRulesFirstLock")
     final SparseBooleanArray mFirewallChainStates = new SparseBooleanArray();
 
+    // "Power save mode" is the concept used in the DeviceIdleController that includes various
+    // features including Doze and Battery Saver. It include Battery Saver, but "power save mode"
+    // and "battery saver" are not equivalent.
+
     /**
      * UIDs that have been white-listed to always be able to have network access
      * in power save mode, except device idle (doze) still applies.
@@ -482,6 +486,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @GuardedBy("mUidRulesFirstLock")
     private final SparseBooleanArray mPowerSaveTempWhitelistAppIds = new SparseBooleanArray();
+
+    /**
+     * UIDs that have been white-listed temporarily to be able to have network access despite being
+     * idle. Other power saving restrictions still apply.
+     */
+    @GuardedBy("mUidRulesFirstLock")
+    private final SparseBooleanArray mAppIdleTempWhitelistAppIds = new SparseBooleanArray();
 
     /**
      * UIDs that have been initially white-listed by system to avoid restricted background.
@@ -3372,6 +3383,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     fout.decreaseIndent();
                 }
 
+                size = mAppIdleTempWhitelistAppIds.size();
+                if (size > 0) {
+                    fout.println("App idle whitelist app ids:");
+                    fout.increaseIndent();
+                    for (int i = 0; i < size; i++) {
+                        fout.print("UID=");
+                        fout.print(mAppIdleTempWhitelistAppIds.keyAt(i));
+                        fout.print(": ");
+                        fout.print(mAppIdleTempWhitelistAppIds.valueAt(i));
+                        fout.println();
+                    }
+                    fout.decreaseIndent();
+                }
+
                 size = mDefaultRestrictBackgroundWhitelistUids.size();
                 if (size > 0) {
                     fout.println("Default restrict background whitelist uids:");
@@ -3640,12 +3665,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
+     * Returns whether a uid is whitelisted from power saving restrictions (eg: Battery Saver, Doze
+     * mode, and app idle).
+     *
      * @param deviceIdleMode if true then we don't consider
      *        {@link #mPowerSaveWhitelistExceptIdleAppIds} for checking if the {@param uid} is
      *        whitelisted.
      */
     @GuardedBy("mUidRulesFirstLock")
-    private boolean isWhitelistedBatterySaverUL(int uid, boolean deviceIdleMode) {
+    private boolean isWhitelistedFromPowerSaveUL(int uid, boolean deviceIdleMode) {
         final int appId = UserHandle.getAppId(uid);
         boolean isWhitelisted = mPowerSaveTempWhitelistAppIds.get(appId)
                 || mPowerSaveWhitelistAppIds.get(appId);
@@ -3660,7 +3688,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mUidRulesFirstLock")
     private void updateRulesForWhitelistedPowerSaveUL(int uid, boolean enabled, int chain) {
         if (enabled) {
-            final boolean isWhitelisted = isWhitelistedBatterySaverUL(uid,
+            final boolean isWhitelisted = isWhitelistedFromPowerSaveUL(uid,
                     chain == FIREWALL_CHAIN_DOZABLE);
             if (isWhitelisted || isUidForegroundOnRestrictPowerUL(uid)) {
                 setUidFirewallRule(chain, uid, FIREWALL_RULE_ALLOW);
@@ -3712,8 +3740,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (!mPowerSaveTempWhitelistAppIds.get(appId) && isUidIdle(uid)
                     && !isUidForegroundOnRestrictPowerUL(uid)) {
                 setUidFirewallRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DENY);
+                if (LOGD) Log.d(TAG, "updateRuleForAppIdleUL DENY " + uid);
             } else {
                 setUidFirewallRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DEFAULT);
+                if (LOGD) Log.d(TAG, "updateRuleForAppIdleUL " + uid + " to DEFAULT");
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
@@ -3896,7 +3926,59 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return UserHandle.isApp(uid) && hasInternetPermissions(uid);
     }
 
-    private boolean isUidIdle(int uid) {
+    /**
+     * Set whether or not an app should be whitelisted for network access while in app idle. Other
+     * power saving restrictions may still apply.
+     */
+    @VisibleForTesting
+    public void setAppIdleWhitelist(int uid, boolean shouldWhitelist) {
+        synchronized (mUidRulesFirstLock) {
+            if (mAppIdleTempWhitelistAppIds.get(uid) == shouldWhitelist) {
+                // No change.
+                return;
+            }
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mLogger.appIdleWlChanged(uid, shouldWhitelist);
+                if (shouldWhitelist) {
+                    mAppIdleTempWhitelistAppIds.put(uid, true);
+                } else {
+                    mAppIdleTempWhitelistAppIds.delete(uid);
+                }
+                updateRuleForAppIdleUL(uid);
+                updateRulesForPowerRestrictionsUL(uid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
+
+    /** Return the list of UIDs currently in the app idle whitelist. */
+    @VisibleForTesting
+    public int[] getAppIdleWhitelist() {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        synchronized (mUidRulesFirstLock) {
+            final int len = mAppIdleTempWhitelistAppIds.size();
+            int[] uids = new int[len];
+            for (int i = 0; i < len; ++i) {
+                uids[i] = mAppIdleTempWhitelistAppIds.keyAt(i);
+            }
+            return uids;
+        }
+    }
+
+    /** Returns if the UID is currently considered idle. */
+    @VisibleForTesting
+    public boolean isUidIdle(int uid) {
+        synchronized (mUidRulesFirstLock) {
+            if (mAppIdleTempWhitelistAppIds.get(uid)) {
+                // UID is temporarily whitelisted.
+                return false;
+            }
+        }
+
         final String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
         final int userId = UserHandle.getUserId(uid);
 
@@ -3940,6 +4022,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mPowerSaveWhitelistExceptIdleAppIds.delete(uid);
         mPowerSaveWhitelistAppIds.delete(uid);
         mPowerSaveTempWhitelistAppIds.delete(uid);
+        mAppIdleTempWhitelistAppIds.delete(uid);
 
         // ...then update iptables asynchronously.
         mHandler.obtainMessage(MSG_RESET_FIREWALL_RULES_BY_UID, uid, 0).sendToTarget();
@@ -3984,7 +4067,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * <li>@{code bw_happy_box}: UIDs added to this chain have access (whitelist), unless they're
      *     also blacklisted.
      * <li>@{code bw_data_saver}: when enabled (through {@link #setRestrictBackground(boolean)}),
-     *     no UIDs other those whitelisted will have access.
+     *     no UIDs other than those whitelisted will have access.
      * <ul>
      *
      * <p>The @{code bw_penalty_box} and @{code bw_happy_box} are primarily managed through the
@@ -4194,7 +4277,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final boolean restrictMode = isIdle || mRestrictPower || mDeviceIdleMode;
         final boolean isForeground = isUidForegroundOnRestrictPowerUL(uid);
 
-        final boolean isWhitelisted = isWhitelistedBatterySaverUL(uid, mDeviceIdleMode);
+        final boolean isWhitelisted = isWhitelistedFromPowerSaveUL(uid, mDeviceIdleMode);
         final int oldRule = oldUidRules & MASK_ALL_NETWORKS;
         int newRule = RULE_NONE;
 
@@ -5020,6 +5103,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         @Override
         public void onAdminDataAvailable() {
             mAdminDataAvailableLatch.countDown();
+        }
+
+        @Override
+        public void setAppIdleWhitelist(int uid, boolean shouldWhitelist) {
+            NetworkPolicyManagerService.this.setAppIdleWhitelist(uid, shouldWhitelist);
         }
 
         @Override

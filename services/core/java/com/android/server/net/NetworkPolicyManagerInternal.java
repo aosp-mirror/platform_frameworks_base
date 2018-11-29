@@ -105,6 +105,12 @@ public abstract class NetworkPolicyManagerInternal {
     public abstract void onAdminDataAvailable();
 
     /**
+     * Control if a UID should be whitelisted even if it's in app idle mode. Other restrictions may
+     * still be in effect.
+     */
+    public abstract void setAppIdleWhitelist(int uid, boolean shouldWhitelist);
+
+    /**
      * Sets a list of packages which are restricted by admin from accessing metered data.
      *
      * @param packageNames the list of restricted packages.
