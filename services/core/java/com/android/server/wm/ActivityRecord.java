@@ -1105,6 +1105,8 @@ final class ActivityRecord extends ConfigurationContainer {
     }
 
     void removeWindowContainer() {
+        if (service.mWindowManager.mRoot == null) return;
+
         final DisplayContent dc = service.mWindowManager.mRoot.getDisplayContent(
                 getDisplayId());
         if (dc == null) {
