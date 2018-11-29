@@ -23,10 +23,10 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.android.systemui.bubbles.BubbleMovementHelper.EDGE_OVERLAP;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -56,6 +56,11 @@ public class BubbleController {
     public static final boolean DEBUG_ENABLE_AUTO_BUBBLE = false;
     // When a bubble is dismissed, recreate it as a notification
     public static final boolean DEBUG_DEMOTE_TO_NOTIF = false;
+
+    // Secure settings
+    private static final String ENABLE_AUTO_BUBBLE_MESSAGES = "experiment_autobubble_messaging";
+    private static final String ENABLE_AUTO_BUBBLE_ONGOING = "experiment_autobubble_ongoing";
+    private static final String ENABLE_AUTO_BUBBLE_ALL = "experiment_autobubble_all";
 
     private Context mContext;
     private BubbleDismissListener mDismissListener;
@@ -318,11 +323,15 @@ public class BubbleController {
     /**
      * Whether the notification should bubble or not.
      */
-    public static boolean shouldAutoBubble(NotificationData.Entry entry, int priority,
-            boolean canAppOverlay) {
-        if (!DEBUG_ENABLE_AUTO_BUBBLE || entry.isBubbleDismissed()) {
+    public static boolean shouldAutoBubble(Context context, NotificationData.Entry entry) {
+        if (entry.isBubbleDismissed()) {
             return false;
         }
+
+        boolean autoBubbleMessages = shouldAutoBubbleMessages(context) || DEBUG_ENABLE_AUTO_BUBBLE;
+        boolean autoBubbleOngoing = shouldAutoBubbleOngoing(context) || DEBUG_ENABLE_AUTO_BUBBLE;
+        boolean autoBubbleAll = shouldAutoBubbleAll(context) || DEBUG_ENABLE_AUTO_BUBBLE;
+
         StatusBarNotification n = entry.notification;
         boolean hasRemoteInput = false;
         if (n.getNotification().actions != null) {
@@ -333,12 +342,28 @@ public class BubbleController {
                 }
             }
         }
+
         Class<? extends Notification.Style> style = n.getNotification().getNotificationStyle();
-        boolean shouldBubble = priority >= NotificationManager.IMPORTANCE_HIGH
-                || Notification.MessagingStyle.class.equals(style)
+        boolean isMessageType = Notification.MessagingStyle.class.equals(style)
                 || Notification.CATEGORY_MESSAGE.equals(n.getNotification().category)
-                || hasRemoteInput
-                || canAppOverlay;
-        return shouldBubble && !entry.isBubbleDismissed();
+                || hasRemoteInput;
+        return (isMessageType && autoBubbleMessages)
+                || (n.isOngoing() && autoBubbleOngoing)
+                || autoBubbleAll;
+    }
+
+    private static boolean shouldAutoBubbleMessages(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
+                ENABLE_AUTO_BUBBLE_MESSAGES, 0) != 0;
+    }
+
+    private static boolean shouldAutoBubbleOngoing(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
+                ENABLE_AUTO_BUBBLE_ONGOING, 0) != 0;
+    }
+
+    private static boolean shouldAutoBubbleAll(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
+                ENABLE_AUTO_BUBBLE_ALL, 0) != 0;
     }
 }
