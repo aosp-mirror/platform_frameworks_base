@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.IContentProvider;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.google.android.collect.Maps;
@@ -35,7 +36,11 @@ import java.util.Map;
  */
 public class TestableContentResolver extends ContentResolver {
 
-    private final Map<String, ContentProvider> mProviders = Maps.newHashMap();
+    public static final int STABLE = 1;
+    public static final int UNSTABLE = 2;
+
+    private final Map<String, ContentProvider> mProviders = new ArrayMap<>();
+    private final Map<String, ContentProvider> mUnstableProviders = new ArrayMap<>();
     private final ContentResolver mParent;
     private final ArraySet<ContentProvider> mInUse = new ArraySet<>();
     private boolean mFallbackToExisting;
@@ -62,7 +67,23 @@ public class TestableContentResolver extends ContentResolver {
      * subclasses, or null.
      */
     public void addProvider(String name, ContentProvider provider) {
-        mProviders.put(name, provider);
+        addProvider(name, provider, STABLE | UNSTABLE);
+    }
+
+    /**
+     * Adds access to a provider based on its authority
+     *
+     * @param name The authority name associated with the provider.
+     * @param provider An instance of {@link android.content.ContentProvider} or one of its
+     * subclasses, or null.
+     */
+    public void addProvider(String name, ContentProvider provider, int flags) {
+        if ((flags & STABLE) != 0) {
+            mProviders.put(name, provider);
+        }
+        if ((flags & UNSTABLE) != 0) {
+            mUnstableProviders.put(name, provider);
+        }
     }
 
     @Override
@@ -98,7 +119,7 @@ public class TestableContentResolver extends ContentResolver {
 
     @Override
     protected IContentProvider acquireUnstableProvider(Context c, String name) {
-        final ContentProvider provider = mProviders.get(name);
+        final ContentProvider provider = mUnstableProviders.get(name);
         if (provider != null) {
             return provider.getIContentProvider();
         } else {
@@ -128,7 +149,8 @@ public class TestableContentResolver extends ContentResolver {
     @Override
     public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {
         if (!mFallbackToExisting) return;
-        if (!mProviders.containsKey(uri.getAuthority())) {
+        if (!mProviders.containsKey(uri.getAuthority())
+                && !mUnstableProviders.containsKey(uri.getAuthority())) {
             super.notifyChange(uri, observer, syncToNetwork);
         }
     }

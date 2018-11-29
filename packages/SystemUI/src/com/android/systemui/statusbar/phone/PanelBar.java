@@ -29,6 +29,7 @@ public abstract class PanelBar extends FrameLayout {
     private static final boolean SPEW = false;
     private boolean mBouncerShowing;
     private boolean mExpanded;
+    protected float mPanelFraction;
 
     public static final void LOG(String fmt, Object... args) {
         if (!DEBUG) return;
@@ -75,6 +76,14 @@ public abstract class PanelBar extends FrameLayout {
         updateVisibility();
 
         if (mPanel != null) mPanel.setImportantForAccessibility(important);
+    }
+
+    public float getExpansionFraction() {
+        return mPanelFraction;
+    }
+
+    public boolean isExpanded() {
+        return mExpanded;
     }
 
     private void updateVisibility() {
@@ -131,6 +140,7 @@ public abstract class PanelBar extends FrameLayout {
         if (SPEW) LOG("panelExpansionChanged: start state=%d", mState);
         PanelView pv = mPanel;
         mExpanded = expanded;
+        mPanelFraction = frac;
         updateVisibility();
         // adjust any other panels that may be partially visible
         if (expanded) {

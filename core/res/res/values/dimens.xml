@@ -61,6 +61,15 @@
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
     <dimen name="status_bar_edge_ignore">5dp</dimen>
 
+    <!-- Default radius of the software rounded corners. -->
+    <dimen name="rounded_corner_radius">0dp</dimen>
+    <!-- Radius of the software rounded corners at the top of the display in its natural
+        orientation. If zero, the value of rounded_corner_radius is used. -->
+    <dimen name="rounded_corner_radius_top">0dp</dimen>
+    <!-- Radius of the software rounded corners at the bottom of the display in its natural
+        orientation. If zero, the value of rounded_corner_radius is used. -->
+    <dimen name="rounded_corner_radius_bottom">0dp</dimen>
+
     <!-- Width of the window of the divider bar used to resize docked stacks. -->
     <dimen name="docked_stack_divider_thickness">48dp</dimen>
 

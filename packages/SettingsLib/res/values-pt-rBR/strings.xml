@@ -195,8 +195,8 @@
     <string name="bugreport_in_power" msgid="7923901846375587241">"Atalho para relatório do bug"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Mostrar um botão para gerar relatórios de bugs no menu do botão liga/desliga"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Permanecer ativo"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"A tela nunca entrará em inatividade enquanto estiver carregando."</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Ativar log de rastreamento Bluetooth HCI"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"A tela nunca entrará em suspensão enquanto estiver carregando."</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Ativar registro de rastreamento Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Capturar todos os pacotes Bluetooth HCI em um arquivo (ative o Bluetooth depois de alterar esta configuração)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Desbloqueio de OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Permitir que o bootloader seja desbloqueado"</string>
@@ -239,7 +239,7 @@
     <string name="wifi_metered_label" msgid="4514924227256839725">"Limitada"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Ilimitada"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tamanhos de buffer de logger"</string>
-    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Sel. tam. de logger/buffer de log"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Sel. tam. de logger/buffer de registro"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Limpar armazenamento de logger constante?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Quando não estivermos mais monitorando com o logger constante, devemos limpar o residente de dados de logger do seu dispositivo."</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"Armazenar dados de logger constantemente no dispositivo"</string>

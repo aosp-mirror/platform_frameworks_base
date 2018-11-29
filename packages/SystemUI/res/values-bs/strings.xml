@@ -310,7 +310,7 @@
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"WiFi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nije povezano"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nema mreže"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WiFi isključen"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WiFi je isključen"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"WiFi uključen"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nema dostupnih WiFi mreža"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Uključivanje…"</string>
@@ -328,7 +328,7 @@
     <string name="quick_settings_connected" msgid="1722253542984847487">"Povezano"</string>
     <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"Povezano, baterija <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Povezivanje..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Dijeljenje veze"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Povezivanje putem mobitela"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Pristupna tačka"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"Uključivanje…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"Ušteda podataka uklj."</string>
@@ -525,7 +525,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Želite li sakriti <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Pojavit će se sljedeći put kada opciju uključite u postavkama."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Sakrij"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Koristite svoj profil za posao"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Poziv"</string>
     <string name="stream_system" msgid="7493299064422163147">"Sistem"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Zvono"</string>

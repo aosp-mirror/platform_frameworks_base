@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"‏Wi-Fi به اینترنت دسترسی ندارد"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"برای گزینه‌ها ضربه بزنید"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"تغییرات در تنظیمات نقطه اتصال"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"نوار نقطه اتصال شما تغییر کرد."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"این دستگاه از اولویت فقط ۵ گیگاهرتز شما پشتیبانی نمی‌کند. هرزمان نوار ۵ گیگاهرتزی دردسترس باشد این دستگاه از آن استفاده خواهد کرد."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"به <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> تغییر کرد"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"وقتی <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> به اینترنت دسترسی نداشته باشد، دستگاه از <xliff:g id="NEW_NETWORK">%1$s</xliff:g> استفاده می‌کند. ممکن است هزینه‌هایی اعمال شود."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"از <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> به <xliff:g id="NEW_NETWORK">%2$s</xliff:g> تغییر کرد"</string>

@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"ওয়াই-ফাই এ ইন্টারনেট অ্যাক্সেস নেই"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"বিকল্পগুলির জন্য আলতো চাপুন"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"আপনার হটস্পট সেটিংসে পরিবর্তনগুলি"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"আপনার হটস্পট ব্যান্ড পরিবর্তন করা হয়েছে।"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"এই ডিভাইসটি শুধুমাত্র 5GHz এর জন্য আপনার পছন্দ সমর্থন করে না। পরিবর্তে, এই ডিভাইসটি 5GHz ব্যান্ড ব্যবহার করবে।"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> এ পাল্টানো হয়েছে"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> এ ইন্টারনেট অ্যাক্সেস না থাকলে <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ব্যবহার করা হয়৷ ডেটা চার্জ প্রযোজ্য৷"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> থেকে <xliff:g id="NEW_NETWORK">%2$s</xliff:g> এ পাল্টানো হয়েছে"</string>
@@ -1314,7 +1317,7 @@
     <string name="ext_media_status_ejecting" msgid="5463887263101234174">"সরিয়ে ফেলা হচ্ছে..."</string>
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"ফরম্যাট করা হচ্ছে..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"ঢোকানো হয় নি"</string>
-    <string name="activity_list_empty" msgid="1675388330786841066">"কোনো সমরূপ কার্যকলাপ খুঁজে পাওয়া যায়নি৷"</string>
+    <string name="activity_list_empty" msgid="1675388330786841066">"কোনো সমরূপ অ্যাক্টিভিটি খুঁজে পাওয়া যায়নি৷"</string>
     <string name="permlab_route_media_output" msgid="6243022988998972085">"মিডিয়া আউটপুট রুট করুন"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"অ্যাপ্লিকেশানটিকে অন্যান্য বহিরাগত ডিভাইসে মিডিয়া আউটপুট রুট করার অনুমতি দেয়৷"</string>
     <string name="permlab_readInstallSessions" msgid="3713753067455750349">"ইনস্টল সেশন পড়ুন"</string>
@@ -1474,7 +1477,7 @@
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 আঙ্গুলের ছাপ:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 আঙ্গুলের ছাপ:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"সবগুলো দেখুন"</string>
-    <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"কার্যকলাপ বেছে নিন"</string>
+    <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"অ্যাক্টিভিটি বেছে নিন"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"এর সাথে শেয়ার করুন"</string>
     <string name="sending" msgid="3245653681008218030">"পাঠানো হচ্ছে..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ব্রাউজার লঞ্চ করতে চান?"</string>

@@ -925,6 +925,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             public boolean isTetheringSupported() {
                 return ConnectivityService.this.isTetheringSupported();
             }
+            @Override
+            public NetworkRequest getDefaultNetworkRequest() {
+                return mDefaultRequest;
+            }
         };
         return new Tethering(mContext, mNetd, mStatsService, mPolicyManager,
                 IoThread.get().getLooper(), new MockableSystemProperties(),
@@ -942,7 +946,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private NetworkRequest createDefaultInternetRequestForTransport(
             int transportType, NetworkRequest.Type type) {
-        NetworkCapabilities netCap = new NetworkCapabilities();
+        final NetworkCapabilities netCap = new NetworkCapabilities();
         netCap.addCapability(NET_CAPABILITY_INTERNET);
         netCap.addCapability(NET_CAPABILITY_NOT_RESTRICTED);
         if (transportType > -1) {
@@ -2250,6 +2254,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         updateCapabilities(oldScore, nai, nai.networkCapabilities);
                         // If score has changed, rebroadcast to NetworkFactories. b/17726566
                         if (oldScore != nai.getCurrentScore()) sendUpdatedScoreToFactories(nai);
+                        if (valid) handleFreshlyValidatedNetwork(nai);
                     }
                     updateInetCondition(nai);
                     // Let the NetworkAgent know the state of its network
@@ -2342,6 +2347,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private boolean networkRequiresValidation(NetworkAgentInfo nai) {
         return NetworkMonitor.isValidationRequired(
                 mDefaultRequest.networkCapabilities, nai.networkCapabilities);
+    }
+
+    private void handleFreshlyValidatedNetwork(NetworkAgentInfo nai) {
+        if (nai == null) return;
+        // If the Private DNS mode is opportunistic, reprogram the DNS servers
+        // in order to restart a validation pass from within netd.
+        final PrivateDnsConfig cfg = mDnsManager.getPrivateDnsConfig();
+        if (cfg.useTls && TextUtils.isEmpty(cfg.hostname)) {
+            updateDnses(nai.linkProperties, null, nai.network.netId);
+        }
     }
 
     private void handlePrivateDnsSettingsChanged() {

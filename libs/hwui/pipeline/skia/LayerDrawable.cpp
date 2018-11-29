@@ -82,7 +82,14 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
             textureMatrix = textureMatrixInv;
         }
 
-        SkMatrix matrix = SkMatrix::Concat(layerTransform, textureMatrix);
+        SkMatrix matrix;
+        if (dstRect) {
+            // Destination rectangle is set only when we are trying to read back the content
+            // of the layer. In this case we don't want to apply layer transform.
+            matrix = textureMatrix;
+        } else {
+            matrix = SkMatrix::Concat(layerTransform, textureMatrix);
+        }
 
         SkPaint paint;
         paint.setAlpha(layer->getAlpha());

@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi şəbəkəsinin internetə girişi yoxdur"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Seçimlər üçün tıklayın"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Hotspot ayarlarınızda dəyişiklik"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Hotspot qrupu dəyişdi."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Bu cihaz yalnız 5GHz üçün tərcihinizi dəstəkləmir. Əvəzinə əlçatan olduqda bu cihaz 5GHz qrupundan istifadə edəcək."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> şəbəkə növünə keçirildi"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> şəbəkəsinin internetə girişi olmadıqda, cihaz <xliff:g id="NEW_NETWORK">%1$s</xliff:g> şəbəkəsini istifadə edir. Xidmət haqqı tutula bilər."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> şəbəkəsindən <xliff:g id="NEW_NETWORK">%2$s</xliff:g> şəbəkəsinə keçirildi"</string>

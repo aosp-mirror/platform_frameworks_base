@@ -433,9 +433,9 @@
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"impedir modo de inatividade do tablet"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"impedir a suspensão da TV"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir modo de inatividade do telefone"</string>
-    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que o app impeça o tablet de entrar no modo de inatividade."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que o app impeça a suspensão do tablet."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Permite que o app impeça a suspensão da TV."</string>
-    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permite que o app impeça o telefone de entrar no modo de inatividade."</string>
+    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permite que o app impeça a suspensão do telefone."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"transmitir infravermelhos"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Permite que o app use o transmissor infravermelho do tablet."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Permite que o app use o transmissor de infravermelho da TV."</string>
@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"O Wi‑Fi não tem acesso à Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toque para ver opções"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Mudanças nas suas configurações de ponto de acesso"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Sua banda de ponto de acesso foi alterada."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Este dispositivo não é compatível com sua preferência apenas por 5 GHz. Em vez disso, o dispositivo usará a banda de 5 GHz quando ela estiver disponível."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Alternado para <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"O dispositivo usa <xliff:g id="NEW_NETWORK">%1$s</xliff:g> quando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> não tem acesso à Internet. Esse serviço pode ser cobrado."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Alternado de <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> para <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1395,7 +1398,7 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"Sim"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Não"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Limite de exclusão excedido"</string>
-    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Há <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> itens excluídos para <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, conta <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. O que você deseja fazer?"</string>
+    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Há <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> itens excluídos para <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, conta <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. O que você quer fazer?"</string>
     <string name="sync_really_delete" msgid="2572600103122596243">"Excluir os itens"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Desfazer as exclusões"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Não fazer nada por enquanto"</string>

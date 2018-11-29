@@ -1219,6 +1219,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Omrežje Wi-Fi nima dostopa do interneta"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Dotaknite se za možnosti"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Spremembe nastavitev dostopne točke"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Pas dostopne točke je spremenjen."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Ta naprava ne podpira prednostne nastavitve samo za 5-GHz pas. Namesto tega bo ta naprava uporabljala 5-GHz pas, ko bo na voljo."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Preklopljeno na omrežje vrste <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Naprava uporabi omrežje vrste <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, ko omrežje vrste <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nima dostopa do interneta. Prenos podatkov se lahko zaračuna."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Preklopljeno z omrežja vrste <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na omrežje vrste <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

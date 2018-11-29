@@ -625,7 +625,7 @@ public final class BatteryService extends SystemService {
             // them will get the new sequence number at that point.  (See for example how testing
             // of JobScheduler's BatteryController works.)
             sendBatteryChangedIntentLocked();
-            if (mLastBatteryLevel != mHealthInfo.batteryLevel) {
+            if (mLastBatteryLevel != mHealthInfo.batteryLevel || mLastPlugType != mPlugType) {
                 sendBatteryLevelChangedIntentLocked();
             }
 

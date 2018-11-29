@@ -25,6 +25,7 @@ import android.app.usage.StorageStatsManager;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -62,6 +63,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.text.Collator;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
@@ -132,7 +134,7 @@ public class ApplicationsState {
     boolean mSessionsChanged;
 
     // Temporary for dispatching session callbacks.  Only touched by main thread.
-    final ArrayList<Session> mActiveSessions = new ArrayList<Session>();
+    final ArrayList<WeakReference<Session>> mActiveSessions = new ArrayList<>();
 
     final HandlerThread mThread;
     final BackgroundHandler mBackgroundHandler;
@@ -618,7 +620,7 @@ public class ApplicationsState {
             for (int i=0; i<mSessions.size(); i++) {
                 Session s = mSessions.get(i);
                 if (s.mResumed) {
-                    mActiveSessions.add(s);
+                    mActiveSessions.add(new WeakReference<>(s));
                 }
             }
         }
@@ -830,46 +832,70 @@ public class ApplicationsState {
             rebuildActiveSessions();
             switch (msg.what) {
                 case MSG_REBUILD_COMPLETE: {
-                    Session s = (Session)msg.obj;
-                    if (mActiveSessions.contains(s)) {
-                        s.mCallbacks.onRebuildComplete(s.mLastAppList);
+                    Session s = (Session) msg.obj;
+                    for (WeakReference<Session> sessionRef : mActiveSessions) {
+                        final Session session = sessionRef.get();
+                        if (session != null && session == s) {
+                            s.mCallbacks.onRebuildComplete(s.mLastAppList);
+                        }
                     }
                 } break;
                 case MSG_PACKAGE_LIST_CHANGED: {
-                    for (int i=0; i<mActiveSessions.size(); i++) {
-                        mActiveSessions.get(i).mCallbacks.onPackageListChanged();
+                    for (WeakReference<Session> sessionRef : mActiveSessions) {
+                        final Session session = sessionRef.get();
+                        if (session != null) {
+                            session.mCallbacks.onPackageListChanged();
+                        }
                     }
                 } break;
                 case MSG_PACKAGE_ICON_CHANGED: {
-                    for (int i=0; i<mActiveSessions.size(); i++) {
-                        mActiveSessions.get(i).mCallbacks.onPackageIconChanged();
+                    for (WeakReference<Session> sessionRef : mActiveSessions) {
+                        final Session session = sessionRef.get();
+                        if (session != null) {
+                            session.mCallbacks.onPackageIconChanged();
+                        }
                     }
                 } break;
                 case MSG_PACKAGE_SIZE_CHANGED: {
-                    for (int i=0; i<mActiveSessions.size(); i++) {
-                        mActiveSessions.get(i).mCallbacks.onPackageSizeChanged(
-                                (String)msg.obj);
+                    for (WeakReference<Session> sessionRef : mActiveSessions) {
+                        final Session session = sessionRef.get();
+                        if (session != null) {
+                            session.mCallbacks.onPackageSizeChanged(
+                                    (String) msg.obj);
+                        }
                     }
                 } break;
                 case MSG_ALL_SIZES_COMPUTED: {
-                    for (int i=0; i<mActiveSessions.size(); i++) {
-                        mActiveSessions.get(i).mCallbacks.onAllSizesComputed();
+                    for (WeakReference<Session> sessionRef : mActiveSessions) {
+                        final Session session = sessionRef.get();
+                        if (session != null) {
+                            session.mCallbacks.onAllSizesComputed();
+                        }
                     }
                 } break;
                 case MSG_RUNNING_STATE_CHANGED: {
-                    for (int i=0; i<mActiveSessions.size(); i++) {
-                        mActiveSessions.get(i).mCallbacks.onRunningStateChanged(
-                                msg.arg1 != 0);
+                    for (WeakReference<Session> sessionRef : mActiveSessions) {
+                        final Session session = sessionRef.get();
+                        if (session != null) {
+                            session.mCallbacks.onRunningStateChanged(
+                                    msg.arg1 != 0);
+                        }
                     }
                 } break;
                 case MSG_LAUNCHER_INFO_CHANGED: {
-                    for (int i=0; i<mActiveSessions.size(); i++) {
-                        mActiveSessions.get(i).mCallbacks.onLauncherInfoChanged();
+                    for (WeakReference<Session> sessionRef : mActiveSessions) {
+                        final Session session = sessionRef.get();
+                        if (session != null) {
+                            session.mCallbacks.onLauncherInfoChanged();
+                        }
                     }
                 } break;
                 case MSG_LOAD_ENTRIES_COMPLETE: {
-                    for (int i=0; i<mActiveSessions.size(); i++) {
-                        mActiveSessions.get(i).mCallbacks.onLoadEntriesCompleted();
+                    for (WeakReference<Session> sessionRef : mActiveSessions) {
+                        final Session session = sessionRef.get();
+                        if (session != null) {
+                            session.mCallbacks.onLoadEntriesCompleted();
+                        }
                     }
                 } break;
             }

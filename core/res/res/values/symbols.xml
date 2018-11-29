@@ -309,6 +309,7 @@
   <java-symbol type="bool" name="config_allowAnimationsInLowPowerMode" />
   <java-symbol type="bool" name="config_useDevInputEventForAudioJack" />
   <java-symbol type="bool" name="config_safe_media_volume_enabled" />
+  <java-symbol type="bool" name="config_safe_media_disable_on_volume_up" />
   <java-symbol type="bool" name="config_camera_sound_forced" />
   <java-symbol type="bool" name="config_dontPreferApn" />
   <java-symbol type="bool" name="config_restartRadioAfterProvisioning" />
@@ -336,7 +337,14 @@
   <java-symbol type="bool" name="config_wifi_framework_enable_associated_network_selection" />
   <java-symbol type="bool" name="config_wifi_framework_use_single_radio_chain_scan_results_network_selection" />
   <java-symbol type="bool" name="config_wifi_only_link_same_credential_configurations" />
-  <java-symbol type="bool" name="config_wifi_framework_enable_voice_call_sar_tx_power_limit" />
+  <java-symbol type="bool" name="config_wifi_framework_enable_sar_tx_power_limit" />
+  <java-symbol type="bool" name="config_wifi_framework_enable_soft_ap_sar_tx_power_limit" />
+  <java-symbol type="bool" name="config_wifi_framework_enable_body_proximity_sar_tx_power_limit" />
+  <java-symbol type="string" name="config_wifi_sar_sensor_type" />
+  <java-symbol type="integer" name="config_wifi_framework_sar_free_space_event_id" />
+  <java-symbol type="integer" name="config_wifi_framework_sar_near_hand_event_id" />
+  <java-symbol type="integer" name="config_wifi_framework_sar_near_head_event_id" />
+  <java-symbol type="integer" name="config_wifi_framework_sar_near_body_event_id" />
   <java-symbol type="bool" name="config_wifi_enable_disconnection_debounce" />
   <java-symbol type="bool" name="config_wifi_revert_country_code_on_cellular_loss" />
   <java-symbol type="bool" name="config_wifi_enable_wifi_firmware_debugging" />
@@ -1055,6 +1063,9 @@
   <java-symbol type="string" name="network_switch_type_name_unknown" />
   <java-symbol type="string" name="wifi_no_internet" />
   <java-symbol type="string" name="wifi_no_internet_detailed" />
+  <java-symbol type="string" name="wifi_softap_config_change" />
+  <java-symbol type="string" name="wifi_softap_config_change_summary" />
+  <java-symbol type="string" name="wifi_softap_config_change_detailed" />
   <java-symbol type="string" name="wifi_connect_alert_title" />
   <java-symbol type="string" name="wifi_connect_alert_message" />
   <java-symbol type="string" name="wifi_connect_default_application" />
@@ -1822,6 +1833,7 @@
   <java-symbol type="array" name="config_tether_bluetooth_regexs" />
   <java-symbol type="array" name="config_tether_dhcp_range" />
   <java-symbol type="array" name="config_tether_upstream_types" />
+  <java-symbol type="bool" name="config_tether_upstream_automatic" />
   <java-symbol type="array" name="config_tether_apndata" />
   <java-symbol type="array" name="config_tether_usb_regexs" />
   <java-symbol type="array" name="config_tether_wifi_regexs" />
@@ -2193,6 +2205,7 @@
   <java-symbol type="string" name="ext_media_move_failure_message" />
   <java-symbol type="style" name="Animation.RecentApplications" />
   <java-symbol type="integer" name="dock_enter_exit_duration" />
+  <java-symbol type="bool" name="config_battery_percentage_setting_available" />
 
   <!-- ImfTest -->
   <java-symbol type="layout" name="auto_complete_list" />
@@ -2232,6 +2245,7 @@
   <java-symbol type="drawable" name="decor_maximize_button_light" />
   <java-symbol type="color" name="decor_button_dark_color" />
   <java-symbol type="color" name="decor_button_light_color" />
+  <java-symbol type="array" name="unloggable_phone_numbers" />
 
   <!-- From TelephonyProvider -->
   <java-symbol type="xml" name="apns" />
@@ -2887,6 +2901,7 @@
   <!-- Pinner Service -->
   <java-symbol type="array" name="config_defaultPinnerServiceFiles" />
   <java-symbol type="bool" name="config_pinnerCameraApp" />
+  <java-symbol type="bool" name="config_pinnerHomeApp" />
 
   <java-symbol type="string" name="config_doubleTouchGestureEnableFile" />
 
@@ -3231,6 +3246,7 @@
   <java-symbol type="dimen" name="config_inCallNotificationVolume" />
   <java-symbol type="string" name="config_inCallNotificationSound" />
   <java-symbol type="bool" name="config_dozeAlwaysOnDisplayAvailable" />
+  <java-symbol type="bool" name="config_dozeAlwaysOnEnabled" />
   <java-symbol type="bool" name="config_displayBlanksAfterDoze" />
   <java-symbol type="bool" name="config_displayBrightnessBucketsInDoze" />
   <java-symbol type="integer" name="config_storageManagerDaystoRetainDefault" />
@@ -3326,6 +3342,7 @@
 
   <java-symbol type="string" name="global_action_logout" />
   <java-symbol type="string" name="config_mainBuiltInDisplayCutout" />
+  <java-symbol type="string" name="config_mainBuiltInDisplayCutoutRectApproximation" />
   <java-symbol type="drawable" name="messaging_user" />
   <java-symbol type="bool" name="config_fillMainBuiltInDisplayCutout" />
   <java-symbol type="drawable" name="ic_logout" />
@@ -3390,4 +3407,12 @@
 
   <java-symbol type="integer" name="config_defaultHapticFeedbackIntensity" />
   <java-symbol type="integer" name="config_defaultNotificationVibrationIntensity" />
+
+  <java-symbol type="bool" name="config_maskMainBuiltInDisplayCutout" />
+
+  <java-symbol type="array" name="config_disableApksUnlessMatchedSku_apk_list" />
+  <java-symbol type="array" name="config_disableApkUnlessMatchedSku_skus_list" />
+
+  <java-symbol type="string" name="config_misprovisionedDeviceModel" />
+  <java-symbol type="string" name="config_misprovisionedBrandValue" />
 </resources>

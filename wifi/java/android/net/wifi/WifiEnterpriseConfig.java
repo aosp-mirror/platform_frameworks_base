@@ -948,16 +948,15 @@ public class WifiEnterpriseConfig implements Parcelable {
      * for Hotspot 2.0 defined matching of AAA server certs per WFA HS2.0 spec, section 7.3.3.2,
      * second paragraph.
      *
-     * From wpa_supplicant documentation:
-     * Constraint for server domain name. If set, this FQDN is used as a suffix match requirement
+     * <p>From wpa_supplicant documentation:
+     * <p>Constraint for server domain name. If set, this FQDN is used as a suffix match requirement
      * for the AAAserver certificate in SubjectAltName dNSName element(s). If a matching dNSName is
-     * found, this constraint is met. If no dNSName values are present, this constraint is matched
-     * against SubjectName CN using same suffix match comparison.
-     * Suffix match here means that the host/domain name is compared one label at a time starting
+     * found, this constraint is met.
+     * <p>Suffix match here means that the host/domain name is compared one label at a time starting
      * from the top-level domain and all the labels in domain_suffix_match shall be included in the
      * certificate. The certificate may include additional sub-level labels in addition to the
      * required labels.
-     * For example, domain_suffix_match=example.com would match test.example.com but would not
+     * <p>For example, domain_suffix_match=example.com would match test.example.com but would not
      * match test-example.com.
      * @param domain The domain value
      */

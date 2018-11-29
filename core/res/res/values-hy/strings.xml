@@ -219,16 +219,16 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Շտապ կանչ"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Վրիպակի զեկույց"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Ավարտել աշխատաշրջանը"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Էկրանի պատկեր"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Սքրինշոթ"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Հաղորդել սխալի մասին"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Սա տեղեկություններ կհավաքագրի ձեր սարքի առկա կարգավիճակի մասին և կուղարկի այն էլեկտրոնային նամակով: Որոշակի ժամանակ կպահանջվի վրիպակի մասին զեկուցելու պահից սկսած մինչ ուղարկելը: Խնդրում ենք փոքր-ինչ համբերատար լինել:"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Ինտերակտիվ զեկույց"</string>
-    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Հիմնականում օգտագործեք այս տարբերակը: Այն ձեզ թույլ է տալիս հետևել զեկույցի ստեղծման գործընթացին, խնդրի մասին լրացուցիչ տեղեկություններ մուտքագրել և էկրանի պատկերներ կորզել: Կարող է բաց թողնել քիչ օգտագործվող որոշ բաժինները, որոնց ստեղծումը երկար է տևում:"</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Հիմնականում օգտագործեք այս տարբերակը: Այն ձեզ թույլ է տալիս հետևել զեկույցի ստեղծման գործընթացին, խնդրի մասին լրացուցիչ տեղեկություններ մուտքագրել և սքրինշոթներ ստեղծել: Կարող է բաց թողնել քիչ օգտագործվող որոշ բաժիններ, որոնց ստեղծումը երկար է տևում:"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Ամբողջական զեկույց"</string>
     <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Օգտագործեք այս տարբերակը համակարգի միջամտությունը նվազեցնելու համար՝ երբ սարքը չի արձագանքում կամ շատ դանդաղ է աշխատում, կամ երբ ձեզ հարկավոր են զեկույցի բոլոր բաժինները: Թույլ չի տալիս լրացուցիչ տվյալներ մուտքագրել կամ էկրանի լրացուցիչ պատկերներ ստանալ:"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
-      <item quantity="one">Վրիպակի զեկույցի համար էկրանի պատկերի լուսանկարումը կատարվելու է <xliff:g id="NUMBER_1">%d</xliff:g> վայրկյանից:</item>
-      <item quantity="other">Վրիպակի զեկույցի համար էկրանի պատկերի լուսանկարումը կատարվելու է <xliff:g id="NUMBER_1">%d</xliff:g> վայրկյանից:</item>
+      <item quantity="one">Սքրինշոթը կարվի <xliff:g id="NUMBER_1">%d</xliff:g> վայրկյանից:</item>
+      <item quantity="other">Սքրինշոթը կարվի <xliff:g id="NUMBER_1">%d</xliff:g> վայրկյանից:</item>
     </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Անձայն ռեժիմ"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ձայնը անջատված է"</string>
@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi ցանցում ինտերնետ կապ չկա"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Հպեք՝ ընտրանքները տեսնելու համար"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Փոփոխություններ թեժ կետի կարգավորումներում"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Ձեր թեժ կետի հաճախականությունը փոխվել է։"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Սարքը չի կարող աշխատել միայն 5 ԳՀց հաճախականությամբ։ Այդ հաճախականությունը կօգտագործվի հնարավորության դեպքում։"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Անցել է <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ցանցի"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Երբ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ցանցում ինտերնետ կապ չի լինում, սարքն անցնում է <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ցանցի: Նման դեպքում կարող են վճարներ գանձվել:"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ցանցից անցել է <xliff:g id="NEW_NETWORK">%2$s</xliff:g> ցանցի"</string>
@@ -1814,7 +1817,7 @@
     <string name="app_category_social" msgid="5842783057834965912">"Սոցցանցեր և հաղորդակցություն"</string>
     <string name="app_category_news" msgid="7496506240743986873">"Նորություններ և ամսագրեր"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"Քարտեզներ և նավարկում"</string>
-    <string name="app_category_productivity" msgid="3742083261781538852">"Աշխատանք"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Արդյունավետություն"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Սարքի հիշողություն"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB վրիպազերծում"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"ժամ"</string>

@@ -1084,7 +1084,7 @@
     <string name="capital_on" msgid="1544682755514494298">"מופעל"</string>
     <string name="capital_off" msgid="6815870386972805832">"כבוי"</string>
     <string name="whichApplication" msgid="4533185947064773386">"השלמת פעולה באמצעות"</string>
-    <string name="whichApplicationNamed" msgid="8260158865936942783">"‏השלם את הפעולה באמצעות %1$s"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"‏להשלמת הפעולה באמצעות %1$s"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"השלם פעולה"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"פתח באמצעות"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"‏פתח באמצעות %1$s"</string>
@@ -1219,6 +1219,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"‏לרשת ה-Wi-Fi אין גישה לאינטרנט"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"הקש לקבלת אפשרויות"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"שינויים להגדרות של הנקודה לשיתוף אינטרנט"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"התדר של הנקודה לשיתוף אינטרנט השתנה."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"‏מכשיר זה לא תומך בהעדפות שלך ל-5GHz בלבד. במקום זאת, מכשיר זה ישתמש בתדר 5GHz כשיהיה זמין."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"מעבר אל <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"המכשיר משתמש ברשת <xliff:g id="NEW_NETWORK">%1$s</xliff:g> כשלרשת <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> אין גישה לאינטרנט. עשויים לחול חיובים."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"עבר מרשת <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> לרשת <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

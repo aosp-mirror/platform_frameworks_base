@@ -1005,7 +1005,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppTransition.registerListenerLocked(mActivityManagerAppTransitionNotifier);
 
         final AnimationHandler animationHandler = new AnimationHandler();
-        animationHandler.setProvider(new SfVsyncFrameCallbackProvider());
         mBoundsAnimationController = new BoundsAnimationController(context, mAppTransition,
                 AnimationThread.getHandler(), animationHandler);
 
@@ -1061,7 +1060,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, TAG_WM);
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
-        mSurfaceAnimationRunner = new SurfaceAnimationRunner();
+        mSurfaceAnimationRunner = new SurfaceAnimationRunner(mPowerManagerInternal);
 
         mAllowTheaterModeWakeFromLayout = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
@@ -1883,6 +1882,13 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             win.setFrameNumber(frameNumber);
+
+            if (win.mPendingForcedSeamlessRotate != null && !mWaitingForConfig) {
+                win.mPendingForcedSeamlessRotate.finish(win.mToken, win);
+                win.mFinishForcedSeamlessRotateFrameNumber = win.getFrameNumber();
+                win.mPendingForcedSeamlessRotate = null;
+            }
+
             int attrChanges = 0;
             int flagChanges = 0;
             if (attrs != null) {
@@ -6210,6 +6216,17 @@ public class WindowManagerService extends IWindowManager.Stub
             if (appWindow != null) {
                 mUnknownAppVisibilityController.notifyAppResumedFinished(appWindow);
             }
+        }
+    }
+
+    /**
+     * Returns true if the callingUid has any window currently visible to the user.
+     */
+    public boolean isAnyWindowVisibleForUid(int callingUid) {
+        synchronized (mWindowMap) {
+            return mRoot.forAllWindows(w -> {
+                return w.getOwningUid() == callingUid && w.isVisible();
+            }, true /* traverseTopToBottom */);
         }
     }
 

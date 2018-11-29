@@ -955,12 +955,18 @@ public class LockSettingsService extends ILockSettings.Stub {
     @GuardedBy("mSeparateChallengeLock")
     private void setSeparateProfileChallengeEnabledLocked(@UserIdInt int userId, boolean enabled,
             String managedUserPassword) {
+        final boolean old = getBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, false, userId);
         setBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, enabled, userId);
-        if (enabled) {
-            mStorage.removeChildProfileLock(userId);
-            removeKeystoreProfileKey(userId);
-        } else {
-            tieManagedProfileLockIfNecessary(userId, managedUserPassword);
+        try {
+            if (enabled) {
+                mStorage.removeChildProfileLock(userId);
+                removeKeystoreProfileKey(userId);
+            } else {
+                tieManagedProfileLockIfNecessary(userId, managedUserPassword);
+            }
+        } catch (IllegalStateException e) {
+            setBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, old, userId);
+            throw e;
         }
     }
 

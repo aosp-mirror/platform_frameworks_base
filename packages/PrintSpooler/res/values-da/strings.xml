@@ -32,7 +32,7 @@
     <string name="template_page_range" msgid="428638530038286328">"Interval på <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"f.eks. 1-5,8,11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Vis udskrift"</string>
-    <string name="install_for_print_preview" msgid="6366303997385509332">"Installer et PDF-visningsprog. for at se eksempel"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"Installer et PDF-visningsprog. for at se en forhåndsvisning"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"Udskrivningsapp gik ned"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Udskriften generes"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"Gem som PDF"</string>
@@ -106,6 +106,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"Det virkede desværre ikke. Prøv igen."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Prøv igen"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Denne printer er i øjeblikket ikke tilgængelig."</string>
-    <string name="print_cannot_load_page" msgid="6179560924492912009">"Eksempelvisning kan ikke vises"</string>
-    <string name="print_preparing_preview" msgid="3939930735671364712">"Eksempelvisning forberedes..."</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"Forhåndsvisning kan ikke vises"</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"Forhåndsvisning klargøres..."</string>
 </resources>

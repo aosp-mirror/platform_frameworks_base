@@ -941,9 +941,10 @@ message MetricsEvent {
     // OS: 6.0
     NOTIFICATION_ZEN_MODE_EVENT_RULE = 146;
 
-    // ACTION: App notification settings > Block Notifications
+    // ACTION: App notification settings > Block Notifications or long press on
+    // notification blocks.
     // CATEGORY: SETTINGS
-    // OS: 6.0
+    // OS: 9.0
     ACTION_BAN_APP_NOTES = 147;
 
     // ACTION: Notification shade > Dismiss all button
@@ -6116,7 +6117,320 @@ message MetricsEvent {
     // OS: P
     FIELD_AUTOFILL_SESSION_ID = 1456;
 
+    // NOTIFICATION_SINCE_INTERRUPTION_MILLIS added to P
+    // NOTIFICATION_INTERRUPTION added to P
+
     // ---- End P Constants, all P constants go above this line ----
+
+    // Time since this notification last interrupted (visibly or audible) the user
+    NOTIFICATION_SINCE_INTERRUPTION_MILLIS = 1500;
+
+    // OPEN: Notification interrupted the user, either audibly or visually.
+    //   Tagged data: NOTIFICATION_SINCE_INTERRUPTION_MILLIS
+    // CATEGORY: NOTIFICATION
+    NOTIFICATION_INTERRUPTION = 1501;
+
+    // OPEN: Settings
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_HOMEPAGE = 1502;
+
+    // OPEN: Settings > Create shortcut(widget)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_CREATE_SHORTCUT = 1503;
+
+    // ACTION: Authenticate using fingerprint
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_FACE_AUTH = 1504;
+
+    // ACTION: Add fingerprint > Enroll fingerprint
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_FACE_ENROLL = 1505;
+
+    // OPEN: Face Enroll introduction
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE_ENROLL_INTRO = 1506;
+
+    // OPEN: Face Enroll introduction
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE_ENROLL_ENROLLING = 1507;
+
+    // OPEN: Face Enroll introduction
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE_ENROLL_FINISHED = 1508;
+
+    // OPEN: Face Enroll sidecar
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE_ENROLL_SIDECAR = 1509;
+
+    // OPEN: Settings > Add face > Error dialog
+    // OS: Q
+    DIALOG_FACE_ERROR = 1510;
+
+    // OPEN: Settings > Security > Face
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE = 1511;
+
+    // OPEN: Settings > Acessibility > HearingAid pairing instructions dialog
+    // CATEGORY: SETTINGS
+    // OS: Q
+    DIALOG_ACCESSIBILITY_HEARINGAID = 1512;
+
+    // ACTION: Activity start
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    ACTION_ACTIVITY_START = 1513;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Calling UID
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_CALLING_UID = 1514;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Calling package name
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_CALLING_PACKAGE_NAME = 1515;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Calling UID proc state
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_CALLING_UID_PROC_STATE = 1516;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Calling UID has any visible window
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_CALLING_UID_HAS_ANY_VISIBLE_WINDOW = 1517;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Real calling UID
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_REAL_CALLING_UID = 1518;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Real calling UID proc state
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_REAL_CALLING_UID_PROC_STATE = 1519;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Real calling UID has any visible window
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_REAL_CALLING_UID_HAS_ANY_VISIBLE_WINDOW = 1520;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Target UID
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_TARGET_UID = 1521;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Target UID package name
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_TARGET_PACKAGE_NAME = 1522;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Target UID proc state
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_TARGET_UID_PROC_STATE = 1523;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Target UID has any visible window
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_TARGET_UID_HAS_ANY_VISIBLE_WINDOW = 1524;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Target doze whitelist tag
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_TARGET_WHITELIST_TAG = 1525;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Target short component name
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_TARGET_SHORT_COMPONENT_NAME = 1526;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Coming from pending intent
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_COMING_FROM_PENDING_INTENT = 1527;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Intent action
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_INTENT_ACTION = 1528;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Caller app process record process name
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_PROCESS_RECORD_PROCESS_NAME = 1529;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Caller app process record current proc state
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_PROCESS_RECORD_CUR_PROC_STATE = 1530;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Caller app process record has client activities
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_PROCESS_RECORD_HAS_CLIENT_ACTIVITIES = 1531;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Caller app process record has foreground services
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_PROCESS_RECORD_HAS_FOREGROUND_SERVICES = 1532;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Caller app process record has foreground activities
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_PROCESS_RECORD_HAS_FOREGROUND_ACTIVITIES = 1533;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Caller app process record has top UI
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_PROCESS_RECORD_HAS_TOP_UI = 1534;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Caller app process record has overlay UI
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_PROCESS_RECORD_HAS_OVERLAY_UI = 1535;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Caller app process record pending UI clean
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_PROCESS_RECORD_PENDING_UI_CLEAN = 1536;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Millis since caller app's process record last interaction event
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_PROCESS_RECORD_MILLIS_SINCE_LAST_INTERACTION_EVENT = 1537;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Millis since caller app's process record fg interaction
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_PROCESS_RECORD_MILLIS_SINCE_FG_INTERACTION = 1538;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Millis since caller app's process record last became unimportant
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_PROCESS_RECORD_MILLIS_SINCE_UNIMPORTANT = 1539;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Activity record launch mode
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_LAUNCH_MODE = 1540;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Activity record target activity
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_TARGET_ACTIVITY = 1541;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Activity record flags
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_FLAGS = 1542;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Activity record real activity
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_REAL_ACTIVITY = 1543;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Activity record short component name
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_SHORT_COMPONENT_NAME = 1544;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Activity record process name
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_PROCESS_NAME = 1545;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Activity record is fullscreen
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_IS_FULLSCREEN = 1546;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Activity record is no display
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_IS_NO_DISPLAY = 1547;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Millis since activity was last visible
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_VISIBLE = 1548;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Activity record's resultTo packageName
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_RESULT_TO_PKG_NAME = 1549;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Activity record's resultTo shortComponentName
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_RESULT_TO_SHORT_COMPONENT_NAME = 1550;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Activity record is visible
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_IS_VISIBLE = 1551;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Activity record is visible ignoring keyguard
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_IS_VISIBLE_IGNORING_KEYGUARD = 1552;
+
+    // Tagged data for ACTION_ACTIVITY_START.
+    // FIELD: Millis since activity's last launch
+    // CATEGORY: OTHER
+    // OS: Q (will also ship in PQ1A)
+    FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_LAUNCH = 1553;
+
+    // ---- End Q Constants, all Q constants go above this line ----
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

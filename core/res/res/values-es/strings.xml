@@ -256,7 +256,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Alertas de la red"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Red disponible"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Estado de la VPN"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administración del dispositivo"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administración de dispositivos"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertas"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo para tiendas"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Conexión USB"</string>
@@ -605,7 +605,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Inhabilitar cámaras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Evitar el uso de las cámaras del dispositivo"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Inhabilitar algunas funciones del bloqueo de pantalla"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Evita el uso de algunas funciones del bloqueo de pantalla."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Evitar el uso de algunas funciones del bloqueo de pantalla"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Móvil"</item>
@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"La red Wi-Fi no tiene acceso a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toca para ver opciones"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Cambios en los ajustes de tu punto de acceso"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"La banda de tu punto de acceso ha cambiado."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Este dispositivo no admite la opción de conectarse exclusivamente a bandas de 5 GHz, pero las usará cuando estén disponibles."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Se ha cambiado a <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"El dispositivo utiliza <xliff:g id="NEW_NETWORK">%1$s</xliff:g> cuando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> no tiene acceso a Internet. Es posible que se apliquen cargos."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Se ha cambiado de <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> a <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

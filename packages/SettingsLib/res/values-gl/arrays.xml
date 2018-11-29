@@ -207,17 +207,17 @@
   </string-array>
   <string-array name="overlay_display_devices_entries">
     <item msgid="1606809880904982133">"Ningunha"</item>
-    <item msgid="9033194758688161545">"480 p"</item>
-    <item msgid="1025306206556583600">"480 p (seguro)"</item>
-    <item msgid="1853913333042744661">"720 p"</item>
-    <item msgid="3414540279805870511">"720 p (seguro)"</item>
-    <item msgid="9039818062847141551">"1080 p"</item>
-    <item msgid="4939496949750174834">"1080 p (seguro)"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p (seguro)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p (seguro)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p (seguro)"</item>
     <item msgid="1833612718524903568">"4K"</item>
     <item msgid="238303513127879234">"4K (seguro)"</item>
     <item msgid="3547211260846843098">"4K (mellorado)"</item>
     <item msgid="5411365648951414254">"4K (mellorado e seguro)"</item>
-    <item msgid="1311305077526792901">"720 p, 1080 p (pantalla dual)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p (pantalla dual)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="3191973083884253830">"Ningún"</item>

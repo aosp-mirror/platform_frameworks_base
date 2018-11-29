@@ -1197,6 +1197,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi nema pristup internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Dodirnite za opcije"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Promjene postavki vaše žarišne točke"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Promijenila se frekvencija vaše žarišne točke."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Ovaj uređaj ne podržava vašu postavku za upotrebu samo 5 GHz. Upotrebljavat će frekvenciju od 5 GHz kada je dostupna."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Prelazak na drugu mrežu: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Kada <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nema pristup internetu, na uređaju se upotrebljava <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Moguća je naplata naknade."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Mreža je promijenjena: <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> &gt; <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
