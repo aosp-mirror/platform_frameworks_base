@@ -81,6 +81,10 @@ package android.app {
     field public static final int SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT = 0; // 0x0
   }
 
+  public class AppDetailsActivity extends android.app.Activity {
+    ctor public AppDetailsActivity();
+  }
+
   public class AppOpsManager {
     method public java.util.List<android.app.AppOpsManager.HistoricalPackageOps> getAllHistoricPackagesOps(java.lang.String[], long, long);
     method public android.app.AppOpsManager.HistoricalPackageOps getHistoricalPackagesOps(int, java.lang.String, java.lang.String[], long, long);
