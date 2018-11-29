@@ -1362,16 +1362,23 @@ public class DevicePolicyManager {
     public static final String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
 
     /**
-     * Activity action: have the user enter a new password. This activity should
-     * be launched after using {@link #setPasswordQuality(ComponentName, int)},
-     * or {@link #setPasswordMinimumLength(ComponentName, int)} to have the user
-     * enter a new password that meets the current requirements. You can use
-     * {@link #isActivePasswordSufficient()} to determine whether you need to
-     * have the user select a new password in order to meet the current
-     * constraints. Upon being resumed from this activity, you can check the new
+     * Activity action: have the user enter a new password.
+     *
+     * <p>For admin apps, this activity should be launched after using {@link
+     * #setPasswordQuality(ComponentName, int)}, or {@link
+     * #setPasswordMinimumLength(ComponentName, int)} to have the user enter a new password that
+     * meets the current requirements. You can use {@link #isActivePasswordSufficient()} to
+     * determine whether you need to have the user select a new password in order to meet the
+     * current constraints. Upon being resumed from this activity, you can check the new
      * password characteristics to see if they are sufficient.
      *
-     * If the intent is launched from within a managed profile with a profile
+     * <p>Non-admin apps can use {@link #getPasswordComplexity()} to check the current screen lock
+     * complexity, and use this activity with extra {@link #EXTRA_PASSWORD_COMPLEXITY} to suggest
+     * to users how complex the app wants the new screen lock to be. Note that both {@link
+     * #getPasswordComplexity()} and the extra {@link #EXTRA_PASSWORD_COMPLEXITY} require the
+     * calling app to have the permission {@link permission#GET_AND_REQUEST_SCREEN_LOCK_COMPLEXITY}.
+     *
+     * <p>If the intent is launched from within a managed profile with a profile
      * owner built against {@link android.os.Build.VERSION_CODES#M} or before,
      * this will trigger entering a new password for the parent of the profile.
      * For all other cases it will trigger entering a new password for the user
@@ -1382,6 +1389,24 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SET_NEW_PASSWORD
             = "android.app.action.SET_NEW_PASSWORD";
+
+    /**
+     * An integer indicating the complexity level of the new password an app would like the user to
+     * set when launching the action {@link #ACTION_SET_NEW_PASSWORD}.
+     *
+     * <p>Must be one of
+     * <ul>
+     *     <li>{@link #PASSWORD_COMPLEXITY_HIGH}
+     *     <li>{@link #PASSWORD_COMPLEXITY_MEDIUM}
+     *     <li>{@link #PASSWORD_COMPLEXITY_LOW}
+     *     <li>{@link #PASSWORD_COMPLEXITY_NONE}
+     * </ul>
+     *
+     * <p>If an invalid value is used, it will be treated as {@link #PASSWORD_COMPLEXITY_NONE}.
+     */
+    @RequiresPermission(android.Manifest.permission.GET_AND_REQUEST_SCREEN_LOCK_COMPLEXITY)
+    public static final String EXTRA_PASSWORD_COMPLEXITY =
+            "android.app.extra.PASSWORD_COMPLEXITY";
 
     /**
      * Constant for {@link #getPasswordComplexity()}: no password.
