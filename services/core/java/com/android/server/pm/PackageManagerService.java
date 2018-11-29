@@ -298,6 +298,7 @@ import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
+import com.android.server.PackageWatchdog;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.SystemServerInitThreadPool;
@@ -9356,6 +9357,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mPackageUsage.writeNow(mPackages);
         mCompilerStats.writeNow();
         mDexManager.writePackageDexUsageNow();
+        PackageWatchdog.getInstance(mContext).writeNow();
 
         // This is the last chance to write out pending restriction settings
         synchronized (mPackages) {

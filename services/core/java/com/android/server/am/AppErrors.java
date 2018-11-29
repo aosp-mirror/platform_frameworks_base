@@ -53,6 +53,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.server.PackageWatchdog;
 import com.android.server.RescueParty;
 import com.android.server.wm.WindowProcessController;
 
@@ -69,6 +70,7 @@ class AppErrors {
 
     private final ActivityManagerService mService;
     private final Context mContext;
+    private final PackageWatchdog mPackageWatchdog;
 
     private ArraySet<String> mAppsNotReportingCrashes;
 
@@ -93,10 +95,11 @@ class AppErrors {
     private final ProcessMap<BadProcessInfo> mBadProcesses = new ProcessMap<>();
 
 
-    AppErrors(Context context, ActivityManagerService service) {
+    AppErrors(Context context, ActivityManagerService service, PackageWatchdog watchdog) {
         context.assertRuntimeOverlayThemable();
         mService = service;
         mContext = context;
+        mPackageWatchdog = watchdog;
     }
 
     void writeToProto(ProtoOutputStream proto, long fieldId, String dumpPackage) {
@@ -400,10 +403,16 @@ class AppErrors {
             longMsg = shortMsg;
         }
 
-        // If a persistent app is stuck in a crash loop, the device isn't very
-        // usable, so we want to consider sending out a rescue party.
-        if (r != null && r.isPersistent()) {
-            RescueParty.notePersistentAppCrash(mContext, r.uid);
+        if (r != null) {
+            if (r.isPersistent()) {
+                // If a persistent app is stuck in a crash loop, the device isn't very
+                // usable, so we want to consider sending out a rescue party.
+                RescueParty.notePersistentAppCrash(mContext, r.uid);
+            } else {
+                // If a non-persistent app is stuck in crash loop, we want to inform
+                // the package watchdog, maybe an update or experiment can be rolled back.
+                mPackageWatchdog.onPackageFailure(r.getPackageList());
+            }
         }
 
         final int relaunchReason = r != null
@@ -821,12 +830,16 @@ class AppErrors {
 
     void handleShowAnrUi(Message msg) {
         Dialog dialogToShow = null;
+        String[] packageList = null;
         synchronized (mService) {
             AppNotRespondingDialog.Data data = (AppNotRespondingDialog.Data) msg.obj;
             final ProcessRecord proc = data.proc;
             if (proc == null) {
                 Slog.e(TAG, "handleShowAnrUi: proc is null");
                 return;
+            }
+            if (!proc.isPersistent()) {
+                packageList = proc.getPackageList();
             }
             if (proc.anrDialog != null) {
                 Slog.e(TAG, "App already has anr dialog: " + proc);
@@ -859,6 +872,10 @@ class AppErrors {
         // If we've created a crash dialog, show it without the lock held
         if (dialogToShow != null) {
             dialogToShow.show();
+        }
+        // Notify PackageWatchdog without the lock held
+        if (packageList != null) {
+            mPackageWatchdog.onPackageFailure(packageList);
         }
     }
 

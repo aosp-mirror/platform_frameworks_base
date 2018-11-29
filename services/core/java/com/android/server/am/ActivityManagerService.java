@@ -334,6 +334,7 @@ import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.NetworkManagementInternal;
+import com.android.server.PackageWatchdog;
 import com.android.server.RescueParty;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
@@ -585,6 +586,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public final PendingIntentController mPendingIntentController;
 
     final AppErrors mAppErrors;
+    final PackageWatchdog mPackageWatchdog;
 
     /**
      * Indicates the maximum time spent waiting for the network rules to get updated.
@@ -2164,6 +2166,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mContext = mInjector.getContext();
         mUiContext = null;
         mAppErrors = null;
+        mPackageWatchdog = null;
         mActiveUids = new ActiveUids(this, false /* postChangesToAtm */);
         mAppOpsService = mInjector.getAppOpsService(null /* file */, null /* handler */);
         mBatteryStatsService = null;
@@ -2229,7 +2232,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mServices = new ActiveServices(this);
         mProviderMap = new ProviderMap(this);
-        mAppErrors = new AppErrors(mUiContext, this);
+        mPackageWatchdog = PackageWatchdog.getInstance(mUiContext);
+        mAppErrors = new AppErrors(mUiContext, this, mPackageWatchdog);
         mActiveUids = new ActiveUids(this, true /* postChangesToAtm */);
 
         final File systemDir = SystemServiceManager.ensureSystemDir();
