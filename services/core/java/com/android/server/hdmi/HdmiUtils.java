@@ -391,4 +391,33 @@ final class HdmiUtils {
         }
         pw.decreaseIndent();
     }
+
+    // Device configuration of its supported Codecs and their Short Audio Descriptors.
+    public static class DeviceConfig {
+        /** Name of the device. Should be {@link Constants.AudioDevice}. **/
+        public final String name;
+        /** List of a {@link CodecSad}. **/
+        public final List<CodecSad> supportedCodecs;
+
+        private DeviceConfig(String name, List<CodecSad> supportedCodecs) {
+            this.name = name;
+            this.supportedCodecs = supportedCodecs;
+        }
+    }
+
+    // Short Audio Descriptor of a specific Codec
+    public static class CodecSad {
+        /** Audio Codec. Should be {@link Constants.AudioCodec}. **/
+        public final int audioCodec;
+        /**
+         * Three-byte Short Audio Descriptor. See HDMI Specification 1.4b CEC 13.15.3 and
+         * ANSI-CTA-861-F-FINAL 7.5.2 Audio Data Block for more details.
+         */
+        public final byte[] sad;
+
+        public CodecSad(int audioCodec, byte[] sad) {
+            this.audioCodec = audioCodec;
+            this.sad = sad;
+        }
+    }
 }
