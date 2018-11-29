@@ -61,6 +61,7 @@ package android.app {
   }
 
   public class ActivityTaskManager {
+    method public void clearLaunchParamsForPackages(java.util.List<java.lang.String>);
     method public java.lang.String listAllStacks();
     method public void moveTaskToStack(int, int, boolean);
     method public boolean moveTopActivityToPinnedStack(int, android.graphics.Rect);

@@ -269,7 +269,7 @@ class LaunchParamsPersister {
         outParams.mBounds.set(persistableParams.mBounds);
     }
 
-    private void onPackageRemoved(String packageName) {
+    void removeRecordForPackage(String packageName) {
         final List<File> fileToDelete = new ArrayList<>();
         for (int i = 0; i < mMap.size(); ++i) {
             int userId = mMap.keyAt(i);
@@ -310,7 +310,7 @@ class LaunchParamsPersister {
 
         @Override
         public void onPackageRemoved(String packageName) {
-            LaunchParamsPersister.this.onPackageRemoved(packageName);
+            removeRecordForPackage(packageName);
         }
     }
 
