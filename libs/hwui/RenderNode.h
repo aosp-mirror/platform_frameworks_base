@@ -213,6 +213,11 @@ public:
 
     UsageHint usageHint() const { return mUsageHint; }
 
+    int64_t uniqueId() const { return mUniqueId; }
+
+    void markDrawStart(SkCanvas& canvas);
+    void markDrawEnd(SkCanvas& canvas);
+
 private:
     void computeOrderingImpl(RenderNodeOp* opState,
                              std::vector<RenderNodeOp*>* compositedChildrenOfProjectionSurface,
@@ -233,6 +238,7 @@ private:
     void incParentRefCount() { mParentCount++; }
     void decParentRefCount(TreeObserver& observer, TreeInfo* info = nullptr);
 
+    const int64_t mUniqueId;
     String8 mName;
     sp<VirtualLightRefBase> mUserContext;
 

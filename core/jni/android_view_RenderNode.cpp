@@ -468,6 +468,10 @@ static jboolean android_view_RenderNode_getAllowForceDark(jlong renderNodePtr) {
     return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getAllowForceDark();
 }
 
+static jlong android_view_RenderNode_getUniqueId(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->uniqueId();
+}
+
 // ----------------------------------------------------------------------------
 // RenderProperties - Animations
 // ----------------------------------------------------------------------------
@@ -694,6 +698,7 @@ static const JNINativeMethod gMethods[] = {
     { "nGetHeight",                "(J)I",  (void*) android_view_RenderNode_getHeight },
     { "nSetAllowForceDark",        "(JZ)Z", (void*) android_view_RenderNode_setAllowForceDark },
     { "nGetAllowForceDark",        "(J)Z",  (void*) android_view_RenderNode_getAllowForceDark },
+    { "nGetUniqueId",              "(J)J",  (void*) android_view_RenderNode_getUniqueId },
 };
 
 int register_android_view_RenderNode(JNIEnv* env) {
