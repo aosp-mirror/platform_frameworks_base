@@ -25,9 +25,7 @@
 using android::StringPiece16;
 using android::util::Utf16ToUtf8;
 
-namespace android {
-namespace idmap2 {
-namespace utils {
+namespace android::idmap2::utils {
 
 Result<std::string> WARN_UNUSED ResToTypeEntryName(const AssetManager2& am, ResourceId resid) {
   AssetManager2::ResourceName name;
@@ -49,6 +47,4 @@ Result<std::string> WARN_UNUSED ResToTypeEntryName(const AssetManager2& am, Reso
   return {out};
 }
 
-}  // namespace utils
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2::utils

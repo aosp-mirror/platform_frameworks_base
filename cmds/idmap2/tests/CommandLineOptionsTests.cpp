@@ -38,8 +38,7 @@
 
 #include "TestHelpers.h"
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 TEST(CommandLineOptionsTests, Flag) {
   bool foo = true;
@@ -193,5 +192,4 @@ TEST(CommandLineOptionsTests, Usage) {
             std::string::npos);
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

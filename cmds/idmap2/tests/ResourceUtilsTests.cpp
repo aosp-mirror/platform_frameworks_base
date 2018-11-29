@@ -28,8 +28,7 @@
 
 using ::testing::NotNull;
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 class ResourceUtilsTests : public Idmap2Tests {
  protected:
@@ -62,5 +61,4 @@ TEST_F(ResourceUtilsTests, ResToTypeEntryNameNoSuchResourceId) {
   ASSERT_FALSE(name);
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

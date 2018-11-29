@@ -25,8 +25,7 @@
 #include "androidfw/ResourceTypes.h"
 #include "utils/String16.h"
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 class Xml {
  public:
@@ -45,7 +44,6 @@ class Xml {
   DISALLOW_COPY_AND_ASSIGN(Xml);
 };
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2
 
 #endif  // IDMAP2_INCLUDE_IDMAP2_XML_H_

@@ -36,8 +36,7 @@
 #include "idmap2/Result.h"
 #include "idmap2/ZipFile.h"
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 namespace {
 
@@ -450,5 +449,4 @@ void Idmap::accept(Visitor* v) const {
   }
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

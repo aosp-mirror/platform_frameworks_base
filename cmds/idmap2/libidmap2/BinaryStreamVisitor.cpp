@@ -22,8 +22,7 @@
 
 #include "idmap2/BinaryStreamVisitor.h"
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 void BinaryStreamVisitor::Write16(uint16_t value) {
   uint16_t x = htodl(value);
@@ -77,5 +76,4 @@ void BinaryStreamVisitor::visit(const IdmapData::TypeEntry& type_entry) {
   }
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

@@ -27,8 +27,7 @@
 
 using android::ApkAssets;
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 // verbatim copy fomr PrettyPrintVisitor.cpp, move to common utils
 #define RESID(pkg, type, entry) (((pkg) << 24) | ((type) << 16) | (entry))
@@ -127,5 +126,4 @@ void RawPrintVisitor::print(const std::string& value, const char* fmt, ...) {
   offset_ += kIdmapStringLength;
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2

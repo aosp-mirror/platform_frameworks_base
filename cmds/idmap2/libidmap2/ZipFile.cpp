@@ -20,8 +20,7 @@
 #include "idmap2/Result.h"
 #include "idmap2/ZipFile.h"
 
-namespace android {
-namespace idmap2 {
+namespace android::idmap2 {
 
 std::unique_ptr<MemoryChunk> MemoryChunk::Allocate(size_t size) {
   void* ptr = ::operator new(sizeof(MemoryChunk) + size);
@@ -63,5 +62,4 @@ Result<uint32_t> ZipFile::Crc(const std::string& entryPath) const {
   return status == 0 ? Result<uint32_t>(entry.crc32) : kResultError;
 }
 
-}  // namespace idmap2
-}  // namespace android
+}  // namespace android::idmap2
