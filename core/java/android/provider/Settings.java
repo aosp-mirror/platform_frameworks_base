@@ -11618,7 +11618,7 @@ public final class Settings {
         /**
          * Whether or not show hidden launcher icon apps feature is enabled.
          * Type: int (0 for false, 1 for true)
-         * Default: 0
+         * Default: 1
          * @hide
          */
         public static final String SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED =
