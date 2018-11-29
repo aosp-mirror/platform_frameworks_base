@@ -29,7 +29,8 @@ import java.lang.annotation.RetentionPolicy;
 public final class UsesPermissionInfo extends PackageItemInfo implements Parcelable {
 
     /**
-     * Flag for {@link #flags}: the requested permission is currently granted to the application.
+     * Flag for {@link #getFlags()}: the requested permission is currently granted to the
+     * application.
      */
     public static final int FLAG_REQUESTED_PERMISSION_GRANTED = 1 << 1;
 
@@ -46,8 +47,8 @@ public final class UsesPermissionInfo extends PackageItemInfo implements Parcela
     /**
      * A yes value for {@link #getDataSentOffDevice()}, {@link #getDataSharedWithThirdParty()},
      * and {@link #getDataUsedForMonetization()} corresponding to the <code>yes</code> value of
-     * {@link android.R.attrs#dataSentOffDevice}, {@link android.R.attrs#dataSharedWithThirdParty},
-     * and {@link android.R.attrs#dataUsedForMonetization} attributes.
+     * {@link android.R.attr#dataSentOffDevice}, {@link android.R.attr#dataSharedWithThirdParty},
+     * and {@link android.R.attr#dataUsedForMonetization} attributes.
      */
     public static final int USAGE_YES = 1;
 
@@ -55,16 +56,16 @@ public final class UsesPermissionInfo extends PackageItemInfo implements Parcela
      * A user triggered only value for {@link #getDataSentOffDevice()},
      * {@link #getDataSharedWithThirdParty()}, and {@link #getDataUsedForMonetization()}
      * corresponding to the <code>userTriggered</code> value of
-     * {@link android.R.attrs#dataSentOffDevice}, {@link android.R.attrs#dataSharedWithThirdParty},
-     * and {@link android.R.attrs#dataUsedForMonetization} attributes.
+     * {@link android.R.attr#dataSentOffDevice}, {@link android.R.attr#dataSharedWithThirdParty},
+     * and {@link android.R.attr#dataUsedForMonetization} attributes.
      */
     public static final int USAGE_USER_TRIGGERED = 2;
 
     /**
      * A no value for {@link #getDataSentOffDevice()}, {@link #getDataSharedWithThirdParty()},
      * and {@link #getDataUsedForMonetization()} corresponding to the <code>no</code> value of
-     * {@link android.R.attrs#dataSentOffDevice}, {@link android.R.attrs#dataSharedWithThirdParty},
-     * and {@link android.R.attrs#dataUsedForMonetization} attributes.
+     * {@link android.R.attr#dataSentOffDevice}, {@link android.R.attr#dataSharedWithThirdParty},
+     * and {@link android.R.attr#dataUsedForMonetization} attributes.
      */
     public static final int USAGE_NO = 3;
 
@@ -84,25 +85,25 @@ public final class UsesPermissionInfo extends PackageItemInfo implements Parcela
 
     /**
      * A data not retained value for {@link #getDataRetention()} corresponding to the
-     * <code>notRetained</code> value of {@link android.R.attrs#dataRetentionTime}.
+     * <code>notRetained</code> value of {@link android.R.attr#dataRetentionTime}.
      */
     public static final int RETENTION_NOT_RETAINED = 1;
 
     /**
      * A user selected value for {@link #getDataRetention()} corresponding to the
-     * <code>userSelected</code> value of {@link android.R.attrs#dataRetentionTime}.
+     * <code>userSelected</code> value of {@link android.R.attr#dataRetentionTime}.
      */
     public static final int RETENTION_USER_SELECTED = 2;
 
     /**
      * An unlimited value for {@link #getDataRetention()} corresponding to the
-     * <code>unlimited</code> value of {@link android.R.attrs#dataRetentionTime}.
+     * <code>unlimited</code> value of {@link android.R.attr#dataRetentionTime}.
      */
     public static final int RETENTION_UNLIMITED = 3;
 
     /**
      * A specified value for {@link #getDataRetention()} corresponding to providing the number of
-     * weeks data is retained in {@link android.R.attrs#dataRetentionTime}. The number of weeks
+     * weeks data is retained in {@link android.R.attr#dataRetentionTime}. The number of weeks
      * is available in {@link #getDataRetentionWeeks()}.
      */
     public static final int RETENTION_SPECIFIED = 4;
@@ -181,7 +182,7 @@ public final class UsesPermissionInfo extends PackageItemInfo implements Parcela
     /**
      * If the application sends the data guarded by this permission off the device.
      *
-     * See {@link android.R.attrs#dataSentOffDevice}
+     * See {@link android.R.attr#dataSentOffDevice}
      */
     public @Usage int getDataSentOffDevice() {
         return mDataSentOffDevice;
@@ -191,7 +192,7 @@ public final class UsesPermissionInfo extends PackageItemInfo implements Parcela
      * If the application or its services shares the data guarded by this permission with third
      * parties.
      *
-     * See {@link android.R.attrs#dataSharedWithThirdParty}
+     * See {@link android.R.attr#dataSharedWithThirdParty}
      */
     public @Usage int getDataSharedWithThirdParty() {
         return mDataSharedWithThirdParty;
@@ -201,7 +202,7 @@ public final class UsesPermissionInfo extends PackageItemInfo implements Parcela
      * If the application or its services use the data guarded by this permission for monetization
      * purposes.
      *
-     * See {@link android.R.attrs#dataUsedForMonetization}
+     * See {@link android.R.attr#dataUsedForMonetization}
      */
     public @Usage int getDataUsedForMonetization() {
         return mDataUsedForMonetization;
@@ -212,7 +213,7 @@ public final class UsesPermissionInfo extends PackageItemInfo implements Parcela
      * If set to {@link #RETENTION_SPECIFIED} {@link #getDataRetentionWeeks()} will contain the
      * number of weeks the data is stored.
      *
-     * See {@link android.R.attrs#dataRetentionTime}
+     * See {@link android.R.attr#dataRetentionTime}
      */
     public @Retention int getDataRetention() {
         return mDataRetention;
