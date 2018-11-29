@@ -620,6 +620,8 @@
 
     <protected-broadcast android:name="android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL" />
 
+    <protected-broadcast android:name="android.intent.action.DEVICE_CUSTOMIZATION_READY" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
@@ -4203,6 +4205,18 @@
     <!-- Allows financial apps to read filtered sms messages. -->
     <permission android:name="android.permission.SMS_FINANCIAL_TRANSACTIONS"
         android:protectionLevel="signature|appop" />
+
+    <!-- @SystemApi Allows requesting the framework broadcast the
+         {@link Intent#ACTION_DEVICE_CUSTOMIZATION_READY} intent.
+         @hide -->
+    <permission android:name="android.permission.SEND_DEVICE_CUSTOMIZATION_READY"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Permission that protects the {@link Intent#ACTION_DEVICE_CUSTOMIZATION_READY}
+         intent.
+         @hide -->
+    <permission android:name="android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY"
+        android:protectionLevel="signature|preinstalled" />
 
     <application android:process="system"
                  android:persistent="true"

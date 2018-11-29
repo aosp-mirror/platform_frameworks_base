@@ -23594,6 +23594,30 @@ public class PackageManagerService extends IPackageManager.Stub
         return mProtectedPackages.isPackageStateProtected(userId, packageName);
     }
 
+    @Override
+    public void sendDeviceCustomizationReadyBroadcast() {
+        mContext.enforceCallingPermission(Manifest.permission.SEND_DEVICE_CUSTOMIZATION_READY,
+                "sendDeviceCustomizationReadyBroadcast");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            final Intent intent = new Intent(Intent.ACTION_DEVICE_CUSTOMIZATION_READY);
+            intent.setFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+            final IActivityManager am = ActivityManager.getService();
+            final String[] requiredPermissions = {
+                Manifest.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY,
+            };
+            try {
+                am.broadcastIntent(null, intent, null, null, 0, null, null, requiredPermissions,
+                        android.app.AppOpsManager.OP_NONE, null, false, false, UserHandle.USER_ALL);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     static class ActiveInstallSession {
         private final String mPackageName;
         private final File mStagedDir;
