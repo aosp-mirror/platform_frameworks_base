@@ -29,6 +29,7 @@
 
 #include <SkPathOps.h>
 #include <algorithm>
+#include <atomic>
 #include <sstream>
 #include <string>
 
@@ -47,8 +48,14 @@ private:
     TreeInfo* mTreeInfo;
 };
 
+static int64_t generateId() {
+    static std::atomic<int64_t> sNextId{1};
+    return sNextId++;
+}
+
 RenderNode::RenderNode()
-        : mDirtyPropertyFields(0)
+        : mUniqueId(generateId())
+        , mDirtyPropertyFields(0)
         , mNeedsDisplayListSync(false)
         , mDisplayList(nullptr)
         , mStagingDisplayList(nullptr)
@@ -442,6 +449,39 @@ const SkPath* RenderNode::getClippedOutline(const SkRect& clipRect) const {
         Op(*outlinePath, clipPath, kIntersect_SkPathOp, &mClippedOutlineCache.clippedOutline);
     }
     return &mClippedOutlineCache.clippedOutline;
+}
+
+using StringBuffer = FatVector<char, 128>;
+
+template <typename... T>
+static void format(StringBuffer& buffer, const std::string_view& format, T... args) {
+    buffer.resize(buffer.capacity());
+    while (1) {
+        int needed = snprintf(buffer.data(), buffer.size(),
+                format.data(), std::forward<T>(args)...);
+        if (needed < 0) {
+            buffer[0] = '\0';
+            buffer.resize(1);
+            return;
+        }
+        if (needed < buffer.size()) {
+            buffer.resize(needed + 1);
+            return;
+        }
+        buffer.resize(buffer.size() * 2);
+    }
+}
+
+void RenderNode::markDrawStart(SkCanvas& canvas) {
+    StringBuffer buffer;
+    format(buffer, "RenderNode(id=%d, name='%s')", uniqueId(), getName());
+    canvas.drawAnnotation(SkRect::MakeWH(getWidth(), getHeight()), buffer.data(), nullptr);
+}
+
+void RenderNode::markDrawEnd(SkCanvas& canvas) {
+    StringBuffer buffer;
+    format(buffer, "/RenderNode(id=%d, name='%s')", uniqueId(), getName());
+    canvas.drawAnnotation(SkRect::MakeWH(getWidth(), getHeight()), buffer.data(), nullptr);
 }
 
 } /* namespace uirenderer */
