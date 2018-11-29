@@ -572,6 +572,34 @@ public final class MediaStore {
         public void setSecondaryDirectory(@Nullable String secondaryDirectory) {
             this.secondaryDirectory = secondaryDirectory;
         }
+
+        /**
+         * Optionally set the Uri from where the file has been downloaded. This is used
+         * for files being added to {@link Downloads} table.
+         *
+         * @see DownloadColumns#DOWNLOAD_URI
+         */
+        public void setDownloadUri(@Nullable Uri downloadUri) {
+            if (downloadUri == null) {
+                this.insertValues.remove(DownloadColumns.DOWNLOAD_URI);
+            } else {
+                this.insertValues.put(DownloadColumns.DOWNLOAD_URI, downloadUri.toString());
+            }
+        }
+
+        /**
+         * Optionally set the Uri indicating HTTP referer of the file. This is used for
+         * files being added to {@link Downloads} table.
+         *
+         * @see DownloadColumns#REFERER_URI
+         */
+        public void setRefererUri(@Nullable Uri refererUri) {
+            if (refererUri == null) {
+                this.insertValues.remove(DownloadColumns.REFERER_URI);
+            } else {
+                this.insertValues.put(DownloadColumns.REFERER_URI, refererUri.toString());
+            }
+        }
     }
 
     /**
@@ -763,7 +791,7 @@ public final class MediaStore {
          * Type: BOOLEAN
          *
          * @see MediaStore#createPending(Context, PendingParams)
-         * @see MediaStore#QUERY_ARG_INCLUDE_PENDING
+         * @see MediaStore#PARAM_INCLUDE_PENDING
          */
         public static final String IS_PENDING = "is_pending";
 
@@ -927,6 +955,12 @@ public final class MediaStore {
              * Constant for the {@link #MEDIA_TYPE} column indicating that file is a playlist file.
              */
             public static final int MEDIA_TYPE_PLAYLIST = 4;
+
+            /**
+             * Column indicating if the file is part of Downloads collection.
+             * @hide
+             */
+            public static final String IS_DOWNLOAD = "is_download";
         }
     }
 
@@ -938,6 +972,80 @@ public final class MediaStore {
 
         public static final Point MINI_SIZE = new Point(512, 384);
         public static final Point MICRO_SIZE = new Point(96, 96);
+    }
+
+    /** Column fields for downloaded files used in {@link Downloads} table */
+    public interface DownloadColumns extends MediaColumns {
+        /**
+         * Uri indicating where the file has been downloaded from.
+         * <p>
+         * Type: TEXT
+         */
+        String DOWNLOAD_URI = "download_uri";
+
+        /**
+         * Uri indicating HTTP referer of {@link #DOWNLOAD_URI}.
+         * <p>
+         * Type: TEXT
+         */
+        String REFERER_URI = "referer_uri";
+    }
+
+    /**
+     * Container for downloaded files.
+     *
+     * <p>
+     * Querying for downloads from this table will return files contributed via
+     * {@link PendingSession} and also ones which were downloaded using
+     * {@link android.app.DownloadManager} APIs.
+     */
+    public static final class Downloads implements DownloadColumns {
+        private Downloads() {}
+
+        /**
+         * The content:// style URI for the internal storage.
+         */
+        public static final Uri INTERNAL_CONTENT_URI =
+                getContentUri("internal");
+
+        /**
+         * The content:// style URI for the "primary" external storage
+         * volume.
+         */
+        public static final Uri EXTERNAL_CONTENT_URI =
+                getContentUri("external");
+
+        /**
+         * Get the content:// style URI for the downloads table on the
+         * given volume.
+         *
+         * @param volumeName the name of the volume to get the URI for
+         * @return the URI to the image media table on the given volume
+         */
+        public static Uri getContentUri(String volumeName) {
+            return AUTHORITY_URI.buildUpon().appendPath(volumeName)
+                    .appendPath("downloads").build();
+        }
+
+        /** @hide */
+        public static Uri getContentUriForPath(@NonNull String path) {
+            return getContentUri(getVolumeNameForPath(path));
+        }
+    }
+
+    private static String getVolumeNameForPath(@NonNull String path) {
+        final StorageManager sm = AppGlobals.getInitialApplication()
+                .getSystemService(StorageManager.class);
+        final StorageVolume sv = sm.getStorageVolume(new File(path));
+        if (sv != null) {
+            if (sv.isPrimary()) {
+                return VOLUME_EXTERNAL;
+            } else {
+                return sv.getUuid();
+            }
+        } else {
+            return VOLUME_INTERNAL;
+        }
     }
 
     /**
@@ -1671,18 +1779,7 @@ public final class MediaStore {
              *             access this path.
              */
             public static @Nullable Uri getContentUriForPath(@NonNull String path) {
-                final StorageManager sm = AppGlobals.getInitialApplication()
-                        .getSystemService(StorageManager.class);
-                final StorageVolume sv = sm.getStorageVolume(new File(path));
-                if (sv != null) {
-                    if (sv.isPrimary()) {
-                        return EXTERNAL_CONTENT_URI;
-                    } else {
-                        return getContentUri(sv.getUuid());
-                    }
-                } else {
-                    return INTERNAL_CONTENT_URI;
-                }
+                return getContentUri(getVolumeNameForPath(path));
             }
 
             /**
