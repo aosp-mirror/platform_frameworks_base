@@ -761,12 +761,25 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
                     public void onDestroyActionMode(ActionMode actionMode) {
                     }
                 }));
+        getInstrumentation().waitForIdleSync();
         final String text = "droid@android.com";
 
         onView(withId(R.id.textview)).perform(replaceText(text));
         onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('@')));
         sleepForFloatingToolbarPopup();
         assertFloatingToolbarItemIndex(android.R.id.textAssist, 0);
+    }
+
+    public void testNoAssistItemForTextFieldWithUnsupportedCharacters() throws Throwable {
+        getActivity().getSystemService(TextClassificationManager.class).setTextClassifier(null);
+        final String text = "\u202Emoc.diordna.com";
+        final TextView textView = getActivity().findViewById(R.id.textview);
+        textView.post(() -> textView.setText(text));
+        getInstrumentation().waitForIdleSync();
+
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('.')));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarItemIndex(android.R.id.cut, 0);
     }
 
     public void testPastePlainText_menuAction() throws Exception {

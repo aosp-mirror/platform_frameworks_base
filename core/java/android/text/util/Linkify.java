@@ -26,6 +26,7 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.method.MovementMethod;
 import android.text.style.URLSpan;
+import android.util.Log;
 import android.util.Patterns;
 import android.webkit.WebView;
 import android.widget.TextView;
@@ -64,6 +65,9 @@ import java.util.regex.Pattern;
  */
 
 public class Linkify {
+
+    private static final String LOG_TAG = "Linkify";
+
     /**
      *  Bit field indicating that web URLs should be matched in methods that
      *  take an options mask
@@ -221,6 +225,11 @@ public class Linkify {
      *  @return True if at least one link is found and applied.
      */
     public static final boolean addLinks(@NonNull Spannable text, @LinkifyMask int mask) {
+        if (text != null && containsUnsupportedCharacters(text.toString())) {
+            android.util.EventLog.writeEvent(0x534e4554, "116321860", -1, "");
+            return false;
+        }
+
         if (mask == 0) {
             return false;
         }
@@ -264,6 +273,29 @@ public class Linkify {
         }
 
         return true;
+    }
+
+    /**
+     * Returns true if the specified text contains at least one unsupported character for applying
+     * links. Also logs the error.
+     *
+     * @param text the text to apply links to
+     * @hide
+     */
+    public static boolean containsUnsupportedCharacters(String text) {
+        if (text.contains("\u202C")) {
+            Log.e(LOG_TAG, "Unsupported character for applying links: u202C");
+            return true;
+        }
+        if (text.contains("\u202D")) {
+            Log.e(LOG_TAG, "Unsupported character for applying links: u202D");
+            return true;
+        }
+        if (text.contains("\u202E")) {
+            Log.e(LOG_TAG, "Unsupported character for applying links: u202E");
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -413,6 +445,10 @@ public class Linkify {
     public static final boolean addLinks(@NonNull Spannable spannable, @NonNull Pattern pattern,
             @Nullable String scheme, @Nullable MatchFilter matchFilter,
             @Nullable TransformFilter transformFilter) {
+        if (spannable != null && containsUnsupportedCharacters(spannable.toString())) {
+            android.util.EventLog.writeEvent(0x534e4554, "116321860", -1, "");
+            return false;
+        }
         return addLinks(spannable, pattern, scheme, null, matchFilter,
                 transformFilter);
     }
