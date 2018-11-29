@@ -19204,6 +19204,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mConstants.mFlagActivityStartsLoggingEnabled;
         }
 
+        public boolean isBackgroundActivityStartsEnabled() {
+            return mConstants.mFlagBackgroundActivityStartsEnabled;
+        }
+
         public void reportCurKeyguardUsageEvent(boolean keyguardShowing) {
             synchronized(ActivityManagerService.this) {
                 ActivityManagerService.this.reportGlobalUsageEventLocked(keyguardShowing

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.START_ABORTED;
 import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
@@ -69,6 +70,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
@@ -110,6 +112,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
     private static final int FAKE_CALLING_UID = 666;
     private static final int FAKE_REAL_CALLING_UID = 667;
     private static final String FAKE_CALLING_PACKAGE = "com.whatever.dude";
+    private static final int UNIMPORTANT_UID = 12345;
 
     @Before
     public void setUp() throws Exception {
@@ -548,6 +551,79 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 eq(FAKE_REAL_CALLING_UID), anyInt(), anyBoolean(), anyInt(),
                 eq(ActivityBuilder.getDefaultComponent().getPackageName()), anyInt(), anyBoolean(),
                 any(), eq(false));
+    }
+
+    /**
+     * This test ensures that unsupported usecases aren't aborted when background starts are
+     * allowed.
+     */
+    @Test
+    public void testBackgroundActivityStartsAllowed_noStartsAborted() {
+        doReturn(true).when(mService).isBackgroundActivityStartsEnabled();
+
+        runAndVerifyBackgroundActivityStartsSubtest("allowed_noStartsAborted",
+                false, UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1, false);
+    }
+
+    /**
+     * This test ensures that unsupported usecases are aborted when background starts are
+     * disallowed.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_unsupportedStartsAborted() {
+        doReturn(false).when(mService).isBackgroundActivityStartsEnabled();
+
+        runAndVerifyBackgroundActivityStartsSubtest("disallowed_unsupportedUsecase_aborted",
+                true, UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed.
+     * The scenarios each have only one condidion that makes them supported.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_supportedStartsNotAborted() {
+        doReturn(false).when(mService).isBackgroundActivityStartsEnabled();
+
+        runAndVerifyBackgroundActivityStartsSubtest("disallowed_rootUid_notAborted",
+                false, Process.ROOT_UID, false, PROCESS_STATE_TOP + 1, false);
+        runAndVerifyBackgroundActivityStartsSubtest("disallowed_systemUid_notAborted",
+                false, Process.SYSTEM_UID, false, PROCESS_STATE_TOP + 1, false);
+        runAndVerifyBackgroundActivityStartsSubtest("disallowed_hasVisibleWindow_notAborted",
+                false, UNIMPORTANT_UID, true, PROCESS_STATE_TOP + 1, false);
+        runAndVerifyBackgroundActivityStartsSubtest("disallowed_processStateTop_notAborted",
+                false, UNIMPORTANT_UID, false, PROCESS_STATE_TOP, false);
+        runAndVerifyBackgroundActivityStartsSubtest("disallowed_hasForegroundActivities_notAborted",
+                false, UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1, true);
+    }
+
+    private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
+            int testCallingUid, boolean hasVisibleWindow, int procState,
+            boolean hasForegroundActivities) {
+        // window visibility
+        doReturn(hasVisibleWindow).when(mService.mWindowManager).isAnyWindowVisibleForUid(
+                testCallingUid);
+        // process importance
+        doReturn(procState).when(mService).getUidStateLocked(testCallingUid);
+        // foreground activities
+        final IApplicationThread caller = mock(IApplicationThread.class);
+        final ApplicationInfo ai = new ApplicationInfo();
+        ai.uid = testCallingUid;
+        final WindowProcessController callerApp =
+                new WindowProcessController(mService, ai, null, testCallingUid, -1, null, null);
+        callerApp.setHasForegroundActivities(hasForegroundActivities);
+        doReturn(callerApp).when(mService).getProcessController(caller);
+
+        final ActivityOptions options = spy(ActivityOptions.makeBasic());
+        ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK).setCaller(caller)
+                .setCallingUid(testCallingUid).setActivityOptions(new SafeActivityOptions(options));
+
+        final int result = starter.setReason("testBackgroundActivityStarts_" + name).execute();
+
+        assertEquals(ActivityStarter.getExternalResult(
+                shouldHaveAborted ? START_ABORTED : START_SUCCESS), result);
+        verify(options, times(shouldHaveAborted ? 1 : 0)).abort();
     }
 
     /**
