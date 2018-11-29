@@ -258,8 +258,9 @@ static bool isDefaultMessageImpl(const Descriptor* descriptor, const Destination
                 return false;
             case FieldDescriptor::TYPE_STRING:
                 if (getPrivacyFlags(field).patterns_size() != 0) return false;
+                break;
             default:
-                continue;
+                break;
         }
     }
     parents->erase(descriptor->full_name());
