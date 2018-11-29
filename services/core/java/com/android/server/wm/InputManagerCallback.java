@@ -6,21 +6,16 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import android.app.ActivityManager;
 import android.os.Debug;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Slog;
+import android.view.InputApplicationHandle;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
-import android.view.InputApplicationHandle;
 import com.android.server.input.InputManagerService;
-import android.view.InputWindowHandle;
-import android.view.InputChannel;
 
 import java.io.PrintWriter;
-import java.util.HashMap;
 
 final class InputManagerCallback implements InputManagerService.WindowManagerCallbacks {
     private final WindowManagerService mService;
@@ -112,9 +107,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         if (appWindowToken != null && appWindowToken.appToken != null) {
             // Notify the activity manager about the timeout and let it decide whether
             // to abort dispatching or keep waiting.
-            final AppWindowContainerController controller = appWindowToken.getController();
-            final boolean abort = controller != null
-                    && controller.keyDispatchingTimedOut(reason,
+            final boolean abort = appWindowToken.keyDispatchingTimedOut(reason,
                     (windowState != null) ? windowState.mSession.mPid : -1);
             if (!abort) {
                 // The activity manager declined to abort dispatching.

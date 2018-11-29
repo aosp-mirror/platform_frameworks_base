@@ -1182,7 +1182,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         mActivities.add(newTop);
 
         // Make sure window manager is aware of the position change.
-        mWindowContainerController.positionChildAtTop(newTop.mWindowContainerController);
+        mWindowContainerController.positionChildAtTop(newTop.mAppWindowToken);
         updateEffectiveIntent();
 
         setFrontOfTask();
@@ -1264,12 +1264,10 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
             mService.notifyTaskPersisterLocked(this, false);
         }
 
-        // Sync. with window manager
-        final AppWindowContainerController appController = r.getWindowContainerController();
-        if (appController != null) {
+        if (r.mAppWindowToken != null) {
             // Only attempt to move in WM if the child has a controller. It is possible we haven't
             // created controller for the activity we are starting yet.
-            mWindowContainerController.positionChildAt(appController, index);
+            mWindowContainerController.positionChildAt(r.mAppWindowToken, index);
         }
 
         // Make sure the list of display UID whitelists is updated

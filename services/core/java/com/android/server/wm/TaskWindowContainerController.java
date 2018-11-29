@@ -16,6 +16,14 @@
 
 package com.android.server.wm;
 
+import static com.android.server.EventLogTags.WM_TASK_CREATED;
+import static com.android.server.wm.ConfigurationContainer.BOUNDS_CHANGE_NONE;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Rect;
@@ -24,17 +32,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.EventLog;
 import android.util.Slog;
+
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.ref.WeakReference;
-
-import static com.android.server.EventLogTags.WM_TASK_CREATED;
-import static com.android.server.wm.ConfigurationContainer.BOUNDS_CHANGE_NONE;
-import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
-import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
-import static com.android.server.wm.WindowContainer.POSITION_TOP;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 /**
  * Controller for the task container. This is created by activity manager to link task records to
@@ -103,16 +104,15 @@ public class TaskWindowContainerController
         }
     }
 
-    public void positionChildAtTop(AppWindowContainerController childController) {
-        positionChildAt(childController, POSITION_TOP);
+    void positionChildAtTop(AppWindowToken aToken) {
+        positionChildAt(aToken, POSITION_TOP);
     }
 
-    public void positionChildAt(AppWindowContainerController childController, int position) {
+    void positionChildAt(AppWindowToken aToken, int position) {
         synchronized (mService.mGlobalLock) {
-            final AppWindowToken aToken = childController.mContainer;
             if (aToken == null) {
                 Slog.w(TAG_WM,
-                        "Attempted to position of non-existing app : " + childController);
+                        "Attempted to position of non-existing app");
                 return;
             }
 

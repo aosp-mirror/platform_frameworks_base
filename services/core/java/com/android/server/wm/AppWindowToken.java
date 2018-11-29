@@ -28,10 +28,12 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static android.view.WindowManager.TRANSIT_UNSET;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
 
@@ -81,7 +83,9 @@ import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 
 import android.annotation.CallSuper;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.GraphicBuffer;
 import android.graphics.Point;
@@ -90,6 +94,7 @@ import android.os.Binder;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -106,6 +111,8 @@ import android.view.animation.Animation;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
+import com.android.server.AttributeCache;
+import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 import com.android.server.wm.WindowManagerService.H;
 
@@ -121,7 +128,8 @@ class AppTokenList extends ArrayList<AppWindowToken> {
  * Version of WindowToken that is specifically for a particular application (or
  * really activity) that is displaying windows.
  */
-class AppWindowToken extends WindowToken implements WindowManagerService.AppFreezeListener {
+class AppWindowToken extends WindowToken implements WindowManagerService.AppFreezeListener,
+        ConfigurationContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "AppWindowToken" : TAG_WM;
 
     /**
@@ -226,6 +234,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     private Task mLastParent;
 
+    // TODO: Remove after unification
+    ActivityRecord mActivityRecord;
+
     /**
      * See {@link #canTurnScreenOn()}
      */
@@ -273,14 +284,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     /** Whether this token needs to create mAnimationBoundsLayer for cropping animations. */
     boolean mNeedsAnimationBoundsLayer;
 
+    private static final int STARTING_WINDOW_TYPE_NONE = 0;
+    private static final int STARTING_WINDOW_TYPE_SNAPSHOT = 1;
+    private static final int STARTING_WINDOW_TYPE_SPLASH_SCREEN = 2;
+
     AppWindowToken(WindowManagerService service, IApplicationToken token,
             ComponentName activityComponent, boolean voiceInteraction, DisplayContent dc,
             long inputDispatchingTimeoutNanos, boolean fullscreen, boolean showForAllUsers,
             int targetSdk, int orientation, int rotationAnimationHint, int configChanges,
             boolean launchTaskBehind, boolean alwaysFocusable,
-            AppWindowContainerController controller) {
+            ActivityRecord activityRecord) {
         this(service, token, activityComponent, voiceInteraction, dc, fullscreen);
-        setController(controller);
+        // TODO: remove after unification
+        mActivityRecord = activityRecord;
+        mActivityRecord.registerConfigurationChangeListener(this);
         mInputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
         mShowForAllUsers = showForAllUsers;
         mTargetSdk = targetSdk;
@@ -320,9 +337,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // it from behind the starting window, so there is no need for it to also be doing its
             // own stuff.
             win.cancelAnimation();
-            if (getController() != null) {
-                getController().removeStartingWindow();
-            }
+            removeStartingWindow();
         }
         updateReportedVisibilityLocked();
     }
@@ -360,16 +375,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         if (DEBUG_VISIBILITY) Slog.v(TAG, "VIS " + this + ": interesting="
                 + numInteresting + " visible=" + numVisible);
-        final AppWindowContainerController controller = getController();
         if (nowDrawn != reportedDrawn) {
-            if (nowDrawn) {
-                if (controller != null) {
-                    controller.reportWindowsDrawn();
-                }
-            } else {
-                if (controller != null) {
-                    controller.reportWindowsNotDrawn();
-                }
+            if (mActivityRecord != null) {
+                mActivityRecord.onWindowsDrawn(nowDrawn, SystemClock.uptimeMillis());
             }
             reportedDrawn = nowDrawn;
         }
@@ -377,14 +385,34 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             if (DEBUG_VISIBILITY) Slog.v(TAG,
                     "Visibility changed in " + this + ": vis=" + nowVisible);
             reportedVisible = nowVisible;
-            if (controller != null) {
+            if (mActivityRecord != null) {
                 if (nowVisible) {
-                    controller.reportWindowsVisible();
+                    onWindowsVisible();
                 } else {
-                    controller.reportWindowsGone();
+                    onWindowsGone();
                 }
             }
         }
+    }
+
+    private void onWindowsGone() {
+        if (mActivityRecord == null) {
+            return;
+        }
+        if (DEBUG_VISIBILITY) {
+            Slog.v(TAG_WM, "Reporting gone in " + mActivityRecord.appToken);
+        }
+        mActivityRecord.onWindowsGone();
+    }
+
+    private void onWindowsVisible() {
+        if (mActivityRecord == null) {
+            return;
+        }
+        if (DEBUG_VISIBILITY) {
+            Slog.v(TAG_WM, "Reporting visible in " + mActivityRecord.appToken);
+        }
+        mActivityRecord.onWindowsVisible();
     }
 
     boolean isClientHidden() {
@@ -401,7 +429,116 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         sendAppVisibilityToClients();
     }
 
-    boolean setVisibility(WindowManager.LayoutParams lp,
+    void setVisibility(boolean visible, boolean deferHidingClient) {
+        final AppTransition appTransition = getDisplayContent().mAppTransition;
+
+        // Don't set visibility to false if we were already not visible. This prevents WM from
+        // adding the app to the closing app list which doesn't make sense for something that is
+        // already not visible. However, set visibility to true even if we are already visible.
+        // This makes sure the app is added to the opening apps list so that the right
+        // transition can be selected.
+        // TODO: Probably a good idea to separate the concept of opening/closing apps from the
+        // concept of setting visibility...
+        if (!visible && hiddenRequested) {
+
+            if (!deferHidingClient && mDeferHidingClient) {
+                // We previously deferred telling the client to hide itself when visibility was
+                // initially set to false. Now we would like it to hide, so go ahead and set it.
+                mDeferHidingClient = deferHidingClient;
+                setClientHidden(true);
+            }
+            return;
+        }
+
+        if (DEBUG_APP_TRANSITIONS || DEBUG_ORIENTATION) {
+            Slog.v(TAG_WM, "setAppVisibility("
+                    + appToken + ", visible=" + visible + "): " + appTransition
+                    + " hidden=" + isHidden() + " hiddenRequested="
+                    + hiddenRequested + " Callers=" + Debug.getCallers(6));
+        }
+
+        final DisplayContent displayContent = getDisplayContent();
+        displayContent.mOpeningApps.remove(this);
+        displayContent.mClosingApps.remove(this);
+        waitingToShow = false;
+        hiddenRequested = !visible;
+        mDeferHidingClient = deferHidingClient;
+
+        if (!visible) {
+            // If the app is dead while it was visible, we kept its dead window on screen.
+            // Now that the app is going invisible, we can remove it. It will be restarted
+            // if made visible again.
+            removeDeadWindows();
+        } else {
+            if (!appTransition.isTransitionSet()
+                    && appTransition.isReady()) {
+                // Add the app mOpeningApps if transition is unset but ready. This means
+                // we're doing a screen freeze, and the unfreeze will wait for all opening
+                // apps to be ready.
+                displayContent.mOpeningApps.add(this);
+            }
+            startingMoved = false;
+            // If the token is currently hidden (should be the common case), or has been
+            // stopped, then we need to set up to wait for its windows to be ready.
+            if (isHidden() || mAppStopped) {
+                clearAllDrawn();
+
+                // If the app was already visible, don't reset the waitingToShow state.
+                if (isHidden()) {
+                    waitingToShow = true;
+                }
+            }
+
+            // In the case where we are making an app visible but holding off for a transition,
+            // we still need to tell the client to make its windows visible so they get drawn.
+            // Otherwise, we will wait on performing the transition until all windows have been
+            // drawn, they never will be, and we are sad.
+            setClientHidden(false);
+
+            requestUpdateWallpaperIfNeeded();
+
+            if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "No longer Stopped: " + this);
+            mAppStopped = false;
+
+            transferStartingWindowFromHiddenAboveTokenIfNeeded();
+        }
+
+        // If we are preparing an app transition, then delay changing
+        // the visibility of this token until we execute that transition.
+        if (okToAnimate() && appTransition.isTransitionSet()) {
+            inPendingTransaction = true;
+            if (visible) {
+                displayContent.mOpeningApps.add(this);
+                mEnteringAnimation = true;
+            } else {
+                displayContent.mClosingApps.add(this);
+                mEnteringAnimation = false;
+            }
+            if (appTransition.getAppTransition()
+                    == WindowManager.TRANSIT_TASK_OPEN_BEHIND) {
+                // We're launchingBehind, add the launching activity to mOpeningApps.
+                final WindowState win = getDisplayContent().findFocusedWindow();
+                if (win != null) {
+                    final AppWindowToken focusedToken = win.mAppToken;
+                    if (focusedToken != null) {
+                        if (DEBUG_APP_TRANSITIONS) {
+                            Slog.d(TAG_WM, "TRANSIT_TASK_OPEN_BEHIND, "
+                                    + " adding " + focusedToken + " to mOpeningApps");
+                        }
+                        // Force animation to be loaded.
+                        focusedToken.setHidden(true);
+                        displayContent.mOpeningApps.add(focusedToken);
+                    }
+                }
+            }
+            return;
+        }
+
+        commitVisibility(null, visible, TRANSIT_UNSET, true, mVoiceInteraction);
+        updateReportedVisibilityLocked();
+    }
+
+    boolean commitVisibility(WindowManager.LayoutParams lp,
             boolean visible, int transit, boolean performLayout, boolean isVoiceInteraction) {
 
         boolean delayed = false;
@@ -461,8 +598,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 forAllWindows(mService::makeWindowFreezingScreenIfNeededLocked, true);
             }
 
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "setVisibility: " + this
-                    + ": hidden=" + isHidden() + " hiddenRequested=" + hiddenRequested);
+            if (DEBUG_APP_TRANSITIONS) {
+                Slog.v(TAG_WM, "commitVisibility: " + this
+                        + ": hidden=" + isHidden() + " hiddenRequested=" + hiddenRequested);
+            }
 
             if (changed) {
                 getDisplayContent().getInputMonitor().setUpdateInputWindowsNeededLw();
@@ -499,10 +638,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 mService.mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(token);
             }
 
-            // If we're becoming visible, immediately change client visibility as well although it
-            // usually gets changed in AppWindowContainerController.setVisibility already. However,
-            // there seem to be some edge cases where we change our visibility but client visibility
-            // never gets updated.
+            // If we're becoming visible, immediately change client visibility as well. there seem
+            // to be some edge cases where we change our visibility but client visibility never gets
+            // updated.
             // If we're becoming invisible, update the client visibility if we are not running an
             // animation. Otherwise, we'll update client visibility in onAnimationFinished.
             if (visible || !isReallyAnimating()) {
@@ -596,11 +734,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return getWindowConfiguration().canReceiveKeys() || mAlwaysFocusable;
     }
 
-    AppWindowContainerController getController() {
-        final WindowContainerController controller = super.getController();
-        return controller != null ? (AppWindowContainerController) controller : null;
-    }
-
     @Override
     boolean isVisible() {
         // If the app token isn't hidden then it is considered visible and there is no need to check
@@ -637,7 +770,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Removing app token: " + this);
 
-        boolean delayed = setVisibility(null, false, TRANSIT_UNSET, true, mVoiceInteraction);
+        boolean delayed = commitVisibility(null, false, TRANSIT_UNSET, true, mVoiceInteraction);
 
         getDisplayContent().mOpeningApps.remove(this);
         getDisplayContent().mUnknownAppVisibilityController.appRemovedOrHidden(this);
@@ -656,8 +789,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM, "removeAppToken: "
                 + this + " delayed=" + delayed + " Callers=" + Debug.getCallers(4));
 
-        if (startingData != null && getController() != null) {
-            getController().removeStartingWindow();
+        if (startingData != null) {
+            removeStartingWindow();
         }
 
         // If this window was animating, then we need to ensure that the app transition notifies
@@ -768,9 +901,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mAppStopped = true;
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
-        if (getController() != null) {
-            getController().removeStartingWindow();
-        }
+        removeStartingWindow();
     }
 
     void clearAllDrawn() {
@@ -826,9 +957,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // TODO: Something smells about the code below...Is there a better way?
         if (startingWindow == win) {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Notify removed startingWindow " + win);
-            if (getController() != null) {
-                getController().removeStartingWindow();
-            }
+            removeStartingWindow();
         } else if (mChildren.size() == 0) {
             // If this is the last window and we had requested a starting transition window,
             // well there is no point now.
@@ -845,9 +974,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // we need to get rid of the starting transition.
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Last window, removing starting window "
                     + win);
-            if (getController() != null) {
-                getController().removeStartingWindow();
-            }
+            removeStartingWindow();
         }
     }
 
@@ -1021,6 +1148,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     @Override
     void removeChild(WindowState child) {
+        if (!mChildren.contains(child)) {
+            // This can be true when testing.
+            return;
+        }
         super.removeChild(child);
         checkKeyguardFlagsChanged();
         updateLetterboxSurface(child);
@@ -1040,6 +1171,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             (mChildren.get(i)).onWindowReplacementTimeout();
         }
+    }
+
+    void reparent(TaskWindowContainerController taskController, int position) {
+        if (DEBUG_ADD_REMOVE) {
+            Slog.i(TAG_WM, "reparent: moving app token=" + this
+                    + " to task=" + taskController + " at " + position);
+        }
+        final Task task = taskController.mContainer;
+        if (task == null) {
+            throw new IllegalArgumentException("reparent: could not find task="
+                    + taskController);
+        }
+        reparent(task, position);
+        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
     }
 
     void reparent(Task task, int position) {
@@ -1300,9 +1445,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             startingData = fromToken.startingData;
             fromToken.startingData = null;
             fromToken.startingMoved = true;
-            if (getController() != null) {
-                getController().scheduleAddStartingWindow();
-            }
+            scheduleAddStartingWindow();
             return true;
         }
 
@@ -1471,6 +1614,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
+    boolean keyDispatchingTimedOut(String reason, int windowPid) {
+        return mActivityRecord != null && mActivityRecord.keyDispatchingTimedOut(reason, windowPid);
+    }
+
     /**
      * Updated this app token tracking states for interesting and drawn windows based on the window.
      *
@@ -1533,8 +1680,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     }
                 }
             } else if (w.isDrawnLw()) {
-                if (getController() != null) {
-                    getController().reportStartingWindowDrawn();
+                if (mActivityRecord != null) {
+                    mActivityRecord.onStartingWindowDrawn(SystemClock.uptimeMillis());
                 }
                 startingDisplayed = true;
             }
@@ -1599,6 +1746,266 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     AppWindowToken asAppWindowToken() {
         // I am an app window token!
         return this;
+    }
+
+    boolean addStartingWindow(String pkg, int theme, CompatibilityInfo compatInfo,
+            CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
+            IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
+            boolean allowTaskSnapshot, boolean activityCreated, boolean fromRecents) {
+        // If the display is frozen, we won't do anything until the actual window is
+        // displayed so there is no reason to put in the starting window.
+        if (!okToDisplay()) {
+            return false;
+        }
+
+        if (startingData != null) {
+            return false;
+        }
+
+        final WindowState mainWin = findMainWindow();
+        if (mainWin != null && mainWin.mWinAnimator.getShown()) {
+            // App already has a visible window...why would you want a starting window?
+            return false;
+        }
+
+        final ActivityManager.TaskSnapshot snapshot =
+                mService.mTaskSnapshotController.getSnapshot(
+                        getTask().mTaskId, getTask().mUserId,
+                        false /* restoreFromDisk */, false /* reducedResolution */);
+        final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
+                allowTaskSnapshot, activityCreated, fromRecents, snapshot);
+
+        if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
+            return createSnapshot(snapshot);
+        }
+
+        // If this is a translucent window, then don't show a starting window -- the current
+        // effect (a full-screen opaque starting window that fades away to the real contents
+        // when it is ready) does not work for this.
+        if (DEBUG_STARTING_WINDOW) {
+            Slog.v(TAG, "Checking theme of starting window: 0x" + Integer.toHexString(theme));
+        }
+        if (theme != 0) {
+            AttributeCache.Entry ent = AttributeCache.instance().get(pkg, theme,
+                    com.android.internal.R.styleable.Window,
+                    mService.mCurrentUserId);
+            if (ent == null) {
+                // Whoops!  App doesn't exist. Um. Okay. We'll just pretend like we didn't
+                // see that.
+                return false;
+            }
+            final boolean windowIsTranslucent = ent.array.getBoolean(
+                    com.android.internal.R.styleable.Window_windowIsTranslucent, false);
+            final boolean windowIsFloating = ent.array.getBoolean(
+                    com.android.internal.R.styleable.Window_windowIsFloating, false);
+            final boolean windowShowWallpaper = ent.array.getBoolean(
+                    com.android.internal.R.styleable.Window_windowShowWallpaper, false);
+            final boolean windowDisableStarting = ent.array.getBoolean(
+                    com.android.internal.R.styleable.Window_windowDisablePreview, false);
+            if (DEBUG_STARTING_WINDOW) {
+                Slog.v(TAG, "Translucent=" + windowIsTranslucent
+                        + " Floating=" + windowIsFloating
+                        + " ShowWallpaper=" + windowShowWallpaper);
+            }
+            if (windowIsTranslucent) {
+                return false;
+            }
+            if (windowIsFloating || windowDisableStarting) {
+                return false;
+            }
+            if (windowShowWallpaper) {
+                if (getDisplayContent().mWallpaperController
+                        .getWallpaperTarget() == null) {
+                    // If this theme is requesting a wallpaper, and the wallpaper
+                    // is not currently visible, then this effectively serves as
+                    // an opaque window and our starting window transition animation
+                    // can still work.  We just need to make sure the starting window
+                    // is also showing the wallpaper.
+                    windowFlags |= FLAG_SHOW_WALLPAPER;
+                } else {
+                    return false;
+                }
+            }
+
+            if (transferStartingWindow(transferFrom)) {
+                return true;
+            }
+
+            // There is no existing starting window, and we don't want to create a splash screen, so
+            // that's it!
+            if (type != STARTING_WINDOW_TYPE_SPLASH_SCREEN) {
+                return false;
+            }
+
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating SplashScreenStartingData");
+            startingData = new SplashScreenStartingData(mService, pkg,
+                    theme, compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
+                    getMergedOverrideConfiguration());
+            scheduleAddStartingWindow();
+        }
+        return true;
+    }
+
+
+    private boolean createSnapshot(ActivityManager.TaskSnapshot snapshot) {
+        if (snapshot == null) {
+            return false;
+        }
+
+        if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating SnapshotStartingData");
+        startingData = new SnapshotStartingData(mService, snapshot);
+        scheduleAddStartingWindow();
+        return true;
+    }
+
+    void scheduleAddStartingWindow() {
+        // Note: we really want to do sendMessageAtFrontOfQueue() because we
+        // want to process the message ASAP, before any other queued
+        // messages.
+        if (!mService.mAnimationHandler.hasCallbacks(mAddStartingWindow)) {
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Enqueueing ADD_STARTING");
+            mService.mAnimationHandler.postAtFrontOfQueue(mAddStartingWindow);
+        }
+    }
+
+    private final Runnable mAddStartingWindow = new Runnable() {
+
+        @Override
+        public void run() {
+            synchronized (mService.mGlobalLock) {
+                // There can only be one adding request, silly caller!
+                mService.mAnimationHandler.removeCallbacks(this);
+            }
+
+            if (startingData == null) {
+                // Animation has been canceled... do nothing.
+                if (DEBUG_STARTING_WINDOW) {
+                    Slog.v(TAG, "startingData was nulled out before handling"
+                            + " mAddStartingWindow: " + AppWindowToken.this);
+                }
+                return;
+            }
+
+            if (DEBUG_STARTING_WINDOW) {
+                Slog.v(TAG, "Add starting " + this + ": startingData=" + startingData);
+            }
+
+            WindowManagerPolicy.StartingSurface surface = null;
+            try {
+                surface = startingData.createStartingSurface(AppWindowToken.this);
+            } catch (Exception e) {
+                Slog.w(TAG, "Exception when adding starting window", e);
+            }
+            if (surface != null) {
+                boolean abort = false;
+                synchronized (mService.mGlobalLock) {
+                    // If the window was successfully added, then
+                    // we need to remove it.
+                    if (removed || startingData == null) {
+                        if (DEBUG_STARTING_WINDOW) {
+                            Slog.v(TAG, "Aborted starting " + AppWindowToken.this
+                                    + ": removed=" + removed + " startingData=" + startingData);
+                        }
+                        startingWindow = null;
+                        startingData = null;
+                        abort = true;
+                    } else {
+                        startingSurface = surface;
+                    }
+                    if (DEBUG_STARTING_WINDOW && !abort) {
+                        Slog.v(TAG, "Added starting " + AppWindowToken.this + ": startingWindow="
+                                + startingWindow + " startingView=" + startingSurface);
+                    }
+                }
+                if (abort) {
+                    surface.remove();
+                }
+            } else if (DEBUG_STARTING_WINDOW) {
+                Slog.v(TAG, "Surface returned was null: " + AppWindowToken.this);
+            }
+        }
+    };
+
+    private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
+            boolean allowTaskSnapshot, boolean activityCreated, boolean fromRecents,
+            ActivityManager.TaskSnapshot snapshot) {
+        if (getDisplayContent().mAppTransition.getAppTransition()
+                == TRANSIT_DOCK_TASK_FROM_RECENTS) {
+            // TODO(b/34099271): Remove this statement to add back the starting window and figure
+            // out why it causes flickering, the starting window appears over the thumbnail while
+            // the docked from recents transition occurs
+            return STARTING_WINDOW_TYPE_NONE;
+        } else if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
+            return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+        } else if (taskSwitch && allowTaskSnapshot) {
+            return snapshot == null ? STARTING_WINDOW_TYPE_NONE
+                    : snapshotOrientationSameAsTask(snapshot) || fromRecents
+                            ? STARTING_WINDOW_TYPE_SNAPSHOT : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+        } else {
+            return STARTING_WINDOW_TYPE_NONE;
+        }
+    }
+
+
+    private boolean snapshotOrientationSameAsTask(ActivityManager.TaskSnapshot snapshot) {
+        if (snapshot == null) {
+            return false;
+        }
+        return getTask().getConfiguration().orientation == snapshot.getOrientation();
+    }
+
+    void removeStartingWindow() {
+        if (startingWindow == null) {
+            if (startingData != null) {
+                // Starting window has not been added yet, but it is scheduled to be added.
+                // Go ahead and cancel the request.
+                if (DEBUG_STARTING_WINDOW) {
+                    Slog.v(TAG_WM, "Clearing startingData for token=" + this);
+                }
+                startingData = null;
+            }
+            return;
+        }
+
+        final WindowManagerPolicy.StartingSurface surface;
+        if (startingData != null) {
+            surface = startingSurface;
+            startingData = null;
+            startingSurface = null;
+            startingWindow = null;
+            startingDisplayed = false;
+            if (surface == null) {
+                if (DEBUG_STARTING_WINDOW) {
+                    Slog.v(TAG_WM, "startingWindow was set but startingSurface==null, couldn't "
+                            + "remove");
+                }
+                return;
+            }
+        } else {
+            if (DEBUG_STARTING_WINDOW) {
+                Slog.v(TAG_WM, "Tried to remove starting window but startingWindow was null:"
+                        + this);
+            }
+            return;
+        }
+
+        if (DEBUG_STARTING_WINDOW) {
+            Slog.v(TAG_WM, "Schedule remove starting " + this
+                    + " startingWindow=" + startingWindow
+                    + " startingView=" + startingSurface
+                    + " Callers=" + Debug.getCallers(5));
+        }
+
+        // Use the same thread to remove the window as we used to add it, as otherwise we end up
+        // with things in the view hierarchy being called from different threads.
+        mService.mAnimationHandler.post(() -> {
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Removing startingView=" + surface);
+            try {
+                surface.remove();
+            } catch (Exception e) {
+                Slog.w(TAG_WM, "Exception when removing starting window", e);
+            }
+        });
     }
 
     @Override
@@ -2214,9 +2621,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         if (mPendingRelaunchCount != 0) {
             pw.print(prefix); pw.print("mPendingRelaunchCount="); pw.println(mPendingRelaunchCount);
-        }
-        if (getController() != null) {
-            pw.print(prefix); pw.print("controller="); pw.println(getController());
         }
         if (mRemovingFromDisplay) {
             pw.println(prefix + "mRemovingFromDisplay=" + mRemovingFromDisplay);

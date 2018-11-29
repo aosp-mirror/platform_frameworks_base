@@ -17,8 +17,6 @@
 package com.android.server.wm;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.platform.test.annotations.Presubmit;
@@ -37,6 +35,7 @@ import org.junit.Test;
 @Presubmit
 public class TaskWindowContainerControllerTests extends WindowTestsBase {
 
+    /* Comment out due to removal of AppWindowContainerController
     @Test
     public void testRemoveContainer() {
         final WindowTestUtils.TestTaskWindowContainerController taskController =
@@ -49,7 +48,9 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
         assertNull(taskController.mContainer);
         assertNull(appController.mContainer);
     }
+    */
 
+    /* Comment out due to removal of AppWindowContainerController
     @Test
     public void testRemoveContainer_deferRemoval() {
         final WindowTestUtils.TestTaskWindowContainerController taskController =
@@ -74,6 +75,7 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
         assertNull(appController.mContainer);
         assertNull(app.getController());
     }
+    */
 
     @Test
     public void testReparent() {
