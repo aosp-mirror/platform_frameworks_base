@@ -16,13 +16,13 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.AppWindowThumbnailProto.HEIGHT;
+import static com.android.server.wm.AppWindowThumbnailProto.SURFACE_ANIMATOR;
+import static com.android.server.wm.AppWindowThumbnailProto.WIDTH;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
-import static com.android.server.wm.AppWindowThumbnailProto.HEIGHT;
-import static com.android.server.wm.AppWindowThumbnailProto.SURFACE_ANIMATOR;
-import static com.android.server.wm.AppWindowThumbnailProto.WIDTH;
 
 import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
@@ -65,7 +65,7 @@ class AppWindowThumbnail implements Animatable {
         // this to the task.
         mSurfaceControl = appToken.makeSurface()
                 .setName("thumbnail anim: " + appToken.toString())
-                .setSize(mWidth, mHeight)
+                .setBufferSize(mWidth, mHeight)
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .setMetadata(appToken.windowType,
                         window != null ? window.mOwnerUid : Binder.getCallingUid())

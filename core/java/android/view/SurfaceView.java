@@ -557,7 +557,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                             name,
                             (mSurfaceFlags & SurfaceControl.OPAQUE) != 0,
                             new SurfaceControl.Builder(mSurfaceSession)
-                                    .setSize(mSurfaceWidth, mSurfaceHeight)
+                                    .setBufferSize(mSurfaceWidth, mSurfaceHeight)
                                     .setFormat(mFormat)
                                     .setFlags(mSurfaceFlags));
                 } else if (mSurfaceControl == null) {
@@ -595,10 +595,14 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                             mSurfaceControl.setMatrix(mScreenRect.width() / (float) mSurfaceWidth,
                                     0.0f, 0.0f,
                                     mScreenRect.height() / (float) mSurfaceHeight);
+                            // Set a window crop when creating the surface or changing its size to
+                            // crop the buffer to the surface size since the buffer producer may
+                            // use SCALING_MODE_SCALE and submit a larger size than the surface
+                            // size.
+                            mSurfaceControl.setWindowCrop(mSurfaceWidth, mSurfaceHeight);
                         }
                         if (sizeChanged && !creating) {
-                            mSurfaceControl.setSize(mSurfaceWidth, mSurfaceHeight);
-                            mSurfaceControl.setWindowCrop(mSurfaceWidth, mSurfaceHeight);
+                            mSurfaceControl.setBufferSize(mSurfaceWidth, mSurfaceHeight);
                         }
                     } finally {
                         SurfaceControl.closeTransaction();
@@ -1133,6 +1137,8 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
             mBackgroundControl = b.setName("Background for -" + name)
                     .setFormat(OPAQUE)
+                    // Unset the buffer size of the background color layer.
+                    .setBufferSize(0, 0)
                     .setColorLayer(true)
                     .build();
             mOpaque = opaque;
@@ -1158,9 +1164,9 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         }
 
         @Override
-        public void setSize(int w, int h) {
-            super.setSize(w, h);
-            mBackgroundControl.setSize(w, h);
+        public void setBufferSize(int w, int h) {
+            super.setBufferSize(w, h);
+            // The background surface is a color layer so we do not set a size.
         }
 
         @Override

@@ -145,7 +145,7 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testUpdateDimsAppliesSize() {
+    public void testUpdateDimsAppliesCrop() {
         mDimmer.dimAbove(mTransaction, 0.8f);
 
         int width = 100;
@@ -153,7 +153,7 @@ public class DimmerTests extends WindowTestsBase {
         Rect bounds = new Rect(0, 0, width, height);
         mDimmer.updateDims(mTransaction, bounds);
 
-        verify(mTransaction).setSize(getDimLayer(), width, height);
+        verify(mTransaction).setWindowCrop(getDimLayer(), width, height);
         verify(mTransaction).show(getDimLayer());
     }
 
@@ -242,13 +242,13 @@ public class DimmerTests extends WindowTestsBase {
         SurfaceControl dimLayer = getDimLayer();
         bounds.set(0, 0, 10, 10);
         mDimmer.updateDims(mTransaction, bounds);
+        verify(mTransaction).setWindowCrop(dimLayer, bounds.width(), bounds.height());
         verify(mTransaction, times(1)).show(dimLayer);
-        verify(mTransaction).setSize(dimLayer, bounds.width(), bounds.height());
         verify(mTransaction).setPosition(dimLayer, 0, 0);
 
         bounds.set(10, 10, 30, 30);
         mDimmer.updateDims(mTransaction, bounds);
-        verify(mTransaction).setSize(dimLayer, bounds.width(), bounds.height());
+        verify(mTransaction).setWindowCrop(dimLayer, bounds.width(), bounds.height());
         verify(mTransaction).setPosition(dimLayer, 10, 10);
     }
 

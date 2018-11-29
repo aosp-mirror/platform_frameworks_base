@@ -248,7 +248,6 @@ public class TaskStack extends WindowContainer<Task> implements
         getRawBounds(mTmpRect);
         final Rect stackBounds = getBounds();
         getPendingTransaction()
-                .setSize(mAnimationBackgroundSurface, mTmpRect.width(), mTmpRect.height())
                 .setWindowCrop(mAnimationBackgroundSurface, mTmpRect.width(), mTmpRect.height())
                 .setPosition(mAnimationBackgroundSurface, mTmpRect.left - stackBounds.left,
                         mTmpRect.top - stackBounds.top);
@@ -751,7 +750,6 @@ public class TaskStack extends WindowContainer<Task> implements
         if (width == mLastSurfaceSize.x && height == mLastSurfaceSize.y) {
             return;
         }
-        transaction.setSize(mSurfaceControl, width, height);
         transaction.setWindowCrop(mSurfaceControl, width, height);
         mLastSurfaceSize.set(width, height);
     }

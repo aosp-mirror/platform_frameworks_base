@@ -48,7 +48,6 @@ public class BlackFrame {
 
             surface = dc.makeOverlay()
                     .setName("BlackSurface")
-                    .setSize(w, h)
                     .setColorLayer(true)
                     .setParent(null) // TODO: Work-around for b/69259549
                     .build();

@@ -2161,10 +2161,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.i(TAG, "Creating animation bounds layer");
         final SurfaceControl.Builder builder = makeAnimationLeash()
                 .setParent(getAnimationLeashParent())
-                .setName(getSurfaceControl() + " - animation-bounds")
-                .setSize(getSurfaceWidth(), getSurfaceHeight());
+                .setName(getSurfaceControl() + " - animation-bounds");
         final SurfaceControl boundsLayer = builder.build();
-        t.setWindowCrop(boundsLayer, getSurfaceWidth(), getSurfaceHeight());
         t.show(boundsLayer);
         return boundsLayer;
     }

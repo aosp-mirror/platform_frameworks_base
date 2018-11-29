@@ -16,16 +16,7 @@
 
 package com.android.server.display;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-
 import android.content.Context;
-import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayTransactionListener;
@@ -34,19 +25,28 @@ import android.opengl.EGLConfig;
 import android.opengl.EGLContext;
 import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
-import android.opengl.GLES20;
 import android.opengl.GLES11Ext;
+import android.opengl.GLES20;
 import android.util.Slog;
 import android.view.DisplayInfo;
-import android.view.Surface.OutOfResourcesException;
 import android.view.Surface;
+import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
-
-import libcore.io.Streams;
 
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
+
+import libcore.io.Streams;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 
 /**
  * <p>
@@ -569,37 +569,31 @@ final class ColorFade {
             mSurfaceSession = new SurfaceSession();
         }
 
-        SurfaceControl.openTransaction();
-        try {
-            if (mSurfaceControl == null) {
-                try {
-                    int flags;
-                    if (mMode == MODE_FADE) {
-                        flags = SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN;
-                    } else {
-                        flags = SurfaceControl.OPAQUE | SurfaceControl.HIDDEN;
-                    }
-                    mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
-                            .setName("ColorFade")
-                            .setSize(mDisplayWidth, mDisplayHeight)
-                            .setFlags(flags)
-                            .build();
-                } catch (OutOfResourcesException ex) {
-                    Slog.e(TAG, "Unable to create surface.", ex);
-                    return false;
+        if (mSurfaceControl == null) {
+            Transaction t = new Transaction();
+            try {
+                final SurfaceControl.Builder builder =
+                        new SurfaceControl.Builder(mSurfaceSession).setName("ColorFade");
+                if (mMode == MODE_FADE) {
+                    builder.setColorLayer(true);
+                } else {
+                    builder.setBufferSize(mDisplayWidth, mDisplayHeight);
                 }
-
-                mSurfaceControl.setLayerStack(mDisplayLayerStack);
-                mSurfaceControl.setSize(mDisplayWidth, mDisplayHeight);
-                mSurface = new Surface();
-                mSurface.copyFrom(mSurfaceControl);
-
-                mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManagerInternal,
-                        mDisplayId, mSurfaceControl);
-                mSurfaceLayout.onDisplayTransaction();
+                mSurfaceControl = builder.build();
+            } catch (OutOfResourcesException ex) {
+                Slog.e(TAG, "Unable to create surface.", ex);
+                return false;
             }
-        } finally {
-            SurfaceControl.closeTransaction();
+
+            t.setLayerStack(mSurfaceControl, mDisplayLayerStack);
+            t.setWindowCrop(mSurfaceControl, mDisplayWidth, mDisplayHeight);
+            mSurface = new Surface();
+            mSurface.copyFrom(mSurfaceControl);
+
+            mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManagerInternal,
+                    mDisplayId, mSurfaceControl);
+            mSurfaceLayout.onDisplayTransaction(t);
+            t.apply();
         }
         return true;
     }
@@ -746,7 +740,7 @@ final class ColorFade {
         }
 
         @Override
-        public void onDisplayTransaction() {
+        public void onDisplayTransaction(Transaction t) {
             synchronized (this) {
                 if (mSurfaceControl == null) {
                     return;
@@ -755,21 +749,21 @@ final class ColorFade {
                 DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(mDisplayId);
                 switch (displayInfo.rotation) {
                     case Surface.ROTATION_0:
-                        mSurfaceControl.setPosition(0, 0);
-                        mSurfaceControl.setMatrix(1, 0, 0, 1);
+                        t.setPosition(mSurfaceControl, 0, 0);
+                        t.setMatrix(mSurfaceControl, 1, 0, 0, 1);
                         break;
                     case Surface.ROTATION_90:
-                        mSurfaceControl.setPosition(0, displayInfo.logicalHeight);
-                        mSurfaceControl.setMatrix(0, -1, 1, 0);
+                        t.setPosition(mSurfaceControl, 0, displayInfo.logicalHeight);
+                        t.setMatrix(mSurfaceControl, 0, -1, 1, 0);
                         break;
                     case Surface.ROTATION_180:
-                        mSurfaceControl.setPosition(displayInfo.logicalWidth,
+                        t.setPosition(mSurfaceControl, displayInfo.logicalWidth,
                                 displayInfo.logicalHeight);
-                        mSurfaceControl.setMatrix(-1, 0, 0, -1);
+                        t.setMatrix(mSurfaceControl, -1, 0, 0, -1);
                         break;
                     case Surface.ROTATION_270:
-                        mSurfaceControl.setPosition(displayInfo.logicalWidth, 0);
-                        mSurfaceControl.setMatrix(0, 1, -1, 0);
+                        t.setPosition(mSurfaceControl, displayInfo.logicalWidth, 0);
+                        t.setMatrix(mSurfaceControl, 0, 1, -1, 0);
                         break;
                 }
             }

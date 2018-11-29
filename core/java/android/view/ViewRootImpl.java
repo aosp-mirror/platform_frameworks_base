@@ -1473,31 +1473,22 @@ public final class ViewRootImpl implements ViewParent,
 
         mBoundsSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
                 .setName("Bounds for - " + getTitle().toString())
-                .setSize(mWidth, mHeight)
                 .build();
 
-        setBoundsSurfaceSizeAndCrop();
+        setBoundsSurfaceCrop();
         mTransaction.setLayer(mBoundsSurfaceControl, zOrderLayer)
                     .show(mBoundsSurfaceControl)
                     .apply();
         mBoundsSurface.copyFrom(mBoundsSurfaceControl);
     }
 
-    private void setBoundsSurfaceSizeAndCrop() {
+    private void setBoundsSurfaceCrop() {
         // mWinFrame is already adjusted for surface insets. So offset it and use it as
         // the cropping bounds.
         mTempBoundsRect.set(mWinFrame);
         mTempBoundsRect.offsetTo(mWindowAttributes.surfaceInsets.left,
                 mWindowAttributes.surfaceInsets.top);
         mTransaction.setWindowCrop(mBoundsSurfaceControl, mTempBoundsRect);
-
-        // Expand the bounds by the surface insets to get the size of surface.
-        mTempBoundsRect.inset(-mWindowAttributes.surfaceInsets.left,
-                -mWindowAttributes.surfaceInsets.top,
-                -mWindowAttributes.surfaceInsets.right,
-                -mWindowAttributes.surfaceInsets.bottom);
-        mTransaction.setSize(mBoundsSurfaceControl, mTempBoundsRect.width(),
-                mTempBoundsRect.height());
     }
 
     /**
@@ -1506,7 +1497,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     private void updateBoundsSurface() {
         if (mBoundsSurfaceControl != null && mSurface.isValid()) {
-            setBoundsSurfaceSizeAndCrop();
+            setBoundsSurfaceCrop();
             mTransaction.deferTransactionUntilSurface(mBoundsSurfaceControl,
                     mSurface, mSurface.getNextFrameNumber())
                     .apply();

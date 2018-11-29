@@ -375,9 +375,13 @@ public class SurfaceControl implements Parcelable {
          * Construct a new {@link SurfaceControl} with the set parameters.
          */
         public SurfaceControl build() {
-            if (mWidth <= 0 || mHeight <= 0) {
+            if (mWidth < 0 || mHeight < 0) {
                 throw new IllegalArgumentException(
-                        "width and height must be set");
+                        "width and height must be positive or unset");
+            }
+            if ((mWidth > 0 || mHeight > 0) && (isColorLayerSet() || isContainerLayerSet())) {
+                throw new IllegalArgumentException(
+                        "Only buffer layers can set a valid buffer size.");
             }
             return new SurfaceControl(mSession, mName, mWidth, mHeight, mFormat,
                     mFlags, mParent, mWindowType, mOwnerUid);
@@ -399,8 +403,8 @@ public class SurfaceControl implements Parcelable {
          * @param width The buffer width in pixels.
          * @param height The buffer height in pixels.
          */
-        public Builder setSize(int width, int height) {
-            if (width <= 0 || height <= 0) {
+        public Builder setBufferSize(int width, int height) {
+            if (width < 0 || height < 0) {
                 throw new IllegalArgumentException(
                         "width and height must be positive");
             }
@@ -533,6 +537,10 @@ public class SurfaceControl implements Parcelable {
             return this;
         }
 
+        private boolean isColorLayerSet() {
+            return  (mFlags & FX_SURFACE_DIM) == FX_SURFACE_DIM;
+        }
+
         /**
          * Indicates whether a 'ContainerLayer' is to be constructed.
          *
@@ -548,6 +556,10 @@ public class SurfaceControl implements Parcelable {
                 mFlags &= ~FX_SURFACE_CONTAINER;
             }
             return this;
+        }
+
+        private boolean isContainerLayerSet() {
+            return  (mFlags & FX_SURFACE_CONTAINER) == FX_SURFACE_CONTAINER;
         }
 
         /**
@@ -869,10 +881,10 @@ public class SurfaceControl implements Parcelable {
         }
     }
 
-    public void setSize(int w, int h) {
+    public void setBufferSize(int w, int h) {
         checkNotReleased();
         synchronized(SurfaceControl.class) {
-            sGlobalTransaction.setSize(this, w, h);
+            sGlobalTransaction.setBufferSize(this, w, h);
         }
     }
 
@@ -1427,7 +1439,7 @@ public class SurfaceControl implements Parcelable {
         }
 
         @UnsupportedAppUsage
-        public Transaction setSize(SurfaceControl sc, int w, int h) {
+        public Transaction setBufferSize(SurfaceControl sc, int w, int h) {
             sc.checkNotReleased();
             mResizedSurfaces.put(sc, new Point(w, h));
             nativeSetSize(mNativeObject, sc.mNativeObject, w, h);

@@ -837,7 +837,7 @@ public final class Magnifier {
             mSurfaceSession = new SurfaceSession(parentSurface);
             mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
                     .setFormat(PixelFormat.TRANSLUCENT)
-                    .setSize(mSurfaceWidth, mSurfaceHeight)
+                    .setBufferSize(mSurfaceWidth, mSurfaceHeight)
                     .setName("magnifier surface")
                     .setFlags(SurfaceControl.HIDDEN)
                     .build();

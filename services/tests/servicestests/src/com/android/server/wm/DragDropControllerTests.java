@@ -171,7 +171,7 @@ public class DragDropControllerTests extends WindowTestsBase {
         try {
             final SurfaceControl surface = new SurfaceControl.Builder(appSession)
                     .setName("drag surface")
-                    .setSize(100, 100)
+                    .setBufferSize(100, 100)
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
 

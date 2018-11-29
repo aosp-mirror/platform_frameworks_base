@@ -24,7 +24,7 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
-import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 
 /**
  * Display manager local system service interface.
@@ -126,7 +126,7 @@ public abstract class DisplayManagerInternal {
      * Called by the window manager to perform traversals while holding a
      * surface flinger transaction.
      */
-    public abstract void performTraversal(SurfaceControl.Transaction t);
+    public abstract void performTraversal(Transaction t);
 
     /**
      * Tells the display manager about properties of the display that depend on the windows on it.
@@ -383,6 +383,6 @@ public abstract class DisplayManagerInternal {
      * update the position of its surfaces as part of the same transaction.
      */
     public interface DisplayTransactionListener {
-        void onDisplayTransaction();
+        void onDisplayTransaction(Transaction t);
     }
 }

@@ -32,6 +32,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+
 import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.getColorViewLeftInset;
@@ -312,7 +313,7 @@ class TaskSnapshotSurface implements StartingSurface {
         // Keep a reference to it such that it doesn't get destroyed when finalized.
         mChildSurfaceControl = new SurfaceControl.Builder(session)
                 .setName(mTitle + " - task-snapshot-surface")
-                .setSize(buffer.getWidth(), buffer.getHeight())
+                .setBufferSize(buffer.getWidth(), buffer.getHeight())
                 .setFormat(buffer.getFormat())
                 .build();
         Surface surface = new Surface();
