@@ -738,7 +738,8 @@ class ActivityStarter {
         // not sure if we need to create START_ABORTED_BACKGROUND so for now piggybacking
         // on START_ABORTED
         if (!abort) {
-            abort |= shouldAbortBackgroundActivityStart(callingUid, callingPackage, callerApp);
+            abort |= shouldAbortBackgroundActivityStart(callingUid, callingPackage, realCallingUid,
+                    callerApp);
         }
 
         // Merge the two options bundles, while realCallerOptions takes precedence.
@@ -886,7 +887,7 @@ class ActivityStarter {
     }
 
     private boolean shouldAbortBackgroundActivityStart(int callingUid, final String callingPackage,
-            WindowProcessController callerApp) {
+            int realCallingUid, WindowProcessController callerApp) {
         if (mService.isBackgroundActivityStartsEnabled()) {
             return false;
         }
@@ -898,12 +899,12 @@ class ActivityStarter {
         if (callerApp != null && callerApp.hasForegroundActivities()) {
             return false;
         }
-        // don't abort if the callingUid's process is important enough
-        if (mService.getUidStateLocked(callingUid) <= ActivityManager.PROCESS_STATE_TOP) {
+        // don't abort if the callingUid is in the foreground
+        if (isUidForeground(callingUid)) {
             return false;
         }
-        // don't abort if the callingUid has any visible window
-        if (mService.mWindowManager.isAnyWindowVisibleForUid(callingUid)) {
+        // don't abort if the realCallingUid is in the foreground and callingUid isn't
+        if ((realCallingUid != callingUid) && isUidForeground(realCallingUid)) {
             return false;
         }
         // don't abort if the caller has the same uid as the recents component
@@ -918,6 +919,12 @@ class ActivityStarter {
                     Toast.LENGTH_SHORT).show();
         });
         return true;
+    }
+
+    /** Returns true if uid has a visible window or its process is in top or persistent state. */
+    private boolean isUidForeground(int uid) {
+        return (mService.getUidStateLocked(uid) <= ActivityManager.PROCESS_STATE_TOP)
+            || mService.mWindowManager.isAnyWindowVisibleForUid(uid);
     }
 
     private void maybeLogActivityStart(int callingUid, String callingPackage, int realCallingUid,
