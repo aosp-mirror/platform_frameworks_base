@@ -1657,35 +1657,42 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int len = devices != null ? devices.length : 0;
         for (int i = 0; i < len; i++) {
             InputDevice device = devices[i];
-            if (!device.isVirtual()) {
-                final int sources = device.getSources();
-                final int presenceFlag = device.isExternal() ?
-                        WindowManagerPolicy.PRESENCE_EXTERNAL :
-                        WindowManagerPolicy.PRESENCE_INTERNAL;
+            // Ignore virtual input device.
+            if (device.isVirtual()) {
+                continue;
+            }
 
-                // TODO(multi-display): Configure on per-display basis.
-                if (mWmService.mIsTouchDevice) {
-                    if ((sources & InputDevice.SOURCE_TOUCHSCREEN) ==
-                            InputDevice.SOURCE_TOUCHSCREEN) {
-                        config.touchscreen = Configuration.TOUCHSCREEN_FINGER;
-                    }
-                } else {
-                    config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
-                }
+            // Check if input device can dispatch events to current display.
+            // If display type is virtual, will follow the default display.
+            if (!mWmService.mInputManager.canDispatchToDisplay(device.getId(),
+                    displayInfo.type == Display.TYPE_VIRTUAL ? DEFAULT_DISPLAY : mDisplayId)) {
+                continue;
+            }
 
-                if ((sources & InputDevice.SOURCE_TRACKBALL) == InputDevice.SOURCE_TRACKBALL) {
-                    config.navigation = Configuration.NAVIGATION_TRACKBALL;
-                    navigationPresence |= presenceFlag;
-                } else if ((sources & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD
-                        && config.navigation == Configuration.NAVIGATION_NONAV) {
-                    config.navigation = Configuration.NAVIGATION_DPAD;
-                    navigationPresence |= presenceFlag;
-                }
+            final int sources = device.getSources();
+            final int presenceFlag = device.isExternal()
+                    ? WindowManagerPolicy.PRESENCE_EXTERNAL : WindowManagerPolicy.PRESENCE_INTERNAL;
 
-                if (device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
-                    config.keyboard = Configuration.KEYBOARD_QWERTY;
-                    keyboardPresence |= presenceFlag;
+            if (mWmService.mIsTouchDevice) {
+                if ((sources & InputDevice.SOURCE_TOUCHSCREEN) == InputDevice.SOURCE_TOUCHSCREEN) {
+                    config.touchscreen = Configuration.TOUCHSCREEN_FINGER;
                 }
+            } else {
+                config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
+            }
+
+            if ((sources & InputDevice.SOURCE_TRACKBALL) == InputDevice.SOURCE_TRACKBALL) {
+                config.navigation = Configuration.NAVIGATION_TRACKBALL;
+                navigationPresence |= presenceFlag;
+            } else if ((sources & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD
+                    && config.navigation == Configuration.NAVIGATION_NONAV) {
+                config.navigation = Configuration.NAVIGATION_DPAD;
+                navigationPresence |= presenceFlag;
+            }
+
+            if (device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
+                config.keyboard = Configuration.KEYBOARD_QWERTY;
+                keyboardPresence |= presenceFlag;
             }
         }
 
