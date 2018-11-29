@@ -304,7 +304,7 @@ interface IWindowManager
     /**
      * Get the position of the nav bar
      */
-    int getNavBarPosition();
+    int getNavBarPosition(int displayId);
 
     /**
      * Lock the device immediately with the specified options (can be null).

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_QUICK_SCRUB;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
@@ -950,10 +951,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private void updateTaskSwitchHelper() {
         if (mGestureHelper == null) return;
         boolean isRtl = (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
-        int navBarPos = 0;
+        int navBarPos = NAV_BAR_INVALID;
         try {
-            // TODO: Use WindowManagerService.getNavBarPosition(int displayId)
-            navBarPos = WindowManagerGlobal.getWindowManagerService().getNavBarPosition();
+            navBarPos = WindowManagerGlobal.getWindowManagerService().getNavBarPosition(
+                    mDisplay.getDisplayId());
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to get nav bar position.", e);
         }

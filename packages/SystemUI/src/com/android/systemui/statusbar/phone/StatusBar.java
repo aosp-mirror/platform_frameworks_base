@@ -1211,7 +1211,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         int dockSide = WindowManagerProxy.getInstance().getDockSide();
         if (dockSide == WindowManager.DOCKED_INVALID) {
-            final int navbarPos = WindowManagerWrapper.getInstance().getNavBarPosition();
+            final int navbarPos = WindowManagerWrapper.getInstance().getNavBarPosition(
+                    mDisplay.getDisplayId());
             if (navbarPos == NAV_BAR_POS_INVALID) {
                 return false;
             }
