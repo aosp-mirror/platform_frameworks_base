@@ -17,6 +17,7 @@
 package android.view;
 
 import android.graphics.Region;
+import android.os.IBinder;
 import android.view.IWindow;
 import android.view.InputChannel;
 
@@ -37,8 +38,8 @@ public final class InputWindowHandle {
     // The client window.
     public final IWindow clientWindow;
 
-    // The input channel associated with the window.
-    public InputChannel inputChannel;
+    // The token assosciated with the window.
+    public IBinder token;
 
     // The window name.
     public String name;
@@ -55,6 +56,8 @@ public final class InputWindowHandle {
     public int frameTop;
     public int frameRight;
     public int frameBottom;
+
+    public int surfaceInset;
 
     // Global scaling factor applied to touch events when they are dispatched
     // to the window

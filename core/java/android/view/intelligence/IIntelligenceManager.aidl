@@ -38,7 +38,8 @@ oneway interface IIntelligenceManager {
     /**
       * Finishes a session.
       */
-    void finishSession(int userId, in InteractionSessionId sessionId);
+    void finishSession(int userId, in InteractionSessionId sessionId,
+                       in List<ContentCaptureEvent> events);
 
     /**
       * Sends a batch of events

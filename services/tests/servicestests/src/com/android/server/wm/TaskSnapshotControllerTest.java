@@ -48,7 +48,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
     public void testGetClosingApps_closing() {
         final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
                 "closingWindow");
-        closingWindow.mAppToken.setVisibility(null, false /* visible */, TRANSIT_UNSET,
+        closingWindow.mAppToken.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
                 true /* performLayout */, false /* isVoiceInteraction */);
         final ArraySet<AppWindowToken> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mAppToken);
@@ -64,9 +64,9 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
                 "closingWindow");
         final WindowState openingWindow = createAppWindow(closingWindow.getTask(),
                 FIRST_APPLICATION_WINDOW, "openingWindow");
-        closingWindow.mAppToken.setVisibility(null, false /* visible */, TRANSIT_UNSET,
+        closingWindow.mAppToken.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
                 true /* performLayout */, false /* isVoiceInteraction */);
-        openingWindow.mAppToken.setVisibility(null, true /* visible */, TRANSIT_UNSET,
+        openingWindow.mAppToken.commitVisibility(null, true /* visible */, TRANSIT_UNSET,
                 true /* performLayout */, false /* isVoiceInteraction */);
         final ArraySet<AppWindowToken> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mAppToken);
@@ -79,7 +79,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
     public void testGetClosingApps_skipClosingAppsSnapshotTasks() {
         final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
                 "closingWindow");
-        closingWindow.mAppToken.setVisibility(null, false /* visible */, TRANSIT_UNSET,
+        closingWindow.mAppToken.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
                 true /* performLayout */, false /* isVoiceInteraction */);
         final ArraySet<AppWindowToken> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mAppToken);

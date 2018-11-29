@@ -36,6 +36,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.util.Log;
@@ -412,6 +413,9 @@ public class MediaPlayer2 implements AutoCloseable
             mHandlerThread = null;
         }
 
+        setCurrentSourceInfo(null);
+        clearNextSourceInfos();
+
         // Modular DRM clean up
         mOnDrmConfigHelper = null;
         synchronized (mDrmEventCbLock) {
@@ -457,10 +461,8 @@ public class MediaPlayer2 implements AutoCloseable
         synchronized (mDrmEventCbLock) {
             mDrmEventCallbackRecords.clear();
         }
-        synchronized (mSrcLock) {
-            mCurrentSourceInfo = null;
-            mNextSourceInfos.clear();
-        }
+        setCurrentSourceInfo(null);
+        clearNextSourceInfos();
 
         synchronized (mTaskLock) {
             mPendingTasks.clear();
@@ -685,6 +687,8 @@ public class MediaPlayer2 implements AutoCloseable
 
     /**
      * Sets the data source as described by a DataSourceDesc.
+     * When the data source is of {@link FileDataSourceDesc} type, the {@link ParcelFileDescriptor}
+     * in the {@link FileDataSourceDesc} will be closed by the player.
      *
      * @param dsd the descriptor of data source you want to play
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
@@ -696,13 +700,17 @@ public class MediaPlayer2 implements AutoCloseable
             void process() throws IOException {
                 Media2Utils.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
                 int state = getState();
-                if (state != PLAYER_STATE_ERROR && state != PLAYER_STATE_IDLE) {
-                    throw new IllegalStateException("called in wrong state " + state);
-                }
+                try {
+                    if (state != PLAYER_STATE_ERROR && state != PLAYER_STATE_IDLE) {
+                        throw new IllegalStateException("called in wrong state " + state);
+                    }
 
-                synchronized (mSrcLock) {
-                    mCurrentSourceInfo = new SourceInfo(dsd);
-                    handleDataSource(true /* isCurrent */, dsd, mCurrentSourceInfo.mId);
+                    synchronized (mSrcLock) {
+                        setCurrentSourceInfo(new SourceInfo(dsd));
+                        handleDataSource(true /* isCurrent */, dsd, mCurrentSourceInfo.mId);
+                    }
+                } finally {
+                    dsd.close();
                 }
             }
         });
@@ -711,6 +719,8 @@ public class MediaPlayer2 implements AutoCloseable
     /**
      * Sets a single data source as described by a DataSourceDesc which will be played
      * after current data source is finished.
+     * When the data source is of {@link FileDataSourceDesc} type, the {@link ParcelFileDescriptor}
+     * in the {@link FileDataSourceDesc} will be closed by the player.
      *
      * @param dsd the descriptor of data source you want to play after current one
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
@@ -722,7 +732,7 @@ public class MediaPlayer2 implements AutoCloseable
             void process() {
                 Media2Utils.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
                 synchronized (mSrcLock) {
-                    mNextSourceInfos.clear();
+                    clearNextSourceInfos();
                     mNextSourceInfos.add(new SourceInfo(dsd));
                 }
                 prepareNextDataSource();
@@ -732,6 +742,8 @@ public class MediaPlayer2 implements AutoCloseable
 
     /**
      * Sets a list of data sources to be played sequentially after current data source is done.
+     * When the data source is of {@link FileDataSourceDesc} type, the {@link ParcelFileDescriptor}
+     * in the {@link FileDataSourceDesc} will be closed by the player.
      *
      * @param dsds the list of data sources you want to play after current one
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
@@ -744,17 +756,15 @@ public class MediaPlayer2 implements AutoCloseable
                 if (dsds == null || dsds.size() == 0) {
                     throw new IllegalArgumentException("data source list cannot be null or empty.");
                 }
-                for (DataSourceDesc dsd : dsds) {
-                    if (dsd == null) {
-                        throw new IllegalArgumentException(
-                                "DataSourceDesc in the source list cannot be null.");
-                    }
-                }
 
                 synchronized (mSrcLock) {
-                    mNextSourceInfos.clear();
+                    clearNextSourceInfos();
                     for (DataSourceDesc dsd : dsds) {
-                        mNextSourceInfos.add(new SourceInfo(dsd));
+                        if (dsd != null) {
+                            mNextSourceInfos.add(new SourceInfo(dsd));
+                        } else {
+                            Log.w(TAG, "DataSourceDesc in the source list shall not be null.");
+                        }
                     }
                 }
                 prepareNextDataSource();
@@ -771,7 +781,7 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_CLEAR_NEXT_DATA_SOURCES, false) {
             @Override
             void process() {
-                mNextSourceInfos.clear();
+                clearNextSourceInfos();
             }
         });
     }
@@ -802,7 +812,7 @@ public class MediaPlayer2 implements AutoCloseable
             FileDataSourceDesc fileDSD = (FileDataSourceDesc) dsd;
             handleDataSource(isCurrent,
                              srcId,
-                             fileDSD.getFileDescriptor(),
+                             fileDSD.getParcelFileDescriptor(),
                              fileDSD.getOffset(),
                              fileDSD.getLength(),
                              fileDSD.getStartPosition(),
@@ -886,7 +896,7 @@ public class MediaPlayer2 implements AutoCloseable
             if (afd.getDeclaredLength() < 0) {
                 handleDataSource(isCurrent,
                         srcId,
-                        afd.getFileDescriptor(),
+                        ParcelFileDescriptor.dup(afd.getFileDescriptor()),
                         0,
                         DataSourceDesc.LONG_MAX,
                         startPos,
@@ -894,7 +904,7 @@ public class MediaPlayer2 implements AutoCloseable
             } else {
                 handleDataSource(isCurrent,
                         srcId,
-                        afd.getFileDescriptor(),
+                        ParcelFileDescriptor.dup(afd.getFileDescriptor()),
                         afd.getStartOffset(),
                         afd.getDeclaredLength(),
                         startPos,
@@ -960,7 +970,8 @@ public class MediaPlayer2 implements AutoCloseable
         if (file.exists()) {
             FileInputStream is = new FileInputStream(file);
             FileDescriptor fd = is.getFD();
-            handleDataSource(isCurrent, srcId, fd, 0, DataSourceDesc.LONG_MAX, startPos, endPos);
+            handleDataSource(isCurrent, srcId, ParcelFileDescriptor.dup(fd),
+                    0, DataSourceDesc.LONG_MAX, startPos, endPos);
             is.close();
         } else {
             throw new IOException("handleDataSource failed.");
@@ -984,9 +995,10 @@ public class MediaPlayer2 implements AutoCloseable
      */
     private void handleDataSource(
             boolean isCurrent, long srcId,
-            FileDescriptor fd, long offset, long length,
+            ParcelFileDescriptor pfd, long offset, long length,
             long startPos, long endPos) throws IOException {
-        nativeHandleDataSourceFD(isCurrent, srcId, fd, offset, length, startPos, endPos);
+        nativeHandleDataSourceFD(isCurrent, srcId, pfd.getFileDescriptor(), offset, length,
+                startPos, endPos);
     }
 
     private native void nativeHandleDataSourceFD(boolean isCurrent, long srcId,
@@ -1037,7 +1049,10 @@ public class MediaPlayer2 implements AutoCloseable
                         MEDIA_ERROR, MEDIA_ERROR_IO, MEDIA_ERROR_UNKNOWN, null);
                 mTaskHandler.handleMessage(msg, nextSource.mId);
 
-                mNextSourceInfos.poll();
+                SourceInfo nextSourceInfo = mNextSourceInfos.poll();
+                if (nextSource != null) {
+                    nextSourceInfo.close();
+                }
                 return prepareNextDataSource();
             }
         }
@@ -1058,7 +1073,7 @@ public class MediaPlayer2 implements AutoCloseable
                 SourceInfo nextSourceInfo = mNextSourceInfos.peek();
                 if (nextSourceInfo.mStateAsNextSource == NEXT_SOURCE_STATE_PREPARED) {
                     // Switch to next source only when it has been prepared.
-                    mCurrentSourceInfo = mNextSourceInfos.poll();
+                    setCurrentSourceInfo(mNextSourceInfos.poll());
 
                     long srcId = mCurrentSourceInfo.mId;
                     try {
@@ -4490,6 +4505,7 @@ public class MediaPlayer2 implements AutoCloseable
         final DataSourceDesc mDSD;
         final long mId = mSrcIdGenerator.getAndIncrement();
         AtomicInteger mBufferedPercentage = new AtomicInteger(0);
+        boolean mClosed = false;
 
         // m*AsNextSource (below) only applies to pending data sources in the playlist;
         // the meanings of mCurrentSourceInfo.{mStateAsNextSource,mPlayPendingAsNextSource}
@@ -4499,6 +4515,17 @@ public class MediaPlayer2 implements AutoCloseable
 
         SourceInfo(DataSourceDesc dsd) {
             this.mDSD = dsd;
+        }
+
+        void close() {
+            synchronized (this) {
+                if (!mClosed) {
+                    if (mDSD != null) {
+                        mDSD.close();
+                    }
+                    mClosed = true;
+                }
+            }
         }
 
         @Override
@@ -4529,6 +4556,26 @@ public class MediaPlayer2 implements AutoCloseable
     private boolean isNextSource(long srcId) {
         SourceInfo nextSourceInfo = mNextSourceInfos.peek();
         return nextSourceInfo != null && nextSourceInfo.mId == srcId;
+    }
+
+    private void setCurrentSourceInfo(SourceInfo newSourceInfo) {
+        synchronized (mSrcLock) {
+            if (mCurrentSourceInfo != null) {
+                mCurrentSourceInfo.close();
+            }
+            mCurrentSourceInfo = newSourceInfo;
+        }
+    }
+
+    private void clearNextSourceInfos() {
+        synchronized (mSrcLock) {
+            for (SourceInfo sourceInfo : mNextSourceInfos) {
+                if (sourceInfo != null) {
+                    sourceInfo.close();
+                }
+            }
+            mNextSourceInfos.clear();
+        }
     }
 
     public static final class MetricsConstants {

@@ -7967,6 +7967,14 @@ public final class Settings {
                 "managed_profile_contact_remote_search";
 
         /**
+         * Whether parent profile can access remote calendar data in managed profile.
+         *
+         * @hide
+         */
+        public static final String CROSS_PROFILE_CALENDAR_ENABLED =
+                "cross_profile_calendar_enabled";
+
+        /**
          * Whether or not the automatic storage manager is enabled and should run on the device.
          *
          * @hide
@@ -10780,6 +10788,41 @@ public final class Settings {
         public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
 
         /**
+         * The threshold value for the number of consecutive dns timeout events received to be a
+         * signal of data stall. Set the value to 0 or less than 0 to disable. Note that the value
+         * should be larger than 0 if the DNS data stall detection is enabled.
+         *
+         * @hide
+         */
+        public static final String DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD =
+                "data_stall_consecutive_dns_timeout_threshold";
+
+        /**
+         * The minimal time interval in milliseconds for data stall reevaluation.
+         *
+         * @hide
+         */
+        public static final String DATA_STALL_MIN_EVALUATE_INTERVAL =
+                "data_stall_min_evaluate_interval";
+
+        /**
+         * DNS timeouts older than this timeout (in milliseconds) are not considered for detecting
+         * a data stall.
+         *
+         * @hide
+         */
+        public static final String DATA_STALL_VALID_DNS_TIME_THRESHOLD =
+                "data_stall_valid_dns_time_threshold";
+
+        /**
+         * Which data stall detection signal to use. Possible values are a union of the powers of 2
+         * of DATA_STALL_EVALUATION_TYPE_*.
+         *
+         * @hide
+         */
+        public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
+
+        /**
          * Whether network service discovery is enabled.
          *
          * @hide
@@ -10998,6 +11041,16 @@ public final class Settings {
          */
         public static final String ACTIVITY_STARTS_LOGGING_ENABLED
                 = "activity_starts_logging_enabled";
+
+        /**
+         * Feature flag to enable or disable the background activity starts.
+         * When disabled, apps aren't allowed to start activities unless they're in the foreground.
+         * Type: int (0 for false, 1 for true)
+         * Default: 1
+         * @hide
+         */
+        public static final String BACKGROUND_ACTIVITY_STARTS_ENABLED =
+                "background_activity_starts_enabled";
 
         /**
          * @hide
@@ -13717,6 +13770,15 @@ public final class Settings {
          * @hide
          */
         public static final String LAST_ACTIVE_USER_ID = "last_active_persistent_user_id";
+
+
+        /**
+         * Whether we've enabled native flags health check on this device. Takes effect on
+         * reboot. The value "1" enables native flags health check; otherwise it's disabled.
+         * @hide
+         */
+        public static final String NATIVE_FLAGS_HEALTH_CHECK_ENABLED =
+                "native_flags_health_check_enabled";
 
     }
 

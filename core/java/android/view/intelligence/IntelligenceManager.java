@@ -39,7 +39,6 @@ import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
 import android.view.intelligence.ContentCaptureEvent.EventType;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.Preconditions;
 
@@ -47,9 +46,17 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * TODO(b/111276913): add javadocs / implement
+ */
+/*
+ * NOTE: all methods in this class should return right away, or do the real work in a handler
+ * thread.
+ *
+ * Hence, the only field that must be thread-safe is mEnabled, which is called at the beginning
+ * of every method.
  */
 @SystemService(Context.INTELLIGENCE_MANAGER_SERVICE)
 public final class IntelligenceManager {
@@ -97,48 +104,48 @@ public final class IntelligenceManager {
     private static final String BG_THREAD_NAME = "intel_svc_streamer_thread";
 
     /**
-     * Maximum number of events that are delayed for an app.
-     *
-     * <p>If the session is not started after the limit is reached, it's discarded.
+     * Maximum number of events that are buffered before sent to the app.
      */
-    private static final int MAX_DELAYED_SIZE = 20;
+    // TODO(b/111276913): use settings
+    private static final int MAX_BUFFER_SIZE = 100;
 
+    @NonNull
+    private final AtomicBoolean mDisabled = new AtomicBoolean();
+
+    @NonNull
     private final Context mContext;
 
     @Nullable
     private final IIntelligenceManager mService;
 
-    private final Object mLock = new Object();
-
     @Nullable
-    @GuardedBy("mLock")
     private InteractionSessionId mId;
 
-    @GuardedBy("mLock")
     private int mState = STATE_UNKNOWN;
 
-    @GuardedBy("mLock")
+    @Nullable
     private IBinder mApplicationToken;
 
-    // TODO(b/111276913): replace by an interface name implemented by Activity, similar to
-    // AutofillClient
-    @GuardedBy("mLock")
+    @Nullable
     private ComponentName mComponentName;
 
-    // TODO(b/111276913): create using maximum batch size as capacity
     /**
      * List of events held to be sent as a batch.
      */
-    @GuardedBy("mLock")
-    private final ArrayList<ContentCaptureEvent> mEvents = new ArrayList<>();
+    @Nullable
+    private ArrayList<ContentCaptureEvent> mEvents;
 
+    // TODO(b/111276913): use UI Thread directly (as calls are one-way) or a shared thread / handler
+    // held at the Application level
     private final Handler mHandler;
 
     /** @hide */
     public IntelligenceManager(@NonNull Context context, @Nullable IIntelligenceManager service) {
         mContext = Preconditions.checkNotNull(context, "context cannot be null");
+        if (VERBOSE) {
+            Log.v(TAG, "Constructor for " + context.getPackageName());
+        }
         mService = service;
-
         // TODO(b/111276913): use an existing bg thread instead...
         final HandlerThread bgThread = new HandlerThread(BG_THREAD_NAME);
         bgThread.start();
@@ -149,102 +156,100 @@ public final class IntelligenceManager {
     public void onActivityCreated(@NonNull IBinder token, @NonNull ComponentName componentName) {
         if (!isContentCaptureEnabled()) return;
 
-        synchronized (mLock) {
-            if (mState != STATE_UNKNOWN) {
-                // TODO(b/111276913): revisit this scenario
-                Log.w(TAG, "ignoring onActivityStarted(" + token + ") while on state "
-                        + getStateAsString(mState));
-                return;
-            }
-            mState = STATE_WAITING_FOR_SERVER;
-            mId = new InteractionSessionId();
-            mApplicationToken = token;
-            mComponentName = componentName;
+        mHandler.sendMessage(obtainMessage(IntelligenceManager::handleStartSession, this,
+                token, componentName));
+    }
 
-            if (VERBOSE) {
-                Log.v(TAG, "onActivityCreated(): token=" + token + ", act="
-                        + getActivityDebugNameLocked() + ", id=" + mId);
-            }
-            final int flags = 0; // TODO(b/111276913): get proper flags
+    private void handleStartSession(@NonNull IBinder token, @NonNull ComponentName componentName) {
+        if (mState != STATE_UNKNOWN) {
+            // TODO(b/111276913): revisit this scenario
+            Log.w(TAG, "ignoring handleStartSession(" + token + ") while on state "
+                    + getStateAsString(mState));
+            return;
+        }
+        mState = STATE_WAITING_FOR_SERVER;
+        mId = new InteractionSessionId();
+        mApplicationToken = token;
+        mComponentName = componentName;
 
-            try {
-                mService.startSession(mContext.getUserId(), mApplicationToken, componentName,
-                        mId, flags, new IResultReceiver.Stub() {
-                            @Override
-                            public void send(int resultCode, Bundle resultData)
-                                    throws RemoteException {
-                                synchronized (mLock) {
-                                    mState = resultCode;
-                                    if (VERBOSE) {
-                                        Log.v(TAG, "onActivityStarted() result: code=" + resultCode
-                                                + ", id=" + mId
-                                                + ", state=" + getStateAsString(mState));
-                                    }
-                                }
-                            }
-                        });
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        if (VERBOSE) {
+            Log.v(TAG, "handleStartSession(): token=" + token + ", act="
+                    + getActivityDebugName() + ", id=" + mId);
+        }
+        final int flags = 0; // TODO(b/111276913): get proper flags
+
+        try {
+            mService.startSession(mContext.getUserId(), mApplicationToken, componentName,
+                    mId, flags, new IResultReceiver.Stub() {
+                        @Override
+                        public void send(int resultCode, Bundle resultData) {
+                            handleSessionStarted(resultCode);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error starting session for " + componentName.flattenToShortString() + ": "
+                    + e);
         }
     }
 
-    //TODO(b/111276913): should buffer event (and call service on handler thread), instead of
-    // calling right away
-    private void sendEvent(@NonNull ContentCaptureEvent event) {
-        mHandler.sendMessage(obtainMessage(IntelligenceManager::handleSendEvent, this, event));
+    private  void handleSessionStarted(int resultCode) {
+        mState = resultCode;
+        mDisabled.set(mState == STATE_DISABLED);
+        if (VERBOSE) {
+            Log.v(TAG, "onActivityStarted() result: code=" + resultCode + ", id=" + mId
+                    + ", state=" + getStateAsString(mState) + ", disabled=" + mDisabled.get());
+        }
     }
 
-    private void handleSendEvent(@NonNull ContentCaptureEvent event) {
-
-        //TODO(b/111276913): make a copy and don't use lock
-        synchronized (mLock) {
-            mEvents.add(event);
-            final int numberEvents = mEvents.size();
-            if (mState != STATE_ACTIVE) {
-                if (numberEvents >= MAX_DELAYED_SIZE) {
-                    // Typically happens on system apps that are started before the system service
-                    // is ready (like com.android.settings/.FallbackHome)
-                    //TODO(b/111276913): try to ignore session while system is not ready / boot
-                    // not complete instead. Similarly, the manager service should return right away
-                    // when the user does not have a service set
-                    if (VERBOSE) {
-                        Log.v(TAG, "Closing session for " + getActivityDebugNameLocked()
-                                + " after " + numberEvents + " delayed events and state "
-                                + getStateAsString(mState));
-                    }
-                    // TODO(b/111276913): blacklist activity / use special flag to indicate that
-                    // when it's launched again
-                    resetStateLocked();
-                    return;
-                }
-
-                if (VERBOSE) {
-                    Log.v(TAG, "Delaying " + numberEvents + " events for "
-                            + getActivityDebugNameLocked() + " while on state "
-                            + getStateAsString(mState));
-                }
-                return;
+    private void handleSendEvent(@NonNull ContentCaptureEvent event, boolean forceFlush) {
+        if (mEvents == null) {
+            if (VERBOSE) {
+                Log.v(TAG, "Creating buffer for " + MAX_BUFFER_SIZE + " events");
             }
+            mEvents = new ArrayList<>(MAX_BUFFER_SIZE);
+        }
+        mEvents.add(event);
+        final int numberEvents = mEvents.size();
+        if (numberEvents < MAX_BUFFER_SIZE && !forceFlush) {
+            // Buffering events, return right away...
+            return;
+        }
 
-            if (mId == null) {
-                // Sanity check - should not happen
-                Log.wtf(TAG, "null session id for " + mComponentName);
-                return;
+        if (mState != STATE_ACTIVE) {
+            // Callback from startSession hasn't been called yet - typically happens on system
+            // apps that are started before the system service
+            // TODO(b/111276913): try to ignore session while system is not ready / boot
+            // not complete instead. Similarly, the manager service should return right away
+            // when the user does not have a service set
+            if (VERBOSE) {
+                Log.v(TAG, "Closing session for " + getActivityDebugName()
+                        + " after " + numberEvents + " delayed events and state "
+                        + getStateAsString(mState));
             }
+            handleResetState();
+            // TODO(b/111276913): blacklist activity / use special flag to indicate that
+            // when it's launched again
+            return;
+        }
 
-            //TODO(b/111276913): right now we're sending sending right away (unless not ready), but
-            // we should hold the events and flush later.
-            try {
-                if (DEBUG) {
-                    Log.d(TAG, "Sending " + numberEvents + " event(s) for "
-                            + getActivityDebugNameLocked());
-                }
-                mService.sendEvents(mContext.getUserId(), mId, mEvents);
-                mEvents.clear();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+        if (mId == null) {
+            // Sanity check - should not happen
+            Log.wtf(TAG, "null session id for " + getActivityDebugName());
+            return;
+        }
+
+        try {
+            if (DEBUG) {
+                Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getActivityDebugName());
             }
+            mService.sendEvents(mContext.getUserId(), mId, mEvents);
+            // TODO(b/111276913): decide whether we should clear or set it to null, as each has
+            // its own advantages: clearing will save extra allocations while the session is
+            // active, while setting to null would save memory if there's no more event coming.
+            mEvents.clear();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error sending " + numberEvents + " for " + getActivityDebugName()
+                    + ": " + e);
         }
     }
 
@@ -256,41 +261,54 @@ public final class IntelligenceManager {
     public void onActivityLifecycleEvent(@EventType int type) {
         if (!isContentCaptureEnabled()) return;
         if (VERBOSE) {
-            Log.v(TAG, "onActivityLifecycleEvent() for " + getActivityDebugNameLocked()
+            Log.v(TAG, "onActivityLifecycleEvent() for " + getActivityDebugName()
                     + ": " + ContentCaptureEvent.getTypeAsString(type));
         }
-        sendEvent(new ContentCaptureEvent(type));
+        mHandler.sendMessage(obtainMessage(IntelligenceManager::handleSendEvent, this,
+                new ContentCaptureEvent(type), /* forceFlush= */ true));
     }
 
     /** @hide */
     public void onActivityDestroyed() {
         if (!isContentCaptureEnabled()) return;
 
-        synchronized (mLock) {
-            //TODO(b/111276913): check state (for example, how to handle if it's waiting for remote
-            // id) and send it to the cache of batched commands
+        //TODO(b/111276913): check state (for example, how to handle if it's waiting for remote
+        // id) and send it to the cache of batched commands
+        if (VERBOSE) {
+            Log.v(TAG, "onActivityDestroyed(): state=" + getStateAsString(mState)
+                    + ", mId=" + mId);
+        }
 
-            if (VERBOSE) {
-                Log.v(TAG, "onActivityDestroyed(): state=" + getStateAsString(mState)
-                        + ", mId=" + mId);
+        mHandler.sendMessage(obtainMessage(IntelligenceManager::handleFinishSession, this));
+    }
+
+    private void handleFinishSession() {
+        //TODO(b/111276913): right now both the ContentEvents and lifecycle sessions are sent
+        // to system_server, so it's ok to call both in sequence here. But once we split
+        // them so the events are sent directly to the service, we need to make sure they're
+        // sent in order.
+        try {
+            if (DEBUG) {
+                Log.d(TAG, "Finishing session " + mId + " with "
+                        + (mEvents == null ? 0 : mEvents.size()) + " event(s) for "
+                        + getActivityDebugName());
             }
 
-            try {
-                mService.finishSession(mContext.getUserId(), mId);
-                resetStateLocked();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+            mService.finishSession(mContext.getUserId(), mId, mEvents);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error finishing session " + mId + " for " + getActivityDebugName()
+                    + ": " + e);
+        } finally {
+            handleResetState();
         }
     }
 
-    @GuardedBy("mLock")
-    private void resetStateLocked() {
+    private void handleResetState() {
         mState = STATE_UNKNOWN;
         mId = null;
         mApplicationToken = null;
         mComponentName = null;
-        mEvents.clear();
+        mEvents = null;
     }
 
     /**
@@ -309,8 +327,11 @@ public final class IntelligenceManager {
         if (!(node instanceof ViewNode.ViewStructureImpl)) {
             throw new IllegalArgumentException("Invalid node class: " + node.getClass());
         }
-        sendEvent(new ContentCaptureEvent(TYPE_VIEW_APPEARED)
-                .setViewNode(((ViewNode.ViewStructureImpl) node).mNode));
+
+        mHandler.sendMessage(obtainMessage(IntelligenceManager::handleSendEvent, this,
+                new ContentCaptureEvent(TYPE_VIEW_APPEARED)
+                        .setViewNode(((ViewNode.ViewStructureImpl) node).mNode),
+                        /* forceFlush= */ false));
     }
 
     /**
@@ -325,7 +346,9 @@ public final class IntelligenceManager {
         Preconditions.checkNotNull(id);
         if (!isContentCaptureEnabled()) return;
 
-        sendEvent(new ContentCaptureEvent(TYPE_VIEW_DISAPPEARED).setAutofillId(id));
+        mHandler.sendMessage(obtainMessage(IntelligenceManager::handleSendEvent, this,
+                new ContentCaptureEvent(TYPE_VIEW_DISAPPEARED).setAutofillId(id),
+                        /* forceFlush= */ false));
     }
 
     /**
@@ -339,10 +362,12 @@ public final class IntelligenceManager {
     public void notifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text,
             int flags) {
         Preconditions.checkNotNull(id);
+
         if (!isContentCaptureEnabled()) return;
 
-        sendEvent(new ContentCaptureEvent(TYPE_VIEW_TEXT_CHANGED, flags).setAutofillId(id)
-                .setText(text));
+        mHandler.sendMessage(obtainMessage(IntelligenceManager::handleSendEvent, this,
+                new ContentCaptureEvent(TYPE_VIEW_TEXT_CHANGED, flags).setAutofillId(id)
+                        .setText(text), /* forceFlush= */ false));
     }
 
     /**
@@ -384,10 +409,7 @@ public final class IntelligenceManager {
      * Checks whether content capture is enabled for this activity.
      */
     public boolean isContentCaptureEnabled() {
-        //TODO(b/111276913): properly implement by checking if it was explicitly disabled by
-        // service, or if service is not set
-        // (and probably renamign to isEnabledLocked()
-        return mService != null && mState != STATE_DISABLED;
+        return mService != null && !mDisabled.get();
     }
 
     /**
@@ -504,25 +526,36 @@ public final class IntelligenceManager {
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.println("IntelligenceManager");
         final String prefix2 = prefix + "  ";
-        synchronized (mLock) {
-            pw.print(prefix2); pw.print("mContext: "); pw.println(mContext);
+        pw.print(prefix2); pw.print("mContext: "); pw.println(mContext);
+        pw.print(prefix2); pw.print("user: "); pw.println(mContext.getUserId());
+        if (mService != null) {
             pw.print(prefix2); pw.print("mService: "); pw.println(mService);
-            pw.print(prefix2); pw.print("user: "); pw.println(mContext.getUserId());
-            pw.print(prefix2); pw.print("enabled: "); pw.println(isContentCaptureEnabled());
+        }
+        pw.print(prefix2); pw.print("mDisabled: "); pw.println(mDisabled.get());
+        pw.print(prefix2); pw.print("isEnabled(): "); pw.println(isContentCaptureEnabled());
+        if (mId != null) {
             pw.print(prefix2); pw.print("id: "); pw.println(mId);
-            pw.print(prefix2); pw.print("state: "); pw.print(mState); pw.print(" (");
-            pw.print(getStateAsString(mState)); pw.println(")");
+        }
+        pw.print(prefix2); pw.print("state: "); pw.print(mState); pw.print(" (");
+        pw.print(getStateAsString(mState)); pw.println(")");
+        if (mApplicationToken != null) {
             pw.print(prefix2); pw.print("app token: "); pw.println(mApplicationToken);
+        }
+        if (mComponentName != null) {
             pw.print(prefix2); pw.print("component name: ");
-            pw.println(mComponentName == null ? "null" : mComponentName.flattenToShortString());
+            pw.println(mComponentName.flattenToShortString());
+        }
+        if (mEvents != null) {
             final int numberEvents = mEvents.size();
-            pw.print(prefix2); pw.print("batched events: "); pw.println(numberEvents);
-            if (numberEvents > 0) {
+            pw.print(prefix2); pw.print("batched events: "); pw.print(numberEvents);
+            pw.print('/'); pw.println(MAX_BUFFER_SIZE);
+            if (VERBOSE && numberEvents > 0) {
+                final String prefix3 = prefix2 + "  ";
                 for (int i = 0; i < numberEvents; i++) {
                     final ContentCaptureEvent event = mEvents.get(i);
-                    pw.println(i); pw.print(": "); event.dump(pw); pw.println();
+                    pw.print(prefix3); pw.print(i); pw.print(": "); event.dump(pw);
+                    pw.println();
                 }
-
             }
         }
     }
@@ -530,8 +563,7 @@ public final class IntelligenceManager {
     /**
      * Gets a string that can be used to identify the activity on logging statements.
      */
-    @GuardedBy("mLock")
-    private String getActivityDebugNameLocked() {
+    private String getActivityDebugName() {
         return mComponentName == null ? mContext.getPackageName()
                 : mComponentName.flattenToShortString();
     }

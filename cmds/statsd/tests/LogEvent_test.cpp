@@ -394,6 +394,167 @@ TEST(LogEventTest, TestKeyValuePairsEvent) {
     EXPECT_EQ(1.1f, item16.mValue.float_value);
 }
 
+TEST(LogEventTest, TestStatsLogEventWrapperNoChain) {
+    Parcel parcel;
+    // tag id
+    parcel.writeInt32(1);
+    // elapsed realtime
+    parcel.writeInt64(1111L);
+    // wallclock time
+    parcel.writeInt64(2222L);
+    // no chain
+    parcel.writeInt32(0);
+    // 2 data
+    parcel.writeInt32(2);
+    // int 6
+    parcel.writeInt32(1);
+    parcel.writeInt32(6);
+    // long 10
+    parcel.writeInt32(2);
+    parcel.writeInt64(10);
+    parcel.setDataPosition(0);
+
+    StatsLogEventWrapper statsLogEventWrapper;
+    EXPECT_EQ(NO_ERROR, statsLogEventWrapper.readFromParcel(&parcel));
+    EXPECT_EQ(1, statsLogEventWrapper.getTagId());
+    EXPECT_EQ(1111L, statsLogEventWrapper.getElapsedRealTimeNs());
+    EXPECT_EQ(2222L, statsLogEventWrapper.getWallClockTimeNs());
+    EXPECT_EQ(0, statsLogEventWrapper.getWorkChains().size());
+    EXPECT_EQ(2, statsLogEventWrapper.getElements().size());
+    EXPECT_EQ(6, statsLogEventWrapper.getElements()[0].int_value);
+    EXPECT_EQ(10L, statsLogEventWrapper.getElements()[1].long_value);
+    LogEvent event(statsLogEventWrapper, -1);
+    EXPECT_EQ(1, event.GetTagId());
+    EXPECT_EQ(1111L, event.GetElapsedTimestampNs());
+    EXPECT_EQ(2222L, event.GetLogdTimestampNs());
+    EXPECT_EQ(2, event.size());
+    EXPECT_EQ(6, event.getValues()[0].mValue.int_value);
+    EXPECT_EQ(10, event.getValues()[1].mValue.long_value);
+}
+
+TEST(LogEventTest, TestStatsLogEventWrapperWithChain) {
+    Parcel parcel;
+    // tag id
+    parcel.writeInt32(1);
+    // elapsed realtime
+    parcel.writeInt64(1111L);
+    // wallclock time
+    parcel.writeInt64(2222L);
+    // 3 chains
+    parcel.writeInt32(3);
+    // chain1, 2 nodes (1, "tag1") (2, "tag2")
+    parcel.writeInt32(2);
+    parcel.writeInt32(1);
+    parcel.writeString16(String16("tag1"));
+    parcel.writeInt32(2);
+    parcel.writeString16(String16("tag2"));
+    // chain2, 1 node (3, "tag3")
+    parcel.writeInt32(1);
+    parcel.writeInt32(3);
+    parcel.writeString16(String16("tag3"));
+    // chain3, 2 nodes (4, "") (5, "")
+    parcel.writeInt32(2);
+    parcel.writeInt32(4);
+    parcel.writeString16(String16(""));
+    parcel.writeInt32(5);
+    parcel.writeString16(String16(""));
+    // 2 data
+    parcel.writeInt32(2);
+    // int 6
+    parcel.writeInt32(1);
+    parcel.writeInt32(6);
+    // long 10
+    parcel.writeInt32(2);
+    parcel.writeInt64(10);
+    parcel.setDataPosition(0);
+
+    StatsLogEventWrapper statsLogEventWrapper;
+    EXPECT_EQ(NO_ERROR, statsLogEventWrapper.readFromParcel(&parcel));
+    EXPECT_EQ(1, statsLogEventWrapper.getTagId());
+    EXPECT_EQ(1111L, statsLogEventWrapper.getElapsedRealTimeNs());
+    EXPECT_EQ(2222L, statsLogEventWrapper.getWallClockTimeNs());
+    EXPECT_EQ(3, statsLogEventWrapper.getWorkChains().size());
+    EXPECT_EQ(2, statsLogEventWrapper.getWorkChains()[0].uids.size());
+    EXPECT_EQ(1, statsLogEventWrapper.getWorkChains()[0].uids[0]);
+    EXPECT_EQ(2, statsLogEventWrapper.getWorkChains()[0].uids[1]);
+    EXPECT_EQ(2, statsLogEventWrapper.getWorkChains()[0].tags.size());
+    EXPECT_EQ("tag1", statsLogEventWrapper.getWorkChains()[0].tags[0]);
+    EXPECT_EQ("tag2", statsLogEventWrapper.getWorkChains()[0].tags[1]);
+    EXPECT_EQ(1, statsLogEventWrapper.getWorkChains()[1].uids.size());
+    EXPECT_EQ(3, statsLogEventWrapper.getWorkChains()[1].uids[0]);
+    EXPECT_EQ(1, statsLogEventWrapper.getWorkChains()[1].tags.size());
+    EXPECT_EQ("tag3", statsLogEventWrapper.getWorkChains()[1].tags[0]);
+    EXPECT_EQ(2, statsLogEventWrapper.getElements().size());
+    EXPECT_EQ(6, statsLogEventWrapper.getElements()[0].int_value);
+    EXPECT_EQ(10L, statsLogEventWrapper.getElements()[1].long_value);
+    EXPECT_EQ(2, statsLogEventWrapper.getWorkChains()[2].uids.size());
+    EXPECT_EQ(4, statsLogEventWrapper.getWorkChains()[2].uids[0]);
+    EXPECT_EQ(5, statsLogEventWrapper.getWorkChains()[2].uids[1]);
+    EXPECT_EQ(2, statsLogEventWrapper.getWorkChains()[2].tags.size());
+    EXPECT_EQ("", statsLogEventWrapper.getWorkChains()[2].tags[0]);
+    EXPECT_EQ("", statsLogEventWrapper.getWorkChains()[2].tags[1]);
+
+    LogEvent event(statsLogEventWrapper, -1);
+    EXPECT_EQ(1, event.GetTagId());
+    EXPECT_EQ(1111L, event.GetElapsedTimestampNs());
+    EXPECT_EQ(2222L, event.GetLogdTimestampNs());
+    EXPECT_EQ(2, event.size());
+    EXPECT_EQ(6, event.getValues()[0].mValue.int_value);
+    EXPECT_EQ(10, event.getValues()[1].mValue.long_value);
+
+    LogEvent event1(statsLogEventWrapper, 0);
+
+    EXPECT_EQ(1, event1.GetTagId());
+    EXPECT_EQ(1111L, event1.GetElapsedTimestampNs());
+    EXPECT_EQ(2222L, event1.GetLogdTimestampNs());
+    EXPECT_EQ(6, event1.size());
+    EXPECT_EQ(1, event1.getValues()[0].mValue.int_value);
+    EXPECT_EQ(0x2010101, event1.getValues()[0].mField.getField());
+    EXPECT_EQ("tag1", event1.getValues()[1].mValue.str_value);
+    EXPECT_EQ(0x2010182, event1.getValues()[1].mField.getField());
+    EXPECT_EQ(2, event1.getValues()[2].mValue.int_value);
+    EXPECT_EQ(0x2010201, event1.getValues()[2].mField.getField());
+    EXPECT_EQ("tag2", event1.getValues()[3].mValue.str_value);
+    EXPECT_EQ(0x2018282, event1.getValues()[3].mField.getField());
+    EXPECT_EQ(6, event1.getValues()[4].mValue.int_value);
+    EXPECT_EQ(0x20000, event1.getValues()[4].mField.getField());
+    EXPECT_EQ(10, event1.getValues()[5].mValue.long_value);
+    EXPECT_EQ(0x30000, event1.getValues()[5].mField.getField());
+
+    LogEvent event2(statsLogEventWrapper, 1);
+
+    EXPECT_EQ(1, event2.GetTagId());
+    EXPECT_EQ(1111L, event2.GetElapsedTimestampNs());
+    EXPECT_EQ(2222L, event2.GetLogdTimestampNs());
+    EXPECT_EQ(4, event2.size());
+    EXPECT_EQ(3, event2.getValues()[0].mValue.int_value);
+    EXPECT_EQ(0x2010101, event2.getValues()[0].mField.getField());
+    EXPECT_EQ("tag3", event2.getValues()[1].mValue.str_value);
+    EXPECT_EQ(0x2018182, event2.getValues()[1].mField.getField());
+    EXPECT_EQ(6, event2.getValues()[2].mValue.int_value);
+    EXPECT_EQ(0x20000, event2.getValues()[2].mField.getField());
+    EXPECT_EQ(10, event2.getValues()[3].mValue.long_value);
+    EXPECT_EQ(0x30000, event2.getValues()[3].mField.getField());
+
+    LogEvent event3(statsLogEventWrapper, 2);
+
+    EXPECT_EQ(1, event3.GetTagId());
+    EXPECT_EQ(1111L, event3.GetElapsedTimestampNs());
+    EXPECT_EQ(2222L, event3.GetLogdTimestampNs());
+    EXPECT_EQ(6, event3.size());
+    EXPECT_EQ(4, event3.getValues()[0].mValue.int_value);
+    EXPECT_EQ(0x2010101, event3.getValues()[0].mField.getField());
+    EXPECT_EQ("", event3.getValues()[1].mValue.str_value);
+    EXPECT_EQ(0x2010182, event3.getValues()[1].mField.getField());
+    EXPECT_EQ(5, event3.getValues()[2].mValue.int_value);
+    EXPECT_EQ(0x2010201, event3.getValues()[2].mField.getField());
+    EXPECT_EQ("", event3.getValues()[3].mValue.str_value);
+    EXPECT_EQ(0x2018282, event3.getValues()[3].mField.getField());
+    EXPECT_EQ(6, event3.getValues()[4].mValue.int_value);
+    EXPECT_EQ(0x20000, event3.getValues()[4].mField.getField());
+    EXPECT_EQ(10, event3.getValues()[5].mValue.long_value);
+    EXPECT_EQ(0x30000, event3.getValues()[5].mField.getField());
+}
 
 TEST(LogEventTest, TestBinaryFieldAtom) {
     Atom launcherAtom;

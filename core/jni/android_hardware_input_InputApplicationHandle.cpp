@@ -22,6 +22,7 @@
 #include <utils/threads.h>
 
 #include "android_hardware_input_InputApplicationHandle.h"
+#include "android_util_Binder.h"
 
 namespace android {
 
@@ -29,6 +30,7 @@ static struct {
     jfieldID ptr;
     jfieldID name;
     jfieldID dispatchingTimeoutNanos;
+    jfieldID token;
 } gInputApplicationHandleClassInfo;
 
 static Mutex gHandleMutex;
@@ -74,6 +76,15 @@ bool NativeInputApplicationHandle::updateInfo() {
 
     mInfo->dispatchingTimeout = env->GetLongField(obj,
             gInputApplicationHandleClassInfo.dispatchingTimeoutNanos);
+
+    jobject tokenObj = env->GetObjectField(obj,
+            gInputApplicationHandleClassInfo.token);
+    if (tokenObj) {
+        mInfo->token = ibinderForJavaObject(env, tokenObj);
+        env->DeleteLocalRef(tokenObj);
+    } else {
+        mInfo->token.clear();
+    }
 
     env->DeleteLocalRef(obj);
     return true;
@@ -152,6 +163,9 @@ int register_android_server_InputApplicationHandle(JNIEnv* env) {
     GET_FIELD_ID(gInputApplicationHandleClassInfo.dispatchingTimeoutNanos,
             clazz,
             "dispatchingTimeoutNanos", "J");
+
+    GET_FIELD_ID(gInputApplicationHandleClassInfo.token, clazz,
+            "token", "Landroid/os/IBinder;");
 
     return 0;
 }

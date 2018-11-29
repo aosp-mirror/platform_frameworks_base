@@ -652,6 +652,17 @@ public class Typeface {
         private @Nullable FontStyle mStyle;
 
         /**
+         * Returns the maximum capacity of custom fallback families.
+         *
+         * This includes the the first font family passed to the constructor.
+         *
+         * @return the maximum number of font families for the custom fallback
+         */
+        public static @IntRange(from = 1) int getMaxCustomFallbackCount() {
+            return MAX_CUSTOM_FALLBACK;
+        }
+
+        /**
          * Constructs a builder with a font family.
          *
          * @param family a family object
@@ -706,8 +717,8 @@ public class Typeface {
          */
         public CustomFallbackBuilder addCustomFallback(@NonNull FontFamily family) {
             Preconditions.checkNotNull(family);
-            Preconditions.checkArgument(mFamilies.size() < MAX_CUSTOM_FALLBACK,
-                    "Custom fallback limit exceeded(" + MAX_CUSTOM_FALLBACK + ")");
+            Preconditions.checkArgument(mFamilies.size() < getMaxCustomFallbackCount(),
+                    "Custom fallback limit exceeded(" + getMaxCustomFallbackCount() + ")");
             mFamilies.add(family);
             return this;
         }

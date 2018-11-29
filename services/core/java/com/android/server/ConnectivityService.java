@@ -1667,6 +1667,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 loge("Error parsing ip address in validation event");
             }
         }
+
+        @Override
+        public void onDnsEvent(int netId, int eventType, int returnCode, String hostname,
+                String[] ipAddresses, int ipAddressesCount, long timestamp, int uid) {
+            NetworkAgentInfo nai = getNetworkAgentInfoForNetId(netId);
+            // Netd event only allow registrants from system. Each NetworkMonitor thread is under
+            // the caller thread of registerNetworkAgent. Thus, it's not allowed to register netd
+            // event callback for certain nai. e.g. cellular. Register here to pass to
+            // NetworkMonitor instead.
+            // TODO: Move the Dns Event to NetworkMonitor. Use Binder.clearCallingIdentity() in
+            // registerNetworkAgent to have NetworkMonitor created with system process as design
+            // expectation. Also, NetdEventListenerService only allow one callback from each
+            // caller type. Need to re-factor NetdEventListenerService to allow multiple
+            // NetworkMonitor registrants.
+            if (nai != null && nai.satisfies(mDefaultRequest)) {
+                nai.networkMonitor.sendMessage(NetworkMonitor.EVENT_DNS_NOTIFICATION, returnCode);
+            }
+        }
     };
 
     @VisibleForTesting
@@ -2081,12 +2099,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return new MockableSystemProperties();
     }
 
-    private void updateTcpBufferSizes(NetworkAgentInfo nai) {
+    // TODO: Replace nai and newLp with TcpBufferSizes and check default network before calling
+    // this method.
+    private void updateTcpBufferSizes(NetworkAgentInfo nai, LinkProperties newLp) {
         if (isDefaultNetwork(nai) == false) {
             return;
         }
 
-        String tcpBufferSizes = nai.linkProperties.getTcpBufferSizes();
+        String tcpBufferSizes = newLp.getTcpBufferSizes();
         String[] values = null;
         if (tcpBufferSizes != null) {
             values = tcpBufferSizes.split(",");
@@ -4762,8 +4782,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         updateUids(nai, null, nai.networkCapabilities);
     }
 
-    private void updateLinkProperties(NetworkAgentInfo networkAgent, LinkProperties oldLp) {
-        LinkProperties newLp = new LinkProperties(networkAgent.linkProperties);
+    private void updateLinkProperties(NetworkAgentInfo networkAgent, LinkProperties newLp,
+            LinkProperties oldLp) {
         int netId = networkAgent.network.netId;
 
         // The NetworkAgentInfo does not know whether clatd is running on its network or not. Before
@@ -4778,7 +4798,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 //        for (LinkProperties lp : newLp.getStackedLinks()) {
 //            updateMtu(lp, null);
 //        }
-        updateTcpBufferSizes(networkAgent);
+        updateTcpBufferSizes(networkAgent, newLp);
 
         updateRoutes(newLp, oldLp, netId);
         updateDnses(newLp, oldLp, netId);
@@ -4788,8 +4808,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // updateDnses will fetch the private DNS configuration from DnsManager.
         mDnsManager.updatePrivateDnsStatus(netId, newLp);
 
-        // Start or stop clat accordingly to network state.
-        networkAgent.updateClat(mNMS);
         if (isDefaultNetwork(networkAgent)) {
             handleApplyDefaultProxy(newLp.getHttpProxy());
         } else {
@@ -4800,8 +4818,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized (networkAgent) {
                 networkAgent.linkProperties = newLp;
             }
+            // Start or stop clat accordingly to network state.
+            networkAgent.updateClat(mNMS);
             notifyIfacesChangedForNetworkStats();
-            notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_IP_CHANGED);
+            if (networkAgent.everConnected) {
+                notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_IP_CHANGED);
+            }
         }
 
         mKeepaliveTracker.handleCheckKeepalivesStillValid(networkAgent);
@@ -5106,13 +5128,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     "; created=" + nai.created +
                     "; everConnected=" + nai.everConnected);
         }
-        LinkProperties oldLp = nai.linkProperties;
-        synchronized (nai) {
-            nai.linkProperties = newLp;
-        }
-        if (nai.everConnected) {
-            updateLinkProperties(nai, oldLp);
-        }
+        updateLinkProperties(nai, newLp, new LinkProperties(nai.linkProperties));
     }
 
     private void sendUpdatedScoreToFactories(NetworkAgentInfo nai) {
@@ -5273,7 +5289,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         notifyLockdownVpn(newNetwork);
         handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
-        updateTcpBufferSizes(newNetwork);
+        updateTcpBufferSizes(newNetwork, new LinkProperties(newNetwork.linkProperties));
         mDnsManager.setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
         notifyIfacesChangedForNetworkStats();
     }
@@ -5688,7 +5704,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
 
             handlePerNetworkPrivateDnsConfig(networkAgent, mDnsManager.getPrivateDnsConfig());
-            updateLinkProperties(networkAgent, null);
+            updateLinkProperties(networkAgent, new LinkProperties(networkAgent.linkProperties),
+                    null);
 
             networkAgent.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
             scheduleUnvalidatedPrompt(networkAgent);

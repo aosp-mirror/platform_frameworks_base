@@ -755,9 +755,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
         final ActivityDisplay activityDisplay =
-                mAtm.mStackSupervisor.getActivityDisplay(mDisplayId);
+                mAtm.mRootActivityContainer.getActivityDisplay(mDisplayId);
         if (activityDisplay != null) {
-            mAtm.mStackSupervisor.getActivityDisplay(
+            mAtm.mRootActivityContainer.getActivityDisplay(
                     mDisplayId).unregisterConfigurationChangeListener(this);
         }
         mDisplayId = INVALID_DISPLAY;

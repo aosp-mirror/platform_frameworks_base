@@ -21,6 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"नेटवर्क के लिए स्‍कैन नहीं कर सकता"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"कोई नहीं"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"सेव किया गया"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"अक्षम"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP कॉन्‍फ़िगरेशन की विफलता"</string>
@@ -374,6 +375,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"आपके इस्तेमाल के हिसाब से बैटरी लगभग <xliff:g id="TIME">%1$s</xliff:g> चलेगी"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"बैटरी लगभग <xliff:g id="TIME">%1$s</xliff:g> चलेगी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"बैटरी लगभग <xliff:g id="TIME">%1$s</xliff:g> चलेगी"</string>
+    <string name="power_discharge_by_only_short" msgid="1372817269546888804">"<xliff:g id="TIME">%1$s</xliff:g> तक"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> से कम समय बचा है"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g> से कम बैटरी बची है (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> से ज़्यादा चलने लायक बैटरी बची है (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -447,4 +449,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"हर बार पूछें"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"जब तक आप इसे बंद नहीं करते"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"अभी-अभी"</string>
+    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"डेवलपमेंट में अपडेट किए गए ग्राफ़िक्स ड्राइवर का इस्तेमाल करने के लिए ऐप्लिकेशन में ऑप्ट इन करें"</string>
+    <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"फ़ोन स्पीकर"</string>
 </resources>

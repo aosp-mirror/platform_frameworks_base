@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.LocaleList;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -64,6 +65,8 @@ public class TextClassifierTest {
     @Parameterized.Parameter
     public String mTextClassifierType;
 
+    private static final TextClassificationConstants TC_CONSTANTS =
+            TextClassificationConstants.loadFromString("");
     private static final LocaleList LOCALES = LocaleList.forLanguageTags("en-US");
     private static final String NO_TYPE = null;
 
@@ -80,7 +83,7 @@ public class TextClassifierTest {
     }
 
     @Test
-    public void testSmartSelection() {
+    public void testSuggestSelection() {
         if (isTextClassifierDisabled()) return;
 
         String text = "Contact me at droid@android.com";
@@ -101,7 +104,7 @@ public class TextClassifierTest {
     }
 
     @Test
-    public void testSmartSelection_url() {
+    public void testSuggestSelection_url() {
         if (isTextClassifierDisabled()) return;
 
         String text = "Visit http://www.android.com for more information";
@@ -157,7 +160,7 @@ public class TextClassifierTest {
     }
 
     @Test
-    public void testTextClassifyText_url() {
+    public void testClassifyText_url() {
         if (isTextClassifierDisabled()) return;
 
         String text = "Visit www.android.com for more information";
@@ -174,7 +177,7 @@ public class TextClassifierTest {
     }
 
     @Test
-    public void testTextClassifyText_address() {
+    public void testClassifyText_address() {
         if (isTextClassifierDisabled()) return;
 
         String text = "Brandschenkestrasse 110, Zürich, Switzerland";
@@ -188,7 +191,7 @@ public class TextClassifierTest {
     }
 
     @Test
-    public void testTextClassifyText_url_inCaps() {
+    public void testClassifyText_url_inCaps() {
         if (isTextClassifierDisabled()) return;
 
         String text = "Visit HTTP://ANDROID.COM for more information";
@@ -205,7 +208,7 @@ public class TextClassifierTest {
     }
 
     @Test
-    public void testTextClassifyText_date() {
+    public void testClassifyText_date() {
         if (isTextClassifierDisabled()) return;
 
         String text = "Let's meet on January 9, 2018.";
@@ -222,7 +225,7 @@ public class TextClassifierTest {
     }
 
     @Test
-    public void testTextClassifyText_datetime() {
+    public void testClassifyText_datetime() {
         if (isTextClassifierDisabled()) return;
 
         String text = "Let's meet 2018/01/01 10:30:20.";
@@ -237,6 +240,30 @@ public class TextClassifierTest {
         TextClassification classification = mClassifier.classifyText(request);
         assertThat(classification,
                 isTextClassification(classifiedText, TextClassifier.TYPE_DATE_TIME));
+    }
+
+    @Test
+    public void testClassifyText_foreignText() {
+        LocaleList originalLocales = LocaleList.getDefault();
+        LocaleList.setDefault(LocaleList.forLanguageTags("en"));
+        String foreignText = "これは日本語のテキストです";
+
+        Context context = new FakeContextBuilder()
+                .setIntentComponent(Intent.ACTION_TRANSLATE, FakeContextBuilder.DEFAULT_COMPONENT)
+                .build();
+        TextClassifier classifier = new TextClassifierImpl(context, TC_CONSTANTS);
+        TextClassification.Request request = new TextClassification.Request.Builder(
+                foreignText, 0, foreignText.length())
+                .setDefaultLocales(LOCALES)
+                .build();
+
+        TextClassification classification = classifier.classifyText(request);
+        assertEquals(1, classification.getActions().size());
+        assertEquals(
+                context.getString(com.android.internal.R.string.translate),
+                classification.getActions().get(0).getTitle());
+
+        LocaleList.setDefault(originalLocales);
     }
 
     @Test

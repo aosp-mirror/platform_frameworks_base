@@ -21,6 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Nevar skenēt tīklus"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"Nav"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Saglabāts"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Atspējots"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP konfigurācijas kļūme"</string>
@@ -374,6 +375,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Ņemot vērā lietojumu, darbosies aptuveni līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Darbosies aptuveni līdz <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Darbosies aptuveni līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Atlikušais laiks — mazāk nekā <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Atlicis mazāk nekā <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Atlicis vairāk nekā <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -448,4 +450,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Vaicāt katru reizi"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Līdz brīdim, kad izslēgsiet"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Tikko"</string>
+    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"Izvēlēties izmantot atjaunināto grafikas dzini šīs lietotnes izstrādē"</string>
+    <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"Tālruņa skaļrunis"</string>
 </resources>

@@ -37,9 +37,9 @@ import android.os.Process;
 import android.util.Log;
 
 import com.android.server.backup.BackupAgentTimeoutParameters;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.Trampoline;
 import com.android.server.backup.TransportManager;
+import com.android.server.backup.UserBackupManagerService;
 
 import org.mockito.stubbing.Answer;
 import org.robolectric.shadows.ShadowApplication;
@@ -49,26 +49,26 @@ import java.io.File;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.atomic.AtomicReference;
 
-/** Test utils for {@link BackupManagerService} and friends. */
+/** Test utils for {@link UserBackupManagerService} and friends. */
 public class BackupManagerServiceTestUtils {
     /**
      * If the class-under-test is going to execute methods as the system, it's a good idea to also
      * call {@link #setUpBinderCallerAndApplicationAsSystem(Application)} before this method.
      */
-    public static BackupManagerService createInitializedBackupManagerService(
+    public static UserBackupManagerService createInitializedUserBackupManagerService(
             Context context, File baseStateDir, File dataDir, TransportManager transportManager) {
-        return createInitializedBackupManagerService(
+        return createInitializedUserBackupManagerService(
                 context, startBackupThread(null), baseStateDir, dataDir, transportManager);
     }
 
-    public static BackupManagerService createInitializedBackupManagerService(
+    public static UserBackupManagerService createInitializedUserBackupManagerService(
             Context context,
             HandlerThread backupThread,
             File baseStateDir,
             File dataDir,
             TransportManager transportManager) {
-        BackupManagerService backupManagerService =
-                new BackupManagerService(
+        UserBackupManagerService backupManagerService =
+                new UserBackupManagerService(
                         context,
                         new Trampoline(context),
                         backupThread,
@@ -80,15 +80,16 @@ public class BackupManagerServiceTestUtils {
     }
 
     /**
-     * Sets up basic mocks for {@link BackupManagerService} mock. If {@code backupManagerService} is
-     * a spy, make sure you provide in the arguments the same objects that the original object uses.
+     * Sets up basic mocks for {@link UserBackupManagerService} mock. If {@code
+     * backupManagerService} is a spy, make sure you provide in the arguments the same objects that
+     * the original object uses.
      *
      * <p>If the class-under-test is going to execute methods as the system, it's a good idea to
      * also call {@link #setUpBinderCallerAndApplicationAsSystem(Application)}.
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void setUpBackupManagerServiceBasics(
-            BackupManagerService backupManagerService,
+            UserBackupManagerService backupManagerService,
             Application application,
             TransportManager transportManager,
             PackageManager packageManager,

@@ -1720,7 +1720,9 @@ filegroup {
         "core/java/android/annotation/RequiresPermission.java",
         "core/java/android/annotation/SdkConstant.java",
         "core/java/android/annotation/StringDef.java",
+        "core/java/android/annotation/TestApi.java",
         "core/java/android/annotation/UnsupportedAppUsage.java",
+        "core/java/com/android/internal/annotations/GuardedBy.java",
     ],
 }
 

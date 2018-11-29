@@ -4372,7 +4372,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         EventLog.writeEvent(EventLogTags.AM_PROC_BOUND, app.userId, app.pid, app.processName);
 
-        app.makeActive(thread, mProcessStats);
         app.curAdj = app.setAdj = app.verifiedAdj = ProcessList.INVALID_ADJ;
         app.setCurrentSchedulingGroup(app.setSchedGroup = ProcessList.SCHED_GROUP_DEFAULT);
         app.forcingToImportant = null;
@@ -4579,6 +4578,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 profilerInfo.closeFd();
                 profilerInfo = null;
             }
+
+            // Make app active after binding application or client may be running requests (e.g
+            // starting activities) before it is ready.
+            app.makeActive(thread, mProcessStats);
             checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             mProcessList.updateLruProcessLocked(app, false, null);
             checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
@@ -19199,6 +19202,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         public boolean isActivityStartsLoggingEnabled() {
             return mConstants.mFlagActivityStartsLoggingEnabled;
+        }
+
+        public boolean isBackgroundActivityStartsEnabled() {
+            return mConstants.mFlagBackgroundActivityStartsEnabled;
         }
 
         public void reportCurKeyguardUsageEvent(boolean keyguardShowing) {

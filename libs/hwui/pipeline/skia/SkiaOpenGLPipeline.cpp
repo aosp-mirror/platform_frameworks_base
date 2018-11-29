@@ -97,7 +97,7 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
     SkASSERT(mRenderThread.getGrContext() != nullptr);
     sk_sp<SkSurface> surface(SkSurface::MakeFromBackendRenderTarget(
             mRenderThread.getGrContext(), backendRT, kBottomLeft_GrSurfaceOrigin, colorType,
-            nullptr, &props));
+            mSurfaceColorSpace, &props));
 
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
@@ -176,6 +176,7 @@ bool SkiaOpenGLPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior,
     } else if (colorMode == ColorMode::WideColorGamut) {
         mSurfaceColorType = SkColorType::kRGBA_F16_SkColorType;
     }
+    mSurfaceColorSpace = SkColorSpace::MakeSRGB();
 
     if (mEglSurface != EGL_NO_SURFACE) {
         const bool preserveBuffer = (swapBehavior != SwapBehavior::kSwap_discardBuffer);

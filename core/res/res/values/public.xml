@@ -2921,6 +2921,7 @@
         <public name="interactiveUiTimeout" />
         <public name="importantForContentCapture" />
         <public name="supportsMultipleDisplays" />
+        <public name="useAppZygote" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">

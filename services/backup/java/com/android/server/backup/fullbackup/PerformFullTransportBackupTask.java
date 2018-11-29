@@ -16,12 +16,12 @@
 
 package com.android.server.backup.fullbackup;
 
-import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.BackupManagerService.OP_PENDING;
-import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP;
-import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
+import static com.android.server.backup.GlobalBackupManagerService.DEBUG_SCHEDULING;
+import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.UserBackupManagerService.OP_PENDING;
+import static com.android.server.backup.UserBackupManagerService.OP_TYPE_BACKUP;
+import static com.android.server.backup.UserBackupManagerService.OP_TYPE_BACKUP_WAIT;
 
 import android.annotation.Nullable;
 import android.app.IBackupAgent;
@@ -45,10 +45,10 @@ import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FullBackupJob;
 import com.android.server.backup.TransportManager;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.internal.Operation;
 import com.android.server.backup.remote.RemoteCall;
@@ -97,7 +97,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class PerformFullTransportBackupTask extends FullBackupTask implements BackupRestoreTask {
     public static PerformFullTransportBackupTask newWithCurrentTransport(
-            BackupManagerService backupManagerService,
+            UserBackupManagerService backupManagerService,
             IFullBackupRestoreObserver observer,
             String[] whichPackages,
             boolean updateSchedule,
@@ -128,7 +128,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
 
     private static final String TAG = "PFTBT";
 
-    private BackupManagerService backupManagerService;
+    private UserBackupManagerService backupManagerService;
     private final Object mCancelLock = new Object();
 
     ArrayList<PackageInfo> mPackages;
@@ -150,7 +150,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     private final int mCurrentOpToken;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
-    public PerformFullTransportBackupTask(BackupManagerService backupManagerService,
+    public PerformFullTransportBackupTask(UserBackupManagerService backupManagerService,
             TransportClient transportClient,
             IFullBackupRestoreObserver observer,
             String[] whichPackages, boolean updateSchedule,

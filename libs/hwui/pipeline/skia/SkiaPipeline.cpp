@@ -169,7 +169,7 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
     if (!layer || layer->width() != surfaceWidth || layer->height() != surfaceHeight) {
         SkImageInfo info;
         info = SkImageInfo::Make(surfaceWidth, surfaceHeight, getSurfaceColorType(),
-                                 kPremul_SkAlphaType);
+                                 kPremul_SkAlphaType, getSurfaceColorSpace());
         SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
         SkASSERT(mRenderThread.getGrContext() != nullptr);
         node->setLayerSurface(SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
@@ -204,8 +204,7 @@ void SkiaPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
     GrContext* context = thread.getGrContext();
     if (context) {
         ATRACE_FORMAT("Bitmap#prepareToDraw %dx%d", bitmap->width(), bitmap->height());
-        sk_sp<SkColorFilter> colorFilter;
-        auto image = bitmap->makeImage(&colorFilter);
+        auto image = bitmap->makeImage();
         if (image.get() && !bitmap->isHardware()) {
             SkImage_pinAsTexture(image.get(), context);
             SkImage_unpinAsTexture(image.get(), context);

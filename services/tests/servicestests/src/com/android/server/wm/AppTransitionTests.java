@@ -35,7 +35,6 @@ import static org.mockito.Mockito.spy;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
-import android.view.IApplicationToken;
 
 import androidx.test.filters.SmallTest;
 
@@ -111,16 +110,9 @@ public class AppTransitionTests extends WindowTestsBase {
         final WindowTestUtils.TestAppWindowToken token2 = createTestAppWindowToken(dc2,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
 
-        // Set TestAppWindowContainerController & assign first app token state to be good to go.
-        final WindowTestUtils.TestAppWindowContainerController controller1 =
-                createAppWindowController(dc1, token1.appToken);
-        final WindowTestUtils.TestAppWindowContainerController controller2 =
-                createAppWindowController(dc1, token2.appToken);
-        controller1.setContainer(token1);
         token1.allDrawn = true;
         token1.startingDisplayed = true;
         token1.startingMoved = true;
-        controller2.setContainer(token2);
 
         // Simulate activity resume / finish flows to prepare app transition & set visibility,
         // make sure transition is set as expected for each display.
@@ -132,8 +124,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_ACTIVITY_CLOSE, dc2.mAppTransition.getAppTransition());
         // One activity window is visible for resuming & the other activity window is invisible
         // for finishing in different display.
-        controller1.setVisibility(true, false);
-        controller2.setVisibility(false, false);
+        token1.setVisibility(true, false);
+        token2.setVisibility(false, false);
 
         // Make sure each display is in animating stage.
         assertTrue(dc1.mOpeningApps.size() > 0);
@@ -174,16 +166,4 @@ public class AppTransitionTests extends WindowTestsBase {
         assertFalse(dc1.mOpeningApps.contains(token1));
     }
 
-    private WindowTestUtils.TestAppWindowContainerController createAppWindowController(
-            DisplayContent dc, IApplicationToken token) {
-        return createAppWindowController(
-                new WindowTestUtils.TestTaskWindowContainerController(
-                        createStackControllerOnDisplay(dc)), token);
-    }
-
-    private WindowTestUtils.TestAppWindowContainerController createAppWindowController(
-            WindowTestUtils.TestTaskWindowContainerController taskController,
-            IApplicationToken token) {
-        return new WindowTestUtils.TestAppWindowContainerController(taskController, token);
-    }
 }

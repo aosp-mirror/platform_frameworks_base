@@ -103,6 +103,49 @@ public class ResolverActivityTest {
     }
 
     @Test
+    public void setMaxHeight() throws Exception {
+        Intent sendIntent = createSendImageIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        waitForIdle();
+
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        final View resolverList = activity.findViewById(R.id.resolver_list);
+        final int initialResolverHeight = resolverList.getHeight();
+
+        activity.runOnUiThread(() -> {
+            ResolverDrawerLayout layout = (ResolverDrawerLayout)
+                    activity.findViewById(
+                            R.id.contentPanel);
+            ((ResolverDrawerLayout.LayoutParams) resolverList.getLayoutParams()).maxHeight
+                = initialResolverHeight - 1;
+            // Force a relayout
+            layout.invalidate();
+            layout.requestLayout();
+        });
+        waitForIdle();
+        assertThat("Drawer should be capped at maxHeight",
+            resolverList.getHeight() == (initialResolverHeight - 1));
+
+        activity.runOnUiThread(() -> {
+            ResolverDrawerLayout layout = (ResolverDrawerLayout)
+                    activity.findViewById(
+                            R.id.contentPanel);
+            ((ResolverDrawerLayout.LayoutParams) resolverList.getLayoutParams()).maxHeight
+                = initialResolverHeight + 1;
+            // Force a relayout
+            layout.invalidate();
+            layout.requestLayout();
+        });
+        waitForIdle();
+        assertThat("Drawer should not change height if its height is less than maxHeight",
+            resolverList.getHeight() == initialResolverHeight);
+    }
+
+    @Test
     public void setShowAtTopToTrue() throws Exception {
         Intent sendIntent = createSendImageIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);

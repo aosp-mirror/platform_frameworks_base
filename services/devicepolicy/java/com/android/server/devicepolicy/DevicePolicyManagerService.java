@@ -74,8 +74,10 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent
         .PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker
         .STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
-import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER;
-import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER;
+import static com.android.server.devicepolicy.TransferOwnershipMetadataManager
+        .ADMIN_TYPE_DEVICE_OWNER;
+import static com.android.server.devicepolicy.TransferOwnershipMetadataManager
+        .ADMIN_TYPE_PROFILE_OWNER;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -908,8 +910,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         private static final String TAG_IS_LOGOUT_ENABLED = "is_logout_enabled";
         private static final String TAG_START_USER_SESSION_MESSAGE = "start_user_session_message";
         private static final String TAG_END_USER_SESSION_MESSAGE = "end_user_session_message";
-        private static final String TAG_METERED_DATA_DISABLED_PACKAGES
-                = "metered_data_disabled_packages";
+        private static final String TAG_METERED_DATA_DISABLED_PACKAGES =
+                "metered_data_disabled_packages";
+        private static final String TAG_CROSS_PROFILE_CALENDAR_PACKAGES =
+                "cross-profile-calendar-packages";
+        private static final String TAG_PACKAGE = "package";
+
 
         DeviceAdminInfo info;
 
@@ -1029,6 +1035,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // Message for user switcher
         String startUserSessionMessage = null;
         String endUserSessionMessage = null;
+
+        // The whitelist of packages that can access cross profile calendar APIs.
+        final Set<String> mCrossProfileCalendarPackages = new ArraySet<>();
 
         ActiveAdmin(DeviceAdminInfo _info, boolean parent) {
             info = _info;
@@ -1299,6 +1308,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 out.text(endUserSessionMessage);
                 out.endTag(null, TAG_END_USER_SESSION_MESSAGE);
             }
+            if (!mCrossProfileCalendarPackages.isEmpty()) {
+                out.startTag(null, TAG_CROSS_PROFILE_CALENDAR_PACKAGES);
+                writeAttributeValuesToXml(
+                        out, TAG_PACKAGE, mCrossProfileCalendarPackages);
+                out.endTag(null, TAG_CROSS_PROFILE_CALENDAR_PACKAGES);
+            }
         }
 
         void writePackageListToXml(XmlSerializer out, String outerTag,
@@ -1491,6 +1506,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     } else {
                         Log.w(LOG_TAG, "Missing text when loading end session message");
                     }
+                } else if (TAG_CROSS_PROFILE_CALENDAR_PACKAGES.equals(tag)) {
+                    readAttributeValues(
+                            parser, TAG_PACKAGE, mCrossProfileCalendarPackages);
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -1706,6 +1724,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 pw.print(prefix);  pw.println("parentAdmin:");
                 parentAdmin.dump(prefix + "  ", pw);
             }
+            pw.print(prefix); pw.print("mCrossProfileCalendarPackages=");
+            pw.println(mCrossProfileCalendarPackages);
         }
     }
 
@@ -13339,9 +13359,77 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-
     private boolean isDeviceAB() {
         return "true".equalsIgnoreCase(android.os.SystemProperties
                 .get(AB_DEVICE_KEY, ""));
+    }
+
+    @Override
+    public void addCrossProfileCalendarPackage(ComponentName who, String packageName) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkStringNotEmpty(packageName, "Package name is null or empty");
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getActiveAdminForCallerLocked(
+                    who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (admin.mCrossProfileCalendarPackages.add(packageName)) {
+                saveSettingsLocked(mInjector.userHandleGetCallingUserId());
+            }
+        }
+    }
+
+    @Override
+    public boolean removeCrossProfileCalendarPackage(ComponentName who, String packageName) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkStringNotEmpty(packageName, "Package name is null or empty");
+
+        boolean isRemoved = false;
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getActiveAdminForCallerLocked(
+                    who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            isRemoved = admin.mCrossProfileCalendarPackages.remove(packageName);
+            if (isRemoved) {
+                saveSettingsLocked(mInjector.userHandleGetCallingUserId());
+            }
+        }
+        return isRemoved;
+    }
+
+    @Override
+    public List<String> getCrossProfileCalendarPackages(ComponentName who) {
+        if (!mHasFeature) {
+            return Collections.emptyList();
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getActiveAdminForCallerLocked(
+                    who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return new ArrayList<String>(admin.mCrossProfileCalendarPackages);
+        }
+    }
+
+    @Override
+    public boolean isPackageAllowedToAccessCalendarForUser(String packageName,
+            int userHandle) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkStringNotEmpty(packageName, "Package name is null or empty");
+
+        enforceCrossUsersPermission(userHandle);
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
+            if (admin != null && admin.mCrossProfileCalendarPackages != null) {
+                return admin.mCrossProfileCalendarPackages.contains(packageName);
+            }
+        }
+        return false;
     }
 }

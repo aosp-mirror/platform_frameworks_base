@@ -302,11 +302,13 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Returns whether there is a soft nav bar.
+     * Returns whether there is a soft nav bar on specified display.
+     *
+     * @param displayId the id of display to check if there is a software navigation bar.
      */
-    public boolean hasSoftNavigationBar() {
+    public boolean hasSoftNavigationBar(int displayId) {
         try {
-            return mIwm.hasNavigationBar();
+            return mIwm.hasNavigationBar(displayId);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

@@ -147,7 +147,8 @@ public class SubscriptionManager {
     public static final Uri WFC_ENABLED_CONTENT_URI = Uri.withAppendedPath(CONTENT_URI, "wfc");
 
     /**
-     * A content {@link Uri} used to receive updates on advanced calling user setting.
+     * A content {@link Uri} used to receive updates on advanced calling user setting
+     * @see ImsMmTelManager#isAdvancedCallingSettingEnabled().
      * <p>
      * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
      * subscription advanced calling enabled
@@ -1426,7 +1427,7 @@ public class SubscriptionManager {
      * subscriptions in the slot.
      */
     @Nullable
-    public static int[] getSubscriptionIds(int slotIndex) {
+    public int[] getSubscriptionIds(int slotIndex) {
         return getSubId(slotIndex);
     }
 

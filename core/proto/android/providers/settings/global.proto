@@ -550,6 +550,10 @@ message GlobalSettingsProto {
     }
     optional MultiSim multi_sim = 76;
 
+    // Whether we've enabled native flags health check on this device. Takes effect on
+    // reboot. The value "1" enables native flags health check; otherwise it's disabled.
+    optional SettingProto native_flags_health_check_enabled = 144 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     message Netstats {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -987,5 +991,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 144;
+    // Next tag = 145;
 }

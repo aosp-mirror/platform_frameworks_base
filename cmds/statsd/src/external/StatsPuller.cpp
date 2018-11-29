@@ -32,9 +32,10 @@ using std::lock_guard;
 sp<UidMap> StatsPuller::mUidMap = nullptr;
 void StatsPuller::SetUidMap(const sp<UidMap>& uidMap) { mUidMap = uidMap; }
 
-// ValueMetric has a minimum bucket size of 10min so that we don't pull too frequently
 StatsPuller::StatsPuller(const int tagId)
     : mTagId(tagId) {
+    // Pullers can cause significant impact to system health and battery.
+    // So that we don't pull too frequently.
     mCoolDownNs = StatsPullerManager::kAllPullAtomInfo.find(tagId)->second.coolDownNs;
     VLOG("Puller for tag %d created. Cooldown set to %lld", mTagId, (long long)mCoolDownNs);
 }
@@ -64,8 +65,8 @@ bool StatsPuller::Pull(const int64_t elapsedTimeNs, std::vector<std::shared_ptr<
         data->setLogdWallClockTimestampNs(wallClockTimeNs);
     }
     if (ret && mCachedData.size() > 0) {
-      mergeIsolatedUidsToHostUid(mCachedData, mUidMap, mTagId);
-      (*data) = mCachedData;
+        mapAndMergeIsolatedUidsToHostUid(mCachedData, mUidMap, mTagId);
+        (*data) = mCachedData;
     }
     StatsdStats::getInstance().notePullDelay(mTagId, getElapsedRealtimeNs() - elapsedTimeNs);
     return ret;

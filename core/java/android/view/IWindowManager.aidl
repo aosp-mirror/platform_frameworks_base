@@ -96,8 +96,9 @@ interface IWindowManager
      */
     void overridePendingAppTransitionMultiThumbFuture(
             IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback startedCallback,
-            boolean scaleUp);
-    void overridePendingAppTransitionRemote(in RemoteAnimationAdapter remoteAnimationAdapter);
+            boolean scaleUp, int displayId);
+    void overridePendingAppTransitionRemote(in RemoteAnimationAdapter remoteAnimationAdapter,
+            int displayId);
     void executeAppTransition();
 
     /**
@@ -294,9 +295,11 @@ interface IWindowManager
     void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled);
 
     /**
-     * Device has a software navigation bar (separate from the status bar).
+     * Device has a software navigation bar (separate from the status bar) on specific display.
+     *
+     * @param displayId the id of display to check if there is a software navigation bar.
      */
-    boolean hasNavigationBar();
+    boolean hasNavigationBar(int displayId);
 
     /**
      * Get the position of the nav bar

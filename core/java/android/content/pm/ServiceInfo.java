@@ -56,6 +56,23 @@ public class ServiceInfo extends ComponentInfo
     public static final int FLAG_EXTERNAL_SERVICE = 0x0004;
 
     /**
+     * Bit in {@link #flags}: If set, the service (which must be isolated)
+     * will be spawned from an Application Zygote, instead of the regular Zygote.
+     * The Application Zygote will pre-initialize the application's class loader,
+     * and call a static callback into the application to allow it to perform
+     * application-specific preloads (such as loading a shared library). Therefore,
+     * spawning from the Application Zygote will typically reduce the service
+     * launch time and reduce its memory usage. The downside of using this flag
+     * is that you will have an additional process (the app zygote itself) that
+     * is taking up memory. Whether actual memory usage is improved therefore
+     * strongly depends on the number of isolated services that an application
+     * starts, and how much memory those services save by preloading. Therefore,
+     * it is recommended to measure memory usage under typical workloads to
+     * determine whether it makes sense to use this flag.
+     */
+    public static final int FLAG_USE_APP_ZYGOTE = 0x0008;
+
+    /**
      * Bit in {@link #flags} indicating if the service is visible to ephemeral applications.
      * @hide
      */

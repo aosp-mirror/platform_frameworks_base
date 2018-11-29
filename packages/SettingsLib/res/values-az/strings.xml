@@ -21,6 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Şəbəkə axtarmaq olmur"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"Heç biri"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Yadda saxlanılan"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Deaktiv"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP Konfiqurasiya Uğursuzluğu"</string>
@@ -374,6 +375,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"İstifadəyə əsasən təxminən <xliff:g id="TIME">%1$s</xliff:g> olana qədər davam edəcək"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Təxminən <xliff:g id="TIME">%1$s</xliff:g> olana qədər davam edəcək (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Təxminən <xliff:g id="TIME">%1$s</xliff:g> olana qədər davam edəcək"</string>
+    <string name="power_discharge_by_only_short" msgid="1372817269546888804">"<xliff:g id="TIME">%1$s</xliff:g> olana qədər"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Qalan vaxt <xliff:g id="THRESHOLD">%1$s</xliff:g> və daha azdır"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Qalan vaxt <xliff:g id="THRESHOLD">%1$s</xliff:g> və daha azdır (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Qalan vaxt <xliff:g id="TIME_REMAINING">%1$s</xliff:g> və daha çoxdur (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -447,4 +449,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Hər dəfə soruşun"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Deaktiv edənə qədər"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"İndicə"</string>
+    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"Qrafik drayverdən istifadə etmək üçün tətbiq seçin"</string>
+    <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"Telefon spikeri"</string>
 </resources>

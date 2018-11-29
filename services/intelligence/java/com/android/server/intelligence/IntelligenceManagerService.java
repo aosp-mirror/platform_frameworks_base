@@ -19,6 +19,7 @@ package com.android.server.intelligence;
 import static android.content.Context.INTELLIGENCE_MANAGER_SERVICE;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
@@ -134,12 +135,13 @@ public final class IntelligenceManagerService extends
         }
 
         @Override
-        public void finishSession(@UserIdInt int userId, @NonNull InteractionSessionId sessionId) {
+        public void finishSession(@UserIdInt int userId, @NonNull InteractionSessionId sessionId,
+                @Nullable List<ContentCaptureEvent> events) {
             Preconditions.checkNotNull(sessionId);
 
             synchronized (mLock) {
                 final IntelligencePerUserService service = getServiceForUserLocked(userId);
-                service.finishSessionLocked(sessionId);
+                service.finishSessionLocked(sessionId, events);
             }
         }
 

@@ -2420,8 +2420,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         .setContentText(summary)
                         .setContentIntent(mImeSwitchPendingIntent);
                 try {
+                    // TODO(b/120076400): Figure out what is the best behavior
                     if ((mNotificationManager != null)
-                            && !mIWindowManager.hasNavigationBar()) {
+                            && !mIWindowManager.hasNavigationBar(DEFAULT_DISPLAY)) {
                         if (DEBUG) {
                             Slog.d(TAG, "--- show notification: label =  " + summary);
                         }

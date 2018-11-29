@@ -381,11 +381,9 @@ public final class Settings {
     final SparseArray<CrossProfileIntentResolver> mCrossProfileIntentResolvers =
             new SparseArray<CrossProfileIntentResolver>();
 
-    final ArrayMap<String, SharedUserSetting> mSharedUsers =
-            new ArrayMap<String, SharedUserSetting>();
-    private final ArrayList<Object> mUserIds = new ArrayList<Object>();
-    private final SparseArray<Object> mOtherUserIds =
-            new SparseArray<Object>();
+    final ArrayMap<String, SharedUserSetting> mSharedUsers = new ArrayMap<>();
+    private final ArrayList<SettingBase> mAppIds = new ArrayList<>();
+    private final SparseArray<SettingBase> mOtherAppIds = new SparseArray<>();
 
     // For reading/writing settings file.
     private final ArrayList<Signature> mPastSignatures =
@@ -519,7 +517,7 @@ public final class Settings {
         SharedUserSetting s = mSharedUsers.get(name);
         if (s == null && create) {
             s = new SharedUserSetting(name, pkgFlags, pkgPrivateFlags);
-            s.userId = newUserIdLPw(s);
+            s.userId = acquireAndRegisterNewAppIdLPw(s);
             if (s.userId < 0) {
                 // < 0 means we couldn't assign a userid; throw exception
                 throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
@@ -612,7 +610,7 @@ public final class Settings {
                 cpuAbiOverrideString, vc, pkgFlags, pkgPrivateFlags, parentPackageName,
                 childPackageNames, 0 /*userId*/, usesStaticLibraries, usesStaticLibraryNames);
         p.appId = uid;
-        if (addUserIdLPw(uid, p, name)) {
+        if (registerExistingAppIdLPw(uid, p, name)) {
             mPackages.put(name, p);
             return p;
         }
@@ -635,7 +633,7 @@ public final class Settings {
         }
         s = new SharedUserSetting(name, pkgFlags, pkgPrivateFlags);
         s.userId = uid;
-        if (addUserIdLPw(uid, s, name)) {
+        if (registerExistingAppIdLPw(uid, s, name)) {
             mSharedUsers.put(name, s);
             return s;
         }
@@ -885,13 +883,13 @@ public final class Settings {
      * Registers a user ID with the system. Potentially allocates a new user ID.
      * @throws PackageManagerException If a user ID could not be allocated.
      */
-    void addUserToSettingLPw(PackageSetting p) throws PackageManagerException {
+    void registerAppIdLPw(PackageSetting p) throws PackageManagerException {
         if (p.appId == 0) {
             // Assign new user ID
-            p.appId = newUserIdLPw(p);
+            p.appId = acquireAndRegisterNewAppIdLPw(p);
         } else {
             // Add new setting to list of user IDs
-            addUserIdLPw(p.appId, p, p.name);
+            registerExistingAppIdLPw(p.appId, p, p.name);
         }
         if (p.appId < 0) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -972,14 +970,14 @@ public final class Settings {
 
         // If the we know about this user id, we have to update it as it
         // has to point to the same PackageSetting instance as the package.
-        Object userIdPs = getUserIdLPr(p.appId);
+        Object userIdPs = getSettingLPr(p.appId);
         if (sharedUser == null) {
             if (userIdPs != null && userIdPs != p) {
-                replaceUserIdLPw(p.appId, p);
+                replaceAppIdLPw(p.appId, p);
             }
         } else {
             if (userIdPs != null && userIdPs != sharedUser) {
-                replaceUserIdLPw(p.appId, sharedUser);
+                replaceAppIdLPw(p.appId, sharedUser);
             }
         }
 
@@ -1083,11 +1081,11 @@ public final class Settings {
                 p.sharedUser.removePackage(p);
                 if (p.sharedUser.packages.size() == 0) {
                     mSharedUsers.remove(p.sharedUser.name);
-                    removeUserIdLPw(p.sharedUser.userId);
+                    removeAppIdLPw(p.sharedUser.userId);
                     return p.sharedUser.userId;
                 }
             } else {
-                removeUserIdLPw(p.appId);
+                removeAppIdLPw(p.appId);
                 return p.appId;
             }
         }
@@ -1115,65 +1113,69 @@ public final class Settings {
         mInstallerPackages.remove(packageName);
     }
 
-    private boolean addUserIdLPw(int uid, Object obj, Object name) {
-        if (uid > Process.LAST_APPLICATION_UID) {
+    /** Returns true if the requested AppID was valid and not already registered. */
+    private boolean registerExistingAppIdLPw(int appId, SettingBase obj, Object name) {
+        if (appId > Process.LAST_APPLICATION_UID) {
             return false;
         }
 
-        if (uid >= Process.FIRST_APPLICATION_UID) {
-            int N = mUserIds.size();
-            final int index = uid - Process.FIRST_APPLICATION_UID;
-            while (index >= N) {
-                mUserIds.add(null);
-                N++;
+        if (appId >= Process.FIRST_APPLICATION_UID) {
+            int size = mAppIds.size();
+            final int index = appId - Process.FIRST_APPLICATION_UID;
+            // fill the array until our index becomes valid
+            while (index >= size) {
+                mAppIds.add(null);
+                size++;
             }
-            if (mUserIds.get(index) != null) {
+            if (mAppIds.get(index) != null) {
                 PackageManagerService.reportSettingsProblem(Log.ERROR,
-                        "Adding duplicate user id: " + uid
+                        "Adding duplicate app id: " + appId
                         + " name=" + name);
                 return false;
             }
-            mUserIds.set(index, obj);
+            mAppIds.set(index, obj);
         } else {
-            if (mOtherUserIds.get(uid) != null) {
+            if (mOtherAppIds.get(appId) != null) {
                 PackageManagerService.reportSettingsProblem(Log.ERROR,
-                        "Adding duplicate shared id: " + uid
+                        "Adding duplicate shared id: " + appId
                                 + " name=" + name);
                 return false;
             }
-            mOtherUserIds.put(uid, obj);
+            mOtherAppIds.put(appId, obj);
         }
         return true;
     }
 
-    public Object getUserIdLPr(int uid) {
-        if (uid >= Process.FIRST_APPLICATION_UID) {
-            final int N = mUserIds.size();
-            final int index = uid - Process.FIRST_APPLICATION_UID;
-            return index < N ? mUserIds.get(index) : null;
+    /** Gets the setting associated with the provided App ID */
+    public SettingBase getSettingLPr(int appId) {
+        if (appId >= Process.FIRST_APPLICATION_UID) {
+            final int size = mAppIds.size();
+            final int index = appId - Process.FIRST_APPLICATION_UID;
+            return index < size ? mAppIds.get(index) : null;
         } else {
-            return mOtherUserIds.get(uid);
+            return mOtherAppIds.get(appId);
         }
     }
 
-    private void removeUserIdLPw(int uid) {
-        if (uid >= Process.FIRST_APPLICATION_UID) {
-            final int N = mUserIds.size();
-            final int index = uid - Process.FIRST_APPLICATION_UID;
-            if (index < N) mUserIds.set(index, null);
+    /** Unregisters the provided app ID. */
+    void removeAppIdLPw(int appId) {
+        if (appId >= Process.FIRST_APPLICATION_UID) {
+            final int size = mAppIds.size();
+            final int index = appId - Process.FIRST_APPLICATION_UID;
+            if (index < size) mAppIds.set(index, null);
         } else {
-            mOtherUserIds.remove(uid);
+            mOtherAppIds.remove(appId);
         }
-        setFirstAvailableUid(uid+1);
+        setFirstAvailableUid(appId + 1);
     }
 
-    private void replaceUserIdLPw(int uid, Object obj) {
-        if (uid >= Process.FIRST_APPLICATION_UID) {
-            final int N = mUserIds.size();
-            final int index = uid - Process.FIRST_APPLICATION_UID;
-            if (index < N) mUserIds.set(index, obj);
+    private void replaceAppIdLPw(int appId, SettingBase obj) {
+        if (appId >= Process.FIRST_APPLICATION_UID) {
+            final int size = mAppIds.size();
+            final int index = appId - Process.FIRST_APPLICATION_UID;
+            if (index < size) mAppIds.set(index, obj);
         } else {
-            mOtherUserIds.put(uid, obj);
+            mOtherAppIds.put(appId, obj);
         }
     }
 
@@ -3157,7 +3159,7 @@ public final class Settings {
         for (int i = 0; i < N; i++) {
             final PackageSetting p = mPendingPackages.get(i);
             final int sharedUserId = p.getSharedUserId();
-            final Object idObj = getUserIdLPr(sharedUserId);
+            final Object idObj = getSettingLPr(sharedUserId);
             if (idObj instanceof SharedUserSetting) {
                 final SharedUserSetting sharedUser = (SharedUserSetting) idObj;
                 p.sharedUser = sharedUser;
@@ -3202,7 +3204,7 @@ public final class Settings {
         final Iterator<PackageSetting> disabledIt = mDisabledSysPackages.values().iterator();
         while (disabledIt.hasNext()) {
             final PackageSetting disabledPs = disabledIt.next();
-            final Object id = getUserIdLPr(disabledPs.appId);
+            final Object id = getSettingLPr(disabledPs.appId);
             if (id != null && id instanceof SharedUserSetting) {
                 disabledPs.sharedUser = (SharedUserSetting) id;
             }
@@ -4201,24 +4203,24 @@ public final class Settings {
         }
     }
 
-    // Returns -1 if we could not find an available UserId to assign
-    private int newUserIdLPw(Object obj) {
+    /** Returns a new AppID or -1 if we could not find an available AppID to assign */
+    private int acquireAndRegisterNewAppIdLPw(SettingBase obj) {
         // Let's be stupidly inefficient for now...
-        final int N = mUserIds.size();
-        for (int i = mFirstAvailableUid; i < N; i++) {
-            if (mUserIds.get(i) == null) {
-                mUserIds.set(i, obj);
+        final int size = mAppIds.size();
+        for (int i = mFirstAvailableUid; i < size; i++) {
+            if (mAppIds.get(i) == null) {
+                mAppIds.set(i, obj);
                 return Process.FIRST_APPLICATION_UID + i;
             }
         }
 
         // None left?
-        if (N > (Process.LAST_APPLICATION_UID-Process.FIRST_APPLICATION_UID)) {
+        if (size > (Process.LAST_APPLICATION_UID - Process.FIRST_APPLICATION_UID)) {
             return -1;
         }
 
-        mUserIds.add(obj);
-        return Process.FIRST_APPLICATION_UID + N;
+        mAppIds.add(obj);
+        return Process.FIRST_APPLICATION_UID + size;
     }
 
     public VerifierDeviceIdentity getVerifierDeviceIdentityLPw() {
@@ -4253,9 +4255,46 @@ public final class Settings {
         return false;
     }
 
+    /**
+     * Returns the disabled {@link PackageSetting} for the provided package name if one exists,
+     * {@code null} otherwise.
+     */
+    @Nullable
     public PackageSetting getDisabledSystemPkgLPr(String name) {
         PackageSetting ps = mDisabledSysPackages.get(name);
         return ps;
+    }
+
+    /**
+     * Returns the disabled {@link PackageSetting} for the provided enabled {@link PackageSetting}
+     * if one exists, {@code null} otherwise.
+     */
+    @Nullable
+    public PackageSetting getDisabledSystemPkgLPr(PackageSetting enabledPackageSetting) {
+        if (enabledPackageSetting == null) {
+            return null;
+        }
+        return getDisabledSystemPkgLPr(enabledPackageSetting.name);
+    }
+
+    /**
+     * Fetches an array of the child {@link PackageSetting}s for all child package names referenced
+     * by the provided parent {@link PackageSetting} or {@code null} if no children are referenced.
+     *
+     * Note: Any child packages not found will be null in the returned array.
+     */
+    @Nullable
+    public PackageSetting[] getChildSettingsLPr(PackageSetting parentPackageSetting) {
+        if (parentPackageSetting == null || !parentPackageSetting.hasChildPackages()) {
+            return null;
+        }
+        final int childCount = parentPackageSetting.childPackageNames.size();
+        PackageSetting[] children =
+                new PackageSetting[childCount];
+        for (int i = 0; i < childCount; i++) {
+            children[i] = mPackages.get(parentPackageSetting.childPackageNames.get(i));
+        }
+        return children;
     }
 
     boolean isEnabledAndMatchLPr(ComponentInfo componentInfo, int flags, int userId) {

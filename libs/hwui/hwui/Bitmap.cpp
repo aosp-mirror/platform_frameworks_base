@@ -32,7 +32,6 @@
 
 #include <SkCanvas.h>
 #include <SkImagePriv.h>
-#include <SkToSRGBColorFilter.h>
 
 #include <SkHighContrastFilter.h>
 #include <limits>
@@ -287,14 +286,8 @@ void Bitmap::setAlphaType(SkAlphaType alphaType) {
 
 void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
     if (isHardware()) {
-        outBitmap->allocPixels(SkImageInfo::Make(info().width(), info().height(),
-                                                 info().colorType(), info().alphaType(), nullptr));
+        outBitmap->allocPixels(mInfo);
         uirenderer::renderthread::RenderProxy::copyHWBitmapInto(this, outBitmap);
-        if (mInfo.colorSpace()) {
-            sk_sp<SkPixelRef> pixelRef = sk_ref_sp(outBitmap->pixelRef());
-            outBitmap->setInfo(mInfo);
-            outBitmap->setPixelRef(std::move(pixelRef), 0, 0);
-        }
         return;
     }
     outBitmap->setInfo(mInfo, rowBytes());
@@ -313,7 +306,7 @@ GraphicBuffer* Bitmap::graphicBuffer() {
     return nullptr;
 }
 
-sk_sp<SkImage> Bitmap::makeImage(sk_sp<SkColorFilter>* outputColorFilter) {
+sk_sp<SkImage> Bitmap::makeImage() {
     sk_sp<SkImage> image = mImage;
     if (!image) {
         SkASSERT(!isHardware());
@@ -324,9 +317,6 @@ sk_sp<SkImage> Bitmap::makeImage(sk_sp<SkColorFilter>* outputColorFilter) {
         // internally and ~Bitmap won't be invoked.
         // TODO: refactor Bitmap to not derive from SkPixelRef, which would allow caching here.
         image = SkMakeImageFromRasterBitmap(skiaBitmap, kNever_SkCopyPixelsMode);
-    }
-    if (image->colorSpace() != nullptr && !image->colorSpace()->isSRGB()) {
-        *outputColorFilter = SkToSRGBColorFilter::Make(image->refColorSpace());
     }
     return image;
 }

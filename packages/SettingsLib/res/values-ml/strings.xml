@@ -21,6 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"നെ‌റ്റ്‌വർക്കുകൾക്കായി സ്കാൻ ചെയ്യാനായില്ല"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"ഒന്നുമില്ല"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"സംരക്ഷിച്ചു"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP കോൺഫിഗറേഷൻ പരാജയം"</string>
@@ -374,6 +375,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"നിങ്ങളുടെ ഉപയോഗത്തെ അടിസ്ഥാനമാക്കി ഏകദേശം <xliff:g id="TIME">%1$s</xliff:g> വരെ നീണ്ടുനിൽക്കേണ്ടതാണ്"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"ഏകദേശം <xliff:g id="TIME">%1$s</xliff:g> വരെ നീണ്ടുനിൽക്കേണ്ടതാണ് (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"ഏകദേശം <xliff:g id="TIME">%1$s</xliff:g> വരെ നീണ്ടുനിൽക്കേണ്ടതാണ്"</string>
+    <string name="power_discharge_by_only_short" msgid="1372817269546888804">"<xliff:g id="TIME">%1$s</xliff:g> വരെ"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-ൽ കുറവ് സമയം ശേഷിക്കുന്നു"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-ൽ കുറവ് സമയം ശേഷിക്കുന്നു (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-ൽ കൂടുതൽ സമയം ശേഷിക്കുന്നു (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -447,4 +449,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"എപ്പോഴും ചോദിക്കുക"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"നിങ്ങൾ ഓഫാക്കുന്നത് വരെ"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"ഇപ്പോൾ"</string>
+    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"വികസനത്തിൽ, അപ്ഡേറ്റ് ചെയ്‌ത ഗ്രാഫിക്‌സ് ഡ്രൈവർ ഉപയോഗിക്കാൻ ഓപ്റ്റ് ഇൻ ചെയ്യുക"</string>
+    <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"ഫോൺ സ്‌പീക്കർ"</string>
 </resources>

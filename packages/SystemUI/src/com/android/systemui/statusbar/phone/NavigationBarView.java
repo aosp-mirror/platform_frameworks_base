@@ -77,6 +77,8 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.NavigationBarCompat;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+import com.android.systemui.statusbar.phone.NavigationPrototypeController.GestureAction;
+import com.android.systemui.statusbar.phone.NavigationPrototypeController.OnPrototypeChangedListener;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
@@ -146,6 +148,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private RecentsOnboarding mRecentsOnboarding;
     private NotificationPanelView mPanelView;
 
+    private NavigationPrototypeController mPrototypeController;
+    private NavigationGestureAction[] mDefaultGestureMap;
     private QuickScrubAction mQuickScrubAction;
     private QuickStepAction mQuickStepAction;
     private NavigationBackAction mBackAction;
@@ -261,6 +265,18 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
     };
 
+    private OnPrototypeChangedListener mPrototypeListener = new OnPrototypeChangedListener() {
+        @Override
+        public void onGestureRemap(int[] actions) {
+            updateNavigationGestures();
+        }
+
+        @Override
+        public void onBackButtonVisibilityChanged(boolean visible) {
+            getBackButton().setVisibility(visible ? VISIBLE : GONE);
+        }
+    };
+
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -309,6 +325,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mQuickScrubAction = new QuickScrubAction(this, mOverviewProxyService);
         mQuickStepAction = new QuickStepAction(this, mOverviewProxyService);
         mBackAction = new NavigationBackAction(this, mOverviewProxyService);
+        mDefaultGestureMap = new NavigationGestureAction[] {
+                mQuickStepAction, null /* swipeDownAction*/, null /* swipeLeftAction */,
+                mQuickScrubAction
+        };
+
+        mPrototypeController = new NavigationPrototypeController(mHandler, mContext);
+        mPrototypeController.register();
+        mPrototypeController.setOnPrototypeChangedListener(mPrototypeListener);
     }
 
     public BarTransitions getBarTransitions() {
@@ -323,8 +347,32 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mPanelView = panel;
         if (mGestureHelper instanceof QuickStepController) {
             ((QuickStepController) mGestureHelper).setComponents(this);
-            ((QuickStepController) mGestureHelper).setGestureActions(mQuickStepAction,
-                    null /* swipeDownAction*/, mBackAction, mQuickScrubAction);
+            updateNavigationGestures();
+        }
+    }
+
+    private void updateNavigationGestures() {
+        if (mGestureHelper instanceof QuickStepController) {
+            final int[] assignedMap = mPrototypeController.getGestureActionMap();
+            ((QuickStepController) mGestureHelper).setGestureActions(
+                    getNavigationActionFromType(assignedMap[0], mDefaultGestureMap[0]),
+                    getNavigationActionFromType(assignedMap[1], mDefaultGestureMap[1]),
+                    getNavigationActionFromType(assignedMap[2], mDefaultGestureMap[2]),
+                    getNavigationActionFromType(assignedMap[3], mDefaultGestureMap[3]));
+        }
+    }
+
+    private NavigationGestureAction getNavigationActionFromType(@GestureAction int actionType,
+            NavigationGestureAction defaultAction) {
+        switch(actionType) {
+            case NavigationPrototypeController.ACTION_QUICKSTEP:
+                return mQuickStepAction;
+            case NavigationPrototypeController.ACTION_QUICKSCRUB:
+                return mQuickScrubAction;
+            case NavigationPrototypeController.ACTION_BACK:
+                return mBackAction;
+            default:
+                return defaultAction;
         }
     }
 
@@ -1043,6 +1091,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mGestureHelper != null) {
             mGestureHelper.destroy();
         }
+        mPrototypeController.unregister();
         setUpSwipeUpOnboarding(false);
         for (int i = 0; i < mButtonDispatchers.size(); ++i) {
             mButtonDispatchers.valueAt(i).onDestroy();

@@ -631,7 +631,8 @@ public class RecentsView extends FrameLayout {
                     }
                 };
                 WindowManagerWrapper.getInstance().overridePendingAppTransitionMultiThumbFuture(
-                        future, animStartedListener, getHandler(), true /* scaleUp */);
+                        future, animStartedListener, getHandler(), true /* scaleUp */,
+                        getContext().getDisplayId());
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_DRAG_DROP,
                         event.task.getTopComponent().flattenToShortString());
             } else {

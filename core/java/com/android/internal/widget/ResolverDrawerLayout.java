@@ -814,7 +814,14 @@ public class ResolverDrawerLayout extends ViewGroup {
             final View child = getChildAt(i);
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             if (lp.alwaysShow && child.getVisibility() != GONE) {
-                measureChildWithMargins(child, widthSpec, widthPadding, heightSpec, heightUsed);
+                if (lp.maxHeight != -1) {
+                    final int remainingHeight = heightSize - heightUsed;
+                    measureChildWithMargins(child, widthSpec, widthPadding,
+                            MeasureSpec.makeMeasureSpec(lp.maxHeight, MeasureSpec.AT_MOST),
+                            lp.maxHeight > remainingHeight ? lp.maxHeight - remainingHeight : 0);
+                } else {
+                    measureChildWithMargins(child, widthSpec, widthPadding, heightSpec, heightUsed);
+                }
                 heightUsed += child.getMeasuredHeight();
             }
         }
@@ -824,9 +831,17 @@ public class ResolverDrawerLayout extends ViewGroup {
         // And now the rest.
         for (int i = 0; i < childCount; i++) {
             final View child = getChildAt(i);
+
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             if (!lp.alwaysShow && child.getVisibility() != GONE) {
-                measureChildWithMargins(child, widthSpec, widthPadding, heightSpec, heightUsed);
+                if (lp.maxHeight != -1) {
+                    final int remainingHeight = heightSize - heightUsed;
+                    measureChildWithMargins(child, widthSpec, widthPadding,
+                            MeasureSpec.makeMeasureSpec(lp.maxHeight, MeasureSpec.AT_MOST),
+                            lp.maxHeight > remainingHeight ? lp.maxHeight - remainingHeight : 0);
+                } else {
+                    measureChildWithMargins(child, widthSpec, widthPadding, heightSpec, heightUsed);
+                }
                 heightUsed += child.getMeasuredHeight();
             }
         }
@@ -938,6 +953,7 @@ public class ResolverDrawerLayout extends ViewGroup {
         public boolean alwaysShow;
         public boolean ignoreOffset;
         public boolean hasNestedScrollIndicator;
+        public int maxHeight;
 
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
@@ -953,6 +969,8 @@ public class ResolverDrawerLayout extends ViewGroup {
             hasNestedScrollIndicator = a.getBoolean(
                     R.styleable.ResolverDrawerLayout_LayoutParams_layout_hasNestedScrollIndicator,
                     false);
+            maxHeight = a.getDimensionPixelSize(
+                    R.styleable.ResolverDrawerLayout_LayoutParams_layout_maxHeight, -1);
             a.recycle();
         }
 
@@ -965,6 +983,7 @@ public class ResolverDrawerLayout extends ViewGroup {
             this.alwaysShow = source.alwaysShow;
             this.ignoreOffset = source.ignoreOffset;
             this.hasNestedScrollIndicator = source.hasNestedScrollIndicator;
+            this.maxHeight = source.maxHeight;
         }
 
         public LayoutParams(MarginLayoutParams source) {

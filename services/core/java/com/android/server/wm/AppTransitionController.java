@@ -305,7 +305,7 @@ public class AppTransitionController {
             AppWindowToken wtoken = openingApps.valueAt(i);
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now opening app" + wtoken);
 
-            if (!wtoken.setVisibility(animLp, true, transit, false, voiceInteraction)) {
+            if (!wtoken.commitVisibility(animLp, true, transit, false, voiceInteraction)) {
                 // This token isn't going to be animating. Add it to the list of tokens to
                 // be notified of app transition complete since the notification will not be
                 // sent be the app window animator.
@@ -341,7 +341,7 @@ public class AppTransitionController {
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now closing app " + wtoken);
             // TODO: Do we need to add to mNoAnimationNotifyOnTransitionFinished like above if not
             //       animating?
-            wtoken.setVisibility(animLp, false, transit, false, voiceInteraction);
+            wtoken.commitVisibility(animLp, false, transit, false, voiceInteraction);
             wtoken.updateReportedVisibilityLocked();
             // Force the allDrawn flag, because we want to start
             // this guy's animations regardless of whether it's
@@ -350,9 +350,8 @@ public class AppTransitionController {
             wtoken.deferClearAllDrawn = false;
             // Ensure that apps that are mid-starting are also scheduled to have their
             // starting windows removed after the animation is complete
-            if (wtoken.startingWindow != null && !wtoken.startingWindow.mAnimatingExit
-                    && wtoken.getController() != null) {
-                wtoken.getController().removeStartingWindow();
+            if (wtoken.startingWindow != null && !wtoken.startingWindow.mAnimatingExit) {
+                wtoken.removeStartingWindow();
             }
 
             if (mDisplayContent.mAppTransition.isNextAppTransitionThumbnailDown()) {

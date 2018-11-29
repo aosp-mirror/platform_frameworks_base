@@ -6172,6 +6172,9 @@ libcore.reflect.TypeVariableImpl
 libcore.reflect.Types
 libcore.reflect.WildcardTypeImpl
 libcore.timezone.TimeZoneDataFiles
+libcore.timezone.ZoneInfoDB
+libcore.timezone.ZoneInfoDB$TzData
+libcore.timezone.ZoneInfoDB$TzData$1
 libcore.util.BasicLruCache
 libcore.util.CharsetUtils
 libcore.util.CollectionUtils
@@ -6184,9 +6187,6 @@ libcore.util.SneakyThrow
 libcore.util.ZoneInfo
 libcore.util.ZoneInfo$CheckedArithmeticException
 libcore.util.ZoneInfo$WallTime
-libcore.util.ZoneInfoDB
-libcore.util.ZoneInfoDB$TzData
-libcore.util.ZoneInfoDB$TzData$1
 org.apache.harmony.dalvik.NativeTestTarget
 org.apache.harmony.dalvik.ddmc.Chunk
 org.apache.harmony.dalvik.ddmc.ChunkHandler

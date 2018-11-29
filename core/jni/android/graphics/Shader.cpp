@@ -64,11 +64,10 @@ static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, j
         jint tileModeX, jint tileModeY) {
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
     sk_sp<SkImage> image;
-    sk_sp<SkColorFilter> colorFilter;
     if (jbitmap) {
         // Only pass a valid SkBitmap object to the constructor if the Bitmap exists. Otherwise,
         // we'll pass an empty SkBitmap to avoid crashing/excepting for compatibility.
-        image = android::bitmap::toBitmap(env, jbitmap).makeImage(&colorFilter);
+        image = android::bitmap::toBitmap(env, jbitmap).makeImage();
     }
 
     if (!image.get()) {
@@ -80,9 +79,6 @@ static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, j
 
     if (matrix) {
         shader = shader->makeWithLocalMatrix(*matrix);
-    }
-    if(colorFilter) {
-        shader = shader->makeWithColorFilter(colorFilter);
     }
 
     ThrowIAE_IfNull(env, shader.get());

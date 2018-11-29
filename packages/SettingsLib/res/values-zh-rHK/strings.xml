@@ -21,6 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"無法掃瞄網絡"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"無"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"已儲存"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"已停用"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP 設定失敗"</string>
@@ -374,6 +375,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"根據您的使用情況，電量剩餘約 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"電量剩餘約 <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"電量剩餘約 <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="1372817269546888804">"還可用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"剩餘電量時間少於 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"還有少於 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"還有超過 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -447,4 +449,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"每次都詢問"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"直至您關閉為止"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"剛剛"</string>
+    <string name="updated_gfx_driver_dev_opt_in_app_summary" msgid="5309913444094165199">"請選取應用程式，以在開發階段使用更新的顯示卡驅動程式"</string>
+    <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"手機喇叭"</string>
 </resources>

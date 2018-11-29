@@ -148,6 +148,9 @@ import com.android.server.net.NetworkStatsManagerInternal;
 
 import com.google.common.util.concurrent.AbstractFuture;
 
+import libcore.io.IoUtils;
+import libcore.io.Streams;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -161,9 +164,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-
-import libcore.io.IoUtils;
-import libcore.io.Streams;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -841,6 +841,18 @@ public class NetworkPolicyManagerServiceTest {
         callOnUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_TOP, 0);
         assertFalse(mService.isUidForeground(UID_A));
         assertTrue(mService.isUidForeground(UID_B));
+    }
+
+    @Test
+    public void testAppIdleTempWhitelisting() throws Exception {
+        mService.setAppIdleWhitelist(UID_A, true);
+        mService.setAppIdleWhitelist(UID_B, false);
+        int[] whitelistedIds = mService.getAppIdleWhitelist();
+        assertTrue(Arrays.binarySearch(whitelistedIds, UID_A) >= 0);
+        assertTrue(Arrays.binarySearch(whitelistedIds, UID_B) < 0);
+        assertFalse(mService.isUidIdle(UID_A));
+        // Can't currently guarantee UID_B's app idle state.
+        // TODO: expand with multiple app idle states.
     }
 
     private static long computeLastCycleBoundary(long currentTime, NetworkPolicy policy) {

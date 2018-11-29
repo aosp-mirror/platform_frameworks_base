@@ -105,14 +105,8 @@ public:
      * Creates or returns a cached SkImage and is safe to be invoked from either
      * the UI or RenderThread.
      *
-     * @param outputColorFilter is a required param that will be populated by
-     *     this function if the bitmap's colorspace is not sRGB. If populated the
-     *     filter will convert colors from the bitmaps colorspace into sRGB. It
-     *     is the callers responsibility to use this colorFilter when drawing
-     *     this image into any destination that is presumed to be sRGB (i.e. a
-     *     buffer that has no colorspace defined).
      */
-    sk_sp<SkImage> makeImage(sk_sp<SkColorFilter>* outputColorFilter);
+    sk_sp<SkImage> makeImage();
 
     static BitmapPalette computePalette(const SkImageInfo& info, const void* addr, size_t rowBytes);
 

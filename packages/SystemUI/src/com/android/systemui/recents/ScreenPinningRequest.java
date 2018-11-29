@@ -219,7 +219,7 @@ public class ScreenPinningRequest implements View.OnClickListener {
             mLayout.findViewById(R.id.screen_pinning_text_area)
                     .setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
             View buttons = mLayout.findViewById(R.id.screen_pinning_buttons);
-            if (WindowManagerWrapper.getInstance().hasSoftNavigationBar()) {
+            if (WindowManagerWrapper.getInstance().hasSoftNavigationBar(mContext.getDisplayId())) {
                 buttons.setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
                 swapChildrenIfRtlAndVertical(buttons);
             } else {

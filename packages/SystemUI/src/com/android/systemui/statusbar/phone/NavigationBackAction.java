@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_HOME;
-
 import android.annotation.NonNull;
 import android.hardware.input.InputManager;
 import android.os.Handler;
@@ -35,10 +33,8 @@ import com.android.systemui.recents.OverviewProxyService;
  */
 public class NavigationBackAction extends NavigationGestureAction {
 
-    private static final String PULL_HOME_GO_BACK_PROP = "quickstepcontroller_homegoesback";
     private static final String BACK_AFTER_END_PROP =
             "quickstepcontroller_homegoesbackwhenend";
-    private static final String NAVBAR_EXPERIMENTS_DISABLED = "navbarexperiments_disabled";
     private static final long BACK_BUTTON_FADE_OUT_ALPHA = 60;
     private static final long BACK_GESTURE_POLL_TIMEOUT = 1000;
 
@@ -60,23 +56,13 @@ public class NavigationBackAction extends NavigationGestureAction {
     }
 
     @Override
-    public int requiresTouchDownHitTarget() {
-        return HIT_TARGET_HOME;
-    }
-
-    @Override
-    public boolean requiresDragWithHitTarget() {
-        return true;
-    }
-
-    @Override
     public boolean canPerformAction() {
         return mProxySender.getBackButtonAlpha() > 0;
     }
 
     @Override
     public boolean isEnabled() {
-        return swipeHomeGoBackGestureEnabled();
+        return !getGlobalBoolean(NavigationPrototypeController.NAVBAR_EXPERIMENTS_DISABLED);
     }
 
     @Override
@@ -110,13 +96,8 @@ public class NavigationBackAction extends NavigationGestureAction {
         mNavigationBarView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }
 
-    private boolean swipeHomeGoBackGestureEnabled() {
-        return !getGlobalBoolean(NAVBAR_EXPERIMENTS_DISABLED)
-                && getGlobalBoolean(PULL_HOME_GO_BACK_PROP);
-    }
-
     private boolean shouldExecuteBackOnUp() {
-        return !getGlobalBoolean(NAVBAR_EXPERIMENTS_DISABLED)
+        return !getGlobalBoolean(NavigationPrototypeController.NAVBAR_EXPERIMENTS_DISABLED)
                 && getGlobalBoolean(BACK_AFTER_END_PROP);
     }
 

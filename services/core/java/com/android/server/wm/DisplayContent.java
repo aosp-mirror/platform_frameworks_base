@@ -2400,8 +2400,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mDisplayReady = false;
             mRemovingDisplay = false;
         }
+
         mDisplayPolicy.onDisplayRemoved();
-        mInputMonitor.onRemoved();
         mService.mWindowPlacerLocked.requestTraversal();
     }
 

@@ -94,6 +94,7 @@ class ActivityTestsBase {
     final TestInjector mTestInjector = new TestInjector();
 
     ActivityTaskManagerService mService;
+    RootActivityContainer mRootActivityContainer;
     ActivityStackSupervisor mSupervisor;
 
     // Default package name
@@ -120,6 +121,7 @@ class ActivityTestsBase {
     ActivityTaskManagerService createActivityTaskManagerService() {
         mService = new TestActivityTaskManagerService(mContext);
         mSupervisor = mService.mStackSupervisor;
+        mRootActivityContainer = mService.mRootActivityContainer;
         return mService;
     }
 
@@ -139,7 +141,7 @@ class ActivityTestsBase {
     /** Creates and adds a {@link TestActivityDisplay} to supervisor at the given position. */
     TestActivityDisplay addNewActivityDisplayAt(int position) {
         final TestActivityDisplay display = createNewActivityDisplay();
-        mSupervisor.addChild(display, position);
+        mRootActivityContainer.addChild(display, position);
         return display;
     }
 
@@ -231,7 +233,7 @@ class ActivityTestsBase {
                     aInfo /*aInfo*/, new Configuration(), null /* resultTo */, null /* resultWho */,
                     0 /* reqCode */, false /*componentSpecified*/, false /* rootVoiceInteraction */,
                     mService.mStackSupervisor, null /* options */, null /* sourceRecord */);
-            activity.mWindowContainerController = mock(AppWindowContainerController.class);
+            activity.mAppWindowToken = mock(AppWindowToken.class);
 
             if (mTaskRecord != null) {
                 mTaskRecord.addActivityToTop(activity);
@@ -243,6 +245,7 @@ class ActivityTestsBase {
                     mock(WindowProcessListener.class));
             wpc.setThread(mock(IApplicationThread.class));
             activity.setProcess(wpc);
+            activity.service.mWindowManager.mRoot = mock(RootWindowContainer.class);
             return activity;
         }
     }
@@ -317,7 +320,7 @@ class ActivityTestsBase {
 
         TaskRecord build() {
             if (mStack == null && mCreateStack) {
-                mStack = mSupervisor.getDefaultDisplay().createStack(
+                mStack = mSupervisor.mRootActivityContainer.getDefaultDisplay().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
             }
 
@@ -375,6 +378,8 @@ class ActivityTestsBase {
         // We keep the reference in order to prevent creating it twice.
         ActivityStackSupervisor mTestStackSupervisor;
 
+        ActivityDisplay mDefaultDisplay;
+
         TestActivityTaskManagerService(Context context) {
             super(context);
             spyOn(this);
@@ -390,18 +395,11 @@ class ActivityTestsBase {
             final TestActivityManagerService am =
                     new TestActivityManagerService(mTestInjector, this);
 
-            // Put a home stack on the default display, so that we'll always have something
-            // focusable.
-            final TestActivityStackSupervisor supervisor =
-                    (TestActivityStackSupervisor) mStackSupervisor;
-            supervisor.mDisplay.createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-            final TaskRecord task = new TaskBuilder(mStackSupervisor)
-                    .setStack(supervisor.getDefaultDisplay().getHomeStack()).build();
-            new ActivityBuilder(this).setTask(task).build();
-
             spyOn(getLifecycleManager());
             spyOn(getLockTaskController());
             doReturn(mock(IPackageManager.class)).when(this).getPackageManager();
+            // allow background activity starts by default
+            doReturn(true).when(this).isBackgroundActivityStartsEnabled();
         }
 
         void setActivityManagerService(IntentFirewall intentFirewall,
@@ -409,7 +407,36 @@ class ActivityTestsBase {
                 WindowManagerService wm) {
             mAmInternal = amInternal;
             setActivityManagerService(intentFirewall, intentController);
+            initRootActivityContainerMocks(wm);
             setWindowManager(wm);
+        }
+
+        void initRootActivityContainerMocks(WindowManagerService wm) {
+            spyOn(mRootActivityContainer);
+            mRootActivityContainer.setWindowContainer(mock(RootWindowContainer.class));
+            mRootActivityContainer.mWindowManager = wm;
+            mRootActivityContainer.mDisplayManager =
+                    (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
+            doNothing().when(mRootActivityContainer).setWindowManager(any());
+            // Invoked during {@link ActivityStack} creation.
+            doNothing().when(mRootActivityContainer).updateUIDsPresentOnDisplay();
+            // Always keep things awake.
+            doReturn(true).when(mRootActivityContainer).hasAwakeDisplay();
+            // Called when moving activity to pinned stack.
+            doNothing().when(mRootActivityContainer).ensureActivitiesVisible(any(), anyInt(),
+                    anyBoolean());
+
+            // Create a default display and put a home stack on it so that we'll always have
+            // something focusable.
+            mDefaultDisplay = TestActivityDisplay.create(mStackSupervisor, DEFAULT_DISPLAY);
+            spyOn(mDefaultDisplay);
+            mRootActivityContainer.addChild(mDefaultDisplay, ActivityDisplay.POSITION_TOP);
+            mDefaultDisplay.createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+            final TaskRecord task = new TaskBuilder(mStackSupervisor)
+                    .setStack(mDefaultDisplay.getHomeStack()).build();
+            new ActivityBuilder(this).setTask(task).build();
+
+            doReturn(mDefaultDisplay).when(mRootActivityContainer).getDefaultDisplay();
         }
 
         @Override
@@ -508,25 +535,14 @@ class ActivityTestsBase {
      * setup not available in the test environment. Also specifies an injector for
      */
     protected class TestActivityStackSupervisor extends ActivityStackSupervisor {
-        private ActivityDisplay mDisplay;
         private KeyguardController mKeyguardController;
 
         TestActivityStackSupervisor(ActivityTaskManagerService service, Looper looper) {
             super(service, looper);
             spyOn(this);
-            mDisplayManager =
-                    (DisplayManager) mService.mContext.getSystemService(Context.DISPLAY_SERVICE);
             mWindowManager = prepareMockWindowManager();
             mKeyguardController = mock(KeyguardController.class);
-            setWindowContainerController(mock(RootWindowContainerController.class));
 
-            // Invoked during {@link ActivityStack} creation.
-            doNothing().when(this).updateUIDsPresentOnDisplay();
-            // Always keep things awake.
-            doReturn(true).when(this).hasAwakeDisplay();
-            // Called when moving activity to pinned stack.
-            doNothing().when(this).ensureActivitiesVisibleLocked(any(), anyInt(),
-                    anyBoolean());
             // Do not schedule idle timeouts
             doNothing().when(this).scheduleIdleTimeoutLocked(any());
             // unit test version does not handle launch wake lock
@@ -537,21 +553,8 @@ class ActivityTestsBase {
         }
 
         @Override
-        public void initialize() {
-            super.initialize();
-            mDisplay = TestActivityDisplay.create(this, DEFAULT_DISPLAY);
-            spyOn(mDisplay);
-            addChild(mDisplay, ActivityDisplay.POSITION_TOP);
-        }
-
-        @Override
         public KeyguardController getKeyguardController() {
             return mKeyguardController;
-        }
-
-        @Override
-        ActivityDisplay getDefaultDisplay() {
-            return mDisplay;
         }
 
         @Override
@@ -571,7 +574,7 @@ class ActivityTestsBase {
                 DisplayInfo info) {
             if (displayId == DEFAULT_DISPLAY) {
                 return new TestActivityDisplay(supervisor,
-                        supervisor.mDisplayManager.getDisplay(displayId));
+                        supervisor.mRootActivityContainer.mDisplayManager.getDisplay(displayId));
             }
             final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                     info, DEFAULT_DISPLAY_ADJUSTMENTS);
@@ -579,7 +582,7 @@ class ActivityTestsBase {
         }
 
         TestActivityDisplay(ActivityStackSupervisor supervisor, Display display) {
-            super(supervisor, display);
+            super(supervisor.mService.mRootActivityContainer, display);
             // Normally this comes from display-properties as exposed by WM. Without that, just
             // hard-code to FULLSCREEN for tests.
             setWindowingMode(WINDOWING_MODE_FULLSCREEN);
@@ -590,7 +593,7 @@ class ActivityTestsBase {
         @Override
         <T extends ActivityStack> T createStackUnchecked(int windowingMode, int activityType,
                 int stackId, boolean onTop) {
-            return new StackBuilder(mSupervisor).setDisplay(this)
+            return new StackBuilder(mSupervisor.mRootActivityContainer).setDisplay(this)
                     .setWindowingMode(windowingMode).setActivityType(activityType)
                     .setStackId(stackId).setOnTop(onTop).setCreateActivity(false).build();
         }
@@ -732,8 +735,8 @@ class ActivityTestsBase {
         }
     }
 
-    protected static class StackBuilder {
-        private final ActivityStackSupervisor mSupervisor;
+    static class StackBuilder {
+        private final RootActivityContainer mRootActivityContainer;
         private ActivityDisplay mDisplay;
         private int mStackId = -1;
         private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
@@ -741,9 +744,9 @@ class ActivityTestsBase {
         private boolean mOnTop = true;
         private boolean mCreateActivity = true;
 
-        StackBuilder(ActivityStackSupervisor supervisor) {
-            mSupervisor = supervisor;
-            mDisplay = mSupervisor.getDefaultDisplay();
+        StackBuilder(RootActivityContainer root) {
+            mRootActivityContainer = root;
+            mDisplay = mRootActivityContainer.getDefaultDisplay();
         }
 
         StackBuilder setWindowingMode(int windowingMode) {
@@ -780,7 +783,8 @@ class ActivityTestsBase {
         <T extends ActivityStack> T build() {
             final int stackId = mStackId >= 0 ? mStackId : mDisplay.getNextStackId();
             if (mWindowingMode == WINDOWING_MODE_PINNED) {
-                return (T) new PinnedActivityStack(mDisplay, stackId, mSupervisor, mOnTop) {
+                return (T) new PinnedActivityStack(mDisplay, stackId,
+                        mRootActivityContainer.mStackSupervisor, mOnTop) {
                     @Override
                     Rect getDefaultPictureInPictureBounds(float aspectRatio) {
                         return new Rect(50, 50, 100, 100);
@@ -796,7 +800,8 @@ class ActivityTestsBase {
                     }
                 };
             } else {
-                return (T) new TestActivityStack(mDisplay, stackId, mSupervisor, mWindowingMode,
+                return (T) new TestActivityStack(mDisplay, stackId,
+                        mRootActivityContainer.mStackSupervisor, mWindowingMode,
                         mActivityType, mOnTop, mCreateActivity);
             }
         }

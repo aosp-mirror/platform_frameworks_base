@@ -17,6 +17,7 @@ package android.hardware.location;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Intent;
 
@@ -30,6 +31,7 @@ import com.android.internal.util.Preconditions;
  *
  * @hide
  */
+@SystemApi
 public class ContextHubIntentEvent {
     @ContextHubManager.Event private final int mEventType;
 

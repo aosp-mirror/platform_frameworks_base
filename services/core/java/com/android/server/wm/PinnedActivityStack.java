@@ -41,7 +41,7 @@ class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
     PinnedStackWindowController createStackWindowController(int displayId, boolean onTop,
             Rect outBounds) {
         return new PinnedStackWindowController(mStackId, this, displayId, onTop, outBounds,
-                mStackSupervisor.mWindowManager);
+                mRootActivityContainer.mWindowManager);
     }
 
     Rect getDefaultPictureInPictureBounds(float aspectRatio) {

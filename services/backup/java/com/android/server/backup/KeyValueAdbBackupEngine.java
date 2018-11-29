@@ -5,7 +5,8 @@ import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
 
-import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_FILENAME;
+import static com.android.server.backup.UserBackupManagerService.OP_TYPE_BACKUP_WAIT;
 
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
@@ -50,7 +51,7 @@ public class KeyValueAdbBackupEngine {
     private static final String BACKUP_KEY_VALUE_BACKUP_DATA_FILENAME_SUFFIX = ".data";
     private static final String BACKUP_KEY_VALUE_NEW_STATE_FILENAME_SUFFIX = ".new";
 
-    private BackupManagerService mBackupManagerService;
+    private UserBackupManagerService mBackupManagerService;
     private final PackageManager mPackageManager;
     private final OutputStream mOutput;
     private final PackageInfo mCurrentPackage;
@@ -66,7 +67,7 @@ public class KeyValueAdbBackupEngine {
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     public KeyValueAdbBackupEngine(OutputStream output, PackageInfo packageInfo,
-            BackupManagerService backupManagerService, PackageManager packageManager,
+            UserBackupManagerService backupManagerService, PackageManager packageManager,
             File baseStateDir, File dataDir) {
         mOutput = output;
         mCurrentPackage = packageInfo;
@@ -85,7 +86,7 @@ public class KeyValueAdbBackupEngine {
         mNewStateName = new File(mStateDir,
                 pkg + BACKUP_KEY_VALUE_NEW_STATE_FILENAME_SUFFIX);
 
-        mManifestFile = new File(mDataDir, BackupManagerService.BACKUP_MANIFEST_FILENAME);
+        mManifestFile = new File(mDataDir, BACKUP_MANIFEST_FILENAME);
         mAgentTimeoutParameters = Preconditions.checkNotNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");

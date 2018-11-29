@@ -21,19 +21,19 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/threads.h>
 
-#include <android_view_InputChannel.h>
 #include <android/graphics/Region.h>
 #include <ui/Region.h>
 
 #include "android_hardware_input_InputWindowHandle.h"
 #include "android_hardware_input_InputApplicationHandle.h"
+#include "android_util_Binder.h"
 
 namespace android {
 
 static struct {
     jfieldID ptr;
     jfieldID inputApplicationHandle;
-    jfieldID inputChannel;
+    jfieldID token;
     jfieldID name;
     jfieldID layoutParamsFlags;
     jfieldID layoutParamsType;
@@ -42,6 +42,7 @@ static struct {
     jfieldID frameTop;
     jfieldID frameRight;
     jfieldID frameBottom;
+    jfieldID surfaceInset;
     jfieldID scaleFactor;
     jfieldID touchableRegion;
     jfieldID visible;
@@ -61,9 +62,7 @@ static Mutex gHandleMutex;
 
 // --- NativeInputWindowHandle ---
 
-NativeInputWindowHandle::NativeInputWindowHandle(
-        const sp<InputApplicationHandle>& inputApplicationHandle, jweak objWeak) :
-        InputWindowHandle(inputApplicationHandle),
+NativeInputWindowHandle::NativeInputWindowHandle(jweak objWeak) :
         mObjWeak(objWeak) {
 }
 
@@ -86,13 +85,12 @@ bool NativeInputWindowHandle::updateInfo() {
 
     mInfo.touchableRegion.clear();
 
-    jobject inputChannelObj = env->GetObjectField(obj,
-            gInputWindowHandleClassInfo.inputChannel);
-    if (inputChannelObj) {
-        mInfo.inputChannel = android_view_InputChannel_getInputChannel(env, inputChannelObj);
-        env->DeleteLocalRef(inputChannelObj);
+    jobject tokenObj = env->GetObjectField(obj,
+            gInputWindowHandleClassInfo.token);
+    if (tokenObj) {
+        mInfo.token = ibinderForJavaObject(env, tokenObj);
     } else {
-        mInfo.inputChannel.clear();
+        mInfo.token.clear();
     }
 
     jstring nameObj = jstring(env->GetObjectField(obj,
@@ -120,7 +118,9 @@ bool NativeInputWindowHandle::updateInfo() {
             gInputWindowHandleClassInfo.frameRight);
     mInfo.frameBottom = env->GetIntField(obj,
             gInputWindowHandleClassInfo.frameBottom);
-    mInfo.scaleFactor = env->GetFloatField(obj,
+    mInfo.surfaceInset = env->GetIntField(obj,
+            gInputWindowHandleClassInfo.surfaceInset);
+    mInfo.globalScaleFactor = env->GetFloatField(obj,
             gInputWindowHandleClassInfo.scaleFactor);
 
     jobject regionObj = env->GetObjectField(obj,
@@ -155,6 +155,18 @@ bool NativeInputWindowHandle::updateInfo() {
     mInfo.displayId = env->GetIntField(obj,
             gInputWindowHandleClassInfo.displayId);
 
+    jobject inputApplicationHandleObj = env->GetObjectField(obj,
+            gInputWindowHandleClassInfo.inputApplicationHandle);
+    if (inputApplicationHandleObj) {
+        sp<InputApplicationHandle> inputApplicationHandle =
+            android_server_InputApplicationHandle_getHandle(env, inputApplicationHandleObj);
+        if (inputApplicationHandle != nullptr) {
+            inputApplicationHandle->updateInfo();
+            mInfo.applicationInfo = *(inputApplicationHandle->getInfo());
+        }
+        env->DeleteLocalRef(inputApplicationHandleObj);
+    }
+
     env->DeleteLocalRef(obj);
     return true;
 }
@@ -175,14 +187,8 @@ sp<NativeInputWindowHandle> android_server_InputWindowHandle_getHandle(
     if (ptr) {
         handle = reinterpret_cast<NativeInputWindowHandle*>(ptr);
     } else {
-        jobject inputApplicationHandleObj = env->GetObjectField(inputWindowHandleObj,
-                gInputWindowHandleClassInfo.inputApplicationHandle);
-        sp<InputApplicationHandle> inputApplicationHandle =
-                android_server_InputApplicationHandle_getHandle(env, inputApplicationHandleObj);
-        env->DeleteLocalRef(inputApplicationHandleObj);
-
         jweak objWeak = env->NewWeakGlobalRef(inputWindowHandleObj);
-        handle = new NativeInputWindowHandle(inputApplicationHandle, objWeak);
+        handle = new NativeInputWindowHandle(objWeak);
         handle->incStrong((void*)android_server_InputWindowHandle_getHandle);
         env->SetLongField(inputWindowHandleObj, gInputWindowHandleClassInfo.ptr,
                 reinterpret_cast<jlong>(handle));
@@ -236,8 +242,8 @@ int register_android_server_InputWindowHandle(JNIEnv* env) {
             clazz,
             "inputApplicationHandle", "Landroid/view/InputApplicationHandle;");
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.inputChannel, clazz,
-            "inputChannel", "Landroid/view/InputChannel;");
+    GET_FIELD_ID(gInputWindowHandleClassInfo.token, clazz,
+            "token", "Landroid/os/IBinder;");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.name, clazz,
             "name", "Ljava/lang/String;");
@@ -262,6 +268,9 @@ int register_android_server_InputWindowHandle(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.frameBottom, clazz,
             "frameBottom", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.surfaceInset, clazz,
+            "surfaceInset", "I");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.scaleFactor, clazz,
             "scaleFactor", "F");
