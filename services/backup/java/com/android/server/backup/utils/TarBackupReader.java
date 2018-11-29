@@ -34,9 +34,9 @@ import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_SYSTEM_APP_NO
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSIONS_MATCH;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER;
 
-import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
-import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_FILENAME;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_VERSION;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA_FILENAME;

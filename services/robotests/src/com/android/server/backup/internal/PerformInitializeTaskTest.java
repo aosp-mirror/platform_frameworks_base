@@ -44,7 +44,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import com.android.internal.backup.IBackupTransport;
-import com.android.server.backup.GlobalBackupManagerService;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.testing.TransportData;
@@ -212,7 +212,7 @@ public class PerformInitializeTaskTest {
         performInitializeTask.run();
 
         assertLogcatContains(
-                GlobalBackupManagerService.TAG,
+                BackupManagerService.TAG,
                 log -> log.msg.contains("finishBackup()") && log.type >= Log.ERROR);
     }
 
@@ -225,7 +225,7 @@ public class PerformInitializeTaskTest {
         performInitializeTask.run();
 
         assertLogcatContains(
-                GlobalBackupManagerService.TAG,
+                BackupManagerService.TAG,
                 log -> log.msg.contains("initializeDevice()") && log.type >= Log.ERROR);
     }
 

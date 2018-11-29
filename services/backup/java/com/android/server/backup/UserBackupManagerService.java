@@ -18,10 +18,10 @@ package com.android.server.backup;
 
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND;
 
-import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
-import static com.android.server.backup.GlobalBackupManagerService.DEBUG_SCHEDULING;
-import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_FULL_CONFIRMATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_OP_COMPLETE;
@@ -2665,7 +2665,7 @@ public class UserBackupManagerService {
             boolean wasEnabled = mEnabled;
             synchronized (this) {
                 // TODO(b/118520567): Clean up writing backup enabled logic.
-                GlobalBackupManagerService.writeBackupEnableState(enable, UserHandle.USER_SYSTEM);
+                BackupManagerService.writeBackupEnableState(enable, UserHandle.USER_SYSTEM);
                 mEnabled = enable;
             }
 

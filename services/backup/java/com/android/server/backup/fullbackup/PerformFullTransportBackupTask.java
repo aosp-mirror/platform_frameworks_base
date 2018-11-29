@@ -16,9 +16,9 @@
 
 package com.android.server.backup.fullbackup;
 
-import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
-import static com.android.server.backup.GlobalBackupManagerService.DEBUG_SCHEDULING;
-import static com.android.server.backup.GlobalBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.UserBackupManagerService.OP_PENDING;
 import static com.android.server.backup.UserBackupManagerService.OP_TYPE_BACKUP;
 import static com.android.server.backup.UserBackupManagerService.OP_TYPE_BACKUP_WAIT;

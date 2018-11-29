@@ -18,8 +18,8 @@ package com.android.server.backup.utils;
 
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME;
 
-import static com.android.server.backup.GlobalBackupManagerService.DEBUG;
-import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.annotation.Nullable;
 import android.app.backup.BackupManagerMonitor;

@@ -16,7 +16,7 @@
 
 package com.android.server.backup.utils;
 
-import static com.android.server.backup.GlobalBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
