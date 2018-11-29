@@ -45,9 +45,6 @@ cc_defaults {
     ],
 
     product_variables: {
-        device_uses_hwc2: {
-            cflags: ["-DUSE_HWC2"],
-        },
         eng: {
             lto: {
                 never: true,
