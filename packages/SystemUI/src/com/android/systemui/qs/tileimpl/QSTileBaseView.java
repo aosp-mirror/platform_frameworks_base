@@ -198,7 +198,8 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         mIcon.setIcon(state, allowAnimations);
         setContentDescription(state.contentDescription);
 
-        mAccessibilityClass = state.expandedAccessibilityClassName;
+        mAccessibilityClass =
+                state.state == Tile.STATE_UNAVAILABLE ? null : state.expandedAccessibilityClassName;
         if (state instanceof QSTile.BooleanState) {
             boolean newState = ((BooleanState) state).value;
             if (mTileState != newState) {
