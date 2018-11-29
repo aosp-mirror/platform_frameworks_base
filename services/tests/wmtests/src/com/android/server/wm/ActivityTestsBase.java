@@ -411,8 +411,7 @@ class ActivityTestsBase {
 
         void initRootActivityContainerMocks(WindowManagerService wm) {
             spyOn(mRootActivityContainer);
-            mRootActivityContainer.setWindowContainerController(
-                    mock(RootWindowContainerController.class));
+            mRootActivityContainer.setWindowContainer(mock(RootWindowContainer.class));
             mRootActivityContainer.mWindowManager = wm;
             mRootActivityContainer.mDisplayManager =
                     (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
