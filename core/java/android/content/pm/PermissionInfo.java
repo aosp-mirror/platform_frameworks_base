@@ -310,7 +310,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public CharSequence nonLocalizedDescription;
 
     /**
-     * If {@code true} an application targeting {@link Build.VERSION_CODES.Q} <em>must</em>
+     * If {@code true} an application targeting {@link Build.VERSION_CODES#Q} <em>must</em>
      * include permission data usage information in order to be able to be granted this permission.
      */
     public boolean usageInfoRequired;
