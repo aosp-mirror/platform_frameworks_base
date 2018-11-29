@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.net;
 
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_WIFI;
@@ -72,7 +72,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
@@ -142,9 +141,8 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.BroadcastInterceptingContext.FutureIntent;
-import com.android.server.net.NetworkPolicyManagerInternal;
-import com.android.server.net.NetworkPolicyManagerService;
-import com.android.server.net.NetworkStatsManagerInternal;
+import com.android.server.DeviceIdleController;
+import com.android.server.LocalServices;
 
 import com.google.common.util.concurrent.AbstractFuture;
 
@@ -195,15 +193,6 @@ import java.util.stream.Collectors;
 
 /**
  * Tests for {@link NetworkPolicyManagerService}.
- *
- * <p>Typical usage:
- *
- * <pre><code>
-    m -j32 FrameworksServicesTests && adb install -r -g \
-    ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk && \
-    adb shell am instrument -e class "com.android.server.NetworkPolicyManagerServiceTest" -w \
-    "com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner"
- * </code></pre>
  */
 @RunWith(AndroidJUnit4.class)
 @MediumTest
@@ -376,7 +365,7 @@ public class NetworkPolicyManagerServiceTest {
                 return null;
             }
         }).when(mActivityManager).registerUidObserver(any(), anyInt(),
-                eq(NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE), isNull(String.class));
+                eq(NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE), any(String.class));
 
         mFutureIntent = newRestrictBackgroundChangedFuture();
         mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager,
@@ -425,7 +414,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // catch INetworkManagementEventObserver during systemReady()
         final ArgumentCaptor<INetworkManagementEventObserver> networkObserver =
-              ArgumentCaptor.forClass(INetworkManagementEventObserver.class);
+                ArgumentCaptor.forClass(INetworkManagementEventObserver.class);
         verify(mNetworkManager).registerObserver(networkObserver.capture());
         mNetworkObserver = networkObserver.getValue();
 
@@ -1782,7 +1771,7 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private static NetworkPolicy buildFakeMobilePolicy(int cycleDay, long warningBytes,
-            long limitBytes, boolean inferred){
+            long limitBytes, boolean inferred) {
         final NetworkTemplate template = buildTemplateMobileAll(FAKE_SUBSCRIBER_ID);
         return new NetworkPolicy(template, cycleDay, new Time().timezone, warningBytes,
                 limitBytes, SNOOZE_NEVER, SNOOZE_NEVER, true, inferred);
@@ -1880,7 +1869,7 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private static void assertNotificationType(int expected, String actualTag) {
-        assertEquals("notification type mismatch for '" + actualTag +"'",
+        assertEquals("notification type mismatch for '" + actualTag + "'",
                 Integer.toString(expected), actualTag.substring(actualTag.lastIndexOf(':') + 1));
     }
 
@@ -1914,7 +1903,8 @@ public class NetworkPolicyManagerServiceTest {
         final String action = ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED;
         final Intent intent = future.get(5, TimeUnit.SECONDS);
         assertNotNull("Didn't get a " + action + "intent in 5 seconds");
-        assertEquals("Wrong package on " + action + " intent", expectedPackage, intent.getPackage());
+        assertEquals("Wrong package on " + action + " intent",
+                expectedPackage, intent.getPackage());
     }
 
     // TODO: replace by Truth, Hamcrest, or a similar tool.
@@ -1935,7 +1925,7 @@ public class NetworkPolicyManagerServiceTest {
         }
         if (errors.length() > 0) {
             fail("assertContainsInAnyOrder(expected=" + Arrays.toString(expected)
-                    + ", actual=" + Arrays.toString(actual) +") failed: \n" + errors);
+                    + ", actual=" + Arrays.toString(actual) + ") failed: \n" + errors);
         }
     }
 
@@ -1998,7 +1988,7 @@ public class NetworkPolicyManagerServiceTest {
 
         @Override
         public Void answer(InvocationOnMock invocation) throws Throwable {
-            Log.d(TAG,"counting down on answer: " + invocation);
+            Log.d(TAG, "counting down on answer: " + invocation);
             latch.countDown();
             return null;
         }
@@ -2036,8 +2026,8 @@ public class NetworkPolicyManagerServiceTest {
             final String assetPath = NETPOLICY_DIR + "/" + mNetpolicyXml;
             final File netConfigFile = new File(mPolicyDir, "netpolicy.xml");
             Log.d(TAG, "Creating " + netConfigFile + " from asset " + assetPath);
-            try (final InputStream in = context.getResources().getAssets().open(assetPath);
-                    final OutputStream out = new FileOutputStream(netConfigFile)) {
+            try (InputStream in = context.getResources().getAssets().open(assetPath);
+                    OutputStream out = new FileOutputStream(netConfigFile)) {
                 Streams.copy(in, out);
             }
         }
@@ -2049,9 +2039,7 @@ public class NetworkPolicyManagerServiceTest {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
     public @interface NetPolicyXml {
-
-        public String value() default "";
-
+        String value() default "";
     }
 
     /**
