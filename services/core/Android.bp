@@ -30,6 +30,10 @@ java_library_static {
         "android.hardware.tv.cec-V1.0-java",
     ],
 
+    required: [
+        "gps_debug.conf",
+    ],
+
     static_libs: [
         "time_zone_distro",
         "time_zone_distro_installer",
@@ -65,4 +69,10 @@ java_genrule {
 java_library {
     name: "services.core",
     static_libs: ["services.core.priorityboosted"],
+}
+
+
+prebuilt_etc {
+    name: "gps_debug.conf",
+    src: "java/com/android/server/location/gps_debug.conf",
 }
