@@ -165,7 +165,7 @@ private:
     const bool mSkipZeroDiffOutput;
 
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsNoCondition);
-  FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset);
     FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
