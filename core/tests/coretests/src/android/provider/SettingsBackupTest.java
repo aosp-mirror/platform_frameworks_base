@@ -662,7 +662,8 @@ public class SettingsBackupTest {
                  Settings.Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION,
                  Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE,
                  Settings.Secure.FLASHLIGHT_AVAILABLE,
-                 Settings.Secure.FLASHLIGHT_ENABLED);
+                 Settings.Secure.FLASHLIGHT_ENABLED,
+                 Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {
