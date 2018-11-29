@@ -434,7 +434,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         mInitialized = true;
         mRunningTasks = createRunningTasks();
-        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext, mHandler.getLooper());
+
+        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext,
+                mHandler.getLooper());
         mKeyguardController = new KeyguardController(mService, this);
 
         mPersisterQueue = new PersisterQueue();
