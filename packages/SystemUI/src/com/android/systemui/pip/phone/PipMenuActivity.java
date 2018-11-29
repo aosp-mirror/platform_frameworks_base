@@ -19,6 +19,8 @@ package com.android.systemui.pip.phone;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.provider.Settings.ACTION_PICTURE_IN_PICTURE_SETTINGS;
+import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTROLS;
+import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS;
 
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ACTIONS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ALLOW_TIMEOUT;
@@ -65,6 +67,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -90,8 +93,8 @@ public class PipMenuActivity extends Activity {
     public static final int MESSAGE_UPDATE_DISMISS_FRACTION = 5;
     public static final int MESSAGE_ANIMATION_ENDED = 6;
 
-    private static final long INITIAL_DISMISS_DELAY = 3500;
-    private static final long POST_INTERACTION_DISMISS_DELAY = 2000;
+    private static final int INITIAL_DISMISS_DELAY = 3500;
+    private static final int POST_INTERACTION_DISMISS_DELAY = 2000;
     private static final long MENU_FADE_DURATION = 125;
 
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
@@ -105,6 +108,7 @@ public class PipMenuActivity extends Activity {
 
     private final List<RemoteAction> mActions = new ArrayList<>();
 
+    private AccessibilityManager mAccessibilityManager;
     private View mViewRoot;
     private Drawable mBackgroundDrawable;
     private View mMenuContainer;
@@ -194,6 +198,7 @@ public class PipMenuActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pip_menu_activity);
 
+        mAccessibilityManager = getSystemService(AccessibilityManager.class);
         mBackgroundDrawable = new ColorDrawable(Color.BLACK);
         mBackgroundDrawable.setAlpha(0);
         mViewRoot = findViewById(R.id.background);
@@ -639,8 +644,10 @@ public class PipMenuActivity extends Activity {
         mHandler.removeCallbacks(mFinishRunnable);
     }
 
-    private void repostDelayedFinish(long delay) {
+    private void repostDelayedFinish(int delay) {
+        int recommendedTimeout = mAccessibilityManager.getRecommendedTimeoutMillis(delay,
+                FLAG_CONTENT_ICONS | FLAG_CONTENT_CONTROLS);
         mHandler.removeCallbacks(mFinishRunnable);
-        mHandler.postDelayed(mFinishRunnable, delay);
+        mHandler.postDelayed(mFinishRunnable, recommendedTimeout);
     }
 }
