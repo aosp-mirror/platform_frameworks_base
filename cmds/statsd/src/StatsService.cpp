@@ -1089,6 +1089,14 @@ hardware::Return<void> StatsService::reportBatteryCausedShutdown(
     return hardware::Void();
 }
 
+hardware::Return<void> StatsService::reportUsbPortOverheatEvent(
+        const UsbPortOverheatEvent& usbPortOverheatEvent) {
+    LogEvent event(getWallClockSec() * NS_PER_SEC, getElapsedRealtimeNs(), usbPortOverheatEvent);
+    mProcessor->OnLogEvent(&event);
+
+    return hardware::Void();
+}
+
 void StatsService::binderDied(const wp <IBinder>& who) {
     ALOGW("statscompanion service died");
     StatsdStats::getInstance().noteSystemServerRestart(getWallClockSec());

@@ -199,6 +199,12 @@ public:
     virtual Return<void> reportBatteryCausedShutdown(
             const BatteryCausedShutdown& batteryCausedShutdown) override;
 
+    /**
+     * Binder call to get UsbPortOverheatEvent atom.
+     */
+    virtual Return<void> reportUsbPortOverheatEvent(
+            const UsbPortOverheatEvent& usbPortOverheatEvent) override;
+
     /** IBinder::DeathRecipient */
     virtual void binderDied(const wp<IBinder>& who) override;
 

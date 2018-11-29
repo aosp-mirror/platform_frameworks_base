@@ -276,6 +276,24 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                                  Value(batteryCausedShutdown.voltageMicroV)));
 }
 
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   const UsbPortOverheatEvent& usbPortOverheatEvent) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::USB_PORT_OVERHEAT_EVENT_REPORTED;
+
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)),
+                                 Value(usbPortOverheatEvent.plugTemperatureDeciC)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)),
+                                 Value(usbPortOverheatEvent.maxTemperatureDeciC)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)),
+                                 Value(usbPortOverheatEvent.timeToOverheat)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)),
+                                 Value(usbPortOverheatEvent.timeToHysteresis)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(5)),
+                                 Value(usbPortOverheatEvent.timeToInactive)));
+}
+
 LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, 0) {}
 
 LogEvent::LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid) {

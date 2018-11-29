@@ -193,6 +193,7 @@ message Atom {
         LowStorageStateChanged low_storage_state_changed = 130;
         GnssNfwNotificationReported gnss_nfw_notification_reported = 131;
         GnssConfigurationReported gnss_configuration_reported = 132;
+        UsbPortOverheatEvent usb_port_overheat_event_reported = 133;
     }
 
     // Pulled events will start at field 10000.
@@ -2467,6 +2468,24 @@ message BinaryPushStateChanged {
     }
     optional State state = 3;
 }
+
+/** Represents USB port overheat event. */
+message UsbPortOverheatEvent {
+    /* Temperature of USB port at USB plug event, in 1/10ths of degree C. */
+    optional int32 plug_temperature_deci_c = 1;
+
+    /* Maximum temperature of USB port during overheat event, in 1/10ths of degree C. */
+    optional int32 max_temperature_deci_c = 2;
+
+    /* Time between USB plug event and overheat threshold trip, in seconds. */
+    optional int32 time_to_overheat_secs = 3;
+
+    /* Time between overheat threshold trip and hysteresis, in seconds. */
+    optional int32 time_to_hysteresis_secs = 4;
+
+    /* Time between hysteresis and active mitigation ending, in seconds. */
+    optional int32 time_to_inactive_secs = 5;
+};
 
 /*
  * Logs when a connection becomes available and lost.
