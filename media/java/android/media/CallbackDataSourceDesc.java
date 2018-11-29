@@ -31,18 +31,18 @@ import android.annotation.NonNull;
  *
  */
 public class CallbackDataSourceDesc extends DataSourceDesc {
-    private Media2DataSource mMedia2DataSource;
+    private DataSourceCallback mDataSourceCallback;
 
     private CallbackDataSourceDesc() {
     }
 
     /**
-     * Return the Media2DataSource of this data source.
+     * Return the DataSourceCallback of this data source.
      * It's meaningful only when {@code getType} returns {@link #TYPE_CALLBACK}.
-     * @return the Media2DataSource of this data source
+     * @return the DataSourceCallback of this data source
      */
-    public Media2DataSource getMedia2DataSource() {
-        return mMedia2DataSource;
+    public DataSourceCallback getDataSourceCallback() {
+        return mDataSourceCallback;
     }
 
     /**
@@ -60,7 +60,7 @@ public class CallbackDataSourceDesc extends DataSourceDesc {
      * </pre>
      */
     public static class Builder extends BuilderBase<Builder> {
-        private Media2DataSource mMedia2DataSource;
+        private DataSourceCallback mDataSourceCallback;
 
         /**
          * Constructs a new Builder with the defaults.
@@ -79,7 +79,7 @@ public class CallbackDataSourceDesc extends DataSourceDesc {
             if (dsd == null) {
                 return;  // use default
             }
-            mMedia2DataSource = dsd.mMedia2DataSource;
+            mDataSourceCallback = dsd.mDataSourceCallback;
         }
 
         /**
@@ -92,21 +92,21 @@ public class CallbackDataSourceDesc extends DataSourceDesc {
         public @NonNull CallbackDataSourceDesc build() {
             CallbackDataSourceDesc dsd = new CallbackDataSourceDesc();
             super.build(dsd);
-            dsd.mMedia2DataSource = mMedia2DataSource;
+            dsd.mDataSourceCallback = mDataSourceCallback;
 
             return dsd;
         }
 
         /**
-         * Sets the data source (Media2DataSource) to use.
+         * Sets the data source (DataSourceCallback) to use.
          *
-         * @param m2ds the Media2DataSource for the media to play
+         * @param dscb the DataSourceCallback for the media to play
          * @return the same Builder instance.
-         * @throws NullPointerException if m2ds is null.
+         * @throws NullPointerException if dscb is null.
          */
-        public @NonNull Builder setDataSource(@NonNull Media2DataSource m2ds) {
-            Media2Utils.checkArgument(m2ds != null, "data source cannot be null.");
-            mMedia2DataSource = m2ds;
+        public @NonNull Builder setDataSource(@NonNull DataSourceCallback dscb) {
+            Media2Utils.checkArgument(dscb != null, "data source cannot be null.");
+            mDataSourceCallback = dscb;
             return this;
         }
     }
