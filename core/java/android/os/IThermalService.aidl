@@ -67,7 +67,7 @@ interface IThermalService {
 
     /**
       * Register a listener for thermal status change.
-      * @param listener the IThermalStatusListener to be notified.
+      * @param listener the {@link android.os.IThermalStatusListener} to be notified.
       * @return true if registered successfully.
       * {@hide}
       */
@@ -75,7 +75,7 @@ interface IThermalService {
 
     /**
       * Unregister a previously-registered listener for thermal status.
-      * @param listener the IThermalStatusListener to no longer be notified.
+      * @param listener the {@link android.os.IThermalStatusListener} to no longer be notified.
       * @return true if unregistered successfully.
       * {@hide}
       */
@@ -86,5 +86,5 @@ interface IThermalService {
       * @return status defined in {@link android.os.Temperature}.
       * {@hide}
       */
-    int getCurrentStatus();
+    int getCurrentThermalStatus();
 }

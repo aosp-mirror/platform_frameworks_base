@@ -28,7 +28,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-public class Temperature implements Parcelable {
+public final class Temperature implements Parcelable {
     /** Temperature value */
     private float mValue;
     /** A temperature type from ThermalHAL */
