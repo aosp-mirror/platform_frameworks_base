@@ -217,10 +217,19 @@ std::set<ResTable_config> AssetManager2::GetResourceConfigurations(bool exclude_
   ATRACE_NAME("AssetManager::GetResourceConfigurations");
   std::set<ResTable_config> configurations;
   for (const PackageGroup& package_group : package_groups_) {
+    bool found_system_package = false;
     for (const ConfiguredPackage& package : package_group.packages_) {
       if (exclude_system && package.loaded_package_->IsSystem()) {
+        found_system_package = true;
         continue;
       }
+
+      if (exclude_system && package.loaded_package_->IsOverlay() && found_system_package) {
+        // Overlays must appear after the target package to take effect. Any overlay found in the
+        // same package as a system package is able to overlay system resources.
+        continue;
+      }
+
       package.loaded_package_->CollectConfigurations(exclude_mipmap, &configurations);
     }
   }
@@ -232,10 +241,19 @@ std::set<std::string> AssetManager2::GetResourceLocales(bool exclude_system,
   ATRACE_NAME("AssetManager::GetResourceLocales");
   std::set<std::string> locales;
   for (const PackageGroup& package_group : package_groups_) {
+    bool found_system_package = false;
     for (const ConfiguredPackage& package : package_group.packages_) {
       if (exclude_system && package.loaded_package_->IsSystem()) {
+        found_system_package = true;
         continue;
       }
+
+      if (exclude_system && package.loaded_package_->IsOverlay() && found_system_package) {
+        // Overlays must appear after the target package to take effect. Any overlay found in the
+        // same package as a system package is able to overlay system resources.
+        continue;
+      }
+
       package.loaded_package_->CollectLocales(merge_equivalent_languages, &locales);
     }
   }
