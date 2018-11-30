@@ -1128,6 +1128,39 @@ static jlong android_os_Process_getPss(JNIEnv* env, jobject clazz, jint pid)
     return pss * 1024;
 }
 
+static jlongArray android_os_Process_getRss(JNIEnv* env, jobject clazz, jint pid)
+{
+    // total, file, anon, swap
+    jlong rss[4] = {0, 0, 0, 0};
+    std::string status_path =
+            android::base::StringPrintf("/proc/%d/status", pid);
+    UniqueFile file = MakeUniqueFile(status_path.c_str(), "re");
+
+    char line[256];
+    while (fgets(line, sizeof(line), file.get())) {
+        jlong v;
+        if ( sscanf(line, "VmRSS: %" SCNd64 " kB", &v) == 1) {
+            rss[0] = v;
+        } else if ( sscanf(line, "RssFile: %" SCNd64 " kB", &v) == 1) {
+            rss[1] = v;
+        } else if ( sscanf(line, "RssAnon: %" SCNd64 " kB", &v) == 1) {
+            rss[2] = v;
+        } else if ( sscanf(line, "VmSwap: %" SCNd64 " kB", &v) == 1) {
+            rss[3] = v;
+        }
+    }
+
+    jlongArray rssArray = env->NewLongArray(4);
+    if (rssArray == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return NULL;
+    }
+
+    env->SetLongArrayRegion(rssArray, 0, 4, rss);
+
+    return rssArray;
+}
+
 jintArray android_os_Process_getPidsForCommands(JNIEnv* env, jobject clazz,
         jobjectArray commandNames)
 {
@@ -1253,6 +1286,7 @@ static const JNINativeMethod methods[] = {
     {"parseProcLine", "([BII[I[Ljava/lang/String;[J[F)Z", (void*)android_os_Process_parseProcLine},
     {"getElapsedCpuTime", "()J", (void*)android_os_Process_getElapsedCpuTime},
     {"getPss", "(I)J", (void*)android_os_Process_getPss},
+    {"getRss", "(I)[J", (void*)android_os_Process_getRss},
     {"getPidsForCommands", "([Ljava/lang/String;)[I", (void*)android_os_Process_getPidsForCommands},
     //{"setApplicationObject", "(Landroid/os/IBinder;)V", (void*)android_os_Process_setApplicationObject},
     {"killProcessGroup", "(II)I", (void*)android_os_Process_killProcessGroup},
