@@ -30,6 +30,9 @@ import android.util.TypedValue;
 
 import dalvik.system.CloseGuard;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Abstraction for an Animation that can be applied to Views, Surfaces, or
  * other objects. See the {@link android.view.animation animation package
@@ -182,10 +185,14 @@ public abstract class Animation implements Cloneable {
     Interpolator mInterpolator;
 
     /**
-     * The animation listener to be notified when the animation starts, ends or repeats.
+     * An animation listener to be notified when the animation starts, ends or repeats.
      */
-    @UnsupportedAppUsage
-    AnimationListener mListener;
+    private AnimationListener mListener;
+
+    /**
+     * A list of animation listeners to be notified when the animation starts, ends or repeats.
+     */
+    private List<AnimationListener> mListeners;
 
     /**
      * Desired Z order mode during animation.
@@ -371,23 +378,17 @@ public abstract class Animation implements Cloneable {
         if (mListenerHandler == null) {
             mOnStart = new Runnable() {
                 public void run() {
-                    if (mListener != null) {
-                        mListener.onAnimationStart(Animation.this);
-                    }
+                    dispatchAnimationStart();
                 }
             };
             mOnRepeat = new Runnable() {
                 public void run() {
-                    if (mListener != null) {
-                        mListener.onAnimationRepeat(Animation.this);
-                    }
+                    dispatchAnimationRepeat();
                 }
             };
             mOnEnd = new Runnable() {
                 public void run() {
-                    if (mListener != null) {
-                        mListener.onAnimationEnd(Animation.this);
-                    }
+                    dispatchAnimationEnd();
                 }
             };
         }
@@ -830,6 +831,10 @@ public abstract class Animation implements Cloneable {
         return true;
     }
 
+    private boolean hasAnimationListener() {
+        return mListener != null || (mListeners != null && !mListeners.isEmpty());
+    }
+
     /**
      * <p>Binds an animation listener to this animation. The animation listener
      * is notified of animation events such as the end of the animation or the
@@ -839,6 +844,32 @@ public abstract class Animation implements Cloneable {
      */
     public void setAnimationListener(AnimationListener listener) {
         mListener = listener;
+    }
+
+    /**
+     * <p>Adds an animation listener to this animation. The animation listener
+     * is notified of animation events such as the end of the animation or the
+     * repetition of the animation.</p>
+     *
+     * @param listener the animation listener to be notified
+     */
+    public void addAnimationListener(AnimationListener listener) {
+        if (mListeners == null) {
+            mListeners = new ArrayList<>(1);
+        }
+        mListeners.add(listener);
+    }
+
+    /**
+     * <p>Removes an animation listener that has been added with
+     * {@link #addAnimationListener(AnimationListener)}.</p>
+     *
+     * @param listener the animation listener to be removed
+     */
+    public void removeAnimationListener(AnimationListener listener) {
+        if (mListeners != null) {
+            mListeners.remove(listener);
+        }
     }
 
     /**
@@ -947,23 +978,56 @@ public abstract class Animation implements Cloneable {
     }
 
     private void fireAnimationStart() {
-        if (mListener != null) {
-            if (mListenerHandler == null) mListener.onAnimationStart(this);
+        if (hasAnimationListener()) {
+            if (mListenerHandler == null) dispatchAnimationStart();
             else mListenerHandler.postAtFrontOfQueue(mOnStart);
         }
     }
 
     private void fireAnimationRepeat() {
-        if (mListener != null) {
-            if (mListenerHandler == null) mListener.onAnimationRepeat(this);
+        if (hasAnimationListener()) {
+            if (mListenerHandler == null) dispatchAnimationRepeat();
             else mListenerHandler.postAtFrontOfQueue(mOnRepeat);
         }
     }
 
     private void fireAnimationEnd() {
-        if (mListener != null) {
-            if (mListenerHandler == null) mListener.onAnimationEnd(this);
+        if (hasAnimationListener()) {
+            if (mListenerHandler == null) dispatchAnimationEnd();
             else mListenerHandler.postAtFrontOfQueue(mOnEnd);
+        }
+    }
+
+    void dispatchAnimationStart() {
+        if (mListener != null) {
+            mListener.onAnimationStart(this);
+        }
+        if (mListeners != null && !mListeners.isEmpty()) {
+            for (AnimationListener listener : mListeners) {
+                listener.onAnimationStart(this);
+            }
+        }
+    }
+
+    void dispatchAnimationRepeat() {
+        if (mListener != null) {
+            mListener.onAnimationRepeat(this);
+        }
+        if (mListeners != null && !mListeners.isEmpty()) {
+            for (AnimationListener listener : mListeners) {
+                listener.onAnimationRepeat(this);
+            }
+        }
+    }
+
+    void dispatchAnimationEnd() {
+        if (mListener != null) {
+            mListener.onAnimationEnd(this);
+        }
+        if (mListeners != null && !mListeners.isEmpty()) {
+            for (AnimationListener listener : mListeners) {
+                listener.onAnimationEnd(this);
+            }
         }
     }
 
