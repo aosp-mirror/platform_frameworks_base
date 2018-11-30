@@ -28,6 +28,7 @@ import com.sun.tools.javac.util.Position;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -38,7 +39,9 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
 /**
@@ -108,8 +111,23 @@ public class UnsupportedAppUsageProcessor extends AbstractProcessor {
                 "startline",
                 "startcol",
                 "endline",
-                "endcol"
+                "endcol",
+                "properties"
         );
+    }
+
+    private String encodeAnnotationProperties(AnnotationMirror annotation) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> e
+                : annotation.getElementValues().entrySet()) {
+            if (sb.length() > 0) {
+                sb.append("&");
+            }
+            sb.append(e.getKey().getSimpleName())
+                    .append("=")
+                    .append(URLEncoder.encode(e.getValue().toString()));
+        }
+        return sb.toString();
     }
 
     /**
@@ -137,7 +155,8 @@ public class UnsupportedAppUsageProcessor extends AbstractProcessor {
                 lines.getLineNumber(pair.fst.pos().getStartPosition()),
                 lines.getColumnNumber(pair.fst.pos().getStartPosition()),
                 lines.getLineNumber(pair.fst.pos().getEndPosition(pair.snd.endPositions)),
-                lines.getColumnNumber(pair.fst.pos().getEndPosition(pair.snd.endPositions)));
+                lines.getColumnNumber(pair.fst.pos().getEndPosition(pair.snd.endPositions)),
+                encodeAnnotationProperties(unsupportedAppUsage));
     }
 
     /**
