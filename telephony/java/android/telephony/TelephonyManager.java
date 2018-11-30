@@ -9449,4 +9449,55 @@ public class TelephonyManager {
         }
         return false;
     }
+
+    /**
+     * Set preferred opportunistic data subscription id.
+     *
+     * <p>Requires that the calling app has carrier privileges on both primary and
+     * secondary subscriptions (see
+     * {@link #hasCarrierPrivileges}), or has permission
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
+     * @param subId which opportunistic subscription
+     * {@link SubscriptionManager#getOpportunisticSubscriptions} is preferred for cellular data.
+     * Pass {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID} to unset the preference
+     * @return true if request is accepted, else false.
+     *
+     */
+    public boolean setPreferredOpportunisticDataSubscription(int subId) {
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        try {
+            IAns iAlternativeNetworkService = getIAns();
+            if (iAlternativeNetworkService != null) {
+                return iAlternativeNetworkService.setPreferredData(subId, pkgForDebug);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setPreferredData RemoteException", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Get preferred opportunistic data subscription Id
+     *
+     * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}),
+     * or has permission {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}.
+     * @return subId preferred opportunistic subscription id or
+     * {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID} if there are no preferred
+     * subscription id
+     *
+     */
+    public int getPreferredOpportunisticDataSubscription() {
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+        try {
+            IAns iAlternativeNetworkService = getIAns();
+            if (iAlternativeNetworkService != null) {
+                subId = iAlternativeNetworkService.getPreferredData(pkgForDebug);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getPreferredData RemoteException", ex);
+        }
+        return subId;
+    }
 }
