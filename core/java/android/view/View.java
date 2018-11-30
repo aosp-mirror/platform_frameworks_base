@@ -16288,9 +16288,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
-    public void setAnimationMatrix(Matrix matrix) {
+    /**
+     * Changes the transformation matrix on the view. This is used in animation frameworks,
+     * such as {@link android.transition.Transition}. When the animation finishes, the matrix
+     * should be cleared by calling this method with <code>null</code> as the matrix parameter.
+     * Application developers should use transformation methods like {@link #setRotation(float)},
+     * {@link #setScaleX(float)}, {@link #setScaleX(float)}, {@link #setTranslationX(float)}}
+     * and {@link #setTranslationY(float)} (float)}} instead.
+     *
+     * @param matrix The matrix, null indicates that the matrix should be cleared.
+     */
+    public void setAnimationMatrix(@Nullable Matrix matrix) {
         invalidateViewProperty(true, false);
         mRenderNode.setAnimationMatrix(matrix);
         invalidateViewProperty(false, true);
