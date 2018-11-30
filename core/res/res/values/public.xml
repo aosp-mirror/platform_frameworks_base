@@ -2922,6 +2922,11 @@
         <public name="importantForContentCapture" />
         <public name="supportsMultipleDisplays" />
         <public name="useAppZygote" />
+        <public name="usageInfoRequired" />
+        <public name="dataSentOffDevice" />
+        <public name="dataSharedWithThirdParty" />
+        <public name="dataUsedForMonetization" />
+        <public name="dataRetentionTime" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">
