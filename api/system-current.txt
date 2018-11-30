@@ -6195,12 +6195,6 @@ package android.telephony.ims {
     method public android.telephony.ims.ImsSsInfo.Builder setProvisionStatus(int);
   }
 
-  public static abstract class ImsSsInfo.ClirInterrogationStatus implements java.lang.annotation.Annotation {
-  }
-
-  public static abstract class ImsSsInfo.ClirOutgoingState implements java.lang.annotation.Annotation {
-  }
-
   public final class ImsStreamMediaProfile implements android.os.Parcelable {
     ctor public ImsStreamMediaProfile(int, int, int, int, int);
     method public void copyFrom(android.telephony.ims.ImsStreamMediaProfile);
