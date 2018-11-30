@@ -116,8 +116,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_FAILURE;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS;
-import static com.android.server.pm.permission.PermissionsState
-        .PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
+import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -314,8 +313,7 @@ import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.DefaultPermissionGrantPolicy;
-import com.android.server.pm.permission.DefaultPermissionGrantPolicy
-        .DefaultPermissionGrantedCallback;
+import com.android.server.pm.permission.DefaultPermissionGrantPolicy.DefaultPermissionGrantedCallback;
 import com.android.server.pm.permission.PermissionManagerInternal;
 import com.android.server.pm.permission.PermissionManagerInternal.PermissionCallback;
 import com.android.server.pm.permission.PermissionManagerService;
@@ -374,6 +372,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -23207,6 +23206,45 @@ public class PackageManagerService extends IPackageManager.Stub
                 throws IOException {
             PackageManagerService.this.freeStorage(volumeUuid, bytes, storageFlags);
         }
+
+        @Override
+        public void forEachPackage(Consumer<PackageParser.Package> actionLocked) {
+            PackageManagerService.this.forEachPackage(actionLocked);
+        }
+
+        @Override
+        public ArraySet<String> getEnabledComponents(String packageName, int userId) {
+            synchronized (mPackages) {
+                PackageSetting setting = mSettings.getPackageLPr(packageName);
+                if (setting == null) {
+                    return new ArraySet<>();
+                }
+                return setting.getEnabledComponents(userId);
+            }
+        }
+
+        @Override
+        public ArraySet<String> getDisabledComponents(String packageName, int userId) {
+            synchronized (mPackages) {
+                PackageSetting setting = mSettings.getPackageLPr(packageName);
+                if (setting == null) {
+                    return new ArraySet<>();
+                }
+                return setting.getDisabledComponents(userId);
+            }
+        }
+
+        @Override
+        public @PackageManager.EnabledState int getApplicationEnabledState(
+                String packageName, int userId) {
+            synchronized (mPackages) {
+                PackageSetting setting = mSettings.getPackageLPr(packageName);
+                if (setting == null) {
+                    return COMPONENT_ENABLED_STATE_DEFAULT;
+                }
+                return setting.getEnabled(userId);
+            }
+        }
     }
 
     @GuardedBy("mPackages")
@@ -23325,6 +23363,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 mDefaultPermissionPolicy.revokeDefaultPermissionsFromLuiApps(packageNames, userId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
+    void forEachPackage(Consumer<PackageParser.Package> actionLocked) {
+        synchronized (mPackages) {
+            int numPackages = mPackages.size();
+            for (int i = 0; i < numPackages; i++) {
+                actionLocked.accept(mPackages.valueAt(i));
             }
         }
     }

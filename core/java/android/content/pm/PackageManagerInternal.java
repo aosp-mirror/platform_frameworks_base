@@ -28,6 +28,7 @@ import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManager.ResolveInfoFlags;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.internal.util.function.TriFunction;
@@ -37,6 +38,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 /**
  * Package manager local system service interface.
@@ -735,4 +737,22 @@ public abstract class PackageManagerInternal {
 
     /** Returns {@code true} if the given user requires extra badging for icons. */
     public abstract boolean userNeedsBadging(int userId);
+
+    /**
+     * Perform the given action for each package.
+     * Note that packages lock will be held while performin the actions.
+     *
+     * @param actionLocked action to be performed
+     */
+    public abstract void forEachPackage(Consumer<PackageParser.Package> actionLocked);
+
+    /** Returns the list of enabled components */
+    public abstract ArraySet<String> getEnabledComponents(String packageName, int userId);
+
+    /** Returns the list of disabled components */
+    public abstract ArraySet<String> getDisabledComponents(String packageName, int userId);
+
+    /** Returns whether the given package is enabled for the given user */
+    public abstract @PackageManager.EnabledState int getApplicationEnabledState(
+            String packageName, int userId);
 }

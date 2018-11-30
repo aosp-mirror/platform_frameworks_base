@@ -28,7 +28,7 @@ import java.util.function.IntFunction;
 
 /**
  * A utility class for handling unsigned integers and unsigned arithmetics, as well as syntactic
- * sugar methods for ByteBuffer. Useful for networking and packet manipulations.
+ * sugar methods for {@link ByteBuffer}. Useful for networking and packet manipulations.
  * {@hide}
  */
 public final class BitUtils {
@@ -150,5 +150,12 @@ public final class BitUtils {
         }
         TextUtils.wrap(builder, "[", "]");
         return builder.toString();
+    }
+
+    /**
+     * Converts long to byte array
+     */
+    public static byte[] toBytes(long l) {
+        return ByteBuffer.allocate(8).putLong(l).array();
     }
 }
