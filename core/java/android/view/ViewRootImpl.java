@@ -459,7 +459,7 @@ public final class ViewRootImpl implements ViewParent,
     final DisplayCutout.ParcelableWrapper mPendingDisplayCutout =
             new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
     boolean mPendingAlwaysConsumeNavBar;
-    private InsetsState mPendingInsets;
+    private InsetsState mPendingInsets = new InsetsState();
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
