@@ -1080,7 +1080,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(processMemoryState.rssInBytes);
             e.writeLong(processMemoryState.cacheInBytes);
             e.writeLong(processMemoryState.swapInBytes);
-            e.writeLong(processMemoryState.rssHighWatermarkInBytes);
+            e.writeLong(0);  // unused
             e.writeLong(processMemoryState.startTimeNanos);
             pulledData.add(e);
         }
@@ -1104,7 +1104,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(memoryStat.pgfault);
             e.writeLong(memoryStat.pgmajfault);
             e.writeLong(memoryStat.rssInBytes);
-            e.writeLong(memoryStat.rssHighWatermarkInBytes);
+            e.writeLong(0);  // unused
             e.writeLong(memoryStat.startTimeNanos);
             pulledData.add(e);
         }
