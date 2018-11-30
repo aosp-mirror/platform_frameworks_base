@@ -56,6 +56,7 @@ public class BinderCallsStatsService extends Binder {
         private static final String SETTINGS_DETAILED_TRACKING_KEY = "detailed_tracking";
         private static final String SETTINGS_UPLOAD_DATA_KEY = "upload_data";
         private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
+        private static final String SETTINGS_MAX_CALL_STATS_KEY = "max_call_stats_count";
 
         private boolean mEnabled;
         private final Uri mUri = Settings.Global.getUriFor(Settings.Global.BINDER_CALLS_STATS);
@@ -97,6 +98,9 @@ public class BinderCallsStatsService extends Binder {
             mBinderCallsStats.setSamplingInterval(mParser.getInt(
                     SETTINGS_SAMPLING_INTERVAL_KEY,
                     BinderCallsStats.PERIODIC_SAMPLING_INTERVAL_DEFAULT));
+            mBinderCallsStats.setSamplingInterval(mParser.getInt(
+                    SETTINGS_MAX_CALL_STATS_KEY,
+                    BinderCallsStats.MAX_BINDER_CALL_STATS_COUNT_DEFAULT));
 
 
             final boolean enabled =
