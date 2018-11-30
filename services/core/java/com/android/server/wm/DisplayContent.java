@@ -1546,6 +1546,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int dh = displayInfo.logicalHeight;
         config.orientation = (dw <= dh) ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
         config.windowConfiguration.setWindowingMode(getWindowingMode());
+        config.windowConfiguration.setDisplayWindowingMode(getWindowingMode());
         config.windowConfiguration.setRotation(displayInfo.rotation);
 
         final float density = mDisplayMetrics.density;
@@ -1951,6 +1952,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void onAppTransitionDone() {
         super.onAppTransitionDone();
         mWmService.mWindowsChanged = true;
+    }
+
+    @Override
+    public void setWindowingMode(int windowingMode) {
+        super.setWindowingMode(windowingMode);
+        super.setDisplayWindowingMode(windowingMode);
+    }
+
+    @Override
+    void setDisplayWindowingMode(int windowingMode) {
+        setWindowingMode(windowingMode);
     }
 
     /**

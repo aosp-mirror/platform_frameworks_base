@@ -75,6 +75,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** The current windowing mode of the configuration. */
     private @WindowingMode int mWindowingMode;
 
+    /** The display windowing mode of the configuration */
+    private @WindowingMode int mDisplayWindowingMode;
+
     /** Windowing mode is currently not defined. */
     public static final int WINDOWING_MODE_UNDEFINED = 0;
     /** Occupies the full area of the screen or the parent container. */
@@ -176,6 +179,10 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** Bit that indicates that the {@link #mRotation} changed.
      * @hide */
     public static final int WINDOW_CONFIG_ROTATION = 1 << 5;
+    /** Bit that indicates that the {@link #mDisplayWindowingMode} changed.
+     * @hide */
+    public static final int WINDOW_CONFIG_DISPLAY_WINDOWING_MODE = 1 << 6;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "WINDOW_CONFIG_" }, value = {
             WINDOW_CONFIG_BOUNDS,
@@ -184,6 +191,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             WINDOW_CONFIG_ACTIVITY_TYPE,
             WINDOW_CONFIG_ALWAYS_ON_TOP,
             WINDOW_CONFIG_ROTATION,
+            WINDOW_CONFIG_DISPLAY_WINDOWING_MODE,
     })
     public @interface WindowConfig {}
 
@@ -211,6 +219,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         dest.writeInt(mActivityType);
         dest.writeInt(mAlwaysOnTop);
         dest.writeInt(mRotation);
+        dest.writeInt(mDisplayWindowingMode);
     }
 
     private void readFromParcel(Parcel source) {
@@ -220,6 +229,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         mActivityType = source.readInt();
         mAlwaysOnTop = source.readInt();
         mRotation = source.readInt();
+        mDisplayWindowingMode = source.readInt();
     }
 
     @Override
@@ -322,6 +332,12 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return mWindowingMode;
     }
 
+    /** @hide */
+    public void setDisplayWindowingMode(@WindowingMode int windowingMode) {
+        mDisplayWindowingMode = windowingMode;
+    }
+
+
     public void setActivityType(@ActivityType int activityType) {
         if (mActivityType == activityType) {
             return;
@@ -351,6 +367,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         setActivityType(other.mActivityType);
         setAlwaysOnTop(other.mAlwaysOnTop);
         setRotation(other.mRotation);
+        setDisplayWindowingMode(other.mDisplayWindowingMode);
     }
 
     /** Set this object to completely undefined.
@@ -367,6 +384,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         setActivityType(ACTIVITY_TYPE_UNDEFINED);
         setAlwaysOnTop(ALWAYS_ON_TOP_UNDEFINED);
         setRotation(ROTATION_UNDEFINED);
+        setDisplayWindowingMode(WINDOWING_MODE_UNDEFINED);
     }
 
     /**
@@ -406,6 +424,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         if (delta.mRotation != ROTATION_UNDEFINED && delta.mRotation != mRotation) {
             changed |= WINDOW_CONFIG_ROTATION;
             setRotation(delta.mRotation);
+        }
+        if (delta.mDisplayWindowingMode != WINDOWING_MODE_UNDEFINED
+                && mDisplayWindowingMode != delta.mDisplayWindowingMode) {
+            changed |= WINDOW_CONFIG_DISPLAY_WINDOWING_MODE;
+            setDisplayWindowingMode(delta.mDisplayWindowingMode);
         }
         return changed;
     }
@@ -455,6 +478,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             changes |= WINDOW_CONFIG_ROTATION;
         }
 
+        if ((compareUndefined || other.mDisplayWindowingMode != WINDOWING_MODE_UNDEFINED)
+                && mDisplayWindowingMode != other.mDisplayWindowingMode) {
+            changes |= WINDOW_CONFIG_DISPLAY_WINDOWING_MODE;
+        }
+
         return changes;
     }
 
@@ -493,6 +521,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         if (n != 0) return n;
         n = mRotation - that.mRotation;
         if (n != 0) return n;
+        n = mDisplayWindowingMode - that.mDisplayWindowingMode;
+        if (n != 0) return n;
 
         // if (n != 0) return n;
         return n;
@@ -522,6 +552,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         result = 31 * result + mActivityType;
         result = 31 * result + mAlwaysOnTop;
         result = 31 * result + mRotation;
+        result = 31 * result + mDisplayWindowingMode;
         return result;
     }
 
@@ -531,6 +562,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return "{ mBounds=" + mBounds
                 + " mAppBounds=" + mAppBounds
                 + " mWindowingMode=" + windowingModeToString(mWindowingMode)
+                + " mDisplayWindowingMode=" + windowingModeToString(mDisplayWindowingMode)
                 + " mActivityType=" + activityTypeToString(mActivityType)
                 + " mAlwaysOnTop=" + alwaysOnTopToString(mAlwaysOnTop)
                 + " mRotation=" + (mRotation == ROTATION_UNDEFINED
@@ -603,7 +635,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @hide
      */
     public boolean hasWindowDecorCaption() {
-        return mWindowingMode == WINDOWING_MODE_FREEFORM;
+        return mActivityType == ACTIVITY_TYPE_STANDARD && (mWindowingMode == WINDOWING_MODE_FREEFORM
+                || mDisplayWindowingMode == WINDOWING_MODE_FREEFORM);
     }
 
     /**
