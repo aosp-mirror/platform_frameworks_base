@@ -144,6 +144,11 @@ public final class DefaultPermissionGrantPolicy {
         LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_COARSE_LOCATION);
     }
 
+    private static final Set<String> ACTIVITY_RECOGNITION_PERMISSIONS = new ArraySet<>();
+    static {
+        ACTIVITY_RECOGNITION_PERMISSIONS.add(Manifest.permission.ACTIVITY_RECOGNITION);
+    }
+
     private static final Set<String> COARSE_LOCATION_PERMISSIONS = new ArraySet<>();
     static {
         COARSE_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_COARSE_LOCATION);
@@ -624,7 +629,7 @@ public final class DefaultPermissionGrantPolicy {
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
                         SENSORS_PERMISSIONS, STORAGE_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(packageName, userId,
-                        LOCATION_PERMISSIONS);
+                        LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
             }
         }
 
