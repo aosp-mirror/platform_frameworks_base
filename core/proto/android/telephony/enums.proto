@@ -51,6 +51,7 @@ enum NetworkTypeEnum {
     NETWORK_TYPE_TD_SCDMA = 17;
     NETWORK_TYPE_IWLAN = 18;
     NETWORK_TYPE_LTE_CA = 19;
+    NETWORK_TYPE_NR = 20;
 }
 
 // Signal strength levels, primarily used by android/telephony/SignalStrength.java.
