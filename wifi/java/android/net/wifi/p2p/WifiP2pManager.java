@@ -1220,7 +1220,7 @@ public class WifiP2pManager {
      * an access point that can accept connections from legacy clients as well as other p2p
      * devices.
      *
-     * <p> An app should use {@link WifiP2pConfig#Builder} to build the configuration
+     * <p> An app should use {@link WifiP2pConfig.Builder} to build the configuration
      * for a group.
      *
      * <p class="note"><strong>Note:</strong>
