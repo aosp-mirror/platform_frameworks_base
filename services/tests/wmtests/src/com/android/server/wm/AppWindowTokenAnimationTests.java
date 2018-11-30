@@ -33,8 +33,6 @@ import android.view.SurfaceControl;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
-import com.android.server.wm.WindowTestUtils.TestAppWindowToken;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,7 +52,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(WindowTestRunner.class)
 public class AppWindowTokenAnimationTests extends WindowTestsBase {
 
-    private TestAppWindowToken mToken;
+    private AppWindowToken mToken;
 
     @Mock
     private AnimationAdapter mSpec;

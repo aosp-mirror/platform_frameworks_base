@@ -20,8 +20,12 @@ import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.EMPTY;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
 
 import static com.android.server.EventLogTags.WM_TASK_REMOVED;
@@ -114,6 +118,13 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
     // TODO: remove after unification
     TaskRecord mTaskRecord;
 
+    // TODO: Remove after unification.
+    @Override
+    public void onConfigurationChanged(Configuration newParentConfig) {
+        // Only forward configuration changes in cases where children won't get it from TaskRecord.
+        onConfigurationChanged(newParentConfig, mTaskRecord == null /*forwardToChildren*/);
+    }
+
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, int resizeMode,
             boolean supportsPictureInPicture, TaskDescription taskDescription,
             TaskRecord taskRecord) {
@@ -129,11 +140,21 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
             // unification.
             mTaskRecord.registerConfigurationChangeListener(this);
         }
-        setBounds(getRequestedOverrideBounds());
+        setBounds(getResolvedOverrideBounds());
         mTaskDescription = taskDescription;
 
-        // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED).
-        setOrientation(SCREEN_ORIENTATION_UNSET);
+        // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED) not unless
+        // set through the override configuration.
+        int orientation = SCREEN_ORIENTATION_UNSET;
+        switch (getResolvedOverrideConfiguration().orientation) {
+            case ORIENTATION_PORTRAIT:
+                orientation = SCREEN_ORIENTATION_PORTRAIT;
+                break;
+            case ORIENTATION_LANDSCAPE:
+                orientation = SCREEN_ORIENTATION_LANDSCAPE;
+                break;
+        }
+        setOrientation(orientation);
     }
 
     @Override

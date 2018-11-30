@@ -287,22 +287,6 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testNotifiesSeqIncrementToAppToken() {
-        final Configuration appWindowTokenRequestedOrientation = mock(Configuration.class);
-        mActivity.mAppWindowToken = mock(AppWindowToken.class);
-        doReturn(appWindowTokenRequestedOrientation).when(mActivity.mAppWindowToken)
-                .getRequestedOverrideConfiguration();
-
-        final Configuration newConfig = new Configuration();
-        newConfig.orientation = ORIENTATION_PORTRAIT;
-
-        final int prevSeq = mActivity.getMergedOverrideConfiguration().seq;
-        mActivity.onRequestedOverrideConfigurationChanged(newConfig);
-        assertEquals(prevSeq + 1, appWindowTokenRequestedOrientation.seq);
-        verify(mActivity.mAppWindowToken).onMergedOverrideConfigurationChanged();
-    }
-
-    @Test
     public void testSetsRelaunchReason_NotDragResizing() {
         mActivity.setState(ActivityStack.ActivityState.RESUMED, "Testing");
 
@@ -519,7 +503,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 anyInt() /* height */, any() /* displayCutout */, any() /* outInsets */);
 
         doReturn(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
-                .when(mActivity.mAppWindowToken).getOrientationIgnoreVisibility();
+                .when(mActivity).getRequestedOrientation();
         mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
         mActivity.info.minAspectRatio = mActivity.info.maxAspectRatio = 1;
         ensureActivityConfiguration();
@@ -571,7 +555,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Move the non-resizable activity to the new display.
         mStack.reparent(newDisplay, true /* onTop */, false /* displayRemoved */);
 
-        assertEquals(originalBounds, mActivity.getBounds());
+        assertEquals(originalBounds, mActivity.getWindowConfiguration().getBounds());
         assertEquals(originalDpi, mActivity.getConfiguration().densityDpi);
         assertTrue(mActivity.inSizeCompatMode());
     }
@@ -579,7 +563,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testSizeCompatMode_FixedScreenBoundsWhenDisplaySizeChanged() {
         setupDisplayContentForCompatDisplayInsets();
-        when(mActivity.mAppWindowToken.getOrientationIgnoreVisibility()).thenReturn(
+        when(mActivity.getRequestedOrientation()).thenReturn(
                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         mTask.getWindowConfiguration().setAppBounds(mStack.getDisplay().getBounds());
         mTask.getConfiguration().orientation = ORIENTATION_PORTRAIT;
@@ -592,7 +576,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         setupDisplayAndParentSize(1000, 2000);
         ensureActivityConfiguration();
 
-        assertEquals(originalBounds, mActivity.getBounds());
+        assertEquals(originalBounds, mActivity.getWindowConfiguration().getBounds());
         assertTrue(mActivity.inSizeCompatMode());
     }
 
@@ -627,7 +611,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.visible = false;
         mActivity.app.setReportedProcState(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY);
         // Make the parent bounds to be different so the activity is in size compatibility mode.
-        mTask.getWindowConfiguration().setAppBounds(new Rect(0, 0, 600, 1200));
+        setupDisplayAndParentSize(600, 1200);
 
         // Simulate the display changes orientation.
         doReturn(ActivityInfo.CONFIG_SCREEN_SIZE | CONFIG_ORIENTATION

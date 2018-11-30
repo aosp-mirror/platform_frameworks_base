@@ -118,13 +118,15 @@ message TaskRecordProto {
 message ActivityRecordProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
+    // To be removed soon.
+    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1 [deprecated=true];
     optional .com.android.server.wm.IdentifierProto identifier = 2;
     optional string state = 3;
     optional bool visible = 4;
     optional bool front_of_task = 5;
     optional int32 proc_id = 6;
     optional bool translucent = 7;
+    optional .com.android.server.wm.AppWindowTokenProto app_window_token = 8;
 }
 
 message KeyguardControllerProto {

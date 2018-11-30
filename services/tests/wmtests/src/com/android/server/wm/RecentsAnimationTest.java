@@ -97,7 +97,6 @@ public class RecentsAnimationTest extends ActivityTestsBase {
                 .setStack(recentsStack)
                 .build();
         ActivityRecord topActivity = new ActivityBuilder(mService).setCreateTask(true).build();
-        topActivity.fullscreen = true;
         topActivity.getActivityStack().moveToFront("testRecentsActivityVisiblility");
 
         doCallRealMethod().when(mRootActivityContainer).ensureActivitiesVisible(

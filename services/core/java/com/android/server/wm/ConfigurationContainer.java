@@ -90,7 +90,8 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     private ArrayList<ConfigurationContainerListener> mChangeListeners = new ArrayList<>();
 
     // TODO: Can't have ag/2592611 soon enough!
-    private final Configuration mTmpConfig = new Configuration();
+    private final Configuration mRequestsTmpConfig = new Configuration();
+    private final Configuration mResolvedTmpConfig = new Configuration();
 
     // Used for setting bounds
     private final Rect mTmpRect = new Rect();
@@ -121,12 +122,19 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * @see #mFullConfiguration
      */
     public void onConfigurationChanged(Configuration newParentConfig) {
-        mTmpConfig.setTo(mResolvedOverrideConfiguration);
+        onConfigurationChanged(newParentConfig, true /*forwardToChildren*/);
+    }
+
+    // TODO: Consolidate with onConfigurationChanged() method above once unification is done. This
+    // is only currently need during the process of unification where we don't want configuration
+    // forwarded to a child from both parents.
+    public void onConfigurationChanged(Configuration newParentConfig, boolean forwardToChildren) {
+        mResolvedTmpConfig.setTo(mResolvedOverrideConfiguration);
         resolveOverrideConfiguration(newParentConfig);
         mFullConfiguration.setTo(newParentConfig);
         mLastOverrideConfigurationChanges =
                 mFullConfiguration.updateFrom(mResolvedOverrideConfiguration);
-        if (!mTmpConfig.equals(mResolvedOverrideConfiguration)) {
+        if (!mResolvedTmpConfig.equals(mResolvedOverrideConfiguration)) {
             onMergedOverrideConfigurationChanged();
             // This depends on the assumption that change-listeners don't do
             // their own override resolution. This way, dependent hierarchies
@@ -139,9 +147,11 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
                         mResolvedOverrideConfiguration);
             }
         }
-        for (int i = getChildCount() - 1; i >= 0; --i) {
-            final ConfigurationContainer child = getChildAt(i);
-            child.onConfigurationChanged(mFullConfiguration);
+        if (forwardToChildren) {
+            for (int i = getChildCount() - 1; i >= 0; --i) {
+                final ConfigurationContainer child = getChildAt(i);
+                child.onConfigurationChanged(mFullConfiguration);
+            }
         }
     }
 
@@ -262,6 +272,11 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         out.set(bounds.left, bounds.top);
     }
 
+    Rect getResolvedOverrideBounds() {
+        mReturnBounds.set(getResolvedOverrideConfiguration().windowConfiguration.getBounds());
+        return mReturnBounds;
+    }
+
     /**
      * Returns the bounds requested on this container. These may not be the actual bounds the
      * container ends up with due to policy constraints. The {@link Rect} handed back is
@@ -306,9 +321,9 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         }
 
 
-        mTmpConfig.setTo(getRequestedOverrideConfiguration());
-        mTmpConfig.windowConfiguration.setBounds(bounds);
-        onRequestedOverrideConfigurationChanged(mTmpConfig);
+        mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
+        mRequestsTmpConfig.windowConfiguration.setBounds(bounds);
+        onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
 
         return boundsChange;
     }
@@ -360,9 +375,9 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
 
     /** Sets the requested windowing mode override for the configuration container. */
     public void setWindowingMode(/*@WindowConfiguration.WindowingMode*/ int windowingMode) {
-        mTmpConfig.setTo(getRequestedOverrideConfiguration());
-        mTmpConfig.windowConfiguration.setWindowingMode(windowingMode);
-        onRequestedOverrideConfigurationChanged(mTmpConfig);
+        mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
+        mRequestsTmpConfig.windowConfiguration.setWindowingMode(windowingMode);
+        onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
     }
 
     /** Sets the always on top flag for this configuration container.
@@ -372,16 +387,16 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      *  - {@Link ActivityDisplay#positionChildAtTop(ActivityStack)};
      * */
     public void setAlwaysOnTop(boolean alwaysOnTop) {
-        mTmpConfig.setTo(getRequestedOverrideConfiguration());
-        mTmpConfig.windowConfiguration.setAlwaysOnTop(alwaysOnTop);
-        onRequestedOverrideConfigurationChanged(mTmpConfig);
+        mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
+        mRequestsTmpConfig.windowConfiguration.setAlwaysOnTop(alwaysOnTop);
+        onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
     }
 
     /** Sets the windowing mode for the configuration container. */
     void setDisplayWindowingMode(int windowingMode) {
-        mTmpConfig.setTo(getRequestedOverrideConfiguration());
-        mTmpConfig.windowConfiguration.setDisplayWindowingMode(windowingMode);
-        onRequestedOverrideConfigurationChanged(mTmpConfig);
+        mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
+        mRequestsTmpConfig.windowConfiguration.setDisplayWindowingMode(windowingMode);
+        onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
     }
 
     /**
@@ -451,9 +466,9 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             throw new IllegalStateException("Can't change activity type once set: " + this
                     + " activityType=" + activityTypeToString(activityType));
         }
-        mTmpConfig.setTo(getRequestedOverrideConfiguration());
-        mTmpConfig.windowConfiguration.setActivityType(activityType);
-        onRequestedOverrideConfigurationChanged(mTmpConfig);
+        mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
+        mRequestsTmpConfig.windowConfiguration.setActivityType(activityType);
+        onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
     }
 
     public boolean isActivityTypeHome() {

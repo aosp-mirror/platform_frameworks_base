@@ -120,7 +120,9 @@ class WindowToken extends WindowContainer<WindowState> {
         mPersistOnEmpty = persistOnEmpty;
         mOwnerCanManageAppTokens = ownerCanManageAppTokens;
         mRoundedCornerOverlay = roundedCornerOverlay;
-        onDisplayChanged(dc);
+        if (dc != null) {
+            onDisplayChanged(dc);
+        }
     }
 
     void setHidden(boolean hidden) {

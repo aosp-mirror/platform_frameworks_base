@@ -144,8 +144,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
                         .setStack(homeStack)
                         .setCreateTask(true)
-                        .build()
-                        .mAppWindowToken;
+                        .build();
         final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final AppWindowToken hiddenAppWindow = createAppWindowToken(mDisplayContent,
@@ -170,8 +169,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
                         .setStack(homeStack)
                         .setCreateTask(true)
-                        .build()
-                        .mAppWindowToken;
+                        .build();
         final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
@@ -200,8 +198,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
                         .setStack(homeStack)
                         .setCreateTask(true)
-                        .build()
-                        .mAppWindowToken;
+                        .build();
         final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
@@ -232,8 +229,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
                         .setStack(homeStack)
                         .setCreateTask(true)
-                        .build()
-                        .mAppWindowToken;
+                        .build();
         final WindowState hwin1 = createWindow(null, TYPE_BASE_APPLICATION, homeAppWindow, "hwin1");
         homeAppWindow.addWindow(hwin1);
         final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,

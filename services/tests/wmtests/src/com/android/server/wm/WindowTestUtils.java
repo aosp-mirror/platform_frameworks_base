@@ -19,14 +19,17 @@ package com.android.server.wm;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.ActivityTestsBase.ActivityBuilder.createIntentAndActivityInfo;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import android.app.ActivityManager;
-import android.content.ComponentName;
-import android.os.Build;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.IBinder;
-import android.view.IApplicationToken;
+import android.util.Pair;
 import android.view.IWindow;
 import android.view.WindowManager;
 
@@ -48,55 +51,24 @@ class WindowTestUtils {
     }
 
     /** Creates an {@link AppWindowToken} and adds it to the specified {@link Task}. */
-    static TestAppWindowToken createAppWindowTokenInTask(DisplayContent dc, Task task) {
-        final TestAppWindowToken newToken = createTestAppWindowToken(dc);
+    static AppWindowToken createAppWindowTokenInTask(DisplayContent dc, Task task) {
+        final AppWindowToken newToken = createTestAppWindowToken(dc);
         task.addChild(newToken, POSITION_TOP);
         return newToken;
     }
 
-    static TestAppWindowToken createTestAppWindowToken(DisplayContent dc) {
+    static AppWindowToken createTestAppWindowToken(DisplayContent dc) {
         synchronized (dc.mWmService.mGlobalLock) {
-            return new TestAppWindowToken(dc);
+            Pair<Intent, ActivityInfo> pair = createIntentAndActivityInfo();
+            final AppWindowToken token = new AppWindowToken(dc.mWmService,
+                    dc.mWmService.mAtmService, new ActivityRecord.Token(pair.first), pair.second,
+                    null, pair.first, dc);
+            token.setOccludesParent(true);
+            token.setHidden(false);
+            token.hiddenRequested = false;
+            spyOn(token);
+            return token;
         }
-    }
-
-    /** Used so we can gain access to some protected members of the {@link AppWindowToken} class. */
-    static class TestAppWindowToken extends AppWindowToken {
-        boolean mOnTop = false;
-
-        private TestAppWindowToken(DisplayContent dc) {
-            super(dc.mWmService, new IApplicationToken.Stub() {
-                @Override
-                public String getName() {
-                    return null;
-                }
-            }, new ComponentName("", ""), false, dc, true /* fillsParent */);
-            mTargetSdk = Build.VERSION_CODES.CUR_DEVELOPMENT;
-            mActivityRecord = mock(ActivityRecord.class);
-            mActivityRecord.app = mock(WindowProcessController.class);
-        }
-
-        int getWindowsCount() {
-            return mChildren.size();
-        }
-
-        boolean hasWindow(WindowState w) {
-            return mChildren.contains(w);
-        }
-
-        WindowState getFirstChild() {
-            return mChildren.peekFirst();
-        }
-
-        WindowState getLastChild() {
-            return mChildren.peekLast();
-        }
-
-        @Override
-        boolean isOnTop() {
-            return mOnTop;
-        }
-
     }
 
     static TestWindowToken createTestWindowToken(int type, DisplayContent dc) {

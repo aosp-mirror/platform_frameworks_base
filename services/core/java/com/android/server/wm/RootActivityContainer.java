@@ -638,9 +638,15 @@ class RootActivityContainer extends ConfigurationContainer
         if (displayContent != null) {
             config = displayContent.updateOrientation(
                     getDisplayOverrideConfiguration(displayId),
-                    starting != null && starting.mayFreezeScreenLocked(starting.app)
+                    starting != null && starting.mayFreezeScreenLocked()
                             ? starting.appToken : null,
                     true /* forceUpdate */);
+        }
+        // Visibilities may change so let the starting activity have a chance to report. Can't do it
+        // when visibility is changed in each AppWindowToken because it may trigger wrong
+        // configuration push because the visibility of some activities may not be updated yet.
+        if (starting != null) {
+            starting.reportDescendantOrientationChangeIfNeeded();
         }
         if (starting != null && markFrozenIfConfigChanged && config != null) {
             starting.frozenBeforeDestroy = true;

@@ -122,9 +122,9 @@ public class AppTransitionTests extends WindowTestsBase {
         final DisplayContent dc2 = createNewDisplay(Display.STATE_ON);
 
         // Create 2 app window tokens to represent 2 activity window.
-        final WindowTestUtils.TestAppWindowToken token1 = createTestAppWindowToken(dc1,
+        final AppWindowToken token1 = createTestAppWindowToken(dc1,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowTestUtils.TestAppWindowToken token2 = createTestAppWindowToken(dc2,
+        final AppWindowToken token2 = createTestAppWindowToken(dc2,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
 
         token1.allDrawn = true;
@@ -159,7 +159,7 @@ public class AppTransitionTests extends WindowTestsBase {
 
         final TaskStack stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
-        final WindowTestUtils.TestAppWindowToken token1 =
+        final AppWindowToken token1 =
                 WindowTestUtils.createTestAppWindowToken(dc1);
         task1.addChild(token1, 0);
 

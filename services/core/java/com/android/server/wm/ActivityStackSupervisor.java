@@ -1901,7 +1901,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 "Added restored task=" + task + " to stack=" + stack);
         final ArrayList<ActivityRecord> activities = task.mActivities;
         for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-            activities.get(activityNdx).createAppWindowToken();
+            activities.get(activityNdx).setTask(task);
         }
         return true;
     }
@@ -2123,6 +2123,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         return false;
     }
 
+    // TODO: Change method name to reflect what it actually does.
     final ArrayList<ActivityRecord> processStoppingActivitiesLocked(ActivityRecord idleActivity,
             boolean remove, boolean processPausingActivities) {
         ArrayList<ActivityRecord> stops = null;
@@ -2131,7 +2132,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         for (int activityNdx = mStoppingActivities.size() - 1; activityNdx >= 0; --activityNdx) {
             ActivityRecord s = mStoppingActivities.get(activityNdx);
 
-            final boolean animating = s.mAppWindowToken.isSelfAnimating();
+            final boolean animating = s.isSelfAnimating();
 
             if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
                     + " animating=" + animating + " finishing=" + s.finishing);
@@ -2482,9 +2483,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     void activityRelaunchedLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.isInStackLocked(token);
         if (r != null) {
-            if (r.mAppWindowToken != null) {
-                r.mAppWindowToken.finishRelaunching();
-            }
+            r.finishRelaunching();
             if (r.getActivityStack().shouldSleepOrShutDownActivities()) {
                 r.setSleeping(true, true);
             }

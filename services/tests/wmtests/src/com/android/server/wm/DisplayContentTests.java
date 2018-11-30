@@ -241,8 +241,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc, stack.getDisplayContent());
 
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final WindowTestUtils.TestAppWindowToken token = WindowTestUtils.createTestAppWindowToken(
-                dc);
+        final AppWindowToken token = WindowTestUtils.createTestAppWindowToken(dc);
         task.addChild(token, 0);
         assertEquals(dc, task.getDisplayContent());
         assertEquals(dc, token.getDisplayContent());
@@ -314,7 +313,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // Add stack with activity.
         final TaskStack stack0 = createTaskStackOnDisplay(dc0);
         final Task task0 = createTaskInStack(stack0, 0 /* userId */);
-        final WindowTestUtils.TestAppWindowToken token =
+        final AppWindowToken token =
                 WindowTestUtils.createTestAppWindowToken(dc0);
         task0.addChild(token, 0);
         dc0.configureDisplayPolicy();
@@ -322,7 +321,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final TaskStack stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
-        final WindowTestUtils.TestAppWindowToken token1 =
+        final AppWindowToken token1 =
                 WindowTestUtils.createTestAppWindowToken(dc0);
         task1.addChild(token1, 0);
         dc1.configureDisplayPolicy();

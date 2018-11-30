@@ -1251,7 +1251,7 @@ class TaskRecord extends ConfigurationContainer {
         mActivities.add(newTop);
 
         // Make sure window manager is aware of the position change.
-        mTask.positionChildAtTop(newTop.mAppWindowToken);
+        mTask.positionChildAtTop(newTop);
         updateEffectiveIntent();
     }
 
@@ -1283,7 +1283,7 @@ class TaskRecord extends ConfigurationContainer {
         r.setTask(this);
 
         // Remove r first, and if it wasn't already in the list and it's fullscreen, count it.
-        if (!mActivities.remove(r) && r.fullscreen) {
+        if (!mActivities.remove(r) && r.occludesParent()) {
             // Was not previously in list.
             numFullscreen++;
         }
@@ -1327,10 +1327,10 @@ class TaskRecord extends ConfigurationContainer {
             mService.notifyTaskPersisterLocked(this, false);
         }
 
-        if (r.mAppWindowToken != null) {
+        if (r.getParent() != null) {
             // Only attempt to move in WM if the child has a controller. It is possible we haven't
             // created controller for the activity we are starting yet.
-            mTask.positionChildAt(r.mAppWindowToken, index);
+            mTask.positionChildAt(r, index);
         }
 
         // Make sure the list of display UID whitelists is updated
@@ -1355,7 +1355,7 @@ class TaskRecord extends ConfigurationContainer {
 
         r.setTask(null /* task */, reparenting /* reparenting */);
 
-        if (mActivities.remove(r) && r.fullscreen) {
+        if (mActivities.remove(r) && r.occludesParent()) {
             // Was previously in list.
             numFullscreen--;
         }
