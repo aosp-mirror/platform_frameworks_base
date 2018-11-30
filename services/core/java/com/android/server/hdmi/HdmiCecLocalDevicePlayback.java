@@ -77,6 +77,10 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected void onAddressAllocated(int logicalAddress, int reason) {
         assertRunOnServiceThread();
+        if (reason == mService.INITIATED_BY_ENABLE_CEC) {
+            mService.setAndBroadcastActiveSource(mService.getPhysicalAddress(),
+                    getDeviceInfo().getDeviceType(), Constants.ADDR_BROADCAST);
+        }
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(

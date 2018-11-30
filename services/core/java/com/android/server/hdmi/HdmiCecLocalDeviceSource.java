@@ -218,7 +218,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     // This method should only be called when the device can be the active source.
     protected void setAndBroadcastActiveSource(HdmiCecMessage message, int physicalAddress) {
         mService.setAndBroadcastActiveSource(
-                message, physicalAddress, getDeviceInfo().getDeviceType());
+                physicalAddress, getDeviceInfo().getDeviceType(), message.getSource());
     }
 
     @ServiceThreadOnly

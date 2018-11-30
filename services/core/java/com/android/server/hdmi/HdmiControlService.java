@@ -2707,14 +2707,14 @@ public class HdmiControlService extends SystemService {
     // For example, when receiving broadcast messages, all the device types will call this
     // method but only one of them will be the Active Source.
     protected void setAndBroadcastActiveSource(
-            HdmiCecMessage message, int physicalAddress, int deviceType) {
+            int physicalAddress, int deviceType, int source) {
         // If the device has both playback and audio system logical addresses,
         // playback will claim active source. Otherwise audio system will.
         if (deviceType == HdmiDeviceInfo.DEVICE_PLAYBACK) {
             HdmiCecLocalDevicePlayback playback = playback();
             playback.setIsActiveSource(true);
             playback.wakeUpIfActiveSource();
-            playback.maySendActiveSource(message.getSource());
+            playback.maySendActiveSource(source);
             setActiveSource(playback.mAddress, physicalAddress);
         }
 
@@ -2725,7 +2725,7 @@ public class HdmiControlService extends SystemService {
             } else {
                 audioSystem.setIsActiveSource(true);
                 audioSystem.wakeUpIfActiveSource();
-                audioSystem.maySendActiveSource(message.getSource());
+                audioSystem.maySendActiveSource(source);
                 setActiveSource(audioSystem.mAddress, physicalAddress);
             }
         }
