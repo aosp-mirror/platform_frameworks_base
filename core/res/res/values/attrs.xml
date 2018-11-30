@@ -5532,7 +5532,7 @@
         <attr name="solidColor" format="color|reference" />
         <!-- @hide The divider for making the selection area. -->
         <attr name="selectionDivider" format="reference" />
-        <!-- @hide The height of the selection divider. -->
+        <!-- The height of the selection divider. -->
         <attr name="selectionDividerHeight" format="dimension" />
         <!-- @hide The distance between the two selection dividers. -->
         <attr name="selectionDividersDistance" format="dimension" />

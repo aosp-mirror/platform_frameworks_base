@@ -18,6 +18,8 @@ package android.widget;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
+import android.annotation.Px;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.annotation.Widget;
@@ -30,6 +32,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -87,6 +90,16 @@ import java.util.Locale;
  * Long pressing on the lesser and greater values also allows for a quick change
  * of the current value. Tapping on the current value allows to type in a
  * desired value.
+ * </li>
+ * <li>
+ * If the current theme is derived from {@link android.R.style#Theme_Material}
+ * the widget presents the current value as a scrolling vertical selector with
+ * the selected value in the center and the previous and following numbers above
+ * and below, separated by a divider. The value is changed by flinging vertically.
+ * The thickness of the divider can be changed by using the
+ * {@link android.R.attr#selectionDividerHeight} attribute and the color of the
+ * divider can be changed by using the
+ * {@link android.R.attr#colorControlNormal} attribute.
  * </li>
  * </ul>
  * <p>
@@ -436,14 +449,14 @@ public class NumberPicker extends LinearLayout {
     /**
      * Divider for showing item to be selected while scrolling
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private final Drawable mSelectionDivider;
 
     /**
      * The height of the selection divider.
      */
-    @UnsupportedAppUsage
-    private final int mSelectionDividerHeight;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    private int mSelectionDividerHeight;
 
     /**
      * The current scroll state of the number picker.
@@ -1554,6 +1567,24 @@ public class NumberPicker extends LinearLayout {
         // picker. As such, the contents of the cache are always synced to the latest state of
         // the widget.
         return mSelectorIndexToStringCache.get(getValue());
+    }
+
+    /**
+     * Set the height for the divider that separates the currently selected value from the others.
+     * @param height The height to be set
+     */
+    public void setSelectionDividerHeight(@IntRange(from = 0) @Px int height) {
+        mSelectionDividerHeight = height;
+        invalidate();
+    }
+
+    /**
+     * Retrieve the height for the divider that separates the currently selected value from the
+     * others.
+     * @return The height of the divider
+     */
+    public int getSelectionDividerHeight() {
+        return mSelectionDividerHeight;
     }
 
     @Override
