@@ -108,13 +108,6 @@ public class KernelCpuThreadReader {
     private static final Predicate<Integer> DEFAULT_UID_PREDICATE = uid -> uid == 1000;
 
     /**
-     * Do not report any threads that have a total CPU usage (across all frequencies) less than or
-     * equal to this number. This significantly reduces the amount of reported threads without
-     * losing any important information
-     */
-    private static final int TOTAL_CPU_USAGE_THRESHOLD_MILLIS = 20;
-
-    /**
      * Value returned when there was an error getting an integer ID value (e.g. PID, UID)
      */
     private static final int ID_ERROR = -1;
@@ -344,15 +337,6 @@ public class KernelCpuThreadReader {
             return null;
         }
         int[] cpuUsages = mFrequencyBucketCreator.getBucketedValues(cpuUsagesLong);
-
-        // Filter threads that have low total CPU usage
-        int cpuUsageSum = 0;
-        for (int i = 0; i < cpuUsages.length; i++) {
-            cpuUsageSum += cpuUsages[i];
-        }
-        if (cpuUsageSum <= TOTAL_CPU_USAGE_THRESHOLD_MILLIS) {
-            return null;
-        }
 
         return new ThreadCpuUsage(threadId, threadName, cpuUsages);
     }
