@@ -76,7 +76,8 @@ static void getDirectionalities(JNIEnv* env, jobject obj, jcharArray srcArray,
             int c = 0x00010000 + ((src[i] - 0xD800) << 10) +
                                  (src[i + 1] & 0x3FF);
             int dir = u_charDirection(c);
-            if (dir < 0 || dir > JAVA_LANG_CHARACTER_MAX_DIRECTIONALITY)
+            if (dir < 0 || dir > JAVA_LANG_CHARACTER_MAX_DIRECTIONALITY
+                    || u_charType(c) == U_UNASSIGNED)
                 dir = PROPERTY_UNDEFINED;
             else
                 dir = directionality_map[dir];
@@ -86,7 +87,8 @@ static void getDirectionalities(JNIEnv* env, jobject obj, jcharArray srcArray,
         } else {
             int c = src[i];
             int dir = u_charDirection(c);
-            if (dir < 0 || dir > JAVA_LANG_CHARACTER_MAX_DIRECTIONALITY)
+            if (dir < 0 || dir > JAVA_LANG_CHARACTER_MAX_DIRECTIONALITY
+                    || u_charType(c) == U_UNASSIGNED)
                 dest[i] = PROPERTY_UNDEFINED;
             else
                 dest[i] = directionality_map[dir];
