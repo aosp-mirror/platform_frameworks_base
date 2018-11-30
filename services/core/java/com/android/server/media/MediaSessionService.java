@@ -923,7 +923,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public void dispatchMediaKeyEvent(String packageName, boolean asSystemService,
                 KeyEvent keyEvent, boolean needWakeLock) {
-            if (keyEvent == null || !KeyEvent.isMediaKey(keyEvent.getKeyCode())) {
+            if (keyEvent == null || !KeyEvent.isMediaSessionKey(keyEvent.getKeyCode())) {
                 Log.w(TAG, "Attempted to dispatch null or non-media key event.");
                 return;
             }
