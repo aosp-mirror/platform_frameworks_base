@@ -42,8 +42,10 @@ import java.util.List;
 public class WifiNetworkConfigBuilder {
     private static final String MATCH_ALL_SSID_PATTERN_PATH = ".*";
     private static final String MATCH_EMPTY_SSID_PATTERN_PATH = "";
-    private static final Pair<MacAddress, MacAddress> MATCH_NO_BSSID_PATTERN =
+    private static final Pair<MacAddress, MacAddress> MATCH_NO_BSSID_PATTERN1 =
             new Pair(MacAddress.BROADCAST_ADDRESS, MacAddress.BROADCAST_ADDRESS);
+    private static final Pair<MacAddress, MacAddress> MATCH_NO_BSSID_PATTERN2 =
+            new Pair(MacAddress.ALL_ZEROS_ADDRESS, MacAddress.BROADCAST_ADDRESS);
     private static final Pair<MacAddress, MacAddress> MATCH_ALL_BSSID_PATTERN =
             new Pair(MacAddress.ALL_ZEROS_ADDRESS, MacAddress.ALL_ZEROS_ADDRESS);
     private static final MacAddress MATCH_EXACT_BSSID_PATTERN_MASK =
@@ -189,7 +191,13 @@ public class WifiNetworkConfigBuilder {
      * Set the BSSID to use for filtering networks from scan results. Will only match network whose
      * BSSID is identical to the specified value.
      * <p>
-     * <li>Only allowed for creating network specifier, i.e {@link #buildNetworkSpecifier()}. </li>
+     * <li>For network requests ({@link NetworkSpecifier}), built using
+     * {@link #buildNetworkSpecifier}, sets the BSSID to use for filtering networks from scan
+     * results. Will only match networks whose BSSID is identical to specified value.</li>
+     * <li>For network suggestions ({@link WifiNetworkSuggestion}), built using
+     * {@link #buildNetworkSuggestion()}, sets a specific BSSID for the network suggestion.
+     * If set, only the specified BSSID with the specified SSID will be considered for connection.
+     * If not set, all BSSIDs with the specified SSID will be considered for connection.</li>
      * <li>Overrides any previous value set using {@link #setBssid(MacAddress)} or
      * {@link #setBssidPattern(MacAddress, MacAddress)}.</li>
      *
@@ -432,6 +440,9 @@ public class WifiNetworkConfigBuilder {
         if (mSsidPatternMatcher.getType() == PatternMatcher.PATTERN_LITERAL) {
             wifiConfiguration.SSID = "\"" + mSsidPatternMatcher.getPath() + "\"";
         }
+        if (mBssidPatternMatcher.second == MATCH_EXACT_BSSID_PATTERN_MASK) {
+            wifiConfiguration.BSSID = mBssidPatternMatcher.first.toString();
+        }
         setSecurityParamsInWifiConfiguration(wifiConfiguration);
         wifiConfiguration.hiddenSSID = mIsHiddenSSID;
         wifiConfiguration.priority = mPriority;
@@ -460,7 +471,10 @@ public class WifiNetworkConfigBuilder {
                 && mSsidPatternMatcher.getPath().equals(MATCH_EMPTY_SSID_PATTERN_PATH)) {
             return true;
         }
-        if (mBssidPatternMatcher.equals(MATCH_NO_BSSID_PATTERN)) {
+        if (mBssidPatternMatcher.equals(MATCH_NO_BSSID_PATTERN1)) {
+            return true;
+        }
+        if (mBssidPatternMatcher.equals(MATCH_NO_BSSID_PATTERN2)) {
             return true;
         }
         return false;
@@ -469,6 +483,16 @@ public class WifiNetworkConfigBuilder {
     private boolean hasSetMatchAllPattern() {
         if ((mSsidPatternMatcher.match(MATCH_EMPTY_SSID_PATTERN_PATH))
                 && mBssidPatternMatcher.equals(MATCH_ALL_BSSID_PATTERN)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean hasSetMatchExactPattern() {
+        // exact ssid match with either match-all bssid or match-exact bssid.
+        if (mSsidPatternMatcher.getType() == PatternMatcher.PATTERN_LITERAL
+                && (mBssidPatternMatcher.equals(MATCH_ALL_BSSID_PATTERN)
+                || mBssidPatternMatcher.second.equals(MATCH_EXACT_BSSID_PATTERN_MASK))) {
             return true;
         }
         return false;
@@ -566,9 +590,42 @@ public class WifiNetworkConfigBuilder {
     }
 
     /**
-     * Create a network suggestion object use in
-     * {@link WifiManager#addNetworkSuggestions(List)}.
+     * Create a network suggestion object use in {@link WifiManager#addNetworkSuggestions(List)}.
      * See {@link WifiNetworkSuggestion}.
+     *<p>
+     * Note: Apps can set a combination of SSID using {@link #setSsid(String)} and BSSID
+     * using {@link #setBssid(MacAddress)} to provide more fine grained network suggestions to the
+     * platform.
+     * </p>
+     *
+     * For example:
+     * To provide credentials for one open, one WPA2 and one WPA3 network with their
+     * corresponding SSID's:
+     * {@code
+     * final WifiNetworkSuggestion suggestion1 =
+     *      new WifiNetworkConfigBuilder()
+     *      .setSsid("test111111")
+     *      .buildNetworkSuggestion()
+     * final WifiNetworkSuggestion suggestion2 =
+     *      new WifiNetworkConfigBuilder()
+     *      .setSsid("test222222")
+     *      .setWpa2Passphrase("test123456")
+     *      .buildNetworkSuggestion()
+     * final WifiNetworkSuggestion suggestion3 =
+     *      new WifiNetworkConfigBuilder()
+     *      .setSsid("test333333")
+     *      .setWpa3Passphrase("test6789")
+     *      .buildNetworkSuggestion()
+     * final List<WifiNetworkSuggestion> suggestionsList = new ArrayList<WifiNetworkSuggestion> {{
+     *          add(suggestion1);
+     *          add(suggestion2);
+     *          add(suggestion3);
+     *      }};
+     * final WifiManager wifiManager =
+     *      context.getSystemService(Context.WIFI_SERVICE);
+     * wifiManager.addNetworkSuggestions(suggestionsList);
+     * ...
+     * }
      *
      * @return Instance of {@link WifiNetworkSuggestion}.
      * @throws IllegalStateException on invalid params set.
@@ -577,10 +634,13 @@ public class WifiNetworkConfigBuilder {
         if (mSsidPatternMatcher == null) {
             throw new IllegalStateException("setSsid should be invoked for suggestion");
         }
-        if (mSsidPatternMatcher.getType() != PatternMatcher.PATTERN_LITERAL
-                || mBssidPatternMatcher != null) {
-            throw new IllegalStateException("none of setSsidPattern/setBssidPattern/setBssid are"
+        setMatchAnyPatternIfUnset();
+        if (!hasSetMatchExactPattern()) {
+            throw new IllegalStateException("none of setSsidPattern/setBssidPattern are"
                     + " allowed for suggestion");
+        }
+        if (hasSetMatchNonePattern()) {
+            throw new IllegalStateException("cannot set match-none for suggestion");
         }
         validateSecurityParams();
 
