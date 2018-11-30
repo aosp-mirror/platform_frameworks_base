@@ -18,7 +18,6 @@ package com.android.settingslib.net;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
@@ -35,12 +34,10 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetworkStatsSession;
 import android.net.NetworkStatsHistory;
-import android.net.NetworkStatsHistory.Entry;
 import android.net.NetworkTemplate;
 import android.os.RemoteException;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
-import android.util.FeatureFlagUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +45,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class DataUsageControllerTest {
@@ -61,16 +57,18 @@ public class DataUsageControllerTest {
     private TelephonyManager mTelephonyManager;
     @Mock
     private NetworkStatsManager mNetworkStatsManager;
-
+    @Mock
     private Context mContext;
+
     private DataUsageController mController;
     private NetworkStatsHistory mNetworkStatsHistory;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        mContext = RuntimeEnvironment.application;
-        mController = spy(new DataUsageController(mContext));
+        when(mContext.getSystemService(Context.TELEPHONY_SERVICE)).thenReturn(mTelephonyManager);
+        when(mContext.getSystemService(NetworkStatsManager.class)).thenReturn(mNetworkStatsManager);
+        mController = new DataUsageController(mContext);
         mNetworkStatsHistory = spy(
                 new NetworkStatsHistory(DateUtils.DAY_IN_MILLIS /* bucketDuration */));
         doReturn(mNetworkStatsHistory)
@@ -79,75 +77,25 @@ public class DataUsageControllerTest {
     }
 
     @Test
-    public void getHistoricalUsageLevel_v1_noNetworkSession_shouldReturnNegative1() {
-        FeatureFlagUtils.setEnabled(mContext, DataUsageController.DATA_USAGE_V2, false);
-        doReturn(null).when(mController).getSession();
+    public void getHistoricalUsageLevel_shouldQuerySummaryForDevice() throws Exception {
 
-        assertThat(mController.getHistoricalUsageLevel(null /* template */)).isEqualTo(-1L);
-    }
-
-    @Test
-    public void getHistoriclUsageLevel_v1_noUsageData_shouldReturn0() {
-        FeatureFlagUtils.setEnabled(mContext, DataUsageController.DATA_USAGE_V2, false);
-        doReturn(mSession).when(mController).getSession();
-
-        assertThat(mController.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard()))
-                .isEqualTo(0L);
-    }
-
-    @Test
-    public void getHistoricalUsageLevel_v1_hasUsageData_shouldReturnTotalUsage() {
-        FeatureFlagUtils.setEnabled(mContext, DataUsageController.DATA_USAGE_V2, false);
-        doReturn(mSession).when(mController).getSession();
-        final long receivedBytes = 743823454L;
-        final long transmittedBytes = 16574289L;
-        final Entry entry = new Entry();
-        entry.bucketStart = 1521583200000L;
-        entry.rxBytes = receivedBytes;
-        entry.txBytes = transmittedBytes;
-        when(mNetworkStatsHistory.getValues(eq(0L), anyLong(), anyLong(), nullable(Entry.class)))
-                .thenReturn(entry);
-
-        assertThat(mController.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard()))
-                .isEqualTo(receivedBytes + transmittedBytes);
-    }
-
-    @Test
-    public void getHistoricalUsageLevel_v2_shouldQuerySummaryForDevice() throws Exception {
-        final Context context = mock(Context.class);
-        FeatureFlagUtils.setEnabled(context, DataUsageController.DATA_USAGE_V2, true);
-        when(context.getSystemService(Context.TELEPHONY_SERVICE)).thenReturn(mTelephonyManager);
-        when(context.getSystemService(NetworkStatsManager.class)).thenReturn(mNetworkStatsManager);
-        final DataUsageController controller = new DataUsageController(context);
-
-        controller.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard());
+        mController.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard());
 
         verify(mNetworkStatsManager).querySummaryForDevice(eq(ConnectivityManager.TYPE_WIFI),
                 eq(SUB_ID), eq(0L) /* startTime */, anyLong() /* endTime */);
     }
 
     @Test
-    public void getHistoricalUsageLevel_v2NoUsageData_shouldReturn0() throws Exception {
-        final Context context = mock(Context.class);
-        FeatureFlagUtils.setEnabled(context, DataUsageController.DATA_USAGE_V2, true);
-        when(context.getSystemService(Context.TELEPHONY_SERVICE)).thenReturn(mTelephonyManager);
-        when(context.getSystemService(NetworkStatsManager.class)).thenReturn(mNetworkStatsManager);
+    public void getHistoricalUsageLevel_noUsageData_shouldReturn0() throws Exception {
         when(mNetworkStatsManager.querySummaryForDevice(eq(ConnectivityManager.TYPE_WIFI),
                 eq(SUB_ID), eq(0L) /* startTime */, anyLong() /* endTime */))
                 .thenReturn(mock(NetworkStats.Bucket.class));
-        final DataUsageController controller = new DataUsageController(context);
-
-        assertThat(controller.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard()))
+        assertThat(mController.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard()))
             .isEqualTo(0L);
     }
 
     @Test
-    public void getHistoricalUsageLevel_v2HasUsageData_shouldReturnTotalUsage()
-            throws Exception {
-        final Context context = mock(Context.class);
-        FeatureFlagUtils.setEnabled(context, DataUsageController.DATA_USAGE_V2, true);
-        when(context.getSystemService(Context.TELEPHONY_SERVICE)).thenReturn(mTelephonyManager);
-        when(context.getSystemService(NetworkStatsManager.class)).thenReturn(mNetworkStatsManager);
+    public void getHistoricalUsageLevel_hasUsageData_shouldReturnTotalUsage() throws Exception {
         final long receivedBytes = 743823454L;
         final long transmittedBytes = 16574289L;
         final NetworkStats.Bucket bucket = mock(NetworkStats.Bucket.class);
@@ -155,9 +103,8 @@ public class DataUsageControllerTest {
         when(bucket.getTxBytes()).thenReturn(transmittedBytes);
         when(mNetworkStatsManager.querySummaryForDevice(eq(ConnectivityManager.TYPE_WIFI),
                 eq(SUB_ID), eq(0L) /* startTime */, anyLong() /* endTime */)).thenReturn(bucket);
-        final DataUsageController controller = new DataUsageController(context);
 
-        assertThat(controller.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard()))
+        assertThat(mController.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard()))
                 .isEqualTo(receivedBytes + transmittedBytes);
     }
 }
