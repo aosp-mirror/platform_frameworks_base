@@ -175,10 +175,6 @@ public final class AutofillManagerService
         }
     };
 
-    // TODO(b/117779333): move to superclass / create super-class for ShellCommand
-    @GuardedBy("mLock")
-    private boolean mAllowInstantService;
-
     /**
      * Supported modes for Augmented Autofill Smart Suggestions.
      */
@@ -271,6 +267,11 @@ public final class AutofillManagerService
         addCompatibilityModeRequestsLocked(service, userId);
     }
 
+    @Override // from AbstractMasterSystemService
+    protected void enforceCallingPermissionForManagement() {
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+    }
+
     @Override // from SystemService
     public void onStart() {
         publishBinderService(AUTOFILL_MANAGER_SERVICE, new AutoFillManagerServiceStub());
@@ -290,7 +291,7 @@ public final class AutofillManagerService
     // Called by Shell command.
     void destroySessions(@UserIdInt int userId, IResultReceiver receiver) {
         Slog.i(TAG, "destroySessions() for userId " + userId);
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        enforceCallingPermissionForManagement();
 
         synchronized (mLock) {
             if (userId != UserHandle.USER_ALL) {
@@ -313,7 +314,7 @@ public final class AutofillManagerService
     // Called by Shell command.
     void listSessions(int userId, IResultReceiver receiver) {
         Slog.i(TAG, "listSessions() for userId " + userId);
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        enforceCallingPermissionForManagement();
 
         final Bundle resultData = new Bundle();
         final ArrayList<String> sessions = new ArrayList<>();
@@ -340,7 +341,7 @@ public final class AutofillManagerService
     // Called by Shell command.
     void reset() {
         Slog.i(TAG, "reset()");
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        enforceCallingPermissionForManagement();
 
         synchronized (mLock) {
             visitServicesLocked((s) -> s.destroyLocked());
@@ -351,7 +352,7 @@ public final class AutofillManagerService
     // Called by Shell command.
     void setLogLevel(int level) {
         Slog.i(TAG, "setLogLevel(): " + level);
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        enforceCallingPermissionForManagement();
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -388,7 +389,7 @@ public final class AutofillManagerService
 
     // Called by Shell command.
     int getLogLevel() {
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        enforceCallingPermissionForManagement();
 
         synchronized (mLock) {
             if (sVerbose) return AutofillManager.FLAG_ADD_CLIENT_VERBOSE;
@@ -399,7 +400,7 @@ public final class AutofillManagerService
 
     // Called by Shell command.
     int getMaxPartitions() {
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        enforceCallingPermissionForManagement();
 
         synchronized (mLock) {
             return sPartitionMaxCount;
@@ -408,8 +409,8 @@ public final class AutofillManagerService
 
     // Called by Shell command.
     void setMaxPartitions(int max) {
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         Slog.i(TAG, "setMaxPartitions(): " + max);
+        enforceCallingPermissionForManagement();
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -433,7 +434,7 @@ public final class AutofillManagerService
 
     // Called by Shell command.
     int getMaxVisibleDatasets() {
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        enforceCallingPermissionForManagement();
 
         synchronized (sLock) {
             return sVisibleDatasetsMaxCount;
@@ -442,8 +443,8 @@ public final class AutofillManagerService
 
     // Called by Shell command.
     void setMaxVisibleDatasets(int max) {
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         Slog.i(TAG, "setMaxVisibleDatasets(): " + max);
+        enforceCallingPermissionForManagement();
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -480,7 +481,7 @@ public final class AutofillManagerService
     // Called by Shell command.
     void getScore(@Nullable String algorithmName, @NonNull String value1,
             @NonNull String value2, @NonNull RemoteCallback callback) {
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        enforceCallingPermissionForManagement();
 
         final FieldClassificationStrategy strategy =
                 new FieldClassificationStrategy(getContext(), UserHandle.USER_CURRENT);
@@ -491,31 +492,14 @@ public final class AutofillManagerService
 
     // Called by Shell command.
     Boolean getFullScreenMode() {
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        enforceCallingPermissionForManagement();
         return sFullScreenMode;
     }
 
     // Called by Shell command.
     void setFullScreenMode(@Nullable Boolean mode) {
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        enforceCallingPermissionForManagement();
         sFullScreenMode = mode;
-    }
-
-    // Called by Shell command.
-    boolean getAllowInstantService() {
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
-        synchronized (mLock) {
-            return mAllowInstantService;
-        }
-    }
-
-    // Called by Shell command.
-    void setAllowInstantService(boolean mode) {
-        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
-        Slog.i(TAG, "setAllowInstantService(): " + mode);
-        synchronized (mLock) {
-            mAllowInstantService = mode;
-        }
     }
 
     private void setLoggingLevelsLocked(boolean debug, boolean verbose) {
@@ -1218,7 +1202,6 @@ public final class AutofillManagerService
                     mAutofillCompatState.dump(prefix, pw);
                     pw.print("from settings: ");
                     pw.println(getWhitelistedCompatModePackagesFromSettings());
-                    pw.print("Allow instant service: "); pw.println(mAllowInstantService);
                     if (mSupportedSmartSuggestionModes != 0) {
                         pw.print("Smart Suggestion modes: ");
                         pw.println(smartSuggestionFlagsToString(mSupportedSmartSuggestionModes));
