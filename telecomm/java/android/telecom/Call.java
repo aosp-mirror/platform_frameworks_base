@@ -29,7 +29,6 @@ import android.os.ParcelFileDescriptor;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.String;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
@@ -908,10 +907,16 @@ public final class Call {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            sb.append("[pa: ");
+            sb.append("[id: ");
+            sb.append(mTelecomCallId);
+            sb.append(", pa: ");
             sb.append(mAccountHandle);
             sb.append(", hdl: ");
-            sb.append(Log.pii(mHandle));
+            sb.append(Log.piiHandle(mHandle));
+            sb.append(", hdlPres: ");
+            sb.append(mHandlePresentation);
+            sb.append(", videoState: ");
+            sb.append(VideoProfile.videoStateToString(mVideoState));
             sb.append(", caps: ");
             sb.append(capabilitiesToString(mCallCapabilities));
             sb.append(", props: ");
