@@ -2692,7 +2692,6 @@ Lcom/android/internal/telephony/dataconnection/DataConnection;->initConnection(L
 Lcom/android/internal/telephony/dataconnection/DataConnection;->log(Ljava/lang/String;)V
 Lcom/android/internal/telephony/dataconnection/DataConnection;->mActivatingState:Lcom/android/internal/telephony/dataconnection/DataConnection$DcActivatingState;
 Lcom/android/internal/telephony/dataconnection/DataConnection;->mActiveState:Lcom/android/internal/telephony/dataconnection/DataConnection$DcActiveState;
-Lcom/android/internal/telephony/dataconnection/DataConnection;->mApnContexts:Ljava/util/HashMap;
 Lcom/android/internal/telephony/dataconnection/DataConnection;->mConnectionParams:Lcom/android/internal/telephony/dataconnection/DataConnection$ConnectionParams;
 Lcom/android/internal/telephony/dataconnection/DataConnection;->mDataRegState:I
 Lcom/android/internal/telephony/dataconnection/DataConnection;->mDcFailCause:Lcom/android/internal/telephony/dataconnection/DcFailCause;
