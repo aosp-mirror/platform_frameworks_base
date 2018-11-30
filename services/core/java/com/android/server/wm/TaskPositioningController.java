@@ -28,12 +28,12 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.Display;
-import android.view.SurfaceControl;
 import android.view.IWindow;
+import android.view.InputWindowHandle;
+import android.view.SurfaceControl;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.input.InputManagerService;
-import android.view.InputWindowHandle;
 
 /**
  * Controller for task positioning by drag.
@@ -184,9 +184,7 @@ class TaskPositioningController {
         if (!mInputManager.transferTouchFocus(
                 transferFocusFromWin.mInputChannel, mTaskPositioner.mServerChannel)) {
             Slog.e(TAG_WM, "startPositioningLocked: Unable to transfer touch focus");
-            mTaskPositioner.unregister();
-            mTaskPositioner = null;
-            displayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
+            cleanUpTaskPositioner();
             return false;
         }
 
@@ -199,12 +197,21 @@ class TaskPositioningController {
             if (DEBUG_TASK_POSITIONING) Slog.d(TAG_WM, "finishPositioning");
 
             synchronized (mService.mGlobalLock) {
-                if (mTaskPositioner != null) {
-                    mTaskPositioner.unregister();
-                    mTaskPositioner = null;
-                }
+                cleanUpTaskPositioner();
                 mPositioningDisplay = null;
             }
         });
+    }
+
+    private void cleanUpTaskPositioner() {
+        final TaskPositioner positioner = mTaskPositioner;
+        if (positioner == null) {
+            return;
+        }
+
+        // We need to assign task positioner to null first to indicate that we're finishing task
+        // positioning.
+        mTaskPositioner = null;
+        positioner.unregister();
     }
 }
