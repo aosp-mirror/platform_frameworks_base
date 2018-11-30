@@ -184,6 +184,15 @@ public class BackupManagerService {
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
+    /**
+     * Starts the backup service for user {@code userId} by creating a new instance of {@link
+     * UserBackupManagerService} and registering it with this service.
+     */
+    // TODO(b/120212806): Add UserBackupManagerService initialization logic.
+    void startServiceForUser(int userId) {
+        // Intentionally empty.
+    }
+
     /*
      * The following methods are implementations of IBackupManager methods called from Trampoline.
      * They delegate to the appropriate per-user instance of UserBackupManagerService to perform the
@@ -626,7 +635,9 @@ public class BackupManagerService {
         @Override
         public void onUnlockUser(int userId) {
             if (userId == UserHandle.USER_SYSTEM) {
-                sInstance.unlockSystemUser();
+                sInstance.initializeServiceAndUnlockSystemUser();
+            } else {
+                sInstance.startServiceForUser(userId);
             }
         }
     }

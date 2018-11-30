@@ -41,6 +41,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -81,6 +82,12 @@ public class Trampoline extends IBackupManager.Stub {
     // Product-level suppression of backup/restore.
     private static final String BACKUP_DISABLE_PROPERTY = "ro.backup.disable";
 
+    private static final String BACKUP_THREAD = "backup";
+
+    /** Values for setting {@link Settings.Global#BACKUP_MULTI_USER_ENABLED} */
+    private static final int MULTI_USER_DISABLED = 0;
+    private static final int MULTI_USER_ENABLED = 1;
+
     private final Context mContext;
 
     @GuardedBy("mStateLock")
@@ -91,16 +98,29 @@ public class Trampoline extends IBackupManager.Stub {
 
     private volatile BackupManagerService mService;
     private HandlerThread mHandlerThread;
+    private Handler mHandler;
 
     public Trampoline(Context context) {
         mContext = context;
         mGlobalDisable = isBackupDisabled();
         mSuppressFile = getSuppressFile();
         mSuppressFile.getParentFile().mkdirs();
+
+        mHandlerThread = new HandlerThread(BACKUP_THREAD, Process.THREAD_PRIORITY_BACKGROUND);
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
     }
 
     protected boolean isBackupDisabled() {
         return SystemProperties.getBoolean(BACKUP_DISABLE_PROPERTY, false);
+    }
+
+    protected boolean isMultiUserEnabled() {
+        return Settings.Global.getInt(
+                mContext.getContentResolver(),
+                Settings.Global.BACKUP_MULTI_USER_ENABLED,
+                MULTI_USER_DISABLED)
+                == MULTI_USER_ENABLED;
     }
 
     protected int binderGetCallingUid() {
@@ -147,15 +167,9 @@ public class Trampoline extends IBackupManager.Stub {
     /**
      * Called from {@link BackupManagerService.Lifecycle} when the system user is unlocked. Attempts
      * to initialize {@link BackupManagerService} and set backup state for the system user.
-     *
-     * @see BackupManagerService#unlockSystemUser()
      */
-    void unlockSystemUser() {
-        mHandlerThread = new HandlerThread("backup", Process.THREAD_PRIORITY_BACKGROUND);
-        mHandlerThread.start();
-
-        Handler h = new Handler(mHandlerThread.getLooper());
-        h.post(
+    void initializeServiceAndUnlockSystemUser() {
+        mHandler.post(
                 () -> {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup init");
                     initializeService(UserHandle.USER_SYSTEM);
@@ -165,6 +179,29 @@ public class Trampoline extends IBackupManager.Stub {
                     if (service != null) {
                         Slog.i(TAG, "Unlocking system user");
                         service.unlockSystemUser();
+                    }
+                });
+    }
+
+    /**
+     * Called from {@link BackupManagerService.Lifecycle} when a non-system user {@code userId} is
+     * unlocked. Starts the backup service for this user if the service supports multi-user.
+     * Offloads work onto the handler thread {@link #mHandlerThread} to keep unlock time low.
+     */
+    // TODO(b/120212806): Consolidate service start for system and non-system users when system
+    // user-only logic is removed.
+    void startServiceForUser(int userId) {
+        if (!isMultiUserEnabled()) {
+            Slog.i(TAG, "Multi-user disabled, cannot start service for user: " + userId);
+            return;
+        }
+
+        mHandler.post(
+                () -> {
+                    BackupManagerService service = mService;
+                    if (service != null) {
+                        Slog.i(TAG, "Starting service for user: " + userId);
+                        service.startServiceForUser(userId);
                     }
                 });
     }
