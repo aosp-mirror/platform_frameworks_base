@@ -288,7 +288,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     @Override
     protected int findKeyReceiverAddress() {
-        return Constants.ADDR_TV;
+        if (getActiveSource().isValid()) {
+            return getActiveSource().logicalAddress;
+        }
+        return Constants.ADDR_INVALID;
     }
 
     @VisibleForTesting
