@@ -541,6 +541,7 @@ public class AudioManager {
      * Adjusting the volume due to a hardware key press.
      * @hide
      */
+    @SystemApi
     public static final int FLAG_FROM_KEY = 1 << 12;
 
     private static final String[] FLAG_NAMES = {
