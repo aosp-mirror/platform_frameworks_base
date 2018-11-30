@@ -6627,6 +6627,16 @@ message MetricsEvent {
     // OS: Q
     ACTION_DISPLAY_FOLD = 1594;
 
+    // OPEN: WifiDppConfiguratorActivity (android.settings.WIFI_DPP_CONFIGURATOR_XXX action intents)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_WIFI_DPP_CONFIGURATOR = 1595;
+
+    // OPEN: WifiDppEnrolleeActivity (android.settings.WIFI_DPP_ENROLLEE_XXX action intents)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_WIFI_DPP_ENROLLEE = 1596;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
