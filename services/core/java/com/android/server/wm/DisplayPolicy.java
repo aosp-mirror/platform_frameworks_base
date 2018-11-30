@@ -755,6 +755,12 @@ public class DisplayPolicy {
                         || attrs.hideTimeoutMilliseconds > TOAST_WINDOW_TIMEOUT) {
                     attrs.hideTimeoutMilliseconds = TOAST_WINDOW_TIMEOUT;
                 }
+                // Accessibility users may need longer timeout duration. This api compares
+                // original timeout with user's preference and return longer one. It returns
+                // original timeout if there's no preference.
+                attrs.hideTimeoutMilliseconds = mAccessibilityManager.getRecommendedTimeoutMillis(
+                        (int) attrs.hideTimeoutMilliseconds,
+                        AccessibilityManager.FLAG_CONTENT_TEXT);
                 attrs.windowAnimations = com.android.internal.R.style.Animation_Toast;
                 break;
         }
