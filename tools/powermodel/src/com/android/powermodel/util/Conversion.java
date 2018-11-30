@@ -35,6 +35,10 @@ public class Conversion {
         return result;
     }
     
+    public static double msToHr(double ms) {
+        return ms / 3600.0 / 1000.0;
+    }
+
     /**
      * No public constructor.
      */

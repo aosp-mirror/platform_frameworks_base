@@ -168,6 +168,80 @@ public class RawBatteryStats {
         public String lineType;
     }
 
+    @Line(tag="bt", scope=Scope.SYSTEM, count=Count.SINGLE)
+    public static class Battery extends Record {
+        // If which != STATS_SINCE_CHARGED, the csv will be "N/A" and we will get
+        // a parsing warning.  Nobody uses anything other than STATS_SINCE_CHARGED.
+        @Field(index=0)
+        public int startCount;
+
+        @Field(index=1)
+        public long whichBatteryRealtimeMs;
+
+        @Field(index=2)
+        public long whichBatteryUptimeMs;
+
+        @Field(index=3)
+        public long totalRealtimeMs;
+
+        @Field(index=4)
+        public long totalUptimeMs;
+
+        @Field(index=5)
+        public long getStartClockTimeMs;
+
+        @Field(index=6)
+        public long whichBatteryScreenOffRealtimeMs;
+
+        @Field(index=7)
+        public long whichBatteryScreenOffUptimeMs;
+
+        @Field(index=8)
+        public long estimatedBatteryCapacityMah;
+
+        @Field(index=9)
+        public long minLearnedBatteryCapacityMah;
+
+        @Field(index=10)
+        public long maxLearnedBatteryCapacityMah;
+
+        @Field(index=11)
+        public long screenDozeTimeMs;
+    }
+
+    @Line(tag="gn", scope=Scope.SYSTEM, count=Count.SINGLE)
+    public static class GlobalNetwork extends Record {
+        @Field(index=0)
+        public long mobileRxTotalBytes;
+
+        @Field(index=1)
+        public long mobileTxTotalBytes;
+
+        @Field(index=2)
+        public long wifiRxTotalBytes;
+
+        @Field(index=3)
+        public long wifiTxTotalBytes;
+
+        @Field(index=4)
+        public long mobileRxTotalPackets;
+
+        @Field(index=5)
+        public long mobileTxTotalPackets;
+
+        @Field(index=6)
+        public long wifiRxTotalPackets;
+
+        @Field(index=7)
+        public long wifiTxTotalPackets;
+
+        @Field(index=8)
+        public long btRxTotalBytes;
+
+        @Field(index=9)
+        public long btTxTotalBytes;
+    }
+
     @Line(tag="gmcd", scope=Scope.SYSTEM, count=Count.SINGLE)
     public static class GlobalModemController extends Record {
         @Field(index=0)
@@ -181,6 +255,154 @@ public class RawBatteryStats {
 
         @Field(index=3)
         public long[] txTimeMs;
+    }
+
+    @Line(tag="m", scope=Scope.SYSTEM, count=Count.SINGLE)
+    public static class Misc extends Record {
+        @Field(index=0)
+        public long screenOnTimeMs;
+
+        @Field(index=1)
+        public long phoneOnTimeMs;
+
+        @Field(index=2)
+        public long fullWakeLockTimeTotalMs;
+
+        @Field(index=3)
+        public long partialWakeLockTimeTotalMs;
+
+        @Field(index=4)
+        public long mobileRadioActiveTimeMs;
+
+        @Field(index=5)
+        public long mobileRadioActiveAdjustedTimeMs;
+
+        @Field(index=6)
+        public long interactiveTimeMs;
+
+        @Field(index=7)
+        public long powerSaveModeEnabledTimeMs;
+
+        @Field(index=8)
+        public int connectivityChangeCount;
+
+        @Field(index=9)
+        public long deepDeviceIdleModeTimeMs;
+
+        @Field(index=10)
+        public long deepDeviceIdleModeCount;
+
+        @Field(index=11)
+        public long deepDeviceIdlingTimeMs;
+
+        @Field(index=12)
+        public long deepDeviceIdlingCount;
+
+        @Field(index=13)
+        public long mobileRadioActiveCount;
+
+        @Field(index=14)
+        public long mobileRadioActiveUnknownTimeMs;
+
+        @Field(index=15)
+        public long lightDeviceIdleModeTimeMs;
+
+        @Field(index=16)
+        public long lightDeviceIdleModeCount;
+
+        @Field(index=17)
+        public long lightDeviceIdlingTimeMs;
+
+        @Field(index=18)
+        public long lightDeviceIdlingCount;
+
+        @Field(index=19)
+        public long lightLongestDeviceIdleModeTimeMs;
+
+        @Field(index=20)
+        public long deepLongestDeviceIdleModeTimeMs;
+    }
+
+    @Line(tag="nt", scope=Scope.UID, count=Count.SINGLE)
+    public static class Network extends Record {
+        @Field(index=0)
+        public long mobileRxBytes;
+
+        @Field(index=1)
+        public long mobileTxBytes;
+
+        @Field(index=2)
+        public long wifiRxBytes;
+
+        @Field(index=3)
+        public long wifiTxBytes;
+
+        @Field(index=4)
+        public long mobileRxPackets;
+
+        @Field(index=5)
+        public long mobileTxPackets;
+
+        @Field(index=6)
+        public long wifiRxPackets;
+
+        @Field(index=7)
+        public long wifiTxPackets;
+
+        // This is microseconds, because... batterystats.
+        @Field(index=8)
+        public long mobileRadioActiveTimeUs;
+
+        @Field(index=9)
+        public long mobileRadioActiveCount;
+
+        @Field(index=10)
+        public long btRxBytes;
+
+        @Field(index=11)
+        public long btTxBytes;
+
+        @Field(index=12)
+        public long mobileWakeupCount;
+
+        @Field(index=13)
+        public long wifiWakeupCount;
+
+        @Field(index=14)
+        public long mobileBgRxBytes;
+
+        @Field(index=15)
+        public long mobileBgTxBytes;
+
+        @Field(index=16)
+        public long wifiBgRxBytes;
+
+        @Field(index=17)
+        public long wifiBgTxBytes;
+
+        @Field(index=18)
+        public long mobileBgRxPackets;
+
+        @Field(index=19)
+        public long mobileBgTxPackets;
+
+        @Field(index=20)
+        public long wifiBgRxPackets;
+
+        @Field(index=21)
+        public long wifiBgTxPackets;
+    }
+
+    @Line(tag="sgt", scope=Scope.SYSTEM, count=Count.SINGLE)
+    public static class SignalStrengthTime extends Record {
+        @Field(index=0)
+        public long[] phoneSignalStrengthTimeMs;
+    }
+
+    @Line(tag="sst", scope=Scope.SYSTEM, count=Count.SINGLE)
+    public static class SignalScanningTime extends Record {
+        @Field(index=0)
+        public long phoneSignalScanningTimeMs;
     }
 
     @Line(tag="uid", scope=Scope.UID, count=Count.MULTIPLE)
