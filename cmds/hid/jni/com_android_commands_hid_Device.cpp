@@ -42,7 +42,6 @@ namespace android {
 namespace uhid {
 
 static const char* UHID_PATH = "/dev/uhid";
-static const size_t UHID_MAX_NAME_LENGTH = 128;
 
 static struct {
     jmethodID onDeviceOpen;
@@ -90,8 +89,13 @@ JNIEnv* DeviceCallback::getJNIEnv() {
 }
 
 Device* Device::open(int32_t id, const char* name, int32_t vid, int32_t pid,
-        std::unique_ptr<uint8_t[]> descriptor, size_t descriptorSize,
-        std::unique_ptr<DeviceCallback> callback) {
+        std::vector<uint8_t> descriptor, std::unique_ptr<DeviceCallback> callback) {
+
+    size_t size = descriptor.size();
+    if (size > HID_MAX_DESCRIPTOR_SIZE) {
+        LOGE("Received invalid hid report with descriptor size %zu, skipping", size);
+        return nullptr;
+    }
 
     int fd = ::open(UHID_PATH, O_RDWR | O_CLOEXEC);
     if (fd < 0) {
@@ -102,10 +106,10 @@ Device* Device::open(int32_t id, const char* name, int32_t vid, int32_t pid,
     struct uhid_event ev;
     memset(&ev, 0, sizeof(ev));
     ev.type = UHID_CREATE2;
-    strncpy((char*)ev.u.create2.name, name, UHID_MAX_NAME_LENGTH);
-    memcpy(&ev.u.create2.rd_data, descriptor.get(),
-            descriptorSize * sizeof(ev.u.create2.rd_data[0]));
-    ev.u.create2.rd_size = descriptorSize;
+    strlcpy(reinterpret_cast<char*>(ev.u.create2.name), name, sizeof(ev.u.create2.name));
+    memcpy(&ev.u.create2.rd_data, descriptor.data(),
+            size * sizeof(ev.u.create2.rd_data[0]));
+    ev.u.create2.rd_size = size;
     ev.u.create2.bus = BUS_BLUETOOTH;
     ev.u.create2.vendor = vid;
     ev.u.create2.product = pid;
@@ -156,12 +160,17 @@ Device::~Device() {
     mFd = -1;
 }
 
-void Device::sendReport(uint8_t* report, size_t reportSize) {
+void Device::sendReport(const std::vector<uint8_t>& report) const {
+    if (report.size() > UHID_DATA_MAX) {
+        LOGE("Received invalid report of size %zu, skipping", report.size());
+        return;
+    }
+
     struct uhid_event ev;
     memset(&ev, 0, sizeof(ev));
     ev.type = UHID_INPUT2;
-    ev.u.input2.size = reportSize;
-    memcpy(&ev.u.input2.data, report, reportSize);
+    ev.u.input2.size = report.size();
+    memcpy(&ev.u.input2.data, report.data(), report.size() * sizeof(ev.u.input2.data[0]));
     ssize_t ret = TEMP_FAILURE_RETRY(::write(mFd, &ev, sizeof(ev)));
     if (ret < 0 || ret != sizeof(ev)) {
         LOGE("Failed to send hid event: %s", strerror(errno));
@@ -191,12 +200,13 @@ int Device::handleEvents(int events) {
 
 } // namespace uhid
 
-std::unique_ptr<uint8_t[]> getData(JNIEnv* env, jbyteArray javaArray, size_t& outSize) {
+std::vector<uint8_t> getData(JNIEnv* env, jbyteArray javaArray) {
     ScopedByteArrayRO scopedArray(env, javaArray);
-    outSize = scopedArray.size();
-    std::unique_ptr<uint8_t[]> data(new uint8_t[outSize]);
-    for (size_t i = 0; i < outSize; i++) {
-        data[i] = static_cast<uint8_t>(scopedArray[i]);
+    size_t size = scopedArray.size();
+    std::vector<uint8_t> data;
+    data.reserve(size);
+    for (size_t i = 0; i < size; i++) {
+        data.push_back(static_cast<uint8_t>(scopedArray[i]));
     }
     return data;
 }
@@ -208,23 +218,20 @@ static jlong openDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jint i
         return 0;
     }
 
-    size_t size;
-    std::unique_ptr<uint8_t[]> desc = getData(env, rawDescriptor, size);
+    std::vector<uint8_t> desc = getData(env, rawDescriptor);
 
     std::unique_ptr<uhid::DeviceCallback> cb(new uhid::DeviceCallback(env, callback));
 
     uhid::Device* d = uhid::Device::open(
-            id, reinterpret_cast<const char*>(name.c_str()), vid, pid,
-            std::move(desc), size, std::move(cb));
+            id, reinterpret_cast<const char*>(name.c_str()), vid, pid, desc, std::move(cb));
     return reinterpret_cast<jlong>(d);
 }
 
 static void sendReport(JNIEnv* env, jclass /* clazz */, jlong ptr, jbyteArray rawReport) {
-    size_t size;
-    std::unique_ptr<uint8_t[]> report = getData(env, rawReport, size);
+    std::vector<uint8_t> report = getData(env, rawReport);
     uhid::Device* d = reinterpret_cast<uhid::Device*>(ptr);
     if (d) {
-        d->sendReport(report.get(), size);
+        d->sendReport(report);
     } else {
         LOGE("Could not send report, Device* is null!");
     }
