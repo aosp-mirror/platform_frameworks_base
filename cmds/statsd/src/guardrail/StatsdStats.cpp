@@ -101,6 +101,7 @@ const int FIELD_ID_UID_MAP_DELETED_APPS = 4;
 
 const std::map<int, std::pair<size_t, size_t>> StatsdStats::kAtomDimensionKeySizeLimitMap = {
         {android::util::BINDER_CALLS, {6000, 10000}},
+        {android::util::LOOPER_STATS, {1500, 2500}},
         {android::util::CPU_TIME_PER_UID_FREQ, {6000, 10000}},
 };
 
