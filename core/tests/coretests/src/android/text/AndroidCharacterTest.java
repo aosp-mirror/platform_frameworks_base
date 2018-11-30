@@ -35,13 +35,10 @@ public class AndroidCharacterTest {
         byte[] java_lang_results = new byte[size];
         int index = 0;
         for (int cp = 0; cp <= Character.MAX_VALUE; cp++) {
-            // Exempt unassigned code point due to b/120074586
-            if (Character.getType(cp) != Character.UNASSIGNED) {
-                if (cp < Character.MIN_SURROGATE || cp > Character.MAX_SURROGATE) {
-                    chars[index] = (char) cp;
-                    java_lang_results[index] = Character.getDirectionality(cp);
-                    index++;
-                }
+            if (cp < Character.MIN_SURROGATE || cp > Character.MAX_SURROGATE) {
+                chars[index] = (char) cp;
+                java_lang_results[index] = Character.getDirectionality(cp);
+                index++;
             }
         }
 
@@ -60,14 +57,11 @@ public class AndroidCharacterTest {
         int index = 0;
         for (int cp = Character.MIN_SUPPLEMENTARY_CODE_POINT; cp <= Character.MAX_CODE_POINT;
                 cp++) {
-            // Exempt unassigned code point due to b/120074586
-            if (Character.getType(cp) != Character.UNASSIGNED) {
-                chars[index] = Character.highSurrogate(cp);
-                chars[index + 1] = Character.lowSurrogate(cp);
-                java_lang_results[index] = java_lang_results[index + 1] = Character
-                        .getDirectionality(cp);
-                index += 2;
-            }
+            chars[index] = Character.highSurrogate(cp);
+            chars[index + 1] = Character.lowSurrogate(cp);
+            java_lang_results[index] = java_lang_results[index + 1] = Character
+                    .getDirectionality(cp);
+            index += 2;
         }
 
         byte[] android_text_results = new byte[size];
