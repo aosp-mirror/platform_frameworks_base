@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 /**
  * Copyright (c) 2018, The Android Open Source Project
  *
@@ -15,9 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- -->
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.internal.experiment.navbar.slim24"
+        android:versionCode="1"
+        android:versionName="1.0">
+    <overlay android:targetPackage="android"
+        android:category="com.android.internal.experiment_navbar_slim24"
+        android:priority="1"/>
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="experiment_navigationbar_overlay" msgid="6953777362606036161">"සිහින් සංචාලන තීරු අත්දැකීම"</string>
-</resources>
+    <application android:label="@string/experiment_navigationbar_overlay" android:hasCode="false"/>
+</manifest>

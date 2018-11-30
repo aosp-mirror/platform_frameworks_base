@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
 /**
  * Copyright (c) 2018, The Android Open Source Project
@@ -16,7 +15,13 @@
  * limitations under the License.
  */
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Name of overlay [CHAR LIMIT=64] -->
-    <string name="experiment_navigationbar_overlay">Slim Navigation Bar Experiment</string>
-</resources>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.internal.experiment.navbar.default"
+        android:versionCode="1"
+        android:versionName="1.0">
+    <overlay android:targetPackage="android"
+        android:category="com.android.internal.experiment_navbar_default"
+        android:priority="1"/>
+
+    <application android:label="@string/experiment_navigationbar_overlay" android:hasCode="false"/>
+</manifest>

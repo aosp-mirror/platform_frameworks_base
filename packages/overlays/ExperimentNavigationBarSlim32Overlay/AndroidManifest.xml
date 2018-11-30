@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
 /**
  * Copyright (c) 2018, The Android Open Source Project
@@ -16,13 +15,13 @@
  * limitations under the License.
  */
 -->
-<resources>
-    <!-- Height of the bottom navigation / system bar. -->
-    <dimen name="navigation_bar_height">36dp</dimen>
-    <!-- Width of the navigation bar when it is placed vertically on the screen -->
-    <dimen name="navigation_bar_width">36dp</dimen>
-    <!-- Height of the bottom navigation / system bar frame; navigation buttons height. -->
-    <dimen name="navigation_bar_frame_width">36dp</dimen>
-    <!-- Width of the navigation bar frame when it is placed vertically on the screen -->
-    <dimen name="navigation_bar_frame_height">36dp</dimen>
-</resources>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.internal.experiment.navbar.slim32"
+        android:versionCode="1"
+        android:versionName="1.0">
+    <overlay android:targetPackage="android"
+        android:category="com.android.internal.experiment_navbar_slim32"
+        android:priority="1"/>
+
+    <application android:label="@string/experiment_navigationbar_overlay" android:hasCode="false"/>
+</manifest>

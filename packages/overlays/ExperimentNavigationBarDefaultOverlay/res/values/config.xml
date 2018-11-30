@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<?xml version="1.0" encoding="utf-8"?>
+<!--
 /**
  * Copyright (c) 2018, The Android Open Source Project
  *
@@ -15,9 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- -->
-
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="experiment_navigationbar_overlay" msgid="6953777362606036161">"স্লিম নেভিগেশন বার সম্পর্কিত পরীক্ষা"</string>
+-->
+<resources>
+    <!-- Height of the bottom navigation / system bar frame; navigation buttons height. -->
+    <dimen name="navigation_bar_frame_width">48dp</dimen>
+    <!-- Width of the navigation bar frame when it is placed vertically on the screen -->
+    <dimen name="navigation_bar_frame_height">48dp</dimen>
 </resources>
