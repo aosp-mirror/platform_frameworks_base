@@ -5541,6 +5541,7 @@ package android.telephony {
     method public void requestEmbeddedSubscriptionInfoListRefresh();
     method public void setDefaultDataSubId(int);
     method public void setDefaultSmsSubId(int);
+    method public void requestEmbeddedSubscriptionInfoListRefresh(int);
     field public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
     field public static final int PROFILE_CLASS_DEFAULT = -1; // 0xffffffff
     field public static final int PROFILE_CLASS_OPERATIONAL = 2; // 0x2
