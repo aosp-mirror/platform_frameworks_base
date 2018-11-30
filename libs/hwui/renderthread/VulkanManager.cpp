@@ -263,6 +263,15 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         tailPNext = &blend->pNext;
     }
 
+    VkPhysicalDeviceSamplerYcbcrConversionFeatures* ycbcrFeature;
+    ycbcrFeature = (VkPhysicalDeviceSamplerYcbcrConversionFeatures*) malloc(
+            sizeof(VkPhysicalDeviceSamplerYcbcrConversionFeatures));
+    LOG_ALWAYS_FATAL_IF(!ycbcrFeature);
+    ycbcrFeature->sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES;
+    ycbcrFeature->pNext = nullptr;
+    *tailPNext = ycbcrFeature;
+    tailPNext = &ycbcrFeature->pNext;
+
     // query to get the physical device features
     mGetPhysicalDeviceFeatures2(mPhysicalDevice, &features);
     // this looks like it would slow things down,
