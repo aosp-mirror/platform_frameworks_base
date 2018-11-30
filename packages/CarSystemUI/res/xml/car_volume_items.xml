@@ -23,8 +23,8 @@
         car:icon="@drawable/car_ic_music"/>
   <item car:usage="media"
         car:icon="@drawable/car_ic_music"/>
-  <item car:usage="voice_communication"
-        car:icon="@*android:drawable/ic_audio_ring_notif"/>
+  <item car:usage="assistance_navigation_guidance"
+        car:icon="@drawable/car_ic_navigation"/>
   <item car:usage="voice_communication_signalling"
         car:icon="@*android:drawable/ic_audio_ring_notif"/>
   <item car:usage="alarm"
@@ -43,8 +43,8 @@
         car:icon="@drawable/car_ic_notification"/>
   <item car:usage="assistance_accessibility"
         car:icon="@drawable/car_ic_notification"/>
-  <item car:usage="assistance_navigation_guidance"
-        car:icon="@drawable/car_ic_navigation"/>
+  <item car:usage="voice_communication"
+        car:icon="@*android:drawable/ic_audio_ring_notif"/>
   <item car:usage="assistance_sonification"
         car:icon="@drawable/car_ic_notification"/>
   <item car:usage="game"
