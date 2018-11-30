@@ -1054,8 +1054,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             return;
         }
 
-        int routingInformationPath =
-                getActivePathOnSwitchFromActivePortId(getRoutingPort());
+        int routingInformationPath = mService.portIdToPath(getRoutingPort());
         // If current device is already the leaf of the whole HDMI system, will do nothing.
         if (routingInformationPath == mService.getPhysicalAddress()) {
             HdmiLogger.debug("Current device can't assign valid physical address"
