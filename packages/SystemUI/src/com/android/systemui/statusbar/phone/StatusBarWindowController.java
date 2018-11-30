@@ -283,7 +283,6 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         applyModalFlag(state);
         applyBrightness(state);
         applyHasTopUi(state);
-        applySleepToken(state);
         applyNotTouchable(state);
         if (mLp.copyFrom(mLpChanged) != 0) {
             mWindowManager.updateViewLayout(mStatusBarView, mLp);
@@ -326,14 +325,6 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
 
     private void applyHasTopUi(State state) {
         mHasTopUiChanged = isExpanded(state);
-    }
-
-    private void applySleepToken(State state) {
-        if (state.dozing) {
-            mLpChanged.privateFlags |= LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN;
-        } else {
-            mLpChanged.privateFlags &= ~LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN;
-        }
     }
 
     private void applyNotTouchable(State state) {

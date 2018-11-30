@@ -45,7 +45,6 @@ import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR;
@@ -2321,12 +2320,6 @@ public class DisplayPolicy {
         if (mTopDockedOpaqueOrDimmingWindowState == null && affectsSystemUi && win.isDimming()
                 && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             mTopDockedOpaqueOrDimmingWindowState = win;
-        }
-
-        // Take note if a window wants to acquire a sleep token.
-        if ((attrs.privateFlags & PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN) != 0
-                && win.canAcquireSleepToken()) {
-            mWindowSleepTokenNeeded = true;
         }
     }
 
