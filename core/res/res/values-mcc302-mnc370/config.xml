@@ -41,7 +41,7 @@
         <item>SUPL_PORT=7275</item>
         <item>SUPL_VER=0x20000</item>
         <item>SUPL_MODE=1</item>
-        <item>SUPL_ES=0</item>
+        <item>SUPL_ES=1</item>
         <item>LPP_PROFILE=2</item>
         <item>USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL=1</item>
         <item>A_GLONASS_POS_PROTOCOL_SELECT=0</item>

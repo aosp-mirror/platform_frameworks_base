@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi በይነመረብ መዳረሻ የለውም"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ለአማራጮች መታ ያድርጉ"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"በእርስዎ ሆትስፖት ቅንብሮች ላይ ለውጦች"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"የእርስዎ ሆትስፖት ባንድ ተለውጧል።"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ይህ መሣሪያ የእርስዎን ምርጫ ለ5GHz ብቻ አይደግፍም። በምትኩ፣ ይህ መሣሪያ ሲገኝ 5GHz ባንድ ይጠቀማል።"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"ወደ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ተቀይሯል"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ምንም ዓይነት የበይነመረብ ግንኙነት በማይኖረው ጊዜ መሣሪያዎች <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ን ይጠቀማሉ። ክፍያዎች ተፈጻሚ ሊሆኑ ይችላሉ።"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"ከ<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ወደ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> ተቀይሯል"</string>
@@ -1789,7 +1792,7 @@
     <string name="work_mode_turn_on" msgid="2062544985670564875">"አብራ"</string>
     <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"ይህ መተግበሪያ ለቆየ የAndroid ስሪት ነው የተገነባው፣ እና በአግባቡ ላይሰራ ይችላል። ዝማኔዎች ካሉ ለመመልከት ይሞክሩ፣ ወይም ደግሞ ገንቢውን ያነጋግሩ።"</string>
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"ዝማኔ ካለ አረጋግጥ"</string>
-    <string name="new_sms_notification_title" msgid="8442817549127555977">"አዲስ መልእክቶች አለዎት"</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"አዲስ መልዕክቶች አለዎት"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ለመመልከት የኤስኤምኤስ መተግበሪያ ይክፈቱ"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"አንዳንድ ተግባሮች የተገደቡ ሊሆኑ ይችላሉ"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"ለመክፈት መታ ያድርጉ"</string>
@@ -1846,7 +1849,7 @@
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"ረጋ ይበሉና በአቅራቢያ ያለ መጠለያ ይፈልጉ።"</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"ወዲያውኑ ከባህር ዳርቻ አካባቢዎች እና የወንዝ ዳርቻ አካባቢዎች ይውጡና እንደ ከፍ ያለ መሬት ያሉ ከአደጋ የተሻለ ደህንነት ወዳቸው ቦታዎች ይሂዱ።"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"ረጋ ይበሉና በአቅራቢያ ያለ መጠለያ ይፈልጉ።"</string>
-    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"የአስቸኳይ አደጋ መልእክቶች ሙከራ"</string>
+    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"የአስቸኳይ አደጋ መልዕክቶች ሙከራ"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"ምላሽ ስጥ"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="5767701075994754356">"ሲም ለድምጽ አይፈቀድም"</string>

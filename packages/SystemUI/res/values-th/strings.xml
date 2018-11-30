@@ -57,7 +57,7 @@
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ไหม"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ไหม"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"แอปพลิเคชันที่ติดตั้งใช้กับอุปกรณ์ USB นี้ไม่ได้ เรียนรู้เพิ่มเติมเกี่ยวกับอุปกรณ์เสริมนี้ที่ <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"แอปพลิเคชันที่ติดตั้งใช้กับอุปกรณ์ USB นี้ไม่ได้ ดูข้อมูลเพิ่มเติมเกี่ยวกับอุปกรณ์เสริมนี้ที่ <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"อุปกรณ์เสริม USB"</string>
     <string name="label_view" msgid="6304565553218192990">"ดู"</string>
     <string name="always_use_device" msgid="4015357883336738417">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> ทุกครั้งเมื่อเชื่อมต่อกับ <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
@@ -480,7 +480,7 @@
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ใช้ <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> เพื่อจัดการอุปกรณ์"</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"ผู้ดูแลระบบสามารถตรวจสอบและจัดการการตั้งค่า การเข้าถึงของบริษัท แอป ข้อมูลที่เชื่อมโยงกับอุปกรณ์ของคุณ และข้อมูลตำแหน่งของอุปกรณ์"</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
-    <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"เรียนรู้เพิ่มเติม"</string>
+    <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"ดูข้อมูลเพิ่มเติม"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"คุณเชื่อมต่อกับ <xliff:g id="VPN_APP">%1$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์ได้"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"เปิดการตั้งค่า VPN"</string>
@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"ซ่อน <xliff:g id="TILE_LABEL">%1$s</xliff:g> ไหม"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"จะปรากฏอีกครั้งเมื่อคุณเปิดใช้ในการตั้งค่าครั้งถัดไป"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ซ่อน"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"คุณกำลังใช้โปรไฟล์งานของคุณ"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"การโทร"</string>
     <string name="stream_system" msgid="7493299064422163147">"ระบบ"</string>
     <string name="stream_ring" msgid="8213049469184048338">"เสียงเรียกเข้า"</string>

@@ -138,7 +138,7 @@
     <string name="user_guest" msgid="8475274842845401871">"Aliyealikwa"</string>
     <string name="unknown" msgid="1592123443519355854">"Haijulikani"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Mtumiaji: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <string name="launch_defaults_some" msgid="313159469856372621">"Baadhi ya chaguo msingi zimewekwa"</string>
+    <string name="launch_defaults_some" msgid="313159469856372621">"Baadhi ya chaguomsingi zimewekwa"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Hakuna chaguo-misingi zilizowekwa"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Mipangilio ya kusoma maandishi kwa sauti"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"Kusoma maandishi kwa sauti"</string>
@@ -157,7 +157,7 @@
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Hotuba hii inawezesha injini huenda ikaweza kukusanya maandishi ambayo yatazungumziwa, ikijumlisha data ya kibinafsi ya nenosiri na namba ya kaddi ya mkopo. Inatoka kwa injini ya <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> Wezesha matumizi ya hotuba hii iliyowezeshwa ya injini?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Lugha hii inahitaji muunganisho wa mtandao unaofanya kazi ili kipengele cha kusoma maandishi kwa sauti kifanye kazi."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Huu ni mfano wa usanisi usemaji"</string>
-    <string name="tts_status_title" msgid="7268566550242584413">"Hali ya lugha chaguo msingi"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Hali ya lugha chaguomsingi"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> inaweza kutumiwa kikamilifu"</string>
     <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> inahitaji muunganisho wa mtandao"</string>
     <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> haiwezi kutumiwa"</string>
@@ -167,7 +167,7 @@
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Injini inayofaa"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Kwa ujumla"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Weka upya mipangilio ya ubora wa matamshi"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Rejesha mipangilio ya ubora wa matamshi kuwa ya chaguo msingi."</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Rejesha mipangilio ya ubora wa matamshi kuwa ya chaguomsingi."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Polepole sana"</item>
     <item msgid="4795095314303559268">"Polepole"</item>
@@ -333,7 +333,7 @@
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Nenosiri jipya na uthibitisho havioani"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Imeshindwa kuweka nenosiri la hifadhi rudufu"</string>
   <string-array name="color_mode_names">
-    <item msgid="2425514299220523812">"Maridadi (chaguo msingi)"</item>
+    <item msgid="2425514299220523812">"Maridadi (chaguomsingi)"</item>
     <item msgid="8446070607501413455">"Asili"</item>
     <item msgid="6553408765810699025">"Muundo-msingi"</item>
   </string-array>
@@ -412,7 +412,7 @@
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> zilizopita"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"Zimesalia <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Ndogo"</string>
-    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Chaguo msingi"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Chaguomsingi"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Kubwa"</string>
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Kubwa kiasi"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Kubwa zaidi"</string>

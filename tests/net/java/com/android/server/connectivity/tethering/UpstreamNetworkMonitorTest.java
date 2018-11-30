@@ -31,6 +31,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -73,6 +74,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -83,6 +85,10 @@ public class UpstreamNetworkMonitorTest {
 
     private static final boolean INCLUDES = true;
     private static final boolean EXCLUDES = false;
+
+    // Actual contents of the request don't matter for this test. The lack of
+    // any specific TRANSPORT_* is sufficient to identify this request.
+    private static final NetworkRequest mDefaultRequest = new NetworkRequest.Builder().build();
 
     @Mock private Context mContext;
     @Mock private IConnectivityManager mCS;
@@ -113,6 +119,13 @@ public class UpstreamNetworkMonitorTest {
     }
 
     @Test
+    public void testStopWithoutStartIsNonFatal() {
+        mUNM.stop();
+        mUNM.stop();
+        mUNM.stop();
+    }
+
+    @Test
     public void testDoesNothingBeforeStarted() {
         assertTrue(mCM.hasNoCallbacks());
         assertFalse(mUNM.mobileNetworkRequested());
@@ -127,7 +140,7 @@ public class UpstreamNetworkMonitorTest {
     public void testDefaultNetworkIsTracked() throws Exception {
         assertEquals(0, mCM.trackingDefault.size());
 
-        mUNM.start();
+        mUNM.start(mDefaultRequest);
         assertEquals(1, mCM.trackingDefault.size());
 
         mUNM.stop();
@@ -138,7 +151,7 @@ public class UpstreamNetworkMonitorTest {
     public void testListensForAllNetworks() throws Exception {
         assertTrue(mCM.listening.isEmpty());
 
-        mUNM.start();
+        mUNM.start(mDefaultRequest);
         assertFalse(mCM.listening.isEmpty());
         assertTrue(mCM.isListeningForAll());
 
@@ -148,9 +161,11 @@ public class UpstreamNetworkMonitorTest {
 
     @Test
     public void testCallbacksRegistered() {
-        mUNM.start();
-        verify(mCM, times(1)).registerNetworkCallback(any(), any(), any());
-        verify(mCM, times(1)).registerDefaultNetworkCallback(any(), any());
+        mUNM.start(mDefaultRequest);
+        verify(mCM, times(1)).registerNetworkCallback(
+                any(NetworkRequest.class), any(NetworkCallback.class), any(Handler.class));
+        verify(mCM, times(1)).requestNetwork(
+                eq(mDefaultRequest), any(NetworkCallback.class), any(Handler.class));
 
         mUNM.stop();
         verify(mCM, times(2)).unregisterNetworkCallback(any(NetworkCallback.class));
@@ -161,7 +176,7 @@ public class UpstreamNetworkMonitorTest {
         assertFalse(mUNM.mobileNetworkRequested());
         assertEquals(0, mCM.requested.size());
 
-        mUNM.start();
+        mUNM.start(mDefaultRequest);
         assertFalse(mUNM.mobileNetworkRequested());
         assertEquals(0, mCM.requested.size());
 
@@ -184,17 +199,17 @@ public class UpstreamNetworkMonitorTest {
         assertFalse(mUNM.mobileNetworkRequested());
         assertEquals(0, mCM.requested.size());
 
-        mUNM.start();
-        verify(mCM, Mockito.times(1)).registerNetworkCallback(
+        mUNM.start(mDefaultRequest);
+        verify(mCM, times(1)).registerNetworkCallback(
                 any(NetworkRequest.class), any(NetworkCallback.class), any(Handler.class));
-        verify(mCM, Mockito.times(1)).registerDefaultNetworkCallback(
-                any(NetworkCallback.class), any(Handler.class));
+        verify(mCM, times(1)).requestNetwork(
+                eq(mDefaultRequest), any(NetworkCallback.class), any(Handler.class));
         assertFalse(mUNM.mobileNetworkRequested());
         assertEquals(0, mCM.requested.size());
 
         mUNM.updateMobileRequiresDun(true);
         mUNM.registerMobileNetworkRequest();
-        verify(mCM, Mockito.times(1)).requestNetwork(
+        verify(mCM, times(1)).requestNetwork(
                 any(NetworkRequest.class), any(NetworkCallback.class), anyInt(), anyInt(),
                 any(Handler.class));
 
@@ -222,7 +237,7 @@ public class UpstreamNetworkMonitorTest {
         assertFalse(mUNM.mobileNetworkRequested());
         assertEquals(0, mCM.requested.size());
 
-        mUNM.start();
+        mUNM.start(mDefaultRequest);
         assertFalse(mUNM.mobileNetworkRequested());
         assertEquals(0, mCM.requested.size());
 
@@ -242,7 +257,7 @@ public class UpstreamNetworkMonitorTest {
 
     @Test
     public void testUpdateMobileRequiresDun() throws Exception {
-        mUNM.start();
+        mUNM.start(mDefaultRequest);
 
         // Test going from no-DUN to DUN correctly re-registers callbacks.
         mUNM.updateMobileRequiresDun(false);
@@ -270,7 +285,7 @@ public class UpstreamNetworkMonitorTest {
         final Collection<Integer> preferredTypes = new ArrayList<>();
         preferredTypes.add(TYPE_WIFI);
 
-        mUNM.start();
+        mUNM.start(mDefaultRequest);
         // There are no networks, so there is nothing to select.
         assertSatisfiesLegacyType(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
 
@@ -334,8 +349,47 @@ public class UpstreamNetworkMonitorTest {
     }
 
     @Test
+    public void testGetCurrentPreferredUpstream() throws Exception {
+        mUNM.start(mDefaultRequest);
+        mUNM.updateMobileRequiresDun(false);
+
+        // [0] Mobile connects, DUN not required -> mobile selected.
+        final TestNetworkAgent cellAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
+        cellAgent.fakeConnect();
+        mCM.makeDefaultNetwork(cellAgent);
+        assertEquals(cellAgent.networkId, mUNM.getCurrentPreferredUpstream().network);
+
+        // [1] WiFi connects but not validated/promoted to default -> mobile selected.
+        final TestNetworkAgent wifiAgent = new TestNetworkAgent(mCM, TRANSPORT_WIFI);
+        wifiAgent.fakeConnect();
+        assertEquals(cellAgent.networkId, mUNM.getCurrentPreferredUpstream().network);
+
+        // [2] WiFi validates and is promoted to the default network -> WiFi selected.
+        mCM.makeDefaultNetwork(wifiAgent);
+        assertEquals(wifiAgent.networkId, mUNM.getCurrentPreferredUpstream().network);
+
+        // [3] DUN required, no other changes -> WiFi still selected
+        mUNM.updateMobileRequiresDun(true);
+        assertEquals(wifiAgent.networkId, mUNM.getCurrentPreferredUpstream().network);
+
+        // [4] WiFi no longer validated, mobile becomes default, DUN required -> null selected.
+        mCM.makeDefaultNetwork(cellAgent);
+        assertEquals(null, mUNM.getCurrentPreferredUpstream());
+        // TODO: make sure that a DUN request has been filed. This is currently
+        // triggered by code over in Tethering, but once that has been moved
+        // into UNM we should test for this here.
+
+        // [5] DUN network arrives -> DUN selected
+        final TestNetworkAgent dunAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
+        dunAgent.networkCapabilities.addCapability(NET_CAPABILITY_DUN);
+        dunAgent.networkCapabilities.removeCapability(NET_CAPABILITY_INTERNET);
+        dunAgent.fakeConnect();
+        assertEquals(dunAgent.networkId, mUNM.getCurrentPreferredUpstream().network);
+    }
+
+    @Test
     public void testLocalPrefixes() throws Exception {
-        mUNM.start();
+        mUNM.start(mDefaultRequest);
 
         // [0] Test minimum set of local prefixes.
         Set<IpPrefix> local = mUNM.getLocalPrefixes();
@@ -345,7 +399,7 @@ public class UpstreamNetworkMonitorTest {
 
         // [1] Pretend Wi-Fi connects.
         final TestNetworkAgent wifiAgent = new TestNetworkAgent(mCM, TRANSPORT_WIFI);
-        final LinkProperties wifiLp = new LinkProperties();
+        final LinkProperties wifiLp = wifiAgent.linkProperties;
         wifiLp.setInterfaceName("wlan0");
         final String[] WIFI_ADDRS = {
                 "fe80::827a:bfff:fe6f:374d", "100.112.103.18",
@@ -358,7 +412,7 @@ public class UpstreamNetworkMonitorTest {
             wifiLp.addLinkAddress(new LinkAddress(addrStr + cidr));
         }
         wifiAgent.fakeConnect();
-        wifiAgent.sendLinkProperties(wifiLp);
+        wifiAgent.sendLinkProperties();
 
         local = mUNM.getLocalPrefixes();
         assertPrefixSet(local, INCLUDES, alreadySeen);
@@ -372,7 +426,7 @@ public class UpstreamNetworkMonitorTest {
 
         // [2] Pretend mobile connects.
         final TestNetworkAgent cellAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
-        final LinkProperties cellLp = new LinkProperties();
+        final LinkProperties cellLp = cellAgent.linkProperties;
         cellLp.setInterfaceName("rmnet_data0");
         final String[] CELL_ADDRS = {
                 "10.102.211.48", "2001:db8:0:1:b50e:70d9:10c9:433d",
@@ -382,7 +436,7 @@ public class UpstreamNetworkMonitorTest {
             cellLp.addLinkAddress(new LinkAddress(addrStr + cidr));
         }
         cellAgent.fakeConnect();
-        cellAgent.sendLinkProperties(cellLp);
+        cellAgent.sendLinkProperties();
 
         local = mUNM.getLocalPrefixes();
         assertPrefixSet(local, INCLUDES, alreadySeen);
@@ -394,17 +448,18 @@ public class UpstreamNetworkMonitorTest {
         // [3] Pretend DUN connects.
         final TestNetworkAgent dunAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
         dunAgent.networkCapabilities.addCapability(NET_CAPABILITY_DUN);
-        final LinkProperties dunLp = new LinkProperties();
+        dunAgent.networkCapabilities.removeCapability(NET_CAPABILITY_INTERNET);
+        final LinkProperties dunLp = dunAgent.linkProperties;
         dunLp.setInterfaceName("rmnet_data1");
         final String[] DUN_ADDRS = {
                 "192.0.2.48", "2001:db8:1:2:b50e:70d9:10c9:433d",
         };
         for (String addrStr : DUN_ADDRS) {
             final String cidr = addrStr.contains(":") ? "/64" : "/27";
-            cellLp.addLinkAddress(new LinkAddress(addrStr + cidr));
+            dunLp.addLinkAddress(new LinkAddress(addrStr + cidr));
         }
         dunAgent.fakeConnect();
-        dunAgent.sendLinkProperties(dunLp);
+        dunAgent.sendLinkProperties();
 
         local = mUNM.getLocalPrefixes();
         assertPrefixSet(local, INCLUDES, alreadySeen);
@@ -442,6 +497,7 @@ public class UpstreamNetworkMonitorTest {
     public static class TestConnectivityManager extends ConnectivityManager {
         public Map<NetworkCallback, Handler> allCallbacks = new HashMap<>();
         public Set<NetworkCallback> trackingDefault = new HashSet<>();
+        public TestNetworkAgent defaultNetwork = null;
         public Map<NetworkCallback, NetworkRequest> listening = new HashMap<>();
         public Map<NetworkCallback, NetworkRequest> requested = new HashMap<>();
         public Map<NetworkCallback, Integer> legacyTypeMap = new HashMap<>();
@@ -483,12 +539,34 @@ public class UpstreamNetworkMonitorTest {
 
         int getNetworkId() { return ++mNetworkId; }
 
+        void makeDefaultNetwork(TestNetworkAgent agent) {
+            if (Objects.equals(defaultNetwork, agent)) return;
+
+            final TestNetworkAgent formerDefault = defaultNetwork;
+            defaultNetwork = agent;
+
+            for (NetworkCallback cb : trackingDefault) {
+                if (defaultNetwork != null) {
+                    cb.onAvailable(defaultNetwork.networkId);
+                    cb.onCapabilitiesChanged(
+                            defaultNetwork.networkId, defaultNetwork.networkCapabilities);
+                    cb.onLinkPropertiesChanged(
+                            defaultNetwork.networkId, defaultNetwork.linkProperties);
+                }
+            }
+        }
+
         @Override
         public void requestNetwork(NetworkRequest req, NetworkCallback cb, Handler h) {
             assertFalse(allCallbacks.containsKey(cb));
             allCallbacks.put(cb, h);
-            assertFalse(requested.containsKey(cb));
-            requested.put(cb, req);
+            if (mDefaultRequest.equals(req)) {
+                assertFalse(trackingDefault.contains(cb));
+                trackingDefault.add(cb);
+            } else {
+                assertFalse(requested.containsKey(cb));
+                requested.put(cb, req);
+            }
         }
 
         @Override
@@ -524,10 +602,7 @@ public class UpstreamNetworkMonitorTest {
 
         @Override
         public void registerDefaultNetworkCallback(NetworkCallback cb, Handler h) {
-            assertFalse(allCallbacks.containsKey(cb));
-            allCallbacks.put(cb, h);
-            assertFalse(trackingDefault.contains(cb));
-            trackingDefault.add(cb);
+            fail("Should never be called.");
         }
 
         @Override
@@ -561,6 +636,7 @@ public class UpstreamNetworkMonitorTest {
         public final Network networkId;
         public final int transportType;
         public final NetworkCapabilities networkCapabilities;
+        public final LinkProperties linkProperties;
 
         public TestNetworkAgent(TestConnectivityManager cm, int transportType) {
             this.cm = cm;
@@ -569,12 +645,14 @@ public class UpstreamNetworkMonitorTest {
             networkCapabilities = new NetworkCapabilities();
             networkCapabilities.addTransportType(transportType);
             networkCapabilities.addCapability(NET_CAPABILITY_INTERNET);
+            linkProperties = new LinkProperties();
         }
 
         public void fakeConnect() {
             for (NetworkCallback cb : cm.listening.keySet()) {
                 cb.onAvailable(networkId);
                 cb.onCapabilitiesChanged(networkId, copy(networkCapabilities));
+                cb.onLinkPropertiesChanged(networkId, copy(linkProperties));
             }
         }
 
@@ -584,10 +662,15 @@ public class UpstreamNetworkMonitorTest {
             }
         }
 
-        public void sendLinkProperties(LinkProperties lp) {
+        public void sendLinkProperties() {
             for (NetworkCallback cb : cm.listening.keySet()) {
-                cb.onLinkPropertiesChanged(networkId, lp);
+                cb.onLinkPropertiesChanged(networkId, copy(linkProperties));
             }
+        }
+
+        @Override
+        public String toString() {
+            return String.format("TestNetworkAgent: %s %s", networkId, networkCapabilities);
         }
     }
 
@@ -616,6 +699,10 @@ public class UpstreamNetworkMonitorTest {
 
     static NetworkCapabilities copy(NetworkCapabilities nc) {
         return new NetworkCapabilities(nc);
+    }
+
+    static LinkProperties copy(LinkProperties lp) {
+        return new LinkProperties(lp);
     }
 
     static void assertPrefixSet(Set<IpPrefix> prefixes, boolean expectation, String... expected) {

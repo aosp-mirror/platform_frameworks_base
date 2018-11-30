@@ -610,7 +610,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Wymaganie szyfrowania przechowywanych danych aplikacji"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Wyłącz aparaty"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zapobieganie używaniu wszystkich aparatów w urządzeniu"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Wył. niektórych funkcji bl. ekr."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Wył. funkcji blokady ekranu"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zapobieganie użyciu niektórych funkcji blokady ekranu."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Dom"</item>
@@ -1219,6 +1219,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Sieć Wi-Fi nie ma dostępu do internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Kliknij, by wyświetlić opcje"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Zmieniono ustawienia hotspotu"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Zmieniono pasmo hotspotu."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"To urządzenie nie może korzystać tylko z częstotliwości 5 GHz. Będzie korzystać z tego pasma, jeśli będzie ono dostępne."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Zmieniono na połączenie typu <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Urządzenie korzysta z połączenia typu <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, gdy <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nie dostępu do internetu. Mogą zostać naliczone opłaty."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Przełączono z połączenia typu <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na <xliff:g id="NEW_NETWORK">%2$s</xliff:g>."</string>
@@ -1450,7 +1453,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Dodaj konto"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Zwiększ"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Zmniejsz"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> dotknij i przytrzymaj."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> naciśnij i przytrzymaj."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Przesuń w górę, by zwiększyć, i w dół, by zmniejszyć."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Zmień minutę na późniejszą"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Zmień minutę na wcześniejszą"</string>
@@ -1477,7 +1480,7 @@
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Nie udało się uruchomić aplikacji <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Udostępnij przez:"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Udostępnij przez <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="content_description_sliding_handle" msgid="415975056159262248">"Uchwyt przesuwny. Dotknij i przytrzymaj."</string>
+    <string name="content_description_sliding_handle" msgid="415975056159262248">"Uchwyt przesuwny. Naciśnij i przytrzymaj."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Przesuń, aby odblokować."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Przejdź do strony głównej"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Przejdź wyżej"</string>

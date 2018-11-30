@@ -160,11 +160,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="6921048829791179331">"Desativado"</item>
-    <item msgid="2969458029344750262">"64 K/buffer de log"</item>
-    <item msgid="1342285115665698168">"256 K/buffer de log"</item>
-    <item msgid="1314234299552254621">"1 M/buffer de log"</item>
-    <item msgid="3606047780792894151">"4 M/buffer de log"</item>
-    <item msgid="5431354956856655120">"16 M/buffer de log"</item>
+    <item msgid="2969458029344750262">"64 K/buffer de registro"</item>
+    <item msgid="1342285115665698168">"256 K/buffer de registro"</item>
+    <item msgid="1314234299552254621">"1 M/buffer de registro"</item>
+    <item msgid="3606047780792894151">"4 M/buffer de registro"</item>
+    <item msgid="5431354956856655120">"16 M/buffer de registro"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="1744840221860799971">"Desativado"</item>

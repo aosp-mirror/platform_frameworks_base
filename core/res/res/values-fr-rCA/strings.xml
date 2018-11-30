@@ -272,22 +272,22 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Passer au profil professionnel"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accéder à vos contacts"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à accéder à vos contacts?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à vos contacts?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Localisation"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accéder à la position de cet appareil"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à la position de cet appareil?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accéder à votre agenda"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à accéder à votre agenda?"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à votre agenda?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Messagerie texte"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"envoyer et afficher des messages texte"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à envoyer et à afficher des messages texte?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;  à envoyer et à afficher des messages texte?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stockage"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"accéder aux photos, aux contenus multimédias et aux fichiers sur votre appareil"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à accéder aux photos, aux médias et aux fichiers de votre appareil?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"enregistrer des fichiers audio"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à enregistrer de l\'audio?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&amp;gt à enregistrer l\'audio?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"prendre des photos et filmer des vidéos"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à prendre des photos et à filmer des vidéos?"</string>
@@ -296,7 +296,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à vos journaux d\'appels?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Téléphone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"faire et gérer des appels téléphoniques"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à faire et à gérer les appels téléphoniques?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à faire et à gérer les appels téléphoniques?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Capteurs corporels"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accéder aux données des capteurs sur vos signes vitaux"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à accéder aux données des capteurs pour vos signes vitaux?"</string>
@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Le réseau Wi-Fi ne dispose d\'aucun accès à Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Touchez pour afficher les options"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modifications apportées à vos paramètres de point d\'accès"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"La bande de votre point d\'accès a changé."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Cet appareil ne prend pas en charge votre préférence pour la bande de 5 GHz seulement. Au lieu de cela, cet appareil utilisera la bande de 5 GHz lorsqu\'elle sera disponible."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Passé au réseau <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"L\'appareil utilise <xliff:g id="NEW_NETWORK">%1$s</xliff:g> quand <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> n\'a pas d\'accès à Internet. Des frais peuvent s\'appliquer."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Passé du réseau <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> au <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

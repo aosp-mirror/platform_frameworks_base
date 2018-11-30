@@ -41,18 +41,18 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.logWithStack;
-import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowStateAnimatorProto.DRAW_STATE;
 import static com.android.server.wm.WindowStateAnimatorProto.LAST_CLIP_RECT;
 import static com.android.server.wm.WindowStateAnimatorProto.SURFACE;
 import static com.android.server.wm.WindowStateAnimatorProto.SYSTEM_DECOR_RECT;
+import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
+import static com.android.server.wm.utils.CoordinateTransforms.transformToRotation;
 
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Debug;
 import android.os.Trace;
@@ -366,7 +366,8 @@ class WindowStateAnimator {
         mDrawState = READY_TO_SHOW;
         boolean result = false;
         final AppWindowToken atoken = mWin.mAppToken;
-        if (atoken == null || atoken.allDrawn || mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
+        if (atoken == null || atoken.canShowWindows()
+                || mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
             result = mWin.performShowLocked();
         }
         return result;
@@ -685,8 +686,11 @@ class WindowStateAnimator {
         final int displayId = mWin.getDisplayId();
         final ScreenRotationAnimation screenRotationAnimation =
                 mAnimator.getScreenRotationAnimationLocked(displayId);
-        final boolean screenAnimation =
-                screenRotationAnimation != null && screenRotationAnimation.isAnimating();
+        final boolean windowParticipatesInScreenRotationAnimation =
+                !mWin.mForceSeamlesslyRotate;
+        final boolean screenAnimation = screenRotationAnimation != null
+                && screenRotationAnimation.isAnimating()
+                && windowParticipatesInScreenRotationAnimation;
 
         if (screenAnimation) {
             // cache often used attributes locally
@@ -795,6 +799,13 @@ class WindowStateAnimator {
         }
 
         if (w.inPinnedWindowingMode()) {
+            return false;
+        }
+
+        // During forced seamless rotation, the surface bounds get updated with the crop in the
+        // new rotation, which is not compatible with showing the surface in the old rotation.
+        // To work around that we disable cropping for such windows, as it is not necessary anyways.
+        if (w.mForceSeamlesslyRotate) {
             return false;
         }
 
@@ -1492,40 +1503,14 @@ class WindowStateAnimator {
         }
     }
 
-    void seamlesslyRotateWindow(SurfaceControl.Transaction t,
-            int oldRotation, int newRotation) {
+    void seamlesslyRotate(SurfaceControl.Transaction t, int oldRotation, int newRotation) {
         final WindowState w = mWin;
-        if (!w.isVisibleNow() || w.mIsWallpaper) {
-            return;
-        }
 
-        final Rect cropRect = mService.mTmpRect;
-        final Rect displayRect = mService.mTmpRect2;
-        final RectF frameRect = mService.mTmpRectF;
+        // We rotated the screen, but have not received a new buffer with the correct size yet. In
+        // the mean time, we rotate the buffer we have to the new orientation.
         final Matrix transform = mService.mTmpTransform;
-
-        final float x = w.mFrame.left;
-        final float y = w.mFrame.top;
-        final float width = w.mFrame.width();
-        final float height = w.mFrame.height();
-
-        mService.getDefaultDisplayContentLocked().getBounds(displayRect);
-        final float displayWidth = displayRect.width();
-        final float displayHeight = displayRect.height();
-
-        // Compute a transform matrix to undo the coordinate space transformation,
-        // and present the window at the same physical position it previously occupied.
-        final int deltaRotation = DisplayContent.deltaRotation(newRotation, oldRotation);
-        DisplayContent.createRotationMatrix(deltaRotation, x, y, displayWidth, displayHeight,
+        transformToRotation(oldRotation, newRotation, w.mFrame.width(), w.mFrame.height(),
                 transform);
-
-        // We just need to apply a rotation matrix to the window. For example
-        // if we have a portrait window and rotate to landscape, the window is still portrait
-        // and now extends off the bottom of the screen (and only halfway across). Essentially we
-        // apply a transform to display the current buffer at it's old position
-        // (in the new coordinate space). We then freeze layer updates until the resize
-        // occurs, at which point we undo, them.
-        mService.markForSeamlessRotation(w, true);
         transform.getValues(mService.mTmpFloats);
 
         float DsDx = mService.mTmpFloats[Matrix.MSCALE_X];

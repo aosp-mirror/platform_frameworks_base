@@ -1634,6 +1634,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * @param markFrozenIfConfigChanged Whether to set {@link ActivityRecord#frozenBeforeDestroy} to
      *                                  {@code true} if config changed.
      * @param deferResume Whether to defer resume while updating config.
+     * @return 'true' if starting activity was kept or wasn't provided, 'false' if it was relaunched
+     *         because of configuration update.
      */
     boolean ensureVisibilityAndConfig(ActivityRecord starting, int displayId,
             boolean markFrozenIfConfigChanged, boolean deferResume) {
@@ -1643,6 +1645,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // activity will be properly updated.
         ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
                 false /* preserveWindows */, false /* notifyClients */);
+
+        if (displayId == INVALID_DISPLAY) {
+            // The caller didn't provide a valid display id, skip updating config.
+            return true;
+        }
 
         // Force-update the orientation from the WindowManager, since we need the true configuration
         // to send to the client now.
@@ -3930,6 +3937,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         stops = new ArrayList<>();
                     }
                     stops.add(s);
+
+                    // Make sure to remove it in all cases in case we entered this block with
+                    // shouldSleepOrShutDown
+                    mActivitiesWaitingForVisibleActivity.remove(s);
                     mStoppingActivities.remove(activityNdx);
                 }
             }
@@ -4842,7 +4853,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return mService.getActivityStartController().startActivityInPackage(
                     task.mCallingUid, callingPid, callingUid, callingPackage, intent, null, null,
                     null, 0, 0, options, userId, task, "startActivityFromRecents",
-                    false /* validateIncomingUser */);
+                    false /* validateIncomingUser */, null /* originatingPendingIntent */);
         } finally {
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY && task != null) {
                 // If we are launching the task in the docked stack, put it into resizing mode so

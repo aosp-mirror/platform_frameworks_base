@@ -66,7 +66,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau de l\'RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Dona sempre permís des d\'aquest equip"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"No es permet la depuració USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració per USB. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració USB. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom per omplir pantalla"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estira per omplir pant."</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de pantalla"</string>
@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Vols amagar <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Tornarà a mostrar-se la propera vegada que l\'activis a la configuració."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Amaga"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Estàs utilitzant el perfil professional"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Trucada"</string>
     <string name="stream_system" msgid="7493299064422163147">"Sistema"</string>
     <string name="stream_ring" msgid="8213049469184048338">"To de trucada"</string>

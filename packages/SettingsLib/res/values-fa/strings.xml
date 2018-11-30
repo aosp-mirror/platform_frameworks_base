@@ -159,7 +159,7 @@
     <string name="tts_default_sample_string" msgid="4040835213373086322">"این نمونه‌ای از ترکیب گفتار است"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"وضعیت زبان پیش‌فرض"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> کاملاً پشتیبانی می‌شود"</string>
-    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> به اتصال شبکه نیاز دارد"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> باید اتصال شبکه داشته باشد"</string>
     <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> پشتیبانی نمی‌شود"</string>
     <string name="tts_status_checking" msgid="5339150797940483592">"در حال بررسی…"</string>
     <string name="tts_engine_settings_title" msgid="3499112142425680334">"تنظیمات برای <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>

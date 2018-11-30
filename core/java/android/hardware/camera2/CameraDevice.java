@@ -44,19 +44,27 @@ import java.lang.annotation.RetentionPolicy;
  * {@link android.Manifest.permission#CAMERA Camera} permission in its manifest
  * in order to access camera devices.</p>
  *
- * <p>A given camera device may provide support at one of two levels: limited or
- * full. If a device only supports the limited level, then Camera2 exposes a
- * feature set that is roughly equivalent to the older
+ * <p>A given camera device may provide support at one of several levels defined
+ * in {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL}.
+ * If a device supports {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY} level,
+ * the camera device is running in backward compatibility mode and has minimum camera2 API support.
+ * If a device supports the {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED}
+ * level, then Camera2 exposes a feature set that is roughly equivalent to the older
  * {@link android.hardware.Camera Camera} API, although with a cleaner and more
- * efficient interface.  Devices that implement the full level of support
+ * efficient interface.
+ * If a device supports the {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL EXTERNAL}
+ * level, then the device is a removable camera that provides similar but slightly less features
+ * as the {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED} level.
+ * Devices that implement the {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL} or
+ * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_3 LEVEL3} level of support
  * provide substantially improved capabilities over the older camera
- * API. Applications that target the limited level devices will run unchanged on
- * the full-level devices; if your application requires a full-level device for
+ * API. If your application requires a full-level device for
  * proper operation, declare the "android.hardware.camera.level.full" feature in your
  * manifest.</p>
  *
  * @see CameraManager#openCamera
  * @see android.Manifest.permission#CAMERA
+ * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
  */
 public abstract class CameraDevice implements AutoCloseable {
 

@@ -150,16 +150,13 @@
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
-    <!-- no translation found for data_connection_3_5g (3164370985817123144) -->
-    <skip />
-    <!-- no translation found for data_connection_3_5g_plus (4464630787664529264) -->
-    <skip />
+    <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
     <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <!-- no translation found for data_connection_cdma (8176597308239086780) -->
-    <skip />
+    <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"ରୋମିଙ୍ଗ"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"ୱାଇ-ଫାଇ"</string>
@@ -525,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ଲୁଚାନ୍ତୁ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"ଆଗକୁ ଆପଣ ଯେତେବେଳେ ଏହି ସେଟିଙ୍ଗକୁ ଚାଲୁ କରିବେ, ଏହା ପୁଣି ଦେଖାଦେବ।"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ଲୁଚାନ୍ତୁ"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ଆପଣ ନିଜ ୱର୍କ ପ୍ରୋଫାଇଲ୍‌ ବ୍ୟବହାର କରୁଛନ୍ତି"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"କଲ୍ କରନ୍ତୁ"</string>
     <string name="stream_system" msgid="7493299064422163147">"ସିଷ୍ଟମ୍‌"</string>
     <string name="stream_ring" msgid="8213049469184048338">"ରିଙ୍ଗ"</string>

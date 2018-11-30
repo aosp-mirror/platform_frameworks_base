@@ -13967,6 +13967,68 @@ public class PackageManagerService extends IPackageManager.Stub
         return false;
     }
 
+    @Override
+    public void setSystemAppHiddenUntilInstalled(String packageName, boolean hidden) {
+        enforceSystemOrPhoneCaller("setSystemAppHiddenUntilInstalled");
+        synchronized (mPackages) {
+            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+            if (pkgSetting == null || !pkgSetting.isSystem()) {
+                return;
+            }
+            PackageParser.Package pkg = pkgSetting.pkg;
+            if (pkg != null && pkg.applicationInfo != null) {
+                pkg.applicationInfo.hiddenUntilInstalled = hidden;
+            }
+            final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(packageName);
+            if (disabledPs == null) {
+                return;
+            }
+            pkg = disabledPs.pkg;
+            if (pkg != null && pkg.applicationInfo != null) {
+                pkg.applicationInfo.hiddenUntilInstalled = hidden;
+            }
+        }
+    }
+
+    @Override
+    public boolean setSystemAppInstallState(String packageName, boolean installed, int userId) {
+        enforceSystemOrPhoneCaller("setSystemAppInstallState");
+        synchronized (mPackages) {
+            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+            // The target app should always be in system
+            if (pkgSetting == null || !pkgSetting.isSystem()) {
+                return false;
+            }
+            // Check if the install state is the same
+            if (pkgSetting.getInstalled(userId) == installed) {
+                return false;
+            }
+        }
+
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            if (installed) {
+                // install the app from uninstalled state
+                installExistingPackageAsUser(
+                        packageName,
+                        userId,
+                        0 /*installFlags*/,
+                        PackageManager.INSTALL_REASON_DEVICE_SETUP);
+                return true;
+            }
+
+            // uninstall the app from installed state
+            deletePackageVersioned(
+                    new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
+                    new LegacyPackageDeleteObserver(null).getBinder(),
+                    userId,
+                    PackageManager.DELETE_SYSTEM_APP);
+            return true;
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
     private void sendApplicationHiddenForUser(String packageName, PackageSetting pkgSetting,
             int userId) {
         final PackageRemovedInfo info = new PackageRemovedInfo(this);
@@ -14031,10 +14093,16 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
             int installReason) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES,
-                null);
-        PackageSetting pkgSetting;
         final int callingUid = Binder.getCallingUid();
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED
+                && mContext.checkCallingOrSelfPermission(
+                        android.Manifest.permission.INSTALL_EXISTING_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Neither user " + callingUid + " nor current process has "
+                    + android.Manifest.permission.INSTALL_PACKAGES + ".");
+        }
+        PackageSetting pkgSetting;
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, true /* checkShell */,
                 "installExistingPackage for user " + userId);
@@ -21093,6 +21161,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         CarrierAppUtils.disableCarrierAppsUntilPrivileged(mContext.getOpPackageName(), this,
                 mContext.getContentResolver(), UserHandle.USER_SYSTEM);
 
+        disableSkuSpecificApps();
+
         // Read the compatibilty setting when the system is ready.
         boolean compatibilityModeEnabled = android.provider.Settings.Global.getInt(
                 mContext.getContentResolver(),
@@ -21877,6 +21947,27 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             // the given package is involved with.
             if (dumpState.onTitlePrinted()) pw.println();
             mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
+        }
+    }
+
+    //TODO: b/111402650
+    private void disableSkuSpecificApps() {
+        String apkList[] = mContext.getResources().getStringArray(
+                R.array.config_disableApksUnlessMatchedSku_apk_list);
+        String skuArray[] = mContext.getResources().getStringArray(
+                R.array.config_disableApkUnlessMatchedSku_skus_list);
+        if (ArrayUtils.isEmpty(apkList)) {
+           return;
+        }
+        String sku = SystemProperties.get("ro.boot.hardware.sku");
+        if (!TextUtils.isEmpty(sku) && ArrayUtils.contains(skuArray, sku)) {
+            return;
+        }
+        for (String packageName : apkList) {
+            setSystemAppHiddenUntilInstalled(packageName, true);
+            for (UserInfo user : sUserManager.getUsers(false)) {
+                setSystemAppInstallState(packageName, false, user.id);
+            }
         }
     }
 

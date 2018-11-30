@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> लपवायचे?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"तुम्ही सेटिंग्जमध्ये ते पुढील वेळी चालू कराल तेव्हा ते पुन्हा दिसेल."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"लपवा"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"तुम्ही तुमचे कार्य प्रोफाईल वापरत आहात"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"कॉल करा"</string>
     <string name="stream_system" msgid="7493299064422163147">"सिस्टम"</string>
     <string name="stream_ring" msgid="8213049469184048338">"रिंग करा"</string>

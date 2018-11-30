@@ -404,7 +404,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final AppWindowToken atoken = w.mAppToken;
         if (winAnimator.mDrawState == READY_TO_SHOW) {
-            if (atoken == null || atoken.allDrawn) {
+            if (atoken == null || atoken.canShowWindows()) {
                 if (w.performShowLocked()) {
                     pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
                     if (DEBUG_LAYOUT_REPEATS) {
@@ -1106,11 +1106,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
+        forAllWindows(w -> {
+            w.forceSeamlesslyRotateIfAllowed(oldRotation, rotation);
+        }, true /* traverseTopToBottom */);
+
         if (rotateSeamlessly) {
-            forAllWindows(w -> {
-                    w.mWinAnimator.seamlesslyRotateWindow(getPendingTransaction(),
-                            oldRotation, rotation);
-            }, true /* traverseTopToBottom */);
+            seamlesslyRotate(getPendingTransaction(), oldRotation, rotation);
         }
 
         mService.mDisplayManagerInternal.performTraversal(getPendingTransaction());
@@ -1252,11 +1253,21 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     cutout, mInitialDisplayWidth, mInitialDisplayHeight);
         }
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
-        final Path bounds = cutout.getBounds().getBoundaryPath();
+        final List<Rect> bounds = WmDisplayCutout.computeSafeInsets(
+                        cutout, mInitialDisplayWidth, mInitialDisplayHeight)
+                .getDisplayCutout().getBoundingRects();
         transformPhysicalToLogicalCoordinates(rotation, mInitialDisplayWidth, mInitialDisplayHeight,
                 mTmpMatrix);
-        bounds.transform(mTmpMatrix);
-        return WmDisplayCutout.computeSafeInsets(DisplayCutout.fromBounds(bounds),
+        final Region region = Region.obtain();
+        for (int i = 0; i < bounds.size(); i++) {
+            final Rect rect = bounds.get(i);
+            final RectF rectF = new RectF(bounds.get(i));
+            mTmpMatrix.mapRect(rectF);
+            rectF.round(rect);
+            region.op(rect, Op.UNION);
+        }
+
+        return WmDisplayCutout.computeSafeInsets(DisplayCutout.fromBounds(region),
                 rotated ? mInitialDisplayHeight : mInitialDisplayWidth,
                 rotated ? mInitialDisplayWidth : mInitialDisplayHeight);
     }
@@ -1764,8 +1775,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int newDensity = mDisplayInfo.logicalDensityDpi;
         final DisplayCutout newCutout = mDisplayInfo.displayCutout;
 
-        final boolean displayMetricsChanged = mInitialDisplayWidth != newWidth
-                || mInitialDisplayHeight != newHeight
+        final boolean sizeChanged = mInitialDisplayWidth != newWidth
+                || mInitialDisplayHeight != newHeight;
+        final boolean displayMetricsChanged = sizeChanged
                 || mInitialDisplayDensity != mDisplayInfo.logicalDensityDpi
                 || !Objects.equals(mInitialDisplayCutout, newCutout);
 
@@ -1786,6 +1798,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mInitialDisplayDensity = newDensity;
             mInitialDisplayCutout = newCutout;
             mService.reconfigureDisplayLocked(this);
+        }
+
+        if (isDefaultDisplay && sizeChanged) {
+            mService.mH.post(mService.mAmInternal::notifyDefaultDisplaySizeChanged);
         }
     }
 
@@ -3701,6 +3717,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         @Override
+        SurfaceControl.Builder makeChildSurface(WindowContainer child) {
+            final SurfaceControl.Builder builder = super.makeChildSurface(child);
+            if (child instanceof WindowToken && ((WindowToken) child).mRoundedCornerOverlay) {
+                // To draw above the ColorFade layer during the screen off transition, the
+                // rounded corner overlays need to be at the root of the surface hierarchy.
+                // TODO: move the ColorLayer into the display overlay layer such that this is not
+                // necessary anymore.
+                builder.setParent(null);
+            }
+            return builder;
+        }
+
+        @Override
         void assignChildLayers(SurfaceControl.Transaction t) {
             assignChildLayers(t, null /* imeContainer */);
         }
@@ -3714,6 +3743,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // See {@link mSplitScreenDividerAnchor}
                 if (wt.windowType == TYPE_DOCK_DIVIDER) {
                     wt.assignRelativeLayer(t, mTaskStackContainers.getSplitScreenDividerAnchor(), 1);
+                    continue;
+                }
+                if (wt.mRoundedCornerOverlay) {
+                    wt.assignLayer(t, WindowManagerPolicy.COLOR_FADE_LAYER + 1);
                     continue;
                 }
                 wt.assignLayer(t, j);

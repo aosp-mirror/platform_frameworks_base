@@ -194,7 +194,7 @@
     <string name="clear_adb_keys" msgid="4038889221503122743">"Odwołaj dostęp do debugowania USB"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Skrót do zgłoszenia błędu"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Pokaż w menu zasilania przycisk zgłaszania błędu"</string>
-    <string name="keep_screen_on" msgid="1146389631208760344">"Pozostaw ekran włączony"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"Pozostaw włączony ekran"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Ekran nie będzie gaszony podczas ładowania telefonu"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Włącz dziennik snoop Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Przechwyć wszystkie pakiety Bluetooth HCI do pliku (przełącz Bluetooth po zmianie tego ustawienia)"</string>

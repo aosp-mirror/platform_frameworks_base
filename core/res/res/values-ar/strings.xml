@@ -1188,7 +1188,7 @@
     <string name="android_start_title" product="default" msgid="4536778526365907780">"جارٍ بدء تشغيل الهاتف…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"جارٍ بدء تشغيل الجهاز اللوحي…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"جارٍ بدء تشغيل الجهاز…"</string>
-    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"جارٍ تحسين السعة التخزينية."</string>
+    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"جارٍ تحسين سعة التخزين."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="1511552415039349062">"جارٍ إنهاء تحديث النظام…"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"جارٍ ترقية <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"جارٍ تحسين التطبيق <xliff:g id="NUMBER_0">%1$d</xliff:g> من <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
@@ -1263,6 +1263,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"‏شبكة Wi-Fi غير متصلة بالإنترنت"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"انقر للحصول على الخيارات."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"التغييرات التي طرأت على إعدادات نقطة الاتصال"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"تمّ تغيير نطاق نقطة الاتصال الخاصة بك."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"لا يتوافق هذا الجهاز مع إعدادك المفضّل الخاص باستخدام النطاق 5 غيغاهرتز فقط. وسيستخدم الجهاز بدلاً من ذلك النطاق 5 غيغاهرتز عندما يكون متاحًا."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"تم التبديل إلى <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"يستخدم الجهاز <xliff:g id="NEW_NETWORK">%1$s</xliff:g> عندما لا يتوفر اتصال بالإنترنت في شبكة <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>، ويمكن أن يتم فرض رسوم مقابل ذلك."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"تم التبديل من <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> إلى <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1530,7 +1533,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"المزيد من الخيارات"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s، %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s، %2$s، %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"السعة التخزينية المشتركة الداخلية"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"سعة التخزين المشتركة الداخلية"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"‏بطاقة SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"‏بطاقة SD من <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"‏محرك أقراص USB"</string>
@@ -1951,7 +1954,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"الأخبار والمجلات"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"الخرائط والتنقل"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"الإنتاجية"</string>
-    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"السعة التخزينية للجهاز"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"سعة التخزين للجهاز"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"‏تصحيح أخطاء USB"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"ساعة"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"دقيقة"</string>

@@ -98,6 +98,7 @@ public class SettingsBackupTest {
     private static final Set<String> BACKUP_BLACKLISTED_GLOBAL_SETTINGS =
             newHashSet(
                     Settings.Global.ACTIVITY_MANAGER_CONSTANTS,
+                    Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED,
                     Settings.Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED,
                     Settings.Global.ADB_ENABLED,
                     Settings.Global.ADD_USERS_WHEN_LOCKED,
@@ -507,6 +508,8 @@ public class SettingsBackupTest {
                  Settings.Secure.ANR_SHOW_BACKGROUND,
                  Settings.Secure.ASSISTANT,
                  Settings.Secure.ASSIST_DISCLOSURE_ENABLED,
+                 Settings.Secure.ASSIST_GESTURE_SENSITIVITY,
+                 Settings.Secure.ASSIST_GESTURE_SETUP_COMPLETE,
                  Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
                  Settings.Secure.ASSIST_STRUCTURE_ENABLED,
                  Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION,

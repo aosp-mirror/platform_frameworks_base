@@ -40,4 +40,7 @@
       <item>INTERNET,airtelnet.es,,,vodafone,vodafone,,,,,214,01,1,DUN</item>
     </string-array>
 
+    <!-- Whether safe headphone volume warning dialog is disabled on Vol+ (operator specific). -->
+    <bool name="config_safe_media_disable_on_volume_up">false</bool>
+
 </resources>

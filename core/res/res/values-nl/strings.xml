@@ -287,13 +287,13 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot foto\'s, media en bestanden op je apparaat?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfoon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"audio opnemen"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; het volgende toestaan: audio opnemen."</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toestaan om audio op te nemen?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"foto\'s maken en video opnemen"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toestaan om foto\'s te maken en video op te nemen?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Gesprekkenlijsten"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"gesprekkenlijst lezen en schrijven"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Wil je &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot je gesprekkenlijsten geven?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot je gesprekkenlijsten?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefoon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefoneren en oproepen beheren"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toestaan om telefoongesprekken te starten en te beheren?"</string>
@@ -585,13 +585,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tv vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de telefoon vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"De schermvergrendeling wijzigen"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"De schermvergrendeling wijzigen."</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Wijzig de schermvergrendeling."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Het scherm vergrendelen"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Beheren hoe en wanneer het scherm wordt vergrendeld."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Beheer hoe en wanneer het scherm wordt vergrendeld."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Alle gegevens wissen"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"De gegevens van de tablet zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"De gegevens van de tv zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"De gegevens van de telefoon zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Wis de gegevens van de telefoon zonder waarschuwing door de fabrieksinstellingen te herstellen."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Gebruikersgegevens wissen"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"De gegevens van deze gebruiker op deze tablet zonder waarschuwing wissen."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"De gegevens van deze gebruiker op deze tv zonder waarschuwing wissen."</string>
@@ -605,7 +605,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Camera\'s uitschakelen"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Het gebruik van alle apparaatcamera\'s voorkomen."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Bepaalde functies voor schermvergrendeling uitschakelen"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Gebruik van bepaalde functies voor schermvergrendeling voorkomen."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Voorkom het gebruik van bepaalde functies voor schermvergrendeling."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Thuis"</item>
     <item msgid="869923650527136615">"Mobiel"</item>
@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wifi-netwerk heeft geen internettoegang"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tik voor opties"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Wijzigingen in je hotspot-instellingen"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Je hotspot-band is gewijzigd."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Dit apparaat biedt geen ondersteuning voor je voorkeur voor alleen 5 GHz. In plaats daarvan gebruikt dit apparaat de 5-GHz-band wanneer deze beschikbaar is."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Overgeschakeld naar <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Apparaat gebruikt <xliff:g id="NEW_NETWORK">%1$s</xliff:g> wanneer <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> geen internetverbinding heeft. Er kunnen kosten in rekening worden gebracht."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Overgeschakeld van <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> naar <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1550,7 +1553,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt u gevraagd je telefoon te ontgrendelen via een e-mailaccount.\n\n Probeer het over <xliff:g id="NUMBER_2">%3$d</xliff:g> seconden opnieuw."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwijderen"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Volume verhogen tot boven het aanbevolen niveau?\n\nAls u langere tijd op hoog volume naar muziek luistert, raakt je gehoor mogelijk beschadigd."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Volume verhogen tot boven het aanbevolen niveau?\n\nAls je langere tijd op hoog volume naar muziek luistert, raakt je gehoor mogelijk beschadigd."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Sneltoets voor toegankelijkheid gebruiken?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Wanneer de snelkoppeling is ingeschakeld, kun je drie seconden op beide volumeknoppen drukken om een toegankelijkheidsfunctie te starten.\n\n Huidige toegankelijkheidsfunctie:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Je kunt de functie wijzigen in Instellingen &gt; Toegankelijkheid."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Sneltoets uitschakelen"</string>

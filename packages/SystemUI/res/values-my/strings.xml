@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ဝှက်မည်လား?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"နောက်တစ်ကြိမ်သင် ချိန်ညှိချက်များဖွင့်လျှင် ၎င်းပေါ်လာပါမည်။"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ဖျောက်ထားမည်"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"သင်သည် အလုပ်ပရိုဖိုင်းအား သုံးနေသည်"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"ဖုန်းခေါ်ရန်"</string>
     <string name="stream_system" msgid="7493299064422163147">"စနစ်"</string>
     <string name="stream_ring" msgid="8213049469184048338">"အသံမြည်စေသည်"</string>

@@ -1326,9 +1326,6 @@
     <!-- Hide quick settings tile confirmation button -->
     <string name="quick_settings_reset_confirmation_button">Hide</string>
 
-    <!-- Toast shown when user unlocks screen and managed profile activity is in the foreground -->
-    <string name="managed_profile_foreground_toast">You\'re using your work profile</string>
-
     <!-- volume stream names. All nouns. -->
     <string name="stream_voice_call">Call</string> <!-- STREAM_VOICE_CALL -->
     <string name="stream_system">System</string> <!-- STREAM_SYSTEM -->

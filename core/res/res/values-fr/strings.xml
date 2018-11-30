@@ -293,7 +293,7 @@
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; de prendre des photos et de filmer des vidéos ?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Journaux d\'appels"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"Lire et écrire les journaux d\'appels du téléphone"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder aux journaux d\'appels de votre téléphone ?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder aux journaux d\'appels de votre téléphone ?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Téléphone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"effectuer et gérer des appels téléphoniques"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; de passer et gérer des appels téléphoniques ?"</string>
@@ -605,7 +605,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Désactiver les appareils photo"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Empêcher l\'utilisation de tous les appareils photos"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Désact. options du verr. écran"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Empêchez l\'utilisation de certaines fonctionnalités du verrouillage de l\'écran."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Empêcher l\'utilisation de certaines fonctionnalités du verrouillage de l\'écran."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domicile"</item>
     <item msgid="869923650527136615">"Mobile"</item>
@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Impossible de se connecter à Internet via le réseau Wi-Fi"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Appuyez ici pour afficher des options."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modifications apportées à vos paramètres de point d\'accès"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Votre bande de point d\'accès a été modifiée."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Cet appareil n\'est pas compatible avec votre préférence d\'utilisation de la bande 5 GHz uniquement. Il utilisera la bande 5 GHz lorsqu\'elle sera disponible."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Nouveau réseau : <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"L\'appareil utilise <xliff:g id="NEW_NETWORK">%1$s</xliff:g> lorsque <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> n\'a pas de connexion Internet. Des frais peuvent s\'appliquer."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Ancien réseau : <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>. Nouveau réseau : <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

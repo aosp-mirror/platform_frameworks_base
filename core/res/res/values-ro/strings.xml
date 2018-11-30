@@ -1197,6 +1197,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Rețeaua Wi-Fi nu are acces la internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Atingeți pentru opțiuni"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modificări aduse setărilor pentru hotspot"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"S-a schimbat banda de frecvență a hotspotului."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Dispozitivul nu acceptă doar preferința pentru 5 GHz. Dispozitivul va folosi banda de 5 GHz când este disponibilă."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"S-a comutat la <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Dispozitivul folosește <xliff:g id="NEW_NETWORK">%1$s</xliff:g> când <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nu are acces la internet. Se pot aplica taxe."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"S-a comutat de la <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> la <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
