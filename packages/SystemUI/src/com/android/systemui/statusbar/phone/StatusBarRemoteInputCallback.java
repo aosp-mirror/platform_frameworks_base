@@ -238,8 +238,10 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks {
     }
 
     @Override
-    public void disable(int state1, int state2, boolean animate) {
-        mDisabled2 = state2;
+    public void disable(int displayId, int state1, int state2, boolean animate) {
+        if (displayId == mContext.getDisplayId()) {
+            mDisabled2 = state2;
+        }
     }
 
     protected class ChallengeReceiver extends BroadcastReceiver {

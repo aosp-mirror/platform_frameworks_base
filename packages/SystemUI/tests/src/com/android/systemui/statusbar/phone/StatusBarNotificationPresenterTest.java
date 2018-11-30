@@ -14,6 +14,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -61,7 +63,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     public void setup() {
         mMetricsLogger = new FakeMetricsLogger();
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
-        mCommandQueue = new CommandQueue();
+        mCommandQueue = new CommandQueue(mContext);
         mContext.putComponent(CommandQueue.class, mCommandQueue);
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
 
@@ -81,7 +83,8 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
-        mCommandQueue.disable(StatusBarManager.DISABLE_EXPAND, 0, false /* animate */);
+        mCommandQueue.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_EXPAND, 0,
+                false /* animate */);
         TestableLooper.get(this).processAllMessages();
 
         assertFalse("The panel shouldn't allow heads up while disabled",
@@ -94,7 +97,8 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
-        mCommandQueue.disable(0, StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false /* animate */);
+        mCommandQueue.disable(DEFAULT_DISPLAY, 0, StatusBarManager.DISABLE2_NOTIFICATION_SHADE,
+                false /* animate */);
         TestableLooper.get(this).processAllMessages();
 
         assertFalse("The panel shouldn't allow heads up while notitifcation shade disabled",

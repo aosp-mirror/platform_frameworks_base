@@ -736,9 +736,12 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
             };
 
     @Override
-    public void appTransitionStarting(long startTime, long duration, boolean forced) {
-        updateManagedProfile();
-        updateForegroundInstantApps();
+    public void appTransitionStarting(int displayId, long startTime, long duration,
+            boolean forced) {
+        if (mContext.getDisplayId() == displayId) {
+            updateManagedProfile();
+            updateForegroundInstantApps();
+        }
     }
 
     @Override

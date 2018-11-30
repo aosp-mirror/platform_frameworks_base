@@ -69,6 +69,22 @@ public class StatusBarManager {
             | DISABLE_SYSTEM_INFO | DISABLE_RECENT | DISABLE_HOME | DISABLE_BACK | DISABLE_CLOCK
             | DISABLE_SEARCH;
 
+    @IntDef(flag = true, prefix = {"DISABLE_"}, value = {
+            DISABLE_NONE,
+            DISABLE_EXPAND,
+            DISABLE_NOTIFICATION_ICONS,
+            DISABLE_NOTIFICATION_ALERTS,
+            DISABLE_NOTIFICATION_TICKER,
+            DISABLE_SYSTEM_INFO,
+            DISABLE_HOME,
+            DISABLE_RECENT,
+            DISABLE_BACK,
+            DISABLE_CLOCK,
+            DISABLE_SEARCH
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DisableFlags {}
+
     /**
      * Flag to disable quick settings.
      *
@@ -104,9 +120,24 @@ public class StatusBarManager {
     public static final int WINDOW_STATUS_BAR = 1;
     public static final int WINDOW_NAVIGATION_BAR = 2;
 
+    @IntDef(flag = true, prefix = { "WINDOW_" }, value = {
+        WINDOW_STATUS_BAR,
+        WINDOW_NAVIGATION_BAR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WindowType {}
+
     public static final int WINDOW_STATE_SHOWING = 0;
     public static final int WINDOW_STATE_HIDING = 1;
     public static final int WINDOW_STATE_HIDDEN = 2;
+
+    @IntDef(flag = true, prefix = { "WINDOW_STATE_" }, value = {
+            WINDOW_STATE_SHOWING,
+            WINDOW_STATE_HIDING,
+            WINDOW_STATE_HIDDEN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WindowVisibleState {}
 
     public static final int CAMERA_LAUNCH_SOURCE_WIGGLE = 0;
     public static final int CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP = 1;

@@ -69,10 +69,13 @@ public class Utils {
 
         /**
          * Sets visibility of this {@link View} given the states passed from
-         * {@link com.android.systemui.statusbar.CommandQueue.Callbacks#disable(int, int)}.
+         * {@link com.android.systemui.statusbar.CommandQueue.Callbacks#disable(int, int, int)}.
          */
         @Override
-        public void disable(int state1, int state2, boolean animate) {
+        public void disable(int displayId, int state1, int state2, boolean animate) {
+            if (displayId != mView.getDisplay().getDisplayId()) {
+                return;
+            }
             final boolean disabled = ((state1 & mMask1) != 0) || ((state2 & mMask2) != 0);
             if (disabled == mDisabled) return;
             mDisabled = disabled;

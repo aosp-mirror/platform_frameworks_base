@@ -18,6 +18,8 @@ import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+import static android.app.StatusBarManager.WindowType;
+import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
@@ -130,7 +132,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
     protected NavigationBarView mNavigationBarView = null;
 
-    private int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
+    private @WindowVisibleState int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
 
     private int mNavigationIconHints = 0;
     private @TransitionMode int mNavigationBarMode;
@@ -376,8 +378,11 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     // ----- CommandQueue Callbacks -----
 
     @Override
-    public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
+    public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher) {
+        if (displayId != mDisplayId) {
+            return;
+        }
         boolean imeShown = (vis & InputMethodService.IME_VISIBLE) != 0;
         int hints = mNavigationIconHints;
         switch (backDisposition) {
@@ -410,15 +415,17 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     @Override
-    public void topAppWindowChanged(boolean showMenu) {
-        if (mNavigationBarView != null) {
+    public void topAppWindowChanged(int displayId, boolean showMenu) {
+        if (displayId == mDisplayId && mNavigationBarView != null) {
             mNavigationBarView.setMenuVisibility(showMenu);
         }
     }
 
     @Override
-    public void setWindowState(int window, int state) {
-        if (mNavigationBarView != null
+    public void setWindowState(
+            int displayId, @WindowType int window, @WindowVisibleState int state) {
+        if (displayId == mDisplayId
+                && mNavigationBarView != null
                 && window == StatusBarManager.WINDOW_NAVIGATION_BAR
                 && mNavigationBarWindowState != state) {
             mNavigationBarWindowState = state;
@@ -470,8 +477,11 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     @Override
-    public void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis,
-            int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+    public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+        if (displayId != mDisplayId) {
+            return;
+        }
         final int oldVal = mSystemUiVisibility;
         final int newVal = (oldVal & ~mask) | (vis & mask);
         final int diff = newVal ^ oldVal;
@@ -536,7 +546,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     @Override
-    public void disable(int state1, int state2, boolean animate) {
+    public void disable(int displayId, int state1, int state2, boolean animate) {
+        if (displayId != mDisplayId) {
+            return;
+        }
         // Navigation bar flags are in both state1 and state2.
         final int masked = state1 & (StatusBarManager.DISABLE_HOME
                 | StatusBarManager.DISABLE_RECENT
