@@ -3265,6 +3265,7 @@
   <java-symbol type="string" name="notification_channel_do_not_disturb" />
   <java-symbol type="string" name="config_defaultAutofillService" />
   <java-symbol type="string" name="config_defaultTextClassifierPackage" />
+  <java-symbol type="string" name="config_defaultSmartSuggestionsService" />
 
   <java-symbol type="string" name="notification_channel_foreground_service" />
   <java-symbol type="string" name="foreground_service_app_in_background" />

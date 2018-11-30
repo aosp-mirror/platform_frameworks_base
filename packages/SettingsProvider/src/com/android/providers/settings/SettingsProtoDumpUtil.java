@@ -1165,6 +1165,12 @@ class SettingsProtoDumpUtil {
                 GlobalSettingsProto.SmartSelection.UPDATE_METADATA_URL);
         p.end(smartSelectToken);
 
+        final long smartSuggestionsToken = p.start(GlobalSettingsProto.SMART_SUGGESTIONS);
+        dumpSetting(s, p,
+                Settings.Global.SMART_SUGGESTIONS_SERVICE_EXPLICITLY_ENABLED,
+                GlobalSettingsProto.SmartSuggestions.SERVICE_EXPLICITLY_ENABLED);
+        p.end(smartSuggestionsToken);
+
         final long smsToken = p.start(GlobalSettingsProto.SMS);
         dumpSetting(s, p,
                 Settings.Global.SMS_OUTGOING_CHECK_INTERVAL_MS,

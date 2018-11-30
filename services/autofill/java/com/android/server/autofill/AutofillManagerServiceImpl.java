@@ -190,6 +190,11 @@ final class AutofillManagerServiceImpl
         return mInfo.getServiceInfo();
     }
 
+    @Override // from PerUserSystemService
+    protected String getDefaultComponentName() {
+        return getComponentNameFromSettings();
+    }
+
     @Nullable
     String[] getUrlBarResourceIdsForCompatMode(@NonNull String packageName) {
         return mAutofillCompatState.getUrlBarResourceIds(packageName, mUserId);
@@ -369,7 +374,7 @@ final class AutofillManagerServiceImpl
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            final String autoFillService = getComponentNameFromSettings();
+            final String autoFillService = getComponentNameLocked();
             final ComponentName componentName = serviceInfo.getComponentName();
             if (componentName.equals(ComponentName.unflattenFromString(autoFillService))) {
                 mMetricsLogger.action(MetricsEvent.AUTOFILL_SERVICE_DISABLED_SELF,

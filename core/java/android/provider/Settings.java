@@ -12838,6 +12838,23 @@ public final class Settings {
                 "max_sound_trigger_detection_service_ops_per_day";
 
         /**
+         * Property used by {@code com.android.server.SystemServer} on start to decide whether
+         * the Smart Suggestions service should be created or not
+         *
+         * <p>By default it should *NOT* be set (in which case the decision is based on whether
+         * the OEM provides an implementation for the service), but it can be overridden to:
+         *
+         * <ul>
+         *   <li>Provide a "kill switch" so OEMs can disable it remotely in case of emergency.
+         *   <li>Enable the CTS tests to be run on AOSP builds
+         * </ul>
+         *
+         * @hide
+         */
+        public static final String SMART_SUGGESTIONS_SERVICE_EXPLICITLY_ENABLED =
+                "smart_suggestions_service_explicitly_enabled";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
