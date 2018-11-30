@@ -24,6 +24,7 @@
 #include "idmap2/Idmap.h"
 #include "idmap2/PrettyPrintVisitor.h"
 #include "idmap2/RawPrintVisitor.h"
+#include "idmap2/SysTrace.h"
 
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Idmap;
@@ -31,6 +32,7 @@ using android::idmap2::PrettyPrintVisitor;
 using android::idmap2::RawPrintVisitor;
 
 bool Dump(const std::vector<std::string>& args, std::ostream& out_error) {
+  SYSTRACE << "Dump " << args;
   std::string idmap_path;
   bool verbose;
 
