@@ -443,7 +443,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             for (int i = 0; i < activities.size(); i++) {
                 final ActivityRecord r = activities.get(i);
                 if (!r.finishing && r.isInStackLocked()) {
-                    r.getStack().finishActivityLocked(r, Activity.RESULT_CANCELED,
+                    r.getActivityStack().finishActivityLocked(r, Activity.RESULT_CANCELED,
                             null, "finish-heavy", true);
                 }
             }
@@ -513,7 +513,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
             ActivityRecord hist = mActivities.get(0);
             intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_APP, hist.packageName);
-            intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK, hist.getTask().taskId);
+            intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK, hist.getTaskRecord().taskId);
         }
     }
 
@@ -524,7 +524,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 // Don't kill process(es) that has an activity not stopped.
                 return false;
             }
-            final TaskRecord otherTask = activity.getTask();
+            final TaskRecord otherTask = activity.getTaskRecord();
             if (tr.taskId != otherTask.taskId && otherTask.inRecents) {
                 // Don't kill process(es) that has an activity in a different task that is
                 // also in recents.
@@ -557,7 +557,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 continue;
             }
 
-            final TaskRecord task = r.getTask();
+            final TaskRecord task = r.getTaskRecord();
             if (task != null) {
                 if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Collecting release task " + task
                         + " from " + r);
@@ -600,7 +600,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 }
                 if (r.visible) {
                     callback.onVisibleActivity();
-                    final TaskRecord task = r.getTask();
+                    final TaskRecord task = r.getTaskRecord();
                     if (task != null && minTaskLayer > 0) {
                         final int layer = task.mLayerRank;
                         if (layer >= 0 && minTaskLayer > layer) {

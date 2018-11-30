@@ -115,7 +115,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     protected final Transaction mPendingTransaction;
     protected final SurfaceAnimator mSurfaceAnimator;
-    protected final WindowManagerService mService;
+    protected final WindowManagerService mWmService;
 
     private final Point mTmpPos = new Point();
     protected final Point mLastSurfacePosition = new Point();
@@ -129,10 +129,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     private boolean mCommittedReparentToAnimationLeash;
 
-    WindowContainer(WindowManagerService service) {
-        mService = service;
-        mPendingTransaction = service.mTransactionFactory.make();
-        mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, service);
+    WindowContainer(WindowManagerService wms) {
+        mWmService = wms;
+        mPendingTransaction = wms.mTransactionFactory.make();
+        mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, wms);
     }
 
     @Override

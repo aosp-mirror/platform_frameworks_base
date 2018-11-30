@@ -187,7 +187,7 @@ final class VrController {
         synchronized (mGlobalAmLock) {
             vrMode = record.requestedVrComponent != null;
             requestedPackage = record.requestedVrComponent;
-            userId = record.userId;
+            userId = record.mUserId;
             callingPackage = record.info.getComponentName();
 
             // Tell the VrController that a VR mode change is requested.

@@ -244,7 +244,7 @@ final class ActivityRecord extends ConfigurationContainer {
     private static final String ATTR_COMPONENTSPECIFIED = "component_specified";
     static final String ACTIVITY_ICON_SUFFIX = "_activity_icon_";
 
-    final ActivityTaskManagerService service; // owner
+    final ActivityTaskManagerService mAtmService; // owner
     final IApplicationToken.Stub appToken; // window manager token
     // TODO: Remove after unification
     AppWindowToken mAppWindowToken;
@@ -255,9 +255,9 @@ final class ActivityRecord extends ConfigurationContainer {
     final int launchedFromPid; // always the pid who started the activity.
     final int launchedFromUid; // always the uid who started the activity.
     final String launchedFromPackage; // always the package who started the activity.
-    final int userId;          // Which user is this running for?
+    final int mUserId;          // Which user is this running for?
     final Intent intent;    // the original intent that generated us
-    final ComponentName realActivity;  // the intent component, or target of an alias.
+    final ComponentName mActivityComponent;  // the intent component, or target of an alias.
     final String shortComponentName; // the short component name of the intent
     final String resolvedType; // as per original caller;
     final String packageName; // the package implementing intent's component
@@ -407,14 +407,14 @@ final class ActivityRecord extends ConfigurationContainer {
                 pw.print(" processName="); pw.println(processName);
         pw.print(prefix); pw.print("launchedFromUid="); pw.print(launchedFromUid);
                 pw.print(" launchedFromPackage="); pw.print(launchedFromPackage);
-                pw.print(" userId="); pw.println(userId);
+                pw.print(" userId="); pw.println(mUserId);
         pw.print(prefix); pw.print("app="); pw.println(app);
         pw.print(prefix); pw.println(intent.toInsecureStringWithClip());
         pw.print(prefix); pw.print("frontOfTask="); pw.print(frontOfTask);
                 pw.print(" task="); pw.println(task);
         pw.print(prefix); pw.print("taskAffinity="); pw.println(taskAffinity);
-        pw.print(prefix); pw.print("realActivity=");
-                pw.println(realActivity.flattenToShortString());
+        pw.print(prefix); pw.print("mActivityComponent=");
+                pw.println(mActivityComponent.flattenToShortString());
         if (appInfo != null) {
             pw.print(prefix); pw.print("baseDir="); pw.println(appInfo.sourceDir);
             if (!Objects.equals(appInfo.sourceDir, appInfo.publicSourceDir)) {
@@ -644,7 +644,7 @@ final class ActivityRecord extends ConfigurationContainer {
                     "Reporting activity moved to display" + ", activityRecord=" + this
                             + ", displayId=" + displayId + ", config=" + config);
 
-            service.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     MoveToDisplayItem.obtain(displayId, config));
         } catch (RemoteException e) {
             // If process died, whatever.
@@ -662,7 +662,7 @@ final class ActivityRecord extends ConfigurationContainer {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + this + ", config: "
                     + config);
 
-            service.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     ActivityConfigurationChangeItem.obtain(config));
         } catch (RemoteException e) {
             // If process died, whatever.
@@ -689,7 +689,7 @@ final class ActivityRecord extends ConfigurationContainer {
 
     private void scheduleMultiWindowModeChanged(Configuration overrideConfig) {
         try {
-            service.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     MultiWindowModeChangeItem.obtain(mLastReportedMultiWindowMode, overrideConfig));
         } catch (Exception e) {
             // If process died, I don't care.
@@ -720,7 +720,7 @@ final class ActivityRecord extends ConfigurationContainer {
 
     private void schedulePictureInPictureModeChanged(Configuration overrideConfig) {
         try {
-            service.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     PipModeChangeItem.obtain(mLastReportedPictureInPictureMode,
                             overrideConfig));
         } catch (Exception e) {
@@ -741,10 +741,10 @@ final class ActivityRecord extends ConfigurationContainer {
 
     @Override
     protected ConfigurationContainer getParent() {
-        return getTask();
+        return getTaskRecord();
     }
 
-    TaskRecord getTask() {
+    TaskRecord getTaskRecord() {
         return task;
     }
 
@@ -765,12 +765,12 @@ final class ActivityRecord extends ConfigurationContainer {
      * @param reparenting   Whether we're in the middle of reparenting.
      */
     void setTask(TaskRecord task, boolean reparenting) {
-        // Do nothing if the {@link TaskRecord} is the same as the current {@link getTask}.
-        if (task != null && task == getTask()) {
+        // Do nothing if the {@link TaskRecord} is the same as the current {@link getTaskRecord}.
+        if (task != null && task == getTaskRecord()) {
             return;
         }
 
-        final ActivityStack oldStack = getStack();
+        final ActivityStack oldStack = getActivityStack();
         final ActivityStack newStack = task != null ? task.getStack() : null;
 
         // Inform old stack (if present) of activity removal and new stack (if set) of activity
@@ -819,7 +819,7 @@ final class ActivityRecord extends ConfigurationContainer {
                 return null;
             }
             ActivityRecord r = token.weakActivity.get();
-            if (r == null || r.getStack() == null) {
+            if (r == null || r.getActivityStack() == null) {
                 return null;
             }
             return r;
@@ -852,7 +852,7 @@ final class ActivityRecord extends ConfigurationContainer {
     }
 
     boolean isResolverActivity() {
-        return ResolverActivity.class.getName().equals(realActivity.getClassName());
+        return ResolverActivity.class.getName().equals(mActivityComponent.getClassName());
     }
 
     boolean isResolverOrChildActivity() {
@@ -861,7 +861,7 @@ final class ActivityRecord extends ConfigurationContainer {
         }
         try {
             return ResolverActivity.class.isAssignableFrom(
-                    Object.class.getClassLoader().loadClass(realActivity.getClassName()));
+                    Object.class.getClassLoader().loadClass(mActivityComponent.getClassName()));
         } catch (ClassNotFoundException e) {
             return false;
         }
@@ -873,14 +873,14 @@ final class ActivityRecord extends ConfigurationContainer {
             ActivityRecord _resultTo, String _resultWho, int _reqCode, boolean _componentSpecified,
             boolean _rootVoiceInteraction, ActivityStackSupervisor supervisor,
             ActivityOptions options, ActivityRecord sourceRecord) {
-        service = _service;
+        mAtmService = _service;
         mRootActivityContainer = _service.mRootActivityContainer;
         appToken = new Token(this, _intent);
         info = aInfo;
         launchedFromPid = _launchedFromPid;
         launchedFromUid = _launchedFromUid;
         launchedFromPackage = _launchedFromPackage;
-        userId = UserHandle.getUserId(aInfo.applicationInfo.uid);
+        mUserId = UserHandle.getUserId(aInfo.applicationInfo.uid);
         intent = _intent;
         shortComponentName = _intent.getComponent().flattenToShortString();
         resolvedType = _resolvedType;
@@ -917,9 +917,9 @@ final class ActivityRecord extends ConfigurationContainer {
                 || (aInfo.targetActivity.equals(_intent.getComponent().getClassName())
                 && (aInfo.launchMode == LAUNCH_MULTIPLE
                 || aInfo.launchMode == LAUNCH_SINGLE_TOP))) {
-            realActivity = _intent.getComponent();
+            mActivityComponent = _intent.getComponent();
         } else {
-            realActivity = new ComponentName(aInfo.packageName, aInfo.targetActivity);
+            mActivityComponent = new ComponentName(aInfo.packageName, aInfo.targetActivity);
         }
         taskAffinity = aInfo.taskAffinity;
         stateNotNeeded = (aInfo.flags & FLAG_STATE_NOT_NEEDED) != 0;
@@ -958,7 +958,7 @@ final class ActivityRecord extends ConfigurationContainer {
         launchMode = aInfo.launchMode;
 
         Entry ent = AttributeCache.instance().get(packageName,
-                realTheme, com.android.internal.R.styleable.Window, userId);
+                realTheme, com.android.internal.R.styleable.Window, mUserId);
 
         if (ent != null) {
             fullscreen = !ActivityInfo.isTranslucentOrFloating(ent.array);
@@ -1038,7 +1038,7 @@ final class ActivityRecord extends ConfigurationContainer {
         updateOverrideConfiguration();
 
         // TODO: remove after unification
-        mAppWindowToken = service.mWindowManager.mRoot.getAppWindowToken(appToken.asBinder());
+        mAppWindowToken = mAtmService.mWindowManager.mRoot.getAppWindowToken(appToken.asBinder());
         if (mAppWindowToken != null) {
             // TODO: Should this throw an exception instead?
             Slog.w(TAG, "Attempted to add existing app token: " + appToken);
@@ -1048,7 +1048,7 @@ final class ActivityRecord extends ConfigurationContainer {
                 throw new IllegalArgumentException("AppWindowContainerController: invalid "
                         + " controller=" + taskController);
             }
-            mAppWindowToken = createAppWindow(service.mWindowManager, appToken,
+            mAppWindowToken = createAppWindow(mAtmService.mWindowManager, appToken,
                     task.voiceSession != null, container.getDisplayContent(),
                     ActivityTaskManagerService.getInputDispatchingTimeoutLocked(this)
                             * 1000000L, fullscreen,
@@ -1098,16 +1098,16 @@ final class ActivityRecord extends ConfigurationContainer {
             boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
             int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
             boolean alwaysFocusable) {
-        return new AppWindowToken(service, token, realActivity, voiceInteraction, dc,
+        return new AppWindowToken(service, token, mActivityComponent, voiceInteraction, dc,
                 inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk, orientation,
                 rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
                 this);
     }
 
     void removeWindowContainer() {
-        if (service.mWindowManager.mRoot == null) return;
+        if (mAtmService.mWindowManager.mRoot == null) return;
 
-        final DisplayContent dc = service.mWindowManager.mRoot.getDisplayContent(
+        final DisplayContent dc = mAtmService.mWindowManager.mRoot.getDisplayContent(
                 getDisplayId());
         if (dc == null) {
             Slog.w(TAG, "removeWindowContainer: Attempted to remove token: "
@@ -1193,7 +1193,7 @@ final class ActivityRecord extends ConfigurationContainer {
      */
     private boolean canLaunchAssistActivity(String packageName) {
         final ComponentName assistComponent =
-                service.mActiveVoiceInteractionServiceComponent;
+                mAtmService.mActiveVoiceInteractionServiceComponent;
         if (assistComponent != null) {
             return assistComponent.getPackageName().equals(packageName);
         }
@@ -1213,8 +1213,8 @@ final class ActivityRecord extends ConfigurationContainer {
                 // We only allow home activities to be resizeable if they explicitly requested it.
                 info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             }
-        } else if (realActivity.getClassName().contains(LEGACY_RECENTS_PACKAGE_NAME)
-                || service.getRecentTasks().isRecentsComponent(realActivity, appInfo.uid)) {
+        } else if (mActivityComponent.getClassName().contains(LEGACY_RECENTS_PACKAGE_NAME)
+                || mAtmService.getRecentTasks().isRecentsComponent(mActivityComponent, appInfo.uid)) {
             activityType = ACTIVITY_TYPE_RECENTS;
         } else if (options != null && options.getLaunchActivityType() == ACTIVITY_TYPE_ASSISTANT
                 && canLaunchAssistActivity(launchedFromPackage)) {
@@ -1232,16 +1232,16 @@ final class ActivityRecord extends ConfigurationContainer {
     /**
      * @return Stack value from current task, null if there is no task.
      */
-    <T extends ActivityStack> T getStack() {
+    <T extends ActivityStack> T getActivityStack() {
         return task != null ? (T) task.getStack() : null;
     }
 
     int getStackId() {
-        return getStack() != null ? getStack().mStackId : INVALID_STACK_ID;
+        return getActivityStack() != null ? getActivityStack().mStackId : INVALID_STACK_ID;
     }
 
     ActivityDisplay getDisplay() {
-        final ActivityStack stack = getStack();
+        final ActivityStack stack = getActivityStack();
         return stack != null ? stack.getDisplay() : null;
     }
 
@@ -1272,7 +1272,7 @@ final class ActivityRecord extends ConfigurationContainer {
     }
 
     boolean isInStackLocked() {
-        final ActivityStack stack = getStack();
+        final ActivityStack stack = getActivityStack();
         return stack != null && stack.isInStackLocked(this) != null;
     }
 
@@ -1302,7 +1302,7 @@ final class ActivityRecord extends ConfigurationContainer {
      * @return whether this activity supports PiP multi-window and can be put in the pinned stack.
      */
     boolean supportsPictureInPicture() {
-        return service.mSupportsPictureInPicture && isActivityTypeStandardOrUndefined()
+        return mAtmService.mSupportsPictureInPicture && isActivityTypeStandardOrUndefined()
                 && info.supportsPictureInPicture();
     }
 
@@ -1315,7 +1315,7 @@ final class ActivityRecord extends ConfigurationContainer {
         // An activity can not be docked even if it is considered resizeable because it only
         // supports picture-in-picture mode but has a non-resizeable resizeMode
         return super.supportsSplitScreenWindowingMode()
-                && service.mSupportsSplitScreenMultiWindow && supportsResizeableMultiWindow();
+                && mAtmService.mSupportsSplitScreenMultiWindow && supportsResizeableMultiWindow();
     }
 
     /**
@@ -1323,16 +1323,16 @@ final class ActivityRecord extends ConfigurationContainer {
      *         stack.
      */
     boolean supportsFreeform() {
-        return service.mSupportsFreeformWindowManagement && supportsResizeableMultiWindow();
+        return mAtmService.mSupportsFreeformWindowManagement && supportsResizeableMultiWindow();
     }
 
     /**
      * @return whether this activity supports non-PiP multi-window.
      */
     private boolean supportsResizeableMultiWindow() {
-        return service.mSupportsMultiWindow && !isActivityTypeHome()
+        return mAtmService.mSupportsMultiWindow && !isActivityTypeHome()
                 && (ActivityInfo.isResizeableMode(info.resizeMode)
-                        || service.mForceResizableActivities);
+                        || mAtmService.mForceResizableActivities);
     }
 
     /**
@@ -1343,7 +1343,7 @@ final class ActivityRecord extends ConfigurationContainer {
      *         secondary screen.
      */
     boolean canBeLaunchedOnDisplay(int displayId) {
-        return service.mStackSupervisor.canPlaceEntityOnDisplay(displayId, launchedFromPid,
+        return mAtmService.mStackSupervisor.canPlaceEntityOnDisplay(displayId, launchedFromPid,
                 launchedFromUid, info);
     }
 
@@ -1364,13 +1364,13 @@ final class ActivityRecord extends ConfigurationContainer {
         }
 
         // Check to see if we are in VR mode, and disallow PiP if so
-        if (service.shouldDisableNonVrUiLocked()) {
+        if (mAtmService.shouldDisableNonVrUiLocked()) {
             return false;
         }
 
-        boolean isKeyguardLocked = service.isKeyguardLocked();
+        boolean isKeyguardLocked = mAtmService.isKeyguardLocked();
         boolean isCurrentAppLocked =
-                service.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
+                mAtmService.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
         final ActivityDisplay display = getDisplay();
         boolean hasPinnedStack = display != null && display.hasPinnedStack();
         // Don't return early if !isNotLocked, since we want to throw an exception if the activity
@@ -1411,7 +1411,7 @@ final class ActivityRecord extends ConfigurationContainer {
      * @return Whether AppOps allows this package to enter picture-in-picture.
      */
     private boolean checkEnterPictureInPictureAppOpsState() {
-        return service.getAppOpsService().checkOperation(
+        return mAtmService.getAppOpsService().checkOperation(
                 OP_PICTURE_IN_PICTURE, appInfo.uid, packageName) == MODE_ALLOWED;
     }
 
@@ -1428,8 +1428,8 @@ final class ActivityRecord extends ConfigurationContainer {
             return false;
         }
 
-        final TaskRecord task = getTask();
-        final ActivityStack stack = getStack();
+        final TaskRecord task = getTaskRecord();
+        final ActivityStack stack = getActivityStack();
         if (stack == null) {
             Slog.w(TAG, "moveActivityStackToFront: invalid task or stack: activity="
                     + this + " task=" + task);
@@ -1451,7 +1451,7 @@ final class ActivityRecord extends ConfigurationContainer {
         // Report top activity change to tracking services and WM
         if (mRootActivityContainer.getTopResumedActivity() == this) {
             // TODO(b/111361570): Support multiple focused apps in WM
-            service.setResumedActivityUncheckLocked(this, reason);
+            mAtmService.setResumedActivityUncheckLocked(this, reason);
         }
         return true;
     }
@@ -1461,7 +1461,7 @@ final class ActivityRecord extends ConfigurationContainer {
      *         {@link LayoutParams#FLAG_DISMISS_KEYGUARD} set
      */
     boolean hasDismissKeyguardWindows() {
-        return service.mWindowManager.containsDismissKeyguardWindow(appToken);
+        return mAtmService.mWindowManager.containsDismissKeyguardWindow(appToken);
     }
 
     void makeFinishingLocked() {
@@ -1473,14 +1473,14 @@ final class ActivityRecord extends ConfigurationContainer {
             clearOptionsLocked();
         }
 
-        if (service != null) {
-            service.getTaskChangeNotificationController().notifyTaskStackChanged();
+        if (mAtmService != null) {
+            mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
         }
     }
 
     UriPermissionOwner getUriPermissionsLocked() {
         if (uriPermissions == null) {
-            uriPermissions = new UriPermissionOwner(service.mUgmInternal, this);
+            uriPermissions = new UriPermissionOwner(mAtmService.mUgmInternal, this);
         }
         return uriPermissions;
     }
@@ -1522,8 +1522,8 @@ final class ActivityRecord extends ConfigurationContainer {
     }
 
     final boolean isSleeping() {
-        final ActivityStack stack = getStack();
-        return stack != null ? stack.shouldSleepActivities() : service.isSleepingLocked();
+        final ActivityStack stack = getActivityStack();
+        return stack != null ? stack.shouldSleepActivities() : mAtmService.isSleepingLocked();
     }
 
     /**
@@ -1532,8 +1532,8 @@ final class ActivityRecord extends ConfigurationContainer {
      */
     final void deliverNewIntentLocked(int callingUid, Intent intent, String referrer) {
         // The activity now gets access to the data associated with this Intent.
-        service.mUgmInternal.grantUriPermissionFromIntent(callingUid, packageName,
-                intent, getUriPermissionsLocked(), userId);
+        mAtmService.mUgmInternal.grantUriPermissionFromIntent(callingUid, packageName,
+                intent, getUriPermissionsLocked(), mUserId);
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
         final boolean isTopActivityWhileSleeping = isTopRunningActivity() && isSleeping();
@@ -1547,7 +1547,7 @@ final class ActivityRecord extends ConfigurationContainer {
             try {
                 ArrayList<ReferrerIntent> ar = new ArrayList<>(1);
                 ar.add(rintent);
-                service.getLifecycleManager().scheduleTransaction(
+                mAtmService.getLifecycleManager().scheduleTransaction(
                         app.getThread(), appToken, NewIntentItem.obtain(ar, mState == PAUSED));
                 unsent = false;
             } catch (RemoteException e) {
@@ -1781,7 +1781,7 @@ final class ActivityRecord extends ConfigurationContainer {
 
         mState = state;
 
-        final TaskRecord parent = getTask();
+        final TaskRecord parent = getTaskRecord();
 
         if (parent != null) {
             parent.onActivityStateChanged(this, state, reason);
@@ -1879,7 +1879,7 @@ final class ActivityRecord extends ConfigurationContainer {
         // If this activity is paused, tell it to now show its window.
         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                 "Making visible and scheduling visibility: " + this);
-        final ActivityStack stack = getStack();
+        final ActivityStack stack = getActivityStack();
         try {
             if (stack.mTranslucentActivityWaiting != null) {
                 updateOptionsLocked(returningOptions);
@@ -1907,13 +1907,13 @@ final class ActivityRecord extends ConfigurationContainer {
     void makeClientVisible() {
         mClientVisibilityDeferred = false;
         try {
-            service.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     WindowVisibilityItem.obtain(true /* showWindow */));
             if (shouldPauseWhenBecomingVisible()) {
                 // An activity must be in the {@link PAUSING} state for the system to validate
                 // the move to {@link PAUSED}.
                 setState(PAUSING, "makeVisibleIfNeeded");
-                service.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+                mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                         PauseActivityItem.obtain(finishing, false /* userLeaving */,
                                 configChangeFlags, false /* dontReport */));
             }
@@ -1931,7 +1931,7 @@ final class ActivityRecord extends ConfigurationContainer {
         // paused state. We also avoid doing this for the activity the stack supervisor
         // considers the resumed activity, as normal means will bring the activity from STOPPED
         // to RESUMED. Adding PAUSING in this scenario will lead to double lifecycles.
-        if (!isState(STOPPED, STOPPING) || getStack().mTranslucentActivityWaiting != null
+        if (!isState(STOPPED, STOPPING) || getActivityStack().mTranslucentActivityWaiting != null
                 || isResumedActivityOnDisplay()) {
             return false;
         }
@@ -1994,8 +1994,8 @@ final class ActivityRecord extends ConfigurationContainer {
 
         if (isActivityTypeHome()) {
             WindowProcessController app = task.mActivities.get(0).app;
-            if (hasProcess() && app != service.mHomeProcess) {
-                service.mHomeProcess = app;
+            if (hasProcess() && app != mAtmService.mHomeProcess) {
+                mAtmService.mHomeProcess = app;
             }
         }
 
@@ -2010,7 +2010,7 @@ final class ActivityRecord extends ConfigurationContainer {
         mStackSupervisor.reportResumedActivityLocked(this);
 
         resumeKeyDispatchingLocked();
-        final ActivityStack stack = getStack();
+        final ActivityStack stack = getActivityStack();
         mStackSupervisor.mNoAnimActivities.clear();
 
         // Mark the point when the activity is resuming
@@ -2036,7 +2036,7 @@ final class ActivityRecord extends ConfigurationContainer {
 
     final void activityStoppedLocked(Bundle newIcicle, PersistableBundle newPersistentState,
             CharSequence description) {
-        final ActivityStack stack = getStack();
+        final ActivityStack stack = getActivityStack();
         if (mState != STOPPING) {
             Slog.i(TAG, "Activity reported stop, but no longer stopping: " + this);
             stack.mHandler.removeMessages(STOP_TIMEOUT_MSG, this);
@@ -2044,7 +2044,7 @@ final class ActivityRecord extends ConfigurationContainer {
         }
         if (newPersistentState != null) {
             persistentState = newPersistentState;
-            service.notifyTaskPersisterLocked(task, false);
+            mAtmService.notifyTaskPersisterLocked(task, false);
         }
         if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE, "Saving icicle of " + this + ": " + icicle);
 
@@ -2094,7 +2094,7 @@ final class ActivityRecord extends ConfigurationContainer {
             return false;
         }
 
-        final ActivityStack stack = getStack();
+        final ActivityStack stack = getActivityStack();
         if (stack == null) {
             return false;
         }
@@ -2107,7 +2107,7 @@ final class ActivityRecord extends ConfigurationContainer {
 
     void finishLaunchTickingLocked() {
         launchTickTime = 0;
-        final ActivityStack stack = getStack();
+        final ActivityStack stack = getActivityStack();
         if (stack != null) {
             stack.mHandler.removeMessages(LAUNCH_TICK_MSG);
         }
@@ -2168,7 +2168,7 @@ final class ActivityRecord extends ConfigurationContainer {
      * Called when the starting window for this container is drawn.
      */
     public void onStartingWindowDrawn(long timestamp) {
-        synchronized (service.mGlobalLock) {
+        synchronized (mAtmService.mGlobalLock) {
             mStackSupervisor.getActivityMetricsLogger().notifyStartingWindowDrawn(
                     getWindowingMode(), timestamp);
         }
@@ -2176,7 +2176,7 @@ final class ActivityRecord extends ConfigurationContainer {
 
     /** Called when the windows associated app window container are drawn. */
     public void onWindowsDrawn(boolean drawn, long timestamp) {
-        synchronized (service.mGlobalLock) {
+        synchronized (mAtmService.mGlobalLock) {
             mDrawn = drawn;
             if (!drawn) {
                 return;
@@ -2196,7 +2196,7 @@ final class ActivityRecord extends ConfigurationContainer {
 
     /** Called when the windows associated app window container are visible. */
     public void onWindowsVisible() {
-        synchronized (service.mGlobalLock) {
+        synchronized (mAtmService.mGlobalLock) {
             mStackSupervisor.reportActivityVisibleLocked(this);
             if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "windowsVisibleLocked(): " + this);
             if (!nowVisible) {
@@ -2223,14 +2223,14 @@ final class ActivityRecord extends ConfigurationContainer {
                     mStackSupervisor.processStoppingActivitiesLocked(null /* idleActivity */,
                             false /* remove */, true /* processPausingActivities */);
                 }
-                service.scheduleAppGcsLocked();
+                mAtmService.scheduleAppGcsLocked();
             }
         }
     }
 
     /** Called when the windows associated app window container are no longer visible. */
     public void onWindowsGone() {
-        synchronized (service.mGlobalLock) {
+        synchronized (mAtmService.mGlobalLock) {
             if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "windowsGone(): " + this);
             nowVisible = false;
         }
@@ -2248,7 +2248,7 @@ final class ActivityRecord extends ConfigurationContainer {
         ActivityRecord anrActivity;
         WindowProcessController anrApp;
         boolean windowFromSameProcessAsActivity;
-        synchronized (service.mGlobalLock) {
+        synchronized (mAtmService.mGlobalLock) {
             anrActivity = getWaitingHistoryRecordLocked();
             anrApp = app;
             windowFromSameProcessAsActivity =
@@ -2256,13 +2256,13 @@ final class ActivityRecord extends ConfigurationContainer {
         }
 
         if (windowFromSameProcessAsActivity) {
-            return service.mAmInternal.inputDispatchingTimedOut(anrApp.mOwner,
+            return mAtmService.mAmInternal.inputDispatchingTimedOut(anrApp.mOwner,
                     anrActivity.shortComponentName, anrActivity.appInfo, shortComponentName,
                     app, false, reason);
         } else {
             // In this case another process added windows using this activity token. So, we call the
             // generic service input dispatch timed out method so that the right process is blamed.
-            return service.mAmInternal.inputDispatchingTimedOut(
+            return mAtmService.mAmInternal.inputDispatchingTimedOut(
                     windowPid, false /* aboveSystem */, reason) < 0;
         }
     }
@@ -2289,14 +2289,14 @@ final class ActivityRecord extends ConfigurationContainer {
     public boolean okToShowLocked() {
         // We cannot show activities when the device is locked and the application is not
         // encryption aware.
-        if (!StorageManager.isUserKeyUnlocked(userId)
+        if (!StorageManager.isUserKeyUnlocked(mUserId)
                 && !info.applicationInfo.isEncryptionAware()) {
             return false;
         }
 
         return (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0
-                || (mStackSupervisor.isCurrentProfileLocked(userId)
-                && service.mAmInternal.isUserRunning(userId, 0 /* flags */));
+                || (mStackSupervisor.isCurrentProfileLocked(mUserId)
+                && mAtmService.mAmInternal.isUserRunning(mUserId, 0 /* flags */));
     }
 
     /**
@@ -2343,13 +2343,13 @@ final class ActivityRecord extends ConfigurationContainer {
 
     static ActivityRecord isInStackLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        return (r != null) ? r.getStack().isInStackLocked(r) : null;
+        return (r != null) ? r.getActivityStack().isInStackLocked(r) : null;
     }
 
     static ActivityStack getStackLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.isInStackLocked(token);
         if (r != null) {
-            return r.getStack();
+            return r.getActivityStack();
         }
         return null;
     }
@@ -2359,7 +2359,7 @@ final class ActivityRecord extends ConfigurationContainer {
      *         {@link android.view.Display#INVALID_DISPLAY} if not attached.
      */
     int getDisplayId() {
-        final ActivityStack stack = getStack();
+        final ActivityStack stack = getActivityStack();
         if (stack == null) {
             return INVALID_DISPLAY;
         }
@@ -2371,7 +2371,7 @@ final class ActivityRecord extends ConfigurationContainer {
             // This would be redundant.
             return false;
         }
-        final ActivityStack stack = getStack();
+        final ActivityStack stack = getActivityStack();
         if (stack == null || this == stack.getResumedActivity() || this == stack.mPausingActivity
                 || !haveState || !stopped) {
             // We're not ready for this kind of thing.
@@ -2397,7 +2397,7 @@ final class ActivityRecord extends ConfigurationContainer {
             final File iconFile = new File(TaskPersister.getUserImagesDir(task.userId),
                     iconFilename);
             final String iconFilePath = iconFile.getAbsolutePath();
-            service.getRecentTasks().saveImage(icon, iconFilePath);
+            mAtmService.getRecentTasks().saveImage(icon, iconFilePath);
             _taskDescription.setIconFilename(iconFilePath);
         }
         taskDescription = _taskDescription;
@@ -2433,7 +2433,7 @@ final class ActivityRecord extends ConfigurationContainer {
         }
 
         final CompatibilityInfo compatInfo =
-                service.compatibilityInfoForPackageLocked(info.applicationInfo);
+                mAtmService.compatibilityInfoForPackageLocked(info.applicationInfo);
         final boolean shown = addStartingWindow(packageName, theme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
@@ -2466,12 +2466,12 @@ final class ActivityRecord extends ConfigurationContainer {
                 displayId, displayConfig, mayFreezeScreenLocked(app));
         if (config != null) {
             frozenBeforeDestroy = true;
-            if (!service.updateDisplayOverrideConfigurationLocked(config, this,
+            if (!mAtmService.updateDisplayOverrideConfigurationLocked(config, this,
                     false /* deferResume */, displayId)) {
                 mRootActivityContainer.resumeFocusedStacksTopActivities();
             }
         }
-        service.getTaskChangeNotificationController().notifyActivityRequestedOrientationChanged(
+        mAtmService.getTaskChangeNotificationController().notifyActivityRequestedOrientationChanged(
                 task.taskId, requestedOrientation);
     }
 
@@ -2486,7 +2486,7 @@ final class ActivityRecord extends ConfigurationContainer {
         mAppWindowToken.setOrientation(requestedOrientation);
 
         final IBinder binder = freezeScreenIfNeeded ? appToken.asBinder() : null;
-        return service.mWindowManager.updateOrientationFromAppTokens(displayConfig, binder,
+        return mAtmService.mWindowManager.updateOrientationFromAppTokens(displayConfig, binder,
                 displayId);
     }
 
@@ -2572,7 +2572,7 @@ final class ActivityRecord extends ConfigurationContainer {
     private void computeBounds(Rect outBounds) {
         outBounds.setEmpty();
         final float maxAspectRatio = info.maxAspectRatio;
-        final ActivityStack stack = getStack();
+        final ActivityStack stack = getActivityStack();
         if (task == null || stack == null || task.inMultiWindowMode() || maxAspectRatio == 0
                 || isInVrUiMode(getConfiguration())) {
             // We don't set override configuration if that activity task isn't fullscreen. I.e. the
@@ -2618,7 +2618,7 @@ final class ActivityRecord extends ConfigurationContainer {
         // bounds would end up too small.
         outBounds.set(0, 0, maxActivityWidth + appBounds.left, maxActivityHeight + appBounds.top);
 
-        if (service.mWindowManager.getNavBarPosition(getDisplayId()) == NAV_BAR_LEFT) {
+        if (mAtmService.mWindowManager.getNavBarPosition(getDisplayId()) == NAV_BAR_LEFT) {
             // Position the activity frame on the opposite side of the nav bar.
             outBounds.left = appBounds.right - maxActivityWidth;
             outBounds.right = appBounds.right;
@@ -2654,7 +2654,7 @@ final class ActivityRecord extends ConfigurationContainer {
      */
     boolean ensureActivityConfiguration(int globalChanges, boolean preserveWindow,
             boolean ignoreStopState) {
-        final ActivityStack stack = getStack();
+        final ActivityStack stack = getActivityStack();
         if (stack.mConfigWillChange) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Skipping config check (will change): " + this);
@@ -2717,7 +2717,7 @@ final class ActivityRecord extends ConfigurationContainer {
         // Update last reported values.
         final Configuration newMergedOverrideConfig = getMergedOverrideConfiguration();
 
-        setLastReportedConfiguration(service.getGlobalConfiguration(), newMergedOverrideConfig);
+        setLastReportedConfiguration(mAtmService.getGlobalConfiguration(), newMergedOverrideConfig);
 
         if (mState == INITIALIZING) {
             // No need to relaunch or schedule new config for activity that hasn't been launched
@@ -2771,7 +2771,7 @@ final class ActivityRecord extends ConfigurationContainer {
             final boolean hasResizeChange = hasResizeChange(changes & ~info.getRealConfigChanged());
             if (hasResizeChange) {
                 final boolean isDragResizing =
-                        getTask().getWindowContainerController().isDragResizing();
+                        getTaskRecord().getWindowContainerController().isDragResizing();
                 mRelaunchReason = isDragResizing ? RELAUNCH_REASON_FREE_RESIZE
                         : RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
             } else {
@@ -2904,7 +2904,7 @@ final class ActivityRecord extends ConfigurationContainer {
     }
 
     void relaunchActivityLocked(boolean andResume, boolean preserveWindow) {
-        if (service.mSuppressResizeConfigChanges && preserveWindow) {
+        if (mAtmService.mSuppressResizeConfigChanges && preserveWindow) {
             configChangeFlags = 0;
             return;
         }
@@ -2920,7 +2920,7 @@ final class ActivityRecord extends ConfigurationContainer {
                         + " newIntents=" + pendingNewIntents + " andResume=" + andResume
                         + " preserveWindow=" + preserveWindow);
         EventLog.writeEvent(andResume ? AM_RELAUNCH_RESUME_ACTIVITY
-                        : AM_RELAUNCH_ACTIVITY, userId, System.identityHashCode(this),
+                        : AM_RELAUNCH_ACTIVITY, mUserId, System.identityHashCode(this),
                 task.taskId, shortComponentName);
 
         startFreezingScreenLocked(app, 0);
@@ -2933,7 +2933,7 @@ final class ActivityRecord extends ConfigurationContainer {
             mStackSupervisor.activityRelaunchingLocked(this);
             final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(pendingResults,
                     pendingNewIntents, configChangeFlags,
-                    new MergedConfiguration(service.getGlobalConfiguration(),
+                    new MergedConfiguration(mAtmService.getGlobalConfiguration(),
                             getMergedOverrideConfiguration()),
                     preserveWindow);
             final ActivityLifecycleItem lifecycleItem;
@@ -2946,7 +2946,7 @@ final class ActivityRecord extends ConfigurationContainer {
             final ClientTransaction transaction = ClientTransaction.obtain(app.getThread(), appToken);
             transaction.addCallback(callbackItem);
             transaction.setLifecycleStateRequest(lifecycleItem);
-            service.getLifecycleManager().scheduleTransaction(transaction);
+            mAtmService.getLifecycleManager().scheduleTransaction(transaction);
             // Note: don't need to call pauseIfSleepingLocked() here, because the caller will only
             // request resume if this activity is currently resumed, which implies we aren't
             // sleeping.
@@ -2960,9 +2960,9 @@ final class ActivityRecord extends ConfigurationContainer {
             }
             results = null;
             newIntents = null;
-            service.getAppWarningsLocked().onResumeActivity(this);
+            mAtmService.getAppWarningsLocked().onResumeActivity(this);
         } else {
-            final ActivityStack stack = getStack();
+            final ActivityStack stack = getActivityStack();
             if (stack != null) {
                 stack.mHandler.removeMessages(PAUSE_TIMEOUT_MSG, this);
             }
@@ -2977,7 +2977,7 @@ final class ActivityRecord extends ConfigurationContainer {
     private boolean isProcessRunning() {
         WindowProcessController proc = app;
         if (proc == null) {
-            proc = service.mProcessNames.get(processName, info.applicationInfo.uid);
+            proc = mAtmService.mProcessNames.get(processName, info.applicationInfo.uid);
         }
         return proc != null && proc.hasThread();
     }
@@ -3021,7 +3021,7 @@ final class ActivityRecord extends ConfigurationContainer {
             out.attribute(null, ATTR_RESOLVEDTYPE, resolvedType);
         }
         out.attribute(null, ATTR_COMPONENTSPECIFIED, String.valueOf(componentSpecified));
-        out.attribute(null, ATTR_USERID, String.valueOf(userId));
+        out.attribute(null, ATTR_USERID, String.valueOf(mUserId));
 
         if (taskDescription != null) {
             taskDescription.saveToXml(out);
@@ -3144,7 +3144,7 @@ final class ActivityRecord extends ConfigurationContainer {
      */
     boolean canShowWhenLocked() {
         return !inPinnedWindowingMode() && (mShowWhenLocked
-                || service.mWindowManager.containsShowWhenLockedWindow(appToken));
+                || mAtmService.mWindowManager.containsShowWhenLockedWindow(appToken));
     }
 
     void setTurnScreenOn(boolean turnScreenOn) {
@@ -3159,7 +3159,7 @@ final class ActivityRecord extends ConfigurationContainer {
      * @return true if the screen can be turned on, false otherwise.
      */
     boolean canTurnScreenOn() {
-        final ActivityStack stack = getStack();
+        final ActivityStack stack = getActivityStack();
         return mTurnScreenOn && stack != null &&
                 stack.checkKeyguardVisibility(this, true /* shouldBeVisible */, true /* isTop */);
     }
@@ -3200,7 +3200,7 @@ final class ActivityRecord extends ConfigurationContainer {
         sb.append("ActivityRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(" u");
-        sb.append(userId);
+        sb.append(mUserId);
         sb.append(' ');
         sb.append(intent.getComponent().flattenToShortString());
         stringName = sb.toString();
@@ -3210,7 +3210,7 @@ final class ActivityRecord extends ConfigurationContainer {
     void writeIdentifierToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(HASH_CODE, System.identityHashCode(this));
-        proto.write(USER_ID, userId);
+        proto.write(USER_ID, mUserId);
         proto.write(TITLE, intent.getComponent().flattenToShortString());
         proto.end(token);
     }

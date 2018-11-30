@@ -244,7 +244,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final ActivityRecord source = builder.build();
 
         if (!containsConditions(preconditions, PRECONDITION_NO_INTENT_COMPONENT)) {
-            intent.setComponent(source.realActivity);
+            intent.setComponent(source.mActivityComponent);
         }
 
         if (containsConditions(preconditions, PRECONDITION_DISALLOW_APP_SWITCHING)) {
@@ -263,11 +263,11 @@ public class ActivityStarterTests extends ActivityTestsBase {
                     PRECONDITION_ACTIVITY_SUPPORTS_INTENT_EXCEPTION)) {
                 doAnswer((inv) -> {
                     throw new RemoteException();
-                }).when(packageManager).activitySupportsIntent(eq(source.realActivity), eq(intent),
-                        any());
+                }).when(packageManager).activitySupportsIntent(
+                        eq(source.mActivityComponent), eq(intent), any());
             } else {
                 doReturn(!containsConditions(preconditions, PRECONDITION_NO_VOICE_SESSION_SUPPORT))
-                        .when(packageManager).activitySupportsIntent(eq(source.realActivity),
+                        .when(packageManager).activitySupportsIntent(eq(source.mActivityComponent),
                         eq(intent), any());
             }
         } catch (RemoteException e) {
@@ -431,7 +431,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .setCreateTask(true)
                 .build();
 
-        focusActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        focusActivity.getActivityStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
 
         final ActivityRecord reusableActivity = new ActivityBuilder(mService)
                 .setCreateTask(true)
@@ -439,10 +439,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // Create reusable activity after entering split-screen so that it is the top secondary
         // stack.
-        reusableActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        reusableActivity.getActivityStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
         // Set focus back to primary.
-        final ActivityStack focusStack = focusActivity.getStack();
+        final ActivityStack focusStack = focusActivity.getActivityStack();
         focusStack.moveToFront("testSplitScreenDeliverToTop");
 
         doReturn(reusableActivity).when(mRootActivityContainer).findTask(any(), anyInt());
@@ -468,14 +468,14 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .setCreateTask(true)
                 .build();
 
-        reusableActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        reusableActivity.getActivityStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
         final ActivityRecord focusActivity = new ActivityBuilder(mService)
                 .setCreateTask(true)
                 .build();
 
         // Enter split-screen. Primary stack should have focus.
-        focusActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        focusActivity.getActivityStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
 
         doReturn(reusableActivity).when(mRootActivityContainer).findTask(any(), anyInt());
 

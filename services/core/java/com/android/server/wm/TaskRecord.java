@@ -903,7 +903,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         // Correct the activity intent for aliasing. The task record intent will always be based on
         // the real activity that will be launched not the alias, so we need to use an intent with
         // the component name pointing to the real activity not the alias in the activity record.
-        intent.setComponent(r.realActivity);
+        intent.setComponent(r.mActivityComponent);
         return intent.filterEquals(this.intent);
     }
 
@@ -1211,7 +1211,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
      * be in the current task or unparented to any task.
      */
     void addActivityAtIndex(int index, ActivityRecord r) {
-        TaskRecord task = r.getTask();
+        TaskRecord task = r.getTaskRecord();
         if (task != null && task != this) {
             throw new IllegalArgumentException("Can not add r=" + " to task=" + this
                     + " current parent=" + task);
@@ -1285,7 +1285,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
     }
 
     boolean removeActivity(ActivityRecord r, boolean reparenting) {
-        if (r.getTask() != this) {
+        if (r.getTaskRecord() != this) {
             throw new IllegalArgumentException(
                     "Activity=" + r + " does not belong to task=" + this);
         }
@@ -1401,7 +1401,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
             if (r.finishing) {
                 continue;
             }
-            if (r.realActivity.equals(newR.realActivity)) {
+            if (r.mActivityComponent.equals(newR.mActivityComponent)) {
                 // Here it is!  Now finish everything in front...
                 final ActivityRecord ret = r;
 
@@ -1559,13 +1559,13 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
      * the index within the history at which it's found, or < 0 if not found.
      */
     final ActivityRecord findActivityInHistoryLocked(ActivityRecord r) {
-        final ComponentName realActivity = r.realActivity;
+        final ComponentName realActivity = r.mActivityComponent;
         for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
             ActivityRecord candidate = mActivities.get(activityNdx);
             if (candidate.finishing) {
                 continue;
             }
-            if (candidate.realActivity.equals(realActivity)) {
+            if (candidate.mActivityComponent.equals(realActivity)) {
                 return candidate;
             }
         }
@@ -1990,7 +1990,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
                 ? reuseActivitiesReport.base.intent.getComponent()
                 : null;
         info.topActivity = reuseActivitiesReport.top != null
-                ? reuseActivitiesReport.top.realActivity
+                ? reuseActivitiesReport.top.mActivityComponent
                 : null;
         info.origActivity = origActivity;
         info.realActivity = realActivity;
@@ -2041,7 +2041,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
             pw.println(origActivity.flattenToShortString());
         }
         if (realActivity != null) {
-            pw.print(prefix); pw.print("realActivity=");
+            pw.print(prefix); pw.print("mActivityComponent=");
             pw.println(realActivity.flattenToShortString());
         }
         if (autoRemoveRecents || isPersistable || !isActivityTypeStandard() || numFullscreen != 0) {

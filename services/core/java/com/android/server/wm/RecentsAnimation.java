@@ -148,8 +148,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 // If there are multiple tasks in the target stack (ie. the home stack, with 3p
                 // and default launchers coexisting), then move the task to the top as a part of
                 // moving the stack to the front
-                if (targetStack.topTask() != targetActivity.getTask()) {
-                    targetStack.addTask(targetActivity.getTask(), true /* toTop */,
+                if (targetStack.topTask() != targetActivity.getTaskRecord()) {
+                    targetStack.addTask(targetActivity.getTaskRecord(), true /* toTop */,
                             "startRecentsActivity");
                 }
             } else {

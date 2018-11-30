@@ -182,7 +182,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 mTopFocusedDisplayId != topFocusedDisplayId && mode == UPDATE_FOCUS_NORMAL;
         if (mTopFocusedDisplayId != topFocusedDisplayId) {
             mTopFocusedDisplayId = topFocusedDisplayId;
-            mService.mInputManager.setFocusedDisplay(mTopFocusedDisplayId);
+            mWmService.mInputManager.setFocusedDisplay(mTopFocusedDisplayId);
             if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "New topFocusedDisplayId="
                     + mTopFocusedDisplayId);
         }
@@ -194,10 +194,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final boolean isTopFocusedDisplay =
                     topFocusedDisplayChanged && dc.getDisplayId() == mTopFocusedDisplayId;
             if (windowFocusChanged || isTopFocusedDisplay) {
-                final Message msg = mService.mH.obtainMessage(
+                final Message msg = mWmService.mH.obtainMessage(
                         WindowManagerService.H.REPORT_FOCUS_CHANGE, dc);
                 msg.arg1 = topFocusedDisplayChanged ? 1 : 0;
-                mService.mH.sendMessage(msg);
+                mWmService.mH.sendMessage(msg);
             }
         });
 
@@ -211,7 +211,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     @Override
     void onChildPositionChanged() {
-        mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /* updateInputWindows */);
+        mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /* updateInputWindows */);
     }
 
     DisplayContent getDisplayContent(int displayId) {
@@ -238,20 +238,20 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return existing;
         }
 
-        final DisplayContent dc = new DisplayContent(display, mService, controller);
+        final DisplayContent dc = new DisplayContent(display, mWmService, controller);
 
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
 
-        mService.mDisplayWindowSettings.applySettingsToDisplayLocked(dc);
+        mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(dc);
         initializeDisplayOverrideConfiguration(controller, dc);
 
-        if (mService.mDisplayManagerInternal != null) {
-            mService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
+        if (mWmService.mDisplayManagerInternal != null) {
+            mWmService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
                     displayId, dc.getDisplayInfo());
             dc.configureDisplayPolicy();
         }
 
-        mService.reconfigureDisplayLocked(dc);
+        mWmService.reconfigureDisplayLocked(dc);
 
         return dc;
     }
@@ -436,11 +436,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     void removeReplacedWindows() {
         if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION removeReplacedWindows");
-        mService.openSurfaceTransaction();
+        mWmService.openSurfaceTransaction();
         try {
             forAllWindows(sRemoveReplacedWindowsConsumer, true /* traverseTopToBottom */);
         } finally {
-            mService.closeSurfaceTransaction("removeReplacedWindows");
+            mWmService.closeSurfaceTransaction("removeReplacedWindows");
             if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION removeReplacedWindows");
         }
     }
@@ -488,7 +488,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 final SparseIntArray pidCandidates = new SparseIntArray();
                 for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
                     mChildren.get(displayNdx).forAllWindows((w) -> {
-                        if (mService.mForceRemoves.contains(w)) {
+                        if (mWmService.mForceRemoves.contains(w)) {
                             return;
                         }
                         final WindowStateAnimator wsa = w.mWinAnimator;
@@ -503,7 +503,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                             pids[i] = pidCandidates.keyAt(i);
                         }
                         try {
-                            if (mService.mActivityManager.killPids(pids, "Free memory", secure)) {
+                            if (mWmService.mActivityManager.killPids(pids, "Free memory", secure)) {
                                 killedApps = true;
                             }
                         } catch (RemoteException e) {
@@ -547,9 +547,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         int i;
         boolean updateInputWindowsNeeded = false;
 
-        if (mService.mFocusMayChange) {
-            mService.mFocusMayChange = false;
-            updateInputWindowsNeeded = mService.updateFocusedWindowLocked(
+        if (mWmService.mFocusMayChange) {
+            mWmService.mFocusMayChange = false;
+            updateInputWindowsNeeded = mWmService.updateFocusedWindowLocked(
                     UPDATE_FOCUS_WILL_PLACE_SURFACES, false /*updateInputWindows*/);
         }
 
@@ -565,31 +565,31 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mUserActivityTimeout = -1;
         mObscureApplicationContentOnSecondaryDisplays = false;
         mSustainedPerformanceModeCurrent = false;
-        mService.mTransactionSequence++;
+        mWmService.mTransactionSequence++;
 
         // TODO(multi-display): recents animation & wallpaper need support multi-display.
-        final DisplayContent defaultDisplay = mService.getDefaultDisplayContentLocked();
-        final WindowSurfacePlacer surfacePlacer = mService.mWindowPlacerLocked;
+        final DisplayContent defaultDisplay = mWmService.getDefaultDisplayContentLocked();
+        final WindowSurfacePlacer surfacePlacer = mWmService.mWindowPlacerLocked;
 
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                 ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
-        mService.openSurfaceTransaction();
+        mWmService.openSurfaceTransaction();
         try {
             applySurfaceChangesTransaction(recoveringMemory);
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
-            mService.closeSurfaceTransaction("performLayoutAndPlaceSurfaces");
+            mWmService.closeSurfaceTransaction("performLayoutAndPlaceSurfaces");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
         }
-        mService.mAnimator.executeAfterPrepareSurfacesRunnables();
+        mWmService.mAnimator.executeAfterPrepareSurfacesRunnables();
 
         checkAppTransitionReady(surfacePlacer);
 
         // Defer starting the recents animation until the wallpaper has drawn
         final RecentsAnimationController recentsAnimationController =
-                mService.getRecentsAnimationController();
+                mWmService.getRecentsAnimationController();
         if (recentsAnimationController != null) {
             recentsAnimationController.checkAnimationReady(defaultDisplay.mWallpaperController);
         }
@@ -606,9 +606,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
-        if (mService.mFocusMayChange) {
-            mService.mFocusMayChange = false;
-            if (mService.updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
+        if (mWmService.mFocusMayChange) {
+            mWmService.mFocusMayChange = false;
+            if (mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
                     false /*updateInputWindows*/)) {
                 updateInputWindowsNeeded = true;
             }
@@ -622,23 +622,23 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         handleResizingWindows();
 
-        if (DEBUG_ORIENTATION && mService.mDisplayFrozen) Slog.v(TAG,
+        if (DEBUG_ORIENTATION && mWmService.mDisplayFrozen) Slog.v(TAG,
                 "With display frozen, orientationChangeComplete=" + mOrientationChangeComplete);
         if (mOrientationChangeComplete) {
-            if (mService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_NONE) {
-                mService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_NONE;
-                mService.mLastFinishedFreezeSource = mLastWindowFreezeSource;
-                mService.mH.removeMessages(WINDOW_FREEZE_TIMEOUT);
+            if (mWmService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_NONE) {
+                mWmService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_NONE;
+                mWmService.mLastFinishedFreezeSource = mLastWindowFreezeSource;
+                mWmService.mH.removeMessages(WINDOW_FREEZE_TIMEOUT);
             }
-            mService.stopFreezingDisplayLocked();
+            mWmService.stopFreezingDisplayLocked();
         }
 
         // Destroy the surface of any windows that are no longer visible.
-        i = mService.mDestroySurface.size();
+        i = mWmService.mDestroySurface.size();
         if (i > 0) {
             do {
                 i--;
-                WindowState win = mService.mDestroySurface.get(i);
+                WindowState win = mWmService.mDestroySurface.get(i);
                 win.mDestroying = false;
                 final DisplayContent displayContent = win.getDisplayContent();
                 if (displayContent.mInputMethodWindow == win) {
@@ -650,7 +650,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 win.destroySurfaceUnchecked();
                 win.mWinAnimator.destroyPreservedSurfaceLocked();
             } while (i > 0);
-            mService.mDestroySurface.clear();
+            mWmService.mDestroySurface.clear();
         }
 
         // Time to remove any exiting tokens?
@@ -671,8 +671,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
         });
 
-        mService.setHoldScreenLocked(mHoldScreen);
-        if (!mService.mDisplayFrozen) {
+        mWmService.setHoldScreenLocked(mHoldScreen);
+        if (!mWmService.mDisplayFrozen) {
             final int brightness = mScreenBrightness < 0 || mScreenBrightness > 1.0f
                     ? -1 : toBrightnessOverride(mScreenBrightness);
 
@@ -684,7 +684,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         if (mSustainedPerformanceModeCurrent != mSustainedPerformanceModeEnabled) {
             mSustainedPerformanceModeEnabled = mSustainedPerformanceModeCurrent;
-            mService.mPowerManagerInternal.powerHint(
+            mWmService.mPowerManagerInternal.powerHint(
                     PowerHint.SUSTAINED_PERFORMANCE,
                     (mSustainedPerformanceModeEnabled ? 1 : 0));
         }
@@ -694,22 +694,22 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mUpdateRotation = updateRotationUnchecked();
         }
 
-        if (mService.mWaitingForDrawnCallback != null
+        if (mWmService.mWaitingForDrawnCallback != null
                 || (mOrientationChangeComplete && !isLayoutNeeded()
                         && !mUpdateRotation)) {
-            mService.checkDrawnWindowsLocked();
+            mWmService.checkDrawnWindowsLocked();
         }
 
-        final int N = mService.mPendingRemove.size();
+        final int N = mWmService.mPendingRemove.size();
         if (N > 0) {
-            if (mService.mPendingRemoveTmp.length < N) {
-                mService.mPendingRemoveTmp = new WindowState[N + 10];
+            if (mWmService.mPendingRemoveTmp.length < N) {
+                mWmService.mPendingRemoveTmp = new WindowState[N + 10];
             }
-            mService.mPendingRemove.toArray(mService.mPendingRemoveTmp);
-            mService.mPendingRemove.clear();
+            mWmService.mPendingRemove.toArray(mWmService.mPendingRemoveTmp);
+            mWmService.mPendingRemove.clear();
             ArrayList<DisplayContent> displayList = new ArrayList();
             for (i = 0; i < N; i++) {
-                final WindowState w = mService.mPendingRemoveTmp[i];
+                final WindowState w = mWmService.mPendingRemoveTmp[i];
                 w.removeImmediately();
                 final DisplayContent displayContent = w.getDisplayContent();
                 if (displayContent != null && !displayList.contains(displayContent)) {
@@ -737,12 +737,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.
-        mService.enableScreenIfNeededLocked();
+        mWmService.enableScreenIfNeededLocked();
 
-        mService.scheduleAnimationLocked();
+        mWmService.scheduleAnimationLocked();
 
         if (DEBUG_WINDOW_TRACE) Slog.e(TAG,
-                "performSurfacePlacementInner exit: animating=" + mService.mAnimator.isAnimating());
+                "performSurfacePlacementInner exit: animating="
+                        + mWmService.mAnimator.isAnimating());
     }
 
     private void checkAppTransitionReady(WindowSurfacePlacer surfacePlacer) {
@@ -782,23 +783,23 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mObscuringWindow = null;
 
         // TODO(multi-display): Support these features on secondary screens.
-        final DisplayContent defaultDc = mService.getDefaultDisplayContentLocked();
+        final DisplayContent defaultDc = mWmService.getDefaultDisplayContentLocked();
         final DisplayInfo defaultInfo = defaultDc.getDisplayInfo();
         final int defaultDw = defaultInfo.logicalWidth;
         final int defaultDh = defaultInfo.logicalHeight;
-        if (mService.mWatermark != null) {
-            mService.mWatermark.positionSurface(defaultDw, defaultDh);
+        if (mWmService.mWatermark != null) {
+            mWmService.mWatermark.positionSurface(defaultDw, defaultDh);
         }
-        if (mService.mStrictModeFlash != null) {
-            mService.mStrictModeFlash.positionSurface(defaultDw, defaultDh);
+        if (mWmService.mStrictModeFlash != null) {
+            mWmService.mStrictModeFlash.positionSurface(defaultDw, defaultDh);
         }
-        if (mService.mCircularDisplayMask != null) {
-            mService.mCircularDisplayMask.positionSurface(defaultDw, defaultDh,
-                    mService.getDefaultDisplayRotation());
+        if (mWmService.mCircularDisplayMask != null) {
+            mWmService.mCircularDisplayMask.positionSurface(defaultDw, defaultDh,
+                    mWmService.getDefaultDisplayRotation());
         }
-        if (mService.mEmulatorDisplayOverlay != null) {
-            mService.mEmulatorDisplayOverlay.positionSurface(defaultDw, defaultDh,
-                    mService.getDefaultDisplayRotation());
+        if (mWmService.mEmulatorDisplayOverlay != null) {
+            mWmService.mEmulatorDisplayOverlay.positionSurface(defaultDw, defaultDh,
+                    mWmService.getDefaultDisplayRotation());
         }
 
         final int count = mChildren.size();
@@ -809,7 +810,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         // Give the display manager a chance to adjust properties like display rotation if it needs
         // to.
-        mService.mDisplayManagerInternal.performTraversal(mDisplayTransaction);
+        mWmService.mDisplayManagerInternal.performTraversal(mDisplayTransaction);
         SurfaceControl.mergeToGlobalTransaction(mDisplayTransaction);
     }
 
@@ -817,14 +818,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * Handles resizing windows during surface placement.
      */
     private void handleResizingWindows() {
-        for (int i = mService.mResizingWindows.size() - 1; i >= 0; i--) {
-            WindowState win = mService.mResizingWindows.get(i);
+        for (int i = mWmService.mResizingWindows.size() - 1; i >= 0; i--) {
+            WindowState win = mWmService.mResizingWindows.get(i);
             if (win.mAppFreezing) {
                 // Don't remove this window until rotation has completed.
                 continue;
             }
             win.reportResized();
-            mService.mResizingWindows.remove(i);
+            mWmService.mResizingWindows.remove(i);
         }
     }
 
@@ -862,7 +863,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if ((attrFlags & FLAG_KEEP_SCREEN_ON) != 0) {
                 mHoldScreen = w.mSession;
                 mHoldScreenWindow = w;
-            } else if (DEBUG_KEEP_SCREEN_ON && w == mService.mLastWakeLockHoldingWindow) {
+            } else if (DEBUG_KEEP_SCREEN_ON && w == mWmService.mLastWakeLockHoldingWindow) {
                 Slog.d(TAG_KEEP_SCREEN_ON, "handleNotObscuredLocked: " + w + " was holding "
                         + "screen wakelock but no longer has FLAG_KEEP_SCREEN_ON!!! called by"
                         + Debug.getCallers(10));
@@ -911,7 +912,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     boolean copyAnimToLayoutParams() {
         boolean doRequest = false;
 
-        final int bulkUpdateParams = mService.mAnimator.mBulkUpdateParams;
+        final int bulkUpdateParams = mWmService.mAnimator.mBulkUpdateParams;
         if ((bulkUpdateParams & SET_UPDATE_ROTATION) != 0) {
             mUpdateRotation = true;
             doRequest = true;
@@ -920,8 +921,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mOrientationChangeComplete = false;
         } else {
             mOrientationChangeComplete = true;
-            mLastWindowFreezeSource = mService.mAnimator.mLastWindowFreezeSource;
-            if (mService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_NONE) {
+            mLastWindowFreezeSource = mWmService.mAnimator.mLastWindowFreezeSource;
+            if (mWmService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_NONE) {
                 doRequest = true;
             }
         }
@@ -947,12 +948,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SET_SCREEN_BRIGHTNESS_OVERRIDE:
-                    mService.mPowerManagerInternal.setScreenBrightnessOverrideFromWindowManager(
+                    mWmService.mPowerManagerInternal.setScreenBrightnessOverrideFromWindowManager(
                             msg.arg1);
                     break;
                 case SET_USER_ACTIVITY_TIMEOUT:
-                    mService.mPowerManagerInternal.setUserActivityTimeoutOverrideFromWindowManager(
-                            (Long) msg.obj);
+                    mWmService.mPowerManagerInternal.
+                            setUserActivityTimeoutOverrideFromWindowManager((Long) msg.obj);
                     break;
                 default:
                     break;
@@ -962,7 +963,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     void dumpDisplayContents(PrintWriter pw) {
         pw.println("WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)");
-        if (mService.mDisplayReady) {
+        if (mWmService.mDisplayReady) {
             final int count = mChildren.size();
             for (int i = 0; i < count; ++i) {
                 final DisplayContent displayContent = mChildren.get(i);
@@ -1015,7 +1016,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
         final long token = proto.start(fieldId);
         super.writeToProto(proto, WINDOW_CONTAINER, trim);
-        if (mService.mDisplayReady) {
+        if (mWmService.mDisplayReady) {
             final int count = mChildren.size();
             for (int i = 0; i < count; ++i) {
                 final DisplayContent displayContent = mChildren.get(i);
@@ -1050,7 +1051,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     @Override
     void scheduleAnimation() {
-        mService.scheduleAnimationLocked();
+        mWmService.scheduleAnimationLocked();
     }
 
     /**

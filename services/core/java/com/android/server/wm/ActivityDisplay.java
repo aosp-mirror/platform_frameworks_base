@@ -1242,7 +1242,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 if (r.isActivityTypeHome()
-                        && ((userId == UserHandle.USER_ALL) || (r.userId == userId))) {
+                        && ((userId == UserHandle.USER_ALL) || (r.mUserId == userId))) {
                     return r;
                 }
             }

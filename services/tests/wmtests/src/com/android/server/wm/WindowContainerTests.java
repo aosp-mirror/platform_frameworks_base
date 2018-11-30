@@ -782,7 +782,7 @@ public class WindowContainerTests extends WindowTestsBase {
         }
 
         TestWindowContainer addChildWindow() {
-            return addChildWindow(new TestWindowContainerBuilder(mService).setLayer(1));
+            return addChildWindow(new TestWindowContainerBuilder(mWmService).setLayer(1));
         }
 
         @Override

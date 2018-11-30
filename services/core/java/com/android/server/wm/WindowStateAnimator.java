@@ -234,7 +234,7 @@ class WindowStateAnimator {
     private final Point mTmpPos = new Point();
 
     WindowStateAnimator(final WindowState win) {
-        final WindowManagerService service = win.mService;
+        final WindowManagerService service = win.mWmService;
 
         mService = service;
         mAnimator = service.mAnimator;

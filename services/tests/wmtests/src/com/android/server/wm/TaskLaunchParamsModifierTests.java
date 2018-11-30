@@ -175,7 +175,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
                 WINDOWING_MODE_FREEFORM);
         ActivityRecord source = createSourceActivity(freeformDisplay);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(source.getTask(), null /* layout */,
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(source.getTaskRecord(), null /* layout */,
                 null /* activity */, null /* source */, null /* options */, mCurrent, mResult));
 
         assertEquals(freeformDisplay.mDisplayId, mResult.mPreferredDisplayId);
