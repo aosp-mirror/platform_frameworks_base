@@ -104,7 +104,7 @@ interface ISub {
     /**
      * @see android.telephony.SubscriptionManager#requestEmbeddedSubscriptionInfoListRefresh
      */
-    oneway void requestEmbeddedSubscriptionInfoListRefresh();
+    oneway void requestEmbeddedSubscriptionInfoListRefresh(int cardId);
 
     /**
      * Add a new SubscriptionInfo to subinfo database if needed
