@@ -131,7 +131,7 @@ class Dimmer {
                 if (!mDimming) {
                     dimAnimatable.getPendingTransaction().destroy(mDimLayer);
                 }
-            }, mHost.mService);
+            }, mHost.mWmService);
         }
     }
 
@@ -333,7 +333,7 @@ class Dimmer {
             SurfaceControl.Transaction t, float startAlpha, float endAlpha) {
         mSurfaceAnimatorStarter.startAnimation(animator, t, new LocalAnimationAdapter(
                 new AlphaAnimationSpec(startAlpha, endAlpha, getDimDuration(container)),
-                mHost.mService.mSurfaceAnimationRunner), false /* hidden */);
+                mHost.mWmService.mSurfaceAnimationRunner), false /* hidden */);
     }
 
     private long getDimDuration(WindowContainer container) {

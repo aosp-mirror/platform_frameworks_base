@@ -246,8 +246,8 @@ class LaunchParamsPersister {
     }
 
     void getLaunchParams(TaskRecord task, ActivityRecord activity, LaunchParams outParams) {
-        final ComponentName name = task != null ? task.realActivity : activity.realActivity;
-        final int userId = task != null ? task.userId : activity.userId;
+        final ComponentName name = task != null ? task.realActivity : activity.mActivityComponent;
+        final int userId = task != null ? task.userId : activity.mUserId;
 
         outParams.reset();
         Map<ComponentName, PersistableLaunchParams> map = mMap.get(userId);

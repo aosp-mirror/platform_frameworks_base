@@ -53,7 +53,8 @@ class AppWindowThumbnail implements Animatable {
 
     AppWindowThumbnail(Transaction t, AppWindowToken appToken, GraphicBuffer thumbnailHeader) {
         mAppToken = appToken;
-        mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, appToken.mService);
+        mSurfaceAnimator =
+                new SurfaceAnimator(this, this::onAnimationFinished, appToken.mWmService);
         mWidth = thumbnailHeader.getWidth();
         mHeight = thumbnailHeader.getHeight();
 
@@ -93,11 +94,11 @@ class AppWindowThumbnail implements Animatable {
 
     void startAnimation(Transaction t, Animation anim, Point position) {
         anim.restrictDuration(MAX_ANIMATION_DURATION);
-        anim.scaleCurrentDuration(mAppToken.mService.getTransitionAnimationScaleLocked());
+        anim.scaleCurrentDuration(mAppToken.mWmService.getTransitionAnimationScaleLocked());
         mSurfaceAnimator.startAnimation(t, new LocalAnimationAdapter(
                 new WindowAnimationSpec(anim, position,
                         mAppToken.getDisplayContent().mAppTransition.canSkipFirstFrame()),
-                mAppToken.mService.mSurfaceAnimationRunner), false /* hidden */);
+                mAppToken.mWmService.mSurfaceAnimationRunner), false /* hidden */);
     }
 
     private void onAnimationFinished() {

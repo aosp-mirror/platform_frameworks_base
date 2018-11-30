@@ -233,7 +233,7 @@ public class ActivityStackTests extends ActivityTestsBase {
                 .setStack(mStack)
                 .setUid(0)
                 .build();
-        final TaskRecord task = r.getTask();
+        final TaskRecord task = r.getTaskRecord();
         // Overlay must be for a different user to prevent recognizing a matching top activity
         final ActivityRecord taskOverlay = new ActivityBuilder(mService).setTask(task)
                 .setUid(UserHandle.PER_USER_RANGE * 2).build();

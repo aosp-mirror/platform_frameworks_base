@@ -154,7 +154,7 @@ public class WindowTestUtils {
     }
 
     static TestAppWindowToken createTestAppWindowToken(DisplayContent dc) {
-        synchronized (dc.mService.mGlobalLock) {
+        synchronized (dc.mWmService.mGlobalLock) {
             return new TestAppWindowToken(dc);
         }
     }
@@ -165,7 +165,7 @@ public class WindowTestUtils {
         private Transaction mPendingTransactionOverride;
 
         private TestAppWindowToken(DisplayContent dc) {
-            super(dc.mService, new IApplicationToken.Stub() {
+            super(dc.mWmService, new IApplicationToken.Stub() {
                 @Override
                 public String getName() {
                     return null;
@@ -231,7 +231,7 @@ public class WindowTestUtils {
 
     static TestWindowToken createTestWindowToken(int type, DisplayContent dc,
             boolean persistOnEmpty) {
-        synchronized (dc.mService.mGlobalLock) {
+        synchronized (dc.mWmService.mGlobalLock) {
             return new TestWindowToken(type, dc, persistOnEmpty);
         }
     }
@@ -240,7 +240,7 @@ public class WindowTestUtils {
     public static class TestWindowToken extends WindowToken {
 
         private TestWindowToken(int type, DisplayContent dc, boolean persistOnEmpty) {
-            super(dc.mService, mock(IBinder.class), type, persistOnEmpty, dc,
+            super(dc.mWmService, mock(IBinder.class), type, persistOnEmpty, dc,
                     false /* ownerCanManageAppTokens */);
         }
 

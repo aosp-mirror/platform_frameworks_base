@@ -335,7 +335,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     public void testTransferStartingWindowWhileCreating() {
         final WindowTestUtils.TestAppWindowToken token1 = createIsolatedTestAppWindowToken();
         final WindowTestUtils.TestAppWindowToken token2 = createIsolatedTestAppWindowToken();
-        ((TestWindowManagerPolicy) token1.mService.mPolicy).setRunnableWhenAddingSplashScreen(
+        ((TestWindowManagerPolicy) token1.mWmService.mPolicy).setRunnableWhenAddingSplashScreen(
                 () -> {
                     // Surprise, ...! Transfer window in the middle of the creation flow.
                     token2.addStartingWindow(mPackageName,

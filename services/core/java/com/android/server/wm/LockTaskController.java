@@ -225,7 +225,7 @@ public class LockTaskController {
      * of the last locked task and finishing it would mean that lock task mode is ended illegally.
      */
     boolean activityBlockedFromFinish(ActivityRecord activity) {
-        final TaskRecord task = activity.getTask();
+        final TaskRecord task = activity.getTaskRecord();
         if (activity == task.getRootActivity()
                 && activity == task.getTopActivity()
                 && task.mLockTaskAuth != LOCK_TASK_AUTH_LAUNCHABLE_PRIV
@@ -647,7 +647,7 @@ public class LockTaskController {
         }
 
         final ActivityRecord r = mSupervisor.mRootActivityContainer.topRunningActivity();
-        final TaskRecord task = (r != null) ? r.getTask() : null;
+        final TaskRecord task = (r != null) ? r.getTaskRecord() : null;
         if (mLockTaskModeTasks.isEmpty() && task!= null
                 && task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE) {
             // This task must have just been authorized.

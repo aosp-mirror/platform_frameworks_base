@@ -89,9 +89,9 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         final WindowLayout layout = new WindowLayout(0, 0, 0, 0, 0, 0, 0);
         final ActivityOptions options = mock(ActivityOptions.class);
 
-        mController.calculate(record.getTask(), layout, record, source, options,
+        mController.calculate(record.getTaskRecord(), layout, record, source, options,
                 new LaunchParams());
-        verify(positioner, times(1)).onCalculate(eq(record.getTask()), eq(layout), eq(record),
+        verify(positioner, times(1)).onCalculate(eq(record.getTaskRecord()), eq(layout), eq(record),
                 eq(source), eq(options), any(), any());
     }
 
@@ -114,7 +114,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         mPersister.putLaunchParams(userId, name, expected);
 
-        mController.calculate(activity.getTask(), null /*layout*/, activity, null /*source*/,
+        mController.calculate(activity.getTaskRecord(), null /*layout*/, activity, null /*source*/,
                 null /*options*/, new LaunchParams());
         verify(positioner, times(1)).onCalculate(any(), any(), any(), any(), any(), eq(expected),
                 any());
@@ -228,7 +228,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         final LaunchParams result = new LaunchParams();
         final ActivityRecord vrActivity = new ActivityBuilder(mService).build();
-        vrActivity.requestedVrComponent = vrActivity.realActivity;
+        vrActivity.requestedVrComponent = vrActivity.mActivityComponent;
 
         // VR activities should always land on default display.
         mController.calculate(null /*task*/, null /*layout*/, vrActivity /*activity*/,
@@ -412,8 +412,9 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         @Override
         void getLaunchParams(TaskRecord task, ActivityRecord activity, LaunchParams params) {
-            final int userId = task != null ? task.userId : activity.userId;
-            final ComponentName name = task != null ? task.realActivity : activity.realActivity;
+            final int userId = task != null ? task.userId : activity.mUserId;
+            final ComponentName name = task != null
+                    ? task.realActivity : activity.mActivityComponent;
 
             params.reset();
             final Map<ComponentName, LaunchParams> map = mMap.get(userId);

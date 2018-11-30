@@ -18,15 +18,8 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
-import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -36,9 +29,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
-import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
-import static com.android.server.wm.RootActivityContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -53,20 +43,13 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 
-import android.app.ActivityOptions;
 import android.app.WaitResult;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
-import android.graphics.Rect;
-import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.MediumTest;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.ArrayList;
 
 /**
  * Tests for the {@link ActivityStackSupervisor} class.
@@ -127,7 +110,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
 
             assertThat(mSupervisor.mWaitingActivityLaunched).isEmpty();
             assertEquals(deliverToTopWait.result, START_DELIVERED_TO_TOP);
-            assertEquals(deliverToTopWait.who, firstActivity.realActivity);
+            assertEquals(deliverToTopWait.who, firstActivity.mActivityComponent);
         }
     }
 }

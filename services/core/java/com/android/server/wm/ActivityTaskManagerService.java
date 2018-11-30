@@ -1442,7 +1442,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return true;
             }
             // Keep track of the root activity of the task before we finish it
-            TaskRecord tr = r.getTask();
+            final TaskRecord tr = r.getTaskRecord();
             ActivityRecord rootR = tr.getRootActivity();
             if (rootR == null) {
                 Slog.w(TAG, "Finishing task with all activities already finished");
@@ -1457,7 +1457,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // We should consolidate.
             if (mController != null) {
                 // Find the first activity that is not finishing.
-                ActivityRecord next = r.getStack().topRunningActivityLocked(token, 0);
+                final ActivityRecord next = r.getActivityStack().topRunningActivityLocked(token, 0);
                 if (next != null) {
                     // ask watcher if this is allowed
                     boolean resumeOK = true;
@@ -1519,7 +1519,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 // Do not allow task to finish if last task in lockTask mode. Launchable priv-apps
                 // can finish.
-                final TaskRecord task = r.getTask();
+                final TaskRecord task = r.getTaskRecord();
                 if (getLockTaskController().activityBlockedFromFinish(r)) {
                     return false;
                 }
@@ -1822,7 +1822,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (r == null) {
                     return false;
                 }
-                final TaskRecord task = r.getTask();
+                final TaskRecord task = r.getTaskRecord();
                 int index = task.mActivities.lastIndexOf(r);
                 if (index > 0) {
                     ActivityRecord under = task.mActivities.get(index - 1);
@@ -1830,7 +1830,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 final boolean translucentChanged = r.changeWindowTranslucency(false);
                 if (translucentChanged) {
-                    r.getStack().convertActivityToTranslucent(r);
+                    r.getActivityStack().convertActivityToTranslucent(r);
                 }
                 mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
                 mWindowManager.setAppFullscreen(token, false);
@@ -1847,7 +1847,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             ActivityRecord r = mRootActivityContainer.isInAnyStack(token);
             if (r != null) {
-                r.getStack().notifyActivityDrawnLocked(r);
+                r.getActivityStack().notifyActivityDrawnLocked(r);
             }
         }
     }
@@ -1967,7 +1967,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final ActivityRecord srec = ActivityRecord.forTokenLocked(token);
             if (srec != null) {
-                return srec.getStack().shouldUpRecreateTaskLocked(srec, destAffinity);
+                return srec.getActivityStack().shouldUpRecreateTaskLocked(srec, destAffinity);
             }
         }
         return false;
@@ -1980,7 +1980,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
             if (r != null) {
-                return r.getStack().navigateUpToLocked(r, destIntent, resultCode, resultData);
+                return r.getActivityStack().navigateUpToLocked(
+                        r, destIntent, resultCode, resultData);
             }
             return false;
         }
@@ -2300,7 +2301,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final long origId = Binder.clearCallingIdentity();
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
-                r.getStack().finishSubActivityLocked(r, resultWho, requestCode);
+                r.getActivityStack().finishSubActivityLocked(r, resultWho, requestCode);
             }
             Binder.restoreCallingIdentity(origId);
         }
@@ -2545,7 +2546,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (r == null) {
                 return;
             }
-            startLockTaskModeLocked(r.getTask(), false /* isSystemCaller */);
+            startLockTaskModeLocked(r.getTaskRecord(), false /* isSystemCaller */);
         }
     }
 
@@ -2578,7 +2579,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (r == null) {
                 return;
             }
-            stopLockTaskModeInternal(r.getTask(), false /* isSystemCaller */);
+            stopLockTaskModeInternal(r.getTaskRecord(), false /* isSystemCaller */);
         }
     }
 
@@ -2671,7 +2672,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
                 r.setTaskDescription(td);
-                final TaskRecord task = r.getTask();
+                final TaskRecord task = r.getTaskRecord();
                 task.updateTaskDescription();
                 mTaskChangeNotificationController.notifyTaskDescriptionChanged(task.taskId, td);
             }
@@ -2727,7 +2728,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean isTopOfTask(IBinder token) {
         synchronized (mGlobalLock) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            return r != null && r.getTask().getTopActivity() == r;
+            return r != null && r.getTaskRecord().getTopActivity() == r;
         }
     }
 
@@ -2766,8 +2767,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             if (structure != null) {
                 // Pre-fill the task/activity component for all assist data receivers
-                structure.setTaskId(pae.activity.getTask().taskId);
-                structure.setActivityComponent(pae.activity.realActivity);
+                structure.setTaskId(pae.activity.getTaskRecord().taskId);
+                structure.setActivityComponent(pae.activity.mActivityComponent);
                 structure.setHomeActivity(pae.isHome);
             }
             pae.haveResult = true;
@@ -2875,9 +2876,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                                     + ainfo.applicationInfo.uid + ", calling uid=" + callingUid);
                 }
 
-                final ActivityStack stack = r.getStack();
+                final ActivityStack stack = r.getActivityStack();
                 final TaskRecord task = stack.createTaskRecord(
-                        mStackSupervisor.getNextTaskIdForUserLocked(r.userId), ainfo, intent,
+                        mStackSupervisor.getNextTaskIdForUserLocked(r.mUserId), ainfo, intent,
                         null /* voiceSession */, null /* voiceInteractor */, !ON_TOP);
                 if (!mRecentTasks.addToBottom(task)) {
                     // The app has too many tasks already and we can't add any more
@@ -2973,7 +2974,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (r == null) {
                     return false;
                 }
-                return r.getStack().safelyDestroyActivityLocked(r, "app-req");
+                return r.getActivityStack().safelyDestroyActivityLocked(r, "app-req");
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -3123,7 +3124,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             "exitFreeformMode: No activity record matching token=" + token);
                 }
 
-                final ActivityStack stack = r.getStack();
+                final ActivityStack stack = r.getActivityStack();
                 if (stack == null || !stack.inFreeformWindowingMode()) {
                     throw new IllegalStateException(
                             "exitFreeformMode: You can only go fullscreen from freeform.");
@@ -3409,7 +3410,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (activity == null) {
                 return false;
             }
-            userId = activity.userId;
+            userId = activity.mUserId;
         }
         return !DevicePolicyCache.getInstance().getScreenCaptureDisabled(userId);
     }
@@ -3783,14 +3784,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     private boolean isInPictureInPictureMode(ActivityRecord r) {
-        if (r == null || r.getStack() == null || !r.inPinnedWindowingMode()
-                || r.getStack().isInStackLocked(r) == null) {
+        if (r == null || r.getActivityStack() == null || !r.inPinnedWindowingMode()
+                || r.getActivityStack().isInStackLocked(r) == null) {
             return false;
         }
 
         // If we are animating to fullscreen then we have already dispatched the PIP mode
         // changed, so we should reflect that check here as well.
-        final PinnedActivityStack stack = r.getStack();
+        final PinnedActivityStack stack = r.getActivityStack();
         final PinnedStackWindowController windowController = stack.getWindowContainerController();
         return !windowController.isAnimatingBoundsToFullscreen();
     }
@@ -3826,7 +3827,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                                 r.pictureInPictureArgs.getSourceRectHint());
                         mRootActivityContainer.moveActivityToPinnedStack(
                                 r, sourceBounds, aspectRatio, "enterPictureInPictureMode");
-                        final PinnedActivityStack stack = r.getStack();
+                        final PinnedActivityStack stack = r.getActivityStack();
                         stack.setPictureInPictureAspectRatio(aspectRatio);
                         stack.setPictureInPictureActions(actions);
                         MetricsLoggerWrapper.logPictureInPictureEnter(mContext, r.appInfo.uid,
@@ -3870,7 +3871,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // If the activity is already in picture-in-picture, update the pinned stack now
                     // if it is not already expanding to fullscreen. Otherwise, the arguments will
                     // be used the next time the activity enters PiP
-                    final PinnedActivityStack stack = r.getStack();
+                    final PinnedActivityStack stack = r.getActivityStack();
                     if (!stack.isAnimatingBoundsToFullscreen()) {
                         stack.setPictureInPictureAspectRatio(
                                 r.pictureInPictureArgs.getAspectRatio());
@@ -3928,8 +3929,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         if (params.hasSetAspectRatio()
-                && !mWindowManager.isValidPictureInPictureAspectRatio(r.getStack().mDisplayId,
-                params.getAspectRatio())) {
+                && !mWindowManager.isValidPictureInPictureAspectRatio(
+                        r.getActivityStack().mDisplayId, params.getAspectRatio())) {
             final float minAspectRatio = mContext.getResources().getFloat(
                     com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
             final float maxAspectRatio = mContext.getResources().getFloat(
@@ -4015,7 +4016,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         int err;
-        if ((err = vrService.hasVrPackage(packageName, r.userId)) !=
+        if ((err = vrService.hasVrPackage(packageName, r.mUserId)) !=
                 VrManagerInternal.NO_ERROR) {
             return err;
         }
@@ -4045,7 +4046,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (ActivityRecord.forTokenLocked(callingActivity) != activity) {
                 throw new SecurityException("Only focused activity can call startVoiceInteraction");
             }
-            if (mRunningVoice != null || activity.getTask().voiceSession != null
+            if (mRunningVoice != null || activity.getTaskRecord().voiceSession != null
                     || activity.voiceSession != null) {
                 Slog.w(TAG, "Already in a voice interaction, cannot start new voice interaction");
                 return;
@@ -4255,7 +4256,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (mLastResumedActivity == null) {
                 return getCurrentUserId();
             }
-            return mLastResumedActivity.userId;
+            return mLastResumedActivity.mUserId;
         }
     }
 
@@ -4435,7 +4436,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     + " to main stack for VR");
             final ActivityStack stack = mRootActivityContainer.getDefaultDisplay().getOrCreateStack(
                     WINDOWING_MODE_FULLSCREEN, r.getActivityType(), true /* toTop */);
-            moveTaskToStack(r.getTask().taskId, stack.mStackId, true /* toTop */);
+            moveTaskToStack(r.getTaskRecord().taskId, stack.mStackId, true /* toTop */);
         }
         mH.post(() -> {
             if (!mVrController.onVrModeChanged(r)) {
@@ -4646,7 +4647,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             needSep = true;
             synchronized (mGlobalLock) {
-                final TaskRecord task = r.getTask();
+                final TaskRecord task = r.getTaskRecord();
                 if (lastTask != task) {
                     lastTask = task;
                     pw.print("TASK "); pw.print(lastTask.affinity);
@@ -5110,7 +5111,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /** Update AMS states when an activity is resumed. */
     void setResumedActivityUncheckLocked(ActivityRecord r, String reason) {
-        final TaskRecord task = r.getTask();
+        final TaskRecord task = r.getTaskRecord();
         if (task.isActivityTypeStandard()) {
             if (mCurAppTimeTracker != r.appTimeTracker) {
                 // We are switching app tracking.  Complete the current one.
@@ -5142,7 +5143,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (mLastResumedActivity != null) {
                 final IVoiceInteractionSession session;
 
-                final TaskRecord lastResumedActivityTask = mLastResumedActivity.getTask();
+                final TaskRecord lastResumedActivityTask = mLastResumedActivity.getTaskRecord();
                 if (lastResumedActivityTask != null
                         && lastResumedActivityTask.voiceSession != null) {
                     session = lastResumedActivityTask.voiceSession;
@@ -5160,8 +5161,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
-        if (mLastResumedActivity != null && r.userId != mLastResumedActivity.userId) {
-            mAmInternal.sendForegroundProfileChanged(r.userId);
+        if (mLastResumedActivity != null && r.mUserId != mLastResumedActivity.mUserId) {
+            mAmInternal.sendForegroundProfileChanged(r.mUserId);
         }
         updateResumedAppTrace(r);
         mLastResumedActivity = r;
@@ -5172,7 +5173,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         applyUpdateVrModeLocked(r);
 
         EventLogTags.writeAmSetResumedActivity(
-                r == null ? -1 : r.userId,
+                r == null ? -1 : r.mUserId,
                 r == null ? "NULL" : r.shortComponentName,
                 reason);
     }
@@ -5234,7 +5235,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     void updateUsageStats(ActivityRecord component, boolean resumed) {
         final Message m = PooledLambda.obtainMessage(ActivityManagerInternal::updateUsageStats,
-                mAmInternal, component.realActivity, component.app.mUid, component.userId, resumed);
+                mAmInternal, component.mActivityComponent, component.app.mUid, component.mUserId,
+                resumed);
         mH.sendMessage(m);
     }
 
@@ -5269,7 +5271,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mHeavyWeightProcess = root.app;
         final Message m = PooledLambda.obtainMessage(
                 ActivityTaskManagerService::postHeavyWeightProcessNotification, this,
-                root.app, root.intent, root.userId);
+                root.app, root.intent, root.mUserId);
         mH.sendMessage(m);
     }
 
@@ -5637,7 +5639,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord homeActivity =
                         mRootActivityContainer.getDefaultDisplayHomeActivityForUser(userId);
-                return homeActivity == null ? null : homeActivity.realActivity;
+                return homeActivity == null ? null : homeActivity.mActivityComponent;
             }
         }
 
@@ -6131,9 +6133,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 int requestCode, int resultCode, Intent data) {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
-                if (r != null && r.getStack() != null) {
-                    r.getStack().sendActivityResultLocked(callingUid, r, resultWho, requestCode,
-                            resultCode, data);
+                if (r != null && r.getActivityStack() != null) {
+                    r.getActivityStack().sendActivityResultLocked(callingUid, r, resultWho,
+                            requestCode, resultCode, data);
                 }
             }
         }
@@ -6407,7 +6409,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     final ActivityRecord homeActivity =
                             mRootActivityContainer.getDefaultDisplayHomeActivity();
                     if (homeActivity != null) {
-                        activityOptions.setLaunchTaskId(homeActivity.getTask().taskId);
+                        activityOptions.setLaunchTaskId(homeActivity.getTaskRecord().taskId);
                     }
                     mContext.startActivityAsUser(intent, activityOptions.toBundle(),
                             UserHandle.CURRENT);

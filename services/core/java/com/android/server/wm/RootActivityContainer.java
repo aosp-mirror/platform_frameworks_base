@@ -414,7 +414,7 @@ class RootActivityContainer extends ConfigurationContainer
         // Only resume home activity if isn't finishing.
         if (r != null && !r.finishing) {
             r.moveFocusableActivityToTop(myReason);
-            return resumeFocusedStacksTopActivities(r.getStack(), prev, null);
+            return resumeFocusedStacksTopActivities(r.getActivityStack(), prev, null);
         }
         return startHomeOnDisplay(mCurrentUser, myReason, displayId);
     }
@@ -843,7 +843,7 @@ class RootActivityContainer extends ConfigurationContainer
 
         mWindowManager.deferSurfaceLayout();
 
-        final ActivityDisplay display = r.getStack().getDisplay();
+        final ActivityDisplay display = r.getActivityStack().getDisplay();
         PinnedActivityStack stack = display.getPinnedStack();
 
         // This will clear the pinned stack by moving an existing task to the full screen stack,
@@ -860,7 +860,7 @@ class RootActivityContainer extends ConfigurationContainer
         final Rect destBounds = stack.getDefaultPictureInPictureBounds(aspectRatio);
 
         try {
-            final TaskRecord task = r.getTask();
+            final TaskRecord task = r.getTaskRecord();
             // Resize the pinned stack to match the current size of the task the activity we are
             // going to be moving is currently contained in. We do this to have the right starting
             // animation bounds for the pinned stack to the desired bounds the caller wants.
@@ -882,7 +882,7 @@ class RootActivityContainer extends ConfigurationContainer
                 // ensures that all the necessary work to migrate states in the old and new stacks
                 // is also done.
                 final TaskRecord newTask = task.getStack().createTaskRecord(
-                        mStackSupervisor.getNextTaskIdForUserLocked(r.userId), r.info,
+                        mStackSupervisor.getNextTaskIdForUserLocked(r.mUserId), r.info,
                         r.intent, null, null, true);
                 r.reparent(newTask, MAX_VALUE, "moveActivityToStack");
 
@@ -1538,7 +1538,7 @@ class RootActivityContainer extends ConfigurationContainer
             stack = candidateTask.getStack();
         }
         if (stack == null && r != null) {
-            stack = r.getStack();
+            stack = r.getActivityStack();
         }
         if (stack != null) {
             display = stack.getDisplay();
@@ -1604,7 +1604,7 @@ class RootActivityContainer extends ConfigurationContainer
         // If {@code r} is already in target display and its task is the same as the candidate task,
         // the intention should be getting a launch stack for the reusable activity, so we can use
         // the existing stack.
-        if (r.getDisplayId() == displayId && r.getTask() == candidateTask) {
+        if (r.getDisplayId() == displayId && r.getTaskRecord() == candidateTask) {
             return candidateTask.getStack();
         }
 
@@ -1950,8 +1950,8 @@ class RootActivityContainer extends ConfigurationContainer
         final ActivityRecord activityRecord = task.getTopActivity();
         final ActivityRecord resultTo = (activityRecord != null ? activityRecord.resultTo : null);
 
-        return (activityRecord != null && activityRecord.userId == userId)
-                || (resultTo != null && resultTo.userId == userId);
+        return (activityRecord != null && activityRecord.mUserId == userId)
+                || (resultTo != null && resultTo.mUserId == userId);
     }
 
     void cancelInitializingActivities() {

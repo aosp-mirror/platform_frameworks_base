@@ -254,7 +254,7 @@ class ActivityMetricsLogger {
             type = getTransitionType(info);
             processRecord = findProcessForActivity(launchedActivity);
             processName = launchedActivity.processName;
-            userId = launchedActivity.userId;
+            userId = launchedActivity.mUserId;
             launchedActivityShortComponentName = launchedActivity.shortComponentName;
             activityRecordIdHashCode = System.identityHashCode(launchedActivity);
             this.windowsFullyDrawnDelayMs = windowsFullyDrawnDelayMs;
@@ -520,7 +520,7 @@ class ActivityMetricsLogger {
         if (info.launchedActivity != activityRecord) {
             return;
         }
-        final TaskRecord t = activityRecord.getTask();
+        final TaskRecord t = activityRecord.getTaskRecord();
         final SomeArgs args = SomeArgs.obtain();
         args.arg1 = t;
         args.arg2 = activityRecord;
@@ -893,7 +893,7 @@ class ActivityMetricsLogger {
             builder.addTaggedData(FIELD_ACTIVITY_RECORD_TARGET_ACTIVITY, r.info.targetActivity);
             builder.addTaggedData(FIELD_ACTIVITY_RECORD_FLAGS, r.info.flags);
             builder.addTaggedData(FIELD_ACTIVITY_RECORD_REAL_ACTIVITY,
-                    r.realActivity.toShortString());
+                    r.mActivityComponent.toShortString());
             builder.addTaggedData(FIELD_ACTIVITY_RECORD_SHORT_COMPONENT_NAME, r.shortComponentName);
             builder.addTaggedData(FIELD_ACTIVITY_RECORD_PROCESS_NAME, r.processName);
             builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_FULLSCREEN, r.fullscreen ? 1 : 0);
