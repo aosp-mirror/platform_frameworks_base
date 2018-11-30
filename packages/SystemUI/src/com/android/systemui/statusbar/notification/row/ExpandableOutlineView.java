@@ -115,12 +115,14 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         if (!mCustomOutline) {
             int translation = mShouldTranslateContents && !ignoreTranslation
                     ? (int) getTranslation() : 0;
-            left = Math.max(translation, 0);
+            int halfExtraWidth = (int) (mExtraWidthForClipping / 2.0f);
+            left = Math.max(translation, 0) - halfExtraWidth;
             top = mClipTopAmount + mBackgroundTop;
-            right = getWidth() + Math.min(translation, 0);
+            right = getWidth() + halfExtraWidth + Math.min(translation, 0);
             // If the top is rounded we want the bottom to be at most at the top roundness, in order
             // to avoid the shadow changing when scrolling up.
-            bottom = Math.max(getActualHeight() - mClipBottomAmount, (int) (top + topRoundness));
+            bottom = Math.max(mMinimumHeightForClipping,
+                    Math.max(getActualHeight() - mClipBottomAmount, (int) (top + topRoundness)));
         } else {
             left = mOutlineRect.left;
             top = mOutlineRect.top;
@@ -219,10 +221,12 @@ public abstract class ExpandableOutlineView extends ExpandableView {
 
     public void setExtraWidthForClipping(float extraWidthForClipping) {
         mExtraWidthForClipping = extraWidthForClipping;
+        invalidate();
     }
 
     public void setMinimumHeightForClipping(int minimumHeightForClipping) {
         mMinimumHeightForClipping = minimumHeightForClipping;
+        invalidate();
     }
 
     @Override

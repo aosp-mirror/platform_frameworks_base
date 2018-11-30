@@ -176,8 +176,11 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             }
 
             // Check if the notification is displaying the menu, if so slide notification back
-            if (row.getProvider() != null && row.getProvider().isMenuVisible()) {
+            if (isMenuVisible(row)) {
                 row.animateTranslateNotification(0);
+                return;
+            } else if (row.isChildInGroup() && isMenuVisible(row.getNotificationParent())) {
+                row.getNotificationParent().animateTranslateNotification(0);
                 return;
             }
 
@@ -191,6 +194,10 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             }
 
             mCallback.onNotificationClicked(sbn, row);
+        }
+
+        private boolean isMenuVisible(ExpandableNotificationRow row) {
+            return row.getProvider() != null && row.getProvider().isMenuVisible();
         }
 
         public void register(ExpandableNotificationRow row, StatusBarNotification sbn) {
