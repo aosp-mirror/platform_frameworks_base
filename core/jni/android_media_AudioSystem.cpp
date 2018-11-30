@@ -32,6 +32,7 @@
 #include <nativehelper/ScopedLocalRef.h>
 #include <system/audio.h>
 #include <system/audio_policy.h>
+#include "android_media_AudioEffectDescriptor.h"
 #include "android_media_AudioFormat.h"
 #include "android_media_AudioErrors.h"
 #include "android_media_MicrophoneInfo.h"
@@ -427,9 +428,14 @@ android_media_AudioSystem_dyn_policy_callback(int event, String8 regId, int val)
 }
 
 static void
-android_media_AudioSystem_recording_callback(int event, const record_client_info_t *clientInfo,
-        const audio_config_base_t *clientConfig, const audio_config_base_t *deviceConfig,
-        audio_patch_handle_t patchHandle)
+android_media_AudioSystem_recording_callback(int event,
+                                             const record_client_info_t *clientInfo,
+                                             const audio_config_base_t *clientConfig,
+                                             std::vector<effect_descriptor_t> clientEffects,
+                                             const audio_config_base_t *deviceConfig,
+                                             std::vector<effect_descriptor_t> effects __unused,
+                                             audio_patch_handle_t patchHandle,
+                                             audio_source_t source)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     if (env == NULL) {
@@ -460,14 +466,24 @@ android_media_AudioSystem_recording_callback(int event, const record_client_info
     recParamData[6] = (jint) patchHandle;
     env->SetIntArrayRegion(recParamArray, 0, REC_PARAM_SIZE, recParamData);
 
+    jobjectArray jClientEffects;
+    convertAudioEffectDescriptorVectorFromNative(env, &jClientEffects, clientEffects);
+
+    jobjectArray jEffects;
+    convertAudioEffectDescriptorVectorFromNative(env, &jEffects, effects);
+
     // callback into java
     jclass clazz = env->FindClass(kClassPathName);
-    env->CallStaticVoidMethod(clazz,
-            gAudioPolicyEventHandlerMethods.postRecordConfigEventFromNative,
-            event, (jint) clientInfo->uid, clientInfo->session, clientInfo->source, recParamArray);
-    env->DeleteLocalRef(clazz);
 
+    env->CallStaticVoidMethod(clazz,
+                              gAudioPolicyEventHandlerMethods.postRecordConfigEventFromNative,
+                              event, (jint) clientInfo->uid, clientInfo->session,
+                              clientInfo->source, clientInfo->port_id, clientInfo->silenced,
+                              recParamArray, jClientEffects, jEffects, source);
+    env->DeleteLocalRef(clazz);
     env->DeleteLocalRef(recParamArray);
+    env->DeleteLocalRef(jClientEffects);
+    env->DeleteLocalRef(jEffects);
 }
 
 static jint
@@ -2260,7 +2276,7 @@ int register_android_media_AudioSystem(JNIEnv *env)
                     "dynamicPolicyCallbackFromNative", "(ILjava/lang/String;I)V");
     gAudioPolicyEventHandlerMethods.postRecordConfigEventFromNative =
             GetStaticMethodIDOrDie(env, env->FindClass(kClassPathName),
-                    "recordingCallbackFromNative", "(IIII[I)V");
+                    "recordingCallbackFromNative", "(IIIIIZ[I[Landroid/media/audiofx/AudioEffect$Descriptor;[Landroid/media/audiofx/AudioEffect$Descriptor;I)V");
 
     jclass audioMixClass = FindClassOrDie(env, "android/media/audiopolicy/AudioMix");
     gAudioMixClass = MakeGlobalRefOrDie(env, audioMixClass);

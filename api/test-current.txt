@@ -639,6 +639,11 @@ package android.media {
     method public static boolean isEncodingLinearPcm(int);
   }
 
+  public final class AudioRecordingConfiguration implements android.os.Parcelable {
+    ctor public AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, java.lang.String, int, boolean, int, android.media.audiofx.AudioEffect.Descriptor[], android.media.audiofx.AudioEffect.Descriptor[]);
+    ctor public AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, java.lang.String);
+  }
+
   public final class BufferingParams implements android.os.Parcelable {
     method public int describeContents();
     method public int getInitialMarkMs();
