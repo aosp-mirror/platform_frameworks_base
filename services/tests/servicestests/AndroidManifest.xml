@@ -143,9 +143,6 @@
         <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity2" />
         <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity3" />
 
-        <activity android:name="com.android.server.wm.ScreenDecorWindowTests$TestActivity"
-                  android:showWhenLocked="true"/>
-
         <activity android:name="com.android.server.pm.ShortcutTestActivity"
                  android:enabled="true" android:exported="true" />
 
@@ -205,12 +202,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
-
-        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityA" />
-        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityB" />
-        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityRequestedOrientationChange" />
-        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityTaskChangeCallbacks" />
-        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityTaskDescriptionChange" />
 
         <receiver android:name="com.android.server.appwidget.DummyAppWidget">
             <intent-filter>
