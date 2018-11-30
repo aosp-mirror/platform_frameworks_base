@@ -249,5 +249,5 @@ void LinearAllocator::dumpMemoryStats(const char* prefix) {
     ALOGD("%sPages %zu (dedicated %zu)", prefix, mPageCount, mDedicatedPageCount);
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

@@ -141,6 +141,6 @@ void SkiaDisplayList::output(std::ostream& output, uint32_t level) {
     mDisplayList.draw(&canvas);
 }
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

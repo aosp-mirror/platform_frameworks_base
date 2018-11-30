@@ -54,5 +54,5 @@ SkBlendMode Layer::getMode() const {
     }
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

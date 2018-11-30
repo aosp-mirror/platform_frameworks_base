@@ -103,5 +103,5 @@ static inline void SetLatticeFlags(SkCanvas::Lattice* lattice, SkCanvas::Lattice
     }
 }
 
-};  // namespace NinePatchUtils
-};  // namespace android
+}  // namespace NinePatchUtils
+}  // namespace android

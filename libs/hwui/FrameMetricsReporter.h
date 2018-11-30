@@ -56,5 +56,5 @@ private:
     std::vector<sp<FrameMetricsObserver> > mObservers;
 };
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

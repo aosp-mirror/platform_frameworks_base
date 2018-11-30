@@ -97,4 +97,4 @@ private:
     ImageSlot mImageSlots[BufferQueueDefs::NUM_BUFFER_SLOTS];
 };
 
-}; /* namespace android */
+} /* namespace android */

@@ -99,7 +99,7 @@ private:
     typename InlineStdAllocator<T, SIZE>::Allocation mAllocation;
 };
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android
 
 #endif  // ANDROID_FAT_VECTOR_H

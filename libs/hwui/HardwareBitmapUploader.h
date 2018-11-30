@@ -25,4 +25,4 @@ public:
     static sk_sp<Bitmap> allocateHardwareBitmap(const SkBitmap& sourceBitmap);
 };
 
-};  // namespace android::uirenderer
+}  // namespace android::uirenderer

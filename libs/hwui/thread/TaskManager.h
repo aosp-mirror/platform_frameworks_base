@@ -101,7 +101,7 @@ private:
     std::vector<sp<WorkerThread> > mThreads;
 };
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android
 
 #endif  // ANDROID_HWUI_TASK_MANAGER_H

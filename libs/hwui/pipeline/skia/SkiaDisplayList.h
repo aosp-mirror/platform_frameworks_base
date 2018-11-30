@@ -36,7 +36,7 @@ class Outline;
 
 namespace VectorDrawable {
 class Tree;
-};
+}
 typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
 namespace skiapipeline {
@@ -179,6 +179,6 @@ public:
     SkMatrix mParentMatrix;
 };
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

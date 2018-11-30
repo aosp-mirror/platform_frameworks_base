@@ -46,6 +46,6 @@ public:
     static void validateVerbAndPoints(char verb, size_t points, ParseResult* result);
 };
 
-};      // namespace uirenderer
-};      // namespace android
+}      // namespace uirenderer
+}      // namespace android
 #endif  // ANDROID_HWUI_PATHPARSER_H

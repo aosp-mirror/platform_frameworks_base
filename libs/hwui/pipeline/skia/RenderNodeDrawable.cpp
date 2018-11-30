@@ -332,6 +332,6 @@ void RenderNodeDrawable::setViewProperties(const RenderProperties& properties, S
     }
 }
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

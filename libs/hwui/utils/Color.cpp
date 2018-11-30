@@ -221,5 +221,5 @@ SkColor LabToSRGB(const Lab& lab, SkAlpha alpha) {
             static_cast<uint8_t>(rgb.b * 255));
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android
