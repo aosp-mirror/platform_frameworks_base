@@ -133,7 +133,7 @@ public class InsetsState implements Parcelable {
                         true /* ignoreVisibility */, null /* typeSideMap */);
             }
         }
-        return new WindowInsets(new Rect(systemInsets), null, new Rect(maxInsets), isScreenRound,
+        return new WindowInsets(new Rect(systemInsets), new Rect(maxInsets), isScreenRound,
                 alwaysConsumeNavBar, cutout);
     }
 

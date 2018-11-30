@@ -1859,8 +1859,7 @@ public final class ViewRootImpl implements ViewParent,
                         mContext.getResources().getConfiguration().isScreenRound(),
                         mAttachInfo.mAlwaysConsumeNavBar, displayCutout);
             } else {
-                mLastWindowInsets = new WindowInsets(contentInsets,
-                        null /* windowDecorInsets */, stableInsets,
+                mLastWindowInsets = new WindowInsets(contentInsets, stableInsets,
                         mContext.getResources().getConfiguration().isScreenRound(),
                         mAttachInfo.mAlwaysConsumeNavBar, displayCutout);
             }
