@@ -27,7 +27,6 @@ import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -151,30 +150,6 @@ public class BackupManagerService {
      * a background thread to keep the unlock time down.
      */
     public void unlockSystemUser() {
-        // Migrate legacy setting
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup migrate");
-        if (!backupSettingMigrated(UserHandle.USER_SYSTEM)) {
-            if (DEBUG) {
-                Slog.i(TAG, "Backup enable apparently not migrated");
-            }
-            ContentResolver resolver = sInstance.getContext().getContentResolver();
-            int enableState = Settings.Secure.getIntForUser(resolver,
-                    Settings.Secure.BACKUP_ENABLED, -1, UserHandle.USER_SYSTEM);
-            if (enableState >= 0) {
-                if (DEBUG) {
-                    Slog.i(TAG, "Migrating enable state " + (enableState != 0));
-                }
-                writeBackupEnableState(enableState != 0, UserHandle.USER_SYSTEM);
-                Settings.Secure.putStringForUser(resolver,
-                        Settings.Secure.BACKUP_ENABLED, null, UserHandle.USER_SYSTEM);
-            } else {
-                if (DEBUG) {
-                    Slog.i(TAG, "Backup not yet configured; retaining null enable state");
-                }
-            }
-        }
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup enable");
         try {
             sInstance.setBackupEnabled(readBackupEnableState(UserHandle.USER_SYSTEM));
@@ -572,12 +547,6 @@ public class BackupManagerService {
         mUserBackupManagerService.dump(fd, pw, args);
     }
 
-    private static boolean backupSettingMigrated(int userId) {
-        File base = new File(Environment.getDataDirectory(), "backup");
-        File enableFile = new File(base, BACKUP_ENABLE_FILE);
-        return enableFile.exists();
-    }
-
     private static boolean readBackupEnableState(int userId) {
         File base = new File(Environment.getDataDirectory(), "backup");
         File enableFile = new File(base, BACKUP_ENABLE_FILE);
@@ -607,14 +576,8 @@ public class BackupManagerService {
             stage.renameTo(enableFile);
             // will be synced immediately by the try-with-resources call to close()
         } catch (IOException | RuntimeException e) {
-            // Whoops; looks like we're doomed.  Roll everything out, disabled,
-            // including the legacy state.
             Slog.e(TAG, "Unable to record backup enable state; reverting to disabled: "
                     + e.getMessage());
-
-            ContentResolver resolver = sInstance.getContext().getContentResolver();
-            Settings.Secure.putStringForUser(resolver,
-                    Settings.Secure.BACKUP_ENABLED, null, userId);
             enableFile.delete();
             stage.delete();
         }
