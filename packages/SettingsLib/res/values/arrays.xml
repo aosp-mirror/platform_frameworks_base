@@ -102,6 +102,20 @@
 
 
     <!-- Bluetooth settings -->
+    <!-- Titles for Bluetooth HCI Snoop Logging -->
+    <string-array name="bt_hci_snoop_log_entries">
+        <item>Disabled</item>
+        <item>Enabled Filtered</item>
+        <item>Enabled</item>
+    </string-array>
+
+    <!-- Values for Bluetooth HCI Snoop Logging -->
+    <string-array name="bt_hci_snoop_log_values" translatable="false">
+        <item>disabled</item>
+        <item>filtered</item>
+        <item>full</item>
+    </string-array>
+
     <!-- Titles for Bluetooth AVRCP Versions -->
     <string-array name="bluetooth_avrcp_versions">
         <item>AVRCP 1.4 (Default)</item>
