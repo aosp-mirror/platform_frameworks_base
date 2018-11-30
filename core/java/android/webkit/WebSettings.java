@@ -987,7 +987,9 @@ public abstract class WebSettings {
      * {@link PluginState#OFF}.
      *
      * @param state a PluginState value
-     * @deprecated Plugins will not be supported in future, and should not be used.
+     * @deprecated Plugins are not supported in API level
+     *             {@link android.os.Build.VERSION_CODES#KITKAT} or later;
+     *             enabling plugins is a no-op.
      */
     @Deprecated
     public abstract void setPluginState(PluginState state);
@@ -1182,7 +1184,9 @@ public abstract class WebSettings {
      *
      * @return the plugin state as a {@link PluginState} value
      * @see #setPluginState
-     * @deprecated Plugins will not be supported in future, and should not be used.
+     * @deprecated Plugins are not supported in API level
+     *             {@link android.os.Build.VERSION_CODES#KITKAT} or later;
+     *             enabling plugins is a no-op.
      */
     @Deprecated
     public abstract PluginState getPluginState();

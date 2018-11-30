@@ -278,7 +278,7 @@
     <string name="media_category" msgid="4388305075496848353">"মিডিয়া"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"পর্যবেক্ষণে রাখা"</string>
     <string name="strict_mode" msgid="1938795874357830695">"কঠোর মোড সক্ষম"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"মুখ্য থ্রেডে অ্যাপ্লিকেশানগুলির দীর্ঘ কার্যকলাপের সময় স্ক্রিন ফ্ল্যাশ করে"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"মুখ্য থ্রেডে অ্যাপ্লিকেশানগুলির দীর্ঘ অ্যাক্টিভিটির সময় স্ক্রিন ফ্ল্যাশ করে"</string>
     <string name="pointer_location" msgid="6084434787496938001">"পয়েন্টারের লোকেশন"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"স্ক্রিন ওভারলে বর্তমান স্পর্শ ডেটা দেখাচ্ছে"</string>
     <string name="show_touches" msgid="2642976305235070316">"আলতো চাপ দেখান"</string>
@@ -304,7 +304,7 @@
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2D অঙ্কনের জন্য GPU-এর ব্যবহারে জোর দিন"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA এ জোর দিন"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 অ্যাপ্লিকেশানগুলির মধ্যে 4x MSAA সক্রিয় করুন"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"অ-আয়তক্ষেত্রাকার ক্লিপ কার্যকলাপ ডিবাগ করুন"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"অ-আয়তক্ষেত্রাকার ক্লিপ অ্যাক্টিভিটি ডিবাগ করুন"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"প্রোফাইল GPU রেন্ডারিং"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU ডিবাগ স্তর সক্ষম করুন"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"ডিবাগ অ্যাপের জন্য GPU ডিবাগ স্তর লোড হতে দিন"</string>
@@ -313,8 +313,8 @@
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"অ্যানিমেটর সময়কাল স্কেল"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"গৌণ প্রদর্শনগুলি নকল করুন"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"অ্যাপ"</string>
-    <string name="immediately_destroy_activities" msgid="1579659389568133959">"কার্যকলাপ রাখবেন না"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ব্যবহারকারী এটি ছেড়ে যাওয়ার পরে যত তাড়াতাড়ি সম্ভব প্রতিটি কার্যকলাপ ধ্বংস করুন"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"অ্যাক্টিভিটি রাখবেন না"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ব্যবহারকারী এটি ছেড়ে যাওয়ার পরে যত তাড়াতাড়ি সম্ভব প্রতিটি অ্যাক্টিভিটি ধ্বংস করুন"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"পশ্চাদপট প্রক্রিয়ার সীমা"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"ব্যাকগ্রাউন্ডের ANR দেখুন"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"ব্যাকগ্রাউন্ডের অ্যাপগুলির জন্য \'অ্যাপ থেকে সাড়া পাওয়া যাচ্ছে না\' মেসেজ দেখান"</string>

@@ -20,7 +20,7 @@
     <string name="more_options_button" msgid="2243228396432556771">"နောက်ထပ် ရွေးစရာများ"</string>
     <string name="label_destination" msgid="9132510997381599275">"ဦးတည်ရာ"</string>
     <string name="label_copies" msgid="3634531042822968308">"မိတ္တူများ"</string>
-    <string name="label_copies_summary" msgid="3861966063536529540">"မိတ္တူများ:"</string>
+    <string name="label_copies_summary" msgid="3861966063536529540">"မိတ္တူများ-"</string>
     <string name="label_paper_size" msgid="908654383827777759">"စက္ကူ  ဆိုက်"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"စက္ကူ  ဆိုက်:"</string>
     <string name="label_color" msgid="1108690305218188969">"ရောင်စုံ"</string>
@@ -35,7 +35,7 @@
     <string name="install_for_print_preview" msgid="6366303997385509332">"အစမ်းကြည့်ရန် ပီဒီအက်ဖ် ဖတ်ရှုစရာ ထည့်သွင်းပါ"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"စာထုတ်လုပ်သော အက်ပ်ခဏ ပျက်သွားပါသည်"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"စာထုတ်အလုပ်ကို လုပ်နေပါသည်"</string>
-    <string name="save_as_pdf" msgid="5718454119847596853">"ပီဒီအက်ဖ် အဖြစ်သိမ်းဆည်းရန်"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"PDF အဖြစ်သိမ်းရန်"</string>
     <string name="all_printers" msgid="5018829726861876202">"စာထုတ်စက် အားလုံး"</string>
     <string name="print_dialog" msgid="32628687461331979">"စာထုတ်ရန် အချက်ပြခြင်း"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
@@ -103,8 +103,8 @@
     <item msgid="3199660090246166812">"အလျားလိုက်"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"ဖိုင်သို့ မရေးနိုင်ခဲ့"</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"ဆော်ရီး၊ အဲဒါ အလုပ်မဖြစ်ခဲ့ပါ။ ထပ် စမ်းပါ။"</string>
-    <string name="print_error_retry" msgid="1426421728784259538">"ထပ်စမ်း"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"လုပ်၍မရခဲ့ပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"ထပ်စမ်းကြည့်ရန်"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ဒီပရင်တာမှာ ယခုအချိန်မှာ မရနိုင်ပါ။"</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"အစမ်းကြည့်ခြင်းကို ပြသ၍မရပါ"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"အစမ်းကြည့်ရန် ပြင်ဆင်နေ…"</string>

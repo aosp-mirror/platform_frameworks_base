@@ -150,6 +150,7 @@ public class ConditionProviders extends ManagedServices {
         try {
             provider.onConnected();
         } catch (RemoteException e) {
+            Slog.e(TAG, "can't connect to service " + info, e);
             // we tried
         }
         if (mCallback != null) {

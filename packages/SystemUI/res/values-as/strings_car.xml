@@ -22,8 +22,6 @@
     <string name="car_guest" msgid="3738772168718508650">"অতিথি"</string>
     <string name="car_add_user" msgid="5245196248349230898">"ব্যৱহাৰকাৰী যোগ কৰক"</string>
     <string name="car_new_user" msgid="8142927244990323906">"নতুন ব্যৱহাৰকাৰী"</string>
-    <!-- no translation found for user_add_user_message_setup (1791011504259527329) -->
-    <skip />
-    <!-- no translation found for user_add_user_message_update (3383320289232716179) -->
-    <skip />
+    <string name="user_add_user_message_setup" msgid="1791011504259527329">"আপুনি কোনো নতুন ব্য়ৱহাৰকাৰীক যোগ কৰিলে তেখেতে নিজৰ বাবে খালী ঠাই ছেট আপ কৰিব লাগে।"</string>
+    <string name="user_add_user_message_update" msgid="3383320289232716179">"সকলো ব্য়ৱহাৰকাৰীয়ে অইন ব্য়ৱহাৰকাৰীৰ বাবে এপসমূহ আপডেট কৰিব পাৰে।"</string>
 </resources>

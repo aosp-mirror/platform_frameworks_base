@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -407,4 +408,14 @@ public abstract class ActivityManagerInternal {
      * has {@code permission}.
      */
     public abstract void enforceCallerIsRecentsOrHasPermission(String permission, String func);
+
+    /**
+     * @return The intent used to launch the home activity.
+     */
+    public abstract Intent getHomeIntent();
+
+    /**
+     * WindowManager notifies AM when display size of the default display changes.
+     */
+    public abstract void notifyDefaultDisplaySizeChanged();
 }

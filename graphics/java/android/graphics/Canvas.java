@@ -1591,9 +1591,9 @@ public class Canvas extends BaseCanvas {
      * Draw the specified circle using the specified paint. If radius is <= 0, then nothing will be
      * drawn. The circle will be filled or framed based on the Style in the paint.
      *
-     * @param cx The x-coordinate of the center of the cirle to be drawn
-     * @param cy The y-coordinate of the center of the cirle to be drawn
-     * @param radius The radius of the cirle to be drawn
+     * @param cx The x-coordinate of the center of the circle to be drawn
+     * @param cy The y-coordinate of the center of the circle to be drawn
+     * @param radius The radius of the circle to be drawn
      * @param paint The paint used to draw the circle
      */
     public void drawCircle(float cx, float cy, float radius, @NonNull Paint paint) {

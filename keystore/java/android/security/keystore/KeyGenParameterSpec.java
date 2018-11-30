@@ -268,6 +268,11 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     private final boolean mIsStrongBoxBacked;
     private final boolean mUserConfirmationRequired;
     private final boolean mUnlockedDeviceRequired;
+    /*
+     * ***NOTE***: All new fields MUST also be added to the following:
+     * ParcelableKeyGenParameterSpec class.
+     * The KeyGenParameterSpec.Builder constructor that takes a KeyGenParameterSpec
+     */
 
     /**
      * @hide should be built with Builder
@@ -791,6 +796,9 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             mUniqueIdIncluded = sourceSpec.isUniqueIdIncluded();
             mUserAuthenticationValidWhileOnBody = sourceSpec.isUserAuthenticationValidWhileOnBody();
             mInvalidatedByBiometricEnrollment = sourceSpec.isInvalidatedByBiometricEnrollment();
+            mIsStrongBoxBacked = sourceSpec.isStrongBoxBacked();
+            mUserConfirmationRequired = sourceSpec.isUserConfirmationRequired();
+            mUnlockedDeviceRequired = sourceSpec.isUnlockedDeviceRequired();
         }
 
         /**

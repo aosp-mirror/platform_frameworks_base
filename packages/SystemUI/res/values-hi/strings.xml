@@ -409,7 +409,7 @@
     <string name="user_add_user" msgid="5110251524486079492">"उपयोगकर्ता जोड़ें"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"नया उपयोगकर्ता"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"मेहमान"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"अतिथि जोड़ें"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"मेहमान जोड़ें"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"अतिथि को निकालें"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"अतिथि को निकालें?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"इस सत्र के सभी ऐप्स और डेटा को हटा दिया जाएगा."</string>
@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> को छिपाएं?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"जब आप उसे अगली बार सेटिंग में चालू करेंगे तो वह फिर से दिखाई देगी."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"छिपाएं"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"आप अपनी कार्य प्रोफ़ाइल का उपयोग कर रहे हैं"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"कॉल करें"</string>
     <string name="stream_system" msgid="7493299064422163147">"सिस्‍टम"</string>
     <string name="stream_ring" msgid="8213049469184048338">"घंटी बजाएं"</string>

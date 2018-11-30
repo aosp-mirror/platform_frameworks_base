@@ -265,6 +265,8 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
+        // Clear selected state so it is not announce by talkback.
+        info.setSelected(false);
         if (!TextUtils.isEmpty(mAccessibilityClass)) {
             info.setClassName(mAccessibilityClass);
             if (Switch.class.getName().equals(mAccessibilityClass)) {

@@ -524,7 +524,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ezkutatu nahi duzu?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ezarpenetan aktibatzen duzun hurrengoan agertuko da berriro."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ezkutatu"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Work profila erabiltzen ari zara"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Deia"</string>
     <string name="stream_system" msgid="7493299064422163147">"Sistema"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Jo tonua"</string>
@@ -564,8 +563,8 @@
     <string name="status_bar" msgid="4877645476959324760">"Egoera-barra"</string>
     <string name="overview" msgid="4018602013895926956">"Ikuspegi orokorra"</string>
     <string name="demo_mode" msgid="2532177350215638026">"Sistemaren erabiltzaile-interfazearen demo modua"</string>
-    <string name="enable_demo_mode" msgid="4844205668718636518">"Gaitu proba modua"</string>
-    <string name="show_demo_mode" msgid="2018336697782464029">"Erakutsi proba modua"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"Gaitu demo modua"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"Erakutsi demo modua"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Alarma"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Work profila"</string>

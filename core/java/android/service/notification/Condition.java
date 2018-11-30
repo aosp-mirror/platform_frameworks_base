@@ -151,14 +151,14 @@ public final class Condition implements Parcelable {
     @Override
     public String toString() {
         return new StringBuilder(Condition.class.getSimpleName()).append('[')
-            .append("id=").append(id)
-            .append(",summary=").append(summary)
-            .append(",line1=").append(line1)
-            .append(",line2=").append(line2)
-            .append(",icon=").append(icon)
-            .append(",state=").append(stateToString(state))
-            .append(",flags=").append(flags)
-            .append(']').toString();
+                .append("state=").append(stateToString(state))
+                .append(",id=").append(id)
+                .append(",summary=").append(summary)
+                .append(",line1=").append(line1)
+                .append(",line2=").append(line2)
+                .append(",icon=").append(icon)
+                .append(",flags=").append(flags)
+                .append(']').toString();
     }
 
     /** @hide */

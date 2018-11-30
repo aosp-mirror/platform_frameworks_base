@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"কেমেৰা"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ফট\' তুলিব আৰু ভিডিঅ\' ৰেকৰ্ড কৰিব পাৰে"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক ছবি তুলিবলৈ আৰু ভিডিঅ\' ৰেকৰ্ড কৰিবলৈ অনুমতি দিবনে?"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"কল লগসমূহ"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ফ\'নৰ কল লগ পঢ়ক আৰু লিখক"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক আপোনাৰ ফ\'ন কল লগ চাবলৈ অনুমতি দিবনে?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ফ’ন"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ফ\'ন কল কৰিব আৰু পৰিচলনা কৰিব পাৰে"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক ফ\'ন কল কৰিবলৈ আৰু পৰিচালনা কৰিবলৈ অনুমতি দিবনে?"</string>
@@ -1178,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"ৱাই-ফাইত ইন্টাৰনেট নাই"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"অধিক বিকল্পৰ বাবে টিপক"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"আপোনাৰ হটস্পট ছেটিংসমূহত কৰা সালসলনি"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"আপোনাৰ হটস্পটৰ বেণ্ড সলনি কৰা হ’ল।"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"আপোনাৰ কেৱল ৫গিগাহাৰ্টজৰ প্ৰতি অগ্ৰাধিকাৰ এই ডিভাচইচটোৱে সমৰ্থন নকৰে। ইয়াৰ পৰিৱৰ্তে, ডিভাচইচটোৱে যেতিয়া ৫গিগাহাৰ্টজ বেণ্ড উপলব্ধ হ’ব তেতিয়া সেইয়া ব্যৱহাৰ কৰিব।"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>লৈ সলনি কৰা হ\'ল"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"যেতিয়া <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>ত ইণ্টাৰনেট নাথাকে, তেতিয়া ডিভাইচে <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ক ব্যৱহাৰ কৰে। মাচুল প্ৰযোজ্য হ\'ব পাৰে।"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>ৰ পৰা <xliff:g id="NEW_NETWORK">%2$s</xliff:g> লৈ সলনি কৰা হ\'ল"</string>

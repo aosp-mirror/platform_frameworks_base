@@ -823,12 +823,6 @@ interface ITelephony {
     IImsConfig getImsConfig(int slotId, int feature);
 
     /**
-     * @return true if the IMS resolver is busy resolving a binding and should not be considered
-     * available, false if the IMS resolver is idle.
-     */
-    boolean isResolvingImsBinding();
-
-    /**
     *  @return true if the ImsService to bind to for the slot id specified was set, false otherwise.
     */
     boolean setImsService(int slotId, boolean isCarrierImsService, String packageName);

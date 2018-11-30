@@ -528,7 +528,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Slėpti „<xliff:g id="TILE_LABEL">%1$s</xliff:g>“?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Tai bus vėl parodyta, kai kitą kartą įjungsite tai nustatymuose."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Slėpti"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Naudojate darbo profilį"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Skambutis"</string>
     <string name="stream_system" msgid="7493299064422163147">"Sistema"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Skambutis"</string>
@@ -829,8 +828,8 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"Bendrieji pranešimai"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Saugykla"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"Užuominos"</string>
-    <string name="instant_apps" msgid="6647570248119804907">"Akimirksniu įkeliamos programėlės"</string>
-    <string name="instant_apps_message" msgid="8116608994995104836">"Akimirksniu įkeliamų programėlių nereikia įdiegti."</string>
+    <string name="instant_apps" msgid="6647570248119804907">"Akimirksniu įkeliamos programos"</string>
+    <string name="instant_apps_message" msgid="8116608994995104836">"Akimirksniu įkeliamų programų nereikia įdiegti."</string>
     <string name="app_info" msgid="6856026610594615344">"Programos informacija"</string>
     <string name="go_to_web" msgid="2650669128861626071">"Eiti į naršyklę"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobilieji duomenys"</string>

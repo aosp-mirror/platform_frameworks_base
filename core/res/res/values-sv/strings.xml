@@ -272,19 +272,19 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Byt till jobbprofilen"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"få tillgång till dina kontakter"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till dina kontakter?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till dina kontakter?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Plats"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"komma åt enhetens platsuppgifter"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till enhetens plats?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till enhetens plats?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"få tillgång till din kalender"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till din kalender?"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till din kalender?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"skicka och visa sms"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att skicka och visa sms?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"få åtkomst till foton, media och filer på din enhet"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till foton, mediafiler och andra filer på enheten?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till foton, mediefiler och andra filer på enheten?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"spela in ljud"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att spela in ljud?"</string>
@@ -299,7 +299,7 @@
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att ringa och hantera telefonsamtal?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Kroppssensorer"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få åtkomst till sensordata om dina vitalparametrar"</string>
-    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till sensordata om vitalparametrar?"</string>
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till sensordata om vitalparametrar?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Hämta fönsterinnehåll"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Granska innehållet i ett fönster som du interagerar med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivera Explore by touch"</string>
@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi-nätverket är inte anslutet till internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tryck för alternativ"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ändringar i inställningarna för surfzon"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Frekvensbandet för surfzonen har ändrats."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Den här enheten har inte stöd för inställningen för att endast använda 5 GHz. I stället används 5 GHz när det är möjligt."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Byte av nätverk till <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="NEW_NETWORK">%1$s</xliff:g> används på enheten när det inte finns internetåtkomst via <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Avgifter kan tillkomma."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Byte av nätverk från <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> till <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

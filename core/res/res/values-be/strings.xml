@@ -220,7 +220,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Параметры тэлефона"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Блакіроўка экрана"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Выключыць"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"SOS-выклік"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Экстранны выклік"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Справаздача пра памылкі"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Скончыць сеанс"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Здымак экрана"</string>
@@ -741,7 +741,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Націсніце \"Меню\", каб разблакаваць, або зрабіце экстраны выклік."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Націсніце \"Меню\", каб разблакаваць."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Намалюйце камбінацыю разблакоўкі, каб разблакаваць"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"SOS-выклік"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Экстранны выклік"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Вярнуцца да выкліку"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правільна!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Паспрабуйце яшчэ раз"</string>
@@ -1219,6 +1219,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"У Wi-Fi няма доступу да інтэрнэту"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Дакраніцеся, каб убачыць параметры"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Змяненні ў наладах хот-спота"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Частата хот-спота змянілася."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Прылада не можа працаваць толькі на частаце 5 ГГц. Гэта частата будзе выкарыстоўвацца, калі гэта магчыма."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Выкананы пераход да <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Прылада выкарыстоўвае сетку <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, калі ў сетцы <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> няма доступу да інтэрнэту. Можа спаганяцца плата."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Выкананы пераход з <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> да <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1927,7 +1930,7 @@
     <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> адсутнічае"</string>
     <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"Дзеянні з SIM <xliff:g id="SIMNUMBER">%d</xliff:g> не дазволены"</string>
     <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"Дзеянні з SIM <xliff:g id="SIMNUMBER">%d</xliff:g> не дазволены"</string>
-    <string name="popup_window_default_title" msgid="4874318849712115433">"Выплыўное акно"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"Усплывальнае акно"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Ярлык адносіцца да старэйшай версіі праграмы або несумяшчальны з ёю"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Не атрымалася аднавіць ярлык, бо праграма не падтрымлівае рэзервовае капіраванне і аднаўленне"</string>

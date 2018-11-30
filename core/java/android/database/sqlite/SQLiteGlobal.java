@@ -39,10 +39,17 @@ import android.os.SystemProperties;
 public final class SQLiteGlobal {
     private static final String TAG = "SQLiteGlobal";
 
+    /** @hide */
+    public static final String SYNC_MODE_FULL = "FULL";
+
     private static final Object sLock = new Object();
+
     private static int sDefaultPageSize;
 
     private static native int nativeReleaseMemory();
+
+    /** @hide */
+    public static volatile String sDefaultSyncMode;
 
     private SQLiteGlobal() {
     }
@@ -103,6 +110,11 @@ public final class SQLiteGlobal {
      * Gets the default database synchronization mode when WAL is not in use.
      */
     public static String getDefaultSyncMode() {
+        // Use the FULL synchronous mode for system processes by default.
+        String defaultMode = sDefaultSyncMode;
+        if (defaultMode != null) {
+            return defaultMode;
+        }
         return SystemProperties.get("debug.sqlite.syncmode",
                 Resources.getSystem().getString(
                 com.android.internal.R.string.db_default_sync_mode));
@@ -112,6 +124,11 @@ public final class SQLiteGlobal {
      * Gets the database synchronization mode when in WAL mode.
      */
     public static String getWALSyncMode() {
+        // Use the FULL synchronous mode for system processes by default.
+        String defaultMode = sDefaultSyncMode;
+        if (defaultMode != null) {
+            return defaultMode;
+        }
         return SystemProperties.get("debug.sqlite.wal.syncmode",
                 Resources.getSystem().getString(
                 com.android.internal.R.string.db_wal_sync_mode));

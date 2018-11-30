@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"I-Wi-Fi ayinakho ukufinyelela kwe-inthanethi"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Thepha ukuze uthole izinketho"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ushintsho kuzilungiselelo zakho ze-hotspot"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Ibhendi yakho ye-hotspot ishintshile."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Le divayisi ayisekeli okuncamelayo kwe-5GHz kuphela. Kunalokho, le divayisi izosebenzisa ibhendi ye-5GHz uma itholakala."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Kushintshelwe ku-<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Idivayisi isebenzisa i-<xliff:g id="NEW_NETWORK">%1$s</xliff:g> uma i-<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> inganakho ukufinyelela kwe-inthanethi. Kungasebenza izindleko."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Kushintshelewe kusuka ku-<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> kuya ku-<xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

@@ -309,7 +309,7 @@
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Slå på GPU-feilsøkingslag"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Tillat GPU-feilsøkingslag for feilsøkingsapper"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Animasjonsskala for vindu"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Overgangsanimasjonsskala"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Animasjonsskala for overgang"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Varighetsskala for animasjon"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simulering av sekundærskjermer"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Apper"</string>

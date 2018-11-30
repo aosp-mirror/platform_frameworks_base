@@ -62,7 +62,8 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
         appInfo = ai;
         name = _name;
         singleton = _singleton;
-        noReleaseNeeded = uid == 0 || uid == Process.SYSTEM_UID;
+        noReleaseNeeded = (uid == 0 || uid == Process.SYSTEM_UID)
+                && (_name == null || !"com.android.settings".equals(_name.getPackageName()));
     }
 
     public ContentProviderRecord(ContentProviderRecord cpr) {
