@@ -43,4 +43,9 @@ public interface DialogViewCallback {
      * should be dismissed.
      */
     void onPositivePressed();
+
+    /**
+     * Invoked when the "try again" button is pressed.
+     */
+    void onTryAgainPressed();
 }

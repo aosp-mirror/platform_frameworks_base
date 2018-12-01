@@ -21,7 +21,7 @@ import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
-import android.hardware.biometrics.IBiometricPromptReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -92,7 +92,7 @@ interface IStatusBarService
     void showPinningEscapeToast();
 
     // Used to show the dialog when BiometricService starts authentication
-    void showBiometricDialog(in Bundle bundle, IBiometricPromptReceiver receiver, int type,
+    void showBiometricDialog(in Bundle bundle, IBiometricServiceReceiverInternal receiver, int type,
             boolean requireConfirmation, int userId);
     // Used to hide the dialog when a biometric is authenticated
     void onBiometricAuthenticated();
@@ -102,4 +102,6 @@ interface IStatusBarService
     void onBiometricError(String error);
     // Used to hide the biometric dialog when the AuthenticationClient is stopped
     void hideBiometricDialog();
+    // Used to request the "try again" button for authentications which requireConfirmation=true
+    void showBiometricTryAgain();
 }

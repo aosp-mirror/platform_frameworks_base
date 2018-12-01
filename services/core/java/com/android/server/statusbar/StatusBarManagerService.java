@@ -24,7 +24,7 @@ import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Rect;
-import android.hardware.biometrics.IBiometricPromptReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -598,8 +598,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver, int type,
-            boolean requireConfirmation, int userId) {
+    public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
+            int type, boolean requireConfirmation, int userId) {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
@@ -648,6 +648,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         if (mBar != null) {
             try {
                 mBar.hideBiometricDialog();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void showBiometricTryAgain() {
+        enforceBiometricDialog();
+        if (mBar != null) {
+            try {
+                mBar.showBiometricTryAgain();
             } catch (RemoteException ex) {
             }
         }

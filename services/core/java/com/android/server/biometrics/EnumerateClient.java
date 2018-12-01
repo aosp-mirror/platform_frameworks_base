@@ -34,7 +34,7 @@ public abstract class EnumerateClient extends ClientMonitor {
             BiometricServiceBase.ServiceListener listener, int groupId, int userId,
             boolean restricted, String owner) {
         super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
-                owner);
+                owner, 0 /* cookie */);
     }
 
     @Override

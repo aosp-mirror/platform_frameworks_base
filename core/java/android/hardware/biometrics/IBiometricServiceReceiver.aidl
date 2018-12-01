@@ -16,12 +16,18 @@
 package android.hardware.biometrics;
 
 /**
- * Communication channel from the BiometricService back to BiometricPrompt.
+ * Communication channel from BiometricService back to BiometricPrompt
  * @hide
  */
 oneway interface IBiometricServiceReceiver {
-    void onAuthenticationSucceeded(long deviceId);
-    void onAuthenticationFailed(long deviceId);
-    void onError(long deviceId, int error, String message);
-    void onAcquired(long deviceId, int acquiredInfo, String message);
+    // Notify BiometricPrompt that authentication was successful
+    void onAuthenticationSucceeded();
+    // Noties that authentication failed.
+    void onAuthenticationFailed();
+    // Notify BiometricPrompt that an error has occurred.
+    void onError(int error, String message);
+    // Notifies that a biometric has been acquired.
+    void onAcquired(int acquiredInfo, String message);
+    // Notifies that the SystemUI dialog has been dismissed.
+    void onDialogDismissed(int reason);
 }
