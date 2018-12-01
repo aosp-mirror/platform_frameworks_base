@@ -128,7 +128,9 @@ private:
         int sampleSize;
         // If this dimension has any non-tainted value. If not, don't report the
         // dimension.
-        bool hasValue;
+        bool hasValue = false;
+        // Whether new data is seen in the bucket.
+        bool seenNewData = false;
     } Interval;
 
     std::unordered_map<MetricDimensionKey, std::vector<Interval>> mCurrentSlicedBucket;
@@ -145,6 +147,8 @@ private:
 
     // Util function to check whether the specified dimension hits the guardrail.
     bool hitGuardRailLocked(const MetricDimensionKey& newKey);
+
+    bool hitFullBucketGuardRailLocked(const MetricDimensionKey& newKey);
 
     void pullAndMatchEventsLocked(const int64_t timestampNs);
 
@@ -202,6 +206,7 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBase);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures);
+    FRIEND_TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey);
 };
 
 }  // namespace statsd
