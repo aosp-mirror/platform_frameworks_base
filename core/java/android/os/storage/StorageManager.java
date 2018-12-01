@@ -25,6 +25,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.app.Activity;
@@ -1531,6 +1532,12 @@ public class StorageManager {
     /** {@hide} */
     public static boolean hasAdoptable() {
         return SystemProperties.getBoolean(PROP_HAS_ADOPTABLE, false);
+    }
+
+    /** {@hide} */
+    @TestApi
+    public static boolean hasIsolatedStorage() {
+        return SystemProperties.getBoolean(PROP_ISOLATED_STORAGE, false);
     }
 
     /**

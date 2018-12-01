@@ -97,8 +97,7 @@ public abstract class ContentResolver {
      *
      * @hide
      */
-    public static final boolean DEPRECATE_DATA_COLUMNS = SystemProperties
-            .getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false);
+    public static final boolean DEPRECATE_DATA_COLUMNS = StorageManager.hasIsolatedStorage();
 
     /**
      * Special filesystem path prefix which indicates that a path should be

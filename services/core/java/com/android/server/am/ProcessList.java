@@ -27,7 +27,6 @@ import static android.os.Process.getFreeMemory;
 import static android.os.Process.getTotalMemory;
 import static android.os.Process.killProcessQuiet;
 import static android.os.Process.startWebView;
-import static android.os.storage.StorageManager.PROP_ISOLATED_STORAGE;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
@@ -73,6 +72,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.text.TextUtils;
 import android.util.EventLog;
@@ -1281,8 +1281,7 @@ public final class ProcessList {
                     final IPackageManager pm = AppGlobals.getPackageManager();
                     permGids = pm.getPackageGids(app.info.packageName,
                             MATCH_DIRECT_BOOT_AUTO, app.userId);
-                    if (SystemProperties.getBoolean(PROP_ISOLATED_STORAGE, false)
-                            && mountExtStorageFull) {
+                    if (StorageManager.hasIsolatedStorage() && mountExtStorageFull) {
                         mountExternal = Zygote.MOUNT_EXTERNAL_FULL;
                     } else {
                         StorageManagerInternal storageManagerInternal = LocalServices.getService(

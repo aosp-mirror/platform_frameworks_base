@@ -183,8 +183,7 @@ class StorageManagerService extends IStorageManager.Stub
     private static final String ZRAM_ENABLED_PROPERTY =
             "persist.sys.zram_enabled";
 
-    private static final boolean ENABLE_ISOLATED_STORAGE = SystemProperties
-            .getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false);
+    private static final boolean ENABLE_ISOLATED_STORAGE = StorageManager.hasIsolatedStorage();
 
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;

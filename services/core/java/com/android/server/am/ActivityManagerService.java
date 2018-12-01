@@ -19346,7 +19346,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public boolean isAppStorageSandboxed(int pid, int uid) {
-            if (!SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+            if (!StorageManager.hasIsolatedStorage()) {
                 return false;
             }
             if (uid == SHELL_UID || uid == ROOT_UID) {

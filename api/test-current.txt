@@ -943,6 +943,10 @@ package android.os.health {
 
 package android.os.storage {
 
+  public class StorageManager {
+    method public static boolean hasIsolatedStorage();
+  }
+
   public final class StorageVolume implements android.os.Parcelable {
     method public java.lang.String getPath();
   }

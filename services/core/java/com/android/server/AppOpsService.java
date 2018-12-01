@@ -692,7 +692,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 });
 
-        if (!SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+        if (!StorageManager.hasIsolatedStorage()) {
             StorageManagerInternal storageManagerInternal = LocalServices.getService(
                     StorageManagerInternal.class);
             storageManagerInternal.addExternalStoragePolicy(
