@@ -558,22 +558,26 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     }
 
     /**
-     * Pause all activities in either all of the stacks or just the back stacks.
+     * Pause all activities in either all of the stacks or just the back stacks. This is done before
+     * resuming a new activity and to make sure that previously active activities are
+     * paused in stacks that are no longer visible or in pinned windowing mode. This does not
+     * pause activities in visible stacks, so if an activity is launched within the same stack/task,
+     * then we should explicitly pause that stack's top activity.
      * @param userLeaving Passed to pauseActivity() to indicate whether to call onUserLeaving().
      * @param resuming The resuming activity.
      * @param dontWait The resuming activity isn't going to wait for all activities to be paused
      *                 before resuming.
-     * @return true if any activity was paused as a result of this call.
+     * @return {@code true} if any activity was paused as a result of this call.
      */
     boolean pauseBackStacks(boolean userLeaving, ActivityRecord resuming, boolean dontWait) {
         boolean someActivityPaused = false;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
-            // TODO(b/111541062): Check if resumed activity on this display instead
-            if (!mRootActivityContainer.isTopDisplayFocusedStack(stack)
-                    && stack.getResumedActivity() != null) {
+            final ActivityRecord resumedActivity = stack.getResumedActivity();
+            if (resumedActivity != null
+                    && (!stack.shouldBeVisible(resuming) || !stack.isFocusable())) {
                 if (DEBUG_STATES) Slog.d(TAG_STATES, "pauseBackStacks: stack=" + stack +
-                        " mResumedActivity=" + stack.getResumedActivity());
+                        " mResumedActivity=" + resumedActivity);
                 someActivityPaused |= stack.startPausingLocked(userLeaving, false, resuming,
                         dontWait);
             }
