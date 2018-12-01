@@ -23545,6 +23545,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Get the identifier used for this view by the drawing system.
+     *
+     * @see RenderNode#getUniqueId()
+     * @return A long that uniquely identifies this view's drawing component
+     */
+    public long getUniqueDrawingId() {
+        return mRenderNode.getUniqueId();
+    }
+
+    /**
      * Returns this view's tag.
      *
      * @return the Object stored in this view as a tag, or {@code null} if not
