@@ -195,10 +195,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             "/system/bin/traced",  // Perfetto.
             "/system/bin/traced_probes",  // Perfetto.
             "webview_zygote",
-            // Temporarily excluded zygote to investigate its forking consequences in
-            // NativeProcessMemoryState.
-            // "zygote",
-            // "zygote64",
+            "zygote",
+            "zygote64",
     };
 
     private static final int CPU_TIME_PER_THREAD_FREQ_NUM_FREQUENCIES = 8;
@@ -1090,6 +1088,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullNativeProcessMemoryState(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
+        final List<String> processNames = Arrays.asList(MEMORY_INTERESTING_NATIVE_PROCESSES);
         int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
         for (int i = 0; i < pids.length; i++) {
             int pid = pids[i];
@@ -1099,6 +1098,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             int uid = getUidForPid(pid);
             String processName = readCmdlineFromProcfs(pid);
+            // Sometimes we get here processName that is not included in the whitelist. It comes
+            // from forking the zygote for an app. We can ignore that sample because this process
+            // is collected by ProcessMemoryState.
+            if (!processNames.contains(processName)) {
+                continue;
+            }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(uid);
             e.writeString(processName);
