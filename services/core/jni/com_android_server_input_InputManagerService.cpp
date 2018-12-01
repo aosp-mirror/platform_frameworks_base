@@ -1750,7 +1750,7 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     jclass clazz;
     FIND_CLASS(clazz, "com/android/server/input/InputManagerService");
-    gServiceClassInfo.clazz = clazz;
+    gServiceClassInfo.clazz = reinterpret_cast<jclass>(env->NewGlobalRef(clazz));
 
     GET_METHOD_ID(gServiceClassInfo.notifyConfigurationChanged, clazz,
             "notifyConfigurationChanged", "(J)V");
