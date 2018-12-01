@@ -1639,6 +1639,19 @@ public final class LoadedApk {
         }
     }
 
+    @UnsupportedAppUsage
+    public IServiceConnection lookupServiceDispatcher(ServiceConnection c,
+            Context context) {
+        synchronized (mServices) {
+            LoadedApk.ServiceDispatcher sd = null;
+            ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher> map = mServices.get(context);
+            if (map != null) {
+                sd = map.get(c);
+            }
+            return sd != null ? sd.getIServiceConnection() : null;
+        }
+    }
+
     public final IServiceConnection forgetServiceDispatcher(Context context,
             ServiceConnection c) {
         synchronized (mServices) {

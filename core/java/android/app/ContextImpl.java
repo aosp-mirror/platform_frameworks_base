@@ -1729,8 +1729,11 @@ class ContextImpl extends Context {
             throw new IllegalArgumentException("connection is null");
         }
         if (mPackageInfo != null) {
-            IServiceConnection sd = mPackageInfo.forgetServiceDispatcher(
-                    getOuterContext(), conn);
+            IServiceConnection sd = mPackageInfo.lookupServiceDispatcher(conn, getOuterContext());
+            if (sd == null) {
+                throw new IllegalArgumentException("ServiceConnection not currently bound: "
+                        + conn);
+            }
             try {
                 ActivityManager.getService().updateServiceGroup(sd, group, importance);
             } catch (RemoteException e) {

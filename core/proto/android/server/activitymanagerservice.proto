@@ -185,6 +185,7 @@ message ProcessRecordProto {
     optional int32 app_id = 5;
     optional int32 isolated_app_id = 6;
     optional bool persistent = 7;
+    optional int32 lru_index = 8;
 }
 
 message BroadcastRecordProto {

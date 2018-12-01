@@ -9183,6 +9183,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             sdumper.dumpWithClient();
         }
+        if (dumpPackage == null) {
+            // Intentionally dropping the lock for this, because dumpBinderProxies() will make many
+            // outgoing binder calls to retrieve interface descriptors; while that is system code,
+            // there is nothing preventing an app from overriding this implementation by talking to
+            // the binder driver directly, and hang up system_server in the process. So, dump
+            // without locks held, and even then only when there is an unreasonably large number of
+            // proxies in the first place.
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpBinderProxies(pw, BINDER_PROXY_HIGH_WATERMARK /* minToDump */);
+        }
         synchronized(this) {
             pw.println();
             if (dumpAll) {
@@ -9247,19 +9260,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage, dumpAppId);
-        }
-        if (dumpPackage == null) {
-            // Intentionally dropping the lock for this, because dumpBinderProxies() will make many
-            // outgoing binder calls to retrieve interface descriptors; while that is system code,
-            // there is nothing preventing an app from overriding this implementation by talking to
-            // the binder driver directly, and hang up system_server in the process. So, dump
-            // without locks held, and even then only when there is an unreasonably large number of
-            // proxies in the first place.
-            pw.println();
-            if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-            }
-            dumpBinderProxies(pw, BINDER_PROXY_HIGH_WATERMARK /* minToDump */);
         }
     }
 
@@ -10240,7 +10240,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (dumpPackage != null && !r.pkgList.containsKey(dumpPackage)) {
                     continue;
                 }
-                r.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.PROCS);
+                r.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.PROCS, mProcessList.mLruProcesses.indexOf(r)
+                );
                 if (r.isPersistent()) {
                     numPers++;
                 }
@@ -10252,7 +10253,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (dumpPackage != null && !r.pkgList.containsKey(dumpPackage)) {
                 continue;
             }
-            r.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.ISOLATED_PROCS);
+            r.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.ISOLATED_PROCS,
+                    mProcessList.mLruProcesses.indexOf(r)
+            );
         }
 
         for (int i=0; i<mActiveInstrumentation.size(); i++) {

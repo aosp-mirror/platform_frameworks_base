@@ -586,7 +586,7 @@ final class ProcessRecord implements WindowProcessListener {
                 }
                 origBase.makeInactive();
             }
-            baseProcessTracker = tracker.getProcessStateLocked(info.packageName, uid,
+            baseProcessTracker = tracker.getProcessStateLocked(info.packageName, info.uid,
                     info.longVersionCode, processName);
             baseProcessTracker.makeActive();
             for (int i=0; i<pkgList.size(); i++) {
@@ -594,7 +594,7 @@ final class ProcessRecord implements WindowProcessListener {
                 if (holder.state != null && holder.state != origBase) {
                     holder.state.makeInactive();
                 }
-                tracker.updateProcessStateHolderLocked(holder, pkgList.keyAt(i), uid,
+                tracker.updateProcessStateHolderLocked(holder, pkgList.keyAt(i), info.uid,
                         info.longVersionCode, processName);
                 if (holder.state != baseProcessTracker) {
                     holder.state.makeActive();
@@ -760,19 +760,25 @@ final class ProcessRecord implements WindowProcessListener {
 
     @Override
     public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        writeToProto(proto, fieldId, -1);
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId, int lruIndex) {
         long token = proto.start(fieldId);
         proto.write(ProcessRecordProto.PID, pid);
         proto.write(ProcessRecordProto.PROCESS_NAME, processName);
-        if (info.uid < Process.FIRST_APPLICATION_UID) {
-            proto.write(ProcessRecordProto.UID, uid);
-        } else {
+        proto.write(ProcessRecordProto.UID, info.uid);
+        if (UserHandle.getAppId(info.uid) >= Process.FIRST_APPLICATION_UID) {
             proto.write(ProcessRecordProto.USER_ID, userId);
             proto.write(ProcessRecordProto.APP_ID, UserHandle.getAppId(info.uid));
-            if (uid != info.uid) {
-                proto.write(ProcessRecordProto.ISOLATED_APP_ID, UserHandle.getAppId(uid));
-            }
+        }
+        if (uid != info.uid) {
+            proto.write(ProcessRecordProto.ISOLATED_APP_ID, UserHandle.getAppId(uid));
         }
         proto.write(ProcessRecordProto.PERSISTENT, mPersistent);
+        if (lruIndex >= 0) {
+            proto.write(ProcessRecordProto.LRU_INDEX, lruIndex);
+        }
         proto.end(token);
     }
 
@@ -864,7 +870,8 @@ final class ProcessRecord implements WindowProcessListener {
             ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
                     versionCode);
             if (baseProcessTracker != null) {
-                tracker.updateProcessStateHolderLocked(holder, pkg, uid, versionCode, processName);
+                tracker.updateProcessStateHolderLocked(holder, pkg, info.uid, versionCode,
+                        processName);
                 pkgList.put(pkg, holder);
                 if (holder.state != baseProcessTracker) {
                     holder.state.makeActive();
@@ -925,7 +932,7 @@ final class ProcessRecord implements WindowProcessListener {
                 pkgList.clear();
                 ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
                         info.longVersionCode);
-                tracker.updateProcessStateHolderLocked(holder, info.packageName, uid,
+                tracker.updateProcessStateHolderLocked(holder, info.packageName, info.uid,
                         info.longVersionCode, processName);
                 pkgList.put(info.packageName, holder);
                 if (holder.state != baseProcessTracker) {
