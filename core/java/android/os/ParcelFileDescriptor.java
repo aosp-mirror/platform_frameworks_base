@@ -17,12 +17,6 @@
 package android.os;
 
 import static android.system.OsConstants.AF_UNIX;
-import static android.system.OsConstants.O_APPEND;
-import static android.system.OsConstants.O_CREAT;
-import static android.system.OsConstants.O_RDONLY;
-import static android.system.OsConstants.O_RDWR;
-import static android.system.OsConstants.O_TRUNC;
-import static android.system.OsConstants.O_WRONLY;
 import static android.system.OsConstants.SEEK_SET;
 import static android.system.OsConstants.SOCK_SEQPACKET;
 import static android.system.OsConstants.SOCK_STREAM;
@@ -254,8 +248,16 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     }
 
     /** {@hide} */
-    public static ParcelFileDescriptor fromFd(
-            FileDescriptor fd, Handler handler, final OnCloseListener listener) throws IOException {
+    public static ParcelFileDescriptor fromPfd(ParcelFileDescriptor pfd, Handler handler,
+            final OnCloseListener listener) throws IOException {
+        final FileDescriptor original = new FileDescriptor();
+        original.setInt$(pfd.detachFd());
+        return fromFd(original, handler, listener);
+    }
+
+    /** {@hide} */
+    public static ParcelFileDescriptor fromFd(FileDescriptor fd, Handler handler,
+            final OnCloseListener listener) throws IOException {
         if (handler == null) {
             throw new IllegalArgumentException("Handler must not be null");
         }
