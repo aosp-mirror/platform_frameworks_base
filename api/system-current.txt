@@ -217,6 +217,10 @@ package android {
     field public static final java.lang.String WRITE_SECURE_SETTINGS = "android.permission.WRITE_SECURE_SETTINGS";
   }
 
+  public static final class Manifest.permission_group {
+    field public static final java.lang.String UNDEFINED = "android.permission-group.UNDEFINED";
+  }
+
   public static final class R.array {
     field public static final int config_keySystemUuidMapping = 17235973; // 0x1070005
   }
