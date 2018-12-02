@@ -233,7 +233,9 @@ class ActivityTestsBase {
                     aInfo /*aInfo*/, new Configuration(), null /* resultTo */, null /* resultWho */,
                     0 /* reqCode */, false /*componentSpecified*/, false /* rootVoiceInteraction */,
                     mService.mStackSupervisor, null /* options */, null /* sourceRecord */);
+            spyOn(activity);
             activity.mAppWindowToken = mock(AppWindowToken.class);
+            doNothing().when(activity).removeWindowContainer();
 
             if (mTaskRecord != null) {
                 mTaskRecord.addActivityToTop(activity);
@@ -245,7 +247,6 @@ class ActivityTestsBase {
                     mock(WindowProcessListener.class));
             wpc.setThread(mock(IApplicationThread.class));
             activity.setProcess(wpc);
-            activity.service.mWindowManager.mRoot = mock(RootWindowContainer.class);
             return activity;
         }
     }

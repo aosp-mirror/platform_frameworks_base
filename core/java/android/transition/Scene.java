@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.os.Build;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,9 +39,9 @@ public final class Scene {
     private int mLayoutId = -1;
     private ViewGroup mSceneRoot;
     private View mLayout; // alternative to layoutId
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     Runnable mEnterAction;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     Runnable mExitAction;
 
     /**
@@ -200,7 +201,7 @@ public final class Scene {
      *
      * @param sceneRoot The view on which the current scene is being set
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     static void setCurrentScene(@NonNull View sceneRoot, @Nullable Scene scene) {
         sceneRoot.setTagInternal(com.android.internal.R.id.current_scene, scene);
     }

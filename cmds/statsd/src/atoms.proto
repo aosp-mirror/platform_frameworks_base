@@ -1338,8 +1338,9 @@ message PhysicalDropDetected {
  * Log bucketed battery charge cycles.
  *
  * Each bucket represents cycles of the battery past
- * a given charge point.  For example, bucket 1 is the
- * lowest 1/8th of the battery, and bucket 8 is 100%.
+ * a given charge point.  For example, if 10 cycle buckets are
+ * initialized, bucket 1 is the lowest 1/10th of the battery,
+ * and bucket 10 is 100%.
  *
  * Logged from:
  * /sys/class/power_supply/bms/cycle_count, via Vendor.
@@ -1353,6 +1354,8 @@ message ChargeCyclesReported {
     optional int32 cycle_bucket_6 = 6;
     optional int32 cycle_bucket_7 = 7;
     optional int32 cycle_bucket_8 = 8;
+    optional int32 cycle_bucket_9 = 9;
+    optional int32 cycle_bucket_10 = 10;
 }
 
 /**
@@ -2015,6 +2018,9 @@ message LmkKillOccurred {
 
     // SWAP
     optional int64 swap_in_bytes = 8;
+
+    // The elapsed real time of start of the process.
+    optional int64 process_start_time_nanos = 9;
 }
 
 /*
@@ -2540,10 +2546,7 @@ message ProcessMemoryState {
     // SWAP
     optional int64 swap_in_bytes = 8;
 
-    // RSS high watermark.
-    // Peak RSS usage of the process. Value is read from the VmHWM field in /proc/PID/status or
-    // from memory.max_usage_in_bytes under /dev/memcg if the device uses per-app memory cgroups.
-    // Deprecated: use ProcessMemoryHighWaterMark atom instead.
+    // Deprecated: use ProcessMemoryHighWaterMark atom instead. Always 0.
     optional int64 rss_high_watermark_in_bytes = 9 [deprecated = true];
 
     // Elapsed real time when the process started.
@@ -2570,9 +2573,7 @@ message NativeProcessMemoryState {
     // RSS
     optional int64 rss_in_bytes = 5;
 
-    // RSS high watermark.
-    // Peak RSS usage of the process. Value is read from the VmHWM field in /proc/PID/status.
-    // Deprecated: use ProcessMemoryHighWaterMark atom instead.
+    // Deprecated: use ProcessMemoryHighWaterMark atom instead. Always 0.
     optional int64 rss_high_watermark_in_bytes = 6 [deprecated = true];
 
     // Elapsed real time when the process started.
@@ -3328,10 +3329,27 @@ message CpuTimePerThreadFreq {
     optional string process_name = 4;
     // Name of the thread taken from `/proc/$PID/task/$TID/comm`
     optional string thread_name = 5;
-    // What frequency the CPU was running at, in KHz
-    optional int32 frequency_khz = 6;
-    // Time spent in frequency in milliseconds, since thread start.
-    optional int32 time_millis = 7;
+
+    // Report eight different frequencies, and how much time is spent in each frequency. Frequencies
+    // are given in KHz, and time is given in milliseconds since the thread started. All eight
+    // frequencies are given here as the alternative is sending eight separate atoms. This method
+    // significantly reduces the amount of data created
+    optional int32 frequency1_khz = 6;
+    optional int32 time1_millis = 7;
+    optional int32 frequency2_khz = 8;
+    optional int32 time2_millis = 9;
+    optional int32 frequency3_khz = 10;
+    optional int32 time3_millis = 11;
+    optional int32 frequency4_khz = 12;
+    optional int32 time4_millis = 13;
+    optional int32 frequency5_khz = 14;
+    optional int32 time5_millis = 15;
+    optional int32 frequency6_khz = 16;
+    optional int32 time6_millis = 17;
+    optional int32 frequency7_khz = 18;
+    optional int32 time7_millis = 19;
+    optional int32 frequency8_khz = 20;
+    optional int32 time8_millis = 21;
 }
 
 /**

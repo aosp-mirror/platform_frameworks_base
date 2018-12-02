@@ -121,9 +121,9 @@ public class NotificationDataTest extends SysuiTestCase {
         when(mEnvironment.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
         mNotificationData = new TestableNotificationData();
-        Dependency.get(InitController.class).executePostInitTasks();
         mNotificationData.updateRanking(mock(NotificationListenerService.RankingMap.class));
         mRow = new NotificationTestHelper(getContext()).createRow();
+        Dependency.get(InitController.class).executePostInitTasks();
     }
 
     @Test

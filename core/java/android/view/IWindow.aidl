@@ -24,6 +24,7 @@ import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.DisplayCutout;
+import android.view.InsetsState;
 
 import com.android.internal.os.IResultReceiver;
 import android.util.MergedConfiguration;
@@ -53,6 +54,12 @@ oneway interface IWindow {
             in MergedConfiguration newMergedConfiguration, in Rect backDropFrame,
             boolean forceLayout, boolean alwaysConsumeNavBar, int displayId,
             in DisplayCutout.ParcelableWrapper displayCutout);
+
+    /**
+     * Called when the window insets configuration has changed.
+     */
+    void insetsChanged(in InsetsState insetsState);
+
     void moved(int newX, int newY);
     void dispatchAppVisibility(boolean visible);
     void dispatchGetNewSurface();

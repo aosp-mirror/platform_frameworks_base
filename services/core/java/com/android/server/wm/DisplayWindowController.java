@@ -90,7 +90,7 @@ public class DisplayWindowController
     public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
         synchronized (mGlobalLock) {
             if (mContainer != null) {
-                mContainer.mService.setNewDisplayOverrideConfiguration(overrideConfiguration,
+                mContainer.mWmService.setNewDisplayOverrideConfiguration(overrideConfiguration,
                         mContainer);
             }
         }

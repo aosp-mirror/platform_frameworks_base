@@ -16,7 +16,7 @@
 
 package com.android.server.backup;
 
-import static com.android.server.backup.GlobalBackupManagerService.DEBUG_SCHEDULING;
+import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
 
 import android.app.AlarmManager;
 import android.app.job.JobInfo;
@@ -118,7 +118,7 @@ public class KeyValueBackupJob extends JobService {
         }
 
         // Time to run a key/value backup!
-        Trampoline service = GlobalBackupManagerService.getInstance();
+        Trampoline service = BackupManagerService.getInstance();
         try {
             service.backupNow();
         } catch (RemoteException e) {}

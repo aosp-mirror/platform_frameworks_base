@@ -57,7 +57,6 @@ import com.android.systemui.statusbar.policy.SmartReplyView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -493,11 +492,11 @@ public class NotificationContentView extends FrameLayout {
         if (child == null) {
             mExpandedChild = null;
             mExpandedWrapper = null;
-            if (mVisibleType == VISIBLE_TYPE_EXPANDED) {
-                mVisibleType = VISIBLE_TYPE_CONTRACTED;
-            }
             if (mTransformationStartVisibleType == VISIBLE_TYPE_EXPANDED) {
                 mTransformationStartVisibleType = UNDEFINED;
+            }
+            if (mVisibleType == VISIBLE_TYPE_EXPANDED) {
+                selectLayout(false /* animate */, true /* force */);
             }
             return;
         }
@@ -531,11 +530,11 @@ public class NotificationContentView extends FrameLayout {
         if (child == null) {
             mHeadsUpChild = null;
             mHeadsUpWrapper = null;
-            if (mVisibleType == VISIBLE_TYPE_HEADSUP) {
-                mVisibleType = VISIBLE_TYPE_CONTRACTED;
-            }
             if (mTransformationStartVisibleType == VISIBLE_TYPE_HEADSUP) {
                 mTransformationStartVisibleType = UNDEFINED;
+            }
+            if (mVisibleType == VISIBLE_TYPE_HEADSUP) {
+                selectLayout(false /* animate */, true /* force */);
             }
             return;
         }
@@ -558,11 +557,11 @@ public class NotificationContentView extends FrameLayout {
         if (child == null) {
             mAmbientChild = null;
             mAmbientWrapper = null;
-            if (mVisibleType == VISIBLE_TYPE_AMBIENT) {
-                mVisibleType = VISIBLE_TYPE_CONTRACTED;
-            }
             if (mTransformationStartVisibleType == VISIBLE_TYPE_AMBIENT) {
                 mTransformationStartVisibleType = UNDEFINED;
+            }
+            if (mVisibleType == VISIBLE_TYPE_AMBIENT) {
+                selectLayout(false /* animate */, true /* force */);
             }
             return;
         }
@@ -1520,7 +1519,8 @@ public class NotificationContentView extends FrameLayout {
                         smartRepliesAndActions.smartReplies, mSmartReplyController, entry);
             }
             if (smartRepliesAndActions.smartActions != null) {
-                smartReplyView.addSmartActions(smartRepliesAndActions.smartActions);
+                smartReplyView.addSmartActions(
+                        smartRepliesAndActions.smartActions, mSmartReplyController, entry);
             }
             smartReplyContainer.setVisibility(View.VISIBLE);
         }

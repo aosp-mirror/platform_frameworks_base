@@ -32,13 +32,11 @@ public final class ProcessMemoryState implements Parcelable {
     public final long rssInBytes;
     public final long cacheInBytes;
     public final long swapInBytes;
-    // TODO(rslawik): Delete this field once ProcessMemoryHighWaterMark is ready.
-    public final long rssHighWatermarkInBytes;
     public final long startTimeNanos;
 
     public ProcessMemoryState(int uid, String processName, int oomScore, long pgfault,
                               long pgmajfault, long rssInBytes, long cacheInBytes,
-                              long swapInBytes, long rssHighWatermarkInBytes, long startTimeNanos) {
+                              long swapInBytes, long startTimeNanos) {
         this.uid = uid;
         this.processName = processName;
         this.oomScore = oomScore;
@@ -47,7 +45,6 @@ public final class ProcessMemoryState implements Parcelable {
         this.rssInBytes = rssInBytes;
         this.cacheInBytes = cacheInBytes;
         this.swapInBytes = swapInBytes;
-        this.rssHighWatermarkInBytes = rssHighWatermarkInBytes;
         this.startTimeNanos = startTimeNanos;
     }
 
@@ -60,7 +57,6 @@ public final class ProcessMemoryState implements Parcelable {
         rssInBytes = in.readLong();
         cacheInBytes = in.readLong();
         swapInBytes = in.readLong();
-        rssHighWatermarkInBytes = in.readLong();
         startTimeNanos = in.readLong();
     }
 
@@ -91,7 +87,6 @@ public final class ProcessMemoryState implements Parcelable {
         parcel.writeLong(rssInBytes);
         parcel.writeLong(cacheInBytes);
         parcel.writeLong(swapInBytes);
-        parcel.writeLong(rssHighWatermarkInBytes);
         parcel.writeLong(startTimeNanos);
     }
 }

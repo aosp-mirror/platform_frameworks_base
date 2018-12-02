@@ -250,23 +250,24 @@ public class MessagingLayoutTransformState extends TransformState {
                     otherChild = null;
                 }
             }
-            if (otherChild == null) {
+            if (otherChild == null && previousTranslation < 0) {
+                // Let's fade out as we approach the top of the screen. We can only do this if
+                // we're actually moving up
                 float distanceToTop = child.getTop() + child.getHeight() + previousTranslation;
                 transformationAmount = distanceToTop / child.getHeight();
                 transformationAmount = Math.max(0.0f, Math.min(1.0f, transformationAmount));
-                if (to) {
-                    transformationAmount = 1.0f - transformationAmount;
-                }
             }
             transformView(transformationAmount, to, child, otherChild, false, /* sameAsAny */
                     useLinearTransformation);
-            if (transformationAmount == 0.0f
-                    && otherGroup.getIsolatedMessage() == otherChild) {
+            boolean otherIsIsolated = otherGroup.getIsolatedMessage() == otherChild;
+            if (transformationAmount == 0.0f && otherIsIsolated) {
                 ownGroup.setTransformingImages(true);
             }
             if (otherChild == null) {
                 child.setTranslationY(previousTranslation);
                 setClippingDeactivated(child, true);
+            } else if (ownGroup.getIsolatedMessage() == child || otherIsIsolated) {
+                // We don't want to add any translation for the image that is transforming
             } else if (to) {
                 float totalTranslation = child.getTop() + ownGroup.getTop()
                         - otherChild.getTop() - otherChild.getTop();

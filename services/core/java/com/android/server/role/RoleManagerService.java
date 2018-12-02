@@ -30,18 +30,28 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManagerInternal;
+import android.content.pm.Signature;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.BitUtils;
+import com.android.internal.util.CollectionUtils;
+import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -114,13 +124,18 @@ public class RoleManagerService extends SystemService {
 
     @Override
     public void onStartUser(@UserIdInt int userId) {
+        RoleUserState userState;
         synchronized (mLock) {
-            //TODO only call into PermissionController if it or system upgreaded (for boot time)
-            getUserStateLocked(userId);
+            userState = getUserStateLocked(userId);
         }
-        //TODO consider calling grants only when certain conditions are met
-        // such as OS or PermissionController upgrade
-        if (RemoteRoleControllerService.DEBUG) {
+        String packagesHash = computeComponentStateHash(userId);
+        boolean needGrant;
+        synchronized (mLock) {
+            needGrant = !packagesHash.equals(userState.getLastGrantPackagesHashLocked());
+        }
+        if (needGrant) {
+            // Some vital packages state has changed since last role grant
+            // Run grants again
             Slog.i(LOG_TAG, "Granting default permissions...");
             CompletableFuture<Void> result = new CompletableFuture<>();
             getControllerService(userId).onGrantDefaultRoles(
@@ -137,10 +152,45 @@ public class RoleManagerService extends SystemService {
                     });
             try {
                 result.get(5, TimeUnit.SECONDS);
+                synchronized (mLock) {
+                    userState.setLastGrantPackagesHashLocked(packagesHash);
+                }
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 Slog.e(LOG_TAG, "Failed to grant defaults for user " + userId, e);
             }
+        } else if (RemoteRoleControllerService.DEBUG) {
+            Slog.i(LOG_TAG, "Already ran grants for package state " + packagesHash);
         }
+    }
+
+    private String computeComponentStateHash(int userId) {
+        PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        pm.forEachPackage(FunctionalUtils.uncheckExceptions(pkg -> {
+            out.write(pkg.packageName.getBytes());
+            out.write(BitUtils.toBytes(pkg.getLongVersionCode()));
+            out.write(pm.getApplicationEnabledState(pkg.packageName, userId));
+
+            ArraySet<String> enabledComponents =
+                    pm.getEnabledComponents(pkg.packageName, userId);
+            int numComponents = CollectionUtils.size(enabledComponents);
+            for (int i = 0; i < numComponents; i++) {
+                out.write(enabledComponents.valueAt(i).getBytes());
+            }
+
+            ArraySet<String> disabledComponents =
+                    pm.getDisabledComponents(pkg.packageName, userId);
+            numComponents = CollectionUtils.size(disabledComponents);
+            for (int i = 0; i < numComponents; i++) {
+                out.write(disabledComponents.valueAt(i).getBytes());
+            }
+            for (Signature signature : pkg.mSigningDetails.signatures) {
+                out.write(signature.toByteArray());
+            }
+        }));
+
+        return PackageUtils.computeSha256Digest(out.toByteArray());
     }
 
     @GuardedBy("mLock")
@@ -333,6 +383,14 @@ public class RoleManagerService extends SystemService {
         private int handleIncomingUser(@UserIdInt int userId, @NonNull String name) {
             return ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                     false, true, name, null);
+        }
+
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out,
+                FileDescriptor err, String[] args, ShellCallback callback,
+                ResultReceiver resultReceiver) {
+            (new RoleManagerShellCommand(this)).exec(
+                    this, in, out, err, args, callback, resultReceiver);
         }
     }
 }

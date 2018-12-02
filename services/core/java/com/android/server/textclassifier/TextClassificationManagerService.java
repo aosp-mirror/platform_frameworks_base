@@ -402,7 +402,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             throws RemoteException {
         try {
             final int uid = context.getPackageManager()
-                    .getPackageUid(packageName, 0);
+                    .getPackageUidAsUser(packageName, UserHandle.getCallingUserId());
             Preconditions.checkArgument(Binder.getCallingUid() == uid);
         } catch (IllegalArgumentException | NullPointerException |
                 PackageManager.NameNotFoundException e) {

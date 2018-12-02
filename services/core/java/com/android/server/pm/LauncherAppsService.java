@@ -310,7 +310,7 @@ public class LauncherAppsService extends SystemService {
                             .setPackage(packageName),
                     user);
             if (Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED, 0) == 0) {
+                    Settings.Global.SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED, 1) == 0) {
                 return launcherActivities;
             }
 

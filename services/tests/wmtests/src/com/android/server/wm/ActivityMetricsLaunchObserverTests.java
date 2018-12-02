@@ -24,20 +24,30 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMoreInteractions;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.timeout;
 
 import android.content.Intent;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseIntArray;
+import android.util.proto.ProtoOutputStream;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.wm.ActivityMetricsLaunchObserver.ActivityRecordProto;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
+
+import java.util.Arrays;
 
 /**
  * Tests for the {@link ActivityMetricsLaunchObserver} class.
@@ -51,6 +61,7 @@ import org.junit.Test;
 public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     private ActivityMetricsLogger mActivityMetricsLogger;
     private ActivityMetricsLaunchObserver mLaunchObserver;
+    private ActivityMetricsLaunchObserverRegistry mLaunchObserverRegistry;
 
     private TestActivityStack mStack;
     private TaskRecord mTask;
@@ -61,16 +72,13 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     public void setUpAMLO() throws Exception {
         setupActivityTaskManagerService();
 
-        mActivityMetricsLogger =
-                new ActivityMetricsLogger(mSupervisor, mService.mContext, mService.mH.getLooper());
-
         mLaunchObserver = mock(ActivityMetricsLaunchObserver.class);
 
-        // TODO: Use ActivityMetricsLaunchObserverRegistry .
-        java.lang.reflect.Field f =
-                mActivityMetricsLogger.getClass().getDeclaredField("mLaunchObserver");
-        f.setAccessible(true);
-        f.set(mActivityMetricsLogger, mLaunchObserver);
+        // ActivityStackSupervisor always creates its own instance of ActivityMetricsLogger.
+        mActivityMetricsLogger = mSupervisor.getActivityMetricsLogger();
+
+        mLaunchObserverRegistry = mActivityMetricsLogger.getLaunchObserverRegistry();
+        mLaunchObserverRegistry.registerLaunchObserver(mLaunchObserver);
 
         // Sometimes we need an ActivityRecord for ActivityMetricsLogger to do anything useful.
         // This seems to be the easiest way to create an ActivityRecord.
@@ -81,13 +89,45 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         mActivityRecordTrampoline = new ActivityBuilder(mService).setTask(mTask).build();
     }
 
+    @After
+    public void tearDownAMLO() throws Exception {
+        if (mLaunchObserverRegistry != null) {  // Don't NPE if setUp failed.
+            mLaunchObserverRegistry.unregisterLaunchObserver(mLaunchObserver);
+        }
+    }
+
+    static class ActivityRecordMatcher implements ArgumentMatcher</*@ActivityRecordProto*/ byte[]> {
+        private final @ActivityRecordProto byte[] mExpected;
+
+        public ActivityRecordMatcher(ActivityRecord activityRecord) {
+            mExpected = activityRecordToProto(activityRecord);
+        }
+
+        public boolean matches(@ActivityRecordProto byte[] actual) {
+            return Arrays.equals(mExpected, actual);
+        }
+    }
+
+    static @ActivityRecordProto byte[] activityRecordToProto(ActivityRecord record) {
+        return ActivityMetricsLogger.convertActivityRecordToProto(record);
+    }
+
+    static @ActivityRecordProto byte[] eqProto(ActivityRecord record) {
+        return argThat(new ActivityRecordMatcher(record));
+    }
+
+    static <T> T verifyAsync(T mock) {
+        // AMLO callbacks happen on a separate thread than AML calls, so we need to use a timeout.
+        return verify(mock, timeout(100));
+    }
+
     @Test
     public void testOnIntentStarted() throws Exception {
         Intent intent = new Intent("action 1");
 
         mActivityMetricsLogger.notifyActivityLaunching(intent);
 
-        verify(mLaunchObserver).onIntentStarted(eq(intent));
+        verifyAsync(mLaunchObserver).onIntentStarted(eq(intent));
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -102,7 +142,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT,
                 activityRecord);
 
-        verify(mLaunchObserver).onIntentFailed();
+        verifyAsync(mLaunchObserver).onIntentFailed();
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -113,7 +153,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         mActivityMetricsLogger.notifyActivityLaunched(START_SUCCESS,
                 mActivityRecord);
 
-        verify(mLaunchObserver).onActivityLaunched(eq(mActivityRecord), anyInt());
+        verifyAsync(mLaunchObserver).onActivityLaunched(eqProto(mActivityRecord), anyInt());
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -127,7 +167,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
        mActivityMetricsLogger.notifyWindowsDrawn(mActivityRecord.getWindowingMode(),
                SystemClock.uptimeMillis());
 
-       verify(mLaunchObserver).onActivityLaunchFinished(eq(mActivityRecord));
+       verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mActivityRecord));
        verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -135,12 +175,12 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     public void testOnActivityLaunchCancelled() throws Exception {
        testOnActivityLaunched();
 
-       mActivityRecord.nowVisible = true;
+       mActivityRecord.mDrawn = true;
 
        // Cannot time already-visible activities.
        mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT, mActivityRecord);
 
-       verify(mLaunchObserver).onActivityLaunchCancelled(eq(mActivityRecord));
+       verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mActivityRecord));
        verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -151,7 +191,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         mActivityMetricsLogger.notifyActivityLaunched(START_SUCCESS,
                 mActivityRecord);
 
-        verify(mLaunchObserver).onActivityLaunched(eq(mActivityRecord), anyInt());
+        verifyAsync(mLaunchObserver).onActivityLaunched(eqProto(mActivityRecord), anyInt());
 
         // A second, distinct, activity launch is coalesced into the the current app launch sequence
         mActivityMetricsLogger.notifyActivityLaunched(START_SUCCESS,
@@ -170,7 +210,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
        mActivityMetricsLogger.notifyWindowsDrawn(mActivityRecordTrampoline.getWindowingMode(),
                SystemClock.uptimeMillis());
 
-       verify(mLaunchObserver).onActivityLaunchFinished(eq(mActivityRecordTrampoline));
+       verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mActivityRecordTrampoline));
        verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -178,13 +218,26 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     public void testOnActivityLaunchCancelledTrampoline() throws Exception {
        testOnActivityLaunchedTrampoline();
 
-       mActivityRecordTrampoline.nowVisible = true;
+       mActivityRecordTrampoline.mDrawn = true;
 
        // Cannot time already-visible activities.
        mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT,
                mActivityRecordTrampoline);
 
-       verify(mLaunchObserver).onActivityLaunchCancelled(eq(mActivityRecordTrampoline));
+       verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mActivityRecordTrampoline));
        verifyNoMoreInteractions(mLaunchObserver);
+    }
+
+    @Test
+    public void testActivityRecordProtoIsNotTooBig() throws Exception {
+        // The ActivityRecordProto must not be too big, otherwise converting it at runtime
+        // will become prohibitively expensive.
+        assertWithMessage("mActivityRecord: %s", mActivityRecord).
+                that(activityRecordToProto(mActivityRecord).length).
+                isAtMost(ActivityMetricsLogger.LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE);
+
+        assertWithMessage("mActivityRecordTrampoline: %s", mActivityRecordTrampoline).
+                that(activityRecordToProto(mActivityRecordTrampoline).length).
+                isAtMost(ActivityMetricsLogger.LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE);
     }
 }

@@ -445,4 +445,9 @@ interface IActivityTaskManager {
     void setPackageScreenCompatMode(in String packageName, int mode);
     boolean getPackageAskScreenCompat(in String packageName);
     void setPackageAskScreenCompat(in String packageName, boolean ask);
+
+    /**
+     * Clears launch params for given packages.
+     */
+    void clearLaunchParamsForPackages(in List<String> packageNames);
 }

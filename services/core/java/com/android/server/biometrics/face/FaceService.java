@@ -27,9 +27,8 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
-import android.hardware.biometrics.IBiometricPromptReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
-import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.biometrics.face.V1_0.Status;
@@ -38,7 +37,6 @@ import android.hardware.face.FaceManager;
 import android.hardware.face.IFaceService;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -50,7 +48,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.biometrics.BiometricServiceBase;
@@ -89,27 +86,9 @@ public class FaceService extends BiometricServiceBase {
         public FaceAuthClient(Context context,
                 DaemonWrapper daemon, long halDeviceId, IBinder token,
                 ServiceListener listener, int targetUserId, int groupId, long opId,
-                boolean restricted, String owner, Bundle bundle,
-                IBiometricPromptReceiver dialogReceiver, IStatusBarService statusBarService,
-                boolean requireConfirmation) {
+                boolean restricted, String owner, int cookie, boolean requireConfirmation) {
             super(context, daemon, halDeviceId, token, listener, targetUserId, groupId, opId,
-                    restricted, owner, bundle, dialogReceiver, statusBarService,
-                    requireConfirmation);
-        }
-
-        @Override
-        public String getErrorString(int error, int vendorCode) {
-            return FaceManager.getErrorString(getContext(), error, vendorCode);
-        }
-
-        @Override
-        public String getAcquiredString(int acquireInfo, int vendorCode) {
-            return FaceManager.getAcquiredString(getContext(), acquireInfo, vendorCode);
-        }
-
-        @Override
-        public int getBiometricType() {
-            return BiometricAuthenticator.TYPE_FACE;
+                    restricted, owner, cookie, requireConfirmation);
         }
     }
 
@@ -162,25 +141,30 @@ public class FaceService extends BiometricServiceBase {
             final AuthenticationClientImpl client = new FaceAuthClient(getContext(),
                     mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),
                     mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName,
-                    null /* bundle */, null /* dialogReceiver */, mStatusBarService,
-                    false /* requireConfirmation */);
+                    0 /* cookie */, false /* requireConfirmation */);
             authenticateInternal(client, opId, opPackageName);
         }
 
         @Override // Binder call
-        public void authenticateFromService(boolean requireConfirmation, IBinder token, long opId,
-                int groupId, IBiometricServiceReceiver receiver, int flags,
-                String opPackageName, Bundle bundle, IBiometricPromptReceiver dialogReceiver,
-                int callingUid, int callingPid, int callingUserId) {
+        public void prepareForAuthentication(boolean requireConfirmation, IBinder token, long opId,
+                int groupId, IBiometricServiceReceiverInternal wrapperReceiver,
+                String opPackageName, int cookie, int callingUid, int callingPid,
+                int callingUserId) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
             final boolean restricted = true; // BiometricPrompt is always restricted
             final AuthenticationClientImpl client = new FaceAuthClient(getContext(),
                     mDaemonWrapper, mHalDeviceId, token,
-                    new BiometricPromptServiceListenerImpl(receiver),
-                    mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName,
-                    bundle, dialogReceiver, mStatusBarService, true /* requireConfirmation */);
+                    new BiometricPromptServiceListenerImpl(wrapperReceiver),
+                    mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName, cookie,
+                    true /* requireConfirmation */);
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
                     callingUserId);
+        }
+
+        @Override // Binder call
+        public void startPreparedClient(int cookie) {
+            checkPermission(MANAGE_BIOMETRIC);
+            startCurrentClient(cookie);
         }
 
         @Override // Binder call
@@ -191,10 +175,10 @@ public class FaceService extends BiometricServiceBase {
 
         @Override // Binder call
         public void cancelAuthenticationFromService(final IBinder token, final String opPackageName,
-                int callingUid, int callingPid, int callingUserId) {
+                int callingUid, int callingPid, int callingUserId, boolean fromClient) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
-            cancelAuthenticationInternal(token, opPackageName,
-                    callingUid, callingPid, callingUserId);
+            cancelAuthenticationInternal(token, opPackageName, callingUid, callingPid,
+                    callingUserId, fromClient);
         }
 
         @Override // Binder call
@@ -405,12 +389,9 @@ public class FaceService extends BiometricServiceBase {
      * Receives callbacks from the ClientMonitor implementations. The results are forwarded to
      * BiometricPrompt.
      */
-    private class BiometricPromptServiceListenerImpl implements ServiceListener {
-
-        private IBiometricServiceReceiver mBiometricServiceReceiver;
-
-        public BiometricPromptServiceListenerImpl(IBiometricServiceReceiver receiver) {
-            mBiometricServiceReceiver = receiver;
+    private class BiometricPromptServiceListenerImpl extends BiometricServiceListener {
+        BiometricPromptServiceListenerImpl(IBiometricServiceReceiverInternal wrapperReceiver) {
+            super(wrapperReceiver);
         }
 
         @Override
@@ -419,32 +400,18 @@ public class FaceService extends BiometricServiceBase {
             /**
              * Map the acquired codes onto existing {@link BiometricConstants} acquired codes.
              */
-            if (mBiometricServiceReceiver != null) {
-                mBiometricServiceReceiver.onAcquired(deviceId,
+            if (getWrapperReceiver() != null) {
+                getWrapperReceiver().onAcquired(
                         FaceManager.getMappedAcquiredInfo(acquiredInfo, vendorCode),
                         FaceManager.getAcquiredString(getContext(), acquiredInfo, vendorCode));
             }
         }
 
         @Override
-        public void onAuthenticationSucceeded(long deviceId,
-                BiometricAuthenticator.Identifier biometric, int userId) throws RemoteException {
-            if (mBiometricServiceReceiver != null) {
-                mBiometricServiceReceiver.onAuthenticationSucceeded(deviceId);
-            }
-        }
-
-        @Override
-        public void onAuthenticationFailed(long deviceId) throws RemoteException {
-            if (mBiometricServiceReceiver != null) {
-                mBiometricServiceReceiver.onAuthenticationFailed(deviceId);
-            }
-        }
-
-        @Override
-        public void onError(long deviceId, int error, int vendorCode) throws RemoteException {
-            if (mBiometricServiceReceiver != null) {
-                mBiometricServiceReceiver.onError(deviceId, error,
+        public void onError(long deviceId, int error, int vendorCode, int cookie)
+                throws RemoteException {
+            if (getWrapperReceiver() != null) {
+                getWrapperReceiver().onError(cookie, error,
                         FaceManager.getErrorString(getContext(), error, vendorCode));
             }
         }
@@ -455,7 +422,6 @@ public class FaceService extends BiometricServiceBase {
      * the FaceManager.
      */
     private class ServiceListenerImpl implements ServiceListener {
-
         private IFaceServiceReceiver mFaceServiceReceiver;
 
         public ServiceListenerImpl(IFaceServiceReceiver receiver) {
@@ -501,7 +467,8 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public void onError(long deviceId, int error, int vendorCode) throws RemoteException {
+        public void onError(long deviceId, int error, int vendorCode, int cookie)
+                throws RemoteException {
             if (mFaceServiceReceiver != null) {
                 mFaceServiceReceiver.onError(deviceId, error, vendorCode);
             }

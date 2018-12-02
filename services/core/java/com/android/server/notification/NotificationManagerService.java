@@ -752,7 +752,8 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onNotificationActionClick(int callingUid, int callingPid, String key,
-                int actionIndex, NotificationVisibility nv) {
+                int actionIndex, Notification.Action action, NotificationVisibility nv,
+                boolean generatedByAssistant) {
             exitIdle();
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
@@ -772,6 +773,8 @@ public class NotificationManagerService extends SystemService {
                         nv.rank, nv.count);
                 nv.recycle();
                 reportUserInteraction(r);
+                mAssistants.notifyAssistantActionClicked(
+                        r.sbn, actionIndex, action, generatedByAssistant);
             }
         }
 
@@ -6923,6 +6926,27 @@ public class NotificationManagerService extends SystemService {
                     });
         }
 
+        @GuardedBy("mNotificationLock")
+        void notifyAssistantActionClicked(
+                final StatusBarNotification sbn, int actionIndex, Notification.Action action,
+                boolean generatedByAssistant) {
+            final String key = sbn.getKey();
+            notifyAssistantLocked(
+                    sbn,
+                    false /* sameUserOnly */,
+                    (assistant, sbnHolder) -> {
+                        try {
+                            assistant.onActionClicked(
+                                    key,
+                                    action,
+                                    generatedByAssistant
+                                            ? NotificationAssistantService.SOURCE_FROM_ASSISTANT
+                                            : NotificationAssistantService.SOURCE_FROM_APP);
+                        } catch (RemoteException ex) {
+                            Log.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
+                        }
+                    });
+        }
 
         /**
          * asynchronously notify the assistant that a notification has been snoozed until a

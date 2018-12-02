@@ -104,7 +104,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private AnimatorSet mExpandAnimation;
     private boolean mIsForeground;
     private boolean mIsDeviceProvisioned;
-    private boolean mIsNoisy;
 
     private CheckSaveListener mCheckSaveListener;
     private OnSettingsClickListener mOnSettingsClickListener;
@@ -186,13 +185,12 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             final OnAppSettingsClickListener onAppSettingsClick,
             boolean isDeviceProvisioned,
             boolean isNonblockable,
-            boolean isNoisy,
             int importance)
             throws RemoteException {
         bindNotification(pm, iNotificationManager, pkg, notificationChannel,
                 numUniqueChannelsInRow, sbn, checkSaveListener, onSettingsClick,
                 onAppSettingsClick, isDeviceProvisioned, isNonblockable,
-                false /* isBlockingHelper */, false /* isUserSentimentNegative */, isNoisy,
+                false /* isBlockingHelper */, false /* isUserSentimentNegative */,
                 importance);
     }
 
@@ -210,7 +208,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean isNonblockable,
             boolean isForBlockingHelper,
             boolean isUserSentimentNegative,
-            boolean isNoisy,
             int importance)
             throws RemoteException {
         mINotificationManager = iNotificationManager;
@@ -236,7 +233,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mAppUid = mSbn.getUid();
         mDelegatePkg = mSbn.getOpPkg();
         mIsDeviceProvisioned = isDeviceProvisioned;
-        mIsNoisy = isNoisy;
 
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
                 pkg, mAppUid, false /* includeDeleted */);
@@ -411,54 +407,74 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     private void bindButtons() {
-        // Set up stay-in-notification actions
-        View block =  findViewById(R.id.block);
-        TextView keep = findViewById(R.id.keep);
-        TextView silent = findViewById(R.id.toggle_silent);
-        View minimize = findViewById(R.id.minimize);
-
         findViewById(R.id.undo).setOnClickListener(mOnUndo);
-        block.setOnClickListener(mOnStopOrMinimizeNotifications);
-        keep.setOnClickListener(mOnKeepShowing);
-        silent.setOnClickListener(mOnToggleSilent);
-        minimize.setOnClickListener(mOnStopOrMinimizeNotifications);
 
-        if (mIsNonblockable) {
-            keep.setText(android.R.string.ok);
-            block.setVisibility(GONE);
-            silent.setVisibility(GONE);
-            minimize.setVisibility(GONE);
-        } else if (mIsForeground) {
-            block.setVisibility(GONE);
-            silent.setVisibility(GONE);
-            minimize.setVisibility(VISIBLE);
-        } else {
-            block.setVisibility(VISIBLE);
-            boolean showToggleSilent = mIsNoisy
-                    && NotificationUtils.useNewInterruptionModel(mContext);
-            silent.setVisibility(showToggleSilent ? VISIBLE : GONE);
+        boolean showInterruptivenessSettings =
+                !mIsNonblockable
+                        && !mIsForeground
+                        && !mIsForBlockingHelper
+                        && NotificationUtils.useNewInterruptionModel(mContext);
+        if (showInterruptivenessSettings) {
+            findViewById(R.id.block_or_minimize).setVisibility(GONE);
+            findViewById(R.id.interruptiveness_settings).setVisibility(VISIBLE);
+            View block = findViewById(R.id.int_block);
+            TextView silent = findViewById(R.id.int_silent);
+            TextView alert = findViewById(R.id.int_alert);
+
             boolean isCurrentlyAlerting =
                     mStartingChannelOrNotificationImportance >= IMPORTANCE_DEFAULT;
-            silent.setText(isCurrentlyAlerting
-                    ? R.string.inline_silent_button_silent
-                    : R.string.inline_silent_button_alert);
-            minimize.setVisibility(GONE);
-        }
 
-        // Set up app settings link (i.e. Customize)
-        TextView settingsLinkView = findViewById(R.id.app_settings);
-        Intent settingsIntent = getAppSettingsIntent(mPm, mPackageName, mSingleNotificationChannel,
-                mSbn.getId(), mSbn.getTag());
-        if (!mIsForBlockingHelper
-                && settingsIntent != null
-                && !TextUtils.isEmpty(mSbn.getNotification().getSettingsText())) {
-            settingsLinkView.setVisibility(VISIBLE);
-            settingsLinkView.setText(mContext.getString(R.string.notification_app_settings));
-            settingsLinkView.setOnClickListener((View view) -> {
-                mAppSettingsClickListener.onClick(view, settingsIntent);
-            });
+            block.setOnClickListener(mOnStopOrMinimizeNotifications);
+            if (isCurrentlyAlerting) {
+                silent.setOnClickListener(mOnToggleSilent);
+                silent.setText(R.string.inline_silent_button_silent);
+                alert.setOnClickListener(mOnKeepShowing);
+                alert.setText(R.string.inline_silent_button_keep_alerting);
+            } else {
+                silent.setOnClickListener(mOnKeepShowing);
+                silent.setText(R.string.inline_silent_button_stay_silent);
+                alert.setOnClickListener(mOnToggleSilent);
+                alert.setText(R.string.inline_silent_button_alert);
+            }
         } else {
-            settingsLinkView.setVisibility(View.GONE);
+            findViewById(R.id.block_or_minimize).setVisibility(VISIBLE);
+            findViewById(R.id.interruptiveness_settings).setVisibility(GONE);
+            View block = findViewById(R.id.block);
+            TextView keep = findViewById(R.id.keep);
+            View minimize = findViewById(R.id.minimize);
+
+            block.setOnClickListener(mOnStopOrMinimizeNotifications);
+            keep.setOnClickListener(mOnKeepShowing);
+            minimize.setOnClickListener(mOnStopOrMinimizeNotifications);
+
+            if (mIsNonblockable) {
+                keep.setText(android.R.string.ok);
+                block.setVisibility(GONE);
+                minimize.setVisibility(GONE);
+            } else if (mIsForeground) {
+                block.setVisibility(GONE);
+                minimize.setVisibility(VISIBLE);
+            } else {
+                block.setVisibility(VISIBLE);
+                minimize.setVisibility(GONE);
+            }
+
+            // Set up app settings link (i.e. Customize)
+            TextView settingsLinkView = findViewById(R.id.app_settings);
+            Intent settingsIntent = getAppSettingsIntent(mPm, mPackageName,
+                    mSingleNotificationChannel,
+                    mSbn.getId(), mSbn.getTag());
+            if (!mIsForBlockingHelper
+                    && settingsIntent != null
+                    && !TextUtils.isEmpty(mSbn.getNotification().getSettingsText())) {
+                settingsLinkView.setVisibility(VISIBLE);
+                settingsLinkView.setText(mContext.getString(R.string.notification_app_settings));
+                settingsLinkView.setOnClickListener((View view) -> {
+                    mAppSettingsClickListener.onClick(view, settingsIntent);
+                });
+            } else {
+                settingsLinkView.setVisibility(View.GONE);
+            }
         }
     }
 

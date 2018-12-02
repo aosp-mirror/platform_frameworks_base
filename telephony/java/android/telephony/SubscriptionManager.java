@@ -569,14 +569,6 @@ public class SubscriptionManager {
     public static final String IS_OPPORTUNISTIC = "is_opportunistic";
 
     /**
-     * TelephonyProvider column name for subId of parent subscription of an opportunistic
-     * subscription.
-     * if the parent sub id is valid, then is_opportunistic should always to true.
-     * @hide
-     */
-    public static final String PARENT_SUB_ID = "parent_sub_id";
-
-    /**
      * TelephonyProvider column name for group ID. Subscriptions with same group ID
      * are considered bundled together, and should behave as a single subscription at
      * certain scenarios.

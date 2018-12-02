@@ -144,6 +144,11 @@ public final class DefaultPermissionGrantPolicy {
         LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_COARSE_LOCATION);
     }
 
+    private static final Set<String> ACTIVITY_RECOGNITION_PERMISSIONS = new ArraySet<>();
+    static {
+        ACTIVITY_RECOGNITION_PERMISSIONS.add(Manifest.permission.ACTIVITY_RECOGNITION);
+    }
+
     private static final Set<String> COARSE_LOCATION_PERMISSIONS = new ArraySet<>();
     static {
         COARSE_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_COARSE_LOCATION);
@@ -184,7 +189,7 @@ public final class DefaultPermissionGrantPolicy {
     private static final Set<String> STORAGE_PERMISSIONS = new ArraySet<>();
     static {
         // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (!SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+        if (!StorageManager.hasIsolatedStorage()) {
             STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
             STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
@@ -193,7 +198,7 @@ public final class DefaultPermissionGrantPolicy {
     private static final Set<String> MEDIA_AURAL_PERMISSIONS = new ArraySet<>();
     static {
         // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+        if (StorageManager.hasIsolatedStorage()) {
             MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
         }
     }
@@ -201,7 +206,7 @@ public final class DefaultPermissionGrantPolicy {
     private static final Set<String> MEDIA_VISUAL_PERMISSIONS = new ArraySet<>();
     static {
         // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+        if (StorageManager.hasIsolatedStorage()) {
             MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
             MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
         }
@@ -624,7 +629,7 @@ public final class DefaultPermissionGrantPolicy {
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
                         SENSORS_PERMISSIONS, STORAGE_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(packageName, userId,
-                        LOCATION_PERMISSIONS);
+                        LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
             }
         }
 

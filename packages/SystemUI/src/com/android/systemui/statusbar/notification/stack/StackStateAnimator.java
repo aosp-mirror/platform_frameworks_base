@@ -375,12 +375,9 @@ public class StackStateAnimator {
 
                 // Find the amount to translate up. This is needed in order to understand the
                 // direction of the remove animation (either downwards or upwards)
-                ExpandableViewState viewState =
-                        ((ExpandableView) event.viewAfterChangingView).getViewState();
-                int actualHeight = changingView.getActualHeight();
                 // upwards by default
                 float translationDirection = -1.0f;
-                if (viewState != null) {
+                if (event.viewAfterChangingView != null) {
                     float ownPosition = changingView.getTranslationY();
                     if (changingView instanceof ExpandableNotificationRow
                             && event.viewAfterChangingView instanceof ExpandableNotificationRow) {
@@ -396,8 +393,11 @@ public class StackStateAnimator {
                             ownPosition = changingRow.getTranslationWhenRemoved();
                         }
                     }
+                    int actualHeight = changingView.getActualHeight();
                     // there was a view after this one, Approximate the distance the next child
                     // travelled
+                    ExpandableViewState viewState =
+                            ((ExpandableView) event.viewAfterChangingView).getViewState();
                     translationDirection = ((viewState.yTranslation
                             - (ownPosition + actualHeight / 2.0f)) * 2 /
                             actualHeight);

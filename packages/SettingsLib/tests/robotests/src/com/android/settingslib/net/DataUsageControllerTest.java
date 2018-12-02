@@ -42,16 +42,15 @@ import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.FeatureFlagUtils;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class DataUsageControllerTest {
 
     private static final String SUB_ID = "Test Subscriber";
@@ -85,7 +84,6 @@ public class DataUsageControllerTest {
         doReturn(null).when(mController).getSession();
 
         assertThat(mController.getHistoricalUsageLevel(null /* template */)).isEqualTo(-1L);
-
     }
 
     @Test
@@ -95,7 +93,6 @@ public class DataUsageControllerTest {
 
         assertThat(mController.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard()))
                 .isEqualTo(0L);
-
     }
 
     @Test
@@ -113,7 +110,6 @@ public class DataUsageControllerTest {
 
         assertThat(mController.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard()))
                 .isEqualTo(receivedBytes + transmittedBytes);
-
     }
 
     @Test

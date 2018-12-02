@@ -49,13 +49,8 @@ public final class MemoryStatUtil {
     private static final boolean DEVICE_HAS_PER_APP_MEMCG =
             SystemProperties.getBoolean("ro.config.per_app_memcg", false);
 
-    /** Path to check if device has memcg */
-    private static final String MEMCG_TEST_PATH = "/dev/memcg/apps/memory.stat";
     /** Path to memory stat file for logging app start memory state */
     private static final String MEMORY_STAT_FILE_FMT = "/dev/memcg/apps/uid_%d/pid_%d/memory.stat";
-    /** Path to memory max usage file for logging app memory state */
-    private static final String MEMORY_MAX_USAGE_FILE_FMT =
-            "/dev/memcg/apps/uid_%d/pid_%d/memory.max_usage_in_bytes";
     /** Path to procfs stat file for logging app start memory state */
     private static final String PROC_STAT_FILE_FMT = "/proc/%d/stat";
     /** Path to procfs status file for logging app memory state */
@@ -98,14 +93,7 @@ public final class MemoryStatUtil {
     @Nullable
     static MemoryStat readMemoryStatFromMemcg(int uid, int pid) {
         final String statPath = String.format(Locale.US, MEMORY_STAT_FILE_FMT, uid, pid);
-        MemoryStat stat = parseMemoryStatFromMemcg(readFileContents(statPath));
-        if (stat == null) {
-            return null;
-        }
-        String maxUsagePath = String.format(Locale.US, MEMORY_MAX_USAGE_FILE_FMT, uid, pid);
-        stat.rssHighWatermarkInBytes = parseMemoryMaxUsageFromMemCg(
-                readFileContents(maxUsagePath));
-        return stat;
+        return parseMemoryStatFromMemcg(readFileContents(statPath));
     }
 
     /**
@@ -116,12 +104,7 @@ public final class MemoryStatUtil {
     @Nullable
     public static MemoryStat readMemoryStatFromProcfs(int pid) {
         final String statPath = String.format(Locale.US, PROC_STAT_FILE_FMT, pid);
-        MemoryStat stat = parseMemoryStatFromProcfs(readFileContents(statPath));
-        if (stat == null) {
-            return null;
-        }
-        stat.rssHighWatermarkInBytes = readRssHighWaterMarkFromProcfs(pid);
-        return stat;
+        return parseMemoryStatFromProcfs(readFileContents(statPath));
     }
 
     /**
@@ -185,19 +168,6 @@ public final class MemoryStatUtil {
         return memoryStat;
     }
 
-    @VisibleForTesting
-    static long parseMemoryMaxUsageFromMemCg(String memoryMaxUsageContents) {
-        if (memoryMaxUsageContents == null || memoryMaxUsageContents.isEmpty()) {
-            return 0;
-        }
-        try {
-            return Long.parseLong(memoryMaxUsageContents);
-        } catch (NumberFormatException e) {
-            Slog.e(TAG, "Failed to parse value", e);
-            return 0;
-        }
-    }
-
     /**
      * Parses relevant statistics out from the contents of the /proc/pid/stat file in procfs.
      */
@@ -258,8 +228,6 @@ public final class MemoryStatUtil {
         public long cacheInBytes;
         /** Number of bytes of swap usage */
         public long swapInBytes;
-        /** Number of bytes of peak anonymous and swap cache memory */
-        public long rssHighWatermarkInBytes;
         /** Device time when the processes started. */
         public long startTimeNanos;
     }

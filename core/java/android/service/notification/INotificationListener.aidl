@@ -16,6 +16,7 @@
 
 package android.service.notification;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.content.pm.ParceledListSlice;
@@ -50,4 +51,5 @@ oneway interface INotificationListener
     void onNotificationExpansionChanged(String key, boolean userAction, boolean expanded);
     void onNotificationDirectReply(String key);
     void onSuggestedReplySent(String key, in CharSequence reply, int source);
+    void onActionClicked(String key, in Notification.Action action, int source);
 }

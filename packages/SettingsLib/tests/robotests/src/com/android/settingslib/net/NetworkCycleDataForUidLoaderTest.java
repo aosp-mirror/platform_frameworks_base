@@ -19,7 +19,7 @@ package com.android.settingslib.net;
 import static android.app.usage.NetworkStats.Bucket.STATE_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -33,15 +33,14 @@ import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.text.format.DateUtils;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class NetworkCycleDataForUidLoaderTest {
 
     @Mock

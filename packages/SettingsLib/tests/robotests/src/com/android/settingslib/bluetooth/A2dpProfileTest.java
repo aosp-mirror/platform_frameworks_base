@@ -17,8 +17,8 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -32,7 +32,6 @@ import android.content.Context;
 import android.content.res.Resources;
 
 import com.android.settingslib.R;
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.testutils.shadow.ShadowBluetoothAdapter;
 
 import org.junit.Before;
@@ -40,26 +39,27 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowBluetoothAdapter.class})
 public class A2dpProfileTest {
 
     @Mock
-    Context mContext;
+    private Context mContext;
     @Mock
-    CachedBluetoothDeviceManager mDeviceManager;
+    private CachedBluetoothDeviceManager mDeviceManager;
     @Mock
-    LocalBluetoothProfileManager mProfileManager;
+    private LocalBluetoothProfileManager mProfileManager;
     @Mock
-    BluetoothDevice mDevice;
+    private BluetoothDevice mDevice;
     @Mock
-    BluetoothA2dp mBluetoothA2dp;
-    BluetoothProfile.ServiceListener mServiceListener;
+    private BluetoothA2dp mBluetoothA2dp;
+    private BluetoothProfile.ServiceListener mServiceListener;
 
-    A2dpProfile mProfile;
+    private A2dpProfile mProfile;
     private ShadowBluetoothAdapter mShadowBluetoothAdapter;
 
     @Before

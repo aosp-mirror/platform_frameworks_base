@@ -40,7 +40,7 @@ public abstract class EnrollClient extends ClientMonitor {
             BiometricServiceBase.ServiceListener listener, int userId, int groupId,
             byte[] cryptoToken, boolean restricted, String owner, BiometricUtils utils) {
         super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
-                owner);
+                owner, 0 /* cookie */);
         mBiometricUtils = utils;
         mCryptoToken = Arrays.copyOf(cryptoToken, cryptoToken.length);
     }

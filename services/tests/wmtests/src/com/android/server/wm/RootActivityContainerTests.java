@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
-import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -51,7 +49,6 @@ import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 
 import android.app.ActivityOptions;
-import android.app.WaitResult;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Rect;
@@ -101,11 +98,11 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     public void testReplacingTaskInPinnedStack() {
         final ActivityRecord firstActivity = new ActivityBuilder(mService).setCreateTask(true)
                 .setStack(mFullscreenStack).build();
-        final TaskRecord firstTask = firstActivity.getTask();
+        final TaskRecord firstTask = firstActivity.getTaskRecord();
 
         final ActivityRecord secondActivity = new ActivityBuilder(mService).setCreateTask(true)
                 .setStack(mFullscreenStack).build();
-        final TaskRecord secondTask = secondActivity.getTask();
+        final TaskRecord secondTask = secondActivity.getTaskRecord();
 
         mFullscreenStack.moveToFront("testReplacingTaskInPinnedStack");
 
@@ -257,7 +254,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         assertTrue(pinnedActivity.isFocusable());
 
         // Without the overridding activity, stack should not be focusable.
-        pinnedStack.removeTask(pinnedActivity.getTask(), "testFocusability",
+        pinnedStack.removeTask(pinnedActivity.getTaskRecord(), "testFocusability",
                 REMOVE_TASK_MODE_DESTROYING);
         assertFalse(pinnedStack.isFocusable());
     }

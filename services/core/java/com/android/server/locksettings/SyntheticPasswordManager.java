@@ -26,9 +26,9 @@ import android.hardware.weaver.V1_0.WeaverConfig;
 import android.hardware.weaver.V1_0.WeaverReadResponse;
 import android.hardware.weaver.V1_0.WeaverReadStatus;
 import android.hardware.weaver.V1_0.WeaverStatus;
-import android.security.GateKeeper;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.security.GateKeeper;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.util.ArrayMap;
@@ -102,7 +102,8 @@ public class SyntheticPasswordManager {
     private static final int INVALID_WEAVER_SLOT = -1;
 
     private static final byte SYNTHETIC_PASSWORD_VERSION_V1 = 1;
-    private static final byte SYNTHETIC_PASSWORD_VERSION = 2;
+    private static final byte SYNTHETIC_PASSWORD_VERSION_V2 = 2;
+    private static final byte SYNTHETIC_PASSWORD_VERSION_V3 = 3;
     private static final byte SYNTHETIC_PASSWORD_PASSWORD_BASED = 0;
     private static final byte SYNTHETIC_PASSWORD_TOKEN_BASED = 1;
 
@@ -128,6 +129,8 @@ public class SyntheticPasswordManager {
     private static final byte[] PERSONALISATION_WEAVER_PASSWORD = "weaver-pwd".getBytes();
     private static final byte[] PERSONALISATION_WEAVER_KEY = "weaver-key".getBytes();
     private static final byte[] PERSONALISATION_WEAVER_TOKEN = "weaver-token".getBytes();
+    private static final byte[] PERSONALISATION_CONTEXT =
+        "android-synthetic-password-personalization-context".getBytes();
 
     static class AuthenticationResult {
         public AuthenticationToken authToken;
@@ -136,6 +139,7 @@ public class SyntheticPasswordManager {
     }
 
     static class AuthenticationToken {
+        private final byte mVersion;
         /*
          * Here is the relationship between all three fields:
          * P0 and P1 are two randomly-generated blocks. P1 is stored on disk but P0 is not.
@@ -146,29 +150,38 @@ public class SyntheticPasswordManager {
         private @Nullable byte[] P1;
         private @NonNull String syntheticPassword;
 
+        AuthenticationToken(byte version) {
+            mVersion = version;
+        }
+
+        private byte[] derivePassword(byte[] personalization) {
+            if (mVersion == SYNTHETIC_PASSWORD_VERSION_V3) {
+                return (new SP800Derive(syntheticPassword.getBytes()))
+                    .withContext(personalization, PERSONALISATION_CONTEXT);
+            } else {
+                return SyntheticPasswordCrypto.personalisedHash(personalization,
+                        syntheticPassword.getBytes());
+            }
+        }
+
         public String deriveKeyStorePassword() {
-            return bytesToHex(SyntheticPasswordCrypto.personalisedHash(
-                    PERSONALIZATION_KEY_STORE_PASSWORD, syntheticPassword.getBytes()));
+            return bytesToHex(derivePassword(PERSONALIZATION_KEY_STORE_PASSWORD));
         }
 
         public byte[] deriveGkPassword() {
-            return SyntheticPasswordCrypto.personalisedHash(PERSONALIZATION_SP_GK_AUTH,
-                    syntheticPassword.getBytes());
+            return derivePassword(PERSONALIZATION_SP_GK_AUTH);
         }
 
         public byte[] deriveDiskEncryptionKey() {
-            return SyntheticPasswordCrypto.personalisedHash(PERSONALIZATION_FBE_KEY,
-                    syntheticPassword.getBytes());
+            return derivePassword(PERSONALIZATION_FBE_KEY);
         }
 
         public byte[] deriveVendorAuthSecret() {
-            return SyntheticPasswordCrypto.personalisedHash(PERSONALIZATION_AUTHSECRET_KEY,
-                    syntheticPassword.getBytes());
+            return derivePassword(PERSONALIZATION_AUTHSECRET_KEY);
         }
 
         public byte[] derivePasswordHashFactor() {
-            return SyntheticPasswordCrypto.personalisedHash(PERSONALIZATION_PASSWORD_HASH,
-                    syntheticPassword.getBytes());
+            return derivePassword(PERSONALIZATION_PASSWORD_HASH);
         }
 
         private void initialize(byte[] P0, byte[] P1) {
@@ -185,7 +198,7 @@ public class SyntheticPasswordManager {
         }
 
         protected static AuthenticationToken create() {
-            AuthenticationToken result = new AuthenticationToken();
+            AuthenticationToken result = new AuthenticationToken(SYNTHETIC_PASSWORD_VERSION_V3);
             result.initialize(secureRandom(SYNTHETIC_PASSWORD_LENGTH),
                     secureRandom(SYNTHETIC_PASSWORD_LENGTH));
             return result;
@@ -802,7 +815,16 @@ public class SyntheticPasswordManager {
         }
         byte[] content = createSPBlob(getHandleName(handle), secret, applicationId, sid);
         byte[] blob = new byte[content.length + 1 + 1];
-        blob[0] = SYNTHETIC_PASSWORD_VERSION;
+        /*
+         * We can upgrade from v1 to v2 because that's just a change in the way that
+         * the SP is stored. However, we can't upgrade to v3 because that is a change
+         * in the way that passwords are derived from the SP.
+         */
+        if (authToken.mVersion == SYNTHETIC_PASSWORD_VERSION_V3) {
+            blob[0] = SYNTHETIC_PASSWORD_VERSION_V3;
+        } else {
+            blob[0] = SYNTHETIC_PASSWORD_VERSION_V2;
+        }
         blob[1] = type;
         System.arraycopy(content, 0, blob, 2, content.length);
         saveState(SP_BLOB_NAME, blob, handle, userId);
@@ -940,7 +962,9 @@ public class SyntheticPasswordManager {
             return null;
         }
         final byte version = blob[0];
-        if (version != SYNTHETIC_PASSWORD_VERSION && version != SYNTHETIC_PASSWORD_VERSION_V1) {
+        if (version != SYNTHETIC_PASSWORD_VERSION_V3
+                && version != SYNTHETIC_PASSWORD_VERSION_V2
+                && version != SYNTHETIC_PASSWORD_VERSION_V1) {
             throw new RuntimeException("Unknown blob version");
         }
         if (blob[1] != type) {
@@ -958,7 +982,7 @@ public class SyntheticPasswordManager {
             Log.e(TAG, "Fail to decrypt SP for user " + userId);
             return null;
         }
-        AuthenticationToken result = new AuthenticationToken();
+        AuthenticationToken result = new AuthenticationToken(version);
         if (type == SYNTHETIC_PASSWORD_TOKEN_BASED) {
             if (!loadEscrowData(result, userId)) {
                 Log.e(TAG, "User is not escrowable: " + userId);

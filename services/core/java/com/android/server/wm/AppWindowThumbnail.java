@@ -16,13 +16,13 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.AppWindowThumbnailProto.HEIGHT;
+import static com.android.server.wm.AppWindowThumbnailProto.SURFACE_ANIMATOR;
+import static com.android.server.wm.AppWindowThumbnailProto.WIDTH;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
-import static com.android.server.wm.AppWindowThumbnailProto.HEIGHT;
-import static com.android.server.wm.AppWindowThumbnailProto.SURFACE_ANIMATOR;
-import static com.android.server.wm.AppWindowThumbnailProto.WIDTH;
 
 import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
@@ -53,7 +53,8 @@ class AppWindowThumbnail implements Animatable {
 
     AppWindowThumbnail(Transaction t, AppWindowToken appToken, GraphicBuffer thumbnailHeader) {
         mAppToken = appToken;
-        mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, appToken.mService);
+        mSurfaceAnimator =
+                new SurfaceAnimator(this, this::onAnimationFinished, appToken.mWmService);
         mWidth = thumbnailHeader.getWidth();
         mHeight = thumbnailHeader.getHeight();
 
@@ -65,7 +66,7 @@ class AppWindowThumbnail implements Animatable {
         // this to the task.
         mSurfaceControl = appToken.makeSurface()
                 .setName("thumbnail anim: " + appToken.toString())
-                .setSize(mWidth, mHeight)
+                .setBufferSize(mWidth, mHeight)
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .setMetadata(appToken.windowType,
                         window != null ? window.mOwnerUid : Binder.getCallingUid())
@@ -93,11 +94,11 @@ class AppWindowThumbnail implements Animatable {
 
     void startAnimation(Transaction t, Animation anim, Point position) {
         anim.restrictDuration(MAX_ANIMATION_DURATION);
-        anim.scaleCurrentDuration(mAppToken.mService.getTransitionAnimationScaleLocked());
+        anim.scaleCurrentDuration(mAppToken.mWmService.getTransitionAnimationScaleLocked());
         mSurfaceAnimator.startAnimation(t, new LocalAnimationAdapter(
                 new WindowAnimationSpec(anim, position,
                         mAppToken.getDisplayContent().mAppTransition.canSkipFirstFrame()),
-                mAppToken.mService.mSurfaceAnimationRunner), false /* hidden */);
+                mAppToken.mWmService.mSurfaceAnimationRunner), false /* hidden */);
     }
 
     private void onAnimationFinished() {

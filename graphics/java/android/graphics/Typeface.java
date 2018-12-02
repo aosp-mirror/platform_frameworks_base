@@ -163,9 +163,6 @@ public class Typeface {
     private int[] mSupportedAxes;
     private static final int[] EMPTY_AXES = {};
 
-    // The underlying font families.
-    private final FontFamily[] mFamilies;
-
     @UnsupportedAppUsage
     private static void setDefault(Typeface t) {
         sDefaultTypeface = t;
@@ -655,10 +652,11 @@ public class Typeface {
          * Returns the maximum capacity of custom fallback families.
          *
          * This includes the the first font family passed to the constructor.
+         * It is guaranteed that the value will be greater than or equal to 64.
          *
          * @return the maximum number of font families for the custom fallback
          */
-        public static @IntRange(from = 1) int getMaxCustomFallbackCount() {
+        public static @IntRange(from = 64) int getMaxCustomFallbackCount() {
             return MAX_CUSTOM_FALLBACK;
         }
 
@@ -731,21 +729,17 @@ public class Typeface {
         public Typeface build() {
             final int userFallbackSize = mFamilies.size();
             final FontFamily[] fallback = SystemFonts.getSystemFallback(mFallbackName);
-            final FontFamily[] fullFamilies = new FontFamily[fallback.length + userFallbackSize];
             final long[] ptrArray = new long[fallback.length + userFallbackSize];
             for (int i = 0; i < userFallbackSize; ++i) {
                 ptrArray[i] = mFamilies.get(i).getNativePtr();
-                fullFamilies[i] = mFamilies.get(i);
             }
             for (int i = 0; i < fallback.length; ++i) {
                 ptrArray[i + userFallbackSize] = fallback[i].getNativePtr();
-                fullFamilies[i + userFallbackSize] = fallback[i];
             }
             final int weight = mStyle == null ? 400 : mStyle.getWeight();
             final int italic =
                     (mStyle == null || mStyle.getSlant() == FontStyle.FONT_SLANT_UPRIGHT) ?  0 : 1;
-
-            return new Typeface(nativeCreateFromArray(ptrArray, weight, italic), fullFamilies);
+            return new Typeface(nativeCreateFromArray(ptrArray, weight, italic));
         }
     }
 
@@ -810,7 +804,7 @@ public class Typeface {
                 }
             }
 
-            typeface = new Typeface(nativeCreateFromTypeface(ni, style), family.mFamilies);
+            typeface = new Typeface(nativeCreateFromTypeface(ni, style));
             styles.put(style, typeface);
         }
         return typeface;
@@ -878,8 +872,7 @@ public class Typeface {
             }
 
             typeface = new Typeface(
-                    nativeCreateFromTypefaceWithExactStyle(
-                            base.native_instance, weight, italic), base.mFamilies);
+                    nativeCreateFromTypefaceWithExactStyle(base.native_instance, weight, italic));
             innerCache.put(key, typeface);
         }
         return typeface;
@@ -889,8 +882,7 @@ public class Typeface {
     public static Typeface createFromTypefaceWithVariation(@Nullable Typeface family,
             @NonNull List<FontVariationAxis> axes) {
         final Typeface base = family == null ? Typeface.DEFAULT : family;
-        return new Typeface(nativeCreateFromTypefaceWithVariation(base.native_instance, axes),
-                base.mFamilies);
+        return new Typeface(nativeCreateFromTypefaceWithVariation(base.native_instance, axes));
     }
 
     /**
@@ -996,7 +988,7 @@ public class Typeface {
             ptrArray[i] = families[i].getNativePtr();
         }
         return new Typeface(nativeCreateFromArray(ptrArray,
-                  RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE), families);
+                  RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
     }
 
     /**
@@ -1044,19 +1036,6 @@ public class Typeface {
         }
 
         native_instance = ni;
-        mFamilies = new FontFamily[0];
-        sRegistry.registerNativeAllocation(this, native_instance);
-        mStyle = nativeGetStyle(ni);
-        mWeight = nativeGetWeight(ni);
-    }
-
-    private Typeface(long ni, @NonNull FontFamily[] families) {
-        if (ni == 0) {
-            throw new IllegalStateException("native typeface cannot be made");
-        }
-
-        native_instance = ni;
-        mFamilies = families;
         sRegistry.registerNativeAllocation(this, native_instance);
         mStyle = nativeGetStyle(ni);
         mWeight = nativeGetWeight(ni);
@@ -1083,8 +1062,7 @@ public class Typeface {
             final Typeface base = systemFontMap.get(alias.getToName());
             final int weight = alias.getWeight();
             final Typeface newFace = weight == 400 ? base :
-                    new Typeface(nativeCreateWeightAlias(base.native_instance, weight),
-                            base.mFamilies);
+                    new Typeface(nativeCreateWeightAlias(base.native_instance, weight));
             systemFontMap.put(alias.getName(), newFace);
         }
     }

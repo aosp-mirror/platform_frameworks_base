@@ -827,6 +827,8 @@ public class Activity extends ContextThemeWrapper
     /** The screen observation manager. Always access via {@link #getIntelligenceManager()}. */
     @Nullable private IntelligenceManager mIntelligenceManager;
 
+    private final ArrayList<Application.ActivityLifecycleCallbacks> mActivityLifecycleCallbacks =
+            new ArrayList<Application.ActivityLifecycleCallbacks>();
 
     static final class NonConfigurationInstances {
         Object activity;
@@ -1065,6 +1067,288 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Register an {@link Application.ActivityLifecycleCallbacks} instance that receives
+     * lifecycle callbacks for only this Activity.
+     * <p>
+     * In relation to any
+     * {@link Application#registerActivityLifecycleCallbacks Application registered callbacks},
+     * the callbacks registered here will always occur nested within those callbacks. This means:
+     * <ul>
+     *     <li>Pre events will first be sent to Application registered callbacks, then to callbacks
+     *     registered here.</li>
+     *     <li>{@link Application.ActivityLifecycleCallbacks#onActivityCreated(Activity, Bundle)},
+     *     {@link Application.ActivityLifecycleCallbacks#onActivityStarted(Activity)}, and
+     *     {@link Application.ActivityLifecycleCallbacks#onActivityResumed(Activity)} will
+     *     be sent first to Application registered callbacks, then to callbacks registered here.
+     *     For all other events, callbacks registered here will be sent first.</li>
+     *     <li>Post events will first be sent to callbacks registered here, then to
+     *     Application registered callbacks.</li>
+     * </ul>
+     * <p>
+     * If multiple callbacks are registered here, they receive events in a first in (up through
+     * {@link Application.ActivityLifecycleCallbacks#onActivityPostResumed}, last out
+     * ordering.
+     * <p>
+     * It is strongly recommended to register this in the constructor of your Activity to ensure
+     * you get all available callbacks. As this callback is associated with only this Activity,
+     * it is not usually necessary to {@link #unregisterActivityLifecycleCallbacks unregister} it
+     * unless you specifically do not want to receive further lifecycle callbacks.
+     *
+     * @param callback The callback instance to register
+     */
+    public void registerActivityLifecycleCallbacks(
+            @NonNull Application.ActivityLifecycleCallbacks callback) {
+        synchronized (mActivityLifecycleCallbacks) {
+            mActivityLifecycleCallbacks.add(callback);
+        }
+    }
+
+    /**
+     * Unregister an {@link Application.ActivityLifecycleCallbacks} previously registered
+     * with {@link #registerActivityLifecycleCallbacks}. It will not receive any further
+     * callbacks.
+     *
+     * @param callback The callback instance to unregister
+     * @see #registerActivityLifecycleCallbacks
+     */
+    public void unregisterActivityLifecycleCallbacks(
+            @NonNull Application.ActivityLifecycleCallbacks callback) {
+        synchronized (mActivityLifecycleCallbacks) {
+            mActivityLifecycleCallbacks.remove(callback);
+        }
+    }
+
+    private void dispatchActivityPreCreated(@Nullable Bundle savedInstanceState) {
+        getApplication().dispatchActivityPreCreated(this, savedInstanceState);
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityPreCreated(this,
+                        savedInstanceState);
+            }
+        }
+    }
+
+    private void dispatchActivityCreated(@Nullable Bundle savedInstanceState) {
+        getApplication().dispatchActivityCreated(this, savedInstanceState);
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityCreated(this,
+                        savedInstanceState);
+            }
+        }
+    }
+
+    private void dispatchActivityPostCreated(@Nullable Bundle savedInstanceState) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityPostCreated(this,
+                        savedInstanceState);
+            }
+        }
+        getApplication().dispatchActivityPostCreated(this, savedInstanceState);
+    }
+
+    private void dispatchActivityPreStarted() {
+        getApplication().dispatchActivityPreStarted(this);
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityPreStarted(this);
+            }
+        }
+    }
+
+    private void dispatchActivityStarted() {
+        getApplication().dispatchActivityStarted(this);
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityStarted(this);
+            }
+        }
+    }
+
+    private void dispatchActivityPostStarted() {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i])
+                        .onActivityPostStarted(this);
+            }
+        }
+        getApplication().dispatchActivityPostStarted(this);
+    }
+
+    private void dispatchActivityPreResumed() {
+        getApplication().dispatchActivityPreResumed(this);
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityPreResumed(this);
+            }
+        }
+    }
+
+    private void dispatchActivityResumed() {
+        getApplication().dispatchActivityResumed(this);
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityResumed(this);
+            }
+        }
+    }
+
+    private void dispatchActivityPostResumed() {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityPostResumed(this);
+            }
+        }
+        getApplication().dispatchActivityPostResumed(this);
+    }
+
+    private void dispatchActivityPrePaused() {
+        getApplication().dispatchActivityPrePaused(this);
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = callbacks.length - 1; i >= 0; i--) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityPrePaused(this);
+            }
+        }
+    }
+
+    private void dispatchActivityPaused() {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = callbacks.length - 1; i >= 0; i--) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityPaused(this);
+            }
+        }
+        getApplication().dispatchActivityPaused(this);
+    }
+
+    private void dispatchActivityPostPaused() {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = callbacks.length - 1; i >= 0; i--) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityPostPaused(this);
+            }
+        }
+        getApplication().dispatchActivityPostPaused(this);
+    }
+
+    private void dispatchActivityPreStopped() {
+        getApplication().dispatchActivityPreStopped(this);
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = callbacks.length - 1; i >= 0; i--) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityPreStopped(this);
+            }
+        }
+    }
+
+    private void dispatchActivityStopped() {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = callbacks.length - 1; i >= 0; i--) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityStopped(this);
+            }
+        }
+        getApplication().dispatchActivityStopped(this);
+    }
+
+    private void dispatchActivityPostStopped() {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = callbacks.length - 1; i >= 0; i--) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i])
+                        .onActivityPostStopped(this);
+            }
+        }
+        getApplication().dispatchActivityPostStopped(this);
+    }
+
+    private void dispatchActivityPreSaveInstanceState(@NonNull Bundle outState) {
+        getApplication().dispatchActivityPreSaveInstanceState(this, outState);
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = callbacks.length - 1; i >= 0; i--) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i])
+                        .onActivityPreSaveInstanceState(this, outState);
+            }
+        }
+    }
+
+    private void dispatchActivitySaveInstanceState(@NonNull Bundle outState) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = callbacks.length - 1; i >= 0; i--) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i])
+                        .onActivitySaveInstanceState(this, outState);
+            }
+        }
+        getApplication().dispatchActivitySaveInstanceState(this, outState);
+    }
+
+    private void dispatchActivityPostSaveInstanceState(@NonNull Bundle outState) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = callbacks.length - 1; i >= 0; i--) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i])
+                        .onActivityPostSaveInstanceState(this, outState);
+            }
+        }
+        getApplication().dispatchActivityPostSaveInstanceState(this, outState);
+    }
+
+    private void dispatchActivityPreDestroyed() {
+        getApplication().dispatchActivityPreDestroyed(this);
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = callbacks.length - 1; i >= 0; i--) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i])
+                        .onActivityPreDestroyed(this);
+            }
+        }
+    }
+
+    private void dispatchActivityDestroyed() {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = callbacks.length - 1; i >= 0; i--) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i]).onActivityDestroyed(this);
+            }
+        }
+        getApplication().dispatchActivityDestroyed(this);
+    }
+
+    private void dispatchActivityPostDestroyed() {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = callbacks.length - 1; i >= 0; i--) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i])
+                        .onActivityPostDestroyed(this);
+            }
+        }
+        getApplication().dispatchActivityPostDestroyed(this);
+    }
+
+    private Object[] collectActivityLifecycleCallbacks() {
+        Object[] callbacks = null;
+        synchronized (mActivityLifecycleCallbacks) {
+            if (mActivityLifecycleCallbacks.size() > 0) {
+                callbacks = mActivityLifecycleCallbacks.toArray();
+            }
+        }
+        return callbacks;
+    }
+
+    /**
      * Called when the activity is starting.  This is where most initialization
      * should go: calling {@link #setContentView(int)} to inflate the
      * activity's UI, using {@link #findViewById} to programmatically interact
@@ -1119,7 +1403,7 @@ public class Activity extends ContextThemeWrapper
                     ? mLastNonConfigurationInstances.fragments : null);
         }
         mFragments.dispatchCreate();
-        getApplication().dispatchActivityCreated(this, savedInstanceState);
+        dispatchActivityCreated(savedInstanceState);
         if (mVoiceInteractor != null) {
             mVoiceInteractor.attachActivity(this);
         }
@@ -1355,7 +1639,7 @@ public class Activity extends ContextThemeWrapper
 
         mFragments.doLoaderStart();
 
-        getApplication().dispatchActivityStarted(this);
+        dispatchActivityStarted();
 
         if (mAutoFillResetNeeded) {
             getAutofillManager().onVisibleForAutofill();
@@ -1426,7 +1710,7 @@ public class Activity extends ContextThemeWrapper
     @CallSuper
     protected void onResume() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onResume " + this);
-        getApplication().dispatchActivityResumed(this);
+        dispatchActivityResumed();
         mActivityTransitionState.onResume(this, isTopOfTask());
         enableAutofillCompatibilityIfNeeded();
         if (mAutoFillResetNeeded) {
@@ -1642,13 +1926,13 @@ public class Activity extends ContextThemeWrapper
      * @param outState The bundle to save the state to.
      */
     final void performSaveInstanceState(@NonNull Bundle outState) {
-        getApplication().dispatchActivityPreSaveInstanceState(this, outState);
+        dispatchActivityPreSaveInstanceState(outState);
         onSaveInstanceState(outState);
         saveManagedDialogs(outState);
         mActivityTransitionState.saveState(outState);
         storeHasCurrentPermissionRequest(outState);
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onSaveInstanceState " + this + ": " + outState);
-        getApplication().dispatchActivityPostSaveInstanceState(this, outState);
+        dispatchActivityPostSaveInstanceState(outState);
     }
 
     /**
@@ -1662,13 +1946,13 @@ public class Activity extends ContextThemeWrapper
      */
     final void performSaveInstanceState(@NonNull Bundle outState,
             @NonNull PersistableBundle outPersistentState) {
-        getApplication().dispatchActivityPreSaveInstanceState(this, outState);
+        dispatchActivityPreSaveInstanceState(outState);
         onSaveInstanceState(outState, outPersistentState);
         saveManagedDialogs(outState);
         storeHasCurrentPermissionRequest(outState);
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onSaveInstanceState " + this + ": " + outState +
                 ", " + outPersistentState);
-        getApplication().dispatchActivityPostSaveInstanceState(this, outState);
+        dispatchActivityPostSaveInstanceState(outState);
     }
 
     /**
@@ -1731,7 +2015,7 @@ public class Activity extends ContextThemeWrapper
             outState.putBoolean(AUTOFILL_RESET_NEEDED, true);
             getAutofillManager().onSaveInstanceState(outState);
         }
-        getApplication().dispatchActivitySaveInstanceState(this, outState);
+        dispatchActivitySaveInstanceState(outState);
     }
 
     /**
@@ -1831,7 +2115,7 @@ public class Activity extends ContextThemeWrapper
     @CallSuper
     protected void onPause() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onPause " + this);
-        getApplication().dispatchActivityPaused(this);
+        dispatchActivityPaused();
         if (mAutoFillResetNeeded) {
             if (!mAutoFillIgnoreFirstResumePause) {
                 if (DEBUG_LIFECYCLE) Slog.v(TAG, "autofill notifyViewExited " + this);
@@ -2015,7 +2299,7 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStop " + this);
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
         mActivityTransitionState.onStop();
-        getApplication().dispatchActivityStopped(this);
+        dispatchActivityStopped();
         mTranslucentCallback = null;
         mCalled = true;
 
@@ -2104,7 +2388,7 @@ public class Activity extends ContextThemeWrapper
             mActionBar.onDestroy();
         }
 
-        getApplication().dispatchActivityDestroyed(this);
+        dispatchActivityDestroyed();
 
         notifyIntelligenceManagerIfNeeded(ContentCaptureEvent.TYPE_ACTIVITY_DESTROYED);
 
@@ -7284,7 +7568,7 @@ public class Activity extends ContextThemeWrapper
 
     @UnsupportedAppUsage
     final void performCreate(Bundle icicle, PersistableBundle persistentState) {
-        getApplication().dispatchActivityPreCreated(this, icicle);
+        dispatchActivityPreCreated(icicle);
         mCanEnterPictureInPicture = true;
         restoreHasCurrentPermissionRequest(icicle);
         if (persistentState != null) {
@@ -7299,7 +7583,7 @@ public class Activity extends ContextThemeWrapper
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
         mFragments.dispatchActivityCreated();
         mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
-        getApplication().dispatchActivityPostCreated(this, icicle);
+        dispatchActivityPostCreated(icicle);
     }
 
     final void performNewIntent(@NonNull Intent intent) {
@@ -7308,7 +7592,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performStart(String reason) {
-        getApplication().dispatchActivityPreStarted(this);
+        dispatchActivityPreStarted();
         mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
         mFragments.noteStateNotSaved();
         mCalled = false;
@@ -7351,7 +7635,7 @@ public class Activity extends ContextThemeWrapper
         }
 
         mActivityTransitionState.enterReady(this);
-        getApplication().dispatchActivityPostStarted(this);
+        dispatchActivityPostStarted();
     }
 
     /**
@@ -7406,7 +7690,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performResume(boolean followedByPause, String reason) {
-        getApplication().dispatchActivityPreResumed(this);
+        dispatchActivityPreResumed();
         performRestart(true /* start */, reason);
 
         mFragments.execPendingActions();
@@ -7456,11 +7740,11 @@ public class Activity extends ContextThemeWrapper
                 "Activity " + mComponent.toShortString() +
                 " did not call through to super.onPostResume()");
         }
-        getApplication().dispatchActivityPostResumed(this);
+        dispatchActivityPostResumed();
     }
 
     final void performPause() {
-        getApplication().dispatchActivityPrePaused(this);
+        dispatchActivityPrePaused();
         mDoReportFullyDrawn = false;
         mFragments.dispatchPause();
         mCalled = false;
@@ -7473,7 +7757,7 @@ public class Activity extends ContextThemeWrapper
                     "Activity " + mComponent.toShortString() +
                     " did not call through to super.onPause()");
         }
-        getApplication().dispatchActivityPostPaused(this);
+        dispatchActivityPostPaused();
     }
 
     final void performUserLeaving() {
@@ -7489,7 +7773,7 @@ public class Activity extends ContextThemeWrapper
         mCanEnterPictureInPicture = false;
 
         if (!mStopped) {
-            getApplication().dispatchActivityPreStopped(this);
+            dispatchActivityPreStopped();
             if (mWindow != null) {
                 mWindow.closeAllPanels();
             }
@@ -7524,13 +7808,13 @@ public class Activity extends ContextThemeWrapper
             }
 
             mStopped = true;
-            getApplication().dispatchActivityPostStopped(this);
+            dispatchActivityPostStopped();
         }
         mResumed = false;
     }
 
     final void performDestroy() {
-        getApplication().dispatchActivityPreDestroyed(this);
+        dispatchActivityPreDestroyed();
         mDestroyed = true;
         mWindow.destroy();
         mFragments.dispatchDestroy();
@@ -7540,7 +7824,7 @@ public class Activity extends ContextThemeWrapper
         if (mVoiceInteractor != null) {
             mVoiceInteractor.detachActivity();
         }
-        getApplication().dispatchActivityPostDestroyed(this);
+        dispatchActivityPostDestroyed();
     }
 
     final void dispatchMultiWindowModeChanged(boolean isInMultiWindowMode,

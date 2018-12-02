@@ -497,7 +497,7 @@ public final class DisplayManagerService extends SystemService {
 
         // List is self-synchronized copy-on-write.
         for (DisplayTransactionListener listener : mDisplayTransactionListeners) {
-            listener.onDisplayTransaction();
+            listener.onDisplayTransaction(t);
         }
     }
 

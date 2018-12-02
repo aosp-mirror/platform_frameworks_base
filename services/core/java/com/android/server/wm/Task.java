@@ -302,7 +302,6 @@ class Task extends WindowContainer<AppWindowToken> {
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
-        updateSurfaceSize(dc);
         adjustBoundsForDisplayChangeIfNeeded(dc);
         super.onDisplayChanged(dc);
     }
@@ -333,7 +332,7 @@ class Task extends WindowContainer<AppWindowToken> {
 
     boolean isResizeable() {
         return ActivityInfo.isResizeableMode(mResizeMode) || mSupportsPictureInPicture
-                || mService.mForceResizableTasks;
+                || mWmService.mForceResizableTasks;
     }
 
     /**
@@ -582,7 +581,7 @@ class Task extends WindowContainer<AppWindowToken> {
     }
 
     boolean isTaskAnimating() {
-        final RecentsAnimationController recentsAnim = mService.getRecentsAnimationController();
+        final RecentsAnimationController recentsAnim = mWmService.getRecentsAnimationController();
         if (recentsAnim != null) {
             if (recentsAnim.isAnimatingTask(this)) {
                 return true;
@@ -629,13 +628,13 @@ class Task extends WindowContainer<AppWindowToken> {
     }
 
     void forceWindowsScaleable(boolean force) {
-        mService.openSurfaceTransaction();
+        mWmService.openSurfaceTransaction();
         try {
             for (int i = mChildren.size() - 1; i >= 0; i--) {
                 mChildren.get(i).forceWindowsScaleableInTransaction(force);
             }
         } finally {
-            mService.closeSurfaceTransaction("forceWindowsScaleable");
+            mWmService.closeSurfaceTransaction("forceWindowsScaleable");
         }
     }
 

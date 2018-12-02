@@ -554,7 +554,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     final Handler mHandler;
     @VisibleForTesting
-    public final Handler mUidEventHandler;
+    final Handler mUidEventHandler;
 
     private final ServiceThread mUidEventThread;
 
@@ -1465,7 +1465,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @VisibleForTesting
-    public void updateNetworks() throws InterruptedException {
+    void updateNetworks() throws InterruptedException {
         updateNetworksInternal();
         final CountDownLatch latch = new CountDownLatch(1);
         mHandler.post(() -> {
@@ -1510,7 +1510,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * @return cycleDay to use in the mobile NetworkPolicy.
      */
     @VisibleForTesting
-    public int getCycleDayFromCarrierConfig(@Nullable PersistableBundle config,
+    int getCycleDayFromCarrierConfig(@Nullable PersistableBundle config,
             int fallbackCycleDay) {
         if (config == null) {
             return fallbackCycleDay;
@@ -1542,7 +1542,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * @return warningBytes to use in the mobile NetworkPolicy.
      */
     @VisibleForTesting
-    public long getWarningBytesFromCarrierConfig(@Nullable PersistableBundle config,
+    long getWarningBytesFromCarrierConfig(@Nullable PersistableBundle config,
             long fallbackWarningBytes) {
         if (config == null) {
             return fallbackWarningBytes;
@@ -1575,7 +1575,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * @return limitBytes to use in the mobile NetworkPolicy.
      */
     @VisibleForTesting
-    public long getLimitBytesFromCarrierConfig(@Nullable PersistableBundle config,
+    long getLimitBytesFromCarrierConfig(@Nullable PersistableBundle config,
             long fallbackLimitBytes) {
         if (config == null) {
             return fallbackLimitBytes;
@@ -2039,7 +2039,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @VisibleForTesting
-    public NetworkPolicy buildDefaultMobilePolicy(int subId, String subscriberId) {
+    NetworkPolicy buildDefaultMobilePolicy(int subId, String subscriberId) {
         final NetworkTemplate template = buildTemplateMobileAll(subscriberId);
         final RecurrenceRule cycleRule = NetworkPolicy
                 .buildRule(ZonedDateTime.now().getDayOfMonth(), ZoneId.systemDefault());
@@ -3489,7 +3489,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @VisibleForTesting
-    public boolean isUidForeground(int uid) {
+    boolean isUidForeground(int uid) {
         synchronized (mUidRulesFirstLock) {
             return isUidStateForeground(
                     mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY));
@@ -3931,7 +3931,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * power saving restrictions may still apply.
      */
     @VisibleForTesting
-    public void setAppIdleWhitelist(int uid, boolean shouldWhitelist) {
+    void setAppIdleWhitelist(int uid, boolean shouldWhitelist) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
         synchronized (mUidRulesFirstLock) {
             if (mAppIdleTempWhitelistAppIds.get(uid) == shouldWhitelist) {
                 // No change.
@@ -3956,7 +3958,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /** Return the list of UIDs currently in the app idle whitelist. */
     @VisibleForTesting
-    public int[] getAppIdleWhitelist() {
+    int[] getAppIdleWhitelist() {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
         synchronized (mUidRulesFirstLock) {
@@ -3971,7 +3973,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /** Returns if the UID is currently considered idle. */
     @VisibleForTesting
-    public boolean isUidIdle(int uid) {
+    boolean isUidIdle(int uid) {
         synchronized (mUidRulesFirstLock) {
             if (mAppIdleTempWhitelistAppIds.get(uid)) {
                 // UID is temporarily whitelisted.
@@ -4844,13 +4846,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @VisibleForTesting
-    public void addIdleHandler(IdleHandler handler) {
+    void addIdleHandler(IdleHandler handler) {
         mHandler.getLooper().getQueue().addIdleHandler(handler);
     }
 
     @GuardedBy("mUidRulesFirstLock")
     @VisibleForTesting
-    public void updateRestrictBackgroundByLowPowerModeUL(final PowerSaveState result) {
+    void updateRestrictBackgroundByLowPowerModeUL(final PowerSaveState result) {
         mRestrictBackgroundPowerState = result;
 
         boolean restrictBackground = result.batterySaverEnabled;

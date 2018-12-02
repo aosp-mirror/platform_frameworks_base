@@ -195,12 +195,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             "/system/bin/traced",  // Perfetto.
             "/system/bin/traced_probes",  // Perfetto.
             "webview_zygote",
-            // Temporarily excluded zygote to investigate its forking consequences in
-            // NativeProcessMemoryState.
-            // "zygote",
-            // "zygote64",
+            "zygote",
+            "zygote64",
     };
 
+    private static final int CPU_TIME_PER_THREAD_FREQ_NUM_FREQUENCIES = 8;
 
     static final class CompanionHandler extends Handler {
         CompanionHandler(Looper looper) {
@@ -1080,7 +1079,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(processMemoryState.rssInBytes);
             e.writeLong(processMemoryState.cacheInBytes);
             e.writeLong(processMemoryState.swapInBytes);
-            e.writeLong(processMemoryState.rssHighWatermarkInBytes);
+            e.writeLong(0);  // unused
             e.writeLong(processMemoryState.startTimeNanos);
             pulledData.add(e);
         }
@@ -1089,6 +1088,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullNativeProcessMemoryState(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
+        final List<String> processNames = Arrays.asList(MEMORY_INTERESTING_NATIVE_PROCESSES);
         int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
         for (int i = 0; i < pids.length; i++) {
             int pid = pids[i];
@@ -1098,13 +1098,19 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             int uid = getUidForPid(pid);
             String processName = readCmdlineFromProcfs(pid);
+            // Sometimes we get here processName that is not included in the whitelist. It comes
+            // from forking the zygote for an app. We can ignore that sample because this process
+            // is collected by ProcessMemoryState.
+            if (!processNames.contains(processName)) {
+                continue;
+            }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(uid);
             e.writeString(processName);
             e.writeLong(memoryStat.pgfault);
             e.writeLong(memoryStat.pgmajfault);
             e.writeLong(memoryStat.rssInBytes);
-            e.writeLong(memoryStat.rssHighWatermarkInBytes);
+            e.writeLong(0);  // unused
             e.writeLong(memoryStat.startTimeNanos);
             pulledData.add(e);
         }
@@ -1654,6 +1660,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             return;
         }
         int[] cpuFrequencies = mKernelCpuThreadReader.getCpuFrequenciesKhz();
+        if (cpuFrequencies.length != CPU_TIME_PER_THREAD_FREQ_NUM_FREQUENCIES) {
+            Slog.w(TAG, "Expected " + CPU_TIME_PER_THREAD_FREQ_NUM_FREQUENCIES
+                    + " frequencies, but got " + cpuFrequencies.length);
+            return;
+        }
         for (int i = 0; i < processCpuUsages.size(); i++) {
             KernelCpuThreadReader.ProcessCpuUsage processCpuUsage = processCpuUsages.get(i);
             ArrayList<KernelCpuThreadReader.ThreadCpuUsage> threadCpuUsages =
@@ -1667,23 +1678,18 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     continue;
                 }
 
-                for (int k = 0; k < threadCpuUsage.usageTimesMillis.length; k++) {
-                    // Do not report CPU usage at a frequency when it's zero
-                    if (threadCpuUsage.usageTimesMillis[k] == 0) {
-                        continue;
-                    }
-
-                    StatsLogEventWrapper e =
-                            new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                    e.writeInt(processCpuUsage.uid);
-                    e.writeInt(processCpuUsage.processId);
-                    e.writeInt(threadCpuUsage.threadId);
-                    e.writeString(processCpuUsage.processName);
-                    e.writeString(threadCpuUsage.threadName);
+                StatsLogEventWrapper e =
+                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                e.writeInt(processCpuUsage.uid);
+                e.writeInt(processCpuUsage.processId);
+                e.writeInt(threadCpuUsage.threadId);
+                e.writeString(processCpuUsage.processName);
+                e.writeString(threadCpuUsage.threadName);
+                for (int k = 0; k < CPU_TIME_PER_THREAD_FREQ_NUM_FREQUENCIES; k++) {
                     e.writeInt(cpuFrequencies[k]);
                     e.writeInt(threadCpuUsage.usageTimesMillis[k]);
-                    pulledData.add(e);
                 }
+                pulledData.add(e);
             }
         }
     }

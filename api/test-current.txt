@@ -61,6 +61,7 @@ package android.app {
   }
 
   public class ActivityTaskManager {
+    method public void clearLaunchParamsForPackages(java.util.List<java.lang.String>);
     method public java.lang.String listAllStacks();
     method public void moveTaskToStack(int, int, boolean);
     method public boolean moveTopActivityToPinnedStack(int, android.graphics.Rect);
@@ -79,6 +80,10 @@ package android.app {
     field public static final int INVALID_STACK_ID = -1; // 0xffffffff
     field public static final int SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT = 1; // 0x1
     field public static final int SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT = 0; // 0x0
+  }
+
+  public class AppDetailsActivity extends android.app.Activity {
+    ctor public AppDetailsActivity();
   }
 
   public class AppOpsManager {
@@ -300,14 +305,9 @@ package android.content {
 
   public abstract class Context {
     method public android.content.Context createPackageContextAsUser(java.lang.String, int, android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public abstract java.lang.String getOpPackageName();
     method public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillCompatibilityEnabled(boolean);
-  }
-
-  public class ContextWrapper extends android.content.Context {
-    method public java.lang.String getOpPackageName();
   }
 
 }
@@ -943,6 +943,10 @@ package android.os.health {
 
 package android.os.storage {
 
+  public class StorageManager {
+    method public static boolean hasIsolatedStorage();
+  }
+
   public final class StorageVolume implements android.os.Parcelable {
     method public java.lang.String getPath();
   }
@@ -1155,6 +1159,7 @@ package android.service.notification {
     ctor public NotificationAssistantService();
     method public final void adjustNotification(android.service.notification.Adjustment);
     method public final void adjustNotifications(java.util.List<android.service.notification.Adjustment>);
+    method public void onActionClicked(java.lang.String, android.app.Notification.Action, int);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public void onNotificationDirectReply(java.lang.String);
     method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification);

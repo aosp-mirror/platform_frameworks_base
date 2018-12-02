@@ -35,7 +35,7 @@
             android:id="@+id/entity_header_icon"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:scaleType="fitXY"
+            android:scaleType="fitCenter"
             android:antialias="true"/>
 
         <TextView
@@ -72,7 +72,6 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/entity_header_links"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
@@ -85,6 +84,7 @@
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:layout_height="0dp"
+            android:visibility="gone"
             android:minWidth="24dp"
             android:src="@null"
             android:tint="?android:attr/colorAccent"/>
@@ -95,6 +95,7 @@
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:layout_height="0dp"
+            android:visibility="gone"
             android:minWidth="24dp"
             android:src="@null"
             android:tint="?android:attr/colorAccent"/>

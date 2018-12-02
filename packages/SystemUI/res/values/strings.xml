@@ -272,6 +272,8 @@
     <string name="accessibility_biometric_dialog_help_area">Help message area</string>
     <!-- Message shown when a biometric is authenticated, asking the user to confirm authentication [CHAR LIMIT=30] -->
     <string name="biometric_dialog_confirm">Confirm</string>
+    <!-- Button name on BiometricPrompt shown when a biometric is detected but not authenticated. Tapping the button resumes authentication [CHAR_LIMIT=30] -->
+    <string name="biometric_dialog_try_again">Try again</string>
 
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
@@ -1556,17 +1558,26 @@
     <!-- Notification inline controls: block notifications button -->
     <string name="inline_stop_button">Stop notifications</string>
 
+    <!-- Notification inline controls: button to block notifications from this channel [CHAR_LIMIT=35] -->
+    <string name="inline_block_button">Block</string>
+
     <!-- Notification inline controls: keep getting notifications button -->
     <string name="inline_keep_button">Keep showing</string>
 
     <!-- Notification inline controls: minimize notifications button -->
     <string name="inline_minimize_button">Minimize</string>
 
-    <!-- Notification inline controls: show notifications silently button [CHAR_LIMIT=25] -->
+    <!-- Notification inline controls: button to show notifications silently, without alerting the user [CHAR_LIMIT=35] -->
     <string name="inline_silent_button_silent">Show silently</string>
 
-    <!-- Notification inline controls: show and alert button [CHAR_LIMIT=25] -->
-    <string name="inline_silent_button_alert">Show and alert</string>
+    <!-- Notification inline controls: button to continue showing notifications silently [CHAR_LIMIT=35] -->
+    <string name="inline_silent_button_stay_silent">Stay silent</string>
+
+    <!-- Notification inline controls: button to make notifications alert the user [CHAR_LIMIT=35] -->
+    <string name="inline_silent_button_alert">Alert me</string>
+
+    <!-- Notification inline controls: button to continue alerting the user when notifications arrive [CHAR_LIMIT=35] -->
+    <string name="inline_silent_button_keep_alerting">Keep alerting</string>
 
     <!-- Notification Inline controls: continue receiving notifications prompt, app level -->
     <string name="inline_keep_showing_app">Keep showing notifications from this app?</string>
@@ -2255,6 +2266,7 @@
 
     <!-- Text on chip for multiple apps using a single app op [CHAR LIMIT=10] -->
     <plurals name="ongoing_privacy_chip_multiple_apps">
+        <item quantity="one"><xliff:g id="num_apps" example="1">%d</xliff:g> app</item>
         <item quantity="few"><xliff:g id="num_apps" example="3">%d</xliff:g> apps</item>
         <item quantity="other"><xliff:g id="num_apps" example="3">%d</xliff:g> apps</item>
     </plurals>
@@ -2267,6 +2279,7 @@
 
     <!-- Content description for ongoing privacy chip. Use with multiple apps using same app op[CHAR LIMIT=NONE]-->
     <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op">
+        <item quantity="one"><xliff:g id="num_apps" example="1">%1$d</xliff:g> application is using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</item>
         <item quantity="few"><xliff:g id="num_apps" example="3">%1$d</xliff:g> applications are using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</item>
         <item quantity="other"><xliff:g id="num_apps" example="3">%1$d</xliff:g> applications are using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</item>
     </plurals>

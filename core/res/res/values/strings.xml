@@ -1444,9 +1444,14 @@
 
     <!-- Title shown when the system-provided biometric dialog is shown, asking the user to authenticate. [CHAR LIMIT=40] -->
     <string name="biometric_dialog_default_title">Application <xliff:g id="app" example="Gmail">%s</xliff:g> wants to authenticate.</string>
-
     <!-- Message shown when biometric hardware is not available [CHAR LIMIT=50] -->
     <string name="biometric_error_hw_unavailable">Biometric hardware unavailable</string>
+    <!-- Message shown when biometric authentication was canceled by the user [CHAR LIMIT=50] -->
+    <string name="biometric_error_user_canceled">Authentication canceled</string>
+    <!-- Message shown by the biometric dialog when biometric is not recognized -->
+    <string name="biometric_not_recognized">Not recognized</string>
+    <!-- Message shown when biometric authentication has been canceled [CHAR LIMIT=50] -->
+    <string name="biometric_error_canceled">Authentication canceled</string>
 
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_partial">Partial fingerprint detected. Please try again.</string>
@@ -1462,8 +1467,6 @@
     <string-array name="fingerprint_acquired_vendor">
     </string-array>
 
-    <!-- Message shown by the biometric dialog when biometric is not recognized -->
-    <string name="biometric_not_recognized">Not recognized</string>
     <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
     <string name="fingerprint_authenticated">Fingerprint authenticated</string>
     <!-- Accessibility message announced when a face has been authenticated [CHAR LIMIT=NONE] -->

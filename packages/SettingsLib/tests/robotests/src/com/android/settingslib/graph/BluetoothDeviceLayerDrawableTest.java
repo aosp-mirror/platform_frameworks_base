@@ -22,14 +22,14 @@ import android.content.Context;
 import android.graphics.drawable.VectorDrawable;
 
 import com.android.settingslib.R;
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class BluetoothDeviceLayerDrawableTest {
     private static final int RES_ID = R.drawable.ic_bt_cellphone;
     private static final int BATTERY_LEVEL = 15;

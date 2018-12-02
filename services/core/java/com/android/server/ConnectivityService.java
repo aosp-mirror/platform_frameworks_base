@@ -2099,14 +2099,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return new MockableSystemProperties();
     }
 
-    // TODO: Replace nai and newLp with TcpBufferSizes and check default network before calling
-    // this method.
-    private void updateTcpBufferSizes(NetworkAgentInfo nai, LinkProperties newLp) {
-        if (isDefaultNetwork(nai) == false) {
-            return;
-        }
-
-        String tcpBufferSizes = newLp.getTcpBufferSizes();
+    private void updateTcpBufferSizes(String tcpBufferSizes) {
         String[] values = null;
         if (tcpBufferSizes != null) {
             values = tcpBufferSizes.split(",");
@@ -4798,7 +4791,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 //        for (LinkProperties lp : newLp.getStackedLinks()) {
 //            updateMtu(lp, null);
 //        }
-        updateTcpBufferSizes(networkAgent, newLp);
+        if (isDefaultNetwork(networkAgent)) {
+            updateTcpBufferSizes(newLp.getTcpBufferSizes());
+        }
 
         updateRoutes(newLp, oldLp, netId);
         updateDnses(newLp, oldLp, netId);
@@ -5289,7 +5284,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         notifyLockdownVpn(newNetwork);
         handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
-        updateTcpBufferSizes(newNetwork, new LinkProperties(newNetwork.linkProperties));
+        updateTcpBufferSizes(newNetwork.linkProperties.getTcpBufferSizes());
         mDnsManager.setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
         notifyIfacesChangedForNetworkStats();
     }

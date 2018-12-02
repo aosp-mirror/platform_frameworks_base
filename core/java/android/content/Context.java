@@ -741,16 +741,22 @@ public abstract class Context {
     /** Return the name of this application's package. */
     public abstract String getPackageName();
 
-    /** @hide Return the name of the base context this context is derived from. */
+    /**
+     * @hide Return the name of the base context this context is derived from.
+     * This is the same as {@link #getOpPackageName()} except in
+     * cases where system components are loaded into other app processes, in which
+     * case {@link #getOpPackageName()} will be the name of the primary package in
+     * that process (so that app ops uid verification will work with the name).
+     */
     @UnsupportedAppUsage
     public abstract String getBasePackageName();
 
-    /** @hide Return the package name that should be used for app ops calls from
-     * this context.  This is the same as {@link #getBasePackageName()} except in
-     * cases where system components are loaded into other app processes, in which
-     * case this will be the name of the primary package in that process (so that app
-     * ops uid verification will work with the name). */
-    @TestApi
+    /**
+     * Return the package name that should be used for {@link android.app.AppOpsManager} calls from
+     * this context, so that app ops manager's uid verification will work with the name.
+     * <p>
+     * This is not generally intended for third party application developers.
+     */
     public abstract String getOpPackageName();
 
     /** Return the full application info for this context's package. */

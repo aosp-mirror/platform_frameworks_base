@@ -184,6 +184,9 @@ public class WifiScanner {
     public static final String SCAN_PARAMS_SCAN_SETTINGS_KEY = "ScanSettings";
     /** {@hide} */
     public static final String SCAN_PARAMS_WORK_SOURCE_KEY = "WorkSource";
+    /** {@hide} */
+    public static final String REQUEST_PACKAGE_NAME_KEY = "PackageName";
+
     /**
      * scan configuration parameters to be sent to {@link #startBackgroundScan}
      */
@@ -798,6 +801,7 @@ public class WifiScanner {
         Bundle scanParams = new Bundle();
         scanParams.putParcelable(SCAN_PARAMS_SCAN_SETTINGS_KEY, settings);
         scanParams.putParcelable(SCAN_PARAMS_WORK_SOURCE_KEY, workSource);
+        scanParams.putString(REQUEST_PACKAGE_NAME_KEY, mContext.getOpPackageName());
         mAsyncChannel.sendMessage(CMD_START_BACKGROUND_SCAN, 0, key, scanParams);
     }
 
@@ -812,8 +816,11 @@ public class WifiScanner {
         int key = removeListener(listener);
         if (key == INVALID_KEY) return;
         validateChannel();
-        mAsyncChannel.sendMessage(CMD_STOP_BACKGROUND_SCAN, 0, key);
+        Bundle scanParams = new Bundle();
+        scanParams.putString(REQUEST_PACKAGE_NAME_KEY, mContext.getOpPackageName());
+        mAsyncChannel.sendMessage(CMD_STOP_BACKGROUND_SCAN, 0, key, scanParams);
     }
+
     /**
      * reports currently available scan results on appropriate listeners
      * @return true if all scan results were reported correctly
@@ -821,7 +828,10 @@ public class WifiScanner {
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public boolean getScanResults() {
         validateChannel();
-        Message reply = mAsyncChannel.sendMessageSynchronously(CMD_GET_SCAN_RESULTS, 0);
+        Bundle scanParams = new Bundle();
+        scanParams.putString(REQUEST_PACKAGE_NAME_KEY, mContext.getOpPackageName());
+        Message reply =
+                mAsyncChannel.sendMessageSynchronously(CMD_GET_SCAN_RESULTS, 0, 0, scanParams);
         return reply.what == CMD_OP_SUCCEEDED;
     }
 
@@ -856,6 +866,7 @@ public class WifiScanner {
         Bundle scanParams = new Bundle();
         scanParams.putParcelable(SCAN_PARAMS_SCAN_SETTINGS_KEY, settings);
         scanParams.putParcelable(SCAN_PARAMS_WORK_SOURCE_KEY, workSource);
+        scanParams.putString(REQUEST_PACKAGE_NAME_KEY, mContext.getOpPackageName());
         mAsyncChannel.sendMessage(CMD_START_SINGLE_SCAN, 0, key, scanParams);
     }
 
@@ -870,7 +881,9 @@ public class WifiScanner {
         int key = removeListener(listener);
         if (key == INVALID_KEY) return;
         validateChannel();
-        mAsyncChannel.sendMessage(CMD_STOP_SINGLE_SCAN, 0, key);
+        Bundle scanParams = new Bundle();
+        scanParams.putString(REQUEST_PACKAGE_NAME_KEY, mContext.getOpPackageName());
+        mAsyncChannel.sendMessage(CMD_STOP_SINGLE_SCAN, 0, key, scanParams);
     }
 
     /**
@@ -879,7 +892,10 @@ public class WifiScanner {
      */
     public List<ScanResult> getSingleScanResults() {
         validateChannel();
-        Message reply = mAsyncChannel.sendMessageSynchronously(CMD_GET_SINGLE_SCAN_RESULTS, 0);
+        Bundle scanParams = new Bundle();
+        scanParams.putString(REQUEST_PACKAGE_NAME_KEY, mContext.getOpPackageName());
+        Message reply = mAsyncChannel.sendMessageSynchronously(CMD_GET_SINGLE_SCAN_RESULTS, 0, 0,
+                scanParams);
         if (reply.what == WifiScanner.CMD_OP_SUCCEEDED) {
             return Arrays.asList(((ParcelableScanResults) reply.obj).getResults());
         }

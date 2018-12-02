@@ -222,7 +222,7 @@ class ScreenRotationAnimation {
     }
 
     public ScreenRotationAnimation(Context context, DisplayContent displayContent,
-            boolean forceDefaultOrientation, boolean isSecure, WindowManagerService service) {
+            boolean fixedToUserRotation, boolean isSecure, WindowManagerService service) {
         mService = service;
         mContext = context;
         mDisplayContent = displayContent;
@@ -234,7 +234,7 @@ class ScreenRotationAnimation {
         final int originalWidth;
         final int originalHeight;
         DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        if (forceDefaultOrientation) {
+        if (fixedToUserRotation) {
             // Emulated orientation.
             mForceDefaultOrientation = true;
             originalWidth = displayContent.mBaseDisplayWidth;
@@ -261,7 +261,7 @@ class ScreenRotationAnimation {
         try {
             mSurfaceControl = displayContent.makeOverlay()
                     .setName("ScreenshotSurface")
-                    .setSize(mWidth, mHeight)
+                    .setBufferSize(mWidth, mHeight)
                     .setSecure(isSecure)
                     .build();
 

@@ -18,23 +18,19 @@ package com.android.settingslib.development;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.os.UserManager;
 import android.content.Context;
+import android.os.UserManager;
 import android.provider.Settings;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
-import org.robolectric.shadows.ShadowUserManager;
-import org.robolectric.shadow.api.Shadow;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
+import org.robolectric.shadow.api.Shadow;
+import org.robolectric.shadows.ShadowUserManager;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class DevelopmentSettingsEnablerTest {
 
     private Context mContext;

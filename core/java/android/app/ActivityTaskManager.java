@@ -433,4 +433,18 @@ public class ActivityTaskManager {
         }
         return sb.toString();
     }
+
+    /**
+     * Clears launch params for the given package.
+     * @param packageNames the names of the packages of which the launch params are to be cleared
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public void clearLaunchParamsForPackages(List<String> packageNames) {
+        try {
+            getService().clearLaunchParamsForPackages(packageNames);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
 }

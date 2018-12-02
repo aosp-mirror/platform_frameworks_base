@@ -18,12 +18,13 @@ package com.android.settingslib;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -36,20 +37,19 @@ import android.content.res.TypedArray;
 import android.provider.Settings;
 import android.view.MenuItem;
 
-import android.R;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 /**
  * Tests for {@link HelpUtils}.
  */
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class HelpUtilsTest {
     private static final String TEST_HELP_URL = "intent:#Intent;action=com.android.test;end";
     private static final String PACKAGE_NAME_KEY = "package-name-key";
@@ -83,8 +83,6 @@ public class HelpUtilsTest {
         when(mContext.getResources().getString(R.string.config_feedbackIntentNameKey))
                 .thenReturn(FEEDBACK_INTENT_NAME_KEY);
         when(mActivity.getPackageManager()).thenReturn(mPackageManager);
-
-
     }
 
     @Test

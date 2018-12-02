@@ -116,8 +116,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_FAILURE;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS;
-import static com.android.server.pm.permission.PermissionsState
-        .PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
+import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -197,6 +196,7 @@ import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UsesPermissionInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.content.pm.VersionedPackage;
@@ -313,8 +313,7 @@ import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.DefaultPermissionGrantPolicy;
-import com.android.server.pm.permission.DefaultPermissionGrantPolicy
-        .DefaultPermissionGrantedCallback;
+import com.android.server.pm.permission.DefaultPermissionGrantPolicy.DefaultPermissionGrantedCallback;
 import com.android.server.pm.permission.PermissionManagerInternal;
 import com.android.server.pm.permission.PermissionManagerInternal.PermissionCallback;
 import com.android.server.pm.permission.PermissionManagerService;
@@ -373,6 +372,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -11242,6 +11242,26 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
             }
+
+            // Check permission usage info requirements.
+            if (pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q) {
+                for (UsesPermissionInfo upi : pkg.usesPermissionInfos) {
+                    if (!mPermissionManager.isPermissionUsageInfoRequired(upi.getPermission())) {
+                        continue;
+                    }
+                    if (upi.getDataSentOffDevice() == UsesPermissionInfo.USAGE_UNDEFINED
+                            || upi.getDataSharedWithThirdParty()
+                                == UsesPermissionInfo.USAGE_UNDEFINED
+                            || upi.getDataUsedForMonetization()
+                                == UsesPermissionInfo.USAGE_UNDEFINED
+                            || upi.getDataRetention() == UsesPermissionInfo.RETENTION_UNDEFINED) {
+                        // STOPSHIP: Make this throw
+                        Slog.wtf(TAG, "Package " + pkg.packageName + " does not provide usage "
+                                + "information for permission " + upi.getPermission()
+                                + ". This will be a fatal error in Q.");
+                    }
+                }
+            }
         }
     }
 
@@ -20115,7 +20135,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (Process.isIsolated(uid)) {
                     return Zygote.MOUNT_EXTERNAL_NONE;
                 }
-                if (SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+                if (StorageManager.hasIsolatedStorage()) {
                     return checkUidPermission(WRITE_MEDIA_STORAGE, uid) == PERMISSION_GRANTED
                             ? Zygote.MOUNT_EXTERNAL_FULL
                             : Zygote.MOUNT_EXTERNAL_WRITE;
@@ -23186,6 +23206,45 @@ public class PackageManagerService extends IPackageManager.Stub
                 throws IOException {
             PackageManagerService.this.freeStorage(volumeUuid, bytes, storageFlags);
         }
+
+        @Override
+        public void forEachPackage(Consumer<PackageParser.Package> actionLocked) {
+            PackageManagerService.this.forEachPackage(actionLocked);
+        }
+
+        @Override
+        public ArraySet<String> getEnabledComponents(String packageName, int userId) {
+            synchronized (mPackages) {
+                PackageSetting setting = mSettings.getPackageLPr(packageName);
+                if (setting == null) {
+                    return new ArraySet<>();
+                }
+                return setting.getEnabledComponents(userId);
+            }
+        }
+
+        @Override
+        public ArraySet<String> getDisabledComponents(String packageName, int userId) {
+            synchronized (mPackages) {
+                PackageSetting setting = mSettings.getPackageLPr(packageName);
+                if (setting == null) {
+                    return new ArraySet<>();
+                }
+                return setting.getDisabledComponents(userId);
+            }
+        }
+
+        @Override
+        public @PackageManager.EnabledState int getApplicationEnabledState(
+                String packageName, int userId) {
+            synchronized (mPackages) {
+                PackageSetting setting = mSettings.getPackageLPr(packageName);
+                if (setting == null) {
+                    return COMPONENT_ENABLED_STATE_DEFAULT;
+                }
+                return setting.getEnabled(userId);
+            }
+        }
     }
 
     @GuardedBy("mPackages")
@@ -23304,6 +23363,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 mDefaultPermissionPolicy.revokeDefaultPermissionsFromLuiApps(packageNames, userId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
+    void forEachPackage(Consumer<PackageParser.Package> actionLocked) {
+        synchronized (mPackages) {
+            int numPackages = mPackages.size();
+            for (int i = 0; i < numPackages; i++) {
+                actionLocked.accept(mPackages.valueAt(i));
             }
         }
     }
@@ -23593,6 +23661,30 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         return mProtectedPackages.isPackageStateProtected(userId, packageName);
+    }
+
+    @Override
+    public void sendDeviceCustomizationReadyBroadcast() {
+        mContext.enforceCallingPermission(Manifest.permission.SEND_DEVICE_CUSTOMIZATION_READY,
+                "sendDeviceCustomizationReadyBroadcast");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            final Intent intent = new Intent(Intent.ACTION_DEVICE_CUSTOMIZATION_READY);
+            intent.setFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+            final IActivityManager am = ActivityManager.getService();
+            final String[] requiredPermissions = {
+                Manifest.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY,
+            };
+            try {
+                am.broadcastIntent(null, intent, null, null, 0, null, null, requiredPermissions,
+                        android.app.AppOpsManager.OP_NONE, null, false, false, UserHandle.USER_ALL);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     static class ActiveInstallSession {

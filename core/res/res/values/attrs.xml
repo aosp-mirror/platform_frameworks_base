@@ -5532,7 +5532,7 @@
         <attr name="solidColor" format="color|reference" />
         <!-- @hide The divider for making the selection area. -->
         <attr name="selectionDivider" format="reference" />
-        <!-- @hide The height of the selection divider. -->
+        <!-- The height of the selection divider. -->
         <attr name="selectionDividerHeight" format="dimension" />
         <!-- @hide The distance between the two selection dividers. -->
         <attr name="selectionDividersDistance" format="dimension" />
@@ -7935,7 +7935,9 @@
              wallpaper. -->
         <attr name="showMetadataInPreview" format="boolean" />
 
-        <!-- Wallpapers optimized and capable of drawing in ambient mode will return true. -->
+        <!-- Wallpapers optimized and capable of drawing in ambient mode will return true.
+             This feature requires the android.permission.AMBIENT_WALLPAPER permission.
+             @hide @SystemApi -->
         <attr name="supportsAmbientMode" format="boolean" />
 
         <!-- Uri that specifies a settings Slice for this wallpaper. -->

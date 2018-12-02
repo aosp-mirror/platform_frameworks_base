@@ -248,7 +248,6 @@ public class TaskStack extends WindowContainer<Task> implements
         getRawBounds(mTmpRect);
         final Rect stackBounds = getBounds();
         getPendingTransaction()
-                .setSize(mAnimationBackgroundSurface, mTmpRect.width(), mTmpRect.height())
                 .setWindowCrop(mAnimationBackgroundSurface, mTmpRect.width(), mTmpRect.height())
                 .setPosition(mAnimationBackgroundSurface, mTmpRect.left - stackBounds.left,
                         mTmpRect.top - stackBounds.top);
@@ -451,7 +450,7 @@ public class TaskStack extends WindowContainer<Task> implements
             final int newDockSide = getDockSide(parentConfig, inOutBounds);
             // Update the dock create mode and clear the dock create bounds, these
             // might change after a rotation and the original values will be invalid.
-            mService.setDockedStackCreateStateLocked(
+            mWmService.setDockedStackCreateStateLocked(
                     (newDockSide == DOCKED_LEFT || newDockSide == DOCKED_TOP)
                             ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
                             : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT,
@@ -524,7 +523,7 @@ public class TaskStack extends WindowContainer<Task> implements
         mDisplayContent.getDisplayPolicy().getStableInsetsLw(rotation, displayWidth, displayHeight,
                 displayCutout, outBounds);
         final DividerSnapAlgorithm algorithm = new DividerSnapAlgorithm(
-                mService.mContext.getResources(), displayWidth, displayHeight,
+                mWmService.mContext.getResources(), displayWidth, displayHeight,
                 dividerSize, orientation == Configuration.ORIENTATION_PORTRAIT, outBounds,
                 getDockSide(), isMinimizedDockAndHomeStackResizable());
         final SnapTarget target = algorithm.calculateNonDismissingSnapTarget(dividerPosition);
@@ -595,7 +594,7 @@ public class TaskStack extends WindowContainer<Task> implements
     private int findPositionForTask(Task task, int targetPosition, boolean showForAllUsers,
             boolean addingNew) {
         final boolean canShowTask =
-                showForAllUsers || mService.isCurrentProfileLocked(task.mUserId);
+                showForAllUsers || mWmService.isCurrentProfileLocked(task.mUserId);
 
         final int stackSize = mChildren.size();
         int minPosition = 0;
@@ -629,7 +628,7 @@ public class TaskStack extends WindowContainer<Task> implements
             final Task tmpTask = mChildren.get(minPosition);
             final boolean canShowTmpTask =
                     tmpTask.showForAllUsers()
-                            || mService.isCurrentProfileLocked(tmpTask.mUserId);
+                            || mWmService.isCurrentProfileLocked(tmpTask.mUserId);
             if (canShowTmpTask) {
                 break;
             }
@@ -648,7 +647,7 @@ public class TaskStack extends WindowContainer<Task> implements
             final Task tmpTask = mChildren.get(maxPosition);
             final boolean canShowTmpTask =
                     tmpTask.showForAllUsers()
-                            || mService.isCurrentProfileLocked(tmpTask.mUserId);
+                            || mWmService.isCurrentProfileLocked(tmpTask.mUserId);
             if (!canShowTmpTask) {
                 break;
             }
@@ -729,7 +728,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
             // We multiply by two to match the client logic for converting view elevation
             // to insets, as in {@link WindowManager.LayoutParams#setSurfaceInsets}
-            return (int)Math.ceil(mService.dipToPixel(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP,
+            return (int)Math.ceil(mWmService.dipToPixel(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP,
                     displayMetrics) * 2);
         }
         return 0;
@@ -751,7 +750,6 @@ public class TaskStack extends WindowContainer<Task> implements
         if (width == mLastSurfaceSize.x && height == mLastSurfaceSize.y) {
             return;
         }
-        transaction.setSize(mSurfaceControl, width, height);
         transaction.setWindowCrop(mSurfaceControl, width, height);
         mLastSurfaceSize.set(width, height);
     }
@@ -793,7 +791,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
         if (dockedBounds == null || dockedBounds.isEmpty()) {
             // Calculate the primary docked bounds.
-            final boolean dockedOnTopOrLeft = mService.mDockedStackCreateMode
+            final boolean dockedOnTopOrLeft = mWmService.mDockedStackCreateMode
                     == SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
             getStackDockedModeBounds(parentConfig,
                     true /* primary */, outStackBounds, dockedBounds,
@@ -858,8 +856,8 @@ public class TaskStack extends WindowContainer<Task> implements
 
         outBounds.set(displayRect);
         if (primary) {
-            if (mService.mDockedStackCreateBounds != null) {
-                outBounds.set(mService.mDockedStackCreateBounds);
+            if (mWmService.mDockedStackCreateBounds != null) {
+                outBounds.set(mWmService.mDockedStackCreateBounds);
                 return;
             }
 
@@ -870,7 +868,7 @@ public class TaskStack extends WindowContainer<Task> implements
             mDisplayContent.getDisplayPolicy().getStableInsetsLw(
                     parentConfig.windowConfiguration.getRotation(),
                     displayRect.width(), displayRect.height(), displayCutout, mTmpRect2);
-            final int position = new DividerSnapAlgorithm(mService.mContext.getResources(),
+            final int position = new DividerSnapAlgorithm(mWmService.mContext.getResources(),
                     displayRect.width(),
                     displayRect.height(),
                     dockDividerWidth,
@@ -915,7 +913,7 @@ public class TaskStack extends WindowContainer<Task> implements
             throw new IllegalStateException("Not a docked stack=" + this);
         }
 
-        mService.mDockedStackCreateBounds = null;
+        mWmService.mDockedStackCreateBounds = null;
 
         final Rect bounds = new Rect();
         final Rect tempBounds = new Rect();
@@ -957,7 +955,7 @@ public class TaskStack extends WindowContainer<Task> implements
         }
 
         mDisplayContent = null;
-        mService.mWindowPlacerLocked.requestTraversal();
+        mWmService.mWindowPlacerLocked.requestTraversal();
     }
 
     void resetAnimationBackgroundAnimator() {
@@ -979,7 +977,7 @@ public class TaskStack extends WindowContainer<Task> implements
         int top = mChildren.size();
         for (int taskNdx = 0; taskNdx < top; ++taskNdx) {
             Task task = mChildren.get(taskNdx);
-            if (mService.isCurrentProfileLocked(task.mUserId) || task.showForAllUsers()) {
+            if (mWmService.isCurrentProfileLocked(task.mUserId) || task.showForAllUsers()) {
                 mChildren.remove(taskNdx);
                 mChildren.add(task);
                 --top;
@@ -1048,7 +1046,7 @@ public class TaskStack extends WindowContainer<Task> implements
             }
             mAdjustedForIme = false;
             updateAdjustedBounds();
-            mService.setResizeDimLayer(false, getWindowingMode(), 1.0f);
+            mWmService.setResizeDimLayer(false, getWindowingMode(), 1.0f);
         } else {
             mImeGoingAway |= mAdjustedForIme;
         }
@@ -1181,7 +1179,7 @@ public class TaskStack extends WindowContainer<Task> implements
         }
 
         if (dockSide == DOCKED_TOP) {
-            mService.getStableInsetsLocked(DEFAULT_DISPLAY, mTmpRect);
+            mWmService.getStableInsetsLocked(DEFAULT_DISPLAY, mTmpRect);
             int topInset = mTmpRect.top;
             mTmpAdjustedBounds.set(getRawBounds());
             mTmpAdjustedBounds.bottom = (int) (minimizeAmount * topInset + (1 - minimizeAmount)
@@ -1217,7 +1215,7 @@ public class TaskStack extends WindowContainer<Task> implements
         }
 
         if (dockSide == DOCKED_TOP) {
-            mService.getStableInsetsLocked(DEFAULT_DISPLAY, mTmpRect);
+            mWmService.getStableInsetsLocked(DEFAULT_DISPLAY, mTmpRect);
             int topInset = mTmpRect.top;
             return getRawBounds().bottom - topInset;
         } else if (dockSide == DOCKED_LEFT || dockSide == DOCKED_RIGHT) {
@@ -1242,11 +1240,11 @@ public class TaskStack extends WindowContainer<Task> implements
         }
         setAdjustedBounds(mTmpAdjustedBounds);
 
-        final boolean isImeTarget = (mService.getImeFocusStackLocked() == this);
+        final boolean isImeTarget = (mWmService.getImeFocusStackLocked() == this);
         if (mAdjustedForIme && adjust && !isImeTarget) {
             final float alpha = Math.max(mAdjustImeAmount, mAdjustDividerAmount)
                     * IME_ADJUST_DIM_AMOUNT;
-            mService.setResizeDimLayer(true, getWindowingMode(), alpha);
+            mWmService.setResizeDimLayer(true, getWindowingMode(), alpha);
         }
     }
 
@@ -1512,14 +1510,14 @@ public class TaskStack extends WindowContainer<Task> implements
 
     public boolean setPinnedStackSize(Rect stackBounds, Rect tempTaskBounds) {
         // Hold the lock since this is called from the BoundsAnimator running on the UiThread
-        synchronized (mService.mGlobalLock) {
+        synchronized (mWmService.mGlobalLock) {
             if (mCancelCurrentBoundsAnimation) {
                 return false;
             }
         }
 
         try {
-            mService.mActivityTaskManager.resizePinnedStack(stackBounds, tempTaskBounds);
+            mWmService.mActivityTaskManager.resizePinnedStack(stackBounds, tempTaskBounds);
         } catch (RemoteException e) {
             // I don't believe you.
         }
@@ -1537,7 +1535,7 @@ public class TaskStack extends WindowContainer<Task> implements
     @Override  // AnimatesBounds
     public boolean onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate) {
         // Hold the lock since this is called from the BoundsAnimator running on the UiThread
-        synchronized (mService.mGlobalLock) {
+        synchronized (mWmService.mGlobalLock) {
             if (!isAttached()) {
                 // Don't run the animation if the stack is already detached
                 return false;
@@ -1557,7 +1555,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
         if (inPinnedWindowingMode()) {
             try {
-                mService.mActivityTaskManager.notifyPinnedStackAnimationStarted();
+                mWmService.mActivityTaskManager.notifyPinnedStackAnimationStarted();
             } catch (RemoteException e) {
                 // I don't believe you...
             }
@@ -1600,9 +1598,9 @@ public class TaskStack extends WindowContainer<Task> implements
             }
 
             try {
-                mService.mActivityTaskManager.notifyPinnedStackAnimationEnded();
+                mWmService.mActivityTaskManager.notifyPinnedStackAnimationEnded();
                 if (moveToFullscreen) {
-                    mService.mActivityTaskManager.moveTasksToFullscreenStack(mStackId,
+                    mWmService.mActivityTaskManager.moveTasksToFullscreenStack(mStackId,
                             true /* onTop */);
                 }
             } catch (RemoteException e) {
@@ -1616,7 +1614,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
     @Override
     public boolean isAttached() {
-        synchronized (mService.mGlobalLock) {
+        synchronized (mWmService.mGlobalLock) {
             return mDisplayContent != null;
         }
     }
@@ -1625,19 +1623,19 @@ public class TaskStack extends WindowContainer<Task> implements
      * Called immediately prior to resizing the tasks at the end of the pinned stack animation.
      */
     public void onPipAnimationEndResize() {
-        synchronized (mService.mGlobalLock) {
+        synchronized (mWmService.mGlobalLock) {
             mBoundsAnimating = false;
             for (int i = 0; i < mChildren.size(); i++) {
                 final Task t = mChildren.get(i);
                 t.clearPreserveNonFloatingState();
             }
-            mService.requestTraversal();
+            mWmService.requestTraversal();
         }
     }
 
     @Override
     public boolean shouldDeferStartOnMoveToFullscreen() {
-        synchronized (mService.mGlobalLock) {
+        synchronized (mWmService.mGlobalLock) {
             if (!isAttached()) {
                 // Unnecessary to pause the animation because the stack is detached.
                 return false;

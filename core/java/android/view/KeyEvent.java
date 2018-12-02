@@ -1862,12 +1862,12 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Whether this key is a media key, which can be send to apps that are
-     * interested in media key events.
+     * Returns whether this key can be handled by
+     * {@link android.media.session.MediaSession.Callback}.
      *
      * @hide
      */
-    public static final boolean isMediaKey(int keyCode) {
+    public static final boolean isMediaSessionKey(int keyCode) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_MEDIA_PLAY:
             case KeyEvent.KEYCODE_MEDIA_PAUSE:

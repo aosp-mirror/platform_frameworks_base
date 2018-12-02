@@ -46,7 +46,7 @@
 #include "utils/KeyedVector.h"
 #include "utils/String8.h"
 #include "android_media_BufferingParams.h"
-#include "android_media_Media2DataSource.h"
+#include "android_media_DataSourceCallback.h"
 #include "android_media_MediaMetricsJNI.h"
 #include "android_media_PlaybackParams.h"
 #include "android_media_SyncParams.h"
@@ -423,7 +423,7 @@ android_media_MediaPlayer2_handleDataSourceCallback(
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
-    sp<DataSource> callbackDataSource = new JMedia2DataSource(env, dataSource);
+    sp<DataSource> callbackDataSource = new JDataSourceCallback(env, dataSource);
     sp<DataSourceDesc> dsd = new DataSourceDesc();
     dsd->mId = srcId;
     dsd->mType = DataSourceDesc::TYPE_CALLBACK;
@@ -1390,7 +1390,7 @@ static const JNINativeMethod gMethods[] = {
     },
     {
         "nativeHandleDataSourceCallback",
-        "(ZJLandroid/media/Media2DataSource;JJ)V",
+        "(ZJLandroid/media/DataSourceCallback;JJ)V",
         (void *)android_media_MediaPlayer2_handleDataSourceCallback
     },
     {"nativePlayNextDataSource", "(J)V",                        (void *)android_media_MediaPlayer2_playNextDataSource},

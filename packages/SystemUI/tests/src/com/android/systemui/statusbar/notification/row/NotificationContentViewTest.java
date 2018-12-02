@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.row;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;

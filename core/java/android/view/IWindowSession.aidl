@@ -28,6 +28,7 @@ import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -40,10 +41,11 @@ interface IWindowSession {
     int addToDisplay(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outFrame,
             out Rect outContentInsets, out Rect outStableInsets, out Rect outOutsets,
-            out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel);
+            out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel,
+            out InsetsState insetsState);
     int addToDisplayWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outContentInsets,
-            out Rect outStableInsets);
+            out Rect outStableInsets, out InsetsState insetsState);
     void remove(IWindow window);
 
     /**
@@ -86,6 +88,7 @@ interface IWindowSession {
      * config for window, if it is now becoming visible and the merged configuration has changed
      * since it was last displayed.
      * @param outSurface Object in which is placed the new display surface.
+     * @param insetsState The current insets state in the system.
      *
      * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
      * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
@@ -96,7 +99,8 @@ interface IWindowSession {
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
             out Rect outOutsets, out Rect outBackdropFrame,
             out DisplayCutout.ParcelableWrapper displayCutout,
-            out MergedConfiguration outMergedConfiguration, out Surface outSurface);
+            out MergedConfiguration outMergedConfiguration, out Surface outSurface,
+            out InsetsState insetsState);
 
     /*
      * Notify the window manager that an application is relaunching and

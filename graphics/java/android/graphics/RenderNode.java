@@ -1173,6 +1173,22 @@ public final class RenderNode {
         return nGetAllowForceDark(mNativeRenderNode);
     }
 
+    /**
+     * Returns the unique ID that identifies this RenderNode. This ID is unique for the
+     * lifetime of the process. IDs are reset on process death, and are unique only within
+     * the process.
+     *
+     * This ID is intended to be used with debugging tools to associate a particular
+     * RenderNode across different debug dumping & inspection tools. For example
+     * a View layout inspector should include the unique ID for any RenderNodes that it owns
+     * to associate the drawing content with the layout content.
+     *
+     * @return the unique ID for this RenderNode
+     */
+    public long getUniqueId() {
+        return nGetUniqueId(mNativeRenderNode);
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Animations
     ///////////////////////////////////////////////////////////////////////////
@@ -1479,4 +1495,7 @@ public final class RenderNode {
 
     @CriticalNative
     private static native boolean nGetAllowForceDark(long renderNode);
+
+    @CriticalNative
+    private static native long nGetUniqueId(long renderNode);
 }

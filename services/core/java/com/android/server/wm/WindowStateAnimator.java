@@ -234,7 +234,7 @@ class WindowStateAnimator {
     private final Point mTmpPos = new Point();
 
     WindowStateAnimator(final WindowState win) {
-        final WindowManagerService service = win.mService;
+        final WindowManagerService service = win.mWmService;
 
         mService = service;
         mAnimator = service.mAnimator;
@@ -861,7 +861,7 @@ class WindowStateAnimator {
         // to find the surface size changed underneath it.
         final boolean relayout = !w.mRelayoutCalled || w.mInRelayout;
         if (relayout) {
-            mSurfaceResized = mSurfaceController.setSizeInTransaction(
+            mSurfaceResized = mSurfaceController.setBufferSizeInTransaction(
                     mTmpSize.width(), mTmpSize.height(), recoveringMemory);
         } else {
             mSurfaceResized = false;

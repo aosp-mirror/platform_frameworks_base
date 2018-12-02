@@ -19,6 +19,7 @@ package android.hardware.display;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.text.TextUtils;
 
@@ -71,6 +72,9 @@ public final class DisplayViewport {
     // The ID used to uniquely identify this display.
     public String uniqueId;
 
+    // The physical port that the associated display device is connected to.
+    public @Nullable Byte physicalPort;
+
     public @ViewportType int type;
 
     public void copyFrom(DisplayViewport viewport) {
@@ -82,6 +86,7 @@ public final class DisplayViewport {
         deviceWidth = viewport.deviceWidth;
         deviceHeight = viewport.deviceHeight;
         uniqueId = viewport.uniqueId;
+        physicalPort = viewport.physicalPort;
         type = viewport.type;
     }
 
@@ -113,6 +118,7 @@ public final class DisplayViewport {
               && deviceWidth == other.deviceWidth
               && deviceHeight == other.deviceHeight
               && TextUtils.equals(uniqueId, other.uniqueId)
+              && physicalPort == other.physicalPort
               && type == other.type;
     }
 
@@ -128,6 +134,7 @@ public final class DisplayViewport {
         result += prime * result + deviceWidth;
         result += prime * result + deviceHeight;
         result += prime * result + uniqueId.hashCode();
+        result += prime * result + physicalPort;
         result += prime * result + type;
         return result;
     }
@@ -139,6 +146,7 @@ public final class DisplayViewport {
                 + ", valid=" + valid
                 + ", displayId=" + displayId
                 + ", uniqueId='" + uniqueId + "'"
+                + ", physicalPort=" + physicalPort
                 + ", orientation=" + orientation
                 + ", logicalFrame=" + logicalFrame
                 + ", physicalFrame=" + physicalFrame

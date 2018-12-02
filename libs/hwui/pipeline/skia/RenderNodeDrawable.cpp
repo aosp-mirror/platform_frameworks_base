@@ -115,12 +115,26 @@ void RenderNodeDrawable::onDraw(SkCanvas* canvas) {
     }
 }
 
+class MarkDraw {
+public:
+    explicit MarkDraw(SkCanvas& canvas, RenderNode& node) : mCanvas(canvas), mNode(node) {
+        if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
+            mNode.markDrawStart(mCanvas);
+        }
+    }
+    ~MarkDraw() {
+        if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
+            mNode.markDrawEnd(mCanvas);
+        }
+    }
+private:
+    SkCanvas& mCanvas;
+    RenderNode& mNode;
+};
+
 void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
     RenderNode* renderNode = mRenderNode.get();
-    if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
-        SkRect dimensions = SkRect::MakeWH(renderNode->getWidth(), renderNode->getHeight());
-        canvas->drawAnnotation(dimensions, renderNode->getName(), nullptr);
-    }
+    MarkDraw _marker{*canvas, *renderNode};
 
     // We only respect the nothingToDraw check when we are composing a layer. This
     // ensures that we paint the layer even if it is not currently visible in the

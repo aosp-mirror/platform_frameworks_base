@@ -25,26 +25,21 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class InputMethodAndSubtypeUtilTest {
 
     private static final HashSet<String> EMPTY_STRING_SET = new HashSet<>();
 
     private static HashSet<String> asHashSet(String... strings) {
-        HashSet<String> hashSet = new HashSet<>();
-        for (String s : strings) {
-            hashSet.add(s);
-        }
-        return hashSet;
+        return new HashSet<>(Arrays.asList(strings));
     }
 
     @Test
@@ -103,7 +98,6 @@ public class InputMethodAndSubtypeUtilTest {
                 "ime0;subtype0;subtype1:ime1;subtype1;subtype2"))
                 .containsExactly("ime0", asHashSet("subtype0", "subtype1"),
                         "ime1", asHashSet("subtype1", "subtype2"));
-
     }
 
     @Test

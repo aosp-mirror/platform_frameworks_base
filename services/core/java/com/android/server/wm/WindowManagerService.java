@@ -218,6 +218,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.WindowContentFrameStats;
+import android.view.InsetsState;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.RemoveContentMode;
@@ -1111,7 +1112,8 @@ public class WindowManagerService extends IWindowManager.Stub
     public int addWindow(Session session, IWindow client, int seq,
             LayoutParams attrs, int viewVisibility, int displayId, Rect outFrame,
             Rect outContentInsets, Rect outStableInsets, Rect outOutsets,
-            DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel) {
+            DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
+            InsetsState outInsetsState) {
         int[] appOp = new int[1];
         int res = mPolicy.checkAddPermission(attrs, appOp);
         if (res != WindowManagerGlobal.ADD_OKAY) {
@@ -1459,6 +1461,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     outFrame, outContentInsets, outStableInsets, outOutsets, outDisplayCutout)) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR;
             }
+            outInsetsState.set(displayContent.getInsetsStateController().getInsetsForDispatch(win));
 
             if (mInTouchMode) {
                 res |= WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE;
@@ -1856,7 +1859,7 @@ public class WindowManagerService extends IWindowManager.Stub
             long frameNumber, Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
             Rect outVisibleInsets, Rect outStableInsets, Rect outOutsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper outCutout, MergedConfiguration mergedConfiguration,
-            Surface outSurface) {
+            Surface outSurface, InsetsState outInsetsState) {
         int result = 0;
         boolean configChanged;
         final boolean hasStatusBarPermission =
@@ -2157,6 +2160,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     outStableInsets, outOutsets);
             outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
             outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
+            outInsetsState.set(displayContent.getInsetsStateController().getInsetsForDispatch(win));
             if (localLOGV) Slog.v(
                 TAG_WM, "Relayout given client " + client.asBinder()
                 + ", requestedWidth=" + requestedWidth
@@ -3584,6 +3588,17 @@ public class WindowManagerService extends IWindowManager.Stub
     public void removeObsoleteTaskFiles(ArraySet<Integer> persistentTaskIds, int[] runningUserIds) {
         synchronized (mGlobalLock) {
             mTaskSnapshotController.removeObsoleteTaskFiles(persistentTaskIds, runningUserIds);
+        }
+    }
+
+    void setRotateForApp(int displayId, boolean enabled) {
+        synchronized (mGlobalLock) {
+            final DisplayContent display = mRoot.getDisplayContent(displayId);
+            if (display == null) {
+                Slog.w(TAG, "Trying to set rotate for app for a missing display.");
+                return;
+            }
+            display.getDisplayRotation().setFixedToUserRotation(enabled);
         }
     }
 
@@ -5393,7 +5408,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             displayContent.updateDisplayInfo();
             screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
-                    displayContent.getDisplayRotation().isDefaultOrientationForced(), isSecure,
+                    displayContent.getDisplayRotation().isFixedToUserRotation(), isSecure,
                     this);
             mAnimator.setScreenRotationAnimationLocked(mFrozenDisplayId,
                     screenRotationAnimation);

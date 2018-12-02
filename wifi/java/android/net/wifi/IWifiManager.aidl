@@ -58,7 +58,7 @@ interface IWifiManager
      */
     oneway void requestActivityInfo(in ResultReceiver result);
 
-    ParceledListSlice getConfiguredNetworks();
+    ParceledListSlice getConfiguredNetworks(String packageName);
 
     ParceledListSlice getPrivilegedConfiguredNetworks();
 
@@ -90,11 +90,11 @@ interface IWifiManager
 
     List<ScanResult> getScanResults(String callingPackage);
 
-    void disconnect(String packageName);
+    boolean disconnect(String packageName);
 
-    void reconnect(String packageName);
+    boolean reconnect(String packageName);
 
-    void reassociate(String packageName);
+    boolean reassociate(String packageName);
 
     WifiInfo getConnectionInfo(String callingPackage);
 

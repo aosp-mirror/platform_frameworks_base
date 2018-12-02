@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
+import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -44,7 +45,6 @@ import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR;
@@ -128,6 +128,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
+import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
@@ -804,6 +805,11 @@ public class DisplayPolicy {
                 if (mDisplayContent.isDefaultDisplay) {
                     mService.mPolicy.setKeyguardCandidateLw(win);
                 }
+                mDisplayContent.setInsetProvider(TYPE_TOP_BAR, win,
+                        (displayFrames, windowState, rect) -> {
+                            rect.top = 0;
+                            rect.bottom = getStatusBarHeight(displayFrames);
+                        });
                 break;
             case TYPE_NAVIGATION_BAR:
                 mContext.enforceCallingOrSelfPermission(
@@ -818,6 +824,8 @@ public class DisplayPolicy {
                 mNavigationBarController.setWindow(win);
                 mNavigationBarController.setOnBarVisibilityChangedListener(
                         mNavBarVisibilityListener, true);
+                mDisplayContent.setInsetProvider(InsetsState.TYPE_NAVIGATION_BAR,
+                        win, null /* frameProvider */);
                 if (DEBUG_LAYOUT) Slog.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
@@ -845,14 +853,21 @@ public class DisplayPolicy {
             if (mDisplayContent.isDefaultDisplay) {
                 mService.mPolicy.setKeyguardCandidateLw(null);
             }
+            mDisplayContent.setInsetProvider(TYPE_TOP_BAR, null, null);
         } else if (mNavigationBar == win) {
             mNavigationBar = null;
             mNavigationBarController.setWindow(null);
+            mDisplayContent.setInsetProvider(InsetsState.TYPE_NAVIGATION_BAR, null, null);
         }
         if (mLastFocusedWindow == win) {
             mLastFocusedWindow = null;
         }
         mScreenDecorWindows.remove(win);
+    }
+
+    private int getStatusBarHeight(DisplayFrames displayFrames) {
+        return Math.max(mStatusBarHeightForRotation[displayFrames.mRotation],
+                displayFrames.mDisplayCutoutSafe.top);
     }
 
     /**
@@ -2305,12 +2320,6 @@ public class DisplayPolicy {
         if (mTopDockedOpaqueOrDimmingWindowState == null && affectsSystemUi && win.isDimming()
                 && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             mTopDockedOpaqueOrDimmingWindowState = win;
-        }
-
-        // Take note if a window wants to acquire a sleep token.
-        if ((attrs.privateFlags & PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN) != 0
-                && win.canAcquireSleepToken()) {
-            mWindowSleepTokenNeeded = true;
         }
     }
 

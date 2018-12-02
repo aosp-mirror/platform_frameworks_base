@@ -21525,10 +21525,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Same as setFrame, but public and hidden. For use in {@link android.transition.ChangeBounds}.
-     * @hide
+     * Assign a size and position to this view.
+     *
+     * This method is meant to be used in animations only as it applies this position and size
+     * for the view only temporary and it can be changed back at any time by the layout.
+     *
+     * @param left Left position, relative to parent
+     * @param top Top position, relative to parent
+     * @param right Right position, relative to parent
+     * @param bottom Bottom position, relative to parent
+     *
+     * @see #setLeft(int), #setRight(int), #setTop(int), #setBottom(int)
      */
-    @UnsupportedAppUsage
     public void setLeftTopRightBottom(int left, int top, int right, int bottom) {
         setFrame(left, top, right, bottom);
     }
@@ -23537,6 +23545,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Get the identifier used for this view by the drawing system.
+     *
+     * @see RenderNode#getUniqueId()
+     * @return A long that uniquely identifies this view's drawing component
+     */
+    public long getUniqueDrawingId() {
+        return mRenderNode.getUniqueId();
+    }
+
+    /**
      * Returns this view's tag.
      *
      * @return the Object stored in this view as a tag, or {@code null} if not
@@ -24741,7 +24759,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final SurfaceSession session = new SurfaceSession(root.mSurface);
         final SurfaceControl surfaceControl = new SurfaceControl.Builder(session)
                 .setName("drag surface")
-                .setSize(shadowSize.x, shadowSize.y)
+                .setBufferSize(shadowSize.x, shadowSize.y)
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .build();
         final Surface surface = new Surface();

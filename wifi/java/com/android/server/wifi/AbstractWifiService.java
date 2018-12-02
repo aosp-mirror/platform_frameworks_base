@@ -73,7 +73,7 @@ public abstract class AbstractWifiService extends IWifiManager.Stub {
     }
 
     @Override
-    public ParceledListSlice getConfiguredNetworks() {
+    public ParceledListSlice getConfiguredNetworks(String packageName) {
         throw new UnsupportedOperationException();
     }
 
@@ -188,17 +188,17 @@ public abstract class AbstractWifiService extends IWifiManager.Stub {
     }
 
     @Override
-    public void disconnect(String packageName) {
+    public boolean disconnect(String packageName) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void reconnect(String packageName) {
+    public boolean reconnect(String packageName) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void reassociate(String packageName) {
+    public boolean reassociate(String packageName) {
         throw new UnsupportedOperationException();
     }
 

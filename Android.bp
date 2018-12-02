@@ -158,9 +158,9 @@ java_defaults {
         "core/java/android/hardware/IConsumerIrService.aidl",
         "core/java/android/hardware/ISerialManager.aidl",
         "core/java/android/hardware/biometrics/IBiometricEnabledOnKeyguardCallback.aidl",
-        "core/java/android/hardware/biometrics/IBiometricPromptReceiver.aidl",
         "core/java/android/hardware/biometrics/IBiometricService.aidl",
         "core/java/android/hardware/biometrics/IBiometricServiceReceiver.aidl",
+        "core/java/android/hardware/biometrics/IBiometricServiceReceiverInternal.aidl",
         "core/java/android/hardware/biometrics/IBiometricServiceLockoutResetCallback.aidl",
         "core/java/android/hardware/display/IDisplayManager.aidl",
         "core/java/android/hardware/display/IDisplayManagerCallback.aidl",
@@ -731,8 +731,10 @@ java_defaults {
         "netd_aidl_interface-java",
     ],
 
-    // Loaded with System.loadLibrary by android.view.textclassifier
     required: [
+        // TODO: remove gps_debug when the build system propagates "required" properly.
+        "gps_debug.conf",
+        // Loaded with System.loadLibrary by android.view.textclassifier
         "libmedia2_jni",
     ],
 

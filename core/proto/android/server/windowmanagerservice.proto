@@ -156,7 +156,7 @@ message DisplayContentProto {
     optional int32 rotation = 11;
     optional ScreenRotationAnimationProto screen_rotation_animation = 12;
     optional DisplayFramesProto display_frames = 13;
-    optional int32 surface_size = 14;
+    optional int32 surface_size = 14 [deprecated=true];
     optional string focused_app = 15;
     optional AppTransitionProto app_transition = 16;
 }

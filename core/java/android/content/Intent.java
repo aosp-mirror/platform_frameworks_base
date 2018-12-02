@@ -1757,33 +1757,6 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.MANAGE_APP_PERMISSIONS";
 
     /**
-     * Activity action: Launch UI to manage a specific permissions of an app.
-     * <p>
-     * Input: {@link #EXTRA_PACKAGE_NAME} specifies the package whose permission
-     * will be managed by the launched UI.
-     * </p>
-     * <p>
-     * Input: {@link #EXTRA_PERMISSION_NAME} specifies the (individual) permission
-     * that should be managed by the launched UI.
-     * </p>
-     * <p>
-     * <li> {@link #EXTRA_USER} specifies the UserHandle of the user that owns the app.
-     * </p>
-     * <p>
-     * Output: Nothing.
-     * </p>
-     *
-     * @see #EXTRA_PACKAGE_NAME
-     * @see #EXTRA_PERMISSION_NAME
-     *
-     * @hide
-     */
-    @SystemApi
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_MANAGE_APP_PERMISSION =
-            "android.intent.action.MANAGE_APP_PERMISSION";
-
-    /**
      * Activity action: Launch UI to manage permissions.
      * <p>
      * Input: Nothing.
@@ -4115,6 +4088,18 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final String ACTION_DOCK_ACTIVE = "android.intent.action.DOCK_ACTIVE";
+
+    /**
+     * Broadcast Action: Indicates that a new device customization has been
+     * downloaded and applied (packages installed, runtime resource overlays
+     * enabled, xml files copied, ...), and that it is time for components that
+     * need to for example clear their caches to do so now.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_DEVICE_CUSTOMIZATION_READY =
+            "android.intent.action.DEVICE_CUSTOMIZATION_READY";
 
 
     // ---------------------------------------------------------------------

@@ -20,7 +20,6 @@ import static com.android.server.am.MemoryStatUtil.BYTES_IN_KILOBYTE;
 import static com.android.server.am.MemoryStatUtil.JIFFY_NANOS;
 import static com.android.server.am.MemoryStatUtil.MemoryStat;
 import static com.android.server.am.MemoryStatUtil.PAGE_SIZE;
-import static com.android.server.am.MemoryStatUtil.parseMemoryMaxUsageFromMemCg;
 import static com.android.server.am.MemoryStatUtil.parseMemoryStatFromMemcg;
 import static com.android.server.am.MemoryStatUtil.parseMemoryStatFromProcfs;
 import static com.android.server.am.MemoryStatUtil.parseVmHWMFromProcfs;
@@ -194,23 +193,6 @@ public class MemoryStatUtilTest {
 
         stat = parseMemoryStatFromMemcg(null);
         assertNull(stat);
-    }
-
-    @Test
-    public void testParseMemoryMaxUsageFromMemCg_parsesCorrectValue() {
-        assertEquals(1234, parseMemoryMaxUsageFromMemCg("1234"));
-    }
-
-    @Test
-    public void testParseMemoryMaxUsageFromMemCg_emptyContents() {
-        assertEquals(0, parseMemoryMaxUsageFromMemCg(""));
-
-        assertEquals(0, parseMemoryMaxUsageFromMemCg(null));
-    }
-
-    @Test
-    public void testParseMemoryMaxUsageFromMemCg_incorrectValue() {
-        assertEquals(0, parseMemoryMaxUsageFromMemCg("memory"));
     }
 
     @Test

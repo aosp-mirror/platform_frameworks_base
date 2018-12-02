@@ -2,7 +2,7 @@ package com.android.settingslib.location;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
@@ -17,20 +17,19 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class RecentLocationAppsTest {
 
     private static final int TEST_UID = 1234;
@@ -55,8 +54,6 @@ public class RecentLocationAppsTest {
     private UserManager mUserManager;
     private int mTestUserId;
     private RecentLocationApps mRecentLocationApps;
-
-
 
     @Before
     public void setUp() throws NameNotFoundException {

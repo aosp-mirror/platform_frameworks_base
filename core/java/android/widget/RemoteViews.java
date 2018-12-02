@@ -161,6 +161,7 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int LAYOUT_PARAM_ACTION_TAG = 19;
     private static final int OVERRIDE_TEXT_COLORS_TAG = 20;
     private static final int SET_RIPPLE_DRAWABLE_COLOR_TAG = 21;
+    private static final int SET_INT_TAG_TAG = 22;
 
     /**
      * Application that hosts the remote views.
@@ -271,6 +272,15 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void overrideTextColors(int textColor) {
         addAction(new OverrideTextColorsAction(textColor));
+    }
+
+    /**
+     * Sets an integer tag to the view.
+     *
+     * @hide
+     */
+    public void setIntTag(int viewId, int key, int tag) {
+        addAction(new SetIntTagAction(viewId, key, tag));
     }
 
     /**
@@ -2122,6 +2132,43 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    private class SetIntTagAction extends Action {
+        private final int mViewId;
+        private final int mKey;
+        private final int mTag;
+
+        SetIntTagAction(int viewId, int key, int tag) {
+            mViewId = viewId;
+            mKey = key;
+            mTag = tag;
+        }
+
+        SetIntTagAction(Parcel parcel) {
+            mViewId = parcel.readInt();
+            mKey = parcel.readInt();
+            mTag = parcel.readInt();
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mViewId);
+            dest.writeInt(mKey);
+            dest.writeInt(mTag);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
+            final View target = root.findViewById(mViewId);
+            if (target == null) return;
+
+            target.setTagInternal(mKey, mTag);
+        }
+
+        @Override
+        public int getActionTag() {
+            return SET_INT_TAG_TAG;
+        }
+    }
+
     /**
      * Create a new RemoteViews object that will display the views contained
      * in the specified layout file.
@@ -2326,6 +2373,8 @@ public class RemoteViews implements Parcelable, Filter {
                 return new OverrideTextColorsAction(parcel);
             case SET_RIPPLE_DRAWABLE_COLOR_TAG:
                 return new SetRippleDrawableColor(parcel);
+            case SET_INT_TAG_TAG:
+                return new SetIntTagAction(parcel);
             default:
                 throw new ActionException("Tag " + tag + " not found");
         }

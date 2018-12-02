@@ -113,6 +113,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
     private static final int FAKE_REAL_CALLING_UID = 667;
     private static final String FAKE_CALLING_PACKAGE = "com.whatever.dude";
     private static final int UNIMPORTANT_UID = 12345;
+    private static final int UNIMPORTANT_UID2 = 12346;
 
     @Before
     public void setUp() throws Exception {
@@ -243,7 +244,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final ActivityRecord source = builder.build();
 
         if (!containsConditions(preconditions, PRECONDITION_NO_INTENT_COMPONENT)) {
-            intent.setComponent(source.realActivity);
+            intent.setComponent(source.mActivityComponent);
         }
 
         if (containsConditions(preconditions, PRECONDITION_DISALLOW_APP_SWITCHING)) {
@@ -262,11 +263,11 @@ public class ActivityStarterTests extends ActivityTestsBase {
                     PRECONDITION_ACTIVITY_SUPPORTS_INTENT_EXCEPTION)) {
                 doAnswer((inv) -> {
                     throw new RemoteException();
-                }).when(packageManager).activitySupportsIntent(eq(source.realActivity), eq(intent),
-                        any());
+                }).when(packageManager).activitySupportsIntent(
+                        eq(source.mActivityComponent), eq(intent), any());
             } else {
                 doReturn(!containsConditions(preconditions, PRECONDITION_NO_VOICE_SESSION_SUPPORT))
-                        .when(packageManager).activitySupportsIntent(eq(source.realActivity),
+                        .when(packageManager).activitySupportsIntent(eq(source.mActivityComponent),
                         eq(intent), any());
             }
         } catch (RemoteException e) {
@@ -430,7 +431,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .setCreateTask(true)
                 .build();
 
-        focusActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        focusActivity.getActivityStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
 
         final ActivityRecord reusableActivity = new ActivityBuilder(mService)
                 .setCreateTask(true)
@@ -438,10 +439,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // Create reusable activity after entering split-screen so that it is the top secondary
         // stack.
-        reusableActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        reusableActivity.getActivityStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
         // Set focus back to primary.
-        final ActivityStack focusStack = focusActivity.getStack();
+        final ActivityStack focusStack = focusActivity.getActivityStack();
         focusStack.moveToFront("testSplitScreenDeliverToTop");
 
         doReturn(reusableActivity).when(mRootActivityContainer).findTask(any(), anyInt());
@@ -467,14 +468,14 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .setCreateTask(true)
                 .build();
 
-        reusableActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        reusableActivity.getActivityStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
         final ActivityRecord focusActivity = new ActivityBuilder(mService)
                 .setCreateTask(true)
                 .build();
 
         // Enter split-screen. Primary stack should have focus.
-        focusActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        focusActivity.getActivityStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
 
         doReturn(reusableActivity).when(mRootActivityContainer).findTask(any(), anyInt());
 
@@ -561,8 +562,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
     public void testBackgroundActivityStartsAllowed_noStartsAborted() {
         doReturn(true).when(mService).isBackgroundActivityStartsEnabled();
 
-        runAndVerifyBackgroundActivityStartsSubtest("allowed_noStartsAborted",
-                false, UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1, false);
+        runAndVerifyBackgroundActivityStartsSubtest("allowed_noStartsAborted", false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                false, false);
     }
 
     /**
@@ -573,8 +576,11 @@ public class ActivityStarterTests extends ActivityTestsBase {
     public void testBackgroundActivityStartsDisallowed_unsupportedStartsAborted() {
         doReturn(false).when(mService).isBackgroundActivityStartsEnabled();
 
-        runAndVerifyBackgroundActivityStartsSubtest("disallowed_unsupportedUsecase_aborted",
-                true, UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1, false);
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_unsupportedUsecase_aborted", true,
+                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                false, false);
     }
 
     /**
@@ -586,38 +592,77 @@ public class ActivityStarterTests extends ActivityTestsBase {
     public void testBackgroundActivityStartsDisallowed_supportedStartsNotAborted() {
         doReturn(false).when(mService).isBackgroundActivityStartsEnabled();
 
-        runAndVerifyBackgroundActivityStartsSubtest("disallowed_rootUid_notAborted",
-                false, Process.ROOT_UID, false, PROCESS_STATE_TOP + 1, false);
-        runAndVerifyBackgroundActivityStartsSubtest("disallowed_systemUid_notAborted",
-                false, Process.SYSTEM_UID, false, PROCESS_STATE_TOP + 1, false);
-        runAndVerifyBackgroundActivityStartsSubtest("disallowed_hasVisibleWindow_notAborted",
-                false, UNIMPORTANT_UID, true, PROCESS_STATE_TOP + 1, false);
-        runAndVerifyBackgroundActivityStartsSubtest("disallowed_processStateTop_notAborted",
-                false, UNIMPORTANT_UID, false, PROCESS_STATE_TOP, false);
-        runAndVerifyBackgroundActivityStartsSubtest("disallowed_hasForegroundActivities_notAborted",
-                false, UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1, true);
+        runAndVerifyBackgroundActivityStartsSubtest("disallowed_rootUid_notAborted", false,
+                Process.ROOT_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                false, false);
+        runAndVerifyBackgroundActivityStartsSubtest("disallowed_systemUid_notAborted", false,
+                Process.SYSTEM_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                false, false);
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_callingUidHasVisibleWindow_notAborted", false,
+                UNIMPORTANT_UID, true, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                false, false);
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_callingUidProcessStateTop_notAborted", false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                false, false);
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_realCallingUidHasVisibleWindow_notAborted", false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, true, PROCESS_STATE_TOP + 1,
+                false, false);
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_realCallingUidProcessStateTop_notAborted", false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP,
+                false, false);
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_hasForegroundActivities_notAborted", false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                true, false);
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_callerIsRecents_notAborted", false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                false, true);
     }
 
     private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
-            int testCallingUid, boolean hasVisibleWindow, int procState,
-            boolean hasForegroundActivities) {
+            int callingUid, boolean callingUidHasVisibleWindow, int callingUidProcState,
+            int realCallingUid, boolean realCallingUidHasVisibleWindow, int realCallingUidProcState,
+            boolean hasForegroundActivities, boolean callerIsRecents) {
         // window visibility
-        doReturn(hasVisibleWindow).when(mService.mWindowManager).isAnyWindowVisibleForUid(
-                testCallingUid);
+        doReturn(callingUidHasVisibleWindow).when(mService.mWindowManager).isAnyWindowVisibleForUid(
+                callingUid);
+        doReturn(realCallingUidHasVisibleWindow).when(mService.mWindowManager)
+                .isAnyWindowVisibleForUid(realCallingUid);
         // process importance
-        doReturn(procState).when(mService).getUidStateLocked(testCallingUid);
+        doReturn(callingUidProcState).when(mService).getUidStateLocked(callingUid);
+        doReturn(realCallingUidProcState).when(mService).getUidStateLocked(realCallingUid);
         // foreground activities
         final IApplicationThread caller = mock(IApplicationThread.class);
         final ApplicationInfo ai = new ApplicationInfo();
-        ai.uid = testCallingUid;
+        ai.uid = callingUid;
         final WindowProcessController callerApp =
-                new WindowProcessController(mService, ai, null, testCallingUid, -1, null, null);
+                new WindowProcessController(mService, ai, null, callingUid, -1, null, null);
         callerApp.setHasForegroundActivities(hasForegroundActivities);
         doReturn(callerApp).when(mService).getProcessController(caller);
+        // caller is recents
+        RecentTasks recentTasks = mock(RecentTasks.class);
+        mService.mStackSupervisor.setRecentTasks(recentTasks);
+        doReturn(callerIsRecents).when(recentTasks).isCallerRecents(callingUid);
 
         final ActivityOptions options = spy(ActivityOptions.makeBasic());
-        ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK).setCaller(caller)
-                .setCallingUid(testCallingUid).setActivityOptions(new SafeActivityOptions(options));
+        ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK)
+                .setCaller(caller)
+                .setCallingUid(callingUid)
+                .setRealCallingUid(realCallingUid)
+                .setActivityOptions(new SafeActivityOptions(options));
 
         final int result = starter.setReason("testBackgroundActivityStarts_" + name).execute();
 

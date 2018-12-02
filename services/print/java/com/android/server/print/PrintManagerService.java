@@ -146,12 +146,13 @@ public final class PrintManagerService extends SystemService {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     disabledMessage = dpmi.getPrintingDisabledReasonForUser(callingUserId);
+
+                    if (disabledMessage != null) {
+                        Toast.makeText(mContext, Looper.getMainLooper(), disabledMessage,
+                                Toast.LENGTH_LONG).show();
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(identity);
-                }
-                if (disabledMessage != null) {
-                    Toast.makeText(mContext, Looper.getMainLooper(), disabledMessage,
-                            Toast.LENGTH_LONG).show();
                 }
                 try {
                     adapter.start();

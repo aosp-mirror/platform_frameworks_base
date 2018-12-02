@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.SystemApi;
 import android.app.slice.Slice;
 import android.content.ComponentName;
 import android.content.Context;
@@ -330,7 +331,9 @@ public final class WallpaperInfo implements Parcelable {
      * @see WallpaperService.Engine#onAmbientModeChanged(boolean, boolean)
      * @see WallpaperService.Engine#isInAmbientMode()
      * @return {@code true} if wallpaper can draw when in ambient mode.
+     * @hide
      */
+    @SystemApi
     public boolean supportsAmbientMode() {
         return mSupportsAmbientMode;
     }

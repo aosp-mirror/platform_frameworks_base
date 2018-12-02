@@ -115,7 +115,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     protected final Transaction mPendingTransaction;
     protected final SurfaceAnimator mSurfaceAnimator;
-    protected final WindowManagerService mService;
+    protected final WindowManagerService mWmService;
 
     private final Point mTmpPos = new Point();
     protected final Point mLastSurfacePosition = new Point();
@@ -129,10 +129,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     private boolean mCommittedReparentToAnimationLeash;
 
-    WindowContainer(WindowManagerService service) {
-        mService = service;
-        mPendingTransaction = service.mTransactionFactory.make();
-        mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, service);
+    WindowContainer(WindowManagerService wms) {
+        mWmService = wms;
+        mPendingTransaction = wms.mTransactionFactory.make();
+        mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, wms);
     }
 
     @Override
@@ -512,24 +512,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
             child.onDisplayChanged(dc);
-        }
-    }
-
-    /**
-     * Update the surface size when display changed in order to avoid children being bound by the
-     * old display size.
-     *
-     * Note that we don't want to apply this to all layers, but only limiting this to layers that
-     * don't set their own size ({@link Task}, {@link WindowState} and {@link WindowToken}).
-     */
-    void updateSurfaceSize(DisplayContent dc) {
-        if (mSurfaceControl == null) {
-            return;
-        }
-
-        final int newSurfaceSize = dc.getSurfaceSize();
-        if (mSurfaceControl.getWidth() != newSurfaceSize) {
-            getPendingTransaction().setSize(mSurfaceControl, newSurfaceSize, newSurfaceSize);
         }
     }
 

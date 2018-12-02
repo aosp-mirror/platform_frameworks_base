@@ -2909,6 +2909,7 @@
         <public name="opticalInsetRight" />
         <public name="opticalInsetBottom" />
         <public name="forceDarkAllowed" />
+        <!-- @hide @SystemApi -->
         <public name="supportsAmbientMode" />
         <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
         <public name="usesNonSdkApi" />
@@ -2927,6 +2928,7 @@
         <public name="dataSharedWithThirdParty" />
         <public name="dataUsedForMonetization" />
         <public name="dataRetentionTime" />
+        <public name="selectionDividerHeight" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">

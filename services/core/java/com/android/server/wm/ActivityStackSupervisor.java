@@ -91,9 +91,6 @@ import android.app.AppOpsManager;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.WaitResult;
-import android.app.WindowConfiguration;
-import android.app.WindowConfiguration.ActivityType;
-import android.app.WindowConfiguration.WindowingMode;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.LaunchActivityItem;
@@ -111,7 +108,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -434,7 +430,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         mInitialized = true;
         mRunningTasks = createRunningTasks();
-        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext, mHandler.getLooper());
+
+        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext,
+                mHandler.getLooper());
         mKeyguardController = new KeyguardController(mService, this);
 
         mPersisterQueue = new PersisterQueue();
@@ -542,7 +540,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mActivitiesWaitingForVisibleActivity.remove(r);
 
         for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
-            if (mWaitingForActivityVisible.get(i).matches(r.realActivity)) {
+            if (mWaitingForActivityVisible.get(i).matches(r.mActivityComponent)) {
                 mWaitingForActivityVisible.remove(i);
             }
         }
@@ -556,7 +554,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         boolean changed = false;
         for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
             final WaitInfo w = mWaitingForActivityVisible.get(i);
-            if (w.matches(r.realActivity)) {
+            if (w.matches(r.mActivityComponent)) {
                 final WaitResult result = w.getResult();
                 changed = true;
                 result.timeout = false;
@@ -590,7 +588,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // Unlike START_TASK_TO_FRONT, When an intent is delivered to top, there
                 // will be no followup launch signals. Assign the result and launched component.
                 if (result == START_DELIVERED_TO_TOP) {
-                    w.who = r.realActivity;
+                    w.who = r.mActivityComponent;
                 }
             }
         }
@@ -711,7 +709,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return false;
         }
 
-        final TaskRecord task = r.getTask();
+        final TaskRecord task = r.getTaskRecord();
         final ActivityStack stack = task.getStack();
 
         beginDeferResume();
@@ -740,7 +738,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         false /* markFrozenIfConfigChanged */, true /* deferResume */);
             }
 
-            if (r.getStack().checkKeyguardVisibility(r, true /* shouldBeVisible */,
+            if (r.getActivityStack().checkKeyguardVisibility(r, true /* shouldBeVisible */,
                     true /* isTop */)) {
                 // We only set the visibility to true if the activity is allowed to be visible
                 // based on
@@ -752,7 +750,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
             final int applicationInfoUid =
                     (r.info.applicationInfo != null) ? r.info.applicationInfo.uid : -1;
-            if ((r.userId != proc.mUserId) || (r.appInfo.uid != applicationInfoUid)) {
+            if ((r.mUserId != proc.mUserId) || (r.appInfo.uid != applicationInfoUid)) {
                 Slog.wtf(TAG,
                         "User ID for activity changing for " + r
                                 + " appInfo.uid=" + r.appInfo.uid
@@ -793,7 +791,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
                         "Launching: " + r + " icicle=" + r.icicle + " with results=" + results
                                 + " newIntents=" + newIntents + " andResume=" + andResume);
-                EventLog.writeEvent(EventLogTags.AM_RESTART_ACTIVITY, r.userId,
+                EventLog.writeEvent(EventLogTags.AM_RESTART_ACTIVITY, r.mUserId,
                         System.identityHashCode(r), task.taskId, r.shortComponentName);
                 if (r.isActivityTypeHome()) {
                     // Home process is the root process of the task.
@@ -1310,7 +1308,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // waiting for the next one to start.
         for (int i = 0; i < NS; i++) {
             r = stops.get(i);
-            final ActivityStack stack = r.getStack();
+            final ActivityStack stack = r.getActivityStack();
             if (stack != null) {
                 if (r.finishing) {
                     stack.finishCurrentActivityLocked(r, ActivityStack.FINISH_IMMEDIATELY, false,
@@ -1325,7 +1323,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // waiting for the next one to start.
         for (int i = 0; i < NF; i++) {
             r = finishes.get(i);
-            final ActivityStack stack = r.getStack();
+            final ActivityStack stack = r.getActivityStack();
             if (stack != null) {
                 activityRemoved |= stack.destroyActivityLocked(r, true, "finish-idle");
             }
@@ -2007,7 +2005,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     void activitySleptLocked(ActivityRecord r) {
         mGoingToSleepActivities.remove(r);
-        final ActivityStack s = r.getStack();
+        final ActivityStack s = r.getActivityStack();
         if (s != null) {
             s.checkReadyForSleep();
         } else {
@@ -2043,7 +2041,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // A resumed activity cannot be stopping. remove from list
         mStoppingActivities.remove(r);
 
-        final ActivityStack stack = r.getStack();
+        final ActivityStack stack = r.getActivityStack();
         if (mRootActivityContainer.isTopDisplayFocusedStack(stack)) {
             mService.updateUsageStats(r, true);
         }
@@ -2059,7 +2057,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     // Called when WindowManager has finished animating the launchingBehind activity to the back.
     private void handleLaunchTaskBehindCompleteLocked(ActivityRecord r) {
-        final TaskRecord task = r.getTask();
+        final TaskRecord task = r.getTaskRecord();
         final ActivityStack stack = task.getStack();
 
         r.mLaunchTaskBehind = false;
@@ -2071,7 +2069,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // task has been shown briefly
         final ActivityRecord top = stack.getTopActivity();
         if (top != null) {
-            top.getTask().touchActiveTime();
+            top.getTaskRecord().touchActiveTime();
         }
     }
 
@@ -2126,7 +2124,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 }
             }
             if (remove) {
-                final ActivityStack stack = s.getStack();
+                final ActivityStack stack = s.getActivityStack();
                 final boolean shouldSleepOrShutDown = stack != null
                         ? stack.shouldSleepOrShutDownActivities()
                         : mService.isSleepingOrShuttingDownLocked();
@@ -2216,8 +2214,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 pw.println(header);
                 header = null;
             }
-            if (lastTask != r.getTask()) {
-                lastTask = r.getTask();
+            if (lastTask != r.getTaskRecord()) {
+                lastTask = r.getTaskRecord();
                 pw.print(prefix);
                 pw.print(full ? "* " : "  ");
                 pw.println(lastTask);
@@ -2374,7 +2372,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mWindowManager.notifyAppRelaunchingFinished(token);
         final ActivityRecord r = ActivityRecord.isInStackLocked(token);
         if (r != null) {
-            if (r.getStack().shouldSleepOrShutDownActivities()) {
+            if (r.getActivityStack().shouldSleepOrShutDownActivities()) {
                 r.setSleeping(true, true);
             }
         }

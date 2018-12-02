@@ -172,8 +172,8 @@ class WindowToken extends WindowContainer<WindowState> {
         setHidden(true);
 
         if (changed) {
-            mService.mWindowPlacerLocked.performSurfacePlacement();
-            mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /*updateInputWindows*/);
+            mWmService.mWindowPlacerLocked.performSurfacePlacement();
+            mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /*updateInputWindows*/);
         }
 
         if (delayed) {
@@ -202,7 +202,7 @@ class WindowToken extends WindowContainer<WindowState> {
         if (!mChildren.contains(win)) {
             if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + this);
             addChild(win, mWindowComparator);
-            mService.mWindowsChanged = true;
+            mWmService.mWindowsChanged = true;
             // TODO: Should we also be setting layout needed here and other places?
         }
     }
@@ -265,7 +265,6 @@ class WindowToken extends WindowContainer<WindowState> {
         // to another display before the window behind
         // it is ready.
 
-        updateSurfaceSize(dc);
         super.onDisplayChanged(dc);
     }
 
@@ -327,9 +326,9 @@ class WindowToken extends WindowContainer<WindowState> {
      * system bars, or in other words extend outside of the "Decor Frame"
      */
     boolean canLayerAboveSystemBars() {
-        int layer = mService.mPolicy.getWindowLayerFromTypeLw(windowType,
+        int layer = mWmService.mPolicy.getWindowLayerFromTypeLw(windowType,
                 mOwnerCanManageAppTokens);
-        int navLayer = mService.mPolicy.getWindowLayerFromTypeLw(TYPE_NAVIGATION_BAR,
+        int navLayer = mWmService.mPolicy.getWindowLayerFromTypeLw(TYPE_NAVIGATION_BAR,
                 mOwnerCanManageAppTokens);
         return mOwnerCanManageAppTokens && (layer > navLayer);
     }

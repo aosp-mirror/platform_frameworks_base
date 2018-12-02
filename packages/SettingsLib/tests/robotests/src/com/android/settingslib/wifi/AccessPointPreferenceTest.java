@@ -25,16 +25,15 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class AccessPointPreferenceTest {
 
     private Context mContext = RuntimeEnvironment.application;

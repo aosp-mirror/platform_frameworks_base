@@ -25,8 +25,8 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -44,11 +44,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class RestrictedLockUtilsTest {
 
     @Mock
@@ -178,8 +179,7 @@ public class RestrictedLockUtilsTest {
     public void checkIfKeyguardFeaturesAreDisabled_doesMatchAllowedFeature_unifiedManagedProfile() {
         UserInfo userInfo = setUpUser(mUserId, new ComponentName[] {mAdmin1});
         UserInfo profileInfo = setUpManagedProfile(mProfileId, new ComponentName[] {mAdmin2});
-        when(mUserManager.getProfiles(mUserId)).thenReturn(Arrays.asList(new UserInfo[] {
-                userInfo, profileInfo}));
+        when(mUserManager.getProfiles(mUserId)).thenReturn(Arrays.asList(userInfo, profileInfo));
 
         when(mDevicePolicyManager.getKeyguardDisabledFeatures(mAdmin1, mUserId))
                 .thenReturn(KEYGUARD_DISABLE_FEATURES_NONE);
@@ -207,8 +207,7 @@ public class RestrictedLockUtilsTest {
     public void checkIfKeyguardFeaturesAreDisabled_notMatchOtherFeatures_unifiedManagedProfile() {
         UserInfo userInfo = setUpUser(mUserId, new ComponentName[] {mAdmin1});
         UserInfo profileInfo = setUpManagedProfile(mProfileId, new ComponentName[] {mAdmin2});
-        when(mUserManager.getProfiles(mUserId)).thenReturn(Arrays.asList(new UserInfo[] {
-                userInfo, profileInfo}));
+        when(mUserManager.getProfiles(mUserId)).thenReturn(Arrays.asList(userInfo, profileInfo));
 
         when(mDevicePolicyManager.getKeyguardDisabledFeatures(mAdmin1, mUserId))
                 .thenReturn(KEYGUARD_DISABLE_FEATURES_NONE);
@@ -231,8 +230,7 @@ public class RestrictedLockUtilsTest {
     public void checkIfKeyguardFeaturesAreDisabled_onlyMatchesProfile_separateManagedProfile() {
         UserInfo userInfo = setUpUser(mUserId, new ComponentName[] {mAdmin1});
         UserInfo profileInfo = setUpManagedProfile(mProfileId, new ComponentName[] {mAdmin2});
-        when(mUserManager.getProfiles(mUserId)).thenReturn(Arrays.asList(new UserInfo[] {
-                userInfo, profileInfo}));
+        when(mUserManager.getProfiles(mUserId)).thenReturn(Arrays.asList(userInfo, profileInfo));
 
         when(mDevicePolicyManager.getKeyguardDisabledFeatures(mAdmin1, mUserId))
                 .thenReturn(KEYGUARD_DISABLE_FEATURES_NONE);
@@ -268,8 +266,7 @@ public class RestrictedLockUtilsTest {
     public void checkIfKeyguardFeaturesAreDisabled_onlyMatchesParent_profileParentPolicy() {
         UserInfo userInfo = setUpUser(mUserId, new ComponentName[] {mAdmin1});
         UserInfo profileInfo = setUpManagedProfile(mProfileId, new ComponentName[] {mAdmin2});
-        when(mUserManager.getProfiles(mUserId)).thenReturn(Arrays.asList(new UserInfo[] {
-                userInfo, profileInfo}));
+        when(mUserManager.getProfiles(mUserId)).thenReturn(Arrays.asList(userInfo, profileInfo));
 
         when(mProxy.getParentProfileInstance(any(DevicePolicyManager.class), any())
                 .getKeyguardDisabledFeatures(mAdmin2, mProfileId))

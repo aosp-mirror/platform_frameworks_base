@@ -17,6 +17,7 @@ package android {
     field public static final java.lang.String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final java.lang.String ALLOCATE_AGGRESSIVE = "android.permission.ALLOCATE_AGGRESSIVE";
     field public static final java.lang.String ALLOW_ANY_CODEC_FOR_PLAYBACK = "android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK";
+    field public static final java.lang.String AMBIENT_WALLPAPER = "android.permission.AMBIENT_WALLPAPER";
     field public static final java.lang.String BACKUP = "android.permission.BACKUP";
     field public static final java.lang.String BATTERY_STATS = "android.permission.BATTERY_STATS";
     field public static final java.lang.String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
@@ -158,6 +159,7 @@ package android {
     field public static final java.lang.String REAL_GET_TASKS = "android.permission.REAL_GET_TASKS";
     field public static final java.lang.String REBOOT = "android.permission.REBOOT";
     field public static final java.lang.String RECEIVE_DATA_ACTIVITY_CHANGE = "android.permission.RECEIVE_DATA_ACTIVITY_CHANGE";
+    field public static final java.lang.String RECEIVE_DEVICE_CUSTOMIZATION_READY = "android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY";
     field public static final java.lang.String RECEIVE_EMERGENCY_BROADCAST = "android.permission.RECEIVE_EMERGENCY_BROADCAST";
     field public static final java.lang.String RECEIVE_WIFI_CREDENTIAL_CHANGE = "android.permission.RECEIVE_WIFI_CREDENTIAL_CHANGE";
     field public static final java.lang.String RECOVERY = "android.permission.RECOVERY";
@@ -171,6 +173,7 @@ package android {
     field public static final java.lang.String RETRIEVE_WINDOW_CONTENT = "android.permission.RETRIEVE_WINDOW_CONTENT";
     field public static final java.lang.String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final java.lang.String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
+    field public static final java.lang.String SEND_DEVICE_CUSTOMIZATION_READY = "android.permission.SEND_DEVICE_CUSTOMIZATION_READY";
     field public static final java.lang.String SEND_RESPOND_VIA_MESSAGE = "android.permission.SEND_RESPOND_VIA_MESSAGE";
     field public static final java.lang.String SEND_SHOW_SUSPENDED_APP_DETAILS = "android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS";
     field public static final java.lang.String SEND_SMS_NO_CONFIRMATION = "android.permission.SEND_SMS_NO_CONFIRMATION";
@@ -214,6 +217,10 @@ package android {
     field public static final java.lang.String WRITE_SECURE_SETTINGS = "android.permission.WRITE_SECURE_SETTINGS";
   }
 
+  public static final class Manifest.permission_group {
+    field public static final java.lang.String UNDEFINED = "android.permission-group.UNDEFINED";
+  }
+
   public static final class R.array {
     field public static final int config_keySystemUuidMapping = 17235973; // 0x1070005
   }
@@ -222,6 +229,7 @@ package android {
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
+    field public static final int supportsAmbientMode = 16844173; // 0x101058d
     field public static final int userRestriction = 16844164; // 0x1010584
   }
 
@@ -551,6 +559,10 @@ package android.app {
     ctor public VrStateCallback();
     method public void onPersistentVrStateChanged(boolean);
     method public void onVrStateChanged(boolean);
+  }
+
+  public final class WallpaperInfo implements android.os.Parcelable {
+    method public boolean supportsAmbientMode();
   }
 
   public class WallpaperManager {
@@ -1055,12 +1067,12 @@ package android.content {
     field public static final java.lang.String ACTION_BATTERY_LEVEL_CHANGED = "android.intent.action.BATTERY_LEVEL_CHANGED";
     field public static final java.lang.String ACTION_CALL_EMERGENCY = "android.intent.action.CALL_EMERGENCY";
     field public static final java.lang.String ACTION_CALL_PRIVILEGED = "android.intent.action.CALL_PRIVILEGED";
+    field public static final java.lang.String ACTION_DEVICE_CUSTOMIZATION_READY = "android.intent.action.DEVICE_CUSTOMIZATION_READY";
     field public static final java.lang.String ACTION_FACTORY_RESET = "android.intent.action.FACTORY_RESET";
     field public static final java.lang.String ACTION_GLOBAL_BUTTON = "android.intent.action.GLOBAL_BUTTON";
     field public static final java.lang.String ACTION_INSTALL_INSTANT_APP_PACKAGE = "android.intent.action.INSTALL_INSTANT_APP_PACKAGE";
     field public static final java.lang.String ACTION_INSTANT_APP_RESOLVER_SETTINGS = "android.intent.action.INSTANT_APP_RESOLVER_SETTINGS";
     field public static final java.lang.String ACTION_INTENT_FILTER_NEEDS_VERIFICATION = "android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION";
-    field public static final java.lang.String ACTION_MANAGE_APP_PERMISSION = "android.intent.action.MANAGE_APP_PERMISSION";
     field public static final java.lang.String ACTION_MANAGE_APP_PERMISSIONS = "android.intent.action.MANAGE_APP_PERMISSIONS";
     field public static final java.lang.String ACTION_MANAGE_PERMISSIONS = "android.intent.action.MANAGE_PERMISSIONS";
     field public static final java.lang.String ACTION_MANAGE_PERMISSION_APPS = "android.intent.action.MANAGE_PERMISSION_APPS";
@@ -1232,8 +1244,9 @@ package android.content.pm {
     method public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceiversAsUser(android.content.Intent, int, android.os.UserHandle);
     method public abstract void registerDexModule(java.lang.String, android.content.pm.PackageManager.DexModuleRegisterCallback);
     method public abstract void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
-    method public void replacePreferredActivity(android.content.IntentFilter, int, java.util.List<android.content.ComponentName>, android.content.ComponentName);
+    method public deprecated void replacePreferredActivity(android.content.IntentFilter, int, java.util.List<android.content.ComponentName>, android.content.ComponentName);
     method public abstract void revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
+    method public void sendDeviceCustomizationReadyBroadcast();
     method public abstract boolean setDefaultBrowserPackageNameAsUser(java.lang.String, int);
     method public void setHarmfulAppWarning(java.lang.String, java.lang.CharSequence);
     method public deprecated java.lang.String[] setPackagesSuspended(java.lang.String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, java.lang.String);
@@ -2752,7 +2765,6 @@ package android.location {
   public class LocationManager {
     method public deprecated boolean addGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
     method public deprecated boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
-    method public android.app.PendingIntent createManageLocationPermissionIntent(java.lang.String, java.lang.String);
     method public void flushGnssBatch();
     method public int getGnssBatchSize();
     method public java.lang.String getNetworkProviderPackage();
@@ -2861,6 +2873,7 @@ package android.media {
     field public static final int AUDIOFOCUS_FLAG_DELAY_OK = 1; // 0x1
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
     field public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 2; // 0x2
+    field public static final int FLAG_FROM_KEY = 4096; // 0x1000
   }
 
   public static abstract class AudioManager.AudioServerStateCallback {
@@ -3675,6 +3688,10 @@ package android.net.wifi {
 
   public class WifiManager {
     method public void connect(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
+    method public void connect(int, android.net.wifi.WifiManager.ActionListener);
+    method public void disable(int, android.net.wifi.WifiManager.ActionListener);
+    method public void disableEphemeralNetwork(java.lang.String);
+    method public void forget(int, android.net.wifi.WifiManager.ActionListener);
     method public java.util.List<android.net.wifi.WifiConfiguration> getAllMatchingWifiConfigs(java.util.List<android.net.wifi.ScanResult>);
     method public java.util.List<android.net.wifi.hotspot2.OsuProvider> getMatchingOsuProviders(java.util.List<android.net.wifi.ScanResult>);
     method public java.util.List<android.net.wifi.WifiConfiguration> getPrivilegedConfiguredNetworks();
@@ -3686,6 +3703,7 @@ package android.net.wifi {
     method public boolean isWifiApEnabled();
     method public boolean isWifiScannerSupported();
     method public void registerNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback, android.os.Handler);
+    method public void save(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
     method public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
     method public boolean startScan(android.os.WorkSource);
     method public void unregisterNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback);
@@ -5096,6 +5114,7 @@ package android.service.notification {
     ctor public NotificationAssistantService();
     method public final void adjustNotification(android.service.notification.Adjustment);
     method public final void adjustNotifications(java.util.List<android.service.notification.Adjustment>);
+    method public void onActionClicked(java.lang.String, android.app.Notification.Action, int);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public void onNotificationDirectReply(java.lang.String);
     method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification);
@@ -5325,6 +5344,15 @@ package android.service.trust {
     field public static final int TOKEN_STATE_ACTIVE = 1; // 0x1
     field public static final int TOKEN_STATE_INACTIVE = 0; // 0x0
     field public static final java.lang.String TRUST_AGENT_META_DATA = "android.service.trust.trustagent";
+  }
+
+}
+
+package android.service.wallpaper {
+
+  public class WallpaperService.Engine {
+    method public boolean isInAmbientMode();
+    method public void onAmbientModeChanged(boolean, long);
   }
 
 }
@@ -5898,6 +5926,7 @@ package android.telephony {
     field public static final int NETWORK_TYPE_BITMASK_HSUPA = 512; // 0x200
     field public static final int NETWORK_TYPE_BITMASK_LTE = 8192; // 0x2000
     field public static final int NETWORK_TYPE_BITMASK_LTE_CA = 524288; // 0x80000
+    field public static final int NETWORK_TYPE_BITMASK_NR = 1048576; // 0x100000
     field public static final int NETWORK_TYPE_BITMASK_TD_SCDMA = 131072; // 0x20000
     field public static final int NETWORK_TYPE_BITMASK_UMTS = 8; // 0x8
     field public static final int NETWORK_TYPE_BITMASK_UNKNOWN = 1; // 0x1
@@ -6210,6 +6239,7 @@ package android.telephony.ims {
     method public android.os.Bundle getCallExtras();
     method public int getCallType();
     method public static int getCallTypeFromVideoState(int);
+    method public int getEmergencyServiceCategories();
     method public android.telephony.ims.ImsStreamMediaProfile getMediaProfile();
     method public int getRestrictCause();
     method public int getServiceType();
@@ -6222,6 +6252,7 @@ package android.telephony.ims {
     method public void setCallExtraBoolean(java.lang.String, boolean);
     method public void setCallExtraInt(java.lang.String, int);
     method public void setCallRestrictCause(int);
+    method public void setEmergencyServiceCategories(int);
     method public void updateCallExtras(android.telephony.ims.ImsCallProfile);
     method public void updateCallType(android.telephony.ims.ImsCallProfile);
     method public void updateMediaProfile(android.telephony.ims.ImsCallProfile);

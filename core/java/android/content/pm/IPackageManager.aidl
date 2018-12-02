@@ -676,4 +676,6 @@ interface IPackageManager {
     String getSystemTextClassifierPackageName();
 
     boolean isPackageStateProtected(String packageName, int userId);
+
+    void sendDeviceCustomizationReadyBroadcast();
 }

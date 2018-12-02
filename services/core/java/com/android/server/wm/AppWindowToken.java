@@ -554,7 +554,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // * or this is an opening app and windows are being replaced.
         boolean visibilityChanged = false;
         if (isHidden() == visible || (isHidden() && mIsExiting) || (visible && waitingForReplacement())) {
-            final AccessibilityController accessibilityController = mService.mAccessibilityController;
+            final AccessibilityController accessibilityController =
+                    mWmService.mAccessibilityController;
             boolean changed = false;
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
                     "Changing app " + this + " hidden=" + isHidden() + " performLayout=" + performLayout);
@@ -595,7 +596,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
                 // We are becoming visible, so better freeze the screen with the windows that are
                 // getting visible so we also wait for them.
-                forAllWindows(mService::makeWindowFreezingScreenIfNeededLocked, true);
+                forAllWindows(mWmService::makeWindowFreezingScreenIfNeededLocked, true);
             }
 
             if (DEBUG_APP_TRANSITIONS) {
@@ -606,9 +607,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             if (changed) {
                 getDisplayContent().getInputMonitor().setUpdateInputWindowsNeededLw();
                 if (performLayout) {
-                    mService.updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+                    mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                             false /*updateInputWindows*/);
-                    mService.mWindowPlacerLocked.performSurfacePlacement();
+                    mWmService.mWindowPlacerLocked.performSurfacePlacement();
                 }
                 getDisplayContent().getInputMonitor().updateInputWindowsLw(false /*force*/);
             }
@@ -635,7 +636,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // The token was made immediately visible, there will be no entrance animation.
                 // We need to inform the client the enter animation was finished.
                 mEnteringAnimation = true;
-                mService.mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(token);
+                mWmService.mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(
+                        token);
             }
 
             // If we're becoming visible, immediately change client visibility as well. there seem
@@ -658,7 +660,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
                 // Take the screenshot before possibly hiding the WSA, otherwise the screenshot
                 // will not be taken.
-                mService.mTaskSnapshotController.notifyAppVisibilityChanged(this, visible);
+                mWmService.mTaskSnapshotController.notifyAppVisibilityChanged(this, visible);
             }
 
             // If we are hidden but there is no delay needed we immediately
@@ -774,7 +776,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         getDisplayContent().mOpeningApps.remove(this);
         getDisplayContent().mUnknownAppVisibilityController.appRemovedOrHidden(this);
-        mService.mTaskSnapshotController.onAppRemoved(this);
+        mWmService.mTaskSnapshotController.onAppRemoved(this);
         waitingToShow = false;
         if (getDisplayContent().mClosingApps.contains(this)) {
             delayed = true;
@@ -827,7 +829,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Removing focused app token:" + this
                    + " displayId=" + dc.getDisplayId());
             dc.setFocusedApp(null);
-            mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
+            mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
         }
 
         if (!delayed) {
@@ -1141,7 +1143,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         // if we got a replacement window, reset the timeout to give drawing more time
         if (gotReplacementWindow) {
-            mService.scheduleWindowReplacementTimeouts(this);
+            mWmService.scheduleWindowReplacementTimeouts(this);
         }
         checkKeyguardFlagsChanged();
     }
@@ -1271,7 +1273,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             final WindowState win = mChildren.get(i);
             win.onUnfreezeBounds();
         }
-        mService.mWindowPlacerLocked.performSurfacePlacement();
+        mWmService.mWindowPlacerLocked.performSurfacePlacement();
     }
 
     void setAppLayoutChanges(int changes, String reason) {
@@ -1279,7 +1281,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             final DisplayContent dc = getDisplayContent();
             dc.pendingLayoutChanges |= changes;
             if (DEBUG_LAYOUT_REPEATS) {
-                mService.mWindowPlacerLocked.debugLayoutRepeats(reason, dc.pendingLayoutChanges);
+                mWmService.mWindowPlacerLocked.debugLayoutRepeats(reason, dc.pendingLayoutChanges);
             }
         }
     }
@@ -1300,12 +1302,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (!hiddenRequested) {
             if (!mFreezingScreen) {
                 mFreezingScreen = true;
-                mService.registerAppFreezeListener(this);
-                mService.mAppsFreezingScreen++;
-                if (mService.mAppsFreezingScreen == 1) {
-                    mService.startFreezingDisplayLocked(0, 0, getDisplayContent());
-                    mService.mH.removeMessages(H.APP_FREEZE_TIMEOUT);
-                    mService.mH.sendEmptyMessageDelayed(H.APP_FREEZE_TIMEOUT, 2000);
+                mWmService.registerAppFreezeListener(this);
+                mWmService.mAppsFreezingScreen++;
+                if (mWmService.mAppsFreezingScreen == 1) {
+                    mWmService.startFreezingDisplayLocked(0, 0, getDisplayContent());
+                    mWmService.mH.removeMessages(H.APP_FREEZE_TIMEOUT);
+                    mWmService.mH.sendEmptyMessageDelayed(H.APP_FREEZE_TIMEOUT, 2000);
                 }
             }
             final int count = mChildren.size();
@@ -1330,15 +1332,15 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (force || unfrozeWindows) {
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "No longer freezing: " + this);
             mFreezingScreen = false;
-            mService.unregisterAppFreezeListener(this);
-            mService.mAppsFreezingScreen--;
-            mService.mLastFinishedFreezeSource = this;
+            mWmService.unregisterAppFreezeListener(this);
+            mWmService.mAppsFreezingScreen--;
+            mWmService.mLastFinishedFreezeSource = this;
         }
         if (unfreezeSurfaceNow) {
             if (unfrozeWindows) {
-                mService.mWindowPlacerLocked.performSurfacePlacement();
+                mWmService.mWindowPlacerLocked.performSurfacePlacement();
             }
-            mService.stopFreezingDisplayLocked();
+            mWmService.stopFreezingDisplayLocked();
         }
     }
 
@@ -1429,10 +1431,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // pending opening apps.
                 getDisplayContent().mOpeningApps.remove(this);
 
-                mService.updateFocusedWindowLocked(
+                mWmService.updateFocusedWindowLocked(
                         UPDATE_FOCUS_WILL_PLACE_SURFACES, true /*updateInputWindows*/);
                 getDisplayContent().setLayoutNeeded();
-                mService.mWindowPlacerLocked.performSurfacePlacement();
+                mWmService.mWindowPlacerLocked.performSurfacePlacement();
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -1602,7 +1604,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 if (mDisplayContent != null) {
                     mDisplayContent.setLayoutNeeded();
                 }
-                mService.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
+                mWmService.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
 
                 // Notify the pinned stack upon all windows drawn. If there was an animation in
                 // progress then this signal will resume that animation.
@@ -1636,8 +1638,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             return false;
         }
 
-        if (mLastTransactionSequence != mService.mTransactionSequence) {
-            mLastTransactionSequence = mService.mTransactionSequence;
+        if (mLastTransactionSequence != mWmService.mTransactionSequence) {
+            mLastTransactionSequence = mWmService.mTransactionSequence;
             mNumDrawnWindows = 0;
             startingDisplayed = false;
 
@@ -1769,7 +1771,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
 
         final ActivityManager.TaskSnapshot snapshot =
-                mService.mTaskSnapshotController.getSnapshot(
+                mWmService.mTaskSnapshotController.getSnapshot(
                         getTask().mTaskId, getTask().mUserId,
                         false /* restoreFromDisk */, false /* reducedResolution */);
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
@@ -1788,7 +1790,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (theme != 0) {
             AttributeCache.Entry ent = AttributeCache.instance().get(pkg, theme,
                     com.android.internal.R.styleable.Window,
-                    mService.mCurrentUserId);
+                    mWmService.mCurrentUserId);
             if (ent == null) {
                 // Whoops!  App doesn't exist. Um. Okay. We'll just pretend like we didn't
                 // see that.
@@ -1838,7 +1840,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             }
 
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating SplashScreenStartingData");
-            startingData = new SplashScreenStartingData(mService, pkg,
+            startingData = new SplashScreenStartingData(mWmService, pkg,
                     theme, compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                     getMergedOverrideConfiguration());
             scheduleAddStartingWindow();
@@ -1853,7 +1855,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
 
         if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating SnapshotStartingData");
-        startingData = new SnapshotStartingData(mService, snapshot);
+        startingData = new SnapshotStartingData(mWmService, snapshot);
         scheduleAddStartingWindow();
         return true;
     }
@@ -1862,9 +1864,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // Note: we really want to do sendMessageAtFrontOfQueue() because we
         // want to process the message ASAP, before any other queued
         // messages.
-        if (!mService.mAnimationHandler.hasCallbacks(mAddStartingWindow)) {
+        if (!mWmService.mAnimationHandler.hasCallbacks(mAddStartingWindow)) {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Enqueueing ADD_STARTING");
-            mService.mAnimationHandler.postAtFrontOfQueue(mAddStartingWindow);
+            mWmService.mAnimationHandler.postAtFrontOfQueue(mAddStartingWindow);
         }
     }
 
@@ -1872,9 +1874,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         @Override
         public void run() {
-            synchronized (mService.mGlobalLock) {
+            synchronized (mWmService.mGlobalLock) {
                 // There can only be one adding request, silly caller!
-                mService.mAnimationHandler.removeCallbacks(this);
+                mWmService.mAnimationHandler.removeCallbacks(this);
             }
 
             if (startingData == null) {
@@ -1898,7 +1900,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             }
             if (surface != null) {
                 boolean abort = false;
-                synchronized (mService.mGlobalLock) {
+                synchronized (mWmService.mGlobalLock) {
                     // If the window was successfully added, then
                     // we need to remove it.
                     if (removed || startingData == null) {
@@ -1998,7 +2000,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         // Use the same thread to remove the window as we used to add it, as otherwise we end up
         // with things in the view hierarchy being called from different threads.
-        mService.mAnimationHandler.post(() -> {
+        mWmService.mAnimationHandler.post(() -> {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Removing startingView=" + surface);
             try {
                 surface.remove();
@@ -2054,7 +2056,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         final boolean containsShowWhenLocked = containsShowWhenLockedWindow();
         if (containsDismissKeyguard != mLastContainsDismissKeyguardWindow
                 || containsShowWhenLocked != mLastContainsShowWhenLockedWindow) {
-            mService.notifyKeyguardFlagsChanged(null /* callback */,
+            mWmService.notifyKeyguardFlagsChanged(null /* callback */,
                     getDisplayContent().getDisplayId());
         }
         mLastContainsDismissKeyguardWindow = containsDismissKeyguard;
@@ -2161,10 +2163,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.i(TAG, "Creating animation bounds layer");
         final SurfaceControl.Builder builder = makeAnimationLeash()
                 .setParent(getAnimationLeashParent())
-                .setName(getSurfaceControl() + " - animation-bounds")
-                .setSize(getSurfaceWidth(), getSurfaceHeight());
+                .setName(getSurfaceControl() + " - animation-bounds");
         final SurfaceControl boundsLayer = builder.build();
-        t.setWindowCrop(boundsLayer, getSurfaceWidth(), getSurfaceHeight());
         t.show(boundsLayer);
         return boundsLayer;
     }
@@ -2196,7 +2196,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,
             boolean isVoiceInteraction) {
 
-        if (mService.mDisableTransitionAnimation || !shouldAnimate(transit)) {
+        if (mWmService.mDisableTransitionAnimation || !shouldAnimate(transit)) {
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                 Slog.v(TAG_WM, "applyAnimation: transition animation is disabled or skipped."
                         + " atoken=" + this);
@@ -2230,7 +2230,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                                     getDisplayContent().mAppTransition.canSkipFirstFrame(),
                                     appStackClipMode,
                                     true /* isAppAnimation */),
-                            mService.mSurfaceAnimationRunner);
+                            mWmService.mSurfaceAnimationRunner);
                     if (a.getZAdjustment() == Animation.ZORDER_TOP) {
                         mNeedsZBoost = true;
                     }
@@ -2313,7 +2313,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             final int containingWidth = frame.width();
             final int containingHeight = frame.height();
             a.initialize(containingWidth, containingHeight, width, height);
-            a.scaleCurrentDuration(mService.getTransitionAnimationScaleLocked());
+            a.scaleCurrentDuration(mWmService.getTransitionAnimationScaleLocked());
         }
         return a;
     }
@@ -2518,7 +2518,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             return;
         }
         final Rect frame = win.getFrameLw();
-        final int thumbnailDrawableRes = getTask().mUserId == mService.mCurrentUserId
+        final int thumbnailDrawableRes = getTask().mUserId == mWmService.mCurrentUserId
                 ? R.drawable.ic_account_circle
                 : R.drawable.ic_corp_badge;
         final GraphicBuffer thumbnail =

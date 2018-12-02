@@ -1891,7 +1891,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 return true;
             }
             // These are all the recognized media key codes in
-            // KeyEvent.isMediaKey()
+            // KeyEvent.isMediaSessionKey()
             case KeyEvent.KEYCODE_MEDIA_PLAY:
             case KeyEvent.KEYCODE_MEDIA_PAUSE:
             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
@@ -1992,7 +1992,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 return true;
             }
             // These are all the recognized media key codes in
-            // KeyEvent.isMediaKey()
+            // KeyEvent.isMediaSessionKey()
             case KeyEvent.KEYCODE_MEDIA_PLAY:
             case KeyEvent.KEYCODE_MEDIA_PAUSE:
             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:

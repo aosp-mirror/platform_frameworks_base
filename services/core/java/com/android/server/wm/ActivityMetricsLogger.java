@@ -99,10 +99,12 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.StatsLog;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
 /**
@@ -168,7 +170,8 @@ class ActivityMetricsLogger {
      * Due to the global single concurrent launch sequence, all calls to this observer must be made
      * in-order on the same thread to fulfill the "happens-before" guarantee in LaunchObserver.
      */
-    private final ActivityMetricsLaunchObserver mLaunchObserver = null;
+    private final LaunchObserverRegistryImpl mLaunchObserver;
+    @VisibleForTesting static final int LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE = 512;
 
     private final class H extends Handler {
 
@@ -251,7 +254,7 @@ class ActivityMetricsLogger {
             type = getTransitionType(info);
             processRecord = findProcessForActivity(launchedActivity);
             processName = launchedActivity.processName;
-            userId = launchedActivity.userId;
+            userId = launchedActivity.mUserId;
             launchedActivityShortComponentName = launchedActivity.shortComponentName;
             activityRecordIdHashCode = System.identityHashCode(launchedActivity);
             this.windowsFullyDrawnDelayMs = windowsFullyDrawnDelayMs;
@@ -263,6 +266,7 @@ class ActivityMetricsLogger {
         mSupervisor = supervisor;
         mContext = context;
         mHandler = new H(looper);
+        mLaunchObserver = new LaunchObserverRegistryImpl(looper);
     }
 
     void logWindowState() {
@@ -516,7 +520,7 @@ class ActivityMetricsLogger {
         if (info.launchedActivity != activityRecord) {
             return;
         }
-        final TaskRecord t = activityRecord.getTask();
+        final TaskRecord t = activityRecord.getTaskRecord();
         final SomeArgs args = SomeArgs.obtain();
         args.arg1 = t;
         args.arg2 = activityRecord;
@@ -889,7 +893,7 @@ class ActivityMetricsLogger {
             builder.addTaggedData(FIELD_ACTIVITY_RECORD_TARGET_ACTIVITY, r.info.targetActivity);
             builder.addTaggedData(FIELD_ACTIVITY_RECORD_FLAGS, r.info.flags);
             builder.addTaggedData(FIELD_ACTIVITY_RECORD_REAL_ACTIVITY,
-                    r.realActivity.toShortString());
+                    r.mActivityComponent.toShortString());
             builder.addTaggedData(FIELD_ACTIVITY_RECORD_SHORT_COMPONENT_NAME, r.shortComponentName);
             builder.addTaggedData(FIELD_ACTIVITY_RECORD_PROCESS_NAME, r.processName);
             builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_FULLSCREEN, r.fullscreen ? 1 : 0);
@@ -1000,12 +1004,19 @@ class ActivityMetricsLogger {
         }
     }
 
+    public ActivityMetricsLaunchObserverRegistry getLaunchObserverRegistry() {
+        return mLaunchObserver;
+    }
+
     /** Notify the {@link ActivityMetricsLaunchObserver} that a new launch sequence has begun. */
     private void launchObserverNotifyIntentStarted(Intent intent) {
-        if (mLaunchObserver != null) {
-            // Beginning a launch is timing sensitive and so should be observed as soon as possible.
-            mLaunchObserver.onIntentStarted(intent);
-        }
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "MetricsLogger:launchObserverNotifyIntentStarted");
+
+        // Beginning a launch is timing sensitive and so should be observed as soon as possible.
+        mLaunchObserver.onIntentStarted(intent);
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     /**
@@ -1014,9 +1025,12 @@ class ActivityMetricsLogger {
      * intent being delivered to the top running activity.
      */
     private void launchObserverNotifyIntentFailed() {
-        if (mLaunchObserver != null) {
-            mLaunchObserver.onIntentFailed();
-        }
+       Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "MetricsLogger:launchObserverNotifyIntentFailed");
+
+        mLaunchObserver.onIntentFailed();
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     /**
@@ -1024,14 +1038,17 @@ class ActivityMetricsLogger {
      * has started.
      */
     private void launchObserverNotifyActivityLaunched(WindowingModeTransitionInfo info) {
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "MetricsLogger:launchObserverNotifyActivityLaunched");
+
         @ActivityMetricsLaunchObserver.Temperature int temperature =
                 convertTransitionTypeToLaunchObserverTemperature(getTransitionType(info));
 
-        if (mLaunchObserver != null) {
-            // Beginning a launch is timing sensitive and so should be observed as soon as possible.
-            mLaunchObserver.onActivityLaunched(info.launchedActivity,
-                                               temperature);
-        }
+        // Beginning a launch is timing sensitive and so should be observed as soon as possible.
+        mLaunchObserver.onActivityLaunched(convertActivityRecordToProto(info.launchedActivity),
+                                           temperature);
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     /**
@@ -1039,11 +1056,15 @@ class ActivityMetricsLogger {
      * cancelled.
      */
     private void launchObserverNotifyActivityLaunchCancelled(WindowingModeTransitionInfo info) {
-        final ActivityRecord launchedActivity = info != null ? info.launchedActivity : null;
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "MetricsLogger:launchObserverNotifyActivityLaunchCancelled");
 
-        if (mLaunchObserver != null) {
-            mLaunchObserver.onActivityLaunchCancelled(launchedActivity);
-        }
+        final @ActivityMetricsLaunchObserver.ActivityRecordProto byte[] activityRecordProto =
+                info != null ? convertActivityRecordToProto(info.launchedActivity) : null;
+
+        mLaunchObserver.onActivityLaunchCancelled(activityRecordProto);
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     /**
@@ -1051,11 +1072,34 @@ class ActivityMetricsLogger {
      * has fully finished (successfully).
      */
     private void launchObserverNotifyActivityLaunchFinished(WindowingModeTransitionInfo info) {
-        final ActivityRecord launchedActivity = info.launchedActivity;
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "MetricsLogger:launchObserverNotifyActivityLaunchFinished");
 
-        if (mLaunchObserver != null) {
-            mLaunchObserver.onActivityLaunchFinished(launchedActivity);
-        }
+        mLaunchObserver.onActivityLaunchFinished(
+                convertActivityRecordToProto(info.launchedActivity));
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    @VisibleForTesting
+    static @ActivityMetricsLaunchObserver.ActivityRecordProto byte[]
+            convertActivityRecordToProto(ActivityRecord record) {
+        // May take non-negligible amount of time to convert ActivityRecord into a proto,
+        // so track the time.
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "MetricsLogger:convertActivityRecordToProto");
+
+        // There does not appear to be a way to 'reset' a ProtoOutputBuffer stream,
+        // so create a new one every time.
+        final ProtoOutputStream protoOutputStream =
+                new ProtoOutputStream(LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE);
+        // Write this data out as the top-most ActivityRecordProto (i.e. it is not a sub-object).
+        record.writeToProto(protoOutputStream);
+        final byte[] bytes = protoOutputStream.getBytes();
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+        return bytes;
     }
 
     private static @ActivityMetricsLaunchObserver.Temperature int

@@ -32,6 +32,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+
 import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.getColorViewLeftInset;
@@ -65,6 +66,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.InsetsState;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -141,6 +143,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final Rect taskBounds;
         final Rect tmpContentInsets = new Rect();
         final Rect tmpStableInsets = new Rect();
+        final InsetsState mTmpInsetsState = new InsetsState();
         final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
         int backgroundColor = WHITE;
         int statusBarColor = 0;
@@ -201,7 +204,7 @@ class TaskSnapshotSurface implements StartingSurface {
         try {
             final int res = session.addToDisplay(window, window.mSeq, layoutParams,
                     View.GONE, token.getDisplayContent().getDisplayId(), tmpFrame, tmpRect, tmpRect,
-                    tmpRect, tmpCutout, null);
+                    tmpRect, tmpCutout, null, mTmpInsetsState);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
                 return null;
@@ -217,7 +220,7 @@ class TaskSnapshotSurface implements StartingSurface {
         try {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,
                     tmpFrame, tmpRect, tmpContentInsets, tmpRect, tmpStableInsets, tmpRect, tmpRect,
-                    tmpCutout, tmpMergedConfiguration, surface);
+                    tmpCutout, tmpMergedConfiguration, surface, mTmpInsetsState);
         } catch (RemoteException e) {
             // Local call.
         }
@@ -312,7 +315,7 @@ class TaskSnapshotSurface implements StartingSurface {
         // Keep a reference to it such that it doesn't get destroyed when finalized.
         mChildSurfaceControl = new SurfaceControl.Builder(session)
                 .setName(mTitle + " - task-snapshot-surface")
-                .setSize(buffer.getWidth(), buffer.getHeight())
+                .setBufferSize(buffer.getWidth(), buffer.getHeight())
                 .setFormat(buffer.getFormat())
                 .build();
         Surface surface = new Surface();

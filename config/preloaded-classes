@@ -4117,6 +4117,10 @@ com.android.internal.util.StateMachine$SmHandler$StateInfo
 com.android.internal.util.VirtualRefBasePtr
 com.android.internal.util.XmlUtils
 com.android.internal.util.XmlUtils$WriteMapCallback
+com.android.internal.util.function.NonaConsumer
+com.android.internal.util.function.NonaFunction
+com.android.internal.util.function.OctConsumer
+com.android.internal.util.function.OctFunction
 com.android.internal.util.function.HeptConsumer
 com.android.internal.util.function.HeptFunction
 com.android.internal.util.function.HexConsumer
