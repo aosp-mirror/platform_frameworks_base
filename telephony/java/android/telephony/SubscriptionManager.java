@@ -407,6 +407,13 @@ public class SubscriptionManager {
     public static final String MNC = "mnc";
 
     /**
+     * TelephonyProvider column name for the iso country code associated with a SIM.
+     * <P>Type: TEXT (String)</P>
+     * @hide
+     */
+    public static final String ISO_COUNTRY_CODE = "iso_country_code";
+
+    /**
      * TelephonyProvider column name for the sim provisioning status associated with a SIM.
      * <P>Type: INTEGER (int)</P>
      * @hide
