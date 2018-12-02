@@ -193,8 +193,9 @@ public final class SQLiteDatabase extends SQLiteClosable {
      */
     public static final int CONFLICT_NONE = 0;
 
+    /** {@hide} */
     @UnsupportedAppUsage
-    private static final String[] CONFLICT_VALUES = new String[]
+    public static final String[] CONFLICT_VALUES = new String[]
             {"", " OR ROLLBACK ", " OR ABORT ", " OR FAIL ", " OR IGNORE ", " OR REPLACE "};
 
     /**
