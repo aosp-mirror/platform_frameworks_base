@@ -28,9 +28,9 @@
 
 class GrContext;
 
-struct ANativeWindow;
-
 namespace android {
+
+class Surface;
 
 namespace uirenderer {
 
@@ -67,7 +67,7 @@ public:
     virtual bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
                              FrameInfo* currentFrameInfo, bool* requireSwap) = 0;
     virtual DeferredLayerUpdater* createTextureLayer() = 0;
-    virtual bool setSurface(ANativeWindow* window, SwapBehavior swapBehavior, ColorMode colorMode) = 0;
+    virtual bool setSurface(Surface* window, SwapBehavior swapBehavior, ColorMode colorMode) = 0;
     virtual void onStop() = 0;
     virtual bool isSurfaceReady() = 0;
     virtual bool isContextReady() = 0;
