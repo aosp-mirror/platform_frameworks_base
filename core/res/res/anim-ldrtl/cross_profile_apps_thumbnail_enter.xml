@@ -18,7 +18,9 @@
 -->
 <!-- This should be kept in sync with task_open_enter.xml -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-     android:shareInterpolator="false" android:zAdjustment="top">
+     android:hasRoundedCorners="true"
+     android:shareInterpolator="false"
+     android:zAdjustment="top">
 
     <alpha
         android:fromAlpha="1"

@@ -24,6 +24,8 @@ import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.when;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -56,7 +58,7 @@ public class WindowAnimationSpecTest {
         Animation a = createClipRectAnimation(windowCrop, windowCrop);
         WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(a, null,
                 mStackBounds, false /* canSkipFirstFrame */, STACK_CLIP_NONE,
-                true /* isAppAnimation */);
+                true /* isAppAnimation */, 0 /* windowCornerRadius */);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
         verify(mTransaction).setWindowCrop(eq(mSurfaceControl),
                 argThat(rect -> rect.equals(windowCrop)));
@@ -66,7 +68,7 @@ public class WindowAnimationSpecTest {
     public void testApply_clipAfter() {
         WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(mAnimation, null,
                 mStackBounds, false /* canSkipFirstFrame */, STACK_CLIP_AFTER_ANIM,
-                true /* isAppAnimation */);
+                true /* isAppAnimation */, 0 /* windowCornerRadius */);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
         verify(mTransaction).setWindowCrop(eq(mSurfaceControl), argThat(Rect::isEmpty));
     }
@@ -76,8 +78,7 @@ public class WindowAnimationSpecTest {
         // Stack bounds is (0, 0, 10, 10) position is (20, 40)
         WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(mAnimation,
                 new Point(20, 40), mStackBounds, false /* canSkipFirstFrame */,
-                STACK_CLIP_AFTER_ANIM,
-                true /* isAppAnimation */);
+                STACK_CLIP_AFTER_ANIM, true /* isAppAnimation */, 0 /* windowCornerRadius */);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
         verify(mTransaction).setWindowCrop(eq(mSurfaceControl), argThat(Rect::isEmpty));
     }
@@ -87,7 +88,7 @@ public class WindowAnimationSpecTest {
         // Stack bounds is (0, 0, 10, 10) animation clip is (0, 0, 0, 0)
         WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(mAnimation, null,
                 mStackBounds, false /* canSkipFirstFrame */, STACK_CLIP_BEFORE_ANIM,
-                true /* isAppAnimation */);
+                true /* isAppAnimation */, 0 /* windowCornerRadius */);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
         verify(mTransaction).setWindowCrop(eq(mSurfaceControl),
                 argThat(rect -> rect.equals(mStackBounds)));
@@ -101,9 +102,22 @@ public class WindowAnimationSpecTest {
         a.initialize(0, 0, 0, 0);
         WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(a, null,
                 null, false /* canSkipFirstFrame */, STACK_CLIP_BEFORE_ANIM,
-                true /* isAppAnimation */);
+                true /* isAppAnimation */, 0 /* windowCornerRadius */);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
         verify(mTransaction).setWindowCrop(eq(mSurfaceControl), argThat(Rect::isEmpty));
+    }
+
+    @Test
+    public void testApply_setCornerRadius() {
+        final float windowCornerRadius = 30f;
+        WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(mAnimation, null,
+                mStackBounds, false /* canSkipFirstFrame */, STACK_CLIP_BEFORE_ANIM,
+                true /* isAppAnimation */, windowCornerRadius);
+        windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
+        verify(mTransaction, never()).setCornerRadius(eq(mSurfaceControl), eq(windowCornerRadius));
+        when(mAnimation.hasRoundedCorners()).thenReturn(true);
+        windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
+        verify(mTransaction).setCornerRadius(eq(mSurfaceControl), eq(windowCornerRadius));
     }
 
     @Test
@@ -113,7 +127,7 @@ public class WindowAnimationSpecTest {
         Animation a = createClipRectAnimation(windowCrop, windowCrop);
         WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(a, null,
                 mStackBounds, false /* canSkipFirstFrame */, STACK_CLIP_BEFORE_ANIM,
-                true /* isAppAnimation */);
+                true /* isAppAnimation */, 0 /* windowCornerRadius */);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
         verify(mTransaction).setWindowCrop(eq(mSurfaceControl),
                 argThat(rect -> rect.equals(windowCrop)));
@@ -126,7 +140,7 @@ public class WindowAnimationSpecTest {
         Animation a = createClipRectAnimation(windowCrop, windowCrop);
         WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(a, null,
                 mStackBounds, false /* canSkipFirstFrame */, STACK_CLIP_BEFORE_ANIM,
-                true /* isAppAnimation */);
+                true /* isAppAnimation */, 0 /* windowCornerRadius */);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
         verify(mTransaction).setWindowCrop(eq(mSurfaceControl),
                 argThat(rect -> rect.equals(mStackBounds)));
