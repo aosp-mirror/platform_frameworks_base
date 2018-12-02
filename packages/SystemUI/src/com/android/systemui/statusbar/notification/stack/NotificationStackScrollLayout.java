@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator
         .ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.stack.StackStateAnimator
+        .ANIMATION_DURATION_SWIPE;
 import static com.android.systemui.statusbar.phone.NotificationIconAreaController.LOW_PRIORITY;
 
 import android.animation.Animator;
@@ -5093,7 +5095,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             if (i == 0) {
                 endRunnable = animationFinishAction;
             }
-            dismissViewAnimated(view, endRunnable, totalDelay, 260);
+            dismissViewAnimated(view, endRunnable, totalDelay, ANIMATION_DURATION_SWIPE);
             currentDelay = Math.max(50, currentDelay - rowDelayDecrement);
             totalDelay += currentDelay;
         }
