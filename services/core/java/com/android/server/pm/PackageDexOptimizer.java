@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.os.FileUtils;
@@ -128,7 +129,7 @@ public class PackageDexOptimizer {
      * <p>Calls to {@link com.android.server.pm.Installer#dexopt} on {@link #mInstaller} are
      * synchronized on {@link #mInstallLock}.
      */
-    int performDexOpt(PackageParser.Package pkg, String[] sharedLibraries,
+    int performDexOpt(PackageParser.Package pkg, List<SharedLibraryInfo> sharedLibraries,
             String[] instructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
         if (pkg.applicationInfo.uid == -1) {
@@ -154,7 +155,8 @@ public class PackageDexOptimizer {
      * It assumes the install lock is held.
      */
     @GuardedBy("mInstallLock")
-    private int performDexOptLI(PackageParser.Package pkg, String[] sharedLibraries,
+    private int performDexOptLI(PackageParser.Package pkg,
+            List<SharedLibraryInfo> sharedLibraries,
             String[] targetInstructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
         final String[] instructionSets = targetInstructionSets != null ?

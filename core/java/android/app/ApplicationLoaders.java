@@ -27,6 +27,7 @@ import com.android.internal.os.ClassLoaderFactory;
 import dalvik.system.PathClassLoader;
 
 import java.util.Collection;
+import java.util.List;
 
 /** @hide */
 public class ApplicationLoaders {
@@ -38,15 +39,25 @@ public class ApplicationLoaders {
     ClassLoader getClassLoader(String zip, int targetSdkVersion, boolean isBundled,
                                String librarySearchPath, String libraryPermittedPath,
                                ClassLoader parent, String classLoaderName) {
+        return getClassLoaderWithSharedLibraries(zip, targetSdkVersion, isBundled,
+                              librarySearchPath, libraryPermittedPath, parent, classLoaderName,
+                              null);
+    }
+
+    ClassLoader getClassLoaderWithSharedLibraries(
+            String zip, int targetSdkVersion, boolean isBundled,
+            String librarySearchPath, String libraryPermittedPath,
+            ClassLoader parent, String classLoaderName,
+            List<ClassLoader> sharedLibraries) {
         // For normal usage the cache key used is the same as the zip path.
         return getClassLoader(zip, targetSdkVersion, isBundled, librarySearchPath,
-                              libraryPermittedPath, parent, zip, classLoaderName);
+                              libraryPermittedPath, parent, zip, classLoaderName, sharedLibraries);
     }
 
     private ClassLoader getClassLoader(String zip, int targetSdkVersion, boolean isBundled,
                                        String librarySearchPath, String libraryPermittedPath,
                                        ClassLoader parent, String cacheKey,
-                                       String classLoaderName) {
+                                       String classLoaderName, List<ClassLoader> sharedLibraries) {
         /*
          * This is the parent we use if they pass "null" in.  In theory
          * this should be the "system" class loader; in practice we
@@ -75,7 +86,7 @@ public class ApplicationLoaders {
 
                 ClassLoader classloader = ClassLoaderFactory.createClassLoader(
                         zip,  librarySearchPath, libraryPermittedPath, parent,
-                        targetSdkVersion, isBundled, classLoaderName);
+                        targetSdkVersion, isBundled, classLoaderName, sharedLibraries);
 
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
@@ -90,7 +101,7 @@ public class ApplicationLoaders {
 
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, zip);
             ClassLoader loader = ClassLoaderFactory.createClassLoader(
-                    zip, null, parent, classLoaderName);
+                    zip, null, parent, classLoaderName, sharedLibraries);
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             return loader;
         }
@@ -110,7 +121,7 @@ public class ApplicationLoaders {
         // The cache key is passed separately to enable the stub WebView to be cached under the
         // stub's APK path, when the actual package path is the donor APK.
         return getClassLoader(packagePath, Build.VERSION.SDK_INT, false, libsPath, null, null,
-                              cacheKey, null /* classLoaderName */);
+                              cacheKey, null /* classLoaderName */, null /* sharedLibraries */);
     }
 
     /**
