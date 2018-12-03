@@ -37,11 +37,13 @@ import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.SpannedString;
 import android.util.ArrayMap;
 import android.view.View.OnClickListener;
 import android.view.textclassifier.TextClassifier.EntityType;
 import android.view.textclassifier.TextClassifier.Utils;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -518,6 +520,7 @@ public final class TextClassification implements Parcelable {
         @Nullable private final LocaleList mDefaultLocales;
         @Nullable private final ZonedDateTime mReferenceTime;
         @NonNull private final Bundle mExtras;
+        @Nullable private String mCallingPackageName;
 
         private Request(
                 CharSequence text,
@@ -575,6 +578,26 @@ public final class TextClassification implements Parcelable {
         @Nullable
         public ZonedDateTime getReferenceTime() {
             return mReferenceTime;
+        }
+
+        /**
+         * Sets the name of the package that is sending this request.
+         * <p>
+         * For SystemTextClassifier's use.
+         * @hide
+         */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void setCallingPackageName(@Nullable String callingPackageName) {
+            mCallingPackageName = callingPackageName;
+        }
+
+        /**
+         * Returns the name of the package that sent this request.
+         * This returns {@code null} if no calling package name is set.
+         */
+        @Nullable
+        public String getCallingPackageName() {
+            return mCallingPackageName;
         }
 
         /**
@@ -660,7 +683,8 @@ public final class TextClassification implements Parcelable {
              */
             @NonNull
             public Request build() {
-                return new Request(mText, mStartIndex, mEndIndex, mDefaultLocales, mReferenceTime,
+                return new Request(new SpannedString(mText), mStartIndex, mEndIndex,
+                        mDefaultLocales, mReferenceTime,
                         mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
             }
         }
@@ -672,25 +696,37 @@ public final class TextClassification implements Parcelable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(mText.toString());
+            dest.writeCharSequence(mText);
             dest.writeInt(mStartIndex);
             dest.writeInt(mEndIndex);
-            dest.writeInt(mDefaultLocales != null ? 1 : 0);
-            if (mDefaultLocales != null) {
-                mDefaultLocales.writeToParcel(dest, flags);
-            }
-            dest.writeInt(mReferenceTime != null ? 1 : 0);
-            if (mReferenceTime != null) {
-                dest.writeString(mReferenceTime.toString());
-            }
+            dest.writeParcelable(mDefaultLocales, flags);
+            dest.writeString(mReferenceTime == null ? null : mReferenceTime.toString());
+            dest.writeString(mCallingPackageName);
             dest.writeBundle(mExtras);
+        }
+
+        private static Request readFromParcel(Parcel in) {
+            final CharSequence text = in.readCharSequence();
+            final int startIndex = in.readInt();
+            final int endIndex = in.readInt();
+            final LocaleList defaultLocales = in.readParcelable(null);
+            final String referenceTimeString = in.readString();
+            final ZonedDateTime referenceTime = referenceTimeString == null
+                    ? null : ZonedDateTime.parse(referenceTimeString);
+            final String callingPackageName = in.readString();
+            final Bundle extras = in.readBundle();
+
+            final Request request = new Request(text, startIndex, endIndex,
+                    defaultLocales, referenceTime, extras);
+            request.setCallingPackageName(callingPackageName);
+            return request;
         }
 
         public static final Parcelable.Creator<Request> CREATOR =
                 new Parcelable.Creator<Request>() {
                     @Override
                     public Request createFromParcel(Parcel in) {
-                        return new Request(in);
+                        return readFromParcel(in);
                     }
 
                     @Override
@@ -698,15 +734,6 @@ public final class TextClassification implements Parcelable {
                         return new Request[size];
                     }
                 };
-
-        private Request(Parcel in) {
-            mText = in.readString();
-            mStartIndex = in.readInt();
-            mEndIndex = in.readInt();
-            mDefaultLocales = in.readInt() == 0 ? null : LocaleList.CREATOR.createFromParcel(in);
-            mReferenceTime = in.readInt() == 0 ? null : ZonedDateTime.parse(in.readString());
-            mExtras = in.readBundle();
-        }
     }
 
     @Override

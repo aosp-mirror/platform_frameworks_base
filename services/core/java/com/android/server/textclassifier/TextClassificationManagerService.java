@@ -23,7 +23,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -136,6 +135,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             throws RemoteException {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(callback);
+        validateInput(mContext, request.getCallingPackageName());
 
         synchronized (mLock) {
             UserState userState = getCallingUserStateLocked();
@@ -158,6 +158,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             throws RemoteException {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(callback);
+        validateInput(mContext, request.getCallingPackageName());
 
         synchronized (mLock) {
             UserState userState = getCallingUserStateLocked();
@@ -180,6 +181,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             throws RemoteException {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(callback);
+        validateInput(mContext, request.getCallingPackageName());
 
         synchronized (mLock) {
             UserState userState = getCallingUserStateLocked();
@@ -199,7 +201,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     public void onSelectionEvent(
             TextClassificationSessionId sessionId, SelectionEvent event) throws RemoteException {
         Preconditions.checkNotNull(event);
-        validateInput(event.getPackageName(), mContext);
+        validateInput(mContext, event.getPackageName());
 
         synchronized (mLock) {
             UserState userState = getCallingUserStateLocked();
@@ -220,6 +222,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             ITextLanguageCallback callback) throws RemoteException {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(callback);
+        validateInput(mContext, request.getCallingPackageName());
 
         synchronized (mLock) {
             UserState userState = getCallingUserStateLocked();
@@ -242,6 +245,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             IConversationActionsCallback callback) throws RemoteException {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(callback);
+        validateInput(mContext, request.getCallingPackageName());
 
         synchronized (mLock) {
             UserState userState = getCallingUserStateLocked();
@@ -263,7 +267,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             throws RemoteException {
         Preconditions.checkNotNull(sessionId);
         Preconditions.checkNotNull(classificationContext);
-        validateInput(classificationContext.getPackageName(), mContext);
+        validateInput(mContext, classificationContext.getPackageName());
 
         synchronized (mLock) {
             UserState userState = getCallingUserStateLocked();
@@ -398,15 +402,17 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 e -> Slog.d(LOG_TAG, "Error " + opDesc + ": " + e.getMessage()));
     }
 
-    private static void validateInput(String packageName, Context context)
+    private static void validateInput(Context context, @Nullable String packageName)
             throws RemoteException {
+        if (packageName == null) return;
+
         try {
             final int uid = context.getPackageManager()
                     .getPackageUidAsUser(packageName, UserHandle.getCallingUserId());
             Preconditions.checkArgument(Binder.getCallingUid() == uid);
-        } catch (IllegalArgumentException | NullPointerException |
-                PackageManager.NameNotFoundException e) {
-            throw new RemoteException(e.getMessage());
+        } catch (Exception e) {
+            throw new RemoteException(
+                    String.format("Invalid package: name=%s, error=%s", packageName, e));
         }
     }
 

@@ -64,7 +64,7 @@ public class TextLinksTest {
     public void testParcel() {
         final String fullText = "this is just a test";
         final TextLinks reference = new TextLinks.Builder(fullText)
-                .addLink(0, 4, getEntityScores(0.f, 0.f, 1.f))
+                .addLink(0, 4, getEntityScores(0.f, 0.f, 1.f), BUNDLE)
                 .addLink(5, 12, getEntityScores(.8f, .1f, .5f))
                 .setExtras(BUNDLE)
                 .build();
@@ -82,6 +82,7 @@ public class TextLinksTest {
         assertEquals(1, resultList.get(0).getEntityCount());
         assertEquals(TextClassifier.TYPE_OTHER, resultList.get(0).getEntity(0));
         assertEquals(1.f, resultList.get(0).getConfidenceScore(TextClassifier.TYPE_OTHER), 1e-7f);
+        assertEquals(BUNDLE_VALUE, resultList.get(0).getExtras().getString(BUNDLE_KEY));
         assertEquals(5, resultList.get(1).getStart());
         assertEquals(12, resultList.get(1).getEnd());
         assertEquals(3, resultList.get(1).getEntityCount());
@@ -96,6 +97,7 @@ public class TextLinksTest {
 
     @Test
     public void testParcelOptions() {
+        final String packageName = "packageName";
         final TextClassifier.EntityConfig entityConfig = TextClassifier.EntityConfig.create(
                 Arrays.asList(TextClassifier.HINT_TEXT_IS_EDITABLE),
                 Arrays.asList("a", "b", "c"),
@@ -105,6 +107,7 @@ public class TextLinksTest {
                 .setEntityConfig(entityConfig)
                 .setExtras(BUNDLE)
                 .build();
+        reference.setCallingPackageName(packageName);
 
         // Parcel and unparcel.
         final Parcel parcel = Parcel.obtain();
@@ -119,5 +122,6 @@ public class TextLinksTest {
         assertEquals(new HashSet<String>(Arrays.asList("a", "c")),
                 result.getEntityConfig().resolveEntityListModifications(Collections.emptyList()));
         assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
+        assertEquals(packageName, result.getCallingPackageName());
     }
 }
