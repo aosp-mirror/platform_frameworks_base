@@ -34,7 +34,9 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
+import android.view.SurfaceSession;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -59,12 +61,16 @@ public class ActivityView extends ViewGroup {
 
     private VirtualDisplay mVirtualDisplay;
     private final SurfaceView mSurfaceView;
-    private Surface mSurface;
+
+    /**
+     * This is the root surface for the VirtualDisplay. The VirtualDisplay child surfaces will be
+     * re-parented to this surface. This will also be a child of the SurfaceView's SurfaceControl.
+     */
+    private SurfaceControl mRootSurfaceControl;
 
     private final SurfaceCallback mSurfaceCallback;
     private StateCallback mActivityViewCallback;
 
-    private IActivityManager mActivityManager;
     private IActivityTaskManager mActivityTaskManager;
     private IInputForwarder mInputForwarder;
     // Temp container to store view coordinates on screen.
@@ -74,6 +80,9 @@ public class ActivityView extends ViewGroup {
 
     private final CloseGuard mGuard = CloseGuard.get();
     private boolean mOpened; // Protected by mGuard.
+
+    private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
+    private Surface mTmpSurface = new Surface();
 
     @UnsupportedAppUsage
     public ActivityView(Context context) {
@@ -87,7 +96,6 @@ public class ActivityView extends ViewGroup {
     public ActivityView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        mActivityManager = ActivityManager.getService();
         mActivityTaskManager = ActivityTaskManager.getService();
         mSurfaceView = new SurfaceView(context);
         mSurfaceCallback = new SurfaceCallback();
@@ -297,14 +305,19 @@ public class ActivityView extends ViewGroup {
     private class SurfaceCallback implements SurfaceHolder.Callback {
         @Override
         public void surfaceCreated(SurfaceHolder surfaceHolder) {
-            mSurface = mSurfaceView.getHolder().getSurface();
+            mTmpSurface = new Surface();
             if (mVirtualDisplay == null) {
-                initVirtualDisplay();
+                initVirtualDisplay(new SurfaceSession(surfaceHolder.getSurface()));
                 if (mVirtualDisplay != null && mActivityViewCallback != null) {
                     mActivityViewCallback.onActivityViewReady(ActivityView.this);
                 }
             } else {
-                mVirtualDisplay.setSurface(surfaceHolder.getSurface());
+                // TODO (b/119209373): DisplayManager determines if a VirtualDisplay is on by
+                // whether it has a surface. Setting a fake surface here so DisplayManager will
+                // consider this display on.
+                mVirtualDisplay.setSurface(mTmpSurface);
+                mTmpTransaction.reparent(mRootSurfaceControl,
+                        mSurfaceView.getSurfaceControl().getHandle()).apply();
             }
             updateLocation();
         }
@@ -319,8 +332,8 @@ public class ActivityView extends ViewGroup {
 
         @Override
         public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-            mSurface.release();
-            mSurface = null;
+            mTmpSurface.release();
+            mTmpSurface = null;
             if (mVirtualDisplay != null) {
                 mVirtualDisplay.setSurface(null);
             }
@@ -328,7 +341,7 @@ public class ActivityView extends ViewGroup {
         }
     }
 
-    private void initVirtualDisplay() {
+    private void initVirtualDisplay(SurfaceSession surfaceSession) {
         if (mVirtualDisplay != null) {
             throw new IllegalStateException("Trying to initialize for the second time.");
         }
@@ -336,9 +349,13 @@ public class ActivityView extends ViewGroup {
         final int width = mSurfaceView.getWidth();
         final int height = mSurfaceView.getHeight();
         final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+
+        // TODO (b/119209373): DisplayManager determines if a VirtualDisplay is on by
+        // whether it has a surface. Setting a fake surface here so DisplayManager will consider
+        // this display on.
         mVirtualDisplay = displayManager.createVirtualDisplay(
                 DISPLAY_NAME + "@" + System.identityHashCode(this),
-                width, height, getBaseDisplayDensity(), mSurface,
+                width, height, getBaseDisplayDensity(), mTmpSurface,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
                         | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
         if (mVirtualDisplay == null) {
@@ -348,11 +365,20 @@ public class ActivityView extends ViewGroup {
 
         final int displayId = mVirtualDisplay.getDisplay().getDisplayId();
         final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+
+        mRootSurfaceControl = new SurfaceControl.Builder(surfaceSession)
+                .setContainerLayer(true)
+                .setName(DISPLAY_NAME)
+                .build();
+
         try {
+            wm.reparentDisplayContent(displayId, mRootSurfaceControl.getHandle());
             wm.dontOverrideDisplayInfo(displayId);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
+
+        mTmpTransaction.show(mRootSurfaceControl).apply();
         mInputForwarder = InputManager.getInstance().createInputForwarder(displayId);
         mTaskStackListener = new TaskStackListenerImpl();
         try {
@@ -392,9 +418,9 @@ public class ActivityView extends ViewGroup {
             displayReleased = false;
         }
 
-        if (mSurface != null) {
-            mSurface.release();
-            mSurface = null;
+        if (mTmpSurface != null) {
+            mTmpSurface.release();
+            mTmpSurface = null;
         }
 
         if (displayReleased && mActivityViewCallback != null) {

@@ -7448,4 +7448,29 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
     }
+
+    @Override
+    public void reparentDisplayContent(int displayId, IBinder surfaceControlHandle) {
+        final Display display = mDisplayManager.getDisplay(displayId);
+        if (display == null) {
+            throw new IllegalArgumentException(
+                    "Can't reparent display for non-existent displayId: " + displayId);
+        }
+
+        final int callingUid = Binder.getCallingUid();
+        final int displayOwnerUid = display.getOwnerUid();
+        if (callingUid != displayOwnerUid) {
+            throw new SecurityException("Only owner of the display can reparent surfaces to it.");
+        }
+
+        synchronized (mGlobalLock) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+                displayContent.reparentDisplayContent(surfaceControlHandle);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
 }

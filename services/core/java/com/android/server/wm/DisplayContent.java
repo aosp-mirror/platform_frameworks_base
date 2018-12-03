@@ -29,12 +29,12 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
+import static android.view.InsetsState.TYPE_IME;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
-import static android.view.InsetsState.TYPE_IME;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -4735,5 +4735,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // (b/114338689) whenever vr 2d display id is set.
                 || mDisplayId == mWmService.mVr2dDisplayId
                 || mWmService.mForceDesktopModeOnExternalDisplays;
+    }
+
+     /**
+     * Re-parent the DisplayContent's top surfaces, {@link #mWindowingLayer} and
+     * {@link #mOverlayLayer} to the specified surfaceControl.
+     *
+     * @param surfaceControlHandle The handle for the new SurfaceControl, where the DisplayContent's
+     *                             surfaces will be re-parented to.
+     */
+    void reparentDisplayContent(IBinder surfaceControlHandle) {
+        mPendingTransaction.reparent(mWindowingLayer, surfaceControlHandle)
+                .reparent(mOverlayLayer, surfaceControlHandle);
     }
 }

@@ -1126,6 +1126,13 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         }
     };
 
+    /**
+     * @hide
+     */
+    public SurfaceControl getSurfaceControl() {
+        return mSurfaceControl;
+    }
+
     class SurfaceControlWithBackground extends SurfaceControl {
         SurfaceControl mBackgroundControl;
         private boolean mOpaque = true;
