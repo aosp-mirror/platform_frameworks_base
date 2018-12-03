@@ -953,8 +953,12 @@ public class WifiManager {
      * establish a connection to a remembered access point that is
      * within range, and will do periodic scans if there are remembered
      * access points but none are in range.
+     *
+     * @deprecated This API is non-functional and will have no impact.
      */
+    @Deprecated
     public static final int WIFI_MODE_FULL = 1;
+
     /**
      * In this Wi-Fi lock mode, Wi-Fi will be kept active,
      * but the only operation that will be supported is initiation of
@@ -963,27 +967,61 @@ public class WifiManager {
      * nor will periodic scans be automatically performed looking for
      * remembered access points. Scans must be explicitly requested by
      * an application in this mode.
+     *
+     * @deprecated This API is non-functional and will have no impact.
      */
+    @Deprecated
     public static final int WIFI_MODE_SCAN_ONLY = 2;
+
     /**
-     * In this Wi-Fi lock mode, Wi-Fi will be kept active as in mode
-     * {@link #WIFI_MODE_FULL} but it operates at high performance
-     * with minimum packet loss and low packet latency even when
-     * the device screen is off. This mode will consume more power
-     * and hence should be used only when there is a need for such
-     * an active connection.
+     * In this Wi-Fi lock mode, Wi-Fi will not go to power save.
+     * This results in operating with low packet latency.
+     * The lock is active  even when the device screen is off or
+     * the acquiring application is running in the background.
+     * This mode will consume more power and hence should be used only
+     * when there is a need for this tradeoff.
      * <p>
      * An example use case is when a voice connection needs to be
-     * kept active even after the device screen goes off. Holding the
-     * regular {@link #WIFI_MODE_FULL} lock will keep the wifi
-     * connection active, but the connection can be lossy.
+     * kept active even after the device screen goes off.
      * Holding a {@link #WIFI_MODE_FULL_HIGH_PERF} lock for the
-     * duration of the voice call will improve the call quality.
+     * duration of the voice call may improve the call quality.
      * <p>
-     * When there is no support from the hardware, this lock mode
-     * will have the same behavior as {@link #WIFI_MODE_FULL}
+     * When there is no support from the hardware, the {@link #WIFI_MODE_FULL_HIGH_PERF}
+     * lock will have no impact.
      */
     public static final int WIFI_MODE_FULL_HIGH_PERF = 3;
+
+    /**
+     * In this Wi-Fi lock mode, Wi-Fi will operate with a priority to achieve low latency.
+     * {@link #WIFI_MODE_FULL_LOW_LATENCY} lock has the following limitations:
+     * <ol>
+     * <li>The lock is only active when the screen is on.</li>
+     * <li>The lock is only active when the acquiring app is running in the foreground.</li>
+     * </ol>
+     * Low latency mode optimizes for reduced packet latency,
+     * and as a result other performance measures may suffer when there are trade-offs to make:
+     * <ol>
+     * <li>Battery life may be reduced.</li>
+     * <li>Throughput may be reduced.</li>
+     * <li>Frequency of Wi-Fi scanning may be reduced. This may result in: </li>
+     * <ul>
+     * <li>The device may not roam or switch to the AP with highest signal quality.</li>
+     * <li>Location accuracy may be reduced.</li>
+     * </ul>
+     * </ol>
+     * <p>
+     * Example use cases are real time gaming or virtual reality applications where
+     * low latency is a key factor for user experience.
+     * <p>
+     * When there is no support from the hardware, the {@link #WIFI_MODE_FULL_LOW_LATENCY}
+     * lock will cause the device not to go power save.
+     * <p>
+     * Note: For an app which acquires both {@link #WIFI_MODE_FULL_LOW_LATENCY} and
+     * {@link #WIFI_MODE_FULL_HIGH_PERF} locks, {@link #WIFI_MODE_FULL_LOW_LATENCY}
+     * lock will be effective when app is running in foreground and screen is on,
+     * while the {@link #WIFI_MODE_FULL_HIGH_PERF} lock will take effect otherwise.
+     */
+    public static final int WIFI_MODE_FULL_LOW_LATENCY = 4;
 
     /** Anything worse than or equal to this will show 0 bars. */
     @UnsupportedAppUsage
@@ -3830,9 +3868,8 @@ public class WifiManager {
     /**
      * Creates a new WifiLock.
      *
-     * @param lockType the type of lock to create. See {@link #WIFI_MODE_FULL},
-     * {@link #WIFI_MODE_FULL_HIGH_PERF} and {@link #WIFI_MODE_SCAN_ONLY} for
-     * descriptions of the types of Wi-Fi locks.
+     * @param lockType the type of lock to create. See {@link #WIFI_MODE_FULL_HIGH_PERF}
+     * and {@link #WIFI_MODE_FULL_LOW_LATENCY} for descriptions of the types of Wi-Fi locks.
      * @param tag a tag for the WifiLock to identify it in debugging messages.  This string is
      *            never shown to the user under normal conditions, but should be descriptive
      *            enough to identify your application and the specific WifiLock within it, if it
@@ -3857,11 +3894,13 @@ public class WifiManager {
      * @return a new, unacquired WifiLock with the given tag.
      *
      * @see WifiLock
+     *
+     * @deprecated This API is non-functional.
      */
+    @Deprecated
     public WifiLock createWifiLock(String tag) {
         return new WifiLock(WIFI_MODE_FULL, tag);
     }
-
 
     /**
      * Create a new MulticastLock
