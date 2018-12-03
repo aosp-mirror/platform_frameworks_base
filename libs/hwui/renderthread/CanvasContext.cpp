@@ -323,25 +323,6 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
             // the deadline for RT animations
             info.out.canDrawThisFrame = false;
         }
-        /* This logic exists to try and recover from a display latch miss, which essentially
-         * results in the bufferqueue being double-buffered instead of triple-buffered.
-         * SurfaceFlinger itself now tries to handle & recover from this situation, so this
-         * logic should no longer be necessary. As it's occasionally triggering when
-         * undesired disable it.
-         * TODO: Remove this entirely if the results are solid.
-        else if (vsyncDelta >= mRenderThread.timeLord().frameIntervalNanos() * 3 ||
-                   (latestVsync - mLastDropVsync) < 500_ms) {
-            // It's been several frame intervals, assume the buffer queue is fine
-            // or the last drop was too recent
-            info.out.canDrawThisFrame = true;
-        } else {
-            info.out.canDrawThisFrame = !isSwapChainStuffed();
-            if (!info.out.canDrawThisFrame) {
-                // dropping frame
-                mLastDropVsync = mRenderThread.timeLord().latestVsync();
-            }
-        }
-        */
     } else {
         info.out.canDrawThisFrame = true;
     }
