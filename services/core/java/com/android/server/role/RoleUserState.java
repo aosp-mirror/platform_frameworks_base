@@ -47,6 +47,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Stores the state of roles for a user.
@@ -70,25 +71,41 @@ public class RoleUserState {
     private final int mUserId;
 
     @GuardedBy("RoleManagerService.mLock")
-    private int mVersion;
+    private int mVersion = VERSION_UNDEFINED;
 
     @GuardedBy("RoleManagerService.mLock")
-    private String mLastGrantPackagesHash = null;
+    @Nullable
+    private String mLastGrantPackagesHash;
 
     /**
      * Maps role names to its holders' package names. The values should never be null.
      */
     @GuardedBy("RoleManagerService.mLock")
-    @Nullable
-    private ArrayMap<String, ArraySet<String>> mRoles = null;
+    @NonNull
+    private ArrayMap<String, ArraySet<String>> mRoles = new ArrayMap<>();
 
     @GuardedBy("RoleManagerService.mLock")
     private boolean mDestroyed;
 
+    @NonNull
     private final Handler mWriteHandler = new Handler(BackgroundThread.getHandler().getLooper());
 
-    public RoleUserState(@UserIdInt int userId) {
+    private RoleUserState(@UserIdInt int userId) {
         mUserId = userId;
+
+        readSyncLocked();
+    }
+
+    /**
+     * Create a new instance of user state, and read its state from disk if previously persisted.
+     *
+     * @param userId the user id for the new user state
+     *
+     * @return the new user state
+     */
+    @GuardedBy("RoleManagerService.mLock")
+    public static RoleUserState newInstanceLocked(@UserIdInt int userId) {
+        return new RoleUserState(userId);
     }
 
     /**
@@ -116,7 +133,9 @@ public class RoleUserState {
     }
 
     /**
-     * Get the hash representing the state of packages during the last time initial grants was run
+     * Get the hash representing the state of packages during the last time initial grants was run.
+     *
+     * @return the hash representing the state of packages
      */
     @GuardedBy("RoleManagerService.mLock")
     public String getLastGrantPackagesHashLocked() {
@@ -124,10 +143,16 @@ public class RoleUserState {
     }
 
     /**
-     * Set the hash representing the state of packages during the last time initial grants was run
+     * Set the hash representing the state of packages during the last time initial grants was run.
+     *
+     * @param lastGrantPackagesHash the hash representing the state of packages
      */
     @GuardedBy("RoleManagerService.mLock")
-    public void setLastGrantPackagesHashLocked(String lastGrantPackagesHash) {
+    public void setLastGrantPackagesHashLocked(@Nullable String lastGrantPackagesHash) {
+        throwIfDestroyedLocked();
+        if (Objects.equals(mLastGrantPackagesHash, lastGrantPackagesHash)) {
+            return;
+        }
         mLastGrantPackagesHash = lastGrantPackagesHash;
         writeAsyncLocked();
     }
@@ -250,9 +275,9 @@ public class RoleUserState {
      * Schedule writing the state to file.
      */
     @GuardedBy("RoleManagerService.mLock")
-    void writeAsyncLocked() {
+    private void writeAsyncLocked() {
         throwIfDestroyedLocked();
-        int version = mVersion;
+
         ArrayMap<String, ArraySet<String>> roles = new ArrayMap<>();
         for (int i = 0, size = CollectionUtils.size(mRoles); i < size; ++i) {
             String roleName = mRoles.keyAt(i);
@@ -260,15 +285,16 @@ public class RoleUserState {
             roleHolders = new ArraySet<>(roleHolders);
             roles.put(roleName, roleHolders);
         }
+
         mWriteHandler.removeCallbacksAndMessages(null);
         // TODO: Throttle writes.
-        mWriteHandler.sendMessage(PooledLambda.obtainMessage(
-                RoleUserState::writeSync, this, version, roles, mLastGrantPackagesHash));
+        mWriteHandler.sendMessage(PooledLambda.obtainMessage(RoleUserState::writeSync, this,
+                mVersion, mLastGrantPackagesHash, roles));
     }
 
     @WorkerThread
-    private void writeSync(int version, @NonNull ArrayMap<String, ArraySet<String>> roles,
-            String packagesHash) {
+    private void writeSync(int version, @Nullable String packagesHash,
+            @NonNull ArrayMap<String, ArraySet<String>> roles) {
         AtomicFile atomicFile = new AtomicFile(getFile(mUserId), "roles-" + mUserId);
         FileOutputStream out = null;
         try {
@@ -280,7 +306,7 @@ public class RoleUserState {
                     "http://xmlpull.org/v1/doc/features.html#indent-output", true);
             serializer.startDocument(null, true);
 
-            serializeRoles(serializer, version, roles, packagesHash);
+            serializeRoles(serializer, version, packagesHash, roles);
 
             serializer.endDocument();
             atomicFile.finishWrite(out);
@@ -296,19 +322,26 @@ public class RoleUserState {
 
     @WorkerThread
     private void serializeRoles(@NonNull XmlSerializer serializer, int version,
-            @NonNull ArrayMap<String, ArraySet<String>> roles, String packagesHash)
+            @Nullable String packagesHash, @NonNull ArrayMap<String, ArraySet<String>> roles)
             throws IOException {
         serializer.startTag(null, TAG_ROLES);
+
         serializer.attribute(null, ATTRIBUTE_VERSION, Integer.toString(version));
-        serializer.attribute(null, ATTRIBUTE_PACKAGES_HASH, packagesHash);
+
+        if (packagesHash != null) {
+            serializer.attribute(null, ATTRIBUTE_PACKAGES_HASH, packagesHash);
+        }
+
         for (int i = 0, size = roles.size(); i < size; ++i) {
             String roleName = roles.keyAt(i);
             ArraySet<String> roleHolders = roles.valueAt(i);
+
             serializer.startTag(null, TAG_ROLE);
             serializer.attribute(null, ATTRIBUTE_NAME, roleName);
             serializeRoleHolders(serializer, roleHolders);
             serializer.endTag(null, TAG_ROLE);
         }
+
         serializer.endTag(null, TAG_ROLES);
     }
 
@@ -317,6 +350,7 @@ public class RoleUserState {
             @NonNull ArraySet<String> roleHolders) throws IOException {
         for (int i = 0, size = roleHolders.size(); i < size; ++i) {
             String roleHolder = roleHolders.valueAt(i);
+
             serializer.startTag(null, TAG_HOLDER);
             serializer.attribute(null, ATTRIBUTE_NAME, roleHolder);
             serializer.endTag(null, TAG_HOLDER);
@@ -327,11 +361,7 @@ public class RoleUserState {
      * Read the state from file.
      */
     @GuardedBy("RoleManagerService.mLock")
-    public void readSyncLocked() {
-        if (mRoles != null) {
-            throw new IllegalStateException("This RoleUserState has already read the roles.xml");
-        }
-
+    private void readSyncLocked() {
         File file = getFile(mUserId);
         try (FileInputStream in = new AtomicFile(file).openRead()) {
             XmlPullParser parser = Xml.newPullParser();
@@ -339,8 +369,6 @@ public class RoleUserState {
             parseXmlLocked(parser);
         } catch (FileNotFoundException e) {
             Slog.i(LOG_TAG, "roles.xml not found");
-            mRoles = new ArrayMap<>();
-            mVersion = VERSION_UNDEFINED;
         } catch (XmlPullParserException | IOException e) {
             throw new IllegalStateException("Failed to parse roles.xml: " + file, e);
         }
@@ -362,13 +390,14 @@ public class RoleUserState {
                 return;
             }
         }
+        Slog.w(LOG_TAG, "Missing <" + TAG_ROLES + "> in roles.xml");
     }
 
     private void parseRolesLocked(@NonNull XmlPullParser parser) throws IOException,
             XmlPullParserException {
         mVersion = Integer.parseInt(parser.getAttributeValue(null, ATTRIBUTE_VERSION));
         mLastGrantPackagesHash = parser.getAttributeValue(null, ATTRIBUTE_PACKAGES_HASH);
-        mRoles = new ArrayMap<>();
+        mRoles.clear();
 
         int type;
         int depth;
