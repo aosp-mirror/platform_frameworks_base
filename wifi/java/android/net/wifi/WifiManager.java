@@ -25,6 +25,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.net.ConnectivityManager;
@@ -135,6 +136,55 @@ public class WifiManager {
      */
     @Deprecated
     public static final int ERROR_AUTH_FAILURE_EAP_FAILURE = 3;
+
+    /**
+     * Maximum number of active network suggestions allowed per app.
+     * @hide
+     */
+    public static final int NETWORK_SUGGESTIONS_MAX_PER_APP =
+            ActivityManager.isLowRamDeviceStatic() ? 256 : 1024;
+
+    /**
+     * Reason code if all of the network suggestions were successfully added or removed.
+     */
+    public static final int STATUS_NETWORK_SUGGESTIONS_SUCCESS = 0;
+
+    /**
+     * Reason code if there was an internal error in the platform while processing the addition or
+     * removal of suggestions.
+     */
+    public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_INTERNAL = 1;
+
+    /**
+     * Reason code if one or more of the network suggestions added already exists in platform's
+     * database.
+     * @see WifiNetworkSuggestion#equals(Object)
+     */
+    public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE = 2;
+
+    /**
+     * Reason code if the number of network suggestions provided by the app crosses the max
+     * threshold set per app.
+     * @see #getMaxNumberOfNetworkSuggestionsPerApp()
+     */
+    public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_EXCEEDS_MAX_PER_APP = 3;
+
+    /**
+     * Reason code if one or more of the network suggestions removed does not exist in platform's
+     * database.
+     */
+    public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_REMOVE_INVALID = 4;
+
+    @IntDef(prefix = { "STATUS_NETWORK_SUGGESTIONS_" }, value = {
+            STATUS_NETWORK_SUGGESTIONS_SUCCESS,
+            STATUS_NETWORK_SUGGESTIONS_ERROR_INTERNAL,
+            STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE,
+            STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_EXCEEDS_MAX_PER_APP,
+            STATUS_NETWORK_SUGGESTIONS_ERROR_REMOVE_INVALID,
+    })
+
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NetworkSuggestionsStatusCode {}
 
     /**
      * Broadcast intent action indicating whether Wi-Fi scanning is allowed currently
@@ -1497,12 +1547,13 @@ public class WifiManager {
      * suggestion back using this API.</li>
      *
      * @param networkSuggestions List of network suggestions provided by the app.
-     * @return true on success, false if any of the suggestions match (See
+     * @return Status code corresponding to the values in {@link NetworkSuggestionsStatusCode}.
      * {@link WifiNetworkSuggestion#equals(Object)} any previously provided suggestions by the app.
      * @throws {@link SecurityException} if the caller is missing required permissions.
      */
     @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE)
-    public boolean addNetworkSuggestions(@NonNull List<WifiNetworkSuggestion> networkSuggestions) {
+    public @NetworkSuggestionsStatusCode int addNetworkSuggestions(
+            @NonNull List<WifiNetworkSuggestion> networkSuggestions) {
         try {
             return mService.addNetworkSuggestions(networkSuggestions, mContext.getOpPackageName());
         } catch (RemoteException e) {
@@ -1510,21 +1561,20 @@ public class WifiManager {
         }
     }
 
-
     /**
-     * Remove a subset of or all of networks from previously provided suggestions by the app to the
-     * device.
+     * Remove some or all of the network suggestions that were previously provided by the app.
      * See {@link WifiNetworkSuggestion} for a detailed explanation of the parameters.
      * See {@link WifiNetworkSuggestion#equals(Object)} for the equivalence evaluation used.
      *
      * @param networkSuggestions List of network suggestions to be removed. Pass an empty list
      *                           to remove all the previous suggestions provided by the app.
-     * @return true on success, false if any of the suggestions do not match any suggestions
-     * previously provided by the app. Any matching suggestions are removed from the device and
-     * will not be considered for any further connection attempts.
+     * @return Status code corresponding to the values in
+     * {@link NetworkSuggestionsStatusCode}.
+     * Any matching suggestions are removed from the device and will not be considered for any
+     * further connection attempts.
      */
     @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE)
-    public boolean removeNetworkSuggestions(
+    public @NetworkSuggestionsStatusCode int removeNetworkSuggestions(
             @NonNull List<WifiNetworkSuggestion> networkSuggestions) {
         try {
             return mService.removeNetworkSuggestions(
@@ -1532,6 +1582,15 @@ public class WifiManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns the max number of network suggestions that are allowed per app on the device.
+     * @see #addNetworkSuggestions(List)
+     * @see #removeNetworkSuggestions(List)
+     */
+    public int getMaxNumberOfNetworkSuggestionsPerApp() {
+        return NETWORK_SUGGESTIONS_MAX_PER_APP;
     }
 
     /**
