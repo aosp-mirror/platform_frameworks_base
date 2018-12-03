@@ -1571,15 +1571,32 @@ public class GradientDrawable extends Drawable {
         st.mGradient = a.getInt(
                 R.styleable.GradientDrawableGradient_type, st.mGradient);
 
-        // TODO: Update these to be themeable.
+        final boolean hasGradientColors = st.mGradientColors != null;
+        final boolean hasGradientCenter = st.hasCenterColor();
+        final int prevStart = hasGradientColors ? st.mGradientColors[0] : 0;
+        final int prevCenter = hasGradientCenter ? st.mGradientColors[1] : 0;
+        final int prevEnd;
+
+        if (st.hasCenterColor()) {
+            // if there is a center color, the end color is the last of the 3 values
+            prevEnd = st.mGradientColors[2];
+        } else if (hasGradientColors) {
+            // if there is not a center color but there are already colors configured, then
+            // the end color is the 2nd value in the array
+            prevEnd = st.mGradientColors[1];
+        } else {
+            // otherwise, there isn't a previously configured end color
+            prevEnd = 0;
+        }
+
         final int startColor = a.getColor(
-                R.styleable.GradientDrawableGradient_startColor, 0);
+                R.styleable.GradientDrawableGradient_startColor, prevStart);
         final boolean hasCenterColor = a.hasValue(
-                R.styleable.GradientDrawableGradient_centerColor);
+                R.styleable.GradientDrawableGradient_centerColor) || hasGradientCenter;
         final int centerColor = a.getColor(
-                R.styleable.GradientDrawableGradient_centerColor, 0);
+                R.styleable.GradientDrawableGradient_centerColor, prevCenter);
         final int endColor = a.getColor(
-                R.styleable.GradientDrawableGradient_endColor, 0);
+                R.styleable.GradientDrawableGradient_endColor, prevEnd);
 
         if (hasCenterColor) {
             st.mGradientColors = new int[3];
@@ -1941,6 +1958,10 @@ public class GradientDrawable extends Drawable {
 
                 applyDensityScaling(sourceDensity, targetDensity);
             }
+        }
+
+        public boolean hasCenterColor() {
+            return mGradientColors != null && mGradientColors.length == 3;
         }
 
         private void applyDensityScaling(int sourceDensity, int targetDensity) {
