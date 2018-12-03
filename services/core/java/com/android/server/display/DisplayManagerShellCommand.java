@@ -45,6 +45,12 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setAutoBrightnessLoggingEnabled(true);
             case "ab-logging-disable":
                 return setAutoBrightnessLoggingEnabled(false);
+            case "dwb-logging-enable":
+                return setDisplayWhiteBalanceLoggingEnabled(true);
+            case "dwb-logging-disable":
+                return setDisplayWhiteBalanceLoggingEnabled(false);
+            case "dwb-set-cct":
+                return setAmbientColorTemperatureOverride();
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -65,6 +71,12 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Enable auto-brightness logging.");
         pw.println("  ab-logging-disable");
         pw.println("    Disable auto-brightness logging.");
+        pw.println("  dwb-logging-enable");
+        pw.println("    Enable display white-balance logging.");
+        pw.println("  dwb-logging-disable");
+        pw.println("    Disable display white-balance logging.");
+        pw.println("  dwb-set-cct CCT");
+        pw.println("    Sets the ambient color temperature override to CCT (use -1 to disable).");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }
@@ -75,7 +87,7 @@ class DisplayManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: no brightness specified");
             return 1;
         }
-        float brightness = -1;
+        float brightness = -1.0f;
         try {
             brightness = Float.parseFloat(brightnessText);
         } catch (NumberFormatException e) {
@@ -84,7 +96,7 @@ class DisplayManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: brightness should be a number between 0 and 1");
             return 1;
         }
-        mService.setBrightness((int) brightness * 255);
+        mService.setBrightness((int) (brightness * 255));
         return 0;
     }
 
@@ -95,6 +107,28 @@ class DisplayManagerShellCommand extends ShellCommand {
 
     private int setAutoBrightnessLoggingEnabled(boolean enabled) {
         mService.setAutoBrightnessLoggingEnabled(enabled);
+        return 0;
+    }
+
+    private int setDisplayWhiteBalanceLoggingEnabled(boolean enabled) {
+        mService.setDisplayWhiteBalanceLoggingEnabled(enabled);
+        return 0;
+    }
+
+    private int setAmbientColorTemperatureOverride() {
+        String cctText = getNextArg();
+        if (cctText == null) {
+            getErrPrintWriter().println("Error: no cct specified");
+            return 1;
+        }
+        float cct;
+        try {
+            cct = Float.parseFloat(cctText);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: cct should be a number");
+            return 1;
+        }
+        mService.setAmbientColorTemperatureOverride(cct);
         return 0;
     }
 }

@@ -52,6 +52,9 @@ import android.view.Display;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
+import com.android.server.display.whitebalance.DisplayWhiteBalanceFactory;
+import com.android.server.display.whitebalance.DisplayWhiteBalanceSettings;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
@@ -78,7 +81,8 @@ import java.io.PrintWriter;
  * For debugging, you can make the color fade and brightness animations run
  * slower by changing the "animator duration scale" option in Development Settings.
  */
-final class DisplayPowerController implements AutomaticBrightnessController.Callbacks {
+final class DisplayPowerController implements AutomaticBrightnessController.Callbacks,
+        DisplayWhiteBalanceController.Callbacks {
     private static final String TAG = "DisplayPowerController";
     private static final String SCREEN_ON_BLOCKED_TRACE_NAME = "Screen on blocked";
     private static final String SCREEN_OFF_BLOCKED_TRACE_NAME = "Screen off blocked";
@@ -307,6 +311,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // Whether or not to skip the initial brightness ramps into STATE_ON.
     private final boolean mSkipScreenOnBrightnessRamp;
 
+    // Display white balance components.
+    @Nullable
+    private final DisplayWhiteBalanceSettings mDisplayWhiteBalanceSettings;
+    @Nullable
+    private final DisplayWhiteBalanceController mDisplayWhiteBalanceController;
+
     // A record of state for skipping brightness ramps.
     private int mSkipRampState = RAMP_STATE_SKIP_NONE;
 
@@ -504,6 +514,20 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mPendingScreenBrightnessSetting = -1;
         mTemporaryAutoBrightnessAdjustment = Float.NaN;
         mPendingAutoBrightnessAdjustment = Float.NaN;
+
+        DisplayWhiteBalanceSettings displayWhiteBalanceSettings = null;
+        DisplayWhiteBalanceController displayWhiteBalanceController = null;
+        try {
+            displayWhiteBalanceSettings = new DisplayWhiteBalanceSettings(mContext, mHandler);
+            displayWhiteBalanceController = DisplayWhiteBalanceFactory.create(mHandler,
+                    mSensorManager, resources);
+            displayWhiteBalanceSettings.setCallbacks(this);
+            displayWhiteBalanceController.setCallbacks(this);
+        } catch (Exception e) {
+            Slog.e(TAG, "failed to set up display white-balance: " + e);
+        }
+        mDisplayWhiteBalanceSettings = displayWhiteBalanceSettings;
+        mDisplayWhiteBalanceController = displayWhiteBalanceController;
     }
 
     /**
@@ -526,6 +550,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     public void onSwitchUser(@UserIdInt int newUserId) {
         handleSettingsChange(true /* userSwitch */);
         mBrightnessTracker.onSwitchUser(newUserId);
+        if (mDisplayWhiteBalanceSettings != null) {
+            mDisplayWhiteBalanceSettings.onSwitchUser();
+        }
     }
 
     public ParceledListSlice<AmbientBrightnessDayStats> getAmbientBrightnessStats(
@@ -983,6 +1010,16 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 notifyBrightnessChanged(brightness, userInitiatedChange, hadUserBrightnessPoint);
             }
 
+        }
+
+        // Update display white-balance.
+        if (mDisplayWhiteBalanceController != null) {
+            if (state == Display.STATE_ON && mDisplayWhiteBalanceSettings.isEnabled()) {
+                mDisplayWhiteBalanceController.setEnabled(true);
+                mDisplayWhiteBalanceController.updateScreenColorTemperature();
+            } else {
+                mDisplayWhiteBalanceController.setEnabled(false);
+            }
         }
 
         // Determine whether the display is ready for use in the newly requested state.
@@ -1699,6 +1736,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             pw.println();
             mBrightnessTracker.dump(pw);
         }
+
+        pw.println();
+        if (mDisplayWhiteBalanceController != null) {
+            mDisplayWhiteBalanceController.dump(pw);
+            mDisplayWhiteBalanceSettings.dump(pw);
+        }
     }
 
     private static String proximityToString(int state) {
@@ -1843,6 +1886,28 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     void setAutoBrightnessLoggingEnabled(boolean enabled) {
         if (mAutomaticBrightnessController != null) {
             mAutomaticBrightnessController.setLoggingEnabled(enabled);
+        }
+    }
+
+    @Override // DisplayWhiteBalanceController.Callbacks
+    public void updateWhiteBalance() {
+        sendUpdatePowerState();
+    }
+
+    void setDisplayWhiteBalanceLoggingEnabled(boolean enabled) {
+        if (mDisplayWhiteBalanceController != null) {
+            mDisplayWhiteBalanceController.setLoggingEnabled(enabled);
+            mDisplayWhiteBalanceSettings.setLoggingEnabled(enabled);
+        }
+    }
+
+    void setAmbientColorTemperatureOverride(float cct) {
+        if (mDisplayWhiteBalanceController != null) {
+            mDisplayWhiteBalanceController.setAmbientColorTemperatureOverride(cct);
+            // The ambient color temperature override is only applied when the ambient color
+            // temperature changes or is updated, so it doesn't necessarily change the screen color
+            // temperature immediately. So, let's make it!
+            sendUpdatePowerState();
         }
     }
 }

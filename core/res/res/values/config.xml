@@ -3778,4 +3778,105 @@
 
     <!-- Whether or not aware is enabled by default -->
     <bool name="config_awareSettingAvailable">false</bool>
+
+    <!-- Display White-Balance -->
+
+    <!-- See AmbientSensor.AmbientBrightnessSensor.
+         The ambient brightness sensor rate (in milliseconds). Must be positive. -->
+    <integer name="config_displayWhiteBalanceBrightnessSensorRate">250</integer>
+
+    <!-- See AmbientFilter.
+         How long ambient brightness changes are kept and taken into consideration
+         (in milliseconds). Must be positive. -->
+    <integer name="config_displayWhiteBalanceBrightnessFilterHorizon">10000</integer>
+
+    <!-- See AmbientFilter.WeightedMovingAverageAmbientFilter.
+         Recent changes are prioritised by integrating their duration over y = x + intercept
+         (the higher it is, the less prioritised recent changes are). Must be a non-negative
+         number, or NaN to avoid this implementation. -->
+    <item name="config_displayWhiteBalanceBrightnessFilterIntercept" format="float" type="dimen">10.0</item>
+
+    <!-- See AmbientSensor.AmbientColorTemperatureSensor.
+         The ambient color temperature sensor name. -->
+    <string name="config_displayWhiteBalanceColorTemperatureSensorName">com.google.sensor.color</string>
+
+    <!-- See AmbientSensor.AmbientColorTemperatureSensor.
+         The ambient color temperature sensor rate (in milliseconds). Must be positive. -->
+    <integer name="config_displayWhiteBalanceColorTemperatureSensorRate">250</integer>
+
+    <!-- See AmbientFilter.
+         How long ambient color temperature changes are kept and taken into consideration
+         (in milliseconds). Must be positive. -->
+    <integer name="config_displayWhiteBalanceColorTemperatureFilterHorizon">10000</integer>
+
+    <!-- See AmbientFilter.WeightedMovingAverageAmbientFilter.
+         Recent changes are prioritised by integrating their duration over y = x + intercept
+         (the higher it is, the less prioritised recent changes are). Must be a non-negative
+         number, or NaN to avoid this implementation. -->
+    <item name="config_displayWhiteBalanceColorTemperatureFilterIntercept" format="float"
+            type="dimen">10.0</item>
+
+    <!-- See DisplayWhiteBalanceThrottler.
+         The debounce time (in milliseconds) for increasing the screen color temperature, throttled
+         if time > lastTime + debounce. Must be non-negative. -->
+    <integer name="config_displayWhiteBalanceIncreaseDebounce">5000</integer>
+
+    <!-- See DisplayWhiteBalanceThrottler.
+         The debounce time (in milliseconds) for decreasing the screen color tempearture, throttled
+         if time < lastTime - debounce. Must be non-negative. -->
+    <integer name="config_displayWhiteBalanceDecreaseDebounce">5000</integer>
+
+    <!-- See DisplayWhiteBalanceThrottler.
+         The ambient color temperature values used to determine the threshold as the corresponding
+         value in config_displayWhiteBalance{Increase,Decrease}Threholds. Must be non-empty, the
+         same length as config_displayWhiteBalance{Increase,Decrease}Thresholds, and contain
+         non-negative, strictly increasing numbers.
+
+         For example, if:
+
+         - baseThresolds = [0, 100, 1000];
+         - increaseThresholds = [0.1, 0.15, 0.2];
+         - decreaseThresholds = [0.1, 0.05, 0.0];
+
+         Then, given the ambient color temperature INCREASED from X to Y (so X < Y):
+         - If 0 <= Y < 100, we require Y > (1 + 0.1) * X = 1.1X;
+         - If 100 <= Y < 1000, we require Y > (1 + 0.15) * X = 1.15X;
+         - If 1000 <= Y, we require Y > (1 + 0.2) * X = 1.2X.
+
+         Or, if the ambient color temperature DECREASED from X to Y (so X > Y):
+         - If 0 <= Y < 100, we require Y < (1 - 0.1) * X = 0.9X;
+         - If 100 <= Y < 1000, we require Y < (1 - 0.05) * X = 0.95X;
+         - If 1000 <= Y, we require Y < (1 - 0) * X = X.
+
+         NOTE: the numbers in this example are made up, and don't represent how actual base,
+               increase or decrease thresholds would look like. -->
+    <array name="config_displayWhiteBalanceBaseThresholds">
+        <item>0.0</item>
+    </array>
+
+    <!-- See DisplayWhiteBalanceThrottler.
+         The increase threshold values, throttled if value < value * (1 + threshold). Must be
+         non-empty, the same length as config_displayWhiteBalanceBaseThresholds, and contain
+         non-negative numbers. -->
+    <array name="config_displayWhiteBalanceIncreaseThresholds">
+        <item>0.1</item>
+    </array>
+
+    <!-- See DisplayWhiteBalanceThrottler.
+         The decrease threshold values, throttled if value > value * (1 - threshold). Must be
+         non-empty, the same length as config_displayWhiteBalanceBaseThresholds, and contain
+         non-negative numbers. -->
+    <array name="config_displayWhiteBalanceDecreaseThresholds">
+        <item>0.1</item>
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
+         The ambient brightness threshold (in lux) beneath which we fall back to a fixed ambient
+         color temperature. -->
+    <item name="config_displayWhiteBalanceLowLightAmbientBrightnessThreshold" format="float" type="dimen">10.0</item>
+
+    <!-- See DisplayWhiteBalanceController.
+         The ambient color temperature (in cct) to which we fall back when the ambient brightness
+         drops beneath a certain threshold. -->
+    <item name="config_displayWhiteBalanceLowLightAmbientColorTemperature" format="float" type="dimen">6500.0</item>
 </resources>

@@ -3587,4 +3587,20 @@
   <java-symbol type="integer" name="config_attentionApiTimeout" />
 
   <java-symbol type="string" name="config_incidentReportApproverPackage" />
+
+  <!-- Display White-Balance -->
+  <java-symbol type="integer" name="config_displayWhiteBalanceBrightnessSensorRate" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceBrightnessFilterHorizon" />
+  <java-symbol type="dimen" name="config_displayWhiteBalanceBrightnessFilterIntercept" />
+  <java-symbol type="string" name="config_displayWhiteBalanceColorTemperatureSensorName" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureSensorRate" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureFilterHorizon" />
+  <java-symbol type="dimen" name="config_displayWhiteBalanceColorTemperatureFilterIntercept" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceIncreaseDebounce" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceDecreaseDebounce" />
+  <java-symbol type="array" name="config_displayWhiteBalanceBaseThresholds" />
+  <java-symbol type="array" name="config_displayWhiteBalanceIncreaseThresholds" />
+  <java-symbol type="array" name="config_displayWhiteBalanceDecreaseThresholds" />
+  <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientBrightnessThreshold" />
+  <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientColorTemperature" />
 </resources>
