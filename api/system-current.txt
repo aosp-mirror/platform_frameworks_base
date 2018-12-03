@@ -3011,6 +3011,7 @@ package android.media.audiopolicy {
 package android.media.session {
 
   public final class MediaSessionManager {
+    method public android.media.session.ISession createSession(android.media.session.MediaSession.CallbackStub, java.lang.String, int);
     method public void setOnMediaKeyListener(android.media.session.MediaSessionManager.OnMediaKeyListener, android.os.Handler);
     method public void setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, android.os.Handler);
   }
