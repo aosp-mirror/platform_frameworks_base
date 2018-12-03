@@ -98,6 +98,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
     private Notification mNotification;
 
     @Mock ActivityStarter mActivityStarter;
+    @Mock HeadsUpManager mHeadsUpManager;
 
     @Before
     public void setUp() {
@@ -434,7 +435,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mView.addSmartActions(
                 new SmartReplyView.SmartActions(createActions(actionTitles), false),
                 mLogger,
-                mEntry);
+                mEntry,
+                mHeadsUpManager);
     }
 
     private void setSmartRepliesAndActions(CharSequence[] choices, String[] actionTitles) {
@@ -442,7 +444,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mView.addSmartActions(
                 new SmartReplyView.SmartActions(createActions(actionTitles), false),
                 mLogger,
-                mEntry);
+                mEntry,
+                mHeadsUpManager);
     }
 
     private ViewGroup buildExpectedView(CharSequence[] choices, int lineCount) {
@@ -747,7 +750,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
     private Button inflateActionButton(Notification.Action action) {
         return mView.inflateActionButton(getContext(), mView, 0,
                 new SmartReplyView.SmartActions(Collections.singletonList(action), false),
-                mLogger, mEntry);
+                mLogger, mEntry, mHeadsUpManager);
     }
 
     @Test

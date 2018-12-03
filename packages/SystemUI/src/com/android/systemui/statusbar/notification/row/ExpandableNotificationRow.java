@@ -1098,6 +1098,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mHeadsUpManager = headsUpManager;
     }
 
+    public HeadsUpManager getHeadsUpManager() {
+        return mHeadsUpManager;
+    }
+
     public void setGutsView(MenuItem item) {
         if (mGuts != null && item.getGutsView() instanceof NotificationGuts.GutsContent) {
             ((NotificationGuts.GutsContent) item.getGutsView()).setGutsParent(mGuts);
