@@ -3128,7 +3128,6 @@ Lcom/android/internal/telephony/ITelephony;->getCallState()I
 Lcom/android/internal/telephony/ITelephony;->getDataActivity()I
 Lcom/android/internal/telephony/ITelephony;->getDataState()I
 Lcom/android/internal/telephony/ITelephony;->getNetworkType()I
-Lcom/android/internal/telephony/ITelephony;->getVoiceMessageCount()I
 Lcom/android/internal/telephony/ITelephony;->handlePinMmi(Ljava/lang/String;)Z
 Lcom/android/internal/telephony/ITelephony;->handlePinMmiForSubscriber(ILjava/lang/String;)Z
 Lcom/android/internal/telephony/ITelephony;->hasIccCard()Z
