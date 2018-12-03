@@ -4309,6 +4309,7 @@ package android.os {
 
   public class UserManager {
     method public void clearSeedAccountData();
+    method public android.os.UserHandle getProfileParent(android.os.UserHandle);
     method public java.lang.String getSeedAccountName();
     method public android.os.PersistableBundle getSeedAccountOptions();
     method public java.lang.String getSeedAccountType();
@@ -4640,6 +4641,8 @@ package android.provider {
     field public static final java.lang.String HUSH_GESTURE_USED = "hush_gesture_used";
     field public static final java.lang.String INSTANT_APPS_ENABLED = "instant_apps_enabled";
     field public static final java.lang.String LAST_SETUP_SHOWN = "last_setup_shown";
+    field public static final java.lang.String LOCATION_ACCESS_CHECK_DELAY_MILLIS = "location_access_check_delay_millis";
+    field public static final java.lang.String LOCATION_ACCESS_CHECK_INTERVAL_MILLIS = "location_access_check_interval_millis";
     field public static final java.lang.String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS = "lock_screen_allow_private_notifications";
     field public static final java.lang.String LOCK_SCREEN_SHOW_NOTIFICATIONS = "lock_screen_show_notifications";
     field public static final java.lang.String MANUAL_RINGER_TOGGLE_COUNT = "manual_ringer_toggle_count";
