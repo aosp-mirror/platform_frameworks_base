@@ -156,33 +156,39 @@ public class WifiManager {
     public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_INTERNAL = 1;
 
     /**
+     * Reason code if the user has disallowed "android:change_wifi_state" app-ops from the app.
+     * @see android.app.AppOpsManager#unsafeCheckOp(String, int, String).
+     */
+    public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_APP_DISALLOWED = 2;
+
+    /**
      * Reason code if one or more of the network suggestions added already exists in platform's
      * database.
      * @see WifiNetworkSuggestion#equals(Object)
      */
-    public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE = 2;
+    public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE = 3;
 
     /**
      * Reason code if the number of network suggestions provided by the app crosses the max
      * threshold set per app.
      * @see #getMaxNumberOfNetworkSuggestionsPerApp()
      */
-    public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_EXCEEDS_MAX_PER_APP = 3;
+    public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_EXCEEDS_MAX_PER_APP = 4;
 
     /**
      * Reason code if one or more of the network suggestions removed does not exist in platform's
      * database.
      */
-    public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_REMOVE_INVALID = 4;
+    public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_REMOVE_INVALID = 5;
 
     @IntDef(prefix = { "STATUS_NETWORK_SUGGESTIONS_" }, value = {
             STATUS_NETWORK_SUGGESTIONS_SUCCESS,
             STATUS_NETWORK_SUGGESTIONS_ERROR_INTERNAL,
+            STATUS_NETWORK_SUGGESTIONS_ERROR_APP_DISALLOWED,
             STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE,
             STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_EXCEEDS_MAX_PER_APP,
             STATUS_NETWORK_SUGGESTIONS_ERROR_REMOVE_INVALID,
     })
-
     @Retention(RetentionPolicy.SOURCE)
     public @interface NetworkSuggestionsStatusCode {}
 
