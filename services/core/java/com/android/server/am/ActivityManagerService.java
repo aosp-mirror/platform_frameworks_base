@@ -666,14 +666,48 @@ public class ActivityManagerService extends IActivityManager.Stub
     final class PidMap {
         private final SparseArray<ProcessRecord> mPidMap = new SparseArray<>();
 
+        /**
+         * Puts the process record in the map.
+         * <p>NOTE: Callers should avoid acquiring the mPidsSelfLocked lock before calling this
+         * method.
+         */
         void put(int key, ProcessRecord value) {
-            mPidMap.put(key, value);
+            synchronized (this) {
+                mPidMap.put(key, value);
+            }
             mAtmInternal.onProcessMapped(key, value.getWindowProcessController());
         }
 
+        /**
+         * Removes the process record from the map.
+         * <p>NOTE: Callers should avoid acquiring the mPidsSelfLocked lock before calling this
+         * method.
+         */
         void remove(int pid) {
-            mPidMap.remove(pid);
+            synchronized (this) {
+                mPidMap.remove(pid);
+            }
             mAtmInternal.onProcessUnMapped(pid);
+        }
+
+        /**
+         * Removes the process record from the map if it has a thread.
+         * <p>NOTE: Callers should avoid acquiring the mPidsSelfLocked lock before calling this
+         * method.
+         */
+        boolean removeIfNoThread(int pid) {
+            boolean removed = false;
+            synchronized (this) {
+                final ProcessRecord app = get(pid);
+                if (app != null && app.thread == null) {
+                    mPidMap.remove(pid);
+                    removed = true;
+                }
+            }
+            if (removed) {
+                mAtmInternal.onProcessUnMapped(pid);
+            }
+            return removed;
         }
 
         ProcessRecord get(int pid) {
@@ -1889,9 +1923,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.getWindowProcessController().setPid(MY_PID);
                 app.maxAdj = ProcessList.SYSTEM_ADJ;
                 app.makeActive(mSystemThread.getApplicationThread(), mProcessStats);
-                synchronized (mPidsSelfLocked) {
-                    mPidsSelfLocked.put(app.pid, app);
-                }
+                mPidsSelfLocked.put(app.pid, app);
                 mProcessList.updateLruProcessLocked(app, false, null);
                 updateOomAdjLocked();
             }
@@ -4254,14 +4286,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private final void processStartTimedOutLocked(ProcessRecord app) {
         final int pid = app.pid;
-        boolean gone = false;
-        synchronized (mPidsSelfLocked) {
-            ProcessRecord knownApp = mPidsSelfLocked.get(pid);
-            if (knownApp != null && knownApp.thread == null) {
-                mPidsSelfLocked.remove(pid);
-                gone = true;
-            }
-        }
+        boolean gone = mPidsSelfLocked.removeIfNoThread(pid);
 
         if (gone) {
             Slog.w(TAG, "Process " + app + " failed to attach");
@@ -13113,11 +13138,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             return true;
         } else if (app.pid > 0 && app.pid != MY_PID) {
             // Goodbye!
-            boolean removed;
-            synchronized (mPidsSelfLocked) {
-                mPidsSelfLocked.remove(app.pid);
-                mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
-            }
+            mPidsSelfLocked.remove(app.pid);
+            mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
             if (app.isolated) {
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
