@@ -4025,6 +4025,19 @@ package android.os {
     field public static final java.lang.String EXTRA_EVENT_TIMESTAMP = "android.os.extra.EVENT_TIMESTAMP";
   }
 
+  public class Binder implements android.os.IBinder {
+    method public static final long clearCallingWorkSource();
+    method public static final int getCallingWorkSourceUid();
+    method public static final void restoreCallingWorkSource(long);
+    method public static final long setCallingWorkSourceUid(int);
+    method public static void setProxyTransactListener(android.os.Binder.ProxyTransactListener);
+  }
+
+  public static abstract interface Binder.ProxyTransactListener {
+    method public abstract void onTransactEnded(java.lang.Object);
+    method public abstract java.lang.Object onTransactStarted(android.os.IBinder, int);
+  }
+
   public final class ConfigUpdate {
     field public static final java.lang.String ACTION_UPDATE_CARRIER_ID_DB = "android.os.action.UPDATE_CARRIER_ID_DB";
     field public static final java.lang.String ACTION_UPDATE_CARRIER_PROVISIONING_URLS = "android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS";
