@@ -21462,7 +21462,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         previous ones
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected boolean setFrame(int left, int top, int right, int bottom) {
         boolean changed = false;
 
@@ -21539,7 +21539,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #setLeft(int), #setRight(int), #setTop(int), #setBottom(int)
      */
-    public void setLeftTopRightBottom(int left, int top, int right, int bottom) {
+    public final void setLeftTopRightBottom(int left, int top, int right, int bottom) {
         setFrame(left, top, right, bottom);
     }
 
