@@ -1915,6 +1915,9 @@
         <enum name="KEYCODE_SYSTEM_NAVIGATION_RIGHT" value="283" />
         <enum name="KEYCODE_ALL_APPS" value="284" />
         <enum name="KEYCODE_REFRESH" value="285" />
+        <enum name="KEYCODE_THUMBS_UP" value="286" />
+        <enum name="KEYCODE_THUMBS_DOWN" value="287" />
+        <enum name="KEYCODE_PROFILE_SWITCH" value="288" />
     </attr>
 
     <!-- ***************************************************************** -->
