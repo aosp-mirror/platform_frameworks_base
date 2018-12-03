@@ -26,6 +26,8 @@
     <color name="primary_dark_device_default_settings">@color/primary_dark_material_settings</color>
     <color name="primary_dark_device_default_settings_light">@color/primary_dark_material_settings_light</color>
 
+    <color name="navigation_bar_divider_device_default_settings">#1f000000</color>
+
     <color name="secondary_device_default_settings">@color/secondary_material_settings</color>
     <color name="secondary_device_default_settings_light">@color/secondary_material_settings_light</color>
     <color name="tertiary_device_default_settings">@color/tertiary_material_settings</color>
