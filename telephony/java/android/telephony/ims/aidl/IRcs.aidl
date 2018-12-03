@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.tests.rcs;
 
-import android.support.test.runner.AndroidJUnit4;
-import android.telephony.rcs.RcsManager;
+package android.telephony.ims.aidl;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+/**
+ * RPC definition between RCS storage APIs and phone process.
+ * {@hide}
+ */
+interface IRcs {
+    // RcsMessageStore APIs
+    void deleteThread(int threadId);
 
-@RunWith(AndroidJUnit4.class)
-public class RcsManagerTest {
-    //TODO(sahinc): Add meaningful tests once we have more of the implementation in place
-    @Test
-    public void testDeleteThreadDoesntCrash() {
-        RcsManager mRcsManager = new RcsManager();
-        mRcsManager.deleteThread(0);
-    }
+    // RcsThread APIs
+    int getMessageCount(int rcsThreadId);
 }

@@ -13,13 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.tests.rcs;
 
-package com.android.internal.telephony.rcs;
+import android.support.test.runner.AndroidJUnit4;
+import android.telephony.ims.RcsMessageStore;
 
-interface IRcs {
-    // RcsManager APIs
-    void deleteThread(int threadId);
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-    // RcsThread APIs
-    int getMessageCount(int rcsThreadId);
+@RunWith(AndroidJUnit4.class)
+public class RcsMessageStoreTest {
+    //TODO(sahinc): Add meaningful tests once we have more of the implementation in place
+    @Test
+    public void testDeleteThreadDoesntCrash() {
+        RcsMessageStore mRcsMessageStore = new RcsMessageStore();
+        mRcsMessageStore.deleteThread(0);
+    }
 }
