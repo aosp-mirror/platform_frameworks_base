@@ -18,6 +18,7 @@
 package android.view;
 
 import static android.view.WindowInsets.Type.FIRST;
+import static android.view.WindowInsets.Type.IME;
 import static android.view.WindowInsets.Type.LAST;
 import static android.view.WindowInsets.Type.SIDE_BARS;
 import static android.view.WindowInsets.Type.SIZE;
@@ -33,7 +34,9 @@ import android.annotation.UnsupportedAppUsage;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.SparseArray;
+import android.view.InsetsState.InternalInsetType;
 import android.view.WindowInsets.Type.InsetType;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethod;
 
 import com.android.internal.util.Preconditions;
@@ -182,6 +185,18 @@ public final class WindowInsets {
         return result == null ? Insets.NONE : result;
     }
 
+    /**
+     * Sets all entries in {@code typeInsetsMap} that belong to {@code typeMask} to {@code insets},
+     */
+    private static void setInsets(Insets[] typeInsetsMap, @InsetType int typeMask, Insets insets) {
+        for (int i = FIRST; i <= LAST; i = i << 1) {
+            if ((typeMask & i) == 0) {
+                continue;
+            }
+            typeInsetsMap[indexOf(i)] = insets;
+        }
+    }
+
     /** @hide */
     @UnsupportedAppUsage
     public WindowInsets(Rect systemWindowInsets) {
@@ -237,6 +252,45 @@ public final class WindowInsets {
     @NonNull
     public Insets getSystemWindowInsets() {
         return getInsets(mTypeInsetsMap, compatSystemInsets());
+    }
+
+    /**
+     * Returns the insets of a specific set of windows causing insets, denoted by the
+     * {@code typeMask} bit mask of {@link InsetType}s.
+     *
+     * @param typeMask Bit mask of {@link InsetType}s to query the insets for.
+     * @return The insets.
+     *
+     * @hide pending unhide
+     */
+    public Insets getInsets(@InsetType int typeMask) {
+        return getInsets(mTypeInsetsMap, typeMask);
+    }
+
+    /**
+     * Returns the maximum amount of insets a specific set of windows can cause, denoted by the
+     * {@code typeMask} bit mask of {@link InsetType}s.
+     *
+     * <p>The maximum insets represents the area of a a window that that <b>may</b> be partially
+     * or fully obscured by the system window identified by {@code type}. This value does not
+     * change based on the visibility state of those elements. for example, if the status bar is
+     * normally shown, but temporarily hidden, the maximum inset will still provide the inset
+     * associated with the status bar being shown.</p>
+     *
+     * @param typeMask Bit mask of {@link InsetType}s to query the insets for.
+     * @return The insets.
+     *
+     * @throws IllegalArgumentException If the caller tries to query {@link Type#ime()}. Maximum
+     *                                  insets are not available for this type as the height of the
+     *                                  IME is dynamic depending on the {@link EditorInfo} of the
+     *                                  currently focused view, as well as the UI state of the IME.
+     * @hide pending unhide
+     */
+    public Insets getMaxInsets(@InsetType int typeMask) throws IllegalArgumentException {
+        if ((typeMask & IME) != 0) {
+            throw new IllegalArgumentException("Unable to query the maximum insets for IME");
+        }
+        return getInsets(mTypeMaxInsetsMap, typeMask);
     }
 
     /**
@@ -742,6 +796,64 @@ public final class WindowInsets {
             Preconditions.checkNotNull(systemWindowInsets);
             assignCompatInsets(mTypeInsetsMap, systemWindowInsets.toRect());
             mSystemInsetsConsumed = false;
+            return this;
+        }
+
+        /**
+         * Sets the insets of a specific window type in pixels.
+         *
+         * <p>The insets represents the area of a a window that is partially or fully obscured by
+         * the system windows identified by {@code typeMask}.
+         * </p>
+         *
+         * @see #getInsets(int)
+         *
+         * @param typeMask The bitmask of {@link InsetType} to set the insets for.
+         * @param insets The insets to set.
+         *
+         * @return itself
+         * @hide pending unhide
+         */
+        @NonNull
+        public Builder setInsets(@InsetType int typeMask, @NonNull Insets insets) {
+            Preconditions.checkNotNull(insets);
+            WindowInsets.setInsets(mTypeInsetsMap, typeMask, insets);
+            mSystemInsetsConsumed = false;
+            return this;
+        }
+
+        /**
+         * Sets the maximum amount of insets a specific window type in pixels.
+         *
+         * <p>The maximum insets represents the area of a a window that that <b>may</b> be partially
+         * or fully obscured by the system windows identified by {@code typeMask}. This value does
+         * not change based on the visibility state of those elements. for example, if the status
+         * bar is normally shown, but temporarily hidden, the maximum inset will still provide the
+         * inset associated with the status bar being shown.</p>
+         *
+         * @see #getMaxInsets(int)
+         *
+         * @param typeMask The bitmask of {@link InsetType} to set the insets for.
+         * @param insets The insets to set.
+         *
+         * @return itself
+         *
+         * @throws IllegalArgumentException If {@code typeMask} contains {@link Type#ime()}. Maximum
+         *                                  insets are not available for this type as the height of
+         *                                  the IME is dynamic depending on the {@link EditorInfo}
+         *                                  of the currently focused view, as well as the UI
+         *                                  state of the IME.
+         * @hide pending unhide
+         */
+        @NonNull
+        public Builder setMaxInsets(@InsetType int typeMask, @NonNull Insets insets)
+                throws IllegalArgumentException{
+            if (typeMask == IME) {
+                throw new IllegalArgumentException("Maximum inset not available for IME");
+            }
+            Preconditions.checkNotNull(insets);
+            WindowInsets.setInsets(mTypeMaxInsetsMap, typeMask, insets);
+            mStableInsetsConsumed = false;
             return this;
         }
 

@@ -29,12 +29,14 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertNotEquals;
 
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.FlakyTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.SparseIntArray;
+import android.view.WindowInsets.Type;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,9 +58,12 @@ public class InsetsStateTest {
         SparseIntArray typeSideMap = new SparseIntArray();
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), false, false,
                 DisplayCutout.NO_CUTOUT, typeSideMap);
-        assertEquals(new Rect(0, 100, 0, 100), insets.getSystemWindowInsets());
+        assertEquals(Insets.of(0, 100, 0, 100), insets.getSystemWindowInsets());
+        assertEquals(Insets.of(0, 100, 0, 100), insets.getInsets(Type.all()));
         assertEquals(INSET_SIDE_TOP, typeSideMap.get(TYPE_TOP_BAR));
         assertEquals(INSET_SIDE_BOTTOM, typeSideMap.get(TYPE_IME));
+        assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(Type.topBar()));
+        assertEquals(Insets.of(0, 0, 0, 100), insets.getInsets(Type.ime()));
     }
 
     @Test
@@ -70,7 +75,11 @@ public class InsetsStateTest {
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), false, false,
                 DisplayCutout.NO_CUTOUT, null);
         assertEquals(100, insets.getStableInsetBottom());
-        assertEquals(new Rect(0, 0, 0, 200), insets.getSystemWindowInsets());
+        assertEquals(Insets.of(0, 0, 0, 100), insets.getMaxInsets(Type.all()));
+        assertEquals(Insets.of(0, 0, 0, 200), insets.getSystemWindowInsets());
+        assertEquals(Insets.of(0, 0, 0, 200), insets.getInsets(Type.all()));
+        assertEquals(Insets.of(0, 0, 0, 100), insets.getInsets(Type.sideBars()));
+        assertEquals(Insets.of(0, 0, 0, 200), insets.getInsets(Type.ime()));
     }
 
     @Test
@@ -81,7 +90,9 @@ public class InsetsStateTest {
         mState.getSource(TYPE_NAVIGATION_BAR).setVisible(true);
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), false, false,
                 DisplayCutout.NO_CUTOUT, null);
-        assertEquals(new Rect(0, 100, 20, 0), insets.getSystemWindowInsets());
+        assertEquals(Insets.of(0, 100, 20, 0), insets.getSystemWindowInsets());
+        assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(Type.topBar()));
+        assertEquals(Insets.of(0, 0, 20, 0), insets.getInsets(Type.sideBars()));
     }
 
     @Test
