@@ -3693,7 +3693,6 @@ package android.net.wifi {
     method public void disableEphemeralNetwork(java.lang.String);
     method public void forget(int, android.net.wifi.WifiManager.ActionListener);
     method public java.util.List<android.net.wifi.WifiConfiguration> getAllMatchingWifiConfigs(java.util.List<android.net.wifi.ScanResult>);
-    method public java.util.List<android.net.wifi.hotspot2.OsuProvider> getMatchingOsuProviders(java.util.List<android.net.wifi.ScanResult>);
     method public java.util.List<android.net.wifi.WifiConfiguration> getPrivilegedConfiguredNetworks();
     method public android.net.wifi.WifiConfiguration getWifiApConfiguration();
     method public int getWifiApState();
