@@ -52,17 +52,23 @@ public class BinderCallsStats implements BinderInternal.Observer {
     public static final boolean ENABLED_DEFAULT = false;
     public static final boolean DETAILED_TRACKING_DEFAULT = true;
     public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 100;
+    public static final int MAX_BINDER_CALL_STATS_COUNT_DEFAULT = 5000;
+
+    private static class OverflowBinder extends Binder {}
 
     private static final String TAG = "BinderCallsStats";
     private static final int CALL_SESSIONS_POOL_SIZE = 100;
     private static final int MAX_EXCEPTION_COUNT_SIZE = 50;
     private static final String EXCEPTION_COUNT_OVERFLOW_NAME = "overflow";
+    private static final Class<? extends Binder> OVERFLOW_BINDER = OverflowBinder.class;
+    private static final int OVERFLOW_TRANSACTION_CODE = -1;
 
     // Whether to collect all the data: cpu + exceptions + reply/request sizes.
     private boolean mDetailedTracking = DETAILED_TRACKING_DEFAULT;
     // Sampling period to control how often to track CPU usage. 1 means all calls, 100 means ~1 out
     // of 100 requests.
     private int mPeriodicSamplingInterval = PERIODIC_SAMPLING_INTERVAL_DEFAULT;
+    private int mMaxBinderCallStatsCount = MAX_BINDER_CALL_STATS_COUNT_DEFAULT;
     @GuardedBy("mLock")
     private final SparseArray<UidEntry> mUidEntries = new SparseArray<>();
     @GuardedBy("mLock")
@@ -71,6 +77,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     private final Object mLock = new Object();
     private final Random mRandom;
     private long mStartTime = System.currentTimeMillis();
+    private long mCallStatsCount = 0;
 
     private CachedDeviceState.Readonly mDeviceState;
 
@@ -158,7 +165,13 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
                 final CallStat callStat = uidEntry.getOrCreate(
                         callingUid, s.binderClass, s.transactionCode,
-                        mDeviceState.isScreenInteractive());
+                        mDeviceState.isScreenInteractive(),
+                        mCallStatsCount >= mMaxBinderCallStatsCount);
+                final boolean isNewCallStat = callStat.callCount == 0;
+                if (isNewCallStat) {
+                    mCallStatsCount++;
+                }
+
                 callStat.callCount++;
                 callStat.recordedCallCount++;
                 callStat.cpuTimeMicros += duration;
@@ -444,6 +457,24 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
     }
 
+    /**
+     * Sets the maximum number of items to track.
+     */
+    public void setMaxBinderCallStats(int maxKeys) {
+        if (maxKeys <= 0) {
+            Slog.w(TAG, "Ignored invalid max value (value must be positive): "
+                    + maxKeys);
+            return;
+        }
+
+        synchronized (mLock) {
+            if (maxKeys != mMaxBinderCallStatsCount) {
+                mMaxBinderCallStatsCount = maxKeys;
+                reset();
+            }
+        }
+    }
+
     public void setSamplingInterval(int samplingInterval) {
         if (samplingInterval <= 0) {
             Slog.w(TAG, "Ignored invalid sampling interval (value must be positive): "
@@ -461,6 +492,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     public void reset() {
         synchronized (mLock) {
+            mCallStatsCount = 0;
             mUidEntries.clear();
             mExceptionCounts.clear();
             mStartTime = System.currentTimeMillis();
@@ -595,10 +627,21 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
 
         CallStat getOrCreate(int callingUid, Class<? extends Binder> binderClass,
-                int transactionCode, boolean screenInteractive) {
+                int transactionCode, boolean screenInteractive, boolean maxCallStatsReached) {
             CallStat mapCallStat = get(callingUid, binderClass, transactionCode, screenInteractive);
-            // Only create CallStat if it's a new entry, otherwise update existing instance
+            // Only create CallStat if it's a new entry, otherwise update existing instance.
             if (mapCallStat == null) {
+                if (maxCallStatsReached) {
+                    mapCallStat = get(callingUid, OVERFLOW_BINDER, OVERFLOW_TRANSACTION_CODE,
+                            screenInteractive);
+                    if (mapCallStat != null) {
+                        return mapCallStat;
+                    }
+
+                    binderClass = OVERFLOW_BINDER;
+                    transactionCode = OVERFLOW_TRANSACTION_CODE;
+                }
+
                 mapCallStat = new CallStat(callingUid, binderClass, transactionCode,
                         screenInteractive);
                 CallStatKey key = new CallStatKey();
