@@ -1176,7 +1176,6 @@ public class WifiManager {
      * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public List<OsuProvider> getMatchingOsuProviders(List<ScanResult> scanResults) {
         try {
