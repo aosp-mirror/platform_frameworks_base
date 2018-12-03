@@ -8582,7 +8582,8 @@ public class TelephonyManager {
 
     /**
      * Return the application ID for the uicc application type like {@link #APPTYPE_CSIM}.
-     * All uicc applications are uniquely identified by application ID. See ETSI 102.221 and 101.220
+     * All uicc applications are uniquely identified by application ID, represented by the hex
+     * string. e.g, A00000015141434C00. See ETSI 102.221 and 101.220
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
      *
