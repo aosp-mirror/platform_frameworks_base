@@ -53,6 +53,8 @@ public final class CategoryKey {
             "com.android.settings.category.ia.night_display";
     public static final String CATEGORY_PRIVACY =
             "com.android.settings.category.ia.privacy";
+    public static final String CATEGORY_ENTERPRISE_PRIVACY =
+            "com.android.settings.category.ia.enterprise_privacy";
 
     public static final Map<String, String> KEY_COMPAT_MAP;
 
