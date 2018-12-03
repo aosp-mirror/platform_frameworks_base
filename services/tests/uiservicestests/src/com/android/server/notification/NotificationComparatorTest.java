@@ -15,8 +15,9 @@
  */
 package com.android.server.notification;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -34,8 +35,8 @@ import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-import android.telecom.TelecomManager;
 import android.support.test.runner.AndroidJUnit4;
+import android.telecom.TelecomManager;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.server.UiServiceTestCase;
@@ -211,7 +212,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mRecordColorized = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "colorized", uid2, uid2, n13,
                 new UserHandle(userId), "", 1999), getDefaultChannel());
-        mRecordHighCall.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
+        mRecordColorized.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
 
         Notification n14 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_CALL)
@@ -225,11 +226,11 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testOrdering() throws Exception {
+    public void testOrdering() {
         final List<NotificationRecord> expected = new ArrayList<>();
         expected.add(mRecordColorizedCall);
-        expected.add(mRecordDefaultMedia);
         expected.add(mRecordColorized);
+        expected.add(mRecordDefaultMedia);
         expected.add(mRecordHighCall);
         expected.add(mRecordInlineReply);
         if (mRecordSms != null) {
@@ -250,11 +251,11 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
         Collections.sort(actual, new NotificationComparator(mContext));
 
-        assertEquals(expected, actual);
+        assertThat(actual, contains(expected.toArray()));
     }
 
     @Test
-    public void testMessaging() throws Exception {
+    public void testMessaging() {
         NotificationComparator comp = new NotificationComparator(mContext);
         assertTrue(comp.isImportantMessaging(mRecordInlineReply));
         if (mRecordSms != null) {
@@ -265,7 +266,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testPeople() throws Exception {
+    public void testPeople() {
         NotificationComparator comp = new NotificationComparator(mContext);
         assertTrue(comp.isImportantPeople(mRecordStarredContact));
         assertTrue(comp.isImportantPeople(mRecordContact));
