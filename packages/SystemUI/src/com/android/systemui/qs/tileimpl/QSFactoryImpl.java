@@ -114,7 +114,7 @@ public class QSFactoryImpl implements QSFactory {
         }
 
         // Broken tiles.
-        Log.w(TAG, "Bad tile spec: " + tileSpec);
+        Log.w(TAG, "No stock tile spec: " + tileSpec);
         return null;
     }
 
