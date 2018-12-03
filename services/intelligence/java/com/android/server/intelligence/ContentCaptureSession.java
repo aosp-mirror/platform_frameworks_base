@@ -16,6 +16,7 @@
 package com.android.server.intelligence;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
@@ -25,6 +26,7 @@ import android.service.intelligence.SmartSuggestionsService;
 import android.service.intelligence.SnapshotData;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.intelligence.ContentCaptureEvent;
 
@@ -98,8 +100,10 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
      * Requests the service to autofill the given field.
      */
     public AugmentedAutofillCallback requestAutofillLocked(@NonNull IAutoFillManagerClient client,
-            int autofillSessionId, @NonNull AutofillId focusedId) {
-        mRemoteService.onRequestAutofillLocked(mId, client, autofillSessionId, focusedId);
+            int autofillSessionId, @NonNull AutofillId focusedId,
+            @Nullable AutofillValue focusedValue) {
+        mRemoteService.onRequestAutofillLocked(mId, client, autofillSessionId, focusedId,
+                focusedValue);
         if (mAutofillCallback == null) {
             mAutofillCallback = () -> mRemoteService.onDestroyAutofillWindowsRequest(mId);
         }

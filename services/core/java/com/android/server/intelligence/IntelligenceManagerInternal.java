@@ -16,10 +16,12 @@
 package com.android.server.intelligence;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 
 /**
@@ -53,6 +55,7 @@ public abstract class IntelligenceManagerInternal {
      * @param activityToken activity that originated this request.
      * @param autofillSessionId autofill session id (must be used on {@code client} calls.
      * @param focusedId id of the the field that triggered this request.
+     * @param focusedValue current value of the field that triggered this request.
      *
      * @return {@code false} if the service cannot handle this request, {@code true} otherwise.
      * <b>NOTE: </b> it must return right away; typically it will return {@code false} if the
@@ -60,7 +63,8 @@ public abstract class IntelligenceManagerInternal {
      */
     public abstract AugmentedAutofillCallback requestAutofill(@UserIdInt int userId,
             @NonNull IAutoFillManagerClient client, @NonNull IBinder activityToken,
-            int autofillSessionId, @NonNull AutofillId focusedId);
+            int autofillSessionId, @NonNull AutofillId focusedId,
+            @Nullable AutofillValue focusedValue);
 
     /**
      * Callback used by the Autofill Session to communicate with the Augmented Autofill service.

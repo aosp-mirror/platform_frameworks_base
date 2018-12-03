@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.service.intelligence.SmartSuggestionsService.AutofillProxy;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 
 /**
  * Represents a request to augment-fill an activity.
@@ -49,6 +50,14 @@ public final class FillRequest {
     @NonNull
     public AutofillId getFocusedId() {
         return mProxy.focusedId;
+    }
+
+    /**
+     * Gets the current value of the field that triggered the request.
+     */
+    @NonNull
+    public AutofillValue getFocusedAutofillValue() {
+        return mProxy.focusedValue;
     }
 
     /**
