@@ -662,31 +662,29 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId, int flags,
             int filterCallingUid) {
-        synchronized (mService.mGlobalLock) {
-            try {
-                Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "resolveIntent");
-                int modifiedFlags = flags
-                        | PackageManager.MATCH_DEFAULT_ONLY | ActivityManagerService.STOCK_PM_FLAGS;
-                if (intent.isWebIntent()
-                            || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
-                    modifiedFlags |= PackageManager.MATCH_INSTANT;
-                }
-
-                // In order to allow cross-profile lookup, we clear the calling identity here.
-                // Note the binder identity won't affect the result, but filterCallingUid will.
-
-                // Cross-user/profile call check are done at the entry points
-                // (e.g. AMS.startActivityAsUser).
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    return mService.getPackageManagerInternalLocked().resolveIntent(
-                            intent, resolvedType, modifiedFlags, userId, true, filterCallingUid);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-            } finally {
-                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+        try {
+            Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "resolveIntent");
+            int modifiedFlags = flags
+                    | PackageManager.MATCH_DEFAULT_ONLY | ActivityManagerService.STOCK_PM_FLAGS;
+            if (intent.isWebIntent()
+                        || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
+                modifiedFlags |= PackageManager.MATCH_INSTANT;
             }
+
+            // In order to allow cross-profile lookup, we clear the calling identity here.
+            // Note the binder identity won't affect the result, but filterCallingUid will.
+
+            // Cross-user/profile call check are done at the entry points
+            // (e.g. AMS.startActivityAsUser).
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return mService.getPackageManagerInternalLocked().resolveIntent(
+                        intent, resolvedType, modifiedFlags, userId, true, filterCallingUid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        } finally {
+            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
