@@ -118,7 +118,7 @@ public class GridView extends AbsListView {
     @UnsupportedAppUsage
     private int mVerticalSpacing = 0;
     private int mStretchMode = STRETCH_COLUMN_WIDTH;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 117521079)
     private int mColumnWidth;
     @UnsupportedAppUsage
     private int mRequestedColumnWidth;
