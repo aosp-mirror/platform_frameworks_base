@@ -208,6 +208,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         mHiSyncId = id;
     }
 
+    public boolean isHearingAidDevice() {
+        return mHiSyncId != BluetoothHearingAid.HI_SYNC_ID_INVALID;
+    }
+
     void onBondingDockConnect() {
         // Attempt to connect if UUIDs are available. Otherwise,
         // we will connect when the ACTION_UUID intent arrives.
