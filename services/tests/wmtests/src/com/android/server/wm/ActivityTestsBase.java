@@ -34,7 +34,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
@@ -403,11 +402,10 @@ class ActivityTestsBase {
             doReturn(true).when(this).isBackgroundActivityStartsEnabled();
         }
 
-        void setActivityManagerService(IntentFirewall intentFirewall,
-                PendingIntentController intentController, ActivityManagerInternal amInternal,
-                WindowManagerService wm) {
+        void setup(IntentFirewall intentFirewall, PendingIntentController intentController,
+                ActivityManagerInternal amInternal, WindowManagerService wm, Looper looper) {
             mAmInternal = amInternal;
-            setActivityManagerService(intentFirewall, intentController);
+            initialize(intentFirewall, intentController, looper);
             initRootActivityContainerMocks(wm);
             setWindowManager(wm);
         }
@@ -517,8 +515,8 @@ class ActivityTestsBase {
             mWindowManager = prepareMockWindowManager();
             mUgmInternal = mock(UriGrantsManagerInternal.class);
 
-            atm.setActivityManagerService(mIntentFirewall, mPendingIntentController,
-                    new LocalService(), mWindowManager);
+            atm.setup(mIntentFirewall, mPendingIntentController, new LocalService(), mWindowManager,
+                    testInjector.mHandlerThread.getLooper());
 
             mActivityTaskManager = atm;
             mAtmInternal = atm.mInternal;

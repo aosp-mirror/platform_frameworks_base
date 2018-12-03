@@ -328,6 +328,7 @@ import com.android.server.AlarmManagerInternal;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
+import com.android.server.DisplayThread;
 import com.android.server.IntentResolver;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
@@ -2262,7 +2263,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
 
         mActivityTaskManager = atm;
-        mActivityTaskManager.setActivityManagerService(mIntentFirewall, mPendingIntentController);
+        mActivityTaskManager.initialize(mIntentFirewall, mPendingIntentController,
+                DisplayThread.get().getLooper());
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
 
         mProcessCpuThread = new Thread("CpuTracker") {
