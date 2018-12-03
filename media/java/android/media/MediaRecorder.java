@@ -456,6 +456,9 @@ public class MediaRecorder implements AudioRouting,
         /** VP8/VORBIS data in a WEBM container */
         public static final int WEBM = 9;
 
+        /** @hide HEIC data in a HEIF container */
+        public static final int HEIF = 10;
+
         /** Opus data in a Ogg container */
         public static final int OGG = 11;
     };
