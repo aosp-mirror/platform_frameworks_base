@@ -65,6 +65,8 @@ public class BackupManagerServiceTest {
     private static final String TEST_PACKAGE = "package";
     private static final String TEST_TRANSPORT = "transport";
 
+    private static final String[] ADB_TEST_PACKAGES = {TEST_PACKAGE};
+
     private static final int NON_USER_SYSTEM = UserHandle.USER_SYSTEM + 1;
 
     private ShadowContextWrapper mShadowContext;
@@ -555,16 +557,47 @@ public class BackupManagerServiceTest {
         verify(mUserBackupManagerService).hasBackupPassword();
     }
 
-    /** Test that the backup service routes methods correctly to the user that requests it. */
+    /**
+     * Test verifying that {@link BackupManagerService#adbBackup(ParcelFileDescriptor, int, boolean,
+     * boolean, boolean, boolean, boolean, boolean, boolean, boolean, String[])} throws a
+     * {@link SecurityException} if the caller does not have INTERACT_ACROSS_USERS_FULL permission.
+     */
     @Test
-    public void testAdbBackup_callsAdbBackupForUser() throws Exception {
-        File testFile = new File(mContext.getFilesDir(), "test");
-        testFile.createNewFile();
-        ParcelFileDescriptor parcelFileDescriptor =
-                ParcelFileDescriptor.open(testFile, ParcelFileDescriptor.MODE_READ_WRITE);
-        String[] packages = {TEST_PACKAGE};
+    public void testAdbBackup_withoutPermission_throwsSecurityException() {
+        mShadowContext.denyPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        expectThrows(SecurityException.class,
+                () ->
+                        mBackupManagerService.adbBackup(
+                                /* userId */ mUserId,
+                                /* parcelFileDescriptor*/ null,
+                                /* includeApks */ true,
+                                /* includeObbs */ true,
+                                /* includeShared */ true,
+                                /* doWidgets */ true,
+                                /* doAllApps */ true,
+                                /* includeSystem */ true,
+                                /* doCompress */ true,
+                                /* doKeyValue */ true,
+                                null));
+
+    }
+
+    /**
+     * Test verifying that {@link BackupManagerService#adbBackup(ParcelFileDescriptor, int, boolean,
+     * boolean, boolean, boolean, boolean, boolean, boolean, boolean, String[])} does not require
+     * the caller to have INTERACT_ACROSS_USERS_FULL permission when the calling user id is the
+     * same as the target user id.
+     */
+    @Test
+    public void testAdbBackup_whenCallingUserIsTargetUser_doesntNeedPermission() throws Exception {
+        ShadowBinder.setCallingUserHandle(UserHandle.of(mUserId));
+        mShadowContext.denyPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
 
         mBackupManagerService.adbBackup(
+                /* userId */ mUserId,
                 parcelFileDescriptor,
                 /* includeApks */ true,
                 /* includeObbs */ true,
@@ -574,7 +607,7 @@ public class BackupManagerServiceTest {
                 /* includeSystem */ true,
                 /* doCompress */ true,
                 /* doKeyValue */ true,
-                packages);
+                ADB_TEST_PACKAGES);
 
         verify(mUserBackupManagerService)
                 .adbBackup(
@@ -587,18 +620,82 @@ public class BackupManagerServiceTest {
                         /* includeSystem */ true,
                         /* doCompress */ true,
                         /* doKeyValue */ true,
-                        packages);
+                        ADB_TEST_PACKAGES);
+    }
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testAdbBackup_callsAdbBackupForUser() throws Exception {
+        mShadowContext.grantPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
+
+        mBackupManagerService.adbBackup(
+                /* userId */ mUserId,
+                parcelFileDescriptor,
+                /* includeApks */ true,
+                /* includeObbs */ true,
+                /* includeShared */ true,
+                /* doWidgets */ true,
+                /* doAllApps */ true,
+                /* includeSystem */ true,
+                /* doCompress */ true,
+                /* doKeyValue */ true,
+                ADB_TEST_PACKAGES);
+
+        verify(mUserBackupManagerService)
+                .adbBackup(
+                        parcelFileDescriptor,
+                        /* includeApks */ true,
+                        /* includeObbs */ true,
+                        /* includeShared */ true,
+                        /* doWidgets */ true,
+                        /* doAllApps */ true,
+                        /* includeSystem */ true,
+                        /* doCompress */ true,
+                        /* doKeyValue */ true,
+                        ADB_TEST_PACKAGES);
+    }
+
+    /**
+     * Test verifying that {@link BackupManagerService#adbRestore(ParcelFileDescriptor, int)} throws
+     * a {@link SecurityException} if the caller does not have INTERACT_ACROSS_USERS_FULL
+     * permission.
+     */
+    @Test
+    public void testAdbRestore_withoutPermission_throwsSecurityException() {
+        mShadowContext.denyPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        expectThrows(SecurityException.class,
+                () -> mBackupManagerService.adbRestore(mUserId, null));
+
+    }
+
+    /**
+     * Test verifying that {@link BackupManagerService#adbRestore(ParcelFileDescriptor, int)} does
+     * not require the caller to have INTERACT_ACROSS_USERS_FULL permission when the calling user id
+     * is the same as the target user id.
+     */
+    @Test
+    public void testAdbRestore_whenCallingUserIsTargetUser_doesntNeedPermission() throws Exception {
+        ShadowBinder.setCallingUserHandle(UserHandle.of(mUserId));
+        mShadowContext.denyPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
+
+        mBackupManagerService.adbRestore(mUserId, parcelFileDescriptor);
+
+        verify(mUserBackupManagerService).adbRestore(parcelFileDescriptor);
     }
 
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testAdbRestore_callsAdbRestoreForUser() throws Exception {
-        File testFile = new File(mContext.getFilesDir(), "test");
-        testFile.createNewFile();
-        ParcelFileDescriptor parcelFileDescriptor =
-                ParcelFileDescriptor.open(testFile, ParcelFileDescriptor.MODE_READ_WRITE);
+        mShadowContext.grantPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
 
-        mBackupManagerService.adbRestore(parcelFileDescriptor);
+        ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorForAdbTest();
+
+        mBackupManagerService.adbRestore(mUserId, parcelFileDescriptor);
 
         verify(mUserBackupManagerService).adbRestore(parcelFileDescriptor);
     }
@@ -637,5 +734,11 @@ public class BackupManagerServiceTest {
         mBackupManagerService.dump(fileDescriptor, printWriter, args);
 
         verify(mUserBackupManagerService).dump(fileDescriptor, printWriter, args);
+    }
+
+    private ParcelFileDescriptor getFileDescriptorForAdbTest() throws Exception {
+        File testFile = new File(mContext.getFilesDir(), "test");
+        testFile.createNewFile();
+        return ParcelFileDescriptor.open(testFile, ParcelFileDescriptor.MODE_READ_WRITE);
     }
 }

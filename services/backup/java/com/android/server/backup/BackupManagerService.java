@@ -477,6 +477,7 @@ public class BackupManagerService {
      * requires on-screen confirmation by the user.
      */
     public void adbBackup(
+            @UserIdInt int userId,
             ParcelFileDescriptor fd,
             boolean includeApks,
             boolean includeObbs,
@@ -487,6 +488,8 @@ public class BackupManagerService {
             boolean doCompress,
             boolean doKeyValue,
             String[] packageNames) {
+        enforceCallingPermissionOnUserId(userId, "adbBackup");
+
         mUserBackupManagerService.adbBackup(
                 fd,
                 includeApks,
@@ -505,7 +508,9 @@ public class BackupManagerService {
      * is synchronous and does not return to the caller until the restore has been completed. It
      * requires on-screen confirmation by the user.
      */
-    public void adbRestore(ParcelFileDescriptor fd) {
+    public void adbRestore(@UserIdInt int userId, ParcelFileDescriptor fd) {
+        enforceCallingPermissionOnUserId(userId, "setBackupEnabled");
+
         mUserBackupManagerService.adbRestore(fd);
     }
 
