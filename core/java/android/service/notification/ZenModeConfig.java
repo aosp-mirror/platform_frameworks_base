@@ -806,7 +806,7 @@ public class ZenModeConfig implements Parcelable {
         if (zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_CALLS,
                 isPriorityCategoryEnabled(Policy.PRIORITY_CATEGORY_CALLS, defaultPolicy))) {
             priorityCategories |= Policy.PRIORITY_CATEGORY_CALLS;
-            messageSenders = getNotificationPolicySenders(zenPolicy.getPriorityCallSenders());
+            callSenders = getNotificationPolicySenders(zenPolicy.getPriorityCallSenders());
         }
 
         if (zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_REPEAT_CALLERS,
