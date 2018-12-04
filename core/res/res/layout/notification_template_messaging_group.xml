@@ -34,7 +34,7 @@
         android:orientation="vertical">
         <com.android.internal.widget.ImageFloatingTextView
             android:id="@+id/message_name"
-            style="@style/Widget.Material.Notification.MessagingName"
+            style="@style/Widget.DeviceDefault.Notification.MessagingName"
             android:layout_width="wrap_content"
             android:textAlignment="viewStart"
         />

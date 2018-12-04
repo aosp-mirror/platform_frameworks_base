@@ -113,6 +113,15 @@ easier.
     <style name="Widget.DeviceDefault.ListView.White" parent="Widget.Material.ListView.White"/>
     <style name="Widget.DeviceDefault.MediaRouteButton" parent="Widget.Material.MediaRouteButton" />
     <style name="Widget.DeviceDefault.NumberPicker" parent="Widget.Material.NumberPicker"/>
+    <style name="Widget.DeviceDefault.Notification.Text" parent="Widget.Material.Notification.Text">
+        <item name="textAppearance">@style/TextAppearance.DeviceDefault.Notification</item>
+    </style>
+    <style name="Widget.DeviceDefault.Notification.MessagingText" parent="Widget.Material.Notification.MessagingText">
+        <item name="textAppearance">@style/TextAppearance.DeviceDefault.Notification</item>
+    </style>
+    <style name="Widget.DeviceDefault.Notification.MessagingName" parent="Widget.Material.Notification.MessagingName">
+        <item name="textAppearance">@style/TextAppearance.DeviceDefault.Notification.Title</item>
+    </style>
     <style name="Widget.DeviceDefault.PreferenceFrameLayout" parent="Widget.Material.PreferenceFrameLayout"/>
     <style name="Widget.DeviceDefault.ProgressBar.Inverse" parent="Widget.Material.ProgressBar.Inverse"/>
     <style name="Widget.DeviceDefault.ProgressBar.Large.Inverse" parent="Widget.Material.ProgressBar.Large.Inverse"/>
@@ -250,6 +259,16 @@ easier.
     <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Title" parent="TextAppearance.Material.Widget.ActionBar.Title">
         <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
     </style>
+
+    <!-- Notification Styles -->
+    <style name="TextAppearance.DeviceDefault.Notification" parent="TextAppearance.Material.Notification">
+        <item name="fontFamily">@string/config_headlineFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Notification.Title" parent="TextAppearance.Material.Notification.Title">
+        <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Notification.Reply" parent="TextAppearance.Material.Notification.Reply" />
+
     <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle" parent="TextAppearance.Material.Widget.ActionBar.Subtitle"/>
     <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Title" parent="TextAppearance.Material.Widget.ActionMode.Title"/>
     <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle" parent="TextAppearance.Material.Widget.ActionMode.Subtitle"/>
