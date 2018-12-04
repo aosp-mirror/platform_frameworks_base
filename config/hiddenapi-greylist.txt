@@ -2984,8 +2984,6 @@ Lcom/android/internal/telephony/dataconnection/DcFailCause;->USER_AUTHENTICATION
 Lcom/android/internal/telephony/dataconnection/DcTracker$RecoveryAction;->isAggressiveRecovery(I)Z
 Lcom/android/internal/telephony/dataconnection/DcTracker;->cancelReconnectAlarm(Lcom/android/internal/telephony/dataconnection/ApnContext;)V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->cleanUpAllConnections(Ljava/lang/String;)V
-Lcom/android/internal/telephony/dataconnection/DcTracker;->cleanUpAllConnections(ZLjava/lang/String;)Z
-Lcom/android/internal/telephony/dataconnection/DcTracker;->cleanUpConnection(ZLcom/android/internal/telephony/dataconnection/ApnContext;)V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->createAllApnList()V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->getActiveApnTypes()[Ljava/lang/String;
 Lcom/android/internal/telephony/dataconnection/DcTracker;->getOverallState()Lcom/android/internal/telephony/DctConstants$State;
@@ -3016,7 +3014,6 @@ Lcom/android/internal/telephony/dataconnection/DcTracker;->notifyDataConnection(
 Lcom/android/internal/telephony/dataconnection/DcTracker;->notifyOffApnsOfAvailability(Ljava/lang/String;)V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->onActionIntentDataStallAlarm(Landroid/content/Intent;)V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->onActionIntentProvisioningApnAlarm(Landroid/content/Intent;)V
-Lcom/android/internal/telephony/dataconnection/DcTracker;->onCleanUpAllConnections(Ljava/lang/String;)V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->onRecordsLoadedOrSubIdChanged()V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->onSetUserDataEnabled(Z)V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->onTrySetupData(Lcom/android/internal/telephony/dataconnection/ApnContext;)Z
@@ -3025,7 +3022,6 @@ Lcom/android/internal/telephony/dataconnection/DcTracker;->registerSettingsObser
 Lcom/android/internal/telephony/dataconnection/DcTracker;->resetPollStats()V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->restartDataStallAlarm()V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->setInitialAttachApn()V
-Lcom/android/internal/telephony/dataconnection/DcTracker;->setInternalDataEnabled(ZLandroid/os/Message;)Z
 Lcom/android/internal/telephony/dataconnection/DcTracker;->setPreferredApn(I)V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->setRadio(Z)V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->setupDataOnConnectableApns(Ljava/lang/String;)V
