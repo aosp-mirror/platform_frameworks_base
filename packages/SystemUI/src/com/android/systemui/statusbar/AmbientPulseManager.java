@@ -33,7 +33,7 @@ import com.android.systemui.statusbar.notification.row.NotificationInflater.Infl
  * dozing and/or in AOD.  The pulse uses the notification's ambient view and pops in briefly
  * before automatically dismissing the alert.
  */
-public final class AmbientPulseManager extends AlertingNotificationManager {
+public class AmbientPulseManager extends AlertingNotificationManager {
 
     protected final ArraySet<OnAmbientChangedListener> mListeners = new ArraySet<>();
     @VisibleForTesting
