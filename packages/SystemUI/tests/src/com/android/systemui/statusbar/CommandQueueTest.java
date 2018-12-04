@@ -42,7 +42,7 @@ public class CommandQueueTest extends SysuiTestCase {
     public void setup() {
         mCommandQueue = new CommandQueue();
         mCallbacks = mock(Callbacks.class);
-        mCommandQueue.addCallbacks(mCallbacks);
+        mCommandQueue.addCallback(mCallbacks);
         verify(mCallbacks).disable(eq(0), eq(0), eq(false));
     }
 

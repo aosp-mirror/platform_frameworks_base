@@ -187,7 +187,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
                     null, Dependency.get(Dependency.TIME_TICK_HANDLER));
             Dependency.get(TunerService.class).addTunable(this, CLOCK_SECONDS,
                     StatusBarIconController.ICON_BLACKLIST);
-            SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
+            SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallback(this);
             if (mShowDark) {
                 Dependency.get(DarkIconDispatcher.class).addDarkReceiver(this);
             }
@@ -214,7 +214,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             mAttached = false;
             Dependency.get(TunerService.class).removeTunable(this);
             SysUiServiceProvider.getComponent(getContext(), CommandQueue.class)
-                    .removeCallbacks(this);
+                    .removeCallback(this);
             if (mShowDark) {
                 Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(this);
             }

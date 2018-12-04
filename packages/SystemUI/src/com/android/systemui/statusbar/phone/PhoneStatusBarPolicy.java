@@ -268,7 +268,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mLocationController.addCallback(this);
         mPrivacyItemController.setListening(true);
 
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallbacks(this);
+        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallback(this);
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskListener);
 
         // Clear out all old notifications on startup (only present in the case where sysui dies)
@@ -296,7 +296,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mKeyguardMonitor.removeCallback(this);
         mLocationController.removeCallback(this);
         mPrivacyItemController.setListening(false);
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallbacks(this);
+        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallback(this);
         mContext.unregisterReceiver(mIntentReceiver);
 
         NotificationManager noMan = mContext.getSystemService(NotificationManager.class);

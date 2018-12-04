@@ -140,7 +140,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         createDialogs();
 
         if (!mDialogs.isEmpty()) {
-            getComponent(CommandQueue.class).addCallbacks(this);
+            getComponent(CommandQueue.class).addCallback(this);
             mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         }
     }

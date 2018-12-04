@@ -108,12 +108,12 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
                 mQSPanel.getTileLayout().restoreInstanceState(savedInstanceState);
             }
         }
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
+        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallback(this);
     }
 
     @Override
     public void onDestroyView() {
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).removeCallbacks(this);
+        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).removeCallback(this);
         super.onDestroyView();
     }
 

@@ -76,7 +76,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         loadDimens();
 
         SysUiServiceProvider.getComponent(context, CommandQueue.class)
-                .addCallbacks(this);
+                .addCallback(this);
         Dependency.get(TunerService.class).addTunable(this, ICON_BLACKLIST);
     }
 

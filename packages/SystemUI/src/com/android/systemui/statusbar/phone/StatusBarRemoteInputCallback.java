@@ -73,7 +73,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks {
         mStatusBarStateController.addCallback(mStateListener);
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mCommandQueue = getComponent(context, CommandQueue.class);
-        mCommandQueue.addCallbacks(this);
+        mCommandQueue.addCallback(this);
     }
 
     private void setStatusBarState(int state) {

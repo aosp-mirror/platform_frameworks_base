@@ -55,12 +55,12 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         mContext = context;
         mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
-        SysUiServiceProvider.getComponent(context, CommandQueue.class).addCallbacks(this);
+        SysUiServiceProvider.getComponent(context, CommandQueue.class).addCallback(this);
     }
 
     @Override
     public void destroy() {
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallbacks(this);
+        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallback(this);
         if (mGlobalActions != null) {
             mGlobalActions.destroy();
             mGlobalActions = null;

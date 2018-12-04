@@ -37,7 +37,7 @@ public class Recents extends SystemUI implements CommandQueue.Callbacks {
 
     @Override
     public void start() {
-        getComponent(CommandQueue.class).addCallbacks(this);
+        getComponent(CommandQueue.class).addCallback(this);
         putComponent(Recents.class, this);
         mImpl = createRecentsImplementationFromConfig();
         mImpl.onStart(mContext, this);
