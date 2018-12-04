@@ -65,6 +65,7 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
+import static android.content.pm.PackageManager.MATCH_APEX;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
@@ -123,6 +124,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.apex.ApexInfo;
+import android.apex.IApexService;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
@@ -7912,6 +7915,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
         flags = updateFlagsForPackage(flags, userId, null);
         final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
+        final boolean listApex = (flags & MATCH_APEX) != 0;
+
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /* requireFullPermission */, false /* checkShell */,
                 "get installed packages");
@@ -7950,7 +7955,22 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
             }
-
+            if (listApex) {
+                final IApexService apex = IApexService.Stub.asInterface(
+                        ServiceManager.getService("apexservice"));
+                if (apex != null) {
+                    try {
+                        final ApexInfo[] activePkgs = apex.getActivePackages();
+                        for (ApexInfo apexInfo : activePkgs) {
+                            list.add(new PackageInfo(apexInfo));
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to retrieve packages from apexservice: " + e.toString());
+                    }
+                } else {
+                    Log.e(TAG, "Unable to connect to apexservice for querying packages.");
+                }
+            }
             return new ParceledListSlice<>(list);
         }
     }
