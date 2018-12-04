@@ -60,7 +60,6 @@ class IdmapManager {
 
     boolean createIdmap(@NonNull final PackageInfo targetPackage,
             @NonNull final PackageInfo overlayPackage, int userId) {
-        // unused userId: see comment in OverlayManagerServiceImpl.removeIdmapIfPossible
         if (DEBUG) {
             Slog.d(TAG, "create idmap for " + targetPackage.packageName + " and "
                     + overlayPackage.packageName);
@@ -70,16 +69,19 @@ class IdmapManager {
         final String overlayPath = overlayPackage.applicationInfo.getBaseCodePath();
         try {
             if (FEATURE_FLAG_IDMAP2) {
-                mIdmap2Service.createIdmap(targetPath, overlayPath, userId);
+                if (mIdmap2Service.verifyIdmap(overlayPath, userId)) {
+                    return true;
+                }
+                return mIdmap2Service.createIdmap(targetPath, overlayPath, userId) != null;
             } else {
                 mInstaller.idmap(targetPath, overlayPath, sharedGid);
+                return true;
             }
         } catch (Exception e) {
             Slog.w(TAG, "failed to generate idmap for " + targetPath + " and "
                     + overlayPath + ": " + e.getMessage());
             return false;
         }
-        return true;
     }
 
     boolean removeIdmap(@NonNull final OverlayInfo oi, final int userId) {
@@ -88,15 +90,15 @@ class IdmapManager {
         }
         try {
             if (FEATURE_FLAG_IDMAP2) {
-                mIdmap2Service.removeIdmap(oi.baseCodePath, userId);
+                return mIdmap2Service.removeIdmap(oi.baseCodePath, userId);
             } else {
                 mInstaller.removeIdmap(oi.baseCodePath);
+                return true;
             }
         } catch (Exception e) {
             Slog.w(TAG, "failed to remove idmap for " + oi.baseCodePath + ": " + e.getMessage());
             return false;
         }
-        return true;
     }
 
     boolean idmapExists(@NonNull final OverlayInfo oi) {
