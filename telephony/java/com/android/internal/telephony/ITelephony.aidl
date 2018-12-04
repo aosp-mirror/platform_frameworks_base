@@ -1716,7 +1716,7 @@ interface ITelephony {
     /**
      * Identify if the number is emergency number, based on all the active subscriptions.
      */
-    boolean isCurrentEmergencyNumber(String number);
+    boolean isCurrentEmergencyNumber(String number, boolean exactMatch);
 
     /**
      * Return a list of certs in hex string from loaded carrier privileges access rules.

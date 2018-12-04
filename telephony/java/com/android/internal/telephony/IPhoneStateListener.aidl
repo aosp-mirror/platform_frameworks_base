@@ -25,6 +25,7 @@ import android.telephony.PhoneCapability;
 import android.telephony.PhysicalChannelConfig;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
+import android.telephony.emergency.EmergencyNumber;
 
 oneway interface IPhoneStateListener {
     void onServiceStateChanged(in ServiceState serviceState);
@@ -53,5 +54,6 @@ oneway interface IPhoneStateListener {
     void onPhoneCapabilityChanged(in PhoneCapability capability);
     void onPreferredDataSubIdChanged(in int subId);
     void onRadioPowerStateChanged(in int state);
+    void onEmergencyNumberListChanged(in Map emergencyNumberList);
 }
 

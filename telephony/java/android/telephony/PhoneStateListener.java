@@ -27,12 +27,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
+import android.telephony.emergency.EmergencyNumber;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IPhoneStateListener;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -313,6 +315,8 @@ public class PhoneStateListener {
      *
      * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
      * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * @see #onEmergencyNumberListChanged
      */
     public static final int LISTEN_EMERGENCY_NUMBER_LIST                   = 0x01000000;
 
@@ -603,6 +607,21 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when the current emergency number list has changed
+     *
+     * @param emergencyNumberList Map including the key as the active subscription ID
+     *                           (Note: if there is no active subscription, the key is
+     *                           {@link SubscriptionManager#getDefaultSubscriptionId})
+     *                           and the value as the list of {@link EmergencyNumber};
+     *                           null if this information is not available.
+     * @hide
+     */
+    public void onEmergencyNumberListChanged(
+            @NonNull Map<Integer, List<EmergencyNumber>> emergencyNumberList) {
+        // default implementation empty
+    }
+
+    /**
      * Callback invoked when OEM hook raw event is received. Requires
      * the READ_PRIVILEGED_PHONE_STATE permission.
      * @param rawData is the byte array of the OEM hook raw data.
@@ -857,6 +876,16 @@ public class PhoneStateListener {
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(
                             () -> psl.onPhysicalChannelConfigurationChanged(configs)));
+        }
+
+        @Override
+        public void onEmergencyNumberListChanged(Map emergencyNumberList) {
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onEmergencyNumberListChanged(emergencyNumberList)));
         }
 
         public void onPhoneCapabilityChanged(PhoneCapability capability) {
