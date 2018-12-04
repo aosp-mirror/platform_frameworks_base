@@ -313,6 +313,7 @@ public class NetworkMonitor extends StateMachine {
     private final State mCaptivePortalState = new CaptivePortalState();
     private final State mEvaluatingPrivateDnsState = new EvaluatingPrivateDnsState();
     private final State mProbingState = new ProbingState();
+    private final State mWaitingForNextProbeState = new WaitingForNextProbeState();
 
     private CustomIntentReceiver mLaunchCaptivePortalAppBroadcastReceiver = null;
 
@@ -368,6 +369,7 @@ public class NetworkMonitor extends StateMachine {
         addState(mMaybeNotifyState, mDefaultState);
             addState(mEvaluatingState, mMaybeNotifyState);
                 addState(mProbingState, mEvaluatingState);
+                addState(mWaitingForNextProbeState, mEvaluatingState);
             addState(mCaptivePortalState, mMaybeNotifyState);
         addState(mEvaluatingPrivateDnsState, mDefaultState);
         addState(mValidatedState, mDefaultState);
@@ -877,6 +879,11 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public void enter() {
+            if (mEvaluateAttempts >= BLAME_FOR_EVALUATION_ATTEMPTS) {
+                //Don't continue to blame UID forever.
+                TrafficStats.clearThreadStatsUid();
+            }
+
             final int token = ++mProbeToken;
             mThread = new Thread(() -> sendMessage(obtainMessage(CMD_PROBE_COMPLETE, token, 0,
                     isCaptivePortal())));
@@ -904,29 +911,16 @@ public class NetworkMonitor extends StateMachine {
                         mLastPortalProbeResult = probeResult;
                         transitionTo(mCaptivePortalState);
                     } else {
-                        final Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
-                        sendMessageDelayed(msg, mReevaluateDelayMs);
                         logNetworkEvent(NetworkEvent.NETWORK_VALIDATION_FAILED);
                         notifyNetworkTestResultInvalid(probeResult.redirectUrl);
-                        if (mEvaluateAttempts >= BLAME_FOR_EVALUATION_ATTEMPTS) {
-                            // Don't continue to blame UID forever.
-                            TrafficStats.clearThreadStatsUid();
-                        }
-                        mReevaluateDelayMs *= 2;
-                        if (mReevaluateDelayMs > MAX_REEVALUATE_DELAY_MS) {
-                            mReevaluateDelayMs = MAX_REEVALUATE_DELAY_MS;
-                        }
+                        transitionTo(mWaitingForNextProbeState);
                     }
                     return HANDLED;
-                case CMD_REEVALUATE:
-                    // Leave the event to EvaluatingState. Defer this message will result in reset
-                    // of mReevaluateDelayMs and mEvaluateAttempts.
-                case CMD_NETWORK_DISCONNECTED:
                 case EVENT_DNS_NOTIFICATION:
+                    // Leave the event to DefaultState to record correct dns timestamp.
                     return NOT_HANDLED;
                 default:
-                    // TODO: Some events may able to handle in this state, instead of deferring to
-                    // next state.
+                    // Wait for probe result and defer events to next state by default.
                     deferMessage(message);
                     return HANDLED;
             }
@@ -938,6 +932,29 @@ public class NetworkMonitor extends StateMachine {
                 mThread.interrupt();
             }
             mThread = null;
+        }
+    }
+
+    // Being in the WaitingForNextProbeState indicates that evaluating probes failed and state is
+    // transited from ProbingState. This ensures that the state machine is only in ProbingState
+    // while a probe is in progress, not while waiting to perform the next probe. That allows
+    // ProbingState to defer most messages until the probe is complete, which keeps the code simple
+    // and matches the pre-Q behaviour where probes were a blocking operation performed on the state
+    // machine thread.
+    private class WaitingForNextProbeState extends State {
+        @Override
+        public void enter() {
+            final Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
+            sendMessageDelayed(msg, mReevaluateDelayMs);
+            mReevaluateDelayMs *= 2;
+            if (mReevaluateDelayMs > MAX_REEVALUATE_DELAY_MS) {
+                mReevaluateDelayMs = MAX_REEVALUATE_DELAY_MS;
+            }
+        }
+
+        @Override
+        public boolean processMessage(Message message) {
+            return NOT_HANDLED;
         }
     }
 
