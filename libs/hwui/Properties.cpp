@@ -29,8 +29,6 @@
 namespace android {
 namespace uirenderer {
 
-bool Properties::drawDeferDisabled = false;
-bool Properties::drawReorderDisabled = false;
 bool Properties::debugLayersUpdates = false;
 bool Properties::debugOverdraw = false;
 bool Properties::showDirtyRegions = false;
@@ -40,7 +38,6 @@ bool Properties::enablePartialUpdates = true;
 
 DebugLevel Properties::debugLevel = kDebugDisabled;
 OverdrawColorSet Properties::overdrawColorSet = OverdrawColorSet::Default;
-StencilClipDebug Properties::debugStencilClip = StencilClipDebug::Hide;
 
 float Properties::overrideLightRadius = -1.0f;
 float Properties::overrideLightPosY = -1.0f;
@@ -85,7 +82,6 @@ bool Properties::load() {
     char property[PROPERTY_VALUE_MAX];
     bool prevDebugLayersUpdates = debugLayersUpdates;
     bool prevDebugOverdraw = debugOverdraw;
-    StencilClipDebug prevDebugStencilClip = debugStencilClip;
 
     debugOverdraw = false;
     if (property_get(PROPERTY_DEBUG_OVERDRAW, property, nullptr) > 0) {
@@ -99,20 +95,6 @@ bool Properties::load() {
         }
     }
 
-    // See Properties.h for valid values
-    if (property_get(PROPERTY_DEBUG_STENCIL_CLIP, property, nullptr) > 0) {
-        INIT_LOGD("  Stencil clip debug enabled: %s", property);
-        if (!strcmp(property, "hide")) {
-            debugStencilClip = StencilClipDebug::Hide;
-        } else if (!strcmp(property, "highlight")) {
-            debugStencilClip = StencilClipDebug::ShowHighlight;
-        } else if (!strcmp(property, "region")) {
-            debugStencilClip = StencilClipDebug::ShowRegion;
-        }
-    } else {
-        debugStencilClip = StencilClipDebug::Hide;
-    }
-
     sProfileType = ProfileType::None;
     if (property_get(PROPERTY_PROFILE, property, "") > 0) {
         if (!strcmp(property, PROPERTY_PROFILE_VISUALIZE_BARS)) {
@@ -124,12 +106,6 @@ bool Properties::load() {
 
     debugLayersUpdates = property_get_bool(PROPERTY_DEBUG_LAYERS_UPDATES, false);
     INIT_LOGD("  Layers updates debug enabled: %d", debugLayersUpdates);
-
-    drawDeferDisabled = property_get_bool(PROPERTY_DISABLE_DRAW_DEFER, false);
-    INIT_LOGD("  Draw defer %s", drawDeferDisabled ? "disabled" : "enabled");
-
-    drawReorderDisabled = property_get_bool(PROPERTY_DISABLE_DRAW_REORDER, false);
-    INIT_LOGD("  Draw reorder %s", drawReorderDisabled ? "disabled" : "enabled");
 
     showDirtyRegions = property_get_bool(PROPERTY_DEBUG_SHOW_DIRTY_REGIONS, false);
 
@@ -152,8 +128,7 @@ bool Properties::load() {
 
     enableForceDarkSupport = property_get_bool(PROPERTY_ENABLE_FORCE_DARK, true);
 
-    return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw) ||
-           (prevDebugStencilClip != debugStencilClip);
+    return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }
 
 void Properties::overrideProperty(const char* name, const char* value) {
