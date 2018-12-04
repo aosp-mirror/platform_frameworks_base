@@ -55,6 +55,7 @@ import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -106,7 +107,7 @@ public class RoleManagerService extends SystemService {
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         getContext().registerReceiverAsUser(new BroadcastReceiver() {
             @Override
-            public void onReceive(Context context, Intent intent) {
+            public void onReceive(@NonNull Context context, @NonNull Intent intent) {
                 if (TextUtils.equals(intent.getAction(), Intent.ACTION_USER_REMOVED)) {
                     int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                     onRemoveUser(userId);
@@ -129,10 +130,11 @@ public class RoleManagerService extends SystemService {
             userState = getUserStateLocked(userId);
         }
         String packagesHash = computeComponentStateHash(userId);
-        boolean needGrant;
+        String lastGrantPackagesHash;
         synchronized (mLock) {
-            needGrant = !packagesHash.equals(userState.getLastGrantPackagesHashLocked());
+            lastGrantPackagesHash = userState.getLastGrantPackagesHashLocked();
         }
+        boolean needGrant = !Objects.equals(packagesHash, lastGrantPackagesHash);
         if (needGrant) {
             // Some vital packages state has changed since last role grant
             // Run grants again
@@ -144,7 +146,6 @@ public class RoleManagerService extends SystemService {
                         public void onSuccess() {
                             result.complete(null);
                         }
-
                         @Override
                         public void onFailure() {
                             result.completeExceptionally(new RuntimeException());
@@ -163,7 +164,8 @@ public class RoleManagerService extends SystemService {
         }
     }
 
-    private String computeComponentStateHash(int userId) {
+    @Nullable
+    private String computeComponentStateHash(@UserIdInt int userId) {
         PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -198,8 +200,7 @@ public class RoleManagerService extends SystemService {
     private RoleUserState getUserStateLocked(@UserIdInt int userId) {
         RoleUserState userState = mUserStates.get(userId);
         if (userState == null) {
-            userState = new RoleUserState(userId);
-            userState.readSyncLocked();
+            userState = RoleUserState.newInstanceLocked(userId);
             mUserStates.put(userId, userState);
         }
         return userState;
@@ -386,11 +387,11 @@ public class RoleManagerService extends SystemService {
         }
 
         @Override
-        public void onShellCommand(FileDescriptor in, FileDescriptor out,
-                FileDescriptor err, String[] args, ShellCallback callback,
-                ResultReceiver resultReceiver) {
-            (new RoleManagerShellCommand(this)).exec(
-                    this, in, out, err, args, callback, resultReceiver);
+        public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
+                @Nullable FileDescriptor err, @NonNull String[] args,
+                @Nullable ShellCallback callback, @NonNull ResultReceiver resultReceiver) {
+            new RoleManagerShellCommand(this).exec(this, in, out, err, args, callback,
+                    resultReceiver);
         }
     }
 }
