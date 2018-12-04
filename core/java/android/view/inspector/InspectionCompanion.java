@@ -62,7 +62,7 @@ public interface InspectionCompanion<T> {
      * have been mapped and throw a {@link UninitializedPropertyMapException} if this method is
      * called before {mapProperties}.
      *
-     * @param inspectable A object of type {@link T} to read the properties of.
+     * @param inspectable A object of type {T} to read the properties of.
      * @param propertyReader An object which receives the property IDs and values.
      */
     void readProperties(@NonNull T inspectable, @NonNull PropertyReader propertyReader);
