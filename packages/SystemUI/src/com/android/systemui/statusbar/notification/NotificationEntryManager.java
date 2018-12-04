@@ -952,10 +952,12 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
         // Has a copy of the current UI adjustments.
         ArrayMap<String, NotificationUiAdjustment> oldAdjustments = new ArrayMap<>();
+        ArrayMap<String, Integer> oldImportances = new ArrayMap<>();
         for (NotificationData.Entry entry : entries) {
             NotificationUiAdjustment adjustment =
                     NotificationUiAdjustment.extractFromNotificationEntry(entry);
             oldAdjustments.put(entry.key, adjustment);
+            oldImportances.put(entry.key, entry.importance);
         }
 
         // Populate notification entries from the new rankings.
@@ -977,6 +979,11 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 } else {
                     // Once the RowInflaterTask is done, it will pick up the updated entry, so
                     // no-op here.
+                }
+            } else if (oldImportances.containsKey(entry.key)
+                    && entry.importance != oldImportances.get(entry.key)) {
+                if (entry.rowExists()) {
+                    entry.getRow().onNotificationRankingUpdated();
                 }
             }
         }

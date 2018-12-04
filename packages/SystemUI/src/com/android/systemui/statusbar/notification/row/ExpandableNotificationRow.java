@@ -588,6 +588,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateRippleAllowed();
     }
 
+    /** Called when the notification's ranking was changed (but nothing else changed). */
+    public void onNotificationRankingUpdated() {
+        if (mMenuRow != null) {
+            mMenuRow.onNotificationUpdated(mStatusBarNotification);
+        }
+    }
+
     @VisibleForTesting
     void updateShelfIconColor() {
         StatusBarIconView expandedIcon = mEntry.expandedIcon;
