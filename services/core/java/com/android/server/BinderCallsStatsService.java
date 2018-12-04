@@ -98,7 +98,7 @@ public class BinderCallsStatsService extends Binder {
             mBinderCallsStats.setSamplingInterval(mParser.getInt(
                     SETTINGS_SAMPLING_INTERVAL_KEY,
                     BinderCallsStats.PERIODIC_SAMPLING_INTERVAL_DEFAULT));
-            mBinderCallsStats.setSamplingInterval(mParser.getInt(
+            mBinderCallsStats.setMaxBinderCallStats(mParser.getInt(
                     SETTINGS_MAX_CALL_STATS_KEY,
                     BinderCallsStats.MAX_BINDER_CALL_STATS_COUNT_DEFAULT));
 
