@@ -1015,12 +1015,6 @@ public class MediaScanner implements AutoCloseable {
                     // exif is null
                 }
                 if (exif != null) {
-                    float[] latlng = new float[2];
-                    if (exif.getLatLong(latlng)) {
-                        values.put(Images.Media.LATITUDE, latlng[0]);
-                        values.put(Images.Media.LONGITUDE, latlng[1]);
-                    }
-
                     long time = exif.getGpsDateTime();
                     if (time != -1) {
                         values.put(Images.Media.DATE_TAKEN, time);
