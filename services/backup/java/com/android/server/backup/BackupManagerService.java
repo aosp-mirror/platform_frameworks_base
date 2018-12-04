@@ -37,8 +37,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -85,9 +83,7 @@ public class BackupManagerService {
 
     /** Instantiate a new instance of {@link BackupManagerService}. */
     public BackupManagerService(
-            Context context,
-            Trampoline trampoline,
-            HandlerThread backupThread) {
+            Context context, Trampoline trampoline, HandlerThread backupThread) {
         // Set up our transport options and initialize the default transport
         SystemConfig systemConfig = SystemConfig.getInstance();
         Set<ComponentName> transportWhitelist = systemConfig.getBackupTransportWhitelist();
@@ -95,31 +91,9 @@ public class BackupManagerService {
             transportWhitelist = Collections.emptySet();
         }
 
-        String transport =
-                Settings.Secure.getString(
-                        context.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT);
-        if (TextUtils.isEmpty(transport)) {
-            transport = null;
-        }
-        if (DEBUG) {
-            Slog.v(TAG, "Starting with transport " + transport);
-        }
-        TransportManager transportManager =
-                new TransportManager(
-                        context,
-                        transportWhitelist,
-                        transport);
-
-        // If encrypted file systems is enabled or disabled, this call will return the
-        // correct directory.
-        File baseStateDir = new File(Environment.getDataDirectory(), "backup");
-
-        // This dir on /cache is managed directly in init.rc
-        File dataDir = new File(Environment.getDownloadCacheDirectory(), "backup_stage");
-
         mUserBackupManagerService =
-                new UserBackupManagerService(
-                        context, trampoline, backupThread, baseStateDir, dataDir, transportManager);
+                UserBackupManagerService.createAndInitializeService(
+                        context, trampoline, backupThread, transportWhitelist);
     }
 
     // TODO(b/118520567): Remove when tests are modified to use per-user instance.
