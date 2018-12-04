@@ -71,7 +71,7 @@ static JMetricsID gFontMetricsInt_fieldID;
 
 static void defaultSettingsForAndroid(Paint* paint) {
     // GlyphID encoding is required because we are using Harfbuzz shaping
-    paint->setTextEncoding(Paint::kGlyphID_TextEncoding);
+    paint->setTextEncoding(kGlyphID_SkTextEncoding);
 }
 
 namespace PaintGlue {
@@ -321,7 +321,7 @@ namespace PaintGlue {
         x += MinikinUtils::xOffsetForTextAlign(paint, layout);
         Paint::Align align = paint->getTextAlign();
         paint->setTextAlign(Paint::kLeft_Align);
-        paint->setTextEncoding(Paint::kGlyphID_TextEncoding);
+        paint->setTextEncoding(kGlyphID_SkTextEncoding);
         GetTextFunctor f(layout, path, x, y, paint, glyphs, pos);
         MinikinUtils::forFontRun(layout, paint, f);
         paint->setTextAlign(align);
