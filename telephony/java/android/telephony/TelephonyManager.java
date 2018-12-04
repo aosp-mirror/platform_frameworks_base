@@ -77,6 +77,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telecom.ITelecomService;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IAns;
+import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
@@ -1340,6 +1341,13 @@ public class TelephonyManager {
      * @hide
      */
     public static final String EXTRA_RECOVERY_ACTION = "recoveryAction";
+
+    /**
+     * The max value for the timeout passed in {@link #requestNumberVerification}.
+     * @hide
+     */
+    @SystemApi
+    public static final long MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS = 60000;
 
     //
     //
@@ -5500,6 +5508,52 @@ public class TelephonyManager {
             slotIndex = SubscriptionManager.DEFAULT_SIM_SLOT_INDEX;
         }
         return slotIndex;
+    }
+
+    /**
+     * Request that the next incoming call from a number matching {@code range} be intercepted.
+     *
+     * This API is intended for OEMs to provide a service for apps to verify the device's phone
+     * number. When called, the Telephony stack will store the provided {@link PhoneNumberRange} and
+     * intercept the next incoming call from a number that lies within the range, within a timeout
+     * specified by {@code timeoutMillis}.
+     *
+     * If such a phone call is received, the caller will be notified via
+     * {@link NumberVerificationCallback#onCallReceived(String)} on the provided {@link Executor}.
+     * If verification fails for any reason, the caller will be notified via
+     * {@link NumberVerificationCallback#onVerificationFailed(int)}
+     * on the provided {@link Executor}.
+     *
+     * In addition to the {@link Manifest.permission#MODIFY_PHONE_STATE} permission, callers of this
+     * API must also be listed in the device configuration as an authorized app in
+     * {@code packages/services/Telephony/res/values/config.xml} under the
+     * {@code config_number_verification_package_name} key.
+     *
+     * @hide
+     * @param range The range of phone numbers the caller expects a phone call from.
+     * @param timeoutMillis The amount of time to wait for such a call, or
+     *                      {@link #MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS}, whichever is lesser.
+     * @param executor The {@link Executor} that callbacks should be executed on.
+     * @param callback The callback to use for delivering results.
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void requestNumberVerification(@NonNull PhoneNumberRange range, long timeoutMillis,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull NumberVerificationCallback callback) {
+        INumberVerificationCallback internalCallback = new INumberVerificationCallback.Stub() {
+            @Override
+            public void onCallReceived(String phoneNumber) throws RemoteException {
+                Binder.withCleanCallingIdentity(() -> callback.onCallReceived(phoneNumber));
+            }
+
+            @Override
+            public void onVerificationFailed(int reason) throws RemoteException {
+                Binder.withCleanCallingIdentity(() -> callback.onVerificationFailed(reason));
+            }
+        };
+
+        // TODO -- call the aidl method
     }
 
     /**
