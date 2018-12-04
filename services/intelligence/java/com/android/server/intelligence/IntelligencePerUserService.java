@@ -200,7 +200,7 @@ final class IntelligencePerUserService
             return;
         }
         if (mMaster.verbose) {
-            Slog.v(TAG, "sendEvents(): id=" + sessionId + "; events =" + events.size());
+            Slog.v(TAG, "sendEvents(): id=" + sessionId + ", events=" + events.size());
         }
         session.sendEventsLocked(events);
     }

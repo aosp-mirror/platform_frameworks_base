@@ -189,7 +189,7 @@ public final class ContentCaptureManager {
         }
     }
 
-    private  void handleSessionStarted(int resultCode) {
+    private void handleSessionStarted(int resultCode) {
         mState = resultCode;
         mDisabled.set(mState == STATE_DISABLED);
         if (VERBOSE) {

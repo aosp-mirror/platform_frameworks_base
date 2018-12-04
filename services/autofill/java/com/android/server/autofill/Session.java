@@ -902,7 +902,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // VultureCallback
     @Override
-    public void onServiceDied(AbstractRemoteService service) {
+    public void onServiceDied(AbstractRemoteService<? extends AbstractRemoteService<?>> service) {
         Slog.w(TAG, "removing session because service died");
         forceRemoveSelfLocked();
     }
