@@ -2475,6 +2475,8 @@ public class ConnectivityManager {
     public static final int TETHER_ERROR_IFACE_CFG_ERROR      = 10;
     /** {@hide} */
     public static final int TETHER_ERROR_PROVISION_FAILED     = 11;
+    /** {@hide} */
+    public static final int TETHER_ERROR_DHCPSERVER_ERROR     = 12;
 
     /**
      * Get a more detailed error code after a Tethering or Untethering

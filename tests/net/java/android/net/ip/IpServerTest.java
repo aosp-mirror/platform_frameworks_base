@@ -22,20 +22,26 @@ import static android.net.ConnectivityManager.TETHERING_WIFI;
 import static android.net.ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR;
 import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
 import static android.net.ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR;
+import static android.net.NetworkUtils.intToInet4AddressHTH;
+import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.ip.IpServer.STATE_AVAILABLE;
 import static android.net.ip.IpServer.STATE_TETHERED;
 import static android.net.ip.IpServer.STATE_UNAVAILABLE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -48,8 +54,9 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.MacAddress;
 import android.net.RouteInfo;
-import android.net.dhcp.DhcpServer;
-import android.net.dhcp.DhcpServingParams;
+import android.net.dhcp.DhcpServingParamsParcel;
+import android.net.dhcp.IDhcpServer;
+import android.net.dhcp.IDhcpServerCallbacks;
 import android.net.util.InterfaceParams;
 import android.net.util.InterfaceSet;
 import android.net.util.SharedLog;
@@ -82,16 +89,18 @@ public class IpServerTest {
     private static final InterfaceParams TEST_IFACE_PARAMS = new InterfaceParams(
             IFACE_NAME, 42 /* index */, MacAddress.ALL_ZEROS_ADDRESS, 1500 /* defaultMtu */);
 
+    private static final int MAKE_DHCPSERVER_TIMEOUT_MS = 1000;
+
     @Mock private INetworkManagementService mNMService;
     @Mock private INetworkStatsService mStatsService;
     @Mock private IpServer.Callback mCallback;
     @Mock private InterfaceConfiguration mInterfaceConfiguration;
     @Mock private SharedLog mSharedLog;
-    @Mock private DhcpServer mDhcpServer;
+    @Mock private IDhcpServer mDhcpServer;
     @Mock private RouterAdvertisementDaemon mRaDaemon;
     @Mock private IpServer.Dependencies mDependencies;
 
-    @Captor private ArgumentCaptor<DhcpServingParams> mDhcpParamsCaptor;
+    @Captor private ArgumentCaptor<DhcpServingParamsParcel> mDhcpParamsCaptor;
 
     private final TestLooper mLooper = new TestLooper();
     private final ArgumentCaptor<LinkProperties> mLinkPropertiesCaptor =
@@ -112,8 +121,18 @@ public class IpServerTest {
         mLooper.dispatchAll();
         reset(mNMService, mStatsService, mCallback);
         when(mNMService.getInterfaceConfig(IFACE_NAME)).thenReturn(mInterfaceConfiguration);
-        when(mDependencies.makeDhcpServer(
-                any(), any(), mDhcpParamsCaptor.capture(), any())).thenReturn(mDhcpServer);
+
+        doAnswer(inv -> {
+            final IDhcpServerCallbacks cb = inv.getArgument(2);
+            new Thread(() -> {
+                try {
+                    cb.onDhcpServerCreated(STATUS_SUCCESS, mDhcpServer);
+                } catch (RemoteException e) {
+                    fail(e.getMessage());
+                }
+            }).run();
+            return null;
+        }).when(mDependencies).makeDhcpServer(any(), mDhcpParamsCaptor.capture(), any());
         when(mDependencies.getRouterAdvertisementDaemon(any())).thenReturn(mRaDaemon);
         when(mDependencies.getInterfaceParams(IFACE_NAME)).thenReturn(TEST_IFACE_PARAMS);
 
@@ -399,21 +418,20 @@ public class IpServerTest {
         initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE, true /* usingLegacyDhcp */);
         dispatchTetherConnectionChanged(UPSTREAM_IFACE);
 
-        verify(mDependencies, never()).makeDhcpServer(any(), any(), any(), any());
+        verify(mDependencies, never()).makeDhcpServer(any(), any(), any());
     }
 
-    private void assertDhcpStarted(IpPrefix expectedPrefix) {
-        verify(mDependencies, times(1)).makeDhcpServer(
-                eq(mLooper.getLooper()), eq(IFACE_NAME), any(), eq(mSharedLog));
-        verify(mDhcpServer, times(1)).start();
-        final DhcpServingParams params = mDhcpParamsCaptor.getValue();
+    private void assertDhcpStarted(IpPrefix expectedPrefix) throws Exception {
+        verify(mDependencies, times(1)).makeDhcpServer(eq(IFACE_NAME), any(), any());
+        verify(mDhcpServer, timeout(MAKE_DHCPSERVER_TIMEOUT_MS).times(1)).start(any());
+        final DhcpServingParamsParcel params = mDhcpParamsCaptor.getValue();
         // Last address byte is random
-        assertTrue(expectedPrefix.contains(params.serverAddr.getAddress()));
-        assertEquals(expectedPrefix.getPrefixLength(), params.serverAddr.getPrefixLength());
-        assertEquals(1, params.defaultRouters.size());
-        assertEquals(params.serverAddr.getAddress(), params.defaultRouters.iterator().next());
-        assertEquals(1, params.dnsServers.size());
-        assertEquals(params.serverAddr.getAddress(), params.dnsServers.iterator().next());
+        assertTrue(expectedPrefix.contains(intToInet4AddressHTH(params.serverAddr)));
+        assertEquals(expectedPrefix.getPrefixLength(), params.serverAddrPrefixLength);
+        assertEquals(1, params.defaultRouters.length);
+        assertEquals(params.serverAddr, params.defaultRouters[0]);
+        assertEquals(1, params.dnsServers.length);
+        assertEquals(params.serverAddr, params.dnsServers[0]);
         assertEquals(DHCP_LEASE_TIME_SECS, params.dhcpLeaseTimeSecs);
     }
 
@@ -458,7 +476,7 @@ public class IpServerTest {
             addr4 = addr;
             break;
         }
-        assertTrue("missing IPv4 address", addr4 != null);
+        assertNotNull("missing IPv4 address", addr4);
 
         // Assert the presence of the associated directly connected route.
         final RouteInfo directlyConnected = new RouteInfo(addr4, null, lp.getInterfaceName());

@@ -16,14 +16,13 @@
 
 package android.net.dhcp;
 
+import static android.net.InetAddresses.parseNumericAddress;
 import static android.net.NetworkUtils.inet4AddressToIntHTH;
 import static android.net.dhcp.DhcpServingParams.MTU_UNSET;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
-
-import static java.net.InetAddress.parseNumericAddress;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -193,6 +192,11 @@ public class DhcpServingParamsTest {
                 .filter(f -> !Modifier.isStatic(f.getModifiers()))
                 .count();
         assertEquals(7, numFields);
+    }
+
+    @Test(expected = InvalidParameterException.class)
+    public void testFromParcelableObject_NullArgument() throws InvalidParameterException {
+        DhcpServingParams.fromParcelableObject(null);
     }
 
     private static int[] toIntArray(Collection<Inet4Address> addrs) {
