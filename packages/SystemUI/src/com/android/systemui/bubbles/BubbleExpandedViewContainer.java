@@ -24,6 +24,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
@@ -35,6 +36,8 @@ public class BubbleExpandedViewContainer extends LinearLayout {
 
     // The triangle pointing to the expanded view
     private View mPointerView;
+    // The view displayed between the pointer and the expanded view
+    private TextView mHeaderView;
     // The view that is being displayed for the expanded state
     private View mExpandedView;
 
@@ -68,6 +71,7 @@ public class BubbleExpandedViewContainer extends LinearLayout {
                 TriangleShape.create(width, height, true /* pointUp */));
         triangleDrawable.setTint(Color.WHITE); // TODO: dark mode
         mPointerView.setBackground(triangleDrawable);
+        mHeaderView = findViewById(R.id.bubble_content_header);
     }
 
     /**
@@ -80,9 +84,19 @@ public class BubbleExpandedViewContainer extends LinearLayout {
     }
 
     /**
+     * Set the text displayed within the header.
+     */
+    public void setHeaderText(CharSequence text) {
+        mHeaderView.setText(text);
+    }
+
+    /**
      * Set the view to display for the expanded state. Passing null will clear the view.
      */
     public void setExpandedView(View view) {
+        if (mExpandedView == view) {
+            return;
+        }
         if (mExpandedView != null) {
             removeView(mExpandedView);
         }

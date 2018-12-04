@@ -33,7 +33,7 @@ import com.android.systemui.pip.phone.PipDismissViewController;
  * Handles interpreting touches on a {@link BubbleStackView}. This includes expanding, collapsing,
  * dismissing, and flings.
  */
-public class BubbleTouchHandler implements View.OnTouchListener {
+class BubbleTouchHandler implements View.OnTouchListener {
 
     private BubbleController mController = Dependency.get(BubbleController.class);
     private PipDismissViewController mDismissViewController;

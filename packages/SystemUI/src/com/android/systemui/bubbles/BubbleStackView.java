@@ -21,10 +21,13 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
+import android.app.ActivityView;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.RectF;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,6 +53,7 @@ import com.android.systemui.statusbar.notification.stack.ViewState;
  */
 public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.FloatingView {
 
+    private static final String TAG = "BubbleStackView";
     private Point mDisplaySize;
 
     private FrameLayout mBubbleContainer;
@@ -59,6 +63,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     private int mBubblePadding;
 
     private boolean mIsExpanded;
+    private int mExpandedBubbleHeight;
     private BubbleView mExpandedBubble;
     private Point mCollapsedPosition;
     private BubbleTouchHandler mTouchHandler;
@@ -106,6 +111,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         mBubbleSize = res.getDimensionPixelSize(R.dimen.bubble_size);
         mBubblePadding = res.getDimensionPixelSize(R.dimen.bubble_padding);
 
+        mExpandedBubbleHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
         mDisplaySize = new Point();
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getSize(mDisplaySize);
@@ -389,27 +395,63 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     }
 
     private void updateExpandedBubble() {
-        if (mExpandedBubble != null) {
+        if (mExpandedBubble == null) {
+            return;
+        }
+
+        if (mExpandedBubble.hasAppOverlayIntent()) {
+            ActivityView expandedView = mExpandedBubble.getActivityView();
+            expandedView.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, mExpandedBubbleHeight));
+
+            final PendingIntent intent = mExpandedBubble.getAppOverlayIntent();
+            mExpandedViewContainer.setHeaderText(intent.getIntent().getComponent().toShortString());
+            mExpandedViewContainer.setExpandedView(expandedView);
+            expandedView.setCallback(new ActivityView.StateCallback() {
+                @Override
+                public void onActivityViewReady(ActivityView view) {
+                    Log.d(TAG, "onActivityViewReady("
+                            + mExpandedBubble.getEntry().key + "): " + view);
+                    view.startActivity(intent);
+                }
+
+                @Override
+                public void onActivityViewDestroyed(ActivityView view) {
+                    NotificationEntry entry = mExpandedBubble.getEntry();
+                    Log.d(TAG, "onActivityViewDestroyed(key="
+                            + ((entry != null) ? entry.key : "(none)") + "): " + view);
+                }
+            });
+        } else {
             ExpandableNotificationRow row = mExpandedBubble.getRowView();
-            if (!row.equals(mExpandedViewContainer.getChildAt(0))) {
+            if (!row.equals(mExpandedViewContainer.getExpandedView())) {
                 // Different expanded view than what we have
                 mExpandedViewContainer.setExpandedView(null);
             }
-            int pointerPosition = mExpandedBubble.getPosition().x
-                    + (mExpandedBubble.getWidth() / 2);
-            mExpandedViewContainer.setPointerPosition(pointerPosition);
             mExpandedViewContainer.setExpandedView(row);
+            mExpandedViewContainer.setHeaderText(null);
         }
+        int pointerPosition = mExpandedBubble.getPosition().x
+                + (mExpandedBubble.getWidth() / 2);
+        mExpandedViewContainer.setPointerPosition(pointerPosition);
     }
 
     private void applyCurrentState() {
+        Log.d(TAG, "applyCurrentState: mIsExpanded=" + mIsExpanded);
+
         mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
         if (!mIsExpanded) {
             mExpandedViewContainer.setExpandedView(null);
         } else {
             mExpandedViewContainer.setTranslationY(mBubbleContainer.getHeight());
-            ExpandableNotificationRow row = mExpandedBubble.getRowView();
-            applyRowState(row);
+            View expandedView = mExpandedViewContainer.getExpandedView();
+            if (expandedView instanceof ActivityView) {
+                if (expandedView.isAttachedToWindow()) {
+                    ((ActivityView) expandedView).onLocationChanged();
+                }
+            } else {
+                applyRowState(mExpandedBubble.getRowView());
+            }
         }
         int bubbsCount = mBubbleContainer.getChildCount();
         for (int i = 0; i < bubbsCount; i++) {

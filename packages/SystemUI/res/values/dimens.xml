@@ -997,4 +997,8 @@
     <dimen name="bubble_pointer_width">6dp</dimen>
     <!-- Extra padding around the dismiss target for bubbles -->
     <dimen name="bubble_dismiss_slop">16dp</dimen>
+    <!-- Height of the header within the expanded view. -->
+    <dimen name="bubble_expanded_header_height">48dp</dimen>
+    <!-- Left and right padding applied to the header. -->
+    <dimen name="bubble_expanded_header_horizontal_padding">24dp</dimen>
 </resources>
