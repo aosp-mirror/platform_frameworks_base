@@ -4471,8 +4471,8 @@ package android.service.carrier {
 
   public abstract class ApnService extends android.app.Service {
     ctor public ApnService();
-    method public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
     method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
   }
 
 }
@@ -5186,6 +5186,26 @@ package android.telephony {
     field public static final int RESULT_SUCCESS = 0; // 0x0
   }
 
+  public abstract interface NumberVerificationCallback {
+    method public default void onCallReceived(java.lang.String);
+    method public default void onVerificationFailed(int);
+    field public static final int REASON_CONCURRENT_REQUESTS = 4; // 0x4
+    field public static final int REASON_IN_ECBM = 5; // 0x5
+    field public static final int REASON_IN_EMERGENCY_CALL = 6; // 0x6
+    field public static final int REASON_NETWORK_NOT_AVAILABLE = 2; // 0x2
+    field public static final int REASON_TIMED_OUT = 1; // 0x1
+    field public static final int REASON_TOO_MANY_CALLS = 3; // 0x3
+    field public static final int REASON_UNSPECIFIED = 0; // 0x0
+  }
+
+  public final class PhoneNumberRange implements android.os.Parcelable {
+    ctor public PhoneNumberRange(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+    method public int describeContents();
+    method public boolean matches(java.lang.String);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.PhoneNumberRange> CREATOR;
+  }
+
   public class PhoneStateListener {
     method public void onRadioPowerStateChanged(int);
     method public void onSrvccStateChanged(int);
@@ -5350,6 +5370,7 @@ package android.telephony {
     method public boolean needsOtaServiceProvisioning();
     method public boolean rebootRadio();
     method public void requestCellInfoUpdate(android.os.WorkSource, java.util.concurrent.Executor, android.telephony.TelephonyManager.CellInfoCallback);
+    method public void requestNumberVerification(android.telephony.PhoneNumberRange, long, java.util.concurrent.Executor, android.telephony.NumberVerificationCallback);
     method public boolean resetRadioConfig();
     method public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method public void setCarrierDataEnabled(boolean);
@@ -5379,6 +5400,7 @@ package android.telephony {
     field public static final java.lang.String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final java.lang.String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
     field public static final java.lang.String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
+    field public static final long MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS = 60000L; // 0xea60L
     field public static final int NETWORK_MODE_CDMA_EVDO = 4; // 0x4
     field public static final int NETWORK_MODE_CDMA_NO_EVDO = 5; // 0x5
     field public static final int NETWORK_MODE_EVDO_NO_CDMA = 6; // 0x6

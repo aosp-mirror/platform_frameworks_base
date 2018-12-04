@@ -544,6 +544,7 @@ java_defaults {
         "telephony/java/com/android/internal/telephony/IApnSourceService.aidl",
         "telephony/java/com/android/internal/telephony/ICarrierConfigLoader.aidl",
         "telephony/java/com/android/internal/telephony/IMms.aidl",
+        "telephony/java/com/android/internal/telephony/INumberVerificationCallback.aidl",
         "telephony/java/com/android/internal/telephony/IOnSubscriptionsChangedListener.aidl",
         "telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl",
         "telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl",
