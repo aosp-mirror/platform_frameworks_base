@@ -304,4 +304,10 @@ interface ITelecomService {
      * @see TelecomServiceImpl#handleCallIntent
      */
     void handleCallIntent(in Intent intent);
+
+    void setTestDefaultCallScreeningApp(String packageName);
+
+    void addOrRemoveTestCallCompanionApp(String packageName, boolean isAdded);
+
+    void setTestAutoModeApp(String packageName);
 }
