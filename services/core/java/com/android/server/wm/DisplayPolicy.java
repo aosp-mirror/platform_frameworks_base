@@ -222,6 +222,7 @@ public class DisplayPolicy {
     private volatile int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     private volatile boolean mHdmiPlugged;
 
+    private volatile boolean mHasStatusBar;
     private volatile boolean mHasNavigationBar;
     // Can the navigation bar ever move to the side?
     private volatile boolean mNavigationBarCanMove;
@@ -523,6 +524,7 @@ public class DisplayPolicy {
         mNavigationBarCanMove = width != height && shortSizeDp < 600;
 
         if (mDisplayContent.isDefaultDisplay) {
+            mHasStatusBar = true;
             mHasNavigationBar = mContext.getResources().getBoolean(R.bool.config_showNavigationBar);
 
             // Allow a system property to override this. Used by the emulator.
@@ -534,6 +536,7 @@ public class DisplayPolicy {
                 mHasNavigationBar = true;
             }
         } else {
+            mHasStatusBar = false;
             mHasNavigationBar = mDisplayContent.getDisplay().supportsSystemDecorations();
         }
     }
@@ -587,6 +590,10 @@ public class DisplayPolicy {
 
     public boolean hasNavigationBar() {
         return mHasNavigationBar;
+    }
+
+    public boolean hasStatusBar() {
+        return mHasStatusBar;
     }
 
     public boolean navigationBarCanMove() {
@@ -2493,12 +2500,19 @@ public class DisplayPolicy {
         final int landscapeRotation = displayRotation.getLandscapeRotation();
         final int seascapeRotation = displayRotation.getSeascapeRotation();
 
-        mStatusBarHeightForRotation[portraitRotation] =
-        mStatusBarHeightForRotation[upsideDownRotation] =
-                res.getDimensionPixelSize(R.dimen.status_bar_height_portrait);
-        mStatusBarHeightForRotation[landscapeRotation] =
-        mStatusBarHeightForRotation[seascapeRotation] =
-                res.getDimensionPixelSize(R.dimen.status_bar_height_landscape);
+        if (hasStatusBar()) {
+            mStatusBarHeightForRotation[portraitRotation] =
+                    mStatusBarHeightForRotation[upsideDownRotation] =
+                            res.getDimensionPixelSize(R.dimen.status_bar_height_portrait);
+            mStatusBarHeightForRotation[landscapeRotation] =
+                    mStatusBarHeightForRotation[seascapeRotation] =
+                            res.getDimensionPixelSize(R.dimen.status_bar_height_landscape);
+        } else {
+            mStatusBarHeightForRotation[portraitRotation] =
+                    mStatusBarHeightForRotation[upsideDownRotation] =
+                            mStatusBarHeightForRotation[landscapeRotation] =
+                                    mStatusBarHeightForRotation[seascapeRotation] = 0;
+        }
 
         // Height of the navigation bar when presented horizontally at bottom
         mNavigationBarHeightForRotationDefault[portraitRotation] =
