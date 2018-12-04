@@ -697,6 +697,7 @@ java_defaults {
         "android.hardware.radio-V1.3-java",
         "android.hardware.radio-V1.4-java",
         "android.hardware.usb.gadget-V1.0-java",
+        "networkstack-aidl-interfaces-java",
         "netd_aidl_interface-java",
     ],
 
@@ -713,6 +714,16 @@ java_defaults {
         "--multi-dex",
     ],
 
+}
+
+// AIDL interfaces between the core system and the networking mainline module.
+aidl_interface {
+    name: "networkstack-aidl-interfaces",
+    local_include_dir: "core/java",
+    srcs: [
+        "core/java/android/net/IIpMemoryStore.aidl",
+    ],
+    api_dir: "aidl/networkstack",
 }
 
 filegroup {
