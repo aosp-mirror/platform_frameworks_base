@@ -19,6 +19,8 @@ import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
 import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 
+import static com.android.systemui.util.SysuiLifecycle.viewAttachLifecycle;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.animation.ArgbEvaluator;
@@ -166,6 +168,7 @@ public class BatteryMeterView extends LinearLayout implements
 
         setClipChildren(false);
         setClipToPadding(false);
+        Dependency.get(ConfigurationController.class).observe(viewAttachLifecycle(this), this);
     }
 
     public void setForceShowPercent(boolean show) {
@@ -289,7 +292,6 @@ public class BatteryMeterView extends LinearLayout implements
                 Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mSettingObserver, mUser);
         updateShowPercent();
         subscribeForTunerUpdates();
-        Dependency.get(ConfigurationController.class).addCallback(this);
         mUserTracker.startTracking();
     }
 
@@ -300,7 +302,6 @@ public class BatteryMeterView extends LinearLayout implements
         mBatteryController.removeCallback(this);
         getContext().getContentResolver().unregisterContentObserver(mSettingObserver);
         unsubscribeFromTunerUpdates();
-        Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
     @Override

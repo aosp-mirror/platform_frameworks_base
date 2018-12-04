@@ -32,7 +32,6 @@ import android.annotation.IdRes;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
-import android.app.Fragment;
 import android.app.IActivityTaskManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -90,6 +89,7 @@ import com.android.systemui.statusbar.phone.ContextualButton.ContextButtonListen
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyButtonView;
+import com.android.systemui.util.LifecycleFragment;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -101,7 +101,7 @@ import java.util.function.Consumer;
  * Fragment containing the NavigationBarFragment. Contains logic for what happens
  * on clicks and view states of the nav bar.
  */
-public class NavigationBarFragment extends Fragment implements Callbacks {
+public class NavigationBarFragment extends LifecycleFragment implements Callbacks {
 
     public static final String TAG = "NavigationBar";
     private static final boolean DEBUG = false;
@@ -199,7 +199,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mCommandQueue = SysUiServiceProvider.getComponent(getContext(), CommandQueue.class);
-        mCommandQueue.addCallback(this);
+        mCommandQueue.observe(getLifecycle(), this);
         mStatusBar = SysUiServiceProvider.getComponent(getContext(), StatusBar.class);
         mRecents = SysUiServiceProvider.getComponent(getContext(), Recents.class);
         mDivider = SysUiServiceProvider.getComponent(getContext(), Divider.class);
@@ -225,7 +225,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCommandQueue.removeCallback(this);
         Dependency.get(AccessibilityManagerWrapper.class).removeCallback(
                 mAccessibilityListener);
         mContentResolver.unregisterContentObserver(mMagnificationObserver);
