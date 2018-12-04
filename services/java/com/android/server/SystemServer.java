@@ -1431,6 +1431,14 @@ public final class SystemServer {
             }
             traceEnd();
 
+            traceBeginAndSlog("RuntimeService");
+            try {
+                ServiceManager.addService("runtime", new RuntimeService(context));
+            } catch (Throwable e) {
+                reportWtf("starting RuntimeService", e);
+            }
+            traceEnd();
+
             // timezone.RulesManagerService will prevent a device starting up if the chain of trust
             // required for safe time zone updates might be broken. RuleManagerService cannot do
             // this check when mOnlyCore == true, so we don't enable the service in this case.
