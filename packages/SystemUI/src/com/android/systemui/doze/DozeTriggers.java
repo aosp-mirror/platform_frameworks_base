@@ -184,6 +184,7 @@ public class DozeTriggers implements DozeMachine.Part {
             if (DEBUG) Log.i(TAG, "Prox changed, ignore touch = " + ignoreTouch);
             mDozeHost.onIgnoreTouchWhilePulsing(ignoreTouch);
         }
+
         if (far && (paused || pausing)) {
             if (DEBUG) Log.i(TAG, "Prox FAR, unpausing AOD");
             mMachine.requestState(DozeMachine.State.DOZE_AOD);
@@ -205,13 +206,13 @@ public class DozeTriggers implements DozeMachine.Part {
                     // In pocket, drop event.
                     return;
                 }
-                if (pausing || paused) {
+                if (mMachine.getState() == DozeMachine.State.DOZE) {
                     mMachine.requestState(DozeMachine.State.DOZE_AOD);
                 }
             }, false /* alreadyPerformedProxCheck */, DozeLog.REASON_SENSOR_WAKE_UP);
         } else {
             if (!pausing && !paused) {
-                mMachine.requestState(DozeMachine.State.DOZE_AOD_PAUSING);
+                mMachine.requestState(DozeMachine.State.DOZE);
             }
         }
     }

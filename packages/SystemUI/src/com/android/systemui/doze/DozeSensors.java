@@ -401,7 +401,9 @@ public class DozeSensors {
                 }
                 mCallback.onSensorPulse(mPulseReason, sensorPerformsProxCheck, screenX, screenY,
                         event.values);
-                updateListener();  // reregister, this sensor only fires once
+                if (!mRegistered) {
+                    updateListener();  // reregister, this sensor only fires once
+                }
             }));
         }
 
@@ -440,7 +442,9 @@ public class DozeSensors {
                 mRegistered = false;
                 mCallback.onSensorPulse(mPulseReason, true /* sensorPerformsProxCheck */, -1, -1,
                         event.getValues());
-                updateListener();  // reregister, this sensor only fires once
+                if (!mRegistered) {
+                    updateListener();  // reregister, this sensor only fires once
+                }
             }));
         };
 
@@ -487,7 +491,6 @@ public class DozeSensors {
             }
             return sb.append(']').toString();
         }
-
     }
 
     public interface Callback {
