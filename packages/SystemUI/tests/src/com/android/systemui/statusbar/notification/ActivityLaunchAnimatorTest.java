@@ -62,6 +62,7 @@ public class ActivityLaunchAnimatorTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        when(mStatusBarWindowView.getResources()).thenReturn(mContext.getResources());
         when(mCallback.areLaunchAnimationsEnabled()).thenReturn(true);
         mLaunchAnimator = new ActivityLaunchAnimator(
                 mStatusBarWindowView,

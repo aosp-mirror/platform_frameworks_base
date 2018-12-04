@@ -4217,7 +4217,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the voice mail count for a subscription. Return 0 if unavailable.
+     * Returns the voice mail count for a subscription. Return 0 if unavailable or the caller does
+     * not have the READ_PHONE_STATE permission.
      * @param subId whose voice message count is returned
      * @hide
      */
@@ -4228,7 +4229,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return 0;
-            return telephony.getVoiceMessageCountForSubscriber(subId);
+            return telephony.getVoiceMessageCountForSubscriber(subId, getOpPackageName());
         } catch (RemoteException ex) {
             return 0;
         } catch (NullPointerException ex) {
@@ -5371,7 +5372,7 @@ public class TelephonyManager {
 
     /**
      * Rollback modem configurations to factory default except some config which are in whitelist.
-     * Used for device configuration by some CDMA operators.
+     * Used for device configuration by some carriers.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
@@ -5398,7 +5399,7 @@ public class TelephonyManager {
     }
 
     /**
-     * Generate a radio modem reset. Used for device configuration by some CDMA operators.
+     * Generate a radio modem reset. Used for device configuration by some carriers.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
@@ -8582,7 +8583,8 @@ public class TelephonyManager {
 
     /**
      * Return the application ID for the uicc application type like {@link #APPTYPE_CSIM}.
-     * All uicc applications are uniquely identified by application ID. See ETSI 102.221 and 101.220
+     * All uicc applications are uniquely identified by application ID, represented by the hex
+     * string. e.g, A00000015141434C00. See ETSI 102.221 and 101.220
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
      *

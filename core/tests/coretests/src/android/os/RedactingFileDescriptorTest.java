@@ -16,6 +16,10 @@
 
 package android.os;
 
+import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
+import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
+import static android.os.RedactingFileDescriptor.removeRange;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -58,8 +62,8 @@ public class RedactingFileDescriptorTest {
 
     @Test
     public void testSingleByte() throws Exception {
-        final FileDescriptor fd = RedactingFileDescriptor
-                .open(mContext, mFile, new long[] { 10, 11 }).getFileDescriptor();
+        final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_ONLY,
+                new long[] { 10, 11 }).getFileDescriptor();
 
         final byte[] buf = new byte[1_000];
         assertEquals(buf.length, Os.read(fd, buf, 0, buf.length));
@@ -74,8 +78,8 @@ public class RedactingFileDescriptorTest {
 
     @Test
     public void testRanges() throws Exception {
-        final FileDescriptor fd = RedactingFileDescriptor
-                .open(mContext, mFile, new long[] { 100, 200, 300, 400 }).getFileDescriptor();
+        final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_ONLY,
+                new long[] { 100, 200, 300, 400 }).getFileDescriptor();
 
         final byte[] buf = new byte[10];
         assertEquals(buf.length, Os.pread(fd, buf, 0, 10, 90));
@@ -96,8 +100,8 @@ public class RedactingFileDescriptorTest {
 
     @Test
     public void testEntireFile() throws Exception {
-        final FileDescriptor fd = RedactingFileDescriptor
-                .open(mContext, mFile, new long[] { 0, 5_000_000 }).getFileDescriptor();
+        final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_ONLY,
+                new long[] { 0, 5_000_000 }).getFileDescriptor();
 
         try (FileInputStream in = new FileInputStream(fd)) {
             int val;
@@ -105,5 +109,62 @@ public class RedactingFileDescriptorTest {
                 assertEquals(0, val);
             }
         }
+    }
+
+    @Test
+    public void testReadWrite() throws Exception {
+        final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_WRITE,
+                new long[] { 100, 200, 300, 400 }).getFileDescriptor();
+
+        // Redacted at first
+        final byte[] buf = new byte[10];
+        assertEquals(buf.length, Os.pread(fd, buf, 0, 10, 95));
+        assertArrayEquals(new byte[] { 64, 64, 64, 64, 64, 0, 0, 0, 0, 0 }, buf);
+
+        // But we can see data that we've written
+        Os.pwrite(fd, new byte[] { 32, 32 }, 0, 2, 102);
+        assertEquals(buf.length, Os.pread(fd, buf, 0, 10, 95));
+        assertArrayEquals(new byte[] { 64, 64, 64, 64, 64, 0, 0, 32, 32, 0 }, buf);
+    }
+
+    @Test
+    public void testRemoveRange() throws Exception {
+        // Removing outside ranges should have no changes
+        assertArrayEquals(new long[] { 100, 200, 300, 400 },
+                removeRange(new long[] { 100, 200, 300, 400 }, 0, 100));
+        assertArrayEquals(new long[] { 100, 200, 300, 400 },
+                removeRange(new long[] { 100, 200, 300, 400 }, 200, 300));
+        assertArrayEquals(new long[] { 100, 200, 300, 400 },
+                removeRange(new long[] { 100, 200, 300, 400 }, 400, 500));
+
+        // Removing full regions
+        assertArrayEquals(new long[] { 100, 200 },
+                removeRange(new long[] { 100, 200, 300, 400 }, 300, 400));
+        assertArrayEquals(new long[] { 100, 200 },
+                removeRange(new long[] { 100, 200, 300, 400 }, 250, 450));
+        assertArrayEquals(new long[] { 300, 400 },
+                removeRange(new long[] { 100, 200, 300, 400 }, 50, 250));
+        assertArrayEquals(new long[] { },
+                removeRange(new long[] { 100, 200, 300, 400 }, 0, 5_000_000));
+    }
+
+    @Test
+    public void testRemoveRange_Partial() throws Exception {
+        assertArrayEquals(new long[] { 150, 200, 300, 400 },
+                removeRange(new long[] { 100, 200, 300, 400 }, 50, 150));
+        assertArrayEquals(new long[] { 100, 150, 300, 400 },
+                removeRange(new long[] { 100, 200, 300, 400 }, 150, 250));
+        assertArrayEquals(new long[] { 100, 150, 350, 400 },
+                removeRange(new long[] { 100, 200, 300, 400 }, 150, 350));
+        assertArrayEquals(new long[] { 100, 150 },
+                removeRange(new long[] { 100, 200, 300, 400 }, 150, 500));
+    }
+
+    @Test
+    public void testRemoveRange_Hole() throws Exception {
+        assertArrayEquals(new long[] { 100, 125, 175, 200, 300, 400 },
+                removeRange(new long[] { 100, 200, 300, 400 }, 125, 175));
+        assertArrayEquals(new long[] { 100, 200 },
+                removeRange(new long[] { 100, 200 }, 150, 150));
     }
 }

@@ -163,7 +163,7 @@ public final class ContentCaptureEvent implements Parcelable {
      * Gets optional flags associated with the event.
      *
      * @return either {@code 0} or
-     * {@link android.view.intelligence.IntelligenceManager#FLAG_USER_INPUT}.
+     * {@link android.view.intelligence.ContentCaptureManager#FLAG_USER_INPUT}.
      */
     public int getFlags() {
         return mFlags;

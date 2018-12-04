@@ -1049,4 +1049,20 @@ public class ContextWrapper extends Context {
             mBase.setAutofillCompatibilityEnabled(autofillCompatEnabled);
         }
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isContentCaptureSupported() {
+        return mBase.isContentCaptureSupported();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void setContentCaptureSupported(boolean supported) {
+        mBase.setContentCaptureSupported(supported);
+    }
 }

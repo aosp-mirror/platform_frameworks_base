@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Trace;
 import android.util.AttributeSet;
@@ -107,7 +108,7 @@ public class GridView extends AbsListView {
      */
     public static final int AUTO_FIT = -1;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 117521080)
     private int mNumColumns = AUTO_FIT;
 
     @UnsupportedAppUsage
@@ -117,7 +118,7 @@ public class GridView extends AbsListView {
     @UnsupportedAppUsage
     private int mVerticalSpacing = 0;
     private int mStretchMode = STRETCH_COLUMN_WIDTH;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 117521079)
     private int mColumnWidth;
     @UnsupportedAppUsage
     private int mRequestedColumnWidth;

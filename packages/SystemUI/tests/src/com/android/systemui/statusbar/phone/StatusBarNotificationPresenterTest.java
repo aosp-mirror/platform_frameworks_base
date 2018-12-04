@@ -16,6 +16,7 @@ package com.android.systemui.statusbar.phone;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.StatusBarManager;
@@ -63,9 +64,11 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         mContext.putComponent(CommandQueue.class, mCommandQueue);
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
 
+        StatusBarWindowView statusBarWindowView = mock(StatusBarWindowView.class);
+        when(statusBarWindowView.getResources()).thenReturn(mContext.getResources());
         mStatusBar = new StatusBarNotificationPresenter(mContext,
                 mock(NotificationPanelView.class), mock(HeadsUpManagerPhone.class),
-                mock(StatusBarWindowView.class), mock(NotificationListContainerViewGroup.class),
+                statusBarWindowView, mock(NotificationListContainerViewGroup.class),
                 mock(DozeScrimController.class), mock(ScrimController.class),
                 mock(ActivityLaunchAnimator.Callback.class));
     }

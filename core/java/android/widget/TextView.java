@@ -166,7 +166,7 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.intelligence.IntelligenceManager;
+import android.view.intelligence.ContentCaptureManager;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
@@ -10135,7 +10135,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Notify managers (such as {@link AutofillManager} and {@link IntelligenceManager}) that are
+     * Notify managers (such as {@link AutofillManager} and {@link ContentCaptureManager}) that are
      * interested on text changes.
      */
     private void notifyListeningManagersAfterTextChanged() {
@@ -10155,10 +10155,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // ContentCapture
         if (isImportantForContentCapture() && isTextEditable()) {
-            final IntelligenceManager im = mContext.getSystemService(IntelligenceManager.class);
-            if (im != null && im.isContentCaptureEnabled()) {
+            final ContentCaptureManager cm = mContext.getSystemService(ContentCaptureManager.class);
+            if (cm != null && cm.isContentCaptureEnabled()) {
                 // TODO(b/111276913): pass flags when edited by user / add CTS test
-                im.notifyViewTextChanged(getAutofillId(), getText(), /* flags= */ 0);
+                cm.notifyViewTextChanged(getAutofillId(), getText(), /* flags= */ 0);
             }
         }
     }

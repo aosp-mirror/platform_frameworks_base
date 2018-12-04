@@ -1914,6 +1914,15 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Location.CHANGER);
         p.end(locationToken);
 
+        final long locationAccessCheckToken = p.start(SecureSettingsProto.LOCATION_ACCESS_CHECK);
+        dumpSetting(s, p,
+                Settings.Secure.LOCATION_ACCESS_CHECK_INTERVAL_MILLIS,
+                SecureSettingsProto.LocationAccessCheck.INTERVAL_MILLIS);
+        dumpSetting(s, p,
+                Settings.Secure.LOCATION_ACCESS_CHECK_DELAY_MILLIS,
+                SecureSettingsProto.LocationAccessCheck.DELAY_MILLIS);
+        p.end(locationAccessCheckToken);
+
         final long lockScreenToken = p.start(SecureSettingsProto.LOCK_SCREEN);
         // Settings.Secure.LOCK_BIOMETRIC_WEAK_FLAGS intentionally excluded since it's deprecated.
         // Settings.Secure.LOCK_PATTERN_ENABLED intentionally excluded since it's deprecated.

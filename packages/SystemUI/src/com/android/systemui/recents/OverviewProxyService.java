@@ -43,6 +43,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
@@ -97,6 +98,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private int mCurrentBoundedUserId = -1;
     private float mBackButtonAlpha;
     private MotionEvent mStatusBarGestureDownEvent;
+    private float mWindowCornerRadius;
 
     private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
 
@@ -228,6 +230,18 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
         }
 
+        public float getWindowCornerRadius() {
+            if (!verifyCaller("getWindowCornerRadius")) {
+                return 0;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                return mWindowCornerRadius;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         private boolean verifyCaller(String reason) {
             final int callerId = Binder.getCallingUserHandle().getIdentifier();
             if (callerId != mCurrentBoundedUserId) {
@@ -334,6 +348,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 .setPackage(mRecentsComponentName.getPackageName());
         mInteractionFlags = Prefs.getInt(mContext, Prefs.Key.QUICK_STEP_INTERACTION_FLAGS,
                 getDefaultInteractionFlags());
+        mWindowCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext.getResources());
 
         // Listen for the package update changes.
         if (mDeviceProvisionedController.getCurrentUser() == UserHandle.USER_SYSTEM) {

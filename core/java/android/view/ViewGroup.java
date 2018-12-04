@@ -7042,10 +7042,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * suppression is disabled with a later call to suppressLayout(false).
      * When layout suppression is disabled, a requestLayout() call is sent
      * if layout() was attempted while layout was being suppressed.
-     *
-     * @hide
      */
-    @UnsupportedAppUsage
     public void suppressLayout(boolean suppress) {
         mSuppressLayout = suppress;
         if (!suppress) {
@@ -7061,8 +7058,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * suppressed, due to an earlier call to {@link #suppressLayout(boolean)}.
      *
      * @return true if layout calls are currently suppressed, false otherwise.
-     *
-     * @hide
      */
     public boolean isLayoutSuppressed() {
         return mSuppressLayout;

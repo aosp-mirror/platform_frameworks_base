@@ -165,8 +165,8 @@ import android.view.accessibility.CaptioningManager;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.IAutoFillManager;
 import android.view.inputmethod.InputMethodManager;
+import android.view.intelligence.ContentCaptureManager;
 import android.view.intelligence.IIntelligenceManager;
-import android.view.intelligence.IntelligenceManager;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textservice.TextServicesManager;
 
@@ -199,6 +199,7 @@ final class SystemServiceRegistry {
     private SystemServiceRegistry() { }
 
     static {
+        //CHECKSTYLE:OFF IndentationCheck
         registerService(Context.ACCESSIBILITY_SERVICE, AccessibilityManager.class,
                 new CachedServiceFetcher<AccessibilityManager>() {
             @Override
@@ -1050,15 +1051,20 @@ final class SystemServiceRegistry {
                 return new AutofillManager(ctx.getOuterContext(), service);
             }});
 
-        registerService(Context.INTELLIGENCE_MANAGER_SERVICE, IntelligenceManager.class,
-                new CachedServiceFetcher<IntelligenceManager>() {
+        registerService(Context.CONTENT_CAPTURE_MANAGER_SERVICE, ContentCaptureManager.class,
+                new CachedServiceFetcher<ContentCaptureManager>() {
             @Override
-            public IntelligenceManager createService(ContextImpl ctx)
+            public ContentCaptureManager createService(ContextImpl ctx)
                     throws ServiceNotFoundException {
                 // Get the services without throwing as this is an optional feature
-                IBinder b = ServiceManager.getService(Context.INTELLIGENCE_MANAGER_SERVICE);
-                IIntelligenceManager service = IIntelligenceManager.Stub.asInterface(b);
-                return new IntelligenceManager(ctx.getOuterContext(), service);
+                Context outerContext = ctx.getOuterContext();
+                if (outerContext.isContentCaptureSupported()) {
+                    IBinder b = ServiceManager
+                            .getService(Context.CONTENT_CAPTURE_MANAGER_SERVICE);
+                    IIntelligenceManager service = IIntelligenceManager.Stub.asInterface(b);
+                    return new ContentCaptureManager(outerContext, service);
+                }
+                return null;
             }});
 
         registerService(Context.VR_SERVICE, VrManager.class, new CachedServiceFetcher<VrManager>() {
@@ -1138,6 +1144,7 @@ final class SystemServiceRegistry {
                             throws ServiceNotFoundException {
                         return new RoleManager(ctx.getOuterContext());
                     }});
+        //CHECKSTYLE:ON IndentationCheck
     }
 
     /**

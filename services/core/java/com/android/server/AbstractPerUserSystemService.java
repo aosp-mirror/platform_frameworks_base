@@ -108,7 +108,8 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
      * <p>Typically called when the service {@link Settings} property or {@link UserManager}
      * restriction changed, which includes the initial creation of the service.
      *
-     * <p>Subclasses can extend this method to provide extra initialization.
+     * <p>Subclasses can extend this method to provide extra initialization, like clearing up
+     * previous state.
      *
      * @param disabled whether the service is disabled (due to {@link UserManager} restrictions).
      *

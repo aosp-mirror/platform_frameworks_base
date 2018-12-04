@@ -18,6 +18,7 @@ package android.media;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -1029,7 +1030,7 @@ public class RingtoneManager {
      * @throws FileNotFoundException if the provided URI could not be opened.
      * @see #getDefaultUri
      */
-    public static AssetFileDescriptor openDefaultRingtoneUri(
+    public static @Nullable AssetFileDescriptor openDefaultRingtoneUri(
             @NonNull Context context, @NonNull Uri uri) throws FileNotFoundException {
         // Try cached ringtone first since the actual provider may not be
         // encryption aware, or it may be stored on CE media storage

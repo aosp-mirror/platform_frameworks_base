@@ -244,9 +244,20 @@ public class WifiNetworkConfigBuilderTest {
      * when match-none SSID pattern is set.
      */
     @Test(expected = IllegalStateException.class)
-    public void testWifiNetworkSpecifierBuilderWithMatchNoneSsidPattern() {
+    public void testWifiNetworkSpecifierBuilderWithMatchNoneSsidPattern1() {
         new WifiNetworkConfigBuilder()
                 .setSsidPattern(new PatternMatcher("", PatternMatcher.PATTERN_LITERAL))
+                .buildNetworkSpecifier();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} throws an exception
+     * when match-none SSID pattern is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithMatchNoneSsidPattern2() {
+        new WifiNetworkConfigBuilder()
+                .setSsid("")
                 .buildNetworkSpecifier();
     }
 
@@ -255,9 +266,31 @@ public class WifiNetworkConfigBuilderTest {
      * when match-none BSSID pattern is set.
      */
     @Test(expected = IllegalStateException.class)
-    public void testWifiNetworkSpecifierBuilderWithMatchNoneBssidPattern() {
+    public void testWifiNetworkSpecifierBuilderWithMatchNoneBssidPattern1() {
         new WifiNetworkConfigBuilder()
                 .setBssidPattern(MacAddress.BROADCAST_ADDRESS, MacAddress.BROADCAST_ADDRESS)
+                .buildNetworkSpecifier();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} throws an exception
+     * when match-none BSSID pattern is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithMatchNoneBssidPattern2() {
+        new WifiNetworkConfigBuilder()
+                .setBssid(MacAddress.BROADCAST_ADDRESS)
+                .buildNetworkSpecifier();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} throws an exception
+     * when match-none BSSID pattern is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithMatchNoneBssidPattern3() {
+        new WifiNetworkConfigBuilder()
+                .setBssid(MacAddress.ALL_ZEROS_ADDRESS)
                 .buildNetworkSpecifier();
     }
 
@@ -429,13 +462,15 @@ public class WifiNetworkConfigBuilderTest {
      * {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} for OWE network.
      */
     @Test
-    public void testWifiNetworkSuggestionBuilderForEnhancedOpenNetwork() {
+    public void testWifiNetworkSuggestionBuilderForEnhancedOpenNetworkWithBssid() {
         WifiNetworkSuggestion suggestion = new WifiNetworkConfigBuilder()
                 .setSsid(TEST_SSID)
+                .setBssid(MacAddress.fromString(TEST_BSSID))
                 .setIsEnhancedOpen()
                 .buildNetworkSuggestion();
 
         assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertEquals(TEST_BSSID, suggestion.wifiConfiguration.BSSID);
         assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
                 .get(WifiConfiguration.KeyMgmt.OWE));
         assertNull(suggestion.wifiConfiguration.preSharedKey);
@@ -505,7 +540,7 @@ public class WifiNetworkConfigBuilderTest {
 
     /**
      * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} throws an exception
-     * when {@link WifiNetworkConfigBuilder#setBssid(MacAddress)} is set.
+     * when {@link WifiNetworkConfigBuilder#setBssidPattern(MacAddress, MacAddress)} is set.
      */
     @Test(expected = IllegalStateException.class)
     public void testWifiNetworkSuggestionBuilderWithBssidPattern() {
@@ -518,23 +553,46 @@ public class WifiNetworkConfigBuilderTest {
 
     /**
      * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} throws an exception
-     * when {@link WifiNetworkConfigBuilder#setBssidPattern(MacAddress, MacAddress)} is set.
-     */
-    @Test(expected = IllegalStateException.class)
-    public void testWifiNetworkSuggestionBuilderWithBssid() {
-        new WifiNetworkConfigBuilder()
-                .setSsid(TEST_SSID)
-                .setBssid(MacAddress.fromString(TEST_BSSID))
-                .buildNetworkSuggestion();
-    }
-
-    /**
-     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} throws an exception
      * when {@link WifiNetworkConfigBuilder#setSsid(String)} is not set.
      */
     @Test(expected = IllegalStateException.class)
     public void testWifiNetworkSuggestionBuilderWithNoSsid() {
         new WifiNetworkConfigBuilder()
+                .buildNetworkSuggestion();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} throws an exception
+     * when {@link WifiNetworkConfigBuilder#setSsid(String)} is invoked with an invalid value.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSuggestionBuilderWithInvalidSsid() {
+        new WifiNetworkConfigBuilder()
+                .setSsid("")
+                .buildNetworkSuggestion();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} throws an exception
+     * when {@link WifiNetworkConfigBuilder#setBssid(MacAddress)} is invoked with an invalid value.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSuggestionBuilderWithInvalidBroadcastBssid() {
+        new WifiNetworkConfigBuilder()
+                .setSsid(TEST_SSID)
+                .setBssid(MacAddress.BROADCAST_ADDRESS)
+                .buildNetworkSuggestion();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} throws an exception
+     * when {@link WifiNetworkConfigBuilder#setBssid(MacAddress)} is invoked with an invalid value.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSuggestionBuilderWithInvalidAllZeroBssid() {
+        new WifiNetworkConfigBuilder()
+                .setSsid(TEST_SSID)
+                .setBssid(MacAddress.ALL_ZEROS_ADDRESS)
                 .buildNetworkSuggestion();
     }
 

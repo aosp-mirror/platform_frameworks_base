@@ -859,6 +859,27 @@ public final class ZenPolicy implements Parcelable {
     /**
      * @hide
      */
+    public boolean areValuesSet() {
+        return getPriorityCategoryReminders() != STATE_UNSET
+                || getPriorityCategoryEvents() != STATE_UNSET
+                || getPriorityCategoryMessages() != STATE_UNSET
+                || getPriorityCategoryCalls() != STATE_UNSET
+                || getPriorityCategoryRepeatCallers() != STATE_UNSET
+                || getPriorityCategoryAlarms() != STATE_UNSET
+                || getPriorityCategoryMedia() != STATE_UNSET
+                || getPriorityCategorySystem() != STATE_UNSET
+                || getVisualEffectFullScreenIntent() != STATE_UNSET
+                || getVisualEffectLights() != STATE_UNSET
+                || getVisualEffectPeek() != STATE_UNSET
+                || getVisualEffectStatusBar() != STATE_UNSET
+                || getVisualEffectBadge() != STATE_UNSET
+                || getVisualEffectAmbient() != STATE_UNSET
+                || getVisualEffectNotificationList() != STATE_UNSET;
+    }
+
+    /**
+     * @hide
+     */
     public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 

@@ -40,6 +40,12 @@ class PersistentDataBlockLock extends OemLock {
     }
 
     @Override
+    @Nullable
+    String getLockName() {
+        return "";
+    }
+
+    @Override
     void setOemUnlockAllowedByCarrier(boolean allowed, @Nullable byte[] signature) {
         // Note: this implementation does not require a signature
         if (signature != null) {

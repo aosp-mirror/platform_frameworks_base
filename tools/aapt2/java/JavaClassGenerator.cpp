@@ -298,19 +298,20 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
                          "<colgroup align=\"left\" />\n"
                          "<tr><th>Attribute</th><th>Description</th></tr>\n";
 
-    // Build the table of attributes with their links and names.
-    for (const StyleableAttr& entry : sorted_attributes) {
-      if (SkipSymbol(entry.symbol)) {
-        continue;
-      }
-
+    // Removed and hidden attributes are public but hidden from the documentation, so don't emit
+    // them as part of the class documentation.
+    std::vector<StyleableAttr> documentation_attrs = sorted_attributes;
+    auto documentation_remove_iter = std::remove_if(documentation_attrs.begin(),
+                                                    documentation_attrs.end(),
+                                                    [&](StyleableAttr entry) -> bool {
       StringPiece attr_comment_line = entry.symbol.value().attribute->GetComment();
-      if (attr_comment_line.contains("@removed")) {
-        // Removed attributes are public but hidden from the documentation, so
-        // don't emit them as part of the class documentation.
-        continue;
-      }
+      return SkipSymbol(entry.symbol) || attr_comment_line.contains("@removed")
+                                      || attr_comment_line.contains("@hide");
+    });
+    documentation_attrs.erase(documentation_remove_iter, documentation_attrs.end());
 
+    // Build the table of attributes with their links and names.
+    for (const StyleableAttr& entry : documentation_attrs) {
       const ResourceName& attr_name = entry.attr_ref->name.value();
       styleable_comment << "<tr><td><code>{@link #" << entry.field_name << " "
                         << (!attr_name.package.empty() ? attr_name.package
@@ -320,16 +321,14 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
       // Only use the comment up until the first '.'. This is to stay compatible with
       // the way old AAPT did it (presumably to keep it short and to avoid including
       // annotations like @hide which would affect this Styleable).
+      StringPiece attr_comment_line = entry.symbol.value().attribute->GetComment();
       styleable_comment << "<td>" << AnnotationProcessor::ExtractFirstSentence(attr_comment_line)
                         << "</td></tr>\n";
     }
     styleable_comment << "</table>\n";
 
     // Generate the @see lines for each attribute.
-    for (const StyleableAttr& entry : sorted_attributes) {
-      if (SkipSymbol(entry.symbol)) {
-        continue;
-      }
+    for (const StyleableAttr& entry : documentation_attrs) {
       styleable_comment << "@see #" << entry.field_name << "\n";
     }
 

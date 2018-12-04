@@ -25,9 +25,10 @@
 #include "unicode/uchar.h"
 
 #define PROPERTY_UNDEFINED (-1)
+#define JAVA_LANG_CHARACTER_MAX_DIRECTIONALITY 18
 
 // ICU => JDK mapping
-static int directionality_map[U_CHAR_DIRECTION_COUNT] = {
+static int directionality_map[JAVA_LANG_CHARACTER_MAX_DIRECTIONALITY + 1] = {
     0, // U_LEFT_TO_RIGHT (0) => DIRECTIONALITY_LEFT_TO_RIGHT (0)
     1, // U_RIGHT_TO_LEFT (1) => DIRECTIONALITY_RIGHT_TO_LEFT (1)
     3, // U_EUROPEAN_NUMBER (2) => DIRECTIONALITY_EUROPEAN_NUMBER (3)
@@ -75,7 +76,8 @@ static void getDirectionalities(JNIEnv* env, jobject obj, jcharArray srcArray,
             int c = 0x00010000 + ((src[i] - 0xD800) << 10) +
                                  (src[i + 1] & 0x3FF);
             int dir = u_charDirection(c);
-            if (dir < 0 || dir >= U_CHAR_DIRECTION_COUNT)
+            if (dir < 0 || dir > JAVA_LANG_CHARACTER_MAX_DIRECTIONALITY
+                    || u_charType(c) == U_UNASSIGNED)
                 dir = PROPERTY_UNDEFINED;
             else
                 dir = directionality_map[dir];
@@ -85,7 +87,8 @@ static void getDirectionalities(JNIEnv* env, jobject obj, jcharArray srcArray,
         } else {
             int c = src[i];
             int dir = u_charDirection(c);
-            if (dir < 0 || dir >= U_CHAR_DIRECTION_COUNT)
+            if (dir < 0 || dir > JAVA_LANG_CHARACTER_MAX_DIRECTIONALITY
+                    || u_charType(c) == U_UNASSIGNED)
                 dest[i] = PROPERTY_UNDEFINED;
             else
                 dest[i] = directionality_map[dir];
@@ -96,7 +99,7 @@ static void getDirectionalities(JNIEnv* env, jobject obj, jcharArray srcArray,
 static jint getEastAsianWidth(JNIEnv* env, jobject obj, jchar input)
 {
     int width = u_getIntPropertyValue(input, UCHAR_EAST_ASIAN_WIDTH);
-    if (width < 0 || width >= U_EA_COUNT)
+    if (width < 0 || width > u_getIntPropertyMaxValue(UCHAR_EAST_ASIAN_WIDTH))
         width = PROPERTY_UNDEFINED;
 
     return width;
@@ -121,6 +124,7 @@ static void getEastAsianWidths(JNIEnv* env, jobject obj, jcharArray srcArray,
         return;
     }
 
+    int maxWidth = u_getIntPropertyMaxValue(UCHAR_EAST_ASIAN_WIDTH);
     for (int i = 0; i < count; i++) {
         const int srci = start + i;
         if (src[srci] >= 0xD800 && src[srci] <= 0xDBFF &&
@@ -129,7 +133,7 @@ static void getEastAsianWidths(JNIEnv* env, jobject obj, jcharArray srcArray,
             int c = 0x00010000 + ((src[srci] - 0xD800) << 10) +
                                  (src[srci + 1] & 0x3FF);
             int width = u_getIntPropertyValue(c, UCHAR_EAST_ASIAN_WIDTH);
-            if (width < 0 || width >= U_EA_COUNT)
+            if (width < 0 || width > maxWidth)
                 width = PROPERTY_UNDEFINED;
 
             dest[i++] = width;
@@ -137,7 +141,7 @@ static void getEastAsianWidths(JNIEnv* env, jobject obj, jcharArray srcArray,
         } else {
             int c = src[srci];
             int width = u_getIntPropertyValue(c, UCHAR_EAST_ASIAN_WIDTH);
-            if (width < 0 || width >= U_EA_COUNT)
+            if (width < 0 || width > maxWidth)
                 width = PROPERTY_UNDEFINED;
 
             dest[i] = width;

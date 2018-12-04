@@ -234,6 +234,18 @@ message SecureSettingsProto {
     }
     optional Location location = 31;
 
+    // How frequently will the user be reminded about location permission grants
+    message LocationAccessCheck {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        // Time in between periodic checks
+        optional SettingProto interval_millis = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        // Time in between the user granting a location permission and a check
+        optional SettingProto delay_millis = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional LocationAccessCheck location_access_check = 73;
+
     message LockScreen {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -515,5 +527,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 73;
+    // Next tag = 74;
 }

@@ -18,6 +18,7 @@ package com.android.systemui.shared.system;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
 
@@ -61,7 +62,7 @@ public class WindowManagerWrapper {
     public static final int TRANSIT_KEYGUARD_OCCLUDE = WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
     public static final int TRANSIT_KEYGUARD_UNOCCLUDE = WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 
-    public static final int NAV_BAR_POS_INVALID = -1;
+    public static final int NAV_BAR_POS_INVALID = NAV_BAR_INVALID;
     public static final int NAV_BAR_POS_LEFT = NAV_BAR_LEFT;
     public static final int NAV_BAR_POS_RIGHT = NAV_BAR_RIGHT;
     public static final int NAV_BAR_POS_BOTTOM = NAV_BAR_BOTTOM;
@@ -178,10 +179,9 @@ public class WindowManagerWrapper {
      * @see #NAV_BAR_POS_BOTTOM
      * @see #NAV_BAR_POS_INVALID
      */
-    public int getNavBarPosition() {
+    public int getNavBarPosition(int displayId) {
         try {
-            // TODO: Use WindowManagerService.getNavBarPosition(int displayId)
-            return WindowManagerGlobal.getWindowManagerService().getNavBarPosition();
+            return WindowManagerGlobal.getWindowManagerService().getNavBarPosition(displayId);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to get nav bar position");
         }

@@ -23,7 +23,6 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.Context;
@@ -44,13 +43,8 @@ import com.android.internal.util.Preconditions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * TODO(b/111276913): add javadocs / implement
- */
 /*
  * NOTE: all methods in this class should return right away, or do the real work in a handler
  * thread.
@@ -58,10 +52,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Hence, the only field that must be thread-safe is mEnabled, which is called at the beginning
  * of every method.
  */
-@SystemService(Context.INTELLIGENCE_MANAGER_SERVICE)
-public final class IntelligenceManager {
+/**
+ * TODO(b/111276913): add javadocs / implement
+ */
+@SystemService(Context.CONTENT_CAPTURE_MANAGER_SERVICE)
+public final class ContentCaptureManager {
 
-    private static final String TAG = "IntelligenceManager";
+    private static final String TAG = "ContentCaptureManager";
 
     // TODO(b/111276913): define a way to dynamically set them(for example, using settings?)
     private static final boolean VERBOSE = false;
@@ -140,7 +137,7 @@ public final class IntelligenceManager {
     private final Handler mHandler;
 
     /** @hide */
-    public IntelligenceManager(@NonNull Context context, @Nullable IIntelligenceManager service) {
+    public ContentCaptureManager(@NonNull Context context, @Nullable IIntelligenceManager service) {
         mContext = Preconditions.checkNotNull(context, "context cannot be null");
         if (VERBOSE) {
             Log.v(TAG, "Constructor for " + context.getPackageName());
@@ -156,7 +153,7 @@ public final class IntelligenceManager {
     public void onActivityCreated(@NonNull IBinder token, @NonNull ComponentName componentName) {
         if (!isContentCaptureEnabled()) return;
 
-        mHandler.sendMessage(obtainMessage(IntelligenceManager::handleStartSession, this,
+        mHandler.sendMessage(obtainMessage(ContentCaptureManager::handleStartSession, this,
                 token, componentName));
     }
 
@@ -264,7 +261,7 @@ public final class IntelligenceManager {
             Log.v(TAG, "onActivityLifecycleEvent() for " + getActivityDebugName()
                     + ": " + ContentCaptureEvent.getTypeAsString(type));
         }
-        mHandler.sendMessage(obtainMessage(IntelligenceManager::handleSendEvent, this,
+        mHandler.sendMessage(obtainMessage(ContentCaptureManager::handleSendEvent, this,
                 new ContentCaptureEvent(type), /* forceFlush= */ true));
     }
 
@@ -279,7 +276,7 @@ public final class IntelligenceManager {
                     + ", mId=" + mId);
         }
 
-        mHandler.sendMessage(obtainMessage(IntelligenceManager::handleFinishSession, this));
+        mHandler.sendMessage(obtainMessage(ContentCaptureManager::handleFinishSession, this));
     }
 
     private void handleFinishSession() {
@@ -328,7 +325,7 @@ public final class IntelligenceManager {
             throw new IllegalArgumentException("Invalid node class: " + node.getClass());
         }
 
-        mHandler.sendMessage(obtainMessage(IntelligenceManager::handleSendEvent, this,
+        mHandler.sendMessage(obtainMessage(ContentCaptureManager::handleSendEvent, this,
                 new ContentCaptureEvent(TYPE_VIEW_APPEARED)
                         .setViewNode(((ViewNode.ViewStructureImpl) node).mNode),
                         /* forceFlush= */ false));
@@ -346,7 +343,7 @@ public final class IntelligenceManager {
         Preconditions.checkNotNull(id);
         if (!isContentCaptureEnabled()) return;
 
-        mHandler.sendMessage(obtainMessage(IntelligenceManager::handleSendEvent, this,
+        mHandler.sendMessage(obtainMessage(ContentCaptureManager::handleSendEvent, this,
                 new ContentCaptureEvent(TYPE_VIEW_DISAPPEARED).setAutofillId(id),
                         /* forceFlush= */ false));
     }
@@ -365,7 +362,7 @@ public final class IntelligenceManager {
 
         if (!isContentCaptureEnabled()) return;
 
-        mHandler.sendMessage(obtainMessage(IntelligenceManager::handleSendEvent, this,
+        mHandler.sendMessage(obtainMessage(ContentCaptureManager::handleSendEvent, this,
                 new ContentCaptureEvent(TYPE_VIEW_TEXT_CHANGED, flags).setAutofillId(id)
                         .setText(text), /* forceFlush= */ false));
     }
@@ -396,11 +393,11 @@ public final class IntelligenceManager {
     }
 
     /**
-     * Returns the component name of the {@code android.service.intelligence.IntelligenceService}
-     * that is enabled for the current user.
+     * Returns the component name of the system service that is consuming the captured events for
+     * the current user.
      */
     @Nullable
-    public ComponentName getIntelligenceServiceComponentName() {
+    public ComponentName getServiceComponentName() {
         //TODO(b/111276913): implement
         return null;
     }
@@ -420,106 +417,6 @@ public final class IntelligenceManager {
      */
     public void setContentCaptureEnabled(boolean enabled) {
         //TODO(b/111276913): implement
-    }
-
-    /**
-     * Called by the the service {@link android.service.intelligence.IntelligenceService}
-     * to define whether content capture should be enabled for activities with such
-     * {@link android.content.ComponentName}.
-     *
-     * <p>Useful to blacklist a particular activity.
-     *
-     * @throws UnsupportedOperationException if not called by the UID that owns the
-     * {@link android.service.intelligence.IntelligenceService} associated with the
-     * current user.
-     *
-     * @hide
-     */
-    @SystemApi
-    public void setActivityContentCaptureEnabled(@NonNull ComponentName activity,
-            boolean enabled) {
-        //TODO(b/111276913): implement
-    }
-
-    /**
-     * Called by the the service {@link android.service.intelligence.IntelligenceService}
-     * to explicitly limit content capture to the given packages and activities.
-     *
-     * <p>When the whitelist is set, it overrides the values passed to
-     * {@link #setActivityContentCaptureEnabled(ComponentName, boolean)}
-     * and {@link #setPackageContentCaptureEnabled(String, boolean)}.
-     *
-     * <p>To reset the whitelist, call it passing {@code null} to both arguments.
-     *
-     * <p>Useful when the service wants to restrict content capture to a category of apps, like
-     * chat apps. For example, if the service wants to support view captures on all activities of
-     * app {@code ChatApp1} and just activities {@code act1} and {@code act2} of {@code ChatApp2},
-     * it would call: {@code setContentCaptureWhitelist(Arrays.asList("ChatApp1"),
-     * Arrays.asList(new ComponentName("ChatApp2", "act1"),
-     * new ComponentName("ChatApp2", "act2")));}
-     *
-     * @throws UnsupportedOperationException if not called by the UID that owns the
-     * {@link android.service.intelligence.IntelligenceService} associated with the
-     * current user.
-     *
-     * @hide
-     */
-    @SystemApi
-    public void setContentCaptureWhitelist(@Nullable List<String> packages,
-            @Nullable List<ComponentName> activities) {
-        //TODO(b/111276913): implement
-    }
-
-    /**
-     * Called by the the service {@link android.service.intelligence.IntelligenceService}
-     * to define whether content capture should be enabled for activities of the app with such
-     * {@code packageName}.
-     *
-     * <p>Useful to blacklist any activity from a particular app.
-     *
-     * @throws UnsupportedOperationException if not called by the UID that owns the
-     * {@link android.service.intelligence.IntelligenceService} associated with the
-     * current user.
-     *
-     * @hide
-     */
-    @SystemApi
-    public void setPackageContentCaptureEnabled(@NonNull String packageName, boolean enabled) {
-        //TODO(b/111276913): implement
-    }
-
-    /**
-     * Gets the activities where content capture was disabled by
-     * {@link #setActivityContentCaptureEnabled(ComponentName, boolean)}.
-     *
-     * @throws UnsupportedOperationException if not called by the UID that owns the
-     * {@link android.service.intelligence.IntelligenceService} associated with the
-     * current user.
-     *
-     * @hide
-     */
-    @SystemApi
-    @NonNull
-    public Set<ComponentName> getContentCaptureDisabledActivities() {
-        //TODO(b/111276913): implement
-        return null;
-    }
-
-    /**
-     * Gets the apps where content capture was disabled by
-     * {@link #setPackageContentCaptureEnabled(String, boolean)}.
-     *
-     * @throws UnsupportedOperationException if not called by the UID that owns the
-     * {@link android.service.intelligence.IntelligenceService} associated with the
-     * current user.
-     *
-     * @hide
-     */
-    @SystemApi
-    @NonNull
-    public Set<String> getContentCaptureDisabledPackages() {
-        //TODO(b/111276913): implement
-        return null;
     }
 
     /** @hide */
@@ -547,7 +444,7 @@ public final class IntelligenceManager {
         }
         if (mEvents != null) {
             final int numberEvents = mEvents.size();
-            pw.print(prefix2); pw.print("batched events: "); pw.print(numberEvents);
+            pw.print(prefix2); pw.print("buffered events: "); pw.print(numberEvents);
             pw.print('/'); pw.println(MAX_BUFFER_SIZE);
             if (VERBOSE && numberEvents > 0) {
                 final String prefix3 = prefix2 + "  ";

@@ -25,7 +25,6 @@
 #include "IRenderPipeline.h"
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
-#include "ReliableSurface.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
 #include "thread/Task.h"
@@ -220,7 +219,7 @@ private:
     EGLint mLastFrameHeight = 0;
 
     RenderThread& mRenderThread;
-    sp<ReliableSurface> mNativeSurface;
+    sp<Surface> mNativeSurface;
     // stopped indicates the CanvasContext will reject actual redraw operations,
     // and defer repaint until it is un-stopped
     bool mStopped = false;

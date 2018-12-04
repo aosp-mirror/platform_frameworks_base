@@ -3867,6 +3867,9 @@ public class Notification implements Parcelable
          * The system UI may choose to display a heads-up notification, instead of
          * launching this intent, while the user is using the device.
          * </p>
+         * <p>Apps targeting {@link Build.VERSION_CODES#Q} and above will have to request
+         * a permission ({@link android.Manifest.permission#USE_FULL_SCREEN_INTENT}) in order to
+         * use full screen intents.</p>
          *
          * @param intent The pending intent to launch.
          * @param highPriority Passing true will cause this notification to be sent
@@ -4468,6 +4471,14 @@ public class Notification implements Parcelable
             }
         }
 
+        private void bindAlertedIcon(RemoteViews contentView, StandardTemplateParams p) {
+            contentView.setDrawableTint(
+                    R.id.alerted_icon,
+                    false /* targetBackground */,
+                    getNeutralColor(p),
+                    PorterDuff.Mode.SRC_ATOP);
+        }
+
         /**
          * @hide
          */
@@ -4870,6 +4881,7 @@ public class Notification implements Parcelable
                 bindHeaderTextSecondary(contentView, p);
                 bindHeaderChronometerAndTime(contentView, p);
                 bindProfileBadge(contentView, p);
+                bindAlertedIcon(contentView, p);
             }
             bindActivePermissions(contentView, p);
             bindExpandButton(contentView, p);

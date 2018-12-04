@@ -928,7 +928,9 @@ public class Binder implements IBinder {
         final long origWorkSource = ThreadLocalWorkSource.setUid(Binder.getCallingUid());
         try {
             if (tracingEnabled) {
-                Trace.traceBegin(Trace.TRACE_TAG_ALWAYS, getClass().getName() + ":" + code);
+                final String transactionName = getTransactionName(code);
+                Trace.traceBegin(Trace.TRACE_TAG_ALWAYS, getClass().getName() + ":"
+                        + (transactionName != null ? transactionName : code));
             }
             res = onTransact(code, data, reply, flags);
         } catch (RemoteException|RuntimeException e) {

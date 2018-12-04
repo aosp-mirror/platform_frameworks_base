@@ -366,6 +366,46 @@ TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent)
   ASSERT_TRUE(generator.Generate("android", &out));
   out.Flush();
 
+  EXPECT_THAT(output, HasSubstr("#Container_one android:one"));
+  EXPECT_THAT(output, HasSubstr("@see #Container_one"));
+  EXPECT_THAT(output, HasSubstr("attr name android:one"));
+  EXPECT_THAT(output, HasSubstr("attr description"));
+  EXPECT_THAT(output, HasSubstr(attr.GetComment()));
+  EXPECT_THAT(output, HasSubstr(styleable.GetComment()));
+}
+
+TEST(JavaClassGeneratorTest, CommentsForStyleableHiddenAttributesAreNotPresent) {
+  Attribute attr;
+  attr.SetComment(StringPiece("This is an attribute @hide"));
+
+  Styleable styleable;
+  styleable.entries.push_back(Reference(test::ParseNameOrDie("android:attr/one")));
+  styleable.SetComment(StringPiece("This is a styleable"));
+
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("android", 0x01)
+          .AddValue("android:attr/one", util::make_unique<Attribute>(attr))
+          .AddValue("android:styleable/Container",
+                    std::unique_ptr<Styleable>(styleable.Clone(nullptr)))
+          .Build();
+
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder()
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .SetNameManglerPolicy(NameManglerPolicy{"android"})
+          .Build();
+  JavaClassGeneratorOptions options;
+  options.use_final = false;
+  JavaClassGenerator generator(context.get(), table.get(), options);
+
+  std::string output;
+  StringOutputStream out(&output);
+  ASSERT_TRUE(generator.Generate("android", &out));
+  out.Flush();
+
+  EXPECT_THAT(output, Not(HasSubstr("#Container_one android:one")));
+  EXPECT_THAT(output, Not(HasSubstr("@see #Container_one")));
   EXPECT_THAT(output, HasSubstr("attr name android:one"));
   EXPECT_THAT(output, HasSubstr("attr description"));
   EXPECT_THAT(output, HasSubstr(attr.GetComment()));

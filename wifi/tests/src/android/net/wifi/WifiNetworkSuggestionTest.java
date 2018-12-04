@@ -29,6 +29,7 @@ import org.junit.Test;
 @SmallTest
 public class WifiNetworkSuggestionTest {
     private static final String TEST_SSID = "\"Test123\"";
+    private static final String TEST_BSSID = "12:12:12:12:12:12";
     private static final String TEST_SSID_1 = "\"Test1234\"";
 
     /**
@@ -38,6 +39,7 @@ public class WifiNetworkSuggestionTest {
     public void testWifiNetworkSuggestionParcel() {
         WifiConfiguration configuration = new WifiConfiguration();
         configuration.SSID = TEST_SSID;
+        configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
                 new WifiNetworkSuggestion(configuration, false, true, 0);
@@ -65,18 +67,20 @@ public class WifiNetworkSuggestionTest {
 
     /**
      * Check NetworkSuggestion equals returns {@code true} for 2 network suggestions with the same
-     * SSID, key mgmt and UID.
+     * SSID, BSSID, key mgmt and UID.
      */
     @Test
     public void testWifiNetworkSuggestionEqualsSame() {
         WifiConfiguration configuration = new WifiConfiguration();
         configuration.SSID = TEST_SSID;
+        configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion =
                 new WifiNetworkSuggestion(configuration, true, false, 0);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID;
+        configuration1.BSSID = TEST_BSSID;
         configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion1 =
                 new WifiNetworkSuggestion(configuration1, false, true, 0);
@@ -86,7 +90,7 @@ public class WifiNetworkSuggestionTest {
 
     /**
      * Check NetworkSuggestion equals returns {@code false} for 2 network suggestions with the same
-     * key mgmt and UID, but different SSID.
+     * BSSID, key mgmt and UID, but different SSID.
      */
     @Test
     public void testWifiNetworkSuggestionEqualsFailsWhenSsidIsDifferent() {
@@ -107,7 +111,29 @@ public class WifiNetworkSuggestionTest {
 
     /**
      * Check NetworkSuggestion equals returns {@code false} for 2 network suggestions with the same
-     * SSID and UID, but different key mgmt.
+     * SSID, key mgmt and UID, but different BSSID.
+     */
+    @Test
+    public void testWifiNetworkSuggestionEqualsFailsWhenBssidIsDifferent() {
+        WifiConfiguration configuration = new WifiConfiguration();
+        configuration.SSID = TEST_SSID;
+        configuration.BSSID = TEST_BSSID;
+        configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        WifiNetworkSuggestion suggestion =
+                new WifiNetworkSuggestion(configuration, false, false, 0);
+
+        WifiConfiguration configuration1 = new WifiConfiguration();
+        configuration1.SSID = TEST_SSID;
+        configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        WifiNetworkSuggestion suggestion1 =
+                new WifiNetworkSuggestion(configuration1, false, false, 0);
+
+        assertNotEquals(suggestion, suggestion1);
+    }
+
+    /**
+     * Check NetworkSuggestion equals returns {@code false} for 2 network suggestions with the same
+     * SSID, BSSID and UID, but different key mgmt.
      */
     @Test
     public void testWifiNetworkSuggestionEqualsFailsWhenKeyMgmtIsDifferent() {
@@ -128,7 +154,7 @@ public class WifiNetworkSuggestionTest {
 
     /**
      * Check NetworkSuggestion equals returns {@code false} for 2 network suggestions with the same
-     * SSID and key mgmt, but different UID.
+     * SSID, BSSID and key mgmt, but different UID.
      */
     @Test
     public void testWifiNetworkSuggestionEqualsFailsWhenUidIsDifferent() {

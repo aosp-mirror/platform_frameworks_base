@@ -19,9 +19,9 @@ import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
-import android.service.intelligence.IntelligenceService;
 import android.service.intelligence.InteractionContext;
 import android.service.intelligence.InteractionSessionId;
+import android.service.intelligence.SmartSuggestionsService;
 import android.service.intelligence.SnapshotData;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
@@ -59,7 +59,7 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
         mService = service;
         mId = Preconditions.checkNotNull(sessionId);
         mRemoteService = new RemoteIntelligenceService(context,
-                IntelligenceService.SERVICE_INTERFACE, serviceComponentName, userId, this,
+                SmartSuggestionsService.SERVICE_INTERFACE, serviceComponentName, userId, this,
                 bindInstantServiceAllowed, verbose);
         mInterationContext = new InteractionContext(appComponentName, taskId, displayId, flags);
     }
@@ -72,7 +72,7 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
     }
 
     /**
-     * Notifies the {@link IntelligenceService} that the service started.
+     * Notifies the {@link SmartSuggestionsService} that the service started.
      */
     @GuardedBy("mLock")
     public void notifySessionStartedLocked() {
@@ -80,14 +80,14 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
     }
 
     /**
-     * Notifies the {@link IntelligenceService} of a batch of events.
+     * Notifies the {@link SmartSuggestionsService} of a batch of events.
      */
     public void sendEventsLocked(@NonNull List<ContentCaptureEvent> events) {
         mRemoteService.onContentCaptureEventsRequest(mId, events);
     }
 
     /**
-     * Notifies the {@link IntelligenceService} of a snapshot of an activity.
+     * Notifies the {@link SmartSuggestionsService} of a snapshot of an activity.
      */
     @GuardedBy("mLock")
     public void sendActivitySnapshotLocked(@NonNull SnapshotData snapshotData) {
@@ -110,7 +110,7 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
      * Cleans up the session and removes it from the service.
      *
      * @param notifyRemoteService whether it should trigger a {@link
-     * IntelligenceService#onDestroyInteractionSession(InteractionSessionId)}
+     * SmartSuggestionsService#onDestroyInteractionSession(InteractionSessionId)}
      * request.
      */
     @GuardedBy("mLock")
@@ -126,7 +126,7 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
      * Cleans up the session, but not removes it from the service.
      *
      * @param notifyRemoteService whether it should trigger a {@link
-     * IntelligenceService#onDestroyInteractionSession(InteractionSessionId)}
+     * SmartSuggestionsService#onDestroyInteractionSession(InteractionSessionId)}
      * request.
      */
     @GuardedBy("mLock")

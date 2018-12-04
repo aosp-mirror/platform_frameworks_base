@@ -2463,6 +2463,27 @@ public class UserManager {
     }
 
     /**
+     * Get the parent of a user profile.
+     *
+     * @param user the handle of the user profile
+     *
+     * @return the parent of the user or {@code null} if the user is not profile
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public @Nullable UserHandle getProfileParent(@NonNull UserHandle user) {
+        UserInfo info = getProfileParent(user.getIdentifier());
+
+        if (info == null) {
+            return null;
+        }
+
+        return UserHandle.of(info.id);
+    }
+
+    /**
      * Enables or disables quiet mode for a managed profile. If quiet mode is enabled, apps in a
      * managed profile don't run, generate notifications, or consume data or battery.
      * <p>

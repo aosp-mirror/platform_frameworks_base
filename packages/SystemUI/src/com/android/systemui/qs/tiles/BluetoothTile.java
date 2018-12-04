@@ -205,7 +205,10 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             } else {
                 final BluetoothClass bluetoothClass = lastDevice.getBtClass();
                 if (bluetoothClass != null) {
-                    if (bluetoothClass.doesClassMatch(BluetoothClass.PROFILE_A2DP)) {
+                    if (lastDevice.isHearingAidDevice()) {
+                        return mContext.getString(
+                                R.string.quick_settings_bluetooth_secondary_label_hearing_aids);
+                    } else if (bluetoothClass.doesClassMatch(BluetoothClass.PROFILE_A2DP)) {
                         return mContext.getString(
                                 R.string.quick_settings_bluetooth_secondary_label_audio);
                     } else if (bluetoothClass.doesClassMatch(BluetoothClass.PROFILE_HEADSET)) {

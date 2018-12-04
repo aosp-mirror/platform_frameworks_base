@@ -19,6 +19,6 @@ else
         echo "If your change contains no confidential details (such as security fixes), please"
         echo "upload and merge this change at https://android-review.googlesource.com/."
         echo
-        exit 77
+        exit 1
     fi
 fi

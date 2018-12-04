@@ -66,6 +66,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 
 import static com.android.internal.util.LatencyTracker.ACTION_ROTATE_SCREEN;
 import static com.android.server.LockGuard.INDEX_WINDOW;
@@ -208,6 +209,7 @@ import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEventReceiver;
+import android.view.InsetsState;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
@@ -218,7 +220,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.WindowContentFrameStats;
-import android.view.InsetsState;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.RemoveContentMode;
@@ -5640,22 +5641,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    // TODO: Make the callers use getNavBarPosition(int) only.
-    /**
-     * Used by SystemUI and shared SystemUI libraries.
-     * @see DisplayPolicy#getNavBarPosition()
-     */
-    @Override
-    @WindowManagerPolicy.NavigationBarPosition
-    public int getNavBarPosition() {
-        return getNavBarPosition(Display.DEFAULT_DISPLAY);
-    }
-
     /**
      * Used by ActivityManager to determine where to position an app with aspect ratio shorter then
      * the screen is.
      * @see DisplayPolicy#getNavBarPosition()
      */
+    @Override
     @WindowManagerPolicy.NavigationBarPosition
     public int getNavBarPosition(int displayId) {
         synchronized (mGlobalLock) {
@@ -5665,7 +5656,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (displayContent == null) {
                 Slog.w(TAG, "getNavBarPosition with invalid displayId=" + displayId
                         + " callers=" + Debug.getCallers(3));
-                return -1;
+                return NAV_BAR_INVALID;
             }
             displayContent.performLayout(false /* initial */,
                     false /* updateInputWindows */);
@@ -7454,6 +7445,31 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             if (mPolicy.setAodShowing(aodShowing)) {
                 mWindowPlacerLocked.performSurfacePlacement();
+            }
+        }
+    }
+
+    @Override
+    public void reparentDisplayContent(int displayId, IBinder surfaceControlHandle) {
+        final Display display = mDisplayManager.getDisplay(displayId);
+        if (display == null) {
+            throw new IllegalArgumentException(
+                    "Can't reparent display for non-existent displayId: " + displayId);
+        }
+
+        final int callingUid = Binder.getCallingUid();
+        final int displayOwnerUid = display.getOwnerUid();
+        if (callingUid != displayOwnerUid) {
+            throw new SecurityException("Only owner of the display can reparent surfaces to it.");
+        }
+
+        synchronized (mGlobalLock) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+                displayContent.reparentDisplayContent(surfaceControlHandle);
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }

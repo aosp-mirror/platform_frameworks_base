@@ -190,6 +190,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IUserManager;
 import android.os.LocaleList;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
@@ -246,7 +247,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
-import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
@@ -753,9 +753,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mGlobalLock;
     }
 
-    public void setActivityManagerService(IntentFirewall intentFirewall,
-            PendingIntentController intentController) {
-        mH = new H();
+    public void initialize(IntentFirewall intentFirewall, PendingIntentController intentController,
+            Looper looper) {
+        mH = new H(looper);
         mUiHandler = new UiHandler();
         mIntentFirewall = intentFirewall;
         final File systemDir = SystemServiceManager.ensureSystemDir();
@@ -5593,8 +5593,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         static final int FIRST_ACTIVITY_STACK_MSG = 100;
         static final int FIRST_SUPERVISOR_STACK_MSG = 200;
 
-        public H() {
-            super(DisplayThread.get().getLooper());
+        H(Looper looper) {
+            super(looper);
         }
 
         @Override

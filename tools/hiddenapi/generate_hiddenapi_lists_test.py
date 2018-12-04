@@ -2,14 +2,14 @@
 #
 # Copyright (C) 2018 The Android Open Source Project
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #      http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
+# distributed under the License is distributed on an 'AS IS' BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
@@ -18,90 +18,90 @@ import unittest
 from generate_hiddenapi_lists import *
 
 class TestHiddenapiListGeneration(unittest.TestCase):
+    def test_init(self):
+        # Check empty lists
+        flags = FlagsDict([], [])
+        self.assertEquals(flags.generate_csv(), [])
 
-    def test_move_between_sets(self):
-        A = set([1, 2, 3, 4])
-        B = set([5, 6, 7, 8])
-        move_between_sets(set([2, 4]), A, B)
-        self.assertEqual(A, set([1, 3]))
-        self.assertEqual(B, set([2, 4, 5, 6, 7, 8]))
+        # Check valid input - two public and two private API signatures.
+        flags = FlagsDict(['A', 'B'], ['C', 'D'])
+        self.assertEquals(flags.generate_csv(),
+                          [ 'A,' + FLAG_WHITELIST, 'B,' + FLAG_WHITELIST, 'C', 'D' ])
 
-    def test_move_between_sets_fail_not_superset(self):
-        A = set([1, 2, 3, 4])
-        B = set([5, 6, 7, 8])
-        with self.assertRaises(AssertionError) as ar:
-            move_between_sets(set([0, 2]), A, B)
+        # Check invalid input - overlapping public/private API signatures.
+        with self.assertRaises(AssertionError):
+            flags = FlagsDict(['A', 'B'], ['B', 'C', 'D'])
 
-    def test_move_between_sets_fail_not_disjoint(self):
-        A = set([1, 2, 3, 4])
-        B = set([4, 5, 6, 7, 8])
-        with self.assertRaises(AssertionError) as ar:
-            move_between_sets(set([1, 4]), A, B)
+    def test_filter_apis(self):
+        # Initialize flags so that A and B are put on the whitelist and
+        # C, D, E are left unassigned. Try filtering for the unassigned ones.
+        flags = FlagsDict(['A', 'B'], ['C', 'D', 'E'])
+        filter_set = flags.filter_apis(lambda api, flags: not flags)
+        self.assertTrue(isinstance(filter_set, set))
+        self.assertEqual(filter_set, set([ 'C', 'D', 'E' ]))
 
-    def test_get_package_name(self):
-        self.assertEqual(get_package_name("Ljava/lang/String;->clone()V"), "Ljava/lang/")
+    def test_get_valid_subset_of_unassigned_keys(self):
+        # Create flags where only A is unassigned.
+        flags = FlagsDict(['A'], ['B', 'C'])
+        flags.assign_flag(FLAG_GREYLIST, set(['C']))
+        self.assertEquals(flags.generate_csv(),
+            [ 'A,' + FLAG_WHITELIST, 'B', 'C,' + FLAG_GREYLIST ])
 
-    def test_get_package_name_fail_no_arrow(self):
-        with self.assertRaises(AssertionError) as ar:
-            get_package_name("Ljava/lang/String;-clone()V")
-        with self.assertRaises(AssertionError) as ar:
-            get_package_name("Ljava/lang/String;>clone()V")
-        with self.assertRaises(AssertionError) as ar:
-            get_package_name("Ljava/lang/String;__clone()V")
-
-    def test_get_package_name_fail_no_package(self):
-        with self.assertRaises(AssertionError) as ar:
-            get_package_name("LString;->clone()V")
-
-    def test_all_package_names(self):
-        self.assertEqual(all_package_names(), set())
-        self.assertEqual(all_package_names(set(["Lfoo/Bar;->baz()V"])), set(["Lfoo/"]))
+        # Check three things:
+        # (1) B is selected as valid unassigned
+        # (2) A is not selected because it is assigned 'whitelist'
+        # (3) D is not selected because it is not a valid key
         self.assertEqual(
-            all_package_names(set(["Lfoo/Bar;->baz()V", "Lfoo/BarX;->bazx()I"])),
-            set(["Lfoo/"]))
-        self.assertEqual(
-            all_package_names(
-                set(["Lfoo/Bar;->baz()V"]),
-                set(["Lfoo/BarX;->bazx()I", "Labc/xyz/Mno;->ijk()J"])),
-            set(["Lfoo/", "Labc/xyz/"]))
+            flags.get_valid_subset_of_unassigned_apis(set(['A', 'B', 'D'])), set([ 'B' ]))
 
-    def test_move_all(self):
-        src = set([ "abc", "xyz" ])
-        dst = set([ "def" ])
-        move_all(src, dst)
-        self.assertEqual(src, set())
-        self.assertEqual(dst, set([ "abc", "def", "xyz" ]))
+    def test_parse_and_merge_csv(self):
+        flags = FlagsDict(['A'], ['B'])
+        self.assertEquals(flags.generate_csv(), [ 'A,' + FLAG_WHITELIST, 'B' ])
 
-    def test_move_from_packages(self):
-        src = set([ "Lfoo/bar/ClassA;->abc()J",        # will be moved
-                    "Lfoo/bar/ClassA;->def()J",        # will be moved
-                    "Lcom/pkg/example/ClassD;->ijk:J", # not moved: different package
-                    "Lfoo/bar/xyz/ClassC;->xyz()Z" ])  # not moved: subpackage
-        dst = set()
-        packages = set([ "Lfoo/bar/" ])
-        move_from_packages(packages, src, dst)
-        self.assertEqual(
-            src, set([ "Lfoo/bar/xyz/ClassC;->xyz()Z", "Lcom/pkg/example/ClassD;->ijk:J" ]))
-        self.assertEqual(
-            dst, set([ "Lfoo/bar/ClassA;->abc()J", "Lfoo/bar/ClassA;->def()J" ]))
+        # Test empty CSV entry.
+        flags.parse_and_merge_csv(['B'])
+        self.assertEquals(flags.generate_csv(), [ 'A,' + FLAG_WHITELIST, 'B' ])
 
-    def test_move_serialization(self):
-        # All the entries should be moved apart from the last one
-        src = set([ "Lfoo/bar/ClassA;->readObject(Ljava/io/ObjectInputStream;)V",
-                    "Lfoo/bar/ClassA;->readObjectNoData()V",
-                    "Lfoo/bar/ClassA;->readResolve()Ljava/lang/Object;",
-                    "Lfoo/bar/ClassA;->serialVersionUID:J",
-                    "Lfoo/bar/ClassA;->serialPersistentFields:[Ljava/io/ObjectStreamField;",
-                    "Lfoo/bar/ClassA;->writeObject(Ljava/io/ObjectOutputStream;)V",
-                    "Lfoo/bar/ClassA;->writeReplace()Ljava/lang/Object;",
-                    # Should not be moved as signature does not match
-                    "Lfoo/bar/ClassA;->readObject(Ljava/io/ObjectInputStream;)I"])
-        expectedToMove = len(src) - 1
-        dst = set()
-        packages = set([ "Lfoo/bar/" ])
-        move_serialization(src, dst)
-        self.assertEqual(len(src), 1)
-        self.assertEqual(len(dst), expectedToMove)
+        # Test assigning an already assigned flag.
+        flags.parse_and_merge_csv(['A,' + FLAG_WHITELIST])
+        self.assertEquals(flags.generate_csv(), [ 'A,' + FLAG_WHITELIST, 'B' ])
+
+        # Test new additions.
+        flags.parse_and_merge_csv([
+            'A,' + FLAG_GREYLIST,
+            'B,' + FLAG_BLACKLIST + ',' + FLAG_GREYLIST_MAX_O ])
+        self.assertEqual(flags.generate_csv(),
+            [ 'A,' + FLAG_GREYLIST + "," + FLAG_WHITELIST,
+              'B,' + FLAG_BLACKLIST + "," + FLAG_GREYLIST_MAX_O ])
+
+        # Test unknown API signature.
+        with self.assertRaises(AssertionError):
+            flags.parse_and_merge_csv([ 'C' ])
+
+        # Test unknown flag.
+        with self.assertRaises(AssertionError):
+            flags.parse_and_merge_csv([ 'A,foo' ])
+
+    def test_assign_flag(self):
+        flags = FlagsDict(['A'], ['B'])
+        self.assertEquals(flags.generate_csv(), [ 'A,' + FLAG_WHITELIST, 'B' ])
+
+        # Test assigning an already assigned flag.
+        flags.assign_flag(FLAG_WHITELIST, set([ 'A' ]))
+        self.assertEquals(flags.generate_csv(), [ 'A,' + FLAG_WHITELIST, 'B' ])
+
+        # Test new additions.
+        flags.assign_flag(FLAG_GREYLIST, set([ 'A', 'B' ]))
+        self.assertEquals(flags.generate_csv(),
+            [ 'A,' + FLAG_GREYLIST + "," + FLAG_WHITELIST, 'B,' + FLAG_GREYLIST ])
+
+        # Test invalid API signature.
+        with self.assertRaises(AssertionError):
+            flags.assign_flag(FLAG_WHITELIST, set([ 'C' ]))
+
+        # Test invalid flag.
+        with self.assertRaises(AssertionError):
+            flags.assign_flag('foo', set([ 'A' ]))
 
 if __name__ == '__main__':
     unittest.main()

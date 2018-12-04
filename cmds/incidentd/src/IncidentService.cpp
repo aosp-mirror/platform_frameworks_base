@@ -24,6 +24,7 @@
 #include "incidentd_util.h"
 #include "section_list.h"
 
+#include <android/os/IncidentReportArgs.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IResultReceiver.h>
 #include <binder/IServiceManager.h>
@@ -40,6 +41,15 @@ enum { WHAT_RUN_REPORT = 1, WHAT_SEND_BACKLOG_TO_DROPBOX = 2 };
 
 #define DEFAULT_BYTES_SIZE_LIMIT (20 * 1024 * 1024)        // 20MB
 #define DEFAULT_REFACTORY_PERIOD_MS (24 * 60 * 60 * 1000)  // 1 Day
+
+// Skip logs (1100 - 1108) because they are already in the bug report
+// Skip 1200, 1201, 1202, 3018 because they take too long
+// TODO(120079956): Skip 3008, 3015 because of error
+#define SKIPPED_SECTIONS { 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, /* Logs */ \
+                           1200, 1201, 1202, /* Native, hal, java traces */ \
+                           3008, /* "package --proto" */ \
+                           3015, /* "activity --proto processes" */ \
+                           3018  /* "meminfo -a --proto" */ }
 
 namespace android {
 namespace os {
@@ -388,6 +398,38 @@ status_t IncidentService::cmd_privacy(FILE* in, FILE* out, FILE* err, Vector<Str
     } else {
         return cmd_help(out);
     }
+    return NO_ERROR;
+}
+
+status_t IncidentService::dump(int fd, const Vector<String16>& args) {
+    if (std::find(args.begin(), args.end(), String16("--proto")) == args.end()) {
+        ALOGD("Skip dumping incident. Only proto format is supported.");
+        dprintf(fd, "Incident dump only supports proto version.\n");
+        return NO_ERROR;
+    }
+
+    ALOGD("Dump incident proto");
+    IncidentReportArgs incidentArgs;
+    incidentArgs.setDest(DEST_EXPLICIT);
+    int skipped[] = SKIPPED_SECTIONS;
+    for (const Section** section = SECTION_LIST; *section; section++) {
+        const int id = (*section)->id;
+        if (std::find(std::begin(skipped), std::end(skipped), id) == std::end(skipped)) {
+            incidentArgs.addSection(id);
+        }
+    }
+
+    if (!checkIncidentPermissions(incidentArgs).isOk()) {
+        return PERMISSION_DENIED;
+    }
+
+    int fd1 = dup(fd);
+    if (fd1 < 0) {
+        return -errno;
+    }
+
+    mHandler->scheduleRunReport(new ReportRequest(incidentArgs, NULL, fd1));
+
     return NO_ERROR;
 }
 

@@ -112,7 +112,7 @@ import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.intelligence.IntelligenceManager;
+import android.view.intelligence.ContentCaptureManager;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
@@ -4159,7 +4159,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         float mAlpha = 1f;
 
         /**
-         * The opacity of the view as manipulated by the Fade transition. This is a hidden
+         * The opacity of the view as manipulated by the Fade transition. This is a
          * property only used by transitions, which is composited with the other alpha
          * values to calculate the final visual alpha value.
          */
@@ -8138,7 +8138,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * is visible.
      *
      * <p>The populated structure is then passed to the service through
-     * {@link IntelligenceManager#notifyViewAppeared(ViewStructure)}.
+     * {@link ContentCaptureManager#notifyViewAppeared(ViewStructure)}.
      *
      * <p><b>Note: </b>the following methods of the {@code structure} will be ignored:
      * <ul>
@@ -8915,7 +8915,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Helper used to notify the {@link IntelligenceManager} when the view is removed or
+     * Helper used to notify the {@link ContentCaptureManager} when the view is removed or
      * added, based on whether it's laid out and visible, and without knowing if the parent removed
      * it from the view hierarchy.
      *
@@ -8931,11 +8931,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </ol>
      */
     private void notifyAppearedOrDisappearedForContentCaptureIfNeeded(boolean appeared) {
+        // First check if context has client, so it saves a service lookup when it doesn't
+        if (!mContext.isContentCaptureSupported()) return;
 
-        final IntelligenceManager im = mContext.getSystemService(IntelligenceManager.class);
-        if (im == null || !im.isContentCaptureEnabled()) return;
+        // Then check if it's enabled in the context...
+        final ContentCaptureManager cm = mContext.getSystemService(ContentCaptureManager.class);
+        if (cm == null || !cm.isContentCaptureEnabled()) return;
 
-        // NOTE: isImportantForContentCapture() is more expensive than im.isContentCaptureEnabled()
+        // ... and finally at the view level
+        // NOTE: isImportantForContentCapture() is more expensive than cm.isContentCaptureEnabled()
         if (!isImportantForContentCapture()) return;
 
         if (appeared) {
@@ -8950,9 +8954,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return;
             }
             // All good: notify the manager...
-            final ViewStructure structure = im.newViewStructure(this);
+            final ViewStructure structure = cm.newViewStructure(this);
             onProvideContentCaptureStructure(structure, /* flags= */ 0);
-            im.notifyViewAppeared(structure);
+            cm.notifyViewAppeared(structure);
             // ...and set the flags
             mPrivateFlags4 |= PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED;
             mPrivateFlags4 &= ~PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED;
@@ -8969,7 +8973,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return;
             }
             // All good: notify the manager...
-            im.notifyViewDisappeared(getAutofillId());
+            cm.notifyViewDisappeared(getAutofillId());
             // ...and set the flags
             mPrivateFlags4 |= PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED;
             mPrivateFlags4 &= ~PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED;
@@ -15729,15 +15733,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * This property is hidden and intended only for use by the Fade transition, which
-     * animates it to produce a visual translucency that does not side-effect (or get
-     * affected by) the real alpha property. This value is composited with the other
-     * alpha value (and the AlphaAnimation value, when that is present) to produce
-     * a final visual translucency result, which is what is passed into the DisplayList.
-     *
-     * @hide
+     * This property is intended only for use by the Fade transition, which animates it
+     * to produce a visual translucency that does not side-effect (or get affected by)
+     * the real alpha property. This value is composited with the other alpha value
+     * (and the AlphaAnimation value, when that is present) to produce a final visual
+     * translucency result, which is what is passed into the DisplayList.
      */
-    @UnsupportedAppUsage
     public void setTransitionAlpha(float alpha) {
         ensureTransformationInfo();
         if (mTransformationInfo.mTransitionAlpha != alpha) {
@@ -15760,16 +15761,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * This property is hidden and intended only for use by the Fade transition, which
-     * animates it to produce a visual translucency that does not side-effect (or get
-     * affected by) the real alpha property. This value is composited with the other
-     * alpha value (and the AlphaAnimation value, when that is present) to produce
-     * a final visual translucency result, which is what is passed into the DisplayList.
-     *
-     * @hide
+     * This property is intended only for use by the Fade transition, which animates
+     * it to produce a visual translucency that does not side-effect (or get affected
+     * by) the real alpha property. This value is composited with the other alpha
+     * value (and the AlphaAnimation value, when that is present) to produce a final
+     * visual translucency result, which is what is passed into the DisplayList.
      */
     @ViewDebug.ExportedProperty(category = "drawing")
-    @UnsupportedAppUsage
     public float getTransitionAlpha() {
         return mTransformationInfo != null ? mTransformationInfo.mTransitionAlpha : 1;
     }
@@ -16288,9 +16286,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
-    public void setAnimationMatrix(Matrix matrix) {
+    /**
+     * Changes the transformation matrix on the view. This is used in animation frameworks,
+     * such as {@link android.transition.Transition}. When the animation finishes, the matrix
+     * should be cleared by calling this method with <code>null</code> as the matrix parameter.
+     * Application developers should use transformation methods like {@link #setRotation(float)},
+     * {@link #setScaleX(float)}, {@link #setScaleX(float)}, {@link #setTranslationX(float)}}
+     * and {@link #setTranslationY(float)} (float)}} instead.
+     *
+     * @param matrix The matrix, null indicates that the matrix should be cleared.
+     */
+    public void setAnimationMatrix(@Nullable Matrix matrix) {
         invalidateViewProperty(true, false);
         mRenderNode.setAnimationMatrix(matrix);
         invalidateViewProperty(false, true);
@@ -21460,7 +21466,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         previous ones
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected boolean setFrame(int left, int top, int right, int bottom) {
         boolean changed = false;
 
@@ -21537,7 +21543,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #setLeft(int), #setRight(int), #setTop(int), #setBottom(int)
      */
-    public void setLeftTopRightBottom(int left, int top, int right, int bottom) {
+    public final void setLeftTopRightBottom(int left, int top, int right, int bottom) {
         setFrame(left, top, right, bottom);
     }
 

@@ -393,16 +393,11 @@ interface ITelephony {
     int getDataActivationState(int subId, String callingPackage);
 
     /**
-      * Returns the unread count of voicemails
-      */
-    int getVoiceMessageCount();
-
-    /**
      * Returns the unread count of voicemails for a subId.
      * @param subId user preferred subId.
      * Returns the unread count of voicemails
      */
-    int getVoiceMessageCountForSubscriber(int subId);
+    int getVoiceMessageCountForSubscriber(int subId, String callingPackage);
 
     /**
       * Returns true if current state supports both voice and data

@@ -113,6 +113,19 @@ public class OemLockService extends SystemService {
      */
     private final IBinder mService = new IOemLockService.Stub() {
         @Override
+        @Nullable
+        public String getLockName() {
+            enforceManageCarrierOemUnlockPermission();
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return mOemLock.getLockName();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         public void setOemUnlockAllowedByCarrier(boolean allowed, @Nullable byte[] signature) {
             enforceManageCarrierOemUnlockPermission();
             enforceUserIsAdmin();

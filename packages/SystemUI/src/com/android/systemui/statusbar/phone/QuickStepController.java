@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
 
@@ -420,6 +421,9 @@ public class QuickStepController implements GestureHelper {
             case NAV_BAR_BOTTOM:
                 mDragHPositive = !isRTL;
                 mDragVPositive = true;
+                break;
+            case NAV_BAR_INVALID:
+                Log.e(TAG, "Invalid nav bar position");
                 break;
         }
 

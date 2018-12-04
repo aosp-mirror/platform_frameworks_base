@@ -19,8 +19,10 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
@@ -43,19 +45,18 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
- * A service used to capture the content of the screen.
- *
- * <p>The data collected by this service can be analyzed and combined with other sources to provide
- * contextual data in other areas of the system such as Autofill.
+ * A service used to capture the content of the screen to provide contextual data in other areas of
+ * the system such as Autofill.
  *
  * @hide
  */
 @SystemApi
-public abstract class IntelligenceService extends Service {
+public abstract class SmartSuggestionsService extends Service {
 
-    private static final String TAG = "IntelligenceService";
+    private static final String TAG = "SmartSuggestionsService";
 
     // TODO(b/111330312): STOPSHIP use dynamic value, or change to false
     static final boolean DEBUG = true;
@@ -63,11 +64,11 @@ public abstract class IntelligenceService extends Service {
     /**
      * The {@link Intent} that must be declared as handled by the service.
      * To be supported, the service must also require the
-     * {@link android.Manifest.permission#BIND_INTELLIGENCE_SERVICE} permission so
+     * {@link android.Manifest.permission#BIND_SMART_SUGGESTIONS_SERVICE} permission so
      * that other applications can not abuse it.
      */
     public static final String SERVICE_INTERFACE =
-            "android.service.intelligence.IntelligenceService";
+            "android.service.intelligence.SmartSuggestionsService";
 
     private Handler mHandler;
 
@@ -80,21 +81,21 @@ public abstract class IntelligenceService extends Service {
                 throws RemoteException {
             if (context != null) {
                 mHandler.sendMessage(
-                        obtainMessage(IntelligenceService::onCreateInteractionSession,
-                                IntelligenceService.this, context, sessionId));
+                        obtainMessage(SmartSuggestionsService::onCreateInteractionSession,
+                                SmartSuggestionsService.this, context, sessionId));
             } else {
                 mHandler.sendMessage(
-                        obtainMessage(IntelligenceService::onDestroyInteractionSession,
-                                IntelligenceService.this, sessionId));
+                        obtainMessage(SmartSuggestionsService::onDestroyInteractionSession,
+                                SmartSuggestionsService.this, sessionId));
             }
         }
 
         @Override
-        public void onContentCaptureEvents(InteractionSessionId sessionId,
-                List<ContentCaptureEvent> events) {
+        public void onContentCaptureEventsRequest(InteractionSessionId sessionId,
+                ContentCaptureEventsRequest request) {
             mHandler.sendMessage(
-                    obtainMessage(IntelligenceService::onContentCaptureEvent,
-                            IntelligenceService.this, sessionId, events));
+                    obtainMessage(SmartSuggestionsService::onContentCaptureEventsRequest,
+                            SmartSuggestionsService.this, sessionId, request));
 
         }
 
@@ -102,22 +103,22 @@ public abstract class IntelligenceService extends Service {
         public void onActivitySnapshot(InteractionSessionId sessionId,
                 SnapshotData snapshotData) {
             mHandler.sendMessage(
-                    obtainMessage(IntelligenceService::onActivitySnapshot,
-                            IntelligenceService.this, sessionId, snapshotData));
+                    obtainMessage(SmartSuggestionsService::onActivitySnapshot,
+                            SmartSuggestionsService.this, sessionId, snapshotData));
         }
 
         @Override
         public void onAutofillRequest(InteractionSessionId sessionId, IBinder client,
                 int autofilSessionId, AutofillId focusedId) {
-            mHandler.sendMessage(obtainMessage(IntelligenceService::handleOnAutofillRequest,
-                    IntelligenceService.this, sessionId, client, autofilSessionId, focusedId));
+            mHandler.sendMessage(obtainMessage(SmartSuggestionsService::handleOnAutofillRequest,
+                    SmartSuggestionsService.this, sessionId, client, autofilSessionId, focusedId));
         }
 
         @Override
         public void onDestroyAutofillWindowsRequest(InteractionSessionId sessionId) {
             mHandler.sendMessage(
-                    obtainMessage(IntelligenceService::handleOnDestroyAutofillWindowsRequest,
-                            IntelligenceService.this, sessionId));
+                    obtainMessage(SmartSuggestionsService::handleOnDestroyAutofillWindowsRequest,
+                            SmartSuggestionsService.this, sessionId));
         }
     };
 
@@ -139,6 +140,69 @@ public abstract class IntelligenceService extends Service {
     }
 
     /**
+     * Explicitly limits content capture to the given packages and activities.
+     *
+     * <p>When the whitelist is set, it overrides the values passed to
+     * {@link #setActivityContentCaptureEnabled(ComponentName, boolean)}
+     * and {@link #setPackageContentCaptureEnabled(String, boolean)}.
+     *
+     * <p>To reset the whitelist, call it passing {@code null} to both arguments.
+     *
+     * <p>Useful when the service wants to restrict content capture to a category of apps, like
+     * chat apps. For example, if the service wants to support view captures on all activities of
+     * app {@code ChatApp1} and just activities {@code act1} and {@code act2} of {@code ChatApp2},
+     * it would call: {@code setContentCaptureWhitelist(Arrays.asList("ChatApp1"),
+     * Arrays.asList(new ComponentName("ChatApp2", "act1"),
+     * new ComponentName("ChatApp2", "act2")));}
+     */
+    public final void setContentCaptureWhitelist(@Nullable List<String> packages,
+            @Nullable List<ComponentName> activities) {
+        //TODO(b/111276913): implement
+    }
+
+    /**
+     * Defines whether content capture should be enabled for activities with such
+     * {@link android.content.ComponentName}.
+     *
+     * <p>Useful to blacklist a particular activity.
+     */
+    public final void setActivityContentCaptureEnabled(@NonNull ComponentName activity,
+            boolean enabled) {
+        //TODO(b/111276913): implement
+    }
+
+    /**
+     * Defines whether content capture should be enabled for activities of the app with such
+     * {@code packageName}.
+     *
+     * <p>Useful to blacklist any activity from a particular app.
+     */
+    public final void setPackageContentCaptureEnabled(@NonNull String packageName,
+            boolean enabled) {
+        //TODO(b/111276913): implement
+    }
+
+    /**
+     * Gets the activities where content capture was disabled by
+     * {@link #setActivityContentCaptureEnabled(ComponentName, boolean)}.
+     */
+    @NonNull
+    public final Set<ComponentName> getContentCaptureDisabledActivities() {
+        //TODO(b/111276913): implement
+        return null;
+    }
+
+    /**
+     * Gets the apps where content capture was disabled by
+     * {@link #setPackageContentCaptureEnabled(String, boolean)}.
+     */
+    @NonNull
+    public final Set<String> getContentCaptureDisabledPackages() {
+        //TODO(b/111276913): implement
+        return null;
+    }
+
+    /**
      * Creates a new interaction session.
      *
      * @param context interaction context
@@ -152,12 +216,12 @@ public abstract class IntelligenceService extends Service {
      * session.
      *
      * @param sessionId the session's Id
-     * @param events the events
+     * @param request the events
      */
     // TODO(b/111276913): rename to onContentCaptureEvents or something like that; also, pass a
     // Request object so it can be extended
-    public abstract void onContentCaptureEvent(@NonNull InteractionSessionId sessionId,
-            @NonNull List<ContentCaptureEvent> events);
+    public abstract void onContentCaptureEventsRequest(@NonNull InteractionSessionId sessionId,
+            @NonNull ContentCaptureEventsRequest request);
 
     private void handleOnAutofillRequest(@NonNull InteractionSessionId sessionId,
             @NonNull IBinder client, int autofillSessionId, @NonNull AutofillId focusedId) {
@@ -242,8 +306,7 @@ public abstract class IntelligenceService extends Service {
     }
 
     /**
-     * Notifies the service of {@link IntelligenceSnapshotData snapshot data} associated with a
-     * session.
+     * Notifies the service of {@link SnapshotData snapshot data} associated with a session.
      *
      * @param sessionId the session's Id
      * @param snapshotData the data

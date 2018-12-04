@@ -104,8 +104,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(wifiConfiguration.SSID, wifiConfiguration.allowedKeyManagement,
-                suggestorUid);
+        return Objects.hash(wifiConfiguration.SSID, wifiConfiguration.BSSID,
+                wifiConfiguration.allowedKeyManagement, suggestorUid);
     }
 
     /**
@@ -121,6 +121,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
         }
         WifiNetworkSuggestion lhs = (WifiNetworkSuggestion) obj;
         return Objects.equals(this.wifiConfiguration.SSID, lhs.wifiConfiguration.SSID)
+                && Objects.equals(this.wifiConfiguration.BSSID, lhs.wifiConfiguration.BSSID)
                 && Objects.equals(this.wifiConfiguration.allowedKeyManagement,
                                   lhs.wifiConfiguration.allowedKeyManagement)
                 && suggestorUid == lhs.suggestorUid;

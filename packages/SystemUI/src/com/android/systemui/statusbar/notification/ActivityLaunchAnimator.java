@@ -29,6 +29,7 @@ import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 
+import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.shared.system.SurfaceControlCompat;
 import com.android.systemui.shared.system.SyncRtSurfaceTransactionApplier;
@@ -55,6 +56,7 @@ public class ActivityLaunchAnimator {
     private final NotificationPanelView mNotificationPanel;
     private final NotificationListContainer mNotificationContainer;
     private final StatusBarWindowView mStatusBarWindow;
+    private final float mWindowCornerRadius;
     private Callback mCallback;
     private final Runnable mTimeoutRunnable = () -> {
         setAnimationPending(false);
@@ -72,6 +74,8 @@ public class ActivityLaunchAnimator {
         mNotificationContainer = container;
         mStatusBarWindow = statusBarWindow;
         mCallback = callback;
+        mWindowCornerRadius = ScreenDecorationsUtils
+                .getWindowCornerRadius(statusBarWindow.getResources());
     }
 
     public RemoteAnimationAdapter getLaunchAnimation(
@@ -124,6 +128,8 @@ public class ActivityLaunchAnimator {
         private final ExpandableNotificationRow mSourceNotification;
         private final ExpandAnimationParameters mParams;
         private final Rect mWindowCrop = new Rect();
+        private final float mNotificationCornerRadius;
+        private float mCornerRadius;
         private boolean mIsFullScreenLaunch = true;
         private final SyncRtSurfaceTransactionApplier mSyncRtTransactionApplier;
 
@@ -131,6 +137,8 @@ public class ActivityLaunchAnimator {
             mSourceNotification = sourceNofitication;
             mParams = new ExpandAnimationParameters();
             mSyncRtTransactionApplier = new SyncRtSurfaceTransactionApplier(mSourceNotification);
+            mNotificationCornerRadius = Math.max(mSourceNotification.getCurrentTopRoundness(),
+                    mSourceNotification.getCurrentBottomRoundness());
         }
 
         @Override
@@ -181,8 +189,7 @@ public class ActivityLaunchAnimator {
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
                         mParams.linearProgress = animation.getAnimatedFraction();
-                        float progress
-                                = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
+                        float progress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
                                         mParams.linearProgress);
                         int newWidth = (int) MathUtils.lerp(notificationWidth,
                                 targetWidth, progress);
@@ -194,6 +201,8 @@ public class ActivityLaunchAnimator {
                                         + notificationHeight,
                                 primary.position.y + primary.sourceContainerBounds.bottom,
                                 progress);
+                        mCornerRadius = MathUtils.lerp(mNotificationCornerRadius,
+                                mWindowCornerRadius, progress);
                         applyParamsToWindow(primary);
                         applyParamsToNotification(mParams);
                         applyParamsToNotificationList(mParams);
@@ -259,7 +268,7 @@ public class ActivityLaunchAnimator {
             m.postTranslate(0, (float) (mParams.top - app.position.y));
             mWindowCrop.set(mParams.left, 0, mParams.right, mParams.getHeight());
             SurfaceParams params = new SurfaceParams(new SurfaceControlCompat(app.leash),
-                    1f /* alpha */, m, mWindowCrop, app.prefixOrderIndex);
+                    1f /* alpha */, m, mWindowCrop, app.prefixOrderIndex, mCornerRadius);
             mSyncRtTransactionApplier.scheduleApply(params);
         }
 

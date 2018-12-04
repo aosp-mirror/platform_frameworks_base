@@ -121,6 +121,8 @@ public final class MediaStore {
     public static final String PARAM_INCLUDE_PENDING = "includePending";
     /** {@hide} */
     public static final String PARAM_PROGRESS = "progress";
+    /** {@hide} */
+    public static final String PARAM_REQUIRE_ORIGINAL = "requireOriginal";
 
     /**
      * Activity Action: Launch a music player.
@@ -475,6 +477,24 @@ public final class MediaStore {
      */
     public static @NonNull Uri setIncludePending(@NonNull Uri uri) {
         return uri.buildUpon().appendQueryParameter(PARAM_INCLUDE_PENDING, "1").build();
+    }
+
+    /**
+     * Update the given {@link Uri} to indicate that the caller requires the
+     * original file contents when calling
+     * {@link ContentResolver#openFileDescriptor(Uri, String)}.
+     * <p>
+     * This can be useful when the caller wants to ensure they're backing up the
+     * exact bytes of the underlying media, without any Exif redaction being
+     * performed.
+     * <p>
+     * If the original file contents cannot be provided, a
+     * {@link UnsupportedOperationException} will be thrown when the returned
+     * {@link Uri} is used, such as when the caller doesn't hold
+     * {@link android.Manifest.permission#ACCESS_MEDIA_LOCATION}.
+     */
+    public static @NonNull Uri setRequireOriginal(@NonNull Uri uri) {
+        return uri.buildUpon().appendQueryParameter(PARAM_REQUIRE_ORIGINAL, "1").build();
     }
 
     /**

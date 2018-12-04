@@ -1424,7 +1424,62 @@ public class NotificationManager {
             return other.priorityCategories == priorityCategories
                     && other.priorityCallSenders == priorityCallSenders
                     && other.priorityMessageSenders == priorityMessageSenders
-                    && other.suppressedVisualEffects == suppressedVisualEffects;
+                    && suppressedVisualEffectsEqual(suppressedVisualEffects,
+                    other.suppressedVisualEffects);
+        }
+
+
+        private boolean suppressedVisualEffectsEqual(int suppressedEffects,
+                int otherSuppressedVisualEffects) {
+            if (suppressedEffects == otherSuppressedVisualEffects) {
+                return true;
+            }
+
+            if ((suppressedEffects & SUPPRESSED_EFFECT_SCREEN_ON) != 0) {
+                suppressedEffects |= SUPPRESSED_EFFECT_PEEK;
+            }
+            if ((suppressedEffects & SUPPRESSED_EFFECT_SCREEN_OFF) != 0) {
+                suppressedEffects |= SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+                suppressedEffects |= SUPPRESSED_EFFECT_LIGHTS;
+                suppressedEffects |= SUPPRESSED_EFFECT_AMBIENT;
+            }
+
+            if ((otherSuppressedVisualEffects & SUPPRESSED_EFFECT_SCREEN_ON) != 0) {
+                otherSuppressedVisualEffects |= SUPPRESSED_EFFECT_PEEK;
+            }
+            if ((otherSuppressedVisualEffects & SUPPRESSED_EFFECT_SCREEN_OFF) != 0) {
+                otherSuppressedVisualEffects |= SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+                otherSuppressedVisualEffects |= SUPPRESSED_EFFECT_LIGHTS;
+                otherSuppressedVisualEffects |= SUPPRESSED_EFFECT_AMBIENT;
+            }
+
+            if ((suppressedEffects & SUPPRESSED_EFFECT_SCREEN_ON)
+                    != (otherSuppressedVisualEffects & SUPPRESSED_EFFECT_SCREEN_ON)) {
+                int currSuppressedEffects = (suppressedEffects & SUPPRESSED_EFFECT_SCREEN_ON) != 0
+                        ? otherSuppressedVisualEffects : suppressedEffects;
+                if ((currSuppressedEffects & SUPPRESSED_EFFECT_PEEK) == 0) {
+                    return false;
+                }
+            }
+
+            if ((suppressedEffects & SUPPRESSED_EFFECT_SCREEN_OFF)
+                    != (otherSuppressedVisualEffects & SUPPRESSED_EFFECT_SCREEN_OFF)) {
+                int currSuppressedEffects = (suppressedEffects & SUPPRESSED_EFFECT_SCREEN_OFF) != 0
+                        ? otherSuppressedVisualEffects : suppressedEffects;
+                if ((currSuppressedEffects & SUPPRESSED_EFFECT_FULL_SCREEN_INTENT) == 0
+                        || (currSuppressedEffects & SUPPRESSED_EFFECT_LIGHTS) == 0
+                        || (currSuppressedEffects & SUPPRESSED_EFFECT_AMBIENT) == 0) {
+                    return false;
+                }
+            }
+
+            int thisWithoutOldEffects = suppressedEffects
+                    & ~SUPPRESSED_EFFECT_SCREEN_ON
+                    & ~SUPPRESSED_EFFECT_SCREEN_OFF;
+            int otherWithoutOldEffects = otherSuppressedVisualEffects
+                    & ~SUPPRESSED_EFFECT_SCREEN_ON
+                    & ~SUPPRESSED_EFFECT_SCREEN_OFF;
+            return thisWithoutOldEffects == otherWithoutOldEffects;
         }
 
         @Override
