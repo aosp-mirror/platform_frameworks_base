@@ -2620,7 +2620,8 @@ public class AudioTrack extends PlayerBase
      *         to the audio sink.
      *     <BR>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
-     * @param timestamp The timestamp of the first decodable audio frame in the provided audioData.
+     * @param timestamp The timestamp, in nanoseconds, of the first decodable audio frame in the
+     *     provided audioData.
      * @return zero or the positive number of bytes that were written, or one of the following
      *    error codes.
      * <ul>
