@@ -18,6 +18,7 @@ package android.graphics.fonts;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.internal.util.Preconditions;
@@ -230,6 +231,16 @@ public final class FontStyle {
      */
     public @FontSlant int getSlant() {
         return mSlant;
+    }
+
+    /**
+     * Compute the matching score for another style.
+     *
+     * The smaller is better.
+     * @hide
+     */
+    public int getMatchScore(@NonNull FontStyle o) {
+        return Math.abs((getWeight() - o.getWeight())) / 100 + (getSlant() == o.getSlant() ? 0 : 2);
     }
 
     @Override
