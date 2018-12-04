@@ -36,6 +36,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -63,6 +64,7 @@ public class SmartReplyView extends ViewGroup {
 
     private final SmartReplyConstants mConstants;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
+    private final NotificationRemoteInputManager mRemoteInputManager;
     private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
 
     /**
@@ -112,6 +114,7 @@ public class SmartReplyView extends ViewGroup {
         super(context, attrs);
         mConstants = Dependency.get(SmartReplyConstants.class);
         mKeyguardDismissUtil = Dependency.get(KeyguardDismissUtil.class);
+        mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
 
         mHeightUpperLimit = NotificationUtils.getFontScaledHeight(mContext,
             R.dimen.smart_reply_button_max_height);
@@ -242,12 +245,22 @@ public class SmartReplyView extends ViewGroup {
         b.setText(choice);
 
         OnDismissAction action = () -> {
+            // TODO(b/111437455): Also for EDIT_CHOICES_BEFORE_SENDING_AUTO, depending on flags.
+            if (smartReplies.remoteInput.getEditChoicesBeforeSending()
+                    == RemoteInput.EDIT_CHOICES_BEFORE_SENDING_ENABLED) {
+                entry.remoteInputText = choice;
+                mRemoteInputManager.activateRemoteInput(b,
+                        new RemoteInput[] { smartReplies.remoteInput }, smartReplies.remoteInput,
+                        smartReplies.pendingIntent);
+                return false;
+            }
+
             smartReplyController.smartReplySent(
                     entry, replyIndex, b.getText(), smartReplies.fromAssistant);
             Bundle results = new Bundle();
             results.putString(smartReplies.remoteInput.getResultKey(), choice.toString());
             Intent intent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-            RemoteInput.addResultsToIntent(new RemoteInput[]{smartReplies.remoteInput}, intent,
+            RemoteInput.addResultsToIntent(new RemoteInput[] { smartReplies.remoteInput }, intent,
                     results);
             RemoteInput.setResultsSource(intent, RemoteInput.SOURCE_CHOICE);
             entry.setHasSentReply();
