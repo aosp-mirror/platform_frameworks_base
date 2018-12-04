@@ -193,5 +193,7 @@ interface IWifiManager
     int addNetworkSuggestions(in List<WifiNetworkSuggestion> networkSuggestions, in String packageName);
 
     int removeNetworkSuggestions(in List<WifiNetworkSuggestion> networkSuggestions, in String packageName);
+
+    String[] getFactoryMacAddresses();
 }
 

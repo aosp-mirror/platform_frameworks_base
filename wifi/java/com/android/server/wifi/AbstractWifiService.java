@@ -452,4 +452,9 @@ public abstract class AbstractWifiService extends IWifiManager.Stub {
             List<WifiNetworkSuggestion> networkSuggestions, String callingPackageName) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public String[] getFactoryMacAddresses() {
+        throw new UnsupportedOperationException();
+    }
 }
