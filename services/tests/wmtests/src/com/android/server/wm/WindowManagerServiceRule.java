@@ -173,21 +173,21 @@ public class WindowManagerServiceRule implements TestRule {
         };
     }
 
-    public WindowManagerService getWindowManagerService() {
+    WindowManagerService getWindowManagerService() {
         return mService;
     }
 
-    public TestWindowManagerPolicy getWindowManagerPolicy() {
-        return mPolicy;
-    }
-
-    public void waitUntilWindowManagerHandlersIdle() {
+    void waitUntilWindowManagerHandlersIdle() {
         final WindowManagerService wm = getWindowManagerService();
-        if (wm != null) {
-            wm.mH.runWithScissors(() -> { }, 0);
-            wm.mAnimationHandler.runWithScissors(() -> { }, 0);
-            SurfaceAnimationThread.getHandler().runWithScissors(() -> { }, 0);
+        if (wm == null) {
+            return;
         }
+        wm.mH.removeCallbacksAndMessages(null);
+        wm.mAnimationHandler.removeCallbacksAndMessages(null);
+        SurfaceAnimationThread.getHandler().removeCallbacksAndMessages(null);
+        wm.mH.runWithScissors(() -> { }, 0);
+        wm.mAnimationHandler.runWithScissors(() -> { }, 0);
+        SurfaceAnimationThread.getHandler().runWithScissors(() -> { }, 0);
     }
 
     private void destroyAllSurfaceTransactions() {
