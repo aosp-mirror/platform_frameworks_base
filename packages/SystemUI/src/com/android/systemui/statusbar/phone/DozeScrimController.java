@@ -65,10 +65,11 @@ public class DozeScrimController implements StateListener {
             if (!mDozing) {
                 return;
             }
-            // All pulses except notifications should time out on their own.  Pulses due to
-            // notifications should instead be managed externally based off the notification's
-            // lifetime.
-            if (mPulseReason != DozeLog.PULSE_REASON_NOTIFICATION) {
+            // Notifications should time out on their own.  Pulses due to notifications should
+            // instead be managed externally based off the notification's lifetime.
+            // Dock also controls the time out by self.
+            if (mPulseReason != DozeLog.PULSE_REASON_NOTIFICATION
+                    && mPulseReason != DozeLog.PULSE_REASON_DOCKING) {
                 mHandler.postDelayed(mPulseOut, mDozeParameters.getPulseVisibleDuration());
                 mHandler.postDelayed(mPulseOutExtended,
                         mDozeParameters.getPulseVisibleDurationExtended());

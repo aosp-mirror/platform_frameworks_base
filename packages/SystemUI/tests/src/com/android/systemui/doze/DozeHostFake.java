@@ -17,7 +17,6 @@
 package com.android.systemui.doze;
 
 import android.annotation.NonNull;
-import android.app.PendingIntent;
 
 /**
  * A rudimentary fake for DozeHost.
@@ -90,6 +89,9 @@ class DozeHostFake implements DozeHost {
     public void extendPulse() {
         pulseExtended = true;
     }
+
+    @Override
+    public void stopPulsing() {}
 
     @Override
     public void setAnimateWakeup(boolean animateWakeup) {
