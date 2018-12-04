@@ -271,7 +271,7 @@ public class ThermalManagerServiceTest {
         int status = Temperature.THROTTLING_WARNING;
         Temperature newSkin = new Temperature(100, Temperature.TYPE_SKIN, "skin1", status);
         mFakeHal.mCallback.onValues(newSkin);
-        assertEquals(status, mService.mService.getCurrentStatus());
+        assertEquals(status, mService.mService.getCurrentThermalStatus());
     }
 
     @Test
@@ -294,6 +294,6 @@ public class ThermalManagerServiceTest {
         assertEquals(0, mService.mService.getCurrentTemperatures().size());
         assertEquals(0,
                 mService.mService.getCurrentTemperaturesWithType(Temperature.TYPE_SKIN).size());
-        assertEquals(Temperature.THROTTLING_NONE, mService.mService.getCurrentStatus());
+        assertEquals(Temperature.THROTTLING_NONE, mService.mService.getCurrentThermalStatus());
     }
 }
