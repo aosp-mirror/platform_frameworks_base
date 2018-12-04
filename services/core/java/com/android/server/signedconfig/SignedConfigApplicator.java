@@ -24,6 +24,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -65,15 +66,21 @@ class SignedConfigApplicator {
 
     private final Context mContext;
     private final String mSourcePackage;
+    private final SignatureVerifier mVerifier;
 
     SignedConfigApplicator(Context context, String sourcePackage) {
         mContext = context;
         mSourcePackage = sourcePackage;
+        mVerifier = new SignatureVerifier();
     }
 
     private boolean checkSignature(String data, String signature) {
-        Slog.w(TAG, "SIGNATURE CHECK NOT IMPLEMENTED YET!");
-        return false;
+        try {
+            return mVerifier.verifySignature(data, signature);
+        } catch (GeneralSecurityException e) {
+            Slog.e(TAG, "Failed to verify signature", e);
+            return false;
+        }
     }
 
     private int getCurrentConfigVersion() {
