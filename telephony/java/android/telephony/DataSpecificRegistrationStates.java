@@ -33,17 +33,31 @@ public class DataSpecificRegistrationStates implements Parcelable{
      */
     public final boolean isNrAvailable;
 
+    /**
+     * Indicates that if E-UTRA-NR Dual Connectivity (EN-DC) is supported by the primary serving
+     * cell.
+     *
+     * True the primary serving cell is LTE cell and the plmn-InfoList-r15 is present in SIB2 and
+     * at least one bit in this list is true, otherwise this value should be false.
+     *
+     * Reference: 3GPP TS 36.331 v15.2.2 6.3.1 System information blocks.
+     */
+    public final boolean isEnDcAvailable;
+
     DataSpecificRegistrationStates(
-            int maxDataCalls, boolean isDcNrRestricted, boolean isNrAvailable) {
+            int maxDataCalls, boolean isDcNrRestricted, boolean isNrAvailable,
+            boolean isEnDcAvailable) {
         this.maxDataCalls = maxDataCalls;
         this.isDcNrRestricted = isDcNrRestricted;
         this.isNrAvailable = isNrAvailable;
+        this.isEnDcAvailable = isEnDcAvailable;
     }
 
     private DataSpecificRegistrationStates(Parcel source) {
         maxDataCalls = source.readInt();
         isDcNrRestricted = source.readBoolean();
         isNrAvailable = source.readBoolean();
+        isEnDcAvailable = source.readBoolean();
     }
 
     @Override
@@ -51,6 +65,7 @@ public class DataSpecificRegistrationStates implements Parcelable{
         dest.writeInt(maxDataCalls);
         dest.writeBoolean(isDcNrRestricted);
         dest.writeBoolean(isNrAvailable);
+        dest.writeBoolean(isEnDcAvailable);
     }
 
     @Override
@@ -65,13 +80,14 @@ public class DataSpecificRegistrationStates implements Parcelable{
                 .append(" maxDataCalls = " + maxDataCalls)
                 .append(" isDcNrRestricted = " + isDcNrRestricted)
                 .append(" isNrAvailable = " + isNrAvailable)
+                .append(" isEnDcAvailable = " + isEnDcAvailable)
                 .append(" }")
                 .toString();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(maxDataCalls, isDcNrRestricted, isNrAvailable);
+        return Objects.hash(maxDataCalls, isDcNrRestricted, isNrAvailable, isEnDcAvailable);
     }
 
     @Override
@@ -83,7 +99,8 @@ public class DataSpecificRegistrationStates implements Parcelable{
         DataSpecificRegistrationStates other = (DataSpecificRegistrationStates) o;
         return this.maxDataCalls == other.maxDataCalls
                 && this.isDcNrRestricted == other.isDcNrRestricted
-                && this.isNrAvailable == other.isNrAvailable;
+                && this.isNrAvailable == other.isNrAvailable
+                && this.isEnDcAvailable == other.isEnDcAvailable;
     }
 
     public static final Parcelable.Creator<DataSpecificRegistrationStates> CREATOR =
