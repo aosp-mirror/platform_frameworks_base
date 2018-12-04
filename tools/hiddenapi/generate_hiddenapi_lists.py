@@ -26,6 +26,7 @@ FLAG_WHITELIST = "whitelist"
 FLAG_GREYLIST = "greylist"
 FLAG_BLACKLIST = "blacklist"
 FLAG_GREYLIST_MAX_O = "greylist-max-o"
+FLAG_GREYLIST_MAX_P = "greylist-max-p"
 
 # List of all known flags.
 FLAGS = [
@@ -33,6 +34,7 @@ FLAGS = [
     FLAG_GREYLIST,
     FLAG_BLACKLIST,
     FLAG_GREYLIST_MAX_O,
+    FLAG_GREYLIST_MAX_P,
 ]
 FLAGS_SET = set(FLAGS)
 
