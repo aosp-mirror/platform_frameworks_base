@@ -38,8 +38,8 @@ class RenderThread;
 
 class VulkanSurface {
 public:
-    VulkanSurface(ColorMode colorMode, ANativeWindow* window)
-            : mColorMode(colorMode), mNativeWindow(window) {}
+    VulkanSurface(ColorMode colorMode, ANativeWindow* window, sk_sp<SkColorSpace> colorSpace)
+            : mColorMode(colorMode), mNativeWindow(window), mColorSpace(colorSpace) {}
 
     sk_sp<SkSurface> getBackBufferSurface() { return mBackbuffer; }
 
@@ -79,6 +79,7 @@ private:
     ANativeWindow* mNativeWindow;
     int mWindowWidth = 0;
     int mWindowHeight = 0;
+    sk_sp<SkColorSpace> mColorSpace;
 };
 
 // This class contains the shared global Vulkan objects, such as VkInstance, VkDevice and VkQueue,
@@ -96,7 +97,8 @@ public:
 
     // Given a window this creates a new VkSurfaceKHR and VkSwapchain and stores them inside a new
     // VulkanSurface object which is returned.
-    VulkanSurface* createSurface(ANativeWindow* window, ColorMode colorMode);
+    VulkanSurface* createSurface(ANativeWindow* window, ColorMode colorMode,
+            sk_sp<SkColorSpace> surfaceColorSpace);
 
     // Destroy the VulkanSurface and all associated vulkan objects.
     void destroySurface(VulkanSurface* surface);

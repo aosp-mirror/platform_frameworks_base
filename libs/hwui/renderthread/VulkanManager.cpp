@@ -472,8 +472,9 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface** surfaceOut) {
     window->query(window, NATIVE_WINDOW_HEIGHT, &windowHeight);
     if (windowWidth != surface->mWindowWidth || windowHeight != surface->mWindowHeight) {
         ColorMode colorMode = surface->mColorMode;
+        sk_sp<SkColorSpace> colorSpace = surface->mColorSpace;
         destroySurface(surface);
-        *surfaceOut = createSurface(window, colorMode);
+        *surfaceOut = createSurface(window, colorMode, colorSpace);
         surface = *surfaceOut;
     }
 
@@ -647,7 +648,7 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
         imageInfo.mSurface = SkSurface::MakeFromBackendRenderTarget(
                 mRenderThread.getGrContext(), backendRT, kTopLeft_GrSurfaceOrigin,
                 surface->mColorMode == ColorMode::WideColorGamut ? kRGBA_F16_SkColorType
-                : kRGBA_8888_SkColorType, nullptr, &props);
+                : kRGBA_8888_SkColorType, surface->mColorSpace, &props);
     }
 
     SkASSERT(mCommandPool != VK_NULL_HANDLE);
@@ -833,14 +834,15 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
     return true;
 }
 
-VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode colorMode) {
+VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode colorMode,
+        sk_sp<SkColorSpace> surfaceColorSpace) {
     initialize();
 
     if (!window) {
         return nullptr;
     }
 
-    VulkanSurface* surface = new VulkanSurface(colorMode, window);
+    VulkanSurface* surface = new VulkanSurface(colorMode, window, surfaceColorSpace);
 
     VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo;
     memset(&surfaceCreateInfo, 0, sizeof(VkAndroidSurfaceCreateInfoKHR));
