@@ -3655,6 +3655,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    /** @returns the orientation of the display when it's rotation is ROTATION_0. */
+    int getNaturalOrientation() {
+        return mBaseDisplayWidth < mBaseDisplayHeight
+                ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+    }
+
     void performLayout(boolean initial, boolean updateInputWindows) {
         if (!isLayoutNeeded()) {
             return;

@@ -31,12 +31,16 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyString;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
 
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
@@ -144,6 +148,13 @@ class ActivityTestsBase {
         return display;
     }
 
+    /** Creates and adds a {@link TestActivityDisplay} to supervisor at the given position. */
+    TestActivityDisplay addNewActivityDisplayAt(DisplayInfo info, int position) {
+        final TestActivityDisplay display = createNewActivityDisplay(info);
+        mRootActivityContainer.addChild(display, position);
+        return display;
+    }
+
     /**
      * Builder for creating new activities.
      */
@@ -234,6 +245,10 @@ class ActivityTestsBase {
                     mService.mStackSupervisor, null /* options */, null /* sourceRecord */);
             spyOn(activity);
             activity.mAppWindowToken = mock(AppWindowToken.class);
+            doCallRealMethod().when(activity.mAppWindowToken).getOrientationIgnoreVisibility();
+            doCallRealMethod().when(activity.mAppWindowToken)
+                    .setOrientation(anyInt(), any(), any());
+            doCallRealMethod().when(activity.mAppWindowToken).setOrientation(anyInt());
             doNothing().when(activity).removeWindowContainer();
 
             if (mTaskRecord != null) {
@@ -346,6 +361,7 @@ class ActivityTestsBase {
                 mStack.addTask(task, true, "creating test task");
                 task.setStack(mStack);
                 task.setTask();
+                mStack.getWindowContainerController().mContainer.addChild(task.mTask, 0);
             }
 
             task.touchActiveTime();
@@ -365,7 +381,10 @@ class ActivityTestsBase {
                 setTask();
             }
 
-            private void setTask() {
+            void setTask() {
+                Task mockTask = mock(Task.class);
+                mockTask.mTaskRecord = this;
+                doCallRealMethod().when(mockTask).onDescendantOrientationChanged(any(), any());
                 setTask(mock(Task.class));
             }
         }
