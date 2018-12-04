@@ -222,6 +222,13 @@ message GlobalSettingsProto {
     }
     optional Connectivity connectivity = 32;
 
+    message ContentCapture {
+      option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+      optional SettingProto service_explicitly_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional ContentCapture content_capture = 145;
+
     optional SettingProto contact_metadata_sync_enabled = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto contacts_database_wal_enabled = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
@@ -760,13 +767,6 @@ message GlobalSettingsProto {
         optional SettingProto update_metadata_url = 2;
     }
     optional SmartSelection smart_selection = 108;
-
-    message SmartSuggestions {
-      option (android.msg_privacy).dest = DEST_EXPLICIT;
-
-      optional SettingProto service_explicitly_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    }
-    optional SmartSuggestions smart_suggestions = 145;
 
     message Sms {
         option (android.msg_privacy).dest = DEST_EXPLICIT;

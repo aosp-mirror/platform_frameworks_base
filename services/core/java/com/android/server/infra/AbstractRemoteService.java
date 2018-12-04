@@ -248,7 +248,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
         if (checkIfDestroyed() || mCompleted) return;
 
         if (!handleIsBound()) {
-            if (mVerbose) Slog.v(mTag, "handlePendingRequest(): queuing" + pendingRequest);
+            if (mVerbose) Slog.v(mTag, "handlePendingRequest(): queuing " + pendingRequest);
             handlePendingRequestWhileUnBound(pendingRequest);
             handleEnsureBound();
         } else {
@@ -379,6 +379,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
 
                 final S remoteService = mWeakService.get();
                 if (remoteService != null) {
+                    // TODO(b/117779333): we should probably ignore it if service is destroyed.
                     Slog.w(mTag, "timed out after " + service.getRemoteRequestMillis() + " ms");
                     onTimeout(remoteService);
                 } else {

@@ -3939,13 +3939,12 @@ public abstract class Context {
     public static final String AUTOFILL_MANAGER_SERVICE = "autofill";
 
     /**
-     * Official published name of the smart suggestions service.
+     * Official published name of the content capture service.
      *
      * @hide
      * @see #getSystemService(String)
      */
-    // TODO(b/111276913): rename string (will require SELinux change first)
-    public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "intelligence";
+    public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
 
     /**
      * Use with {@link #getSystemService(String)} to access the

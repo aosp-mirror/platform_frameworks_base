@@ -165,9 +165,9 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.CaptioningManager;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.IAutoFillManager;
+import android.view.contentcapture.ContentCaptureManager;
+import android.view.contentcapture.IContentCaptureManager;
 import android.view.inputmethod.InputMethodManager;
-import android.view.intelligence.ContentCaptureManager;
-import android.view.intelligence.IIntelligenceManager;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textservice.TextServicesManager;
 
@@ -1070,7 +1070,7 @@ final class SystemServiceRegistry {
                 if (outerContext.isContentCaptureSupported()) {
                     IBinder b = ServiceManager
                             .getService(Context.CONTENT_CAPTURE_MANAGER_SERVICE);
-                    IIntelligenceManager service = IIntelligenceManager.Stub.asInterface(b);
+                    IContentCaptureManager service = IContentCaptureManager.Stub.asInterface(b);
                     return new ContentCaptureManager(outerContext, service);
                 }
                 return null;

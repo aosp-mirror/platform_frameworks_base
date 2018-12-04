@@ -58,7 +58,7 @@ import java.util.List;
  * <ul>
  *   <li>Disabling the service when {@link UserManager} restrictions change.
  *   <li>Refreshing the service when its underlying
- *   {@link #getSettingsProperty() Settings property} changed.
+ *   {@link #getServiceSettingsProperty() Settings property} changed.
  *   <li>Calling the service when other Settings properties changed.
  * </ul>
  *

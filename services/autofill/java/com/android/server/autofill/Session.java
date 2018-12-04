@@ -99,8 +99,6 @@ import com.android.server.autofill.AutofillManagerService.SmartSuggestionMode;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
 import com.android.server.infra.AbstractRemoteService;
-import com.android.server.intelligence.IntelligenceManagerInternal;
-import com.android.server.intelligence.IntelligenceManagerInternal.AugmentedAutofillCallback;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -248,9 +246,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private final SparseArray<LogMaker> mRequestLogs = new SparseArray<>(1);
 
+    /**
+     * Destroys the augmented Autofill UI.
+     */
+    // TODO(b/111330312): this runnable is called when the Autofill session is destroyed, the
+    // main reason being the cases where user tap HOME.
+    // Right now it's completely destroying the UI, but we need to decide whether / how to
+    // properly recover it later (for example, if the user switches back to the activity,
+    // should it be restored? Right not it kind of is, because Autofill's Session trigger a
+    // new FillRequest, which in turn triggers the Augmented Autofill request again)
     @GuardedBy("mLock")
     @Nullable
-    private AugmentedAutofillCallback mAugmentedAutofillCallback;
+    private Runnable mAugmentedAutofillDestroyer;
 
     /**
      * Receiver of assist data from the app's {@link Activity}.
@@ -2516,8 +2523,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         // The default autofill service cannot fullfill the request, let's check if the intelligence
         // service can.
-        mAugmentedAutofillCallback = triggerAugmentedAutofillLocked();
-        if (mAugmentedAutofillCallback == null) {
+        mAugmentedAutofillDestroyer = triggerAugmentedAutofillLocked();
+        if (mAugmentedAutofillDestroyer == null) {
             if (sVerbose) {
                 Slog.v(TAG, "canceling session " + id + " when server returned null and there is no"
                         + " AugmentedAutofill for user");
@@ -2539,21 +2546,22 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /**
      * Tries to trigger Augmented Autofill when the standard service could not fulfill a request.
      *
-     * @return callback to the Augmented Autofill service, or {@code null} if not supported.
+     * @return callback to destroy the autofill UI, or {@code null} if not supported.
      */
     // TODO(b/111330312): might need to call it in other places, like when the service returns a
     // non-null response but without datasets (for example, just SaveInfo)
     @GuardedBy("mLock")
-    private AugmentedAutofillCallback triggerAugmentedAutofillLocked() {
+    private Runnable triggerAugmentedAutofillLocked() {
         // Check if Smart Suggestions is supported...
         final @SmartSuggestionMode int supportedModes = mService
                 .getSupportedSmartSuggestionModesLocked();
         if (supportedModes == 0) return null;
 
         // ...then if the service is set for the user
-        final IntelligenceManagerInternal intelligenceManagerInternal = mService
-                .getMaster().mIntelligenceManagerInternal;
-        if (intelligenceManagerInternal == null) return null;
+
+        final RemoteAugmentedAutofillService remoteService = mService
+                .getRemoteAugmentedAutofillServiceLocked();
+        if (remoteService == null) return null;
 
         // Define which mode will be used
         final int mode;
@@ -2584,8 +2592,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // TODO(b/111330312): we might need to add a new state in the AutofillManager to optimize
         // furgher AFM -> AFMS calls.
         // TODO(b/119638958): add CTS tests
-        return intelligenceManagerInternal.requestAutofill(mService.getUserId(), mClient,
-                mActivityToken, this.id, mCurrentViewId, currentValue);
+        remoteService.onRequestAutofillLocked(id, mClient, taskId, mComponentName, mCurrentViewId,
+                currentValue);
+
+        if (mAugmentedAutofillDestroyer == null) {
+            mAugmentedAutofillDestroyer = () -> remoteService.onDestroyAutofillWindowsRequest(id);
+        }
+        return mAugmentedAutofillDestroyer;
     }
 
     @GuardedBy("mLock")
@@ -2866,8 +2879,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("mSaveOnAllViewsInvisible: "); pw.println(
                 mSaveOnAllViewsInvisible);
         pw.print(prefix); pw.print("mSelectedDatasetIds: "); pw.println(mSelectedDatasetIds);
-        if (mAugmentedAutofillCallback != null) {
-            pw.print(prefix); pw.println("has AugmentedAutofillCallback");
+        if (mAugmentedAutofillDestroyer != null) {
+            pw.print(prefix); pw.println("has mAugmentedAutofillDestroyer");
         }
         mRemoteFillService.dump(prefix, pw);
     }
@@ -3045,8 +3058,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @GuardedBy("mLock")
     void destroyAugmentedAutofillWindowsLocked() {
-        if (mAugmentedAutofillCallback != null) {
-            mAugmentedAutofillCallback.destroy();
+        if (mAugmentedAutofillDestroyer != null) {
+            mAugmentedAutofillDestroyer.run();
+            mAugmentedAutofillDestroyer = null;
         }
     }
 
