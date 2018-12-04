@@ -217,6 +217,8 @@ class ContextImpl extends Context {
     private AutofillClient mAutofillClient = null;
     private boolean mIsAutofillCompatEnabled;
 
+    private boolean mIsContentCaptureSupported = false;
+
     private final Object mSync = new Object();
 
     @GuardedBy("mSync")
@@ -2374,6 +2376,18 @@ class ContextImpl extends Context {
     @Override
     public void setAutofillCompatibilityEnabled(boolean autofillCompatEnabled) {
         mIsAutofillCompatEnabled = autofillCompatEnabled;
+    }
+
+    /** @hide */
+    @Override
+    public boolean isContentCaptureSupported() {
+        return mIsContentCaptureSupported;
+    }
+
+    /** @hide */
+    @Override
+    public void setContentCaptureSupported(boolean supported) {
+        mIsContentCaptureSupported = supported;
     }
 
     @UnsupportedAppUsage

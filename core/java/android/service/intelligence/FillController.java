@@ -15,12 +15,12 @@
  */
 package android.service.intelligence;
 
-import static android.service.intelligence.IntelligenceService.DEBUG;
+import static android.service.intelligence.SmartSuggestionsService.DEBUG;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
-import android.service.intelligence.IntelligenceService.AutofillProxy;
+import android.service.intelligence.SmartSuggestionsService.AutofillProxy;
 import android.util.Log;
 import android.util.Pair;
 import android.view.autofill.AutofillId;

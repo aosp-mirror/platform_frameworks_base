@@ -3933,12 +3933,13 @@ public abstract class Context {
     public static final String AUTOFILL_MANAGER_SERVICE = "autofill";
 
     /**
-     * Official published name of the intelligence service.
+     * Official published name of the smart suggestions service.
      *
      * @hide
      * @see #getSystemService(String)
      */
-    public static final String INTELLIGENCE_MANAGER_SERVICE = "intelligence";
+    // TODO(b/111276913): rename string (will require SELinux change first)
+    public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "intelligence";
 
     /**
      * Use with {@link #getSystemService(String)} to access the
@@ -5220,6 +5221,25 @@ public abstract class Context {
     @TestApi
     public void setAutofillCompatibilityEnabled(
             @SuppressWarnings("unused") boolean autofillCompatEnabled) {
+    }
+
+    /**
+     * Checks whether this context supports content capture.
+     *
+     * @hide
+     */
+    // NOTE: for now we just need to check if it's supported so we can optimize calls that can be
+    // skipped when it isn't. Eventually, we might need a full
+    // ContentCaptureManager.ContentCaptureClient interface (as it's done with AutofillClient).
+    //
+    public boolean isContentCaptureSupported() {
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    public void setContentCaptureSupported(@SuppressWarnings("unused") boolean supported) {
     }
 
     /**

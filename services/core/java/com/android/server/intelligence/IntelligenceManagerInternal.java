@@ -27,12 +27,13 @@ import android.view.autofill.IAutoFillManagerClient;
  *
  * @hide Only for use within the system server.
  */
+//TODO(b/111276913): rename once the final name is defined
 public abstract class IntelligenceManagerInternal {
 
     /**
      * Checks whether the given {@code uid} owns the
-     * {@link android.service.intelligence.IntelligenceService} implementation associated with the
-     * given {@code userId}.
+     * {@link android.service.intelligence.SmartSuggestionsService} implementation associated with
+     * the given {@code userId}.
      */
     public abstract boolean isIntelligenceServiceForUser(int uid, @UserIdInt int userId);
 

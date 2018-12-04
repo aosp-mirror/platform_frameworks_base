@@ -17,6 +17,7 @@
 package android.service.intelligence;
 
 import android.os.IBinder;
+import android.service.intelligence.ContentCaptureEventsRequest;
 import android.service.intelligence.InteractionSessionId;
 import android.service.intelligence.InteractionContext;
 import android.service.intelligence.SnapshotData;
@@ -26,19 +27,19 @@ import android.view.intelligence.ContentCaptureEvent;
 
 import java.util.List;
 
-
 /**
  * Interface from the system to an intelligence service.
  *
  * @hide
  */
+ // TODO(b/111276913): rename / update javadoc (once the final name is defined)
 oneway interface IIntelligenceService {
 
     // Called when session is created (context not null) or destroyed (context null)
     void onSessionLifecycle(in InteractionContext context, in InteractionSessionId sessionId);
 
-    void onContentCaptureEvents(in InteractionSessionId sessionId,
-                                in List<ContentCaptureEvent> events);
+    void onContentCaptureEventsRequest(in InteractionSessionId sessionId,
+                                in ContentCaptureEventsRequest request);
 
     void onActivitySnapshot(in InteractionSessionId sessionId,
                             in SnapshotData snapshotData);

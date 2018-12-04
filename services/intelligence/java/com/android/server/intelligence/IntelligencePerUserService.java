@@ -41,7 +41,7 @@ import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.intelligence.ContentCaptureEvent;
-import android.view.intelligence.IntelligenceManager;
+import android.view.intelligence.ContentCaptureManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -54,6 +54,7 @@ import java.util.List;
 /**
  * Per-user instance of {@link IntelligenceManagerService}.
  */
+//TODO(b/111276913): rename once the final name is defined
 final class IntelligencePerUserService
         extends AbstractPerUserSystemService<IntelligencePerUserService,
             IntelligenceManagerService> {
@@ -86,14 +87,21 @@ final class IntelligencePerUserService
             Slog.w(TAG, "Could not get service for " + serviceComponent + ": " + e);
             return null;
         }
-        if (!Manifest.permission.BIND_INTELLIGENCE_SERVICE.equals(si.permission)) {
-            Slog.w(TAG, "IntelligenceService from '" + si.packageName
+        if (!Manifest.permission.BIND_SMART_SUGGESTIONS_SERVICE.equals(si.permission)) {
+            Slog.w(TAG, "SmartSuggestionsService from '" + si.packageName
                     + "' does not require permission "
-                    + Manifest.permission.BIND_INTELLIGENCE_SERVICE);
+                    + Manifest.permission.BIND_SMART_SUGGESTIONS_SERVICE);
             throw new SecurityException("Service does not require permission "
-                    + Manifest.permission.BIND_INTELLIGENCE_SERVICE);
+                    + Manifest.permission.BIND_SMART_SUGGESTIONS_SERVICE);
         }
         return si;
+    }
+
+    @Override // from PerUserSystemService
+    @GuardedBy("mLock")
+    protected boolean updateLocked(boolean disabled) {
+        destroyLocked();
+        return super.updateLocked(disabled);
     }
 
     // TODO(b/111276913): log metrics
@@ -103,7 +111,7 @@ final class IntelligencePerUserService
             @NonNull InteractionSessionId sessionId, int flags,
             @NonNull IResultReceiver resultReceiver) {
         if (!isEnabledLocked()) {
-            sendToClient(resultReceiver, IntelligenceManager.STATE_DISABLED);
+            sendToClient(resultReceiver, ContentCaptureManager.STATE_DISABLED);
             return;
         }
         final ComponentName serviceComponentName = getServiceComponentName();
@@ -126,7 +134,7 @@ final class IntelligencePerUserService
             // TODO(b/111276913): check if local ids match and decide what to do if they don't
             // TODO(b/111276913): should we call session.notifySessionStartedLocked() again??
             // if not, move notifySessionStartedLocked() into session constructor
-            sendToClient(resultReceiver, IntelligenceManager.STATE_ACTIVE);
+            sendToClient(resultReceiver, ContentCaptureManager.STATE_ACTIVE);
             return;
         }
 
@@ -142,7 +150,7 @@ final class IntelligencePerUserService
         }
         mSessions.put(sessionId, session);
         session.notifySessionStartedLocked();
-        sendToClient(resultReceiver, IntelligenceManager.STATE_ACTIVE);
+        sendToClient(resultReceiver, ContentCaptureManager.STATE_ACTIVE);
     }
 
     // TODO(b/111276913): log metrics

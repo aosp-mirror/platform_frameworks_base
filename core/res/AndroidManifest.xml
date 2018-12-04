@@ -3047,12 +3047,12 @@
     <permission android:name="android.permission.BIND_TEXTCLASSIFIER_SERVICE"
                 android:protectionLevel="signature" />
 
-    <!-- Must be required by a android.service.intelligence.IntelligenceService,
+    <!-- Must be required by a android.service.intelligence.SmartSuggestionsService,
          to ensure that only the system can bind to it.
          @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).
          <p>Protection level: signature
     -->
-    <permission android:name="android.permission.BIND_INTELLIGENCE_SERVICE"
+    <permission android:name="android.permission.BIND_SMART_SUGGESTIONS_SERVICE"
                 android:protectionLevel="signature" />
 
     <!-- Must be required by hotword enrollment application,
