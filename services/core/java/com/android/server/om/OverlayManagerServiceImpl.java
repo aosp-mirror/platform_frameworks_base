@@ -55,8 +55,8 @@ import java.util.Set;
  */
 final class OverlayManagerServiceImpl {
     // Flags to use in conjunction with updateState.
-    private static final int FLAG_TARGET_IS_UPGRADING = 1<<0;
-    private static final int FLAG_OVERLAY_IS_UPGRADING = 1<<1;
+    private static final int FLAG_TARGET_IS_UPGRADING = 1 << 0;
+    private static final int FLAG_OVERLAY_IS_UPGRADING = 1 << 1;
 
     private final PackageManagerHelper mPackageManager;
     private final IdmapManager mIdmapManager;
@@ -89,8 +89,8 @@ final class OverlayManagerServiceImpl {
         // a change in priority is only relevant for static RROs: specifically,
         // a regular RRO should not have its state reset only because a change
         // in priority
-        if (theTruth.isStaticOverlayPackage() &&
-                theTruth.overlayPriority != oldSettings.priority) {
+        if (theTruth.isStaticOverlayPackage()
+                && theTruth.overlayPriority != oldSettings.priority) {
             return true;
         }
         return false;
@@ -294,8 +294,8 @@ final class OverlayManagerServiceImpl {
             final int userId, final int flags) {
         boolean modified = false;
         final List<OverlayInfo> ois = mSettings.getOverlaysForTarget(targetPackageName, userId);
-        final int N = ois.size();
-        for (int i = 0; i < N; i++) {
+        final int n = ois.size();
+        for (int i = 0; i < n; i++) {
             final OverlayInfo oi = ois.get(i);
             final PackageInfo overlayPackage = mPackageManager.getPackageInfo(oi.packageName,
                     userId);
@@ -610,8 +610,8 @@ final class OverlayManagerServiceImpl {
         final List<OverlayInfo> overlays = mSettings.getOverlaysForTarget(targetPackageName,
                 userId);
         final List<String> paths = new ArrayList<>(overlays.size());
-        final int N = overlays.size();
-        for (int i = 0; i < N; i++) {
+        final int n = overlays.size();
+        for (int i = 0; i < n; i++) {
             final OverlayInfo oi = overlays.get(i);
             if (oi.isEnabled()) {
                 paths.add(oi.packageName);
@@ -632,8 +632,8 @@ final class OverlayManagerServiceImpl {
                 userId);
 
         // Static RROs targeting to "android", ie framework-res.apk, are handled by native layers.
-        if (targetPackage != null && overlayPackage != null &&
-                !("android".equals(targetPackageName)
+        if (targetPackage != null && overlayPackage != null
+                && !("android".equals(targetPackageName)
                         && overlayPackage.isStaticOverlayPackage())) {
             mIdmapManager.createIdmap(targetPackage, overlayPackage, userId);
         }
@@ -663,7 +663,7 @@ final class OverlayManagerServiceImpl {
 
     private @OverlayInfo.State int calculateNewState(@Nullable final PackageInfo targetPackage,
             @Nullable final PackageInfo overlayPackage, final int userId, final int flags)
-        throws OverlayManagerSettings.BadKeyException {
+            throws OverlayManagerSettings.BadKeyException {
 
         if ((flags & FLAG_TARGET_IS_UPGRADING) != 0) {
             return STATE_TARGET_UPGRADING;
