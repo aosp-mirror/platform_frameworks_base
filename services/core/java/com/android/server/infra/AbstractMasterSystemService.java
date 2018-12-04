@@ -58,7 +58,7 @@ import java.util.List;
  * <ul>
  *   <li>Disabling the service when {@link UserManager} restrictions change.
  *   <li>Refreshing the service when its underlying
- *   {@link #getServiceSettingsProperty() Settings property} changed.
+ *   {@link #getSettingsProperty() Settings property} changed.
  *   <li>Calling the service when other Settings properties changed.
  * </ul>
  *
@@ -214,7 +214,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     /**
-     * Temporary sets the service implementation.
+     * Temporarily sets the service implementation.
      *
      * <p>Typically used by Shell command and/or CTS tests.
      *
@@ -473,8 +473,10 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             pw.print(" Verbose: "); pw.println(realVerbose);
             pw.print(prefix); pw.print("Disabled users: "); pw.println(mDisabledUsers);
             pw.print(prefix); pw.print("Allow instant service: "); pw.println(mAllowInstantService);
-            pw.print(prefix); pw.print("Settings property: "); pw.println(
-                    getServiceSettingsProperty());
+            final String settingsProperty = getServiceSettingsProperty();
+            if (settingsProperty != null) {
+                pw.print(prefix); pw.print("Settings property: "); pw.println(settingsProperty);
+            }
             pw.print(prefix); pw.print("Cached services: ");
             if (size == 0) {
                 pw.println("none");

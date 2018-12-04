@@ -36,7 +36,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.intelligence.InteractionSessionId;
 import android.service.intelligence.SnapshotData;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
@@ -48,6 +47,7 @@ import android.view.intelligence.ContentCaptureManager;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.server.infra.AbstractPerUserSystemService;
+import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 import com.android.server.intelligence.IntelligenceManagerInternal.AugmentedAutofillCallback;
 
 import java.io.PrintWriter;
@@ -72,7 +72,8 @@ final class IntelligencePerUserService
 
     protected IntelligencePerUserService(
             IntelligenceManagerService master, Object lock, @UserIdInt int userId) {
-        super(master, lock, userId);
+        super(master, new FrameworkResourcesServiceNameResolver(master.getContext(), userId, lock,
+                com.android.internal.R.string.config_defaultSmartSuggestionsService), lock, userId);
     }
 
     @Override // from PerUserSystemService
@@ -112,13 +113,6 @@ final class IntelligencePerUserService
     protected boolean updateLocked(boolean disabled) {
         destroyLocked();
         return super.updateLocked(disabled);
-    }
-
-    @Override // from PerUserSystemService
-    protected String getDefaultComponentName() {
-        final String name = getContext()
-                .getString(com.android.internal.R.string.config_defaultSmartSuggestionsService);
-        return TextUtils.isEmpty(name) ? null : name;
     }
 
     // TODO(b/111276913): log metrics

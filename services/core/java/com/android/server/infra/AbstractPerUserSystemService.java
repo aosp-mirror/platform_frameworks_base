@@ -26,17 +26,12 @@ import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
-import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -54,14 +49,13 @@ import java.io.PrintWriter;
 public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSystemService<S, M>,
         M extends AbstractMasterSystemService<M, S>> {
 
-    /** Handler message to {@link #resetTemporaryServiceLocked()} */
-    private static final int MSG_RESET_TEMPORARY_SERVICE = 0;
-
     protected final @UserIdInt int mUserId;
     protected final Object mLock;
     protected final String mTag = getClass().getSimpleName();
 
     protected final M mMaster;
+
+    private final ServiceNameResolver mServiceNameResolver;
 
     /**
      * Whether service was disabled for user due to {@link UserManager} restrictions.
@@ -78,29 +72,13 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     @GuardedBy("mLock")
     private ServiceInfo mServiceInfo;
 
-    /**
-     * Temporary service name set by {@link #setTemporaryServiceLocked(String, int)}.
-     *
-     * <p>Typically used by Shell command and/or CTS tests.
-     */
-    @GuardedBy("mLock")
-    private String mTemporaryServiceName;
-
-    /**
-     * When the temporary service will expire (and reset back to the default).
-     */
-    @GuardedBy("mLock")
-    private long mTemporaryServiceExpiration;
-
-    /**
-     * Handler used to reset the temporary service name.
-     */
-    @GuardedBy("mLock")
-    private Handler mTemporaryHandler;
-
-    protected AbstractPerUserSystemService(@NonNull M master, @NonNull Object lock,
+    protected AbstractPerUserSystemService(@NonNull M master,
+            @NonNull ServiceNameResolver serviceNamer, @NonNull Object lock,
             @UserIdInt int userId) {
         mMaster = master;
+        mServiceNameResolver = serviceNamer;
+        mServiceNameResolver
+                .setOnTemporaryServiceNameChangedCallback(() -> updateLocked(mDisabled));
         mLock = lock;
         mUserId = userId;
     }
@@ -219,43 +197,18 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     }
 
     /**
-     * Gets the current name of the service, which is either the
-     *  {@link #getDefaultComponentName() default service} or the
+     * Gets the current name of the service, which is either the default service or the
      *  {@link #setTemporaryServiceLocked(String, int) temporary one}.
      */
     protected final String getComponentNameLocked() {
-        if (mTemporaryServiceName != null) {
-            // Always log it, as it should only be used on CTS or during development
-            Slog.w(mTag, "getComponentName(): using temporary name " + mTemporaryServiceName);
-            return mTemporaryServiceName;
-        }
-        return getDefaultComponentName();
-    }
-
-    /**
-     * Gets the name of the default component for the service.
-     *
-     * <p>Typically implemented by returning {@link #getComponentNameFromSettings()} or by using
-     * a string from the system resources.
-     */
-    @Nullable
-    protected abstract String getDefaultComponentName();
-
-    /**
-     * Gets this name of the remote service this service binds to as defined by {@link Settings}.
-     */
-    @Nullable
-    protected final String getComponentNameFromSettings() {
-        final String property = mMaster.getServiceSettingsProperty();
-        return property == null ? null : Settings.Secure
-                .getStringForUser(getContext().getContentResolver(), property, mUserId);
+        return mServiceNameResolver.getServiceNameLocked();
     }
 
     /**
      * Checks whether the current service for the user was temporarily set.
      */
     public final boolean isTemporaryServiceSetLocked() {
-        return mTemporaryServiceName != null;
+        return mServiceNameResolver.isTemporaryLocked();
     }
 
     /**
@@ -266,49 +219,14 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
      * to the default component after this timeout expires).
      */
     protected final void setTemporaryServiceLocked(@NonNull String componentName, int durationMs) {
-        mTemporaryServiceName = componentName;
-
-        if (mTemporaryHandler == null) {
-            mTemporaryHandler = new Handler(Looper.getMainLooper(), null, true) {
-                @Override
-                public void handleMessage(Message msg) {
-                    if (msg.what == MSG_RESET_TEMPORARY_SERVICE) {
-                        synchronized (mLock) {
-                            resetTemporaryServiceLocked();
-                        }
-                    } else {
-                        Slog.wtf(mTag, "invalid handler msg: " + msg);
-                    }
-                }
-            };
-        } else {
-            removeResetTemporaryServiceMessageLocked();
-        }
-        mTemporaryServiceExpiration = SystemClock.elapsedRealtime() + durationMs;
-        mTemporaryHandler.sendEmptyMessageDelayed(MSG_RESET_TEMPORARY_SERVICE, durationMs);
-
-        updateLocked(mDisabled);
-    }
-
-    private void removeResetTemporaryServiceMessageLocked() {
-        if (mMaster.verbose) {
-            Slog.v(mTag, "setTemporaryServiceLocked(): removing old message");
-        }
-        // NOTE: caller should already have checked it
-        mTemporaryHandler.removeMessages(MSG_RESET_TEMPORARY_SERVICE);
+        mServiceNameResolver.setTemporaryServiceLocked(componentName, durationMs);
     }
 
     /**
      * Resets the temporary service implementation to the default component.
      */
     protected final void resetTemporaryServiceLocked() {
-        Slog.i(mTag, "resetting temporary service from " + mTemporaryServiceName);
-        mTemporaryServiceName = null;
-        if (mTemporaryHandler != null) {
-            removeResetTemporaryServiceMessageLocked();
-            mTemporaryHandler = null;
-        }
-        updateLocked(mDisabled);
+        mServiceNameResolver.resetTemporaryServiceLocked();
     }
 
     /**
@@ -401,14 +319,7 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
             pw.print(prefix); pw.print("Service UID: ");
             pw.println(mServiceInfo.applicationInfo.uid);
         }
-        if (mTemporaryServiceName != null) {
-            pw.print(prefix); pw.print("Temporary service name: "); pw.print(mTemporaryServiceName);
-            final long ttl = mTemporaryServiceExpiration - SystemClock.elapsedRealtime();
-            pw.print(" (expires in "); TimeUtils.formatDuration(ttl, pw); pw.println(")");
-            pw.print(prefix); pw.print(prefix);
-            pw.print("Default service name: "); pw.println(getDefaultComponentName());
-        } else {
-            pw.print(prefix); pw.print("Service name: "); pw.println(getDefaultComponentName());
-        }
+        pw.print(prefix); pw.print("Name resolver: "); mServiceNameResolver.dumpShortLocked(pw);
+        pw.println();
     }
 }
