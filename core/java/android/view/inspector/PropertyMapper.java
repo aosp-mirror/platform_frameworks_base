@@ -16,101 +16,159 @@
 
 package android.view.inspector;
 
+import android.annotation.AttrRes;
 import android.annotation.NonNull;
 
 /**
  * An interface for mapping the string names of inspectable properties to integer identifiers.
  *
- * This interface is consumed by {@link InspectionHelper#mapProperties(PropertyMapper)}.
+ * This interface is consumed by {@link InspectionCompanion#mapProperties(PropertyMapper)}.
  *
  * Mapping properties to IDs enables quick comparisons against shadow copies of inspectable
  * objects without performing a large number of string comparisons.
  *
- * @see InspectionHelper#mapProperties(PropertyMapper)
- * @hide
+ * @see InspectionCompanion#mapProperties(PropertyMapper)
  */
 public interface PropertyMapper {
     /**
      * Map a string name to an integer ID for a primitive boolean property.
      *
      * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
      * @return An integer ID for the property
      * @throws PropertyConflictException If the property name is already mapped as another type.
      */
-    int mapBoolean(@NonNull String name);
+    int mapBoolean(@NonNull String name, @AttrRes int attributeId);
 
     /**
      * Map a string name to an integer ID for a primitive byte property.
      *
      * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
      * @return An integer ID for the property
      * @throws PropertyConflictException If the property name is already mapped as another type.
      */
-    int mapByte(@NonNull String name);
+    int mapByte(@NonNull String name, @AttrRes int attributeId);
 
     /**
      * Map a string name to an integer ID for a primitive char property.
      *
      * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
      * @return An integer ID for the property
      * @throws PropertyConflictException If the property name is already mapped as another type.
      */
-    int mapChar(@NonNull String name);
+    int mapChar(@NonNull String name, @AttrRes int attributeId);
 
     /**
      * Map a string name to an integer ID for a primitive double property.
      *
      * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
      * @return An integer ID for the property
      * @throws PropertyConflictException If the property name is already mapped as another type.
      */
-    int mapDouble(@NonNull String name);
+    int mapDouble(@NonNull String name, @AttrRes int attributeId);
 
     /**
      * Map a string name to an integer ID for a primitive float property.
      *
      * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
      * @return An integer ID for the property
      * @throws PropertyConflictException If the property name is already mapped as another type.
      */
-    int mapFloat(@NonNull String name);
+    int mapFloat(@NonNull String name, @AttrRes int attributeId);
 
     /**
      * Map a string name to an integer ID for a primitive int property.
      *
      * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
      * @return An integer ID for the property
      * @throws PropertyConflictException If the property name is already mapped as another type.
      */
-    int mapInt(@NonNull String name);
+    int mapInt(@NonNull String name, @AttrRes int attributeId);
 
     /**
      * Map a string name to an integer ID for a primitive long property.
      *
      * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
      * @return An integer ID for the property
      * @throws PropertyConflictException If the property name is already mapped as another type.
      */
-    int mapLong(@NonNull String name);
+    int mapLong(@NonNull String name, @AttrRes int attributeId);
 
     /**
      * Map a string name to an integer ID for a primitive short property.
      *
      * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
      * @return An integer ID for the property
      * @throws PropertyConflictException If the property name is already mapped as another type.
      */
-    int mapShort(@NonNull String name);
+    int mapShort(@NonNull String name, @AttrRes int attributeId);
 
     /**
      * Map a string name to an integer ID for an object property.
      *
      * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
      * @return An integer ID for the property
      * @throws PropertyConflictException If the property name is already mapped as another type.
      */
-    int mapObject(@NonNull String name);
+    int mapObject(@NonNull String name, @AttrRes int attributeId);
 
+    /**
+     * Map a string name to an integer ID for a color property.
+     *
+     * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
+     * @return An integer ID for the property
+     * @throws PropertyConflictException If the property name is already mapped as another type.
+     * @see android.graphics.Color
+     */
+    int mapColor(@NonNull String name, @AttrRes int attributeId);
+
+    /**
+     * Map a string name to an integer ID for a gravity property.
+     *
+     * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
+     * @return An integer ID for the property
+     * @throws PropertyConflictException If the property name is already mapped as another type.
+     * @see android.view.Gravity
+     */
+    int mapGravity(@NonNull String name, @AttrRes int attributeId);
+
+    /**
+     * Map a string name to an integer ID for an enumeration packed into an int property.
+     *
+     * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
+     * @param mapping A mapping from int to String
+     * @return An integer ID for the property
+     * @throws PropertyConflictException If the property name is already mapped as another type.
+     */
+    int mapIntEnum(
+            @NonNull String name,
+            @AttrRes int attributeId,
+            @NonNull IntEnumMapping mapping);
+
+    /**
+     * Map a string name to an integer ID for a flag set packed into an int property.
+     *
+     * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
+     * @param mapping A mapping from int to an array of strings
+     * @return An integer ID for the property
+     * @throws PropertyConflictException If the property name is already mapped as another type.
+     */
+    int mapIntFlag(
+            @NonNull String name,
+            @AttrRes int attributeId,
+            @NonNull IntFlagMapping mapping);
     /**
      * Thrown from a map method if a property name is already mapped as different type.
      */

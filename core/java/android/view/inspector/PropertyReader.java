@@ -16,19 +16,21 @@
 
 package android.view.inspector;
 
+import android.annotation.ColorInt;
+import android.annotation.ColorLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Color;
 
 /**
  * An interface for reading the properties of an inspectable object.
  *
- * Used as the parameter for {@link InspectionHelper#readProperties(Object, PropertyReader)}.
+ * Used as the parameter for {@link InspectionCompanion#readProperties(Object, PropertyReader)}.
  * It has separate methods for all primitive types to avoid autoboxing overhead if a concrete
  * implementation is able to work with primitives. Implementations should be prepared to accept
  * {null} as the value of {@link PropertyReader#readObject(int, Object)}.
  *
- * @see InspectionHelper#readProperties(Object, PropertyReader)
- * @hide
+ * @see InspectionCompanion#readProperties(Object, PropertyReader)
  */
 public interface PropertyReader {
     /**
@@ -113,6 +115,60 @@ public interface PropertyReader {
      * @throws PropertyTypeMismatchException If the property ID is not mapped as an object
      */
     void readObject(int id, @Nullable Object value);
+
+    /**
+     * Read a color packed into a {@link ColorInt} as a property.
+     *
+     * @param id Identifier of the property from a {@link PropertyMapper}
+     * @param value Value of the property
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as a color
+     */
+    void readColor(int id, @ColorInt int value);
+
+    /**
+     * Read a color packed into a {@link ColorLong} as a property.
+     *
+     * @param id Identifier of the property from a {@link PropertyMapper}
+     * @param value Value of the property
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as a color
+     */
+    void readColor(int id, @ColorLong long value);
+
+    /**
+     * Read a {@link Color} object as a property.
+     *
+     * @param id Identifier of the property from a {@link PropertyMapper}
+     * @param value Value of the property
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as a color
+     */
+    void readColor(int id, @Nullable Color value);
+
+    /**
+     * Read {@link android.view.Gravity} packed into an primitive {int}.
+     *
+     * @param id Identifier of the property from a {@link PropertyMapper}
+     * @param value Value of the property
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as a gravity property
+     */
+    void readGravity(int id, int value);
+
+    /**
+     * Read an enumeration packed into a primitive {int}.
+     *
+     * @param id Identifier of the property from a {@link PropertyMapper}
+     * @param value Value of the property
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as an object
+     */
+    void readIntEnum(int id, int value);
+
+    /**
+     * Read a flag packed into a primitive {int}.
+     *
+     * @param id Identifier of the property from a {@link PropertyMapper}
+     * @param value Value of the property
+     * @throws PropertyTypeMismatchException If the property ID is not mapped as an object
+     */
+    void readIntFlag(int id, int value);
 
     /**
      * Thrown if a client calls a typed read method for a property of a different type.
