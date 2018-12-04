@@ -127,6 +127,15 @@ public abstract class NavigationGestureAction {
     }
 
     /**
+     * Decide if the controller should not send the current motion event to launcher via
+     * {@link OverviewProxyService}
+     * @return if controller should not proxy
+     */
+    public boolean disableProxyEvents() {
+        return false;
+    }
+
+    /**
      * Tell if action is enabled. Compared to {@link #canPerformAction()} this is based on settings
      * if the action is disabled for a particular gesture. For example a back action can be enabled
      * however if there is nothing to back to then {@link #canPerformAction()} should return false.
