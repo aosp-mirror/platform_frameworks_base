@@ -76,7 +76,9 @@ public final class ActionsSuggestionsHelper {
             return new ActionsSuggestionsModel.ConversationMessage[]{
                     new ActionsSuggestionsModel.ConversationMessage(
                             FIRST_NON_LOCAL_USER,
-                            lastMessage.getText().toString())};
+                            lastMessage.getText().toString(),
+                            0,
+                            null)};
         }
 
         // Encode the messages in the reverse order, stop whenever the Person object is missing.
@@ -89,7 +91,7 @@ public final class ActionsSuggestionsHelper {
             }
             nativeMessages.push(new ActionsSuggestionsModel.ConversationMessage(
                     personEncoder.encode(message.getAuthor()),
-                    message.getText().toString()));
+                    message.getText().toString(), 0, null));
         }
         return nativeMessages.toArray(
                 new ActionsSuggestionsModel.ConversationMessage[nativeMessages.size()]);
