@@ -223,5 +223,5 @@ void Properties::overrideRenderPipelineType(RenderPipelineType type) {
     sRenderPipelineType = type;
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

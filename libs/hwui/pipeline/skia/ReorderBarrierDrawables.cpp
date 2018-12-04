@@ -211,6 +211,6 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
             casterAlpha < 1.0f ? SkShadowFlags::kTransparentOccluder_ShadowFlag : 0);
 }
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

@@ -41,6 +41,6 @@ protected:
     void onDraw(SkCanvas* canvas) override;
 };
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

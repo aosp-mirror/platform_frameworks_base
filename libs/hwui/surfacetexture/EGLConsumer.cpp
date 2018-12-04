@@ -672,4 +672,4 @@ EGLImageKHR EGLConsumer::EglImage::createImage(EGLDisplay dpy,
     return image;
 }
 
-};  // namespace android
+}  // namespace android

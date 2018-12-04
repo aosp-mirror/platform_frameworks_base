@@ -146,4 +146,4 @@ bool transformPaint(ColorTransform transform, SkPaint* paint, BitmapPalette pale
     return shouldInvert;
 }
 
-};  // namespace android::uirenderer
+}  // namespace android::uirenderer

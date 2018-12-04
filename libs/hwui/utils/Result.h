@@ -51,4 +51,4 @@ private:
     std::variant<R, Error<E>> result;
 };
 
-}; // namespace android::uirenderer
+} // namespace android::uirenderer

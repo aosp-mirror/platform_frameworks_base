@@ -491,4 +491,4 @@ sk_sp<SkImage> SurfaceTexture::dequeueImage(SkMatrix& transformMatrix, bool* que
     return image;
 }
 
-};  // namespace android
+}  // namespace android

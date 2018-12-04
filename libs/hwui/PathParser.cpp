@@ -304,5 +304,5 @@ void PathParser::parseAsciiStringForSkPath(SkPath* skPath, ParseResult* result, 
     return;
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

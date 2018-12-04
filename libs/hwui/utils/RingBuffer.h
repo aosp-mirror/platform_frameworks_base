@@ -61,7 +61,7 @@ private:
     size_t mCount = 0;
 };
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android
 
 #endif /* RINGBUFFER_H_ */

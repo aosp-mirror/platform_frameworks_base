@@ -245,5 +245,5 @@ private:
 
 typedef Matrix4 mat4;
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

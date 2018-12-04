@@ -259,6 +259,6 @@ double SkiaRecordingCanvas::drawAnimatedImage(AnimatedImageDrawable* animatedIma
     return 0;
 }
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

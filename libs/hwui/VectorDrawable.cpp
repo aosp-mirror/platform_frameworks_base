@@ -691,7 +691,7 @@ BitmapPalette Tree::computePalette() {
     return BitmapPalette::Unknown;
 }
 
-};  // namespace VectorDrawable
+}  // namespace VectorDrawable
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

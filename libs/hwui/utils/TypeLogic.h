@@ -37,4 +37,4 @@ template <typename D, typename S> struct copy_cv {
 template <typename D, typename S> using same_cv = copy_cv<std::remove_cv_t<D>, S>;
 template <typename D, typename S> using same_cv_t = typename same_cv<D, S>::type;
 
-}; // namespace android::uirenderer
+} // namespace android::uirenderer

@@ -31,5 +31,5 @@ typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
  */
 using DisplayList = skiapipeline::SkiaDisplayList;
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

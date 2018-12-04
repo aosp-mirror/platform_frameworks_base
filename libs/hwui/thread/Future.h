@@ -53,7 +53,7 @@ private:
     T mResult;
 };
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android
 
 #endif  // ANDROID_HWUI_FUTURE_H

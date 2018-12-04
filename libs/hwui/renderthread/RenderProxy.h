@@ -49,7 +49,7 @@ enum {
     Reset = 1 << 1,
     JankStats = 1 << 2,
 };
-};
+}
 
 /*
  * RenderProxy is strictly single threaded. All methods must be invoked on the owning

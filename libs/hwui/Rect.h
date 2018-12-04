@@ -262,5 +262,5 @@ public:
     }
 };  // class Rect
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

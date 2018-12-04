@@ -406,5 +406,5 @@ TEST(VectorDrawable, drawPathWithoutIncrementingShaderRefCount) {
     EXPECT_TRUE(shader->unique());
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android
