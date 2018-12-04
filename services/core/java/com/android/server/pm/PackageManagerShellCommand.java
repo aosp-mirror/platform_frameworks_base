@@ -915,7 +915,10 @@ class PackageManagerShellCommand extends ShellCommand {
                 pw.println("Error: must either specify a package size or an APK file");
                 return 1;
             }
-            if (doWriteSplit(sessionId, inPath, params.sessionParams.sizeBytes, "base.apk",
+            final boolean isApex =
+                    (params.sessionParams.installFlags & PackageManager.INSTALL_APEX) != 0;
+            String splitName = "base." + (isApex ? "apex" : "apk");
+            if (doWriteSplit(sessionId, inPath, params.sessionParams.sizeBytes, splitName,
                     false /*logSuccess*/) != PackageInstaller.STATUS_SUCCESS) {
                 return 1;
             }
@@ -2228,6 +2231,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "--force-sdk":
                     sessionParams.installFlags |= PackageManager.INSTALL_FORCE_SDK;
+                    break;
+                case "--apex":
+                    sessionParams.installFlags |= PackageManager.INSTALL_APEX;
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);

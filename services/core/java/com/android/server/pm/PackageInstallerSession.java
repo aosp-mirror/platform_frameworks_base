@@ -42,6 +42,7 @@ import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.apex.IApexService;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
@@ -73,6 +74,7 @@ import android.os.ParcelableException;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.RevocableFileDescriptor;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
@@ -858,12 +860,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         resolveStageDirLocked();
 
         mSealed = true;
-
-        // Verify that stage looks sane with respect to existing application.
-        // This currently only ensures packageName, versionCode, and certificate
-        // consistency.
         try {
-            validateInstallLocked(pkgInfo);
+            if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+                validateApexInstallLocked(pkgInfo);
+            } else {
+                // Verify that stage looks sane with respect to existing application.
+                // This currently only ensures packageName, versionCode, and certificate
+                // consistency.
+                validateApkInstallLocked(pkgInfo);
+            }
         } catch (PackageManagerException e) {
             throw e;
         } catch (Throwable e) {
@@ -942,6 +947,31 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         Preconditions.checkNotNull(mSigningDetails);
         Preconditions.checkNotNull(mResolvedBaseFile);
 
+        if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+            commitApexLocked();
+        } else {
+            commitApkLocked();
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void commitApexLocked() throws PackageManagerException {
+        try {
+            IApexService apex = IApexService.Stub.asInterface(
+                    ServiceManager.getService("apexservice"));
+            apex.stagePackage(mResolvedBaseFile.toString());
+        } catch (Throwable e) {
+            // Convert all exceptions into package manager exceptions as only those are handled
+            // in the code above
+            throw new PackageManagerException(e);
+        } finally {
+            destroyInternal();
+            dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "APEX installed", null);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void commitApkLocked() throws PackageManagerException {
         if (needToAskForPermissionsLocked()) {
             // User needs to accept permissions; give installer an intent they
             // can use to involve user.
@@ -1063,6 +1093,57 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 (params.installFlags & PackageManager.DONT_KILL_APP) != 0;
     }
 
+    @GuardedBy("mLock")
+    private void validateApexInstallLocked(@Nullable PackageInfo pkgInfo)
+            throws PackageManagerException {
+        mResolvedStagedFiles.clear();
+        mResolvedInheritedFiles.clear();
+
+        try {
+            resolveStageDirLocked();
+        } catch (IOException e) {
+            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
+                "Failed to resolve stage location", e);
+        }
+
+        final File[] addedFiles = mResolvedStageDir.listFiles(sAddedFilter);
+        if (ArrayUtils.isEmpty(addedFiles)) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
+        }
+
+        if (addedFiles.length > 1) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                "Only one APEX file at a time might be installed");
+        }
+        File addedFile = addedFiles[0];
+        final ApkLite apk;
+        try {
+            apk = PackageParser.parseApkLite(
+                addedFile, PackageParser.PARSE_COLLECT_CERTIFICATES);
+        } catch (PackageParserException e) {
+            throw PackageManagerException.from(e);
+        }
+
+        mPackageName = apk.packageName;
+        mVersionCode = apk.getLongVersionCode();
+        mSigningDetails = apk.signingDetails;
+        mResolvedBaseFile = addedFile;
+
+        assertApkConsistentLocked(String.valueOf(addedFile), apk);
+
+        if (mSigningDetails == PackageParser.SigningDetails.UNKNOWN) {
+            try {
+                // STOPSHIP: For APEX we should also implement proper APK Signature verification.
+                mSigningDetails = ApkSignatureVerifier.plsCertsNoVerifyOnlyCerts(
+                    pkgInfo.applicationInfo.sourceDir,
+                    PackageParser.SigningDetails.SignatureSchemeVersion.JAR);
+            } catch (PackageParserException e) {
+                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Couldn't obtain signatures from base APK");
+            }
+        }
+    }
+
     /**
      * Validate install by confirming that all application packages are have
      * consistent package name, version code, and signing certificates.
@@ -1076,7 +1157,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * {@link PackageManagerService}.
      */
     @GuardedBy("mLock")
-    private void validateInstallLocked(@Nullable PackageInfo pkgInfo)
+    private void validateApkInstallLocked(@Nullable PackageInfo pkgInfo)
             throws PackageManagerException {
         mPackageName = null;
         mVersionCode = -1;
