@@ -28,6 +28,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -117,11 +120,11 @@ public class WindowTestUtils {
         // many components rely on the {@link StackWindowController#adjustConfigurationForBounds}
         // to properly set bounds values in the configuration. We must mimick those actions here.
         doAnswer((InvocationOnMock invocationOnMock) -> {
-            final Configuration config = invocationOnMock.<Configuration>getArgument(7);
+            final Configuration config = invocationOnMock.<Configuration>getArgument(6);
             final Rect bounds = invocationOnMock.<Rect>getArgument(0);
             config.windowConfiguration.setBounds(bounds);
             return null;
-        }).when(controller).adjustConfigurationForBounds(any(), any(), any(), any(),
+        }).when(controller).adjustConfigurationForBounds(any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyFloat(), any(), any(), anyInt());
 
         return controller;

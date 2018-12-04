@@ -211,7 +211,7 @@ message TaskProto {
     repeated AppWindowTokenProto app_window_tokens = 3;
     optional bool fills_parent = 4;
     optional .android.graphics.RectProto bounds = 5;
-    optional .android.graphics.RectProto temp_inset_bounds = 6;
+    optional .android.graphics.RectProto displayed_bounds = 6;
     optional bool defer_removal = 7;
     optional int32 surface_width = 8;
     optional int32 surface_height = 9;

@@ -2543,7 +2543,7 @@ final class ActivityRecord extends ConfigurationContainer {
 
         // Bounds changed...update configuration to match.
         if (!matchParentBounds()) {
-            task.computeOverrideConfiguration(mTmpConfig, updatedBounds, null /* insetBounds */,
+            task.computeOverrideConfiguration(mTmpConfig, updatedBounds,
                     false /* overrideWidth */, false /* overrideHeight */);
         }
 

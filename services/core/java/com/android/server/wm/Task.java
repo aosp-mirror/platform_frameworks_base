@@ -27,11 +27,11 @@ import static com.android.server.EventLogTags.WM_TASK_REMOVED;
 import static com.android.server.wm.TaskProto.APP_WINDOW_TOKENS;
 import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.DEFER_REMOVAL;
+import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
 import static com.android.server.wm.TaskProto.FILLS_PARENT;
 import static com.android.server.wm.TaskProto.ID;
 import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
 import static com.android.server.wm.TaskProto.SURFACE_WIDTH;
-import static com.android.server.wm.TaskProto.TEMP_INSET_BOUNDS;
 import static com.android.server.wm.TaskProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -66,8 +66,8 @@ class Task extends WindowContainer<AppWindowToken> {
     final Rect mPreparedFrozenBounds = new Rect();
     final Configuration mPreparedFrozenMergedConfig = new Configuration();
 
-    // Bounds used to calculate the insets.
-    private final Rect mTempInsetBounds = new Rect();
+    // If non-empty, bounds used to display the task during animations/interactions.
+    private final Rect mOverrideDisplayedBounds = new Rect();
 
     /** ID of the display which rotation {@link #mRotation} has. */
     private int mLastRotationDisplayId = Display.INVALID_DISPLAY;
@@ -307,23 +307,23 @@ class Task extends WindowContainer<AppWindowToken> {
     }
 
     /**
-     * Sets the bounds used to calculate the insets. See
-     * {@link android.app.IActivityTaskManager#resizeDockedStack} why this is needed.
+     * Sets bounds that override where the task is displayed. Used during transient operations
+     * like animation / interaction.
      */
-    void setTempInsetBounds(Rect tempInsetBounds) {
-        if (tempInsetBounds != null) {
-            mTempInsetBounds.set(tempInsetBounds);
+    void setOverrideDisplayedBounds(Rect overrideDisplayedBounds) {
+        if (overrideDisplayedBounds != null) {
+            mOverrideDisplayedBounds.set(overrideDisplayedBounds);
         } else {
-            mTempInsetBounds.setEmpty();
+            mOverrideDisplayedBounds.setEmpty();
         }
     }
 
     /**
-     * Gets the bounds used to calculate the insets. See
+     * Gets the bounds that override where the task is displayed. See
      * {@link android.app.IActivityTaskManager#resizeDockedStack} why this is needed.
      */
-    void getTempInsetBounds(Rect out) {
-        out.set(mTempInsetBounds);
+    Rect getOverrideDisplayedBounds() {
+        return mOverrideDisplayedBounds;
     }
 
     void setResizeable(int resizeMode) {
@@ -380,8 +380,13 @@ class Task extends WindowContainer<AppWindowToken> {
         } else {
             mTmpRect2.offsetTo(adjustedBounds.left, adjustedBounds.top);
         }
-        setTempInsetBounds(tempInsetBounds);
-        setBounds(mTmpRect2, false /* forced */);
+        if (tempInsetBounds == null || tempInsetBounds.isEmpty()) {
+            setOverrideDisplayedBounds(null);
+            setBounds(mTmpRect2);
+        } else {
+            setOverrideDisplayedBounds(mTmpRect2);
+            setBounds(tempInsetBounds);
+        }
     }
 
     /** Return true if the current bound can get outputted to the rest of the system as-is. */
@@ -405,6 +410,15 @@ class Task extends WindowContainer<AppWindowToken> {
         // The bounds has been adjusted to accommodate for a docked stack, but the docked stack is
         // not currently visible. Go ahead a represent it as fullscreen to the rest of the system.
         mStack.getDisplayContent().getBounds(out);
+    }
+
+    @Override
+    public Rect getDisplayedBounds() {
+        if (mOverrideDisplayedBounds.isEmpty()) {
+            return super.getDisplayedBounds();
+        } else {
+            return mOverrideDisplayedBounds;
+        }
     }
 
     /**
@@ -723,7 +737,7 @@ class Task extends WindowContainer<AppWindowToken> {
         }
         proto.write(FILLS_PARENT, matchParentBounds());
         getBounds().writeToProto(proto, BOUNDS);
-        mTempInsetBounds.writeToProto(proto, TEMP_INSET_BOUNDS);
+        mOverrideDisplayedBounds.writeToProto(proto, DISPLAYED_BOUNDS);
         proto.write(DEFER_REMOVAL, mDeferRemoval);
         proto.write(SURFACE_WIDTH, mSurfaceControl.getWidth());
         proto.write(SURFACE_HEIGHT, mSurfaceControl.getHeight());
@@ -739,7 +753,7 @@ class Task extends WindowContainer<AppWindowToken> {
         pw.println(doublePrefix + "mBounds=" + getBounds().toShortString());
         pw.println(doublePrefix + "mdr=" + mDeferRemoval);
         pw.println(doublePrefix + "appTokens=" + mChildren);
-        pw.println(doublePrefix + "mTempInsetBounds=" + mTempInsetBounds.toShortString());
+        pw.println(doublePrefix + "mDisplayedBounds=" + mOverrideDisplayedBounds.toShortString());
 
         final String triplePrefix = doublePrefix + "  ";
         final String quadruplePrefix = triplePrefix + "  ";

@@ -310,6 +310,11 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
     // This number will be assigned when we evaluate OOM scores for all visible tasks.
     int mLayerRank = -1;
 
+    // When non-empty, this represents the bounds this task will be drawn at. This gets set during
+    // transient operations such as split-divider dragging and animations.
+    // TODO(b/119687367): This member is temporary.
+    final Rect mDisplayedBounds = new Rect();
+
     /** Helper object used for updating override configuration. */
     private Configuration mTmpConfig = new Configuration();
 
@@ -447,6 +452,9 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         }
 
         mWindowContainerController = controller;
+        if (!mDisplayedBounds.isEmpty() && controller.mContainer != null) {
+            controller.mContainer.setOverrideDisplayedBounds(mDisplayedBounds);
+        }
     }
 
     void removeWindowContainer() {
@@ -1732,9 +1740,15 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         final Configuration newOverrideConfig = new Configuration();
         if (bounds != null) {
             newOverrideConfig.setTo(getOverrideConfiguration());
-            mTmpRect.set(bounds);
+            if (insetBounds != null && !insetBounds.isEmpty()) {
+                mTmpRect.set(insetBounds);
+                setDisplayedBounds(bounds);
+            } else {
+                mTmpRect.set(bounds);
+                setDisplayedBounds(null);
+            }
             adjustForMinimalTaskDimensions(mTmpRect);
-            computeOverrideConfiguration(newOverrideConfig, mTmpRect, insetBounds,
+            computeOverrideConfiguration(newOverrideConfig, mTmpRect,
                     mTmpRect.right != bounds.right, mTmpRect.bottom != bounds.bottom);
         }
 
@@ -1782,16 +1796,23 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
                 setLastNonFullscreenBounds(currentBounds);
             }
             setBounds(null);
+            setDisplayedBounds(null);
             newConfig.unset();
         } else {
-            mTmpRect.set(bounds);
+            if (insetBounds != null && !insetBounds.isEmpty()) {
+                mTmpRect.set(insetBounds);
+                setDisplayedBounds(bounds);
+            } else {
+                mTmpRect.set(bounds);
+                setDisplayedBounds(null);
+            }
             adjustForMinimalTaskDimensions(mTmpRect);
             setBounds(mTmpRect);
 
             if (mStack == null || persistBounds) {
                 setLastNonFullscreenBounds(getOverrideBounds());
             }
-            computeOverrideConfiguration(newConfig, mTmpRect, insetBounds,
+            computeOverrideConfiguration(newConfig, mTmpRect,
                     mTmpRect.right != bounds.right, mTmpRect.bottom != bounds.bottom);
         }
         onOverrideConfigurationChanged(newConfig);
@@ -1847,11 +1868,44 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         mService.mStackSupervisor.mLaunchParamsPersister.saveTask(this);
     }
 
+    /**
+     * Displayed bounds are used to set where the task is drawn at any given time. This is
+     * separate from its actual bounds so that the app doesn't see any meaningful configuration
+     * changes during transitionary periods.
+     */
+    void setDisplayedBounds(Rect bounds) {
+        if (bounds == null) {
+            mDisplayedBounds.setEmpty();
+        } else {
+            mDisplayedBounds.set(bounds);
+        }
+        final TaskWindowContainerController controller = getWindowContainerController();
+        if (controller != null && controller.mContainer != null) {
+            controller.mContainer.setOverrideDisplayedBounds(
+                    mDisplayedBounds.isEmpty() ? null : mDisplayedBounds);
+        }
+    }
+
+    /**
+     * Gets the current overridden displayed bounds. These will be empty if the task is not
+     * currently overriding where it is displayed.
+     */
+    Rect getDisplayedBounds() {
+        return mDisplayedBounds;
+    }
+
+    /**
+     * @return {@code true} if this has overridden displayed bounds.
+     */
+    boolean hasDisplayedBounds() {
+        return !mDisplayedBounds.isEmpty();
+    }
+
     /** Clears passed config and fills it with new override values. */
     // TODO(b/36505427): TaskRecord.computeOverrideConfiguration() is a utility method that doesn't
     // depend on task or stacks, but uses those object to get the display to base the calculation
     // on. Probably best to centralize calculations like this in ConfigurationContainer.
-    void computeOverrideConfiguration(Configuration config, Rect bounds, Rect insetBounds,
+    void computeOverrideConfiguration(Configuration config, Rect bounds,
             boolean overrideWidth, boolean overrideHeight) {
         mTmpNonDecorBounds.set(bounds);
         mTmpStableBounds.set(bounds);
@@ -1863,7 +1917,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
 
         if (mStack != null) {
             final StackWindowController stackController = mStack.getWindowContainerController();
-            stackController.adjustConfigurationForBounds(bounds, insetBounds,
+            stackController.adjustConfigurationForBounds(bounds,
                     mTmpNonDecorBounds, mTmpStableBounds, overrideWidth, overrideHeight, density,
                     config, parentConfig, getWindowingMode());
         } else {
