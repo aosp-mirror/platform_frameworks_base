@@ -42,13 +42,11 @@ enum { WHAT_RUN_REPORT = 1, WHAT_SEND_BACKLOG_TO_DROPBOX = 2 };
 #define DEFAULT_BYTES_SIZE_LIMIT (20 * 1024 * 1024)        // 20MB
 #define DEFAULT_REFACTORY_PERIOD_MS (24 * 60 * 60 * 1000)  // 1 Day
 
-// Skip logs (1100 - 1108) because they are already in the bug report
-// Skip 1200, 1201, 1202, 3018 because they take too long
-// TODO(120079956): Skip 3008, 3015 because of error
+// Skip these sections for dumpstate only. Dumpstate allows 10s max for each service to dump.
+// Skip logs (1100 - 1108) and traces (1200 - 1202) because they are already in the bug report.
+// Skip 3018 because it takes too long.
 #define SKIPPED_SECTIONS { 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, /* Logs */ \
                            1200, 1201, 1202, /* Native, hal, java traces */ \
-                           3008, /* "package --proto" */ \
-                           3015, /* "activity --proto processes" */ \
                            3018  /* "meminfo -a --proto" */ }
 
 namespace android {

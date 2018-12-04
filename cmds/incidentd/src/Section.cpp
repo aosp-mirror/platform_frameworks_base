@@ -75,6 +75,7 @@ static void write_section_stats(IncidentMetadata::SectionStats* stats, const FdB
     stats->set_dump_duration_ms(buffer.durationMs());
     stats->set_timed_out(buffer.timedOut());
     stats->set_is_truncated(buffer.truncated());
+    stats->set_success(!buffer.timedOut() && !buffer.truncated());
 }
 
 // Reads data from FdBuffer and writes it to the requests file descriptor.
@@ -83,7 +84,8 @@ static status_t write_report_requests(const int id, const FdBuffer& buffer,
     status_t err = -EBADF;
     EncodedBuffer::iterator data = buffer.data();
     PrivacyBuffer privacyBuffer(get_privacy_of_section(id), data);
-    int writeable = 0;
+    IncidentMetadata::SectionStats* stats = requests->sectionStats(id);
+    int nPassed = 0;
 
     // The streaming ones, group requests by spec in order to save unnecessary strip operations
     map<PrivacySpec, vector<sp<ReportRequest>>> requestsBySpec;
@@ -99,7 +101,18 @@ static status_t write_report_requests(const int id, const FdBuffer& buffer,
     for (auto mit = requestsBySpec.begin(); mit != requestsBySpec.end(); mit++) {
         PrivacySpec spec = mit->first;
         err = privacyBuffer.strip(spec);
-        if (err != NO_ERROR) return err;  // it means the privacyBuffer data is corrupted.
+        if (err != NO_ERROR) {
+            // Privacy Buffer is corrupted, probably due to an ill-formatted proto. This is a
+            // non-fatal error. The whole report is still valid. So just log the failure.
+            ALOGW("Failed to strip section %d with spec %d: %s",
+                id, spec.dest, strerror(-err));
+            stats->set_success(false);
+            stats->set_error_msg("Failed to strip section: privacy buffer corrupted, probably "
+                "due to an ill-formatted proto");
+            nPassed++;
+            continue;
+        }
+
         if (privacyBuffer.size() == 0) continue;
 
         for (auto it = mit->second.begin(); it != mit->second.end(); it++) {
@@ -114,7 +127,7 @@ static status_t write_report_requests(const int id, const FdBuffer& buffer,
                 request->err = err;
                 continue;
             }
-            writeable++;
+            nPassed++;
             VLOG("Section %d flushed %zu bytes to fd %d with spec %d", id, privacyBuffer.size(),
                  request->fd, spec.dest);
         }
@@ -125,7 +138,15 @@ static status_t write_report_requests(const int id, const FdBuffer& buffer,
     if (requests->mainFd() >= 0) {
         PrivacySpec spec = PrivacySpec::new_spec(requests->mainDest());
         err = privacyBuffer.strip(spec);
-        if (err != NO_ERROR) return err;  // the buffer data is corrupted.
+        if (err != NO_ERROR) {
+            ALOGW("Failed to strip section %d with spec %d for dropbox: %s",
+                id, spec.dest, strerror(-err));
+            stats->set_success(false);
+            stats->set_error_msg("Failed to strip section: privacy buffer corrupted, probably "
+                "due to an ill-formatted proto");
+            nPassed++;
+            goto DONE;
+        }
         if (privacyBuffer.size() == 0) goto DONE;
 
         err = write_section_header(requests->mainFd(), id, privacyBuffer.size());
@@ -138,7 +159,7 @@ static status_t write_report_requests(const int id, const FdBuffer& buffer,
             requests->setMainFd(-1);
             goto DONE;
         }
-        writeable++;
+        nPassed++;
         VLOG("Section %d flushed %zu bytes to dropbox %d with spec %d", id, privacyBuffer.size(),
              requests->mainFd(), spec.dest);
         // Reports bytes of the section uploaded via dropbox after filtering.
@@ -147,7 +168,7 @@ static status_t write_report_requests(const int id, const FdBuffer& buffer,
 
 DONE:
     // only returns error if there is no fd to write to.
-    return writeable > 0 ? NO_ERROR : err;
+    return nPassed > 0 ? NO_ERROR : err;
 }
 
 // ================================================================================
@@ -213,6 +234,8 @@ status_t MetadataSection::Execute(ReportRequestSet* requests) const {
                     stats.timed_out());
         proto.write(FIELD_TYPE_BOOL | IncidentMetadata::SectionStats::kIsTruncatedFieldNumber,
                     stats.is_truncated());
+        proto.write(FIELD_TYPE_STRING | IncidentMetadata::SectionStats::kErrorMsgFieldNumber,
+                    stats.error_msg());
         proto.end(token);
     }
 
@@ -439,8 +462,9 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
     status_t err = NO_ERROR;
     pthread_t thread;
     pthread_attr_t attr;
-    bool timedOut = false;
+    bool workerDone = false;
     FdBuffer buffer;
+    IncidentMetadata::SectionStats* stats = requests->sectionStats(this->id);
 
     // Data shared between this thread and the worker thread.
     sp<WorkerThreadData> data = new WorkerThreadData(this);
@@ -475,8 +499,7 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
     // Loop reading until either the timeout or the worker side is done (i.e. eof).
     err = buffer.read(data->pipe.readFd().get(), this->timeoutMs);
     if (err != NO_ERROR) {
-        // TODO: Log this error into the incident report.
-        ALOGW("[%s] reader failed with error '%s'", this->name.string(), strerror(-err));
+        ALOGE("[%s] reader failed with error '%s'", this->name.string(), strerror(-err));
     }
 
     // Done with the read fd. The worker thread closes the write one so
@@ -484,31 +507,32 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
     data->pipe.readFd().reset();
 
     // If the worker side is finished, then return its error (which may overwrite
-    // our possible error -- but it's more interesting anyway).  If not, then we timed out.
+    // our possible error -- but it's more interesting anyway). If not, then we timed out.
     {
         unique_lock<mutex> lock(data->lock);
-        if (!data->workerDone) {
-            // We timed out
-            timedOut = true;
-        } else {
-            if (data->workerError != NO_ERROR) {
-                err = data->workerError;
-                // TODO: Log this error into the incident report.
-                ALOGW("[%s] worker failed with error '%s'", this->name.string(), strerror(-err));
-            }
+        if (data->workerError != NO_ERROR) {
+            err = data->workerError;
+            ALOGE("[%s] worker failed with error '%s'", this->name.string(), strerror(-err));
         }
+        workerDone = data->workerDone;
     }
 
-    write_section_stats(requests->sectionStats(this->id), buffer);
-    if (timedOut || buffer.timedOut()) {
-        ALOGW("[%s] timed out", this->name.string());
+    write_section_stats(stats, buffer);
+    if (err != NO_ERROR) {
+        char errMsg[128];
+        snprintf(errMsg, 128, "[%s] failed with error '%s'",
+            this->name.string(), strerror(-err));
+        stats->set_success(false);
+        stats->set_error_msg(errMsg);
         return NO_ERROR;
     }
-
-    // TODO: There was an error with the command or buffering. Report that.  For now
-    // just exit with a log messasge.
-    if (err != NO_ERROR) {
-        ALOGW("[%s] failed with error '%s'", this->name.string(), strerror(-err));
+    if (buffer.truncated()) {
+        ALOGW("[%s] too large, truncating", this->name.string());
+        // Do not write a truncated section. It won't pass through the PrivacyBuffer.
+        return NO_ERROR;
+    }
+    if (!workerDone || buffer.timedOut()) {
+        ALOGW("[%s] timed out", this->name.string());
         return NO_ERROR;
     }
 
@@ -617,14 +641,8 @@ status_t DumpsysSection::BlockingCall(int pipeWriteFd) const {
     sp<IBinder> service = defaultServiceManager()->checkService(mService);
 
     if (service == NULL) {
-        // Returning an error interrupts the entire incident report, so just
-        // log the failure.
-        // TODO: have a meta record inside the report that would log this
-        // failure inside the report, because the fact that we can't find
-        // the service is good data in and of itself. This is running in
-        // another thread so lock that carefully...
         ALOGW("DumpsysSection: Can't lookup service: %s", String8(mService).string());
-        return NO_ERROR;
+        return NAME_NOT_FOUND;
     }
 
     service->dump(pipeWriteFd, mArgs);

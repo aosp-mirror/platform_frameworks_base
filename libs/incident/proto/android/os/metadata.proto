@@ -61,8 +61,10 @@ message IncidentMetadata {
         optional bool timed_out = 7;
         // true if the section is truncated.
         optional bool is_truncated = 8;
+        // message for debugging if there is an error.
+        optional string error_msg = 9;
 
-        // Next Tag: 9
+        // Next Tag: 10;
     }
     repeated SectionStats sections = 6;
 
