@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.content.pm.permission;
+package android.permission;
 
 parcelable RuntimePermissionPresentationInfo;
