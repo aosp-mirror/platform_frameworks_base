@@ -744,7 +744,7 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
     surface->mWindowWidth = extent.width;
     surface->mWindowHeight = extent.height;
 
-    uint32_t imageCount = caps.minImageCount + 2;
+    uint32_t imageCount = std::max<uint32_t>(3, caps.minImageCount);
     if (caps.maxImageCount > 0 && imageCount > caps.maxImageCount) {
         // Application must settle for fewer images than desired:
         imageCount = caps.maxImageCount;
