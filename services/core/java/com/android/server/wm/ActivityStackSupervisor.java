@@ -179,6 +179,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 12;
     static final int REPORT_MULTI_WINDOW_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 14;
     static final int REPORT_PIP_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 15;
+    static final int REPORT_HOME_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 16;
 
     // Used to indicate that windows of activities should be preserved during the resize.
     static final boolean PRESERVE_WINDOWS = true;
@@ -795,7 +796,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         System.identityHashCode(r), task.taskId, r.shortComponentName);
                 if (r.isActivityTypeHome()) {
                     // Home process is the root process of the task.
-                    mService.mHomeProcess = task.mActivities.get(0).app;
+                    updateHomeProcess(task.mActivities.get(0).app);
                 }
                 mService.getPackageManagerInternalLocked().notifyPackageUse(
                         r.intent.getComponent().getPackageName(), NOTIFY_PACKAGE_USE_ACTIVITY);
@@ -915,6 +916,15 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         return true;
+    }
+
+    void updateHomeProcess(WindowProcessController app) {
+        if (app != null && mService.mHomeProcess != app) {
+            if (!mHandler.hasMessages(REPORT_HOME_CHANGED_MSG)) {
+                mHandler.sendEmptyMessage(REPORT_HOME_CHANGED_MSG);
+            }
+            mService.mHomeProcess = app;
+        }
     }
 
     private void logIfTransactionTooLarge(Intent intent, Bundle icicle) {
@@ -2545,7 +2555,15 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         }
                     }
                 } break;
+                case REPORT_HOME_CHANGED_MSG: {
+                    synchronized (mService.mGlobalLock) {
+                        mHandler.removeMessages(REPORT_HOME_CHANGED_MSG);
 
+                        // Start home activities on displays with no activities.
+                        mRootActivityContainer.startHomeOnEmptyDisplays("homeChanged");
+                    }
+                }
+                break;
             }
         }
     }
