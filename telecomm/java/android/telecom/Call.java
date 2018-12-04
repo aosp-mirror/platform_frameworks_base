@@ -518,6 +518,7 @@ public final class Call {
         private final Bundle mExtras;
         private final Bundle mIntentExtras;
         private final long mCreationTimeMillis;
+        private final CallIdentification mCallIdentification;
 
         /**
          * Whether the supplied capabilities  supports the specified capability.
@@ -699,6 +700,12 @@ public final class Call {
         }
 
         /**
+         * The display name for the caller.
+         * <p>
+         * This is the name as reported by the {@link ConnectionService} associated with this call.
+         * The name reported by a {@link CallScreeningService} can be retrieved using
+         * {@link CallIdentification#getName()}.
+         *
          * @return The display name for the caller.
          */
         public String getCallerDisplayName() {
@@ -814,6 +821,23 @@ public final class Call {
             return mCreationTimeMillis;
         }
 
+        /**
+         * Returns {@link CallIdentification} information provided by a
+         * {@link CallScreeningService} for this call.
+         * <p>
+         * {@link InCallService} implementations should display the {@link CallIdentification} for
+         * calls.  The name of the call screening service is provided in
+         * {@link CallIdentification#getCallScreeningAppName()} and should be used to attribute the
+         * call identification information.
+         *
+         * @return The {@link CallIdentification} if it was provided by a
+         * {@link CallScreeningService}, or {@code null} if no {@link CallScreeningService} has
+         * provided {@link CallIdentification} information for the call.
+         */
+        public @Nullable CallIdentification getCallIdentification() {
+            return mCallIdentification;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof Details) {
@@ -834,7 +858,8 @@ public final class Call {
                         Objects.equals(mStatusHints, d.mStatusHints) &&
                         areBundlesEqual(mExtras, d.mExtras) &&
                         areBundlesEqual(mIntentExtras, d.mIntentExtras) &&
-                        Objects.equals(mCreationTimeMillis, d.mCreationTimeMillis);
+                        Objects.equals(mCreationTimeMillis, d.mCreationTimeMillis) &&
+                        Objects.equals(mCallIdentification, d.mCallIdentification);
             }
             return false;
         }
@@ -855,7 +880,8 @@ public final class Call {
                             mStatusHints,
                             mExtras,
                             mIntentExtras,
-                            mCreationTimeMillis);
+                            mCreationTimeMillis,
+                            mCallIdentification);
         }
 
         /** {@hide} */
@@ -875,7 +901,8 @@ public final class Call {
                 StatusHints statusHints,
                 Bundle extras,
                 Bundle intentExtras,
-                long creationTimeMillis) {
+                long creationTimeMillis,
+                CallIdentification callIdentification) {
             mTelecomCallId = telecomCallId;
             mHandle = handle;
             mHandlePresentation = handlePresentation;
@@ -892,6 +919,7 @@ public final class Call {
             mExtras = extras;
             mIntentExtras = intentExtras;
             mCreationTimeMillis = creationTimeMillis;
+            mCallIdentification = callIdentification;
         }
 
         /** {@hide} */
@@ -912,7 +940,8 @@ public final class Call {
                     parcelableCall.getStatusHints(),
                     parcelableCall.getExtras(),
                     parcelableCall.getIntentExtras(),
-                    parcelableCall.getCreationTimeMillis());
+                    parcelableCall.getCreationTimeMillis(),
+                    parcelableCall.getCallIdentification());
         }
 
         @Override
