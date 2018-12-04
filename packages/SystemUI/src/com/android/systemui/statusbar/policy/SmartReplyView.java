@@ -310,8 +310,6 @@ public class SmartReplyView extends ViewGroup {
                             headsUpManager.removeNotification(entry.key, true);
                         }));
 
-        // TODO(b/119010281): handle accessibility
-
         // Mark this as an Action button
         final LayoutParams lp = (LayoutParams) button.getLayoutParams();
         lp.buttonType = SmartButtonType.ACTION;
