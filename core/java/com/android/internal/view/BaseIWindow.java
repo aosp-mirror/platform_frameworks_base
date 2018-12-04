@@ -27,6 +27,7 @@ import android.view.DragEvent;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.PointerIcon;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 
 import com.android.internal.os.IResultReceiver;
@@ -55,6 +56,11 @@ public class BaseIWindow extends IWindow.Stub {
 
     @Override
     public void insetsChanged(InsetsState insetsState) {
+    }
+
+    @Override
+    public void insetsControlChanged(InsetsState insetsState,
+            InsetsSourceControl[] activeControls) throws RemoteException {
     }
 
     @Override

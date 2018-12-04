@@ -18,11 +18,18 @@ package com.android.server.wm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.util.proto.ProtoOutputStream;
+import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 import android.view.InsetsSource;
+import android.view.InsetsSourceControl;
 
 import com.android.internal.util.function.TriConsumer;
-import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
+
+import java.io.PrintWriter;
 
 /**
  * Controller for a specific inset source on the server. It's called provider as it provides the
@@ -32,11 +39,19 @@ class InsetsSourceProvider {
 
     private final Rect mTmpRect = new Rect();
     private final @NonNull InsetsSource mSource;
+    private final DisplayContent mDisplayContent;
+    private final InsetsStateController mStateController;
+    private @Nullable InsetsSourceControl mControl;
+    private @Nullable WindowState mControllingWin;
+    private @Nullable ControlAdapter mAdapter;
     private WindowState mWin;
     private TriConsumer<DisplayFrames, WindowState, Rect> mFrameProvider;
 
-    InsetsSourceProvider(InsetsSource source) {
+    InsetsSourceProvider(InsetsSource source, InsetsStateController stateController,
+            DisplayContent displayContent) {
         mSource = source;
+        mDisplayContent = displayContent;
+        mStateController = stateController;
     }
 
     InsetsSource getSource() {
@@ -84,4 +99,81 @@ class InsetsSourceProvider {
         mSource.setVisible(mWin.isVisible() && !mWin.mGivenInsetsPending);
 
     }
+
+    void updateControlForTarget(@Nullable WindowState target) {
+        if (target == mControllingWin) {
+            return;
+        }
+        if (target == null) {
+            revokeControl();
+            return;
+        }
+        mAdapter = new ControlAdapter();
+        mWin.startAnimation(mDisplayContent.getPendingTransaction(), mAdapter,
+                false /* TODO hidden */);
+        mControllingWin = target;
+        mControl = new InsetsSourceControl(mSource.getType(), mAdapter.mCapturedLeash);
+    }
+
+    InsetsSourceControl getControl() {
+        return mControl;
+    }
+
+    void revokeControl() {
+        if (mControllingWin != null) {
+
+            // Cancelling the animation will invoke onAnimationCancelled, resetting all the fields.
+            mWin.cancelAnimation();
+        }
+    }
+
+    private class ControlAdapter implements AnimationAdapter {
+
+        private SurfaceControl mCapturedLeash;
+
+        @Override
+        public boolean getShowWallpaper() {
+            return false;
+        }
+
+        @Override
+        public int getBackgroundColor() {
+            return 0;
+        }
+
+        @Override
+        public void startAnimation(SurfaceControl animationLeash, Transaction t,
+                OnAnimationFinishedCallback finishCallback) {
+            mCapturedLeash = animationLeash;
+            t.setPosition(mCapturedLeash, mSource.getFrame().left, mSource.getFrame().top);
+        }
+
+        @Override
+        public void onAnimationCancelled(SurfaceControl animationLeash) {
+            if (mAdapter == this) {
+                mStateController.notifyControlRevoked(mControllingWin, InsetsSourceProvider.this);
+                mControl = null;
+                mControllingWin = null;
+                mAdapter = null;
+            }
+        }
+
+        @Override
+        public long getDurationHint() {
+            return 0;
+        }
+
+        @Override
+        public long getStatusBarTransitionsStartTime() {
+            return 0;
+        }
+
+        @Override
+        public void dump(PrintWriter pw, String prefix) {
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream proto) {
+        }
+    };
 }

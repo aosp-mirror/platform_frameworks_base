@@ -18,13 +18,17 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.view.inputmethod.InputMethod;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -805,6 +809,71 @@ public final class WindowInsets {
         public WindowInsets build() {
             return new WindowInsets(mSystemWindowInsets, mWindowDecorInsets, mStableInsets,
                     mIsRound, mAlwaysConsumeNavBar, mDisplayCutout);
+        }
+    }
+
+    /**
+     * Class that defines different types of sources causing window insets.
+     * @hide pending unhide
+     */
+    public static final class Type {
+
+        static final int TOP_BAR = 0x1;
+        static final int IME = 0x2;
+        static final int SIDE_BARS = 0x4;
+        static final int WINDOW_DECOR = 0x8;
+
+        private Type() {
+        }
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, value = { TOP_BAR, IME, SIDE_BARS, WINDOW_DECOR })
+        public @interface InsetType {
+        }
+
+        /**
+         * @return An inset type representing the top bar of a window, which can be the status
+         *         bar on handheld-like devices as well as a caption bar.
+         */
+        public static @InsetType int topBar() {
+            return TOP_BAR;
+        }
+
+        /**
+         * @return An inset type representing the window of an {@link InputMethod}.
+         */
+        public static @InsetType int ime() {
+            return IME;
+        }
+
+        /**
+         * @return An inset type representing any system bars that are not {@link #topBar()}.
+         */
+        public static @InsetType int sideBars() {
+            return SIDE_BARS;
+        }
+
+        /**
+         * @return An inset type representing decor that is being app-controlled.
+         */
+        public static @InsetType int windowDecor() {
+            return WINDOW_DECOR;
+        }
+
+        /**
+         * @return All system bars. Includes {@link #topBar()} as well as {@link #sideBars()}, but
+         *         not {@link #ime()}.
+         */
+        public static @InsetType int systemBars() {
+            return TOP_BAR | SIDE_BARS;
+        }
+
+        /**
+         * @return All inset types combined.
+         */
+        public static @InsetType int all() {
+            return 0xFFFFFFFF;
         }
     }
 }

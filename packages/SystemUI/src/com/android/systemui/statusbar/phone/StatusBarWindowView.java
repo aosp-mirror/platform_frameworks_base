@@ -49,6 +49,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.WindowInsetsController;
 import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -784,6 +785,11 @@ public class StatusBarWindowView extends FrameLayout {
 
         @Override
         public void reportActivityRelaunched() {
+        }
+
+        @Override
+        public WindowInsetsController getInsetsController() {
+            return null;
         }
     };
 

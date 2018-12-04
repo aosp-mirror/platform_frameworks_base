@@ -29,6 +29,7 @@ import android.view.InsetsSource;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
+import org.junit.Before;
 import org.junit.Test;
 
 @SmallTest
@@ -36,8 +37,15 @@ import org.junit.Test;
 @Presubmit
 public class InsetsSourceProviderTest extends WindowTestsBase {
 
-    private InsetsSourceProvider mProvider = new InsetsSourceProvider(
-            new InsetsSource(TYPE_TOP_BAR));
+    private InsetsSource mSource = new InsetsSource(TYPE_TOP_BAR);
+    private InsetsSourceProvider mProvider;
+
+    @Before
+    public void setUp() throws Exception {
+        mSource.setVisible(true);
+        mProvider = new InsetsSourceProvider(mSource,
+                mDisplayContent.getInsetsStateController(), mDisplayContent);
+    }
 
     @Test
     public void testPostLayout() {

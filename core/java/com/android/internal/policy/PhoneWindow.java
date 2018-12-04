@@ -91,6 +91,7 @@ import android.view.ViewParent;
 import android.view.ViewRootImpl;
 import android.view.ViewRootImpl.ActivityConfigCallback;
 import android.view.Window;
+import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -3876,5 +3877,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mDecor != null) {
             mDecor.updateLogTag(params);
         }
+    }
+
+    @Override
+    public WindowInsetsController getInsetsController() {
+        return mDecor.getWindowInsetsController();
     }
 }

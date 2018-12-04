@@ -170,7 +170,12 @@ public final class ViewRootImpl implements ViewParent,
      * fully migrated over.
      */
     private static final String USE_NEW_INSETS_PROPERTY = "persist.wm.new_insets";
-    private static final boolean USE_NEW_INSETS =
+
+    /**
+     * @see #USE_NEW_INSETS_PROPERTY
+     * @hide
+     */
+    public static final boolean USE_NEW_INSETS =
             SystemProperties.getBoolean(USE_NEW_INSETS_PROPERTY, false);
 
     /**
@@ -1845,6 +1850,10 @@ public final class ViewRootImpl implements ViewParent,
             insets = insets.consumeDisplayCutout();
         }
         host.dispatchApplyWindowInsets(insets);
+    }
+
+    InsetsController getInsetsController() {
+        return mInsetsController;
     }
 
     private static boolean shouldUseDisplaySize(final WindowManager.LayoutParams lp) {
@@ -4208,6 +4217,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_POINTER_CAPTURE_CHANGED = 28;
     private final static int MSG_DRAW_FINISHED = 29;
     private final static int MSG_INSETS_CHANGED = 30;
+    private final static int MSG_INSETS_CONTROL_CHANGED = 31;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -4371,11 +4381,22 @@ public final class ViewRootImpl implements ViewParent,
                 case MSG_INSETS_CHANGED:
                     mPendingInsets = (InsetsState) msg.obj;
 
-                    // TODO: Full traversal not needed here
+                    // TODO: Full traversal not needed here.
                     if (USE_NEW_INSETS) {
                         requestLayout();
                     }
                     break;
+                case MSG_INSETS_CONTROL_CHANGED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    mPendingInsets = (InsetsState) args.arg1;
+                    mInsetsController.onControlsChanged((InsetsSourceControl[]) args.arg2);
+
+                    // TODO: Full traversal not necessarily needed here.
+                    if (USE_NEW_INSETS) {
+                        requestLayout();
+                    }
+                    break;
+                }
                 case MSG_WINDOW_MOVED:
                     if (mAdded) {
                         final int w = mWinFrame.width();
@@ -7116,6 +7137,14 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.obtainMessage(MSG_INSETS_CHANGED, insetsState).sendToTarget();
     }
 
+    private void dispatchInsetsControlChanged(InsetsState insetsState,
+            InsetsSourceControl[] activeControls) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = insetsState;
+        args.arg2 = activeControls;
+        mHandler.obtainMessage(MSG_INSETS_CONTROL_CHANGED, args).sendToTarget();
+    }
+
     public void dispatchMoved(int newX, int newY) {
         if (DEBUG_LAYOUT) Log.v(mTag, "Window moved " + this + ": newX=" + newX + " newY=" + newY);
         if (mTranslator != null) {
@@ -8183,6 +8212,15 @@ public final class ViewRootImpl implements ViewParent,
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchInsetsChanged(insetsState);
+            }
+        }
+
+        @Override
+        public void insetsControlChanged(InsetsState insetsState,
+                InsetsSourceControl[] activeControls) {
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
+            if (viewAncestor != null) {
+                viewAncestor.dispatchInsetsControlChanged(insetsState, activeControls);
             }
         }
 
