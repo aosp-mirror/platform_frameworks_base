@@ -55,7 +55,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     private boolean mIsUpdatingUnchangedGroup;
 
     public NotificationGroupManager() {
-        Dependency.get(StatusBarStateController.class).addListener(this);
+        Dependency.get(StatusBarStateController.class).addCallback(this);
     }
 
     /**

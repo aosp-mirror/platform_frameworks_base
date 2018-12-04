@@ -156,7 +156,7 @@ public class KeyguardIndicationController implements StateListener {
                 new IntentFilter(Intent.ACTION_TIME_TICK), null,
                 Dependency.get(Dependency.TIME_TICK_HANDLER));
 
-        Dependency.get(StatusBarStateController.class).addListener(this);
+        Dependency.get(StatusBarStateController.class).addCallback(this);
     }
 
     /**
@@ -167,7 +167,7 @@ public class KeyguardIndicationController implements StateListener {
      */
     public void destroy() {
         mContext.unregisterReceiver(mTickReceiver);
-        Dependency.get(StatusBarStateController.class).removeListener(this);
+        Dependency.get(StatusBarStateController.class).removeCallback(this);
     }
 
     /**
