@@ -24,7 +24,6 @@ cc_defaults {
         "libdexfile",
         "slicer",
     ],
-    cppflags: ["-std=c++17"],
 }
 
 cc_library_host_static {
