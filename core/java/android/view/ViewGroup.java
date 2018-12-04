@@ -7111,6 +7111,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public WindowInsets dispatchApplyWindowInsets(WindowInsets insets) {
         insets = super.dispatchApplyWindowInsets(insets);
+        if (View.sBrokenInsetsDispatch) {
+            return brokenDispatchApplyWindowInsets(insets);
+        } else {
+            return newDispatchApplyWindowInsets(insets);
+        }
+    }
+
+    private WindowInsets brokenDispatchApplyWindowInsets(WindowInsets insets) {
         if (!insets.isConsumed()) {
             final int count = getChildCount();
             for (int i = 0; i < count; i++) {
@@ -7119,6 +7127,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     break;
                 }
             }
+        }
+        return insets;
+    }
+
+    private WindowInsets newDispatchApplyWindowInsets(WindowInsets insets) {
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            getChildAt(i).dispatchApplyWindowInsets(insets);
         }
         return insets;
     }
