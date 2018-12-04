@@ -57,7 +57,6 @@ public class BackupManagerServiceTest {
     private static final String TEST_TRANSPORT = "transport";
 
     @Mock private UserBackupManagerService mUserBackupManagerService;
-    @Mock private TransportManager mTransportManager;
     private BackupManagerService mBackupManagerService;
     private Context mContext;
 
@@ -72,10 +71,7 @@ public class BackupManagerServiceTest {
                 new BackupManagerService(
                         application,
                         new Trampoline(application),
-                        BackupManagerServiceTestUtils.startBackupThread(null),
-                        new File(application.getCacheDir(), "base_state"),
-                        new File(application.getCacheDir(), "data"),
-                        mTransportManager);
+                        BackupManagerServiceTestUtils.startBackupThread(null));
         mBackupManagerService.setUserBackupManagerService(mUserBackupManagerService);
     }
 

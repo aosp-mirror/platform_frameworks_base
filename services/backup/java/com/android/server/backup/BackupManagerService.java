@@ -81,10 +81,12 @@ public class BackupManagerService {
         return sInstance;
     }
 
-    /** Helper to create the {@link BackupManagerService} instance. */
-    public static BackupManagerService create(
+    private UserBackupManagerService mUserBackupManagerService;
+
+    /** Instantiate a new instance of {@link BackupManagerService}. */
+    public BackupManagerService(
             Context context,
-            Trampoline parent,
+            Trampoline trampoline,
             HandlerThread backupThread) {
         // Set up our transport options and initialize the default transport
         SystemConfig systemConfig = SystemConfig.getInstance();
@@ -115,25 +117,6 @@ public class BackupManagerService {
         // This dir on /cache is managed directly in init.rc
         File dataDir = new File(Environment.getDownloadCacheDirectory(), "backup_stage");
 
-        return new BackupManagerService(
-                context,
-                parent,
-                backupThread,
-                baseStateDir,
-                dataDir,
-                transportManager);
-    }
-
-    private UserBackupManagerService mUserBackupManagerService;
-
-    /** Instantiate a new instance of {@link BackupManagerService}. */
-    public BackupManagerService(
-            Context context,
-            Trampoline trampoline,
-            HandlerThread backupThread,
-            File baseStateDir,
-            File dataDir,
-            TransportManager transportManager) {
         mUserBackupManagerService =
                 new UserBackupManagerService(
                         context, trampoline, backupThread, baseStateDir, dataDir, transportManager);
