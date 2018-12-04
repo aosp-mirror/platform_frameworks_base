@@ -842,6 +842,18 @@ static jint android_media_AudioRecord_get_active_microphones(JNIEnv *env,
 }
 
 // ----------------------------------------------------------------------------
+static jint android_media_AudioRecord_get_port_id(JNIEnv *env,  jobject thiz) {
+    sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
+    if (lpRecorder == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Unable to retrieve AudioRecord pointer for getId()");
+        return (jint)AUDIO_PORT_HANDLE_NONE;
+    }
+    return (jint)lpRecorder->getPortId();
+}
+
+
+// ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static const JNINativeMethod gMethods[] = {
     // name,               signature,  funcPtr
@@ -883,6 +895,7 @@ static const JNINativeMethod gMethods[] = {
                                        (void *)android_media_AudioRecord_get_timestamp},
     {"native_get_active_microphones", "(Ljava/util/ArrayList;)I",
                                         (void *)android_media_AudioRecord_get_active_microphones},
+    {"native_getPortId", "()I", (void *)android_media_AudioRecord_get_port_id},
 };
 
 // field names found in android/media/AudioRecord.java

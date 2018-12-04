@@ -1284,6 +1284,17 @@ static int android_media_AudioTrack_setPresentation(
 }
 
 // ----------------------------------------------------------------------------
+static jint android_media_AudioTrack_get_port_id(JNIEnv *env,  jobject thiz) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "AudioTrack not initialized");
+        return (jint)AUDIO_PORT_HANDLE_NONE;
+    }
+    return (jint)lpTrack->getPortId();
+}
+
+// ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static const JNINativeMethod gMethods[] = {
     // name,              signature,     funcPtr
@@ -1354,6 +1365,7 @@ static const JNINativeMethod gMethods[] = {
             "(I)Landroid/media/VolumeShaper$State;",
                                         (void *)android_media_AudioTrack_get_volume_shaper_state},
     {"native_setPresentation", "(II)I", (void *)android_media_AudioTrack_setPresentation},
+    {"native_getPortId", "()I", (void *)android_media_AudioTrack_get_port_id},
 };
 
 
@@ -1378,7 +1390,6 @@ bool android_media_getIntConstantFromClass(JNIEnv* pEnv, jclass theClass, const 
         return false;
     }
 }
-
 
 // ----------------------------------------------------------------------------
 int register_android_media_AudioTrack(JNIEnv *env)
