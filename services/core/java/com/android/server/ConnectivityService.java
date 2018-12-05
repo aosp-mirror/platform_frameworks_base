@@ -1869,11 +1869,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 "ConnectivityService");
     }
 
+    private void enforceControlAlwaysOnVpnPermission() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CONTROL_ALWAYS_ON_VPN,
+                "ConnectivityService");
+    }
+
     private void enforceNetworkStackSettingsOrSetup() {
         enforceAnyPermissionOf(
             android.Manifest.permission.NETWORK_SETTINGS,
             android.Manifest.permission.NETWORK_SETUP_WIZARD,
             android.Manifest.permission.NETWORK_STACK);
+    }
+
+    private void enforceNetworkStackPermission() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.NETWORK_STACK,
+                "ConnectivityService");
     }
 
     private boolean checkNetworkStackPermission() {
@@ -4069,8 +4081,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
-    public boolean setAlwaysOnVpnPackage(int userId, String packageName, boolean lockdown) {
-        enforceConnectivityInternalPermission();
+    public boolean setAlwaysOnVpnPackage(
+            int userId, String packageName, boolean lockdown, List<String> lockdownWhitelist) {
+        enforceControlAlwaysOnVpnPermission();
         enforceCrossUserPermission(userId);
 
         synchronized (mVpns) {
@@ -4084,11 +4097,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 Slog.w(TAG, "User " + userId + " has no Vpn configuration");
                 return false;
             }
-            if (!vpn.setAlwaysOnPackage(packageName, lockdown)) {
+            if (!vpn.setAlwaysOnPackage(packageName, lockdown, lockdownWhitelist)) {
                 return false;
             }
             if (!startAlwaysOnVpn(userId)) {
-                vpn.setAlwaysOnPackage(null, false);
+                vpn.setAlwaysOnPackage(null, false, null);
                 return false;
             }
         }
@@ -4097,7 +4110,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public String getAlwaysOnVpnPackage(int userId) {
-        enforceConnectivityInternalPermission();
+        enforceControlAlwaysOnVpnPermission();
         enforceCrossUserPermission(userId);
 
         synchronized (mVpns) {
@@ -4107,6 +4120,36 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return null;
             }
             return vpn.getAlwaysOnPackage();
+        }
+    }
+
+    @Override
+    public boolean isVpnLockdownEnabled(int userId) {
+        enforceControlAlwaysOnVpnPermission();
+        enforceCrossUserPermission(userId);
+
+        synchronized (mVpns) {
+            Vpn vpn = mVpns.get(userId);
+            if (vpn == null) {
+                Slog.w(TAG, "User " + userId + " has no Vpn configuration");
+                return false;
+            }
+            return vpn.getLockdown();
+        }
+    }
+
+    @Override
+    public List<String> getVpnLockdownWhitelist(int userId) {
+        enforceControlAlwaysOnVpnPermission();
+        enforceCrossUserPermission(userId);
+
+        synchronized (mVpns) {
+            Vpn vpn = mVpns.get(userId);
+            if (vpn == null) {
+                Slog.w(TAG, "User " + userId + " has no Vpn configuration");
+                return null;
+            }
+            return vpn.getLockdownWhitelist();
         }
     }
 
@@ -4339,7 +4382,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (TextUtils.equals(vpn.getAlwaysOnPackage(), packageName) && !isReplacing) {
                 Slog.d(TAG, "Removing always-on VPN package " + packageName + " for user "
                         + userId);
-                vpn.setAlwaysOnPackage(null, false);
+                vpn.setAlwaysOnPackage(null, false, null);
             }
         }
     }
@@ -6208,7 +6251,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized (mVpns) {
                 final String alwaysOnPackage = getAlwaysOnVpnPackage(userId);
                 if (alwaysOnPackage != null) {
-                    setAlwaysOnVpnPackage(userId, null, false);
+                    setAlwaysOnVpnPackage(userId, null, false, null);
                     setVpnPackageAuthorization(alwaysOnPackage, userId, false);
                 }
 
