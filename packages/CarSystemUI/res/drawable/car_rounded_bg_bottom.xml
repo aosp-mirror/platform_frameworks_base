@@ -14,12 +14,14 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="48dp"
-        android:height="48dp"
-        android:viewportWidth="48.0"
-        android:viewportHeight="48.0">
-    <path
-        android:pathData="M24,28c3.31,0 5.98,-2.69 5.98,-6L30,10c0,-3.32 -2.68,-6 -6,-6 -3.31,0 -6,2.68 -6,6v12c0,3.31 2.69,6 6,6zM34.6,22c0,6 -5.07,10.2 -10.6,10.2 -5.52,0 -10.6,-4.2 -10.6,-10.2L10,22c0,6.83 5.44,12.47 12,13.44L22,42h4v-6.56c6.56,-0.97 12,-6.61 12,-13.44h-3.4z"
-        android:fillColor="#FFFFFF"/>
-</vector>
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    <solid android:color="?android:attr/colorBackgroundFloating" />
+    <corners
+        android:bottomLeftRadius="@dimen/car_radius_3"
+        android:topLeftRadius="0dp"
+        android:bottomRightRadius="@dimen/car_radius_3"
+        android:topRightRadius="0dp"
+        />
+</shape>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (c) 2018, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+-->
+<resources>
+    <!-- dimensions for the car user switcher -->
+    <dimen name="car_user_switcher_name_text_size">@dimen/car_body1_size</dimen>
+    <dimen name="car_user_switcher_image_avatar_size">@dimen/car_large_avatar_size</dimen>
+    <dimen name="car_user_switcher_vertical_spacing_between_users">@dimen/car_padding_5</dimen>
+    <dimen name="car_user_switcher_vertical_spacing_between_name_and_avatar">@dimen/car_padding_4</dimen>
+    <dimen name="car_user_switcher_margin_top">@dimen/car_padding_4</dimen>
+
+    <dimen name="car_navigation_button_width">64dp</dimen>
+    <dimen name="car_navigation_bar_width">760dp</dimen>
+    <dimen name="car_left_navigation_bar_width">96dp</dimen>
+    <dimen name="car_right_navigation_bar_width">96dp</dimen>
+
+    <dimen name="car_qs_footer_height">112dp</dimen>
+    <dimen name="car_qs_footer_padding_bottom">16dp</dimen>
+    <dimen name="car_qs_footer_padding_top">16dp</dimen>
+    <dimen name="car_qs_footer_padding_end">46dp</dimen>
+    <dimen name="car_qs_footer_padding_start">46dp</dimen>
+    <dimen name="car_qs_footer_icon_width">56dp</dimen>
+    <dimen name="car_qs_footer_icon_height">56dp</dimen>
+    <dimen name="car_qs_footer_user_switch_icon_margin">5dp</dimen>
+    <dimen name="car_qs_footer_user_switch_icon_width">36dp</dimen>
+    <dimen name="car_qs_footer_user_name_text_size">@dimen/car_body2_size</dimen>
+
+    <dimen name="car_user_switcher_container_height">420dp</dimen>
+    <!-- This must be the negative of car_user_switcher_container_height for the animation. -->
+    <dimen name="car_user_switcher_container_anim_height">-420dp</dimen>
+
+</resources>
