@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony;
 
+import android.telephony.AvailableNetworkInfo;
 
 interface IAns {
 
@@ -78,4 +79,23 @@ interface IAns {
      *
      */
     int getPreferredData(String callingPackage);
+
+    /**
+     * Update availability of a list of networks in the current location.
+     *
+     * This api should be called if the caller is aware of the availability of a network
+     * at the current location. This information will be used by AlternativeNetwork service
+     * to decide to attach to the network. If an empty list is passed,
+     * it is assumed that no network is available.
+     * Requires that the calling app has carrier privileges on both primary and
+     * secondary subscriptions (see
+     * {@link #hasCarrierPrivileges}), or has permission
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *  @param availableNetworks is a list of available network information.
+     *  @param callingPackage caller's package name
+     *  @return true if request is accepted
+     *
+     */
+    boolean updateAvailableNetworks(in List<AvailableNetworkInfo> availableNetworks,
+            String callingPackage);
 }

@@ -9576,4 +9576,34 @@ public class TelephonyManager {
         }
         return subId;
     }
+
+    /**
+     * Update availability of a list of networks in the current location.
+     *
+     * This api should be called to inform AlternativeNetwork Service about the availability
+     * of a network at the current location. This information will be used by AlternativeNetwork
+     * service to decide to attach to the network opportunistically. If an empty list is passed,
+     * it is assumed that no network is available.
+     * Requires that the calling app has carrier privileges on both primary and
+     * secondary subscriptions (see {@link #hasCarrierPrivileges}), or has permission
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     * @param availableNetworks is a list of available network information.
+     * @return true if request is accepted
+     *
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    public boolean updateAvailableNetworks(List<AvailableNetworkInfo> availableNetworks) {
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        boolean ret = false;
+        try {
+            IAns iAlternativeNetworkService = getIAns();
+            if (iAlternativeNetworkService != null) {
+                ret = iAlternativeNetworkService.updateAvailableNetworks(availableNetworks,
+                        pkgForDebug);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "updateAvailableNetworks RemoteException", ex);
+        }
+        return ret;
+    }
 }
