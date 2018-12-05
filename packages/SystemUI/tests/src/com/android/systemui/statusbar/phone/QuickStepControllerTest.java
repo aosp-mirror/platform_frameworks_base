@@ -78,6 +78,7 @@ public class QuickStepControllerTest extends SysuiTestCase {
         mProxyService = mock(OverviewProxyService.class);
         mProxy = mock(IOverviewProxy.Stub.class);
         doReturn(mProxy).when(mProxyService).getProxy();
+        doReturn(true).when(mProxyService).shouldShowSwipeUpUI();
         mDependency.injectTestDependency(OverviewProxyService.class, mProxyService);
 
         mStatusBar = mock(StatusBar.class);
@@ -99,6 +100,18 @@ public class QuickStepControllerTest extends SysuiTestCase {
 
     @Test
     public void testNoActionsNoGestures() throws Exception {
+        MotionEvent ev = event(MotionEvent.ACTION_DOWN, 1, 1);
+        assertFalse(mController.onInterceptTouchEvent(ev));
+        verify(mNavigationBarView, never()).requestUnbufferedDispatch(ev);
+        assertNull(mController.getCurrentAction());
+    }
+
+    @Test
+    public void testNoGesturesWhenSwipeUpDisabled() throws Exception {
+        doReturn(false).when(mProxyService).shouldShowSwipeUpUI();
+        mController.setGestureActions(mockAction(true), null /* swipeDownAction */,
+                null /* swipeLeftAction */, null /* swipeRightAction */);
+
         MotionEvent ev = event(MotionEvent.ACTION_DOWN, 1, 1);
         assertFalse(mController.onInterceptTouchEvent(ev));
         verify(mNavigationBarView, never()).requestUnbufferedDispatch(ev);

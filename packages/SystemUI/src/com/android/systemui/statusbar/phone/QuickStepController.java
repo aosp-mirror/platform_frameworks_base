@@ -185,6 +185,7 @@ public class QuickStepController implements GestureHelper {
 
         // Requires proxy and an active gesture or able to perform any gesture to continue
         if (mOverviewEventSender.getProxy() == null
+                || !mOverviewEventSender.shouldShowSwipeUpUI()
                 || (mCurrentAction == null && !canPerformAnyAction())) {
             return deadZoneConsumed;
         }
