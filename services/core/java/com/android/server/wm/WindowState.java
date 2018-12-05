@@ -2174,9 +2174,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             getTouchableRegion(region);
         }
 
-        // The area containing the shadows is not touchable.
-        region.translate(mAttrs.surfaceInsets.left, mAttrs.surfaceInsets.top);
-
         return flags;
     }
 
