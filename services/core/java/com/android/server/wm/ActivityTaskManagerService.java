@@ -863,6 +863,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     Configuration getGlobalConfigurationForCallingPid() {
         final int pid = Binder.getCallingPid();
+        return getGlobalConfigurationForPid(pid);
+    }
+
+    /**
+     * Return the global configuration used by the process corresponding to the given pid.
+     */
+    Configuration getGlobalConfigurationForPid(int pid) {
         if (pid == MY_PID || pid < 0) {
             return getGlobalConfiguration();
         }
