@@ -456,6 +456,31 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testNoBeepForImportanceDefaultInAutomotive() throws Exception {
+        mService.setIsAutomotive(true);
+
+        NotificationRecord r = getBeepyNotification();
+        r.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyNeverBeep();
+        assertFalse(r.isInterruptive());
+    }
+
+    @Test
+    public void testBeepForImportanceHighInAutomotive() throws Exception {
+        mService.setIsAutomotive(true);
+
+        NotificationRecord r = getBeepyNotification();
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyBeepLooped();
+        assertTrue(r.isInterruptive());
+    }
+
+    @Test
     public void testNoInterruptionForMin() throws Exception {
         NotificationRecord r = getBeepyNotification();
         r.setSystemImportance(NotificationManager.IMPORTANCE_MIN);
