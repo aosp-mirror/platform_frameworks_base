@@ -17,6 +17,7 @@
 package android.hardware.camera2.params;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.ImageFormat;
@@ -173,7 +174,7 @@ public final class RecommendedStreamConfigurationMap {
      *
      * @return Use case id.
      */
-    public int getRecommendedUseCase() {
+    public @RecommendedUsecase int getRecommendedUseCase() {
         return mUsecase;
     }
 
@@ -326,7 +327,7 @@ public final class RecommendedStreamConfigurationMap {
      * @throws IllegalArgumentException if input size does not exist in the return value of
      *             getHighSpeedVideoSizes
      */
-    public @Nullable Set<Range<Integer>> getHighSpeedVideoFpsRangesFor(Size size) {
+    public @Nullable Set<Range<Integer>> getHighSpeedVideoFpsRangesFor(@NonNull Size size) {
         return getUnmodifiableRangeSet(mRecommendedMap.getHighSpeedVideoFpsRangesFor(size));
     }
 
@@ -349,14 +350,14 @@ public final class RecommendedStreamConfigurationMap {
      * For further information refer to {@link StreamConfigurationMap#getHighSpeedVideoSizesFor}.
      * </p>
      *
-     * @param fpsRange one of the FPS range returned by {@link #getHighSpeedVideoFpsRanges()}
+     * @param fpsRange one of the FPS ranges returned by {@link #getHighSpeedVideoFpsRanges()}
      * @return A non-modifiable set of video sizes to create high speed capture sessions for high
      *         speed streaming use cases.
      *
      * @throws IllegalArgumentException if input FPS range does not exist in the return value of
      *         getHighSpeedVideoFpsRanges
      */
-    public @Nullable Set<Size> getHighSpeedVideoSizesFor(Range<Integer> fpsRange) {
+    public @Nullable Set<Size> getHighSpeedVideoSizesFor(@NonNull Range<Integer> fpsRange) {
         return getUnmodifiableSizeSet(mRecommendedMap.getHighSpeedVideoSizesFor(fpsRange));
     }
 
@@ -390,10 +391,8 @@ public final class RecommendedStreamConfigurationMap {
      *          0 if the minimum frame duration is not available.
      *
      * @throws IllegalArgumentException if {@code format} or {@code size} was not supported
-     * @throws NullPointerException if {@code size} was {@code null}
-     *
      */
-    public long getOutputMinFrameDuration(int format, Size size) {
+    public @IntRange(from = 0) long getOutputMinFrameDuration(int format, @NonNull Size size) {
         return mRecommendedMap.getOutputMinFrameDuration(format, size);
     }
 
@@ -409,9 +408,8 @@ public final class RecommendedStreamConfigurationMap {
      * @return a stall duration {@code >=} 0 in nanoseconds
      *
      * @throws IllegalArgumentException if {@code format} or {@code size} was not supported
-     * @throws NullPointerException if {@code size} was {@code null}
      */
-    public long getOutputStallDuration(int format, Size size) {
+    public @IntRange(from = 0) long getOutputStallDuration(int format, @NonNull Size size) {
         return mRecommendedMap.getOutputStallDuration(format, size);
     }
 
@@ -422,16 +420,12 @@ public final class RecommendedStreamConfigurationMap {
      * </p>
      *
      * @param klass
-     *          a non-{@code null} {@link Class} object reference
+     *          a {@link Class} object reference
      * @return
      *          a non-modifiable set of supported sizes for {@link ImageFormat#PRIVATE} format,
      *          or {@code null} if the {@code klass} is not a supported output.
-     *
-     *
-     * @throws NullPointerException if {@code klass} was {@code null}
-     *
      */
-    public <T> @Nullable Set<Size> getOutputSizes(Class<T> klass) {
+    public <T> @Nullable Set<Size> getOutputSizes(@NonNull Class<T> klass) {
         if (mSupportsPrivate) {
             return getUnmodifiableSizeSet(mRecommendedMap.getOutputSizes(klass));
         }
@@ -447,16 +441,15 @@ public final class RecommendedStreamConfigurationMap {
      * {@link StreamConfigurationMap#getOutputMinFrameDuration(Class, Size)}.</p>
      *
      * @param klass
-     *          a class which  has a non-empty array returned by {@link #getOutputSizes(Class)}
+     *          a class which has a non-empty array returned by {@link #getOutputSizes(Class)}
      * @param size an output-compatible size
      * @return a minimum frame duration {@code >} 0 in nanoseconds, or
      *          0 if the minimum frame duration is not available.
      *
      * @throws IllegalArgumentException if {@code klass} or {@code size} was not supported
-     * @throws NullPointerException if {@code size} or {@code klass} was {@code null}
-     *
      */
-    public <T> long getOutputMinFrameDuration(final Class<T> klass, final Size size) {
+    public <T> @IntRange(from = 0) long getOutputMinFrameDuration(@NonNull final Class<T> klass,
+            @NonNull final Size size) {
         if (mSupportsPrivate) {
             return mRecommendedMap.getOutputMinFrameDuration(klass, size);
         }
@@ -473,14 +466,13 @@ public final class RecommendedStreamConfigurationMap {
      * @param klass
      *          a class which has a non-empty array returned by {@link #getOutputSizes(Class)}.
      * @param size an output-compatible size
-     * @return a minimum frame duration {@code >=} 0 in nanoseconds, or 0 if the stall duration is
+     * @return a minimum frame duration {@code >} 0 in nanoseconds, or 0 if the stall duration is
      *         not available.
      *
      * @throws IllegalArgumentException if {@code klass} or {@code size} was not supported
-     * @throws NullPointerException if {@code size} or {@code klass} was {@code null}
-     *
      */
-    public <T> long getOutputStallDuration(final Class<T> klass, final Size size) {
+    public <T> @IntRange(from = 0) long getOutputStallDuration(@NonNull final Class<T> klass,
+            @NonNull final Size size) {
         if (mSupportsPrivate) {
             return mRecommendedMap.getOutputStallDuration(klass, size);
         }
@@ -495,14 +487,13 @@ public final class RecommendedStreamConfigurationMap {
      * <p>For more information refer to {@link StreamConfigurationMap#isOutputSupportedFor}.
      * </p>
      *
-     * @param surface a non-{@code null} {@link Surface} object reference
+     * @param surface a {@link Surface} object reference
      * @return {@code true} if this is supported, {@code false} otherwise
      *
-     * @throws NullPointerException if {@code surface} was {@code null}
      * @throws IllegalArgumentException if the Surface endpoint is no longer valid
      *
      */
-    public boolean isOutputSupportedFor(Surface surface) {
+    public boolean isOutputSupportedFor(@NonNull Surface surface) {
         return mRecommendedMap.isOutputSupportedFor(surface);
     }
 
