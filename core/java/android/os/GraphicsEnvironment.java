@@ -269,7 +269,7 @@ public class GraphicsEnvironment {
         }
 
         // If no temp rules, load the real ones from the APK
-        if (rulesFd == null) {
+        if (DEBUG && (rulesFd == null)) {
 
             // Pass the rules file to loader for ANGLE decisions
             AssetManager angleAssets = null;
