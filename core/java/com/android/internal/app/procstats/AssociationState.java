@@ -445,8 +445,18 @@ public final class AssociationState {
         }
     }
 
+    public boolean hasProcess(String procName) {
+        final int NSRC = mSources.size();
+        for (int isrc = 0; isrc < NSRC; isrc++) {
+            if (mSources.keyAt(isrc).mProcess.equals(procName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void dumpStats(PrintWriter pw, String prefix, String prefixInner, String headerPrefix,
-            long now, long totalTime, boolean dumpDetails, boolean dumpAll) {
+            long now, long totalTime, String reqPackage, boolean dumpDetails, boolean dumpAll) {
         if (dumpAll) {
             pw.print(prefix);
             pw.print("mNumActive=");
@@ -456,6 +466,9 @@ public final class AssociationState {
         for (int isrc = 0; isrc < NSRC; isrc++) {
             final SourceKey key = mSources.keyAt(isrc);
             final SourceState src = mSources.valueAt(isrc);
+            if (reqPackage != null && !reqPackage.equals(key.mProcess)) {
+                continue;
+            }
             pw.print(prefixInner);
             pw.print("<- ");
             pw.print(key.mProcess);
