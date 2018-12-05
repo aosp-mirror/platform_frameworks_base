@@ -681,7 +681,7 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& p
     if (mPaintFilter) {
         mPaintFilter->filter(&paintCopy);
     }
-    SkASSERT(paintCopy.getTextEncoding() == SkPaint::kGlyphID_TextEncoding);
+    SkASSERT(paintCopy.getTextEncoding() == kGlyphID_SkTextEncoding);
     // Stroke with a hairline is drawn on HW with a fill style for compatibility with Android O and
     // older.
     if (!mCanvasOwned && sApiLevel <= 27 && paintCopy.getStrokeWidth() <= 0 &&
@@ -708,7 +708,7 @@ void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, 
     if (mPaintFilter) {
         mPaintFilter->filter(&paintCopy);
     }
-    SkASSERT(paintCopy.getTextEncoding() == SkPaint::kGlyphID_TextEncoding);
+    SkASSERT(paintCopy.getTextEncoding() == kGlyphID_SkTextEncoding);
 
     const int N = end - start;
     SkAutoSTMalloc<1024, uint8_t> storage(N * (sizeof(uint16_t) + sizeof(SkRSXform)));

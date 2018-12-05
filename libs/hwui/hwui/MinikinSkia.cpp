@@ -43,7 +43,7 @@ MinikinFontSkia::MinikinFontSkia(sk_sp<SkTypeface> typeface, const void* fontDat
 static void MinikinFontSkia_SetSkiaPaint(const minikin::MinikinFont* font, SkPaint* skPaint,
                                          const minikin::MinikinPaint& paint,
                                          const minikin::FontFakery& fakery) {
-    skPaint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+    skPaint->setTextEncoding(kGlyphID_SkTextEncoding);
     skPaint->setTextSize(paint.size);
     skPaint->setTextScaleX(paint.scaleX);
     skPaint->setTextSkewX(paint.skewX);

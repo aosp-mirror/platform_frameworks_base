@@ -59,7 +59,7 @@ struct HarfBuzzFontData {
 static void SkiaGetGlyphWidthAndExtents(SkPaint* paint, hb_codepoint_t codepoint, hb_position_t* width, hb_glyph_extents_t* extents)
 {
     ALOG_ASSERT(codepoint <= 0xFFFF);
-    paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+    paint->setTextEncoding(kGlyphID_SkTextEncoding);
 
     SkScalar skWidth;
     SkRect skBounds;
@@ -84,7 +84,7 @@ static hb_bool_t harfbuzzGetGlyph(hb_font_t* hbFont, void* fontData, hb_codepoin
 {
     HarfBuzzFontData* hbFontData = reinterpret_cast<HarfBuzzFontData*>(fontData);
     SkPaint* paint = hbFontData->m_paint;
-    paint->setTextEncoding(SkPaint::kUTF32_TextEncoding);
+    paint->setTextEncoding(kUTF32_SkTextEncoding);
 
     if (unicode > 0x10ffff) {
         unicode = 0xfffd;
