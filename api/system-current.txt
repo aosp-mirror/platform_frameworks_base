@@ -5788,6 +5788,8 @@ package android.telephony {
     method public java.util.List<android.telephony.SubscriptionInfo> getAvailableSubscriptionInfoList();
     method public java.util.List<android.telephony.SubscriptionPlan> getSubscriptionPlans(int);
     method public void requestEmbeddedSubscriptionInfoListRefresh();
+    method public void setDefaultDataSubId(int);
+    method public void setDefaultSmsSubId(int);
     method public void setSubscriptionOverrideCongested(int, boolean, long);
     method public void setSubscriptionOverrideUnmetered(int, boolean, long);
     method public void setSubscriptionPlans(int, java.util.List<android.telephony.SubscriptionPlan>);
