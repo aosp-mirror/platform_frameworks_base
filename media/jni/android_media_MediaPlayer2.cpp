@@ -1192,7 +1192,7 @@ static Vector<uint8_t> JByteArrayToVector(JNIEnv *env, jbyteArray const &byteArr
 }
 
 static void android_media_MediaPlayer2_prepareDrm(JNIEnv *env, jobject thiz,
-                    jbyteArray uuidObj, jbyteArray drmSessionIdObj)
+                    jlong srcId, jbyteArray uuidObj, jbyteArray drmSessionIdObj)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
@@ -1225,7 +1225,7 @@ static void android_media_MediaPlayer2_prepareDrm(JNIEnv *env, jobject thiz,
         return;
     }
 
-    status_t err = mp->prepareDrm(uuid.array(), drmSessionId);
+    status_t err = mp->prepareDrm(srcId, uuid.array(), drmSessionId);
     if (err != OK) {
         if (err == INVALID_OPERATION) {
             jniThrowException(
@@ -1243,7 +1243,7 @@ static void android_media_MediaPlayer2_prepareDrm(JNIEnv *env, jobject thiz,
     }
 }
 
-static void android_media_MediaPlayer2_releaseDrm(JNIEnv *env, jobject thiz)
+static void android_media_MediaPlayer2_releaseDrm(JNIEnv *env, jobject thiz, jlong srcId)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
@@ -1251,7 +1251,7 @@ static void android_media_MediaPlayer2_releaseDrm(JNIEnv *env, jobject thiz)
         return;
     }
 
-    status_t err = mp->releaseDrm();
+    status_t err = mp->releaseDrm(srcId);
     if (err != OK) {
         if (err == INVALID_OPERATION) {
             jniThrowException(
@@ -1425,8 +1425,8 @@ static const JNINativeMethod gMethods[] = {
     {"native_setAuxEffectSendLevel", "(F)V",                    (void *)android_media_MediaPlayer2_setAuxEffectSendLevel},
     {"native_attachAuxEffect", "(I)V",                          (void *)android_media_MediaPlayer2_attachAuxEffect},
     // Modular DRM
-    { "native_prepareDrm", "([B[B)V",                           (void *)android_media_MediaPlayer2_prepareDrm },
-    { "native_releaseDrm", "()V",                               (void *)android_media_MediaPlayer2_releaseDrm },
+    { "native_prepareDrm", "(J[B[B)V",                          (void *)android_media_MediaPlayer2_prepareDrm },
+    { "native_releaseDrm", "(J)V",                              (void *)android_media_MediaPlayer2_releaseDrm },
 
     // AudioRouting
     {"native_setPreferredDevice", "(Landroid/media/AudioDeviceInfo;)Z", (void *)android_media_MediaPlayer2_setPreferredDevice},
