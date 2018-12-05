@@ -1159,8 +1159,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // with just the foreground priority.  This means that persistent processes
                 // can never be the top app priority...  that is fine.
                 mUidPriorityOverride.put(uid, JobInfo.PRIORITY_TOP_APP);
+            } else if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+                mUidPriorityOverride.put(uid, JobInfo.PRIORITY_FOREGROUND_SERVICE);
             } else if (procState <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
-                mUidPriorityOverride.put(uid, JobInfo.PRIORITY_FOREGROUND_APP);
+                mUidPriorityOverride.put(uid, JobInfo.PRIORITY_BOUND_FOREGROUND_SERVICE);
             } else {
                 mUidPriorityOverride.delete(uid);
             }
@@ -2196,7 +2198,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     int evaluateJobPriorityLocked(JobStatus job) {
         int priority = job.getPriority();
-        if (priority >= JobInfo.PRIORITY_FOREGROUND_APP) {
+        if (priority >= JobInfo.PRIORITY_BOUND_FOREGROUND_SERVICE) {
             return adjustJobPriority(priority, job);
         }
         int override = mUidPriorityOverride.get(job.getSourceUid(), 0);
@@ -3130,9 +3132,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                 pw.println(job.toShortString());
                 job.dump(pw, "    ", false, nowElapsed);
                 int priority = evaluateJobPriorityLocked(job);
-                if (priority != JobInfo.PRIORITY_DEFAULT) {
-                    pw.print("    Evaluated priority: "); pw.println(priority);
-                }
+                pw.print("    Evaluated priority: ");
+                pw.println(JobInfo.getPriorityString(priority));
+
                 pw.print("    Tag: "); pw.println(job.getTag());
                 pw.print("    Enq: ");
                 TimeUtils.formatDuration(job.madePending - nowUptime, pw);
@@ -3163,9 +3165,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     pw.println();
                     job.dump(pw, "    ", false, nowElapsed);
                     int priority = evaluateJobPriorityLocked(jsc.getRunningJobLocked());
-                    if (priority != JobInfo.PRIORITY_DEFAULT) {
-                        pw.print("    Evaluated priority: "); pw.println(priority);
-                    }
+                    pw.print("    Evaluated priority: ");
+                    pw.println(JobInfo.getPriorityString(priority));
+
                     pw.print("    Active at ");
                     TimeUtils.formatDuration(job.madeActive - nowUptime, pw);
                     pw.print(", pending for ");
@@ -3283,10 +3285,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
                 job.writeToShortProto(proto, PendingJob.INFO);
                 job.dump(proto, PendingJob.DUMP, false, nowElapsed);
-                int priority = evaluateJobPriorityLocked(job);
-                if (priority != JobInfo.PRIORITY_DEFAULT) {
-                    proto.write(PendingJob.EVALUATED_PRIORITY, priority);
-                }
+                proto.write(PendingJob.EVALUATED_PRIORITY, evaluateJobPriorityLocked(job));
                 proto.write(PendingJob.ENQUEUED_DURATION_MS, nowUptime - job.madePending);
 
                 proto.end(pjToken);
@@ -3318,10 +3317,8 @@ public class JobSchedulerService extends com.android.server.SystemService
 
                     job.dump(proto, ActiveJob.RunningJob.DUMP, false, nowElapsed);
 
-                    int priority = evaluateJobPriorityLocked(jsc.getRunningJobLocked());
-                    if (priority != JobInfo.PRIORITY_DEFAULT) {
-                        proto.write(ActiveJob.RunningJob.EVALUATED_PRIORITY, priority);
-                    }
+                    proto.write(ActiveJob.RunningJob.EVALUATED_PRIORITY,
+                            evaluateJobPriorityLocked(jsc.getRunningJobLocked()));
 
                     proto.write(ActiveJob.RunningJob.TIME_SINCE_MADE_ACTIVE_MS,
                             nowUptime - job.madeActive);
