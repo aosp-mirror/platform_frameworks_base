@@ -34,6 +34,8 @@ import com.android.internal.annotations.GuardedBy;
 public class AppZygote {
     private static final String LOG_TAG = "AppZygote";
 
+    private final int mZygoteUid;
+
     private final Object mLock = new Object();
 
     /**
@@ -45,8 +47,9 @@ public class AppZygote {
 
     private final ApplicationInfo mAppInfo;
 
-    public AppZygote(ApplicationInfo appInfo) {
+    public AppZygote(ApplicationInfo appInfo, int zygoteUid) {
         mAppInfo = appInfo;
+        mZygoteUid = zygoteUid;
     }
 
     /**
@@ -94,8 +97,8 @@ public class AppZygote {
             mZygote = Process.zygoteProcess.startChildZygote(
                     "com.android.internal.os.AppZygoteInit",
                     mAppInfo.processName + "_zygote",
-                    mAppInfo.uid,
-                    mAppInfo.uid,
+                    mZygoteUid,
+                    mZygoteUid,
                     null,  // gids
                     0,  // runtimeFlags
                     "app_zygote",  // seInfo

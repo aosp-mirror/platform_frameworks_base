@@ -121,7 +121,6 @@ class WebViewZygoteInit {
 
     public static void main(String argv[]) {
         Log.i(TAG, "Starting WebViewZygoteInit");
-
         WebViewZygoteServer server = new WebViewZygoteServer();
         ChildZygoteInit.runZygoteServer(server, argv);
     }

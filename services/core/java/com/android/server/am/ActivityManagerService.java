@@ -1943,7 +1943,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (this) {
                 ProcessRecord app = mProcessList.newProcessRecordLocked(info, info.processName,
                         false,
-                        0);
+                        0,
+                        false);
                 app.setPersistent(true);
                 app.pid = MY_PID;
                 app.getWindowProcessController().setPid(MY_PID);
@@ -7407,7 +7408,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (app == null) {
-            app = mProcessList.newProcessRecordLocked(info, customProcess, isolated, 0);
+            app = mProcessList.newProcessRecordLocked(info, customProcess, isolated, 0, false);
             mProcessList.updateLruProcessLocked(app, false, null);
             updateOomAdjLocked();
         }
