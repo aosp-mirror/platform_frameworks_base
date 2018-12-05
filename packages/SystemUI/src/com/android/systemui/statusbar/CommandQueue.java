@@ -35,6 +35,8 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.SystemUI;
+import com.android.systemui.statusbar.CommandQueue.Callbacks;
+import com.android.systemui.statusbar.policy.CallbackController;
 
 import java.util.ArrayList;
 
@@ -45,7 +47,7 @@ import java.util.ArrayList;
  * coalescing these calls so they don't stack up.  For the calls
  * are coalesced, note that they are all idempotent.
  */
-public class CommandQueue extends IStatusBar.Stub {
+public class CommandQueue extends IStatusBar.Stub implements CallbackController<Callbacks> {
     private static final int INDEX_MASK = 0xffff;
     private static final int MSG_SHIFT  = 16;
     private static final int MSG_MASK   = 0xffff << MSG_SHIFT;
@@ -183,12 +185,12 @@ public class CommandQueue extends IStatusBar.Stub {
                 && !ONLY_CORE_APPS;
     }
 
-    public void addCallbacks(Callbacks callbacks) {
+    public void addCallback(Callbacks callbacks) {
         mCallbacks.add(callbacks);
         callbacks.disable(mDisable1, mDisable2, false /* animate */);
     }
 
-    public void removeCallbacks(Callbacks callbacks) {
+    public void removeCallback(Callbacks callbacks) {
         mCallbacks.remove(callbacks);
     }
 

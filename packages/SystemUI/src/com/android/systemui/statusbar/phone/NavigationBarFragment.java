@@ -199,7 +199,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mCommandQueue = SysUiServiceProvider.getComponent(getContext(), CommandQueue.class);
-        mCommandQueue.addCallbacks(this);
+        mCommandQueue.addCallback(this);
         mStatusBar = SysUiServiceProvider.getComponent(getContext(), StatusBar.class);
         mRecents = SysUiServiceProvider.getComponent(getContext(), Recents.class);
         mDivider = SysUiServiceProvider.getComponent(getContext(), Divider.class);
@@ -225,7 +225,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCommandQueue.removeCallbacks(this);
+        mCommandQueue.removeCallback(this);
         Dependency.get(AccessibilityManagerWrapper.class).removeCallback(
                 mAccessibilityListener);
         mContentResolver.unregisterContentObserver(mMagnificationObserver);

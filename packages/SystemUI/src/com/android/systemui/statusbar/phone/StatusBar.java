@@ -663,7 +663,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Connect in to the status bar manager service
         mCommandQueue = getComponent(CommandQueue.class);
-        mCommandQueue.addCallbacks(this);
+        mCommandQueue.addCallback(this);
 
         int[] switches = new int[9];
         ArrayList<IBinder> binders = new ArrayList<>();
