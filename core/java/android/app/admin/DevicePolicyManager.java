@@ -10092,11 +10092,40 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.isPackageAllowedToAccessCalendarForUser(packageName,
-                        mContext.getUserId());
+                        myUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
         return false;
+    }
+
+    /**
+     * Gets a set of package names that are whitelisted to access cross profile calendar APIs.
+     *
+     * <p>To query for a specific user, use
+     * {@link Context#createPackageContextAsUser(String, int, UserHandle)} to create a context for
+     * that user, and get a {@link DevicePolicyManager} from this context.
+     *
+     * @return the set of names of packages that were previously whitelisted via
+     * {@link #addCrossProfileCalendarPackage(ComponentName, String)}, or an
+     * empty set if none have been whitelisted.
+     *
+     * @see #addCrossProfileCalendarPackage(ComponentName, String)
+     * @see #removeCrossProfileCalendarPackage(ComponentName, String)
+     * @see #getCrossProfileCalendarPackages(ComponentName)
+     * @hide
+     */
+    public @NonNull Set<String>  getCrossProfileCalendarPackages() {
+        throwIfParentInstance("getCrossProfileCalendarPackages");
+        if (mService != null) {
+            try {
+                return new ArraySet<>(mService.getCrossProfileCalendarPackagesForUser(
+                        myUserId()));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return Collections.emptySet();
     }
 }

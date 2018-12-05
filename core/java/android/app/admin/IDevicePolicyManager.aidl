@@ -427,4 +427,5 @@ interface IDevicePolicyManager {
     boolean removeCrossProfileCalendarPackage(in ComponentName admin, String packageName);
     List<String> getCrossProfileCalendarPackages(in ComponentName admin);
     boolean isPackageAllowedToAccessCalendarForUser(String packageName, int userHandle);
+    List<String> getCrossProfileCalendarPackagesForUser(int userHandle);
 }

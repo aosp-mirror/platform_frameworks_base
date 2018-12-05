@@ -13426,10 +13426,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         enforceCrossUsersPermission(userHandle);
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
-            if (admin != null && admin.mCrossProfileCalendarPackages != null) {
+            if (admin != null) {
                 return admin.mCrossProfileCalendarPackages.contains(packageName);
             }
         }
         return false;
+    }
+
+    @Override
+    public List<String> getCrossProfileCalendarPackagesForUser(int userHandle) {
+        if (!mHasFeature) {
+            return Collections.emptyList();
+        }
+        enforceCrossUsersPermission(userHandle);
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
+            if (admin != null) {
+                return new ArrayList<String>(admin.mCrossProfileCalendarPackages);
+            }
+        }
+        return Collections.emptyList();
     }
 }
