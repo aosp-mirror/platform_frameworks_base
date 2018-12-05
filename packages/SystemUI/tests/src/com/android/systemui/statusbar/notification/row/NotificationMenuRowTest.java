@@ -25,7 +25,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.Notification;
+import android.app.NotificationChannel;
 import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -35,6 +35,7 @@ import android.testing.ViewUtils;
 import android.view.ViewGroup;
 
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
@@ -43,19 +44,26 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper()
+@RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class NotificationMenuRowTest extends LeakCheckedTest {
+
+    private ExpandableNotificationRow mRow;
 
     @Before
     public void setup() {
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
+        mRow = mock(ExpandableNotificationRow.class);
+        NotificationData.Entry entry = new NotificationData.Entry(
+                mock(StatusBarNotification.class));
+        entry.channel = mock(NotificationChannel.class);
+        when(mRow.getEntry()).thenReturn(entry);
     }
 
     @Test
     public void testAttachDetach() {
         NotificationMenuRowPlugin row = new NotificationMenuRow(mContext);
-        row.createMenu(null, null);
+        row.createMenu(mRow, null);
         ViewUtils.attachView(row.getMenuView());
         TestableLooper.get(this).processAllMessages();
         ViewUtils.detachView(row.getMenuView());
@@ -65,9 +73,9 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     @Test
     public void testRecreateMenu() {
         NotificationMenuRowPlugin row = new NotificationMenuRow(mContext);
-        row.createMenu(null, null);
+        row.createMenu(mRow, null);
         assertTrue(row.getMenuView() != null);
-        row.createMenu(null, null);
+        row.createMenu(mRow, null);
         assertTrue(row.getMenuView() != null);
     }
 
@@ -81,12 +89,7 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     @Test
     public void testNoAppOpsInSlowSwipe() {
         NotificationMenuRow row = new NotificationMenuRow(mContext);
-        Notification n = mock(Notification.class);
-        StatusBarNotification sbn = mock(StatusBarNotification.class);
-        when(sbn.getNotification()).thenReturn(n);
-        ExpandableNotificationRow parent = mock(ExpandableNotificationRow.class);
-        when(parent.getStatusBarNotification()).thenReturn(sbn);
-        row.createMenu(parent, null);
+        row.createMenu(mRow, null);
 
         ViewGroup container = (ViewGroup) row.getMenuView();
         // one for snooze and one for noti blocking
