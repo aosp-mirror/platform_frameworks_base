@@ -25,10 +25,12 @@ import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.os.BatteryStats;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
+import android.os.ThreadLocalWorkSource;
 import android.telephony.ModemActivityInfo;
 import android.telephony.TelephonyManager;
 import android.util.IntArray;
@@ -43,11 +45,9 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import libcore.util.EmptyArray;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -74,7 +74,12 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     private final ScheduledExecutorService mExecutorService =
             Executors.newSingleThreadScheduledExecutor(
                     (ThreadFactory) r -> {
-                        Thread t = new Thread(r, "batterystats-worker");
+                        Thread t = new Thread(
+                                () -> {
+                                    ThreadLocalWorkSource.setUid(Process.myUid());
+                                    r.run();
+                                },
+                                "batterystats-worker");
                         t.setPriority(Thread.NORM_PRIORITY);
                         return t;
                     });

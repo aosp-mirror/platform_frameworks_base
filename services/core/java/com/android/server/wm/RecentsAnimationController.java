@@ -603,8 +603,8 @@ public class RecentsAnimationController implements DeathRecipient {
             mTask = task;
             mIsRecentTaskInvisible = isRecentTaskInvisible;
             final WindowContainer container = mTask.getParent();
-            container.getRelativePosition(mPosition);
-            container.getBounds(mBounds);
+            container.getRelativeDisplayedPosition(mPosition);
+            mBounds.set(container.getDisplayedBounds());
         }
 
         RemoteAnimationTarget createRemoteAnimationApp() {

@@ -43,8 +43,6 @@ oneway interface IUidObserver {
      */
     void onUidIdle(int uid, boolean disabled);
 
-    // =============== End of transactions used on native side as well ============================
-
     /**
      * General report of a state change of an uid.
      *
@@ -54,6 +52,8 @@ oneway interface IUidObserver {
      *                     see UidRecord.procStateSeq for details.
      */
     void onUidStateChanged(int uid, int procState, long procStateSeq);
+
+    // =============== End of transactions used on native side as well ============================
 
     /**
      * Report when the cached state of a uid has changed.

@@ -216,6 +216,6 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     }
 }
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

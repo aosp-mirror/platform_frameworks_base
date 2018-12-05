@@ -1246,10 +1246,8 @@ public final class ProcessList {
         long startTime = SystemClock.elapsedRealtime();
         if (app.pid > 0 && app.pid != ActivityManagerService.MY_PID) {
             checkSlow(startTime, "startProcess: removing from pids map");
-            synchronized (mService.mPidsSelfLocked) {
-                mService.mPidsSelfLocked.remove(app.pid);
-                mService.mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
-            }
+            mService.mPidsSelfLocked.remove(app.pid);
+            mService.mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             checkSlow(startTime, "startProcess: done removing from pids map");
             app.setPid(0);
         }
@@ -1767,8 +1765,8 @@ public final class ProcessList {
             mService.cleanUpApplicationRecordLocked(oldApp, false, false, -1,
                     true /*replacingPid*/);
         }
+        mService.mPidsSelfLocked.put(pid, app);
         synchronized (mService.mPidsSelfLocked) {
-            mService.mPidsSelfLocked.put(pid, app);
             if (!procAttached) {
                 Message msg = mService.mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
                 msg.obj = app;
@@ -1928,10 +1926,8 @@ public final class ProcessList {
                 .pendingStart)) {
             int pid = app.pid;
             if (pid > 0) {
-                synchronized (mService.mPidsSelfLocked) {
-                    mService.mPidsSelfLocked.remove(pid);
-                    mService.mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
-                }
+                mService.mPidsSelfLocked.remove(pid);
+                mService.mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
                 mService.mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
                 if (app.isolated) {
                     mService.mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);

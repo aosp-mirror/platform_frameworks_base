@@ -32,30 +32,24 @@ import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
-import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
-import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Range;
 
 import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
 public class DataUsageController {
 
     private static final String TAG = "DataUsageController";
-    @VisibleForTesting
-    static final String DATA_USAGE_V2 = "settings_data_usage_v2";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final int FIELDS = FIELD_RX_BYTES | FIELD_TX_BYTES;
     private static final StringBuilder PERIOD_BUILDER = new StringBuilder(50);
@@ -93,21 +87,6 @@ public class DataUsageController {
     public long getDefaultWarningLevel() {
         return MB_IN_BYTES
                 * mContext.getResources().getInteger(R.integer.default_data_warning_level_mb);
-    }
-
-    @VisibleForTesting
-    @Deprecated
-    INetworkStatsSession getSession() {
-        if (mSession == null) {
-            try {
-                mSession = mStatsService.openSession();
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to open stats session", e);
-            } catch (RuntimeException e) {
-                Log.w(TAG, "Failed to open stats session", e);
-            }
-        }
-        return mSession;
     }
 
     public void setCallback(Callback callback) {
@@ -149,13 +128,7 @@ public class DataUsageController {
             end = now;
             start = now - DateUtils.WEEK_IN_MILLIS * 4;
         }
-        final long totalBytes;
-        final long callStart = System.currentTimeMillis();
-        if (FeatureFlagUtils.isEnabled(mContext, DATA_USAGE_V2)) {
-            totalBytes = getUsageLevel(template, start, end);
-        } else {
-            totalBytes = getUsageLevel(template, start, end, now);
-        }
+        final long totalBytes = getUsageLevel(template, start, end);
         if (totalBytes < 0L) {
             return warn("no entry data");
         }
@@ -185,32 +158,7 @@ public class DataUsageController {
      * retrieving the data.
      */
     public long getHistoricalUsageLevel(NetworkTemplate template) {
-        if (FeatureFlagUtils.isEnabled(mContext, DATA_USAGE_V2)) {
-            return getUsageLevel(template, 0L /* start */, System.currentTimeMillis() /* end */);
-        } else {
-            final long now = System.currentTimeMillis();
-            return getUsageLevel(template, 0L /* start */, now /* end */, now);
-        }
-    }
-
-    @Deprecated
-    private long getUsageLevel(NetworkTemplate template, long start, long end, long now) {
-        final INetworkStatsSession session = getSession();
-        if (session != null) {
-            try {
-                final NetworkStatsHistory history =
-                    session.getHistoryForNetwork(template, FIELDS);
-                final NetworkStatsHistory.Entry entry = history.getValues(
-                        start, end, System.currentTimeMillis() /* now */, null /* recycle */);
-                if (entry != null) {
-                    return entry.rxBytes + entry.txBytes;
-                }
-                Log.w(TAG, "Failed to get data usage, no entry data");
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to get data usage, remote call failed");
-            }
-        }
-        return -1L;
+        return getUsageLevel(template, 0L /* start */, System.currentTimeMillis() /* end */);
     }
 
     private long getUsageLevel(NetworkTemplate template, long start, long end) {
@@ -239,20 +187,6 @@ public class DataUsageController {
             }
         }
         return null;
-    }
-
-    @Deprecated
-    private static String historyEntryToString(NetworkStatsHistory.Entry entry) {
-        return entry == null ? null : new StringBuilder("Entry[")
-                .append("bucketDuration=").append(entry.bucketDuration)
-                .append(",bucketStart=").append(entry.bucketStart)
-                .append(",activeTime=").append(entry.activeTime)
-                .append(",rxBytes=").append(entry.rxBytes)
-                .append(",rxPackets=").append(entry.rxPackets)
-                .append(",txBytes=").append(entry.txBytes)
-                .append(",txPackets=").append(entry.txPackets)
-                .append(",operations=").append(entry.operations)
-                .append(']').toString();
     }
 
     private static String statsBucketToString(Bucket bucket) {

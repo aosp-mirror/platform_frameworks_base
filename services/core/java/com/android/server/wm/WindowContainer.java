@@ -1266,7 +1266,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             return;
         }
 
-        getRelativePosition(mTmpPos);
+        getRelativeDisplayedPosition(mTmpPos);
         if (mTmpPos.equals(mLastSurfacePosition)) {
             return;
         }
@@ -1275,12 +1275,22 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mLastSurfacePosition.set(mTmpPos.x, mTmpPos.y);
     }
 
-    void getRelativePosition(Point outPos) {
-        final Rect bounds = getBounds();
-        outPos.set(bounds.left, bounds.top);
+    /**
+     * Displayed bounds specify where to display this container at. It differs from bounds during
+     * certain operations (like animation or interactive dragging).
+     *
+     * @return the bounds to display this container at.
+     */
+    Rect getDisplayedBounds() {
+        return getBounds();
+    }
+
+    void getRelativeDisplayedPosition(Point outPos) {
+        final Rect dispBounds = getDisplayedBounds();
+        outPos.set(dispBounds.left, dispBounds.top);
         final WindowContainer parent = getParent();
         if (parent != null) {
-            final Rect parentBounds = parent.getBounds();
+            final Rect parentBounds = parent.getDisplayedBounds();
             outPos.offset(-parentBounds.left, -parentBounds.top);
         }
     }

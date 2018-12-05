@@ -588,6 +588,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateRippleAllowed();
     }
 
+    /** Called when the notification's ranking was changed (but nothing else changed). */
+    public void onNotificationRankingUpdated() {
+        if (mMenuRow != null) {
+            mMenuRow.onNotificationUpdated(mStatusBarNotification);
+        }
+    }
+
     @VisibleForTesting
     void updateShelfIconColor() {
         StatusBarIconView expandedIcon = mEntry.expandedIcon;
@@ -2001,7 +2008,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         float interpolation = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(params.getProgress());
         int startClipTopAmount = params.getStartClipTopAmount();
         if (mNotificationParent != null) {
-            top -= mNotificationParent.getTranslationY();
+            float parentY = mNotificationParent.getTranslationY();
+            top -= parentY;
             mNotificationParent.setTranslationZ(translationZ);
             int parentStartClipTopAmount = params.getParentStartClipTopAmount();
             if (startClipTopAmount != 0) {
@@ -2011,8 +2019,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mNotificationParent.setClipTopAmount(clipTopAmount);
             }
             mNotificationParent.setExtraWidthForClipping(extraWidthForClipping);
-            mNotificationParent.setMinimumHeightForClipping(params.getHeight()
-                    + mNotificationParent.getActualHeight());
+            float clipBottom = Math.max(params.getBottom(),
+                    parentY + mNotificationParent.getActualHeight()
+                            - mNotificationParent.getClipBottomAmount());
+            float clipTop = Math.min(params.getTop(), parentY);
+            int minimumHeightForClipping = (int) (clipBottom - clipTop);
+            mNotificationParent.setMinimumHeightForClipping(minimumHeightForClipping);
         } else if (startClipTopAmount != 0) {
             int clipTopAmount = (int) MathUtils.lerp(startClipTopAmount, 0, interpolation);
             setClipTopAmount(clipTopAmount);

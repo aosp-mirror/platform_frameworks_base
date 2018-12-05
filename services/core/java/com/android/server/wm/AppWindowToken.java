@@ -2178,9 +2178,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         final TaskStack stack = getStack();
         final Task task = getTask();
         if (task != null && task.inFreeformWindowingMode()) {
-            task.getRelativePosition(outPosition);
+            task.getRelativeDisplayedPosition(outPosition);
         } else if (stack != null) {
-            stack.getRelativePosition(outPosition);
+            stack.getRelativeDisplayedPosition(outPosition);
         }
 
         // Always use stack bounds in order to have the ability to animate outside the task region.
@@ -2191,6 +2191,18 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         // We have the relative position so the local position can be removed from bounds.
         outBounds.offsetTo(0, 0);
+    }
+
+    @Override
+    Rect getDisplayedBounds() {
+        final Task task = getTask();
+        if (task != null) {
+            final Rect overrideDisplayedBounds = task.getOverrideDisplayedBounds();
+            if (!overrideDisplayedBounds.isEmpty()) {
+                return overrideDisplayedBounds;
+            }
+        }
+        return getBounds();
     }
 
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,

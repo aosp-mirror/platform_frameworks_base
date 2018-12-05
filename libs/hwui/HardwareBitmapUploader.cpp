@@ -256,4 +256,4 @@ sk_sp<Bitmap> HardwareBitmapUploader::allocateHardwareBitmap(const SkBitmap& sou
     return sk_sp<Bitmap>(new Bitmap(buffer.get(), bitmap.info(), Bitmap::computePalette(bitmap)));
 }
 
-};  // namespace android::uirenderer
+}  // namespace android::uirenderer

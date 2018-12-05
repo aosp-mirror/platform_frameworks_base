@@ -572,6 +572,7 @@ java_defaults {
         "telephony/java/com/android/internal/telephony/IApnSourceService.aidl",
         "telephony/java/com/android/internal/telephony/ICarrierConfigLoader.aidl",
         "telephony/java/com/android/internal/telephony/IMms.aidl",
+        "telephony/java/com/android/internal/telephony/INumberVerificationCallback.aidl",
         "telephony/java/com/android/internal/telephony/IOnSubscriptionsChangedListener.aidl",
         "telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl",
         "telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl",
@@ -651,6 +652,8 @@ java_defaults {
         "core/java/com/android/internal/logging/EventLogTags.logtags",
         "core/java/com/android/server/DropboxLogTags.logtags",
         "core/java/org/chromium/arc/EventLogTags.logtags",
+
+        ":platform-properties",
 
         ":framework-statslog-gen",
     ],
@@ -781,9 +784,11 @@ java_library {
 java_library_host {
     name: "inspector-annotation",
     srcs: [
-        "core/java/android/view/inspector/InspectableChildren.java",
         "core/java/android/view/inspector/InspectableNodeName.java",
         "core/java/android/view/inspector/InspectableProperty.java",
+        // Needed for the ResourceId.ID_NULL constant
+        "core/java/android/content/res/ResourceId.java",
+        "core/java/android/annotation/AnyRes.java",
     ],
 }
 

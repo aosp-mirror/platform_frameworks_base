@@ -81,5 +81,5 @@ TEST(LayerUpdateQueue, clear) {
 
     EXPECT_TRUE(queue.entries().empty());
 }
-};
-};
+}
+}

@@ -185,6 +185,7 @@ public class QuickStepController implements GestureHelper {
 
         // Requires proxy and an active gesture or able to perform any gesture to continue
         if (mOverviewEventSender.getProxy() == null
+                || !mOverviewEventSender.shouldShowSwipeUpUI()
                 || (mCurrentAction == null && !canPerformAnyAction())) {
             return deadZoneConsumed;
         }
@@ -275,25 +276,21 @@ public class QuickStepController implements GestureHelper {
                         if (mDragVPositive ? (posV < touchDownV) : (posV > touchDownV)) {
                             // Swiping up gesture
                             tryToStartGesture(mGestureActions[ACTION_SWIPE_UP_INDEX],
-                                    false /* alignedWithNavBar */, false /* positiveDirection */,
-                                    event);
+                                    false /* alignedWithNavBar */, event);
                         } else {
                             // Swiping down gesture
                             tryToStartGesture(mGestureActions[ACTION_SWIPE_DOWN_INDEX],
-                                    false /* alignedWithNavBar */, true /* positiveDirection */,
-                                    event);
+                                    false /* alignedWithNavBar */, event);
                         }
                     } else if (exceededSwipeHorizontalTouchSlop) {
                         if (mDragHPositive ? (posH < touchDownH) : (posH > touchDownH)) {
                             // Swiping left (ltr) gesture
                             tryToStartGesture(mGestureActions[ACTION_SWIPE_LEFT_INDEX],
-                                    true /* alignedWithNavBar */, false /* positiveDirection */,
-                                    event);
+                                    true /* alignedWithNavBar */, event);
                         } else {
                             // Swiping right (ltr) gesture
                             tryToStartGesture(mGestureActions[ACTION_SWIPE_RIGHT_INDEX],
-                                    true /* alignedWithNavBar */, true /* positiveDirection */,
-                                    event);
+                                    true /* alignedWithNavBar */, event);
                         }
                     }
                 }
@@ -306,7 +303,6 @@ public class QuickStepController implements GestureHelper {
             case MotionEvent.ACTION_UP:
                 if (mCurrentAction != null) {
                     mCurrentAction.endGesture();
-                    mCurrentAction = null;
                 }
 
                 // Return the hit target back to its original position
@@ -328,6 +324,11 @@ public class QuickStepController implements GestureHelper {
 
         if (shouldProxyEvents(action)) {
             proxyMotionEvents(event);
+        }
+
+        // Clear action when gesture and event proxy finishes
+        if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
+            mCurrentAction = null;
         }
         return mCurrentAction != null || deadZoneConsumed;
     }
@@ -354,8 +355,7 @@ public class QuickStepController implements GestureHelper {
 
     private boolean shouldProxyEvents(int action) {
         final boolean actionValid = (mCurrentAction == null
-                || (mGestureActions[ACTION_SWIPE_UP_INDEX] != null
-                        && mGestureActions[ACTION_SWIPE_UP_INDEX].isActive()));
+                || !mCurrentAction.disableProxyEvents());
         if (actionValid && !mIsInScreenPinning) {
             // Allow down, cancel and up events, move and other events are passed if notifications
             // are not showing and disabled gestures (such as long press) are not executed
@@ -455,7 +455,7 @@ public class QuickStepController implements GestureHelper {
     }
 
     private void tryToStartGesture(NavigationGestureAction action, boolean alignedWithNavBar,
-            boolean positiveDirection, MotionEvent event) {
+            MotionEvent event) {
         if (action == null) {
             return;
         }

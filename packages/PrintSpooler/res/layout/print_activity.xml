@@ -107,7 +107,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dip"
         android:elevation="@dimen/preview_controls_elevation"
-        android:tint="?android:attr/textColorPrimaryInverse"
+        android:tint="@android:color/white"
         android:background="@drawable/print_button">
     </ImageButton>
 

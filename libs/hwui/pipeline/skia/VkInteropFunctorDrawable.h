@@ -51,6 +51,6 @@ private:
     SkImageInfo mFBInfo;
 };
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

@@ -129,5 +129,5 @@ void TaskManager::WorkerThread::exit() {
     mSignal.signal();
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

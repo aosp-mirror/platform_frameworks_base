@@ -9,8 +9,6 @@ cc_defaults {
         "hwui_lto",
     ],
 
-    cpp_std: "c++17",
-
     cflags: [
         "-DEGL_EGLEXT_PROTOTYPES",
         "-DGL_GLEXT_PROTOTYPES",

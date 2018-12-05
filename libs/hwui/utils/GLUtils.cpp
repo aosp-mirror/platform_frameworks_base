@@ -76,5 +76,5 @@ const char* GLUtils::getGLFramebufferError() {
     }
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

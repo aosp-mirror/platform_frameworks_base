@@ -48,8 +48,6 @@ import android.view.SurfaceHolder;
 import com.android.framework.protobuf.InvalidProtocolBufferException;
 import com.android.internal.annotations.GuardedBy;
 
-import dalvik.system.CloseGuard;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;

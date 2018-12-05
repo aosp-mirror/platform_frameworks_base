@@ -267,7 +267,9 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         } else {
             mRightMenuItems.add(mInfoItem);
             mRightMenuItems.add(mAppOpsItem);
-            mRightMenuItems.add(mSnoozeItem);
+            if (!isForeground) {
+                mRightMenuItems.add(mSnoozeItem);
+            }
         }
 
         populateMenuViews();

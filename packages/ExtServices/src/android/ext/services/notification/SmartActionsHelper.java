@@ -48,7 +48,7 @@ public class SmartActionsHelper {
                     | Notification.FLAG_NO_CLEAR;
     private static final int MAX_ACTION_EXTRACTION_TEXT_LENGTH = 400;
     private static final int MAX_ACTIONS_PER_LINK = 1;
-    private static final int MAX_SMART_ACTIONS = Notification.MAX_ACTION_BUTTONS;
+    private static final int MAX_SMART_ACTIONS = 3;
     private static final int MAX_SUGGESTED_REPLIES = 3;
 
     private static final ConversationActions.TypeConfig TYPE_CONFIG =
@@ -81,12 +81,9 @@ public class SmartActionsHelper {
         if (tcm == null) {
             return EMPTY_ACTION_LIST;
         }
-        Notification.Action[] actions = entry.getNotification().actions;
-        int numOfExistingActions = actions == null ? 0: actions.length;
-        int maxSmartActions = MAX_SMART_ACTIONS - numOfExistingActions;
         return suggestActionsFromText(
                 tcm,
-                getMostSalientActionText(entry.getNotification()), maxSmartActions);
+                getMostSalientActionText(entry.getNotification()), MAX_SMART_ACTIONS);
     }
 
     ArrayList<CharSequence> suggestReplies(

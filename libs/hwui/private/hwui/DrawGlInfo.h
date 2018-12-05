@@ -83,7 +83,7 @@ struct DrawGlInfo {
     };
 };  // struct DrawGlInfo
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android
 
 #endif  // ANDROID_HWUI_DRAW_GL_INFO_H

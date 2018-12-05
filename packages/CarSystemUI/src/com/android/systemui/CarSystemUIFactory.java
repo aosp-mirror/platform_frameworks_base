@@ -28,6 +28,8 @@ import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.car.hvac.HvacController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.volume.CarVolumeDialogComponent;
+import com.android.systemui.volume.VolumeDialogComponent;
 
 /**
  * Class factory to provide car specific SystemUI components.
@@ -37,6 +39,10 @@ public class CarSystemUIFactory extends SystemUIFactory {
     public StatusBarKeyguardViewManager createStatusBarKeyguardViewManager(Context context,
         ViewMediatorCallback viewMediatorCallback, LockPatternUtils lockPatternUtils) {
         return new CarStatusBarKeyguardViewManager(context, viewMediatorCallback, lockPatternUtils);
+    }
+
+    public VolumeDialogComponent createVolumeDialogComponent(SystemUI systemUi, Context context) {
+        return new CarVolumeDialogComponent(systemUi, context);
     }
 
     @Override

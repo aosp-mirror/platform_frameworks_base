@@ -88,6 +88,7 @@ public class AppWidgetHostView extends FrameLayout {
     int mViewMode = VIEW_MODE_NOINIT;
     int mLayoutId = -1;
     private OnClickHandler mOnClickHandler;
+    private boolean mOnLightBackground;
 
     private Executor mAsyncExecutor;
     private CancellationSignal mLastExecutionSignal;
@@ -374,6 +375,15 @@ public class AppWidgetHostView extends FrameLayout {
     }
 
     /**
+     * Sets whether the widget should is being displayed on a light/white background and use an
+     * alternate UI if available.
+     * @see RemoteViews#setLightBackgroundLayoutId(int)
+     */
+    public void setOnLightBackground(boolean useDarkTextLayout) {
+        mOnLightBackground = useDarkTextLayout;
+    }
+
+    /**
      * Update the AppWidgetProviderInfo for this view, and reset it to the
      * initial layout.
      */
@@ -413,6 +423,10 @@ public class AppWidgetHostView extends FrameLayout {
             mLayoutId = -1;
             mViewMode = VIEW_MODE_DEFAULT;
         } else {
+            if (mOnLightBackground) {
+                remoteViews = remoteViews.getDarkTextViews();
+            }
+
             if (mAsyncExecutor != null && useAsyncIfPossible) {
                 inflateAsync(remoteViews);
                 return;

@@ -31,7 +31,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.InputDevice;
-import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -291,9 +290,14 @@ public class ActivityView extends ViewGroup {
         return super.onGenericMotionEvent(event);
     }
 
-    private boolean injectInputEvent(InputEvent event) {
+    private boolean injectInputEvent(MotionEvent event) {
         if (mInputForwarder != null) {
             try {
+                // The touch event that the ActivityView gets is in View space, but the event needs
+                // to get forwarded in screen space. This offsets the touch event by the location
+                // the ActivityView is on screen and sends it to the input forwarder.
+                getLocationOnScreen(mLocationOnScreen);
+                event.offsetLocation(mLocationOnScreen[0], mLocationOnScreen[1]);
                 return mInputForwarder.forwardEvent(event);
             } catch (RemoteException e) {
                 e.rethrowAsRuntimeException();

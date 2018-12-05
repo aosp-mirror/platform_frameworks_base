@@ -308,4 +308,4 @@ protected:
     sp<EglImage> mReleasedTexImage;
 };
 
-};  // namespace android
+}  // namespace android

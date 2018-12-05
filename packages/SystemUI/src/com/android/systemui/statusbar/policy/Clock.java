@@ -165,7 +165,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
         mClockVisibleByUser = bundle.getBoolean(VISIBLE_BY_USER, true);
         mShowSeconds = bundle.getBoolean(SHOW_SECONDS, false);
         if (bundle.containsKey(VISIBILITY)) {
-            setVisibility(bundle.getInt(VISIBILITY));
+            super.setVisibility(bundle.getInt(VISIBILITY));
         }
     }
 
@@ -203,6 +203,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
 
         // Make sure we update to the current time
         updateClock();
+        updateClockVisibility();
         updateShowSeconds();
     }
 
@@ -247,6 +248,15 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
         }
     };
 
+    @Override
+    public void setVisibility(int visibility) {
+        if (visibility == View.VISIBLE && !shouldBeVisible()) {
+            return;
+        }
+
+        super.setVisibility(visibility);
+    }
+
     public void setClockVisibleByUser(boolean visible) {
         mClockVisibleByUser = visible;
         updateClockVisibility();
@@ -257,11 +267,15 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
         updateClockVisibility();
     }
 
+    private boolean shouldBeVisible() {
+        return mClockVisibleByPolicy && mClockVisibleByUser;
+    }
+
     private void updateClockVisibility() {
-        boolean visible = mClockVisibleByPolicy && mClockVisibleByUser;
+        boolean visible = shouldBeVisible();
         Dependency.get(IconLogger.class).onIconVisibility("clock", visible);
         int visibility = visible ? View.VISIBLE : View.GONE;
-        setVisibility(visibility);
+        super.setVisibility(visibility);
     }
 
     final void updateClock() {

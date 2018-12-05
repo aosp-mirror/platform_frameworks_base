@@ -1028,5 +1028,5 @@ void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
     fDL->drawVectorDrawable(tree);
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

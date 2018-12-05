@@ -34,5 +34,5 @@ struct LightInfo {
     uint8_t spotShadowAlpha;
 };
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

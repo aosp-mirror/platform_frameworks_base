@@ -249,7 +249,22 @@ public class Typeface {
             if (familyBuilder == null) {
                 return Typeface.DEFAULT;
             }
-            typeface = new Typeface.CustomFallbackBuilder(familyBuilder.build()).build();
+            final FontFamily family = familyBuilder.build();
+            final FontStyle normal = new FontStyle(FontStyle.FONT_WEIGHT_NORMAL,
+                    FontStyle.FONT_SLANT_UPRIGHT);
+            Font bestFont = family.getFont(0);
+            int bestScore = normal.getMatchScore(bestFont.getStyle());
+            for (int i = 1; i < family.getSize(); ++i) {
+                final Font candidate = family.getFont(i);
+                final int score = normal.getMatchScore(candidate.getStyle());
+                if (score < bestScore) {
+                    bestFont = candidate;
+                    bestScore = score;
+                }
+            }
+            typeface = new Typeface.CustomFallbackBuilder(family)
+                    .setStyle(bestFont.getStyle())
+                    .build();
         } catch (IOException e) {
             typeface = Typeface.DEFAULT;
         }

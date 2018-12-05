@@ -62,6 +62,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
+import com.android.systemui.volume.VolumeDialogComponent;
 
 import java.util.function.Consumer;
 
@@ -130,6 +131,10 @@ public class SystemUIFactory {
     public QSTileHost createQSTileHost(Context context, StatusBar statusBar,
             StatusBarIconController iconController) {
         return new QSTileHost(context, statusBar, iconController);
+    }
+
+    public VolumeDialogComponent createVolumeDialogComponent(SystemUI systemUi, Context context) {
+        return new VolumeDialogComponent(systemUi, context);
     }
 
     public void injectDependencies(ArrayMap<Object, DependencyProvider> providers,

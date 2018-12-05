@@ -74,6 +74,6 @@ private:
     StartReorderBarrierDrawable* mStartBarrier;
 };
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

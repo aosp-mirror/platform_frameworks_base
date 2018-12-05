@@ -2410,4 +2410,11 @@ public abstract class Window {
     public boolean isCloseOnSwipeEnabled() {
         return mCloseOnSwipeEnabled;
     }
+
+    /**
+     * @return The {@link WindowInsetsController} associated with this window
+     * @see View#getWindowInsetsController()
+     * @hide pending unhide
+     */
+    public abstract @NonNull WindowInsetsController getInsetsController();
 }

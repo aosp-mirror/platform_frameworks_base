@@ -16,16 +16,6 @@
 
 package android.media;
 
-import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.ref.WeakReference;
-import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -39,12 +29,20 @@ import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
+
+import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * The AudioRecord class manages the audio resources for Java applications
@@ -1806,6 +1804,8 @@ public class AudioRecord implements AudioRouting
 
     private native final int native_get_active_microphones(
             ArrayList<MicrophoneInfo> activeMicrophones);
+
+    private native int native_getPortId();
 
     //---------------------------------------------------------
     // Utility methods

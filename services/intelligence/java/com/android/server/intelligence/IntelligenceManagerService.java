@@ -16,6 +16,7 @@
 
 package com.android.server.intelligence;
 
+import static android.Manifest.permission.MANAGE_SMART_SUGGESTIONS;
 import static android.content.Context.CONTENT_CAPTURE_MANAGER_SERVICE;
 
 import android.annotation.NonNull;
@@ -26,8 +27,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.intelligence.InteractionSessionId;
+import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.intelligence.ContentCaptureEvent;
@@ -42,6 +48,7 @@ import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,6 +62,8 @@ public final class IntelligenceManagerService extends
         AbstractMasterSystemService<IntelligenceManagerService, IntelligencePerUserService> {
 
     private static final String TAG = "IntelligenceManagerService";
+
+    static final String RECEIVER_BUNDLE_EXTRA_SESSIONS = "sessions";
 
     @GuardedBy("mLock")
     private ActivityManagerInternal mAm;
@@ -90,6 +99,61 @@ public final class IntelligenceManagerService extends
         service.destroyLocked();
     }
 
+    @Override // from AbstractMasterSystemService
+    protected void enforceCallingPermissionForManagement() {
+        getContext().enforceCallingPermission(MANAGE_SMART_SUGGESTIONS, TAG);
+    }
+
+    // Called by Shell command.
+    void destroySessions(@UserIdInt int userId, @NonNull IResultReceiver receiver) {
+        Slog.i(TAG, "destroySessions() for userId " + userId);
+        enforceCallingPermissionForManagement();
+
+        synchronized (mLock) {
+            if (userId != UserHandle.USER_ALL) {
+                final IntelligencePerUserService service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    service.destroySessionsLocked();
+                }
+            } else {
+                visitServicesLocked((s) -> s.destroySessionsLocked());
+            }
+        }
+
+        try {
+            receiver.send(0, new Bundle());
+        } catch (RemoteException e) {
+            // Just ignore it...
+        }
+    }
+
+    // Called by Shell command.
+    void listSessions(int userId, IResultReceiver receiver) {
+        Slog.i(TAG, "listSessions() for userId " + userId);
+        enforceCallingPermissionForManagement();
+
+        final Bundle resultData = new Bundle();
+        final ArrayList<String> sessions = new ArrayList<>();
+
+        synchronized (mLock) {
+            if (userId != UserHandle.USER_ALL) {
+                final IntelligencePerUserService service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    service.listSessionsLocked(sessions);
+                }
+            } else {
+                visitServicesLocked((s) -> s.listSessionsLocked(sessions));
+            }
+        }
+
+        resultData.putStringArrayList(RECEIVER_BUNDLE_EXTRA_SESSIONS, sessions);
+        try {
+            receiver.send(0, resultData);
+        } catch (RemoteException e) {
+            // Just ignore it...
+        }
+    }
+
     private ActivityManagerInternal getAmInternal() {
         synchronized (mLock) {
             if (mAm == null) {
@@ -119,7 +183,7 @@ public final class IntelligenceManagerService extends
             synchronized (mLock) {
                 final IntelligencePerUserService service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, componentName, taskId, displayId,
-                        sessionId, flags, result);
+                        sessionId, flags, mAllowInstantService, result);
             }
         }
 
@@ -153,6 +217,14 @@ public final class IntelligenceManagerService extends
             synchronized (mLock) {
                 dumpLocked("", pw);
             }
+        }
+
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+                String[] args, ShellCallback callback, ResultReceiver resultReceiver)
+                throws RemoteException {
+            new IntelligenceServiceShellCommand(IntelligenceManagerService.this).exec(
+                    this, in, out, err, args, callback, resultReceiver);
         }
     }
 

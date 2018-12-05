@@ -93,6 +93,12 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     public boolean debug = false;
 
     /**
+     * Whether the service is allowed to bind to an instant-app.
+     */
+    @GuardedBy("mLock")
+    protected boolean mAllowInstantService;
+
+    /**
      * Users disabled due to {@link UserManager} restrictions, or {@code null} if the service cannot
      * be disabled through {@link UserManager}.
      */
@@ -173,6 +179,47 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         synchronized (mLock) {
             removeCachedServiceLocked(userId);
         }
+    }
+
+    /**
+     * Gets whether the service is allowed to bind to an instant-app.
+     *
+     * <p>Typically called by {@code ShellCommand} during CTS tests.
+     *
+     * @throws SecurityException if caller is not allowed to manage this service's settings.
+     */
+    public final boolean getAllowInstantService() {
+        enforceCallingPermissionForManagement();
+        synchronized (mLock) {
+            return mAllowInstantService;
+        }
+    }
+
+    /**
+     * Sets whether the service is allowed to bind to an instant-app.
+     *
+     * <p>Typically called by {@code ShellCommand} during CTS tests.
+     *
+     * @throws SecurityException if caller is not allowed to manage this service's settings.
+     */
+    public final void setAllowInstantService(boolean mode) {
+        Slog.i(mTag, "setAllowInstantService(): " + mode);
+        enforceCallingPermissionForManagement();
+        synchronized (mLock) {
+            mAllowInstantService = mode;
+        }
+    }
+
+    /**
+     * Asserts that the caller has permissions to manage this service.
+     *
+     * <p>Typically called by {@code ShellCommand} implementations.
+     *
+     * @throws UnsupportedOperationException if subclass doesn't override it.
+     * @throws SecurityException if caller is not allowed to manage this service's settings.
+     */
+    protected void enforceCallingPermissionForManagement() {
+        throw new UnsupportedOperationException("Not implemented by " + getClass());
     }
 
     /**
@@ -362,6 +409,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             pw.print(prefix); pw.print("Debug: "); pw.print(realDebug);
             pw.print(" Verbose: "); pw.println(realVerbose);
             pw.print(prefix); pw.print("Disabled users: "); pw.println(mDisabledUsers);
+            pw.print(prefix); pw.print("Allow instant service: "); pw.println(mAllowInstantService);
             pw.print(prefix); pw.print("Settings property: "); pw.println(
                     getServiceSettingsProperty());
             pw.print(prefix); pw.print("Cached services: ");

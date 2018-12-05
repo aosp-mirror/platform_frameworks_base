@@ -56,11 +56,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <ViewStub android:id="@+id/fullscreen_user_switcher_stub"
-              android:layout="@layout/car_fullscreen_user_switcher"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"/>
-
     <include layout="@layout/status_bar_expanded"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

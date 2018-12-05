@@ -55,6 +55,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.IStorageManager;
+import android.sysprop.VoldProperties;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
@@ -654,7 +655,7 @@ public final class SystemServer {
         traceEnd();
 
         // Only run "core" apps if we're encrypting the device.
-        String cryptState = SystemProperties.get("vold.decrypt");
+        String cryptState = VoldProperties.decrypt().orElse("");
         if (ENCRYPTING_STATE.equals(cryptState)) {
             Slog.w(TAG, "Detected encryption in progress - only parsing core apps");
             mOnlyCore = true;
@@ -1500,6 +1501,14 @@ public final class SystemServer {
                 ServiceManager.addService("diskstats", new DiskStatsService(context));
             } catch (Throwable e) {
                 reportWtf("starting DiskStats Service", e);
+            }
+            traceEnd();
+
+            traceBeginAndSlog("RuntimeService");
+            try {
+                ServiceManager.addService("runtime", new RuntimeService(context));
+            } catch (Throwable e) {
+                reportWtf("starting RuntimeService", e);
             }
             traceEnd();
 

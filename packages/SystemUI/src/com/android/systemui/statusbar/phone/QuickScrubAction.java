@@ -212,6 +212,11 @@ public class QuickScrubAction extends NavigationGestureAction {
     }
 
     @Override
+    public boolean disableProxyEvents() {
+        return true;
+    }
+
+    @Override
     protected void onGestureStart(MotionEvent event) {
         updateHighlight();
         ObjectAnimator trackAnimator = ObjectAnimator.ofPropertyValuesHolder(this,

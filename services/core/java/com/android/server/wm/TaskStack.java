@@ -184,9 +184,15 @@ public class TaskStack extends WindowContainer<Task> implements
         // Update bounds of containing tasks.
         for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; --taskNdx) {
             final Task task = mChildren.get(taskNdx);
-            task.setBounds(taskBounds.get(task.mTaskId), false /* forced */);
-            task.setTempInsetBounds(taskTempInsetBounds != null ?
-                    taskTempInsetBounds.get(task.mTaskId) : null);
+            final Rect insetBounds =
+                    taskTempInsetBounds != null ? taskTempInsetBounds.get(task.mTaskId) : null;
+            if (insetBounds != null) {
+                task.setBounds(insetBounds);
+                task.setOverrideDisplayedBounds(taskBounds.get(task.mTaskId));
+            } else {
+                task.setBounds(taskBounds.get(task.mTaskId));
+                task.setOverrideDisplayedBounds(null);
+            }
         }
         return true;
     }
@@ -739,7 +745,7 @@ public class TaskStack extends WindowContainer<Task> implements
             return;
         }
 
-        final Rect stackBounds = getBounds();
+        final Rect stackBounds = getDisplayedBounds();
         int width = stackBounds.width();
         int height = stackBounds.height();
 
@@ -1752,14 +1758,6 @@ public class TaskStack extends WindowContainer<Task> implements
     void stopDimming() {
         mDimmer.stopDim(getPendingTransaction());
         scheduleAnimation();
-    }
-
-    @Override
-    void getRelativePosition(Point outPos) {
-        super.getRelativePosition(outPos);
-        final int outset = getStackOutset();
-        outPos.x -= outset;
-        outPos.y -= outset;
     }
 
     AnimatingAppWindowTokenRegistry getAnimatingAppWindowTokenRegistry() {

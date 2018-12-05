@@ -60,6 +60,7 @@ public abstract class SmartSuggestionsService extends Service {
 
     // TODO(b/111330312): STOPSHIP use dynamic value, or change to false
     static final boolean DEBUG = true;
+    static final boolean VERBOSE = false;
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -209,7 +210,11 @@ public abstract class SmartSuggestionsService extends Service {
      * @param sessionId the session's Id
      */
     public void onCreateInteractionSession(@NonNull InteractionContext context,
-            @NonNull InteractionSessionId sessionId) {}
+            @NonNull InteractionSessionId sessionId) {
+        if (VERBOSE) {
+            Log.v(TAG, "onCreateInteractionSession(id=" + sessionId + ", ctx=" + context + ")");
+        }
+    }
 
     /**
      * Notifies the service of {@link ContentCaptureEvent events} associated with a content capture
@@ -319,7 +324,11 @@ public abstract class SmartSuggestionsService extends Service {
      *
      * @param sessionId the id of the session to destroy
      */
-    public void onDestroyInteractionSession(@NonNull InteractionSessionId sessionId) {}
+    public void onDestroyInteractionSession(@NonNull InteractionSessionId sessionId) {
+        if (VERBOSE) {
+            Log.v(TAG, "onDestroyInteractionSession(id=" + sessionId + ")");
+        }
+    }
 
     /** @hide */
     static final class AutofillProxy {

@@ -289,7 +289,7 @@ private:
     static RenderPipelineType sRenderPipelineType;
 };  // class Caches
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android
 
 #endif  // ANDROID_HWUI_PROPERTIES_H

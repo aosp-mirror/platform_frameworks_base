@@ -26,5 +26,5 @@ public:
     virtual void notify(const int64_t* buffer);
 };
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

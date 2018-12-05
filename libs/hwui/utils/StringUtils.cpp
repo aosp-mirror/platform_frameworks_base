@@ -34,5 +34,5 @@ unordered_string_set StringUtils::split(const char* spacedList) {
     return set;
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

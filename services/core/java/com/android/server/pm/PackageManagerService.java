@@ -58,6 +58,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_TEST_ONLY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
 import static android.content.pm.PackageManager.INSTALL_INTERNAL;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
@@ -10299,12 +10300,21 @@ public class PackageManagerService extends IPackageManager.Stub
                         compareSignatures(
                             signatureCheckPs.sharedUser.signatures.mSigningDetails.signatures,
                             pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH) {
-                        // Treat mismatched signatures on system packages using a shared UID as
-                        // fatal for the system overall, rather than just failing to install
-                        // whichever package happened to be scanned later.
-                        throw new IllegalStateException(
-                                "Signature mismatch on system package " + pkg.packageName
-                                + " for shared user " + pkgSetting.sharedUser);
+                        if (SystemProperties.getInt("ro.product.first_api_level", 0) <= 28) {
+                            // Mismatched signatures is an error and silently skipping system
+                            // packages will likely break the device in unforeseen ways. However,
+                            // we allow the device to boot anyway because, prior to P, vendors were
+                            // not expecting the platform to crash in this situation.
+                            throw new PackageManagerException(
+                                    INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                                    "Signature mismatch for shared user: " + pkgSetting.sharedUser);
+                        } else {
+                            // Treat mismatched signatures on system packages using a shared UID as
+                            // fatal for the system overall, rather than just failing to install
+                            // whichever package happened to be scanned later.
+                            throw new IllegalStateException("Signature mismatch on system package "
+                                + pkg.packageName + " for shared user " + pkgSetting.sharedUser);
+                        }
                     }
 
                     signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;

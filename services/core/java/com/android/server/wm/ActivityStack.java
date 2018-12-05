@@ -4944,9 +4944,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
             }
 
-            mTmpBounds.put(task.taskId, task.getOverrideBounds());
-            if (tempTaskInsetBounds != null) {
-                mTmpInsetBounds.put(task.taskId, tempTaskInsetBounds);
+            if (task.hasDisplayedBounds()) {
+                mTmpBounds.put(task.taskId, task.getDisplayedBounds());
+                mTmpInsetBounds.put(task.taskId, task.getOverrideBounds());
+            } else {
+                mTmpBounds.put(task.taskId, task.getOverrideBounds());
+                mTmpInsetBounds.put(task.taskId, null);
             }
         }
 

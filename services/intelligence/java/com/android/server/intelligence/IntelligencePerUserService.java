@@ -49,6 +49,7 @@ import com.android.server.AbstractPerUserSystemService;
 import com.android.server.intelligence.IntelligenceManagerInternal.AugmentedAutofillCallback;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -108,7 +109,7 @@ final class IntelligencePerUserService
     @GuardedBy("mLock")
     public void startSessionLocked(@NonNull IBinder activityToken,
             @NonNull ComponentName componentName, int taskId, int displayId,
-            @NonNull InteractionSessionId sessionId, int flags,
+            @NonNull InteractionSessionId sessionId, int flags, boolean bindInstantServiceAllowed,
             @NonNull IResultReceiver resultReceiver) {
         if (!isEnabledLocked()) {
             sendToClient(resultReceiver, ContentCaptureManager.STATE_DISABLED);
@@ -137,9 +138,6 @@ final class IntelligencePerUserService
             sendToClient(resultReceiver, ContentCaptureManager.STATE_ACTIVE);
             return;
         }
-
-        // TODO(b/117779333): get from mMaster once it's moved to superclass
-        final boolean bindInstantServiceAllowed = false;
 
         session = new ContentCaptureSession(getContext(), mUserId, mLock, activityToken,
                 this, serviceComponentName, componentName, taskId, displayId, sessionId, flags,
@@ -200,7 +198,7 @@ final class IntelligencePerUserService
             return;
         }
         if (mMaster.verbose) {
-            Slog.v(TAG, "sendEvents(): id=" + sessionId + "; events =" + events.size());
+            Slog.v(TAG, "sendEvents(): id=" + sessionId + ", events=" + events.size());
         }
         session.sendEventsLocked(events);
     }
@@ -253,12 +251,26 @@ final class IntelligencePerUserService
     @GuardedBy("mLock")
     public void destroyLocked() {
         if (mMaster.debug) Slog.d(TAG, "destroyLocked()");
+        destroySessionsLocked();
+    }
+
+    @GuardedBy("mLock")
+    void destroySessionsLocked() {
         final int numSessions = mSessions.size();
         for (int i = 0; i < numSessions; i++) {
             final ContentCaptureSession session = mSessions.valueAt(i);
             session.destroyLocked(true);
         }
         mSessions.clear();
+    }
+
+    @GuardedBy("mLock")
+    void listSessionsLocked(ArrayList<String> output) {
+        final int numSessions = mSessions.size();
+        for (int i = 0; i < numSessions; i++) {
+            final ContentCaptureSession session = mSessions.valueAt(i);
+            output.add(session.toShortString());
+        }
     }
 
     public AugmentedAutofillCallback requestAutofill(@NonNull IAutoFillManagerClient client,

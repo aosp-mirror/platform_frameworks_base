@@ -76,8 +76,8 @@ typedef uint32_t Flags;
 namespace uirenderer {
 namespace VectorDrawable {
 class Tree;
-};
-};
+}
+}
 typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
 typedef std::function<void(uint16_t* text, float* positions)> ReadGlyphFunc;
@@ -318,4 +318,4 @@ protected:
     friend class DrawTextOnPathFunctor;
 };
 
-};  // namespace android
+}  // namespace android

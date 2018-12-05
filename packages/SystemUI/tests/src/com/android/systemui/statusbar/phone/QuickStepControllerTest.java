@@ -38,12 +38,12 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.content.Context;
 import com.android.systemui.R;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.SysuiTestCase;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -78,6 +78,7 @@ public class QuickStepControllerTest extends SysuiTestCase {
         mProxyService = mock(OverviewProxyService.class);
         mProxy = mock(IOverviewProxy.Stub.class);
         doReturn(mProxy).when(mProxyService).getProxy();
+        doReturn(true).when(mProxyService).shouldShowSwipeUpUI();
         mDependency.injectTestDependency(OverviewProxyService.class, mProxyService);
 
         mStatusBar = mock(StatusBar.class);
@@ -99,6 +100,18 @@ public class QuickStepControllerTest extends SysuiTestCase {
 
     @Test
     public void testNoActionsNoGestures() throws Exception {
+        MotionEvent ev = event(MotionEvent.ACTION_DOWN, 1, 1);
+        assertFalse(mController.onInterceptTouchEvent(ev));
+        verify(mNavigationBarView, never()).requestUnbufferedDispatch(ev);
+        assertNull(mController.getCurrentAction());
+    }
+
+    @Test
+    public void testNoGesturesWhenSwipeUpDisabled() throws Exception {
+        doReturn(false).when(mProxyService).shouldShowSwipeUpUI();
+        mController.setGestureActions(mockAction(true), null /* swipeDownAction */,
+                null /* swipeLeftAction */, null /* swipeRightAction */);
+
         MotionEvent ev = event(MotionEvent.ACTION_DOWN, 1, 1);
         assertFalse(mController.onInterceptTouchEvent(ev));
         verify(mNavigationBarView, never()).requestUnbufferedDispatch(ev);
@@ -395,6 +408,7 @@ public class QuickStepControllerTest extends SysuiTestCase {
         verify(mProxy, times(1)).onQuickScrubStart();
         verify(mProxyService, times(1)).notifyQuickScrubStarted();
         verify(mNavigationBarView, times(1)).updateSlippery();
+        verify(mProxy, never()).onMotionEvent(moveEvent1);
 
         // Move again for scrub
         MotionEvent moveEvent2 = event(MotionEvent.ACTION_MOVE, 200, y);
@@ -402,6 +416,7 @@ public class QuickStepControllerTest extends SysuiTestCase {
         assertEquals(action, mController.getCurrentAction());
         verify(action, times(1)).onGestureMove(200, y);
         verify(mProxy, times(1)).onQuickScrubProgress(1f / 2);
+        verify(mProxy, never()).onMotionEvent(moveEvent2);
 
         // Action up
         MotionEvent upEvent = event(MotionEvent.ACTION_UP, 1, y);
@@ -409,6 +424,7 @@ public class QuickStepControllerTest extends SysuiTestCase {
         assertNull(mController.getCurrentAction());
         verify(action, times(1)).onGestureEnd();
         verify(mProxy, times(1)).onQuickScrubEnd();
+        verify(mProxy, never()).onMotionEvent(upEvent);
     }
 
     @Test

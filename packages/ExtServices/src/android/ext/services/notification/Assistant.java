@@ -19,8 +19,7 @@ package android.ext.services.notification;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEGATIVE;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -241,7 +240,7 @@ public class Assistant extends NotificationAssistantService {
             signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
         }
         if (Settings.Secure.getInt(getContentResolver(),
-                Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL, 0) == 1) {
+                Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL, 1) == 1) {
             if (mNotificationCategorizer.shouldSilence(entry)) {
                 final int importance = entry.getImportance() < IMPORTANCE_LOW
                         ? entry.getImportance() : IMPORTANCE_LOW;

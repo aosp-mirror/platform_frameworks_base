@@ -428,6 +428,7 @@ public class NotificationManagerService extends SystemService {
     private GroupHelper mGroupHelper;
     private int mAutoGroupAtCount;
     private boolean mIsTelevision;
+    private boolean mIsAutomotive;
 
     private MetricsLogger mMetricsLogger;
     private Predicate<String> mAllowedManagedServicePackages;
@@ -1388,6 +1389,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    void setIsAutomotive(boolean isAutomotive) {
+        mIsAutomotive = isAutomotive;
+    }
+
+    @VisibleForTesting
     void setIsTelevision(boolean isTelevision) {
         mIsTelevision = isTelevision;
     }
@@ -1543,6 +1549,9 @@ public class NotificationManagerService extends SystemService {
 
         mIsTelevision = mPackageManagerClient.hasSystemFeature(FEATURE_LEANBACK)
                 || mPackageManagerClient.hasSystemFeature(FEATURE_TELEVISION);
+
+        mIsAutomotive =
+                mPackageManagerClient.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0);
     }
 
     @Override
@@ -5131,7 +5140,9 @@ public class NotificationManagerService extends SystemService {
 
         // Should this notification make noise, vibe, or use the LED?
         final boolean aboveThreshold =
-                record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT;
+                mIsAutomotive
+                        ? record.getImportance() > NotificationManager.IMPORTANCE_DEFAULT
+                        : record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT;
 
         // Remember if this notification already owns the notification channels.
         boolean wasBeep = key != null && key.equals(mSoundNotificationKey);

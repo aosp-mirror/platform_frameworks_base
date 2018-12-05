@@ -225,7 +225,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             }
             viewState.hasItemsInStableShelf = lastViewState.inShelf;
             viewState.hidden = !mAmbientState.isShadeExpanded()
-                    || mAmbientState.isQsCustomizerShowing();
+                    || mAmbientState.isQsCustomizerShowing() || mAmbientState.isFullyDark();
             viewState.maxShelfEnd = maxShelfEnd;
         } else {
             viewState.hidden = true;

@@ -146,7 +146,7 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
     }
 
     @Override // from RemoteScreenObservationServiceCallbacks
-    public void onServiceDied(AbstractRemoteService service) {
+    public void onServiceDied(AbstractRemoteService<?> service) {
         // TODO(b/111276913): implement (remove session from PerUserSession?)
         if (mService.isDebug()) {
             Slog.d(TAG, "onServiceDied() for " + mId);
@@ -174,6 +174,10 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
         pw.print(prefix); pw.print("activity token: "); pw.println(mActivityToken);
         pw.print(prefix); pw.print("has autofill callback: ");
         pw.println(mAutofillCallback != null);
+    }
+
+    String toShortString() {
+        return mId.getValue() + ":" + mActivityToken;
     }
 
     @Override
