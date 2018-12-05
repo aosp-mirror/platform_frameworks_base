@@ -761,6 +761,13 @@ message GlobalSettingsProto {
     }
     optional SmartSelection smart_selection = 108;
 
+    message SmartSuggestions {
+      option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+      optional SettingProto service_explicitly_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional SmartSuggestions smart_suggestions = 145;
+
     message Sms {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -993,5 +1000,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 145;
+    // Next tag = 146;
 }

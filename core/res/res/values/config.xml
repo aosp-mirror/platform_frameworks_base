@@ -3350,6 +3350,14 @@
     -->
     <string name="config_defaultTextClassifierPackage" translatable="false"></string>
 
+    <!-- The package name for the system's smart suggestion service.
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         If no service with the specified name exists on the device, content capture and
+         smart suggestions will be disabled.
+         Example: "com.android.intelligence/.SmartSuggestionsService"
+    -->
+    <string name="config_defaultSmartSuggestionsService" translatable="false"></string>
+
     <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
     <bool name="config_useDefaultFocusHighlight">true</bool>
 

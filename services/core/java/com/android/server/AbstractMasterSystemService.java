@@ -39,6 +39,7 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.Preconditions;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -207,6 +208,66 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         enforceCallingPermissionForManagement();
         synchronized (mLock) {
             mAllowInstantService = mode;
+        }
+    }
+
+    /**
+     * Temporary sets the service implementation.
+     *
+     * <p>Typically used by Shell command and/or CTS tests.
+     *
+     * @param componentName name of the new component
+     * @param durationMs how long the change will be valid (the service will be automatically reset
+     *            to the default component after this timeout expires).
+     * @throws SecurityException if caller is not allowed to manage this service's settings.
+     * @throws IllegalArgumentException if value of {@code durationMs} is higher than
+     *             {@link #getMaximumTemporaryServiceDurationMs()}.
+     */
+    public final void setTemporaryService(@UserIdInt int userId, @NonNull String componentName,
+            int durationMs) {
+        Slog.i(mTag, "setTemporaryService(" + userId + ") to " + componentName + " for "
+                + durationMs + "ms");
+        enforceCallingPermissionForManagement();
+
+        Preconditions.checkNotNull(componentName);
+        final int maxDurationMs = getMaximumTemporaryServiceDurationMs();
+        if (durationMs > maxDurationMs) {
+            throw new IllegalArgumentException(
+                    "Max duration is " + maxDurationMs + " (called with " + durationMs + ")");
+        }
+
+        synchronized (mLock) {
+            final S service = getServiceForUserLocked(userId);
+            if (service != null) {
+                service.setTemporaryServiceLocked(componentName, durationMs);
+            }
+        }
+    }
+
+    /**
+     * Gets the maximum time the service implementation can be changed.
+     *
+     * @throws UnsupportedOperationException if subclass doesn't override it.
+     */
+    protected int getMaximumTemporaryServiceDurationMs() {
+        throw new UnsupportedOperationException("Not implemented by " + getClass());
+    }
+
+    /**
+     * Resets the temporary service implementation to the default component.
+     *
+     * <p>Typically used by Shell command and/or CTS tests.
+     *
+     * @throws SecurityException if caller is not allowed to manage this service's settings.
+     */
+    public final void resetTemporaryService(@UserIdInt int userId) {
+        Slog.i(mTag, "resetTemporaryService(): " + userId);
+        enforceCallingPermissionForManagement();
+        synchronized (mLock) {
+            final S service = getServiceForUserLocked(userId);
+            if (service != null) {
+                service.resetTemporaryServiceLocked();
+            }
         }
     }
 

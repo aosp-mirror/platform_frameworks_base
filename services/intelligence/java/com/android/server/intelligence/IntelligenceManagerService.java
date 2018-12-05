@@ -65,6 +65,8 @@ public final class IntelligenceManagerService extends
 
     static final String RECEIVER_BUNDLE_EXTRA_SESSIONS = "sessions";
 
+    private static final int MAX_TEMP_SERVICE_DURATION_MS = 1_000 * 60 * 2; // 2 minutes
+
     @GuardedBy("mLock")
     private ActivityManagerInternal mAm;
 
@@ -72,12 +74,6 @@ public final class IntelligenceManagerService extends
 
     public IntelligenceManagerService(Context context) {
         super(context, UserManager.DISALLOW_INTELLIGENCE_CAPTURE);
-    }
-
-    @Override // from AbstractMasterSystemService
-    protected String getServiceSettingsProperty() {
-        // TODO(b/111276913): STOPSHIP temporary settings, until it's set by resourcs + cmd
-        return "smart_suggestions_service";
     }
 
     @Override // from AbstractMasterSystemService
@@ -102,6 +98,11 @@ public final class IntelligenceManagerService extends
     @Override // from AbstractMasterSystemService
     protected void enforceCallingPermissionForManagement() {
         getContext().enforceCallingPermission(MANAGE_SMART_SUGGESTIONS, TAG);
+    }
+
+    @Override // from AbstractMasterSystemService
+    protected int getMaximumTemporaryServiceDurationMs() {
+        return MAX_TEMP_SERVICE_DURATION_MS;
     }
 
     // Called by Shell command.
