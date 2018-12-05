@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TypeEvaluator;
@@ -29,8 +31,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.hardware.display.IColorDisplayManager;
 import android.net.Uri;
 import android.opengl.Matrix;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -39,6 +43,7 @@ import android.util.MathUtils;
 import android.util.Slog;
 import android.view.animation.AnimationUtils;
 
+import com.android.internal.R;
 import com.android.internal.app.ColorDisplayController;
 import com.android.server.SystemService;
 import com.android.server.twilight.TwilightListener;
@@ -49,12 +54,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
-import com.android.internal.R;
-
-import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
-
 /**
- * Tints the display at night.
+ * Controls the display's color transforms.
  */
 public final class ColorDisplayService extends SystemService
         implements ColorDisplayController.Callback {
@@ -101,7 +102,7 @@ public final class ColorDisplayService extends SystemService
 
     @Override
     public void onStart() {
-        // Nothing to publish.
+        publishBinderService(Context.COLOR_DISPLAY_SERVICE, new BinderService());
     }
 
     @Override
@@ -171,7 +172,7 @@ public final class ColorDisplayService extends SystemService
                     }
                 };
                 cr.registerContentObserver(Secure.getUriFor(Secure.USER_SETUP_COMPLETE),
-                        false /* notifyForDescendents */, mUserSetupObserver, mCurrentUser);
+                        false /* notifyForDescendants */, mUserSetupObserver, mCurrentUser);
             } else if (mBootCompleted) {
                 setUp();
             }
@@ -405,8 +406,8 @@ public final class ColorDisplayService extends SystemService
     }
 
     /**
-     * Returns the first date time corresponding to the local time that occurs before the
-     * provided date time.
+     * Returns the first date time corresponding to the local time that occurs before the provided
+     * date time.
      *
      * @param compareTime the LocalDateTime to compare against
      * @return the prior LocalDateTime corresponding to this local time
@@ -420,8 +421,8 @@ public final class ColorDisplayService extends SystemService
     }
 
     /**
-     * Returns the first date time corresponding to this local time that occurs after the
-     * provided date time.
+     * Returns the first date time corresponding to this local time that occurs after the provided
+     * date time.
      *
      * @param compareTime the LocalDateTime to compare against
      * @return the next LocalDateTime corresponding to this local time
@@ -432,6 +433,11 @@ public final class ColorDisplayService extends SystemService
 
         // Check if the local time has passed, if so return the same time tomorrow.
         return ldt.isBefore(compareTime) ? ldt.plusDays(1) : ldt;
+    }
+
+    private boolean isDeviceColorManagedInternal() {
+        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
+        return dtm.isDeviceColorManaged();
     }
 
     private abstract class AutoMode implements ColorDisplayController.Callback {
@@ -614,6 +620,18 @@ public final class ColorDisplayService extends SystemService
                 mResultMatrix[i] = MathUtils.lerp(startValue[i], endValue[i], fraction);
             }
             return mResultMatrix;
+        }
+    }
+
+    private final class BinderService extends IColorDisplayManager.Stub {
+        @Override
+        public boolean isDeviceColorManaged() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return isDeviceColorManagedInternal();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 }

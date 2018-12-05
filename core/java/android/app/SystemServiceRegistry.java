@@ -59,6 +59,7 @@ import android.hardware.SystemSensorManager;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.camera2.CameraManager;
+import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
 import android.hardware.face.IFaceService;
@@ -385,6 +386,14 @@ final class SystemServiceRegistry {
             public DisplayManager createService(ContextImpl ctx) {
                 return new DisplayManager(ctx.getOuterContext());
             }});
+
+        registerService(Context.COLOR_DISPLAY_SERVICE, ColorDisplayManager.class,
+                new CachedServiceFetcher<ColorDisplayManager>() {
+                    @Override
+                    public ColorDisplayManager createService(ContextImpl ctx) {
+                        return new ColorDisplayManager();
+                    }
+                });
 
         // InputMethodManager has its own cache strategy based on display id to support apps that
         // still assume InputMethodManager is a per-process singleton and it's safe to directly
