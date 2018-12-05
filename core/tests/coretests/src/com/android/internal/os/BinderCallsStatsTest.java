@@ -17,6 +17,7 @@
 package com.android.internal.os;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
@@ -613,6 +614,23 @@ public class BinderCallsStatsTest {
         assertEquals(CALLING_UID, callStats.callingUid);
     }
 
+    @Test
+    public void testAddsDebugEntries() {
+        long startTime = System.currentTimeMillis();
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setAddDebugEntries(true);
+        ArrayList<BinderCallsStats.ExportedCallStat> callStats = bcs.getExportedCallStats();
+        assertEquals(2, callStats.size());
+        BinderCallsStats.ExportedCallStat debugEntry1 = callStats.get(0);
+        assertEquals("", debugEntry1.className);
+        assertEquals("__DEBUG_start_time_millis", debugEntry1.methodName);
+        assertTrue(startTime <= debugEntry1.maxReplySizeBytes);
+        BinderCallsStats.ExportedCallStat debugEntry2 = callStats.get(1);
+        assertEquals("", debugEntry2.className);
+        assertEquals("__DEBUG_end_time_millis", debugEntry2.methodName);
+        assertTrue(debugEntry1.maxReplySizeBytes <= debugEntry2.maxReplySizeBytes);
+    }
+
     class TestBinderCallsStats extends BinderCallsStats {
         public int callingUid = CALLING_UID;
         public int workSourceUid = WORKSOURCE_UID;
@@ -634,6 +652,7 @@ public class BinderCallsStatsTest {
             });
             setSamplingInterval(1);
             setDeviceState(mDeviceState.getReadonlyClient());
+            setAddDebugEntries(false);
         }
 
         @Override

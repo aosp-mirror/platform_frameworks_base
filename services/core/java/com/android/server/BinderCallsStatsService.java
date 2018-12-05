@@ -116,6 +116,7 @@ public class BinderCallsStatsService extends Binder {
                 }
                 mEnabled = enabled;
                 mBinderCallsStats.reset();
+                mBinderCallsStats.setAddDebugEntries(enabled);
             }
         }
     }

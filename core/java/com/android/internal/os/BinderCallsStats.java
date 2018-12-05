@@ -19,6 +19,7 @@ package com.android.internal.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Binder;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
@@ -78,6 +79,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     private final Random mRandom;
     private long mStartTime = System.currentTimeMillis();
     private long mCallStatsCount = 0;
+    private boolean mAddDebugEntries = false;
 
     private CachedDeviceState.Readonly mDeviceState;
 
@@ -317,7 +319,26 @@ public class BinderCallsStats implements BinderInternal.Observer {
             exported.methodName = methodName;
         }
 
+        // Debug entries added to help validate the data.
+        if (mAddDebugEntries) {
+            resultCallStats.add(createDebugEntry("start_time_millis", mStartTime));
+            resultCallStats.add(createDebugEntry("end_time_millis", System.currentTimeMillis()));
+        }
+
         return resultCallStats;
+    }
+
+    private ExportedCallStat createDebugEntry(String variableName, long value) {
+        final int uid = Process.myUid();
+        final ExportedCallStat callStat = new ExportedCallStat();
+        callStat.className = "";
+        callStat.workSourceUid = uid;
+        callStat.callingUid = uid;
+        callStat.recordedCallCount = 1;
+        callStat.callCount = 1;
+        callStat.methodName = "__DEBUG_" + variableName;
+        callStat.maxReplySizeBytes = value;
+        return callStat;
     }
 
     /** @hide */
@@ -455,6 +476,10 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 reset();
             }
         }
+    }
+
+    public void setAddDebugEntries(boolean addDebugEntries) {
+        mAddDebugEntries = addDebugEntries;
     }
 
     /**
