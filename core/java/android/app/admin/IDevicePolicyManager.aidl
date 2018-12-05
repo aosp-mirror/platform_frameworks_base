@@ -431,4 +431,6 @@ interface IDevicePolicyManager {
 
     boolean isManagedKiosk();
     boolean isUnattendedManagedKiosk();
+
+    boolean startViewCalendarEventInManagedProfile(String packageName, long eventId, long start, long end, boolean allDay, int flags);
 }

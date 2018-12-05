@@ -66,6 +66,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManager.UserOperationException;
 import android.os.UserManager.UserOperationResult;
+import android.provider.CalendarContract;
 import android.provider.ContactsContract.Directory;
 import android.provider.Settings;
 import android.security.AttestedKeyPair;
@@ -10302,6 +10303,35 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.isUnattendedManagedKiosk();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Starts an activity to view calendar events in the managed profile.
+     *
+     * @param eventId the id of the event to be viewed.
+     * @param start the start time of the event.
+     * @param end the end time of the event.
+     * @param allDay if the event is an all-day event.
+     * @param flags flags to be set for the intent
+     * @return {@code true} if the activity is started successfully. {@code false} otherwise.
+     *
+     * @see CalendarContract#startViewCalenderEventInManagedProfile(Context, String, long, long,
+     * long, boolean, int)
+     *
+     * @hide
+     */
+    public boolean startViewCalendarEventInManagedProfile(long eventId, long start, long end,
+            boolean allDay, int flags) {
+        throwIfParentInstance("startViewCalendarEventInManagedProfile");
+        if (mService != null) {
+            try {
+                return mService.startViewCalendarEventInManagedProfile(mContext.getPackageName(),
+                        eventId, start, end, allDay, flags);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

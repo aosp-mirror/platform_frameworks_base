@@ -124,6 +124,7 @@ import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -184,6 +185,7 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.storage.StorageManager;
+import android.provider.CalendarContract;
 import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsInternal;
 import android.provider.Settings;
@@ -13657,5 +13659,60 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private PowerManagerInternal getPowerManagerInternal() {
         return mInjector.getPowerManagerInternal();
+    }
+
+    @Override
+    public boolean startViewCalendarEventInManagedProfile(String packageName, long eventId,
+            long start, long end, boolean allDay, int flags) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkStringNotEmpty(packageName, "Package name is empty");
+
+        final int callingUid = mInjector.binderGetCallingUid();
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        if (!isCallingFromPackage(packageName, callingUid)) {
+            throw new SecurityException("Input package name doesn't align with actual "
+                    + "calling package.");
+        }
+        final long identity = mInjector.binderClearCallingIdentity();
+        try {
+            final int workProfileUserId = getManagedUserId(callingUserId);
+            if (workProfileUserId < 0) {
+                return false;
+            }
+            if (!isPackageAllowedToAccessCalendarForUser(packageName, workProfileUserId)) {
+                Log.d(LOG_TAG, String.format("Package %s is not allowed to access cross-profile"
+                        + "calendar APIs", packageName));
+                return false;
+            }
+            final Intent intent = new Intent(CalendarContract.ACTION_VIEW_WORK_CALENDAR_EVENT);
+            intent.setPackage(packageName);
+            intent.putExtra(CalendarContract.EXTRA_EVENT_ID, eventId);
+            intent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, start);
+            intent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, end);
+            intent.putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, allDay);
+            intent.setFlags(flags);
+            try {
+                mContext.startActivityAsUser(intent, UserHandle.of(workProfileUserId));
+            } catch (ActivityNotFoundException e) {
+                Log.e(LOG_TAG, "View event activity not found", e);
+                return false;
+            }
+        } finally {
+            mInjector.binderRestoreCallingIdentity(identity);
+        }
+        return true;
+    }
+
+    private boolean isCallingFromPackage(String packageName, int callingUid) {
+        try {
+            final int packageUid = mInjector.getPackageManager().getPackageUidAsUser(
+                    packageName, UserHandle.getUserId(callingUid));
+            return packageUid == callingUid;
+        } catch (NameNotFoundException e) {
+            Log.d(LOG_TAG, "Calling package not found", e);
+            return false;
+        }
     }
 }
