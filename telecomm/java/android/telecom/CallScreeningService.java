@@ -27,8 +27,8 @@ import android.os.Message;
 import android.os.RemoteException;
 
 import com.android.internal.os.SomeArgs;
-import com.android.internal.telecom.ICallScreeningService;
 import com.android.internal.telecom.ICallScreeningAdapter;
+import com.android.internal.telecom.ICallScreeningService;
 
 /**
  * This service can be implemented by the default dialer (see
@@ -147,7 +147,7 @@ public abstract class CallScreeningService extends Service {
             private boolean mShouldSkipCallLog;
             private boolean mShouldSkipNotification;
 
-            /*
+            /**
              * Sets whether the incoming call should be blocked.
              */
             public Builder setDisallowCall(boolean shouldDisallowCall) {
@@ -155,7 +155,7 @@ public abstract class CallScreeningService extends Service {
                 return this;
             }
 
-            /*
+            /**
              * Sets whether the incoming call should be disconnected as if the user had manually
              * rejected it. This property should only be set to true if the call is disallowed.
              */
@@ -164,16 +164,20 @@ public abstract class CallScreeningService extends Service {
                 return this;
             }
 
-            /*
+            /**
              * Sets whether the incoming call should not be displayed in the call log. This property
              * should only be set to true if the call is disallowed.
+             * <p>
+             * Note: Calls will still be logged with type
+             * {@link android.provider.CallLog.Calls#BLOCKED_TYPE}, regardless of how this property
+             * is set.
              */
             public Builder setSkipCallLog(boolean shouldSkipCallLog) {
                 mShouldSkipCallLog = shouldSkipCallLog;
                 return this;
             }
 
-            /*
+            /**
              * Sets whether a missed call notification should not be shown for the incoming call.
              * This property should only be set to true if the call is disallowed.
              */
@@ -211,6 +215,17 @@ public abstract class CallScreeningService extends Service {
      * Called when a new incoming call is added.
      * {@link CallScreeningService#respondToCall(Call.Details, CallScreeningService.CallResponse)}
      * should be called to allow or disallow the call.
+     * <p>
+     * Note: The {@link Call.Details} instance provided to a call screening service will only have
+     * the following properties set.  The rest of the {@link Call.Details} properties will be set to
+     * their default value or {@code null}.
+     * <ul>
+     *     <li>{@link Call.Details#getState()}</li>
+     *     <li>{@link Call.Details#getConnectTimeMillis()}</li>
+     *     <li>{@link Call.Details#getCreationTimeMillis()}</li>
+     *     <li>{@link Call.Details#getHandle()}</li>
+     *     <li>{@link Call.Details#getHandlePresentation()}</li>
+     * </ul>
      *
      * @param callDetails Information about a new incoming call, see {@link Call.Details}.
      */
