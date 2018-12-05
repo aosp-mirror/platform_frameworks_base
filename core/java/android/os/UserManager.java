@@ -1225,6 +1225,9 @@ public class UserManager {
      * system user hasn't been unlocked yet, or {@link #DISALLOW_USER_SWITCH} is set.
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean canSwitchUsers() {
         boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
                 mContext.getContentResolver(),
@@ -2623,6 +2626,19 @@ public class UserManager {
             throw re.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Removes a user and all associated data.
+     *
+     * @param user the user that needs to be removed.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public boolean removeUser(UserHandle user) {
+        return removeUser(user.getIdentifier());
+    }
+
 
     /**
      * Similar to {@link #removeUser(int)} except bypassing the checking of

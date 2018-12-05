@@ -16,13 +16,13 @@
 
 package com.android.server.pm;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.app.ActivityManager;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -157,6 +157,29 @@ public class UserManagerTest extends AndroidTestCase {
     public void testRemoveUser() throws Exception {
         UserInfo userInfo = createUser("Guest 1", UserInfo.FLAG_GUEST);
         removeUser(userInfo.id);
+
+        assertFalse(findUser(userInfo.id));
+    }
+
+    @MediumTest
+    public void testRemoveUserByHandle() {
+        UserInfo userInfo = createUser("Guest 1", UserInfo.FLAG_GUEST);
+        final UserHandle user = userInfo.getUserHandle();
+        synchronized (mUserRemoveLock) {
+            mUserManager.removeUser(user);
+            long time = System.currentTimeMillis();
+            while (mUserManager.getUserInfo(user.getIdentifier()) != null) {
+                try {
+                    mUserRemoveLock.wait(REMOVE_CHECK_INTERVAL_MILLIS);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                if (System.currentTimeMillis() - time > REMOVE_TIMEOUT_MILLIS) {
+                    fail("Timeout waiting for removeUser. userId = " + user.getIdentifier());
+                }
+            }
+        }
 
         assertFalse(findUser(userInfo.id));
     }
