@@ -578,6 +578,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mVibrateOnOpening;
     private VibratorHelper mVibratorHelper;
     protected NotificationPresenter mPresenter;
+    private boolean mPulsing;
 
     @Override
     public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
@@ -1540,7 +1541,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean isPulsing() {
-        return mAmbientPulseManager.hasNotifications();
+        return mPulsing;
     }
 
     public boolean isLaunchTransitionFadingAway() {
@@ -3931,6 +3932,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                 return;
             }
 
+            // Set the state to pulsing, so ScrimController will know what to do once we ask it to
+            // execute the transition. The pulse callback will then be invoked when the scrims
+            // are black, indicating that StatusBar is ready to present the rest of the UI.
+            mPulsing = true;
             mDozeScrimController.pulse(new PulseCallback() {
                 @Override
                 public void onPulseStarted() {
@@ -3944,6 +3949,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
                 @Override
                 public void onPulseFinished() {
+                    mPulsing = false;
                     callback.onPulseFinished();
                     setPulsing(false);
                 }
