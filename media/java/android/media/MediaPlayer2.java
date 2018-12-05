@@ -3501,7 +3501,7 @@ public class MediaPlayer2 implements AutoCloseable
         }
     }
 
-    private native void native_releaseDrm();
+    private native void native_releaseDrm(long mSrcId);
 
     /**
      * A key request/response exchange occurs between the app and a license server
@@ -3821,7 +3821,8 @@ public class MediaPlayer2 implements AutoCloseable
         }
     }
 
-    private native void native_prepareDrm(@NonNull byte[] uuid, @NonNull byte[] drmSessionId);
+    private native void native_prepareDrm(
+            long srcId, @NonNull byte[] uuid, @NonNull byte[] drmSessionId);
 
     // Instantiated from the native side
     @SuppressWarnings("unused")
@@ -4064,6 +4065,7 @@ public class MediaPlayer2 implements AutoCloseable
         static final int PROVISION_TIMEOUT_MS = 60000;
 
         final DataSourceDesc mDSD;
+        final long mSrcId;
 
         //--- guarded by |this| start
         MediaDrm mDrmObj;
@@ -4075,8 +4077,9 @@ public class MediaPlayer2 implements AutoCloseable
         Future<?> mProvisionResult;
         //--- guarded by |this| end
 
-        DrmHandle(DataSourceDesc dsd) {
+        DrmHandle(DataSourceDesc dsd, long srcId) {
             mDSD = dsd;
+            mSrcId = srcId;
         }
 
         void prepare(UUID uuid) throws UnsupportedSchemeException,
@@ -4186,7 +4189,8 @@ public class MediaPlayer2 implements AutoCloseable
 
                 // Sending it down to native/mediaserver to create the crypto object
                 // This call could simply fail due to bad player state, e.g., after play().
-                MediaPlayer2.this.native_prepareDrm(getByteArrayFromUUID(uuid), mDrmSessionId);
+                final MediaPlayer2 mp2 = MediaPlayer2.this;
+                mp2.native_prepareDrm(mSrcId, getByteArrayFromUUID(uuid), mDrmSessionId);
                 Log.v(TAG, "prepareDrm_openSessionStep: native_prepareDrm/Crypto succeeded");
 
             } catch (Exception e) { //ResourceBusyException, NotProvisionedException
@@ -4367,7 +4371,7 @@ public class MediaPlayer2 implements AutoCloseable
                     // exception if we're in a non-stopped/prepared state.
 
                     // for cleaning native/mediaserver crypto object
-                    native_releaseDrm();
+                    native_releaseDrm(mSrcId);
 
                     // for cleaning client-side MediaDrm object; only called if above has succeeded
                     cleanDrmObj();
@@ -4573,7 +4577,7 @@ public class MediaPlayer2 implements AutoCloseable
 
         SourceInfo(DataSourceDesc dsd) {
             this.mDSD = dsd;
-            mDrmHandle = new DrmHandle(dsd);
+            mDrmHandle = new DrmHandle(dsd, mId);
         }
 
         void close() {
