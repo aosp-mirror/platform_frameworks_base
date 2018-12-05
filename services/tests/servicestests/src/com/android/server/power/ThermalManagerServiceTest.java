@@ -268,7 +268,7 @@ public class ThermalManagerServiceTest {
 
     @Test
     public void testGetCurrentStatus() throws RemoteException {
-        int status = Temperature.THROTTLING_WARNING;
+        int status = Temperature.THROTTLING_EMERGENCY;
         Temperature newSkin = new Temperature(100, Temperature.TYPE_SKIN, "skin1", status);
         mFakeHal.mCallback.onValues(newSkin);
         assertEquals(status, mService.mService.getCurrentThermalStatus());
