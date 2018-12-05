@@ -4992,6 +4992,7 @@ package android.service.intelligence {
   }
 
   public final class FillRequest {
+    method public android.view.autofill.AutofillValue getFocusedAutofillValue();
     method public android.view.autofill.AutofillId getFocusedId();
     method public android.service.intelligence.PresentationParams getPresentationParams();
     method public android.service.intelligence.InteractionSessionId getSessionId();

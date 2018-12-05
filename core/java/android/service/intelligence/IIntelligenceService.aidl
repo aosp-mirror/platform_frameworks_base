@@ -23,6 +23,7 @@ import android.service.intelligence.InteractionContext;
 import android.service.intelligence.SnapshotData;
 
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 import android.view.intelligence.ContentCaptureEvent;
 
 import java.util.List;
@@ -45,7 +46,8 @@ oneway interface IIntelligenceService {
                             in SnapshotData snapshotData);
 
     void onAutofillRequest(in InteractionSessionId sessionId, in IBinder autofillManagerClient,
-                           int autofilSessionId, in AutofillId focusedId);
+                           int autofilSessionId, in AutofillId focusedId,
+                           in AutofillValue focusedValue, long requestTime);
 
     void onDestroyAutofillWindowsRequest(in InteractionSessionId sessionId);
 }

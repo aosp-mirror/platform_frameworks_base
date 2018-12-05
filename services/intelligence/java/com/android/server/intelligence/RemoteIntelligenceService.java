@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.service.intelligence.ContentCaptureEventsRequest;
 import android.service.intelligence.IIntelligenceService;
 import android.service.intelligence.InteractionContext;
@@ -32,6 +33,7 @@ import android.text.format.DateUtils;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.intelligence.ContentCaptureEvent;
 
@@ -114,10 +116,10 @@ final class RemoteIntelligenceService
      */
     public void onRequestAutofillLocked(@NonNull InteractionSessionId sessionId,
             @NonNull IAutoFillManagerClient client, int autofillSessionId,
-            @NonNull AutofillId focusedId) {
+            @NonNull AutofillId focusedId, @Nullable AutofillValue focusedValue) {
         cancelScheduledUnbind();
         scheduleRequest(new PendingAutofillRequest(this, sessionId, client, autofillSessionId,
-                focusedId));
+                focusedId, focusedValue));
     }
 
     /**
@@ -222,16 +224,20 @@ final class RemoteIntelligenceService
 
     private static final class PendingAutofillRequest extends MyPendingRequest {
         private final @NonNull AutofillId mFocusedId;
+        private final @Nullable AutofillValue mFocusedValue;
         private final @NonNull IAutoFillManagerClient mClient;
         private final int mAutofillSessionId;
+        private final long mRequestTime = SystemClock.elapsedRealtime();
 
         protected PendingAutofillRequest(@NonNull RemoteIntelligenceService service,
                 @NonNull InteractionSessionId sessionId, @NonNull IAutoFillManagerClient client,
-                int autofillSessionId, @NonNull AutofillId focusedId) {
+                int autofillSessionId, @NonNull AutofillId focusedId,
+                @Nullable AutofillValue focusedValue) {
             super(service, sessionId);
             mClient = client;
             mAutofillSessionId = autofillSessionId;
             mFocusedId = focusedId;
+            mFocusedValue = focusedValue;
         }
 
         @Override // from MyPendingRequest
@@ -243,7 +249,7 @@ final class RemoteIntelligenceService
                     final IBinder realClient = resultData
                             .getBinder(AutofillManager.EXTRA_AUGMENTED_AUTOFILL_CLIENT);
                     remoteService.mService.onAutofillRequest(mSessionId, realClient,
-                            mAutofillSessionId, mFocusedId);
+                            mAutofillSessionId, mFocusedId, mFocusedValue, mRequestTime);
                 }
             };
 

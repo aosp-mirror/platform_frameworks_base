@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.app.Dialog;
 import android.graphics.Rect;
 import android.service.intelligence.PresentationParams.Area;
+import android.service.intelligence.SmartSuggestionsService.AutofillProxy;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -32,6 +33,8 @@ import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+
+import dalvik.system.CloseGuard;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -73,12 +76,15 @@ public final class FillWindow {
     @interface Flags{}
 
     private final Object mLock = new Object();
+    private final CloseGuard mCloseGuard = CloseGuard.get();
 
     @GuardedBy("mLock")
     private Dialog mDialog;
 
     @GuardedBy("mLock")
     private boolean mDestroyed;
+
+    private AutofillProxy mProxy;
 
     /**
      * Updates the content of the window.
@@ -123,6 +129,8 @@ public final class FillWindow {
         synchronized (mLock) {
             checkNotDestroyedLocked();
 
+            mProxy = area.proxy;
+
             // TODO(b/111330312): once we have the SurfaceControl approach, we should update the
             // window instead of destroying. In fact, it might be better to allocate a full window
             // initially, which is transparent (and let touches get through) everywhere but in the
@@ -133,6 +141,7 @@ public final class FillWindow {
             // etc.
 
             mDialog = new Dialog(rootView.getContext());
+            mCloseGuard.open("destroy");
             final Window window = mDialog.getWindow();
             window.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
 
@@ -156,7 +165,7 @@ public final class FillWindow {
                 Log.d(TAG, "Created FillWindow: params= " + smartSuggestion + " view=" + rootView);
             }
 
-            area.proxy.setFillWindow(this);
+            mProxy.setFillWindow(this);
             return true;
         }
     }
@@ -173,6 +182,9 @@ public final class FillWindow {
             }
 
             mDialog.show();
+            if (mProxy != null) {
+                mProxy.report(AutofillProxy.REPORT_EVENT_UI_SHOWN);
+            }
         }
     }
 
@@ -182,15 +194,29 @@ public final class FillWindow {
      * <p>Once destroyed, this window cannot be used anymore
      */
     public void destroy() {
-        if (DEBUG) Log.d(TAG, "destroy(): mDestroyed = " + mDestroyed);
+        if (DEBUG) Log.d(TAG, "destroy(): mDestroyed=" + mDestroyed + " mDialog=" + mDialog);
 
         synchronized (this) {
-            if (mDestroyed) return;
+            if (mDestroyed || mDialog == null) return;
 
-            if (mDialog != null) {
-                mDialog.dismiss();
-                mDialog = null;
+            mDialog.dismiss();
+            mDialog = null;
+            if (mProxy != null) {
+                mProxy.report(AutofillProxy.REPORT_EVENT_UI_DESTROYED);
             }
+            mCloseGuard.close();
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
+            }
+            destroy();
+        } finally {
+            super.finalize();
         }
     }
 

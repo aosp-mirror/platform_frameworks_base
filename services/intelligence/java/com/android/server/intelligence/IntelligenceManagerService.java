@@ -35,6 +35,7 @@ import android.os.UserManager;
 import android.service.intelligence.InteractionSessionId;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.intelligence.ContentCaptureEvent;
 import android.view.intelligence.IIntelligenceManager;
@@ -257,12 +258,13 @@ public final class IntelligenceManagerService extends
         @Override
         public AugmentedAutofillCallback requestAutofill(@UserIdInt int userId,
                 @NonNull IAutoFillManagerClient client, @NonNull IBinder activityToken,
-                int autofillSessionId, @NonNull AutofillId focusedId) {
+                int autofillSessionId, @NonNull AutofillId focusedId,
+                @Nullable AutofillValue focusedValue) {
             synchronized (mLock) {
                 final IntelligencePerUserService service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     return service.requestAutofill(client, activityToken, autofillSessionId,
-                            focusedId);
+                            focusedId, focusedValue);
                 }
             }
             return null;

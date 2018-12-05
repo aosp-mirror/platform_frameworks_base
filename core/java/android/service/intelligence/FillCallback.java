@@ -15,8 +15,10 @@
  */
 package android.service.intelligence;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.service.intelligence.SmartSuggestionsService.AutofillProxy;
 
 /**
  * Callback used to indicate at {@link FillRequest} has been fulfilled.
@@ -25,8 +27,11 @@ import android.annotation.SystemApi;
  */
 @SystemApi
 public final class FillCallback {
+    private final AutofillProxy mProxy;
 
-    FillCallback() {}
+    FillCallback(@NonNull AutofillProxy proxy) {
+        mProxy = proxy;
+    }
 
     /**
      * Sets the response associated with the request.
@@ -35,6 +40,7 @@ public final class FillCallback {
      * could not provide autofill for the request.
      */
     public void onSuccess(@Nullable FillResponse response) {
+        mProxy.report(AutofillProxy.REPORT_EVENT_ON_SUCCESS);
         final FillWindow fillWindow = response.getFillWindow();
         if (fillWindow != null) {
             fillWindow.show();

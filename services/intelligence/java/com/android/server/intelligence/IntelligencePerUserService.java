@@ -40,6 +40,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.intelligence.ContentCaptureEvent;
 import android.view.intelligence.ContentCaptureManager;
@@ -289,13 +290,15 @@ final class IntelligencePerUserService
     }
 
     public AugmentedAutofillCallback requestAutofill(@NonNull IAutoFillManagerClient client,
-            @NonNull IBinder activityToken, int autofillSessionId, @NonNull AutofillId focusedId) {
+            @NonNull IBinder activityToken, int autofillSessionId, @NonNull AutofillId focusedId,
+            @Nullable AutofillValue focusedValue) {
         synchronized (mLock) {
             final ContentCaptureSession session = getSession(activityToken);
             if (session != null) {
                 // TODO(b/111330312): log metrics
                 if (mMaster.verbose) Slog.v(TAG, "requestAugmentedAutofill()");
-                return session.requestAutofillLocked(client, autofillSessionId, focusedId);
+                return session.requestAutofillLocked(client, autofillSessionId, focusedId,
+                        focusedValue);
             }
             if (mMaster.debug) {
                 Slog.d(TAG, "requestAutofill(): no session for " + activityToken);

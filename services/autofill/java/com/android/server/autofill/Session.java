@@ -2579,11 +2579,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + " when server returned null for session " + this.id);
         }
 
+        final AutofillValue currentValue = mViewStates.get(mCurrentViewId).getCurrentValue();
+
         // TODO(b/111330312): we might need to add a new state in the AutofillManager to optimize
         // furgher AFM -> AFMS calls.
         // TODO(b/119638958): add CTS tests
         return intelligenceManagerInternal.requestAutofill(mService.getUserId(), mClient,
-                mActivityToken, this.id, mCurrentViewId);
+                mActivityToken, this.id, mCurrentViewId, currentValue);
     }
 
     @GuardedBy("mLock")
