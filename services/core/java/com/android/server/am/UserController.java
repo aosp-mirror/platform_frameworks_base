@@ -1144,7 +1144,7 @@ class UserController implements Handler.Callback {
     /**
      * Attempt to unlock user without a credential token. This typically
      * succeeds when the device doesn't have credential-encrypted storage, or
-     * when the the credential-encrypted storage isn't tied to a user-provided
+     * when the credential-encrypted storage isn't tied to a user-provided
      * PIN or pattern.
      */
     private boolean maybeUnlockUser(final int userId) {
