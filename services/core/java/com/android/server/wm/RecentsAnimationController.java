@@ -504,10 +504,12 @@ public class RecentsAnimationController implements DeathRecipient {
     public void binderDied() {
         cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "binderDied");
 
-        // Clear associated input consumers on runner death
-        final InputMonitor inputMonitor =
-                mService.mRoot.getDisplayContent(mDisplayId).getInputMonitor();
-        inputMonitor.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
+        synchronized (mService.getWindowManagerLock()) {
+            // Clear associated input consumers on runner death
+            final InputMonitor inputMonitor =
+                    mService.mRoot.getDisplayContent(mDisplayId).getInputMonitor();
+            inputMonitor.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
+        }
     }
 
     void checkAnimationReady(WallpaperController wallpaperController) {
