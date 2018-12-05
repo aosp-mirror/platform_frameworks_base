@@ -77,7 +77,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -111,7 +110,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -135,7 +133,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     public static final boolean DEBUG_STANDBY = DEBUG || false;
 
     /** The maximum number of concurrent jobs we run at one time. */
-    private static final int MAX_JOB_CONTEXTS_COUNT = 16;
+    static final int MAX_JOB_CONTEXTS_COUNT = 16;
     /** Enforce a per-app limit on scheduled jobs? */
     private static final boolean ENFORCE_MAX_JOBS = true;
     /** The maximum number of jobs that we allow an unprivileged app to schedule */
@@ -156,6 +154,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     final StandbyTracker mStandbyTracker;
     /** Tracking amount of time each package runs for. */
     final JobPackageTracker mJobPackageTracker = new JobPackageTracker();
+    final JobConcurrencyManager mConcurrencyManager;
 
     static final int MSG_JOB_EXPIRED = 0;
     static final int MSG_CHECK_JOB = 1;
@@ -173,7 +172,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     final List<JobServiceContext> mActiveServices = new ArrayList<>();
 
     /** List of controllers that will notify this service of updates to jobs. */
-    private final List<StateController> mControllers;
+    final List<StateController> mControllers;
     /** Need direct access to this for testing. */
     private final BatteryController mBatteryController;
     /** Need direct access to this for testing. */
@@ -267,22 +266,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     final HeartbeatAlarmListener mHeartbeatAlarm = new HeartbeatAlarmListener();
 
     // -- Pre-allocated temporaries only for use in assignJobsToContextsLocked --
-
-    /**
-     * This array essentially stores the state of mActiveServices array.
-     * The ith index stores the job present on the ith JobServiceContext.
-     * We manipulate this array until we arrive at what jobs should be running on
-     * what JobServiceContext.
-     */
-    JobStatus[] mTmpAssignContextIdToJobMap = new JobStatus[MAX_JOB_CONTEXTS_COUNT];
-    /**
-     * Indicates whether we need to act on this jobContext id
-     */
-    boolean[] mTmpAssignAct = new boolean[MAX_JOB_CONTEXTS_COUNT];
-    /**
-     * The uid whose jobs we would like to assign to a context.
-     */
-    int[] mTmpAssignPreferredUidForContext = new int[MAX_JOB_CONTEXTS_COUNT];
 
     private class ConstantsObserver extends ContentObserver {
         private ContentResolver mResolver;
@@ -1267,6 +1250,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         mConstantsObserver = new ConstantsObserver(mHandler);
         mJobSchedulerStub = new JobSchedulerStub();
 
+        mConcurrencyManager = new JobConcurrencyManager(this);
+
         // Set up the app standby bucketing tracker
         mStandbyTracker = new StandbyTracker();
         mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
@@ -2193,7 +2178,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (DEBUG) {
             Slog.d(TAG, "pending queue: " + mPendingJobs.size() + " jobs.");
         }
-        assignJobsToContextsLocked();
+        mConcurrencyManager.assignJobsToContextsLocked();
         reportActiveLocked();
     }
 
@@ -2209,7 +2194,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         return curPriority;
     }
 
-    private int evaluateJobPriorityLocked(JobStatus job) {
+    int evaluateJobPriorityLocked(JobStatus job) {
         int priority = job.getPriority();
         if (priority >= JobInfo.PRIORITY_FOREGROUND_APP) {
             return adjustJobPriority(priority, job);
@@ -2219,161 +2204,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             return adjustJobPriority(override, job);
         }
         return adjustJobPriority(priority, job);
-    }
-
-    /**
-     * Takes jobs from pending queue and runs them on available contexts.
-     * If no contexts are available, preempts lower priority jobs to
-     * run higher priority ones.
-     * Lock on mJobs before calling this function.
-     */
-    private void assignJobsToContextsLocked() {
-        if (DEBUG) {
-            Slog.d(TAG, printPendingQueue());
-        }
-
-        int memLevel;
-        try {
-            memLevel = ActivityManager.getService().getMemoryTrimLevel();
-        } catch (RemoteException e) {
-            memLevel = ProcessStats.ADJ_MEM_FACTOR_NORMAL;
-        }
-        switch (memLevel) {
-            case ProcessStats.ADJ_MEM_FACTOR_MODERATE:
-                mMaxActiveJobs = mConstants.BG_MODERATE_JOB_COUNT;
-                break;
-            case ProcessStats.ADJ_MEM_FACTOR_LOW:
-                mMaxActiveJobs = mConstants.BG_LOW_JOB_COUNT;
-                break;
-            case ProcessStats.ADJ_MEM_FACTOR_CRITICAL:
-                mMaxActiveJobs = mConstants.BG_CRITICAL_JOB_COUNT;
-                break;
-            default:
-                mMaxActiveJobs = mConstants.BG_NORMAL_JOB_COUNT;
-                break;
-        }
-
-        JobStatus[] contextIdToJobMap = mTmpAssignContextIdToJobMap;
-        boolean[] act = mTmpAssignAct;
-        int[] preferredUidForContext = mTmpAssignPreferredUidForContext;
-        int numActive = 0;
-        int numForeground = 0;
-        for (int i=0; i<MAX_JOB_CONTEXTS_COUNT; i++) {
-            final JobServiceContext js = mActiveServices.get(i);
-            final JobStatus status = js.getRunningJobLocked();
-            if ((contextIdToJobMap[i] = status) != null) {
-                numActive++;
-                if (status.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
-                    numForeground++;
-                }
-            }
-            act[i] = false;
-            preferredUidForContext[i] = js.getPreferredUid();
-        }
-        if (DEBUG) {
-            Slog.d(TAG, printContextIdToJobMap(contextIdToJobMap, "running jobs initial"));
-        }
-        for (int i=0; i<mPendingJobs.size(); i++) {
-            JobStatus nextPending = mPendingJobs.get(i);
-
-            // If job is already running, go to next job.
-            int jobRunningContext = findJobContextIdFromMap(nextPending, contextIdToJobMap);
-            if (jobRunningContext != -1) {
-                continue;
-            }
-
-            final int priority = evaluateJobPriorityLocked(nextPending);
-            nextPending.lastEvaluatedPriority = priority;
-
-            // Find a context for nextPending. The context should be available OR
-            // it should have lowest priority among all running jobs
-            // (sharing the same Uid as nextPending)
-            int minPriority = Integer.MAX_VALUE;
-            int minPriorityContextId = -1;
-            for (int j=0; j<MAX_JOB_CONTEXTS_COUNT; j++) {
-                JobStatus job = contextIdToJobMap[j];
-                int preferredUid = preferredUidForContext[j];
-                if (job == null) {
-                    if ((numActive < mMaxActiveJobs ||
-                            (priority >= JobInfo.PRIORITY_TOP_APP &&
-                                    numForeground < mConstants.FG_JOB_COUNT)) &&
-                            (preferredUid == nextPending.getUid() ||
-                                    preferredUid == JobServiceContext.NO_PREFERRED_UID)) {
-                        // This slot is free, and we haven't yet hit the limit on
-                        // concurrent jobs...  we can just throw the job in to here.
-                        minPriorityContextId = j;
-                        break;
-                    }
-                    // No job on this context, but nextPending can't run here because
-                    // the context has a preferred Uid or we have reached the limit on
-                    // concurrent jobs.
-                    continue;
-                }
-                if (job.getUid() != nextPending.getUid()) {
-                    continue;
-                }
-                if (evaluateJobPriorityLocked(job) >= nextPending.lastEvaluatedPriority) {
-                    continue;
-                }
-                if (minPriority > nextPending.lastEvaluatedPriority) {
-                    minPriority = nextPending.lastEvaluatedPriority;
-                    minPriorityContextId = j;
-                }
-            }
-            if (minPriorityContextId != -1) {
-                contextIdToJobMap[minPriorityContextId] = nextPending;
-                act[minPriorityContextId] = true;
-                numActive++;
-                if (priority >= JobInfo.PRIORITY_TOP_APP) {
-                    numForeground++;
-                }
-            }
-        }
-        if (DEBUG) {
-            Slog.d(TAG, printContextIdToJobMap(contextIdToJobMap, "running jobs final"));
-        }
-        mJobPackageTracker.noteConcurrency(numActive, numForeground);
-        for (int i=0; i<MAX_JOB_CONTEXTS_COUNT; i++) {
-            boolean preservePreferredUid = false;
-            if (act[i]) {
-                JobStatus js = mActiveServices.get(i).getRunningJobLocked();
-                if (js != null) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "preempting job: " + mActiveServices.get(i).getRunningJobLocked());
-                    }
-                    // preferredUid will be set to uid of currently running job.
-                    mActiveServices.get(i).preemptExecutingJobLocked();
-                    preservePreferredUid = true;
-                } else {
-                    final JobStatus pendingJob = contextIdToJobMap[i];
-                    if (DEBUG) {
-                        Slog.d(TAG, "About to run job on context "
-                                + String.valueOf(i) + ", job: " + pendingJob);
-                    }
-                    for (int ic=0; ic<mControllers.size(); ic++) {
-                        mControllers.get(ic).prepareForExecutionLocked(pendingJob);
-                    }
-                    if (!mActiveServices.get(i).executeRunnableJob(pendingJob)) {
-                        Slog.d(TAG, "Error executing " + pendingJob);
-                    }
-                    if (mPendingJobs.remove(pendingJob)) {
-                        mJobPackageTracker.noteNonpending(pendingJob);
-                    }
-                }
-            }
-            if (!preservePreferredUid) {
-                mActiveServices.get(i).clearPreferredUid();
-            }
-        }
-    }
-
-    int findJobContextIdFromMap(JobStatus jobStatus, JobStatus[] map) {
-        for (int i=0; i<map.length; i++) {
-            if (map[i] != null && map[i].matches(jobStatus.getUid(), jobStatus.getJobId())) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     final class LocalService implements JobSchedulerInternal {
@@ -3148,31 +2978,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         dockIntent.setPackage("android");
         dockIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
         getContext().sendBroadcastAsUser(dockIntent, UserHandle.ALL);
-    }
-
-    private String printContextIdToJobMap(JobStatus[] map, String initial) {
-        StringBuilder s = new StringBuilder(initial + ": ");
-        for (int i=0; i<map.length; i++) {
-            s.append("(")
-                    .append(map[i] == null? -1: map[i].getJobId())
-                    .append(map[i] == null? -1: map[i].getUid())
-                    .append(")" );
-        }
-        return s.toString();
-    }
-
-    private String printPendingQueue() {
-        StringBuilder s = new StringBuilder("Pending queue: ");
-        Iterator<JobStatus> it = mPendingJobs.iterator();
-        while (it.hasNext()) {
-            JobStatus js = it.next();
-            s.append("(")
-                    .append(js.getJob().getId())
-                    .append(", ")
-                    .append(js.getUid())
-                    .append(") ");
-        }
-        return s.toString();
     }
 
     static void dumpHelp(PrintWriter pw) {
