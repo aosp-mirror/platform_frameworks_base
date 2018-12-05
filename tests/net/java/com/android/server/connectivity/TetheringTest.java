@@ -245,7 +245,7 @@ public class TetheringTest {
                 }
 
                 @Override
-                public DhcpServer makeDhcpServer(Looper looper, InterfaceParams iface,
+                public DhcpServer makeDhcpServer(Looper looper, String ifName,
                         DhcpServingParams params, SharedLog log) {
                     return mDhcpServer;
                 }
