@@ -1982,6 +1982,8 @@ public class WifiManager {
     public static final int WIFI_FEATURE_WPA3_SUITE_B     = 0x10000000; // WPA3-Enterprise Suite-B
     /** @hide */
     public static final int WIFI_FEATURE_OWE              = 0x20000000; // Enhanced Open
+    /** @hide */
+    public static final int WIFI_FEATURE_LOW_LATENCY      = 0x40000000; // Low Latency modes
 
     private int getSupportedFeatures() {
         try {
