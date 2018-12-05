@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server;
+package com.android.server.infra;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,6 +40,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
 
 import java.io.PrintWriter;
 import java.util.List;

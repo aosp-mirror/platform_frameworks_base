@@ -38,7 +38,7 @@ import android.view.autofill.IAutoFillManagerClient;
 import android.view.intelligence.ContentCaptureEvent;
 
 import com.android.internal.os.IResultReceiver;
-import com.android.server.AbstractMultiplePendingRequestsRemoteService;
+import com.android.server.infra.AbstractMultiplePendingRequestsRemoteService;
 
 import java.util.List;
 

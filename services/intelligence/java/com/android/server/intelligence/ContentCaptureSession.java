@@ -32,7 +32,7 @@ import android.view.intelligence.ContentCaptureEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
-import com.android.server.AbstractRemoteService;
+import com.android.server.infra.AbstractRemoteService;
 import com.android.server.intelligence.IntelligenceManagerInternal.AugmentedAutofillCallback;
 import com.android.server.intelligence.RemoteIntelligenceService.RemoteIntelligenceServiceCallbacks;
 

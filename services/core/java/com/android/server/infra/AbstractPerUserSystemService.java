@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server;
+package com.android.server.infra;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;

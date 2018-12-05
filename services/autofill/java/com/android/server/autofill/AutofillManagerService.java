@@ -70,10 +70,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
-import com.android.server.AbstractMasterSystemService;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.autofill.ui.AutoFillUI;
+import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.intelligence.IntelligenceManagerInternal;
 
 import java.io.FileDescriptor;

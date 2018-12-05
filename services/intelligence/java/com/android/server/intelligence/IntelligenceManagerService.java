@@ -44,8 +44,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
-import com.android.server.AbstractMasterSystemService;
 import com.android.server.LocalServices;
+import com.android.server.infra.AbstractMasterSystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

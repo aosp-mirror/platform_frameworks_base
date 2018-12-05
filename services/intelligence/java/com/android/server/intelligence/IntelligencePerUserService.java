@@ -47,7 +47,7 @@ import android.view.intelligence.ContentCaptureManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
-import com.android.server.AbstractPerUserSystemService;
+import com.android.server.infra.AbstractPerUserSystemService;
 import com.android.server.intelligence.IntelligenceManagerInternal.AugmentedAutofillCallback;
 
 import java.io.PrintWriter;
