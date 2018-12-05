@@ -139,7 +139,7 @@ public final class TextClassifierImpl implements TextClassifier {
                         FACTORY_MODEL_DIR,
                         LANG_ID_FACTORY_MODEL_FILENAME_REGEX,
                         UPDATED_LANG_ID_MODEL_FILE,
-                        fd -> -1, // TODO: Replace this with LangIdModel.getVersion(fd)
+                        LangIdModel::getVersion,
                         fd -> ModelFileManager.ModelFile.LANGUAGE_INDEPENDENT));
         mActionsModelFileManager = new ModelFileManager(
                 new ModelFileManager.ModelFileSupplierImpl(
@@ -777,6 +777,9 @@ public final class TextClassifierImpl implements TextClassifier {
             if (foreignText) {
                 insertTranslateAction(actions, context, text);
             }
+            actions.forEach(
+                    action -> action.getIntent()
+                            .putExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, true));
             return actions;
         }
 
