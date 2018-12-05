@@ -1399,6 +1399,15 @@ public final class SystemServer {
                 traceEnd();
             }
 
+            // Start ADB Debugging Service
+            traceBeginAndSlog("StartAdbService");
+            try {
+                mSystemServiceManager.startService(ADB_SERVICE_CLASS);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting AdbService");
+            }
+            traceEnd();
+
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)
                     || mPackageManager.hasSystemFeature(
                     PackageManager.FEATURE_USB_ACCESSORY)
@@ -1408,15 +1417,6 @@ public final class SystemServer {
                 mSystemServiceManager.startService(USB_SERVICE_CLASS);
                 traceEnd();
             }
-
-            // Start ADB Debugging Service
-            traceBeginAndSlog("StartAdbService");
-            try {
-                mSystemServiceManager.startService(ADB_SERVICE_CLASS);
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting AdbService");
-            }
-            traceEnd();
 
             if (!isWatch) {
                 traceBeginAndSlog("StartSerialService");
