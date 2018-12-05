@@ -971,10 +971,11 @@ public class Binder implements IBinder {
             if (tracingEnabled) {
                 Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
             }
+            if (observer != null) {
+                observer.callEnded(callSession, data.dataSize(), reply.dataSize());
+            }
         }
         checkParcel(this, code, reply, "Unreasonably large binder reply buffer");
-        int replySizeBytes = reply.dataSize();
-        int requestSizeBytes = data.dataSize();
         reply.recycle();
         data.recycle();
 
@@ -984,9 +985,6 @@ public class Binder implements IBinder {
         // to the main transaction loop to wait for another incoming transaction.  Either
         // way, strict mode begone!
         StrictMode.clearGatheredViolations();
-        if (observer != null) {
-            observer.callEnded(callSession, requestSizeBytes, replySizeBytes);
-        }
         return res;
     }
 }

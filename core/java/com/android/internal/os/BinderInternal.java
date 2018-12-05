@@ -22,7 +22,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.EventLog;
-import android.util.Log;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.Preconditions;
@@ -100,7 +99,8 @@ public class BinderInternal {
         /**
          * Called when a binder call stops.
          *
-         * <li>This method will be called even when an exception is thrown.
+         * <li>This method will be called even when an exception is thrown by the binder stub
+         * implementation.
          */
         void callEnded(CallSession s, int parcelRequestSize, int parcelReplySize);
 
