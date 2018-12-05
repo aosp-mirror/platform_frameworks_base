@@ -3892,14 +3892,6 @@ package android.net.wifi.aware {
 
 }
 
-package android.net.wifi.p2p {
-
-  public class WifiP2pManager {
-    method public void factoryReset(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
-  }
-
-}
-
 package android.net.wifi.rtt {
 
   public static final class RangingRequest.Builder {

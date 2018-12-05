@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -1695,7 +1694,6 @@ public class WifiP2pManager {
      * @param listener for callback on success or failure. Can be null.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void factoryReset(@NonNull Channel c, @Nullable ActionListener listener) {
         checkChannel(c);
