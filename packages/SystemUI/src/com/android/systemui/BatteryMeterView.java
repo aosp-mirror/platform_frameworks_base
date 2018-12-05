@@ -88,6 +88,9 @@ public class BatteryMeterView extends LinearLayout implements
     private int mShowPercentMode = MODE_DEFAULT;
     private boolean mForceShowPercent;
     private boolean mShowPercentAvailable;
+    // Some places may need to show the battery conditionally, and not obey the tuner
+    private boolean mIgnoreTunerUpdates;
+    private boolean mIsSubscribedForTunerUpdates;
 
     private int mDarkModeBackgroundColor;
     private int mDarkModeFillColor;
@@ -183,6 +186,44 @@ public class BatteryMeterView extends LinearLayout implements
     }
 
     /**
+     * Set {@code true} to turn off BatteryMeterView's subscribing to the tuner for updates, and
+     * thus avoid it controlling its own visibility
+     *
+     * @param ignore whether to ignore the tuner or not
+     */
+    public void setIgnoreTunerUpdates(boolean ignore) {
+        mIgnoreTunerUpdates = ignore;
+        updateTunerSubscription();
+    }
+
+    private void updateTunerSubscription() {
+        if (mIgnoreTunerUpdates) {
+            unsubscribeFromTunerUpdates();
+        } else {
+            subscribeForTunerUpdates();
+        }
+    }
+
+    private void subscribeForTunerUpdates() {
+        if (mIsSubscribedForTunerUpdates || mIgnoreTunerUpdates) {
+            return;
+        }
+
+        Dependency.get(TunerService.class)
+                .addTunable(this, StatusBarIconController.ICON_BLACKLIST);
+        mIsSubscribedForTunerUpdates = true;
+    }
+
+    private void unsubscribeFromTunerUpdates() {
+        if (!mIsSubscribedForTunerUpdates) {
+            return;
+        }
+
+        Dependency.get(TunerService.class).removeTunable(this);
+        mIsSubscribedForTunerUpdates = false;
+    }
+
+    /**
      * Sets whether the battery meter view uses the wallpaperTextColor. If we're not using it, we'll
      * revert back to dark-mode-based/tinted colors.
      *
@@ -247,8 +288,7 @@ public class BatteryMeterView extends LinearLayout implements
         getContext().getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mSettingObserver, mUser);
         updateShowPercent();
-        Dependency.get(TunerService.class)
-                .addTunable(this, StatusBarIconController.ICON_BLACKLIST);
+        subscribeForTunerUpdates();
         Dependency.get(ConfigurationController.class).addCallback(this);
         mUserTracker.startTracking();
     }
@@ -259,7 +299,7 @@ public class BatteryMeterView extends LinearLayout implements
         mUserTracker.stopTracking();
         mBatteryController.removeCallback(this);
         getContext().getContentResolver().unregisterContentObserver(mSettingObserver);
-        Dependency.get(TunerService.class).removeTunable(this);
+        unsubscribeFromTunerUpdates();
         Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
