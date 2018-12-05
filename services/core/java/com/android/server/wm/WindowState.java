@@ -2268,8 +2268,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // For child windows we want to use the pid for the parent window in case the the child
         // window was added from another process.
         final int pid = getParentWindow() != null ? getParentWindow().mSession.mPid : mSession.mPid;
-        mTempConfiguration.setTo(mWmService.mProcessConfigurations.get(
-                pid, mWmService.mRoot.getConfiguration()));
+        final Configuration processConfig =
+                mWmService.mAtmService.getGlobalConfigurationForPid(pid);
+        mTempConfiguration.setTo(processConfig == null
+                ? mWmService.mRoot.getConfiguration() : processConfig);
         return mTempConfiguration;
     }
 

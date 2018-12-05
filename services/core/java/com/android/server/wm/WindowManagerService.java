@@ -735,6 +735,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
     final DisplayManager mDisplayManager;
+    final ActivityTaskManagerService mAtmService;
 
     // Indicates whether this device supports wide color gamut / HDR rendering
     private boolean mHasWideColorGamutSupport;
@@ -897,11 +898,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public static WindowManagerService main(final Context context, final InputManagerService im,
             final boolean showBootMsgs, final boolean onlyCore, WindowManagerPolicy policy,
-            final WindowManagerGlobalLock globalLock) {
+            ActivityTaskManagerService atm) {
         DisplayThread.getHandler().runWithScissors(() ->
                 sInstance = new WindowManagerService(context, im, showBootMsgs, onlyCore, policy,
-                        globalLock),
-                0);
+                        atm), 0);
         return sInstance;
     }
 
@@ -923,9 +923,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private WindowManagerService(Context context, InputManagerService inputManager,
             boolean showBootMsgs, boolean onlyCore, WindowManagerPolicy policy,
-            WindowManagerGlobalLock globalLock) {
+            ActivityTaskManagerService atm) {
         installLock(this, INDEX_WINDOW);
-        mGlobalLock = globalLock;
+        mGlobalLock = atm.getGlobalLock();
+        mAtmService = atm;
         mContext = context;
         mAllowBootMessages = showBootMsgs;
         mOnlyCore = onlyCore;
@@ -7279,19 +7280,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     return window.getDisplayContent().getDisplayId();
                 }
                 return Display.INVALID_DISPLAY;
-            }
-        }
-
-        @Override
-        public void onProcessConfigurationChanged(int pid, Configuration newConfig) {
-            synchronized (mGlobalLock) {
-                Configuration currentConfig = mProcessConfigurations.get(pid);
-                if (currentConfig == null) {
-                    currentConfig = new Configuration(newConfig);
-                } else {
-                    currentConfig.setTo(newConfig);
-                }
-                mProcessConfigurations.put(pid, currentConfig);
             }
         }
     }
