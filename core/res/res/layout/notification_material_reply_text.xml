@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
             android:visibility="gone"
-            android:textAppearance="@style/TextAppearance.Material.Notification.Reply"
+            android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Reply"
             android:singleLine="true" />
 
     <TextView
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
             android:visibility="gone"
-            android:textAppearance="@style/TextAppearance.Material.Notification.Reply"
+            android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Reply"
             android:singleLine="true" />
 
     <LinearLayout
@@ -64,7 +64,7 @@
                 android:layout_weight="1"
                 android:layout_marginEnd="@dimen/notification_content_margin_end"
                 android:layout_gravity="center"
-                android:textAppearance="@style/TextAppearance.Material.Notification.Reply"
+                android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Reply"
                 android:singleLine="true" />
         <ProgressBar
             android:id="@+id/notification_material_reply_progress"

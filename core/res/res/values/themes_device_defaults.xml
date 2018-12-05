@@ -1724,4 +1724,10 @@ easier.
         <item name="layout_gravity">center</item>
     </style>
 
+    <style name="Theme.DeviceDefault.Notification" parent="@style/Theme.Material.Notification">
+    </style>
+
+    <style name="Theme.DeviceDefault.Notification.Ambient" parent="@style/Theme.Material.Notification.Ambient">
+    </style>
+
 </resources>
