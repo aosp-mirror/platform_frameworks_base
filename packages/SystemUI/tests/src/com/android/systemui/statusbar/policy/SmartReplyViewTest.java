@@ -801,4 +801,55 @@ public class SmartReplyViewTest extends SysuiTestCase {
         assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(1), mView.getChildAt(1));
         assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(2), mView.getChildAt(2));
     }
+
+    @Test
+    public void testMeasure_choicesAndActionsPrioritizeActionsOnlyActions() {
+        String[] choices = new String[] {"Reply"};
+        String[] actions = new String[] {"Looooooong actioooon", "second action", "third action"};
+
+        // All actions should be displayed as DOUBLE-line smart action buttons.
+        ViewGroup expectedView = buildExpectedView(new String[0], 2,
+                createActions(new String[] {
+                        "Looooooong \nactioooon", "second \naction", "third \naction"}));
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        setSmartRepliesAndActions(choices, actions);
+        mView.measure(
+                MeasureSpec.makeMeasureSpec(expectedView.getMeasuredWidth(), MeasureSpec.AT_MOST),
+                MeasureSpec.UNSPECIFIED);
+
+        assertEqualMeasures(expectedView, mView);
+        // smart replies
+        assertReplyButtonHidden(mView.getChildAt(0));
+        // smart actions
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(0), mView.getChildAt(1));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(1), mView.getChildAt(2));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(2), mView.getChildAt(3));
+    }
+
+    @Test
+    public void testMeasure_choicesAndActionsPrioritizeActions() {
+        String[] choices = new String[] {"Short", "longer reply"};
+        String[] actions = new String[] {"Looooooong actioooon", "second action"};
+
+        // All actions should be displayed as DOUBLE-line smart action buttons.
+        ViewGroup expectedView = buildExpectedView(new String[] {"Short"}, 2,
+                createActions(new String[] {"Looooooong \nactioooon", "second \naction"}));
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        setSmartRepliesAndActions(choices, actions);
+        mView.measure(
+                MeasureSpec.makeMeasureSpec(expectedView.getMeasuredWidth(), MeasureSpec.AT_MOST),
+                MeasureSpec.UNSPECIFIED);
+
+        Button firstAction = ((Button) mView.getChildAt(1));
+
+        assertEqualMeasures(expectedView, mView);
+        // smart replies
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(0), mView.getChildAt(0));
+        assertReplyButtonHidden(mView.getChildAt(1));
+        // smart actions
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(1), mView.getChildAt(2));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(2), mView.getChildAt(3));
+    }
 }
