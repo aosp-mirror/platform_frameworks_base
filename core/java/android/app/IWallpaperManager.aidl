@@ -142,19 +142,20 @@ interface IWallpaperManager {
      *
      * @param which either {@link WallpaperManager#FLAG_LOCK}
      * or {@link WallpaperManager#FLAG_SYSTEM}
+     * @param displayId Which display is interested
      * @return colors of chosen wallpaper
      */
-    WallpaperColors getWallpaperColors(int which, int userId);
+    WallpaperColors getWallpaperColors(int which, int userId, int displayId);
 
     /**
-     * Register a callback to receive color updates
+     * Register a callback to receive color updates from a display
      */
-    void registerWallpaperColorsCallback(IWallpaperManagerCallback cb, int userId);
+    void registerWallpaperColorsCallback(IWallpaperManagerCallback cb, int userId, int displayId);
 
     /**
-     * Unregister a callback that was receiving color updates
+     * Unregister a callback that was receiving color updates from a display
      */
-    void unregisterWallpaperColorsCallback(IWallpaperManagerCallback cb, int userId);
+    void unregisterWallpaperColorsCallback(IWallpaperManagerCallback cb, int userId, int displayId);
 
     /**
      * Called from SystemUI when it shows the AoD UI.
