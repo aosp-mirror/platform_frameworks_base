@@ -13510,6 +13510,13 @@ public final class Settings {
          */
         public static final String WARNING_TEMPERATURE = "warning_temperature";
 
+
+        /**
+         * USB Temperature at which the high temperature alarm notification should be shown.
+         * @hide
+         */
+        public static final String USB_ALARM_TEMPERATURE = "usb_alarm_temperature";
+
         /**
          * Whether the diskstats logging task is enabled/disabled.
          * @hide
