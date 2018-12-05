@@ -916,23 +916,49 @@ public class Binder implements IBinder {
     private static native long getNativeBBinderHolder();
     private static native long getFinalizer();
 
+    /**
+     * By default, we use the calling uid since we can always trust it.
+     */
+    private static volatile BinderInternal.WorkSourceProvider sWorkSourceProvider =
+            Binder::getCallingUid;
+
+    /**
+     * Sets the work source provider.
+     *
+     * <li>The callback is global. Only fast operations should be done to avoid thread
+     * contentions.
+     * <li>The callback implementation needs to handle synchronization if needed. The methods on the
+     * callback can be called concurrently.
+     * <li>The callback is called on the critical path of the binder transaction so be careful about
+     * performance.
+     * <li>Never execute another binder transaction inside the callback.
+     * @hide
+     */
+    public static void setWorkSourceProvider(BinderInternal.WorkSourceProvider workSourceProvider) {
+        if (workSourceProvider == null) {
+            throw new IllegalArgumentException("workSourceProvider cannot be null");
+        }
+        sWorkSourceProvider = workSourceProvider;
+    }
+
     // Entry point from android_util_Binder.cpp's onTransact
     private boolean execTransact(int code, long dataObj, long replyObj,
             int flags) {
-        final long origWorkSource = ThreadLocalWorkSource.setUid(Binder.getCallingUid());
+        final int workSourceUid = sWorkSourceProvider.resolveWorkSourceUid();
+        final long origWorkSource = ThreadLocalWorkSource.setUid(workSourceUid);
         try {
-            return execTransactInternal(code, dataObj, replyObj, flags);
+            return execTransactInternal(code, dataObj, replyObj, flags, workSourceUid);
         } finally {
             ThreadLocalWorkSource.restore(origWorkSource);
         }
     }
 
     private boolean execTransactInternal(int code, long dataObj, long replyObj,
-            int flags) {
+            int flags, int workSourceUid) {
         // Make sure the observer won't change while processing a transaction.
         final BinderInternal.Observer observer = sObserver;
         final CallSession callSession =
-                observer != null ? observer.callStarted(this, code) : null;
+                observer != null ? observer.callStarted(this, code, workSourceUid) : null;
         Parcel data = Parcel.obtain(dataObj);
         Parcel reply = Parcel.obtain(replyObj);
         // theoretically, we should call transact, which will call onTransact,
@@ -972,7 +998,7 @@ public class Binder implements IBinder {
                 Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
             }
             if (observer != null) {
-                observer.callEnded(callSession, data.dataSize(), reply.dataSize());
+                observer.callEnded(callSession, data.dataSize(), reply.dataSize(), workSourceUid);
             }
         }
         checkParcel(this, code, reply, "Unreasonably large binder reply buffer");

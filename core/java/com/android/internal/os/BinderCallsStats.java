@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.Process;
 import android.os.SystemClock;
-import android.os.ThreadLocalWorkSource;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.Pair;
@@ -105,7 +104,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     @Override
     @Nullable
-    public CallSession callStarted(Binder binder, int code) {
+    public CallSession callStarted(Binder binder, int code, int workSourceUid) {
         if (mDeviceState == null || mDeviceState.isCharging()) {
             return null;
         }
@@ -129,19 +128,21 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     @Override
-    public void callEnded(@Nullable CallSession s, int parcelRequestSize, int parcelReplySize) {
+    public void callEnded(@Nullable CallSession s, int parcelRequestSize,
+            int parcelReplySize, int workSourceUid) {
         if (s == null) {
             return;
         }
 
-        processCallEnded(s, parcelRequestSize, parcelReplySize);
+        processCallEnded(s, parcelRequestSize, parcelReplySize, workSourceUid);
 
         if (mCallSessionsPool.size() < CALL_SESSIONS_POOL_SIZE) {
             mCallSessionsPool.add(s);
         }
     }
 
-    private void processCallEnded(CallSession s, int parcelRequestSize, int parcelReplySize) {
+    private void processCallEnded(CallSession s,
+            int parcelRequestSize, int parcelReplySize, int workSourceUid) {
         // Non-negative time signals we need to record data for this call.
         final boolean recordCall = s.cpuTimeStarted >= 0;
         final long duration;
@@ -154,7 +155,6 @@ public class BinderCallsStats implements BinderInternal.Observer {
             latencyDuration = 0;
         }
         final int callingUid = getCallingUid();
-        final int workSourceUid = getWorkSourceUid();
 
         synchronized (mLock) {
             // This was already checked in #callStart but check again while synchronized.
@@ -452,10 +452,6 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     protected int getCallingUid() {
         return Binder.getCallingUid();
-    }
-
-    protected int getWorkSourceUid() {
-        return ThreadLocalWorkSource.getUid();
     }
 
     protected long getElapsedRealtimeMicro() {
