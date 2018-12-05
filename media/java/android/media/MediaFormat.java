@@ -1045,8 +1045,8 @@ public final class MediaFormat {
 
     /**
      * Returns the value of a numeric key. This is provided as a convenience method for keys
-     * that may take multiple numeric types, such as {@link KEY_FRAME_RATE}, or {@link
-     * KEY_I_FRAME_INTERVAL}.
+     * that may take multiple numeric types, such as {@link #KEY_FRAME_RATE}, or {@link
+     * #KEY_I_FRAME_INTERVAL}.
      *
      * @return null if the key does not exist or the stored value for the key is null
      * @throws ClassCastException if the stored value for the key is ByteBuffer or String
