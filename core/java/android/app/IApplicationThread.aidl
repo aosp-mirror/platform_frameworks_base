@@ -100,8 +100,7 @@ oneway interface IApplicationThread {
     void dumpActivity(in ParcelFileDescriptor fd, IBinder servicetoken, in String prefix,
             in String[] args);
     void clearDnsCache();
-    void setHttpProxy(in String proxy, in String port, in String exclList,
-            in Uri pacFileUrl);
+    void updateHttpProxy();
     void setCoreSettings(in Bundle coreSettings);
     void updatePackageCompatibilityInfo(in String pkg, in CompatibilityInfo info);
     void scheduleTrimMemory(int level);
