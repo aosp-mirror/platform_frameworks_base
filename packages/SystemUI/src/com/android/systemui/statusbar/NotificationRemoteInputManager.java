@@ -141,7 +141,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                 ActivityManager.getService().resumeAppSwitches();
             } catch (RemoteException e) {
             }
-            return mCallback.handleRemoteViewClick(pendingIntent, () -> {
+            return mCallback.handleRemoteViewClick(view, pendingIntent, () -> {
                 Pair<Intent, ActivityOptions> options = response.getLaunchOptions(view);
                 options.second.setLaunchWindowingMode(
                         WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
@@ -666,11 +666,13 @@ public class NotificationRemoteInputManager implements Dumpable {
          * Performs any special handling for a remote view click. The default behaviour can be
          * called through the defaultHandler parameter.
          *
+         * @param view
          * @param pendingIntent
          * @param defaultHandler
          * @return  true iff the click was handled
          */
-        boolean handleRemoteViewClick(PendingIntent pendingIntent, ClickHandler defaultHandler);
+        boolean handleRemoteViewClick(View view, PendingIntent pendingIntent,
+                ClickHandler defaultHandler);
     }
 
     /**
