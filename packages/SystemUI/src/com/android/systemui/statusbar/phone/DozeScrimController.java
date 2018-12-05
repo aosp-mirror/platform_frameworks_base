@@ -88,7 +88,7 @@ public class DozeScrimController implements StateListener {
     public DozeScrimController(DozeParameters dozeParameters) {
         mDozeParameters = dozeParameters;
         //Never expected to be destroyed
-        Dependency.get(StatusBarStateController.class).addListener(this);
+        Dependency.get(StatusBarStateController.class).addCallback(this);
     }
 
     @VisibleForTesting

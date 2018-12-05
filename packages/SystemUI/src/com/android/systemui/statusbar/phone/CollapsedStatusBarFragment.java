@@ -121,14 +121,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onResume() {
         super.onResume();
         mCommandQueue.addCallbacks(this);
-        mStatusBarStateController.addListener(this);
+        mStatusBarStateController.addCallback(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mCommandQueue.removeCallbacks(this);
-        mStatusBarStateController.removeListener(this);
+        mStatusBarStateController.removeCallback(this);
     }
 
     @Override

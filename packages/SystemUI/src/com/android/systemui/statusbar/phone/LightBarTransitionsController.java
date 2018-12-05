@@ -74,14 +74,14 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
         SysUiServiceProvider.getComponent(context, CommandQueue.class)
                 .addCallbacks(this);
-        mStatusBarStateController.addListener(this);
+        mStatusBarStateController.addCallback(this);
         mDozeAmount = mStatusBarStateController.getDozeAmount();
     }
 
     public void destroy(Context context) {
         SysUiServiceProvider.getComponent(context, CommandQueue.class)
                 .removeCallbacks(this);
-        mStatusBarStateController.removeListener(this);
+        mStatusBarStateController.removeCallback(this);
     }
 
     public void saveState(Bundle outState) {

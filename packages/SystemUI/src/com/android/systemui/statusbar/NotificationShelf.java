@@ -121,13 +121,13 @@ public class NotificationShelf extends ActivatableNotificationView implements
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         Dependency.get(StatusBarStateController.class)
-                .addListener(mStateListener, StatusBarStateController.RANK_SHELF);
+                .addCallback(mStateListener, StatusBarStateController.RANK_SHELF);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Dependency.get(StatusBarStateController.class).removeListener(mStateListener);
+        Dependency.get(StatusBarStateController.class).removeCallback(mStateListener);
     }
 
     public void bind(AmbientState ambientState, NotificationStackScrollLayout hostLayout) {

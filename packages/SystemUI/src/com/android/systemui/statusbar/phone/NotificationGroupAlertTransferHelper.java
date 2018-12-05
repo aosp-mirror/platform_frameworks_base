@@ -82,7 +82,7 @@ public class NotificationGroupAlertTransferHelper implements OnGroupChangeListen
     private boolean mIsDozing;
 
     public NotificationGroupAlertTransferHelper() {
-        Dependency.get(StatusBarStateController.class).addListener(this);
+        Dependency.get(StatusBarStateController.class).addCallback(this);
     }
 
     /**

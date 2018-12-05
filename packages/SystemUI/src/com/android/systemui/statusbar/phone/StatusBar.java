@@ -627,7 +627,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
         mColorExtractor.addOnColorsChangedListener(this);
-        mStatusBarStateController.addListener(this, StatusBarStateController.RANK_STATUS_BAR);
+        mStatusBarStateController.addCallback(this, StatusBarStateController.RANK_STATUS_BAR);
 
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mDreamManager = IDreamManager.Stub.asInterface(
@@ -2889,7 +2889,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mContext.unregisterReceiver(mDemoReceiver);
         mAssistManager.destroy();
         mHeadsUpManager.destroy();
-        mStatusBarStateController.removeListener(this);
+        mStatusBarStateController.removeCallback(this);
 
         if (mQSPanel != null && mQSPanel.getHost() != null) {
             mQSPanel.getHost().destroy();

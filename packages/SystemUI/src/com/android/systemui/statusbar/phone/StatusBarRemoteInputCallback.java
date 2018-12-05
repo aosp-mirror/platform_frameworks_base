@@ -70,7 +70,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks {
         mContext = context;
         mContext.registerReceiverAsUser(mChallengeReceiver, UserHandle.ALL,
                 new IntentFilter(ACTION_DEVICE_LOCKED_CHANGED), null, null);
-        mStatusBarStateController.addListener(mStateListener);
+        mStatusBarStateController.addCallback(mStateListener);
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mCommandQueue = getComponent(context, CommandQueue.class);
         mCommandQueue.addCallbacks(this);
