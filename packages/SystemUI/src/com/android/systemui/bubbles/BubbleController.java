@@ -344,10 +344,9 @@ public class BubbleController {
         }
 
         Class<? extends Notification.Style> style = n.getNotification().getNotificationStyle();
-        boolean isMessageType = Notification.MessagingStyle.class.equals(style)
-                || Notification.CATEGORY_MESSAGE.equals(n.getNotification().category)
-                || hasRemoteInput;
-        return (isMessageType && autoBubbleMessages)
+        boolean isMessageType = Notification.CATEGORY_MESSAGE.equals(n.getNotification().category);
+        boolean isMessageStyle = Notification.MessagingStyle.class.equals(style);
+        return (((isMessageType && hasRemoteInput) || isMessageStyle) && autoBubbleMessages)
                 || (n.isOngoing() && autoBubbleOngoing)
                 || autoBubbleAll;
     }
