@@ -21,7 +21,6 @@ import android.text.TextPaint;
 import android.text.method.TransformationMethod;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -282,9 +281,9 @@ public class SmartReplyView extends ViewGroup {
 
         Drawable iconDrawable = action.getIcon().loadDrawable(context);
         // Add the action icon to the Smart Action button.
-        Size newIconSize = calculateIconSizeFromSingleLineButton(context, root,
-                new Size(iconDrawable.getIntrinsicWidth(), iconDrawable.getIntrinsicHeight()));
-        iconDrawable.setBounds(0, 0, newIconSize.getWidth(), newIconSize.getHeight());
+        int newIconSize = context.getResources().getDimensionPixelSize(
+                R.dimen.smart_action_button_icon_size);
+        iconDrawable.setBounds(0, 0, newIconSize, newIconSize);
         button.setCompoundDrawables(iconDrawable, null, null, null);
 
         button.setOnClickListener(view ->
@@ -296,27 +295,6 @@ public class SmartReplyView extends ViewGroup {
         // TODO(b/119010281): handle accessibility
 
         return button;
-    }
-
-    private static Size calculateIconSizeFromSingleLineButton(Context context, ViewGroup root,
-            Size originalIconSize) {
-        Button button = (Button) LayoutInflater.from(context).inflate(
-                R.layout.smart_action_button, root, false);
-        // Add simple text here to ensure the button displays one line of text.
-        button.setText("a");
-        return calculateIconSizeFromButtonHeight(button, originalIconSize);
-    }
-
-    // Given a button with text on a single line - we want to add an icon to that button. This
-    // method calculates the icon height to use to avoid making the button grow in height.
-    private static Size calculateIconSizeFromButtonHeight(Button button, Size originalIconSize) {
-        // A completely permissive measure spec should make the button text single-line.
-        button.measure(MEASURE_SPEC_ANY_LENGTH, MEASURE_SPEC_ANY_LENGTH);
-        int buttonHeight = button.getMeasuredHeight();
-        int newIconHeight = buttonHeight / 2;
-        int newIconWidth = (int) (originalIconSize.getWidth()
-                * ((double) newIconHeight) / originalIconSize.getHeight());
-        return new Size(newIconWidth, newIconHeight);
     }
 
     @Override
