@@ -20,6 +20,7 @@
 #include <memory>
 #include <set>
 #include <vector>
+#include <unordered_set>
 
 #include "android-base/macros.h"
 
@@ -75,6 +76,10 @@ struct TypeSpec {
 // ResTable_type pointers.
 // TypeSpecPtr is a managed pointer that knows how to delete itself.
 using TypeSpecPtr = util::unique_cptr<TypeSpec>;
+
+struct OverlayableInfo {
+  uint32_t policy_flags;
+};
 
 class LoadedPackage {
  public:
@@ -216,6 +221,18 @@ class LoadedPackage {
     }
   }
 
+  // Retrieve the overlayable properties of the specified resource. If the resource is not
+  // overlayable, this will return a null pointer.
+  const OverlayableInfo* GetOverlayableInfo(uint32_t resid) const {
+    for (const std::pair<OverlayableInfo, std::unordered_set<uint32_t>>& overlayable_info_ids
+        : overlayable_infos_) {
+      if (overlayable_info_ids.second.find(resid) != overlayable_info_ids.second.end()) {
+        return &overlayable_info_ids.first;
+      }
+    }
+    return nullptr;
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedPackage);
 
@@ -233,6 +250,7 @@ class LoadedPackage {
   ByteBucketArray<TypeSpecPtr> type_specs_;
   ByteBucketArray<uint32_t> resource_ids_;
   std::vector<DynamicPackageEntry> dynamic_package_map_;
+  std::vector<const std::pair<OverlayableInfo, std::unordered_set<uint32_t>>> overlayable_infos_;
 };
 
 // Read-only view into a resource table. This class validates all data
