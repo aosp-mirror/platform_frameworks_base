@@ -32,9 +32,10 @@ import android.widget.ImageButton;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.RemoteInputController;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.util.Assert;
 
 import org.junit.After;
 import org.junit.Before;
@@ -44,7 +45,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 @SmallTest
 public class RemoteInputViewTest extends SysuiTestCase {
 
@@ -60,6 +61,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        Assert.sMainLooper = TestableLooper.get(this).getLooper();
         MockitoAnnotations.initMocks(this);
 
         mDependency.injectTestDependency(RemoteInputQuickSettingsDisabler.class,

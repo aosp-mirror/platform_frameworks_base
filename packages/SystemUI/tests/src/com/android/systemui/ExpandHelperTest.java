@@ -16,29 +16,29 @@
 
 package com.android.systemui;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.util.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 public class ExpandHelperTest extends SysuiTestCase {
 
     private ExpandableNotificationRow mRow;
@@ -47,6 +47,7 @@ public class ExpandHelperTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        Assert.sMainLooper = TestableLooper.get(this).getLooper();
         Context context = getContext();
         mRow = new NotificationTestHelper(context).createRow();
         mCallback = mock(ExpandHelper.Callback.class);

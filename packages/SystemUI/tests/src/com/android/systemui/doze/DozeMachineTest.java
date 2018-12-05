@@ -28,8 +28,8 @@ import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -40,13 +40,11 @@ import static org.mockito.Mockito.when;
 
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
-import android.view.Display;
+import android.testing.UiThreadTest;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.wakelock.WakeLockFake;
-
-import android.testing.UiThreadTest;
 
 import org.junit.Before;
 import org.junit.Test;

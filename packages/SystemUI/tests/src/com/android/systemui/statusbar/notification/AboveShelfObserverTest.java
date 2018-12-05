@@ -19,15 +19,15 @@ package com.android.systemui.statusbar.notification;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.widget.FrameLayout;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,7 +36,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 public class AboveShelfObserverTest extends SysuiTestCase {
 
     private AboveShelfObserver mObserver;
@@ -46,6 +46,7 @@ public class AboveShelfObserverTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
         mNotificationTestHelper = new NotificationTestHelper(getContext());
         mHostLayout = new FrameLayout(getContext());
         mObserver = new AboveShelfObserver(mHostLayout);

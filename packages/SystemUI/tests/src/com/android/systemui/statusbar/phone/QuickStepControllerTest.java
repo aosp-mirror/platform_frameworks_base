@@ -29,7 +29,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.anyFloat;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -37,11 +36,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import com.android.systemui.R;
-import com.android.systemui.recents.OverviewProxyService;
-import com.android.systemui.shared.recents.IOverviewProxy;
-import com.android.systemui.SysuiTestCase;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -51,6 +45,11 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.android.systemui.R;
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.shared.recents.IOverviewProxy;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,7 +58,7 @@ import org.mockito.MockitoAnnotations;
 
 /** atest QuickStepControllerTest */
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 @SmallTest
 public class QuickStepControllerTest extends SysuiTestCase {
     private QuickStepController mController;

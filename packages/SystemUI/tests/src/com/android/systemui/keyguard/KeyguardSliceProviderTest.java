@@ -55,7 +55,7 @@ import java.util.concurrent.TimeUnit;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 public class KeyguardSliceProviderTest extends SysuiTestCase {
 
     @Mock

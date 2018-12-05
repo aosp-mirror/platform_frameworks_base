@@ -24,15 +24,14 @@ import android.content.ComponentName;
 import android.os.Looper;
 import android.service.quicksettings.Tile;
 import android.test.suitebuilder.annotation.SmallTest;
-
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.testing.TestableLooper.RunWithLooper;
+
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BluetoothController;
-
-import android.testing.TestableLooper;
-import android.testing.TestableLooper.RunWithLooper;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,7 +44,7 @@ import java.util.ArrayList;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 public class TileServicesTest extends SysuiTestCase {
     private static int NUM_FAKES = TileServices.DEFAULT_MAX_BOUND * 2;
 

@@ -51,7 +51,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 @RunWith(AndroidTestingRunner.class)
 public class KeyguardClockSwitchTest extends SysuiTestCase {
     private PluginManager mPluginManager;

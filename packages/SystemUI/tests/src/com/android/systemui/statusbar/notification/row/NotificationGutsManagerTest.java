@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.util.Assert;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -79,7 +80,7 @@ import org.mockito.junit.MockitoRule;
  */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 public class NotificationGutsManagerTest extends SysuiTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
 
@@ -101,6 +102,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mTestableLooper = TestableLooper.get(this);
+        Assert.sMainLooper = TestableLooper.get(this).getLooper();
         mDependency.injectTestDependency(DeviceProvisionedController.class,
                 mDeviceProvisionedController);
         mHandler = Handler.createAsync(mTestableLooper.getLooper());

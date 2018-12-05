@@ -15,6 +15,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -35,7 +36,7 @@ import org.mockito.ArgumentCaptor;
 
 
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 @SmallTest
 public class SystemUIDialogTest extends SysuiTestCase {
 
