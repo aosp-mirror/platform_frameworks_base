@@ -980,7 +980,7 @@ public class HdmiControlService extends SystemService {
      * @param sourceAddress a logical address of source device where sends polling message
      * @param pickStrategy strategy how to pick polling candidates
      * @param retryCount the number of retry used to send polling message to remote devices
-     * @throw IllegalArgumentException if {@code pickStrategy} is invalid value
+     * @throws IllegalArgumentException if {@code pickStrategy} is invalid value
      */
     @ServiceThreadOnly
     void pollDevices(DevicePollingCallback callback, int sourceAddress, int pickStrategy,
