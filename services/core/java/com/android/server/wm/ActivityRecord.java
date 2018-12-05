@@ -1640,7 +1640,6 @@ final class ActivityRecord extends ConfigurationContainer {
                 final IAppTransitionAnimationSpecsFuture specsFuture =
                         pendingOptions.getSpecsFuture();
                 if (specsFuture != null) {
-                    // TODO(multidisplay): Shouldn't be really used anymore from next CL.
                     displayContent.mAppTransition.overridePendingAppTransitionMultiThumbFuture(
                             specsFuture, pendingOptions.getOnAnimationStartListener(),
                             animationType == ANIM_THUMBNAIL_ASPECT_SCALE_UP);
@@ -1669,7 +1668,6 @@ final class ActivityRecord extends ConfigurationContainer {
                         .overridePendingAppTransitionStartCrossProfileApps();
                 break;
             case ANIM_REMOTE_ANIMATION:
-                // TODO(multidisplay): Will pass displayId and adjust dependencies from next CL.
                 displayContent.mAppTransition.overridePendingAppTransitionRemote(
                         pendingOptions.getRemoteAnimationAdapter());
                 break;
