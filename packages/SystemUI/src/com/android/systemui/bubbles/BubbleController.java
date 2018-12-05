@@ -342,12 +342,16 @@ public class BubbleController {
                 }
             }
         }
+        boolean isCall = Notification.CATEGORY_CALL.equals(n.getNotification().category)
+                && n.isOngoing();
+        boolean isMusic = n.getNotification().hasMediaSession();
+        boolean isImportantOngoing = isMusic || isCall;
 
         Class<? extends Notification.Style> style = n.getNotification().getNotificationStyle();
         boolean isMessageType = Notification.CATEGORY_MESSAGE.equals(n.getNotification().category);
         boolean isMessageStyle = Notification.MessagingStyle.class.equals(style);
         return (((isMessageType && hasRemoteInput) || isMessageStyle) && autoBubbleMessages)
-                || (n.isOngoing() && autoBubbleOngoing)
+                || (isImportantOngoing && autoBubbleOngoing)
                 || autoBubbleAll;
     }
 
