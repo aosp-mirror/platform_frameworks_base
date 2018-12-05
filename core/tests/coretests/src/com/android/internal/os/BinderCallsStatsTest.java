@@ -388,8 +388,7 @@ public class BinderCallsStatsTest {
 
     @Test
     public void testNoDataCollectedBeforeInitialDeviceStateSet() {
-        TestBinderCallsStats bcs = new TestBinderCallsStats();
-        bcs.setDeviceState(null);
+        TestBinderCallsStats bcs = new TestBinderCallsStats(null);
         bcs.setDetailedTracking(true);
         Binder binder = new Binder();
         CallSession callSession = bcs.callStarted(binder, 1);
@@ -620,7 +619,7 @@ public class BinderCallsStatsTest {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setAddDebugEntries(true);
         ArrayList<BinderCallsStats.ExportedCallStat> callStats = bcs.getExportedCallStats();
-        assertEquals(2, callStats.size());
+        assertEquals(3, callStats.size());
         BinderCallsStats.ExportedCallStat debugEntry1 = callStats.get(0);
         assertEquals("", debugEntry1.className);
         assertEquals("__DEBUG_start_time_millis", debugEntry1.methodName);
@@ -629,6 +628,10 @@ public class BinderCallsStatsTest {
         assertEquals("", debugEntry2.className);
         assertEquals("__DEBUG_end_time_millis", debugEntry2.methodName);
         assertTrue(debugEntry1.maxReplySizeBytes <= debugEntry2.maxReplySizeBytes);
+        BinderCallsStats.ExportedCallStat debugEntry3 = callStats.get(2);
+        assertEquals("", debugEntry3.className);
+        assertEquals("__DEBUG_battery_time_millis", debugEntry3.methodName);
+        assertTrue(debugEntry3.maxReplySizeBytes >= 0);
     }
 
     class TestBinderCallsStats extends BinderCallsStats {
@@ -638,6 +641,10 @@ public class BinderCallsStatsTest {
         public long elapsedTime = 0;
 
         TestBinderCallsStats() {
+            this(mDeviceState);
+        }
+
+        TestBinderCallsStats(CachedDeviceState deviceState) {
             // Make random generator not random.
             super(new Injector() {
                 public Random getRandomGenerator() {
@@ -651,8 +658,10 @@ public class BinderCallsStatsTest {
                 }
             });
             setSamplingInterval(1);
-            setDeviceState(mDeviceState.getReadonlyClient());
             setAddDebugEntries(false);
+            if (deviceState != null) {
+                setDeviceState(deviceState.getReadonlyClient());
+            }
         }
 
         @Override
