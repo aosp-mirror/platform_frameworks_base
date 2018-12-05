@@ -2083,7 +2083,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     protected boolean shouldClipToActualHeight() {
-        return super.shouldClipToActualHeight() && !mExpandAnimationRunning && !mChildIsExpanding;
+        return super.shouldClipToActualHeight() && !mExpandAnimationRunning;
     }
 
     @Override

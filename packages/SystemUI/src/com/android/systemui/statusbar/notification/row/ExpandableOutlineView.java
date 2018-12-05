@@ -77,8 +77,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     protected boolean mShouldTranslateContents;
     private boolean mTopAmountRounded;
     private float mDistanceToTopRoundness = -1;
-    private float mExtraWidthForClipping;
-    private int mMinimumHeightForClipping = 0;
 
     private final ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
@@ -219,13 +217,15 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         return result;
     }
 
+    @Override
     public void setExtraWidthForClipping(float extraWidthForClipping) {
-        mExtraWidthForClipping = extraWidthForClipping;
+        super.setExtraWidthForClipping(extraWidthForClipping);
         invalidate();
     }
 
+    @Override
     public void setMinimumHeightForClipping(int minimumHeightForClipping) {
-        mMinimumHeightForClipping = minimumHeightForClipping;
+        super.setMinimumHeightForClipping(minimumHeightForClipping);
         invalidate();
     }
 
