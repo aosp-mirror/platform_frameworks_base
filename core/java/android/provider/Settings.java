@@ -6279,6 +6279,7 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
         public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED =
                 "accessibility_display_magnification_navbar_enabled";
 
