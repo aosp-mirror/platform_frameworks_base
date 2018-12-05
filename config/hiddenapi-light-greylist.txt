@@ -2773,7 +2773,6 @@ Lcom/android/internal/telephony/dataconnection/DcTracker;->onRecordsLoadedOrSubI
 Lcom/android/internal/telephony/dataconnection/DcTracker;->onSetUserDataEnabled(Z)V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->onTrySetupData(Lcom/android/internal/telephony/dataconnection/ApnContext;)Z
 Lcom/android/internal/telephony/dataconnection/DcTracker;->onTrySetupData(Ljava/lang/String;)Z
-Lcom/android/internal/telephony/dataconnection/DcTracker;->registerForAllDataDisconnected(Landroid/os/Handler;ILjava/lang/Object;)V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->registerSettingsObserver()V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->resetPollStats()V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->restartDataStallAlarm()V
@@ -2787,7 +2786,6 @@ Lcom/android/internal/telephony/dataconnection/DcTracker;->startNetStatPoll()V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->stopDataStallAlarm()V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->stopNetStatPoll()V
 Lcom/android/internal/telephony/dataconnection/DcTracker;->unregisterForAllDataDisconnected(Landroid/os/Handler;)V
-Lcom/android/internal/telephony/dataconnection/DcTracker;->updateRecords()V
 Lcom/android/internal/telephony/DctConstants$Activity;->DATAIN:Lcom/android/internal/telephony/DctConstants$Activity;
 Lcom/android/internal/telephony/DctConstants$Activity;->DATAINANDOUT:Lcom/android/internal/telephony/DctConstants$Activity;
 Lcom/android/internal/telephony/DctConstants$Activity;->DATAOUT:Lcom/android/internal/telephony/DctConstants$Activity;
@@ -3278,7 +3276,6 @@ Lcom/android/internal/telephony/Phone;->isVolteEnabled()Z
 Lcom/android/internal/telephony/Phone;->isWifiCallingEnabled()Z
 Lcom/android/internal/telephony/Phone;->mCi:Lcom/android/internal/telephony/CommandsInterface;
 Lcom/android/internal/telephony/Phone;->mContext:Landroid/content/Context;
-Lcom/android/internal/telephony/Phone;->mDcTracker:Lcom/android/internal/telephony/dataconnection/DcTracker;
 Lcom/android/internal/telephony/Phone;->mIccRecords:Ljava/util/concurrent/atomic/AtomicReference;
 Lcom/android/internal/telephony/Phone;->mImsPhone:Lcom/android/internal/telephony/Phone;
 Lcom/android/internal/telephony/Phone;->mMmiRegistrants:Landroid/os/RegistrantList;
@@ -3371,7 +3368,6 @@ Lcom/android/internal/telephony/ProxyController;->mOldRadioAccessFamily:[I
 Lcom/android/internal/telephony/ProxyController;->mRadioCapabilitySessionId:I
 Lcom/android/internal/telephony/ProxyController;->mSetRadioAccessFamilyStatus:[I
 Lcom/android/internal/telephony/ProxyController;->mUniqueIdGenerator:Ljava/util/concurrent/atomic/AtomicInteger;
-Lcom/android/internal/telephony/ProxyController;->registerForAllDataDisconnected(ILandroid/os/Handler;ILjava/lang/Object;)V
 Lcom/android/internal/telephony/ProxyController;->sendRadioCapabilityRequest(IIIILjava/lang/String;II)V
 Lcom/android/internal/telephony/ProxyController;->sProxyController:Lcom/android/internal/telephony/ProxyController;
 Lcom/android/internal/telephony/RadioCapability;->getRadioAccessFamily()I
@@ -3471,7 +3467,6 @@ Lcom/android/internal/telephony/ServiceStateTracker;->mVoiceRoamingOnRegistrants
 Lcom/android/internal/telephony/ServiceStateTracker;->notifyDataRegStateRilRadioTechnologyChanged()V
 Lcom/android/internal/telephony/ServiceStateTracker;->notifySignalStrength()Z
 Lcom/android/internal/telephony/ServiceStateTracker;->pollState()V
-Lcom/android/internal/telephony/ServiceStateTracker;->powerOffRadioSafely(Lcom/android/internal/telephony/dataconnection/DcTracker;)V
 Lcom/android/internal/telephony/ServiceStateTracker;->reRegisterNetwork(Landroid/os/Message;)V
 Lcom/android/internal/telephony/ServiceStateTracker;->resetServiceStateInIwlanMode()V
 Lcom/android/internal/telephony/ServiceStateTracker;->setOperatorIdd(Ljava/lang/String;)V
