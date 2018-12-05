@@ -46,7 +46,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.permission.PermissionManager;
@@ -1058,6 +1057,17 @@ public final class DefaultPermissionGrantPolicy {
         if (ArrayUtils.isEmpty(requestedPermissions)) {
             return;
         }
+
+        // Intersect the requestedPermissions for a factory image with that of its current update
+        // in case the latter one removed a <uses-permission>
+        String[] requestedByNonSystemPackage = getPackageInfo(pkg.packageName).requestedPermissions;
+        int size = requestedPermissions.length;
+        for (int i = 0; i < size; i++) {
+            if (!ArrayUtils.contains(requestedByNonSystemPackage, requestedPermissions[i])) {
+                requestedPermissions[i] = null;
+            }
+        }
+        requestedPermissions = ArrayUtils.filterNotNull(requestedPermissions, String[]::new);
 
         PackageManager pm = mContext.getPackageManager();
         final ArraySet<String> permissions = new ArraySet<>(permissionsWithoutSplits);
