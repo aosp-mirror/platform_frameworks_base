@@ -8263,7 +8263,7 @@ public class Notification implements Parcelable
                 customContent = customContent.clone();
                 remoteViews.removeAllViewsExceptId(R.id.notification_main_column, R.id.progress);
                 remoteViews.addView(R.id.notification_main_column, customContent, 0 /* index */);
-                remoteViews.setReapplyDisallowed();
+                remoteViews.addFlags(RemoteViews.FLAG_REAPPLY_DISALLOWED);
             }
             // also update the end margin if there is an image
             Resources resources = mBuilder.mContext.getResources();
@@ -8394,7 +8394,7 @@ public class Notification implements Parcelable
                 customContent.overrideTextColors(mBuilder.getPrimaryTextColor(mBuilder.mParams));
                 remoteViews.removeAllViews(id);
                 remoteViews.addView(id, customContent);
-                remoteViews.setReapplyDisallowed();
+                remoteViews.addFlags(RemoteViews.FLAG_REAPPLY_DISALLOWED);
             }
             return remoteViews;
         }
