@@ -58,4 +58,8 @@ public class ActivityCompat {
         encoder.endStream();
         return true;
     }
+
+    public int getDisplayId() {
+        return mWrapped.getDisplayId();
+    }
 }
