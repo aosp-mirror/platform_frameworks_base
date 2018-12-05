@@ -17,8 +17,7 @@ package com.android.systemui.statusbar.phone;
 import static android.content.Intent.ACTION_DEVICE_LOCKED_CHANGED;
 
 import static com.android.systemui.SysUiServiceProvider.getComponent;
-import static com.android.systemui.statusbar.NotificationLockscreenUserManager
-        .NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION;
+import static com.android.systemui.statusbar.NotificationLockscreenUserManager.NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION;
 
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
@@ -163,7 +162,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks {
         mPendingWorkRemoteInputView = clicked;
     }
 
-    protected boolean startWorkChallengeIfNecessary(int userId, IntentSender intendSender,
+    boolean startWorkChallengeIfNecessary(int userId, IntentSender intendSender,
             String notificationKey) {
         // Clear pending remote view, as we do not want to trigger pending remote input view when
         // it's called by other code

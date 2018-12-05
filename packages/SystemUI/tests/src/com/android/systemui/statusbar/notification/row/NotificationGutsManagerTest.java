@@ -59,8 +59,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationData;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -92,7 +92,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
     @Mock private NotificationPresenter mPresenter;
-    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private NotificationActivityStarter mNotificationActivityStarter;
     @Mock private NotificationStackScrollLayout mStackScroller;
     @Mock private NotificationInfo.CheckSaveListener mCheckSaveListener;
     @Mock private OnSettingsClickListener mOnSettingsClickListener;
@@ -110,6 +110,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         mGutsManager = new NotificationGutsManager(mContext);
         mGutsManager.setUpWithPresenter(mPresenter, mStackScroller,
                 mCheckSaveListener, mOnSettingsClickListener);
+        mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,7 +218,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         ops.add(OP_CAMERA);
         mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
-        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        verify(mNotificationActivityStarter, times(1))
+                .startNotificationGutsIntent(captor.capture(), anyInt(), any());
         assertEquals(Intent.ACTION_MANAGE_APP_PERMISSIONS, captor.getValue().getAction());
     }
 
@@ -227,7 +229,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         ops.add(OP_RECORD_AUDIO);
         mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
-        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        verify(mNotificationActivityStarter, times(1))
+                .startNotificationGutsIntent(captor.capture(), anyInt(), any());
         assertEquals(Intent.ACTION_MANAGE_APP_PERMISSIONS, captor.getValue().getAction());
     }
 
@@ -238,7 +241,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         ops.add(OP_RECORD_AUDIO);
         mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
-        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        verify(mNotificationActivityStarter, times(1))
+                .startNotificationGutsIntent(captor.capture(), anyInt(), any());
         assertEquals(Intent.ACTION_MANAGE_APP_PERMISSIONS, captor.getValue().getAction());
     }
 
@@ -248,7 +252,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         ops.add(OP_SYSTEM_ALERT_WINDOW);
         mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
-        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        verify(mNotificationActivityStarter, times(1))
+                .startNotificationGutsIntent(captor.capture(), anyInt(), any());
         assertEquals(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, captor.getValue().getAction());
     }
 
@@ -260,7 +265,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         ops.add(OP_SYSTEM_ALERT_WINDOW);
         mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
-        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        verify(mNotificationActivityStarter, times(1))
+                .startNotificationGutsIntent(captor.capture(), anyInt(), any());
         assertEquals(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, captor.getValue().getAction());
     }
 
@@ -271,7 +277,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         ops.add(OP_SYSTEM_ALERT_WINDOW);
         mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
-        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        verify(mNotificationActivityStarter, times(1))
+                .startNotificationGutsIntent(captor.capture(), anyInt(), any());
         assertEquals(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, captor.getValue().getAction());
     }
 
@@ -282,7 +289,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         ops.add(OP_SYSTEM_ALERT_WINDOW);
         mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
-        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        verify(mNotificationActivityStarter, times(1))
+                .startNotificationGutsIntent(captor.capture(), anyInt(), any());
         assertEquals(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, captor.getValue().getAction());
     }
 
