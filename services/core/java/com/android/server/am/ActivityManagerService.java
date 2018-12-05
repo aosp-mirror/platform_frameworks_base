@@ -272,6 +272,7 @@ import android.os.UserManager;
 import android.os.WorkSource;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
+import android.sysprop.VoldProperties;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.SuggestionSpan;
@@ -4807,8 +4808,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             SystemProperties.set("sys.boot_completed", "1");
 
             // And trigger dev.bootcomplete if we are not showing encryption progress
-            if (!"trigger_restart_min_framework".equals(SystemProperties.get("vold.decrypt"))
-                    || "".equals(SystemProperties.get("vold.encrypt_progress"))) {
+            if (!"trigger_restart_min_framework".equals(VoldProperties.decrypt().orElse(""))
+                    || "".equals(VoldProperties.encrypt_progress().orElse(""))) {
                 SystemProperties.set("dev.bootcomplete", "1");
             }
             mUserController.sendBootCompleted(
