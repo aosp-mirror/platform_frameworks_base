@@ -44,7 +44,6 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.apex.IApexService;
-import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -194,7 +193,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /** Package of the owner of the installer session */
     @GuardedBy("mLock")
-    private String mInstallerPackageName;
+    private @Nullable String mInstallerPackageName;
 
     /** Uid of the owner of the installer session */
     @GuardedBy("mLock")
@@ -340,11 +339,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     @GuardedBy("mLock")
     private boolean isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked() {
+        if (userId != UserHandle.getUserId(mInstallerUid)) {
+            return false;
+        }
         DevicePolicyManagerInternal dpmi =
                 LocalServices.getService(DevicePolicyManagerInternal.class);
-        return dpmi != null && dpmi.isActiveAdminWithPolicy(mInstallerUid,
-                DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) && dpmi.isUserAffiliatedWithDevice(
-                userId);
+        return dpmi != null && dpmi.canSilentlyInstallPackage(mInstallerPackageName, mInstallerUid);
     }
 
     /**

@@ -27,7 +27,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
-import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.Intent;
@@ -738,22 +737,19 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         // Check whether the caller is device owner or affiliated profile owner, in which case we do
         // it silently.
-        final int callingUserId = UserHandle.getUserId(callingUid);
         DevicePolicyManagerInternal dpmi =
                 LocalServices.getService(DevicePolicyManagerInternal.class);
-        final boolean isDeviceOwnerOrAffiliatedProfileOwner =
-                dpmi != null && dpmi.isActiveAdminWithPolicy(callingUid,
-                        DeviceAdminInfo.USES_POLICY_PROFILE_OWNER)
-                        && dpmi.isUserAffiliatedWithDevice(callingUserId);
+        final boolean canSilentlyInstallPackage =
+                dpmi != null && dpmi.canSilentlyInstallPackage(callerPackageName, callingUid);
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),
-                isDeviceOwnerOrAffiliatedProfileOwner, userId);
+                canSilentlyInstallPackage, userId);
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
                     == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
             mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);
-        } else if (isDeviceOwnerOrAffiliatedProfileOwner) {
+        } else if (canSilentlyInstallPackage) {
             // Allow the device owner and affiliated profile owner to silently delete packages
             // Need to clear the calling identity to get DELETE_PACKAGES permission
             long ident = Binder.clearCallingIdentity();

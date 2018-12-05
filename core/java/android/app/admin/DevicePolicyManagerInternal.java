@@ -118,6 +118,12 @@ public abstract class DevicePolicyManagerInternal {
     public abstract boolean isUserAffiliatedWithDevice(int userId);
 
     /**
+     * Returns whether the calling package can install or uninstall packages without user
+     * interaction.
+     */
+    public abstract boolean canSilentlyInstallPackage(String callerPackage, int callerUid);
+
+    /**
      * Reports that a profile has changed to use a unified or separate credential.
      *
      * @param userId User ID of the profile.

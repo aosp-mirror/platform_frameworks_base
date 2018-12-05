@@ -68,7 +68,14 @@ import java.util.List;
  * {@link PackageInstaller.Session}, which any app can create. Once the session
  * is created, the installer can stream one or more APKs into place until it
  * decides to either commit or destroy the session. Committing may require user
- * intervention to complete the installation.
+ * intervention to complete the installation, unless the caller falls into one of the
+ * following categories, in which case the installation will complete automatically.
+ * <ul>
+ * <li>the device owner
+ * <li>the affiliated profile owner
+ * <li>the device owner delegated app with
+ *     {@link android.app.admin.DevicePolicyManager#DELEGATION_PACKAGE_INSTALLATION}
+ * </ul>
  * <p>
  * Sessions can install brand new apps, upgrade existing apps, or add new splits
  * into an existing app.
@@ -481,6 +488,8 @@ public class PackageInstaller {
      * <li>the current "installer of record" for the package
      * <li>the device owner
      * <li>the affiliated profile owner
+     * <li>the device owner delegated app with
+     *     {@link android.app.admin.DevicePolicyManager#DELEGATION_PACKAGE_INSTALLATION}
      * </ul>
      *
      * @param packageName The package to uninstall.
