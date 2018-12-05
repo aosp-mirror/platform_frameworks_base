@@ -395,6 +395,10 @@ public class TrafficStats {
         }
     }
 
+    private static long addIfSupported(long stat) {
+        return (stat == UNSUPPORTED) ? 0 : stat;
+    }
+
     /**
      * Return number of packets transmitted across mobile networks since device
      * boot. Counts packets across all mobile network interfaces, and always
@@ -407,7 +411,7 @@ public class TrafficStats {
     public static long getMobileTxPackets() {
         long total = 0;
         for (String iface : getMobileIfaces()) {
-            total += getTxPackets(iface);
+            total += addIfSupported(getTxPackets(iface));
         }
         return total;
     }
@@ -424,7 +428,7 @@ public class TrafficStats {
     public static long getMobileRxPackets() {
         long total = 0;
         for (String iface : getMobileIfaces()) {
-            total += getRxPackets(iface);
+            total += addIfSupported(getRxPackets(iface));
         }
         return total;
     }
@@ -441,7 +445,7 @@ public class TrafficStats {
     public static long getMobileTxBytes() {
         long total = 0;
         for (String iface : getMobileIfaces()) {
-            total += getTxBytes(iface);
+            total += addIfSupported(getTxBytes(iface));
         }
         return total;
     }
@@ -458,7 +462,7 @@ public class TrafficStats {
     public static long getMobileRxBytes() {
         long total = 0;
         for (String iface : getMobileIfaces()) {
-            total += getRxBytes(iface);
+            total += addIfSupported(getRxBytes(iface));
         }
         return total;
     }
@@ -468,9 +472,7 @@ public class TrafficStats {
         long total = 0;
         for (String iface : getMobileIfaces()) {
             final long stat = nativeGetIfaceStat(iface, TYPE_TCP_RX_PACKETS);
-            if (stat != UNSUPPORTED) {
-                total += stat;
-            }
+            total += addIfSupported(stat);
         }
         return total;
     }
@@ -480,9 +482,7 @@ public class TrafficStats {
         long total = 0;
         for (String iface : getMobileIfaces()) {
             final long stat = nativeGetIfaceStat(iface, TYPE_TCP_TX_PACKETS);
-            if (stat != UNSUPPORTED) {
-                total += stat;
-            }
+            total += addIfSupported(stat);
         }
         return total;
     }
