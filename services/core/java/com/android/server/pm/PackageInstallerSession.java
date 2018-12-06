@@ -250,6 +250,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private int mParentSessionId;
 
+    @GuardedBy("mLock")
+    private boolean mStagedSessionApplied;
+    @GuardedBy("mLock")
+    private boolean mStagedSessionReady;
+    @GuardedBy("mLock")
+    private boolean mStagedSessionFailed;
+    @GuardedBy("mLock")
+    private int mStagedSessionErrorCode = SessionInfo.NO_ERROR;
+
     /**
      * Path to the validated base APK for this session, which may point at an
      * APK inside the session (when the session defines the base), or it may
@@ -470,6 +479,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (info.childSessionIds == null) {
                 info.childSessionIds = EMPTY_CHILD_SESSION_ARRAY;
             }
+            info.isSessionApplied = mStagedSessionApplied;
+            info.isSessionReady = mStagedSessionReady;
+            info.isSessionFailed = mStagedSessionFailed;
+            info.setStagedSessionErrorCode(mStagedSessionErrorCode);
         }
         return info;
     }
@@ -1051,6 +1064,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
         if (isStaged()) {
             // STOPSHIP: implement staged sessions
+            mStagedSessionReady = true;
             dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
             return;
         }
