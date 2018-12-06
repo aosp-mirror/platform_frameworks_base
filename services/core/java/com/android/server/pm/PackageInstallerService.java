@@ -164,6 +164,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     @GuardedBy("mSessions")
     private final SparseArray<PackageInstallerSession> mSessions = new SparseArray<>();
 
+    // STOPSHIP: This is a temporary mock implementation of staged sessions. This variable
+    //           shouldn't be needed at all.
+    @GuardedBy("mStagedSessions")
+    private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
+
     /** Historical sessions kept around for debugging purposes */
     @GuardedBy("mSessions")
     private final List<String> mHistoricalSessions = new ArrayList<>();
@@ -536,6 +541,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mSessions) {
             mSessions.put(sessionId, session);
         }
+        if (params.isStaged) {
+            synchronized (mStagedSessions) {
+                mStagedSessions.put(sessionId, session);
+            }
+        }
 
         mCallbacks.notifySessionCreated(session.sessionId, session.userId);
         writeSessionsAsync();
@@ -663,6 +673,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             final PackageInstallerSession session = mSessions.get(sessionId);
             return session != null ? session.generateInfo() : null;
         }
+    }
+
+    @Override
+    public ParceledListSlice<SessionInfo> getStagedSessions() {
+        final List<SessionInfo> result = new ArrayList<>();
+        synchronized (mStagedSessions) {
+            for (int i = 0; i < mStagedSessions.size(); i++) {
+                final PackageInstallerSession session = mStagedSessions.valueAt(i);
+                result.add(session.generateInfo(false));
+            }
+        }
+        return new ParceledListSlice<>(result);
     }
 
     @Override
@@ -1110,6 +1132,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             mInstallHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    // TODO: remove this mock implementation.
+                    if (session.isStaged()) {
+                        // If the session is aborted, don't keep it in memory. Only store
+                        // sessions successfully staged.
+                        if (!success) {
+                            synchronized (mStagedSessions) {
+                                mStagedSessions.remove(session.sessionId);
+                            }
+                        } else {
+                            return;
+                        }
+                    }
                     synchronized (mSessions) {
                         mSessions.remove(session.sessionId);
                         addHistoricalSessionLocked(session);

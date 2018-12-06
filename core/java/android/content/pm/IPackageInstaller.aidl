@@ -42,6 +42,8 @@ interface IPackageInstaller {
     ParceledListSlice getAllSessions(int userId);
     ParceledListSlice getMySessions(String installerPackageName, int userId);
 
+    ParceledListSlice getStagedSessions();
+
     void registerCallback(IPackageInstallerCallback callback, int userId);
     void unregisterCallback(IPackageInstallerCallback callback);
 

@@ -125,7 +125,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PackageInstallerSession extends IPackageInstallerSession.Stub {
-    private static final String TAG = "PackageInstaller";
+    private static final String TAG = "PackageInstallerSession";
     private static final boolean LOGD = true;
     private static final String REMOVE_SPLIT_MARKER_EXTENSION = ".removed";
 
@@ -147,6 +147,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_SEALED = "sealed";
     private static final String ATTR_MULTI_PACKAGE = "multiPackage";
     private static final String ATTR_PARENT_SESSION_ID = "parentSessionId";
+    private static final String ATTR_STAGED_SESSION = "stagedSession";
     private static final String ATTR_MODE = "mode";
     private static final String ATTR_INSTALL_FLAGS = "installFlags";
     private static final String ATTR_INSTALL_LOCATION = "installLocation";
@@ -463,6 +464,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.grantedRuntimePermissions = params.grantedRuntimePermissions;
             info.installFlags = params.installFlags;
             info.isMultiPackage = params.isMultiPackage;
+            info.isStaged = params.isStaged;
             info.parentSessionId = mParentSessionId;
             info.childSessionIds = mChildSessionIds.copyKeys();
             if (info.childSessionIds == null) {
@@ -1045,6 +1047,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final PackageManagerService.ActiveInstallSession committingSession =
                 makeSessionActiveLocked();
         if (committingSession == null) {
+            return;
+        }
+        if (isStaged()) {
+            // STOPSHIP: implement staged sessions
+            dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
             return;
         }
         if (isMultiPackage()) {
@@ -1816,6 +1823,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
+    public boolean isStaged() {
+        return params.isStaged;
+    }
+
+    @Override
     public int[] getChildSessionIds() {
         final int[] childSessionIds = mChildSessionIds.copyKeys();
         if (childSessionIds != null) {
@@ -1838,6 +1850,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 return;
             }
             session.setParentSessionId(this.sessionId);
+            // TODO: sanity check, if parent session is staged then child session should be
+            //       marked as staged.
             addChildSessionIdInternal(sessionId);
         }
     }
@@ -1975,6 +1989,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("mFinalStatus", mFinalStatus);
         pw.printPair("mFinalMessage", mFinalMessage);
         pw.printPair("params.isMultiPackage", params.isMultiPackage);
+        pw.printPair("params.isStaged", params.isStaged);
         pw.println();
 
         pw.decreaseIndent();
@@ -2026,6 +2041,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeBooleanAttribute(out, ATTR_SEALED, isSealed());
 
             writeBooleanAttribute(out, ATTR_MULTI_PACKAGE, params.isMultiPackage);
+            writeBooleanAttribute(out, ATTR_STAGED_SESSION, params.isStaged);
             // TODO(patb,109941548): avoid writing to xml and instead infer / validate this after
             //                       we've read all sessions.
             writeIntAttribute(out, ATTR_PARENT_SESSION_ID, mParentSessionId);
@@ -2140,6 +2156,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final SessionParams params = new SessionParams(
                 SessionParams.MODE_INVALID);
         params.isMultiPackage = readBooleanAttribute(in, ATTR_MULTI_PACKAGE, false);
+        params.isStaged = readBooleanAttribute(in, ATTR_STAGED_SESSION, false);
         params.mode = readIntAttribute(in, ATTR_MODE);
         params.installFlags = readIntAttribute(in, ATTR_INSTALL_FLAGS);
         params.installLocation = readIntAttribute(in, ATTR_INSTALL_LOCATION);
