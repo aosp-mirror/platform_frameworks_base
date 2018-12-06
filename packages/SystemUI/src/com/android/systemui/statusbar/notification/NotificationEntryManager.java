@@ -182,6 +182,10 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             } else if (row.isChildInGroup() && isMenuVisible(row.getNotificationParent())) {
                 row.getNotificationParent().animateTranslateNotification(0);
                 return;
+            } else if (row.isSummaryWithChildren() && row.areChildrenExpanded()) {
+                // We never want to open the app directly if the user clicks in between
+                // the notifications.
+                return;
             }
 
             // Mark notification for one frame.
