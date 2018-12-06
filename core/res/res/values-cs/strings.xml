@@ -138,14 +138,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g>: Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Volání přes Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g>: VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Volání přes Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Volání přes WiFi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Vypnuto"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferována síť W-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferována mobilní data"</string>
@@ -539,6 +535,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Umožňuje aplikaci číst místa z vaší sbírky médií."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Aplikace <xliff:g id="APP">%s</xliff:g> potřebuje provést ověření."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biometrický hardware není k dispozici"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Nerozpoznáno"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Byla zjištěna jen část otisku prstu. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Zpracování otisku prstu se nezdařilo. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Senzor otisků prstů je znečištěn. Vyčistěte jej a zkuste to znovu."</string>
@@ -546,7 +547,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Pohyb prstem byl příliš pomalý. Zkuste to znovu."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"Nerozpoznáno"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Otisk byl ověřen"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Obličej byl ověřen"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Obličej byl ověřen, stiskněte tlačítko pro potvrzení"</string>
@@ -602,14 +602,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Umožňuje aplikaci změnit nastavení synchronizace v účtu. Pomocí tohoto oprávnění lze například zapnout synchronizaci aplikace Lidé s účtem."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"čtení statistických údajů o synchronizaci"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Umožňuje aplikaci číst statistické informace o synchronizaci v účtu, včetně historie uskutečněných synchronizací a informací o množství synchronizovaných dat."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"čtení obsahu v úložišti USB"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"čtení obsahu na kartě SD"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Umožňuje aplikaci čtení obsahu USB."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Umožňuje aplikaci čtení obsahu karty SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"úprava nebo mazání obsahu v úložišti USB"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"úprava nebo mazání obsahu na kartě SD"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Umožňuje aplikaci zapisovat do úložiště USB."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Umožňuje aplikaci zapisovat na kartu SD."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"čtení obsahu sdíleného úložiště"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"Umožňuje aplikaci čtení obsahu sdíleného úložiště."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"úprava nebo mazání obsahu sdíleného úložiště"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"Umožňuje aplikaci zápis obsahu do sdíleného úložiště."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"uskutečňování/příjem volání SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Povolí aplikaci uskutečňovat a přijímat volání SIP."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"registrování nových komunikačních připojení přes SIM kartu"</string>
@@ -1145,6 +1141,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Naplánovat událost na vybraný čas"</string>
     <string name="view_flight" msgid="7691640491425680214">"Sledovat"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Sledovat vybraný let"</string>
+    <string name="translate" msgid="9218619809342576858">"Přeložit"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"Přeložit vybraný text"</string>
+    <string name="define" msgid="7394820043869954211">"Definovat"</string>
+    <string name="define_desc" msgid="7910883642444919726">"Definuje vybraný text"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"V úložišti je málo místa"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Některé systémové funkce nemusí fungovat"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Pro systém není dostatek místa v úložišti. Uvolněte alespoň 250 MB místa a restartujte zařízení."</string>
@@ -1506,8 +1506,7 @@
       <item quantity="one">1 shoda</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Hotovo"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Mazání úložiště USB..."</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"Mazání karty SD..."</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"Mazání sdíleného úložiště…"</string>
     <string name="share" msgid="1778686618230011964">"Sdílet"</string>
     <string name="find" msgid="4808270900322985960">"Najít"</string>
     <string name="websearch" msgid="4337157977400211589">"Vyhledat na webu"</string>
@@ -1899,8 +1898,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"Požadavek SS byl změněn na požadavek USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Změněno na nový požadavek SS"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Pracovní profil"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"Upozorněno"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Rozbalit"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Sbalit"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"přepnout rozbalení"</string>

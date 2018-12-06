@@ -136,14 +136,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> ವೈ-ಫೈ"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"ವೈಫೈ ಕರೆಮಾಡುವಿಕೆ | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"ವೈ-ಫೈ"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"ವೈಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ಆಫ್"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ವೈ-ಫೈಗೆ ಆದ್ಯತೆ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ಮೊಬೈಲ್‌ಗೆ ಆದ್ಯತೆ"</string>
@@ -533,6 +529,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"ನಿಮ್ಮ ಮೀಡಿಯಾ ಸಂಗ್ರಹಣೆಯಿಂದ ಸ್ಥಳಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> ಆ್ಯಪ್‌ಗೆ ದೃಢೀಕರಣದ ಅಗತ್ಯವಿದೆ."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ಬಯೋಮೆಟ್ರಿಕ್ ಹಾರ್ಡ್‌ವೇರ್‌ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ಭಾಗಶಃ ಬೆರಳಚ್ಚು ಪತ್ತೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ಬೆರಳಚ್ಚು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ಬೆರಳಚ್ಚು ಸೆನ್ಸಾರ್ ಕೊಳೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
@@ -540,7 +541,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ಬೆರಳನ್ನು ತುಂಬಾ ನಿಧಾನವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಪ್ರಮಾಣೀಕರಣ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ, ದೃಢೀಕರಣವನ್ನು ಒತ್ತಿ"</string>
@@ -596,14 +596,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ಖಾತೆಗೆ ಸಿಂಕ್ ಸೆಟ್ಟಿಂಗ್‍‍ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಉದಾಹರಣೆಗೆ, ಖಾತೆಯನ್ನು ಹೊಂದಿರುವ ವ್ಯಕ್ತಿಗಳ ಸಿಂಕ್ ಸಕ್ರಿಯಗೊಳಿಸಲು ಇದನ್ನು ಬಳಸಬಹುದಾಗಿದೆ."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"ಸಿಂಕ್ ಅಂಕಿಅಂಶಗಳನ್ನು ಓದಿರಿ"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"ಸಿಂಕ್ ಈವೆಂಟ್‍‍ಗಳ ಇತಿಹಾಸ ಮತ್ತು ಎಷ್ಟು ಪ್ರಮಾಣದ ಡೇಟಾವನ್ನು ಸಿಂಕ್‍ ಮಾಡಲಾಗಿದೆ ಎಂಬುದು ಸೇರಿದಂತೆ, ಒಂದು ಖಾತೆಗಾಗಿ ಸಿಂಕ್ ಅಂಕಿಅಂಶಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"ನಿಮ್ಮ USB ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಓದಿ"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"ನಿಮ್ಮ SD ಕಾರ್ಡ್‌ನ ವಿಷಯಗಳನ್ನು ಓದಿ"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"ನಿಮ್ಮ USB ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"ನಿಮ್ಮ SD ಕಾರ್ಡ್‌ನ ವಿಷಯಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ನಿಮ್ಮ USB ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಮಾರ್ಪಡಿಸಿ ಅಥವಾ ಅಳಿಸಿ"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ನಿಮ್ಮ SD ಕಾರ್ಡ್‌ನ ವಿಷಯಗಳನ್ನು ಮಾರ್ಪಡಿಸಿ ಅಥವಾ ಅಳಿಸಿ"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"USB ಸಂಗ್ರಹಣೆಗೆ ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"SD ಕಾರ್ಡ್‌ಗೆ ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಓದಿ"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಮಾರ್ಪಡಿಸಿ ಅಥವಾ ಅಳಿಸಿ"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಬರೆಯಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"ಎಸ್‌ಐಪಿ ಕರೆಗಳನ್ನು ಮಾಡಿ/ಸ್ವೀಕರಿಸಿ"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"ಎಸ್‌ಐಪಿ ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"ಹೊಸ ಟೆಲಿಕಾಮ್ ಸಿಮ್‌ ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಾಯಿಸಿ"</string>
@@ -1105,6 +1101,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"ಆಯ್ಕೆ ಮಾಡಿದ ಸಮಯಕ್ಕೆ ಈವೆಂಟ್ ನಿಗದಿಪಡಿಸಿ"</string>
     <string name="view_flight" msgid="7691640491425680214">"ಟ್ರ್ಯಾಕ್"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ಆಯ್ಕೆಮಾಡಿದ ವಿಮಾನವನ್ನು ಟ್ರ್ಯಾಕ್‌ ಮಾಡಿ"</string>
+    <string name="translate" msgid="9218619809342576858">"ಅನುವಾದ"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"ಆಯ್ಕೆಮಾಡಿದ ಪಠ್ಯವನ್ನು ಅನುವಾದಿಸಿ"</string>
+    <string name="define" msgid="7394820043869954211">"ವಿವರಿಸಿ"</string>
+    <string name="define_desc" msgid="7910883642444919726">"ಆಯ್ಕೆಮಾಡಿದ ಪಠ್ಯವನ್ನು ವಿವರಿಸಿ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ಸಂಗ್ರಹಣೆ ಸ್ಥಳವು ತುಂಬಿದೆ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ಕೆಲವು ಸಿಸ್ಟಂ ಕಾರ್ಯವಿಧಾನಗಳು ಕಾರ್ಯನಿರ್ವಹಿಸದೇ ಇರಬಹುದು"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ಸಿಸ್ಟಂನಲ್ಲಿ ಸಾಕಷ್ಟು ಸಂಗ್ರಹಣೆಯಿಲ್ಲ. ನೀವು 250MB ನಷ್ಟು ಖಾಲಿ ಸ್ಥಳವನ್ನು ಹೊಂದಿರುವಿರಾ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ ಹಾಗೂ ಮರುಪ್ರಾರಂಭಿಸಿ."</string>
@@ -1461,8 +1461,7 @@
       <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> ರಲ್ಲಿ <xliff:g id="INDEX">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"ಮುಗಿದಿದೆ"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB ಸಂಗ್ರಹಣೆ ಅಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD ಕಾರ್ಡ್ ಅಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"ಹಂಚಲಾದ ಸಂಗ್ರಹಣೆಯನ್ನು ಅಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="share" msgid="1778686618230011964">"ಹಂಚು"</string>
     <string name="find" msgid="4808270900322985960">"ಹುಡುಕಿ"</string>
     <string name="websearch" msgid="4337157977400211589">"ವೆಬ್ ಹುಡುಕಾಟ"</string>
@@ -1834,8 +1833,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS ವಿನಂತಿಯನ್ನು USSD ವಿನಂತಿಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"ಹೊಸ SS ವಿನಂತಿಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"ಎಚ್ಚರಿಕೆ ನೀಡಲಾಗಿದೆ"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"ವಿಸ್ತೃತಗೊಳಿಸಿ"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"ಕುಗ್ಗಿಸಿ"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"ವಿಸ್ತರಣೆ ಟಾಗಲ್‌ ಮಾಡಿ"</string>

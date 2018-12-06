@@ -136,14 +136,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Chiamate Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Chiamate Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Chiamate Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Non attiva"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Rete preferita: Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Rete preferita: dati mobili"</string>
@@ -533,6 +529,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Consente all\'app di leggere le posizioni dalla tua raccolta multimediale."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"L\'app <xliff:g id="APP">%s</xliff:g> richiede l\'autenticazione."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Hardware biometrico non disponibile"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Non riconosciuto"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Rilevata impronta digitale parziale. Riprova."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossibile elaborare l\'impronta digitale. Riprova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Il sensore di impronte digitali è sporco. Puliscilo e riprova."</string>
@@ -540,7 +541,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Movimento del dito troppo lento. Riprova."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"Non riconosciuto"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Impronta digitale autenticata"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Volto autenticato"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Volto autenticato, premi Conferma"</string>
@@ -596,14 +596,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Consente a un\'applicazione di modificare le impostazioni di sincronizzazione per un account. Ad esempio, può servire per attivare la sincronizzazione dell\'applicazione Persone con un account."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lettura statistiche di sincronizz."</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Consente a un\'applicazione di leggere le statistiche di sincronizzazione per un account, incluse la cronologia degli eventi di sincronizzazione e la quantità di dati sincronizzati."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lettura contenuti archivio USB"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lettura contenuti scheda SD"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"L\'app può leggere i contenuti dell\'archivio USB."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Consente all\'applicazione di leggere i contenuti della scheda SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modifica/eliminazione contenuti USB"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modifica o eliminazione dei contenuti della scheda SD"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Consente all\'applicazione di scrivere nell\'archivio USB."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Consente all\'applicazione di scrivere sulla scheda SD."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"leggere i contenuti dell\'archivio condiviso"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"Consente all\'app di leggere i contenuti del tuo archivio condiviso."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"modificare/eliminare i contenuti dell\'archivio condiviso"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"Consente all\'app di modificare i contenuti del tuo archivio condiviso."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"fare/ricevere chiamate SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Consente all\'app di effettuare e ricevere chiamate SIP."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"registrazione di nuove connessioni SIM di telecomunicazione"</string>
@@ -1105,6 +1101,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Pianifica l\'evento nella data selezionata"</string>
     <string name="view_flight" msgid="7691640491425680214">"Monitora"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Monitora il volo selezionato"</string>
+    <string name="translate" msgid="9218619809342576858">"Traduci"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"Traduci il testo selezionato"</string>
+    <string name="define" msgid="7394820043869954211">"Definisci"</string>
+    <string name="define_desc" msgid="7910883642444919726">"Definisci il testo selezionato"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Spazio di archiviazione in esaurimento"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Alcune funzioni di sistema potrebbero non funzionare"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Memoria insufficiente per il sistema. Assicurati di avere 250 MB di spazio libero e riavvia."</string>
@@ -1460,8 +1460,7 @@
       <item quantity="one">1 partita</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Fine"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Cancellazione dell\'archivio USB..."</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"Cancellazione scheda SD..."</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"Cancellazione archivio condiviso…"</string>
     <string name="share" msgid="1778686618230011964">"Condividi"</string>
     <string name="find" msgid="4808270900322985960">"Trova"</string>
     <string name="websearch" msgid="4337157977400211589">"Ricerca Web"</string>
@@ -1833,8 +1832,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"Richiesta SS modificata in richiesta USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Modificata in nuova richiesta SS"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profilo di lavoro"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"Avviso inviato"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Espandi"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Comprimi"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"attiva/disattiva l\'espansione"</string>

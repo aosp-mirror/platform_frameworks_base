@@ -136,14 +136,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> WLAN"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WLAN-Telefonie | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWLAN"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"WLAN-Telefonie"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"WLAN"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"WLAN-Telefonie"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Aus"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"WLAN bevorzugt"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mobilverbindung bevorzugt"</string>
@@ -533,6 +529,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Ermöglicht der App, Standorte aus deiner Mediensammlung abzurufen."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> möchte, dass du dich authentifizierst."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biometrische Hardware nicht verfügbar"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Nicht erkannt"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Fingerabdruck teilweise erkannt. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Fingerabdruck konnte nicht verarbeitet werden. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Fingerabdrucksensor ist verschmutzt. Reinige ihn und versuche es noch einmal."</string>
@@ -540,7 +541,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Finger zu langsam bewegt. Bitte versuche es noch einmal."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"Nicht erkannt"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Fingerabdruck wurde authentifiziert"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Gesicht authentifiziert"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Gesicht authentifiziert, bitte bestätigen"</string>
@@ -596,14 +596,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Ermöglicht der App, die Synchronisierungseinstellungen eines Kontos zu ändern. Dies kann beispielsweise dazu verwendet werden, die Synchronisierung von Kontakten mit einem Konto zu aktivieren."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"Synchronisierungsstatistiken lesen"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Ermöglicht der App, die Synchronisierungsstatistiken eines Kontos zu lesen, einschließlich des Verlaufs von Synchronisierungsereignissen und der Menge synchronisierter Daten."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB-Speicherinhalte lesen"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD-Karteninhalte lesen"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Ermöglicht der App, den USB-Speicher zu lesen"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Ermöglicht der App, den Inhalt einer SD-Karte zu lesen"</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB-Speicherinhalte ändern oder löschen"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD-Karteninhalte ändern oder löschen"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Ermöglicht der App, in den USB-Speicher zu schreiben"</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Ermöglicht der App, auf die SD-Karte zu schreiben"</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"Inhalte deines freigegebenen Speichers lesen"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"So kann die App Inhalte deines freigegebenen Speichers lesen."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"Inhalte deines freigegebenen Speichers ändern oder löschen"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"So kann die App Inhalte deines freigegebenen Speichers erstellen."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP-Anrufe tätigen/empfangen"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Ermöglicht der App das Tätigen und Empfangen von SIP-Anrufen"</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"Neue SIM-Telekommunikationsverbindungen registrieren"</string>
@@ -627,13 +623,13 @@
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"Auf Benachrichtigungen zugreifen"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Ermöglicht der App das Abrufen, Überprüfen und Löschen von Benachrichtigungen, einschließlich Benachrichtigungen, die von anderen Apps gepostet wurden"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"An Benachrichtigungs-Listener-Dienst binden"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ermöglicht dem Eigentümer, sich an die Oberfläche der obersten Ebene eines Benachrichtigungs-Listener-Dienstes zu binden. Sollte nie für normale Apps benötigt werden."</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ermöglicht dem Inhaber, sich an die Oberfläche der obersten Ebene eines Benachrichtigungs-Listener-Dienstes zu binden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"An einen Bedingungsproviderdienst binden"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ermöglicht dem Eigentümer, sich an die Oberfläche eines Bedingungsproviderdienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ermöglicht dem Inhaber, sich an die Oberfläche eines Bedingungsproviderdienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"An Dream-Dienst binden"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Ermöglicht der App, sich an die Oberfläche eines Dream-Dienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufrufen"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ermöglicht dem Eigentümer, die vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufzurufen. Sollte für normale Apps nie benötigt werden."</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ermöglicht dem Inhaber, die vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufzurufen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Informationen zu den Netzwerkbedingungen erfassen"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Ermöglicht der App, Informationen zu den Netzwerkbedingungen zu erfassen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"Kalibrierung für Eingabegerät ändern"</string>
@@ -645,9 +641,9 @@
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM-Zertifikate entfernen"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ermöglicht einer App das Entfernen von DRM-Zertifikaten. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"An einen Mobilfunkanbieter-Messaging-Dienst binden"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ermöglicht dem Eigentümer die Bindung an die Oberfläche eines Mobilfunkanbieter-Messaging-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ermöglicht dem Inhaber die Bindung an die Oberfläche eines Mobilfunkanbieter-Messaging-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"An Mobilfunkanbieter-Dienste binden"</string>
-    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Ermöglicht dem Eigentümer die Bindung an Mobilfunkanbieter-Dienste. Für normale Apps sollte dies nicht erforderlich sein."</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Ermöglicht dem Inhaber die Bindung an Mobilfunkanbieter-Dienste. Für normale Apps sollte dies nicht erforderlich sein."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Auf \"Bitte nicht stören\" zugreifen"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Ermöglicht der App Lese- und Schreibzugriff auf die \"Bitte nicht stören\"-Konfiguration"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwortregeln festlegen"</string>
@@ -1105,6 +1101,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Termin für die ausgewählte Zeit planen"</string>
     <string name="view_flight" msgid="7691640491425680214">"Verfolgen"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Ausgewählten Flug verfolgen"</string>
+    <string name="translate" msgid="9218619809342576858">"Übersetzen"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"Ausgewählten Text übersetzen"</string>
+    <string name="define" msgid="7394820043869954211">"Definieren"</string>
+    <string name="define_desc" msgid="7910883642444919726">"Ausgewählten Text definieren"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Der Speicherplatz wird knapp"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Einige Systemfunktionen funktionieren eventuell nicht."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Der Speicherplatz reicht nicht für das System aus. Stelle sicher, dass 250 MB freier Speicherplatz vorhanden sind, und starte das Gerät dann neu."</string>
@@ -1460,8 +1460,7 @@
       <item quantity="one">1 Treffer</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Fertig"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB-Speicher wird gelöscht..."</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD-Karteninhalt wird gelöscht..."</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"Freigegebener Speicher wird gelöscht…"</string>
     <string name="share" msgid="1778686618230011964">"Teilen"</string>
     <string name="find" msgid="4808270900322985960">"Suchen"</string>
     <string name="websearch" msgid="4337157977400211589">"Websuche"</string>
@@ -1833,8 +1832,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS-Anfrage wurde in USSD-Anfrage geändert"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"In neue SS-Anfrage geändert"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Arbeitsprofil"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"Gewarnt"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Maximieren"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Minimieren"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"Maximierung ein-/auschalten"</string>

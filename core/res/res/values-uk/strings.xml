@@ -138,14 +138,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> через Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Виклики через Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> через VoWi-Fi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Дзвінки через Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Дзвінки через Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"Передавання голосу через Wi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Вимкнено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi за умовчанням"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Мобільна мережа за умовчанням"</string>
@@ -539,6 +535,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Додаток зможе розпізнавати геодані з вашої колекції медіа-вмісту."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Для додатка <xliff:g id="APP">%s</xliff:g> потрібна автентифікація."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Біометричне апаратне забезпечення недоступне"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Не розпізнано"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Відбиток розпізнано частково. Повторіть спробу."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не вдалось обробити відбиток. Повторіть спробу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Датчик відбитків забруднився. Очистьте його та повторіть спробу."</string>
@@ -546,7 +547,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Ви провели пальцем надто повільно. Повторіть спробу."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"Не розпізнано"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Відбиток автентифіковано"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Обличчя автентифіковано"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Обличчя автентифіковано. Натисніть \"Підтвердити\""</string>
@@ -602,14 +602,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Дозволяє програмі змінювати налаштування синхронізації для облікового запису, наприклад, вмикати синхронізацію програми Люди з обліковим записом."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"Перегляд статистики синхронізації"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Дозволяє програмі читати статистику синхронізації облікового запису, зокрема історію синхронізацій і обсяг синхронізованих даних."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"читати вміст носія USB"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"читати вміст карти SD"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Дозволяє програмі читати вміст носія USB."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Дозволяє програмі читати вміст карти SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"змінювати чи видаляти дані на USB-носії"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"змінювати чи видаляти вміст на карті SD"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Додаток зможе записувати дані на USB-носій"</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Дозволяє програмі записувати на карту SD."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"переглядати вміст у спільній пам’яті"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"Додаток може переглядати вміст у спільній пам’яті."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"змінювати чи видаляти вміст у спільній пам’яті"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"Додаток може писати вміст у спільній пам’яті."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"здійснювати й отримувати дзвінки через протокол SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Додаток зможе здійснювати й отримувати дзвінки через протокол SIP."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"реєструвати нові телекомунікаційні з’єднання SIM-карт"</string>
@@ -1145,6 +1141,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Запланувати подію на вибраний час"</string>
     <string name="view_flight" msgid="7691640491425680214">"Відстежити"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Відстежувати вибраний авіарейс"</string>
+    <string name="translate" msgid="9218619809342576858">"Перекласти"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"Перекласти виділений текст"</string>
+    <string name="define" msgid="7394820043869954211">"Знайти визначення"</string>
+    <string name="define_desc" msgid="7910883642444919726">"Знайти визначення виділеного тексту"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Закінчується пам’ять"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Деякі системні функції можуть не працювати"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Недостатньо місця для системи. Переконайтесь, що на пристрої є 250 МБ вільного місця, і повторіть спробу."</string>
@@ -1506,8 +1506,7 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> із <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Готово"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Стирання носія USB..."</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"Стирання карти SD..."</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"Стирання спільної пам’яті…"</string>
     <string name="share" msgid="1778686618230011964">"Надіслати"</string>
     <string name="find" msgid="4808270900322985960">"Знайти"</string>
     <string name="websearch" msgid="4337157977400211589">"Веб-пошук"</string>
@@ -1899,8 +1898,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"Запит SS змінено на запит USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Змінено на новий запит SS"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Робочий профіль"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"Зі звуком"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Розгорнути"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Згорнути"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"розгорнути або згорнути"</string>
