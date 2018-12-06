@@ -344,7 +344,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         callStat.recordedCallCount = 1;
         callStat.callCount = 1;
         callStat.methodName = "__DEBUG_" + variableName;
-        callStat.maxReplySizeBytes = value;
+        callStat.latencyMicros = value;
         return callStat;
     }
 
