@@ -67,107 +67,87 @@ public class StackWindowController
         mStackId = stackId;
         mHandler = new H(new WeakReference<>(this), service.mH.getLooper());
 
-        synchronized (mGlobalLock) {
-            final DisplayContent dc = mRoot.getDisplayContent(displayId);
-            if (dc == null) {
-                throw new IllegalArgumentException("Trying to add stackId=" + stackId
-                        + " to unknown displayId=" + displayId);
-            }
-
-            dc.createStack(stackId, onTop, this);
-            getRawBounds(outBounds);
+        final DisplayContent dc = mRoot.getDisplayContent(displayId);
+        if (dc == null) {
+            throw new IllegalArgumentException("Trying to add stackId=" + stackId
+                    + " to unknown displayId=" + displayId);
         }
+
+        dc.createStack(stackId, onTop, this);
+        getRawBounds(outBounds);
     }
 
     @Override
     public void removeContainer() {
-        synchronized (mGlobalLock) {
-            if (mContainer != null) {
-                mContainer.removeIfPossible();
-                super.removeContainer();
-            }
+        if (mContainer != null) {
+            mContainer.removeIfPossible();
+            super.removeContainer();
         }
     }
 
-    public void reparent(int displayId, Rect outStackBounds, boolean onTop) {
-        synchronized (mGlobalLock) {
-            if (mContainer == null) {
-                throw new IllegalArgumentException("Trying to move unknown stackId=" + mStackId
-                        + " to displayId=" + displayId);
-            }
-
-            final DisplayContent targetDc = mRoot.getDisplayContent(displayId);
-            if (targetDc == null) {
-                throw new IllegalArgumentException("Trying to move stackId=" + mStackId
-                        + " to unknown displayId=" + displayId);
-            }
-
-            targetDc.moveStackToDisplay(mContainer, onTop);
-            getRawBounds(outStackBounds);
+    void reparent(int displayId, Rect outStackBounds, boolean onTop) {
+        if (mContainer == null) {
+            throw new IllegalArgumentException("Trying to move unknown stackId=" + mStackId
+                    + " to displayId=" + displayId);
         }
+
+        final DisplayContent targetDc = mRoot.getDisplayContent(displayId);
+        if (targetDc == null) {
+            throw new IllegalArgumentException("Trying to move stackId=" + mStackId
+                    + " to unknown displayId=" + displayId);
+        }
+
+        targetDc.moveStackToDisplay(mContainer, onTop);
+        getRawBounds(outStackBounds);
     }
 
-    public void positionChildAt(TaskWindowContainerController child, int position) {
-        synchronized (mGlobalLock) {
-            if (DEBUG_STACK) Slog.i(TAG_WM, "positionChildAt: positioning task=" + child
-                    + " at " + position);
-            if (child.mContainer == null) {
-                if (DEBUG_STACK) Slog.i(TAG_WM,
-                        "positionChildAt: could not find task=" + this);
-                return;
-            }
-            if (mContainer == null) {
-                if (DEBUG_STACK) Slog.i(TAG_WM,
-                        "positionChildAt: could not find stack for task=" + mContainer);
-                return;
-            }
-            child.mContainer.positionAt(position);
-            mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
+    void positionChildAt(Task child, int position) {
+        if (DEBUG_STACK) {
+            Slog.i(TAG_WM, "positionChildAt: positioning task=" + child + " at " + position);
         }
+        if (child == null) {
+            if (DEBUG_STACK) {
+                Slog.i(TAG_WM, "positionChildAt: could not find task=" + this);
+            }
+            return;
+        }
+        if (mContainer == null) {
+            if (DEBUG_STACK) {
+                Slog.i(TAG_WM, "positionChildAt: could not find stack for task=" + mContainer);
+            }
+            return;
+        }
+        child.positionAt(position);
+        mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
     }
 
-    public void positionChildAtTop(TaskWindowContainerController child, boolean includingParents) {
+    void positionChildAtTop(Task child, boolean includingParents) {
         if (child == null) {
             // TODO: Fix the call-points that cause this to happen.
             return;
         }
 
-        synchronized (mGlobalLock) {
-            final Task childTask = child.mContainer;
-            if (childTask == null) {
-                Slog.e(TAG_WM, "positionChildAtTop: task=" + child + " not found");
-                return;
-            }
-            mContainer.positionChildAt(POSITION_TOP, childTask, includingParents);
+        mContainer.positionChildAt(POSITION_TOP, child, includingParents);
 
-            final DisplayContent displayContent = mContainer.getDisplayContent();
-            if (displayContent.mAppTransition.isTransitionSet()) {
-                childTask.setSendingToBottom(false);
-            }
-            displayContent.layoutAndAssignWindowLayersIfNeeded();
+        final DisplayContent displayContent = mContainer.getDisplayContent();
+        if (displayContent.mAppTransition.isTransitionSet()) {
+            child.setSendingToBottom(false);
         }
+        displayContent.layoutAndAssignWindowLayersIfNeeded();
     }
 
-    public void positionChildAtBottom(TaskWindowContainerController child,
-            boolean includingParents) {
+    void positionChildAtBottom(Task child, boolean includingParents) {
         if (child == null) {
             // TODO: Fix the call-points that cause this to happen.
             return;
         }
 
-        synchronized (mGlobalLock) {
-            final Task childTask = child.mContainer;
-            if (childTask == null) {
-                Slog.e(TAG_WM, "positionChildAtBottom: task=" + child + " not found");
-                return;
-            }
-            mContainer.positionChildAt(POSITION_BOTTOM, childTask, includingParents);
+        mContainer.positionChildAt(POSITION_BOTTOM, child, includingParents);
 
-            if (mContainer.getDisplayContent().mAppTransition.isTransitionSet()) {
-                childTask.setSendingToBottom(true);
-            }
-            mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
+        if (mContainer.getDisplayContent().mAppTransition.isTransitionSet()) {
+            child.setSendingToBottom(true);
         }
+        mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
     }
 
     /**
@@ -179,24 +159,20 @@ public class StackWindowController
      */
     public void resize(Rect bounds, SparseArray<Rect> taskBounds,
             SparseArray<Rect> taskTempInsetBounds) {
-        synchronized (mGlobalLock) {
-            if (mContainer == null) {
-                throw new IllegalArgumentException("resizeStack: stack " + this + " not found.");
-            }
-            // We might trigger a configuration change. Save the current task bounds for freezing.
-            mContainer.prepareFreezingTaskBounds();
-            if (mContainer.setBounds(bounds, taskBounds, taskTempInsetBounds)
-                    && mContainer.isVisible()) {
-                mContainer.getDisplayContent().setLayoutNeeded();
-                mService.mWindowPlacerLocked.performSurfacePlacement();
-            }
+        if (mContainer == null) {
+            throw new IllegalArgumentException("resizeStack: stack " + this + " not found.");
+        }
+        // We might trigger a configuration change. Save the current task bounds for freezing.
+        mContainer.prepareFreezingTaskBounds();
+        if (mContainer.setBounds(bounds, taskBounds, taskTempInsetBounds)
+                && mContainer.isVisible()) {
+            mContainer.getDisplayContent().setLayoutNeeded();
+            mService.mWindowPlacerLocked.performSurfacePlacement();
         }
     }
 
     public void onPipAnimationEndResize() {
-        synchronized (mService.mGlobalLock) {
-            mContainer.onPipAnimationEndResize();
-        }
+        mContainer.onPipAnimationEndResize();
     }
 
     /**
@@ -205,45 +181,37 @@ public class StackWindowController
     public void getStackDockedModeBounds(Configuration parentConfig, Rect dockedBounds,
             Rect currentTempTaskBounds,
             Rect outStackBounds, Rect outTempTaskBounds) {
-        synchronized (mGlobalLock) {
-            if (mContainer != null) {
-                mContainer.getStackDockedModeBoundsLocked(parentConfig, dockedBounds,
-                        currentTempTaskBounds, outStackBounds, outTempTaskBounds);
-                return;
-            }
-            outStackBounds.setEmpty();
-            outTempTaskBounds.setEmpty();
+        if (mContainer != null) {
+            mContainer.getStackDockedModeBoundsLocked(parentConfig, dockedBounds,
+                    currentTempTaskBounds, outStackBounds, outTempTaskBounds);
+            return;
         }
+        outStackBounds.setEmpty();
+        outTempTaskBounds.setEmpty();
     }
 
     public void prepareFreezingTaskBounds() {
-        synchronized (mGlobalLock) {
-            if (mContainer == null) {
-                throw new IllegalArgumentException("prepareFreezingTaskBounds: stack " + this
-                        + " not found.");
-            }
-            mContainer.prepareFreezingTaskBounds();
+        if (mContainer == null) {
+            throw new IllegalArgumentException("prepareFreezingTaskBounds: stack " + this
+                    + " not found.");
         }
+        mContainer.prepareFreezingTaskBounds();
     }
 
     public void getRawBounds(Rect outBounds) {
-        synchronized (mGlobalLock) {
-            if (mContainer.matchParentBounds()) {
-                outBounds.setEmpty();
-            } else {
-                mContainer.getRawBounds(outBounds);
-            }
+        if (mContainer.matchParentBounds()) {
+            outBounds.setEmpty();
+        } else {
+            mContainer.getRawBounds(outBounds);
         }
     }
 
     public void getBounds(Rect outBounds) {
-        synchronized (mGlobalLock) {
-            if (mContainer != null) {
-                mContainer.getBounds(outBounds);
-                return;
-            }
-            outBounds.setEmpty();
+        if (mContainer != null) {
+            mContainer.getBounds(outBounds);
+            return;
         }
+        outBounds.setEmpty();
     }
 
     /**
@@ -256,73 +224,71 @@ public class StackWindowController
             Rect nonDecorBounds, Rect stableBounds, boolean overrideWidth,
             boolean overrideHeight, float density, Configuration config,
             Configuration parentConfig, int windowingMode) {
-        synchronized (mGlobalLock) {
-            final TaskStack stack = mContainer;
-            final DisplayContent displayContent = stack.getDisplayContent();
-            final DisplayInfo di = displayContent.getDisplayInfo();
-            final DisplayCutout displayCutout = di.displayCutout;
-            final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
+        final TaskStack stack = mContainer;
+        final DisplayContent displayContent = stack.getDisplayContent();
+        final DisplayInfo di = displayContent.getDisplayInfo();
+        final DisplayCutout displayCutout = di.displayCutout;
+        final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
 
-            // Get the insets and display bounds
-            displayPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                    displayCutout, mTmpStableInsets);
-            displayPolicy.getNonDecorInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                    displayCutout, mTmpNonDecorInsets);
-            mTmpDisplayBounds.set(0, 0, di.logicalWidth, di.logicalHeight);
+        // Get the insets and display bounds
+        displayPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
+                displayCutout, mTmpStableInsets);
+        displayPolicy.getNonDecorInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
+                displayCutout, mTmpNonDecorInsets);
+        mTmpDisplayBounds.set(0, 0, di.logicalWidth, di.logicalHeight);
 
-            int width;
-            int height;
+        int width;
+        int height;
 
-            final Rect parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
+        final Rect parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
 
-            config.windowConfiguration.setBounds(bounds);
-            config.windowConfiguration.setAppBounds(!bounds.isEmpty() ? bounds : null);
-            boolean intersectParentBounds = false;
+        config.windowConfiguration.setBounds(bounds);
+        config.windowConfiguration.setAppBounds(!bounds.isEmpty() ? bounds : null);
+        boolean intersectParentBounds = false;
 
-            if (WindowConfiguration.isFloating(windowingMode)) {
-                // Floating tasks should not be resized to the screen's bounds.
+        if (WindowConfiguration.isFloating(windowingMode)) {
+            // Floating tasks should not be resized to the screen's bounds.
 
-                if (windowingMode == WindowConfiguration.WINDOWING_MODE_PINNED
-                        && bounds.width() == mTmpDisplayBounds.width()
-                        && bounds.height() == mTmpDisplayBounds.height()) {
-                    // If the bounds we are animating is the same as the fullscreen stack
-                    // dimensions, then apply the same inset calculations that we normally do for
-                    // the fullscreen stack, without intersecting it with the display bounds
-                    stableBounds.inset(mTmpStableInsets);
-                    nonDecorBounds.inset(mTmpNonDecorInsets);
-                    // Move app bounds to zero to apply intersection with parent correctly. They are
-                    // used only for evaluating width and height, so it's OK to move them around.
-                    config.windowConfiguration.getAppBounds().offsetTo(0, 0);
-                    intersectParentBounds = true;
-                }
-                width = (int) (stableBounds.width() / density);
-                height = (int) (stableBounds.height() / density);
-            } else {
-                // For calculating screenWidthDp, screenWidthDp, we use the stable inset screen
-                // area, i.e. the screen area without the system bars.
-                // Additionally task dimensions should not be bigger than its parents dimensions.
-                // The non decor inset are areas that could never be removed in Honeycomb. See
-                // {@link WindowManagerPolicy#getNonDecorInsetsLw}.
-                intersectDisplayBoundsExcludeInsets(nonDecorBounds, bounds, mTmpNonDecorInsets,
-                        mTmpDisplayBounds, overrideWidth, overrideHeight);
-                intersectDisplayBoundsExcludeInsets(stableBounds, bounds, mTmpStableInsets,
-                        mTmpDisplayBounds, overrideWidth, overrideHeight);
-                width = Math.min((int) (stableBounds.width() / density),
-                        parentConfig.screenWidthDp);
-                height = Math.min((int) (stableBounds.height() / density),
-                        parentConfig.screenHeightDp);
+            if (windowingMode == WindowConfiguration.WINDOWING_MODE_PINNED
+                    && bounds.width() == mTmpDisplayBounds.width()
+                    && bounds.height() == mTmpDisplayBounds.height()) {
+                // If the bounds we are animating is the same as the fullscreen stack
+                // dimensions, then apply the same inset calculations that we normally do for
+                // the fullscreen stack, without intersecting it with the display bounds
+                stableBounds.inset(mTmpStableInsets);
+                nonDecorBounds.inset(mTmpNonDecorInsets);
+                // Move app bounds to zero to apply intersection with parent correctly. They are
+                // used only for evaluating width and height, so it's OK to move them around.
+                config.windowConfiguration.getAppBounds().offsetTo(0, 0);
                 intersectParentBounds = true;
             }
-
-            if (intersectParentBounds && config.windowConfiguration.getAppBounds() != null) {
-                config.windowConfiguration.getAppBounds().intersect(parentAppBounds);
-            }
-
-            config.screenWidthDp = width;
-            config.screenHeightDp = height;
-            config.smallestScreenWidthDp = getSmallestWidthForTaskBounds(
-                    bounds, density, windowingMode);
+            width = (int) (stableBounds.width() / density);
+            height = (int) (stableBounds.height() / density);
+        } else {
+            // For calculating screenWidthDp, screenWidthDp, we use the stable inset screen
+            // area, i.e. the screen area without the system bars.
+            // Additionally task dimensions should not be bigger than its parents dimensions.
+            // The non decor inset are areas that could never be removed in Honeycomb. See
+            // {@link WindowManagerPolicy#getNonDecorInsetsLw}.
+            intersectDisplayBoundsExcludeInsets(nonDecorBounds, bounds, mTmpNonDecorInsets,
+                    mTmpDisplayBounds, overrideWidth, overrideHeight);
+            intersectDisplayBoundsExcludeInsets(stableBounds, bounds, mTmpStableInsets,
+                    mTmpDisplayBounds, overrideWidth, overrideHeight);
+            width = Math.min((int) (stableBounds.width() / density),
+                    parentConfig.screenWidthDp);
+            height = Math.min((int) (stableBounds.height() / density),
+                    parentConfig.screenHeightDp);
+            intersectParentBounds = true;
         }
+
+        if (intersectParentBounds && config.windowConfiguration.getAppBounds() != null) {
+            config.windowConfiguration.getAppBounds().intersect(parentAppBounds);
+        }
+
+        config.screenWidthDp = width;
+        config.screenHeightDp = height;
+        config.smallestScreenWidthDp = getSmallestWidthForTaskBounds(
+                bounds, density, windowingMode);
     }
 
     /**

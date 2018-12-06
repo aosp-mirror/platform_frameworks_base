@@ -24,6 +24,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.EMPTY;
 
 import static com.android.server.EventLogTags.WM_TASK_REMOVED;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.TaskProto.APP_WINDOW_TOKENS;
 import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.DEFER_REMOVAL;
@@ -38,6 +39,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.CallSuper;
+import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -54,7 +56,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.PrintWriter;
 import java.util.function.Consumer;
 
-class Task extends WindowContainer<AppWindowToken> {
+class Task extends WindowContainer<AppWindowToken> implements ConfigurationContainerListener{
     static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_WM;
 
     // TODO: Track parent marks like this in WindowContainer.
@@ -109,16 +111,24 @@ class Task extends WindowContainer<AppWindowToken> {
     /** @see #setCanAffectSystemUiFlags */
     private boolean mCanAffectSystemUiFlags = true;
 
+    // TODO: remove after unification
+    TaskRecord mTaskRecord;
+
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, int resizeMode,
             boolean supportsPictureInPicture, TaskDescription taskDescription,
-            TaskWindowContainerController controller) {
+            TaskRecord taskRecord) {
         super(service);
         mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
         mResizeMode = resizeMode;
         mSupportsPictureInPicture = supportsPictureInPicture;
-        setController(controller);
+        mTaskRecord = taskRecord;
+        if (mTaskRecord != null) {
+            // This can be null when we call createTaskInStack in WindowTestUtils. Remove this after
+            // unification.
+            mTaskRecord.registerConfigurationChangeListener(this);
+        }
         setBounds(getRequestedOverrideBounds());
         mTaskDescription = taskDescription;
 
@@ -194,6 +204,21 @@ class Task extends WindowContainer<AppWindowToken> {
 
         super.removeImmediately();
     }
+
+    void reparent(StackWindowController stackController, int position, boolean moveParents) {
+        if (DEBUG_STACK) {
+            Slog.i(TAG_WM, "reparent: moving taskId=" + mTaskId
+                    + " to stack=" + stackController + " at " + position);
+        }
+        final TaskStack stack = stackController.mContainer;
+        if (stack == null) {
+            throw new IllegalArgumentException("reparent: could not find stack="
+                    + stackController);
+        }
+        reparent(stack, position, moveParents);
+        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
+    }
+
 
     void reparent(TaskStack stack, int position, boolean moveParents) {
         if (stack == mStack) {
@@ -298,6 +323,12 @@ class Task extends WindowContainer<AppWindowToken> {
         mRotation = rotation;
 
         return boundsChange;
+    }
+
+    void resize(boolean relayout, boolean forced) {
+        if (setBounds(getRequestedOverrideBounds(), forced) != BOUNDS_CHANGE_NONE && relayout) {
+            getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
+        }
     }
 
     @Override
@@ -515,6 +546,15 @@ class Task extends WindowContainer<AppWindowToken> {
         return mDragResizeMode;
     }
 
+    /**
+     * Puts this task into docked drag resizing mode. See {@link DragResizeMode}.
+     *
+     * @param resizing Whether to put the task into drag resize mode.
+     */
+    public void setTaskDockedResizing(boolean resizing) {
+        setDragResizing(resizing, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
+    }
+
     private void adjustBoundsForDisplayChangeIfNeeded(final DisplayContent displayContent) {
         if (displayContent == null) {
             return;
@@ -556,9 +596,8 @@ class Task extends WindowContainer<AppWindowToken> {
 
         displayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         if (setBounds(mTmpRect2) != BOUNDS_CHANGE_NONE) {
-            final TaskWindowContainerController controller = getController();
-            if (controller != null) {
-                controller.requestResize(getBounds(), RESIZE_MODE_SYSTEM_SCREEN_ROTATION);
+            if (mTaskRecord != null) {
+                mTaskRecord.requestResize(getBounds(), RESIZE_MODE_SYSTEM_SCREEN_ROTATION);
             }
         }
     }
@@ -631,6 +670,20 @@ class Task extends WindowContainer<AppWindowToken> {
         return null;
     }
 
+    void positionChildAtTop(AppWindowToken aToken) {
+        positionChildAt(aToken, POSITION_TOP);
+    }
+
+    void positionChildAt(AppWindowToken aToken, int position) {
+        if (aToken == null) {
+            Slog.w(TAG_WM,
+                    "Attempted to position of non-existing app");
+            return;
+        }
+
+        positionChildAt(position, aToken, false /* includeParents */);
+    }
+
     boolean isFullscreen() {
         if (useCurrentBounds()) {
             return matchParentBounds();
@@ -656,6 +709,10 @@ class Task extends WindowContainer<AppWindowToken> {
         mTaskDescription = taskDescription;
     }
 
+    void onSnapshotChanged(ActivityManager.TaskSnapshot snapshot) {
+        mTaskRecord.onSnapshotChanged(snapshot);
+    }
+
     TaskDescription getTaskDescription() {
         return mTaskDescription;
     }
@@ -663,11 +720,6 @@ class Task extends WindowContainer<AppWindowToken> {
     @Override
     boolean fillsParent() {
         return matchParentBounds() || !getWindowConfiguration().canResizeTask();
-    }
-
-    @Override
-    TaskWindowContainerController getController() {
-        return (TaskWindowContainerController) super.getController();
     }
 
     @Override

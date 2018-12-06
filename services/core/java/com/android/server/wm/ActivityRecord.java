@@ -1035,8 +1035,6 @@ final class ActivityRecord extends ConfigurationContainer {
 
         inHistory = true;
 
-        final TaskWindowContainerController taskController = task.getWindowContainerController();
-
         // TODO(b/36505427): Maybe this call should be moved inside updateOverrideConfiguration()
         task.updateOverrideConfigurationFromLaunchBounds();
         // Make sure override configuration is up-to-date before using to create window controller.
@@ -1048,10 +1046,9 @@ final class ActivityRecord extends ConfigurationContainer {
             // TODO: Should this throw an exception instead?
             Slog.w(TAG, "Attempted to add existing app token: " + appToken);
         } else {
-            final Task container = taskController.mContainer;
+            final Task container = task.getTask();
             if (container == null) {
-                throw new IllegalArgumentException("AppWindowContainerController: invalid "
-                        + " controller=" + taskController);
+                throw new IllegalArgumentException("createAppWindowToken: invalid task =" + task);
             }
             mAppWindowToken = createAppWindow(mAtmService.mWindowManager, appToken,
                     task.voiceSession != null, container.getDisplayContent(),
@@ -1062,7 +1059,7 @@ final class ActivityRecord extends ConfigurationContainer {
                     mLaunchTaskBehind, isAlwaysFocusable());
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) {
                 Slog.v(TAG, "addAppToken: "
-                        + mAppWindowToken + " controller=" + taskController + " at "
+                        + mAppWindowToken + " task=" + container + " at "
                         + Integer.MAX_VALUE);
             }
             container.addChild(mAppWindowToken, Integer.MAX_VALUE /* add on top */);
@@ -1148,7 +1145,7 @@ final class ActivityRecord extends ConfigurationContainer {
                     + " r=" + this + " (" + prevTask.getStackId() + ")");
         }
 
-        mAppWindowToken.reparent(newTask.getWindowContainerController(), position);
+        mAppWindowToken.reparent(newTask.getTask(), position);
 
         // Reparenting prevents informing the parent stack of activity removal in the case that
         // the new stack has the same parent. we must manually signal here if this is not the case.
@@ -2774,7 +2771,7 @@ final class ActivityRecord extends ConfigurationContainer {
             final boolean hasResizeChange = hasResizeChange(changes & ~info.getRealConfigChanged());
             if (hasResizeChange) {
                 final boolean isDragResizing =
-                        getTaskRecord().getWindowContainerController().isDragResizing();
+                        getTaskRecord().getTask().isDragResizing();
                 mRelaunchReason = isDragResizing ? RELAUNCH_REASON_FREE_RESIZE
                         : RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
             } else {

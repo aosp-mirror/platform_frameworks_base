@@ -141,6 +141,13 @@ public class WindowTestUtils {
         }
     }
 
+    /** Creates an {@link AppWindowToken} and adds it to the specified {@link Task}. */
+    public static TestAppWindowToken createAppWindowTokenInTask(DisplayContent dc, Task task) {
+        final TestAppWindowToken newToken = createTestAppWindowToken(dc);
+        task.addChild(newToken, POSITION_TOP);
+        return newToken;
+    }
+
     /**
      * An extension of {@link TestTaskStack}, which overrides package scoped methods that would not
      * normally be mocked out.
@@ -264,9 +271,10 @@ public class WindowTestUtils {
 
         TestTask(int taskId, TaskStack stack, int userId, WindowManagerService service,
                 int resizeMode, boolean supportsPictureInPicture,
-                TaskWindowContainerController controller) {
+                TaskRecord taskRecord) {
             super(taskId, stack, userId, service, resizeMode, supportsPictureInPicture,
-                    new ActivityManager.TaskDescription(), controller);
+                    new ActivityManager.TaskDescription(), taskRecord);
+            stack.addTask(this, POSITION_TOP);
         }
 
         boolean shouldDeferRemoval() {
@@ -293,49 +301,10 @@ public class WindowTestUtils {
         }
     }
 
-    /**
-     * Used so we can gain access to some protected members of {@link TaskWindowContainerController}
-     * class.
-     */
-    public static class TestTaskWindowContainerController extends TaskWindowContainerController {
-
-        static final TaskWindowContainerListener NOP_LISTENER = new TaskWindowContainerListener() {
-            @Override
-            public void registerConfigurationChangeListener(
-                    ConfigurationContainerListener listener) {
-            }
-
-            @Override
-            public void unregisterConfigurationChangeListener(
-                    ConfigurationContainerListener listener) {
-            }
-
-            @Override
-            public void onSnapshotChanged(ActivityManager.TaskSnapshot snapshot) {
-            }
-
-            @Override
-            public void requestResize(Rect bounds, int resizeMode) {
-            }
-        };
-
-        TestTaskWindowContainerController(WindowTestsBase testsBase) {
-            this(testsBase.createStackControllerOnDisplay(testsBase.mDisplayContent));
-        }
-
-        TestTaskWindowContainerController(StackWindowController stackController) {
-            super(sNextTaskId++, NOP_LISTENER, stackController, 0 /* userId */, null /* bounds */,
-                    RESIZE_MODE_UNRESIZEABLE, false /* supportsPictureInPicture */, true /* toTop*/,
-                    true /* showForAllUsers */, new ActivityManager.TaskDescription(),
-                    stackController.mService);
-        }
-
-        @Override
-        TestTask createTask(int taskId, TaskStack stack, int userId, int resizeMode,
-                boolean supportsPictureInPicture, ActivityManager.TaskDescription taskDescription) {
-            return new TestTask(taskId, stack, userId, mService, resizeMode,
-                    supportsPictureInPicture, this);
-        }
+    public static TestTask createTestTask(StackWindowController stackWindowController) {
+        return new TestTask(sNextTaskId++, stackWindowController.mContainer, 0,
+                stackWindowController.mService, RESIZE_MODE_UNRESIZEABLE, false,
+                mock(TaskRecord.class));
     }
 
     public static class TestIApplicationToken implements IApplicationToken {
