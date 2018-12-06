@@ -18,7 +18,7 @@
 
 #include "FdBuffer.h"
 
-#include <cutils/log.h>
+#include <log/log.h>
 #include <utils/SystemClock.h>
 
 #include <fcntl.h>

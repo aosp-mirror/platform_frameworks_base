@@ -29,7 +29,7 @@
 #include <binder/IResultReceiver.h>
 #include <binder/IServiceManager.h>
 #include <binder/IShellCallback.h>
-#include <cutils/log.h>
+#include <log/log.h>
 #include <private/android_filesystem_config.h>
 #include <utils/Looper.h>
 

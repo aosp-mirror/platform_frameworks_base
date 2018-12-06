@@ -21,7 +21,7 @@
 
 #include <android-base/file.h>
 #include <android/util/protobuf.h>
-#include <cutils/log.h>
+#include <log/log.h>
 
 namespace android {
 namespace os {
