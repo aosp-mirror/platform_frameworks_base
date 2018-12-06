@@ -15269,9 +15269,12 @@ public class PackageManagerService extends IPackageManager.Stub
             final DeletePackageAction deletePackageAction;
             // we only want to try to delete for non system apps
             if (prepareResult.replace && !prepareResult.system) {
+                final boolean killApp = (scanResult.request.scanFlags & SCAN_DONT_KILL_APP) == 0;
+                final int deleteFlags = PackageManager.DELETE_KEEP_DATA
+                        | (killApp ? 0 : PackageManager.DELETE_DONT_KILL_APP);
                 deletePackageAction = mayDeletePackageLocked(res.removedInfo,
                         prepareResult.originalPs, prepareResult.disabledPs,
-                        prepareResult.childPackageSettings);
+                        prepareResult.childPackageSettings, deleteFlags, installArgs.user);
                 if (deletePackageAction == null) {
                     throw new ReconcileFailure(
                             PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE,
@@ -15353,12 +15356,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     }
                 } else {
-                    final boolean killApp = (scanRequest.scanFlags & SCAN_DONT_KILL_APP) == 0;
-                    final int deleteFlags = PackageManager.DELETE_KEEP_DATA
-                            | (killApp ? 0 : PackageManager.DELETE_DONT_KILL_APP);
                     try {
                         executeDeletePackageLIF(reconciledPkg.deletePackageAction, packageName,
-                                null, true, request.mAllUsers, deleteFlags, true, pkg);
+                                true, request.mAllUsers, true, pkg);
                     } catch (SystemDeleteException e) {
                         if (Build.IS_ENG) {
                             throw new RuntimeException("Unexpected failure", e);
@@ -17818,12 +17818,23 @@ public class PackageManagerService extends IPackageManager.Stub
         public final PackageSetting deletingPs;
         public final PackageSetting disabledPs;
         public final PackageRemovedInfo outInfo;
+        public final int flags;
+        public final UserHandle user;
+        /**
+         * True if this package is an unupdated system app that may be deleted by the system.
+         * When true, disabledPs will be null.
+         */
+        public final boolean mayDeleteUnupdatedSystemApp;
 
         private DeletePackageAction(PackageSetting deletingPs, PackageSetting disabledPs,
-                PackageRemovedInfo outInfo) {
+                PackageRemovedInfo outInfo, int flags, UserHandle user,
+                boolean mayDeleteUnupdatedSystemApp) {
             this.deletingPs = deletingPs;
             this.disabledPs = disabledPs;
             this.outInfo = outInfo;
+            this.flags = flags;
+            this.user = user;
+            this.mayDeleteUnupdatedSystemApp = mayDeleteUnupdatedSystemApp;
         }
     }
 
@@ -17835,23 +17846,26 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mPackages")
     private static DeletePackageAction mayDeletePackageLocked(
             PackageRemovedInfo outInfo, PackageSetting ps, @Nullable PackageSetting disabledPs,
-            @Nullable PackageSetting[] children) {
+            @Nullable PackageSetting[] children, int flags, UserHandle user) {
         if (ps == null) {
             return null;
         }
+        boolean mayDeleteUnupdatedSystemApp = false;
         if (isSystemApp(ps)) {
             if (ps.parentPackageName != null) {
                 Slog.w(TAG, "Attempt to delete child system package " + ps.pkg.packageName);
                 return null;
             }
 
-            // Confirm if the system package has been updated
-            // An updated system app can be deleted. This will also have to restore
-            // the system pkg from system partition
-            // reader
-            if (disabledPs == null) {
-                Slog.w(TAG,
-                        "Attempt to delete unknown system package " + ps.pkg.packageName);
+            if (((flags & PackageManager.DELETE_SYSTEM_APP) != 0) && user != null
+                    && user.getIdentifier() != UserHandle.USER_ALL) {
+                mayDeleteUnupdatedSystemApp = true;
+            } else if (disabledPs == null) {
+                // Confirmed if the system package has been updated
+                // An updated system app can be deleted. This will also have to restore
+                // the system pkg from system partition
+                // reader
+                Slog.w(TAG, "Attempt to delete unknown system package " + ps.pkg.packageName);
                 return null;
             }
         }
@@ -17868,7 +17882,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
         }
-        return new DeletePackageAction(ps, disabledPs, outInfo);
+        return new DeletePackageAction(ps, disabledPs, outInfo, flags, user,
+                mayDeleteUnupdatedSystemApp);
     }
 
     /*
@@ -17883,7 +17898,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(ps);
             PackageSetting[] children = mSettings.getChildSettingsLPr(ps);
-            action = mayDeletePackageLocked(outInfo, ps, disabledPs, children);
+            action = mayDeletePackageLocked(outInfo, ps, disabledPs, children, flags, user);
         }
         if (null == action) {
             return false;
@@ -17892,8 +17907,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageLI: " + packageName + " user " + user);
 
         try {
-            executeDeletePackageLIF(action, packageName, user, deleteCodeAndResources,
-                    allUserHandles, flags, writeSettings, replacingPackage);
+            executeDeletePackageLIF(action, packageName, deleteCodeAndResources,
+                    allUserHandles, writeSettings, replacingPackage);
         } catch (SystemDeleteException e) {
             return false;
         }
@@ -17910,11 +17925,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /** Deletes a package. Only throws when install of a disabled package fails. */
     private void executeDeletePackageLIF(DeletePackageAction action,
-            String packageName, UserHandle user, boolean deleteCodeAndResources,
-            int[] allUserHandles, int flags, boolean writeSettings,
+            String packageName, boolean deleteCodeAndResources,
+            int[] allUserHandles, boolean writeSettings,
             PackageParser.Package replacingPackage) throws SystemDeleteException {
         final PackageSetting ps = action.deletingPs;
         final PackageRemovedInfo outInfo = action.outInfo;
+        final UserHandle user = action.user;
+        final int flags = action.flags;
         final boolean systemApp = isSystemApp(ps);
         synchronized (mPackages) {
 
@@ -17940,8 +17957,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
 
-        if (((!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0) && user != null
-                && user.getIdentifier() != UserHandle.USER_ALL)) {
+        if (!systemApp || action.mayDeleteUnupdatedSystemApp) {
             // The caller is asking that the package only be deleted for a single
             // user.  To do this, we just mark its uninstalled state and delete
             // its data. If this is a system app, we only allow this to happen if
