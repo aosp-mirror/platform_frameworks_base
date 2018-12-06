@@ -51,6 +51,7 @@ import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -586,7 +587,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         private int noteProxyOp(String callingPkg, int op) {
             if (op != AppOpsManager.OP_NONE) {
                 int mode = mAppOpsManager.noteProxyOp(op, callingPkg);
-                return mode == MODE_DEFAULT ? interpretDefaultAppOpMode(op) : mode;
+                int nonDefaultMode = mode == MODE_DEFAULT ? interpretDefaultAppOpMode(op) : mode;
+                if (mode == MODE_DEFAULT && nonDefaultMode == MODE_IGNORED) {
+                    Slog.w(TAG, "Denying access for " + callingPkg + " to " + getClass().getName()
+                            + " (" + AppOpsManager.opToName(op)
+                            + " = " + AppOpsManager.opToName(mode) + ")");
+                }
+                return mode == MODE_DEFAULT ? nonDefaultMode : mode;
             }
 
             return AppOpsManager.MODE_ALLOWED;
