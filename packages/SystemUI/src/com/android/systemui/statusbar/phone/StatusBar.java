@@ -2527,7 +2527,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             }
             if (dismissShade) {
-                if (mExpandedVisible) {
+                if (mExpandedVisible && !mBouncerShowing) {
                     animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */,
                             true /* delayed*/);
                 } else {
@@ -3208,6 +3208,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.onAffordanceLaunchEnded();
         mNotificationPanel.animate().cancel();
         mNotificationPanel.setAlpha(1f);
+        updateScrimController();
         Trace.endSection();
         return staying;
     }
