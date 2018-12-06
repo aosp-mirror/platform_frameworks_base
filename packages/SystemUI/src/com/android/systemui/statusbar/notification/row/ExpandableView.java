@@ -48,6 +48,8 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     private int mActualHeight;
     protected int mClipTopAmount;
     protected int mClipBottomAmount;
+    protected int mMinimumHeightForClipping = 0;
+    protected float mExtraWidthForClipping = 0;
     private boolean mDark;
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
     private static Rect mClipRect = new Rect();
@@ -398,12 +400,24 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     protected void updateClipping() {
         if (mClipToActualHeight && shouldClipToActualHeight()) {
             int top = getClipTopAmount();
-            mClipRect.set(0, top, getWidth(), Math.max(getActualHeight() + getExtraBottomPadding()
-                    - mClipBottomAmount, top));
+            int bottom = Math.max(Math.max(getActualHeight() + getExtraBottomPadding()
+                    - mClipBottomAmount, top), mMinimumHeightForClipping);
+            int halfExtraWidth = (int) (mExtraWidthForClipping / 2.0f);
+            mClipRect.set(-halfExtraWidth, top, getWidth() + halfExtraWidth, bottom);
             setClipBounds(mClipRect);
         } else {
             setClipBounds(null);
         }
+    }
+
+    public void setMinimumHeightForClipping(int minimumHeightForClipping) {
+        mMinimumHeightForClipping = minimumHeightForClipping;
+        updateClipping();
+    }
+
+    public void setExtraWidthForClipping(float extraWidthForClipping) {
+        mExtraWidthForClipping = extraWidthForClipping;
+        updateClipping();
     }
 
     public float getHeaderVisibleAmount() {
