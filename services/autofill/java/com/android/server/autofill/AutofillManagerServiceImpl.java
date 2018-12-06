@@ -75,6 +75,7 @@ import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
 import com.android.server.autofill.AutofillManagerService.SmartSuggestionMode;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.infra.AbstractPerUserSystemService;
+import com.android.server.infra.SecureSettingsServiceNameResolver;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -154,7 +155,8 @@ final class AutofillManagerServiceImpl
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock, LocalLog requestsHistory,
             LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
             AutofillCompatState autofillCompatState, boolean disabled) {
-        super(master, lock, userId);
+        super(master, new SecureSettingsServiceNameResolver(master.getContext(), userId,
+                Settings.Secure.AUTOFILL_SERVICE), lock, userId);
 
         mRequestsHistory = requestsHistory;
         mUiLatencyHistory = uiLatencyHistory;
@@ -188,11 +190,6 @@ final class AutofillManagerServiceImpl
             throws NameNotFoundException {
         mInfo = new AutofillServiceInfo(getContext(), serviceComponent, mUserId);
         return mInfo.getServiceInfo();
-    }
-
-    @Override // from PerUserSystemService
-    protected String getDefaultComponentName() {
-        return getComponentNameFromSettings();
     }
 
     @Nullable
@@ -852,8 +849,6 @@ final class AutofillManagerServiceImpl
             pw.print(prefix); pw.print("Service Label: "); pw.println(getServiceLabelLocked());
             pw.print(prefix); pw.print("Target SDK: "); pw.println(getTargedSdkLocked());
         }
-        pw.print(prefix); pw.print("Component from settings: ");
-            pw.println(getComponentNameFromSettings());
         pw.print(prefix); pw.print("Default component: "); pw.println(getContext()
                 .getString(R.string.config_defaultAutofillService));
         pw.print(prefix); pw.print("Field classification enabled: ");
