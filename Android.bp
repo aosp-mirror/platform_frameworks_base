@@ -732,6 +732,7 @@ java_defaults {
         "android.hardware.radio-V1.4-java",
         "android.hardware.usb.gadget-V1.0-java",
         "netd_aidl_interface-java",
+        "devicepolicyprotosnano",
     ],
 
     required: [
