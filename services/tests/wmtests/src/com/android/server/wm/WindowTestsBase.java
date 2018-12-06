@@ -339,7 +339,7 @@ class WindowTestsBase {
             final int stackId = ++sNextStackId;
             final StackWindowController controller = new StackWindowController(stackId, null,
                     dc.getDisplayId(), true /* onTop */, new Rect(), mWm);
-            controller.onOverrideConfigurationChanged(overrideConfig);
+            controller.onRequestedOverrideConfigurationChanged(overrideConfig);
             return controller;
         }
     }

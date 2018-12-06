@@ -96,7 +96,7 @@ public class WindowFrameTests extends WindowTestsBase {
         }
 
         @Override
-        public void getOverrideBounds(Rect outBounds) {
+        public void getRequestedOverrideBounds(Rect outBounds) {
             outBounds.set(mBounds);
         }
         @Override
@@ -448,9 +448,9 @@ public class WindowFrameTests extends WindowTestsBase {
         final int xInset = logicalWidth / 10;
         final int yInset = logicalWidth / 10;
         final Rect cf = new Rect(xInset, yInset, logicalWidth - xInset, logicalHeight - yInset);
-        Configuration config = new Configuration(w.mAppToken.getOverrideConfiguration());
+        Configuration config = new Configuration(w.mAppToken.getRequestedOverrideConfiguration());
         config.windowConfiguration.setBounds(cf);
-        w.mAppToken.onOverrideConfigurationChanged(config);
+        w.mAppToken.onRequestedOverrideConfigurationChanged(config);
         pf.set(0, 0, logicalWidth, logicalHeight);
         task.mFullscreenForTest = true;
         windowFrames.setFrames(pf, pf, pf, cf, cf, pf, cf, mEmptyRect);

@@ -264,8 +264,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // If we created a docked stack we want to resize it so it resizes all other stacks
             // in the system.
             getStackDockedModeBounds(null, null, mTmpRect2, mTmpRect3);
-            mStackSupervisor.resizeDockedStackLocked(
-                    getOverrideBounds(), mTmpRect2, mTmpRect2, null, null, PRESERVE_WINDOWS);
+            mStackSupervisor.resizeDockedStackLocked(getRequestedOverrideBounds(), mTmpRect2,
+                    mTmpRect2, null, null, PRESERVE_WINDOWS);
         }
         mRootActivityContainer.updateUIDsPresentOnDisplay();
     }
@@ -562,7 +562,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // Update bounds if applicable
         boolean hasNewOverrideBounds = false;
         // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
-        if (getOverrideWindowingMode() == WINDOWING_MODE_PINNED) {
+        if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_PINNED) {
             // Pinned calculation already includes rotation
             mTmpRect2.set(mTmpRect);
             hasNewOverrideBounds = getWindowContainerController().mContainer
@@ -589,8 +589,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         || prevScreenH != getConfiguration().screenHeightDp) {
                     // Use override windowing mode to prevent extra bounds changes if inheriting
                     // the mode.
-                    if (getOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                            || getOverrideWindowingMode()
+                    if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                            || getRequestedOverrideWindowingMode()
                             == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
                         mTmpRect2.set(mTmpRect);
                         getWindowContainerController().mContainer
@@ -602,11 +602,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
         if (getWindowingMode() != prevWindowingMode) {
             // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
-            if (getOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+            if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 getStackDockedModeBounds(null, null, mTmpRect2, mTmpRect3);
                 // immediately resize so docked bounds are available in onSplitScreenModeActivated
                 resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */);
-            } else if (getOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+            } else if (
+                    getRequestedOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
                 Rect dockedBounds = display.getSplitScreenPrimaryStack().getBounds();
                 final boolean isMinimizedDock = getDisplay().getWindowContainerController()
                         .mContainer.getDockedDividerController().isMinimizedDock();
@@ -672,7 +673,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     void setWindowingMode(int preferredWindowingMode, boolean animate, boolean showRecents,
             boolean enteringSplitScreenMode, boolean deferEnsuringVisibility, boolean creating) {
         final int currentMode = getWindowingMode();
-        final int currentOverrideMode = getOverrideWindowingMode();
+        final int currentOverrideMode = getRequestedOverrideWindowingMode();
         final ActivityDisplay display = getDisplay();
         final TaskRecord topTask = topTask();
         final ActivityStack splitScreenStack = display.getSplitScreenPrimaryStack();
@@ -725,7 +726,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // You are already in the window mode, so we can skip most of the work below. However,
             // it's possible that we have inherited the current windowing mode from a parent. So,
             // fulfill this method's contract by setting the override mode directly.
-            getOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
+            getRequestedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
             return;
         }
 
@@ -791,7 +792,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mWindowContainerController.getRawBounds(mTmpRect2);
             }
 
-            if (!Objects.equals(getOverrideBounds(), mTmpRect2)) {
+            if (!Objects.equals(getRequestedOverrideBounds(), mTmpRect2)) {
                 resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */);
             }
         } finally {
@@ -4934,8 +4935,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     // For freeform stack we don't adjust the size of the tasks to match that
                     // of the stack, but we do try to make sure the tasks are still contained
                     // with the bounds of the stack.
-                    if (task.getOverrideBounds() != null) {
-                        mTmpRect2.set(task.getOverrideBounds());
+                    if (task.getRequestedOverrideBounds() != null) {
+                        mTmpRect2.set(task.getRequestedOverrideBounds());
                         fitWithinBounds(mTmpRect2, bounds);
                         task.updateOverrideConfiguration(mTmpRect2);
                     }
@@ -4946,9 +4947,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
             if (task.hasDisplayedBounds()) {
                 mTmpBounds.put(task.taskId, task.getDisplayedBounds());
-                mTmpInsetBounds.put(task.taskId, task.getOverrideBounds());
+                mTmpInsetBounds.put(task.taskId, task.getRequestedOverrideBounds());
             } else {
-                mTmpBounds.put(task.taskId, task.getOverrideBounds());
+                mTmpBounds.put(task.taskId, task.getRequestedOverrideBounds());
                 mTmpInsetBounds.put(task.taskId, null);
             }
         }
@@ -5191,7 +5192,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 pw.println("");
             }
             pw.println(prefix + "Task id #" + task.taskId);
-            pw.println(prefix + "mBounds=" + task.getOverrideBounds());
+            pw.println(prefix + "mBounds=" + task.getRequestedOverrideBounds());
             pw.println(prefix + "mMinWidth=" + task.mMinWidth);
             pw.println(prefix + "mMinHeight=" + task.mMinHeight);
             pw.println(prefix + "mLastNonFullscreenBounds=" + task.mLastNonFullscreenBounds);
@@ -5349,7 +5350,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (!mStackSupervisor.getLaunchParamsController()
                 .layoutTask(task, info.windowLayout, activity, source, options)
                 && !matchParentBounds() && task.isResizeable() && !isLockscreenShown) {
-            task.updateOverrideConfiguration(getOverrideBounds());
+            task.updateOverrideConfiguration(getRequestedOverrideBounds());
         }
         task.createWindowContainer(toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
         return task;
@@ -5541,7 +5542,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
         proto.write(DISPLAY_ID, mDisplayId);
         if (!matchParentBounds()) {
-            final Rect bounds = getOverrideBounds();
+            final Rect bounds = getRequestedOverrideBounds();
             bounds.writeToProto(proto, BOUNDS);
         }
 

@@ -183,7 +183,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
     @Override
     public void onInitializeOverrideConfiguration(Configuration config) {
-        getOverrideConfiguration().updateFrom(config);
+        getRequestedOverrideConfiguration().updateFrom(config);
     }
 
     void addChild(ActivityStack stack, int position) {
@@ -953,15 +953,16 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     }
 
     @Override
-    public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
-        final int currRotation = getOverrideConfiguration().windowConfiguration.getRotation();
+    public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        final int currRotation =
+                getRequestedOverrideConfiguration().windowConfiguration.getRotation();
         if (currRotation != ROTATION_UNDEFINED
                 && currRotation != overrideConfiguration.windowConfiguration.getRotation()
                 && getWindowContainerController() != null) {
             getWindowContainerController().applyRotation(currRotation,
                     overrideConfiguration.windowConfiguration.getRotation());
         }
-        super.onOverrideConfigurationChanged(overrideConfiguration);
+        super.onRequestedOverrideConfigurationChanged(overrideConfiguration);
     }
 
     @Override

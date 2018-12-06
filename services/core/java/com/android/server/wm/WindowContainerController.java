@@ -72,12 +72,12 @@ class WindowContainerController<E extends WindowContainer, I extends WindowConta
     }
 
     @Override
-    public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+    public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
         synchronized (mGlobalLock) {
             if (mContainer == null) {
                 return;
             }
-            mContainer.onOverrideConfigurationChanged(overrideConfiguration);
+            mContainer.onRequestedOverrideConfigurationChanged(overrideConfiguration);
         }
     }
 }
