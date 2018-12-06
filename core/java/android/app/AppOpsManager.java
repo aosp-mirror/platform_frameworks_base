@@ -476,9 +476,11 @@ public class AppOpsManager {
     public static final int OP_READ_MEDIA_IMAGES = 85;
     /** @hide Write media of image type. */
     public static final int OP_WRITE_MEDIA_IMAGES = 86;
+    /** @hide Has a legacy (non-isolated) view of storage. */
+    public static final int OP_LEGACY_STORAGE = 87;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 87;
+    public static final int _NUM_OP = 88;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -745,6 +747,8 @@ public class AppOpsManager {
     public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
     /** @hide Write media of image type. */
     public static final String OPSTR_WRITE_MEDIA_IMAGES = "android:write_media_images";
+    /** @hide Has a legacy (non-isolated) view of storage. */
+    public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
 
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
@@ -903,6 +907,7 @@ public class AppOpsManager {
             OP_WRITE_MEDIA_VIDEO,               // WRITE_MEDIA_VIDEO
             OP_READ_MEDIA_IMAGES,               // READ_MEDIA_IMAGES
             OP_WRITE_MEDIA_IMAGES,              // WRITE_MEDIA_IMAGES
+            OP_LEGACY_STORAGE,                  // LEGACY_STORAGE
     };
 
     /**
@@ -996,6 +1001,7 @@ public class AppOpsManager {
             OPSTR_WRITE_MEDIA_VIDEO,
             OPSTR_READ_MEDIA_IMAGES,
             OPSTR_WRITE_MEDIA_IMAGES,
+            OPSTR_LEGACY_STORAGE,
     };
 
     /**
@@ -1090,6 +1096,7 @@ public class AppOpsManager {
             "WRITE_MEDIA_VIDEO",
             "READ_MEDIA_IMAGES",
             "WRITE_MEDIA_IMAGES",
+            "LEGACY_STORAGE",
     };
 
     /**
@@ -1185,6 +1192,7 @@ public class AppOpsManager {
             null, // no permission for OP_WRITE_MEDIA_VIDEO
             Manifest.permission.READ_MEDIA_IMAGES,
             null, // no permission for OP_WRITE_MEDIA_IMAGES
+            null, // no permission for OP_LEGACY_STORAGE
     };
 
     /**
@@ -1280,6 +1288,7 @@ public class AppOpsManager {
             null, // WRITE_MEDIA_VIDEO
             null, // READ_MEDIA_IMAGES
             null, // WRITE_MEDIA_IMAGES
+            null, // LEGACY_STORAGE
     };
 
     /**
@@ -1374,6 +1383,7 @@ public class AppOpsManager {
             false, // WRITE_MEDIA_VIDEO
             false, // READ_MEDIA_IMAGES
             false, // WRITE_MEDIA_IMAGES
+            false, // LEGACY_STORAGE
     };
 
     /**
@@ -1467,6 +1477,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ERRORED, // WRITE_MEDIA_VIDEO
             AppOpsManager.MODE_ALLOWED, // READ_MEDIA_IMAGES
             AppOpsManager.MODE_ERRORED, // WRITE_MEDIA_IMAGES
+            AppOpsManager.MODE_DEFAULT, // LEGACY_STORAGE
     };
 
     /**
@@ -1564,6 +1575,7 @@ public class AppOpsManager {
             false, // WRITE_MEDIA_VIDEO
             false, // READ_MEDIA_IMAGES
             false, // WRITE_MEDIA_IMAGES
+            false, // LEGACY_STORAGE
     };
 
     /**
