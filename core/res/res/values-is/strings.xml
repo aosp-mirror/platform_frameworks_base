@@ -136,14 +136,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi símtal | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi símtöl"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"WiFi símtöl"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Slökkt"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi í forgangi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Farsímakerfi í forgangi"</string>
@@ -533,6 +529,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Leyfir forritinu að lesa staðsetningar úr efnissafninu þínu."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> forritið vill staðfestingu."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Lífkennavélbúnaður ekki tiltækur"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Þekktist ekki"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hluti fingrafars greindist. Reyndu aftur."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Ekki var hægt að vinna úr fingrafarinu. Reyndu aftur."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Fingrafaraskynjarinn er óhreinn. Hreinsaðu hann og reyndu aftur."</string>
@@ -540,7 +541,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Fingurinn hreyfðist of hægt. Reyndu aftur."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"Þekktist ekki"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Fingrafar staðfest"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Andlit staðfest"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Andlit staðfest, ýttu til að staðfesta"</string>
@@ -596,14 +596,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Leyfir forriti að breyta kostum samstillingar fyrir reikning. Þetta er til dæmis hægt að nota til að kveikja á samstillingu forritsins Fólk við reikning."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lesa talnagögn um samstillingu"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Leyfir forriti að lesa talnagögn samstillingar fyrir reikning, þ. á m. feril samstillingaratvika og samstillt gagnamagn."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lesa innihald USB-geymslunnar"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lesa innihald SD-kortsins"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Leyfir forriti að lesa innihald USB-geymslunnar."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Leyfir forriti að lesa innihald SD-kortsins."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"breyta eða eyða innihaldi USB-geymslunnar"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"breyta eða eyða innihaldi SD-kortsins"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Leyfir forriti að skrifa í USB-geymsluna."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Leyfir forriti að skrifa á SD-kortið."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"lesa innihald samnýtta geymslurýmisins"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"Leyfir forritinu að lesa innihald samnýtta geymslurýmisins."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"breyta eða eyða innihaldi samnýtta geymslurýmisins"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"Leyfir forriti að skrifa í innihald samnýtta geymslurýmisins."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"hringja/svara SIP-símtölum"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Leyfir forritinu að hringja og svara SIP-símtölum."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"skrá nýjar símatengingar fyrir SIM-kort"</string>
@@ -1105,6 +1101,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Skipuleggja viðburð á völdum tíma"</string>
     <string name="view_flight" msgid="7691640491425680214">"Rekja"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Fylgjast með völdu flugi"</string>
+    <string name="translate" msgid="9218619809342576858">"Þýða"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"Þýða valinn texta"</string>
+    <string name="define" msgid="7394820043869954211">"Skilgreina"</string>
+    <string name="define_desc" msgid="7910883642444919726">"Skilgreina valinn texta"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Geymslurýmið er senn á þrotum"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Sumir kerfiseiginleikar kunna að vera óvirkir"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Ekki nægt geymslurými fyrir kerfið. Gakktu úr skugga um að 250 MB séu laus og endurræstu."</string>
@@ -1461,8 +1461,7 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> af <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Lokið"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Hreinsar út af USB-geymslu…"</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"Hreinsar út af SD-korti…"</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"Eyðir samnýttri geymslu…"</string>
     <string name="share" msgid="1778686618230011964">"Deila"</string>
     <string name="find" msgid="4808270900322985960">"Finna"</string>
     <string name="websearch" msgid="4337157977400211589">"Vefleit"</string>
@@ -1834,8 +1833,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS-beiðni breytt í USSD-beiðni"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Breytt í nýja SS-beiðni"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Vinnusnið"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"Tilkynnt"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Stækka"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Minnka"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"stækka eða minnka"</string>

@@ -136,14 +136,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi bidezko deiak | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi bidezko deiak"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi sarea"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi bidezko deiak"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desaktibatuta"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi sarea hobesten da"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Datu-konexioa hobesten da"</string>
@@ -533,6 +529,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Multimedia-edukien bildumako kokapena irakurtzea baimentzen die aplikazioei."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> aplikazioak autentifikatu egin nahi du."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Hardware biometrikoa ez dago erabilgarri"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Ez da ezagutu"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hatz-marka digitala ez da osorik hauteman. Saiatu berriro."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Ezin izan da prozesatu hatz-marka. Saiatu berriro."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Hatz-marka digitalen sentsorea zikina dago. Garbi ezazu, eta saiatu berriro."</string>
@@ -540,7 +541,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Mantsoegi mugitu duzu hatza. Saiatu berriro."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"Ez da ezagutu"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Autentifikatu da hatz-marka"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Autentifikatu da aurpegia"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Autentifikatu da aurpegia; sakatu Berretsi"</string>
@@ -596,14 +596,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Kontu baten sinkronizazio-ezarpenak aldatzeko baimena ematen die aplikazioei. Adibidez, Jendea aplikazioa kontu batekin sinkronizatzeko erabil daiteke."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"irakurri sinkronizazio-estatistikak"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Kontu baten sinkronizazio-estatistikak irakurtzeko baimena ematen dio; besteak beste, sinkronizazio-gertaeren historia eta sinkronizatutako datu kopurua."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB memoriako edukia irakurtzea"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"irakurri SD txarteleko edukia"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"USB memoriako edukia irakurtzeko aukera ematen die aplikazioei."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"SD txartelaren edukia irakurtzeko aukera ematen die aplikazioei."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB memoriako edukia aldatzea edo ezabatzea"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"aldatu edo ezabatu SD txarteleko edukia"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"USB memorian idaztea baimentzen die aplikazioei."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"SD txartelean idaztea baimentzen die aplikazioei."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"Irakurri biltegi partekatuko edukia"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"Biltegi partekatuko edukia irakurtzea baimentzen die aplikazioei."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"Aldatu edo ezabatu biltegi partekatuko edukia"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"Biltegi partekatuko edukian idaztea baimentzen die aplikazioei."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"egin/jaso SIP deiak"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP deiak egitea eta jasotzea baimentzen die aplikazioei."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"erregistratu telekomunikabideekiko SIM konexio berriak"</string>
@@ -1105,6 +1101,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Antolatu gertaera bat hautatutako ordurako"</string>
     <string name="view_flight" msgid="7691640491425680214">"Egin jarraipena"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Egin hautatutako hegaldiaren jarraipena"</string>
+    <string name="translate" msgid="9218619809342576858">"Itzuli"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"Itzuli hautatutako testua"</string>
+    <string name="define" msgid="7394820043869954211">"Definitu"</string>
+    <string name="define_desc" msgid="7910883642444919726">"Definitu hautatutako testua"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Memoria betetzen ari da"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Sistemaren funtzio batzuek ez dute agian funtzionatuko"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Sisteman ez dago behar adina memoria. Ziurtatu gutxienez 250 MB erabilgarri dituzula eta, ondoren, berrabiarazi gailua."</string>
@@ -1461,8 +1461,7 @@
       <item quantity="one">Emaitza bat</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Eginda"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB memoria ezabatzen…"</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD txartela ezabatzen…"</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"Biltegiratze partekatuko eduki guztia ezabatzen…"</string>
     <string name="share" msgid="1778686618230011964">"Partekatu"</string>
     <string name="find" msgid="4808270900322985960">"Aurkitu"</string>
     <string name="websearch" msgid="4337157977400211589">"Web-bilaketa"</string>
@@ -1834,8 +1833,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS eskaera USSD eskaerara aldatu da"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"SS eskaera berrira aldatu da"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Work profila"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"Egin du soinua"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Zabaldu"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Tolestu"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"zabaldu edo tolestu"</string>

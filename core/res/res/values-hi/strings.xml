@@ -136,14 +136,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> वाई-फ़ाई"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"वाई-फ़ाई कॉलिंग | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"वाई-फ़ाई कॉलिंग"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"वाई-फ़ाई"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"वाई-फ़ाई कॉलिंग"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"बंद"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"वाई-फ़ाई को प्राथमिकता"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"मोबाइल को प्राथमिकता"</string>
@@ -426,8 +422,8 @@
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"ऐप्लिकेशन \'जगह की सटीक जानकारी\' सिर्फ़ सामने खुली होने पर एक्सेस करे"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"यह ऐप्लिकेशन सिर्फ़ तब आपकी \'जगह की सटीक जानकारी\' का इस्तेमाल कर सकता है जब यह स्क्रीन पर दिखाई दे रहा हो. यह ज़रूरी है कि \'जगह की जानकारी\' वाली ये सेवाएं आपके फ़ोन में मौजूद हों और चालू की गई हों ताकि ऐप्लिकेशन उनका इस्तेमाल कर पाए. ऐसा करने से ज़्यादा बैटरी खर्च हो सकती है."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"स्क्रीन पर दिखाई देते समय \'जगह की अनुमानित जानकारी\' (नेटवर्क-आधारित) एक्सेस करें"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"यह ऐप्लिकेशन सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क स्रोतों के आधार पर आपकी जगह का पता लगा सकता है, लेकिन सिर्फ़ तब जब ऐप्लिकेशन स्क्रीन पर दिखाई दे रहा हो. यह ज़रूरी है कि \'जगह की जानकारी\' वाली ये सेवाएं आपके टैबलेट में मौजूद हों और चालू की गई हों ताकि ऐप्लिकेशन उनका इस्तेमाल कर पाए."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"यह ऐप्लिकेशन सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क स्रोतों के आधार पर आपकी जगह का पता लगा सकता है, लेकिन सिर्फ़ तब जब ऐप्लिकेशन स्क्रीन पर दिखाई दे रहा हो. यह ज़रूरी है कि \'जगह की जानकारी\' वाली ये सेवाएं आपके टीवी पर मौजूद हों और चालू की गई हों ताकि ऐप्लिकेशन उनका इस्तेमाल कर पाए."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"यह ऐप्लिकेशन सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क स्रोतों के आधार पर आपकी जगह का पता लगा सकता है, लेकिन सिर्फ़ तब, जब ऐप्लिकेशन स्क्रीन पर दिखाई दे रहा हो. यह ज़रूरी है कि \'जगह की जानकारी\' वाली ये सेवाएं आपके टैबलेट में मौजूद हों और चालू की गई हों ताकि ऐप्लिकेशन उनका इस्तेमाल कर पाए."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"यह ऐप्लिकेशन सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क स्रोतों के आधार पर आपकी जगह का पता लगा सकता है, लेकिन सिर्फ़ तब, जब ऐप्लिकेशन स्क्रीन पर दिखाई दे रहा हो. यह ज़रूरी है कि \'जगह की जानकारी\' वाली ये सेवाएं आपके टीवी पर मौजूद हों और चालू की गई हों ताकि ऐप्लिकेशन उनका इस्तेमाल कर पाए."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"यह ऐप्लिकेशन सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क स्रोतों के आधार पर आपकी जगह का पता लगा सकता है, लेकिन सिर्फ़ तब, जब ऐप्लिकेशन स्क्रीन पर दिखाई दे रहा हो. यह ज़रूरी है कि \'जगह की जानकारी\' वाली ये सेवाएं आपके फ़ोन में मौजूद हों और चालू की गई हों ताकि ऐप्लिकेशन उनका इस्तेमाल कर पाए."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"बैकग्राउंड में जगह की जानकारी एक्सेस करना"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"अनुमानित या बिल्कुल सही जगह की जानकारी का एक्सेस करने की अनुमति अलग से दिए जाने पर, बैकग्राउंड में चलने के दौरान ऐप्लिकेशन आपकी जगह की जानकारी एक्सेस कर सकता है."</string>
@@ -533,6 +529,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"इससे ऐप्लिकेशन को आपके मीडिया संग्रह से जगह की जानकारी एक्सेस करने की अनुमति दी जाती है."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"ऐप्लिकेशन <xliff:g id="APP">%s</xliff:g> पुष्टि करना चाहता है."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"बायोमेट्रिक हार्डवेयर उपलब्ध नहीं है"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"पहचान नहीं हो पाई"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक फ़िंगरप्रिंट की पहचान की गई. कृपया पुनः प्रयास करें."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"फ़िंगरप्रिंट संसाधित नहीं हो सका. कृपया पुन: प्रयास करें."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"फ़िंगरप्रिंट सेंसर गंदा है. कृपया साफ़ करें और फिर कोशिश करें."</string>
@@ -540,7 +541,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"उंगली बहुत धीरे चलाई गई. कृपया फिर से कोशिश करें."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"पहचान नहीं हो पाई"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"फ़िंगरप्रिंट की पुष्टि हो गई"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"चेहरे की पहचान की गई"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"चेहरे की पहचान की गई, कृपया पुष्टि बटन दबाएं"</string>
@@ -596,14 +596,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ऐप्स  को किसी खाते की समन्वयन सेटिंग संशोधित करने देता है. उदाहरण के लिए, इसका उपयोग लोग ऐप्स  का समन्‍वयन किसी खाते से सक्षम करने में हो सकता है."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"समन्वयन आंकड़े पढ़ें"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"ऐप्स  को किसी खाते के समन्वयन आंकड़े, साथ ही समन्‍वयित इवेंट का इतिहास और समन्‍वयित डेटा की मात्रा पढ़ने देता है."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"अपने USB मेमोरी की सामग्री पढ़ें"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"अपने SD कार्ड की सामग्री पढ़ें"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"एप्‍लिकेशन को आपके USB मेमोरी की सामग्री पढ़ने की अनुमति देता है."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"एप्‍लिकेशन को आपके SD कार्ड की सामग्री पढ़ने की अनुमति देता है."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"अपने USB मेमोरी की सामग्री बदलें या मिटाएं"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"अपने SD कार्ड की सामग्री बदलें या मिटाएं"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"ऐप्स को USB मेमोरी में लिखने देता है."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"ऐप्स  को SD कार्ड पर लिखने देता है."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"आपकी शेयर की गई मेमोरी की सामग्री पढ़ना"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"ऐप्‍लिकेशन को आपकी शेयर की गई मेमोरी की सामग्री पढ़ने देती है."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"आपकी शेयर की गई मेमोरी की सामग्री में बदलाव करना या उसे मिटाना"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"ऐप्लिकेशन को आपकी शेयर की गई मेमोरी की सामग्री लिखने देती है."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP कॉल करें/प्राप्‍त करें"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"ऐप्स को SIP कॉल करने और प्राप्‍त करने देती है."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"नए टेलिकॉम सिम कनेक्‍शन रजिस्टर करें"</string>
@@ -650,23 +646,23 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"उपयोगकर्ता को किसी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से जोड़ता है. सामान्‍य ऐप के लिए इसकी कभी ज़रूरत नहीं होती."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"\'परेशान न करें\' को ऐक्सेस करें"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"ऐप को परेशान न करें कॉन्फ़िगरेशन पढ़ने और लिखने देती है."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करें"</string>
-    <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्‍क्रीन लॉक पासवर्ड तथा पिन की लंबाई और उसमें अनुमत वर्णों को नियंत्रित करें."</string>
-    <string name="policylab_watchLogin" msgid="5091404125971980158">"स्क्रीन अनलॉक करने की कोशिशों की निगरानी करें"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करना"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्‍क्रीन लॉक पासवर्ड और पिन की लंबाई और उनमें स्वीकृत वर्णों को नियंत्रित करना."</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"स्‍क्रीन अनलॉक करने के की कोशिशों पर नज़र रखना"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"स्‍क्रीन को अनलॉक करते समय गलत लिखे गए पासवर्ड की संख्‍या पर निगरानी करें, और बहुत अधिक बार गलत पासवर्ड लिखे जाने पर टैबलेट लॉक करें या टैबलेट का संपूर्ण डेटा मिटाएं."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"स्‍क्रीन को अनलॉक करते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें और यदि बहुत अधिक गलत पासवर्ड लिखे जाते हैं तो टीवी को लॉक करें या टीवी का सभी डेटा मिटा दें."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"गलत लिखे गए पासवर्ड की संख्‍या पर निगरानी करें. स्क्रीन अनलॉक करते समय, बहुत अधिक बार गलत पासवर्ड लिखे जाने पर फ़ोन लॉक करें या फ़ोन का संपूर्ण डेटा मिटाएं."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"स्क्रीन को अनलॉक करते समय जितनी बार गलत पासवर्ड लिखा गया है, उसकी संख्या पर नज़र रखना और अगर बहुत बार गलत पासवर्ड डाले गए हैं, तो फ़ोन को लॉक कर देना या फ़ोन का सारा डेटा मिटा देना."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"स्‍क्रीन का लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार अधिक पासवर्ड लिखे जाते हैं तो टैबलेट को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"स्‍क्रीन का लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार गलत पासवर्ड लिखा जाता है तो टीवी को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"स्‍क्रीनका लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार गलत पासवर्ड लिखा जाता है तो फ़ोन को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"स्‍क्रीन लॉक बदलें"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"स्‍क्रीन लॉक को बदलें."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"स्‍क्रीन लॉक बदलना"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"स्‍क्रीन लॉक बदलना."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"स्‍क्रीन लॉक करें"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"नियंत्रित करें कि स्‍क्रीन कैसे और कब लॉक हो."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"सभी डेटा मिटाएं"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"फ़ैक्टरी डेटा रीसेट करके, चेतावनी दिए बिना टैबलेट का डेटा मिटाएं."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"फ़ैक्‍टरी डेटा रीसेट करके, चेतावनी दिए बिना टीवी का डेटा मिटाएं."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"फ़ैक्‍टरी डेटा रीसेट करके, चेतावनी दिए बिना फ़ोन का डेटा मिटाएं."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"सारा डेटा मिटाना"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"फ़ैक्‍टरी डेटा रीसेट करके चेतावनी दिए बिना फ़ोन का डेटा मिटाना."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"फ़ैक्‍टरी डेटा रीसेट करके चेतावनी दिए बिना फ़ोन का डेटा मिटाना."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"फ़ैक्‍टरी डेटा रीसेट करके चेतावनी दिए बिना फ़ोन का डेटा मिटाना."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"उपयोगकर्ता डेटा मिटाएं"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"इस टैबलेट पर मौजूद इस उपयोगकर्ता का डेटा बिना चेतावनी के मिटा दें."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"इस टीवी पर मौजूद इस उपयोगकर्ता का डेटा बिना चेतावनी के मिटा दें."</string>
@@ -1105,6 +1101,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"चुने गए समय के लिए इवेंट शेड्यूल करें"</string>
     <string name="view_flight" msgid="7691640491425680214">"मौजूदा स्थिति जानें"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"चुनी गई फ़्लाइट की मौजूदा स्थिति देखें"</string>
+    <string name="translate" msgid="9218619809342576858">"अनुवाद करें"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"चुने गए टेक्स्ट का अनुवाद करें"</string>
+    <string name="define" msgid="7394820043869954211">"परिभाषित करें"</string>
+    <string name="define_desc" msgid="7910883642444919726">"चुना गया टेक्स्ट परिभाषित करें"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"मेमोरी में जगह नहीं बची है"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"हो सकता है कुछ सिस्टम फ़ंक्शन कार्य न करें"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"सिस्टम के लिए ज़रूरी मेमोरी नहीं है. पक्का करें कि आपके पास 250एमबी की खाली जगह है और फिर से शुरू करें."</string>
@@ -1460,8 +1460,7 @@
       <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> में से <xliff:g id="INDEX">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"हो गया"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB मेमोरी मिटाया जा रहा है…"</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD कार्ड मिटाया जा रहा है…"</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"शेयर की गई मेमोरी हमेशा के लिए मिटाई जा रही है…"</string>
     <string name="share" msgid="1778686618230011964">"शेयर करें"</string>
     <string name="find" msgid="4808270900322985960">"ढूंढें"</string>
     <string name="websearch" msgid="4337157977400211589">"वेब सर्च"</string>
@@ -1833,8 +1832,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"एसएस कोड चलाने के अनुरोध को यूएसएसडी कोड चलाने के अनुरोध में बदला गया"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"एसएस कोड चलाने के नए अनुरोध में बदला गया"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"कार्य प्रोफ़ाइल"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"अलर्ट किया गया"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"विस्तार करें"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"छोटा करें"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"टॉगल विस्तार"</string>

@@ -136,14 +136,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"การโทรผ่าน Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"การโทรผ่าน Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"การโทรผ่าน Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ปิด"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ต้องการใช้ Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ต้องการใช้อินเทอร์เน็ตมือถือ"</string>
@@ -533,6 +529,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"อนุญาตให้แอปอ่านตำแหน่งจากคอลเล็กชันสื่อของคุณ"</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"แอปพลิเคชัน <xliff:g id="APP">%s</xliff:g> ต้องการตรวจสอบสิทธิ์"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ฮาร์ดแวร์ไบโอเมตริกไม่พร้อมใช้งาน"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"ไม่รู้จัก"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ตรวจพบลายนิ้วมือเพียงบางส่วน โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ไม่สามารถประมวลผลลายนิ้วมือได้ โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"เซ็นเซอร์ลายนิ้วมือไม่สะอาด โปรดทำความสะอาดและลองอีกครั้ง"</string>
@@ -540,7 +541,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"นิ้วเคลื่อนที่ช้าเกินไป โปรดลองอีกครั้ง"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"ไม่รู้จัก"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"ตรวจสอบสิทธิ์ลายนิ้วมือแล้ว"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"ตรวจสอบสิทธิ์ใบหน้าแล้ว"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"ตรวจสอบสิทธิ์ใบหน้าแล้ว โปรดกดยืนยัน"</string>
@@ -596,14 +596,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงการตั้งค่าการซิงค์ของบัญชี ตัวอย่างเช่น สามารถใช้การอนุญาตเปิดใช้งานการซิงค์แอปพลิเคชัน People กับบัญชี"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"อ่านสถิติการซิงค์"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"อนุญาตให้แอปพลิเคชันอ่านสถานะการซิงค์ของบัญชี ซึ่งรวมถึงประวัติกิจกรรมการซิงค์และปริมาณข้อมูลที่ซิงค์"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"อ่านเนื้อหาในที่จัดเก็บ USB"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"อ่านเนื้อหาในการ์ด SD ของคุณ"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"อนุญาตให้แอปอ่านเนื้อหาในที่จัดเก็บข้อมูล USB"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"อนุญาตให้แอปอ่านเนื้อหาในการ์ด SD"</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"แก้ไขหรือลบเนื้อหาใน USB"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"แก้ไขหรือลบเนื้อหาในการ์ด SD ของคุณ"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"อนุญาตให้แอปเขียนลงใน USB"</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"อนุญาตให้แอปพลิเคชันเขียนลงบนการ์ด SD"</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"อ่านเนื้อหาในพื้นที่จัดเก็บข้อมูลที่ใช้ร่วมกัน"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"อนุญาตให้แอปอ่านเนื้อหาในพื้นที่จัดเก็บข้อมูลที่ใช้ร่วมกัน"</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"แก้ไขหรือลบเนื้อหาในพื้นที่จัดเก็บข้อมูลที่ใช้ร่วมกัน"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"อนุญาตให้แอปเขียนเนื้อหาในพื้นที่จัดเก็บข้อมูลที่ใช้ร่วมกัน"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"โทร/รับสาย SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"อนุญาตให้แอปโทรและรับสาย SIP"</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"ลงทะเบียนการเชื่อมต่อซิมโทรคมนาคมใหม่"</string>
@@ -1105,6 +1101,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"ตั้งเวลากิจกรรมสำหรับเวลาที่เลือก"</string>
     <string name="view_flight" msgid="7691640491425680214">"แทร็ก"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ติดตามเที่ยวบินที่เลือก"</string>
+    <string name="translate" msgid="9218619809342576858">"แปล"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"แปลข้อความที่เลือก"</string>
+    <string name="define" msgid="7394820043869954211">"หาความหมาย"</string>
+    <string name="define_desc" msgid="7910883642444919726">"ให้คำจำกัดความข้อความที่เลือก"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"พื้นที่จัดเก็บเหลือน้อย"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"บางฟังก์ชันระบบอาจไม่ทำงาน"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"พื้นที่เก็บข้อมูลไม่เพียงพอสำหรับระบบ โปรดตรวจสอบว่าคุณมีพื้นที่ว่าง 250 MB แล้วรีสตาร์ท"</string>
@@ -1460,8 +1460,7 @@
       <item quantity="one">ตรงกัน 1 รายการ</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"เสร็จสิ้น"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"กำลังลบที่จัดเก็บข้อมูล USB..."</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"กำลังลบการ์ด SD..."</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"กำลังลบพื้นที่เก็บข้อมูลที่แชร์…"</string>
     <string name="share" msgid="1778686618230011964">"แชร์"</string>
     <string name="find" msgid="4808270900322985960">"ค้นหา"</string>
     <string name="websearch" msgid="4337157977400211589">"ค้นเว็บ"</string>
@@ -1833,8 +1832,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"คำขอ SS เปลี่ยนเป็นคำขอ USSD แล้ว"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"เปลี่ยนเป็นคำขอ SS ใหม่แล้ว"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"โปรไฟล์งาน"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"แจ้งเตือนแล้ว"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"ขยาย"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"ยุบ"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"สลับการขยาย"</string>

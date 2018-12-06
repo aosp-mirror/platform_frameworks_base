@@ -136,14 +136,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Gọi qua Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Gọi qua Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Gọi qua Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Tắt"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Ưu tiên Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Ưu tiên dữ liệu di động"</string>
@@ -533,6 +529,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Cho phép ứng dụng này đọc vị trí từ bộ sưu tập phương tiện của bạn."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Ứng dụng <xliff:g id="APP">%s</xliff:g> muốn xác thực."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Không có phần cứng sinh trắc học"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Không nhận dạng được"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Đã phát hiện được một phần vân tay. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Không thể xử lý vân tay. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Cảm biến vân tay bị bẩn. Hãy làm sạch và thử lại."</string>
@@ -540,7 +541,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Di chuyển ngón tay quá chậm. Vui lòng thử lại."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"Không nhận dạng được"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Đã xác thực vân tay"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Đã xác thực khuôn mặt"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Đã xác thực khuôn mặt, vui lòng nhấn để xác nhận"</string>
@@ -596,14 +596,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Cho phép ứng dụng sửa đổi cài đặt đồng bộ hóa cho tài khoản. Ví dụ: ứng dụng có thể được sử dụng để cho phép đồng bộ hóa ứng dụng Mọi người với tài khoản."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"đọc thống kê đồng bộ hóa"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Cho phép ứng dụng đọc thống kê đồng bộ hóa cho tài khoản, bao gồm lịch sử của các sự kiện đồng bộ hóa và lượng dữ liệu được đồng bộ hóa."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"đọc nội dung của bộ lưu trữ USB của bạn"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"đọc nội dung của thẻ SD của bạn"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Cho phép ứng dụng đọc nội dung của bộ lưu trữ USB."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Cho phép ứng dụng đọc nội dung của thẻ SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"sửa đổi hoặc xóa nội dung của bộ lưu trữ USB của bạn"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"sửa đổi hoặc xóa nội dung của thẻ SD của bạn"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Cho phép ứng dụng ghi vào bộ lưu trữ USB."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Cho phép ứng dụng ghi vào thẻ SD."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"đọc nội dung của bộ nhớ dùng chung"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"Cho phép ứng dụng đọc nội dung của bộ nhớ dùng chung."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"sửa đổi hoặc xóa nội dung của bộ nhớ dùng chung"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"Cho phép ứng dụng ghi nội dung của bộ nhớ dùng chung."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"thực hiện/nhận các cuộc gọi qua SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Cho phép ứng dụng thực hiện và nhận các cuộc gọi qua SIP."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"đăng ký kết nối SIM viễn thông mới"</string>
@@ -1105,6 +1101,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Lên lịch biểu sự kiện cho thời gian đã chọn"</string>
     <string name="view_flight" msgid="7691640491425680214">"Theo dõi"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Theo dõi chuyến bay đã chọn"</string>
+    <string name="translate" msgid="9218619809342576858">"Dịch"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"Dịch văn bản đã chọn"</string>
+    <string name="define" msgid="7394820043869954211">"Định nghĩa"</string>
+    <string name="define_desc" msgid="7910883642444919726">"Định nghĩa văn bản đã chọn"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Sắp hết dung lượng lưu trữ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Một số chức năng hệ thống có thể không hoạt động"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Không đủ bộ nhớ cho hệ thống. Đảm bảo bạn có 250 MB dung lượng trống và khởi động lại."</string>
@@ -1460,8 +1460,7 @@
       <item quantity="one">1 trận đấu</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Xong"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Đang xóa bộ lưu trữ USB..."</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"Đang xóa thẻ SD..."</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"Đang xóa bộ nhớ dùng chung…"</string>
     <string name="share" msgid="1778686618230011964">"Chia sẻ"</string>
     <string name="find" msgid="4808270900322985960">"Tìm"</string>
     <string name="websearch" msgid="4337157977400211589">"Tìm kiếm trên web"</string>
@@ -1833,8 +1832,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"Yêu cầu SS đã thay đổi thành yêu cầu USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Đã thay đổi thành yêu cầu SS mới"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Hồ sơ công việc"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"Đã phát âm báo"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Mở rộng"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Thu gọn"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"chuyển đổi mở rộng"</string>
