@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -45,6 +46,7 @@ public class KeyguardDisplayManager {
     private final Context mContext;
 
     private boolean mShowing;
+    private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
 
     private final SparseArray<Presentation> mPresentations = new SparseArray<>();
 
@@ -86,6 +88,22 @@ public class KeyguardDisplayManager {
         mDisplayService.registerDisplayListener(mDisplayListener, null /* handler */);
     }
 
+    private boolean isKeyguardShowable(Display display) {
+        if (display == null) {
+            if (DEBUG) Log.i(TAG, "Cannot show Keyguard on null display");
+            return false;
+        }
+        if (display.getDisplayId() == DEFAULT_DISPLAY) {
+            if (DEBUG) Log.i(TAG, "Do not show KeyguardPresentation on the default display");
+            return false;
+        }
+        display.getDisplayInfo(mTmpDisplayInfo);
+        if ((mTmpDisplayInfo.flags & Display.FLAG_PRIVATE) != 0) {
+            if (DEBUG) Log.i(TAG, "Do not show KeyguardPresentation on a private display");
+            return false;
+        }
+        return true;
+    }
     /**
      * @param display The display to show the presentation on.
      * @return {@code true} if a presentation was added.
@@ -93,7 +111,7 @@ public class KeyguardDisplayManager {
      *         was already there.
      */
     private boolean showPresentation(Display display) {
-        if (display == null || display.getDisplayId() == DEFAULT_DISPLAY) return false;
+        if (!isKeyguardShowable(display)) return false;
         if (DEBUG) Log.i(TAG, "Keyguard enabled on display: " + display);
         final int displayId = display.getDisplayId();
         Presentation presentation = mPresentations.get(displayId);
