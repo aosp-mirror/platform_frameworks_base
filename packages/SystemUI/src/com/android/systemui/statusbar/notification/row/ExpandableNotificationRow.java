@@ -328,6 +328,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private float mTranslationWhenRemoved;
     private boolean mWasChildInGroupWhenRemoved;
     private int mNotificationColorAmbient;
+    private NotificationInlineImageResolver mImageResolver;
 
     private SystemNotificationAsyncTask mSystemNotificationAsyncTask =
             new SystemNotificationAsyncTask();
@@ -1621,6 +1622,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mFalsingManager = FalsingManager.getInstance(context);
         mNotificationInflater = new NotificationInflater(this);
         mMenuRow = new NotificationMenuRow(mContext);
+        mImageResolver = new NotificationInlineImageResolver(context,
+                new NotificationInlineImageCache());
         initDimens();
     }
 
@@ -1655,6 +1658,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 res.getBoolean(R.bool.config_enableNonGroupedNotificationExpand);
         mShowGroupBackgroundWhenExpanded =
                 res.getBoolean(R.bool.config_showGroupNotificationBgWhenExpanded);
+    }
+
+    NotificationInlineImageResolver getImageResolver() {
+        return mImageResolver;
     }
 
     /**
