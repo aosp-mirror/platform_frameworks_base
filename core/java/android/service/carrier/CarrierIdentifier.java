@@ -71,10 +71,8 @@ public class CarrierIdentifier implements Parcelable {
      * @param gid2 group id level 2
      * @param carrierid carrier unique identifier {@link TelephonyManager#getSimCarrierId()}, used
      *                  to uniquely identify the carrier and look up the carrier configurations.
-     * @param preciseCarrierId precise carrier identifier {@link TelephonyManager#getSimPreciseCarrierId()}
-     * @hide
-     *
-     * TODO: expose this to public API
+     * @param preciseCarrierId precise carrier identifier
+     * {@link TelephonyManager#getSimPreciseCarrierId()}
      */
     public CarrierIdentifier(String mcc, String mnc, @Nullable String spn,
                              @Nullable String imsi, @Nullable String gid1, @Nullable String gid2,
@@ -155,16 +153,16 @@ public class CarrierIdentifier implements Parcelable {
     }
 
     /**
-     * Get the carrier id {@link TelephonyManager#getSimCarrierId() }
-     * @hide
+     * Returns the carrier id.
+     * @see TelephonyManager#getSimCarrierId()
      */
     public int getCarrierId() {
         return mCarrierId;
     }
 
     /**
-     * Get the precise carrier id {@link TelephonyManager#getSimPreciseCarrierId()}
-     * @hide
+     * Returns the precise carrier id.
+     * @see TelephonyManager#getSimPreciseCarrierId()
      */
     public int getPreciseCarrierId() {
         return mPreciseCarrierId;
