@@ -213,6 +213,8 @@ import java.util.Objects;
  * (e.g.{@link AudioTrack#getPlaybackHeadPosition()
  * AudioTrack.getPlaybackHeadPosition()}),
  * depending on the context where audio frame is used.
+ * For the purposes of {@link AudioFormat#getFrameSizeInBytes()}, a compressed data format
+ * returns a frame size of 1 byte.
  */
 public final class AudioFormat implements Parcelable {
 
@@ -707,6 +709,16 @@ public final class AudioFormat implements Parcelable {
             channelCount = 0; // position and index channel count mismatch
         }
         mChannelCount = channelCount;
+
+        int frameSizeInBytes = 1;
+        try {
+            frameSizeInBytes = getBytesPerSample(mEncoding) * channelCount;
+        } catch (IllegalArgumentException iae) {
+            // ignored
+        }
+        // it is possible that channel count is 0, so ensure we return 1 for
+        // mFrameSizeInBytes for consistency.
+        mFrameSizeInBytes = frameSizeInBytes != 0 ? frameSizeInBytes : 1;
     }
 
     /** @hide */
@@ -734,6 +746,7 @@ public final class AudioFormat implements Parcelable {
 
     // Derived values computed in the constructor, cached here.
     private final int mChannelCount;
+    private final int mFrameSizeInBytes;
 
     /**
      * Return the encoding.
@@ -786,6 +799,25 @@ public final class AudioFormat implements Parcelable {
      */
     public int getChannelCount() {
         return mChannelCount;
+    }
+
+    /**
+     * Return the frame size in bytes.
+     *
+     * For PCM or PCM packed compressed data this is the size of a sample multiplied
+     * by the channel count. For all other cases, including invalid/unset channel masks,
+     * this will return 1 byte.
+     * As an example, a stereo 16-bit PCM format would have a frame size of 4 bytes,
+     * an 8 channel float PCM format would have a frame size of 32 bytes,
+     * and a compressed data format (not packed in PCM) would have a frame size of 1 byte.
+     *
+     * Both {@link AudioRecord} or {@link AudioTrack} process data in multiples of
+     * this frame size.
+     *
+     * @return The audio frame size in bytes corresponding to the encoding and the channel mask.
+     */
+    public int getFrameSizeInBytes() {
+        return mFrameSizeInBytes;
     }
 
     /** @hide */
