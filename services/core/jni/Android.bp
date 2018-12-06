@@ -31,6 +31,7 @@ cc_library_static {
         "com_android_server_input_InputManagerService.cpp",
         "com_android_server_lights_LightsService.cpp",
         "com_android_server_location_GnssLocationProvider.cpp",
+        "com_android_server_locksettings_SyntheticPasswordManager.cpp",
         "com_android_server_net_NetworkStatsService.cpp",
         "com_android_server_power_PowerManagerService.cpp",
         "com_android_server_security_VerityUtils.cpp",
@@ -125,6 +126,7 @@ cc_defaults {
 
     static_libs: [
         "android.hardware.broadcastradio@common-utils-1x-lib",
+        "libscrypt_static",
     ],
 
     product_variables: {
