@@ -253,8 +253,12 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                     final IServiceConnection sd = mContext.getServiceDispatcher(this, this, flags);
                     Intent intent = (Intent) msg.obj;
                     int appWidgetId = msg.arg1;
-                    mBindRequested = AppWidgetManager.getInstance(mContext)
-                            .bindRemoteViewsService(mContext, appWidgetId, intent, sd, flags);
+                    try {
+                        mBindRequested = AppWidgetManager.getInstance(mContext)
+                                .bindRemoteViewsService(mContext, appWidgetId, intent, sd, flags);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to bind remoteViewsService: " + e.getMessage());
+                    }
                     return;
                 }
                 case MSG_NOTIFY_DATA_SET_CHANGED: {
