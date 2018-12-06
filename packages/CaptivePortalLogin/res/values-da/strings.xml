@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Der er sikkerhedsproblemer på det netværk, du forsøger at logge ind på."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Det er f.eks. ikke sikkert, at loginsiden tilhører den anførte organisation."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Fortsæt alligevel via browseren"</string>
-    <string name="ok" msgid="1509280796718850364">"OK"</string>
-    <string name="page_info" msgid="4048529256302257195">"Sideoplysninger"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"Adresse:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"Sikkerhedsadvarsel"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"Vis certifikat"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"Dette certifikat stammer ikke fra en troværdig autoritet."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"Navnet på websitet stemmer ikke overens med navnet på certifikatet."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"Dette certifikat er udløbet."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"Dette certifikat er endnu ikke gyldigt."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"Dette certifikat har en ugyldig dato."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"Dette certifikat er ugyldigt."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"Ukendt fejl i certifikatet."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Dette certifikat stammer ikke fra en pålidelig kilde."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Navnet på websitet stemmer ikke overens med navnet på certifikatet."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Dette certifikat er udløbet."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Dette certifikat er ikke gyldigt endnu."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Dette certifikat har en ugyldig dato."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Dette certifikat er ugyldigt."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Ukendt certifikatfejl."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Sikkerhedsadvarsel"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Se certifikat"</string>
+    <string name="ok" msgid="2817931639040794018">"OK"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Adresse:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Sideoplysninger"</string>
 </resources>

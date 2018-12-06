@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"તમે જોડાવાનો પ્રયાસ કરી રહ્યાં છો તે નેટવર્કમાં સુરક્ષા સમસ્યાઓ છે."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"ઉદાહરણ તરીકે, લોગિન પૃષ્ઠ દર્શાવેલ સંસ્થાનું હોઈ શકતું નથી."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"બ્રાઉઝર મારફતે કોઈપણ રીતે ચાલુ રાખો"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"આ પ્રમાણપત્ર વિશ્વસનીય સત્તાધિકારી તરફથી મળ્યું નથી."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"સાઇટનું નામ એ પ્રમાણપત્ર પર રહેલાં નામ સાથે મેળ ખાતું નથી."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"આ પ્રમાણપત્રની સમયસીમા સમાપ્ત થઈ ગઈ છે."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"આ પ્રમાણપત્ર હજુ માન્ય નથી."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"આ પ્રમાણપત્રમાં અમાન્ય તારીખ છે."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"આ પ્રમાણપત્ર અમાન્ય છે."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"પ્રમાણપત્રમાં અજાણી ભૂલ."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"સુરક્ષા વિશે ચેતવણી"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"પ્રમાણપત્ર જુઓ"</string>
+    <string name="ok" msgid="2817931639040794018">"ઓકે"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"સરનામું:"</string>
+    <string name="page_info" msgid="4416941086705172545">"પેજ વિશે માહિતી"</string>
 </resources>

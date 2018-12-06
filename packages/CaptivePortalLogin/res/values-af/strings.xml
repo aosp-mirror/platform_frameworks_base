@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Die netwerk waarby jy probeer aansluit, het sekuriteitkwessies."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Byvoorbeeld, die aanmeldbladsy behoort dalk nie aan die organisasie wat gewys word nie."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Gaan in elk geval deur blaaier voort"</string>
-    <string name="ok" msgid="1509280796718850364">"OK"</string>
-    <string name="page_info" msgid="4048529256302257195">"Bladsy-inligting"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"Adres:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"Sekuriteitswaarskuwing"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"Bekyk sertifikaat"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"Hierdie sertifikaat is nie van \'n betroubare owerheid nie."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"Die naam van die werf kom nie ooreen met die naam op die sertifikaat nie."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"Hierdie sertifikaat het verval."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"Hierdie sertifikaat is nog nie geldig nie."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"Hierdie sertifikaat het \'n ongeldige datum."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"Hierdie sertifikaat is ongeldig."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"Onbekende sertifikaatfout."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Hierdie sertifikaat is nie van \'n betroubare owerheid nie."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Die naam van die werf stem nie ooreen met die naam op die sertifikaat nie."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Hierdie sertifikaat het verval."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Hierdie sertifikaat is nog nie geldig nie."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Hierdie sertifikaat het \'n ongeldige datum."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Hierdie sertifikaat is ongeldig."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Onbekende sertifikaatfout."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Sekuriteitswaarskuwing"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Bekyk sertifikaat"</string>
+    <string name="ok" msgid="2817931639040794018">"OK"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Adres:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Bladsy-inligting"</string>
 </resources>
