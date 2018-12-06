@@ -96,6 +96,7 @@ import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.ConnectivityManager.PacketKeepaliveCallback;
 import android.net.ConnectivityManager.TooManyRequestsException;
 import android.net.ConnectivityThread;
+import android.net.INetd;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
@@ -228,6 +229,7 @@ public class ConnectivityServiceTest {
     @Mock INetworkManagementService mNetworkManagementService;
     @Mock INetworkStatsService mStatsService;
     @Mock INetworkPolicyManager mNpm;
+    @Mock INetd mMockNetd;
 
     private ArgumentCaptor<String[]> mStringArrayCaptor = ArgumentCaptor.forClass(String[].class);
 
@@ -926,8 +928,9 @@ public class ConnectivityServiceTest {
 
         public WrappedConnectivityService(Context context, INetworkManagementService netManager,
                 INetworkStatsService statsService, INetworkPolicyManager policyManager,
-                IpConnectivityLog log) {
+                IpConnectivityLog log, INetd netd) {
             super(context, netManager, statsService, policyManager, log);
+            mNetd = netd;
             mLingerDelayMs = TEST_LINGER_DELAY_MS;
         }
 
@@ -1087,7 +1090,8 @@ public class ConnectivityServiceTest {
                 mNetworkManagementService,
                 mStatsService,
                 mNpm,
-                mock(IpConnectivityLog.class));
+                mock(IpConnectivityLog.class),
+                mMockNetd);
 
         final ArgumentCaptor<INetworkPolicyListener> policyListenerCaptor =
                 ArgumentCaptor.forClass(INetworkPolicyListener.class);
@@ -4765,5 +4769,31 @@ public class ConnectivityServiceTest {
 
         // Clean up
         mCm.unregisterNetworkCallback(networkCallback);
+    }
+
+    private static final String TEST_TCP_BUFFER_SIZES = "1,2,3,4,5,6";
+
+    private void verifyTcpBufferSizeChange(String tcpBufferSizes) throws Exception {
+        String[] values = tcpBufferSizes.split(",");
+        String rmemValues = String.join(" ", values[0], values[1], values[2]);
+        String wmemValues = String.join(" ", values[3], values[4], values[5]);
+        waitForIdle();
+        verify(mMockNetd, atLeastOnce()).setTcpRWmemorySize(rmemValues, wmemValues);
+        reset(mMockNetd);
+    }
+
+    @Test
+    public void testTcpBufferReset() throws Exception {
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        reset(mMockNetd);
+        // Simple connection should have updated tcp buffer size.
+        mCellNetworkAgent.connect(false);
+        verifyTcpBufferSizeChange(ConnectivityService.DEFAULT_TCP_BUFFER_SIZES);
+
+        // Change link Properties should have updated tcp buffer size.
+        LinkProperties lp = new LinkProperties();
+        lp.setTcpBufferSizes(TEST_TCP_BUFFER_SIZES);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        verifyTcpBufferSizeChange(TEST_TCP_BUFFER_SIZES);
     }
 }
