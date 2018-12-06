@@ -1045,11 +1045,11 @@ public final class MediaFormat {
 
     /**
      * Returns the value of a numeric key. This is provided as a convenience method for keys
-     * that may take multiple numeric types, such as {@link KEY_FRAME_RATE}, or {@link
-     * KEY_I_FRAME_INTERVAL}.
+     * that may take multiple numeric types, such as {@link #KEY_FRAME_RATE}, or {@link
+     * #KEY_I_FRAME_INTERVAL}.
      *
      * @return null if the key does not exist or the stored value for the key is null
-     * @throw ClassCastException if the stored value for the key is ByteBuffer or String
+     * @throws ClassCastException if the stored value for the key is ByteBuffer or String
      */
     public final @Nullable Number getNumber(@NonNull String name) {
         return ((Number)mMap.get(name));
@@ -1059,7 +1059,7 @@ public final class MediaFormat {
      * Returns the value of a numeric key, or the default value if the key is missing.
      *
      * @return defaultValue if the key does not exist or the stored value for the key is null
-     * @throw ClassCastException if the stored value for the key is ByteBuffer or String
+     * @throws ClassCastException if the stored value for the key is ByteBuffer or String
      */
     public final @NonNull Number getNumber(@NonNull String name, @NonNull Number defaultValue) {
         Number ret = getNumber(name);
@@ -1069,9 +1069,10 @@ public final class MediaFormat {
     /**
      * Returns the value of an integer key.
      *
-     * @throw NullPointerException if the key does not exist or the stored value for the key is null
-     * @throw ClassCastException if the stored value for the key is long, float, ByteBuffer or
-     *        String
+     * @throws NullPointerException if the key does not exist or the stored value for the key is
+     *         null
+     * @throws ClassCastException if the stored value for the key is long, float, ByteBuffer or
+     *         String
      */
     public final int getInteger(@NonNull String name) {
         return ((Integer)mMap.get(name)).intValue();
@@ -1081,8 +1082,8 @@ public final class MediaFormat {
      * Returns the value of an integer key, or the default value if the key is missing.
      *
      * @return defaultValue if the key does not exist or the stored value for the key is null
-     * @throw ClassCastException if the stored value for the key is long, float, ByteBuffer or
-     *        String
+     * @throws ClassCastException if the stored value for the key is long, float, ByteBuffer or
+     *         String
      */
     public final int getInteger(@NonNull String name, int defaultValue) {
         try {
@@ -1096,9 +1097,10 @@ public final class MediaFormat {
     /**
      * Returns the value of a long key.
      *
-     * @throw NullPointerException if the key does not exist or the stored value for the key is null
-     * @throw ClassCastException if the stored value for the key is int, float, ByteBuffer or
-     *        String
+     * @throws NullPointerException if the key does not exist or the stored value for the key is
+     *         null
+     * @throws ClassCastException if the stored value for the key is int, float, ByteBuffer or
+     *         String
      */
     public final long getLong(@NonNull String name) {
         return ((Long)mMap.get(name)).longValue();
@@ -1108,8 +1110,8 @@ public final class MediaFormat {
      * Returns the value of an long key, or the default value if the key is missing.
      *
      * @return defaultValue if the key does not exist or the stored value for the key is null
-     * @throw ClassCastException if the stored value for the key is int, float, ByteBuffer or
-     *        String
+     * @throws ClassCastException if the stored value for the key is int, float, ByteBuffer or
+     *         String
      */
     public final long getLong(@NonNull String name, long defaultValue) {
         try {
@@ -1123,9 +1125,10 @@ public final class MediaFormat {
     /**
      * Returns the value of a float key.
      *
-     * @throw NullPointerException if the key does not exist or the stored value for the key is null
-     * @throw ClassCastException if the stored value for the key is int, long, ByteBuffer or
-     *        String
+     * @throws NullPointerException if the key does not exist or the stored value for the key is
+     *         null
+     * @throws ClassCastException if the stored value for the key is int, long, ByteBuffer or
+     *         String
      */
     public final float getFloat(@NonNull String name) {
         return ((Float)mMap.get(name)).floatValue();
@@ -1135,8 +1138,8 @@ public final class MediaFormat {
      * Returns the value of an float key, or the default value if the key is missing.
      *
      * @return defaultValue if the key does not exist or the stored value for the key is null
-     * @throw ClassCastException if the stored value for the key is int, long, ByteBuffer or
-     *        String
+     * @throws ClassCastException if the stored value for the key is int, long, ByteBuffer or
+     *         String
      */
     public final float getFloat(@NonNull String name, float defaultValue) {
         try {
@@ -1151,7 +1154,7 @@ public final class MediaFormat {
      * Returns the value of a string key.
      *
      * @return null if the key does not exist or the stored value for the key is null
-     * @throw ClassCastException if the stored value for the key is int, long, float or ByteBuffer
+     * @throws ClassCastException if the stored value for the key is int, long, float or ByteBuffer
      */
     public final @Nullable String getString(@NonNull String name) {
         return (String)mMap.get(name);
@@ -1161,7 +1164,7 @@ public final class MediaFormat {
      * Returns the value of an string key, or the default value if the key is missing.
      *
      * @return defaultValue if the key does not exist or the stored value for the key is null
-     * @throw ClassCastException if the stored value for the key is int, long, float or ByteBuffer
+     * @throws ClassCastException if the stored value for the key is int, long, float or ByteBuffer
      */
     public final @NonNull String getString(@NonNull String name, @NonNull String defaultValue) {
         String ret = getString(name);
@@ -1172,7 +1175,7 @@ public final class MediaFormat {
      * Returns the value of a ByteBuffer key.
      *
      * @return null if the key does not exist or the stored value for the key is null
-     * @throw ClassCastException if the stored value for the key is int, long, float or String
+     * @throws ClassCastException if the stored value for the key is int, long, float or String
      */
     public final @Nullable ByteBuffer getByteBuffer(@NonNull String name) {
         return (ByteBuffer)mMap.get(name);
@@ -1182,7 +1185,7 @@ public final class MediaFormat {
      * Returns the value of a ByteBuffer key, or the default value if the key is missing.
      *
      * @return defaultValue if the key does not exist or the stored value for the key is null
-     * @throw ClassCastException if the stored value for the key is int, long, float or String
+     * @throws ClassCastException if the stored value for the key is int, long, float or String
      */
     public final @NonNull ByteBuffer getByteBuffer(
             @NonNull String name, @NonNull ByteBuffer defaultValue) {
@@ -1197,7 +1200,7 @@ public final class MediaFormat {
      * @param feature the name of a {@link MediaCodecInfo.CodecCapabilities} feature.
      *
      * @throws IllegalArgumentException if the feature was neither set to be enabled
-     *        nor to be disabled.
+     *         nor to be disabled.
      */
     public boolean getFeatureEnabled(@NonNull String feature) {
         Integer enabled = (Integer)mMap.get(KEY_FEATURE_ + feature);

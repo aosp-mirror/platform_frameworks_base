@@ -58,7 +58,7 @@ public class PipUI extends SystemUI implements CommandQueue.Callbacks {
                 : com.android.systemui.pip.phone.PipManager.getInstance();
         mPipManager.initialize(mContext);
 
-        getComponent(CommandQueue.class).addCallbacks(this);
+        getComponent(CommandQueue.class).addCallback(this);
         putComponent(PipUI.class, this);
     }
 

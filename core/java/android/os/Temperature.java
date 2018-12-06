@@ -44,7 +44,7 @@ public final class Temperature implements Parcelable {
             THROTTLING_MODERATE,
             THROTTLING_SEVERE,
             THROTTLING_CRITICAL,
-            THROTTLING_WARNING,
+            THROTTLING_EMERGENCY,
             THROTTLING_SHUTDOWN,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -56,7 +56,7 @@ public final class Temperature implements Parcelable {
     public static final int THROTTLING_MODERATE = ThrottlingSeverity.MODERATE;
     public static final int THROTTLING_SEVERE = ThrottlingSeverity.SEVERE;
     public static final int THROTTLING_CRITICAL = ThrottlingSeverity.CRITICAL;
-    public static final int THROTTLING_WARNING = ThrottlingSeverity.WARNING;
+    public static final int THROTTLING_EMERGENCY = ThrottlingSeverity.EMERGENCY;
     public static final int THROTTLING_SHUTDOWN = ThrottlingSeverity.SHUTDOWN;
 
     @IntDef(prefix = { "TYPE_" }, value = {

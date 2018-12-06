@@ -618,7 +618,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         Dependency.get(StatusBarStateController.class)
-                .addListener(mStateListener, StatusBarStateController.RANK_STACK_SCROLLER);
+                .addCallback(mStateListener, StatusBarStateController.RANK_STACK_SCROLLER);
         Dependency.get(ConfigurationController.class).addCallback(this);
     }
 
@@ -626,7 +626,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Dependency.get(StatusBarStateController.class).removeListener(mStateListener);
+        Dependency.get(StatusBarStateController.class).removeCallback(mStateListener);
         Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 

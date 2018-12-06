@@ -18,6 +18,7 @@ package android.service.intelligence;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.CallSuper;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -30,10 +31,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.service.intelligence.PresentationParams.SystemPopupPresentationParams;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Slog;
+import android.util.TimeUtils;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAugmentedAutofillManagerClient;
@@ -43,6 +47,8 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -110,9 +116,11 @@ public abstract class SmartSuggestionsService extends Service {
 
         @Override
         public void onAutofillRequest(InteractionSessionId sessionId, IBinder client,
-                int autofilSessionId, AutofillId focusedId) {
+                int autofilSessionId, AutofillId focusedId, AutofillValue focusedValue,
+                long requestTime) {
             mHandler.sendMessage(obtainMessage(SmartSuggestionsService::handleOnAutofillRequest,
-                    SmartSuggestionsService.this, sessionId, client, autofilSessionId, focusedId));
+                    SmartSuggestionsService.this, sessionId, client, autofilSessionId, focusedId,
+                    focusedValue, requestTime));
         }
 
         @Override
@@ -229,13 +237,15 @@ public abstract class SmartSuggestionsService extends Service {
             @NonNull ContentCaptureEventsRequest request);
 
     private void handleOnAutofillRequest(@NonNull InteractionSessionId sessionId,
-            @NonNull IBinder client, int autofillSessionId, @NonNull AutofillId focusedId) {
+            @NonNull IBinder client, int autofillSessionId, @NonNull AutofillId focusedId,
+            @Nullable AutofillValue focusedValue, long requestTime) {
         if (mAutofillProxies == null) {
             mAutofillProxies = new ArrayMap<>();
         }
         AutofillProxy proxy = mAutofillProxies.get(sessionId);
         if (proxy == null) {
-            proxy = new AutofillProxy(sessionId, client, autofillSessionId, focusedId);
+            proxy = new AutofillProxy(sessionId, client, autofillSessionId, focusedId, focusedValue,
+                    requestTime);
             mAutofillProxies.put(sessionId,  proxy);
         } else {
             // TODO(b/111330312): figure out if it's ok to reuse the proxy; add logging
@@ -244,7 +254,7 @@ public abstract class SmartSuggestionsService extends Service {
         // TODO(b/111330312): set cancellation signal
         final CancellationSignal cancellationSignal = null;
         onFillRequest(sessionId, new FillRequest(proxy), cancellationSignal,
-                new FillController(proxy), new FillCallback());
+                new FillController(proxy), new FillCallback(proxy));
     }
 
     /**
@@ -332,11 +342,32 @@ public abstract class SmartSuggestionsService extends Service {
 
     /** @hide */
     static final class AutofillProxy {
+
+        static final int REPORT_EVENT_ON_SUCCESS = 1;
+        static final int REPORT_EVENT_UI_SHOWN = 2;
+        static final int REPORT_EVENT_UI_DESTROYED = 3;
+
+        @IntDef(prefix = { "REPORT_EVENT_" }, value = {
+                REPORT_EVENT_ON_SUCCESS,
+                REPORT_EVENT_UI_SHOWN,
+                REPORT_EVENT_UI_DESTROYED
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        @interface ReportEvent{}
+
+
         private final Object mLock = new Object();
         private final IAugmentedAutofillManagerClient mClient;
         private final int mAutofillSessionId;
         public final InteractionSessionId sessionId;
         public final AutofillId focusedId;
+        public final AutofillValue focusedValue;
+
+        // Objects used to log metrics
+        private final long mRequestTime;
+        private long mOnSuccessTime;
+        private long mUiFirstShownTime;
+        private long mUiFirstDestroyedTime;
 
         @GuardedBy("mLock")
         private SystemPopupPresentationParams mSmartSuggestion;
@@ -345,11 +376,14 @@ public abstract class SmartSuggestionsService extends Service {
         private FillWindow mFillWindow;
 
         private AutofillProxy(@NonNull InteractionSessionId sessionId, @NonNull IBinder client,
-                int autofillSessionId, @NonNull AutofillId focusedId) {
+                int autofillSessionId, @NonNull AutofillId focusedId,
+                @Nullable AutofillValue focusedValue, long requestTime) {
             this.sessionId = sessionId;
             mClient = IAugmentedAutofillManagerClient.Stub.asInterface(client);
             mAutofillSessionId = autofillSessionId;
             this.focusedId = focusedId;
+            this.focusedValue = focusedValue;
+            this.mRequestTime = requestTime;
             // TODO(b/111330312): linkToDeath
         }
 
@@ -400,9 +434,50 @@ public abstract class SmartSuggestionsService extends Service {
             }
         }
 
+        // Used for metrics.
+        public void report(@ReportEvent int event) {
+            switch (event) {
+                case REPORT_EVENT_ON_SUCCESS:
+                    if (mOnSuccessTime == 0) {
+                        mOnSuccessTime = SystemClock.elapsedRealtime();
+                        if (DEBUG) {
+                            Slog.d(TAG, "Service responsed in "
+                                    + TimeUtils.formatDuration(mOnSuccessTime - mRequestTime));
+                        }
+                    }
+                    break;
+                case REPORT_EVENT_UI_SHOWN:
+                    if (mUiFirstShownTime == 0) {
+                        mUiFirstShownTime = SystemClock.elapsedRealtime();
+                        if (DEBUG) {
+                            Slog.d(TAG, "UI shown in "
+                                    + TimeUtils.formatDuration(mUiFirstShownTime - mRequestTime));
+                        }
+                    }
+                    break;
+                case REPORT_EVENT_UI_DESTROYED:
+                    if (mUiFirstDestroyedTime == 0) {
+                        mUiFirstDestroyedTime = SystemClock.elapsedRealtime();
+                        if (DEBUG) {
+                            Slog.d(TAG, "UI destroyed in "
+                                    + TimeUtils.formatDuration(
+                                            mUiFirstDestroyedTime - mRequestTime));
+                        }
+                    }
+                    break;
+                default:
+                    Slog.w(TAG, "invalid event reported: " + event);
+            }
+            // TODO(b/111330312): log metrics as well
+        }
+
+
         public void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
             pw.print(prefix); pw.print("afSessionId: "); pw.println(mAutofillSessionId);
             pw.print(prefix); pw.print("focusedId: "); pw.println(focusedId);
+            if (focusedValue != null) {
+                pw.print(prefix); pw.print("focusedValue: "); pw.println(focusedValue);
+            }
             pw.print(prefix); pw.print("client: "); pw.println(mClient);
             final String prefix2 = prefix + "  ";
             if (mFillWindow != null) {
@@ -412,6 +487,23 @@ public abstract class SmartSuggestionsService extends Service {
             if (mSmartSuggestion != null) {
                 pw.print(prefix); pw.println("smartSuggestion:");
                 mSmartSuggestion.dump(prefix2, pw);
+            }
+            if (mOnSuccessTime > 0) {
+                final long responseTime = mOnSuccessTime - mRequestTime;
+                pw.print(prefix); pw.print("response time: ");
+                TimeUtils.formatDuration(responseTime, pw); pw.println();
+            }
+
+            if (mUiFirstShownTime > 0) {
+                final long uiRenderingTime = mUiFirstShownTime - mRequestTime;
+                pw.print(prefix); pw.print("UI rendering time: ");
+                TimeUtils.formatDuration(uiRenderingTime, pw); pw.println();
+            }
+
+            if (mUiFirstDestroyedTime > 0) {
+                final long uiTotalTime = mUiFirstDestroyedTime - mRequestTime;
+                pw.print(prefix); pw.print("UI life time: ");
+                TimeUtils.formatDuration(uiTotalTime, pw); pw.println();
             }
         }
 

@@ -35,6 +35,8 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.SystemUI;
+import com.android.systemui.statusbar.CommandQueue.Callbacks;
+import com.android.systemui.statusbar.policy.CallbackController;
 
 import java.util.ArrayList;
 
@@ -45,7 +47,7 @@ import java.util.ArrayList;
  * coalescing these calls so they don't stack up.  For the calls
  * are coalesced, note that they are all idempotent.
  */
-public class CommandQueue extends IStatusBar.Stub {
+public class CommandQueue extends IStatusBar.Stub implements CallbackController<Callbacks> {
     private static final int INDEX_MASK = 0xffff;
     private static final int MSG_SHIFT  = 16;
     private static final int MSG_MASK   = 0xffff << MSG_SHIFT;
@@ -183,12 +185,12 @@ public class CommandQueue extends IStatusBar.Stub {
                 && !ONLY_CORE_APPS;
     }
 
-    public void addCallbacks(Callbacks callbacks) {
+    public void addCallback(Callbacks callbacks) {
         mCallbacks.add(callbacks);
         callbacks.disable(mDisable1, mDisable2, false /* animate */);
     }
 
-    public void removeCallbacks(Callbacks callbacks) {
+    public void removeCallback(Callbacks callbacks) {
         mCallbacks.remove(callbacks);
     }
 
@@ -223,7 +225,9 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void disable(int state1, int state2) {
+    // TODO(b/117478341): Add multi-display support.
+    @Override
+    public void disable(int displayId, int state1, int state2) {
         disable(state1, state2, true);
     }
 
@@ -266,8 +270,10 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis,
-            int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+    // TODO(b/117478341): Add multi-display support.
+    @Override
+    public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
         synchronized (mLock) {
             // Don't coalesce these, since it might have one time flags set such as
             // STATUS_BAR_UNHIDE which might get lost.
@@ -282,7 +288,9 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void topAppWindowChanged(boolean menuVisible) {
+    // TODO(b/117478341): Add multi-display support.
+    @Override
+    public void topAppWindowChanged(int displayId, boolean menuVisible) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_TOP_APP_WINDOW_CHANGED);
             mHandler.obtainMessage(MSG_TOP_APP_WINDOW_CHANGED, menuVisible ? 1 : 0, 0,
@@ -290,7 +298,9 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
+    // TODO(b/117478341): Add multi-display support.
+    @Override
+    public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_SHOW_IME_BUTTON);
@@ -371,7 +381,9 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void setWindowState(int window, int state) {
+    // TODO(b/117478341): Add multi-display support.
+    @Override
+    public void setWindowState(int displayId, int window, int state) {
         synchronized (mLock) {
             // don't coalesce these
             mHandler.obtainMessage(MSG_SET_WINDOW_STATE, window, state, null).sendToTarget();
@@ -385,7 +397,9 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void appTransitionPending() {
+    // TODO(b/117478341): Add multi-display support.
+    @Override
+    public void appTransitionPending(int displayId) {
         appTransitionPending(false /* forced */);
     }
 
@@ -395,13 +409,17 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void appTransitionCancelled() {
+    // TODO(b/117478341): Add multi-display support.
+    @Override
+    public void appTransitionCancelled(int displayId) {
         synchronized (mLock) {
             mHandler.sendEmptyMessage(MSG_APP_TRANSITION_CANCELLED);
         }
     }
 
-    public void appTransitionStarting(long startTime, long duration) {
+    // TODO(b/117478341): Add multi-display support.
+    @Override
+    public void appTransitionStarting(int displayId, long startTime, long duration) {
         appTransitionStarting(startTime, duration, false /* forced */);
     }
 
@@ -412,8 +430,9 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    // TODO(b/117478341): Add multi-display support.
     @Override
-    public void appTransitionFinished() {
+    public void appTransitionFinished(int displayId) {
         synchronized (mLock) {
             mHandler.sendEmptyMessage(MSG_APP_TRANSITION_FINISHED);
         }

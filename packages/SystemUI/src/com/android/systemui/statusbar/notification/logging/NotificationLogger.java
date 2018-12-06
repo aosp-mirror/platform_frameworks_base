@@ -149,7 +149,7 @@ public class NotificationLogger implements StateListener {
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         // Not expected to be destroyed, don't need to unsubscribe
-        Dependency.get(StatusBarStateController.class).addListener(this);
+        Dependency.get(StatusBarStateController.class).addCallback(this);
     }
 
     public void setUpWithContainer(NotificationListContainer listContainer) {

@@ -35,6 +35,7 @@ import android.telephony.ICellInfoCallback;
 import android.telephony.ModemActivityInfo;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.NetworkScanRequest;
+import android.telephony.PhoneNumberRange;
 import android.telephony.RadioAccessFamily;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -49,6 +50,7 @@ import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
+import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.OperatorInfo;
 
 import java.util.List;
@@ -869,6 +871,17 @@ interface ITelephony {
      * @param subId user preferred subId.
      */
     String getCdmaMin(int subId);
+
+    /**
+     * Request that the next incoming call from a number matching {@code range} be intercepted.
+     * @param range The range of phone numbers the caller expects a phone call from.
+     * @param timeoutMillis The amount of time to wait for such a call, or
+     *                      {@link #MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS}, whichever is lesser.
+     * @param callback the callback aidl
+     * @param callingPackage the calling package name.
+     */
+    void requestNumberVerification(in PhoneNumberRange range, long timeoutMillis,
+            in INumberVerificationCallback callback, String callingPackage);
 
     /**
      * Has the calling application been granted special privileges by the carrier.

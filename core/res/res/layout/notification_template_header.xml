@@ -17,7 +17,7 @@
 <!-- extends ViewGroup -->
 <NotificationHeaderView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:theme="@style/Theme.Material.Notification"
+    android:theme="@style/Theme.DeviceDefault.Notification"
     android:id="@+id/notification_header"
     android:orientation="horizontal"
     android:layout_width="wrap_content"

@@ -22,6 +22,7 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.app.INotificationManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -55,7 +56,9 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.IStorageManager;
+import android.provider.Settings;
 import android.sysprop.VoldProperties;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
@@ -121,6 +124,7 @@ import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.role.RoleManagerService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
+import com.android.server.signedconfig.SignedConfigService;
 import com.android.server.soundtrigger.SoundTriggerService;
 import com.android.server.stats.StatsCompanionService;
 import com.android.server.statusbar.StatusBarManagerService;
@@ -797,10 +801,6 @@ public final class SystemServer {
         boolean disableSystemTextClassifier = SystemProperties.getBoolean(
                 "config.disable_systemtextclassifier", false);
 
-        //TODO(b/111276913): temporarily disabled until the manager is properly implemented to
-        // ignore events when disabled and buffer when enabled
-        boolean disableIntelligence = SystemProperties.getBoolean(
-                "config.disable_intelligence", true);
         boolean disableNetworkTime = SystemProperties.getBoolean("config.disable_networktime",
                 false);
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
@@ -926,7 +926,7 @@ public final class SystemServer {
             ConcurrentUtils.waitForFutureNoInterrupt(mSensorServiceStart, START_SENSOR_SERVICE);
             mSensorServiceStart = null;
             wm = WindowManagerService.main(context, inputManager, !mFirstBoot, mOnlyCore,
-                    new PhoneWindowManager(), mWindowManagerGlobalLock);
+                    new PhoneWindowManager(), mActivityManagerService.mActivityTaskManager);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm, /* allowIsolated= */ false,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PROTO);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager,
@@ -995,6 +995,11 @@ public final class SystemServer {
             traceBeginAndSlog("PinnerService");
             mSystemServiceManager.startService(PinnerService.class);
             traceEnd();
+
+            traceBeginAndSlog("SignedConfigService");
+            SignedConfigService.registerUpdateReceiver(mSystemContext);
+            traceEnd();
+
         } catch (RuntimeException e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service", e);
@@ -1131,13 +1136,7 @@ public final class SystemServer {
                 traceEnd();
             }
 
-            if (!disableIntelligence) {
-                traceBeginAndSlog("StartIntelligenceService");
-                mSystemServiceManager.startService(INTELLIGENCE_MANAGER_SERVICE_CLASS);
-                traceEnd();
-            } else {
-                Slog.d(TAG, "IntelligenceService disabled");
-            }
+            startIntelligenceService(context);
 
             // NOTE: ClipboardService indirectly depends on IntelligenceService
             traceBeginAndSlog("StartClipboardService");
@@ -2099,6 +2098,37 @@ public final class SystemServer {
             }
             traceEnd();
         }, BOOT_TIMINGS_TRACE_LOG);
+    }
+
+    private void startIntelligenceService(@NonNull Context context) {
+
+        // First check if it was explicitly enabled by Settings
+        boolean explicitlySupported = false;
+        final String settings = Settings.Global.getString(context.getContentResolver(),
+                Settings.Global.SMART_SUGGESTIONS_SERVICE_EXPLICITLY_ENABLED);
+        if (settings != null) {
+            explicitlySupported = Boolean.parseBoolean(settings);
+            if (explicitlySupported) {
+                Slog.d(TAG, "IntelligenceService explicitly enabled by Settings");
+            } else {
+                Slog.d(TAG, "IntelligenceService explicitly disabled by Settings");
+                return;
+            }
+        }
+
+        // Then check if OEM overlaid the resource that defines the service.
+        if (!explicitlySupported) {
+            final String serviceName = context
+                    .getString(com.android.internal.R.string.config_defaultSmartSuggestionsService);
+            if (TextUtils.isEmpty(serviceName)) {
+                Slog.d(TAG, "IntelligenceService disabled because config resource is not overlaid");
+                return;
+            }
+        }
+
+        traceBeginAndSlog("StartIntelligenceService");
+        mSystemServiceManager.startService(INTELLIGENCE_MANAGER_SERVICE_CLASS);
+        traceEnd();
     }
 
     static final void startSystemUi(Context context, WindowManagerService windowManager) {

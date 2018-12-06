@@ -35,6 +35,7 @@ import android.os.UserManager;
 import android.service.intelligence.InteractionSessionId;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.intelligence.ContentCaptureEvent;
 import android.view.intelligence.IIntelligenceManager;
@@ -65,6 +66,8 @@ public final class IntelligenceManagerService extends
 
     static final String RECEIVER_BUNDLE_EXTRA_SESSIONS = "sessions";
 
+    private static final int MAX_TEMP_SERVICE_DURATION_MS = 1_000 * 60 * 2; // 2 minutes
+
     @GuardedBy("mLock")
     private ActivityManagerInternal mAm;
 
@@ -72,12 +75,6 @@ public final class IntelligenceManagerService extends
 
     public IntelligenceManagerService(Context context) {
         super(context, UserManager.DISALLOW_INTELLIGENCE_CAPTURE);
-    }
-
-    @Override // from AbstractMasterSystemService
-    protected String getServiceSettingsProperty() {
-        // TODO(b/111276913): STOPSHIP temporary settings, until it's set by resourcs + cmd
-        return "smart_suggestions_service";
     }
 
     @Override // from AbstractMasterSystemService
@@ -102,6 +99,11 @@ public final class IntelligenceManagerService extends
     @Override // from AbstractMasterSystemService
     protected void enforceCallingPermissionForManagement() {
         getContext().enforceCallingPermission(MANAGE_SMART_SUGGESTIONS, TAG);
+    }
+
+    @Override // from AbstractMasterSystemService
+    protected int getMaximumTemporaryServiceDurationMs() {
+        return MAX_TEMP_SERVICE_DURATION_MS;
     }
 
     // Called by Shell command.
@@ -256,12 +258,13 @@ public final class IntelligenceManagerService extends
         @Override
         public AugmentedAutofillCallback requestAutofill(@UserIdInt int userId,
                 @NonNull IAutoFillManagerClient client, @NonNull IBinder activityToken,
-                int autofillSessionId, @NonNull AutofillId focusedId) {
+                int autofillSessionId, @NonNull AutofillId focusedId,
+                @Nullable AutofillValue focusedValue) {
             synchronized (mLock) {
                 final IntelligencePerUserService service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     return service.requestAutofill(client, activityToken, autofillSessionId,
-                            focusedId);
+                            focusedId, focusedValue);
                 }
             }
             return null;

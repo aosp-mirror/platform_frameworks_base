@@ -22,12 +22,14 @@
 #include "TestHelpers.h"
 #include "data/basic/R.h"
 #include "data/libclient/R.h"
+#include "data/overlayable/R.h"
 #include "data/sparse/R.h"
 #include "data/styles/R.h"
 
 namespace app = com::android::app;
 namespace basic = com::android::basic;
 namespace libclient = com::android::libclient;
+namespace overlayable = com::android::overlayable;
 namespace sparse = com::android::sparse;
 
 using ::android::base::ReadFileToString;
@@ -273,10 +275,44 @@ TEST(LoadedArscTest, LoadOverlay) {
   ASSERT_THAT(LoadedPackage::GetEntry(type_spec->types[0], 0x0000), NotNull());
 }
 
-// structs with size fields (like Res_value, ResTable_entry) should be
-// backwards and forwards compatible (aka checking the size field against
-// sizeof(Res_value) might not be backwards compatible.
-TEST(LoadedArscTest, LoadingShouldBeForwardsAndBackwardsCompatible) { ASSERT_TRUE(false); }
+TEST(LoadedArscTest, LoadOverlayable) {
+  std::string contents;
+  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/overlayable/overlayable.apk",
+                                      "resources.arsc", &contents));
+
+  std::unique_ptr<const LoadedArsc> loaded_arsc =
+      LoadedArsc::Load(StringPiece(contents), nullptr /*loaded_idmap*/, false /*system*/,
+                       false /*load_as_shared_library*/);
+
+  ASSERT_THAT(loaded_arsc, NotNull());
+  const LoadedPackage* package = loaded_arsc->GetPackageById(
+      get_package_id(overlayable::R::string::not_overlayable));
+
+  const OverlayableInfo* info = package->GetOverlayableInfo(
+      overlayable::R::string::not_overlayable);
+  ASSERT_THAT(info, IsNull());
+
+  info = package->GetOverlayableInfo(overlayable::R::string::overlayable1);
+  ASSERT_THAT(info, NotNull());
+  EXPECT_THAT(info->policy_flags, Eq(ResTable_overlayable_policy_header::POLICY_PUBLIC));
+
+  info = package->GetOverlayableInfo(overlayable::R::string::overlayable2);
+  ASSERT_THAT(info, NotNull());
+  EXPECT_THAT(info->policy_flags,
+              Eq(ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION
+                 | ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION));
+
+  info = package->GetOverlayableInfo(overlayable::R::string::overlayable3);
+  ASSERT_THAT(info, NotNull());
+  EXPECT_THAT(info->policy_flags,
+              Eq(ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION
+                 | ResTable_overlayable_policy_header::POLICY_PRODUCT_SERVICES_PARTITION
+                 | ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION));
+
+  info = package->GetOverlayableInfo(overlayable::R::string::overlayable4);
+  ASSERT_THAT(info, NotNull());
+  EXPECT_THAT(info->policy_flags, Eq(ResTable_overlayable_policy_header::POLICY_PUBLIC));
+}
 
 TEST(LoadedArscTest, ResourceIdentifierIterator) {
   std::string contents;
@@ -325,5 +361,10 @@ TEST(LoadedArscTest, ResourceIdentifierIterator) {
   ASSERT_EQ(0x7f070003u, *iter++);
   ASSERT_EQ(end, iter);
 }
+
+// structs with size fields (like Res_value, ResTable_entry) should be
+// backwards and forwards compatible (aka checking the size field against
+// sizeof(Res_value) might not be backwards compatible.
+TEST(LoadedArscTest, LoadingShouldBeForwardsAndBackwardsCompatible) { ASSERT_TRUE(false); }
 
 }  // namespace android

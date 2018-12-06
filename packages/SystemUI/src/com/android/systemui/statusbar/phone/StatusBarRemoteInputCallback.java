@@ -70,10 +70,10 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks {
         mContext = context;
         mContext.registerReceiverAsUser(mChallengeReceiver, UserHandle.ALL,
                 new IntentFilter(ACTION_DEVICE_LOCKED_CHANGED), null, null);
-        mStatusBarStateController.addListener(mStateListener);
+        mStatusBarStateController.addCallback(mStateListener);
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mCommandQueue = getComponent(context, CommandQueue.class);
-        mCommandQueue.addCallbacks(this);
+        mCommandQueue.addCallback(this);
     }
 
     private void setStatusBarState(int state) {
@@ -206,7 +206,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks {
     }
 
     @Override
-    public boolean handleRemoteViewClick(PendingIntent pendingIntent,
+    public boolean handleRemoteViewClick(View view, PendingIntent pendingIntent,
             NotificationRemoteInputManager.ClickHandler defaultHandler) {
         final boolean isActivity = pendingIntent.isActivity();
         if (isActivity) {

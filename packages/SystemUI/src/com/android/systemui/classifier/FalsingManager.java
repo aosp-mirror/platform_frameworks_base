@@ -108,7 +108,7 @@ public class FalsingManager implements SensorEventListener {
                 UserHandle.USER_ALL);
 
         updateConfiguration();
-        Dependency.get(StatusBarStateController.class).addListener(mStateListener);
+        Dependency.get(StatusBarStateController.class).addCallback(mStateListener);
     }
 
     public static FalsingManager getInstance(Context context) {

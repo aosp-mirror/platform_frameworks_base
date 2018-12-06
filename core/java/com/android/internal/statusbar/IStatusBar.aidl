@@ -29,7 +29,7 @@ oneway interface IStatusBar
 {
     void setIcon(String slot, in StatusBarIcon icon);
     void removeIcon(String slot);
-    void disable(int state1, int state2);
+    void disable(int displayId, int state1, int state2);
     void animateExpandNotificationsPanel();
     void animateExpandSettingsPanel(String subPanel);
     void animateCollapsePanels();
@@ -38,8 +38,9 @@ oneway interface IStatusBar
     void showWirelessChargingAnimation(int batteryLevel);
 
     /**
-     * Notifies the status bar of a System UI visibility flag change.
+     * Notifies System UI side of a visibility flag change on the specified display.
      *
+     * @param displayId the id of the display to notify
      * @param vis the visibility flags except SYSTEM_UI_FLAG_LIGHT_STATUS_BAR which will be reported
      *            separately in fullscreenStackVis and dockedStackVis
      * @param fullscreenStackVis the flags which only apply in the region of the fullscreen stack,
@@ -50,13 +51,13 @@ oneway interface IStatusBar
      * @param fullscreenBounds the current bounds of the fullscreen stack, in screen coordinates
      * @param dockedBounds the current bounds of the docked stack, in screen coordinates
      */
-    void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis, int mask,
-            in Rect fullscreenBounds, in Rect dockedBounds);
+    void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis, int dockedStackVis,
+            int mask, in Rect fullscreenBounds, in Rect dockedBounds);
 
-    void topAppWindowChanged(boolean menuVisible);
-    void setImeWindowStatus(in IBinder token, int vis, int backDisposition,
+    void topAppWindowChanged(int displayId, boolean menuVisible);
+    void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher);
-    void setWindowState(int window, int state);
+    void setWindowState(int display, int window, int state);
 
     void showRecentApps(boolean triggeredFromAltTab);
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
@@ -70,30 +71,38 @@ oneway interface IStatusBar
     void toggleKeyboardShortcutsMenu(int deviceId);
 
     /**
-     * Notifies the status bar that an app transition is pending to delay applying some flags with
-     * visual impact until {@link #appTransitionReady} is called.
-     */
-    void appTransitionPending();
-
-    /**
-     * Notifies the status bar that a pending app transition has been cancelled.
-     */
-    void appTransitionCancelled();
-
-    /**
-     * Notifies the status bar that an app transition is now being executed.
+     * Notifies System UI on the specified display that an app transition is pending to delay
+     * applying some flags with visual impact until {@link #appTransitionReady} is called.
      *
+     * @param displayId the id of the display to notify
+     */
+    void appTransitionPending(int displayId);
+
+    /**
+     * Notifies System UI on the specified display that a pending app transition has been cancelled.
+     *
+     * @param displayId the id of the display to notify
+     */
+    void appTransitionCancelled(int displayId);
+
+    /**
+     * Notifies System UI on the specified display that an app transition is now being executed.
+     *
+     * @param displayId the id of the display to notify
      * @param statusBarAnimationsStartTime the desired start time for all visual animations in the
      *        status bar caused by this app transition in uptime millis
      * @param statusBarAnimationsDuration the duration for all visual animations in the status
      *        bar caused by this app transition in millis
      */
-    void appTransitionStarting(long statusBarAnimationsStartTime, long statusBarAnimationsDuration);
+    void appTransitionStarting(int displayId, long statusBarAnimationsStartTime,
+            long statusBarAnimationsDuration);
 
     /**
-     * Notifies the status bar that an app transition is done.
+     * Notifies System UI on the specified display that an app transition is done.
+     *
+     * @param displayId the id of the display to notify
      */
-    void appTransitionFinished();
+    void appTransitionFinished(int displayId);
 
     void showAssistDisclosure();
     void startAssist(in Bundle args);

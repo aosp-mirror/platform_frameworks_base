@@ -92,7 +92,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         mKeyguardScreenRotation = shouldEnableKeyguardScreenRotation();
         mDozeParameters = dozeParameters;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
-        Dependency.get(StatusBarStateController.class).addListener(
+        Dependency.get(StatusBarStateController.class).addCallback(
                 mStateListener, StatusBarStateController.RANK_STATUS_BAR_WINDOW_CONTROLLER);
         Dependency.get(ConfigurationController.class).addCallback(this);
     }

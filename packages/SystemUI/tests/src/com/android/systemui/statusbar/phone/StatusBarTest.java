@@ -72,6 +72,8 @@ import com.android.systemui.appops.AppOpsControllerImpl;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.doze.DozeHost;
+import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
@@ -123,6 +125,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private IStatusBarService mBarService;
     @Mock private IDreamManager mDreamManager;
     @Mock private ScrimController mScrimController;
+    @Mock private DozeScrimController mDozeScrimController;
     @Mock private ArrayList<Entry> mNotificationList;
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private NotificationData mNotificationData;
@@ -211,7 +214,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mKeyguardViewMediator, mRemoteInputManager, mock(NotificationGroupManager.class),
                 mock(NotificationGroupAlertTransferHelper.class), mock(FalsingManager.class),
                 mock(StatusBarWindowController.class), mock(NotificationIconAreaController.class),
-                mock(DozeScrimController.class), mock(NotificationShelf.class),
+                mDozeScrimController, mock(NotificationShelf.class),
                 mLockscreenUserManager, mCommandQueue, mNotificationPresenter,
                 mock(BubbleController.class));
         mStatusBar.mContext = mContext;
@@ -570,7 +573,28 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPulseWhileDozing_updatesScrimController() {
+        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        mStatusBar.showKeyguardImpl();
 
+        // Keep track of callback to be able to stop the pulse
+        DozeHost.PulseCallback[] pulseCallback = new DozeHost.PulseCallback[1];
+        doAnswer(invocation -> {
+            pulseCallback[0] = invocation.getArgument(0);
+            return null;
+        }).when(mDozeScrimController).pulse(any(), anyInt());
+
+        // Starting a pulse should change the scrim controller to the pulsing state
+        mStatusBar.mDozeServiceHost.pulseWhileDozing(mock(DozeHost.PulseCallback.class),
+                DozeLog.PULSE_REASON_NOTIFICATION);
+        verify(mScrimController).transitionTo(eq(ScrimState.PULSING), any());
+
+        // Ending a pulse should take it back to keyguard state
+        pulseCallback[0].onPulseFinished();
+        verify(mScrimController).transitionTo(eq(ScrimState.KEYGUARD));
+    }
+
+    @Test
     public void testSetState_changesIsFullScreenUserSwitcherState() {
         mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
         assertFalse(mStatusBar.isFullScreenUserSwitcherState());

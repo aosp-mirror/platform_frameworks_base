@@ -224,7 +224,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
                 root.flags |= Root.FLAG_REMOVABLE_USB;
             }
 
-            if (!VolumeInfo.ID_EMULATED_INTERNAL.equals(volume.getId())) {
+            if (volume.getType() != VolumeInfo.TYPE_EMULATED) {
                 root.flags |= Root.FLAG_SUPPORTS_EJECT;
             }
 

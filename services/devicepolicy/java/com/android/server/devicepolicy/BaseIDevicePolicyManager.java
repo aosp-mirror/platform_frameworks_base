@@ -120,4 +120,9 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
             int userHandle) {
         return false;
     }
+
+    @Override
+    public List<String> getCrossProfileCalendarPackagesForUser(int userHandle) {
+        return Collections.emptyList();
+    }
 }

@@ -75,6 +75,10 @@ public final class IntelligenceServiceShellCommand extends ShellCommand {
             pw.println("  set bind-instant-service-allowed [true | false]");
             pw.println("    Sets whether binding to services provided by instant apps is allowed");
             pw.println("");
+            pw.println("  set temporary-service USER_ID [COMPONENT_NAME DURATION]");
+            pw.println("    Temporarily (for DURATION ms) changes the service implemtation.");
+            pw.println("    To reset, call with just the USER_ID argument.");
+            pw.println("");
             pw.println("  list sessions [--user USER_ID]");
             pw.println("    Lists all pending sessions.");
             pw.println("");
@@ -101,6 +105,8 @@ public final class IntelligenceServiceShellCommand extends ShellCommand {
         switch(what) {
             case "bind-instant-service-allowed":
                 return setBindInstantService(pw);
+            case "temporary-service":
+                return setTemporaryService();
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -129,6 +135,18 @@ public final class IntelligenceServiceShellCommand extends ShellCommand {
                 pw.println("Invalid mode: " + mode);
                 return -1;
         }
+    }
+
+    private int setTemporaryService() {
+        final int userId = getNextIntArgRequired();
+        final String serviceName = getNextArg();
+        if (serviceName == null) {
+            mService.resetTemporaryService(userId);
+            return 0;
+        }
+        final int duration = getNextIntArgRequired();
+        mService.setTemporaryService(userId, serviceName, duration);
+        return 0;
     }
 
     private int requestDestroy(PrintWriter pw) {
@@ -203,5 +221,9 @@ public final class IntelligenceServiceShellCommand extends ShellCommand {
             return UserHandle.parseUserArg(getNextArgRequired());
         }
         return UserHandle.USER_ALL;
+    }
+
+    private int getNextIntArgRequired() {
+        return Integer.parseInt(getNextArgRequired());
     }
 }

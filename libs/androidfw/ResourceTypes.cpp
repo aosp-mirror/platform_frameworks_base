@@ -7076,7 +7076,7 @@ public:
         }
     }
 
-    const auto& getTypeMapping() const {
+    const std::map<uint8_t, std::set<std::pair<uint32_t, uint32_t>>>& getTypeMapping() const {
         return mTypeMapping->mData;
     }
 
@@ -7137,9 +7137,6 @@ status_t ResTable::createIdmap(const ResTable& targetResTable,
 
     const PackageGroup* packageGroup = mPackageGroups[0];
 
-    // the number of resources overlaid that were not explicitly marked overlayable
-    size_t forcedOverlayCount = 0u;
-
     // find the resources that exist in both packages
     auto typeMapping = std::make_unique<IdmapTypeMapping>();
     for (size_t typeIndex = 0; typeIndex < packageGroup->types.size(); ++typeIndex) {
@@ -7168,11 +7165,6 @@ status_t ResTable::createIdmap(const ResTable& targetResTable,
 
             if (target_resid == 0) {
                 continue;
-            }
-
-            if ((dtohl(typeConfigs->typeSpecFlags[entryIndex]) &
-                    ResTable_typeSpec::SPEC_OVERLAYABLE) == 0) {
-                ++forcedOverlayCount;
             }
 
             typeMapping->add(target_resid, overlay_resid);
@@ -7241,10 +7233,6 @@ status_t ResTable::createIdmap(const ResTable& targetResTable,
             *entryData++ = htodl(Res_GETENTRY(ei->second)); // write: (overlay) entry
         }
         typeData += entryCount * 2;
-    }
-
-    if (forcedOverlayCount > 0) {
-        ALOGW("idmap: overlaid %zu resources not marked overlayable", forcedOverlayCount);
     }
 
     return NO_ERROR;

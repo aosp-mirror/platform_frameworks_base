@@ -57,13 +57,13 @@ public class Utils {
         public void onViewAttachedToWindow(View v) {
             mView = v;
             SysUiServiceProvider.getComponent(v.getContext(), CommandQueue.class)
-                    .addCallbacks(this);
+                    .addCallback(this);
         }
 
         @Override
         public void onViewDetachedFromWindow(View v) {
             SysUiServiceProvider.getComponent(mView.getContext(), CommandQueue.class)
-                    .removeCallbacks(this);
+                    .removeCallback(this);
             mView = null;
         }
 

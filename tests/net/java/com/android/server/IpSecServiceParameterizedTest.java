@@ -542,7 +542,7 @@ public class IpSecServiceParameterizedTest {
 
         verify(mMockNetd)
                 .ipSecApplyTransportModeTransform(
-                        eq(pfd.getFileDescriptor()),
+                        eq(pfd),
                         eq(mUid),
                         eq(IpSecManager.DIRECTION_OUT),
                         anyString(),
@@ -555,7 +555,7 @@ public class IpSecServiceParameterizedTest {
         ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(new Socket());
         mIpSecService.removeTransportModeTransforms(pfd);
 
-        verify(mMockNetd).ipSecRemoveTransportModeTransform(pfd.getFileDescriptor());
+        verify(mMockNetd).ipSecRemoveTransportModeTransform(pfd);
     }
 
     private IpSecTunnelInterfaceResponse createAndValidateTunnel(

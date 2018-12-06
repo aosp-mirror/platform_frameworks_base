@@ -19,6 +19,7 @@ package com.android.internal.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Binder;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
@@ -78,8 +79,10 @@ public class BinderCallsStats implements BinderInternal.Observer {
     private final Random mRandom;
     private long mStartTime = System.currentTimeMillis();
     private long mCallStatsCount = 0;
+    private boolean mAddDebugEntries = false;
 
     private CachedDeviceState.Readonly mDeviceState;
+    private CachedDeviceState.TimeInStateStopwatch mBatteryStopwatch;
 
     /** Injector for {@link BinderCallsStats}. */
     public static class Injector {
@@ -93,7 +96,11 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     public void setDeviceState(@NonNull CachedDeviceState.Readonly deviceState) {
+        if (mBatteryStopwatch != null) {
+            mBatteryStopwatch.close();
+        }
         mDeviceState = deviceState;
+        mBatteryStopwatch = deviceState.createTimeOnBatteryStopwatch();
     }
 
     @Override
@@ -317,7 +324,28 @@ public class BinderCallsStats implements BinderInternal.Observer {
             exported.methodName = methodName;
         }
 
+        // Debug entries added to help validate the data.
+        if (mAddDebugEntries && mBatteryStopwatch != null) {
+            resultCallStats.add(createDebugEntry("start_time_millis", mStartTime));
+            resultCallStats.add(createDebugEntry("end_time_millis", System.currentTimeMillis()));
+            resultCallStats.add(
+                    createDebugEntry("battery_time_millis", mBatteryStopwatch.getMillis()));
+        }
+
         return resultCallStats;
+    }
+
+    private ExportedCallStat createDebugEntry(String variableName, long value) {
+        final int uid = Process.myUid();
+        final ExportedCallStat callStat = new ExportedCallStat();
+        callStat.className = "";
+        callStat.workSourceUid = uid;
+        callStat.callingUid = uid;
+        callStat.recordedCallCount = 1;
+        callStat.callCount = 1;
+        callStat.methodName = "__DEBUG_" + variableName;
+        callStat.maxReplySizeBytes = value;
+        return callStat;
     }
 
     /** @hide */
@@ -341,6 +369,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
         long totalCpuTime = 0;
         pw.print("Start time: ");
         pw.println(DateFormat.format("yyyy-MM-dd HH:mm:ss", mStartTime));
+        pw.print("On battery time (ms): ");
+        pw.println(mBatteryStopwatch != null ? mBatteryStopwatch.getMillis() : 0);
         pw.println("Sampling interval period: " + mPeriodicSamplingInterval);
         final List<UidEntry> entries = new ArrayList<>();
 
@@ -457,6 +487,10 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
     }
 
+    public void setAddDebugEntries(boolean addDebugEntries) {
+        mAddDebugEntries = addDebugEntries;
+    }
+
     /**
      * Sets the maximum number of items to track.
      */
@@ -496,6 +530,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
             mUidEntries.clear();
             mExceptionCounts.clear();
             mStartTime = System.currentTimeMillis();
+            if (mBatteryStopwatch != null) {
+                mBatteryStopwatch.reset();
+            }
         }
     }
 

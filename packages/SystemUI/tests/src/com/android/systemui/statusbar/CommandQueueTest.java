@@ -14,6 +14,8 @@
 
 package com.android.systemui.statusbar;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -42,7 +44,7 @@ public class CommandQueueTest extends SysuiTestCase {
     public void setup() {
         mCommandQueue = new CommandQueue();
         mCallbacks = mock(Callbacks.class);
-        mCommandQueue.addCallbacks(mCallbacks);
+        mCommandQueue.addCallback(mCallbacks);
         verify(mCallbacks).disable(eq(0), eq(0), eq(false));
     }
 
@@ -64,11 +66,12 @@ public class CommandQueueTest extends SysuiTestCase {
         verify(mCallbacks).removeIcon(eq(slot));
     }
 
+    // TODO(b/117478341): add test case for multi-display
     @Test
     public void testDisable() {
         int state1 = 14;
         int state2 = 42;
-        mCommandQueue.disable(state1, state2);
+        mCommandQueue.disable(DEFAULT_DISPLAY, state1, state2);
         waitForIdleSync();
         verify(mCallbacks).disable(eq(state1), eq(state2), eq(true));
     }
@@ -95,24 +98,27 @@ public class CommandQueueTest extends SysuiTestCase {
         verify(mCallbacks).animateExpandSettingsPanel(eq(panel));
     }
 
+    // TODO(b/117478341): add test case for multi-display
     @Test
     public void testSetSystemUiVisibility() {
         Rect r = new Rect();
-        mCommandQueue.setSystemUiVisibility(1, 2, 3, 4, null, r);
+        mCommandQueue.setSystemUiVisibility(DEFAULT_DISPLAY, 1, 2, 3, 4, null, r);
         waitForIdleSync();
         verify(mCallbacks).setSystemUiVisibility(eq(1), eq(2), eq(3), eq(4), eq(null), eq(r));
     }
 
+    // TODO(b/117478341): add test case for multi-display
     @Test
     public void testTopAppWindowChanged() {
-        mCommandQueue.topAppWindowChanged(true);
+        mCommandQueue.topAppWindowChanged(DEFAULT_DISPLAY, true);
         waitForIdleSync();
         verify(mCallbacks).topAppWindowChanged(eq(true));
     }
 
+    // TODO(b/117478341): add test case for multi-display
     @Test
     public void testShowImeButton() {
-        mCommandQueue.setImeWindowStatus(null, 1, 2, true);
+        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true);
         waitForIdleSync();
         verify(mCallbacks).setImeWindowStatus(eq(null), eq(1), eq(2), eq(true));
     }
@@ -166,9 +172,10 @@ public class CommandQueueTest extends SysuiTestCase {
         verify(mCallbacks).toggleKeyboardShortcutsMenu(eq(1));
     }
 
+    // TODO(b/117478341): add test case for multi-display
     @Test
     public void testSetWindowState() {
-        mCommandQueue.setWindowState(1, 2);
+        mCommandQueue.setWindowState(DEFAULT_DISPLAY, 1, 2);
         waitForIdleSync();
         verify(mCallbacks).setWindowState(eq(1), eq(2));
     }
@@ -180,30 +187,34 @@ public class CommandQueueTest extends SysuiTestCase {
         verify(mCallbacks).showScreenPinningRequest(eq(1));
     }
 
+    // TODO(b/117478341): add test case for multi-display
     @Test
     public void testAppTransitionPending() {
-        mCommandQueue.appTransitionPending();
+        mCommandQueue.appTransitionPending(DEFAULT_DISPLAY);
         waitForIdleSync();
         verify(mCallbacks).appTransitionPending(eq(false));
     }
 
+    // TODO(b/117478341): add test case for multi-display
     @Test
     public void testAppTransitionCancelled() {
-        mCommandQueue.appTransitionCancelled();
+        mCommandQueue.appTransitionCancelled(DEFAULT_DISPLAY);
         waitForIdleSync();
         verify(mCallbacks).appTransitionCancelled();
     }
 
+    // TODO(b/117478341): add test case for multi-display
     @Test
     public void testAppTransitionStarting() {
-        mCommandQueue.appTransitionStarting(1, 2);
+        mCommandQueue.appTransitionStarting(DEFAULT_DISPLAY, 1, 2);
         waitForIdleSync();
         verify(mCallbacks).appTransitionStarting(eq(1L), eq(2L), eq(false));
     }
 
+    // TODO(b/117478341): add test case for multi-display
     @Test
     public void testAppTransitionFinished() {
-        mCommandQueue.appTransitionFinished();
+        mCommandQueue.appTransitionFinished(DEFAULT_DISPLAY);
         waitForIdleSync();
         verify(mCallbacks).appTransitionFinished();
     }

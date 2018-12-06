@@ -42,7 +42,7 @@ public class TvStatusBar extends SystemUI implements Callbacks {
     public void start() {
         putComponent(TvStatusBar.class, this);
         CommandQueue commandQueue = getComponent(CommandQueue.class);
-        commandQueue.addCallbacks(this);
+        commandQueue.addCallback(this);
         int[] switches = new int[9];
         ArrayList<IBinder> binders = new ArrayList<>();
         ArrayList<String> iconSlots = new ArrayList<>();

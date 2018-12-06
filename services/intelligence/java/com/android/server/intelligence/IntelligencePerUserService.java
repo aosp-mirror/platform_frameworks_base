@@ -36,9 +36,11 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.intelligence.InteractionSessionId;
 import android.service.intelligence.SnapshotData;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.intelligence.ContentCaptureEvent;
 import android.view.intelligence.ContentCaptureManager;
@@ -77,15 +79,22 @@ final class IntelligencePerUserService
     protected ServiceInfo newServiceInfo(@NonNull ComponentName serviceComponent)
             throws NameNotFoundException {
 
+        int flags = PackageManager.GET_META_DATA;
+        final boolean isTemp = isTemporaryServiceSetLocked();
+        if (!isTemp) {
+            flags |= PackageManager.MATCH_SYSTEM_ONLY;
+        }
+
         ServiceInfo si;
         try {
-            // TODO(b/111276913): must check that either the service is from a system component,
-            // or it matches a service set by shell cmd (so it can be used on CTS tests and when
-            // OEMs are implementing the real service
-            si = AppGlobals.getPackageManager().getServiceInfo(serviceComponent,
-                    PackageManager.GET_META_DATA, mUserId);
+            si = AppGlobals.getPackageManager().getServiceInfo(serviceComponent, flags, mUserId);
         } catch (RemoteException e) {
             Slog.w(TAG, "Could not get service for " + serviceComponent + ": " + e);
+            return null;
+        }
+        if (si == null) {
+            Slog.w(TAG, "Could not get serviceInfo for " + (isTemp ? " (temp)" : "(default system)")
+                    + " " + serviceComponent.flattenToShortString());
             return null;
         }
         if (!Manifest.permission.BIND_SMART_SUGGESTIONS_SERVICE.equals(si.permission)) {
@@ -103,6 +112,13 @@ final class IntelligencePerUserService
     protected boolean updateLocked(boolean disabled) {
         destroyLocked();
         return super.updateLocked(disabled);
+    }
+
+    @Override // from PerUserSystemService
+    protected String getDefaultComponentName() {
+        final String name = getContext()
+                .getString(com.android.internal.R.string.config_defaultSmartSuggestionsService);
+        return TextUtils.isEmpty(name) ? null : name;
     }
 
     // TODO(b/111276913): log metrics
@@ -274,13 +290,15 @@ final class IntelligencePerUserService
     }
 
     public AugmentedAutofillCallback requestAutofill(@NonNull IAutoFillManagerClient client,
-            @NonNull IBinder activityToken, int autofillSessionId, @NonNull AutofillId focusedId) {
+            @NonNull IBinder activityToken, int autofillSessionId, @NonNull AutofillId focusedId,
+            @Nullable AutofillValue focusedValue) {
         synchronized (mLock) {
             final ContentCaptureSession session = getSession(activityToken);
             if (session != null) {
                 // TODO(b/111330312): log metrics
                 if (mMaster.verbose) Slog.v(TAG, "requestAugmentedAutofill()");
-                return session.requestAutofillLocked(client, autofillSessionId, focusedId);
+                return session.requestAutofillLocked(client, autofillSessionId, focusedId,
+                        focusedValue);
             }
             if (mMaster.debug) {
                 Slog.d(TAG, "requestAutofill(): no session for " + activityToken);

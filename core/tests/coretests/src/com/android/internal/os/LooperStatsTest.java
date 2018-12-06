@@ -273,8 +273,7 @@ public final class LooperStatsTest {
 
     @Test
     public void testDataNotCollectedBeforeDeviceStateSet() {
-        TestableLooperStats looperStats = new TestableLooperStats(1, 100);
-        looperStats.setDeviceState(null);
+        TestableLooperStats looperStats = new TestableLooperStats(1, 100, null);
 
         Object token1 = looperStats.messageDispatchStarting();
         looperStats.messageDispatched(token1, mHandlerFirst.obtainMessage(1000));
@@ -439,7 +438,7 @@ public final class LooperStatsTest {
         looperStats.messageDispatched(token, message);
 
         List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
-        assertThat(entries).hasSize(3);
+        assertThat(entries).hasSize(4);
         LooperStats.ExportedEntry debugEntry1 = entries.get(1);
         assertThat(debugEntry1.handlerClassName).isEqualTo("");
         assertThat(debugEntry1.messageName).isEqualTo("__DEBUG_start_time_millis");
@@ -448,6 +447,10 @@ public final class LooperStatsTest {
         assertThat(debugEntry2.handlerClassName).isEqualTo("");
         assertThat(debugEntry2.messageName).isEqualTo("__DEBUG_end_time_millis");
         assertThat(debugEntry2.maxDelayMillis).isAtLeast(looperStats.getStartTimeMillis());
+        LooperStats.ExportedEntry debugEntry3 = entries.get(3);
+        assertThat(debugEntry3.handlerClassName).isEqualTo("");
+        assertThat(debugEntry3.messageName).isEqualTo("__DEBUG_battery_time_millis");
+        assertThat(debugEntry3.maxDelayMillis).isAtLeast(0L);
     }
 
     private static void assertThrows(Class<? extends Exception> exceptionClass, Runnable r) {
@@ -468,10 +471,16 @@ public final class LooperStatsTest {
         private int mSamplingInterval;
 
         TestableLooperStats(int samplingInterval, int sizeCap) {
+            this(samplingInterval, sizeCap, mDeviceState);
+        }
+
+        TestableLooperStats(int samplingInterval, int sizeCap, CachedDeviceState deviceState) {
             super(samplingInterval, sizeCap);
-            this.mSamplingInterval = samplingInterval;
-            this.setDeviceState(mDeviceState.getReadonlyClient());
-            this.setAddDebugEntries(false);
+            mSamplingInterval = samplingInterval;
+            setAddDebugEntries(false);
+            if (deviceState != null) {
+                setDeviceState(deviceState.getReadonlyClient());
+            }
         }
 
         void tickRealtime(long micros) {

@@ -16,7 +16,6 @@
 
 package com.android.server.display;
 
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.opengl.Matrix;
 import android.os.IBinder;
@@ -27,8 +26,10 @@ import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ColorDisplayController;
+
 import java.util.Arrays;
 
 /**
@@ -59,10 +60,6 @@ public class DisplayTransformManager {
 
     private static final int SURFACE_FLINGER_TRANSACTION_COLOR_MATRIX = 1015;
     private static final int SURFACE_FLINGER_TRANSACTION_DALTONIZER = 1014;
-
-    private static final String PERSISTENT_PROPERTY_SATURATION = "persist.sys.sf.color_saturation";
-    private static final String PERSISTENT_PROPERTY_DISPLAY_COLOR = "persist.sys.sf.native_mode";
-
     /**
      * SurfaceFlinger global saturation factor.
      */
@@ -71,6 +68,10 @@ public class DisplayTransformManager {
      * SurfaceFlinger display color (managed, unmanaged, etc.).
      */
     private static final int SURFACE_FLINGER_TRANSACTION_DISPLAY_COLOR = 1023;
+    private static final int SURFACE_FLINGER_TRANSACTION_QUERY_WIDE_COLOR = 1030;
+
+    private static final String PERSISTENT_PROPERTY_SATURATION = "persist.sys.sf.color_saturation";
+    private static final String PERSISTENT_PROPERTY_DISPLAY_COLOR = "persist.sys.sf.native_mode";
 
     private static final float COLOR_SATURATION_NATURAL = 1.0f;
     private static final float COLOR_SATURATION_BOOSTED = 1.1f;
@@ -266,6 +267,29 @@ public class DisplayTransformManager {
         updateConfiguration();
 
         return true;
+    }
+
+    /**
+     * Returns whether the screen is wide color gamut via SurfaceFlinger's
+     * {@link #SURFACE_FLINGER_TRANSACTION_QUERY_WIDE_COLOR}.
+     */
+    public boolean isDeviceColorManaged() {
+        final IBinder flinger = ServiceManager.getService(SURFACE_FLINGER);
+        if (flinger != null) {
+            final Parcel data = Parcel.obtain();
+            final Parcel reply = Parcel.obtain();
+            data.writeInterfaceToken("android.ui.ISurfaceComposer");
+            try {
+                flinger.transact(SURFACE_FLINGER_TRANSACTION_QUERY_WIDE_COLOR, data, reply, 0);
+                return reply.readBoolean();
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Failed to query wide color support", ex);
+            } finally {
+                data.recycle();
+                reply.recycle();
+            }
+        }
+        return false;
     }
 
     /**

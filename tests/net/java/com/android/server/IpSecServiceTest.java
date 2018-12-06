@@ -425,7 +425,7 @@ public class IpSecServiceTest {
         ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(new Socket());
         mIpSecService.removeTransportModeTransforms(pfd);
 
-        verify(mMockNetd).ipSecRemoveTransportModeTransform(pfd.getFileDescriptor());
+        verify(mMockNetd).ipSecRemoveTransportModeTransform(pfd);
     }
 
     @Test
@@ -620,10 +620,10 @@ public class IpSecServiceTest {
                 mIpSecService.openUdpEncapsulationSocket(0, new Binder());
 
         FileDescriptor sockFd = udpEncapResp.fileDescriptor.getFileDescriptor();
-        ArgumentMatcher<FileDescriptor> fdMatcher = (arg) -> {
+        ArgumentMatcher<ParcelFileDescriptor> fdMatcher = (arg) -> {
                     try {
                         StructStat sockStat = Os.fstat(sockFd);
-                        StructStat argStat = Os.fstat(arg);
+                        StructStat argStat = Os.fstat(arg.getFileDescriptor());
 
                         return sockStat.st_ino == argStat.st_ino
                                 && sockStat.st_dev == argStat.st_dev;

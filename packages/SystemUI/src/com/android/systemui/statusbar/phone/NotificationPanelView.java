@@ -366,7 +366,7 @@ public class NotificationPanelView extends PanelView implements
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         FragmentHostManager.get(this).addTagListener(QS.TAG, mFragmentListener);
-        Dependency.get(StatusBarStateController.class).addListener(this);
+        Dependency.get(StatusBarStateController.class).addCallback(this);
         Dependency.get(ZenModeController.class).addCallback(this);
         Dependency.get(ConfigurationController.class).addCallback(this);
     }
@@ -375,7 +375,7 @@ public class NotificationPanelView extends PanelView implements
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         FragmentHostManager.get(this).removeTagListener(QS.TAG, mFragmentListener);
-        Dependency.get(StatusBarStateController.class).removeListener(this);
+        Dependency.get(StatusBarStateController.class).removeCallback(this);
         Dependency.get(ZenModeController.class).removeCallback(this);
         Dependency.get(ConfigurationController.class).removeCallback(this);
     }

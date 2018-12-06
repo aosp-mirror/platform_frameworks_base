@@ -30,6 +30,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManagerInternal;
 import android.content.Context;
@@ -125,11 +126,12 @@ public class WindowManagerServiceRule implements TestRule {
                 if (input != null && input.length > 1) {
                     doReturn(input[1]).when(ims).monitorInput(anyString(), anyInt());
                 }
+                ActivityTaskManagerService atms = mock(ActivityTaskManagerService.class);
+                when(atms.getGlobalLock()).thenReturn(new WindowManagerGlobalLock());
 
                 mService = WindowManagerService.main(context, ims, false, false,
                         mPolicy = new TestWindowManagerPolicy(
-                                WindowManagerServiceRule.this::getWindowManagerService),
-                        new WindowManagerGlobalLock());
+                                WindowManagerServiceRule.this::getWindowManagerService), atms);
                 mService.mTransactionFactory = () -> {
                     final SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
                     mSurfaceTransactions.add(new WeakReference<>(transaction));

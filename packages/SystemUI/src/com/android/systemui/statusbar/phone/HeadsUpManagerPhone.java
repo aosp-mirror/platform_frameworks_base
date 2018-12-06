@@ -129,7 +129,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                 updateTouchableRegionListener();
             }
         });
-        Dependency.get(StatusBarStateController.class).addListener(mStateListener);
+        Dependency.get(StatusBarStateController.class).addCallback(mStateListener);
         mBubbleController.setBubbleStateChangeListener((hasBubbles) -> {
             if (!hasBubbles) {
                 mBubbleGoingAway = true;
@@ -143,7 +143,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     }
 
     public void destroy() {
-        Dependency.get(StatusBarStateController.class).removeListener(mStateListener);
+        Dependency.get(StatusBarStateController.class).removeCallback(mStateListener);
     }
 
     private void initResources() {

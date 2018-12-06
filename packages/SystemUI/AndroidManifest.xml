@@ -223,6 +223,9 @@
 
     <uses-permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS" />
 
+    <!-- Permission to change the display color -->
+    <uses-permission android:name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />

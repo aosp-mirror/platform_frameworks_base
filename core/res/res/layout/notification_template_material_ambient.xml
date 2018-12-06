@@ -24,7 +24,7 @@
     android:paddingEnd="@dimen/notification_extra_margin_ambient"
     >
     <include layout="@layout/notification_template_ambient_header"
-             android:theme="@style/Theme.Material.Notification.Ambient" />
+             android:theme="@style/Theme.DeviceDefault.Notification.Ambient" />
 
     <LinearLayout
             android:id="@+id/notification_action_list_margin_target"
@@ -51,8 +51,7 @@
             android:orientation="vertical"
             >
             <TextView android:id="@+id/title"
-                android:textAppearance="@style/TextAppearance.Material.Notification.Title"
-                android:fontFamily="sans-serif"
+                android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="top|center_horizontal"
@@ -65,7 +64,7 @@
             <TextView android:id="@+id/text"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:textAppearance="@style/TextAppearance.Material.Notification"
+                android:textAppearance="@style/TextAppearance.DeviceDefault.Notification"
                 android:singleLine="false"
                 android:layout_weight="1"
                 android:gravity="top|center_horizontal"

@@ -57,6 +57,7 @@ package android {
     field public static final java.lang.String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
     field public static final java.lang.String CONNECTIVITY_INTERNAL = "android.permission.CONNECTIVITY_INTERNAL";
     field public static final java.lang.String CONNECTIVITY_USE_RESTRICTED_NETWORKS = "android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS";
+    field public static final java.lang.String CONTROL_DISPLAY_COLOR_TRANSFORMS = "android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS";
     field public static final java.lang.String CONTROL_DISPLAY_SATURATION = "android.permission.CONTROL_DISPLAY_SATURATION";
     field public static final java.lang.String CONTROL_INCALL_EXPERIENCE = "android.permission.CONTROL_INCALL_EXPERIENCE";
     field public static final java.lang.String CONTROL_KEYGUARD_SECURE_NOTIFICATIONS = "android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS";
@@ -3014,6 +3015,7 @@ package android.media.audiopolicy {
 package android.media.session {
 
   public final class MediaSessionManager {
+    method public android.media.session.ISession createSession(android.media.session.MediaSession.CallbackStub, java.lang.String, int);
     method public void setOnMediaKeyListener(android.media.session.MediaSessionManager.OnMediaKeyListener, android.os.Handler);
     method public void setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, android.os.Handler);
   }
@@ -3886,14 +3888,6 @@ package android.net.wifi.aware {
 
   public class WifiAwareSession implements java.lang.AutoCloseable {
     method public android.net.NetworkSpecifier createNetworkSpecifierPmk(int, byte[], byte[]);
-  }
-
-}
-
-package android.net.wifi.p2p {
-
-  public class WifiP2pManager {
-    method public void factoryReset(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
   }
 
 }
@@ -4998,6 +4992,7 @@ package android.service.intelligence {
   }
 
   public final class FillRequest {
+    method public android.view.autofill.AutofillValue getFocusedAutofillValue();
     method public android.view.autofill.AutofillId getFocusedId();
     method public android.service.intelligence.PresentationParams getPresentationParams();
     method public android.service.intelligence.InteractionSessionId getSessionId();
@@ -5786,6 +5781,8 @@ package android.telephony {
     method public java.util.List<android.telephony.SubscriptionInfo> getAvailableSubscriptionInfoList();
     method public java.util.List<android.telephony.SubscriptionPlan> getSubscriptionPlans(int);
     method public void requestEmbeddedSubscriptionInfoListRefresh();
+    method public void setDefaultDataSubId(int);
+    method public void setDefaultSmsSubId(int);
     method public void setSubscriptionOverrideCongested(int, boolean, long);
     method public void setSubscriptionOverrideUnmetered(int, boolean, long);
     method public void setSubscriptionPlans(int, java.util.List<android.telephony.SubscriptionPlan>);

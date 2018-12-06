@@ -37,6 +37,7 @@ import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -1166,13 +1167,25 @@ public final class MediaStore {
             /**
              * The latitude where the image was captured.
              * <P>Type: DOUBLE</P>
+             *
+             * @deprecated location details are no longer indexed for privacy
+             *             reasons, and this value is now always {@code null}.
+             *             You can still manually obtain location metadata using
+             *             {@link ExifInterface#getLatLong(float[])}.
              */
+            @Deprecated
             public static final String LATITUDE = "latitude";
 
             /**
              * The longitude where the image was captured.
              * <P>Type: DOUBLE</P>
+             *
+             * @deprecated location details are no longer indexed for privacy
+             *             reasons, and this value is now always {@code null}.
+             *             You can still manually obtain location metadata using
+             *             {@link ExifInterface#getLatLong(float[])}.
              */
+            @Deprecated
             public static final String LONGITUDE = "longitude";
 
             /**
@@ -2410,13 +2423,25 @@ public final class MediaStore {
             /**
              * The latitude where the video was captured.
              * <P>Type: DOUBLE</P>
+             *
+             * @deprecated location details are no longer indexed for privacy
+             *             reasons, and this value is now always {@code null}.
+             *             You can still manually obtain location metadata using
+             *             {@link ExifInterface#getLatLong(float[])}.
              */
+            @Deprecated
             public static final String LATITUDE = "latitude";
 
             /**
              * The longitude where the video was captured.
              * <P>Type: DOUBLE</P>
+             *
+             * @deprecated location details are no longer indexed for privacy
+             *             reasons, and this value is now always {@code null}.
+             *             You can still manually obtain location metadata using
+             *             {@link ExifInterface#getLatLong(float[])}.
              */
+            @Deprecated
             public static final String LONGITUDE = "longitude";
 
             /**

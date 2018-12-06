@@ -5541,19 +5541,40 @@ public class TelephonyManager {
     public void requestNumberVerification(@NonNull PhoneNumberRange range, long timeoutMillis,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull NumberVerificationCallback callback) {
+        if (executor == null) {
+            throw new NullPointerException("Executor must be non-null");
+        }
+        if (callback == null) {
+            throw new NullPointerException("Callback must be non-null");
+        }
+
         INumberVerificationCallback internalCallback = new INumberVerificationCallback.Stub() {
             @Override
-            public void onCallReceived(String phoneNumber) throws RemoteException {
-                Binder.withCleanCallingIdentity(() -> callback.onCallReceived(phoneNumber));
+            public void onCallReceived(String phoneNumber) {
+                Binder.withCleanCallingIdentity(() ->
+                        executor.execute(() ->
+                                callback.onCallReceived(phoneNumber)));
             }
 
             @Override
-            public void onVerificationFailed(int reason) throws RemoteException {
-                Binder.withCleanCallingIdentity(() -> callback.onVerificationFailed(reason));
+            public void onVerificationFailed(int reason) {
+                Binder.withCleanCallingIdentity(() ->
+                        executor.execute(() ->
+                                callback.onVerificationFailed(reason)));
             }
         };
 
-        // TODO -- call the aidl method
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.requestNumberVerification(range, timeoutMillis, internalCallback,
+                        getOpPackageName());
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "requestNumberVerification RemoteException", ex);
+            executor.execute(() ->
+                    callback.onVerificationFailed(NumberVerificationCallback.REASON_UNSPECIFIED));
+        }
     }
 
     /**

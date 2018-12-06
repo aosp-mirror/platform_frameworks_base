@@ -2822,8 +2822,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         IoUtils.closeQuietly(stream);
 
         if (!success) {
-            wpdData.mWidth = -1;
-            wpdData.mHeight = -1;
             wallpaper.cropHint.set(0, 0, 0, 0);
             wpdData.mPadding.set(0, 0, 0, 0);
             wallpaper.name = "";
@@ -2839,6 +2837,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
         }
 
+        ensureSaneWallpaperDisplaySize(wpdData, DEFAULT_DISPLAY);
         ensureSaneWallpaperData(wallpaper, DEFAULT_DISPLAY);
         WallpaperData lockWallpaper = mLockWallpaperMap.get(userId);
         if (lockWallpaper != null) {

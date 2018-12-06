@@ -17,8 +17,9 @@
 package com.android.server;
 
 
-import static org.mockito.Mockito.when;
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.Intent;
@@ -133,5 +134,45 @@ public class CachedDeviceStateServiceTest {
         intentUnplugged.putExtra(BatteryManager.EXTRA_PLUGGED, OsProtoEnums.BATTERY_PLUGGED_NONE);
         mContext.sendBroadcast(intentUnplugged);
         assertThat(deviceState.isCharging()).isFalse();
+    }
+
+    @Test
+    public void correctlyTracksTimeOnBattery() throws Exception {
+        CachedDeviceStateService service = new CachedDeviceStateService(mContext);
+        when(mBatteryManager.getPlugType()).thenReturn(OsProtoEnums.BATTERY_PLUGGED_NONE);
+
+        service.onStart();
+        CachedDeviceState.Readonly deviceState =
+                LocalServices.getService(CachedDeviceState.Readonly.class);
+
+        CachedDeviceState.TimeInStateStopwatch stopwatch =
+                deviceState.createTimeOnBatteryStopwatch();
+
+        // State can be initialized correctly only after PHASE_SYSTEM_SERVICES_READY.
+        assertThat(stopwatch.isRunning()).isFalse();
+        service.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+
+        assertThat(stopwatch.isRunning()).isTrue();
+        stopwatch.reset();
+
+        Thread.sleep(100);
+        assertThat(stopwatch.isRunning()).isTrue();
+        assertThat(stopwatch.getMillis()).isAtLeast(100L);
+
+        long timeOnBatteryBeforePluggedIn = stopwatch.getMillis();
+        Intent intentPluggedIn = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        intentPluggedIn.putExtra(BatteryManager.EXTRA_PLUGGED, OsProtoEnums.BATTERY_PLUGGED_AC);
+        mContext.sendBroadcast(intentPluggedIn);
+
+        assertThat(stopwatch.getMillis()).isAtLeast(timeOnBatteryBeforePluggedIn);
+        assertThat(stopwatch.isRunning()).isFalse();
+
+        long timeOnBatteryAfterPluggedIn = stopwatch.getMillis();
+        Thread.sleep(20);
+        assertThat(stopwatch.getMillis()).isEqualTo(timeOnBatteryAfterPluggedIn);
+
+        stopwatch.reset();
+        assertThat(stopwatch.getMillis()).isEqualTo(0L);
+        assertThat(stopwatch.isRunning()).isFalse();
     }
 }

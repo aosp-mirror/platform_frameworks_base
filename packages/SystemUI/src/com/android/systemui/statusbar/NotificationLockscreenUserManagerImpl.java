@@ -165,7 +165,7 @@ public class NotificationLockscreenUserManagerImpl implements
         mCurrentUserId = ActivityManager.getCurrentUser();
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        Dependency.get(StatusBarStateController.class).addListener(this);
+        Dependency.get(StatusBarStateController.class).addCallback(this);
         mLockPatternUtils = new LockPatternUtils(context);
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
     }
