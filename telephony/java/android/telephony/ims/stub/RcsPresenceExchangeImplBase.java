@@ -19,7 +19,11 @@ package android.telephony.ims.stub;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.net.Uri;
+import android.os.RemoteException;
+import android.telephony.ims.ImsException;
 import android.telephony.ims.RcsContactUceCapability;
+import android.telephony.ims.feature.ImsFeature;
+import android.telephony.ims.feature.RcsFeature;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -113,54 +117,95 @@ public class RcsPresenceExchangeImplBase extends RcsCapabilityExchange {
      * Provide the framework with a subsequent network response update to
      * {@link #updateCapabilities(RcsContactUceCapability, int)} and
      * {@link #requestCapabilities(List, int)} operations.
+     *
      * @param code The SIP response code sent from the network for the operation token specified.
      * @param reason The optional reason response from the network. If the network provided no
      *         reason with the code, the string should be empty.
      * @param operationToken The token associated with the operation this service is providing a
      *         response for.
+     * @throws ImsException If this {@link RcsPresenceExchangeImplBase} instance is not currently
+     * connected to the framework. This can happen if the {@link RcsFeature} is not
+     * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received the
+     * {@link ImsFeature#onFeatureReady()} callback. This may also happen in rare cases when the
+     * Telephony stack has crashed.
      */
     public final void onNetworkResponse(@PresenceResponseCode int code, @NonNull String reason,
-            int operationToken) {
-        throw new UnsupportedOperationException();
+            int operationToken) throws ImsException {
+        try {
+            getListener().onNetworkResponse(code, reason, operationToken);
+        } catch (RemoteException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
     }
 
     /**
      * Provides the framework with the requested contacts’ capabilities requested by the framework
-     * using {@link #requestCapabilities(List, int)} .
+     * using {@link #requestCapabilities(List, int)}.
+     *
+     * @throws ImsException If this {@link RcsPresenceExchangeImplBase} instance is not currently
+     * connected to the framework. This can happen if the {@link RcsFeature} is not
+     * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received the
+     * {@link ImsFeature#onFeatureReady()} callback. This may also happen in rare cases when the
+     * Telephony stack has crashed.
      */
     public final void onCapabilityRequestResponse(@NonNull List<RcsContactUceCapability> infos,
-            int operationToken) {
-        throw new UnsupportedOperationException();
+            int operationToken) throws ImsException {
+        try {
+            getListener().onCapabilityRequestResponsePresence(infos, operationToken);
+        } catch (RemoteException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
     }
 
     /**
      * Trigger the framework to provide a capability update using
-     * {@link #updateCapabilities(RcsContactUceCapability, int)}. This is typically used when trying
-     * to generate an initial PUBLISH for a new subscription to the network.
+     * {@link #updateCapabilities(RcsContactUceCapability, int)}.
      * <p>
-     * The device will cache all presence publications after boot until this method is called once.
+     * This is typically used when trying to generate an initial PUBLISH for a new subscription to
+     * the network. The device will cache all presence publications after boot until this method is
+     * called once.
+     * @throws ImsException If this {@link RcsPresenceExchangeImplBase} instance is not currently
+     * connected to the framework. This can happen if the {@link RcsFeature} is not
+     * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received the
+     * {@link ImsFeature#onFeatureReady()} callback. This may also happen in rare cases when the
+     * Telephony stack has crashed.
      */
-    public final void onNotifyUpdateCapabilites() {
-        throw new UnsupportedOperationException();
+    public final void onNotifyUpdateCapabilites() throws ImsException {
+        try {
+            getListener().onNotifyUpdateCapabilities();
+        } catch (RemoteException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
     }
 
     /**
      * Notify the framework that the device’s capabilities have been unpublished from the network.
+     *
+     * @throws ImsException If this {@link RcsPresenceExchangeImplBase} instance is not currently
+     * connected to the framework. This can happen if the {@link RcsFeature} is not
+     * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received the
+     * {@link ImsFeature#onFeatureReady()} callback. This may also happen in rare cases when the
+     * Telephony stack has crashed.
      */
-    public final void onUnpublish() {
-        throw new UnsupportedOperationException();
+    public final void onUnpublish() throws ImsException {
+        try {
+            getListener().onUnpublish();
+        } catch (RemoteException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
     }
 
     /**
-     * The user capabilities of one or multiple contacts have been requested.
+     * The user capabilities of one or multiple contacts have been requested by the framework.
      * <p>
-     * This must be followed up with one call to {@link #onCommandUpdate(int, int)} with an update
-     * as to whether or not the command completed as well as subsequent network
-     * updates using {@link #onNetworkResponse(int, String, int)}. When the operation is completed,
-     * {@link #onCapabilityRequestResponse(List, int)}  should be called with
-     * the presence information for the contacts specified.
-     * @param uris A {@link List} of the URIs that the framework is requesting the UCE capabilities
-     *          for.
+     * The implementer must follow up this call with an {@link #onCommandUpdate(int, int)} call to
+     * indicate whether or not this operation succeeded.  If this operation succeeds, network
+     * response updates should be sent to the framework using
+     * {@link #onNetworkResponse(int, String, int)}. When the operation is completed,
+     * {@link #onCapabilityRequestResponse(List, int)} should be called with the presence
+     * information for the contacts specified.
+     * @param uris A {@link List} of the {@link Uri}s that the framework is requesting the UCE
+     *             capabilities for.
      * @param operationToken The token associated with this operation. Updates to this request using
      *         {@link #onCommandUpdate(int, int)}, {@link #onNetworkResponse(int, String, int)}, and
      *         {@link #onCapabilityRequestResponse(List, int)}  must use the same operation token
@@ -169,14 +214,20 @@ public class RcsPresenceExchangeImplBase extends RcsCapabilityExchange {
     public void requestCapabilities(@NonNull List<Uri> uris, int operationToken) {
         // Stub - to be implemented by service
         Log.w(LOG_TAG, "requestCapabilities called with no implementation.");
-        onCommandUpdate(COMMAND_CODE_GENERIC_FAILURE, operationToken);
+        try {
+            getListener().onCommandUpdate(COMMAND_CODE_NOT_SUPPORTED, operationToken);
+        } catch (RemoteException | ImsException e) {
+            // Do not do anything, this is a stub implementation.
+        }
     }
 
     /**
-     * The capabilities of this device have been updated and should be published
-     * to the network. The framework will expect one {@link #onCommandUpdate(int, int)} call to
-     * indicate whether or not this operation failed first as well as network response
-     * updates to this update using {@link #onNetworkResponse(int, String, int)}.
+     * The capabilities of this device have been updated and should be published to the network.
+     * <p>
+     * The implementer must follow up this call with an {@link #onCommandUpdate(int, int)} call to
+     * indicate whether or not this operation succeeded. If this operation succeeds, network
+     * response updates should be sent to the framework using
+     * {@link #onNetworkResponse(int, String, int)}.
      * @param capabilities The capabilities for this device.
      * @param operationToken The token associated with this operation. Any subsequent
      *         {@link #onCommandUpdate(int, int)} or {@link #onNetworkResponse(int, String, int)}
@@ -186,6 +237,10 @@ public class RcsPresenceExchangeImplBase extends RcsCapabilityExchange {
             int operationToken) {
         // Stub - to be implemented by service
         Log.w(LOG_TAG, "updateCapabilities called with no implementation.");
-        onCommandUpdate(COMMAND_CODE_GENERIC_FAILURE, operationToken);
+        try {
+            getListener().onCommandUpdate(COMMAND_CODE_NOT_SUPPORTED, operationToken);
+        } catch (RemoteException | ImsException e) {
+            // Do not do anything, this is a stub implementation.
+        }
     }
 }
