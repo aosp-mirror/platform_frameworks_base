@@ -25,10 +25,8 @@ import java.io.IOException;
 /**
  * Structure of data source descriptor for sources using file descriptor.
  *
- * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)},
- * {@link MediaPlayer2#setNextDataSource(DataSourceDesc)} and
- * {@link MediaPlayer2#setNextDataSources(List<DataSourceDesc>)}
- * to set data source for playback.
+ * Used by {@link MediaPlayer2#setDataSource}, {@link MediaPlayer2#setNextDataSource} and
+ * {@link MediaPlayer2#setNextDataSources} to set data source for playback.
  *
  * <p>Users should use {@link Builder} to create {@link FileDataSourceDesc}.
  *
@@ -165,9 +163,9 @@ public class FileDataSourceDesc extends DataSourceDesc {
          * Sets the data source (ParcelFileDescriptor) to use. The ParcelFileDescriptor must be
          * seekable (N.B. a LocalSocket is not seekable). When the {@link FileDataSourceDesc}
          * created by this builder is passed to {@link MediaPlayer2} via
-         * {@link MediaPlayer2#setDataSource(DataSourceDesc)},
-         * {@link MediaPlayer2#setNextDataSource(DataSourceDesc)} or
-         * {@link MediaPlayer2#setNextDataSources(List<DataSourceDesc>)}, MediaPlayer2 will
+         * {@link MediaPlayer2#setDataSource},
+         * {@link MediaPlayer2#setNextDataSource} or
+         * {@link MediaPlayer2#setNextDataSources}, MediaPlayer2 will
          * close the ParcelFileDescriptor.
          *
          * @param pfd the ParcelFileDescriptor for the file to play
@@ -185,9 +183,9 @@ public class FileDataSourceDesc extends DataSourceDesc {
          * Sets the data source (ParcelFileDescriptor) to use. The ParcelFileDescriptor must be
          * seekable (N.B. a LocalSocket is not seekable). When the {@link FileDataSourceDesc}
          * created by this builder is passed to {@link MediaPlayer2} via
-         * {@link MediaPlayer2#setDataSource(DataSourceDesc)},
-         * {@link MediaPlayer2#setNextDataSource(DataSourceDesc)} or
-         * {@link MediaPlayer2#setNextDataSources(List<DataSourceDesc>)}, MediaPlayer2 will
+         * {@link MediaPlayer2#setDataSource},
+         * {@link MediaPlayer2#setNextDataSource} or
+         * {@link MediaPlayer2#setNextDataSources}, MediaPlayer2 will
          * close the ParcelFileDescriptor.
          *
          * Any negative number for offset is treated as 0.

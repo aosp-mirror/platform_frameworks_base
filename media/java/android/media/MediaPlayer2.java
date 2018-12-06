@@ -98,11 +98,10 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>The MediaPlayer2 object has five states:</p>
  * <ol>
  *     <li><p>{@link #PLAYER_STATE_IDLE}: MediaPlayer2 is in the <strong>Idle</strong>
- *         state after you create it using
- *         {@link #create()}, or after calling {@link #reset()}.</p>
+ *         state after it's created, or after calling {@link #reset()}.</p>
  *
  *         <p>While in this state, you should call
- *         {@link #setDataSource(DataSourceDesc2) setDataSource()}. It is a good
+ *         {@link #setDataSource setDataSource}. It is a good
  *         programming practice to register an {@link EventCallback#onCallCompleted onCallCompleted}
  *         <a href="#Callbacks">callback</a> and watch for {@link #CALL_STATUS_BAD_VALUE} and
  *         {@link #CALL_STATUS_ERROR_IO}, which might be caused by <code>setDataSource</code>.
@@ -134,7 +133,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *         while streaming audio/video.</p>
  *
  *         <p> When the playback reaches the end of stream, the behavior depends on whether or
- *         not you've enabled looping by calling {@link #loopCurrent(boolean) loopCurrent}:</p>
+ *         not you've enabled looping by calling {@link #loopCurrent}:</p>
  *         <ul>
  *         <li>If the looping mode was set to <code>false</code>, the player will transfer
  *         to the <strong>Paused</strong> state. If you registered an {@link EventCallback#onInfo
@@ -161,15 +160,15 @@ import java.util.concurrent.atomic.AtomicLong;
  *          <p>If you register an {@link EventCallback#onError onError}}
  *          <a href="#Callbacks">callback</a>,
  *          the callback will be performed when entering the state. When programming errors happen,
- *          such as calling {@link #prepare() prepare} and
- *          {@link #setDataSource(DataSourceDesc) setDataSource} methods
+ *          such as calling {@link #prepare()} and
+ *          {@link #setDataSource} methods
  *          from an <a href="#InvalidStates">invalid state</a>, the callback is called with
  *          {@link #CALL_STATUS_INVALID_OPERATION}. The MediaPlayer2 object enters the
  *          <strong>Error</strong> state whether or not a callback exists. </p>
  *
  *          <p>To recover from an error and reuse a MediaPlayer2 object that is in the <strong>
  *          Error</strong> state,
- *          call {@link #reset() reset}. The object will return to the <strong>Idle</strong>
+ *          call {@link #reset()}. The object will return to the <strong>Idle</strong>
  *          state and all state information will be lost.</p>
  *          </li>
  * </ol>
@@ -180,26 +179,26 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * <li>Use <a href="#Callbacks">callbacks</a> to respond to state changes and errors.</li>
  *
- * <li>When  a MediaPlayer2 object is no longer being used, call {@link #close() close} as soon as
+ * <li>When  a MediaPlayer2 object is no longer being used, call {@link #close()} as soon as
  * possible to release the resources used by the internal player engine associated with the
- * MediaPlayer2. Failure to call {@link #close() close} may cause subsequent instances of
+ * MediaPlayer2. Failure to call {@link #close()} may cause subsequent instances of
  * MediaPlayer2 objects to fallback to software implementations or fail altogether.
  * You cannot use MediaPlayer2
- * after you call {@link #close() close}. There is no way to bring it back to any other state.</li>
+ * after you call {@link #close()}. There is no way to bring it back to any other state.</li>
  *
  * <li>The current playback position can be retrieved with a call to
- * {@link #getCurrentPosition() getCurrentPosition},
+ * {@link #getCurrentPosition()},
  * which is helpful for applications such as a Music player that need to keep track of the playback
  * progress.</li>
  *
- * <li>The playback position can be adjusted with a call to {@link #seekTo seekTo}. Although the
- * asynchronous {@link #seekTo seekTo} call returns right away, the actual seek operation may take a
+ * <li>The playback position can be adjusted with a call to {@link #seekTo}. Although the
+ * asynchronous {@link #seekTo} call returns right away, the actual seek operation may take a
  * while to finish, especially for audio/video being streamed. If you register an
  * {@link EventCallback#onCallCompleted onCallCompleted} <a href="#Callbacks">callback</a>,
  * the callback is
  * called When the seek operation completes with {@link #CALL_COMPLETED_SEEK_TO}.</li>
  *
- * <li>You can call {@link #seekTo seekTo} from the <strong>Paused</strong> state.
+ * <li>You can call {@link #seekTo} from the <strong>Paused</strong> state.
  * In this case, if you are playing a video stream and
  * the requested position is valid  one video frame is displayed.</li>
  *
@@ -208,13 +207,13 @@ import java.util.concurrent.atomic.AtomicLong;
  * <h3 id="InvalidStates">Invalid method calls</h3>
  *
  * <p>The only methods you safely call from the <strong>Error</strong> state are
- * {@link #close() close},
- * {@link #reset() reset},
- * {@link #notifyWhenCommandLabelReached notifyWhenCommandLabelReached},
- * {@link #clearPendingCommands() clearPendingCommands},
- * {@link #setEventCallback setEventCallback},
- * {@link #clearEventCallback() clearEventCallback}
- * and {@link #getState() getState}.
+ * {@link #close},
+ * {@link #reset},
+ * {@link #notifyWhenCommandLabelReached},
+ * {@link #clearPendingCommands},
+ * {@link #registerEventCallback},
+ * {@link #unregisterEventCallback}
+ * and {@link #getState}.
  * Any other methods might throw an exception, return meaningless data, or invoke a
  * {@link EventCallback#onCallCompleted onCallCompleted} with an error code.</p>
  *
@@ -248,8 +247,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * <h3 id="Callbacks">Callbacks</h3>
  * <p>Many errors do not result in a transition to the  <strong>Error</strong> state.
  * It is good programming practice to register callback listeners using
- * {@link #setEventCallback(Executor, EventCallback) setEventCallback} and
- * {@link #setDrmEventCallback(Executor, DrmEventCallback) setDrmEventCallback}).
+ * {@link #registerEventCallback}.
  * You can receive a callback at any time and from any state.</p>
  *
  * <p>If it's important for your app to respond to state changes (for instance, to update the
@@ -1445,7 +1443,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return the size of the video. The width and height of size could be 0 if there is no video,
      * no display surface was set, or the size has not been determined yet.
      * The {@code EventCallback} can be registered via
-     * {@link #setEventCallback(Executor, EventCallback)} to provide a
+     * {@link #registerEventCallback(Executor, EventCallback)} to provide a
      * notification {@code EventCallback.onVideoSizeChanged} when the size
      * is available.
      */
@@ -3060,7 +3058,7 @@ public class MediaPlayer2 implements AutoCloseable
     public static final int CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED =
             SEPARATE_CALL_COMPLETED_CALLBACK_START;
 
-    /** The player just completed a call {@link #prepareDrm(DataSourceDesc, UUID)}.
+    /** The player just completed a call {@link #prepareDrm}.
      * @see DrmEventCallback#onDrmPrepared
      * @hide
      */
@@ -3138,9 +3136,10 @@ public class MediaPlayer2 implements AutoCloseable
     public static final int CALL_STATUS_SKIPPED = 5;
 
     /** Status code represents that DRM operation is called before preparing a DRM scheme through
-     *  {@link #prepareDrm(DataSourceDesc, UUID)}.
+     *  {@code prepareDrm}.
      * @see EventCallback#onCallCompleted
      */
+    // TODO: change @code to @link when DRM is unhidden
     public static final int CALL_STATUS_NO_DRM_SCHEME = 6;
 
     /**
@@ -3186,7 +3185,7 @@ public class MediaPlayer2 implements AutoCloseable
      * Register a callback to be invoked for configuration of the DRM object before
      * the session is created.
      * The callback will be invoked synchronously during the execution
-     * of {@link #prepareDrm(DataSourceDesc, UUID)}.
+     * of {@link #prepareDrm}.
      *
      * @param listener the callback that will be run
      * @hide
