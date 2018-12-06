@@ -2143,7 +2143,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    int getTouchableRegion(Region region, int flags) {
+    int getSurfaceTouchableRegion(Region region, int flags) {
         final boolean modal = (flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
         if (modal && mAppToken != null) {
             // Limit the outer touch to the activity stack region.
@@ -2171,7 +2171,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             region.translate(-mWindowFrames.mFrame.left, -mWindowFrames.mFrame.top);
         } else {
             // Not modal or full screen modal
-            getTouchableRegion(region);
+            getTouchableRegion(region, true /* forSurface */);
         }
 
         return flags;
@@ -2807,7 +2807,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 frame.right - inset.right, frame.bottom - inset.bottom);
     }
 
+    /** Get the touchable region in global coordinates. */
     void getTouchableRegion(Region outRegion) {
+        getTouchableRegion(outRegion, false /* forSurface */);
+    }
+
+    /** If {@param forSuface} is {@code true}, the region will be translated to surface based. */
+    private void getTouchableRegion(Region outRegion, boolean forSurface) {
         if (inPinnedWindowingMode() && !isFocused()) {
             outRegion.setEmpty();
             return;
@@ -2818,22 +2824,26 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             default:
             case TOUCHABLE_INSETS_FRAME:
                 outRegion.set(frame);
-                outRegion.translate(-frame.left, -frame.top);
                 break;
             case TOUCHABLE_INSETS_CONTENT:
                 applyInsets(outRegion, frame, mGivenContentInsets);
-                outRegion.translate(-frame.left, -frame.top);
                 break;
             case TOUCHABLE_INSETS_VISIBLE:
                 applyInsets(outRegion, frame, mGivenVisibleInsets);
-                outRegion.translate(-frame.left, -frame.top);
                 break;
             case TOUCHABLE_INSETS_REGION: {
                 outRegion.set(mGivenTouchableRegion);
                 break;
             }
         }
-        outRegion.translate(mAttrs.surfaceInsets.left, mAttrs.surfaceInsets.top);
+
+        if (forSurface) {
+            if (mTouchableInsets != TOUCHABLE_INSETS_REGION) {
+                outRegion.translate(-frame.left, -frame.top);
+            }
+            outRegion.getBounds(mTmpRect);
+            applyInsets(outRegion, mTmpRect, mAttrs.surfaceInsets);
+        }
     }
 
     private void cropRegionToStackBoundsIfNeeded(Region region) {
