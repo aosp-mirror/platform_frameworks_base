@@ -2060,6 +2060,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device has a secure implementation of keyguard, meaning the
+     * device supports PIN, pattern and password as defined in Android CDD
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SECURE_LOCK_SCREEN = "android.software.secure_lock_screen";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes an accelerometer.
      */
     @SdkConstant(SdkConstantType.FEATURE)

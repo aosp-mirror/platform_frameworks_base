@@ -40,9 +40,9 @@ import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationRe
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationToken;
 import com.android.server.locksettings.SyntheticPasswordManager.PasswordData;
 
-import java.util.ArrayList;
-
 import org.mockito.ArgumentCaptor;
+
+import java.util.ArrayList;
 
 
 /**
@@ -446,6 +446,37 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                     .getResponseCode());
         // Verify token is activated
         assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+    }
+
+    public void testSetLockCredentialWithTokenFailsWithoutLockScreen() throws Exception {
+        final String password = "password";
+        final String pattern = "123654";
+        final String token = "some-high-entropy-secure-token";
+
+        mHasSecureLockScreen = false;
+        enableSyntheticPassword();
+        long handle = mLocalService.addEscrowToken(token.getBytes(), PRIMARY_USER_ID);
+        assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+
+        try {
+            mLocalService.setLockCredentialWithToken(password,
+                    LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, handle, token.getBytes(),
+                    PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+            fail("An exception should have been thrown.");
+        } catch (UnsupportedOperationException e) {
+            // Success - the exception was expected.
+        }
+        assertFalse(mService.havePassword(PRIMARY_USER_ID));
+
+        try {
+            mLocalService.setLockCredentialWithToken(pattern,
+                    LockPatternUtils.CREDENTIAL_TYPE_PATTERN, handle, token.getBytes(),
+                    PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+            fail("An exception should have been thrown.");
+        } catch (UnsupportedOperationException e) {
+            // Success - the exception was expected.
+        }
+        assertFalse(mService.havePattern(PRIMARY_USER_ID));
     }
 
     public void testgetHashFactorPrimaryUser() throws RemoteException {

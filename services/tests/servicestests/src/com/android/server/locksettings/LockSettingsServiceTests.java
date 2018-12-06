@@ -26,13 +26,12 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSW
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.service.gatekeeper.GateKeeperResponse;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
-import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
 import com.android.server.locksettings.FakeGateKeeperService.VerifyHandle;
+import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
 
 /**
  * runtest frameworks-services -c com.android.server.locksettings.LockSettingsServiceTests
@@ -54,9 +53,19 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
                 PASSWORD_QUALITY_ALPHABETIC);
     }
 
+    public void testCreatePasswordFailsWithoutLockScreen() throws RemoteException {
+        testCreateCredentialFailsWithoutLockScreen(PRIMARY_USER_ID, "password",
+                CREDENTIAL_TYPE_PASSWORD, PASSWORD_QUALITY_ALPHABETIC);
+    }
+
     public void testCreatePatternPrimaryUser() throws RemoteException {
         testCreateCredential(PRIMARY_USER_ID, "123456789", CREDENTIAL_TYPE_PATTERN,
                 PASSWORD_QUALITY_SOMETHING);
+    }
+
+    public void testCreatePatternFailsWithoutLockScreen() throws RemoteException {
+        testCreateCredentialFailsWithoutLockScreen(PRIMARY_USER_ID, "123456789",
+                CREDENTIAL_TYPE_PATTERN, PASSWORD_QUALITY_SOMETHING);
     }
 
     public void testChangePasswordPrimaryUser() throws RemoteException {
@@ -196,6 +205,21 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
             throws RemoteException {
         mService.setLockCredential(credential, type, null, quality, userId);
         assertVerifyCredentials(userId, credential, type, -1);
+    }
+
+    private void testCreateCredentialFailsWithoutLockScreen(
+            int userId, String credential, int type, int quality) throws RemoteException {
+        mHasSecureLockScreen = false;
+
+        try {
+            mService.setLockCredential(credential, type, null, quality, userId);
+            fail("An exception should have been thrown.");
+        } catch (UnsupportedOperationException e) {
+            // Success - the exception was expected.
+        }
+
+        assertFalse(mService.havePassword(userId));
+        assertFalse(mService.havePattern(userId));
     }
 
     private void testChangeCredentials(int userId, String newCredential, int newType,
