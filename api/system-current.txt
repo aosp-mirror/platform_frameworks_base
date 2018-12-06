@@ -2919,6 +2919,13 @@ package android.media {
     field public static final int RADIO_TUNER = 1998; // 0x7ce
   }
 
+  public static class MediaTimestamp.Builder {
+    ctor public MediaTimestamp.Builder();
+    ctor public MediaTimestamp.Builder(android.media.MediaTimestamp);
+    method public android.media.MediaTimestamp build();
+    method public android.media.MediaTimestamp.Builder setMediaTimestamp(long, long, float);
+  }
+
   public class PlayerProxy {
     method public void pause();
     method public void setPan(float);
@@ -2939,7 +2946,7 @@ package android.media {
     ctor public TimedMetaData.Builder();
     ctor public TimedMetaData.Builder(android.media.TimedMetaData);
     method public android.media.TimedMetaData build();
-    method public android.media.TimedMetaData.Builder setTimedMetaData(int, byte[]);
+    method public android.media.TimedMetaData.Builder setTimedMetaData(long, byte[]);
   }
 
 }
