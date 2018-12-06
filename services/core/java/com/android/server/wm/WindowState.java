@@ -2836,6 +2836,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 break;
             }
         }
+        cropRegionToStackBoundsIfNeeded(outRegion);
 
         if (forSurface) {
             if (mTouchableInsets != TOUCHABLE_INSETS_REGION) {
