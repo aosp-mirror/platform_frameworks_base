@@ -17,7 +17,9 @@
 package android.os;
 
 import android.Manifest.permission;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
@@ -25,11 +27,15 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.service.dreams.Sandman;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.util.Preconditions;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * This class gives you control of the power state of the device.
@@ -642,6 +648,9 @@ public final class PowerManager {
     final Context mContext;
     final IPowerManager mService;
     final Handler mHandler;
+
+    IThermalService mThermalService;
+    private ArrayMap<ThermalStatusCallback, IThermalStatusListener> mCallbackMap = new ArrayMap<>();
 
     IDeviceIdleController mIDeviceIdleController;
 
@@ -1440,6 +1449,159 @@ public final class PowerManager {
     public boolean isSustainedPerformanceModeSupported() {
         return mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_sustainedPerformanceModeSupported);
+    }
+
+    /**
+     * Thermal status code: Not under throttling.
+     */
+    public static final int THERMAL_STATUS_NONE = Temperature.THROTTLING_NONE;
+
+    /**
+     * Thermal status code: Light throttling where UX is not impacted.
+     */
+    public static final int THERMAL_STATUS_LIGHT = Temperature.THROTTLING_LIGHT;
+
+    /**
+     * Thermal status code: Moderate throttling where UX is not largely impacted.
+     */
+    public static final int THERMAL_STATUS_MODERATE = Temperature.THROTTLING_MODERATE;
+
+    /**
+     * Thermal status code: Severe throttling where UX is largely impacted.
+     */
+    public static final int THERMAL_STATUS_SEVERE = Temperature.THROTTLING_SEVERE;
+
+    /**
+     * Thermal status code: Platform has done everything to reduce power.
+     */
+    public static final int THERMAL_STATUS_CRITICAL = Temperature.THROTTLING_CRITICAL;
+
+    /**
+     * Thermal status code: Key components in platform are shutting down due to thermal condition.
+     * Device functionalities will be limited.
+     */
+    public static final int THERMAL_STATUS_EMERGENCY = Temperature.THROTTLING_EMERGENCY;
+
+    /**
+     * Thermal status code: Need shutdown immediately.
+     */
+    public static final int THERMAL_STATUS_SHUTDOWN = Temperature.THROTTLING_SHUTDOWN;
+
+    /** @hide */
+    @IntDef(prefix = { "THERMAL_STATUS_" }, value = {
+            THERMAL_STATUS_NONE,
+            THERMAL_STATUS_LIGHT,
+            THERMAL_STATUS_MODERATE,
+            THERMAL_STATUS_SEVERE,
+            THERMAL_STATUS_CRITICAL,
+            THERMAL_STATUS_EMERGENCY,
+            THERMAL_STATUS_SHUTDOWN,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ThermalStatus {}
+
+    /**
+     * This function returns the current thermal status of the device.
+     *
+     * @return thermal status as int, {@link #THERMAL_STATUS_NONE} if device in not under
+     * thermal throttling.
+     */
+    public @ThermalStatus int getCurrentThermalStatus() {
+        synchronized (this) {
+            if (mThermalService == null) {
+                mThermalService = IThermalService.Stub.asInterface(
+                        ServiceManager.getService(Context.THERMAL_SERVICE));
+            }
+            try {
+                return mThermalService.getCurrentThermalStatus();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+    }
+
+    /**
+     * Callback passed to
+     * {@link PowerManager#registerThermalStatusCallback} and
+     * {@link PowerManager#unregisterThermalStatusCallback}
+     * to notify caller of thermal status.
+     */
+    public abstract static class ThermalStatusCallback {
+
+        /**
+         * Called when overall thermal throttling status changed.
+         * @param status defined in {@link android.os.Temperature}.
+         */
+        public void onStatusChange(@ThermalStatus int status) {}
+    }
+
+    /**
+     * This function registers a callback for thermal status change.
+     *
+     * @param callback callback to be registered.
+     * @param executor {@link Executor} to handle the callbacks.
+     */
+    public void registerThermalStatusCallback(
+            @NonNull ThermalStatusCallback callback, @NonNull @CallbackExecutor Executor executor) {
+        Preconditions.checkNotNull(callback, "callback cannnot be null");
+        Preconditions.checkNotNull(executor, "executor cannnot be null");
+        synchronized (this) {
+            if (mThermalService == null) {
+                mThermalService = IThermalService.Stub.asInterface(
+                        ServiceManager.getService(Context.THERMAL_SERVICE));
+            }
+            try {
+                if (mCallbackMap.containsKey(callback)) {
+                    throw new IllegalArgumentException("ThermalStatusCallback already registered");
+                }
+                IThermalStatusListener listener = new IThermalStatusListener.Stub() {
+                    @Override
+                    public void onStatusChange(int status) {
+                        executor.execute(() -> {
+                            callback.onStatusChange(status);
+                        });
+                    }
+                };
+                if (mThermalService.registerThermalStatusListener(listener)) {
+                    mCallbackMap.put(callback, listener);
+                } else {
+                    throw new RuntimeException("ThermalStatusCallback failed to register");
+                }
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * This function unregisters a callback for thermal status change.
+     *
+     * @param callback to be unregistered.
+     *
+     * see {@link #registerThermalStatusCallback}
+     */
+    public void unregisterThermalStatusCallback(ThermalStatusCallback callback) {
+        Preconditions.checkNotNull(callback, "callback cannnot be null");
+        synchronized (this) {
+            if (mThermalService == null) {
+                mThermalService = IThermalService.Stub.asInterface(
+                        ServiceManager.getService(Context.THERMAL_SERVICE));
+            }
+            try {
+                IThermalStatusListener listener = mCallbackMap.get(callback);
+                if (listener == null) {
+                    throw new IllegalArgumentException("ThermalStatusCallback not registered");
+                }
+                if (mThermalService.unregisterThermalStatusListener(listener)) {
+                    mCallbackMap.remove(callback);
+                } else {
+                    throw new RuntimeException("ThermalStatusCallback failed to unregister");
+                }
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
