@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -68,6 +69,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * SubscriptionManager is the application interface to SubscriptionController
@@ -2510,6 +2512,42 @@ public class SubscriptionManager {
         if (VDBG) logd("[setIsMetered]+ isMetered:" + isMetered + " subId:" + subId);
         return setSubscriptionPropertyHelper(subId, "setIsMetered",
                 (iSub)-> iSub.setMetered(isMetered, subId));
+    }
+
+    /**
+     * Whether system UI should hide a subscription. If it's a bundled opportunistic
+     * subscription, it shouldn't show up in anywhere in Settings app, dialer app,
+     * or status bar.
+     *
+     * @param info the subscriptionInfo to check against.
+     * @return true if this subscription should be hidden.
+     *
+     * @hide
+     */
+    public static boolean shouldHideSubscription(SubscriptionInfo info) {
+        return (info != null && !TextUtils.isEmpty(info.getGroupUuid()) && info.isOpportunistic());
+    }
+
+    /**
+     * Return a list of subscriptions that are available and visible to the user.
+     * Used by Settings app to show a list of subscriptions for user to pick.
+     *
+     * <p>
+     * Permissions android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE is required
+     * for getSelectableSubscriptionInfoList to be invoked.
+     * @return list of user selectable subscriptions.
+     *
+     * @hide
+     */
+    public @Nullable List<SubscriptionInfo> getSelectableSubscriptionInfoList() {
+        List<SubscriptionInfo> availableList = getAvailableSubscriptionInfoList();
+        if (availableList == null) {
+            return null;
+        } else {
+            return getAvailableSubscriptionInfoList().stream()
+                    .filter(subInfo -> !shouldHideSubscription(subInfo))
+                    .collect(Collectors.toList());
+        }
     }
 
     private interface CallISubMethodHelper {
