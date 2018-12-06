@@ -2384,16 +2384,23 @@ message KernelWakelock {
 }
 
 /**
- * Pulls low power state information. This includes platform and subsystem sleep state information,
- * PowerStatePlatformSleepState, PowerStateVoter or PowerStateSubsystemSleepState as defined in
+ * Pulls low power state information. If power.stats HAL is not available, this
+ * includes platform and subsystem sleep state information,
+ * PowerStatePlatformSleepState, PowerStateVoter or PowerStateSubsystemSleepState
+ * as defined in:
  *   hardware/interfaces/power/1.0/types.hal
  *   hardware/interfaces/power/1.1/types.hal
+ * If power.stats HAL is available, this includes PowerEntityStateResidencyResult
+ * as defined in:
+ *   hardware/interfaces/power/stats/1.0/types.hal
  */
 message SubsystemSleepState {
     // Subsystem name
     optional string subsystem_name = 1;
     // For PlatformLowPowerStats (hal 1.0), this is the voter name, which could be empty.
     // For SubsystemLowPowerStats (hal 1.1), this is the sleep state name.
+    // For PowerEntityStateResidencyResult (hal power/stats/1.0) this is the
+    //    powerEntityStateName from the corresponding PowerEntityStateInfo.
     optional string subname = 2;
     // The number of times it entered, or voted for entering the sleep state
     optional uint64 count = 3;
