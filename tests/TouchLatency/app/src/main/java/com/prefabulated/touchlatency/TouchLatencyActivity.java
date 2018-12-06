@@ -24,11 +24,15 @@ import android.graphics.Paint.Align;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
+import android.view.Display.Mode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.os.Trace;
+import android.view.Window;
+import android.view.WindowManager;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
@@ -219,14 +223,30 @@ class TouchLatencyView extends View implements View.OnTouchListener {
 }
 
 public class TouchLatencyActivity extends Activity {
+    private Mode mDisplayModes[];
+    private int mCurrentModeIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         Trace.beginSection("TouchLatencyActivity onCreate");
         setContentView(R.layout.activity_touch_latency);
 
         mTouchView = findViewById(R.id.canvasView);
+
+        WindowManager wm = getWindowManager();
+        Display display = wm.getDefaultDisplay();
+        mDisplayModes = display.getSupportedModes();
+        Mode currentMode = getWindowManager().getDefaultDisplay().getMode();
+
+        for (int i = 0; i < mDisplayModes.length; i++) {
+            if (currentMode.getModeId() == mDisplayModes[i].getModeId()) {
+                mCurrentModeIndex = i;
+                break;
+            }
+        }
+
         Trace.endSection();
     }
 
@@ -236,9 +256,34 @@ public class TouchLatencyActivity extends Activity {
         Trace.beginSection("TouchLatencyActivity onCreateOptionsMenu");
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_touch_latency, menu);
+        if (mDisplayModes.length > 1) {
+            MenuItem menuItem = menu.findItem(R.id.display_mode);
+            Mode currentMode = getWindowManager().getDefaultDisplay().getMode();
+            updateDisplayMode(menuItem, currentMode);
+        }
         Trace.endSection();
         return true;
     }
+
+
+    private void updateDisplayMode(MenuItem menuItem, Mode displayMode) {
+        int fps = (int) displayMode.getRefreshRate();
+        menuItem.setTitle(fps + "hz");
+        menuItem.setVisible(true);
+    }
+
+    public void changeDisplayMode(MenuItem item) {
+        Window w = getWindow();
+        WindowManager.LayoutParams params = w.getAttributes();
+
+        int modeIndex = (mCurrentModeIndex + 1) % mDisplayModes.length;
+        params.preferredDisplayModeId = mDisplayModes[modeIndex].getModeId();
+        w.setAttributes(params);
+
+        updateDisplayMode(item, mDisplayModes[modeIndex]);
+        mCurrentModeIndex = modeIndex;
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -251,6 +296,8 @@ public class TouchLatencyActivity extends Activity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             mTouchView.changeMode(item);
+        } else if (id == R.id.display_mode) {
+            changeDisplayMode(item);
         }
 
         Trace.endSection();
