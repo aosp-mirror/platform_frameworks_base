@@ -109,7 +109,7 @@ public final class Trace {
     private static native void nativeSetTracingEnabled(boolean allowed);
 
     @FastNative
-    private static native void nativeTraceCounter(long tag, String name, int value);
+    private static native void nativeTraceCounter(long tag, String name, long value);
     @FastNative
     private static native void nativeTraceBegin(long tag, String name);
     @FastNative
@@ -365,7 +365,7 @@ public final class Trace {
      * @param counterName The counter name to appear in the trace.
      * @param counterValue The counter value.
      */
-    public static void setCounter(String counterName, int counterValue) {
+    public static void setCounter(String counterName, long counterValue) {
         if (isTagEnabled(TRACE_TAG_APP)) {
             nativeTraceCounter(TRACE_TAG_APP, counterName, counterValue);
         }

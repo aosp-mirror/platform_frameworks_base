@@ -229,6 +229,9 @@ LIBANDROID {
     ATrace_beginSection; # introduced=23
     ATrace_endSection; # introduced=23
     ATrace_isEnabled; # introduced=23
+    ATrace_beginAsyncSection; # introduced=29
+    ATrace_endAsyncSection; # introduced=29
+    ATrace_setCounter; # introduced=29
     android_getaddrinfofornetwork; # introduced=23
     android_setprocnetwork; # introduced=23
     android_setsocknetwork; # introduced=23

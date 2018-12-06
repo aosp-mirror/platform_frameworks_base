@@ -52,9 +52,9 @@ static jlong android_os_Trace_nativeGetEnabledTags(JNIEnv*, jclass) {
 }
 
 static void android_os_Trace_nativeTraceCounter(JNIEnv* env, jclass,
-        jlong tag, jstring nameStr, jint value) {
+        jlong tag, jstring nameStr, jlong value) {
     withString(env, nameStr, [tag, value](char* str) {
-        atrace_int(tag, str, value);
+        atrace_int64(tag, str, value);
     });
 }
 
@@ -106,7 +106,7 @@ static const JNINativeMethod gTraceMethods[] = {
     // ----------- @FastNative  ----------------
 
     { "nativeTraceCounter",
-            "(JLjava/lang/String;I)V",
+            "(JLjava/lang/String;J)V",
             (void*)android_os_Trace_nativeTraceCounter },
     { "nativeTraceBegin",
             "(JLjava/lang/String;)V",
