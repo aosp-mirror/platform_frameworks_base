@@ -54,13 +54,13 @@ import java.lang.ref.WeakReference;
  * (no pun intended) example of how to use it.
  *
  * @param <S> the concrete remote service class
+ * @param <I> the interface of the binder service
  *
  * @hide
  */
 //TODO(b/117779333): improve javadoc above instead of using Autofill as an example
-public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
-        implements DeathRecipient {
-
+public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I>,
+        I extends IInterface> implements DeathRecipient {
     private static final int MSG_UNBIND = 1;
 
     protected static final int LAST_PRIVATE_MSG = MSG_UNBIND;
@@ -74,11 +74,11 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
 
     private final Context mContext;
     private final Intent mIntent;
-    private final VultureCallback mVultureCallback;
+    private final VultureCallback<S> mVultureCallback;
     private final int mUserId;
     private final ServiceConnection mServiceConnection = new RemoteServiceConnection();
     private final boolean mBindInstantServiceAllowed;
-    private IInterface mServiceInterface;
+    protected I mService;
 
     private boolean mBinding;
     private boolean mDestroyed;
@@ -87,19 +87,21 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
 
     /**
      * Callback called when the service dies.
+     *
+     * @param <T> service class
      */
-    public interface VultureCallback {
+    public interface VultureCallback<T> {
         /**
          * Called when the service dies.
          *
          * @param service service that died!
          */
-        void onServiceDied(AbstractRemoteService<? extends AbstractRemoteService<?>> service);
+        void onServiceDied(T service);
     }
 
     // NOTE: must be package-protected so this class is not extend outside
     AbstractRemoteService(@NonNull Context context, @NonNull String serviceInterface,
-            @NonNull ComponentName componentName, int userId, @NonNull VultureCallback callback,
+            @NonNull ComponentName componentName, int userId, @NonNull VultureCallback<S> callback,
             boolean bindInstantServiceAllowed, boolean verbose) {
         mContext = context;
         mVultureCallback = callback;
@@ -150,7 +152,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
      * Gets the base Binder interface from the service.
      */
     @NonNull
-    protected abstract IInterface getServiceInterface(@NonNull IBinder service);
+    protected abstract I getServiceInterface(@NonNull IBinder service);
 
     /**
      * Defines How long after the last interaction with the service we would unbind.
@@ -183,12 +185,14 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
 
     private void handleBinderDied() {
         if (checkIfDestroyed()) return;
-        if (mServiceInterface != null) {
-            mServiceInterface.asBinder().unlinkToDeath(this, 0);
+        if (mService != null) {
+            mService.asBinder().unlinkToDeath(this, 0);
         }
-        mServiceInterface = null;
+        mService = null;
         mServiceDied = true;
-        mVultureCallback.onServiceDied(this);
+        @SuppressWarnings("unchecked") // TODO(b/117779333): fix this warning
+        final S castService = (S) this;
+        mVultureCallback.onServiceDied(castService);
     }
 
     // Note: we are dumping without a lock held so this is a bit racy but
@@ -216,12 +220,35 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
         pw.println();
     }
 
-    protected void scheduleRequest(@NonNull PendingRequest<S> pendingRequest) {
+    /**
+     * Schedules a "sync" request.
+     *
+     * <p>This request must be responded by the service somehow (typically using a callback),
+     * othewise it will trigger a {@link PendingRequest#onTimeout(AbstractRemoteService)} if the
+     * service doesn't respond.
+     */
+    protected void scheduleRequest(@NonNull PendingRequest<S, I> pendingRequest) {
+        cancelScheduledUnbind();
         mHandler.sendMessage(obtainMessage(
                 AbstractRemoteService::handlePendingRequest, this, pendingRequest));
     }
 
-    protected void cancelScheduledUnbind() {
+    /**
+     * Schedules an async request.
+     *
+     * <p>This request is not expecting a callback from the service, hence it's represented by
+     * a simple {@link Runnable}.
+     */
+    protected void scheduleAsyncRequest(@NonNull AsyncRequest<I> request) {
+        cancelScheduledUnbind();
+        // TODO(b/117779333): fix generics below
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        final MyAsyncPendingRequest<S, I> asyncRequest = new MyAsyncPendingRequest(this, request);
+        mHandler.sendMessage(
+                obtainMessage(AbstractRemoteService::handlePendingRequest, this, asyncRequest));
+    }
+
+    private void cancelScheduledUnbind() {
         mHandler.removeMessages(MSG_UNBIND);
     }
 
@@ -244,7 +271,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
      * Handles a request, either processing it right now when bound, or saving it to be handled when
      * bound.
      */
-    protected final void handlePendingRequest(@NonNull PendingRequest<S> pendingRequest) {
+    protected final void handlePendingRequest(@NonNull PendingRequest<S, I> pendingRequest) {
         if (checkIfDestroyed() || mCompleted) return;
 
         if (!handleIsBound()) {
@@ -263,10 +290,10 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
     /**
      * Defines what to do with a request that arrives while not bound to the service.
      */
-    abstract void handlePendingRequestWhileUnBound(@NonNull PendingRequest<S> pendingRequest);
+    abstract void handlePendingRequestWhileUnBound(@NonNull PendingRequest<S, I> pendingRequest);
 
     private boolean handleIsBound() {
-        return mServiceInterface != null;
+        return mService != null;
     }
 
     private void handleEnsureBound() {
@@ -300,9 +327,9 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
         mBinding = false;
         if (handleIsBound()) {
             handleOnConnectedStateChangedInternal(false);
-            if (mServiceInterface != null) {
-                mServiceInterface.asBinder().unlinkToDeath(this, 0);
-                mServiceInterface = null;
+            if (mService != null) {
+                mService.asBinder().unlinkToDeath(this, 0);
+                mService = null;
             }
         }
         mContext.unbindService(mServiceConnection);
@@ -318,7 +345,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
                 return;
             }
             mBinding = false;
-            mServiceInterface = getServiceInterface(service);
+            mService = getServiceInterface(service);
             try {
                 service.linkToDeath(AbstractRemoteService.this, 0);
             } catch (RemoteException re) {
@@ -332,7 +359,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mBinding = true;
-            mServiceInterface = null;
+            mService = null;
         }
     }
 
@@ -349,10 +376,15 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
     /**
      * Base class for the requests serviced by the remote service.
      *
+     * <p><b>NOTE: </b> this class is typically used when the service needs to use a callback to
+     * communicate back with the system server. For cases where that's not needed, you should use
+     * {@link AbstractRemoteService#scheduleAsyncRequest(AsyncRequest)} instead.
+     *
      * @param <S> the remote service class
+     * @param <I> the interface of the binder service
      */
-    public abstract static class PendingRequest<S extends AbstractRemoteService<S>>
-            implements Runnable {
+    public abstract static class PendingRequest<S extends AbstractRemoteService<S, I>,
+            I extends IInterface> implements Runnable {
         protected final String mTag = getClass().getSimpleName();
         protected final Object mLock = new Object();
 
@@ -366,7 +398,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
         @GuardedBy("mLock")
         private boolean mCompleted;
 
-        protected PendingRequest(S service) {
+        protected PendingRequest(@NonNull S service) {
             mWeakService = new WeakReference<>(service);
             mServiceHandler = service.mHandler;
             mTimeoutTrigger = () -> {
@@ -450,6 +482,52 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S>>
          */
         protected boolean isFinal() {
             return false;
+        }
+    }
+
+    /**
+     * Represents a request that does not expect a callback from the remote service.
+     *
+     * @param <I> the interface of the binder service
+     */
+    public interface AsyncRequest<I extends IInterface> {
+
+        /**
+         * Run Forrest, run!
+         */
+        void run(@NonNull I binder) throws RemoteException;
+    }
+
+    private static final class MyAsyncPendingRequest<S extends AbstractRemoteService<S, I>,
+            I extends IInterface> extends PendingRequest<S, I> {
+        private static final String TAG = MyAsyncPendingRequest.class.getSimpleName();
+
+        private final AsyncRequest<I> mRequest;
+
+        protected MyAsyncPendingRequest(@NonNull S service, @NonNull AsyncRequest<I> request) {
+            super(service);
+
+            mRequest = request;
+        }
+
+        @Override
+        public void run() {
+            final S remoteService = getService();
+            if (remoteService == null) return;
+            try {
+                mRequest.run(remoteService.mService);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "exception handling async request (" + this + "): " + e);
+            } finally {
+                finish();
+            }
+        }
+
+        @Override
+        protected void onTimeout(S remoteService) {
+            // TODO(b/117779333): should not happen because we called finish() on run(), although
+            // currently it might be called if the service is destroyed while showing it.
+            Slog.w(TAG, "AsyncPending requested timed out");
         }
     }
 }

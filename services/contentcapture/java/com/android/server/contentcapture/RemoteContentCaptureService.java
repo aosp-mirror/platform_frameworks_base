@@ -20,14 +20,11 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
-import android.os.IInterface;
-import android.os.RemoteException;
 import android.service.contentcapture.ContentCaptureEventsRequest;
 import android.service.contentcapture.IContentCaptureService;
 import android.service.contentcapture.InteractionContext;
 import android.service.contentcapture.SnapshotData;
 import android.text.format.DateUtils;
-import android.util.Slog;
 import android.view.contentcapture.ContentCaptureEvent;
 
 import com.android.server.infra.AbstractMultiplePendingRequestsRemoteService;
@@ -35,16 +32,12 @@ import com.android.server.infra.AbstractMultiplePendingRequestsRemoteService;
 import java.util.List;
 
 final class RemoteContentCaptureService
-        extends AbstractMultiplePendingRequestsRemoteService<RemoteContentCaptureService> {
-
-    private static final String TAG = RemoteContentCaptureService.class.getSimpleName();
+        extends AbstractMultiplePendingRequestsRemoteService<RemoteContentCaptureService,
+        IContentCaptureService> {
 
     // TODO(b/117779333): changed it so it's permanentely bound
     private static final long TIMEOUT_IDLE_BIND_MILLIS = 2 * DateUtils.MINUTE_IN_MILLIS;
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 2 * DateUtils.SECOND_IN_MILLIS;
-
-    private final ContentCaptureServiceCallbacks mCallbacks;
-    private IContentCaptureService mService;
 
     RemoteContentCaptureService(Context context, String serviceInterface,
             ComponentName componentName, int userId,
@@ -52,13 +45,11 @@ final class RemoteContentCaptureService
             boolean verbose) {
         super(context, serviceInterface, componentName, userId, callbacks,
                 bindInstantServiceAllowed, verbose, /* initialCapacity= */ 2);
-        mCallbacks = callbacks;
     }
 
     @Override // from RemoteService
-    protected IInterface getServiceInterface(@NonNull IBinder service) {
-        mService = IContentCaptureService.Stub.asInterface(service);
-        return mService;
+    protected IContentCaptureService getServiceInterface(@NonNull IBinder service) {
+        return IContentCaptureService.Stub.asInterface(service);
     }
 
     // TODO(b/111276913): modify super class to allow permanent binding when value is 0 or negative
@@ -81,8 +72,7 @@ final class RemoteContentCaptureService
      */
     public void onSessionLifecycleRequest(@Nullable InteractionContext context,
             @NonNull String sessionId) {
-        cancelScheduledUnbind();
-        scheduleRequest(new PendingSessionLifecycleRequest(this, context, sessionId));
+        scheduleAsyncRequest((s) -> s.onSessionLifecycle(context, sessionId));
     }
 
     /**
@@ -90,8 +80,8 @@ final class RemoteContentCaptureService
      */
     public void onContentCaptureEventsRequest(@NonNull String sessionId,
             @NonNull List<ContentCaptureEvent> events) {
-        cancelScheduledUnbind();
-        scheduleRequest(new PendingOnContentCaptureEventsRequest(this, sessionId, events));
+        scheduleAsyncRequest((s) -> s.onContentCaptureEventsRequest(sessionId,
+                new ContentCaptureEventsRequest(events)));
     }
 
     /**
@@ -99,103 +89,13 @@ final class RemoteContentCaptureService
      */
     public void onActivitySnapshotRequest(@NonNull String sessionId,
             @NonNull SnapshotData snapshotData) {
-        cancelScheduledUnbind();
-        scheduleRequest(new PendingOnActivitySnapshotRequest(this, sessionId, snapshotData));
+        scheduleAsyncRequest((s) -> s.onActivitySnapshot(sessionId, snapshotData));
     }
 
-    private abstract static class MyPendingRequest
-            extends PendingRequest<RemoteContentCaptureService> {
-        protected final String mSessionId;
-
-        private MyPendingRequest(@NonNull RemoteContentCaptureService service,
-                @NonNull String sessionId) {
-            super(service);
-            mSessionId = sessionId;
-        }
-
-        @Override // from PendingRequest
-        protected final void onTimeout(RemoteContentCaptureService remoteService) {
-            Slog.w(TAG, "timed out handling " + getClass().getSimpleName() + " for "
-                    + mSessionId);
-            remoteService.mCallbacks.onFailureOrTimeout(/* timedOut= */ true);
-        }
-
-        @Override // from PendingRequest
-        public final void run() {
-            final RemoteContentCaptureService remoteService = getService();
-            if (remoteService != null) {
-                try {
-                    // We don't expect the service to call us back, so we finish right away.
-                    myRun(remoteService);
-                    // TODO(b/111330312): not true anymore!!
-                    finish();
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "exception handling " + getClass().getSimpleName() + " for "
-                            + mSessionId + ": " + e);
-                    remoteService.mCallbacks.onFailureOrTimeout(/* timedOut= */ false);
-                }
-            }
-        }
-
-        protected abstract void myRun(@NonNull RemoteContentCaptureService service)
-                throws RemoteException;
-
-    }
-
-    private static final class PendingSessionLifecycleRequest extends MyPendingRequest {
-
-        private final InteractionContext mContext;
-
-        protected PendingSessionLifecycleRequest(@NonNull RemoteContentCaptureService service,
-                @Nullable InteractionContext context, @NonNull String sessionId) {
-            super(service, sessionId);
-            mContext = context;
-        }
-
-        @Override // from MyPendingRequest
-        public void myRun(@NonNull RemoteContentCaptureService remoteService)
-                throws RemoteException {
-            remoteService.mService.onSessionLifecycle(mContext, mSessionId);
-        }
-    }
-
-    private static final class PendingOnContentCaptureEventsRequest extends MyPendingRequest {
-
-        private final List<ContentCaptureEvent> mEvents;
-
-        protected PendingOnContentCaptureEventsRequest(@NonNull RemoteContentCaptureService service,
-                @NonNull String sessionId, @NonNull List<ContentCaptureEvent> events) {
-            super(service, sessionId);
-            mEvents = events;
-        }
-
-        @Override // from MyPendingRequest
-        public void myRun(@NonNull RemoteContentCaptureService remoteService)
-                throws RemoteException {
-            remoteService.mService.onContentCaptureEventsRequest(mSessionId,
-                    new ContentCaptureEventsRequest(mEvents));
-        }
-    }
-
-    private static final class PendingOnActivitySnapshotRequest extends MyPendingRequest {
-
-        private final SnapshotData mSnapshotData;
-
-        protected PendingOnActivitySnapshotRequest(@NonNull RemoteContentCaptureService service,
-                @NonNull String sessionId, @NonNull SnapshotData snapshotData) {
-            super(service, sessionId);
-            mSnapshotData = snapshotData;
-        }
-
-        @Override // from MyPendingRequest
-        protected void myRun(@NonNull RemoteContentCaptureService remoteService)
-                throws RemoteException {
-            remoteService.mService.onActivitySnapshot(mSessionId, mSnapshotData);
-        }
-    }
-
-    public interface ContentCaptureServiceCallbacks extends VultureCallback {
-        // To keep it simple, we use the same callback for all failures / timeouts.
-        void onFailureOrTimeout(boolean timedOut);
+    public interface ContentCaptureServiceCallbacks
+            extends VultureCallback<RemoteContentCaptureService> {
+        // NOTE: so far we don't need to notify the callback implementation (an inner class on
+        // AutofillManagerServiceImpl) of the request results (success, timeouts, etc..), so this
+        // callback interface is empty.
     }
 }

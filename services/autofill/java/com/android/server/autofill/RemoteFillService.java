@@ -28,7 +28,6 @@ import android.content.Context;
 import android.content.IntentSender;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
-import android.os.IInterface;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
 import android.service.autofill.FillRequest;
@@ -42,15 +41,15 @@ import android.util.Slog;
 
 import com.android.server.infra.AbstractSinglePendingRequestRemoteService;
 
-final class RemoteFillService extends AbstractSinglePendingRequestRemoteService<RemoteFillService> {
+final class RemoteFillService
+        extends AbstractSinglePendingRequestRemoteService<RemoteFillService, IAutoFillService> {
 
     private static final long TIMEOUT_IDLE_BIND_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
 
     private final FillServiceCallbacks mCallbacks;
-    private IAutoFillService mAutoFillService;
 
-    public interface FillServiceCallbacks extends VultureCallback {
+    public interface FillServiceCallbacks extends VultureCallback<RemoteFillService> {
         void onFillRequestSuccess(int requestId, @Nullable FillResponse response,
                 @NonNull String servicePackageName, int requestFlags);
         void onFillRequestFailure(int requestId, @Nullable CharSequence message);
@@ -71,21 +70,20 @@ final class RemoteFillService extends AbstractSinglePendingRequestRemoteService<
 
     @Override // from AbstractRemoteService
     protected void handleOnConnectedStateChanged(boolean state) {
-        if (mAutoFillService == null) {
+        if (mService == null) {
             Slog.w(mTag, "onConnectedStateChanged(): null service");
             return;
         }
         try {
-            mAutoFillService.onConnectedStateChanged(state);
+            mService.onConnectedStateChanged(state);
         } catch (Exception e) {
             Slog.w(mTag, "Exception calling onConnectedStateChanged(): " + e);
         }
     }
 
     @Override // from AbstractRemoteService
-    protected IInterface getServiceInterface(IBinder service) {
-        mAutoFillService = IAutoFillService.Stub.asInterface(service);
-        return mAutoFillService;
+    protected IAutoFillService getServiceInterface(IBinder service) {
+        return IAutoFillService.Stub.asInterface(service);
     }
 
     @Override // from AbstractRemoteService
@@ -127,17 +125,15 @@ final class RemoteFillService extends AbstractSinglePendingRequestRemoteService<
     }
 
     public void onFillRequest(@NonNull FillRequest request) {
-        cancelScheduledUnbind();
         scheduleRequest(new PendingFillRequest(request, this));
     }
 
     public void onSaveRequest(@NonNull SaveRequest request) {
-        cancelScheduledUnbind();
         scheduleRequest(new PendingSaveRequest(request, this));
     }
 
     private boolean handleResponseCallbackCommon(
-            @NonNull PendingRequest<RemoteFillService> pendingRequest) {
+            @NonNull PendingRequest<RemoteFillService, IAutoFillService> pendingRequest) {
         if (isDestroyed()) return false;
 
         if (mPendingRequest == pendingRequest) {
@@ -204,7 +200,8 @@ final class RemoteFillService extends AbstractSinglePendingRequestRemoteService<
         });
     }
 
-    private static final class PendingFillRequest extends PendingRequest<RemoteFillService> {
+    private static final class PendingFillRequest
+            extends PendingRequest<RemoteFillService, IAutoFillService> {
         private final FillRequest mRequest;
         private final IFillCallback mCallback;
         private ICancellationSignal mCancellation;
@@ -282,7 +279,7 @@ final class RemoteFillService extends AbstractSinglePendingRequestRemoteService<
             if (remoteService != null) {
                 if (sVerbose) Slog.v(mTag, "calling onFillRequest() for id=" + mRequest.getId());
                 try {
-                    remoteService.mAutoFillService.onFillRequest(mRequest, mCallback);
+                    remoteService.mService.onFillRequest(mRequest, mCallback);
                 } catch (RemoteException e) {
                     Slog.e(mTag, "Error calling on fill request", e);
 
@@ -310,7 +307,8 @@ final class RemoteFillService extends AbstractSinglePendingRequestRemoteService<
         }
     }
 
-    private static final class PendingSaveRequest extends PendingRequest<RemoteFillService> {
+    private static final class PendingSaveRequest
+            extends PendingRequest<RemoteFillService, IAutoFillService> {
         private final SaveRequest mRequest;
         private final ISaveCallback mCallback;
 
@@ -355,7 +353,7 @@ final class RemoteFillService extends AbstractSinglePendingRequestRemoteService<
             if (remoteService != null) {
                 if (sVerbose) Slog.v(mTag, "calling onSaveRequest()");
                 try {
-                    remoteService.mAutoFillService.onSaveRequest(mRequest, mCallback);
+                    remoteService.mService.onSaveRequest(mRequest, mCallback);
                 } catch (RemoteException e) {
                     Slog.e(mTag, "Error calling on save request", e);
 

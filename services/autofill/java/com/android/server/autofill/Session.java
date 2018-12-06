@@ -98,7 +98,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.autofill.AutofillManagerService.SmartSuggestionMode;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
-import com.android.server.infra.AbstractRemoteService;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -909,7 +908,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // VultureCallback
     @Override
-    public void onServiceDied(AbstractRemoteService<? extends AbstractRemoteService<?>> service) {
+    public void onServiceDied(@NonNull RemoteFillService service) {
         Slog.w(TAG, "removing session because service died");
         forceRemoveSelfLocked();
     }

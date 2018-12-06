@@ -19,6 +19,7 @@ package com.android.server.infra;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.IInterface;
 import android.util.Slog;
 
 import java.io.PrintWriter;
@@ -29,17 +30,19 @@ import java.io.PrintWriter;
  * <p>If another request is received while not bound, the previous one will be canceled.
  *
  * @param <S> the concrete remote service class
+ * @param <I> the interface of the binder service
  *
  * @hide
  */
-public abstract class AbstractSinglePendingRequestRemoteService<
-        S extends AbstractSinglePendingRequestRemoteService<S>> extends AbstractRemoteService<S> {
+public abstract class AbstractSinglePendingRequestRemoteService<S
+        extends AbstractSinglePendingRequestRemoteService<S, I>, I extends IInterface>
+        extends AbstractRemoteService<S, I> {
 
-    protected PendingRequest<S> mPendingRequest;
+    protected PendingRequest<S, I> mPendingRequest;
 
     public AbstractSinglePendingRequestRemoteService(@NonNull Context context,
             @NonNull String serviceInterface, @NonNull ComponentName componentName, int userId,
-            @NonNull VultureCallback callback, boolean bindInstantServiceAllowed,
+            @NonNull VultureCallback<S> callback, boolean bindInstantServiceAllowed,
             boolean verbose) {
         super(context, serviceInterface, componentName, userId, callback, bindInstantServiceAllowed,
                 verbose);
@@ -48,7 +51,7 @@ public abstract class AbstractSinglePendingRequestRemoteService<
     @Override // from AbstractRemoteService
     void handlePendingRequests() {
         if (mPendingRequest != null) {
-            final PendingRequest<S> pendingRequest = mPendingRequest;
+            final PendingRequest<S, I> pendingRequest = mPendingRequest;
             mPendingRequest = null;
             handlePendingRequest(pendingRequest);
         }
@@ -70,7 +73,7 @@ public abstract class AbstractSinglePendingRequestRemoteService<
     }
 
     @Override // from AbstractRemoteService
-    void handlePendingRequestWhileUnBound(@NonNull PendingRequest<S> pendingRequest) {
+    void handlePendingRequestWhileUnBound(@NonNull PendingRequest<S, I> pendingRequest) {
         if (mPendingRequest != null) {
             if (mVerbose) {
                 Slog.v(mTag, "handlePendingRequestWhileUnBound(): cancelling " + mPendingRequest
