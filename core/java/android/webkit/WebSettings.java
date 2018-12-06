@@ -224,6 +224,42 @@ public abstract class WebSettings {
      */
     public static final int MIXED_CONTENT_COMPATIBILITY_MODE = 2;
 
+    /** @hide */
+    @IntDef(prefix = { "FORCE_DARK_" }, value = {
+            FORCE_DARK_OFF,
+            FORCE_DARK_AUTO,
+            FORCE_DARK_ON
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ForceDarkMode {}
+
+    /**
+     * Used with {@link #setForceDarkMode}
+     *
+     * Disable force dark, irrespective of the force dark mode of the WebView parent. In this mode,
+     * WebView content will always be rendered as-is, regardless of whether native views are being
+     * automatically darkened.
+     */
+    public static final int FORCE_DARK_OFF = -1;
+
+    /**
+     * Used with {@link #setForceDarkMode}
+     *
+     * Enable force dark, dependent on the state of the WebView parent. If the WebView parent view
+     * is being automatically rendered in dark mode, then WebView content will be rendered so as to
+     * emulate a dark theme. WebViews that are not attached to the view hierarchy will not be
+     * inverted.
+     */
+    public static final int FORCE_DARK_AUTO = 0;
+
+    /**
+     * Used with {@link #setForceDarkMode}
+     *
+     * Unconditionally enable force dark. In this mode WebView content will always be rendered so
+     * as to emulate a dark theme.
+     */
+    public static final int FORCE_DARK_ON = +1;
+
     /**
      * Enables dumping the pages navigation cache to a text file. The default
      * is {@code false}.
@@ -1427,6 +1463,23 @@ public abstract class WebSettings {
      */
     public abstract boolean getSafeBrowsingEnabled();
 
+
+    /**
+     * Set the force dark mode for this WebView.
+     */
+    public void setForceDarkMode(@ForceDarkMode int forceDarkMode) {
+        // Stub implementation to satisfy Roboelectrc shadows that don't override this yet.
+    }
+
+    /**
+     * Get the force dark mode for this WebView.
+     *
+     * @return the currently set force dark mode.
+     */
+    public @ForceDarkMode int getForceDarkMode() {
+        // Stub implementation to satisfy Roboelectrc shadows that don't override this yet.
+        return FORCE_DARK_AUTO;
+    }
 
     /**
      * @hide
