@@ -48,12 +48,16 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.RootActivityContainer.FindTaskResult;
 import static com.android.server.wm.RootActivityContainer.TAG_STATES;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.os.IBinder;
 import android.os.UserHandle;
 import android.util.IntArray;
 import android.util.Slog;
@@ -86,6 +90,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
     private ActivityTaskManagerService mService;
     private RootActivityContainer mRootActivityContainer;
+    // TODO: Remove once unification is complete.
+    DisplayContent mDisplayContent;
     /** Actual Display this object tracks. */
     int mDisplayId;
     Display mDisplay;
@@ -138,8 +144,6 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     // Used in updating the display size
     private Point mTmpDisplaySize = new Point();
 
-    private DisplayWindowController mWindowContainerController;
-
     private final FindTaskResult mTmpFindTaskResult = new FindTaskResult();
 
     ActivityDisplay(RootActivityContainer root, Display display) {
@@ -147,19 +151,15 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         mService = root.mService;
         mDisplayId = display.getDisplayId();
         mDisplay = display;
-        mWindowContainerController = createWindowContainerController();
+        mDisplayContent = createDisplayContent();
         updateBounds();
     }
 
-    protected DisplayWindowController createWindowContainerController() {
-        return new DisplayWindowController(mDisplay, this);
+    protected DisplayContent createDisplayContent() {
+        return mService.mWindowManager.mRoot.createDisplayContent(mDisplay, this);
     }
 
-    DisplayWindowController getWindowContainerController() {
-        return mWindowContainerController;
-    }
-
-    void updateBounds() {
+    private void updateBounds() {
         mDisplay.getRealSize(mTmpDisplaySize);
         setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
     }
@@ -178,7 +178,10 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         }
 
         updateBounds();
-        mWindowContainerController.onDisplayChanged();
+        if (mDisplayContent != null) {
+            mDisplayContent.updateDisplayInfo();
+            mService.mWindowManager.requestTraversal();
+        }
     }
 
     @Override
@@ -270,9 +273,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         // ActivityStack#getWindowContainerController() can be null. In this special case,
         // since DisplayContest#positionStackAt() is called in TaskStack#onConfigurationChanged(),
         // we don't have to call WindowContainerController#positionChildAt() here.
-        if (stack.getWindowContainerController() != null) {
-            mWindowContainerController.positionChildAt(stack.getWindowContainerController(),
-                    insertPosition, includingParents);
+        if (stack.getWindowContainerController() != null && mDisplayContent != null) {
+            mDisplayContent.positionStackAt(insertPosition,
+                    stack.getWindowContainerController().mContainer, includingParents);
         }
         if (!wasContained) {
             stack.setParent(this);
@@ -958,17 +961,23 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 getRequestedOverrideConfiguration().windowConfiguration.getRotation();
         if (currRotation != ROTATION_UNDEFINED
                 && currRotation != overrideConfiguration.windowConfiguration.getRotation()
-                && getWindowContainerController() != null) {
-            getWindowContainerController().applyRotation(currRotation,
+                && mDisplayContent != null) {
+            mDisplayContent.applyRotationLocked(currRotation,
                     overrideConfiguration.windowConfiguration.getRotation());
         }
         super.onRequestedOverrideConfigurationChanged(overrideConfiguration);
+        if (mDisplayContent != null) {
+            mService.mWindowManager.setNewDisplayOverrideConfiguration(
+                    overrideConfiguration, mDisplayContent);
+        }
     }
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         // update resources before cascade so that docked/pinned stacks use the correct info
-        getWindowContainerController().preOnConfigurationChanged();
+        if (mDisplayContent != null) {
+            mDisplayContent.preOnConfigurationChanged();
+        }
         super.onConfigurationChanged(newParentConfig);
     }
 
@@ -1099,8 +1108,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
     private void releaseSelfIfNeeded() {
         if (mStacks.isEmpty() && mRemoved) {
-            mWindowContainerController.removeContainer();
-            mWindowContainerController = null;
+            mDisplayContent.removeIfPossible();
+            mDisplayContent = null;
             mRootActivityContainer.removeChild(this);
             mRootActivityContainer.mStackSupervisor
                     .getKeyguardController().onDisplayRemoved(mDisplayId);
@@ -1122,7 +1131,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
      * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      */
     boolean supportsSystemDecorations() {
-        return mWindowContainerController.supportsSystemDecorations();
+        return mDisplayContent.supportsSystemDecorations();
     }
 
     @VisibleForTesting
@@ -1136,7 +1145,30 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     }
 
     void setFocusedApp(ActivityRecord r, boolean moveFocusNow) {
-        mWindowContainerController.setFocusedApp(r.appToken, moveFocusNow);
+        if (mDisplayContent == null) {
+            return;
+        }
+        final AppWindowToken newFocus;
+        final IBinder token = r.appToken;
+        if (token == null) {
+            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Clearing focused app, displayId="
+                    + mDisplayId);
+            newFocus = null;
+        } else {
+            newFocus = mService.mWindowManager.mRoot.getAppWindowToken(token);
+            if (newFocus == null) {
+                Slog.w(TAG_WM, "Attempted to set focus to non-existing app token: " + token
+                        + ", displayId=" + mDisplayId);
+            }
+            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Set focused app to: " + newFocus
+                    + " moveFocusNow=" + moveFocusNow + " displayId=" + mDisplayId);
+        }
+
+        final boolean changed = mDisplayContent.setFocusedApp(newFocus);
+        if (moveFocusNow && changed) {
+            mService.mWindowManager.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
+                    true /*updateInputWindows*/);
+        }
     }
 
     /**
@@ -1284,17 +1316,21 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     }
 
     /**
-     * See {@link DisplayWindowController#deferUpdateImeTarget()}
+     * See {@link DisplayContent#deferUpdateImeTarget()}
      */
     public void deferUpdateImeTarget() {
-        mWindowContainerController.deferUpdateImeTarget();
+        if (mDisplayContent != null) {
+            mDisplayContent.deferUpdateImeTarget();
+        }
     }
 
     /**
-     * See {@link DisplayWindowController#deferUpdateImeTarget()}
+     * See {@link DisplayContent#deferUpdateImeTarget()}
      */
     public void continueUpdateImeTarget() {
-        mWindowContainerController.continueUpdateImeTarget();
+        if (mDisplayContent != null) {
+            mDisplayContent.continueUpdateImeTarget();
+        }
     }
 
     public void dump(PrintWriter pw, String prefix) {

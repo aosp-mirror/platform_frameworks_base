@@ -1738,7 +1738,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             if (self.isState(
                     ActivityStack.ActivityState.RESUMED, ActivityStack.ActivityState.PAUSING)) {
-                self.getDisplay().getWindowContainerController().overridePendingAppTransition(
+                self.getDisplay().mDisplayContent.mAppTransition.overridePendingAppTransition(
                         packageName, enterAnim, exitAnim, null);
             }
 
@@ -3073,12 +3073,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // Get top display of front most application.
         final ActivityStack focusedStack = getTopDisplayFocusedStack();
         if (focusedStack != null) {
-            final DisplayWindowController dwc =
-                    focusedStack.getDisplay().getWindowContainerController();
-            dwc.prepareAppTransition(TRANSIT_TASK_IN_PLACE, false);
-            dwc.overridePendingAppTransitionInPlace(activityOptions.getPackageName(),
+            final DisplayContent dc = focusedStack.getDisplay().mDisplayContent;
+            dc.prepareAppTransition(TRANSIT_TASK_IN_PLACE, false);
+            dc.mAppTransition.overrideInPlaceAppTransition(activityOptions.getPackageName(),
                     activityOptions.getCustomInPlaceResId());
-            dwc.executeAppTransition();
+            dc.executeAppTransition();
         }
     }
 
@@ -5770,17 +5769,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (activityDisplay == null) {
                     return;
                 }
-                final DisplayWindowController dwc = activityDisplay.getWindowContainerController();
-                final boolean wasTransitionSet = dwc.getPendingAppTransition() != TRANSIT_NONE;
+                final DisplayContent dc = activityDisplay.mDisplayContent;
+                final boolean wasTransitionSet =
+                        dc.mAppTransition.getAppTransition() != TRANSIT_NONE;
                 if (!wasTransitionSet) {
-                    dwc.prepareAppTransition(TRANSIT_NONE, false /* alwaysKeepCurrent */);
+                    dc.prepareAppTransition(TRANSIT_NONE, false /* alwaysKeepCurrent */);
                 }
                 mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
 
                 // If there was a transition set already we don't want to interfere with it as we
                 // might be starting it too early.
                 if (!wasTransitionSet) {
-                    dwc.executeAppTransition();
+                    dc.executeAppTransition();
                 }
             }
             if (callback != null) {

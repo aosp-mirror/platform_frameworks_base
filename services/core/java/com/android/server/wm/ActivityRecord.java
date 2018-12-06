@@ -2942,7 +2942,7 @@ final class ActivityRecord extends ConfigurationContainer {
             final ActivityLifecycleItem lifecycleItem;
             if (andResume) {
                 lifecycleItem = ResumeActivityItem.obtain(
-                        getDisplay().getWindowContainerController().isNextTransitionForward());
+                        getDisplay().mDisplayContent.isNextTransitionForward());
             } else {
                 lifecycleItem = PauseActivityItem.obtain();
             }

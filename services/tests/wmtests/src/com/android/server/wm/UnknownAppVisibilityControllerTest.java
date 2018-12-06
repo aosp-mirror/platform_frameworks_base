@@ -49,7 +49,7 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
         mDisplayContent.mUnknownAppVisibilityController.notifyRelayouted(token);
 
         // Make sure our handler processed the message.
-        SystemClock.sleep(100);
+        mWm.mH.runWithScissors(() -> { }, 0);
         assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
     }
 
@@ -65,7 +65,7 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
         mDisplayContent.mUnknownAppVisibilityController.notifyRelayouted(token2);
 
         // Make sure our handler processed the message.
-        SystemClock.sleep(100);
+        mWm.mH.runWithScissors(() -> { }, 0);
         assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
     }
 
