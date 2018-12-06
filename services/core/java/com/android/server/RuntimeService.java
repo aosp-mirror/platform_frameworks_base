@@ -94,7 +94,7 @@ public class RuntimeService extends Binder {
         // Add /data tz data set using the DistroVersion class (which libcore cannot use).
         // This update mechanism will be removed after the time zone APEX is launched so this
         // untidiness will disappear with it.
-        String debugKeyPrefix = "core_library.timezone.data_";
+        String debugKeyPrefix = "core_library.timezone.source.data_";
         String versionFileName = TimeZoneDataFiles.getDataTimeZoneFile(
                 TimeZoneDistro.DISTRO_VERSION_FILE_NAME);
         addDistroVersionDebugInfo(versionFileName, debugKeyPrefix, coreLibraryDebugInfo);
