@@ -753,124 +753,9 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override public final boolean hasFeature(String feature) {
             return PackageManagerService.this.hasSystemFeature(feature, 0);
         }
-
-        final List<PackageParser.Package> getStaticOverlayPackages(
-                Collection<PackageParser.Package> allPackages, String targetPackageName) {
-            if ("android".equals(targetPackageName)) {
-                // Static RROs targeting to "android", ie framework-res.apk, are already applied by
-                // native AssetManager.
-                return null;
-            }
-
-            List<PackageParser.Package> overlayPackages = null;
-            for (PackageParser.Package p : allPackages) {
-                if (targetPackageName.equals(p.mOverlayTarget) && p.mOverlayIsStatic) {
-                    if (overlayPackages == null) {
-                        overlayPackages = new ArrayList<>();
-                    }
-                    overlayPackages.add(p);
-                }
-            }
-            if (overlayPackages != null) {
-                Comparator<PackageParser.Package> cmp =
-                        Comparator.comparingInt(p -> p.mOverlayPriority);
-                overlayPackages.sort(cmp);
-            }
-            return overlayPackages;
-        }
-
-        final String[] getStaticOverlayPaths(List<PackageParser.Package> overlayPackages,
-                String targetPath) {
-            if (overlayPackages == null || overlayPackages.isEmpty()) {
-                return null;
-            }
-            List<String> overlayPathList = null;
-            for (PackageParser.Package overlayPackage : overlayPackages) {
-                if (targetPath == null) {
-                    if (overlayPathList == null) {
-                        overlayPathList = new ArrayList<>();
-                    }
-                    overlayPathList.add(overlayPackage.baseCodePath);
-                    continue;
-                }
-
-                try {
-                    // Creates idmaps for system to parse correctly the Android manifest of the
-                    // target package.
-                    //
-                    // OverlayManagerService will update each of them with a correct gid from its
-                    // target package app id.
-                    mInstaller.idmap(targetPath, overlayPackage.baseCodePath,
-                            UserHandle.getSharedAppGid(
-                                    UserHandle.getUserGid(UserHandle.USER_SYSTEM)));
-                    if (overlayPathList == null) {
-                        overlayPathList = new ArrayList<>();
-                    }
-                    overlayPathList.add(overlayPackage.baseCodePath);
-                } catch (InstallerException e) {
-                    Slog.e(TAG, "Failed to generate idmap for " + targetPath + " and " +
-                            overlayPackage.baseCodePath);
-                }
-            }
-            return overlayPathList == null ? null : overlayPathList.toArray(new String[0]);
-        }
-
-        String[] getStaticOverlayPaths(String targetPackageName, String targetPath) {
-            List<PackageParser.Package> overlayPackages;
-            synchronized (mInstallLock) {
-                synchronized (mPackages) {
-                    overlayPackages = getStaticOverlayPackages(
-                            mPackages.values(), targetPackageName);
-                }
-                // It is safe to keep overlayPackages without holding mPackages because static overlay
-                // packages can't be uninstalled or disabled.
-                return getStaticOverlayPaths(overlayPackages, targetPath);
-            }
-        }
-
-        @Override public final String[] getOverlayApks(String targetPackageName) {
-            return getStaticOverlayPaths(targetPackageName, null);
-        }
-
-        @Override public final String[] getOverlayPaths(String targetPackageName,
-                String targetPath) {
-            return getStaticOverlayPaths(targetPackageName, targetPath);
-        }
-    }
-
-    class ParallelPackageParserCallback extends PackageParserCallback {
-        List<PackageParser.Package> mOverlayPackages = null;
-
-        void findStaticOverlayPackages() {
-            synchronized (mPackages) {
-                for (PackageParser.Package p : mPackages.values()) {
-                    if (p.mOverlayIsStatic) {
-                        if (mOverlayPackages == null) {
-                            mOverlayPackages = new ArrayList<>();
-                        }
-                        mOverlayPackages.add(p);
-                    }
-                }
-            }
-        }
-
-        @Override
-        synchronized String[] getStaticOverlayPaths(String targetPackageName, String targetPath) {
-            // We can trust mOverlayPackages without holding mPackages because package uninstall
-            // can't happen while running parallel parsing.
-            // And we can call mInstaller inside getStaticOverlayPaths without holding mInstallLock
-            // because mInstallLock is held before running parallel parsing.
-            // Moreover holding mPackages or mInstallLock on each parsing thread causes dead-lock.
-            return mOverlayPackages == null ? null :
-                    getStaticOverlayPaths(
-                            getStaticOverlayPackages(mOverlayPackages, targetPackageName),
-                            targetPath);
-        }
     }
 
     final PackageParser.Callback mPackageParserCallback = new PackageParserCallback();
-    final ParallelPackageParserCallback mParallelPackageParserCallback =
-            new ParallelPackageParserCallback();
 
     // Currently known shared libraries.
     final ArrayMap<String, LongSparseArray<SharedLibraryInfo>> mSharedLibraries = new ArrayMap<>();
@@ -2533,8 +2418,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     | SCAN_AS_SYSTEM
                     | SCAN_AS_ODM,
                     0);
-
-            mParallelPackageParserCallback.findStaticOverlayPackages();
 
             // Find base frameworks (resource packages without code).
             scanDirTracedLI(frameworkDir,
@@ -8571,7 +8454,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         try (ParallelPackageParser parallelPackageParser = new ParallelPackageParser(
                 mSeparateProcesses, mOnlyCore, mMetrics, mCacheDir,
-                mParallelPackageParserCallback)) {
+                mPackageParserCallback)) {
             // Submit files for parsing in parallel
             int fileCount = 0;
             for (File file : files) {
