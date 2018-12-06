@@ -60,6 +60,9 @@ public class RoleUserState {
 
     private static final String ROLES_FILE_NAME = "roles.xml";
 
+    private static final long WRITE_DELAY_MILLIS = 200;
+    private static final long MAX_WRITE_DELAY_MILLIS = 2000;
+
     private static final String TAG_ROLES = "roles";
     private static final String TAG_ROLE = "role";
     private static final String TAG_HOLDER = "holder";
@@ -83,6 +86,9 @@ public class RoleUserState {
     @GuardedBy("RoleManagerService.mLock")
     @NonNull
     private ArrayMap<String, ArraySet<String>> mRoles = new ArrayMap<>();
+
+    @GuardedBy("RoleManagerService.mLock")
+    private long mWritePendingSinceMillis;
 
     @GuardedBy("RoleManagerService.mLock")
     private boolean mDestroyed;
@@ -282,14 +288,31 @@ public class RoleUserState {
         for (int i = 0, size = CollectionUtils.size(mRoles); i < size; ++i) {
             String roleName = mRoles.keyAt(i);
             ArraySet<String> roleHolders = mRoles.valueAt(i);
+
             roleHolders = new ArraySet<>(roleHolders);
             roles.put(roleName, roleHolders);
         }
 
-        mWriteHandler.removeCallbacksAndMessages(null);
-        // TODO: Throttle writes.
-        mWriteHandler.sendMessage(PooledLambda.obtainMessage(RoleUserState::writeSync, this,
-                mVersion, mLastGrantPackagesHash, roles));
+        long currentTimeMillis = System.currentTimeMillis();
+        long writeDelayMillis;
+        if (!mWriteHandler.hasMessagesOrCallbacks()) {
+            mWritePendingSinceMillis = currentTimeMillis;
+            writeDelayMillis = WRITE_DELAY_MILLIS;
+        } else {
+            mWriteHandler.removeCallbacksAndMessages(null);
+            long writePendingDurationMillis = currentTimeMillis - mWritePendingSinceMillis;
+            if (writePendingDurationMillis >= MAX_WRITE_DELAY_MILLIS) {
+                writeDelayMillis = 0;
+            } else {
+                long maxWriteDelayMillis = Math.max(MAX_WRITE_DELAY_MILLIS
+                        - writePendingDurationMillis, 0);
+                writeDelayMillis = Math.min(WRITE_DELAY_MILLIS, maxWriteDelayMillis);
+            }
+        }
+
+        mWriteHandler.sendMessageDelayed(PooledLambda.obtainMessage(RoleUserState::writeSync, this,
+                mVersion, mLastGrantPackagesHash, roles), writeDelayMillis);
+        Slog.i(LOG_TAG, "Scheduled writing roles.xml");
     }
 
     @WorkerThread
@@ -310,6 +333,7 @@ public class RoleUserState {
 
             serializer.endDocument();
             atomicFile.finishWrite(out);
+            Slog.i(LOG_TAG, "Wrote roles.xml successfully");
         } catch (IllegalArgumentException | IllegalStateException | IOException e) {
             Slog.wtf(LOG_TAG, "Failed to write roles.xml, restoring backup", e);
             if (out != null) {
@@ -367,6 +391,7 @@ public class RoleUserState {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(in, null);
             parseXmlLocked(parser);
+            Slog.i(LOG_TAG, "Read roles.xml successfully");
         } catch (FileNotFoundException e) {
             Slog.i(LOG_TAG, "roles.xml not found");
         } catch (XmlPullParserException | IOException e) {
