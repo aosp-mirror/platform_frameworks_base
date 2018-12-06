@@ -10379,7 +10379,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         writeProcessesToGcToProto(proto, ActivityManagerServiceDumpProcessesProto.GC_PROCS, dumpPackage);
         mAppErrors.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.APP_ERRORS, dumpPackage);
-        mAtmInternal.writeProcessesToProto(proto, dumpPackage);
+        mAtmInternal.writeProcessesToProto(proto, dumpPackage, mWakefulness, mTestPssMode);
 
         if (dumpPackage == null) {
             mUserController.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.USER_CONTROLLER);
@@ -10407,14 +10407,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mPendingTempWhitelist.valueAt(i).writeToProto(proto,
                         ActivityManagerServiceDumpProcessesProto.PENDING_TEMP_WHITELIST);
             }
-        }
-
-        if (dumpPackage == null) {
-            final long sleepToken = proto.start(ActivityManagerServiceDumpProcessesProto.SLEEP_STATUS);
-            proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.WAKEFULNESS,
-                    PowerManagerInternal.wakefulnessToProtoEnum(mWakefulness));
-            proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.TEST_PSS_MODE, mTestPssMode);
-            proto.end(sleepToken);
         }
 
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient

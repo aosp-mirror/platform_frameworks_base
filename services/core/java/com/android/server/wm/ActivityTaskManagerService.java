@@ -4708,26 +4708,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    void writeSleepStateToProto(ProtoOutputStream proto) {
+    private void writeSleepStateToProto(ProtoOutputStream proto, int wakeFullness,
+            boolean testPssMode) {
+        final long sleepToken = proto.start(ActivityManagerServiceDumpProcessesProto.SLEEP_STATUS);
+        proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.WAKEFULNESS,
+                PowerManagerInternal.wakefulnessToProtoEnum(wakeFullness));
         for (ActivityTaskManagerInternal.SleepToken st : mRootActivityContainer.mSleepTokens) {
             proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.SLEEP_TOKENS,
                     st.toString());
         }
-
-        if (mRunningVoice != null) {
-            final long vrToken = proto.start(
-                    ActivityManagerServiceDumpProcessesProto.RUNNING_VOICE);
-            proto.write(ActivityManagerServiceDumpProcessesProto.Voice.SESSION,
-                    mRunningVoice.toString());
-            mVoiceWakeLock.writeToProto(
-                    proto, ActivityManagerServiceDumpProcessesProto.Voice.WAKELOCK);
-            proto.end(vrToken);
-        }
-
         proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.SLEEPING, mSleeping);
         proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.SHUTTING_DOWN,
                 mShuttingDown);
-        mVrController.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.VR_CONTROLLER);
+        proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.TEST_PSS_MODE,
+                testPssMode);
+        proto.end(sleepToken);
     }
 
     int getCurrentUserId() {
@@ -6606,12 +6601,24 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void writeProcessesToProto(ProtoOutputStream proto, String dumpPackage) {
+        public void writeProcessesToProto(ProtoOutputStream proto, String dumpPackage,
+                int wakeFullness, boolean testPssMode) {
             synchronized (mGlobalLock) {
                 if (dumpPackage == null) {
                     getGlobalConfiguration().writeToProto(proto, GLOBAL_CONFIGURATION);
                     proto.write(CONFIG_WILL_CHANGE, getTopDisplayFocusedStack().mConfigWillChange);
-                    writeSleepStateToProto(proto);
+                    writeSleepStateToProto(proto, wakeFullness, testPssMode);
+                    if (mRunningVoice != null) {
+                        final long vrToken = proto.start(
+                                ActivityManagerServiceDumpProcessesProto.RUNNING_VOICE);
+                        proto.write(ActivityManagerServiceDumpProcessesProto.Voice.SESSION,
+                                mRunningVoice.toString());
+                        mVoiceWakeLock.writeToProto(
+                                proto, ActivityManagerServiceDumpProcessesProto.Voice.WAKELOCK);
+                        proto.end(vrToken);
+                    }
+                    mVrController.writeToProto(proto,
+                            ActivityManagerServiceDumpProcessesProto.VR_CONTROLLER);
                     if (mController != null) {
                         final long token = proto.start(CONTROLLER);
                         proto.write(CONTROLLER, mController.toString());
