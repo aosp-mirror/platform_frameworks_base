@@ -78,7 +78,6 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -97,6 +96,7 @@ import com.android.server.job.controllers.ContentObserverController;
 import com.android.server.job.controllers.DeviceIdleJobsController;
 import com.android.server.job.controllers.IdleController;
 import com.android.server.job.controllers.JobStatus;
+import com.android.server.job.controllers.QuotaController;
 import com.android.server.job.controllers.StateController;
 import com.android.server.job.controllers.StorageController;
 import com.android.server.job.controllers.TimeController;
@@ -245,11 +245,11 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Named indices into the STANDBY_BEATS array, for clarity in referring to
      * specific buckets' bookkeeping.
      */
-    static final int ACTIVE_INDEX = 0;
-    static final int WORKING_INDEX = 1;
-    static final int FREQUENT_INDEX = 2;
-    static final int RARE_INDEX = 3;
-    static final int NEVER_INDEX = 4;
+    public static final int ACTIVE_INDEX = 0;
+    public static final int WORKING_INDEX = 1;
+    public static final int FREQUENT_INDEX = 2;
+    public static final int RARE_INDEX = 3;
+    public static final int NEVER_INDEX = 4;
 
     /**
      * Bookkeeping about when jobs last run.  We keep our own record in heartbeat time,
@@ -308,6 +308,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 try {
                     mConstants.updateConstantsLocked(Settings.Global.getString(mResolver,
                             Settings.Global.JOB_SCHEDULER_CONSTANTS));
+                    for (int controller = 0; controller < mControllers.size(); controller++) {
+                        final StateController sc = mControllers.get(controller);
+                        sc.onConstantsUpdatedLocked();
+                    }
                 } catch (IllegalArgumentException e) {
                     // Failed to parse the settings string, log this and move on
                     // with defaults.
@@ -315,8 +319,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
             }
 
-            // Reset the heartbeat alarm based on the new heartbeat duration
-            setNextHeartbeatAlarm();
+            if (mConstants.USE_HEARTBEATS) {
+                // Reset the heartbeat alarm based on the new heartbeat duration
+                setNextHeartbeatAlarm();
+            }
         }
     }
 
@@ -352,6 +358,19 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_STANDBY_RARE_BEATS = "standby_rare_beats";
         private static final String KEY_CONN_CONGESTION_DELAY_FRAC = "conn_congestion_delay_frac";
         private static final String KEY_CONN_PREFETCH_RELAX_FRAC = "conn_prefetch_relax_frac";
+        private static final String KEY_USE_HEARTBEATS = "use_heartbeats";
+        private static final String KEY_QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS =
+                "qc_allowed_time_per_period_ms";
+        private static final String KEY_QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS =
+                "qc_in_quota_buffer_ms";
+        private static final String KEY_QUOTA_CONTROLLER_WINDOW_SIZE_ACTIVE_MS =
+                "qc_window_size_active_ms";
+        private static final String KEY_QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS =
+                "qc_window_size_working_ms";
+        private static final String KEY_QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS =
+                "qc_window_size_frequent_ms";
+        private static final String KEY_QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS =
+                "qc_window_size_rare_ms";
 
         private static final int DEFAULT_MIN_IDLE_COUNT = 1;
         private static final int DEFAULT_MIN_CHARGING_COUNT = 1;
@@ -377,6 +396,19 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final int DEFAULT_STANDBY_RARE_BEATS = 130; // ~ 24 hours
         private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
         private static final float DEFAULT_CONN_PREFETCH_RELAX_FRAC = 0.5f;
+        private static final boolean DEFAULT_USE_HEARTBEATS = true;
+        private static final long DEFAULT_QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS =
+                10 * 60 * 1000L; // 10 minutes
+        private static final long DEFAULT_QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS =
+                30 * 1000L; // 30 seconds
+        private static final long DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_ACTIVE_MS =
+                10 * 60 * 1000L; // 10 minutes for ACTIVE -- ACTIVE apps can run jobs at any time
+        private static final long DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS =
+                2 * 60 * 60 * 1000L; // 2 hours
+        private static final long DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS =
+                8 * 60 * 60 * 1000L; // 8 hours
+        private static final long DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS =
+                24 * 60 * 60 * 1000L; // 24 hours
 
         /**
          * Minimum # of idle jobs that must be ready in order to force the JMS to schedule things
@@ -495,6 +527,54 @@ public class JobSchedulerService extends com.android.server.SystemService
          * we consider matching it against a metered network.
          */
         public float CONN_PREFETCH_RELAX_FRAC = DEFAULT_CONN_PREFETCH_RELAX_FRAC;
+        /**
+         * Whether to use heartbeats or rolling window for quota management. True will use
+         * heartbeats, false will use a rolling window.
+         */
+        public boolean USE_HEARTBEATS = DEFAULT_USE_HEARTBEATS;
+
+        /** How much time each app will have to run jobs within their standby bucket window. */
+        public long QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS =
+                DEFAULT_QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS;
+
+        /**
+         * How much time the package should have before transitioning from out-of-quota to in-quota.
+         * This should not affect processing if the package is already in-quota.
+         */
+        public long QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS =
+                DEFAULT_QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
+
+        /**
+         * The quota window size of the particular standby bucket. Apps in this standby bucket are
+         * expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
+         * WINDOW_SIZE_MS.
+         */
+        public long QUOTA_CONTROLLER_WINDOW_SIZE_ACTIVE_MS =
+                DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_ACTIVE_MS;
+
+        /**
+         * The quota window size of the particular standby bucket. Apps in this standby bucket are
+         * expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
+         * WINDOW_SIZE_MS.
+         */
+        public long QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS =
+                DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS;
+
+        /**
+         * The quota window size of the particular standby bucket. Apps in this standby bucket are
+         * expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
+         * WINDOW_SIZE_MS.
+         */
+        public long QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS =
+                DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS;
+
+        /**
+         * The quota window size of the particular standby bucket. Apps in this standby bucket are
+         * expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
+         * WINDOW_SIZE_MS.
+         */
+        public long QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS =
+                DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS;
 
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
@@ -567,6 +647,25 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DEFAULT_CONN_CONGESTION_DELAY_FRAC);
             CONN_PREFETCH_RELAX_FRAC = mParser.getFloat(KEY_CONN_PREFETCH_RELAX_FRAC,
                     DEFAULT_CONN_PREFETCH_RELAX_FRAC);
+            USE_HEARTBEATS = mParser.getBoolean(KEY_USE_HEARTBEATS, DEFAULT_USE_HEARTBEATS);
+            QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS = mParser.getDurationMillis(
+                    KEY_QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS,
+                    DEFAULT_QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS);
+            QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS = mParser.getDurationMillis(
+                    KEY_QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS,
+                    DEFAULT_QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS);
+            QUOTA_CONTROLLER_WINDOW_SIZE_ACTIVE_MS = mParser.getDurationMillis(
+                    KEY_QUOTA_CONTROLLER_WINDOW_SIZE_ACTIVE_MS,
+                    DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_ACTIVE_MS);
+            QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS = mParser.getDurationMillis(
+                    KEY_QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS,
+                    DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS);
+            QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS = mParser.getDurationMillis(
+                    KEY_QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS,
+                    DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS);
+            QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS = mParser.getDurationMillis(
+                    KEY_QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS,
+                    DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS);
         }
 
         void dump(IndentingPrintWriter pw) {
@@ -600,6 +699,19 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.println('}');
             pw.printPair(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
             pw.printPair(KEY_CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC).println();
+            pw.printPair(KEY_USE_HEARTBEATS, USE_HEARTBEATS).println();
+            pw.printPair(KEY_QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS,
+                    QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS).println();
+            pw.printPair(KEY_QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS,
+                    QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS).println();
+            pw.printPair(KEY_QUOTA_CONTROLLER_WINDOW_SIZE_ACTIVE_MS,
+                    QUOTA_CONTROLLER_WINDOW_SIZE_ACTIVE_MS).println();
+            pw.printPair(KEY_QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS,
+                    QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS).println();
+            pw.printPair(KEY_QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS,
+                    QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS).println();
+            pw.printPair(KEY_QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS,
+                    QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS).println();
             pw.decreaseIndent();
         }
 
@@ -629,6 +741,23 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
             proto.write(ConstantsProto.CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC);
             proto.write(ConstantsProto.CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC);
+            proto.write(ConstantsProto.USE_HEARTBEATS, USE_HEARTBEATS);
+
+            final long qcToken = proto.start(ConstantsProto.QUOTA_CONTROLLER);
+            proto.write(ConstantsProto.QuotaController.ALLOWED_TIME_PER_PERIOD_MS,
+                    QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS);
+            proto.write(ConstantsProto.QuotaController.IN_QUOTA_BUFFER_MS,
+                    QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS);
+            proto.write(ConstantsProto.QuotaController.ACTIVE_WINDOW_SIZE_MS,
+                    QUOTA_CONTROLLER_WINDOW_SIZE_ACTIVE_MS);
+            proto.write(ConstantsProto.QuotaController.WORKING_WINDOW_SIZE_MS,
+                    QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS);
+            proto.write(ConstantsProto.QuotaController.FREQUENT_WINDOW_SIZE_MS,
+                    QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS);
+            proto.write(ConstantsProto.QuotaController.RARE_WINDOW_SIZE_MS,
+                    QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS);
+            proto.end(qcToken);
+
             proto.end(token);
         }
     }
@@ -1162,6 +1291,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(new ContentObserverController(this));
         mDeviceIdleJobsController = new DeviceIdleJobsController(this);
         mControllers.add(mDeviceIdleJobsController);
+        mControllers.add(new QuotaController(this));
 
         // If the job store determined that it can't yet reschedule persisted jobs,
         // we need to start watching the clock.
@@ -1225,7 +1355,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             mAppStateTracker = Preconditions.checkNotNull(
                     LocalServices.getService(AppStateTracker.class));
-            setNextHeartbeatAlarm();
+            if (mConstants.USE_HEARTBEATS) {
+                setNextHeartbeatAlarm();
+            }
 
             // Register br for package removals and user removals.
             final IntentFilter filter = new IntentFilter();
@@ -1869,6 +2001,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     // Intentionally does not touch the alarm timing
     void advanceHeartbeatLocked(long beatsElapsed) {
+        if (!mConstants.USE_HEARTBEATS) {
+            return;
+        }
         mHeartbeat += beatsElapsed;
         if (DEBUG_STANDBY) {
             Slog.v(TAG, "Advancing standby heartbeat by " + beatsElapsed
@@ -1904,6 +2039,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     void setNextHeartbeatAlarm() {
         final long heartbeatLength;
         synchronized (mLock) {
+            if (!mConstants.USE_HEARTBEATS) {
+                return;
+            }
             heartbeatLength = mConstants.STANDBY_HEARTBEAT_TIME;
         }
         final long now = sElapsedRealtimeClock.millis();
@@ -1976,48 +2114,51 @@ public class JobSchedulerService extends com.android.server.SystemService
             return false;
         }
 
-        // If the app is in a non-active standby bucket, make sure we've waited
-        // an appropriate amount of time since the last invocation.  During device-
-        // wide parole, standby bucketing is ignored.
-        //
-        // Jobs in 'active' apps are not subject to standby, nor are jobs that are
-        // specifically marked as exempt.
-        if (DEBUG_STANDBY) {
-            Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
-                    + " parole=" + mInParole + " active=" + job.uidActive
-                    + " exempt=" + job.getJob().isExemptedFromAppStandby());
-        }
-        if (!mInParole
-                && !job.uidActive
-                && !job.getJob().isExemptedFromAppStandby()) {
-            final int bucket = job.getStandbyBucket();
+        if (mConstants.USE_HEARTBEATS) {
+            // If the app is in a non-active standby bucket, make sure we've waited
+            // an appropriate amount of time since the last invocation.  During device-
+            // wide parole, standby bucketing is ignored.
+            //
+            // Jobs in 'active' apps are not subject to standby, nor are jobs that are
+            // specifically marked as exempt.
             if (DEBUG_STANDBY) {
-                Slog.v(TAG, "  bucket=" + bucket + " heartbeat=" + mHeartbeat
-                        + " next=" + mNextBucketHeartbeat[bucket]);
+                Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
+                        + " parole=" + mInParole + " active=" + job.uidActive
+                        + " exempt=" + job.getJob().isExemptedFromAppStandby());
             }
-            if (mHeartbeat < mNextBucketHeartbeat[bucket]) {
-                // Only skip this job if the app is still waiting for the end of its nominal
-                // bucket interval.  Once it's waited that long, we let it go ahead and clear.
-                // The final (NEVER) bucket is special; we never age those apps' jobs into
-                // runnability.
-                final long appLastRan = heartbeatWhenJobsLastRun(job);
-                if (bucket >= mConstants.STANDBY_BEATS.length
-                        || (mHeartbeat > appLastRan
-                                && mHeartbeat < appLastRan + mConstants.STANDBY_BEATS[bucket])) {
-                    // TODO: log/trace that we're deferring the job due to bucketing if we hit this
-                    if (job.getWhenStandbyDeferred() == 0) {
-                        if (DEBUG_STANDBY) {
-                            Slog.v(TAG, "Bucket deferral: " + mHeartbeat + " < "
-                                    + (appLastRan + mConstants.STANDBY_BEATS[bucket])
-                                    + " for " + job);
+            if (!mInParole
+                    && !job.uidActive
+                    && !job.getJob().isExemptedFromAppStandby()) {
+                final int bucket = job.getStandbyBucket();
+                if (DEBUG_STANDBY) {
+                    Slog.v(TAG, "  bucket=" + bucket + " heartbeat=" + mHeartbeat
+                            + " next=" + mNextBucketHeartbeat[bucket]);
+                }
+                if (mHeartbeat < mNextBucketHeartbeat[bucket]) {
+                    // Only skip this job if the app is still waiting for the end of its nominal
+                    // bucket interval.  Once it's waited that long, we let it go ahead and clear.
+                    // The final (NEVER) bucket is special; we never age those apps' jobs into
+                    // runnability.
+                    final long appLastRan = heartbeatWhenJobsLastRun(job);
+                    if (bucket >= mConstants.STANDBY_BEATS.length
+                            || (mHeartbeat > appLastRan
+                            && mHeartbeat < appLastRan + mConstants.STANDBY_BEATS[bucket])) {
+                        // TODO: log/trace that we're deferring the job due to bucketing if we
+                        // hit this
+                        if (job.getWhenStandbyDeferred() == 0) {
+                            if (DEBUG_STANDBY) {
+                                Slog.v(TAG, "Bucket deferral: " + mHeartbeat + " < "
+                                        + (appLastRan + mConstants.STANDBY_BEATS[bucket])
+                                        + " for " + job);
+                            }
+                            job.setWhenStandbyDeferred(sElapsedRealtimeClock.millis());
                         }
-                        job.setWhenStandbyDeferred(sElapsedRealtimeClock.millis());
-                    }
-                    return false;
-                } else {
-                    if (DEBUG_STANDBY) {
-                        Slog.v(TAG, "Bucket deferred job aged into runnability at "
-                                + mHeartbeat + " : " + job);
+                        return false;
+                    } else {
+                        if (DEBUG_STANDBY) {
+                            Slog.v(TAG, "Bucket deferred job aged into runnability at "
+                                    + mHeartbeat + " : " + job);
+                        }
                     }
                 }
             }
@@ -2364,32 +2505,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         @Override
         public void onAppIdleStateChanged(final String packageName, final @UserIdInt int userId,
                 boolean idle, int bucket, int reason) {
-            final int uid = mLocalPM.getPackageUid(packageName,
-                    PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
-            if (uid < 0) {
-                if (DEBUG_STANDBY) {
-                    Slog.i(TAG, "App idle state change for unknown app "
-                            + packageName + "/" + userId);
-                }
-                return;
-            }
-
-            final int bucketIndex = standbyBucketToBucketIndex(bucket);
-            // update job bookkeeping out of band
-            BackgroundThread.getHandler().post(() -> {
-                if (DEBUG_STANDBY) {
-                    Slog.i(TAG, "Moving uid " + uid + " to bucketIndex " + bucketIndex);
-                }
-                synchronized (mLock) {
-                    mJobs.forEachJobForSourceUid(uid, job -> {
-                        // double-check uid vs package name to disambiguate shared uids
-                        if (packageName.equals(job.getSourcePackageName())) {
-                            job.setStandbyBucket(bucketIndex);
-                        }
-                    });
-                    onControllerStateChanged();
-                }
-            });
+            // QuotaController handles this now.
         }
 
         @Override
