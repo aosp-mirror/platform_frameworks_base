@@ -46,7 +46,7 @@ public:
     ScopedDrawRequest() { beginDraw(); }
 private:
     void beginDraw() {
-        std::lock_guard{sLock};
+        std::lock_guard _lock{sLock};
 
         if (!sGLDrawThread) {
             sGLDrawThread = new ThreadBase{};
