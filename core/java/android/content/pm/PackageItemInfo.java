@@ -433,18 +433,18 @@ public class PackageItemInfo {
     /**
      * @hide
      */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId, int dumpFlags) {
         long token = proto.start(fieldId);
         if (name != null) {
             proto.write(PackageItemInfoProto.NAME, name);
         }
         proto.write(PackageItemInfoProto.PACKAGE_NAME, packageName);
-        if (labelRes != 0 || nonLocalizedLabel != null || icon != 0 || banner != 0) {
-            proto.write(PackageItemInfoProto.LABEL_RES, labelRes);
+        proto.write(PackageItemInfoProto.LABEL_RES, labelRes);
+        if (nonLocalizedLabel != null) {
             proto.write(PackageItemInfoProto.NON_LOCALIZED_LABEL, nonLocalizedLabel.toString());
-            proto.write(PackageItemInfoProto.ICON, icon);
-            proto.write(PackageItemInfoProto.BANNER, banner);
         }
+        proto.write(PackageItemInfoProto.ICON, icon);
+        proto.write(PackageItemInfoProto.BANNER, banner);
         proto.end(token);
     }
 

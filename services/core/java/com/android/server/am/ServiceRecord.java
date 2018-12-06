@@ -121,6 +121,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     long nextRestartTime;   // time when restartDelay will expire.
     boolean destroying;     // set when we have started destroying the service
     long destroyTime;       // time at which destory was initiated.
+    int pendingConnectionGroup;        // To be filled in to ProcessRecord once it connects
+    int pendingConnectionImportance;   // To be filled in to ProcessRecord once it connects
 
     String stringName;      // caching of toString
 
@@ -386,6 +388,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 pw.print(" restartTime=");
                 TimeUtils.formatDuration(restartTime, now, pw);
                 pw.print(" createdFromFg="); pw.println(createdFromFg);
+        if (pendingConnectionGroup != 0) {
+            pw.print(prefix); pw.print(" pendingConnectionGroup=");
+            pw.print(pendingConnectionGroup);
+            pw.print(" Importance="); pw.println(pendingConnectionImportance);
+        }
         if (startRequested || delayedStop || lastStartId != 0) {
             pw.print(prefix); pw.print("startRequested="); pw.print(startRequested);
                     pw.print(" delayedStop="); pw.print(delayedStop);
@@ -461,7 +468,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         serviceInfo = sInfo;
         appInfo = sInfo.applicationInfo;
         packageName = sInfo.applicationInfo.packageName;
-        processName = sInfo.processName;
+        if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
+            processName = sInfo.processName + ":" + instanceName.getClassName();
+        } else {
+            processName = sInfo.processName;
+        }
         permission = sInfo.permission;
         exported = sInfo.exported;
         this.restarter = restarter;
@@ -507,6 +518,12 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     public void setProcess(ProcessRecord _proc) {
         app = _proc;
+        if (pendingConnectionGroup > 0) {
+            app.connectionService = this;
+            app.connectionGroup = pendingConnectionGroup;
+            app.connectionImportance = pendingConnectionImportance;
+            pendingConnectionGroup = pendingConnectionImportance = 0;
+        }
         if (ActivityManagerService.TRACK_PROCSTATS_ASSOCIATIONS) {
             for (int conni = connections.size() - 1; conni >= 0; conni--) {
                 ArrayList<ConnectionRecord> cr = connections.valueAt(conni);

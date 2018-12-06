@@ -1801,16 +1801,25 @@ public final class ActiveServices {
         for (int i = clist.size() - 1; i >= 0; i--) {
             final ConnectionRecord crec = clist.get(i);
             final ServiceRecord srec = crec.binding.service;
-            if (srec != null && srec.app != null
-                    && (srec.serviceInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
-                if (group > 0) {
-                    srec.app.connectionService = srec;
-                    srec.app.connectionGroup = group;
-                    srec.app.connectionImportance = importance;
+            if (srec != null && (srec.serviceInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
+                if (srec.app != null) {
+                    if (group > 0) {
+                        srec.app.connectionService = srec;
+                        srec.app.connectionGroup = group;
+                        srec.app.connectionImportance = importance;
+                    } else {
+                        srec.app.connectionService = null;
+                        srec.app.connectionGroup = 0;
+                        srec.app.connectionImportance = 0;
+                    }
                 } else {
-                    srec.app.connectionService = null;
-                    srec.app.connectionGroup = 0;
-                    srec.app.connectionImportance = 0;
+                    if (group > 0) {
+                        srec.pendingConnectionGroup = group;
+                        srec.pendingConnectionImportance = importance;
+                    } else {
+                        srec.pendingConnectionGroup = 0;
+                        srec.pendingConnectionImportance = 0;
+                    }
                 }
             }
         }
@@ -2058,8 +2067,8 @@ public final class ActiveServices {
                                 sInfo.applicationInfo.uid, name.getPackageName(),
                                 name.getClassName());
                     }
-                    r = new ServiceRecord(mAm, ss, className, name, filter, sInfo, callingFromFg,
-                            res);
+                    r = new ServiceRecord(mAm, ss, className, name, filter, sInfo,
+                            callingFromFg, res);
                     res.setService(r);
                     smap.mServicesByInstanceName.put(name, r);
                     smap.mServicesByIntent.put(filter, r);
