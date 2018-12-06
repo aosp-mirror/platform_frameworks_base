@@ -266,6 +266,9 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
                                  chainField.name.c_str(), chainField.name.c_str());
                     }
                 }
+            } else if (*arg == JAVA_TYPE_BYTE_ARRAY) {
+                fprintf(out, ", %s arg%d, size_t arg%d_length",
+                        cpp_type_name(*arg), argIndex, argIndex);
             } else {
                 fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
             }
@@ -308,6 +311,10 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
                 fprintf(out, "        event.end();\n");
                 fprintf(out, "    }\n");
                 fprintf(out, "    event.end();\n\n");
+            } else if (*arg == JAVA_TYPE_BYTE_ARRAY) {
+                fprintf(out,
+                        "    event.AppendCharArray(arg%d, arg%d_length);\n",
+                        argIndex, argIndex);
             } else {
                 if (*arg == JAVA_TYPE_STRING) {
                     fprintf(out, "    if (arg%d == NULL) {\n", argIndex);
@@ -348,6 +355,9 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
                                 chainField.name.c_str(), chainField.name.c_str());
                    }
                }
+           } else if (*arg == JAVA_TYPE_BYTE_ARRAY) {
+               fprintf(out, ", %s arg%d, size_t arg%d_length",
+                       cpp_type_name(*arg), argIndex, argIndex);
            } else {
                fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
            }
@@ -374,6 +384,8 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
                                 chainField.name.c_str(), chainField.name.c_str());
                    }
                }
+           } else if (*arg == JAVA_TYPE_BYTE_ARRAY) {
+               fprintf(out, ", arg%d, arg%d_length", argIndex, argIndex);
            } else {
                fprintf(out, ", arg%d", argIndex);
            }
@@ -522,6 +534,10 @@ static void write_cpp_usage(
                          chainField.name.c_str(), chainField.name.c_str());
                 }
             }
+        } else if (field->javaType == JAVA_TYPE_BYTE_ARRAY) {
+            fprintf(out, ", %s %s, size_t %s_length",
+                    cpp_type_name(field->javaType), field->name.c_str(),
+                    field->name.c_str());
         } else {
             fprintf(out, ", %s %s", cpp_type_name(field->javaType), field->name.c_str());
         }
@@ -549,6 +565,9 @@ static void write_cpp_method_header(
                             chainField.name.c_str(), chainField.name.c_str());
                     }
                 }
+            } else if (*arg == JAVA_TYPE_BYTE_ARRAY) {
+                fprintf(out, ", %s arg%d, size_t arg%d_length",
+                        cpp_type_name(*arg), argIndex, argIndex);
             } else {
                 fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
             }
@@ -1007,6 +1026,7 @@ write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp
                 hadStringOrChain = true;
                 fprintf(out, "    jbyte* jbyte_array%d;\n", argIndex);
                 fprintf(out, "    const char* str%d;\n", argIndex);
+                fprintf(out, "    int str%d_length = 0;\n", argIndex);
                 fprintf(out,
                         "    if (arg%d != NULL && env->GetArrayLength(arg%d) > "
                         "0) {\n",
@@ -1014,6 +1034,9 @@ write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp
                 fprintf(out,
                         "        jbyte_array%d = "
                         "env->GetByteArrayElements(arg%d, NULL);\n",
+                        argIndex, argIndex);
+                fprintf(out,
+                        "        str%d_length = env->GetArrayLength(arg%d);\n",
                         argIndex, argIndex);
                 fprintf(out,
                         "        str%d = "
@@ -1096,6 +1119,10 @@ write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp
                                               ? "str"
                                               : "arg";
                 fprintf(out, ", (%s)%s%d", cpp_type_name(*arg), argName, argIndex);
+
+                if (*arg == JAVA_TYPE_BYTE_ARRAY) {
+                    fprintf(out, ", %s%d_length", argName, argIndex);
+                }
             }
             argIndex++;
         }
