@@ -274,7 +274,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private int mDefaultInetConditionPublished = 0;
 
     private INetworkManagementService mNMS;
-    private INetd mNetd;
+    @VisibleForTesting
+    protected INetd mNetd;
     private INetworkStatsService mStatsService;
     private INetworkPolicyManager mPolicyManager;
     private NetworkPolicyManagerInternal mPolicyManagerInternal;
@@ -2090,7 +2091,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private static final String DEFAULT_TCP_BUFFER_SIZES = "4096,87380,110208,4096,16384,110208";
+    @VisibleForTesting
+    protected static final String DEFAULT_TCP_BUFFER_SIZES = "4096,87380,110208,4096,16384,110208";
     private static final String DEFAULT_TCP_RWND_KEY = "net.tcp.default_init_rwnd";
 
     // Overridden for testing purposes to avoid writing to SystemProperties.
@@ -2116,15 +2118,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         try {
             if (VDBG || DDBG) Slog.d(TAG, "Setting tx/rx TCP buffers to " + tcpBufferSizes);
 
-            final String prefix = "/sys/kernel/ipv4/tcp_";
-            FileUtils.stringToFile(prefix + "rmem_min", values[0]);
-            FileUtils.stringToFile(prefix + "rmem_def", values[1]);
-            FileUtils.stringToFile(prefix + "rmem_max", values[2]);
-            FileUtils.stringToFile(prefix + "wmem_min", values[3]);
-            FileUtils.stringToFile(prefix + "wmem_def", values[4]);
-            FileUtils.stringToFile(prefix + "wmem_max", values[5]);
+            String rmemValues = String.join(" ", values[0], values[1], values[2]);
+            String wmemValues = String.join(" ", values[3], values[4], values[5]);
+            mNetd.setTcpRWmemorySize(rmemValues, wmemValues);
             mCurrentTcpBufferSizes = tcpBufferSizes;
-        } catch (IOException e) {
+        } catch (RemoteException | ServiceSpecificException e) {
             loge("Can't set TCP buffer sizes:" + e);
         }
 
