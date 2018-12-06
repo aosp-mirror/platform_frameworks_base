@@ -426,6 +426,12 @@ public final class SurfaceControl implements Parcelable {
     public static final int METADATA_WINDOW_TYPE = 2;
 
     /**
+     * Task id to allow association between surfaces and task.
+     * @hide
+     */
+    public static final int METADATA_TASK_ID = 3;
+
+    /**
      * Builder class for {@link SurfaceControl} objects.
      */
     public static class Builder {
