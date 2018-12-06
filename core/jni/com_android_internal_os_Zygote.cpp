@@ -102,6 +102,11 @@ enum MountExternalKind {
   MOUNT_EXTERNAL_FULL = 4,
 };
 
+// Must match values in com.android.internal.os.Zygote.
+enum RuntimeFlags : uint32_t {
+  DEBUG_ENABLE_JDWP = 1,
+};
+
 static void RuntimeAbort(JNIEnv* env, int line, const char* msg) {
   std::ostringstream oss;
   oss << __FILE__ << ":" << line << ": " << msg;
@@ -252,6 +257,36 @@ static bool SetRLimits(JNIEnv* env, jobjectArray javaRlimits, std::string* error
   }
 
   return true;
+}
+
+static void EnableDebugger() {
+  // To let a non-privileged gdbserver attach to this
+  // process, we must set our dumpable flag.
+  if (prctl(PR_SET_DUMPABLE, 1, 0, 0, 0) == -1) {
+    ALOGE("prctl(PR_SET_DUMPABLE) failed");
+  }
+
+  // A non-privileged native debugger should be able to attach to the debuggable app, even if Yama
+  // is enabled (see kernel/Documentation/security/Yama.txt).
+  if (prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY, 0, 0, 0) == -1) {
+    // if Yama is off prctl(PR_SET_PTRACER) returns EINVAL - don't log in this
+    // case since it's expected behaviour.
+    if (errno != EINVAL) {
+      ALOGE("prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY) failed");
+    }
+  }
+
+  // We don't want core dumps, though, so set the soft limit on core dump size
+  // to 0 without changing the hard limit.
+  rlimit rl;
+  if (getrlimit(RLIMIT_CORE, &rl) == -1) {
+    ALOGE("getrlimit(RLIMIT_CORE) failed");
+  } else {
+    rl.rlim_cur = 0;
+    if (setrlimit(RLIMIT_CORE, &rl) == -1) {
+      ALOGE("setrlimit(RLIMIT_CORE) failed");
+    }
+  }
 }
 
 // The debug malloc library needs to know whether it's the zygote or a child.
@@ -954,6 +989,11 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       ALOGE("prctl(PR_SET_DUMPABLE, 0) failed: %s", strerror(errno));
       RuntimeAbort(env, __LINE__, "prctl(PR_SET_DUMPABLE, 0) failed");
     }
+  }
+
+  // Set process properties to enable debugging if required.
+  if ((runtime_flags & RuntimeFlags::DEBUG_ENABLE_JDWP) != 0) {
+    EnableDebugger();
   }
 
   if (NeedsNoRandomizeWorkaround()) {
