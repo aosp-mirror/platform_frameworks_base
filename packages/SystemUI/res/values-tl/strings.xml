@@ -112,6 +112,8 @@
     <string name="cancel" msgid="6442560571259935130">"Kanselahin"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Lugar ng mensahe ng tulong"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Kumpirmahin"</string>
+    <!-- no translation found for biometric_dialog_try_again (1900185172633183201) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Pindutin ang fingerprint sensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icon ng fingerprint"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Hinahanap ka…"</string>
@@ -290,6 +292,8 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Input"</string>
+    <!-- no translation found for quick_settings_bluetooth_secondary_label_hearing_aids (4930931771490695395) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Ino-on…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brightness"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Awtomatikong i-rotate"</string>
@@ -598,21 +602,25 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Mga Notification"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Hindi mo na makikita ang mga notification na ito"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Imi-minimize ang mga notification na ito"</string>
-    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
-    <skip />
-    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
-    <skip />
+    <string name="notification_channel_silenced" msgid="2877199534497961942">"Ipapakita ang mga notification na ito nang tahimik"</string>
+    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Aalertuhan ka ng mga notification na ito"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Karaniwan mong dini-dismiss ang mga ganitong notification. \nPatuloy na ipakita ang mga ito?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Patuloy na ipakita ang mga notification na ito?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Ihinto ang mga notification"</string>
+    <!-- no translation found for inline_block_button (8735843688021655065) -->
+    <skip />
     <string name="inline_keep_button" msgid="6665940297019018232">"Patuloy na ipakita"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"I-minimize"</string>
-    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <string name="inline_silent_button_silent" msgid="4411510650503783646">"Ipakita nang tahimik"</string>
+    <!-- no translation found for inline_silent_button_stay_silent (6308371431217601009) -->
     <skip />
-    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <!-- no translation found for inline_silent_button_alert (7961887853830826523) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_keep_alerting (327696842264359693) -->
     <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Patuloy na ipakita ang mga notification mula sa app na ito?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Hindi maaaring i-off ang mga notification na ito"</string>
+    <string name="notification_delegate_header" msgid="9167022191405284627">"sa pamamagitan ng <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Ginagamit ng app na ito ang camera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Ginagamit ng app na ito ang mikropono."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Ipinapakita ang app na ito sa ibabaw ng iba pang app sa iyong screen."</string>
@@ -859,16 +867,21 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Mga Setting"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Itapon SysUI Heap"</string>
+    <!-- no translation found for ongoing_privacy_chip_multiple_apps (1406406529558080714) -->
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"Ginagamit ng <xliff:g id="APP">%1$s</xliff:g> ang iyong <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Ginagamit ng mga application ang iyong <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"Buksan: app"</string>
+    <!-- no translation found for ongoing_privacy_chip_content_multiple_apps_single_op (4871926099254314088) -->
     <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Kanselahin"</string>
-    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"Okay"</string>
-    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Mga Setting"</string>
-    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"Ginagamit ng <xliff:g id="APP">%1$s</xliff:g> ang iyong <xliff:g id="TYPE">%2$s</xliff:g> para sa huling <xliff:g id="TIME">%3$d</xliff:g> (na) minuto"</string>
-    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"Ginagamit ng <xliff:g id="APPS">%1$s</xliff:g> ang iyong <xliff:g id="TYPE">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"Ginagamit ng <xliff:g id="APP">%1$s</xliff:g> ang iyong <xliff:g id="TYPES_LIST">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"Tingnan ang mga detalye"</string>
+    <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"App na gumagamit ng iyong <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Mga app na gumagamit ng iyong <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="2400503446627122483">" at "</string>
     <string name="privacy_type_camera" msgid="1676604631892420333">"camera"</string>
     <string name="privacy_type_location" msgid="6435497989657286700">"lokasyon"</string>
     <string name="privacy_type_microphone" msgid="4153045784928554506">"mikropono"</string>
+    <plurals name="ongoing_privacy_dialog_overflow_text" formatted="false" msgid="3441296594927649172">
+      <item quantity="one"><xliff:g id="NUM_APPS_1">%d</xliff:g> (na) iba pang app</item>
+      <item quantity="other"><xliff:g id="NUM_APPS_1">%d</xliff:g> (na) iba pang app</item>
+    </plurals>
 </resources>

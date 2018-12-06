@@ -112,6 +112,8 @@
     <string name="cancel" msgid="6442560571259935130">"إلغاء"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"منطقة رسالة المساعدة"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"تأكيد"</string>
+    <!-- no translation found for biometric_dialog_try_again (1900185172633183201) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"المس جهاز استشعار بصمات الإصبع"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"رمز بصمة الإصبع"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"جارٍ البحث عن وجهك…"</string>
@@ -294,6 +296,8 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"صوت"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"سماعة الرأس"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"الإدخال"</string>
+    <!-- no translation found for quick_settings_bluetooth_secondary_label_hearing_aids (4930931771490695395) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"جارٍ التفعيل…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"السطوع"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"دوران تلقائي"</string>
@@ -615,12 +619,20 @@
     <string name="inline_blocking_helper" msgid="3055064577771478591">"أنت تتجاهل عادةً هذه الإشعارات. \nهل تريد الاستمرار في عرضها؟"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"هل تريد الاستمرار في تلقي هذه الإشعارات؟"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"إيقاف الإشعارات"</string>
+    <!-- no translation found for inline_block_button (8735843688021655065) -->
+    <skip />
     <string name="inline_keep_button" msgid="6665940297019018232">"الاستمرار في تلقّي الإشعارات"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"تصغير"</string>
     <string name="inline_silent_button_silent" msgid="4411510650503783646">"عرض بدون تنبيه صوتي"</string>
-    <string name="inline_silent_button_alert" msgid="2967599358027208807">"العرض والتنبيه"</string>
+    <!-- no translation found for inline_silent_button_stay_silent (6308371431217601009) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (7961887853830826523) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_keep_alerting (327696842264359693) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"هل تريد الاستمرار في تلقي إشعارات من هذا التطبيق؟"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"يتعذَّر إيقاف هذه الإشعارات."</string>
+    <string name="notification_delegate_header" msgid="9167022191405284627">"عبر <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"يستخدم هذا التطبيق الكاميرا."</string>
     <string name="appops_microphone" msgid="741508267659494555">"يستخدم هذا التطبيق الميكروفون."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"يتم عرض هذا التطبيق فوق التطبيقات الأخرى على شاشتك."</string>
@@ -875,16 +887,25 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"الإعدادات"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"حسنًا"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"‏تفريغ ذاكرة SysUI"</string>
+    <!-- no translation found for ongoing_privacy_chip_multiple_apps (1406406529558080714) -->
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"التطبيق <xliff:g id="APP">%1$s</xliff:g> يستخدم <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"تستخدم التطبيقات <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"فتح التطبيق"</string>
+    <!-- no translation found for ongoing_privacy_chip_content_multiple_apps_single_op (4871926099254314088) -->
     <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"إلغاء"</string>
-    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"موافق"</string>
-    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"الإعدادات"</string>
-    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"التطبيق <xliff:g id="APP">%1$s</xliff:g> يستخدم <xliff:g id="TYPE">%2$s</xliff:g> منذ <xliff:g id="TIME">%3$d</xliff:g> من الدقائق مضت."</string>
-    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"التطبيقات <xliff:g id="APPS">%1$s</xliff:g> تستخدم <xliff:g id="TYPE">%2$s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"التطبيق <xliff:g id="APP">%1$s</xliff:g> يستخدم <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"عرض التفاصيل"</string>
+    <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"التطبيق الذي يستخدِم <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"التطبيقات التي تستخدِم <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">"، "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="2400503446627122483">" و "</string>
     <string name="privacy_type_camera" msgid="1676604631892420333">"الكاميرا"</string>
     <string name="privacy_type_location" msgid="6435497989657286700">"الموقع"</string>
     <string name="privacy_type_microphone" msgid="4153045784928554506">"الميكروفون"</string>
+    <plurals name="ongoing_privacy_dialog_overflow_text" formatted="false" msgid="3441296594927649172">
+      <item quantity="zero"><xliff:g id="NUM_APPS_1">%d</xliff:g> تطبيق آخر</item>
+      <item quantity="two">تطبيقان (<xliff:g id="NUM_APPS_1">%d</xliff:g>) آخران</item>
+      <item quantity="few"><xliff:g id="NUM_APPS_1">%d</xliff:g> تطبيقات أخرى</item>
+      <item quantity="many"><xliff:g id="NUM_APPS_1">%d</xliff:g> تطبيقًا آخر</item>
+      <item quantity="other"><xliff:g id="NUM_APPS_1">%d</xliff:g> تطبيق آخر</item>
+      <item quantity="one">تطبيق واحد (<xliff:g id="NUM_APPS_0">%d</xliff:g>) آخر</item>
+    </plurals>
 </resources>
