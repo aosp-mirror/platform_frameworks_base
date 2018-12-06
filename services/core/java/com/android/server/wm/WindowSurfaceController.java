@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Surface.SCALING_MODE_SCALE_TO_WINDOW;
+import static android.view.SurfaceControl.METADATA_OWNER_UID;
+import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -35,7 +37,6 @@ import android.os.IBinder;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowContentFrameStats;
@@ -103,7 +104,8 @@ class WindowSurfaceController {
                 .setBufferSize(w, h)
                 .setFormat(format)
                 .setFlags(flags)
-                .setMetadata(windowType, ownerUid);
+                .setMetadata(METADATA_WINDOW_TYPE, windowType)
+                .setMetadata(METADATA_OWNER_UID, ownerUid);
         mSurfaceControl = b.build();
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }

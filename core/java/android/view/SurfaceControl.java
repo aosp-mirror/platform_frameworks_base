@@ -46,10 +46,9 @@ import android.hardware.display.DisplayedContentSamplingAttributes;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Surface.OutOfResourcesException;
 
@@ -60,6 +59,7 @@ import dalvik.system.CloseGuard;
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.Closeable;
+import java.nio.ByteBuffer;
 
 /**
  * Handle to an on-screen Surface managed by the system compositor. The SurfaceControl is
@@ -75,7 +75,7 @@ public final class SurfaceControl implements Parcelable {
     private static final String TAG = "SurfaceControl";
 
     private static native long nativeCreate(SurfaceSession session, String name,
-            int w, int h, int format, int flags, long parentObject, int windowType, int ownerUid)
+            int w, int h, int format, int flags, long parentObject, Parcel metadata)
             throws OutOfResourcesException;
     private static native long nativeReadFromParcel(Parcel in);
     private static native long nativeCopyFromSurfaceControl(long nativeObject);
@@ -182,6 +182,7 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeTransferTouchFocus(long transactionObj, IBinder fromToken,
             IBinder toToken);
     private static native boolean nativeGetProtectedContentSupport();
+    private static native void nativeSetMetadata(long transactionObj, int key, Parcel data);
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -413,6 +414,18 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * owner UID.
+     * @hide
+     */
+    public static final int METADATA_OWNER_UID = 1;
+
+    /**
+     * Window type as per {@link WindowManager.LayoutParams}.
+     * @hide
+     */
+    public static final int METADATA_WINDOW_TYPE = 2;
+
+    /**
      * Builder class for {@link SurfaceControl} objects.
      */
     public static class Builder {
@@ -423,8 +436,7 @@ public final class SurfaceControl implements Parcelable {
         private int mFormat = PixelFormat.OPAQUE;
         private String mName;
         private SurfaceControl mParent;
-        private int mWindowType = -1;
-        private int mOwnerUid = -1;
+        private SparseIntArray mMetadata;
 
         /**
          * Begin building a SurfaceControl with a given {@link SurfaceSession}.
@@ -455,8 +467,8 @@ public final class SurfaceControl implements Parcelable {
                 throw new IllegalArgumentException(
                         "Only buffer layers can set a valid buffer size.");
             }
-            return new SurfaceControl(mSession, mName, mWidth, mHeight, mFormat,
-                    mFlags, mParent, mWindowType, mOwnerUid);
+            return new SurfaceControl(
+                    mSession, mName, mWidth, mHeight, mFormat, mFlags, mParent, mMetadata);
         }
 
         /**
@@ -581,23 +593,17 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Set surface metadata.
+         * Sets a metadata int.
          *
-         * Currently these are window-types as per {@link WindowManager.LayoutParams} and
-         * owner UIDs. Child surfaces inherit their parents
-         * metadata so only the WindowManager needs to set this on root Surfaces.
-         *
-         * @param windowType A window-type
-         * @param ownerUid UID of the window owner.
+         * @param key metadata key
+         * @param data associated data
          * @hide
          */
-        public Builder setMetadata(int windowType, int ownerUid) {
-            if (UserHandle.getAppId(Process.myUid()) != Process.SYSTEM_UID) {
-                throw new UnsupportedOperationException(
-                        "It only makes sense to set Surface metadata from the WindowManager");
+        public Builder setMetadata(int key, int data) {
+            if (mMetadata == null) {
+                mMetadata = new SparseIntArray();
             }
-            mWindowType = windowType;
-            mOwnerUid = ownerUid;
+            mMetadata.put(key, data);
             return this;
         }
 
@@ -682,13 +688,12 @@ public final class SurfaceControl implements Parcelable {
      * @param h The surface initial height.
      * @param flags The surface creation flags.  Should always include {@link #HIDDEN}
      * in the creation flags.
-     * @param windowType The type of the window as specified in WindowManager.java.
-     * @param ownerUid A unique per-app ID.
+     * @param metadata Initial metadata.
      *
      * @throws throws OutOfResourcesException If the SurfaceControl cannot be created.
      */
     private SurfaceControl(SurfaceSession session, String name, int w, int h, int format, int flags,
-            SurfaceControl parent, int windowType, int ownerUid)
+            SurfaceControl parent, SparseIntArray metadata)
                     throws OutOfResourcesException, IllegalArgumentException {
         if (name == null) {
             throw new IllegalArgumentException("name must not be null");
@@ -706,8 +711,21 @@ public final class SurfaceControl implements Parcelable {
         mName = name;
         mWidth = w;
         mHeight = h;
-        mNativeObject = nativeCreate(session, name, w, h, format, flags,
-            parent != null ? parent.mNativeObject : 0, windowType, ownerUid);
+        Parcel metaParcel = Parcel.obtain();
+        try {
+            if (metadata != null && metadata.size() > 0) {
+                metaParcel.writeInt(metadata.size());
+                for (int i = 0; i < metadata.size(); ++i) {
+                    metaParcel.writeInt(metadata.keyAt(i));
+                    metaParcel.writeByteArray(
+                            ByteBuffer.allocate(4).putInt(metadata.valueAt(i)).array());
+                }
+            }
+            mNativeObject = nativeCreate(session, name, w, h, format, flags,
+                    parent != null ? parent.mNativeObject : 0, metaParcel);
+        } finally {
+            metaParcel.recycle();
+        }
         if (mNativeObject == 0) {
             throw new OutOfResourcesException(
                     "Couldn't allocate SurfaceControl native object");
@@ -2322,6 +2340,30 @@ public final class SurfaceControl implements Parcelable {
          */
         public Transaction setEarlyWakeup() {
             nativeSetEarlyWakeup(mNativeObject);
+            return this;
+        }
+
+        /**
+         * Sets an arbitrary piece of metadata on the surface. This is a helper for int data.
+         * @hide
+         */
+        public Transaction setMetadata(int key, int data) {
+            Parcel parcel = Parcel.obtain();
+            parcel.writeInt(data);
+            try {
+                setMetadata(key, parcel);
+            } finally {
+                parcel.recycle();
+            }
+            return this;
+        }
+
+        /**
+         * Sets an arbitrary piece of metadata on the surface.
+         * @hide
+         */
+        public Transaction setMetadata(int key, Parcel data) {
+            nativeSetMetadata(mNativeObject, key, data);
             return this;
         }
 
