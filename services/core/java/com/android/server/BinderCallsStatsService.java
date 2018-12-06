@@ -16,23 +16,33 @@
 
 package com.android.server;
 
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.ThreadLocalWorkSource;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats;
+import com.android.internal.os.BinderInternal;
+import com.android.internal.os.BinderInternal.CallSession;
 import com.android.internal.os.CachedDeviceState;
 
 import java.io.FileDescriptor;
@@ -49,6 +59,106 @@ public class BinderCallsStatsService extends Binder {
     private static final String PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING
             = "persist.sys.binder_calls_detailed_tracking";
 
+    /** Resolves the work source of an incoming binder transaction. */
+    static class WorkSourceProvider {
+        private ArraySet<Integer> mAppIdWhitelist;
+
+        WorkSourceProvider() {
+            mAppIdWhitelist = new ArraySet<>();
+        }
+
+        public int resolveWorkSourceUid() {
+            final int callingUid = getCallingUid();
+            final int appId = UserHandle.getAppId(callingUid);
+            if (mAppIdWhitelist.contains(appId)) {
+                final int workSource = getCallingWorkSourceUid();
+                final boolean isWorkSourceSet = workSource != Binder.UNSET_WORKSOURCE;
+                return isWorkSourceSet ?  workSource : callingUid;
+            }
+            return callingUid;
+        }
+
+        public void systemReady(Context context) {
+            mAppIdWhitelist = createAppidWhitelist(context);
+        }
+
+        public void dump(PrintWriter pw, Map<Integer, String> appIdToPackageName) {
+            pw.println("AppIds of apps that can set the work source:");
+            final ArraySet<Integer> whitelist = mAppIdWhitelist;
+            for (Integer appId : whitelist) {
+                pw.println("\t- " + appIdToPackageName.getOrDefault(appId, String.valueOf(appId)));
+            }
+        }
+
+        protected int getCallingUid() {
+            return Binder.getCallingUid();
+        }
+
+        protected int getCallingWorkSourceUid() {
+            return Binder.getCallingWorkSourceUid();
+        }
+
+        private ArraySet<Integer> createAppidWhitelist(Context context) {
+            // Use a local copy instead of mAppIdWhitelist to prevent concurrent read access.
+            final ArraySet<Integer> whitelist = new ArraySet<>();
+
+            // We trust our own process.
+            whitelist.add(Process.myUid());
+            // We only need to initialize it once. UPDATE_DEVICE_STATS is a system permission.
+            final PackageManager pm = context.getPackageManager();
+            final String[] permissions = { android.Manifest.permission.UPDATE_DEVICE_STATS };
+            final int queryFlags = MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
+            final List<PackageInfo> packages =
+                    pm.getPackagesHoldingPermissions(permissions, queryFlags);
+            final int packagesSize = packages.size();
+            for (int i = 0; i < packagesSize; i++) {
+                final PackageInfo pkgInfo = packages.get(i);
+                try {
+                    final int uid = pm.getPackageUid(pkgInfo.packageName, queryFlags);
+                    final int appId = UserHandle.getAppId(uid);
+                    whitelist.add(appId);
+                } catch (NameNotFoundException e) {
+                    Slog.e(TAG, "Cannot find uid for package name " + pkgInfo.packageName, e);
+                }
+            }
+            return whitelist;
+        }
+    }
+
+    /** Observer for all system server incoming binder transactions. */
+    @VisibleForTesting
+    static class BinderCallsObserver implements BinderInternal.Observer {
+        private final BinderInternal.Observer mBinderCallsStats;
+        private final WorkSourceProvider mWorkSourceProvider;
+
+        BinderCallsObserver(BinderInternal.Observer callsStats,
+                WorkSourceProvider workSourceProvider) {
+            mBinderCallsStats = callsStats;
+            mWorkSourceProvider = workSourceProvider;
+        }
+
+        @Override
+        public CallSession callStarted(Binder binder, int code) {
+            // We depend on the code in Binder#execTransact to reset the state of
+            // ThreadLocalWorkSource
+            setThreadLocalWorkSourceUid(mWorkSourceProvider.resolveWorkSourceUid());
+            return mBinderCallsStats.callStarted(binder, code);
+        }
+
+        @Override
+        public void callEnded(CallSession s, int parcelRequestSize, int parcelReplySize) {
+            mBinderCallsStats.callEnded(s, parcelRequestSize, parcelReplySize);
+        }
+
+        @Override
+        public void callThrewException(CallSession s, Exception exception) {
+            mBinderCallsStats.callThrewException(s, exception);
+        }
+
+        protected void setThreadLocalWorkSourceUid(int uid) {
+            ThreadLocalWorkSource.setUid(uid);
+        }
+    }
 
     /** Listens for flag changes. */
     private static class SettingsObserver extends ContentObserver {
@@ -63,13 +173,16 @@ public class BinderCallsStatsService extends Binder {
         private final Context mContext;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
         private final BinderCallsStats mBinderCallsStats;
+        private final BinderCallsObserver mBinderCallsObserver;
 
-        public SettingsObserver(Context context, BinderCallsStats binderCallsStats) {
+        SettingsObserver(Context context, BinderCallsStats binderCallsStats,
+                BinderCallsObserver observer) {
             super(BackgroundThread.getHandler());
             mContext = context;
             context.getContentResolver().registerContentObserver(mUri, false, this,
                     UserHandle.USER_SYSTEM);
             mBinderCallsStats = binderCallsStats;
+            mBinderCallsObserver = observer;
             // Always kick once to ensure that we match current state
             onChange();
         }
@@ -107,7 +220,7 @@ public class BinderCallsStatsService extends Binder {
                     mParser.getBoolean(SETTINGS_ENABLED_KEY, BinderCallsStats.ENABLED_DEFAULT);
             if (mEnabled != enabled) {
                 if (enabled) {
-                    Binder.setObserver(mBinderCallsStats);
+                    Binder.setObserver(mBinderCallsObserver);
                     Binder.setProxyTransactListener(
                             new Binder.PropagateWorkSourceTransactListener());
                 } else {
@@ -155,6 +268,7 @@ public class BinderCallsStatsService extends Binder {
     public static class LifeCycle extends SystemService {
         private BinderCallsStatsService mService;
         private BinderCallsStats mBinderCallsStats;
+        private WorkSourceProvider mWorkSourceProvider;
 
         public LifeCycle(Context context) {
             super(context);
@@ -163,7 +277,11 @@ public class BinderCallsStatsService extends Binder {
         @Override
         public void onStart() {
             mBinderCallsStats = new BinderCallsStats(new BinderCallsStats.Injector());
-            mService = new BinderCallsStatsService(mBinderCallsStats);
+            mWorkSourceProvider = new WorkSourceProvider();
+            BinderCallsObserver binderCallsObserver =
+                    new BinderCallsObserver(mBinderCallsStats, mWorkSourceProvider);
+            mService = new BinderCallsStatsService(
+                    mBinderCallsStats, binderCallsObserver, mWorkSourceProvider);
             publishLocalService(Internal.class, new Internal(mBinderCallsStats));
             publishBinderService("binder_calls_stats", mService);
             boolean detailedTrackingEnabled = SystemProperties.getBoolean(
@@ -182,21 +300,29 @@ public class BinderCallsStatsService extends Binder {
             if (SystemService.PHASE_SYSTEM_SERVICES_READY == phase) {
                 CachedDeviceState.Readonly deviceState = getLocalService(
                         CachedDeviceState.Readonly.class);
-                mService.systemReady(getContext());
                 mBinderCallsStats.setDeviceState(deviceState);
+                // It needs to be called before mService.systemReady to make sure the observer is
+                // initialized before installing it.
+                mWorkSourceProvider.systemReady(getContext());
+                mService.systemReady(getContext());
             }
         }
     }
 
     private SettingsObserver mSettingsObserver;
     private final BinderCallsStats mBinderCallsStats;
+    private final BinderCallsObserver mBinderCallsObserver;
+    private final WorkSourceProvider mWorkSourceProvider;
 
-    BinderCallsStatsService(BinderCallsStats binderCallsStats) {
+    BinderCallsStatsService(BinderCallsStats binderCallsStats, BinderCallsObserver observer,
+            WorkSourceProvider workSourceProvider) {
         mBinderCallsStats = binderCallsStats;
+        mBinderCallsObserver = observer;
+        mWorkSourceProvider = workSourceProvider;
     }
 
     public void systemReady(Context context) {
-        mSettingsObserver = new SettingsObserver(context, mBinderCallsStats);
+        mSettingsObserver = new SettingsObserver(context, mBinderCallsStats, mBinderCallsObserver);
     }
 
     public void reset() {
@@ -216,7 +342,7 @@ public class BinderCallsStatsService extends Binder {
                     pw.println("binder_calls_stats reset.");
                     return;
                 } else if ("--enable".equals(arg)) {
-                    Binder.setObserver(mBinderCallsStats);
+                    Binder.setObserver(mBinderCallsObserver);
                     return;
                 } else if ("--disable".equals(arg)) {
                     Binder.setObserver(null);
@@ -233,6 +359,9 @@ public class BinderCallsStatsService extends Binder {
                     SystemProperties.set(PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING, "");
                     mBinderCallsStats.setDetailedTracking(false);
                     pw.println("Detailed tracking disabled");
+                    return;
+                } else if ("--dump-worksource-provider".equals(arg)) {
+                    mWorkSourceProvider.dump(pw, getAppIdToPackagesMap());
                     return;
                 } else if ("-h".equals(arg)) {
                     pw.println("binder_calls_stats commands:");
@@ -272,5 +401,4 @@ public class BinderCallsStatsService extends Binder {
         }
         return map;
     }
-
 }

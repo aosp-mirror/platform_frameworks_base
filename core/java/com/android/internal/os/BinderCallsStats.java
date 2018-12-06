@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.ThreadLocalWorkSource;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
@@ -162,8 +163,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 return;
             }
 
-            final boolean isWorkSourceSet = workSourceUid >= 0;
-            final UidEntry uidEntry = getUidEntry(isWorkSourceSet ? workSourceUid : callingUid);
+            final UidEntry uidEntry = getUidEntry(workSourceUid);
             uidEntry.callCount++;
 
             if (recordCall) {
@@ -464,7 +464,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     protected int getWorkSourceUid() {
-        return Binder.getCallingWorkSourceUid();
+        return ThreadLocalWorkSource.getUid();
     }
 
     protected long getElapsedRealtimeMicro() {
