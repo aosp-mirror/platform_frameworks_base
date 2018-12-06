@@ -1419,6 +1419,13 @@ class RootActivityContainer extends ConfigurationContainer
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+                // Stacks and activities could be removed while putting activities to sleep if
+                // the app process was gone. This prevents us getting exception by accessing an
+                // invalid stack index.
+                if (stackNdx >= display.getChildCount()) {
+                    continue;
+                }
+
                 final ActivityStack stack = display.getChildAt(stackNdx);
                 if (allowDelay) {
                     allSleep &= stack.goToSleepIfPossible(shuttingDown);
