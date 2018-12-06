@@ -68,7 +68,13 @@ public class CarrierConfigManager {
      * This intent is broadcast by the system when carrier config changes. An int is specified in
      * {@link #EXTRA_SLOT_INDEX} to indicate the slot index that this is for. An optional int extra
      * {@link #EXTRA_SUBSCRIPTION_INDEX} is included to indicate the subscription index if a valid
-     * one is available for the slot index.
+     * one is available for the slot index. An optional int extra
+     * {@link TelephonyManager#EXTRA_CARRIER_ID} is included to indicate the carrier id for the
+     * changed carrier configuration. An optional int extra
+     * {@link TelephonyManager#EXTRA_PRECISE_CARRIER_ID} is included to indicate the precise
+     * carrier id for the changed carrier configuration.
+     * @see TelephonyManager#getSimCarrierId()
+     * @see TelephonyManager#getSimPreciseCarrierId()
      */
     public static final String
             ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
