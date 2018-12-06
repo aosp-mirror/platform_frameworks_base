@@ -21,7 +21,6 @@ import java.io.Closeable;
 import java.io.IOException;
 
 /**
- * @hide
  * For supplying media data to the framework. Implement this if your app has
  * special requirements for the way media data is obtained.
  *

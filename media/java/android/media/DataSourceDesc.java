@@ -19,7 +19,6 @@ package android.media;
 import android.annotation.NonNull;
 
 /**
- * @hide
  * Base class of data source descriptor.
  *
  * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)},
@@ -36,6 +35,9 @@ public class DataSourceDesc {
 
     // keep consistent with native code
     public static final long LONG_MAX_TIME_MS = LONG_MAX / 1000;
+    /**
+     * @hide
+     */
     public static final long LONG_MAX_TIME_US = LONG_MAX_TIME_MS * 1000;
 
     public static final long POSITION_UNKNOWN = LONG_MAX_TIME_MS;
@@ -172,7 +174,8 @@ public class DataSourceDesc {
 
         /**
          * Sets the end position in milliseconds at which the playback will end.
-         * Any negative number is treated as maximum length of the data source.
+         * Any negative number is treated as maximum duration {@link #LONG_MAX_TIME_MS}
+         * of the data source
          *
          * @param position the end position in milliseconds at which the playback will end
          * @return the same Builder instance.
