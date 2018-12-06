@@ -4668,18 +4668,18 @@ package android.provider {
   public static final class Telephony.Carriers implements android.provider.BaseColumns {
     field public static final java.lang.String APN_SET_ID = "apn_set_id";
     field public static final int CARRIER_EDITED = 4; // 0x4
-    field public static final java.lang.String EDITED = "edited";
-    field public static final java.lang.String MAX_CONNS = "max_conns";
-    field public static final java.lang.String MAX_CONNS_TIME = "max_conns_time";
-    field public static final java.lang.String MODEM_COGNITIVE = "modem_cognitive";
+    field public static final java.lang.String EDITED_STATUS = "edited";
+    field public static final java.lang.String MAX_CONNECTIONS = "max_conns";
+    field public static final java.lang.String MODEM_PERSIST = "modem_cognitive";
     field public static final java.lang.String MTU = "mtu";
-    field public static final int NO_SET_SET = 0; // 0x0
+    field public static final int NO_APN_SET_ID = 0; // 0x0
+    field public static final java.lang.String TIME_LIMIT_FOR_MAX_CONNECTIONS = "max_conns_time";
     field public static final int UNEDITED = 0; // 0x0
     field public static final int USER_DELETED = 2; // 0x2
     field public static final java.lang.String USER_EDITABLE = "user_editable";
     field public static final int USER_EDITED = 1; // 0x1
     field public static final java.lang.String USER_VISIBLE = "user_visible";
-    field public static final java.lang.String WAIT_TIME = "wait_time";
+    field public static final java.lang.String WAIT_TIME_RETRY = "wait_time";
   }
 
   public final class TimeZoneRulesDataContract {
