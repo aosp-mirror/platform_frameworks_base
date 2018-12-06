@@ -126,7 +126,6 @@ cc_defaults {
 
     static_libs: [
         "android.hardware.broadcastradio@common-utils-1x-lib",
-        "libscrypt_static",
     ],
 
     product_variables: {
