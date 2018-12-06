@@ -30,9 +30,11 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.params.OutputConfiguration;
+import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.SubmitInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.view.Surface;
 
 /**
@@ -175,6 +177,25 @@ public class ICameraDeviceUserWrapper {
     public void waitUntilIdle() throws CameraAccessException {
         try {
             mRemoteDevice.waitUntilIdle();
+        } catch (Throwable t) {
+            CameraManager.throwAsPublicException(t);
+            throw new UnsupportedOperationException("Unexpected exception", t);
+        }
+    }
+
+    public boolean isSessionConfigurationSupported(SessionConfiguration sessionConfig)
+            throws CameraAccessException {
+        try {
+            return mRemoteDevice.isSessionConfigurationSupported(sessionConfig);
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ICameraService.ERROR_INVALID_OPERATION) {
+                throw new UnsupportedOperationException("Session configuration query not " +
+                        "supported");
+            } else if (e.errorCode == ICameraService.ERROR_ILLEGAL_ARGUMENT) {
+                throw new IllegalArgumentException("Invalid session configuration");
+            }
+
+            throw e;
         } catch (Throwable t) {
             CameraManager.throwAsPublicException(t);
             throw new UnsupportedOperationException("Unexpected exception", t);
