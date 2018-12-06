@@ -354,28 +354,6 @@ public class Installer extends SystemService {
         }
     }
 
-    public void idmap(String targetApkPath, String overlayApkPath, int uid)
-            throws InstallerException {
-        if (!checkBeforeRemote()) return;
-        BlockGuard.getVmPolicy().onPathAccess(targetApkPath);
-        BlockGuard.getVmPolicy().onPathAccess(overlayApkPath);
-        try {
-            mInstalld.idmap(targetApkPath, overlayApkPath, uid);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public void removeIdmap(String overlayApkPath) throws InstallerException {
-        if (!checkBeforeRemote()) return;
-        BlockGuard.getVmPolicy().onPathAccess(overlayApkPath);
-        try {
-            mInstalld.removeIdmap(overlayApkPath);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
     public void rmdex(String codePath, String instructionSet) throws InstallerException {
         assertValidInstructionSet(instructionSet);
         if (!checkBeforeRemote()) return;
