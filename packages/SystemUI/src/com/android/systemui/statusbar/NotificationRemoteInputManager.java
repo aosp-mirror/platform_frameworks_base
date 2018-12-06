@@ -111,7 +111,6 @@ public class NotificationRemoteInputManager implements Dumpable {
     private final KeyguardManager mKeyguardManager;
 
     protected RemoteInputController mRemoteInputController;
-    protected NotificationPresenter mPresenter;
     protected NotificationLifetimeExtender.NotificationSafeToRemoveCallback
             mNotificationLifetimeFinishedCallback;
     protected IStatusBarService mBarService;
@@ -320,10 +319,8 @@ public class NotificationRemoteInputManager implements Dumpable {
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
     }
 
-    public void setUpWithPresenter(NotificationPresenter presenter,
-            Callback callback,
-            RemoteInputController.Delegate delegate) {
-        mPresenter = presenter;
+    /** Initializes this component with the provided dependencies. */
+    public void setUpWithCallback(Callback callback, RemoteInputController.Delegate delegate) {
         mCallback = callback;
         mRemoteInputController = new RemoteInputController(delegate);
         mRemoteInputController.addCallback(new RemoteInputController.Callback() {

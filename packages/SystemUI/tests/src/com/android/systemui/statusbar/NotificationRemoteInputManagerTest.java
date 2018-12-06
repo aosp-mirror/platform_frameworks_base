@@ -1,8 +1,8 @@
 package com.android.systemui.statusbar;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -22,13 +22,12 @@ import android.testing.TestableLooper;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
-
-import com.android.systemui.statusbar.notification.NotificationData;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputActiveExtender;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputHistoryExtender;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.SmartReplyHistoryExtender;
+import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import com.google.android.collect.Sets;
 
@@ -80,7 +79,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         mEntry = new NotificationData.Entry(mSbn);
         mEntry.setRow(mRow);
 
-        mRemoteInputManager.setUpWithPresenterForTest(mPresenter, mCallback,
+        mRemoteInputManager.setUpWithPresenterForTest(mCallback,
                 mDelegate, mController);
         for (NotificationLifetimeExtender extender : mRemoteInputManager.getLifetimeExtenders()) {
             extender.setCallback(
@@ -201,11 +200,10 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
             super(context);
         }
 
-        public void setUpWithPresenterForTest(NotificationPresenter presenter,
-                Callback callback,
+        public void setUpWithPresenterForTest(Callback callback,
                 RemoteInputController.Delegate delegate,
                 RemoteInputController controller) {
-            super.setUpWithPresenter(presenter, callback, delegate);
+            super.setUpWithCallback(callback, delegate);
             mRemoteInputController = controller;
         }
 
