@@ -4181,7 +4181,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // test reset password with token
         when(getServices().lockPatternUtils.setLockCredentialWithToken(eq(password),
                 eq(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD),
-                eq(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED), eq(handle), eq(token),
+                eq(DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC), eq(handle), eq(token),
                 eq(UserHandle.USER_SYSTEM)))
                 .thenReturn(true);
         assertTrue(dpm.resetPasswordWithToken(admin1, password, token, 0));
