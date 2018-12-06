@@ -815,9 +815,18 @@ public class NotificationData {
     public boolean isHighPriority(StatusBarNotification statusBarNotification) {
         if (mRankingMap != null) {
             getRanking(statusBarNotification.getKey(), mTmpRanking);
-            return mTmpRanking.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT
+            if (mTmpRanking.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT
                     || statusBarNotification.getNotification().isForegroundService()
-                    || statusBarNotification.getNotification().hasMediaSession();
+                    || statusBarNotification.getNotification().hasMediaSession()) {
+                return true;
+            }
+            if (mGroupManager.isSummaryOfGroup(statusBarNotification)) {
+                for (Entry child : mGroupManager.getLogicalChildren(statusBarNotification)) {
+                    if (isHighPriority(child.notification)) {
+                        return true;
+                    }
+                }
+            }
         }
         return false;
     }
