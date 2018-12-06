@@ -357,11 +357,12 @@ public class WifiScanner {
          */
         private int mBucketsScanned;
         /**
-         * Indicates that the scan results received are as a result of a scan of all available
-         * channels. This should only be expected to function for single scans.
+         * Bands scanned. One of the WIFI_BAND values.
+         * Will be {@link #WIFI_BAND_UNSPECIFIED} if the list of channels do not fully cover
+         * any of the bands.
          * {@hide}
          */
-        private boolean mAllChannelsScanned;
+        private int mBandScanned;
         /** all scan results discovered in this scan, sorted by timestamp in ascending order */
         private ScanResult mResults[];
 
@@ -374,12 +375,12 @@ public class WifiScanner {
         }
 
         /** {@hide} */
-        public ScanData(int id, int flags, int bucketsScanned, boolean allChannelsScanned,
-                ScanResult[] results) {
+        public ScanData(int id, int flags, int bucketsScanned, int bandScanned,
+                        ScanResult[] results) {
             mId = id;
             mFlags = flags;
             mBucketsScanned = bucketsScanned;
-            mAllChannelsScanned = allChannelsScanned;
+            mBandScanned = bandScanned;
             mResults = results;
         }
 
@@ -387,7 +388,7 @@ public class WifiScanner {
             mId = s.mId;
             mFlags = s.mFlags;
             mBucketsScanned = s.mBucketsScanned;
-            mAllChannelsScanned = s.mAllChannelsScanned;
+            mBandScanned = s.mBandScanned;
             mResults = new ScanResult[s.mResults.length];
             for (int i = 0; i < s.mResults.length; i++) {
                 ScanResult result = s.mResults[i];
@@ -410,8 +411,8 @@ public class WifiScanner {
         }
 
         /** {@hide} */
-        public boolean isAllChannelsScanned() {
-            return mAllChannelsScanned;
+        public int getBandScanned() {
+            return mBandScanned;
         }
 
         public ScanResult[] getResults() {
@@ -429,7 +430,7 @@ public class WifiScanner {
                 dest.writeInt(mId);
                 dest.writeInt(mFlags);
                 dest.writeInt(mBucketsScanned);
-                dest.writeInt(mAllChannelsScanned ? 1 : 0);
+                dest.writeInt(mBandScanned);
                 dest.writeInt(mResults.length);
                 for (int i = 0; i < mResults.length; i++) {
                     ScanResult result = mResults[i];
@@ -447,13 +448,13 @@ public class WifiScanner {
                         int id = in.readInt();
                         int flags = in.readInt();
                         int bucketsScanned = in.readInt();
-                        boolean allChannelsScanned = in.readInt() != 0;
+                        int bandScanned = in.readInt();
                         int n = in.readInt();
                         ScanResult results[] = new ScanResult[n];
                         for (int i = 0; i < n; i++) {
                             results[i] = ScanResult.CREATOR.createFromParcel(in);
                         }
-                        return new ScanData(id, flags, bucketsScanned, allChannelsScanned, results);
+                        return new ScanData(id, flags, bucketsScanned, bandScanned, results);
                     }
 
                     public ScanData[] newArray(int size) {
@@ -759,6 +760,7 @@ public class WifiScanner {
      *                 Multiple requests should also not share this object.
      * {@hide}
      */
+    @RequiresPermission(Manifest.permission.NETWORK_STACK)
     public void registerScanListener(ScanListener listener) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         int key = addListener(listener);
