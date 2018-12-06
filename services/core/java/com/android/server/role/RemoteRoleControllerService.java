@@ -34,8 +34,8 @@ import android.rolecontrollerservice.IRoleControllerService;
 import android.rolecontrollerservice.RoleControllerService;
 import android.util.Slog;
 
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.FgThread;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -47,10 +47,6 @@ public class RemoteRoleControllerService {
 
     static final boolean DEBUG = false;
     private static final String LOG_TAG = RemoteRoleControllerService.class.getSimpleName();
-
-    // TODO: STOPSHIP: This isn't the right thread, as we are also using it to write to disk.
-    @NonNull
-    private static final Handler sCallbackHandler = BackgroundThread.getHandler();
 
     @NonNull
     private final Connection mConnection;
@@ -99,8 +95,8 @@ public class RemoteRoleControllerService {
      * @see RoleControllerService#onGrantDefaultRoles(RoleManagerCallback)
      */
     public void onGrantDefaultRoles(@NonNull IRoleManagerCallback callback) {
-        mConnection.enqueueCall(
-                new Connection.Call(IRoleControllerService::onGrantDefaultRoles, callback));
+        mConnection.enqueueCall(new Connection.Call(IRoleControllerService::onGrantDefaultRoles,
+                callback));
     }
 
     private static final class Connection implements ServiceConnection {
@@ -112,6 +108,9 @@ public class RemoteRoleControllerService {
 
         @NonNull
         private final Context mContext;
+
+        @NonNull
+        private final Handler mHandler = FgThread.getHandler();
 
         private boolean mBound;
 
@@ -161,8 +160,8 @@ public class RemoteRoleControllerService {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "Enqueue " + call);
             }
-            sCallbackHandler.executeOrSendMessage(PooledLambda.obtainMessage(
-                    Connection::executeCall, this, call));
+            mHandler.executeOrSendMessage(PooledLambda.obtainMessage(Connection::executeCall, this,
+                    call));
         }
 
         @WorkerThread
@@ -181,7 +180,7 @@ public class RemoteRoleControllerService {
 
         @WorkerThread
         private void ensureBound() {
-            sCallbackHandler.removeCallbacks(mUnbindRunnable);
+            mHandler.removeCallbacks(mUnbindRunnable);
             if (!mBound) {
                 Intent intent = new Intent(RoleControllerService.SERVICE_INTERFACE);
                 intent.setPackage(mContext.getPackageManager()
@@ -191,13 +190,13 @@ public class RemoteRoleControllerService {
                 //
                 // Note that as a result, onServiceConnected may happen not on main thread!
                 mBound = mContext.bindServiceAsUser(intent, this, Context.BIND_AUTO_CREATE,
-                        sCallbackHandler, UserHandle.of(mUserId));
+                        mHandler, UserHandle.of(mUserId));
             }
         }
 
         private void scheduleUnbind() {
-            sCallbackHandler.removeCallbacks(mUnbindRunnable);
-            sCallbackHandler.postDelayed(mUnbindRunnable, UNBIND_DELAY_MILLIS);
+            mHandler.removeCallbacks(mUnbindRunnable);
+            mHandler.postDelayed(mUnbindRunnable, UNBIND_DELAY_MILLIS);
         }
 
         @WorkerThread
@@ -220,6 +219,9 @@ public class RemoteRoleControllerService {
             private final IRoleManagerCallback mCallback;
 
             @NonNull
+            private final Handler mHandler = FgThread.getHandler();
+
+            @NonNull
             private final Runnable mTimeoutRunnable = this::notifyTimeout;
 
             private boolean mCallbackNotified;
@@ -236,7 +238,7 @@ public class RemoteRoleControllerService {
                     Slog.i(LOG_TAG, "Executing " + this);
                 }
                 try {
-                    sCallbackHandler.postDelayed(mTimeoutRunnable, TIMEOUT_MILLIS);
+                    mHandler.postDelayed(mTimeoutRunnable, TIMEOUT_MILLIS);
                     mCallExecutor.execute(service, new CallbackDelegate());
                 } catch (RemoteException e) {
                     Slog.e(LOG_TAG, "Error calling RoleControllerService", e);
@@ -256,7 +258,7 @@ public class RemoteRoleControllerService {
                     return;
                 }
                 mCallbackNotified = true;
-                sCallbackHandler.removeCallbacks(mTimeoutRunnable);
+                mHandler.removeCallbacks(mTimeoutRunnable);
                 try {
                     if (success) {
                         mCallback.onSuccess();
@@ -286,14 +288,14 @@ public class RemoteRoleControllerService {
 
                 @Override
                 public void onSuccess() throws RemoteException {
-                    sCallbackHandler.sendMessage(PooledLambda.obtainMessage(
-                            Call::notifyCallback, Call.this, true));
+                    mHandler.sendMessage(PooledLambda.obtainMessage(Call::notifyCallback, Call.this,
+                            true));
                 }
 
                 @Override
                 public void onFailure() throws RemoteException {
-                    sCallbackHandler.sendMessage(PooledLambda.obtainMessage(
-                            Call::notifyCallback, Call.this, false));
+                    mHandler.sendMessage(PooledLambda.obtainMessage(Call::notifyCallback, Call.this,
+                            false));
                 }
             }
         }
