@@ -31,6 +31,7 @@ import android.text.format.DateFormat;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
+import com.android.internal.os.AppIdToPackageMap;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.CachedDeviceState;
 import com.android.internal.os.LooperStats;
@@ -92,6 +93,7 @@ public class LooperStatsService extends Binder {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+        AppIdToPackageMap packageMap = AppIdToPackageMap.getSnapshot();
         pw.print("Start time: ");
         pw.println(DateFormat.format("yyyy-MM-dd HH:mm:ss", mStats.getStartTimeMillis()));
         pw.print("On battery time (ms): ");
@@ -121,7 +123,7 @@ public class LooperStatsService extends Binder {
         pw.println(header);
         for (LooperStats.ExportedEntry entry : entries) {
             pw.printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
-                    entry.workSourceUid,
+                    packageMap.mapUid(entry.workSourceUid),
                     entry.threadName,
                     entry.handlerClassName,
                     entry.messageName,

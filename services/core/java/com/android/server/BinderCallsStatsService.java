@@ -19,7 +19,6 @@ package com.android.server;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
-import android.app.AppGlobals;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -28,7 +27,6 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.ThreadLocalWorkSource;
 import android.os.UserHandle;
@@ -39,6 +37,7 @@ import android.util.KeyValueListParser;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.AppIdToPackageMap;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
@@ -48,9 +47,7 @@ import com.android.internal.os.CachedDeviceState;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class BinderCallsStatsService extends Binder {
 
@@ -82,11 +79,11 @@ public class BinderCallsStatsService extends Binder {
             mAppIdWhitelist = createAppidWhitelist(context);
         }
 
-        public void dump(PrintWriter pw, Map<Integer, String> appIdToPackageName) {
+        public void dump(PrintWriter pw, AppIdToPackageMap packageMap) {
             pw.println("AppIds of apps that can set the work source:");
             final ArraySet<Integer> whitelist = mAppIdWhitelist;
             for (Integer appId : whitelist) {
-                pw.println("\t- " + appIdToPackageName.getOrDefault(appId, String.valueOf(appId)));
+                pw.println("\t- " + packageMap.mapAppId(appId));
             }
         }
 
@@ -361,7 +358,7 @@ public class BinderCallsStatsService extends Binder {
                     pw.println("Detailed tracking disabled");
                     return;
                 } else if ("--dump-worksource-provider".equals(arg)) {
-                    mWorkSourceProvider.dump(pw, getAppIdToPackagesMap());
+                    mWorkSourceProvider.dump(pw, AppIdToPackageMap.getSnapshot());
                     return;
                 } else if ("-h".equals(arg)) {
                     pw.println("binder_calls_stats commands:");
@@ -377,28 +374,6 @@ public class BinderCallsStatsService extends Binder {
                 }
             }
         }
-        mBinderCallsStats.dump(pw, getAppIdToPackagesMap(), verbose);
-    }
-
-    private Map<Integer, String> getAppIdToPackagesMap() {
-        List<PackageInfo> packages;
-        try {
-            packages = AppGlobals.getPackageManager()
-                    .getInstalledPackages(PackageManager.MATCH_UNINSTALLED_PACKAGES,
-                            UserHandle.USER_SYSTEM).getList();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        Map<Integer,String> map = new HashMap<>();
-        for (PackageInfo pkg : packages) {
-            String name = pkg.packageName;
-            int uid = pkg.applicationInfo.uid;
-            // Use sharedUserId string as package name if there are collisions
-            if (pkg.sharedUserId != null && map.containsKey(uid)) {
-                name = "shared:" + pkg.sharedUserId;
-            }
-            map.put(uid, name);
-        }
-        return map;
+        mBinderCallsStats.dump(pw, AppIdToPackageMap.getSnapshot(), verbose);
     }
 }
