@@ -7371,22 +7371,8 @@ package android.webkit {
     ctor public SslErrorHandler();
   }
 
-  public abstract class TokenBindingService {
+  public abstract deprecated class TokenBindingService {
     ctor public TokenBindingService();
-    method public abstract void deleteAllKeys(android.webkit.ValueCallback<java.lang.Boolean>);
-    method public abstract void deleteKey(android.net.Uri, android.webkit.ValueCallback<java.lang.Boolean>);
-    method public abstract void enableTokenBinding();
-    method public static android.webkit.TokenBindingService getInstance();
-    method public abstract void getKey(android.net.Uri, java.lang.String[], android.webkit.ValueCallback<android.webkit.TokenBindingService.TokenBindingKey>);
-    field public static final java.lang.String KEY_ALGORITHM_ECDSAP256 = "ECDSAP256";
-    field public static final java.lang.String KEY_ALGORITHM_RSA2048_PKCS_1_5 = "RSA2048_PKCS_1.5";
-    field public static final java.lang.String KEY_ALGORITHM_RSA2048_PSS = "RSA2048PSS";
-  }
-
-  public static abstract class TokenBindingService.TokenBindingKey {
-    ctor public TokenBindingService.TokenBindingKey();
-    method public abstract java.lang.String getAlgorithm();
-    method public abstract java.security.KeyPair getKeyPair();
   }
 
   public class WebChromeClient {
@@ -7516,7 +7502,7 @@ package android.webkit {
     method public abstract android.webkit.GeolocationPermissions getGeolocationPermissions();
     method public abstract android.webkit.ServiceWorkerController getServiceWorkerController();
     method public abstract android.webkit.WebViewFactoryProvider.Statics getStatics();
-    method public abstract android.webkit.TokenBindingService getTokenBindingService();
+    method public abstract deprecated android.webkit.TokenBindingService getTokenBindingService();
     method public abstract android.webkit.TracingController getTracingController();
     method public abstract android.webkit.WebIconDatabase getWebIconDatabase();
     method public abstract android.webkit.WebStorage getWebStorage();
