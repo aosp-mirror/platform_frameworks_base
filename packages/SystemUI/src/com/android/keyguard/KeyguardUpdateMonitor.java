@@ -1904,13 +1904,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     + slotId + ", state=" + state +")");
         }
 
+        boolean becameAbsent = false;
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             Log.w(TAG, "invalid subId in handleSimStateChange()");
             /* Only handle No SIM(ABSENT) due to handleServiceStateChange() handle other case */
             if (state == State.ABSENT) {
                 updateTelephonyCapable(true);
+                // Even though the subscription is not valid anymore, we need to notify that the
+                // SIM card was removed so we can update the UI.
+                becameAbsent = true;
+            } else {
+                return;
             }
-            return;
         }
 
         SimData data = mSimDatas.get(subId);
@@ -1925,7 +1930,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             data.subId = subId;
             data.slotId = slotId;
         }
-        if (changed && state != State.UNKNOWN) {
+        if ((changed || becameAbsent) && state != State.UNKNOWN) {
             for (int i = 0; i < mCallbacks.size(); i++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
                 if (cb != null) {
