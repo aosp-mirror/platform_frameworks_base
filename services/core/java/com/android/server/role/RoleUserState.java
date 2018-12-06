@@ -32,6 +32,7 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.CollectionUtils;
+import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import libcore.io.IoUtils;
@@ -78,7 +79,7 @@ public class RoleUserState {
 
     @GuardedBy("RoleManagerService.mLock")
     @Nullable
-    private String mLastGrantPackagesHash;
+    private String mPackagesHash;
 
     /**
      * Maps role names to its holders' package names. The values should never be null.
@@ -99,7 +100,7 @@ public class RoleUserState {
     private RoleUserState(@UserIdInt int userId) {
         mUserId = userId;
 
-        readSyncLocked();
+        readLocked();
     }
 
     /**
@@ -144,22 +145,22 @@ public class RoleUserState {
      * @return the hash representing the state of packages
      */
     @GuardedBy("RoleManagerService.mLock")
-    public String getLastGrantPackagesHashLocked() {
-        return mLastGrantPackagesHash;
+    public String getPackagesHashLocked() {
+        return mPackagesHash;
     }
 
     /**
      * Set the hash representing the state of packages during the last time initial grants was run.
      *
-     * @param lastGrantPackagesHash the hash representing the state of packages
+     * @param packagesHash the hash representing the state of packages
      */
     @GuardedBy("RoleManagerService.mLock")
-    public void setLastGrantPackagesHashLocked(@Nullable String lastGrantPackagesHash) {
+    public void setPackagesHashLocked(@Nullable String packagesHash) {
         throwIfDestroyedLocked();
-        if (Objects.equals(mLastGrantPackagesHash, lastGrantPackagesHash)) {
+        if (Objects.equals(mPackagesHash, packagesHash)) {
             return;
         }
-        mLastGrantPackagesHash = lastGrantPackagesHash;
+        mPackagesHash = packagesHash;
         writeAsyncLocked();
     }
 
@@ -311,7 +312,7 @@ public class RoleUserState {
         }
 
         mWriteHandler.sendMessageDelayed(PooledLambda.obtainMessage(RoleUserState::writeSync, this,
-                mVersion, mLastGrantPackagesHash, roles), writeDelayMillis);
+                mVersion, mPackagesHash, roles), writeDelayMillis);
         Slog.i(LOG_TAG, "Scheduled writing roles.xml");
     }
 
@@ -385,7 +386,7 @@ public class RoleUserState {
      * Read the state from file.
      */
     @GuardedBy("RoleManagerService.mLock")
-    private void readSyncLocked() {
+    private void readLocked() {
         File file = getFile(mUserId);
         try (FileInputStream in = new AtomicFile(file).openRead()) {
             XmlPullParser parser = Xml.newPullParser();
@@ -421,7 +422,7 @@ public class RoleUserState {
     private void parseRolesLocked(@NonNull XmlPullParser parser) throws IOException,
             XmlPullParserException {
         mVersion = Integer.parseInt(parser.getAttributeValue(null, ATTRIBUTE_VERSION));
-        mLastGrantPackagesHash = parser.getAttributeValue(null, ATTRIBUTE_PACKAGES_HASH);
+        mPackagesHash = parser.getAttributeValue(null, ATTRIBUTE_PACKAGES_HASH);
         mRoles.clear();
 
         int type;
@@ -465,11 +466,47 @@ public class RoleUserState {
     }
 
     /**
+     * Dump this user state.
+     *
+     * @param dumpOutputStream the output stream to dump to
+     */
+    @GuardedBy("RoleManagerService.mLock")
+    public void dumpLocked(@NonNull DualDumpOutputStream dumpOutputStream,
+            @NonNull String fieldName, long fieldId) {
+        throwIfDestroyedLocked();
+
+        long fieldToken = dumpOutputStream.start(fieldName, fieldId);
+        dumpOutputStream.write("user_id", RoleUserStateProto.USER_ID, mUserId);
+        dumpOutputStream.write("version", RoleUserStateProto.VERSION, mVersion);
+        dumpOutputStream.write("packages_hash", RoleUserStateProto.PACKAGES_HASH, mPackagesHash);
+
+        int rolesSize = mRoles.size();
+        for (int rolesIndex = 0; rolesIndex < rolesSize; rolesIndex++) {
+            String roleName = mRoles.keyAt(rolesIndex);
+            ArraySet<String> roleHolders = mRoles.valueAt(rolesIndex);
+
+            long rolesToken = dumpOutputStream.start("roles", RoleUserStateProto.ROLES);
+            dumpOutputStream.write("name", RoleProto.NAME, roleName);
+
+            int roleHoldersSize = roleHolders.size();
+            for (int roleHoldersIndex = 0; roleHoldersIndex < roleHoldersSize; roleHoldersIndex++) {
+                String roleHolder = roleHolders.valueAt(roleHoldersIndex);
+
+                dumpOutputStream.write("holders", RoleProto.HOLDERS, roleHolder);
+            }
+
+            dumpOutputStream.end(rolesToken);
+        }
+
+        dumpOutputStream.end(fieldToken);
+    }
+
+    /**
      * Destroy this state and delete the corresponding file. Any pending writes to the file will be
      * cancelled and any future interaction with this state will throw an exception.
      */
     @GuardedBy("RoleManagerService.mLock")
-    public void destroySyncLocked() {
+    public void destroyLocked() {
         throwIfDestroyedLocked();
         mWriteHandler.removeCallbacksAndMessages(null);
         getFile(mUserId).delete();
