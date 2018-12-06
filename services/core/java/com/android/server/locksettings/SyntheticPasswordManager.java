@@ -29,6 +29,7 @@ import android.hardware.weaver.V1_0.WeaverStatus;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.security.GateKeeper;
+import android.security.Scrypt;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.util.ArrayMap;
@@ -1173,11 +1174,10 @@ public class SyntheticPasswordManager {
     }
 
     protected byte[] scrypt(String password, byte[] salt, int N, int r, int p, int outLen) {
-        return nativeScrypt(password.getBytes(), salt, N, r, p, outLen);
+        return new Scrypt().scrypt(password.getBytes(), salt, N, r, p, outLen);
     }
 
     native long nativeSidFromPasswordHandle(byte[] handle);
-    native byte[] nativeScrypt(byte[] password, byte[] salt, int N, int r, int p, int outLen);
 
     protected static ArrayList<Byte> toByteArrayList(byte[] data) {
         ArrayList<Byte> result = new ArrayList<Byte>(data.length);
