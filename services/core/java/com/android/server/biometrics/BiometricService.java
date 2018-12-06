@@ -813,6 +813,24 @@ public class BiometricService extends SystemService {
             }
         }
 
+        @Override // Binder call
+        public void resetTimeout(byte[] token) {
+            checkInternalPermission();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                if (mFingerprintService != null) {
+                    mFingerprintService.resetTimeout(token);
+                }
+                if (mFaceService != null) {
+                    mFaceService.resetTimeout(token);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
         void cancelInternal(IBinder token, String opPackageName, boolean fromClient) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
