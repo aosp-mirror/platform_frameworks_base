@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"جس نیٹ ورک میں آپ شامل ہونے کی کوشش کر رہے ہیں اس میں سیکیورٹی کے مسائل ہیں۔"</string>
     <string name="ssl_error_example" msgid="647898534624078900">"مثال کے طور پر ہو سکتا ہے کہ لاگ ان صفحہ دکھائی گئی تنظیم سے تعلق نہ رکھتا ہو۔"</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"براؤزر کے ذریعے بہرحال جاری رکھیں"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"یہ سرٹیفکیٹ قابل اعتماد اتھارٹی سے حاصل شدہ نہیں ہے۔"</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"سائٹ کا نام سرٹیفکیٹ پر موجود نام سے مماثل نہیں ہے۔"</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"اس سرٹیفکیٹ کی میعاد ختم ہو گئی ہے۔"</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"یہ سرٹیفکیٹ ابھی تک درست نہیں ہے۔"</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"اس سرٹیفکیٹ میں ایک غلط تاریخ ہے۔"</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"یہ سرٹیفیکیٹ غلط ہے۔"</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"سرٹیفکیٹ کی نامعلوم خرابی۔"</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"سیکیورٹی وارننگ"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"سرٹیفکیٹ دیکھیں"</string>
+    <string name="ok" msgid="2817931639040794018">"ٹھیک ہے"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"پتہ:"</string>
+    <string name="page_info" msgid="4416941086705172545">"صفحہ کی معلومات"</string>
 </resources>

@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"A rede à qual você está tentando se conectar tem problemas de segurança."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Por exemplo, a página de login pode não pertencer à organização mostrada."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Continuar mesmo assim pelo navegador"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Esse certificado não é de uma autoridade confiável."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"O nome do site não corresponde ao nome no certificado."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Esse certificado expirou."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Esse certificado ainda não é válido."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"A data desse certificado é inválida."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Esse certificado é inválido."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Erro de certificado desconhecido."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Aviso de segurança"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Ver certificado"</string>
+    <string name="ok" msgid="2817931639040794018">"OK"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Endereço:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Informações da página"</string>
 </resources>

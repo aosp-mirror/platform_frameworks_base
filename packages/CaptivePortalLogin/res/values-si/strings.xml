@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"ඔබ සම්බන්ධ වීමට උත්සහ කරන ජාලයේ ආරක්ෂක ගැටළු ඇත."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"උදාහරණයක් ලෙස, පුරනය වන පිටුව පෙන්වා ඇති සංවිධානයට අයිති නැති විය හැක."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"කෙසේ වුවත් බ්‍රවුසරය හරහා ඉදිරියට යන්න"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"මෙම සහතිකය විශ්වාසී අධිකාරියකින් නොවේ."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"අඩවියේ නම සහතිකයේ නමට නොගැළපේ."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"මෙම සහතිකය කල් ඉකුත් වී ඇත."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"මෙම සහතිකය තවම වලංගු නැත."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"මෙම සහතිකයට වලංගු නොවන දිනයක් ඇත."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"මෙම සහතිකය වලංගු නොවේ."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"නොදන්නා සහතික දෝෂයකි."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"ආරක්ෂක අවවාදයයි"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"සහතිකය බලන්න"</string>
+    <string name="ok" msgid="2817931639040794018">"හරි"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"ලිපිනය:"</string>
+    <string name="page_info" msgid="4416941086705172545">"පිටු තොරතුරු"</string>
 </resources>

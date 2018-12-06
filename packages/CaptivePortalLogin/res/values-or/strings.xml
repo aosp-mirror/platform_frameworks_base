@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"ଆପଣ ଯୋଗ ଦେବାକୁ ଚେଷ୍ଟା କରୁଥିବା ନେଟ୍‌ୱର୍କର ସୁରକ୍ଷା ସମସ୍ୟା ଅଛି।"</string>
     <string name="ssl_error_example" msgid="647898534624078900">"ଉଦାହରଣସ୍ୱରୂପ, ଲଗଇନ୍‍ ପୃଷ୍ଠା ଦେଖାଯାଇଥିବା ସଂସ୍ଥାର ନହୋଇଥାଇପାରେ।"</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"ବ୍ରାଉଜର୍‍ ଜରିଆରେ ଯେମିତିବି ହେଉ ଜାରି ରଖନ୍ତୁ"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"ଏହି ସାର୍ଟିଫିକେଟ୍‍ ଏକ ବିଶ୍ବସ୍ତ କର୍ତ୍ତୃପକ୍ଷଙ୍କ ଠାରୁ ନୁହେଁ।"</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"ସାଇଟ୍‍ର ନାମ ସାର୍ଟିଫିକେଟ୍‍‍‍‍ର ନାମ ସହ ମିଶୁ ନାହିଁ।"</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"ଏହି ସାର୍ଟିଫିକେଟ୍‍ ସମୟସୀମା ଶେଷ ହୋଇଛି।"</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"ଏହି ସାର୍ଟିଫିକେଟ୍‍ ବର୍ତ୍ତମାନ ପର୍ଯ୍ୟନ୍ତ ବୈଧ ନୁହେଁ।"</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"ଏହି ସାର୍ଟିଫିକେଟ୍‍‍‍‍‍ରେ ଏକ ଅବୈଧ ତାରିଖ ରହିଛି।"</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"ଏହି ସାର୍ଟିଫିକେଟ୍‍ ବୈଧ ନୁହେଁ।"</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"ଅଜଣା ସାର୍ଟିଫିକେଟ୍‍ ତ୍ରୁଟି।"</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"ସୁରକ୍ଷା ଚେତାବନୀ"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"ସାର୍ଟିଫିକେଟ୍‍ ଦେଖନ୍ତୁ"</string>
+    <string name="ok" msgid="2817931639040794018">"ଠିକ୍‍ ଅଛି"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"ଠିକଣା:"</string>
+    <string name="page_info" msgid="4416941086705172545">"ପୃଷ୍ଠା ସୂଚନା"</string>
 </resources>

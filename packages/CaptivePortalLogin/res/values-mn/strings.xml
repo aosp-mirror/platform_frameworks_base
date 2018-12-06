@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Таны нэгдэх гэж буй сүлжээ аюулгүй байдлын асуудалтай байна."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Жишээлбэл нэвтрэх хуудас нь харагдах байгууллагынх биш байж болзошгүй."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Ямартаа ч хөтчөөр үргэлжлүүлэх"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Энэ сертификатыг итгэмжлэгдсэн байгууллагаас олгоогүй байна."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Сайтын нэр сертификат дээрх нэртэй таарахгүй байна."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Энэ сертификатын хугацаа дууссан байна."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Энэ сертификат одоогоор хүчингүй байна."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Энэ сертификатын огноо хүчингүй байна."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Энэ сертификат хүчингүй байна."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Сертификатын үл мэдэгдэх алдаа гарлаа."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Аюулгүй байдлын анхааруулга"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Сертификатыг харах"</string>
+    <string name="ok" msgid="2817931639040794018">"ЗА"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Хаяг:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Хуудасны мэдээлэл"</string>
 </resources>

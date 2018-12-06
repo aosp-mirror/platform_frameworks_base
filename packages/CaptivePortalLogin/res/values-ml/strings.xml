@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"നിങ്ങൾ ചേരാൻ ശ്രമിക്കുന്ന നെറ്റ്‌വർക്കിൽ സുരക്ഷാ പ്രശ്‌നങ്ങളുണ്ടായിരിക്കാം."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"ഉദാഹരണത്തിന്, കാണിച്ചിരിക്കുന്ന ഓർഗനൈസേഷന്റേതായിരിക്കില്ല ലോഗിൻ പേജ്."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"എന്തായാലും ബ്രൗസർ വഴി തുടരുക"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"ഈ സർട്ടിഫിക്കറ്റ്, വിശ്വസനീയ അതോറിറ്റിയിൽ നിന്നുള്ളതല്ല."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"സൈറ്റിന്റെ പേര്, സർട്ടിഫിക്കറ്റിലുള്ള പേരുമായി പൊരുത്തപ്പെടുന്നില്ല."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"ഈ സർട്ടിഫിക്കറ്റ് കാലഹരണപ്പെട്ടു."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"ഈ സർട്ടിഫിക്കറ്റിന് ഇപ്പോഴും സാധുതയില്ല."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"ഈ സർട്ടിഫിക്കറ്റിൽ അസാധുവായ തീയതിയാണുള്ളത്."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"ഈ സർട്ടിഫിക്കറ്റ് അസാധുവാണ്."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"അജ്ഞാത സർട്ടിഫിക്കറ്റ് പിശക്."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"സുരക്ഷാ മുന്നറിയിപ്പ്"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"സർട്ടിഫിക്കറ്റ് കാണുക"</string>
+    <string name="ok" msgid="2817931639040794018">"ശരി"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"വിലാസം:"</string>
+    <string name="page_info" msgid="4416941086705172545">"പേജ് വിവരം"</string>
 </resources>
