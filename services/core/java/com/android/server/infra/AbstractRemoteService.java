@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.infra;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -33,6 +33,7 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.FgThread;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.infra;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
