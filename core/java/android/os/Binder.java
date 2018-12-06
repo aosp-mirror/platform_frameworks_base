@@ -919,6 +919,16 @@ public class Binder implements IBinder {
     // Entry point from android_util_Binder.cpp's onTransact
     private boolean execTransact(int code, long dataObj, long replyObj,
             int flags) {
+        final long origWorkSource = ThreadLocalWorkSource.setUid(Binder.getCallingUid());
+        try {
+            return execTransactInternal(code, dataObj, replyObj, flags);
+        } finally {
+            ThreadLocalWorkSource.restore(origWorkSource);
+        }
+    }
+
+    private boolean execTransactInternal(int code, long dataObj, long replyObj,
+            int flags) {
         // Make sure the observer won't change while processing a transaction.
         final BinderInternal.Observer observer = sObserver;
         final CallSession callSession =
@@ -932,7 +942,6 @@ public class Binder implements IBinder {
         // Log any exceptions as warnings, don't silently suppress them.
         // If the call was FLAG_ONEWAY then these exceptions disappear into the ether.
         final boolean tracingEnabled = Binder.isTracingEnabled();
-        final long origWorkSource = ThreadLocalWorkSource.setUid(Binder.getCallingUid());
         try {
             if (tracingEnabled) {
                 final String transactionName = getTransactionName(code);
@@ -959,7 +968,6 @@ public class Binder implements IBinder {
             }
             res = true;
         } finally {
-            ThreadLocalWorkSource.restore(origWorkSource);
             if (tracingEnabled) {
                 Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
             }
