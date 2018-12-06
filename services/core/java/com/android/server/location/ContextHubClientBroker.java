@@ -237,7 +237,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         Supplier<Intent> supplier =
                 () -> createIntent(ContextHubManager.EVENT_NANOAPP_MESSAGE, message.getNanoAppId())
                         .putExtra(ContextHubManager.EXTRA_MESSAGE, message);
-        sendPendingIntent(supplier);
+        sendPendingIntent(supplier, message.getNanoAppId());
     }
 
     /**
@@ -247,7 +247,8 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     /* package */ void onNanoAppLoaded(long nanoAppId) {
         invokeCallback(callback -> callback.onNanoAppLoaded(nanoAppId));
-        sendPendingIntent(() -> createIntent(ContextHubManager.EVENT_NANOAPP_LOADED, nanoAppId));
+        sendPendingIntent(
+                () -> createIntent(ContextHubManager.EVENT_NANOAPP_LOADED, nanoAppId), nanoAppId);
     }
 
     /**
@@ -257,7 +258,8 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     /* package */ void onNanoAppUnloaded(long nanoAppId) {
         invokeCallback(callback -> callback.onNanoAppUnloaded(nanoAppId));
-        sendPendingIntent(() -> createIntent(ContextHubManager.EVENT_NANOAPP_UNLOADED, nanoAppId));
+        sendPendingIntent(
+                () -> createIntent(ContextHubManager.EVENT_NANOAPP_UNLOADED, nanoAppId), nanoAppId);
     }
 
     /**
@@ -280,7 +282,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         Supplier<Intent> supplier =
                 () -> createIntent(ContextHubManager.EVENT_NANOAPP_ABORTED, nanoAppId)
                         .putExtra(ContextHubManager.EXTRA_NANOAPP_ABORT_CODE, abortCode);
-        sendPendingIntent(supplier);
+        sendPendingIntent(supplier, nanoAppId);
     }
 
     /**
@@ -360,18 +362,40 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     private synchronized void sendPendingIntent(Supplier<Intent> supplier) {
         if (mPendingIntentRequest.hasPendingIntent()) {
-            Intent intent = supplier.get();
-            try {
-                mPendingIntentRequest.getPendingIntent().send(
-                        mContext, 0 /* code */, intent, null /* onFinished */, null /* Handler */,
-                        Manifest.permission.LOCATION_HARDWARE /* requiredPermission */,
-                        null /* options */);
-            } catch (PendingIntent.CanceledException e) {
-                // The PendingIntent is no longer valid
-                Log.w(TAG, "PendingIntent has been canceled, unregistering from client"
-                        + " (host endpoint ID " + mHostEndPointId + ")");
-                close();
-            }
+            doSendPendingIntent(mPendingIntentRequest.getPendingIntent(), supplier.get());
+        }
+    }
+
+    /**
+     * Sends an intent to any existing PendingIntent
+     *
+     * @param supplier method to create the extra Intent
+     * @param nanoAppId the ID of the nanoapp which this event is for
+     */
+    private synchronized void sendPendingIntent(Supplier<Intent> supplier, long nanoAppId) {
+        if (mPendingIntentRequest.hasPendingIntent()
+                && mPendingIntentRequest.getNanoAppId() == nanoAppId) {
+            doSendPendingIntent(mPendingIntentRequest.getPendingIntent(), supplier.get());
+        }
+    }
+
+    /**
+     * Sends a PendingIntent with extra Intent data
+     *
+     * @param pendingIntent the PendingIntent
+     * @param intent the extra Intent data
+     */
+    private void doSendPendingIntent(PendingIntent pendingIntent, Intent intent) {
+        try {
+            pendingIntent.send(
+                    mContext, 0 /* code */, intent, null /* onFinished */, null /* Handler */,
+                    Manifest.permission.LOCATION_HARDWARE /* requiredPermission */,
+                    null /* options */);
+        } catch (PendingIntent.CanceledException e) {
+            // The PendingIntent is no longer valid
+            Log.w(TAG, "PendingIntent has been canceled, unregistering from client"
+                    + " (host endpoint ID " + mHostEndPointId + ")");
+            close();
         }
     }
 
