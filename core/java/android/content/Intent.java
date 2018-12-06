@@ -5242,6 +5242,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Optional CharSequence extra to provide a search query.
+     * The format of this query is dependent on the receiving application.
      *
      * <p>Applicable to {@link Intent} with actions:
      * <ul>
