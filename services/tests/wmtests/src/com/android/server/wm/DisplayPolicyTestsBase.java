@@ -79,6 +79,7 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
         resources.addOverride(R.dimen.navigation_bar_width, NAV_BAR_HEIGHT);
         when(mDisplayPolicy.getSystemUiContext()).thenReturn(context);
         when(mDisplayPolicy.hasNavigationBar()).thenReturn(true);
+        when(mDisplayPolicy.hasStatusBar()).thenReturn(true);
 
         final int shortSizeDp =
                 Math.min(DISPLAY_WIDTH, DISPLAY_HEIGHT) * DENSITY_DEFAULT / DISPLAY_DENSITY;
