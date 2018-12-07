@@ -762,7 +762,13 @@ public class NotificationManagerService extends SystemService {
                         .setType(MetricsEvent.TYPE_ACTION)
                         .setSubtype(actionIndex)
                         .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, nv.rank)
-                        .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, nv.count));
+                        .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, nv.count)
+                        .addTaggedData(MetricsEvent.NOTIFICATION_ACTION_IS_SMART,
+                                (Notification.Action.SEMANTIC_ACTION_CONTEXTUAL_SUGGESTION
+                                        == action.getSemanticAction()) ? 1 : 0)
+                        .addTaggedData(
+                                MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
+                                generatedByAssistant ? 1 : 0));
                 EventLogTags.writeNotificationActionClicked(key, actionIndex,
                         r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now),
                         nv.rank, nv.count);
@@ -837,15 +843,20 @@ public class NotificationManagerService extends SystemService {
                         if (DBG) Slog.d(TAG, "Marking notification as visible " + nv.key);
                         reportSeen(r);
 
-                        // If the newly visible notification has smart replies
+                        // If the newly visible notification has smart suggestions
                         // then log that the user has seen them.
-                        if (r.getNumSmartRepliesAdded() > 0
+                        if ((r.getNumSmartRepliesAdded() > 0 || r.getNumSmartActionsAdded() > 0)
                                 && !r.hasSeenSmartReplies()) {
                             r.setSeenSmartReplies(true);
                             LogMaker logMaker = r.getLogMaker()
                                     .setCategory(MetricsEvent.SMART_REPLY_VISIBLE)
                                     .addTaggedData(MetricsEvent.NOTIFICATION_SMART_REPLY_COUNT,
-                                            r.getNumSmartRepliesAdded());
+                                            r.getNumSmartRepliesAdded())
+                                    .addTaggedData(MetricsEvent.NOTIFICATION_SMART_ACTION_COUNT,
+                                            r.getNumSmartActionsAdded())
+                                    .addTaggedData(
+                                            MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
+                                            r.getSuggestionsGeneratedByAssistant());
                             mMetricsLogger.write(logMaker);
                         }
                     }
@@ -908,11 +919,14 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onNotificationSmartRepliesAdded(String key, int replyCount) {
+        public void onNotificationSmartSuggestionsAdded(String key, int smartReplyCount,
+                int smartActionCount, boolean generatedByAssistant) {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
-                    r.setNumSmartRepliesAdded(replyCount);
+                    r.setNumSmartRepliesAdded(smartReplyCount);
+                    r.setNumSmartActionsAdded(smartActionCount);
+                    r.setSuggestionsGeneratedByAssistant(generatedByAssistant);
                 }
             }
         }
@@ -920,6 +934,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onNotificationSmartReplySent(String key, int replyIndex, CharSequence reply,
                 boolean generatedByAssistant) {
+
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
