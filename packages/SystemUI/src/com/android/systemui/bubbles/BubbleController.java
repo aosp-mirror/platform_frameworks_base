@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationData;
@@ -72,7 +73,8 @@ public class BubbleController {
     private Point mDisplaySize;
 
     // Bubbles get added to the status bar view
-    private StatusBarWindowController mStatusBarWindowController;
+    @VisibleForTesting
+    protected StatusBarWindowController mStatusBarWindowController;
 
     // Used for determining view rect for touch interaction
     private Rect mTempRect = new Rect();
@@ -300,6 +302,11 @@ public class BubbleController {
         }
         mStackView.getBoundsOnScreen(mTempRect);
         return mTempRect;
+    }
+
+    @VisibleForTesting
+    public BubbleStackView getStackView() {
+        return mStackView;
     }
 
     // TODO: factor in PIP location / maybe last place user had it
