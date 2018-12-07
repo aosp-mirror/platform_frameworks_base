@@ -1,0 +1,7 @@
+{
+  "presubmit": [
+    {
+      "name": "view-inspector-annotation-processor-test"
+    }
+  ]
+}
