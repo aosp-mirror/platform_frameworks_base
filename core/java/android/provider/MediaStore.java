@@ -70,6 +70,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * The Media provider contains meta data for all available media on both internal
@@ -1046,6 +1047,20 @@ public final class MediaStore {
                 getContentUri("external");
 
         /**
+         * The MIME type for this table.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/download";
+
+        /**
+         * Regex that matches paths that needs to be considered part of downloads collection.
+         * @hide
+         */
+        public static final Pattern PATTERN_DOWNLOADS_FILE = Pattern.compile(
+                "(?i)^/storage/[^/]+/(?:[0-9]+/)?(?:Android/sandbox/[^/]+/)?Download/.+");
+        private static final Pattern PATTERN_DOWNLOADS_DIRECTORY = Pattern.compile(
+                "(?i)^/storage/[^/]+/(?:[0-9]+/)?(?:Android/sandbox/[^/]+/)?Download/?");
+
+        /**
          * Get the content:// style URI for the downloads table on the
          * given volume.
          *
@@ -1060,6 +1075,16 @@ public final class MediaStore {
         /** @hide */
         public static Uri getContentUriForPath(@NonNull String path) {
             return getContentUri(getVolumeNameForPath(path));
+        }
+
+        /** @hide */
+        public static boolean isDownload(@NonNull String path) {
+            return PATTERN_DOWNLOADS_FILE.matcher(path).matches();
+        }
+
+        /** @hide */
+        public static boolean isDownloadDir(@NonNull String path) {
+            return PATTERN_DOWNLOADS_DIRECTORY.matcher(path).matches();
         }
     }
 
