@@ -34,15 +34,18 @@ public abstract class EnrollClient extends ClientMonitor {
     private static final int ENROLLMENT_TIMEOUT_MS = 60 * 1000; // 1 minute
     private final byte[] mCryptoToken;
     private final BiometricUtils mBiometricUtils;
+    private final int[] mDisabledFeatures;
 
     public EnrollClient(Context context, Metrics metrics,
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricServiceBase.ServiceListener listener, int userId, int groupId,
-            byte[] cryptoToken, boolean restricted, String owner, BiometricUtils utils) {
+            byte[] cryptoToken, boolean restricted, String owner, BiometricUtils utils,
+            final int[] disabledFeatures) {
         super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */);
         mBiometricUtils = utils;
         mCryptoToken = Arrays.copyOf(cryptoToken, cryptoToken.length);
+        mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
     }
 
     @Override
@@ -74,7 +77,13 @@ public abstract class EnrollClient extends ClientMonitor {
     public int start() {
         final int timeout = (int) (ENROLLMENT_TIMEOUT_MS / MS_PER_SEC);
         try {
-            final int result = getDaemonWrapper().enroll(mCryptoToken, getGroupId(), timeout);
+            final ArrayList<Integer> disabledFeatures = new ArrayList<>();
+            for (int i = 0; i < mDisabledFeatures.length; i++) {
+                disabledFeatures.add(mDisabledFeatures[i]);
+            }
+
+            final int result = getDaemonWrapper().enroll(mCryptoToken, getGroupId(), timeout,
+                    disabledFeatures);
             if (result != 0) {
                 Slog.w(getLogTag(), "startEnroll failed, result=" + result);
                 mMetricsLogger.histogram(mMetrics.tagEnrollStartError(), result);

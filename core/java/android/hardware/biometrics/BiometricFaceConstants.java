@@ -28,6 +28,21 @@ import android.hardware.face.FaceManager;
  */
 public interface BiometricFaceConstants {
     //
+    // Accessibility constants
+    //
+    /**
+     * Require the user to look at the device during enrollment and
+     * authentication. Note this is to accommodate people who have limited
+     * vision.
+     */
+    public static final int FEATURE_REQUIRE_ATTENTION = 1;
+    /**
+     * Require a diverse set of poses during enrollment. Note this is to
+     * accommodate people with limited mobility.
+     */
+    public static final int FEATURE_REQUIRE_REQUIRE_DIVERSITY = 2;
+
+    //
     // Error messages from face authentication hardware during initialization, enrollment,
     // authentication or removal. Must agree with the list in HAL h file
     //
