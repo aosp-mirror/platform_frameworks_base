@@ -1199,8 +1199,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         void setProfileProc(ProcessRecord profileProc) {
             mProfileProc = profileProc;
             if (mAtmInternal != null) {
-                mAtmInternal.setProfileProc(
-                        profileProc.getWindowProcessController());
+                mAtmInternal.setProfileProc(profileProc == null ? null
+                        : profileProc.getWindowProcessController());
             }
         }
 
