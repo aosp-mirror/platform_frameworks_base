@@ -62,7 +62,6 @@ public class RoleUserState {
     private static final String ROLES_FILE_NAME = "roles.xml";
 
     private static final long WRITE_DELAY_MILLIS = 200;
-    private static final long MAX_WRITE_DELAY_MILLIS = 2000;
 
     private static final String TAG_ROLES = "roles";
     private static final String TAG_ROLE = "role";
@@ -92,7 +91,7 @@ public class RoleUserState {
     private ArrayMap<String, ArraySet<String>> mRoles = new ArrayMap<>();
 
     @GuardedBy("mLock")
-    private long mWritePendingSinceMillis;
+    private boolean mWriteScheduled;
 
     @GuardedBy("mLock")
     private boolean mDestroyed;
@@ -292,26 +291,11 @@ public class RoleUserState {
     private void scheduleWriteFileLocked() {
         throwIfDestroyedLocked();
 
-        long currentTimeMillis = System.currentTimeMillis();
-        long writeDelayMillis;
-        if (!mWriteHandler.hasMessagesOrCallbacks()) {
-            mWritePendingSinceMillis = currentTimeMillis;
-            writeDelayMillis = WRITE_DELAY_MILLIS;
-        } else {
-            mWriteHandler.removeCallbacksAndMessages(null);
-            long writePendingDurationMillis = currentTimeMillis - mWritePendingSinceMillis;
-            if (writePendingDurationMillis >= MAX_WRITE_DELAY_MILLIS) {
-                writeDelayMillis = 0;
-            } else {
-                long maxWriteDelayMillis = Math.max(MAX_WRITE_DELAY_MILLIS
-                        - writePendingDurationMillis, 0);
-                writeDelayMillis = Math.min(WRITE_DELAY_MILLIS, maxWriteDelayMillis);
-            }
+        if (!mWriteScheduled) {
+            mWriteHandler.sendMessageDelayed(PooledLambda.obtainMessage(RoleUserState::writeFile,
+                    this), WRITE_DELAY_MILLIS);
+            mWriteScheduled = true;
         }
-
-        mWriteHandler.sendMessageDelayed(PooledLambda.obtainMessage(RoleUserState::writeFile, this),
-                writeDelayMillis);
-        Slog.i(LOG_TAG, "Scheduled writing roles.xml");
     }
 
     @WorkerThread
@@ -323,6 +307,8 @@ public class RoleUserState {
             if (mDestroyed) {
                 return;
             }
+
+            mWriteScheduled = false;
 
             version = mVersion;
             packagesHash = mPackagesHash;
