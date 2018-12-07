@@ -835,6 +835,7 @@ public class TelephonyManager {
      * @see TelephonyManager#NETWORK_TYPE_LTE
      * @see TelephonyManager#NETWORK_TYPE_EHRPD
      * @see TelephonyManager#NETWORK_TYPE_HSPAP
+     * @see TelephonyManager#NETWORK_TYPE_NR
      *
      * <p class="note">
      * Retrieve with
@@ -2306,6 +2307,7 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_LTE
      * @see #NETWORK_TYPE_EHRPD
      * @see #NETWORK_TYPE_HSPAP
+     * @see #NETWORK_TYPE_NR
      *
      * @hide
      */
@@ -2357,6 +2359,7 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_LTE
      * @see #NETWORK_TYPE_EHRPD
      * @see #NETWORK_TYPE_HSPAP
+     * @see #NETWORK_TYPE_NR
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
@@ -2543,6 +2546,8 @@ public class TelephonyManager {
                 return "IWLAN";
             case NETWORK_TYPE_LTE_CA:
                 return "LTE_CA";
+            case NETWORK_TYPE_NR:
+                return "NR";
             default:
                 return "UNKNOWN";
         }
