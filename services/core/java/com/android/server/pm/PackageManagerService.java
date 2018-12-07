@@ -8631,16 +8631,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (scanSystemPartition && isSystemPkgUpdated && !isSystemPkgBetter) {
             // The version of the application on the /system partition is less than or
-            // equal to the version on the /data partition. Even though the disabled system package
-            // is likely to be replaced by a version on the /data partition, we make assumptions
-            // that it's part of the mPackages collection during package manager initialization. So,
-            // add it to mPackages if there isn't already a package in the collection and then throw
-            // an exception to use the application already installed on the /data partition.
-            synchronized (mPackages) {
-                if (!mPackages.containsKey(pkg.packageName)) {
-                    mPackages.put(pkg.packageName, pkg);
-                }
-            }
+            // equal to the version on the /data partition. Throw an exception and use
+            // the application already installed on the /data partition.
             throw new PackageManagerException(Log.WARN, "Package " + pkg.packageName + " at "
                     + pkg.codePath + " ignored: updated version " + pkgSetting.versionCode
                     + " better than this " + pkg.getLongVersionCode());
