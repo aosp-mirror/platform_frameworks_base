@@ -1680,6 +1680,11 @@ public final class Settings {
      */
     public static final String CALL_METHOD_TAG_KEY = "_tag";
 
+    /**
+     * @hide - String argument extra to the fast-path call()-based requests
+     */
+    public static final String CALL_METHOD_PREFIX_KEY = "_prefix";
+
     /** @hide - Private call() method to write to 'system' table */
     public static final String CALL_METHOD_PUT_SYSTEM = "PUT_system";
 
@@ -1701,14 +1706,17 @@ public final class Settings {
     /** @hide - Private call() method to delete from the 'global' table */
     public static final String CALL_METHOD_DELETE_GLOBAL = "DELETE_global";
 
+    /** @hide - Private call() method to reset to defaults the 'configuration' table */
+    public static final String CALL_METHOD_DELETE_CONFIG = "DELETE_config";
+
+    /** @hide - Private call() method to reset to defaults the 'secure' table */
+    public static final String CALL_METHOD_RESET_SECURE = "RESET_secure";
+
     /** @hide - Private call() method to reset to defaults the 'global' table */
     public static final String CALL_METHOD_RESET_GLOBAL = "RESET_global";
 
     /** @hide - Private call() method to reset to defaults the 'configuration' table */
     public static final String CALL_METHOD_RESET_CONFIG = "RESET_config";
-
-    /** @hide - Private call() method to reset to defaults the 'secure' table */
-    public static final String CALL_METHOD_RESET_SECURE = "RESET_secure";
 
     /** @hide - Private call() method to query the 'system' table */
     public static final String CALL_METHOD_LIST_SYSTEM = "LIST_system";
@@ -1718,6 +1726,9 @@ public final class Settings {
 
     /** @hide - Private call() method to query the 'global' table */
     public static final String CALL_METHOD_LIST_GLOBAL = "LIST_global";
+
+    /** @hide - Private call() method to reset to defaults the 'configuration' table */
+    public static final String CALL_METHOD_LIST_CONFIG = "LIST_config";
 
     /**
      * Activity Extra: Limit available options in launched activity based on the given authority.
