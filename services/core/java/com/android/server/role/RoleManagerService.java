@@ -42,17 +42,23 @@ import android.util.ArraySet;
 import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.CollectionUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FunctionalUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -154,11 +160,11 @@ public class RoleManagerService extends SystemService {
             userState = getUserStateLocked(userId);
         }
         String packagesHash = computeComponentStateHash(userId);
-        String lastGrantPackagesHash;
+        String oldPackagesHash;
         synchronized (mLock) {
-            lastGrantPackagesHash = userState.getLastGrantPackagesHashLocked();
+            oldPackagesHash = userState.getPackagesHashLocked();
         }
-        boolean needGrant = !Objects.equals(packagesHash, lastGrantPackagesHash);
+        boolean needGrant = !Objects.equals(packagesHash, oldPackagesHash);
         if (needGrant) {
             // Some vital packages state has changed since last role grant
             // Run grants again
@@ -178,7 +184,7 @@ public class RoleManagerService extends SystemService {
             try {
                 result.get(5, TimeUnit.SECONDS);
                 synchronized (mLock) {
-                    userState.setLastGrantPackagesHashLocked(packagesHash);
+                    userState.setPackagesHashLocked(packagesHash);
                 }
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 Slog.e(LOG_TAG, "Failed to grant defaults for user " + userId, e);
@@ -246,7 +252,7 @@ public class RoleManagerService extends SystemService {
             mControllerServices.remove(userId);
             RoleUserState userState = mUserStates.removeReturnOld(userId);
             if (userState != null) {
-                userState.destroySyncLocked();
+                userState.destroyLocked();
             }
         }
     }
@@ -416,6 +422,37 @@ public class RoleManagerService extends SystemService {
                 @Nullable ShellCallback callback, @NonNull ResultReceiver resultReceiver) {
             new RoleManagerShellCommand(this).exec(this, in, out, err, args, callback,
                     resultReceiver);
+        }
+
+        @Override
+        protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter fout,
+                @Nullable String[] args) {
+            if (!DumpUtils.checkDumpPermission(getContext(), LOG_TAG, fout)) {
+                return;
+            }
+
+            boolean dumpAsProto = args != null && ArrayUtils.contains(args, "--proto");
+            DualDumpOutputStream dumpOutputStream;
+            if (dumpAsProto) {
+                dumpOutputStream = new DualDumpOutputStream(new ProtoOutputStream(fd));
+            } else {
+                fout.println("ROLE MANAGER STATE (dumpsys role):");
+                dumpOutputStream = new DualDumpOutputStream(new IndentingPrintWriter(fout, "  "));
+            }
+
+            synchronized (mLock) {
+                int[] userIds = mUserManagerInternal.getUserIds();
+                int userIdsLength = userIds.length;
+                for (int i = 0; i < userIdsLength; i++) {
+                    int userId = userIds[i];
+
+                    RoleUserState userState = getUserStateLocked(userId);
+                    userState.dumpLocked(dumpOutputStream, "user_states",
+                            RoleManagerServiceDumpProto.USER_STATES);
+                }
+            }
+
+            dumpOutputStream.flush();
         }
     }
 }
