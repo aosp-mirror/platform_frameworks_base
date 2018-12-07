@@ -3283,10 +3283,10 @@ public abstract class ContentResolver implements ContentInterface {
     }
 
     /** {@hide} */
-    public static Bitmap loadThumbnail(@NonNull ContentProviderClient client, @NonNull Uri uri,
+    public static Bitmap loadThumbnail(@NonNull ContentInterface content, @NonNull Uri uri,
             @NonNull Size size, @Nullable CancellationSignal signal, int allocator)
             throws IOException {
-        Objects.requireNonNull(client);
+        Objects.requireNonNull(content);
         Objects.requireNonNull(uri);
         Objects.requireNonNull(size);
 
@@ -3295,7 +3295,7 @@ public abstract class ContentResolver implements ContentInterface {
         opts.putParcelable(EXTRA_SIZE, Point.convert(size));
 
         return ImageDecoder.decodeBitmap(ImageDecoder.createSource(() -> {
-            return client.openTypedAssetFileDescriptor(uri, "image/*", opts, signal);
+            return content.openTypedAssetFile(uri, "image/*", opts, signal);
         }), (ImageDecoder decoder, ImageInfo info, Source source) -> {
             decoder.setAllocator(allocator);
 
