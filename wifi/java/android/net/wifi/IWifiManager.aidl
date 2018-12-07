@@ -25,6 +25,7 @@ import android.net.wifi.hotspot2.IProvisioningCallback;
 
 import android.net.DhcpInfo;
 import android.net.Network;
+import android.net.wifi.IDppCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ITrafficStateCallback;
@@ -199,5 +200,13 @@ interface IWifiManager
     String[] getFactoryMacAddresses();
 
     void setDeviceMobilityState(int state);
+
+    void startDppAsConfiguratorInitiator(in IBinder binder, in String enrolleeUri,
+        int selectedNetworkId, int netRole, in IDppCallback callback);
+
+    void startDppAsEnrolleeInitiator(in IBinder binder, in String configuratorUri,
+        in IDppCallback callback);
+
+    void stopDppSession();
 }
 
