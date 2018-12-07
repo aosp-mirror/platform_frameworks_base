@@ -36,12 +36,12 @@ public class ShadowActivityManager {
     }
 
     @Implementation
-    public static int getCurrentUser() {
+    protected static int getCurrentUser() {
         return sCurrentUserId;
     }
 
     @Implementation
-    public boolean switchUser(int userId) {
+    protected boolean switchUser(int userId) {
         mUserSwitchedTo = userId;
         return true;
     }
