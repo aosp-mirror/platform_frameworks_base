@@ -49,6 +49,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.NetworkStack;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -3501,6 +3502,15 @@ public abstract class Context {
      * @see android.net.ConnectivityManager
      */
     public static final String CONNECTIVITY_SERVICE = "connectivity";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link NetworkStack} for communicating with the network stack
+     * @hide
+     * @see #getSystemService(String)
+     * @see NetworkStack
+     */
+    public static final String NETWORK_STACK_SERVICE = "network_stack";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
