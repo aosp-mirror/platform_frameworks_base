@@ -635,6 +635,9 @@ message GlobalSettingsProto {
         // separated by commas.
         optional SettingProto snooze_options = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto smart_replies_in_notifications_flags = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Configuration options for smart replies and smart actions in notifications. This is
+        // encoded as a key=value list separated by commas.
+        optional SettingProto smart_suggestions_in_notifications_flags = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Notification notification = 82;
 
