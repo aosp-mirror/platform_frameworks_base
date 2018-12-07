@@ -399,6 +399,7 @@
 
     <protected-broadcast android:name="android.telecom.action.DEFAULT_DIALER_CHANGED" />
     <protected-broadcast android:name="android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED" />
+    <protected-broadcast android:name="android.provider.action.SMS_MMS_DB_CREATED" />
     <protected-broadcast android:name="android.intent.action.CONTENT_CHANGED" />
     <protected-broadcast android:name="android.provider.Telephony.MMS_DOWNLOADED" />
 
