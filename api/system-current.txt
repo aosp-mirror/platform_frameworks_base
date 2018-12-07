@@ -935,6 +935,7 @@ package android.app.usage {
   }
 
   public static final class UsageEvents.Event {
+    method public int getInstanceId();
     method public java.lang.String getNotificationChannelId();
     field public static final int NOTIFICATION_INTERRUPTION = 12; // 0xc
     field public static final int NOTIFICATION_SEEN = 10; // 0xa

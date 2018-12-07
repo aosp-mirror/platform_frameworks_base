@@ -16,10 +16,18 @@
 
 package com.android.server.usage;
 
+import static android.app.usage.UsageStatsManager.INTERVAL_BEST;
+import static android.app.usage.UsageStatsManager.INTERVAL_COUNT;
+import static android.app.usage.UsageStatsManager.INTERVAL_DAILY;
+import static android.app.usage.UsageStatsManager.INTERVAL_MONTHLY;
+import static android.app.usage.UsageStatsManager.INTERVAL_WEEKLY;
+import static android.app.usage.UsageStatsManager.INTERVAL_YEARLY;
+
 import android.app.usage.ConfigurationStats;
 import android.app.usage.EventList;
 import android.app.usage.EventStats;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -29,6 +37,7 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseIntArray;
 
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.usage.UsageStatsDatabase.StatCombiner;
@@ -65,7 +74,7 @@ class UserUsageStatsService {
     private final int mUserId;
 
     // STOPSHIP: Temporary member variable for debugging b/110930764.
-    private UsageEvents.Event mLastEvent;
+    private Event mLastEvent;
 
     private static final long[] INTERVAL_LENGTH = new long[] {
             UnixCalendar.DAY_IN_MILLIS, UnixCalendar.WEEK_IN_MILLIS,
@@ -87,7 +96,7 @@ class UserUsageStatsService {
         mContext = context;
         mDailyExpiryDate = new UnixCalendar(0);
         mDatabase = new UsageStatsDatabase(usageStatsDir);
-        mCurrentStats = new IntervalStats[UsageStatsManager.INTERVAL_COUNT];
+        mCurrentStats = new IntervalStats[INTERVAL_COUNT];
         mListener = listener;
         mLogPrefix = "User[" + Integer.toString(userId) + "] ";
         mUserId = userId;
@@ -125,28 +134,6 @@ class UserUsageStatsService {
             updateRolloverDeadline();
         }
 
-        // Now close off any events that were open at the time this was saved.
-        for (IntervalStats stat : mCurrentStats) {
-            final int pkgCount = stat.packageStats.size();
-            for (int i = 0; i < pkgCount; i++) {
-                final UsageStats pkgStats = stat.packageStats.valueAt(i);
-                if (!pkgStats.mLastForegroundActivityEventMap.isEmpty()
-                        || !pkgStats.mLastForegroundServiceEventMap.isEmpty()) {
-                    if (!pkgStats.mLastForegroundActivityEventMap.isEmpty()) {
-                        stat.update(pkgStats.mPackageName, null, stat.lastTimeSaved,
-                                UsageEvents.Event.END_OF_DAY);
-                    }
-                    if (!pkgStats.mLastForegroundServiceEventMap.isEmpty()) {
-                        stat.update(pkgStats.mPackageName, null , stat.lastTimeSaved,
-                                UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE);
-                    }
-                    notifyStatsChanged();
-                }
-            }
-
-            stat.updateConfigurationStats(null, stat.lastTimeSaved);
-        }
-
         if (mDatabase.isNewUpdate()) {
             notifyNewUpdate();
         }
@@ -158,40 +145,46 @@ class UserUsageStatsService {
         loadActiveStats(newTime);
     }
 
-    void reportEvent(UsageEvents.Event event) {
+    void reportEvent(Event event) {
         if (DEBUG) {
             Slog.d(TAG, mLogPrefix + "Got usage event for " + event.mPackage
                     + "[" + event.mTimeStamp + "]: "
                     + eventToString(event.mEventType));
         }
 
-        mLastEvent = new UsageEvents.Event(event);
+        mLastEvent = new Event(event);
 
         if (event.mTimeStamp >= mDailyExpiryDate.getTimeInMillis()) {
             // Need to rollover
             rolloverStats(event.mTimeStamp);
         }
 
-        final IntervalStats currentDailyStats = mCurrentStats[UsageStatsManager.INTERVAL_DAILY];
+        final IntervalStats currentDailyStats = mCurrentStats[INTERVAL_DAILY];
 
         final Configuration newFullConfig = event.mConfiguration;
-        if (event.mEventType == UsageEvents.Event.CONFIGURATION_CHANGE &&
-                currentDailyStats.activeConfiguration != null) {
+        if (event.mEventType == Event.CONFIGURATION_CHANGE
+                && currentDailyStats.activeConfiguration != null) {
             // Make the event configuration a delta.
             event.mConfiguration = Configuration.generateDelta(
                     currentDailyStats.activeConfiguration, newFullConfig);
         }
 
-        if (event.mEventType != UsageEvents.Event.SYSTEM_INTERACTION) {
+        if (event.mEventType != Event.SYSTEM_INTERACTION
+                // ACTIVITY_DESTROYED is a private event. If there is preceding ACTIVITY_STOPPED
+                // ACTIVITY_DESTROYED will be dropped. Otherwise it will be converted to
+                // ACTIVITY_STOPPED.
+                && event.mEventType != Event.ACTIVITY_DESTROYED
+                // FLUSH_TO_DISK is a private event.
+                && event.mEventType != Event.FLUSH_TO_DISK) {
             currentDailyStats.addEvent(event);
         }
 
         boolean incrementAppLaunch = false;
-        if (event.mEventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+        if (event.mEventType == Event.ACTIVITY_RESUMED) {
             if (event.mPackage != null && !event.mPackage.equals(mLastBackgroundedPackage)) {
                 incrementAppLaunch = true;
             }
-        } else if (event.mEventType == UsageEvents.Event.MOVE_TO_BACKGROUND) {
+        } else if (event.mEventType == Event.ACTIVITY_PAUSED) {
             if (event.mPackage != null) {
                 mLastBackgroundedPackage = event.mPackage;
             }
@@ -199,10 +192,10 @@ class UserUsageStatsService {
 
         for (IntervalStats stats : mCurrentStats) {
             switch (event.mEventType) {
-                case UsageEvents.Event.CONFIGURATION_CHANGE: {
+                case Event.CONFIGURATION_CHANGE: {
                     stats.updateConfigurationStats(newFullConfig, event.mTimeStamp);
                 } break;
-                case UsageEvents.Event.CHOOSER_ACTION: {
+                case Event.CHOOSER_ACTION: {
                     stats.updateChooserCounts(event.mPackage, event.mContentType, event.mAction);
                     String[] annotations = event.mContentAnnotations;
                     if (annotations != null) {
@@ -211,21 +204,21 @@ class UserUsageStatsService {
                         }
                     }
                 } break;
-                case UsageEvents.Event.SCREEN_INTERACTIVE: {
+                case Event.SCREEN_INTERACTIVE: {
                     stats.updateScreenInteractive(event.mTimeStamp);
                 } break;
-                case UsageEvents.Event.SCREEN_NON_INTERACTIVE: {
+                case Event.SCREEN_NON_INTERACTIVE: {
                     stats.updateScreenNonInteractive(event.mTimeStamp);
                 } break;
-                case UsageEvents.Event.KEYGUARD_SHOWN: {
+                case Event.KEYGUARD_SHOWN: {
                     stats.updateKeyguardShown(event.mTimeStamp);
                 } break;
-                case UsageEvents.Event.KEYGUARD_HIDDEN: {
+                case Event.KEYGUARD_HIDDEN: {
                     stats.updateKeyguardHidden(event.mTimeStamp);
                 } break;
                 default: {
                     stats.update(event.mPackage, event.getClassName(),
-                            event.mTimeStamp, event.mEventType);
+                            event.mTimeStamp, event.mEventType, event.mInstanceId);
                     if (incrementAppLaunch) {
                         stats.incrementAppLaunchCount(event.mPackage);
                     }
@@ -286,12 +279,12 @@ class UserUsageStatsService {
      */
     private <T> List<T> queryStats(int intervalType, final long beginTime, final long endTime,
             StatCombiner<T> combiner) {
-        if (intervalType == UsageStatsManager.INTERVAL_BEST) {
+        if (intervalType == INTERVAL_BEST) {
             intervalType = mDatabase.findBestFitBucket(beginTime, endTime);
             if (intervalType < 0) {
                 // Nothing saved to disk yet, so every stat is just as equal (no rollover has
                 // occurred.
-                intervalType = UsageStatsManager.INTERVAL_DAILY;
+                intervalType = INTERVAL_DAILY;
             }
         }
 
@@ -316,10 +309,10 @@ class UserUsageStatsService {
             }
 
             // STOPSHIP: Temporary logging for b/110930764.
-            if (intervalType == UsageStatsManager.INTERVAL_DAILY
+            if (intervalType == INTERVAL_DAILY
                     && mLastEvent != null && mLastEvent.mTimeStamp >= beginTime) {
                 final IntervalStats diskStats = mDatabase.getLatestUsageStats(
-                        UsageStatsManager.INTERVAL_DAILY);
+                        INTERVAL_DAILY);
                 StringBuilder sb = new StringBuilder(256);
                 sb.append("Last 24 hours of UsageStats missing! timeRange : ");
                 sb.append(beginTime);
@@ -395,11 +388,11 @@ class UserUsageStatsService {
     UsageEvents queryEvents(final long beginTime, final long endTime,
             boolean obfuscateInstantApps) {
         final ArraySet<String> names = new ArraySet<>();
-        List<UsageEvents.Event> results = queryStats(UsageStatsManager.INTERVAL_DAILY,
-                beginTime, endTime, new StatCombiner<UsageEvents.Event>() {
+        List<Event> results = queryStats(INTERVAL_DAILY,
+                beginTime, endTime, new StatCombiner<Event>() {
                     @Override
                     public void combine(IntervalStats stats, boolean mutable,
-                            List<UsageEvents.Event> accumulatedResult) {
+                            List<Event> accumulatedResult) {
                         if (stats.events == null) {
                             return;
                         }
@@ -411,11 +404,13 @@ class UserUsageStatsService {
                                 return;
                             }
 
-                            UsageEvents.Event event = stats.events.get(i);
+                            Event event = stats.events.get(i);
                             if (obfuscateInstantApps) {
                                 event = event.getObfuscatedIfInstantApp();
                             }
-                            names.add(event.mPackage);
+                            if (event.mPackage != null) {
+                                names.add(event.mPackage);
+                            }
                             if (event.mClass != null) {
                                 names.add(event.mClass);
                             }
@@ -437,7 +432,7 @@ class UserUsageStatsService {
             final String packageName) {
         final ArraySet<String> names = new ArraySet<>();
         names.add(packageName);
-        final List<UsageEvents.Event> results = queryStats(UsageStatsManager.INTERVAL_DAILY,
+        final List<Event> results = queryStats(INTERVAL_DAILY,
                 beginTime, endTime, (stats, mutable, accumulatedResult) -> {
                     if (stats.events == null) {
                         return;
@@ -450,7 +445,7 @@ class UserUsageStatsService {
                             return;
                         }
 
-                        final UsageEvents.Event event = stats.events.get(i);
+                        final Event event = stats.events.get(i);
                         if (!packageName.equals(event.mPackage)) {
                             continue;
                         }
@@ -492,33 +487,33 @@ class UserUsageStatsService {
         // Make a note of which components need a new CONTINUE_PREVIOUS_DAY or
         // CONTINUING_FOREGROUND_SERVICE entry.
         final Configuration previousConfig =
-                mCurrentStats[UsageStatsManager.INTERVAL_DAILY].activeConfiguration;
-        ArraySet<String> continuePreviousDay = new ArraySet<>();
-        ArrayMap<String, ArrayMap<String, Integer>> continuePreviousDayForegroundActivity =
+                mCurrentStats[INTERVAL_DAILY].activeConfiguration;
+        ArraySet<String> continuePkgs = new ArraySet<>();
+        ArrayMap<String, SparseIntArray> continueActivity =
                 new ArrayMap<>();
-        ArrayMap<String, ArrayMap<String, Integer>> continuePreviousDayForegroundService =
+        ArrayMap<String, ArrayMap<String, Integer>> continueForegroundService =
                 new ArrayMap<>();
         for (IntervalStats stat : mCurrentStats) {
             final int pkgCount = stat.packageStats.size();
             for (int i = 0; i < pkgCount; i++) {
                 final UsageStats pkgStats = stat.packageStats.valueAt(i);
-                if (!pkgStats.mLastForegroundActivityEventMap.isEmpty()
-                        || !pkgStats.mLastForegroundServiceEventMap.isEmpty()) {
-                    if (!pkgStats.mLastForegroundActivityEventMap.isEmpty()) {
-                        continuePreviousDayForegroundActivity.put(pkgStats.mPackageName,
-                                pkgStats.mLastForegroundActivityEventMap);
+                if (pkgStats.mActivities.size() > 0
+                        || !pkgStats.mForegroundServices.isEmpty()) {
+                    if (pkgStats.mActivities.size() > 0) {
+                        continueActivity.put(pkgStats.mPackageName,
+                                pkgStats.mActivities);
                         stat.update(pkgStats.mPackageName, null,
                                 mDailyExpiryDate.getTimeInMillis() - 1,
-                                UsageEvents.Event.END_OF_DAY);
+                                Event.END_OF_DAY, 0);
                     }
-                    if (!pkgStats.mLastForegroundServiceEventMap.isEmpty()) {
-                        continuePreviousDayForegroundService.put(pkgStats.mPackageName,
-                                pkgStats.mLastForegroundServiceEventMap);
+                    if (!pkgStats.mForegroundServices.isEmpty()) {
+                        continueForegroundService.put(pkgStats.mPackageName,
+                                pkgStats.mForegroundServices);
                         stat.update(pkgStats.mPackageName, null,
                                 mDailyExpiryDate.getTimeInMillis() - 1,
-                                UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE);
+                                Event.ROLLOVER_FOREGROUND_SERVICE, 0);
                     }
-                    continuePreviousDay.add(pkgStats.mPackageName);
+                    continuePkgs.add(pkgStats.mPackageName);
                     notifyStatsChanged();
                 }
             }
@@ -532,27 +527,27 @@ class UserUsageStatsService {
         mDatabase.prune(currentTimeMillis);
         loadActiveStats(currentTimeMillis);
 
-        final int continueCount = continuePreviousDay.size();
+        final int continueCount = continuePkgs.size();
         for (int i = 0; i < continueCount; i++) {
-            String pkgName = continuePreviousDay.valueAt(i);
-            final long beginTime = mCurrentStats[UsageStatsManager.INTERVAL_DAILY].beginTime;
+            String pkgName = continuePkgs.valueAt(i);
+            final long beginTime = mCurrentStats[INTERVAL_DAILY].beginTime;
             for (IntervalStats stat : mCurrentStats) {
-                if (continuePreviousDayForegroundActivity.containsKey(pkgName)) {
-                    final ArrayMap<String, Integer> foregroundActivityEventMap =
-                            continuePreviousDayForegroundActivity.get(pkgName);
-                    final int size = foregroundActivityEventMap.size();
+                if (continueActivity.containsKey(pkgName)) {
+                    final SparseIntArray eventMap =
+                            continueActivity.get(pkgName);
+                    final int size = eventMap.size();
                     for (int j = 0; j < size; j++) {
-                        stat.update(pkgName, foregroundActivityEventMap.keyAt(j), beginTime,
-                                UsageEvents.Event.CONTINUE_PREVIOUS_DAY);
+                        stat.update(pkgName, null, beginTime,
+                                eventMap.valueAt(j), eventMap.keyAt(j));
                     }
                 }
-                if (continuePreviousDayForegroundService.containsKey(pkgName)) {
-                    final ArrayMap<String, Integer> foregroundServiceEventMap =
-                            continuePreviousDayForegroundService.get(pkgName);
-                    final int size = foregroundServiceEventMap.size();
+                if (continueForegroundService.containsKey(pkgName)) {
+                    final ArrayMap<String, Integer> eventMap =
+                            continueForegroundService.get(pkgName);
+                    final int size = eventMap.size();
                     for (int j = 0; j < size; j++) {
-                        stat.update(pkgName, foregroundServiceEventMap.keyAt(j), beginTime,
-                                UsageEvents.Event.CONTINUING_FOREGROUND_SERVICE);
+                        stat.update(pkgName, eventMap.keyAt(j), beginTime,
+                                eventMap.valueAt(j), 0);
                     }
                 }
                 stat.updateConfigurationStats(previousConfig, beginTime);
@@ -611,7 +606,7 @@ class UserUsageStatsService {
 
     private void updateRolloverDeadline() {
         mDailyExpiryDate.setTimeInMillis(
-                mCurrentStats[UsageStatsManager.INTERVAL_DAILY].beginTime);
+                mCurrentStats[INTERVAL_DAILY].beginTime);
         mDailyExpiryDate.addDays(1);
         Slog.i(TAG, mLogPrefix + "Rollover scheduled @ " +
                 sDateFormat.format(mDailyExpiryDate.getTimeInMillis()) + "(" +
@@ -660,7 +655,7 @@ class UserUsageStatsService {
     }
 
 
-    void printEvent(IndentingPrintWriter pw, UsageEvents.Event event, boolean prettyDates) {
+    void printEvent(IndentingPrintWriter pw, Event event, boolean prettyDates) {
         pw.printPair("time", formatDateTime(event.mTimeStamp, prettyDates));
         pw.printPair("type", eventToString(event.mEventType));
         pw.printPair("package", event.mPackage);
@@ -673,10 +668,15 @@ class UserUsageStatsService {
         if (event.mShortcutId != null) {
             pw.printPair("shortcutId", event.mShortcutId);
         }
-        if (event.mEventType == UsageEvents.Event.STANDBY_BUCKET_CHANGED) {
+        if (event.mEventType == Event.STANDBY_BUCKET_CHANGED) {
             pw.printPair("standbyBucket", event.getStandbyBucket());
             pw.printPair("reason", UsageStatsManager.reasonToString(event.getStandbyReason()));
+        } else if (event.mEventType == Event.ACTIVITY_RESUMED
+                || event.mEventType == Event.ACTIVITY_PAUSED
+                || event.mEventType == Event.ACTIVITY_STOPPED) {
+            pw.printPair("instanceId", event.getInstanceId());
         }
+
         if (event.mNotificationChannelId != null) {
             pw.printPair("channelId", event.mNotificationChannelId);
         }
@@ -691,11 +691,11 @@ class UserUsageStatsService {
 
         final long beginTime = yesterday.getTimeInMillis();
 
-        List<UsageEvents.Event> events = queryStats(UsageStatsManager.INTERVAL_DAILY,
-                beginTime, endTime, new StatCombiner<UsageEvents.Event>() {
+        List<Event> events = queryStats(INTERVAL_DAILY,
+                beginTime, endTime, new StatCombiner<Event>() {
                     @Override
                     public void combine(IntervalStats stats, boolean mutable,
-                            List<UsageEvents.Event> accumulatedResult) {
+                            List<Event> accumulatedResult) {
                         if (stats.events == null) {
                             return;
                         }
@@ -707,7 +707,7 @@ class UserUsageStatsService {
                                 return;
                             }
 
-                            UsageEvents.Event event = stats.events.get(i);
+                            Event event = stats.events.get(i);
                             if (pkg != null && !pkg.equals(event.mPackage)) {
                                 continue;
                             }
@@ -727,7 +727,7 @@ class UserUsageStatsService {
         pw.println(")");
         if (events != null) {
             pw.increaseIndent();
-            for (UsageEvents.Event event : events) {
+            for (Event event : events) {
                 printEvent(pw, event, prettyDates);
             }
             pw.decreaseIndent();
@@ -772,9 +772,17 @@ class UserUsageStatsService {
                 continue;
             }
             pw.printPair("package", usageStats.mPackageName);
-            pw.printPair("totalTime",
+            pw.printPair("totalTimeUsed",
                     formatElapsedTime(usageStats.mTotalTimeInForeground, prettyDates));
-            pw.printPair("lastTime", formatDateTime(usageStats.mLastTimeUsed, prettyDates));
+            pw.printPair("lastTimeUsed", formatDateTime(usageStats.mLastTimeUsed, prettyDates));
+            pw.printPair("totalTimeVisible",
+                    formatElapsedTime(usageStats.mTotalTimeVisible, prettyDates));
+            pw.printPair("lastTimeVisible",
+                    formatDateTime(usageStats.mLastTimeVisible, prettyDates));
+            pw.printPair("totalTimeFS",
+                    formatElapsedTime(usageStats.mTotalTimeForegroundServiceUsed, prettyDates));
+            pw.printPair("lastTimeFS",
+                    formatDateTime(usageStats.mLastTimeForegroundServiceUsed, prettyDates));
             pw.printPair("appLaunchCount", usageStats.mAppLaunchCount);
             pw.println();
         }
@@ -845,7 +853,7 @@ class UserUsageStatsService {
             final EventList events = stats.events;
             final int eventCount = events != null ? events.size() : 0;
             for (int i = 0; i < eventCount; i++) {
-                final UsageEvents.Event event = events.get(i);
+                final Event event = events.get(i);
                 if (pkg != null && !pkg.equals(event.mPackage)) {
                     continue;
                 }
@@ -858,13 +866,13 @@ class UserUsageStatsService {
 
     private static String intervalToString(int interval) {
         switch (interval) {
-            case UsageStatsManager.INTERVAL_DAILY:
+            case INTERVAL_DAILY:
                 return "daily";
-            case UsageStatsManager.INTERVAL_WEEKLY:
+            case INTERVAL_WEEKLY:
                 return "weekly";
-            case UsageStatsManager.INTERVAL_MONTHLY:
+            case INTERVAL_MONTHLY:
                 return "monthly";
-            case UsageStatsManager.INTERVAL_YEARLY:
+            case INTERVAL_YEARLY:
                 return "yearly";
             default:
                 return "?";
@@ -873,47 +881,49 @@ class UserUsageStatsService {
 
     private static String eventToString(int eventType) {
         switch (eventType) {
-            case UsageEvents.Event.NONE:
+            case Event.NONE:
                 return "NONE";
-            case UsageEvents.Event.MOVE_TO_BACKGROUND:
-                return "MOVE_TO_BACKGROUND";
-            case UsageEvents.Event.MOVE_TO_FOREGROUND:
-                return "MOVE_TO_FOREGROUND";
-            case UsageEvents.Event.FOREGROUND_SERVICE_START:
+            case Event.ACTIVITY_PAUSED:
+                return "ACTIVITY_PAUSED";
+            case Event.ACTIVITY_RESUMED:
+                return "ACTIVITY_RESUMED";
+            case Event.FOREGROUND_SERVICE_START:
                 return "FOREGROUND_SERVICE_START";
-            case UsageEvents.Event.FOREGROUND_SERVICE_STOP:
+            case Event.FOREGROUND_SERVICE_STOP:
                 return "FOREGROUND_SERVICE_STOP";
-            case UsageEvents.Event.END_OF_DAY:
+            case Event.ACTIVITY_STOPPED:
+                return "ACTIVITY_STOPPED";
+            case Event.END_OF_DAY:
                 return "END_OF_DAY";
-            case UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE:
+            case Event.ROLLOVER_FOREGROUND_SERVICE:
                 return "ROLLOVER_FOREGROUND_SERVICE";
-            case UsageEvents.Event.CONTINUE_PREVIOUS_DAY:
+            case Event.CONTINUE_PREVIOUS_DAY:
                 return "CONTINUE_PREVIOUS_DAY";
-            case UsageEvents.Event.CONTINUING_FOREGROUND_SERVICE:
+            case Event.CONTINUING_FOREGROUND_SERVICE:
                 return "CONTINUING_FOREGROUND_SERVICE";
-            case UsageEvents.Event.CONFIGURATION_CHANGE:
+            case Event.CONFIGURATION_CHANGE:
                 return "CONFIGURATION_CHANGE";
-            case UsageEvents.Event.SYSTEM_INTERACTION:
+            case Event.SYSTEM_INTERACTION:
                 return "SYSTEM_INTERACTION";
-            case UsageEvents.Event.USER_INTERACTION:
+            case Event.USER_INTERACTION:
                 return "USER_INTERACTION";
-            case UsageEvents.Event.SHORTCUT_INVOCATION:
+            case Event.SHORTCUT_INVOCATION:
                 return "SHORTCUT_INVOCATION";
-            case UsageEvents.Event.CHOOSER_ACTION:
+            case Event.CHOOSER_ACTION:
                 return "CHOOSER_ACTION";
-            case UsageEvents.Event.NOTIFICATION_SEEN:
+            case Event.NOTIFICATION_SEEN:
                 return "NOTIFICATION_SEEN";
-            case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
+            case Event.STANDBY_BUCKET_CHANGED:
                 return "STANDBY_BUCKET_CHANGED";
-            case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
+            case Event.NOTIFICATION_INTERRUPTION:
                 return "NOTIFICATION_INTERRUPTION";
-            case UsageEvents.Event.SLICE_PINNED:
+            case Event.SLICE_PINNED:
                 return "SLICE_PINNED";
-            case UsageEvents.Event.SLICE_PINNED_PRIV:
+            case Event.SLICE_PINNED_PRIV:
                 return "SLICE_PINNED_PRIV";
-            case UsageEvents.Event.SCREEN_INTERACTIVE:
+            case Event.SCREEN_INTERACTIVE:
                 return "SCREEN_INTERACTIVE";
-            case UsageEvents.Event.SCREEN_NON_INTERACTIVE:
+            case Event.SCREEN_NON_INTERACTIVE:
                 return "SCREEN_NON_INTERACTIVE";
             case UsageEvents.Event.KEYGUARD_SHOWN:
                 return "KEYGUARD_SHOWN";

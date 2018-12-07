@@ -2040,9 +2040,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mStoppingActivities.remove(r);
 
         final ActivityStack stack = r.getActivityStack();
-        if (mRootActivityContainer.isTopDisplayFocusedStack(stack)) {
-            mService.updateUsageStats(r, true);
-        }
         if (stack.getDisplay().allResumedActivitiesComplete()) {
             mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
             // Make sure activity & window visibility should be identical

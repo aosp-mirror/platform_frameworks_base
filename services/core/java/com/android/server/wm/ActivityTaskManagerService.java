@@ -5234,10 +5234,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mH.post(mAmInternal::updateCpuStats);
     }
 
-    void updateUsageStats(ActivityRecord component, boolean resumed) {
-        final Message m = PooledLambda.obtainMessage(ActivityManagerInternal::updateUsageStats,
+    void updateBatteryStats(ActivityRecord component, boolean resumed) {
+        final Message m = PooledLambda.obtainMessage(ActivityManagerInternal::updateBatteryStats,
                 mAmInternal, component.mActivityComponent, component.app.mUid, component.mUserId,
                 resumed);
+        mH.sendMessage(m);
+    }
+
+    void updateActivityUsageStats(ActivityRecord activity, int event) {
+        final Message m = PooledLambda.obtainMessage(
+                ActivityManagerInternal::updateActivityUsageStats, mAmInternal,
+                activity.mActivityComponent, activity.mUserId, event, activity.appToken);
         mH.sendMessage(m);
     }
 

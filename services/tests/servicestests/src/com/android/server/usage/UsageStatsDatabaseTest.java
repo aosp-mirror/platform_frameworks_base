@@ -16,6 +16,8 @@
 
 package com.android.server.usage;
 
+import static android.app.usage.UsageEvents.Event.MAX_EVENT_TYPE;
+
 import static junit.framework.TestCase.fail;
 
 import static org.testng.Assert.assertEquals;
@@ -136,9 +138,11 @@ public class UsageStatsDatabaseTest {
                 event.mFlags |= Event.FLAG_IS_PACKAGE_INSTANT_APP;
             }
 
-            event.mClass = ".fake.class.name" + i % 11;
+            final int instanceId = i % 11;
+            event.mClass = ".fake.class.name" + instanceId;
             event.mTimeStamp = time;
-            event.mEventType = i % 19; //"random" event type
+            event.mEventType = i % (MAX_EVENT_TYPE + 1); //"random" event type
+            event.mInstanceId = instanceId;
 
             switch (event.mEventType) {
                 case Event.CONFIGURATION_CHANGE:
@@ -160,7 +164,8 @@ public class UsageStatsDatabaseTest {
             }
 
             mIntervalStats.events.insert(event);
-            mIntervalStats.update(event.mPackage, event.mClass, event.mTimeStamp, event.mEventType);
+            mIntervalStats.update(event.mPackage, event.mClass, event.mTimeStamp, event.mEventType,
+                    event.mInstanceId);
 
             time += timeProgression; // Arbitrary progression of time
         }
@@ -219,7 +224,9 @@ public class UsageStatsDatabaseTest {
         // mBeginTimeStamp is based on the enclosing IntervalStats, don't bother checking
         // mEndTimeStamp is based on the enclosing IntervalStats, don't bother checking
         assertEquals(us1.mLastTimeUsed, us2.mLastTimeUsed);
+        assertEquals(us1.mLastTimeVisible, us2.mLastTimeVisible);
         assertEquals(us1.mTotalTimeInForeground, us2.mTotalTimeInForeground);
+        assertEquals(us1.mTotalTimeVisible, us2.mTotalTimeVisible);
         assertEquals(us1.mLastTimeForegroundServiceUsed, us2.mLastTimeForegroundServiceUsed);
         assertEquals(us1.mTotalTimeForegroundServiceUsed, us2.mTotalTimeForegroundServiceUsed);
         // mLaunchCount not persisted, so skipped

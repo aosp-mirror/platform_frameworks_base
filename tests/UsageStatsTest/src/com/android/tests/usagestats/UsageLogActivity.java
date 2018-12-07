@@ -21,12 +21,13 @@ import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.collection.CircularArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import androidx.collection.CircularArray;
 
 public class UsageLogActivity extends ListActivity implements Runnable {
     private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 14;
@@ -155,10 +156,10 @@ public class UsageLogActivity extends ListActivity implements Runnable {
 
         private String eventToString(int eventType) {
             switch (eventType) {
-                case UsageEvents.Event.MOVE_TO_FOREGROUND:
+                case UsageEvents.Event.ACTIVITY_RESUMED:
                     return "Foreground";
 
-                case UsageEvents.Event.MOVE_TO_BACKGROUND:
+                case UsageEvents.Event.ACTIVITY_PAUSED:
                     return "Background";
 
                 case UsageEvents.Event.CONFIGURATION_CHANGE:
