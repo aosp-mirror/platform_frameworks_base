@@ -55,7 +55,7 @@ import android.util.SparseArray;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.intelligence.IntelligenceManagerInternal;
+import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -158,7 +158,7 @@ public class ClipboardService extends SystemService {
     private final IUserManager mUm;
     private final PackageManager mPm;
     private final AppOpsManager mAppOps;
-    private final IntelligenceManagerInternal mIm;
+    private final ContentCaptureManagerInternal mContentCaptureInternal;
     private final IBinder mPermissionOwner;
     private HostClipboardMonitor mHostClipboardMonitor = null;
     private Thread mHostMonitorThread = null;
@@ -178,7 +178,7 @@ public class ClipboardService extends SystemService {
         mPm = getContext().getPackageManager();
         mUm = (IUserManager) ServiceManager.getService(Context.USER_SERVICE);
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
-        mIm = LocalServices.getService(IntelligenceManagerInternal.class);
+        mContentCaptureInternal = LocalServices.getService(ContentCaptureManagerInternal.class);
         final IBinder permOwner = mUgmInternal.newUriPermissionOwner("clipboard");
         mPermissionOwner = permOwner;
         if (IS_EMULATOR) {
@@ -652,9 +652,10 @@ public class ClipboardService extends SystemService {
             case AppOpsManager.OP_READ_CLIPBOARD:
                 // Clipboard can only be read by applications with focus..
                 boolean allowed = mWm.isUidFocused(callingUid);
-                if (!allowed && mIm != null) {
+                if (!allowed && mContentCaptureInternal != null) {
                     // ...or the Intelligence Service
-                    allowed = mIm.isIntelligenceServiceForUser(callingUid, userId);
+                    allowed = mContentCaptureInternal.isContentCaptureServiceForUser(callingUid,
+                            userId);
                 }
                 if (!allowed) {
                     Slog.e(TAG, "Denying clipboard access to " + callingPackage

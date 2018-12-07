@@ -948,7 +948,7 @@ public class UserManager {
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
-    public static final String DISALLOW_INTELLIGENCE_CAPTURE = "no_intelligence_capture";
+    public static final String DISALLOW_CONTENT_CAPTURE = "no_content_capture";
 
     /**
      * Specifies if user switching is blocked on the current user.

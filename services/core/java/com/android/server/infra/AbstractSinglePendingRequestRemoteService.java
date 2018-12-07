@@ -73,7 +73,8 @@ public abstract class AbstractSinglePendingRequestRemoteService<
     void handlePendingRequestWhileUnBound(@NonNull PendingRequest<S> pendingRequest) {
         if (mPendingRequest != null) {
             if (mVerbose) {
-                Slog.v(mTag, "handlePendingRequestWhileUnBound(): cancelling " + mPendingRequest);
+                Slog.v(mTag, "handlePendingRequestWhileUnBound(): cancelling " + mPendingRequest
+                        + " to handle " + pendingRequest);
             }
             mPendingRequest.cancel();
         }

@@ -239,8 +239,8 @@ public final class SystemServer {
             "com.android.server.wallpaper.WallpaperManagerService$Lifecycle";
     private static final String AUTO_FILL_MANAGER_SERVICE_CLASS =
             "com.android.server.autofill.AutofillManagerService";
-    private static final String INTELLIGENCE_MANAGER_SERVICE_CLASS =
-            "com.android.server.intelligence.IntelligenceManagerService";
+    private static final String CONTENT_CAPTURE_MANAGER_SERVICE_CLASS =
+            "com.android.server.contentcapture.ContentCaptureManagerService";
     private static final String TIME_ZONE_RULES_MANAGER_SERVICE_CLASS =
             "com.android.server.timezone.RulesManagerService$Lifecycle";
     private static final String IOT_SERVICE_CLASS =
@@ -1136,7 +1136,7 @@ public final class SystemServer {
                 traceEnd();
             }
 
-            startIntelligenceService(context);
+            startContentCaptureService(context);
 
             // NOTE: ClipboardService indirectly depends on IntelligenceService
             traceBeginAndSlog("StartClipboardService");
@@ -2100,18 +2100,18 @@ public final class SystemServer {
         }, BOOT_TIMINGS_TRACE_LOG);
     }
 
-    private void startIntelligenceService(@NonNull Context context) {
+    private void startContentCaptureService(@NonNull Context context) {
 
         // First check if it was explicitly enabled by Settings
         boolean explicitlySupported = false;
         final String settings = Settings.Global.getString(context.getContentResolver(),
-                Settings.Global.SMART_SUGGESTIONS_SERVICE_EXPLICITLY_ENABLED);
+                Settings.Global.CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED);
         if (settings != null) {
             explicitlySupported = Boolean.parseBoolean(settings);
             if (explicitlySupported) {
-                Slog.d(TAG, "IntelligenceService explicitly enabled by Settings");
+                Slog.d(TAG, "ContentCaptureService explicitly enabled by Settings");
             } else {
-                Slog.d(TAG, "IntelligenceService explicitly disabled by Settings");
+                Slog.d(TAG, "ContentCaptureService explicitly disabled by Settings");
                 return;
             }
         }
@@ -2119,15 +2119,15 @@ public final class SystemServer {
         // Then check if OEM overlaid the resource that defines the service.
         if (!explicitlySupported) {
             final String serviceName = context
-                    .getString(com.android.internal.R.string.config_defaultSmartSuggestionsService);
+                    .getString(com.android.internal.R.string.config_defaultContentCaptureService);
             if (TextUtils.isEmpty(serviceName)) {
-                Slog.d(TAG, "IntelligenceService disabled because config resource is not overlaid");
+                Slog.d(TAG, "ContentCaptureService disabled because resource is not overlaid");
                 return;
             }
         }
 
-        traceBeginAndSlog("StartIntelligenceService");
-        mSystemServiceManager.startService(INTELLIGENCE_MANAGER_SERVICE_CLASS);
+        traceBeginAndSlog("StartContentCaptureService");
+        mSystemServiceManager.startService(CONTENT_CAPTURE_MANAGER_SERVICE_CLASS);
         traceEnd();
     }
 

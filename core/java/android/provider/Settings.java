@@ -12840,7 +12840,7 @@ public final class Settings {
 
         /**
          * Property used by {@code com.android.server.SystemServer} on start to decide whether
-         * the Smart Suggestions service should be created or not
+         * the Content Capture service should be created or not
          *
          * <p>By default it should *NOT* be set (in which case the decision is based on whether
          * the OEM provides an implementation for the service), but it can be overridden to:
@@ -12852,8 +12852,8 @@ public final class Settings {
          *
          * @hide
          */
-        public static final String SMART_SUGGESTIONS_SERVICE_EXPLICITLY_ENABLED =
-                "smart_suggestions_service_explicitly_enabled";
+        public static final String CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED =
+                "content_capture_service_explicitly_enabled";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

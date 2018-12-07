@@ -73,8 +73,11 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
 import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
 import com.android.server.autofill.AutofillManagerService.SmartSuggestionMode;
+import com.android.server.autofill.RemoteAugmentedAutofillService.RemoteAugmentedAutofillServiceCallbacks;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.infra.AbstractPerUserSystemService;
+import com.android.server.infra.AbstractRemoteService;
+import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 import com.android.server.infra.SecureSettingsServiceNameResolver;
 
 import java.io.PrintWriter;
@@ -152,6 +155,19 @@ final class AutofillManagerServiceImpl
     /** When was {@link PruneTask} last executed? */
     private long mLastPrune = 0;
 
+    /**
+     * Object used to set the name of the augmented autofill service.
+     */
+    @NonNull
+    final FrameworkResourcesServiceNameResolver mAugmentedAutofillResolver;
+
+    /**
+     * Reference to the {@link RemoteAugmentedAutofillService}, is set on demand.
+     */
+    @GuardedBy("mLock")
+    @Nullable
+    private RemoteAugmentedAutofillService mRemoteAugmentedAutofillService;
+
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock, LocalLog requestsHistory,
             LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
             AutofillCompatState autofillCompatState, boolean disabled) {
@@ -164,6 +180,12 @@ final class AutofillManagerServiceImpl
         mUi = ui;
         mFieldClassificationStrategy = new FieldClassificationStrategy(getContext(), userId);
         mAutofillCompatState = autofillCompatState;
+
+        mAugmentedAutofillResolver = new FrameworkResourcesServiceNameResolver(master.getContext(),
+                userId, lock, com.android.internal.R.string.config_defaultAugmentedAutofillService);
+        mAugmentedAutofillResolver.setOnTemporaryServiceNameChangedCallback(
+                () -> updateRemoteAugmentedAutofillService());
+
         updateLocked(disabled);
     }
 
@@ -851,6 +873,12 @@ final class AutofillManagerServiceImpl
         }
         pw.print(prefix); pw.print("Default component: "); pw.println(getContext()
                 .getString(R.string.config_defaultAutofillService));
+        pw.print(prefix); pw.print("mAugmentedAutofillNamer: ");
+        mAugmentedAutofillResolver.dumpShortLocked(pw); pw.println();
+        if (mRemoteAugmentedAutofillService != null) {
+            pw.print(prefix); pw.println("RemoteAugmentedAutofillService: ");
+            mRemoteAugmentedAutofillService.dump(prefix2, pw);
+        }
         pw.print(prefix); pw.print("Field classification enabled: ");
             pw.println(isFieldClassificationEnabledLocked());
         pw.print(prefix); pw.print("Compat pkgs: ");
@@ -990,6 +1018,52 @@ final class AutofillManagerServiceImpl
             return mInfo.getCompatibilityPackages();
         }
         return null;
+    }
+
+    @GuardedBy("mLock")
+    @Nullable RemoteAugmentedAutofillService getRemoteAugmentedAutofillServiceLocked() {
+        if (mRemoteAugmentedAutofillService == null) {
+            final String serviceName = mAugmentedAutofillResolver.getServiceNameLocked();
+            if (serviceName == null) {
+                if (mMaster.verbose) {
+                    Slog.v(TAG, "getRemoteAugmentedAutofillServiceLocked(): not set");
+                }
+                return null;
+            }
+            final ComponentName componentName = RemoteAugmentedAutofillService.getComponentName(
+                    getContext(), serviceName, mUserId,
+                    mAugmentedAutofillResolver.isTemporaryLocked());
+            if (componentName == null) return null;
+            if (sVerbose) {
+                Slog.v(TAG, "getRemoteAugmentedAutofillServiceLocked(): " + componentName);
+            }
+
+            mRemoteAugmentedAutofillService = new RemoteAugmentedAutofillService(getContext(),
+                    componentName, mUserId, new RemoteAugmentedAutofillServiceCallbacks() {
+                        @Override
+                        public void onServiceDied(
+                                AbstractRemoteService<? extends AbstractRemoteService<?>> service) {
+                            // TODO(b/111330312): properly implement
+                            Slog.w(TAG, "remote augmented autofill service died");
+                        }
+                    }, mMaster.isInstantServiceAllowed(), mMaster.verbose);
+        }
+
+        return mRemoteAugmentedAutofillService;
+    }
+
+    /**
+     * Called when the {@link #mAugmentedAutofillResolver} changed (among other places).
+     */
+    private void updateRemoteAugmentedAutofillService() {
+        final String serviceName = mAugmentedAutofillResolver.getServiceNameLocked();
+        if (serviceName == null) {
+            if (sVerbose) Slog.v(TAG, "updateRemoteAugmentedAutofillService(): time's up!");
+            if (mRemoteAugmentedAutofillService != null) {
+                mRemoteAugmentedAutofillService.destroy();
+                mRemoteAugmentedAutofillService = null;
+            }
+        }
     }
 
     private void sendStateToClients(boolean resetClient) {
