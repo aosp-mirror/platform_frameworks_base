@@ -1595,7 +1595,7 @@
          @hide This should only be used by ManagedProvisioning app.
     -->
     <permission android:name="android.permission.NETWORK_MANAGED_PROVISIONING"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature" />
 
     <!-- #SystemApi @hide Allows applications to access information about LoWPAN interfaces.
          <p>Not for use by third-party applications. -->
