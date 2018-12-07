@@ -54,6 +54,8 @@ import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.IThermalService;
+import android.os.IThermalStatusListener;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
@@ -62,6 +64,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.SystemClock;
+import android.os.Temperature;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
@@ -75,6 +78,7 @@ import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.ArrayUtils;
@@ -179,6 +183,11 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final StorageController mStorageController;
     /** Need directly for sending uid state changes */
     private final DeviceIdleJobsController mDeviceIdleJobsController;
+    /** Need directly for receiving thermal events */
+    private IThermalService mThermalService;
+    /** Thermal constraint. */
+    @GuardedBy("mLock")
+    private boolean mThermalConstraint = false;
 
     /**
      * Queue of pending jobs. The JobServiceContext class will receive jobs from this list
@@ -306,6 +315,19 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // Reset the heartbeat alarm based on the new heartbeat duration
                 setNextHeartbeatAlarm();
             }
+        }
+    }
+
+    /**
+     *  Thermal event received from Thermal Service
+     */
+    private final class ThermalStatusListener extends IThermalStatusListener.Stub {
+        @Override public void onStatusChange(int status) {
+            // Throttle for Temperature.THROTTLING_SEVERE and above
+            synchronized (mLock) {
+                mThermalConstraint = status >= Temperature.THROTTLING_SEVERE;
+            }
+            onControllerStateChanged();
         }
     }
 
@@ -1366,6 +1388,16 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
             // Remove any jobs that are not associated with any of the current users.
             cancelJobsForNonExistentUsers();
+            // Register thermal callback
+            mThermalService = IThermalService.Stub.asInterface(
+                    ServiceManager.getService(Context.THERMAL_SERVICE));
+            if (mThermalService != null) {
+                try {
+                    mThermalService.registerThermalStatusListener(new ThermalStatusListener());
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to register thermal callback.", e);
+                }
+            }
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             synchronized (mLock) {
                 // Let's go!
@@ -1789,14 +1821,26 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    private boolean isJobThermalConstrainedLocked(JobStatus job) {
+        return mThermalConstraint && job.hasConnectivityConstraint()
+                && (evaluateJobPriorityLocked(job) < JobInfo.PRIORITY_FOREGROUND_APP);
+    }
+
     private void stopNonReadyActiveJobsLocked() {
         for (int i=0; i<mActiveServices.size(); i++) {
             JobServiceContext serviceContext = mActiveServices.get(i);
             final JobStatus running = serviceContext.getRunningJobLocked();
-            if (running != null && !running.isReady()) {
+            if (running == null) {
+                continue;
+            }
+            if (!running.isReady()) {
                 serviceContext.cancelExecutingJobLocked(
                         JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED,
                         "cancelled due to unsatisfied constraints");
+            } else if (isJobThermalConstrainedLocked(running)) {
+                serviceContext.cancelExecutingJobLocked(
+                        JobParameters.REASON_DEVICE_THERMAL,
+                        "cancelled due to thermal condition");
             }
         }
     }
@@ -2081,6 +2125,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         // These are also fairly cheap to check, though they typically will not
         // be conditions we fail.
         if (!jobExists || !userStarted) {
+            return false;
+        }
+
+        if (isJobThermalConstrainedLocked(job)) {
             return false;
         }
 
@@ -3033,6 +3081,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.print("    In parole?: ");
             pw.print(mInParole);
             pw.println();
+            pw.print("    In thermal throttling?: ");
+            pw.print(mThermalConstraint);
+            pw.println();
             pw.println();
 
             pw.println("Started users: " + Arrays.toString(mStartedUsers));
@@ -3208,6 +3259,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             proto.write(JobSchedulerServiceDumpProto.NEXT_HEARTBEAT_TIME_MILLIS,
                     mLastHeartbeatTime + mConstants.STANDBY_HEARTBEAT_TIME - nowUptime);
             proto.write(JobSchedulerServiceDumpProto.IN_PAROLE, mInParole);
+            proto.write(JobSchedulerServiceDumpProto.IN_THERMAL, mThermalConstraint);
 
             for (int u : mStartedUsers) {
                 proto.write(JobSchedulerServiceDumpProto.STARTED_USERS, u);
