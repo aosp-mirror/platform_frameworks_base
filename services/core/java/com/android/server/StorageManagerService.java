@@ -99,6 +99,7 @@ import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.sysprop.VoldProperties;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -973,7 +974,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         // On an encrypted device we can't see system properties yet, so pull
         // the system locale out of the mount service.
-        if ("".equals(SystemProperties.get("vold.encrypt_progress"))) {
+        if ("".equals(VoldProperties.encrypt_progress().orElse(""))) {
             copyLocaleFromMountService();
         }
     }
