@@ -71,10 +71,10 @@ public final class PhoneNumberRange implements Parcelable {
     public PhoneNumberRange(@NonNull String countryCode, @NonNull String prefix,
             @NonNull String lowerBound, @NonNull String upperBound) {
         validateLowerAndUpperBounds(lowerBound, upperBound);
-        if (!Pattern.matches("[0-9]+", countryCode)) {
+        if (!Pattern.matches("[0-9]*", countryCode)) {
             throw new IllegalArgumentException("Country code must be all numeric");
         }
-        if (!Pattern.matches("[0-9]+", prefix)) {
+        if (!Pattern.matches("[0-9]*", prefix)) {
             throw new IllegalArgumentException("Prefix must be all numeric");
         }
         mCountryCode = countryCode;
@@ -133,10 +133,10 @@ public final class PhoneNumberRange implements Parcelable {
         if (lowerBound.length() != upperBound.length()) {
             throw new IllegalArgumentException("Lower and upper bounds must have the same length");
         }
-        if (!Pattern.matches("[0-9]+", lowerBound)) {
+        if (!Pattern.matches("[0-9]*", lowerBound)) {
             throw new IllegalArgumentException("Lower bound must be all numeric");
         }
-        if (!Pattern.matches("[0-9]+", upperBound)) {
+        if (!Pattern.matches("[0-9]*", upperBound)) {
             throw new IllegalArgumentException("Upper bound must be all numeric");
         }
         if (Integer.parseInt(lowerBound) > Integer.parseInt(upperBound)) {
