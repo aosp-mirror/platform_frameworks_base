@@ -190,4 +190,5 @@ interface IStorageManager {
     void abortIdleMaintenance() = 80;
     String translateAppToSystem(String path, int pid, int uid) = 81;
     String translateSystemToApp(String path, int pid, int uid) = 82;
+    void commitChanges() = 83;
 }
