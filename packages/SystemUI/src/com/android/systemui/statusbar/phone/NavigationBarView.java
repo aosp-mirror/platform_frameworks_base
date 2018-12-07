@@ -154,6 +154,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private QuickScrubAction mQuickScrubAction;
     private QuickStepAction mQuickStepAction;
     private NavigationBackAction mBackAction;
+    private QuickSwitchAction mQuickSwitchAction;
 
     /**
      * Helper that is responsible for showing the right toast when a disallowed activity operation
@@ -326,9 +327,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mQuickScrubAction = new QuickScrubAction(this, mOverviewProxyService);
         mQuickStepAction = new QuickStepAction(this, mOverviewProxyService);
         mBackAction = new NavigationBackAction(this, mOverviewProxyService);
+        mQuickSwitchAction = new QuickSwitchAction(this, mOverviewProxyService);
         mDefaultGestureMap = new NavigationGestureAction[] {
                 mQuickStepAction, null /* swipeDownAction*/, null /* swipeLeftAction */,
-                mQuickScrubAction
+                mQuickScrubAction, null /* swipeLeftEdgeAction */, null /* swipeRightEdgeAction */
         };
 
         mPrototypeController = new NavigationPrototypeController(mHandler, mContext);
@@ -359,7 +361,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                     getNavigationActionFromType(assignedMap[0], mDefaultGestureMap[0]),
                     getNavigationActionFromType(assignedMap[1], mDefaultGestureMap[1]),
                     getNavigationActionFromType(assignedMap[2], mDefaultGestureMap[2]),
-                    getNavigationActionFromType(assignedMap[3], mDefaultGestureMap[3]));
+                    getNavigationActionFromType(assignedMap[3], mDefaultGestureMap[3]),
+                    getNavigationActionFromType(assignedMap[4], mDefaultGestureMap[4]),
+                    getNavigationActionFromType(assignedMap[5], mDefaultGestureMap[5]));
         }
     }
 
@@ -372,6 +376,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 return mQuickScrubAction;
             case NavigationPrototypeController.ACTION_BACK:
                 return mBackAction;
+            case NavigationPrototypeController.ACTION_QUICKSWITCH:
+                return mQuickSwitchAction;
             default:
                 return defaultAction;
         }

@@ -18,8 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.Interpolators.ALPHA_IN;
 import static com.android.systemui.Interpolators.ALPHA_OUT;
-import static com.android.systemui.recents.OverviewProxyService.DEBUG_OVERVIEW_PROXY;
-import static com.android.systemui.recents.OverviewProxyService.TAG_OPS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -31,11 +29,8 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
-import android.graphics.Rect;
 import android.graphics.Shader;
-import android.os.RemoteException;
 import android.util.FloatProperty;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -46,7 +41,7 @@ import com.android.systemui.shared.recents.utilities.Utilities;
 /**
  * QuickScrub action to send to launcher to start quickscrub gesture
  */
-public class QuickScrubAction extends NavigationGestureAction {
+public class QuickScrubAction extends QuickSwitchAction {
     private static final String TAG = "QuickScrubAction";
 
     private static final float TRACK_SCALE = 0.95f;
@@ -65,7 +60,6 @@ public class QuickScrubAction extends NavigationGestureAction {
     private final int mTrackThickness;
     private final int mTrackEndPadding;
     private final Paint mTrackPaint = new Paint();
-    private final Rect mTrackRect = new Rect();
 
     private final FloatProperty<QuickScrubAction> mTrackAlphaProperty =
             new FloatProperty<QuickScrubAction>("TrackAlpha") {
@@ -177,7 +171,7 @@ public class QuickScrubAction extends NavigationGestureAction {
             x1 = mNavigationBarView.getPaddingStart() + mTrackEndPadding;
             x2 = x1 + width - 2 * mTrackEndPadding;
         }
-        mTrackRect.set(x1, y1, x2, y2);
+        mDragOverRect.set(x1, y1, x2, y2);
     }
 
     @Override
@@ -194,26 +188,22 @@ public class QuickScrubAction extends NavigationGestureAction {
         mTrackPaint.setAlpha(Math.round(255f * mTrackAlpha));
 
         // Scale the track, but apply the inverse scale from the nav bar
-        final float radius = mTrackRect.height() / 2;
+        final float radius = mDragOverRect.height() / 2;
         canvas.save();
-        float translate = Utilities.clamp(mHighlightCenter, mTrackRect.left, mTrackRect.right);
+        float translate = Utilities.clamp(mHighlightCenter, mDragOverRect.left,
+                mDragOverRect.right);
         canvas.translate(translate, 0);
         canvas.scale(mTrackScale / mNavigationBarView.getScaleX(),
                 1f / mNavigationBarView.getScaleY(),
-                mTrackRect.centerX(), mTrackRect.centerY());
-        canvas.drawRoundRect(mTrackRect.left - translate, mTrackRect.top,
-                mTrackRect.right - translate, mTrackRect.bottom, radius, radius, mTrackPaint);
+                mDragOverRect.centerX(), mDragOverRect.centerY());
+        canvas.drawRoundRect(mDragOverRect.left - translate, mDragOverRect.top,
+                mDragOverRect.right - translate, mDragOverRect.bottom, radius, radius, mTrackPaint);
         canvas.restore();
     }
 
     @Override
     public boolean isEnabled() {
         return mNavigationBarView.isQuickScrubEnabled();
-    }
-
-    @Override
-    public boolean disableProxyEvents() {
-        return true;
     }
 
     @Override
@@ -231,42 +221,12 @@ public class QuickScrubAction extends NavigationGestureAction {
         mTrackAnimator.playTogether(trackAnimator, navBarAnimator);
         mTrackAnimator.start();
 
-        // Disable slippery for quick scrub to not cancel outside the nav bar
-        mNavigationBarView.updateSlippery();
-
-        try {
-            mProxySender.getProxy().onQuickScrubStart();
-            if (DEBUG_OVERVIEW_PROXY) {
-                Log.d(TAG_OPS, "Quick Scrub Start");
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to send start of quick scrub.", e);
-        }
-        mProxySender.notifyQuickScrubStarted();
+        startQuickGesture(event);
     }
 
     @Override
     public void onGestureMove(int x, int y) {
-        int trackSize, offset;
-        if (isNavBarVertical()) {
-            trackSize = mTrackRect.height();
-            offset = y - mTrackRect.top;
-        } else {
-            offset = x - mTrackRect.left;
-            trackSize = mTrackRect.width();
-        }
-        if (!mDragHorizontalPositive || !mDragVerticalPositive) {
-            offset -= isNavBarVertical() ? mTrackRect.height() : mTrackRect.width();
-        }
-        float scrubFraction = Utilities.clamp(Math.abs(offset) * 1f / trackSize, 0, 1);
-        try {
-            mProxySender.getProxy().onQuickScrubProgress(scrubFraction);
-            if (DEBUG_OVERVIEW_PROXY) {
-                Log.d(TAG_OPS, "Quick Scrub Progress:" + scrubFraction);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to send progress of quick scrub.", e);
-        }
+        super.onGestureMove(x, y);
         mHighlightCenter = x;
         mNavigationBarView.invalidate();
     }
@@ -278,14 +238,7 @@ public class QuickScrubAction extends NavigationGestureAction {
 
     private void endQuickScrub(boolean animate) {
         animateEnd();
-        try {
-            mProxySender.getProxy().onQuickScrubEnd();
-            if (DEBUG_OVERVIEW_PROXY) {
-                Log.d(TAG_OPS, "Quick Scrub End");
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to send end of quick scrub.", e);
-        }
+        endQuickGesture(animate);
         if (!animate) {
             if (mTrackAnimator != null) {
                 mTrackAnimator.end();
@@ -295,7 +248,7 @@ public class QuickScrubAction extends NavigationGestureAction {
     }
 
     private void updateHighlight() {
-        if (mTrackRect.isEmpty()) {
+        if (mDragOverRect.isEmpty()) {
             return;
         }
         int colorBase, colorGrad;
@@ -306,8 +259,8 @@ public class QuickScrubAction extends NavigationGestureAction {
             colorBase = getContext().getColor(R.color.quick_step_track_background_background_light);
             colorGrad = getContext().getColor(R.color.quick_step_track_background_foreground_light);
         }
-        final RadialGradient mHighlight = new RadialGradient(0, mTrackRect.height() / 2,
-                mTrackRect.width() * GRADIENT_WIDTH, colorGrad, colorBase,
+        final RadialGradient mHighlight = new RadialGradient(0, mDragOverRect.height() / 2,
+                mDragOverRect.width() * GRADIENT_WIDTH, colorGrad, colorBase,
                 Shader.TileMode.CLAMP);
         mTrackPaint.setShader(mHighlight);
     }
