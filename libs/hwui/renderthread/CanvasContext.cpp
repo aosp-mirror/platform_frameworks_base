@@ -142,7 +142,12 @@ void CanvasContext::destroy() {
 void CanvasContext::setSurface(sp<Surface>&& surface) {
     ATRACE_CALL();
 
-    mNativeSurface = std::move(surface);
+    if (surface) {
+        mNativeSurface = new ReliableSurface{std::move(surface)};
+        mNativeSurface->setDequeueTimeout(500_ms);
+    } else {
+        mNativeSurface = nullptr;
+    }
 
     ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;
     bool hasSurface = mRenderPipeline->setSurface(mNativeSurface.get(), mSwapBehavior, colorMode);
@@ -285,10 +290,11 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 
     info.damageAccumulator = &mDamageAccumulator;
     info.layerUpdateQueue = &mLayerUpdateQueue;
+    info.out.canDrawThisFrame = true;
 
     mAnimationContext->startFrame(info.mode);
     mRenderPipeline->onPrepareTree();
-    for (const sp<RenderNode>& node : mRenderNodes) {
+    for (const sp<RenderNode> &node : mRenderNodes) {
         // Only the primary target node will be drawn full - all other nodes would get drawn in
         // real time mode. In case of a window, the primary node is the window content and the other
         // node(s) are non client / filler nodes.
@@ -304,7 +310,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 
     mIsDirty = true;
 
-    if (CC_UNLIKELY(!mNativeSurface.get())) {
+    if (CC_UNLIKELY(!hasSurface())) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
         info.out.canDrawThisFrame = false;
         return;
@@ -312,7 +318,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 
     if (CC_LIKELY(mSwapHistory.size() && !Properties::forceDrawFrame)) {
         nsecs_t latestVsync = mRenderThread.timeLord().latestVsync();
-        SwapHistory& lastSwap = mSwapHistory.back();
+        SwapHistory &lastSwap = mSwapHistory.back();
         nsecs_t vsyncDelta = std::abs(lastSwap.vsyncTime - latestVsync);
         // The slight fudge-factor is to deal with cases where
         // the vsync was estimated due to being slow handling the signal.
@@ -333,7 +339,19 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
         info.out.canDrawThisFrame = false;
     }
 
-    if (!info.out.canDrawThisFrame) {
+    if (info.out.canDrawThisFrame) {
+        int err = mNativeSurface->reserveNext();
+        if (err != OK) {
+            mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
+            info.out.canDrawThisFrame = false;
+            ALOGW("reserveNext failed, error = %d (%s)", err, strerror(-err));
+            if (err != TIMED_OUT) {
+                // A timed out surface can still recover, but assume others are permanently dead.
+                setSurface(nullptr);
+                return;
+            }
+        }
+    } else {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
     }
 
