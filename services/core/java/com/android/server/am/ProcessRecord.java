@@ -153,6 +153,7 @@ final class ProcessRecord implements WindowProcessListener {
     int trimMemoryLevel;        // Last selected memory trimming level
     private int mCurProcState = PROCESS_STATE_NONEXISTENT; // Currently computed process state
     private int mRepProcState = PROCESS_STATE_NONEXISTENT; // Last reported process state
+    private int mCurRawProcState = PROCESS_STATE_NONEXISTENT; // Temp state during computation
     int setProcState = PROCESS_STATE_NONEXISTENT; // Last set process state in process tracker
     int pssProcState = PROCESS_STATE_NONEXISTENT; // Currently requesting pss for
     int pssStatType;            // The type of stat collection that we are currently requesting
@@ -902,6 +903,7 @@ final class ProcessRecord implements WindowProcessListener {
         if (mRepProcState > newState) {
             mRepProcState = newState;
             setCurProcState(newState);
+            setCurRawProcState(newState);
             for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
                 StatsLog.write(StatsLog.PROCESS_STATE_CHANGED,
                         uid, processName, pkgList.keyAt(ipkg),
@@ -982,6 +984,14 @@ final class ProcessRecord implements WindowProcessListener {
 
     int getCurProcState() {
         return mCurProcState;
+    }
+
+    void setCurRawProcState(int curRawProcState) {
+        mCurRawProcState = curRawProcState;
+    }
+
+    int getCurRawProcState() {
+        return mCurRawProcState;
     }
 
     void setReportedProcState(int repProcState) {
