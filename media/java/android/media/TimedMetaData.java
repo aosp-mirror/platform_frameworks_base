@@ -148,7 +148,7 @@ public final class TimedMetaData {
          *     It should not be null.
          * @return the same Builder instance.
          */
-        public @NonNull Builder setTimedMetaData(int timestamp, @NonNull byte[] metaData) {
+        public @NonNull Builder setTimedMetaData(long timestamp, @NonNull byte[] metaData) {
             if (metaData == null) {
                 throw new IllegalArgumentException("null metaData is not allowed");
             }

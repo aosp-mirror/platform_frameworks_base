@@ -1711,10 +1711,12 @@ public class MediaPlayer2 implements AutoCloseable
     public MediaTimestamp getTimestamp() {
         try {
             // TODO: get the timestamp from native side
-            return new MediaTimestamp(
-                    getCurrentPosition() * 1000L,
-                    System.nanoTime(),
-                    getState() == PLAYER_STATE_PLAYING ? getPlaybackParams().getSpeed() : 0.f);
+            return new MediaTimestamp.Builder()
+                    .setMediaTimestamp(
+                        getCurrentPosition() * 1000L,
+                        System.nanoTime(),
+                        getState() == PLAYER_STATE_PLAYING ? getPlaybackParams().getSpeed() : 0.f)
+                    .build();
         } catch (IllegalStateException e) {
             return null;
         }
@@ -2398,11 +2400,13 @@ public class MediaPlayer2 implements AutoCloseable
                             return;
                         }
                         Iterator<Value> in = playerMsg.getValuesList().iterator();
-                        SubtitleData data = new SubtitleData(
-                                in.next().getInt32Value(),  // trackIndex
-                                in.next().getInt64Value(),  // startTimeUs
-                                in.next().getInt64Value(),  // durationUs
-                                in.next().getBytesValue().toByteArray());  // data
+                        SubtitleData data = new SubtitleData.Builder()
+                                .setSubtitleData(
+                                    in.next().getInt32Value(),  // trackIndex
+                                    in.next().getInt64Value(),  // startTimeUs
+                                    in.next().getInt64Value(),  // durationUs
+                                    in.next().getBytesValue().toByteArray())  // data
+                                .build();
                         sendEvent(new EventNotifier() {
                             @Override
                             public void notify(EventCallback callback) {
@@ -2426,9 +2430,11 @@ public class MediaPlayer2 implements AutoCloseable
                             return;
                         }
                         Iterator<Value> in = playerMsg.getValuesList().iterator();
-                        data = new TimedMetaData(
-                                in.next().getInt64Value(),  // timestampUs
-                                in.next().getBytesValue().toByteArray());  // metaData
+                        data = new TimedMetaData.Builder()
+                                .setTimedMetaData(
+                                    in.next().getInt64Value(),  // timestampUs
+                                    in.next().getBytesValue().toByteArray())  // metaData
+                                .build();
                     } else {
                         data = null;
                     }

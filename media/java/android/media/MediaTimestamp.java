@@ -16,6 +16,9 @@
 
 package android.media;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
+
 /**
  * An immutable object that represents the linear correlation between the media time
  * and the system time. It contains the media clock rate, together with the media timestamp
@@ -116,5 +119,72 @@ public final class MediaTimestamp
                 + " AnchorSystemNanoTime=" + nanoTime
                 + " clockRate=" + clockRate
                 + "}";
+    }
+
+    /**
+     * Builder class for {@link MediaTimestamp} objects.
+     * <p> Here is an example where <code>Builder</code> is used to define the
+     * {@link MediaTimestamp}:
+     *
+     * <pre class="prettyprint">
+     * MediaTimestamp mts = new MediaTimestamp.Builder()
+     *         .setMediaTimestamp(mediaTime, systemTime, rate)
+     *         .build();
+     * </pre>
+     * @hide
+     */
+    @SystemApi
+    public static class Builder {
+        long mMediaTimeUs;
+        long mNanoTime;
+        float mClockRate = 1.0f;
+
+        /**
+         * Constructs a new Builder with the defaults.
+         */
+        public Builder() {
+        }
+
+        /**
+         * Constructs a new Builder from a given {@link MediaTimestamp} instance
+         * @param mts the {@link MediaTimestamp} object whose data will be reused
+         * in the new Builder.
+         */
+        public Builder(@NonNull MediaTimestamp mts) {
+            if (mts == null) {
+                throw new IllegalArgumentException("null MediaTimestamp is not allowed");
+            }
+            mMediaTimeUs = mts.mediaTimeUs;
+            mNanoTime = mts.nanoTime;
+            mClockRate = mts.clockRate;
+        }
+
+        /**
+         * Combines all of the fields that have been set and return a new
+         * {@link MediaTimestamp} object.
+         *
+         * @return a new {@link MediaTimestamp} object
+         */
+        public @NonNull MediaTimestamp build() {
+            return new MediaTimestamp(mMediaTimeUs, mNanoTime, mClockRate);
+        }
+
+        /**
+         * Sets the info of media timestamp.
+         *
+         * @param mediaTimeUs the media time of the anchor in microseconds
+         * @param nanoTime the {@link java.lang.System#nanoTime system time} corresponding to
+         *     the media time in nanoseconds.
+         * @param clockRate the rate of the media clock in relation to the system time.
+         * @return the same Builder instance.
+         */
+        public @NonNull Builder setMediaTimestamp(
+                long mediaTimeUs, long nanoTime, float clockRate) {
+            mMediaTimeUs = mediaTimeUs;
+            mNanoTime = nanoTime;
+            mClockRate = clockRate;
+
+            return this;
+        }
     }
 }
