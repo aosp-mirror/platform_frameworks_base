@@ -21,10 +21,8 @@ import android.annotation.NonNull;
 /**
  * Base class of data source descriptor.
  *
- * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)},
- * {@link MediaPlayer2#setNextDataSource(DataSourceDesc)} and
- * {@link MediaPlayer2#setNextDataSources(List<DataSourceDesc>)}
- * to set data source for playback.
+ * Used by {@link MediaPlayer2#setDataSource}, {@link MediaPlayer2#setNextDataSource} and
+ * {@link MediaPlayer2#setNextDataSources} to set data source for playback.
  *
  * <p>Users should use subclasses' builder to change {@link DataSourceDesc}.
  *
