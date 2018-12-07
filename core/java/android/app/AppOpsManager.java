@@ -2490,30 +2490,6 @@ public class AppOpsManager {
     }
 
     /**
-     * Retrieve current operation state for all applications.
-     *
-     * @param ops The set of operations you are interested in, or null if you want all of them.
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
-    @SystemApi
-    public List<AppOpsManager.PackageOps> getPackagesForOpStrs(String[] ops) {
-        if (ops == null) {
-            return getPackagesForOps(null);
-        }
-        final int[] opCodes = new int[ops.length];
-        for (int i = 0; i < ops.length; ++i) {
-            final Integer opCode = sOpStrToOp.get(ops[i]);
-            if (opCode == null) {
-                opCodes[i] = OP_NONE;
-            } else {
-                opCodes[i] = opCode;
-            }
-        }
-        return getPackagesForOps(opCodes);
-    }
-
-    /**
      * Retrieve current operation state for one application.
      *
      * @param uid The uid of the application of interest.
