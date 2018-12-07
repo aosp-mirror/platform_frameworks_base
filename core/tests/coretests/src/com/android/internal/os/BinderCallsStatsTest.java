@@ -575,10 +575,13 @@ public class BinderCallsStatsTest {
 
         Binder binder = new Binder();
         CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
-        bcs.time += 10;
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
 
         callSession = bcs.callStarted(binder, 2, WORKSOURCE_UID);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        // Should use the same overflow entry.
+        callSession = bcs.callStarted(binder, 3, WORKSOURCE_UID);
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
 
         List<BinderCallsStats.ExportedCallStat> callStatsList = bcs.getExportedCallStats();
@@ -590,11 +593,46 @@ public class BinderCallsStatsTest {
         assertEquals(CALLING_UID, callStats.callingUid);
 
         callStats = callStatsList.get(1);
-        assertEquals(1, callStats.callCount);
+        assertEquals(2, callStats.callCount);
         assertEquals("-1", callStats.methodName);
         assertEquals("com.android.internal.os.BinderCallsStats$OverflowBinder",
                 callStats.className);
-        assertEquals(CALLING_UID, callStats.callingUid);
+        assertEquals(false , callStats.screenInteractive);
+        assertEquals(-1 , callStats.callingUid);
+    }
+
+    @Test
+    public void testOverflow_oneOverflowEntryPerUid() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(true);
+        bcs.setSamplingInterval(1);
+        bcs.setMaxBinderCallStats(1);
+
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        callSession = bcs.callStarted(binder, 2, WORKSOURCE_UID + 1);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID + 1);
+
+        // Different uids have different overflow entries.
+        callSession = bcs.callStarted(binder, 2, WORKSOURCE_UID + 2);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID + 2);
+
+        List<BinderCallsStats.ExportedCallStat> callStatsList = bcs.getExportedCallStats();
+        assertEquals(3, callStatsList.size());
+
+        BinderCallsStats.ExportedCallStat callStats = callStatsList.get(1);
+        assertEquals(WORKSOURCE_UID + 1, callStats.workSourceUid);
+        assertEquals(1, callStats.callCount);
+        assertEquals("com.android.internal.os.BinderCallsStats$OverflowBinder",
+                callStats.className);
+
+        callStats = callStatsList.get(2);
+        assertEquals(WORKSOURCE_UID + 2, callStats.workSourceUid);
+        assertEquals(1, callStats.callCount);
+        assertEquals("com.android.internal.os.BinderCallsStats$OverflowBinder",
+                callStats.className);
     }
 
     @Test

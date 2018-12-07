@@ -60,7 +60,11 @@ public class BinderCallsStats implements BinderInternal.Observer {
     private static final int CALL_SESSIONS_POOL_SIZE = 100;
     private static final int MAX_EXCEPTION_COUNT_SIZE = 50;
     private static final String EXCEPTION_COUNT_OVERFLOW_NAME = "overflow";
+    // Default values for overflow entry. The work source uid does not use a default value in order
+    // to have on overflow entry per work source uid.
     private static final Class<? extends Binder> OVERFLOW_BINDER = OverflowBinder.class;
+    private static final boolean OVERFLOW_SCREEN_INTERACTIVE = false;
+    private static final int OVERFLOW_DIRECT_CALLING_UID = -1;
     private static final int OVERFLOW_TRANSACTION_CODE = -1;
 
     // Whether to collect all the data: cpu + exceptions + reply/request sizes.
@@ -656,14 +660,16 @@ public class BinderCallsStats implements BinderInternal.Observer {
             // Only create CallStat if it's a new entry, otherwise update existing instance.
             if (mapCallStat == null) {
                 if (maxCallStatsReached) {
-                    mapCallStat = get(callingUid, OVERFLOW_BINDER, OVERFLOW_TRANSACTION_CODE,
-                            screenInteractive);
+                    mapCallStat = get(OVERFLOW_DIRECT_CALLING_UID, OVERFLOW_BINDER,
+                            OVERFLOW_TRANSACTION_CODE, OVERFLOW_SCREEN_INTERACTIVE);
                     if (mapCallStat != null) {
                         return mapCallStat;
                     }
 
+                    callingUid = OVERFLOW_DIRECT_CALLING_UID;
                     binderClass = OVERFLOW_BINDER;
                     transactionCode = OVERFLOW_TRANSACTION_CODE;
+                    screenInteractive = OVERFLOW_SCREEN_INTERACTIVE;
                 }
 
                 mapCallStat = new CallStat(callingUid, binderClass, transactionCode,
