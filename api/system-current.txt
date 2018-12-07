@@ -4507,6 +4507,21 @@ package android.provider {
     field public static final java.lang.String STATE = "state";
   }
 
+  public final class DocumentsContract {
+    method public static boolean isManageMode(android.net.Uri);
+    method public static android.net.Uri setManageMode(android.net.Uri);
+    field public static final java.lang.String ACTION_DOCUMENT_ROOT_SETTINGS = "android.provider.action.DOCUMENT_ROOT_SETTINGS";
+    field public static final java.lang.String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
+    field public static final java.lang.String EXTRA_SHOW_ADVANCED = "android.provider.extra.SHOW_ADVANCED";
+  }
+
+  public static final class DocumentsContract.Root {
+    field public static final int FLAG_ADVANCED = 65536; // 0x10000
+    field public static final int FLAG_HAS_SETTINGS = 131072; // 0x20000
+    field public static final int FLAG_REMOVABLE_SD = 262144; // 0x40000
+    field public static final int FLAG_REMOVABLE_USB = 524288; // 0x80000
+  }
+
   public abstract class SearchIndexableData {
     ctor public SearchIndexableData();
     ctor public SearchIndexableData(android.content.Context);
