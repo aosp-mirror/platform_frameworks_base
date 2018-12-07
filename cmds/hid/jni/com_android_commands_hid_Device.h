@@ -28,6 +28,7 @@ public:
     ~DeviceCallback();
 
     void onDeviceOpen();
+    void onDeviceGetReport(uint32_t requestId, uint8_t reportId);
     void onDeviceError();
 
 private:
@@ -45,6 +46,7 @@ public:
     ~Device();
 
     void sendReport(const std::vector<uint8_t>& report) const;
+    void sendGetFeatureReportReply(uint32_t id, const std::vector<uint8_t>& report) const;
     void close();
 
     int handleEvents(int events);
