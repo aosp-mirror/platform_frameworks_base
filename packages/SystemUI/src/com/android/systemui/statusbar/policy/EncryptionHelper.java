@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.sysprop.VoldProperties;
+import android.os.SystemProperties;
 
 /**
  * Helper for determining whether the phone is decrypted yet.
@@ -26,7 +26,7 @@ public class EncryptionHelper {
     public static final boolean IS_DATA_ENCRYPTED = isDataEncrypted();
 
     private static boolean isDataEncrypted() {
-        String voldState = VoldProperties.decrypt().orElse("");
+        String voldState = SystemProperties.get("vold.decrypt");
         return "1".equals(voldState) || "trigger_restart_min_framework".equals(voldState);
     }
 }
