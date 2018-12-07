@@ -1121,6 +1121,64 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_USE_MOBILE_DATA";
 
     /**
+     * A String extra holding the provisioning trigger. It could be one of
+     * {@link #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT}, {@link #PROVISIONING_TRIGGER_QR_CODE},
+     * {@link #PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER} or {@link
+     * #PROVISIONING_TRIGGER_UNSPECIFIED}.
+     *
+     * <p>Use in an intent with action {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_TRIGGER =
+            "android.app.extra.PROVISIONING_TRIGGER";
+
+    /**
+     * A value for {@link #EXTRA_PROVISIONING_TRIGGER} indicating that the provisioning
+     * trigger has not been specified.
+     * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
+     * @see #PROVISIONING_TRIGGER_QR_CODE
+     * @see #PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER
+     * @hide
+     */
+    @SystemApi
+    public static final int PROVISIONING_TRIGGER_UNSPECIFIED = 0;
+
+    /**
+     * A value for {@link #EXTRA_PROVISIONING_TRIGGER} indicating that the provisioning
+     * trigger is cloud enrollment.
+     * @see #PROVISIONING_TRIGGER_QR_CODE
+     * @see #PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER
+     * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @hide
+     */
+    @SystemApi
+    public static final int PROVISIONING_TRIGGER_CLOUD_ENROLLMENT = 1;
+
+    /**
+     * A value for {@link #EXTRA_PROVISIONING_TRIGGER} indicating that the provisioning
+     * trigger is the QR code scanner.
+     * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
+     * @see #PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER
+     * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @hide
+     */
+    @SystemApi
+    public static final int PROVISIONING_TRIGGER_QR_CODE = 2;
+
+    /**
+     * A value for {@link #EXTRA_PROVISIONING_TRIGGER} indicating that the provisioning
+     * trigger is persistent device owner enrollment.
+     * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
+     * @see #PROVISIONING_TRIGGER_QR_CODE
+     * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @hide
+     */
+    @SystemApi
+    public static final int PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER = 3;
+
+    /**
      * This MIME type is used for starting the device owner provisioning.
      *
      * <p>During device owner provisioning a device admin app is set as the owner of the device.
