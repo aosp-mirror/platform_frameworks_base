@@ -45,6 +45,7 @@ static const char* UHID_PATH = "/dev/uhid";
 
 static struct {
     jmethodID onDeviceOpen;
+    jmethodID onDeviceGetReport;
     jmethodID onDeviceError;
 } gDeviceCallbackClassInfo;
 
@@ -82,6 +83,13 @@ void DeviceCallback::onDeviceOpen() {
     checkAndClearException(env, "onDeviceOpen");
 }
 
+void DeviceCallback::onDeviceGetReport(uint32_t requestId, uint8_t reportId) {
+    JNIEnv* env = getJNIEnv();
+    env->CallVoidMethod(mCallbackObject, gDeviceCallbackClassInfo.onDeviceGetReport,
+            requestId, reportId);
+    checkAndClearException(env, "onDeviceGetReport");
+}
+
 JNIEnv* DeviceCallback::getJNIEnv() {
     JNIEnv* env;
     mJavaVM->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
@@ -103,8 +111,7 @@ Device* Device::open(int32_t id, const char* name, int32_t vid, int32_t pid,
         return nullptr;
     }
 
-    struct uhid_event ev;
-    memset(&ev, 0, sizeof(ev));
+    struct uhid_event ev = {};
     ev.type = UHID_CREATE2;
     strlcpy(reinterpret_cast<char*>(ev.u.create2.name), name, sizeof(ev.u.create2.name));
     memcpy(&ev.u.create2.rd_data, descriptor.data(),
@@ -152,8 +159,7 @@ Device::~Device() {
     } else {
         LOGE("Could not remove fd, ALooper_forThread() returned NULL!");
     }
-    struct uhid_event ev;
-    memset(&ev, 0, sizeof(ev));
+    struct uhid_event ev = {};
     ev.type = UHID_DESTROY;
     TEMP_FAILURE_RETRY(::write(mFd, &ev, sizeof(ev)));
     ::close(mFd);
@@ -166,14 +172,27 @@ void Device::sendReport(const std::vector<uint8_t>& report) const {
         return;
     }
 
-    struct uhid_event ev;
-    memset(&ev, 0, sizeof(ev));
+    struct uhid_event ev = {};
     ev.type = UHID_INPUT2;
     ev.u.input2.size = report.size();
     memcpy(&ev.u.input2.data, report.data(), report.size() * sizeof(ev.u.input2.data[0]));
     ssize_t ret = TEMP_FAILURE_RETRY(::write(mFd, &ev, sizeof(ev)));
     if (ret < 0 || ret != sizeof(ev)) {
         LOGE("Failed to send hid event: %s", strerror(errno));
+    }
+}
+
+void Device::sendGetFeatureReportReply(uint32_t id, const std::vector<uint8_t>& report) const {
+    struct uhid_event ev = {};
+    ev.type = UHID_GET_REPORT_REPLY;
+    ev.u.get_report_reply.id = id;
+    ev.u.get_report_reply.err = report.size() == 0 ? EIO : 0;
+    ev.u.get_report_reply.size = report.size();
+    memcpy(&ev.u.get_report_reply.data, report.data(),
+            report.size() * sizeof(ev.u.get_report_reply.data[0]));
+    ssize_t ret = TEMP_FAILURE_RETRY(::write(mFd, &ev, sizeof(ev)));
+    if (ret < 0 || ret != sizeof(ev)) {
+        LOGE("Failed to send hid event (UHID_GET_REPORT_REPLY): %s", strerror(errno));
     }
 }
 
@@ -193,6 +212,11 @@ int Device::handleEvents(int events) {
 
     if (ev.type == UHID_OPEN) {
         mDeviceCallback->onDeviceOpen();
+    } else if (ev.type == UHID_GET_REPORT) {
+        mDeviceCallback->onDeviceGetReport(ev.u.get_report.id, ev.u.get_report.rnum);
+    } else if (ev.type == UHID_SET_REPORT) {
+        LOGE("UHID_SET_REPORT is currently not supported");
+        return 0;
     }
 
     return 1;
@@ -201,9 +225,13 @@ int Device::handleEvents(int events) {
 } // namespace uhid
 
 std::vector<uint8_t> getData(JNIEnv* env, jbyteArray javaArray) {
+    std::vector<uint8_t> data;
+    if (javaArray == nullptr) {
+        return data;
+    }
+
     ScopedByteArrayRO scopedArray(env, javaArray);
     size_t size = scopedArray.size();
-    std::vector<uint8_t> data;
     data.reserve(size);
     for (size_t i = 0; i < size; i++) {
         data.push_back(static_cast<uint8_t>(scopedArray[i]));
@@ -237,6 +265,17 @@ static void sendReport(JNIEnv* env, jclass /* clazz */, jlong ptr, jbyteArray ra
     }
 }
 
+static void sendGetFeatureReportReply(JNIEnv* env, jclass /* clazz */, jlong ptr, jint id,
+        jbyteArray rawReport) {
+    uhid::Device* d = reinterpret_cast<uhid::Device*>(ptr);
+    if (d) {
+        std::vector<uint8_t> report = getData(env, rawReport);
+        d->sendGetFeatureReportReply(id, report);
+    } else {
+        LOGE("Could not send get feature report reply, Device* is null!");
+    }
+}
+
 static void closeDevice(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) {
     uhid::Device* d = reinterpret_cast<uhid::Device*>(ptr);
     if (d) {
@@ -250,6 +289,8 @@ static JNINativeMethod sMethods[] = {
             "Lcom/android/commands/hid/Device$DeviceCallback;)J",
             reinterpret_cast<void*>(openDevice) },
     { "nativeSendReport", "(J[B)V", reinterpret_cast<void*>(sendReport) },
+    { "nativeSendGetFeatureReportReply", "(JI[B)V",
+            reinterpret_cast<void*>(sendGetFeatureReportReply) },
     { "nativeCloseDevice", "(J)V", reinterpret_cast<void*>(closeDevice) },
 };
 
@@ -261,6 +302,8 @@ int register_com_android_commands_hid_Device(JNIEnv* env) {
     }
     uhid::gDeviceCallbackClassInfo.onDeviceOpen =
             env->GetMethodID(clazz, "onDeviceOpen", "()V");
+    uhid::gDeviceCallbackClassInfo.onDeviceGetReport =
+            env->GetMethodID(clazz, "onDeviceGetReport", "(II)V");
     uhid::gDeviceCallbackClassInfo.onDeviceError =
             env->GetMethodID(clazz, "onDeviceError", "()V");
     if (uhid::gDeviceCallbackClassInfo.onDeviceOpen == NULL ||
