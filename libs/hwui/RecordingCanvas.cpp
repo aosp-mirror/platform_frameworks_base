@@ -912,18 +912,6 @@ void RecordingCanvas::onDrawAnnotation(const SkRect& rect, const char key[], SkD
     fDL->drawAnnotation(rect, key, val);
 }
 
-void RecordingCanvas::onDrawText(const void* text, size_t bytes, SkScalar x, SkScalar y,
-                                 const SkPaint& paint) {
-    fDL->drawText(text, bytes, x, y, paint);
-}
-void RecordingCanvas::onDrawPosText(const void* text, size_t bytes, const SkPoint pos[],
-                                    const SkPaint& paint) {
-    fDL->drawPosText(text, bytes, pos, paint);
-}
-void RecordingCanvas::onDrawPosTextH(const void* text, size_t bytes, const SkScalar xs[],
-                                     SkScalar y, const SkPaint& paint) {
-    fDL->drawPosTextH(text, bytes, xs, y, paint);
-}
 void RecordingCanvas::onDrawTextRSXform(const void* text, size_t bytes, const SkRSXform xform[],
                                         const SkRect* cull, const SkPaint& paint) {
     fDL->drawTextRSXform(text, bytes, xform, cull, paint);
