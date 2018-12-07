@@ -52,7 +52,6 @@ import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.sysprop.VoldProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -1466,7 +1465,7 @@ public class StorageManager {
      * framework, so no service needs to check for changes during their lifespan
      */
     public static boolean isBlockEncrypting() {
-        final String state = VoldProperties.encrypt_progress().orElse("");
+        final String state = SystemProperties.get("vold.encrypt_progress", "");
         return !"".equalsIgnoreCase(state);
     }
 
@@ -1482,7 +1481,7 @@ public class StorageManager {
      * framework, so no service needs to check for changes during their lifespan
      */
     public static boolean inCryptKeeperBounce() {
-        final String status = VoldProperties.decrypt().orElse("");
+        final String status = SystemProperties.get("vold.decrypt");
         return "trigger_restart_min_framework".equals(status);
     }
 
