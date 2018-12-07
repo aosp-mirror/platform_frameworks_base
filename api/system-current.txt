@@ -2784,7 +2784,9 @@ package android.location {
     method public deprecated boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
     method public void flushGnssBatch();
     method public int getGnssBatchSize();
+    method public java.lang.String getLocationControllerExtraPackage();
     method public java.lang.String getNetworkProviderPackage();
+    method public boolean isLocationControllerExtraPackageEnabled();
     method public boolean isLocationEnabledForUser(android.os.UserHandle);
     method public boolean isProviderEnabledForUser(java.lang.String, android.os.UserHandle);
     method public boolean registerGnssBatchedLocationCallback(long, boolean, android.location.BatchedLocationCallback, android.os.Handler);
@@ -2792,6 +2794,8 @@ package android.location {
     method public deprecated void removeGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
     method public void requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper);
     method public void requestLocationUpdates(android.location.LocationRequest, android.app.PendingIntent);
+    method public void setLocationControllerExtraPackage(java.lang.String);
+    method public void setLocationControllerExtraPackageEnabled(boolean);
     method public void setLocationEnabledForUser(boolean, android.os.UserHandle);
     method public boolean setProviderEnabledForUser(java.lang.String, boolean, android.os.UserHandle);
     method public boolean unregisterGnssBatchedLocationCallback(android.location.BatchedLocationCallback);
@@ -4672,6 +4676,7 @@ package android.provider {
 
   public final class Settings {
     field public static final java.lang.String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
+    field public static final java.lang.String ACTION_LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS = "android.settings.LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS";
     field public static final java.lang.String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
   }
 
