@@ -108,7 +108,13 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     private CarAudioManager mCarAudioManager;
     private final ICarVolumeCallback mVolumeChangeCallback = new ICarVolumeCallback.Stub() {
         @Override
-        public void onGroupVolumeChanged(int groupId, int flags) {
+        public void onGroupVolumeChanged(int zoneId, int groupId, int flags) {
+            // TODO: Include zoneId into consideration.
+            // For instance
+            // - single display + single-zone, ignore zoneId
+            // - multi-display + single-zone, zoneId is fixed, may show volume bar on all displays
+            // - single-display + multi-zone, may show volume bar on primary display only
+            // - multi-display + multi-zone, may show volume bar on display specified by zoneId
             VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
             int value = getSeekbarValue(mCarAudioManager, groupId);
             // Do not update the progress if it is the same as before. When car audio manager sets
@@ -124,7 +130,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         }
 
         @Override
-        public void onMasterMuteChanged(int flags) {
+        public void onMasterMuteChanged(int zoneId, int flags) {
             // ignored
         }
     };
