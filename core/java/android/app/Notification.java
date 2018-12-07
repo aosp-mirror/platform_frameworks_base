@@ -4770,14 +4770,16 @@ public class Notification implements Parcelable
                 TemplateBindResult result) {
             boolean largeIconShown = bindLargeIcon(contentView, p);
             boolean replyIconShown = bindReplyIcon(contentView, p);
+            boolean iconContainerVisible = largeIconShown || replyIconShown;
             contentView.setViewVisibility(R.id.right_icon_container,
-                    largeIconShown || replyIconShown ? View.VISIBLE : View.GONE);
+                    iconContainerVisible ? View.VISIBLE : View.GONE);
             int marginEnd = calculateMarginEnd(largeIconShown, replyIconShown);
             contentView.setViewLayoutMarginEnd(R.id.line1, marginEnd);
             contentView.setViewLayoutMarginEnd(R.id.text, marginEnd);
             contentView.setViewLayoutMarginEnd(R.id.progress, marginEnd);
             if (result != null) {
                 result.setIconMarginEnd(marginEnd);
+                result.setRightIconContainerVisible(iconContainerVisible);
             }
         }
 
@@ -6777,7 +6779,8 @@ public class Notification implements Parcelable
             mBuilder.setTextViewColorSecondary(contentView, R.id.big_text, p);
             contentView.setViewVisibility(R.id.big_text,
                     TextUtils.isEmpty(bigTextText) ? View.GONE : View.VISIBLE);
-            contentView.setBoolean(R.id.big_text, "setHasImage", mBuilder.mN.hasLargeIcon());
+            contentView.setBoolean(R.id.big_text, "setHasImage",
+                    result.isRightIconContainerVisible());
 
             return contentView;
         }
@@ -9914,6 +9917,7 @@ public class Notification implements Parcelable
      */
     private static class TemplateBindResult {
         int mIconMarginEnd;
+        boolean mRightIconContainerVisible;
 
         /**
          * Get the margin end that needs to be added to any fields that may overlap
@@ -9923,8 +9927,20 @@ public class Notification implements Parcelable
             return mIconMarginEnd;
         }
 
+        /**
+         * Is the icon container visible on the right size because of the reply button or the
+         * right icon.
+         */
+        public boolean isRightIconContainerVisible() {
+            return mRightIconContainerVisible;
+        }
+
         public void setIconMarginEnd(int iconMarginEnd) {
             this.mIconMarginEnd = iconMarginEnd;
+        }
+
+        public void setRightIconContainerVisible(boolean iconContainerVisible) {
+            mRightIconContainerVisible = iconContainerVisible;
         }
     }
 
