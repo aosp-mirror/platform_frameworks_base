@@ -121,8 +121,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.widget.MessagingGroup;
-import com.android.internal.widget.MessagingMessage;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
@@ -1116,8 +1114,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onDensityOrFontScaleChanged() {
-        MessagingMessage.dropCache();
-        MessagingGroup.dropCache();
         // TODO: Remove this.
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onDensityOrFontScaleChanged();

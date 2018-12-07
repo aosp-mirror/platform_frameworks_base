@@ -588,7 +588,7 @@ public class NotificationData {
         }
 
         public boolean areGutsExposed() {
-            return row != null && row.getGuts().isExposed();
+            return row != null && row.getGuts() != null && row.getGuts().isExposed();
         }
 
         public boolean isChildInGroup() {
