@@ -157,6 +157,11 @@ public class TouchDelegate {
      * Forward hover events to the delegate view if the event is within the bounds
      * specified in the constructor and touch exploration is enabled.
      *
+     * <p>This method is provided for accessibility purposes so touch exploration, which is
+     * commonly used by screen readers, can properly place accessibility focus on views that
+     * use touch delegates. Therefore, touch exploration must be enabled for hover events
+     * to be dispatched through the delegate.</p>
+     *
      * @param event The hover event to forward
      * @return True if the event was consumed by the delegate, false otherwise.
      *
