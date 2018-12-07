@@ -97,7 +97,7 @@ public class BinderCallsStatsService extends Binder {
             final ArraySet<Integer> whitelist = new ArraySet<>();
 
             // We trust our own process.
-            whitelist.add(Process.myUid());
+            whitelist.add(UserHandle.getAppId(Process.myUid()));
             // We only need to initialize it once. UPDATE_DEVICE_STATS is a system permission.
             final PackageManager pm = context.getPackageManager();
             final String[] permissions = { android.Manifest.permission.UPDATE_DEVICE_STATS };
