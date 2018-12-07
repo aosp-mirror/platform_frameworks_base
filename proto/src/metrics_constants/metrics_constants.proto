@@ -6604,6 +6604,11 @@ message MetricsEvent {
     // OS: Q
     NOTIFICATION_DIRECT_REPLY_ACTION = 1590;
 
+    // OPEN: Settings > Developer options > Disable > Info dialog
+    // CATEGORY: SETTINGS
+    // OS: Q
+    DIALOG_DISABLE_DEVELOPMENT_OPTIONS = 1591;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.

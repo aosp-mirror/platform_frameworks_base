@@ -73,5 +73,8 @@ enum PageId {
 
     // OPEN: Settings > Privacy
     TOP_LEVEL_PRIVACY = 1587;
+
+    // OPEN: Settings > Developer options > Disable > Info dialog
+    DIALOG_DISABLE_DEVELOPMENT_OPTIONS = 1591;
 }
 
