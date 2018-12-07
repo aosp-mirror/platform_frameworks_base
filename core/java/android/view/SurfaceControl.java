@@ -530,9 +530,9 @@ public class SurfaceControl implements Parcelable {
          */
         public Builder setColorLayer(boolean isColorLayer) {
             if (isColorLayer) {
-                mFlags |= FX_SURFACE_DIM;
+                setFlags(FX_SURFACE_DIM, FX_SURFACE_MASK);
             } else {
-                mFlags &= ~FX_SURFACE_DIM;
+                setBufferLayer();
             }
             return this;
         }
@@ -547,11 +547,19 @@ public class SurfaceControl implements Parcelable {
          */
         public Builder setContainerLayer(boolean isContainerLayer) {
             if (isContainerLayer) {
-                mFlags |= FX_SURFACE_CONTAINER;
+                setFlags(FX_SURFACE_CONTAINER, FX_SURFACE_MASK);
             } else {
-                mFlags &= ~FX_SURFACE_CONTAINER;
+                setBufferLayer();
             }
             return this;
+        }
+
+        /**
+         * Indicates whether a buffer layer is to be constructed.
+         *
+         */
+        public Builder setBufferLayer() {
+            return setFlags(FX_SURFACE_NORMAL, FX_SURFACE_MASK);
         }
 
         /**
@@ -562,6 +570,11 @@ public class SurfaceControl implements Parcelable {
          */
         public Builder setFlags(int flags) {
             mFlags = flags;
+            return this;
+        }
+
+        private Builder setFlags(int flags, int mask) {
+            mFlags = (mFlags & ~mask) | flags;
             return this;
         }
     }
