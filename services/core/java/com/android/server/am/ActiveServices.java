@@ -1205,10 +1205,20 @@ public final class ActiveServices {
                                 android.Manifest.permission.INSTANT_APP_FOREGROUND_SERVICE,
                                 r.app.pid, r.appInfo.uid, "startForeground");
                 }
-            } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.P) {
-                mAm.enforcePermission(
-                        android.Manifest.permission.FOREGROUND_SERVICE,
-                        r.app.pid, r.appInfo.uid, "startForeground");
+            } else {
+                if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.P) {
+                    mAm.enforcePermission(
+                            android.Manifest.permission.FOREGROUND_SERVICE,
+                            r.app.pid, r.appInfo.uid, "startForeground");
+                }
+                if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.Q) {
+                    if (r.serviceInfo.getForegroundServiceType()
+                            == ServiceInfo.FOREGROUND_SERVICE_TYPE_UNSPECIFIED) {
+                        // STOPSHIP(b/120611119): replace log message with SecurityException.
+                        Slog.w(TAG, "missing foregroundServiceType attribute in "
+                                + "service element of manifest file");
+                    }
+                }
             }
             boolean alreadyStartedOp = false;
             boolean stopProcStatsOp = false;

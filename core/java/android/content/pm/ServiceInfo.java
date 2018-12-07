@@ -16,9 +16,13 @@
 
 package android.content.pm;
 
+import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Information you can retrieve about a particular application
@@ -94,6 +98,81 @@ public class ServiceInfo extends ComponentInfo
      */
     public int flags;
 
+    /**
+     * The default foreground service type if not been set in manifest file.
+     */
+    public static final int FOREGROUND_SERVICE_TYPE_UNSPECIFIED = 0;
+
+    /**
+     * Constant corresponding to <code>sync</code> in
+     * the {@link android.R.attr#foregroundServiceType} attribute.
+     * Data(photo, file, account) upload/download, backup/restore, import/export, fetch,
+     * transfer over network between device and cloud.
+     */
+    public static final int FOREGROUND_SERVICE_TYPE_SYNC = 1;
+
+    /**
+     * Constant corresponding to <code>mediaPlay</code> in
+     * the {@link android.R.attr#foregroundServiceType} attribute.
+     * Music, video, news or other media play.
+     */
+    public static final int FOREGROUND_SERVICE_TYPE_MEDIA_PLAY = 2;
+
+    /**
+     * Constant corresponding to <code>phoneCall</code> in
+     * the {@link android.R.attr#foregroundServiceType} attribute.
+     * Ongoing phone call or video conference.
+     */
+    public static final int FOREGROUND_SERVICE_TYPE_PHONE_CALL = 3;
+
+    /**
+     * Constant corresponding to <code>location</code> in
+     * the {@link android.R.attr#foregroundServiceType} attribute.
+     * GPS, map, navigation location update.
+     */
+    public static final int FOREGROUND_SERVICE_TYPE_LOCATION = 4;
+
+    /**
+     * Constant corresponding to <code>deviceCompanion</code> in
+     * the {@link android.R.attr#foregroundServiceType} attribute.
+     * Auto, bluetooth, TV or other devices connection, monitoring and interaction.
+     */
+    public static final int FOREGROUND_SERVICE_TYPE_DEVICE_COMPANION = 5;
+
+    /**
+     * Constant corresponding to <code>ongoingProcess</code> in
+     * the {@link android.R.attr#foregroundServiceType} attribute.
+     * Process that should not be interrupted, including installation, setup, photo
+     * compression etc.
+     */
+    public static final int FOREGROUND_SERVICE_TYPE_ONGOING_PROCESS = 6;
+
+    /**
+     * The enumeration of values for foreground service type.
+     * The foreground service type is set in {@link android.R.attr#foregroundServiceType}
+     * attribute.
+     * @hide
+     */
+    @IntDef(flag = false, prefix = { "FOREGROUND_SERVICE_TYPE_" }, value = {
+            FOREGROUND_SERVICE_TYPE_UNSPECIFIED,
+            FOREGROUND_SERVICE_TYPE_SYNC,
+            FOREGROUND_SERVICE_TYPE_MEDIA_PLAY,
+            FOREGROUND_SERVICE_TYPE_PHONE_CALL,
+            FOREGROUND_SERVICE_TYPE_LOCATION,
+            FOREGROUND_SERVICE_TYPE_DEVICE_COMPANION,
+            FOREGROUND_SERVICE_TYPE_ONGOING_PROCESS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ForegroundServiceType {}
+
+    /**
+     * The type of foreground service, set in
+     * {@link android.R.attr#foregroundServiceType} attribute, one value in
+     * {@link ForegroundServiceType}
+     * @hide
+     */
+    public @ForegroundServiceType int mForegroundServiceType = FOREGROUND_SERVICE_TYPE_UNSPECIFIED;
+
     public ServiceInfo() {
     }
 
@@ -101,6 +180,15 @@ public class ServiceInfo extends ComponentInfo
         super(orig);
         permission = orig.permission;
         flags = orig.flags;
+        mForegroundServiceType = orig.mForegroundServiceType;
+    }
+
+    /**
+     * Return the current foreground service type.
+     * @return the current foreground service type.
+     */
+    public int getForegroundServiceType() {
+        return mForegroundServiceType;
     }
 
     public void dump(Printer pw, String prefix) {

@@ -685,6 +685,13 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * the permission {@link android.Manifest.permission#FOREGROUND_SERVICE} in order to use
      * this API.</p>
      *
+     * <p>To use this API, apps targeting API {@link android.os.Build.VERSION_CODES#Q} or later must
+     * specify the foreground service type using attribute
+     * {@link android.R.attr#foregroundServiceType} in service element of manifest file, otherwise
+     * a SecurityException is thrown when this API is called. Apps targeting API older than
+     * {@link android.os.Build.VERSION_CODES#Q} do not need to specify the foreground service type
+     * </p>
+     *
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
      * NotificationManager.notify(int, Notification)}; must not be 0.
@@ -700,7 +707,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
         } catch (RemoteException ex) {
         }
     }
-    
+
     /**
      * Synonym for {@link #stopForeground(int)}.
      * @param removeNotification If true, the {@link #STOP_FOREGROUND_REMOVE} flag
