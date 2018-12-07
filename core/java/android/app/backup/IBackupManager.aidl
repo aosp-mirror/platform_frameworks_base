@@ -91,6 +91,15 @@ interface IBackupManager {
      * at some point in the future.
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     * If {@code userId} is different from the calling user id, then the caller must hold the
+     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     *
+     * @param userId User id for which backup service should be enabled/disabled.
+     */
+    void setBackupEnabledForUser(int userId, boolean isEnabled);
+
+    /**
+     * {@link android.app.backup.IBackupManager.setBackupEnabledForUser} for the calling user id.
      */
     void setBackupEnabled(boolean isEnabled);
 
@@ -120,6 +129,15 @@ interface IBackupManager {
      * Report whether the backup mechanism is currently enabled.
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     * If {@code userId} is different from the calling user id, then the caller must hold the
+     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     *
+     * @param userId User id for which the backup service status should be reported.
+     */
+    boolean isBackupEnabledForUser(int userId);
+
+    /**
+     * {@link android.app.backup.IBackupManager.isBackupEnabledForUser} for the calling user id.
      */
     boolean isBackupEnabled();
 
@@ -149,6 +167,15 @@ interface IBackupManager {
      * method.
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     * If {@code userId} is different from the calling user id, then the caller must hold the
+     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     *
+     * @param userId User id for which an immediate backup should be scheduled.
+     */
+    void backupNowForUser(int userId);
+
+    /**
+     * {@link android.app.backup.IBackupManager.backupNowForUser} for the calling user id.
      */
     void backupNow();
 
@@ -432,6 +459,12 @@ interface IBackupManager {
      * <p>If this method returns zero (meaning success), the OS will attempt to backup all provided
      * packages using the remote transport.
      *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     * If {@code userId} is different from the calling user id, then the caller must hold the
+     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     *
+     * @param userId User id for which an immediate backup should be requested.
+
      * @param observer The {@link BackupObserver} to receive callbacks during the backup
      * operation.
      *
@@ -442,12 +475,29 @@ interface IBackupManager {
      *
      * @return Zero on success; nonzero on error.
      */
+    int requestBackupForUser(int userId, in String[] packages, IBackupObserver observer,
+        IBackupManagerMonitor monitor, int flags);
+
+    /**
+     * {@link android.app.backup.IBackupManager.requestBackupForUser} for the calling user id.
+     */
     int requestBackup(in String[] packages, IBackupObserver observer, IBackupManagerMonitor monitor,
         int flags);
 
     /**
      * Cancel all running backups. After this call returns, no currently running backups will
      * interact with the selected transport.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     * If {@code userId} is different from the calling user id, then the caller must hold the
+     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     *
+     * @param userId User id for which backups should be cancelled.
+     */
+    void cancelBackupsForUser(int userId);
+
+    /**
+     * {@link android.app.backup.IBackupManager.cancelBackups} for the calling user id.
      */
     void cancelBackups();
 }

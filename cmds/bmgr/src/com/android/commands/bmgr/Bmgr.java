@@ -201,7 +201,7 @@ public class Bmgr {
 
     private void doEnabled(@UserIdInt int userId) {
         try {
-            boolean isEnabled = mBmgr.isBackupEnabled();
+            boolean isEnabled = mBmgr.isBackupEnabledForUser(userId);
             System.out.println("Backup Manager currently "
                     + enableToString(isEnabled));
         } catch (RemoteException e) {
@@ -219,7 +219,7 @@ public class Bmgr {
 
         try {
             boolean enable = Boolean.parseBoolean(arg);
-            mBmgr.setBackupEnabled(enable);
+            mBmgr.setBackupEnabledForUser(userId, enable);
             System.out.println("Backup Manager now " + enableToString(enable));
         } catch (NumberFormatException e) {
             showUsage();
@@ -232,7 +232,7 @@ public class Bmgr {
 
     void doRun(@UserIdInt int userId) {
         try {
-            mBmgr.backupNow();
+            mBmgr.backupNowForUser(userId);
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(BMGR_NOT_RUNNING_ERR);
@@ -416,7 +416,8 @@ public class Bmgr {
                     (monitorState != Monitor.OFF)
                             ? new BackupMonitor(monitorState == Monitor.VERBOSE)
                             : null;
-            int err = mBmgr.requestBackup(
+            int err = mBmgr.requestBackupForUser(
+                    userId,
                     packages.toArray(new String[packages.size()]),
                     observer,
                     monitor,
@@ -477,7 +478,7 @@ public class Bmgr {
         String arg = nextArg();
         if ("backups".equals(arg)) {
             try {
-                mBmgr.cancelBackups();
+                mBmgr.cancelBackupsForUser(userId);
             } catch (RemoteException e) {
                 System.err.println(e.toString());
                 System.err.println(BMGR_NOT_RUNNING_ERR);

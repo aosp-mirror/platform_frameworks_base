@@ -19,6 +19,7 @@ package com.android.server.backup;
 import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
 import android.app.backup.IBackupManager;
@@ -121,6 +122,10 @@ public class Trampoline extends IBackupManager.Stub {
                 Settings.Global.BACKUP_MULTI_USER_ENABLED,
                 MULTI_USER_DISABLED)
                 == MULTI_USER_ENABLED;
+    }
+
+    protected int binderGetCallingUserId() {
+        return Binder.getCallingUserHandle().getIdentifier();
     }
 
     protected int binderGetCallingUid() {
@@ -319,11 +324,17 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public void setBackupEnabled(boolean isEnabled) throws RemoteException {
+    public void setBackupEnabledForUser(@UserIdInt int userId, boolean isEnabled)
+            throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.setBackupEnabled(isEnabled);
+            svc.setBackupEnabled(userId, isEnabled);
         }
+    }
+
+    @Override
+    public void setBackupEnabled(boolean isEnabled) throws RemoteException {
+        setBackupEnabledForUser(binderGetCallingUserId(), isEnabled);
     }
 
     @Override
@@ -343,9 +354,14 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public boolean isBackupEnabled() throws RemoteException {
+    public boolean isBackupEnabledForUser(@UserIdInt int userId) throws RemoteException {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.isBackupEnabled() : false;
+        return (svc != null) ? svc.isBackupEnabled(userId) : false;
+    }
+
+    @Override
+    public boolean isBackupEnabled() throws RemoteException {
+        return isBackupEnabledForUser(binderGetCallingUserId());
     }
 
     @Override
@@ -361,11 +377,16 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public void backupNow() throws RemoteException {
+    public void backupNowForUser(@UserIdInt int userId) throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.backupNow();
+            svc.backupNow(userId);
         }
+    }
+
+    @Override
+    public void backupNow() throws RemoteException {
+        backupNowForUser(binderGetCallingUserId());
     }
 
     @Override
@@ -543,21 +564,33 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public int requestBackup(String[] packages, IBackupObserver observer,
-            IBackupManagerMonitor monitor, int flags) throws RemoteException {
+    public int requestBackupForUser(@UserIdInt int userId, String[] packages, IBackupObserver
+            observer, IBackupManagerMonitor monitor, int flags) throws RemoteException {
         BackupManagerService svc = mService;
         if (svc == null) {
             return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
         }
-        return svc.requestBackup(packages, observer, monitor, flags);
+        return svc.requestBackup(userId, packages, observer, monitor, flags);
+    }
+
+    @Override
+    public int requestBackup(String[] packages, IBackupObserver observer,
+            IBackupManagerMonitor monitor, int flags) throws RemoteException {
+        return requestBackupForUser(binderGetCallingUserId(), packages,
+                observer, monitor, flags);
+    }
+
+    @Override
+    public void cancelBackupsForUser(@UserIdInt int userId) throws RemoteException {
+        BackupManagerService svc = mService;
+        if (svc != null) {
+            svc.cancelBackups(userId);
+        }
     }
 
     @Override
     public void cancelBackups() throws RemoteException {
-        BackupManagerService svc = mService;
-        if (svc != null) {
-            svc.cancelBackups();
-        }
+        cancelBackupsForUser(binderGetCallingUserId());
     }
 
     @Override
