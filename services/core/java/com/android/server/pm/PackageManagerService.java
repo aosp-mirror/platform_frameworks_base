@@ -86,11 +86,6 @@ import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageParser.isApkFile;
-import static android.content.pm.SharedLibraryNames.ANDROID_HIDL_BASE;
-import static android.content.pm.SharedLibraryNames.ANDROID_HIDL_MANAGER;
-import static android.content.pm.SharedLibraryNames.ANDROID_TEST_BASE;
-import static android.content.pm.SharedLibraryNames.ANDROID_TEST_MOCK;
-import static android.content.pm.SharedLibraryNames.ANDROID_TEST_RUNNER;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
@@ -2093,28 +2088,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    @GuardedBy("mPackages")
-    private void setupBuiltinSharedLibraryDependenciesLocked() {
-        // Builtin libraries don't have versions.
-        long version = SharedLibraryInfo.VERSION_UNDEFINED;
-
-        SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(ANDROID_HIDL_MANAGER, version);
-        if (libraryInfo != null) {
-            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_HIDL_BASE, version));
-        }
-
-        libraryInfo = getSharedLibraryInfoLPr(ANDROID_TEST_RUNNER, version);
-        if (libraryInfo != null) {
-            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_TEST_MOCK, version));
-            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_TEST_BASE, version));
-        }
-
-        libraryInfo = getSharedLibraryInfoLPr(ANDROID_TEST_MOCK, version);
-        if (libraryInfo != null) {
-            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_TEST_BASE, version));
-        }
-    }
-
     public PackageManagerService(Context context, Installer installer,
             boolean factoryTest, boolean onlyCore) {
         LockGuard.installLock(mPackages, LockGuard.INDEX_PACKAGES);
@@ -2222,17 +2195,32 @@ public class PackageManagerService extends IPackageManager.Stub
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
             mInstantAppRegistry = new InstantAppRegistry(this);
 
-            ArrayMap<String, String> libConfig = systemConfig.getSharedLibraries();
+            ArrayMap<String, SystemConfig.SharedLibraryEntry> libConfig
+                    = systemConfig.getSharedLibraries();
             final int builtInLibCount = libConfig.size();
             for (int i = 0; i < builtInLibCount; i++) {
                 String name = libConfig.keyAt(i);
-                String path = libConfig.valueAt(i);
-                addSharedLibraryLPw(path, null, null, name, SharedLibraryInfo.VERSION_UNDEFINED,
-                        SharedLibraryInfo.TYPE_BUILTIN, PLATFORM_PACKAGE_NAME, 0);
+                SystemConfig.SharedLibraryEntry entry = libConfig.valueAt(i);
+                addSharedLibraryLPw(entry.filename, null, null, name,
+                        SharedLibraryInfo.VERSION_UNDEFINED, SharedLibraryInfo.TYPE_BUILTIN,
+                        PLATFORM_PACKAGE_NAME, 0);
             }
-            // Builtin libraries cannot encode their dependency where they are
-            // defined, so fix that now.
-            setupBuiltinSharedLibraryDependenciesLocked();
+
+            // Now that we have added all the libraries, iterate again to add dependency
+            // information IFF their dependencies are added.
+            long undefinedVersion = SharedLibraryInfo.VERSION_UNDEFINED;
+            for (int i = 0; i < builtInLibCount; i++) {
+                String name = libConfig.keyAt(i);
+                SystemConfig.SharedLibraryEntry entry = libConfig.valueAt(i);
+                final int dependencyCount = entry.dependencies.length;
+                for (int j = 0; j < dependencyCount; j++) {
+                    final SharedLibraryInfo dependency =
+                        getSharedLibraryInfoLPr(entry.dependencies[j], undefinedVersion);
+                    if (dependency != null) {
+                        getSharedLibraryInfoLPr(name, undefinedVersion).addDependency(dependency);
+                    }
+                }
+            }
 
             SELinuxMMAC.readInstallPolicy();
 

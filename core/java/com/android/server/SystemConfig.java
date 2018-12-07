@@ -25,7 +25,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Process;
-import android.os.SystemProperties;
 import android.os.storage.StorageManager;
 import android.permission.PermissionManager.SplitPermissionInfo;
 import android.text.TextUtils;
@@ -78,10 +77,23 @@ public class SystemConfig {
 
     final ArrayList<SplitPermissionInfo> mSplitPermissions = new ArrayList<>();
 
+    public static final class SharedLibraryEntry {
+        public final String name;
+        public final String filename;
+        public final String[] dependencies;
+
+        SharedLibraryEntry(String name, String filename, String[] dependencies) {
+            this.name = name;
+            this.filename = filename;
+            this.dependencies = dependencies;
+        }
+    }
+
     // These are the built-in shared libraries that were read from the
-    // system configuration files.  Keys are the library names; strings are the
-    // paths to the libraries.
-    final ArrayMap<String, String> mSharedLibraries  = new ArrayMap<>();
+    // system configuration files. Keys are the library names; values are
+    // the individual entries that contain information such as filename
+    // and dependencies.
+    final ArrayMap<String, SharedLibraryEntry> mSharedLibraries = new ArrayMap<>();
 
     // These are the features this devices supports that were read from the
     // system configuration files.
@@ -200,7 +212,7 @@ public class SystemConfig {
         return mSplitPermissions;
     }
 
-    public ArrayMap<String, String> getSharedLibraries() {
+    public ArrayMap<String, SharedLibraryEntry> getSharedLibraries() {
         return mSharedLibraries;
     }
 
@@ -497,6 +509,7 @@ public class SystemConfig {
                 } else if ("library".equals(name) && allowLibs) {
                     String lname = parser.getAttributeValue(null, "name");
                     String lfile = parser.getAttributeValue(null, "file");
+                    String ldependency = parser.getAttributeValue(null, "dependency");
                     if (lname == null) {
                         Slog.w(TAG, "<library> without name in " + permFile + " at "
                                 + parser.getPositionDescription());
@@ -505,11 +518,12 @@ public class SystemConfig {
                                 + parser.getPositionDescription());
                     } else {
                         //Log.i(TAG, "Got library " + lname + " in " + lfile);
-                        mSharedLibraries.put(lname, lfile);
+                        SharedLibraryEntry entry = new SharedLibraryEntry(lname, lfile,
+                                ldependency == null ? new String[0] : ldependency.split(":"));
+                        mSharedLibraries.put(lname, entry);
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;
-
                 } else if ("feature".equals(name) && allowFeatures) {
                     String fname = parser.getAttributeValue(null, "name");
                     int fversion = XmlUtils.readIntAttribute(parser, "version", 0);
