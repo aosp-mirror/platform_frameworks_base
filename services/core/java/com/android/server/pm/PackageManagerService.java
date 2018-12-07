@@ -12836,16 +12836,17 @@ public class PackageManagerService extends IPackageManager.Stub
         final List<String> unactionedPackages = new ArrayList<>(packageNames.length);
         final long callingId = Binder.clearCallingIdentity();
         try {
-            synchronized (mPackages) {
-                for (int i = 0; i < packageNames.length; i++) {
-                    final String packageName = packageNames[i];
-                    if (callingPackage.equals(packageName)) {
-                        Slog.w(TAG, "Calling package: " + callingPackage + " trying to "
-                                + (suspended ? "" : "un") + "suspend itself. Ignoring");
-                        unactionedPackages.add(packageName);
-                        continue;
-                    }
-                    final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+            for (int i = 0; i < packageNames.length; i++) {
+                final String packageName = packageNames[i];
+                if (callingPackage.equals(packageName)) {
+                    Slog.w(TAG, "Calling package: " + callingPackage + " trying to "
+                            + (suspended ? "" : "un") + "suspend itself. Ignoring");
+                    unactionedPackages.add(packageName);
+                    continue;
+                }
+                PackageSetting pkgSetting;
+                synchronized (mPackages) {
+                    pkgSetting = mSettings.mPackages.get(packageName);
                     if (pkgSetting == null
                             || filterAppAccessLPr(pkgSetting, callingUid, userId)) {
                         Slog.w(TAG, "Could not find package setting for package: " + packageName
@@ -12853,15 +12854,20 @@ public class PackageManagerService extends IPackageManager.Stub
                         unactionedPackages.add(packageName);
                         continue;
                     }
-                    if (suspended && !canSuspendPackageForUserLocked(packageName, userId)) {
-                        unactionedPackages.add(packageName);
-                        continue;
-                    }
-                    pkgSetting.setSuspended(suspended, callingPackage, dialogInfo, appExtras,
-                            launcherExtras, userId);
-                    changedPackagesList.add(packageName);
-                    changedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
                 }
+                if (suspended && !canSuspendPackageForUserInternal(packageName, userId)) {
+                    unactionedPackages.add(packageName);
+                    continue;
+                }
+                synchronized (mPackages) {
+                    pkgSetting = mSettings.mPackages.get(packageName);
+                    if (pkgSetting != null) {
+                        pkgSetting.setSuspended(suspended, callingPackage, dialogInfo, appExtras,
+                                launcherExtras, userId);
+                    }
+                }
+                changedPackagesList.add(packageName);
+                changedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -13018,16 +13024,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            synchronized (mPackages) {
-                return canSuspendPackageForUserLocked(packageName, userId);
-            }
+            return canSuspendPackageForUserInternal(packageName, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
-    @GuardedBy("mPackages")
-    private boolean canSuspendPackageForUserLocked(String packageName, int userId) {
+    private boolean canSuspendPackageForUserInternal(String packageName, int userId) {
         if (isPackageDeviceAdmin(packageName, userId)) {
             Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": has an active device admin");
@@ -13071,21 +13074,23 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
 
-        if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
-            Slog.w(TAG, "Cannot suspend package \"" + packageName
-                    + "\": protected package");
-            return false;
-        }
+        synchronized (mPackages) {
+            if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
+                Slog.w(TAG, "Cannot suspend package \"" + packageName
+                        + "\": protected package");
+                return false;
+            }
 
-        // Cannot suspend static shared libs as they are considered
-        // a part of the using app (emulating static linking). Also
-        // static libs are installed always on internal storage.
-        PackageParser.Package pkg = mPackages.get(packageName);
-        if (pkg != null && pkg.applicationInfo.isStaticSharedLibrary()) {
-            Slog.w(TAG, "Cannot suspend package: " + packageName
-                    + " providing static shared library: "
-                    + pkg.staticSharedLibName);
-            return false;
+            // Cannot suspend static shared libs as they are considered
+            // a part of the using app (emulating static linking). Also
+            // static libs are installed always on internal storage.
+            PackageParser.Package pkg = mPackages.get(packageName);
+            if (pkg != null && pkg.applicationInfo.isStaticSharedLibrary()) {
+                Slog.w(TAG, "Cannot suspend package: " + packageName
+                        + " providing static shared library: "
+                        + pkg.staticSharedLibName);
+                return false;
+            }
         }
 
         if (PLATFORM_PACKAGE_NAME.equals(packageName)) {
