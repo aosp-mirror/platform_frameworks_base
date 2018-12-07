@@ -1562,6 +1562,7 @@ droidstubs {
     ],
     dex_mapping_filename: "dex-mapping.txt",
     args: metalava_framework_docs_args +
+        " --hide ReferencesHidden " +
         " --show-unannotated " +
         " --show-annotation android.annotation.SystemApi " +
         " --show-annotation android.annotation.TestApi "
