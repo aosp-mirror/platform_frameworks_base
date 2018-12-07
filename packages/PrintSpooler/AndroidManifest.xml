@@ -51,6 +51,7 @@
     <application
         android:allowClearUserData="true"
         android:label="@string/app_label"
+        android:icon="@drawable/ic_app_icon"
         android:supportsRtl="true">
 
         <service
