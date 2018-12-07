@@ -98,6 +98,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 
 /**
  * Watches for updates that may be interesting to the keyguard, and provides
@@ -151,6 +152,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_BIOMETRIC_AUTHENTICATION_CONTINUE = 336;
     private static final int MSG_DEVICE_POLICY_MANAGER_STATE_CHANGED = 337;
     private static final int MSG_TELEPHONY_CAPABLE = 338;
+    private static final int MSG_TIMEZONE_UPDATE = 339;
 
     /** Biometric authentication state: Not listening. */
     private static final int BIOMETRIC_STATE_STOPPED = 0;
@@ -259,6 +261,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             switch (msg.what) {
                 case MSG_TIME_UPDATE:
                     handleTimeUpdate();
+                    break;
+                case MSG_TIMEZONE_UPDATE:
+                    handleTimeZoneUpdate((String) msg.obj);
                     break;
                 case MSG_BATTERY_UPDATE:
                     handleBatteryUpdate((BatteryStatus) msg.obj);
@@ -964,9 +969,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             if (DEBUG) Log.d(TAG, "received broadcast " + action);
 
             if (Intent.ACTION_TIME_TICK.equals(action)
-                    || Intent.ACTION_TIME_CHANGED.equals(action)
-                    || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
+                    || Intent.ACTION_TIME_CHANGED.equals(action)) {
                 mHandler.sendEmptyMessage(MSG_TIME_UPDATE);
+            } else if (Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
+                final Message msg = mHandler.obtainMessage(
+                        MSG_TIMEZONE_UPDATE, intent.getStringExtra("time-zone"));
+                mHandler.sendMessage(msg);
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
                 final int status = intent.getIntExtra(EXTRA_STATUS, BATTERY_STATUS_UNKNOWN);
                 final int plugged = intent.getIntExtra(EXTRA_PLUGGED, 0);
@@ -1854,6 +1862,21 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
+                cb.onTimeChanged();
+            }
+        }
+    }
+
+    /**
+     * Handle (@line #MSG_TIMEZONE_UPDATE}
+     */
+    private void handleTimeZoneUpdate(String timeZone) {
+        if (DEBUG) Log.d(TAG, "handleTimeZoneUpdate");
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onTimeZoneChanged(TimeZone.getTimeZone(timeZone));
+                // Also notify callbacks about time change to remain compatible.
                 cb.onTimeChanged();
             }
         }

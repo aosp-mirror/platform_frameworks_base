@@ -17,6 +17,7 @@ import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
 
 import java.util.Objects;
+import java.util.TimeZone;
 
 /**
  * Switch to show plugin clock when plugin is connected, otherwise it will show default clock.
@@ -158,6 +159,15 @@ public class KeyguardClockSwitch extends FrameLayout {
     public void dozeTimeTick() {
         if (mClockPlugin != null) {
             mClockPlugin.dozeTimeTick();
+        }
+    }
+
+    /**
+     * Notifies that the time zone has changed.
+     */
+    public void onTimeZoneChanged(TimeZone timeZone) {
+        if (mClockPlugin != null) {
+            mClockPlugin.onTimeZoneChanged(timeZone);
         }
     }
 
