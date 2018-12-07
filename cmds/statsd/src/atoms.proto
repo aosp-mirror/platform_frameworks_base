@@ -1501,17 +1501,17 @@ message SettingsUIChanged {
     /**
      * Where the action is happening
      */
-    optional android.app.settings.PageId pageId = 3;
+    optional android.app.settings.PageId page_id = 3;
 
     /**
      * What preference changed in this event.
      */
-    optional string changedPreferenceKey = 4;
+    optional string changed_preference_key = 4;
 
     /**
      * The new value of the changed preference.
      */
-    optional int64 changedPreferenceIntValue = 5;
+    optional int64 changed_preference_int_value = 5;
 }
 
 /**
