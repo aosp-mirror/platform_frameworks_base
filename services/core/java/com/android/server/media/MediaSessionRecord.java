@@ -20,10 +20,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
-import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
@@ -36,7 +36,6 @@ import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
-import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -94,8 +93,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private PendingIntent mLaunchIntent;
 
     // TransportPerformer fields
-
     private Bundle mExtras;
+    // Note: Avoid unparceling the bundle inside MediaMetadata since unparceling in system process
+    // may result in throwing an exception.
     private MediaMetadata mMetadata;
     private PlaybackState mPlaybackState;
     private ParceledListSlice mQueue;
@@ -116,6 +116,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private boolean mIsActive = false;
     private boolean mDestroyed = false;
+
+    private long mDuration;
+    private String mMetadataDescription;
 
     public MediaSessionRecord(int ownerPid, int ownerUid, int userId, String ownerPackageName,
             ISessionCallback cb, String tag, MediaSessionService service, Looper handlerLooper) {
@@ -451,7 +454,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         pw.println(indent + "audioAttrs=" + mAudioAttrs);
         pw.println(indent + "volumeType=" + mVolumeType + ", controlType=" + mVolumeControlType
                 + ", max=" + mMaxVolume + ", current=" + mCurrentVolume);
-        pw.println(indent + "metadata:" + getShortMetadataString());
+        pw.println(indent + "metadata: " + mMetadataDescription);
         pw.println(indent + "queueTitle=" + mQueueTitle + ", size="
                 + (mQueue == null ? 0 : mQueue.getList().size()));
     }
@@ -492,13 +495,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 }
             }
         });
-    }
-
-    private String getShortMetadataString() {
-        int fields = mMetadata == null ? 0 : mMetadata.size();
-        MediaDescription description = mMetadata == null ? null : mMetadata
-                .getDescription();
-        return "size=" + fields + ", description=" + description;
     }
 
     private void logCallbackException(
@@ -670,12 +666,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private PlaybackState getStateWithUpdatedPosition() {
         PlaybackState state;
-        long duration = -1;
+        long duration;
         synchronized (mLock) {
             state = mPlaybackState;
-            if (mMetadata != null && mMetadata.containsKey(MediaMetadata.METADATA_KEY_DURATION)) {
-                duration = mMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
-            }
+            duration = mDuration;
         }
         PlaybackState result = null;
         if (state != null) {
@@ -793,7 +787,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setMetadata(MediaMetadata metadata) {
+        public void setMetadata(MediaMetadata metadata, long duration, String metadataDescription) {
             synchronized (mLock) {
                 MediaMetadata temp = metadata == null ? null : new MediaMetadata.Builder(metadata)
                         .build();
@@ -804,6 +798,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     temp.size();
                 }
                 mMetadata = temp;
+                mDuration = duration;
+                mMetadataDescription = metadataDescription;
             }
             mHandler.post(MessageHandler.MSG_UPDATE_METADATA);
         }
