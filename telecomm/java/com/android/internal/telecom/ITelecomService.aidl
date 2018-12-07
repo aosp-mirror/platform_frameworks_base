@@ -307,6 +307,8 @@ interface ITelecomService {
 
     void setTestDefaultCallRedirectionApp(String packageName);
 
+    void setTestPhoneAcctSuggestionComponent(String flattenedComponentName);
+
     void setTestDefaultCallScreeningApp(String packageName);
 
     void addOrRemoveTestCallCompanionApp(String packageName, boolean isAdded);

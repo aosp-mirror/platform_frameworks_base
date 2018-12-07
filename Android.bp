@@ -484,6 +484,8 @@ java_defaults {
         "telecomm/java/com/android/internal/telecom/IConnectionServiceAdapter.aidl",
         "telecomm/java/com/android/internal/telecom/IInCallAdapter.aidl",
         "telecomm/java/com/android/internal/telecom/IInCallService.aidl",
+        "telecomm/java/com/android/internal/telecom/IPhoneAccountSuggestionCallback.aidl",
+        "telecomm/java/com/android/internal/telecom/IPhoneAccountSuggestionService.aidl",
         "telecomm/java/com/android/internal/telecom/ITelecomService.aidl",
         "telecomm/java/com/android/internal/telecom/RemoteServiceCallback.aidl",
         "telephony/java/android/telephony/data/IDataService.aidl",
