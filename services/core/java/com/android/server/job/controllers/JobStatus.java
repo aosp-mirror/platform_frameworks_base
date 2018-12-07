@@ -1007,6 +1007,18 @@ public final class JobStatus {
      * @return Whether or not this job is ready to run, based on its requirements.
      */
     public boolean isReady() {
+        return isReady(mSatisfiedConstraintsOfInterest);
+    }
+
+    /**
+     * @return Whether or not this job would be ready to run if it had the specified constraint
+     * granted, based on its requirements.
+     */
+    public boolean wouldBeReadyWithConstraint(int constraint) {
+        return isReady(mSatisfiedConstraintsOfInterest | constraint);
+    }
+
+    private boolean isReady(int satisfiedConstraints) {
         // Quota constraints trumps all other constraints.
         if (!mReadyWithinQuota) {
             return false;
@@ -1017,7 +1029,7 @@ public final class JobStatus {
         // DeviceNotDozing implicit constraint must be satisfied
         // NotRestrictedInBackground implicit constraint must be satisfied
         return mReadyNotDozing && mReadyNotRestrictedInBg && (mReadyDeadlineSatisfied
-                || isConstraintsSatisfied());
+                || isConstraintsSatisfied(satisfiedConstraints));
     }
 
     static final int CONSTRAINTS_OF_INTEREST = CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW
@@ -1033,12 +1045,16 @@ public final class JobStatus {
      * @return Whether the constraints set on this job are satisfied.
      */
     public boolean isConstraintsSatisfied() {
+        return isConstraintsSatisfied(mSatisfiedConstraintsOfInterest);
+    }
+
+    private boolean isConstraintsSatisfied(int satisfiedConstraints) {
         if (overrideState == OVERRIDE_FULL) {
             // force override: the job is always runnable
             return true;
         }
 
-        int sat = mSatisfiedConstraintsOfInterest;
+        int sat = satisfiedConstraints;
         if (overrideState == OVERRIDE_SOFT) {
             // override: pretend all 'soft' requirements are satisfied
             sat |= (requiredConstraints & SOFT_OVERRIDE_CONSTRAINTS);

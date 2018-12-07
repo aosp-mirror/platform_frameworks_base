@@ -834,6 +834,15 @@ public class JobSchedulerService extends com.android.server.SystemService
                                 break;
                             }
                         }
+                        if (DEBUG) {
+                            Slog.d(TAG, "Something in " + pkgName
+                                    + " changed. Reevaluating controller states.");
+                        }
+                        synchronized (mLock) {
+                            for (int c = mControllers.size() - 1; c >= 0; --c) {
+                                mControllers.get(c).reevaluateStateLocked(pkgUid);
+                            }
+                        }
                     }
                 } else {
                     Slog.w(TAG, "PACKAGE_CHANGED for " + pkgName + " / uid " + pkgUid);
@@ -1037,6 +1046,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mJobPackageTracker.notePending(jobStatus);
                 addOrderedItem(mPendingJobs, jobStatus, mEnqueueTimeComparator);
                 maybeRunPendingJobsLocked();
+            } else {
+                evaluateControllerStatesLocked(jobStatus);
             }
         }
         return JobScheduler.RESULT_SUCCESS;
@@ -1853,6 +1864,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     newReadyJobs = new ArrayList<JobStatus>();
                 }
                 newReadyJobs.add(job);
+            } else {
+                evaluateControllerStatesLocked(job);
             }
         }
 
@@ -1926,6 +1939,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     runnableJobs = new ArrayList<>();
                 }
                 runnableJobs.add(job);
+            } else {
+                evaluateControllerStatesLocked(job);
             }
         }
 
@@ -2056,6 +2071,15 @@ public class JobSchedulerService extends com.android.server.SystemService
                 HEARTBEAT_TAG, mHeartbeatAlarm, mHandler);
     }
 
+    /** Returns true if both the calling and source users for the job are started. */
+    private boolean areUsersStartedLocked(final JobStatus job) {
+        boolean sourceStarted = ArrayUtils.contains(mStartedUsers, job.getSourceUserId());
+        if (job.getUserId() == job.getSourceUserId()) {
+            return sourceStarted;
+        }
+        return sourceStarted && ArrayUtils.contains(mStartedUsers, job.getUserId());
+    }
+
     /**
      * Criteria for moving a job into the pending queue:
      *      - It's ready.
@@ -2177,6 +2201,61 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         if (DEBUG) {
             Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
+                    + " componentPresent=" + componentPresent);
+        }
+
+        // Everything else checked out so far, so this is the final yes/no check
+        return componentPresent;
+    }
+
+    private void evaluateControllerStatesLocked(final JobStatus job) {
+        for (int c = mControllers.size() - 1; c >= 0; --c) {
+            final StateController sc = mControllers.get(c);
+            sc.evaluateStateLocked(job);
+        }
+    }
+
+    /**
+     * Returns true if non-job constraint components are in place -- if job.isReady() returns true
+     * and this method returns true, then the job is ready to be executed.
+     */
+    public boolean areComponentsInPlaceLocked(JobStatus job) {
+        // This code is very similar to the code in isReadyToBeExecutedLocked --- it uses the same
+        // conditions.
+
+        final boolean jobExists = mJobs.containsJob(job);
+        final boolean userStarted = areUsersStartedLocked(job);
+
+        if (DEBUG) {
+            Slog.v(TAG, "areComponentsInPlaceLocked: " + job.toShortString()
+                    + " exists=" + jobExists + " userStarted=" + userStarted);
+        }
+
+        // These are also fairly cheap to check, though they typically will not
+        // be conditions we fail.
+        if (!jobExists || !userStarted) {
+            return false;
+        }
+
+        // Job pending/active doesn't affect the readiness of a job.
+
+        // Skipping the hearbeat check as this will only come into play when using the rolling
+        // window quota management system.
+
+        // The expensive check last: validate that the defined package+service is
+        // still present & viable.
+        final boolean componentPresent;
+        try {
+            // TODO: cache result until we're notified that something in the package changed.
+            componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
+                    job.getServiceComponent(), PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                    job.getUserId()) != null);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+
+        if (DEBUG) {
+            Slog.v(TAG, "areComponentsInPlaceLocked: " + job.toShortString()
                     + " componentPresent=" + componentPresent);
         }
 

@@ -87,7 +87,6 @@ public class QuotaControllerTest {
     private static final long HOUR_IN_MILLIS = 60 * MINUTE_IN_MILLIS;
     private static final String TAG_CLEANUP = "*job.cleanup*";
     private static final String TAG_QUOTA_CHECK = "*job.quota_check*";
-    private static final long IN_QUOTA_BUFFER_MILLIS = 30 * SECOND_IN_MILLIS;
     private static final int CALLING_UID = 1000;
     private static final String SOURCE_PACKAGE = "com.android.frameworks.mockingservicestests";
     private static final int SOURCE_USER_ID = 0;
@@ -365,7 +364,8 @@ public class QuotaControllerTest {
         final long end = now - (2 * HOUR_IN_MILLIS - 5 * MINUTE_IN_MILLIS);
         // Counting backwards, the quota will come back one minute before the end.
         final long expectedAlarmTime =
-                end - MINUTE_IN_MILLIS + 2 * HOUR_IN_MILLIS + IN_QUOTA_BUFFER_MILLIS;
+                end - MINUTE_IN_MILLIS + 2 * HOUR_IN_MILLIS
+                        + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
         mQuotaController.saveTimingSession(0, "com.android.test",
                 new TimingSession(now - 2 * HOUR_IN_MILLIS, end, 1));
         mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
@@ -415,7 +415,8 @@ public class QuotaControllerTest {
 
         // Test with timing sessions in window but still in quota.
         final long start = now - (6 * HOUR_IN_MILLIS);
-        final long expectedAlarmTime = start + 8 * HOUR_IN_MILLIS + IN_QUOTA_BUFFER_MILLIS;
+        final long expectedAlarmTime =
+                start + 8 * HOUR_IN_MILLIS + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
         mQuotaController.saveTimingSession(0, "com.android.test",
                 createTimingSession(start, 5 * MINUTE_IN_MILLIS, 1));
         mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
@@ -468,7 +469,8 @@ public class QuotaControllerTest {
         // Counting backwards, the first minute in the session is over the allowed time, so it
         // needs to be excluded.
         final long expectedAlarmTime =
-                start + MINUTE_IN_MILLIS + 24 * HOUR_IN_MILLIS + IN_QUOTA_BUFFER_MILLIS;
+                start + MINUTE_IN_MILLIS + 24 * HOUR_IN_MILLIS
+                        + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
         mQuotaController.saveTimingSession(0, "com.android.test",
                 createTimingSession(start, 5 * MINUTE_IN_MILLIS, 1));
         mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", standbyBucket);
@@ -529,19 +531,22 @@ public class QuotaControllerTest {
 
         // And down from there.
         final long expectedWorkingAlarmTime =
-                outOfQuotaTime + (2 * HOUR_IN_MILLIS) + IN_QUOTA_BUFFER_MILLIS;
+                outOfQuotaTime + (2 * HOUR_IN_MILLIS)
+                        + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
         mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", WORKING_INDEX);
         inOrder.verify(mAlarmManager, times(1))
                 .set(anyInt(), eq(expectedWorkingAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
 
         final long expectedFrequentAlarmTime =
-                outOfQuotaTime + (8 * HOUR_IN_MILLIS) + IN_QUOTA_BUFFER_MILLIS;
+                outOfQuotaTime + (8 * HOUR_IN_MILLIS)
+                        + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
         mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", FREQUENT_INDEX);
         inOrder.verify(mAlarmManager, times(1))
                 .set(anyInt(), eq(expectedFrequentAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
 
         final long expectedRareAlarmTime =
-                outOfQuotaTime + (24 * HOUR_IN_MILLIS) + IN_QUOTA_BUFFER_MILLIS;
+                outOfQuotaTime + (24 * HOUR_IN_MILLIS)
+                        + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
         mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", RARE_INDEX);
         inOrder.verify(mAlarmManager, times(1))
                 .set(anyInt(), eq(expectedRareAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
