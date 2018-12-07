@@ -18,8 +18,10 @@ package android.annotation;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.CLASS;
 
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -40,7 +42,8 @@ import java.lang.annotation.Target;
  * {@hide}
  */
 @Retention(CLASS)
-@Target({CONSTRUCTOR, METHOD, FIELD})
+@Target({CONSTRUCTOR, METHOD, FIELD, TYPE})
+@Repeatable(UnsupportedAppUsage.Container.class)
 public @interface UnsupportedAppUsage {
 
     /**
@@ -90,4 +93,27 @@ public @interface UnsupportedAppUsage {
      * @return A dex API signature.
      */
     String expectedSignature() default "";
+
+    /**
+     * The signature of an implicit (not present in the source) member that forms part of the
+     * hiddenapi.
+     *
+     * <p>Allows access to non-SDK API elements that are not represented in the input source to be
+     * managed.
+     *
+     * <p>This must only be used when applying the annotation to a type, using it in any other
+     * situation is an error.
+     *
+     * @return A dex API signature.
+     */
+    String implicitMember() default "";
+
+    /**
+     * Container for {@link UnsupportedAppUsage} that allows it to be applied repeatedly to types.
+     */
+    @Retention(CLASS)
+    @Target(TYPE)
+    @interface Container {
+        UnsupportedAppUsage[] value();
+    }
 }
