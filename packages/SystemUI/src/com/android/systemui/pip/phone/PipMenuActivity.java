@@ -224,6 +224,9 @@ public class PipMenuActivity extends Activity {
                         // next tap
                         mTouchState.scheduleDoubleTapTimeoutCallback();
                     }
+                    // Fall through
+                case MotionEvent.ACTION_CANCEL:
+                    mTouchState.reset();
                     break;
             }
             return true;
