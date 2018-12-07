@@ -26,6 +26,7 @@ import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy
 import android.service.autofill.augmented.PresentationParams.Area;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -140,10 +141,24 @@ public final class FillWindow implements AutoCloseable {
             // TODO(b/111330312): make sure all touch events are handled, window is always closed,
             // etc.
 
-            mDialog = new Dialog(rootView.getContext());
+            mDialog = new Dialog(rootView.getContext()) {
+                @Override
+                public boolean onTouchEvent(MotionEvent event) {
+                    if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                        FillWindow.this.destroy();
+                    }
+                    return false;
+                }
+            };
             mCloseGuard.open("destroy");
             final Window window = mDialog.getWindow();
             window.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+            // Makes sure touch outside the dialog is received by the window behind the dialog.
+            window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+            // Makes sure the touch outside the dialog is received by the dialog to dismiss it.
+            window.addFlags(WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
+            // Makes sure keyboard shows up.
+            window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
 
             final int height = rect.bottom - rect.top;
             final int width = rect.right - rect.left;
