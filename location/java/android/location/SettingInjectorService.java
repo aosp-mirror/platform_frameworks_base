@@ -17,6 +17,7 @@
 package android.location;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -26,7 +27,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 /**
- * Dynamically specifies the enabled status of a preference injected into
+ * Dynamically specifies the summary (subtitle) and enabled status of a preference injected into
  * the list of app settings displayed by the system settings app
  * <p/>
  * For use only by apps that are included in the system image, for preferences that affect multiple
@@ -71,12 +72,13 @@ import android.util.Log;
  * </ul>
  *
  * To ensure a good user experience, your {@link android.app.Application#onCreate()},
- * and {@link #onGetEnabled()} methods must all be fast. If either is slow,
- * it can delay the display of settings values for other apps as well. Note further that these
- * methods are called on your app's UI thread.
+ * {@link #onGetSummary()}, and {@link #onGetEnabled()} methods must all be fast. If any are slow,
+ * it can delay the display of settings values for other apps as well. Note further that all are
+ * called on your app's UI thread.
  * <p/>
  * For compactness, only one copy of a given setting should be injected. If each account has a
- * distinct value for the setting, then only {@code settingsActivity} should display the value for
+ * distinct value for the setting, then the {@link #onGetSummary()} value should represent a summary
+ * of the state across all of the accounts and {@code settingsActivity} should display the value for
  * each account.
  */
 public abstract class SettingInjectorService extends Service {
@@ -106,6 +108,14 @@ public abstract class SettingInjectorService extends Service {
      */
     public static final String ACTION_INJECTED_SETTING_CHANGED =
             "android.location.InjectedSettingChanged";
+
+    /**
+     * Name of the bundle key for the string specifying the summary for the setting (e.g., "ON" or
+     * "OFF").
+     *
+     * @hide
+     */
+    public static final String SUMMARY_KEY = "summary";
 
     /**
      * Name of the bundle key for the string specifying whether the setting is currently enabled.
@@ -150,36 +160,41 @@ public abstract class SettingInjectorService extends Service {
     }
 
     private void onHandleIntent(Intent intent) {
-
-        boolean enabled;
+        String summary = null;
+        boolean enabled = false;
         try {
+            summary = onGetSummary();
             enabled = onGetEnabled();
-        } catch (RuntimeException e) {
-            // Exception. Send status anyway, so that settings injector can immediately start
-            // loading the status of the next setting.
-            sendStatus(intent, true);
-            throw e;
+        } finally {
+            // If exception happens, send status anyway, so that settings injector can immediately
+            // start loading the status of the next setting. But leave the exception uncaught to
+            // crash the injector service itself.
+            sendStatus(intent, summary, enabled);
         }
-
-        sendStatus(intent, enabled);
     }
 
     /**
      * Send the enabled values back to the caller via the messenger encoded in the
      * intent.
      */
-    private void sendStatus(Intent intent, boolean enabled) {
+    private void sendStatus(Intent intent, String summary, boolean enabled) {
+        Messenger messenger = intent.getParcelableExtra(MESSENGER_KEY);
+        // Bail out to avoid crashing GmsCore with incoming malicious Intent.
+        if (messenger == null) {
+            return;
+        }
+
         Message message = Message.obtain();
         Bundle bundle = new Bundle();
+        bundle.putString(SUMMARY_KEY, summary);
         bundle.putBoolean(ENABLED_KEY, enabled);
         message.setData(bundle);
 
         if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, mName + ": received " + intent
+            Log.d(TAG, mName + ": received " + intent + ", summary=" + summary
                     + ", enabled=" + enabled + ", sending message: " + message);
         }
 
-        Messenger messenger = intent.getParcelableExtra(MESSENGER_KEY);
         try {
             messenger.send(message);
         } catch (RemoteException e) {
@@ -188,14 +203,12 @@ public abstract class SettingInjectorService extends Service {
     }
 
     /**
-     * This method is no longer called, because status values are no longer shown for any injected
-     * setting.
+     * Returns the {@link android.preference.Preference#getSummary()} value (allowed to be null or
+     * empty). Should not perform unpredictably-long operations such as network access--see the
+     * running-time comments in the class-level javadoc.
      *
-     * @return ignored
-     *
-     * @deprecated not called any more
+     * @return the {@link android.preference.Preference#getSummary()} value
      */
-    @Deprecated
     protected abstract String onGetSummary();
 
     /**
@@ -217,4 +230,12 @@ public abstract class SettingInjectorService extends Service {
      * @return the {@link android.preference.Preference#isEnabled()} value
      */
     protected abstract boolean onGetEnabled();
+
+    /**
+     * Sends a broadcast to refresh the injected settings on location settings page.
+     */
+    public static final void refreshSettings(Context context) {
+        Intent intent = new Intent(ACTION_INJECTED_SETTING_CHANGED);
+        context.sendBroadcast(intent);
+    }
 }

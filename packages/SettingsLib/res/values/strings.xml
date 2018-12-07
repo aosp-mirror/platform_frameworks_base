@@ -831,6 +831,10 @@
     <!-- Toast message shown when setting a new local backup password fails due to the user not supplying the correct existing password. The phrasing here is deliberately quite general. [CHAR LIMIT=80] -->
     <string name="local_backup_password_toast_validation_failure">Failure setting backup password</string>
 
+    <!-- [CHAR LIMIT=30] Location mode screen, temporary summary text to show as the status of a location
+      setting injected by an external app while the app is being queried for the actual value -->
+    <string name="loading_injected_setting_summary">Loading\u2026</string>
+
     <!-- Name of each color mode for the display. [CHAR LIMIT=40] -->
     <string-array name="color_mode_names">
         <item>Vibrant (default)</item>
