@@ -1023,7 +1023,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
-                mScrimController, mActivityLaunchAnimator);
+                mScrimController, mActivityLaunchAnimator, mStatusBarKeyguardViewManager);
 
         mAppOpsController.addCallback(APP_OPS, this);
         mNotificationListener.setUpWithPresenter(mPresenter);
