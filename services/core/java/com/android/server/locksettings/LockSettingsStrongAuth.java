@@ -24,8 +24,7 @@ import android.app.AlarmManager.OnAlarmListener;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.IStrongAuthTracker;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.biometrics.BiometricManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteCallbackList;
@@ -62,7 +61,7 @@ public class LockSettingsStrongAuth {
     private final Context mContext;
 
     private AlarmManager mAlarmManager;
-    private FingerprintManager mFingerprintManager;
+    private BiometricManager mBiometricManager;
 
     public LockSettingsStrongAuth(Context context) {
         mContext = context;
@@ -71,9 +70,8 @@ public class LockSettingsStrongAuth {
     }
 
     public void systemReady() {
-        final PackageManager pm = mContext.getPackageManager();
-        if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
-            mFingerprintManager = mContext.getSystemService(FingerprintManager.class);
+        if (BiometricManager.hasBiometrics(mContext)) {
+            mBiometricManager = mContext.getSystemService(BiometricManager.class);
         }
     }
 
@@ -187,9 +185,9 @@ public class LockSettingsStrongAuth {
     }
 
     public void reportSuccessfulStrongAuthUnlock(int userId) {
-        if (mFingerprintManager != null) {
-            byte[] token = null; /* TODO: pass real auth token once fp HAL supports it */
-            mFingerprintManager.resetTimeout(token);
+        if (mBiometricManager != null) {
+            byte[] token = null; /* TODO: pass real auth token once HAL supports it */
+            mBiometricManager.resetTimeout(token);
         }
 
         final int argNotUsed = 0;
