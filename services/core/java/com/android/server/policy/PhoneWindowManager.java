@@ -3237,6 +3237,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
+    public void onDefaultDisplayFocusChangedLw(WindowState newFocus) {
+        if (mDisplayFoldController != null) {
+            mDisplayFoldController.onDefaultDisplayFocusChanged(
+                    newFocus != null ? newFocus.getOwningPackage() : null);
+        }
+    }
+
+    @Override
     public void registerShortcutKey(long shortcutCode, IShortcutService shortcutService)
             throws RemoteException {
         synchronized (mLock) {
@@ -4436,6 +4444,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mKeyguardDelegate.onFinishedGoingToSleep(why,
                     mCameraGestureTriggeredDuringGoingToSleep);
         }
+        if (mDisplayFoldController != null) {
+            mDisplayFoldController.finishedGoingToSleep();
+        }
         mCameraGestureTriggeredDuringGoingToSleep = false;
     }
 
@@ -4475,6 +4486,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onFinishedWakingUp();
+        }
+        if (mDisplayFoldController != null) {
+            mDisplayFoldController.finishedWakingUp();
         }
     }
 

@@ -1485,6 +1485,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     }
 
     /**
+     * A new window on default display has been focused.
+     */
+    default void onDefaultDisplayFocusChangedLw(WindowState newFocus) {}
+
+    /**
      * Updates the flag about whether AOD is showing.
      *
      * @return whether the value was changed.

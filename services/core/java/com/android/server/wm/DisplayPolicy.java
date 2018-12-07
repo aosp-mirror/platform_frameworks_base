@@ -2787,6 +2787,9 @@ public class DisplayPolicy {
     public int focusChangedLw(WindowState lastFocus, WindowState newFocus) {
         mFocusedWindow = newFocus;
         mLastFocusedWindow = lastFocus;
+        if (mDisplayContent.isDefaultDisplay) {
+            mService.mPolicy.onDefaultDisplayFocusChangedLw(newFocus);
+        }
         if ((updateSystemUiVisibilityLw() & SYSTEM_UI_CHANGING_LAYOUT) != 0) {
             // If the navigation bar has been hidden or shown, we need to do another
             // layout pass to update that window.
