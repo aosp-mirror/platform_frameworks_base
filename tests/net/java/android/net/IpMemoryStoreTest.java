@@ -16,11 +16,7 @@
 
 package android.net;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
-
 import android.content.Context;
-import android.os.RemoteException;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -37,17 +33,32 @@ public class IpMemoryStoreTest {
     Context mMockContext;
     @Mock
     IIpMemoryStore mMockService;
+    IpMemoryStore mStore;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mStore = new IpMemoryStore(mMockContext, mMockService);
     }
 
-    // TODO : remove this useless test
     @Test
-    public void testVersion() throws RemoteException {
-        doReturn(30).when(mMockService).version();
-        final IpMemoryStore store = new IpMemoryStore(mMockContext, mMockService);
-        assertEquals(store.version(), 30);
+    public void testNetworkAttributes() {
+        // TODO : implement this
     }
+
+    @Test
+    public void testPrivateData() {
+        // TODO : implement this
+    }
+
+    @Test
+    public void testFindL2Key() {
+        // TODO : implement this
+    }
+
+    @Test
+    public void testIsSameNetwork() {
+        // TODO : implement this
+    }
+
 }

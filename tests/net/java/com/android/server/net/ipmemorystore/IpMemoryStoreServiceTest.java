@@ -16,8 +16,6 @@
 
 package com.android.server.net.ipmemorystore;
 
-import static org.junit.Assert.assertEquals;
-
 import android.content.Context;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -40,10 +38,27 @@ public class IpMemoryStoreServiceTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    // TODO : remove this useless test
     @Test
-    public void testVersion() {
+    public void testNetworkAttributes() {
         final IpMemoryStoreService service = new IpMemoryStoreService(mMockContext);
-        assertEquals(service.version(), 1);
+        // TODO : implement this
+    }
+
+    @Test
+    public void testPrivateData() {
+        final IpMemoryStoreService service = new IpMemoryStoreService(mMockContext);
+        // TODO : implement this
+    }
+
+    @Test
+    public void testFindL2Key() {
+        final IpMemoryStoreService service = new IpMemoryStoreService(mMockContext);
+        // TODO : implement this
+    }
+
+    @Test
+    public void testIsSameNetwork() {
+        final IpMemoryStoreService service = new IpMemoryStoreService(mMockContext);
+        // TODO : implement this
     }
 }

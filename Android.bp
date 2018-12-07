@@ -716,16 +716,6 @@ java_defaults {
 
 }
 
-// AIDL interfaces between the core system and the networking mainline module.
-aidl_interface {
-    name: "networkstack-aidl-interfaces",
-    local_include_dir: "core/java",
-    srcs: [
-        "core/java/android/net/IIpMemoryStore.aidl",
-    ],
-    api_dir: "aidl/networkstack",
-}
-
 filegroup {
     name: "libincident_aidl",
     srcs: [
@@ -837,12 +827,14 @@ aidl_interface {
     srcs: [
         "core/java/android/net/INetworkMonitor.aidl",
         "core/java/android/net/INetworkMonitorCallbacks.aidl",
+        "core/java/android/net/IIpMemoryStore.aidl",
         "core/java/android/net/INetworkStackConnector.aidl",
         "core/java/android/net/INetworkStackStatusCallback.aidl",
         "core/java/android/net/PrivateDnsConfigParcel.aidl",
         "core/java/android/net/dhcp/DhcpServingParamsParcel.aidl",
         "core/java/android/net/dhcp/IDhcpServer.aidl",
         "core/java/android/net/dhcp/IDhcpServerCallbacks.aidl",
+        "core/java/android/net/ipmemorystore/**/*.aidl",
     ],
     api_dir: "aidl/networkstack",
 }
