@@ -105,8 +105,10 @@ public class SmartActionsHelper {
             return EMPTY_REPLY_LIST;
         }
         CharSequence text = getMostSalientActionText(entry.getNotification());
+        // TODO: Populate the actual Person object from the message.
         ConversationActions.Message message =
-                new ConversationActions.Message.Builder()
+                new ConversationActions.Message.Builder(
+                        ConversationActions.Message.PERSON_USER_REMOTE)
                         .setText(text)
                         .build();
 

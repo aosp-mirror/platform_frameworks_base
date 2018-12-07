@@ -16,7 +16,6 @@
 
 package android.view.textclassifier;
 
-import android.annotation.NonNull;
 import android.app.Person;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -30,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -57,9 +57,9 @@ public final class ActionsSuggestionsHelper {
      * </ul>
      * User A will be encoded as 2, user B will be encoded as 1 and local user will be encoded as 0.
      */
-    @NonNull
     public static ActionsSuggestionsModel.ConversationMessage[] toNativeMessages(
-            @NonNull List<ConversationActions.Message> messages) {
+            List<ConversationActions.Message> messages,
+            Function<CharSequence, String> languageDetector) {
         List<ConversationActions.Message> messagesWithText =
                 messages.stream()
                         .filter(message -> !TextUtils.isEmpty(message.getText()))
@@ -67,31 +67,18 @@ public final class ActionsSuggestionsHelper {
         if (messagesWithText.isEmpty()) {
             return new ActionsSuggestionsModel.ConversationMessage[0];
         }
-        int size = messagesWithText.size();
-        // If the last message (the most important one) does not have the Person object, we will
-        // just use the last message and consider this message is sent from a remote user.
-        ConversationActions.Message lastMessage = messages.get(size - 1);
-        boolean useLastMessageOnly = lastMessage.getAuthor() == null;
-        if (useLastMessageOnly) {
-            return new ActionsSuggestionsModel.ConversationMessage[]{
-                    new ActionsSuggestionsModel.ConversationMessage(
-                            FIRST_NON_LOCAL_USER,
-                            lastMessage.getText().toString(),
-                            0,
-                            null)};
-        }
-
-        // Encode the messages in the reverse order, stop whenever the Person object is missing.
         Deque<ActionsSuggestionsModel.ConversationMessage> nativeMessages = new ArrayDeque<>();
         PersonEncoder personEncoder = new PersonEncoder();
+        int size = messagesWithText.size();
         for (int i = size - 1; i >= 0; i--) {
             ConversationActions.Message message = messagesWithText.get(i);
-            if (message.getAuthor() == null) {
-                break;
-            }
+            long referenceTime = message.getReferenceTime() == null
+                    ? 0
+                    : message.getReferenceTime().toInstant().toEpochMilli();
             nativeMessages.push(new ActionsSuggestionsModel.ConversationMessage(
                     personEncoder.encode(message.getAuthor()),
-                    message.getText().toString(), 0, null));
+                    message.getText().toString(), referenceTime,
+                    languageDetector.apply(message.getText())));
         }
         return nativeMessages.toArray(
                 new ActionsSuggestionsModel.ConversationMessage[nativeMessages.size()]);
