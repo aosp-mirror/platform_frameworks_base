@@ -16,6 +16,7 @@
 
 package android.app.role;
 
+import android.app.role.IOnRoleHoldersChangedListener;
 import android.app.role.IRoleManagerCallback;
 
 /**
@@ -36,6 +37,11 @@ interface IRoleManager {
             in IRoleManagerCallback callback);
 
     void clearRoleHoldersAsUser(in String roleName, int userId, in IRoleManagerCallback callback);
+
+    void addOnRoleHoldersChangedListenerAsUser(IOnRoleHoldersChangedListener listener, int userId);
+
+    void removeOnRoleHoldersChangedListenerAsUser(IOnRoleHoldersChangedListener listener,
+            int userId);
 
     void setRoleNamesFromController(in List<String> roleNames);
 

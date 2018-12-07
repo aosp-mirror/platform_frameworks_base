@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -30,8 +31,12 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.util.ArrayMap;
+import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -125,6 +130,13 @@ public final class RoleManager {
     @NonNull
     private final IRoleManager mService;
 
+    @GuardedBy("mListenersLock")
+    @NonNull
+    private final SparseArray<ArrayMap<OnRoleHoldersChangedListener,
+            OnRoleHoldersChangedListenerDelegate>> mListeners = new SparseArray<>();
+    @NonNull
+    private final Object mListenersLock = new Object();
+
     /**
      * @hide
      */
@@ -146,8 +158,6 @@ public final class RoleManager {
      * @param roleName the name of requested role
      *
      * @return the {@code Intent} to prompt user to grant the role
-     *
-     * @throws IllegalArgumentException if {@code role} is {@code null} or empty
      */
     @NonNull
     public Intent createRequestRoleIntent(@NonNull String roleName) {
@@ -164,8 +174,6 @@ public final class RoleManager {
      * @param roleName the name of role to checking for
      *
      * @return whether the role is available in the system
-     *
-     * @throws IllegalArgumentException if the role name is {@code null} or empty
      */
     public boolean isRoleAvailable(@NonNull String roleName) {
         Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
@@ -182,8 +190,6 @@ public final class RoleManager {
      * @param roleName the name of the role to check for
      *
      * @return whether the calling application is holding the role
-     *
-     * @throws IllegalArgumentException if the role name is {@code null} or empty.
      */
     public boolean isRoleHeld(@NonNull String roleName) {
         Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
@@ -203,8 +209,6 @@ public final class RoleManager {
      * @param roleName the name of the role to get the role holder for
      *
      * @return a list of package names of the role holders, or an empty list if none.
-     *
-     * @throws IllegalArgumentException if the role name is {@code null} or empty.
      *
      * @see #getRoleHoldersAsUser(String, UserHandle)
      *
@@ -229,8 +233,6 @@ public final class RoleManager {
      * @param user the user to get the role holder for
      *
      * @return a list of package names of the role holders, or an empty list if none.
-     *
-     * @throws IllegalArgumentException if the role name is {@code null} or empty.
      *
      * @see #addRoleHolderAsUser(String, String, UserHandle, Executor, RoleManagerCallback)
      * @see #removeRoleHolderAsUser(String, String, UserHandle, Executor, RoleManagerCallback)
@@ -265,8 +267,6 @@ public final class RoleManager {
      * @param user the user to add the role holder for
      * @param executor the {@code Executor} to run the callback on.
      * @param callback the callback for whether this call is successful
-     *
-     * @throws IllegalArgumentException if the role name or package name is {@code null} or empty.
      *
      * @see #getRoleHoldersAsUser(String, UserHandle)
      * @see #removeRoleHolderAsUser(String, String, UserHandle, Executor, RoleManagerCallback)
@@ -306,8 +306,6 @@ public final class RoleManager {
      * @param executor the {@code Executor} to run the callback on.
      * @param callback the callback for whether this call is successful
      *
-     * @throws IllegalArgumentException if the role name or package name is {@code null} or empty.
-     *
      * @see #getRoleHoldersAsUser(String, UserHandle)
      * @see #addRoleHolderAsUser(String, String, UserHandle, Executor, RoleManagerCallback)
      * @see #clearRoleHoldersAsUser(String, UserHandle, Executor, RoleManagerCallback)
@@ -345,8 +343,6 @@ public final class RoleManager {
      * @param executor the {@code Executor} to run the callback on.
      * @param callback the callback for whether this call is successful
      *
-     * @throws IllegalArgumentException if the role name is {@code null} or empty.
-     *
      * @see #getRoleHoldersAsUser(String, UserHandle)
      * @see #addRoleHolderAsUser(String, String, UserHandle, Executor, RoleManagerCallback)
      * @see #removeRoleHolderAsUser(String, String, UserHandle, Executor, RoleManagerCallback)
@@ -371,6 +367,96 @@ public final class RoleManager {
     }
 
     /**
+     * Add a listener to observe role holder changes
+     * <p>
+     * <strong>Note:</strong> Using this API requires holding
+     * {@code android.permission.OBSERVE_ROLE_HOLDERS} and if the user id is not the current user
+     * {@code android.permission.INTERACT_ACROSS_USERS_FULL}.
+     *
+     * @param executor the {@code Executor} to call the listener on.
+     * @param listener the listener to be added
+     * @param user the user to add the listener for
+     *
+     * @see #removeOnRoleHoldersChangedListenerAsUser(OnRoleHoldersChangedListener, UserHandle)
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.OBSERVE_ROLE_HOLDERS)
+    @SystemApi
+    public void addOnRoleHoldersChangedListenerAsUser(@CallbackExecutor @NonNull Executor executor,
+            @NonNull OnRoleHoldersChangedListener listener, @NonNull UserHandle user) {
+        Preconditions.checkNotNull(executor, "executor cannot be null");
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Preconditions.checkNotNull(user, "user cannot be null");
+        int userId = user.getIdentifier();
+        synchronized (mListenersLock) {
+            ArrayMap<OnRoleHoldersChangedListener, OnRoleHoldersChangedListenerDelegate> listeners =
+                    mListeners.get(userId);
+            if (listeners == null) {
+                listeners = new ArrayMap<>();
+                mListeners.put(userId, listeners);
+            } else {
+                if (listeners.containsKey(listener)) {
+                    return;
+                }
+            }
+            OnRoleHoldersChangedListenerDelegate listenerDelegate =
+                    new OnRoleHoldersChangedListenerDelegate(executor, listener);
+            try {
+                mService.addOnRoleHoldersChangedListenerAsUser(listenerDelegate, userId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            listeners.put(listener, listenerDelegate);
+        }
+    }
+
+    /**
+     * Remove a listener observing role holder changes
+     * <p>
+     * <strong>Note:</strong> Using this API requires holding
+     * {@code android.permission.OBSERVE_ROLE_HOLDERS} and if the user id is not the current user
+     * {@code android.permission.INTERACT_ACROSS_USERS_FULL}.
+     *
+     * @param listener the listener to be removed
+     * @param user the user to remove the listener for
+     *
+     * @see #addOnRoleHoldersChangedListenerAsUser(Executor, OnRoleHoldersChangedListener,
+     *                                             UserHandle)
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.OBSERVE_ROLE_HOLDERS)
+    @SystemApi
+    public void removeOnRoleHoldersChangedListenerAsUser(
+            @NonNull OnRoleHoldersChangedListener listener, @NonNull UserHandle user) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Preconditions.checkNotNull(user, "user cannot be null");
+        int userId = user.getIdentifier();
+        synchronized (mListenersLock) {
+            ArrayMap<OnRoleHoldersChangedListener, OnRoleHoldersChangedListenerDelegate> listeners =
+                    mListeners.get(userId);
+            if (listeners == null) {
+                return;
+            }
+            OnRoleHoldersChangedListenerDelegate listenerDelegate = listeners.get(listener);
+            if (listenerDelegate == null) {
+                return;
+            }
+            try {
+                mService.removeOnRoleHoldersChangedListenerAsUser(listenerDelegate,
+                        user.getIdentifier());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            listeners.remove(listener);
+            if (listeners.isEmpty()) {
+                mListeners.remove(userId);
+            }
+        }
+    }
+
+    /**
      * Set the names of all the available roles. Should only be called from
      * {@link android.rolecontrollerservice.RoleControllerService}.
      * <p>
@@ -378,8 +464,6 @@ public final class RoleManager {
      * {@link #PERMISSION_MANAGE_ROLES_FROM_CONTROLLER}.
      *
      * @param roleNames the names of all the available roles
-     *
-     * @throws IllegalArgumentException if the list of role names is {@code null}.
      *
      * @hide
      */
@@ -407,8 +491,6 @@ public final class RoleManager {
      *
      * @return whether the operation was successful, and will also be {@code true} if a matching
      *         role holder is already found.
-     *
-     * @throws IllegalArgumentException if the role name or package name is {@code null} or empty.
      *
      * @see #getRoleHolders(String)
      * @see #removeRoleHolderFromController(String, String)
@@ -441,8 +523,6 @@ public final class RoleManager {
      *
      * @return whether the operation was successful, and will also be {@code true} if no matching
      *         role holder was found to remove.
-     *
-     * @throws IllegalArgumentException if the role name or package name is {@code null} or empty.
      *
      * @see #getRoleHolders(String)
      * @see #addRoleHolderFromController(String, String)
@@ -490,6 +570,33 @@ public final class RoleManager {
             long token = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(mCallback::onFailure);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
+
+    private static class OnRoleHoldersChangedListenerDelegate
+            extends IOnRoleHoldersChangedListener.Stub {
+
+        @NonNull
+        private final Executor mExecutor;
+        @NonNull
+        private final OnRoleHoldersChangedListener mListener;
+
+        OnRoleHoldersChangedListenerDelegate(@NonNull Executor executor,
+                @NonNull OnRoleHoldersChangedListener listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onRoleHoldersChanged(@NonNull String roleName, @UserIdInt int userId) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(PooledLambda.obtainRunnable(
+                        OnRoleHoldersChangedListener::onRoleHoldersChanged, mListener, roleName,
+                        UserHandle.of(userId)));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

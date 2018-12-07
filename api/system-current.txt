@@ -134,6 +134,7 @@ package android {
     field public static final java.lang.String NOTIFICATION_DURING_SETUP = "android.permission.NOTIFICATION_DURING_SETUP";
     field public static final java.lang.String NOTIFY_TV_INPUTS = "android.permission.NOTIFY_TV_INPUTS";
     field public static final java.lang.String OBSERVE_APP_USAGE = "android.permission.OBSERVE_APP_USAGE";
+    field public static final java.lang.String OBSERVE_ROLE_HOLDERS = "android.permission.OBSERVE_ROLE_HOLDERS";
     field public static final java.lang.String OVERRIDE_WIFI_CONFIG = "android.permission.OVERRIDE_WIFI_CONFIG";
     field public static final java.lang.String PACKAGE_USAGE_STATS = "android.permission.PACKAGE_USAGE_STATS";
     field public static final java.lang.String PACKAGE_VERIFICATION_AGENT = "android.permission.PACKAGE_VERIFICATION_AGENT";
@@ -884,12 +885,18 @@ package android.app.job {
 
 package android.app.role {
 
+  public abstract interface OnRoleHoldersChangedListener {
+    method public abstract void onRoleHoldersChanged(java.lang.String, android.os.UserHandle);
+  }
+
   public final class RoleManager {
+    method public void addOnRoleHoldersChangedListenerAsUser(java.util.concurrent.Executor, android.app.role.OnRoleHoldersChangedListener, android.os.UserHandle);
     method public void addRoleHolderAsUser(java.lang.String, java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
     method public boolean addRoleHolderFromController(java.lang.String, java.lang.String);
     method public void clearRoleHoldersAsUser(java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
     method public java.util.List<java.lang.String> getRoleHolders(java.lang.String);
     method public java.util.List<java.lang.String> getRoleHoldersAsUser(java.lang.String, android.os.UserHandle);
+    method public void removeOnRoleHoldersChangedListenerAsUser(android.app.role.OnRoleHoldersChangedListener, android.os.UserHandle);
     method public void removeRoleHolderAsUser(java.lang.String, java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
     method public boolean removeRoleHolderFromController(java.lang.String, java.lang.String);
     method public void setRoleNamesFromController(java.util.List<java.lang.String>);
