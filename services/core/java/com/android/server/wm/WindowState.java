@@ -2168,11 +2168,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mTmpRect.inset(-delta, -delta);
             }
             region.set(mTmpRect);
-            region.translate(-mWindowFrames.mFrame.left, -mWindowFrames.mFrame.top);
+            cropRegionToStackBoundsIfNeeded(region);
         } else {
             // Not modal or full screen modal
-            getTouchableRegion(region, true /* forSurface */);
+            getTouchableRegion(region);
         }
+        // Translate to surface based coordinates.
+        region.translate(-mWindowFrames.mFrame.left, -mWindowFrames.mFrame.top);
 
         return flags;
     }
@@ -2809,16 +2811,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /** Get the touchable region in global coordinates. */
     void getTouchableRegion(Region outRegion) {
-        getTouchableRegion(outRegion, false /* forSurface */);
-    }
-
-    /** If {@param forSuface} is {@code true}, the region will be translated to surface based. */
-    private void getTouchableRegion(Region outRegion, boolean forSurface) {
-        if (inPinnedWindowingMode() && !isFocused()) {
-            outRegion.setEmpty();
-            return;
-        }
-
         final Rect frame = mWindowFrames.mFrame;
         switch (mTouchableInsets) {
             default:
@@ -2833,18 +2825,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 break;
             case TOUCHABLE_INSETS_REGION: {
                 outRegion.set(mGivenTouchableRegion);
+                outRegion.translate(frame.left, frame.top);
                 break;
             }
         }
         cropRegionToStackBoundsIfNeeded(outRegion);
-
-        if (forSurface) {
-            if (mTouchableInsets != TOUCHABLE_INSETS_REGION) {
-                outRegion.translate(-frame.left, -frame.top);
-            }
-            outRegion.getBounds(mTmpRect);
-            applyInsets(outRegion, mTmpRect, mAttrs.surfaceInsets);
-        }
     }
 
     private void cropRegionToStackBoundsIfNeeded(Region region) {
