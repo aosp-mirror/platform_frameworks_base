@@ -335,6 +335,7 @@ public class SettingsProvider extends ContentProvider {
             startWatchingUserRestrictionChanges();
         });
         ServiceManager.addService("settings", new SettingsService(this));
+        ServiceManager.addService("device_config", new DeviceConfigService(this));
         return true;
     }
 
