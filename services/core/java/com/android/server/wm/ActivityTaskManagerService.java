@@ -6270,18 +6270,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     finishInstrumentationCallback.run();
                 }
 
-                mWindowManager.deferSurfaceLayout();
-                try {
-                    if (!restarting && hasVisibleActivities
-                            && !mRootActivityContainer.resumeFocusedStacksTopActivities()) {
-                        // If there was nothing to resume, and we are not already restarting this
-                        // process, but there is a visible activity that is hosted by the process...
-                        // then make sure all visible activities are running, taking care of
-                        // restarting this process.
-                        mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+                if (!restarting && hasVisibleActivities) {
+                    mWindowManager.deferSurfaceLayout();
+                    try {
+                        if (!mRootActivityContainer.resumeFocusedStacksTopActivities()) {
+                            // If there was nothing to resume, and we are not already restarting
+                            // this process, but there is a visible activity that is hosted by the
+                            // process...then make sure all visible activities are running, taking
+                            // care of restarting this process.
+                            mRootActivityContainer.ensureActivitiesVisible(null, 0,
+                                    !PRESERVE_WINDOWS);
+                        }
+                    } finally {
+                        mWindowManager.continueSurfaceLayout();
                     }
-                } finally {
-                    mWindowManager.continueSurfaceLayout();
                 }
             }
         }
