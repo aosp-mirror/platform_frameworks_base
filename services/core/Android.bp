@@ -13,14 +13,14 @@ java_library_static {
     srcs: [
         "java/**/*.java",
         ":dumpstate_aidl",
-        ":netd_aidl",
-        ":netd_metrics_aidl",
         ":installd_aidl",
         ":storaged_aidl",
         ":vold_aidl",
         ":mediaupdateservice_aidl",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
+        ":netd_aidl",
+        ":netd_metrics_aidl",
     ],
 
     libs: [
