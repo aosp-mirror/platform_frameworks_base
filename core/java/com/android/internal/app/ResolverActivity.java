@@ -94,7 +94,7 @@ import java.util.Set;
 public class ResolverActivity extends Activity {
 
     // Temporary flag for new chooser delegate behavior.
-    boolean mEnableChooserDelegate = false;
+    boolean mEnableChooserDelegate = true;
 
     protected ResolveListAdapter mAdapter;
     private boolean mSafeForwardingMode;
@@ -887,6 +887,8 @@ public class ResolverActivity extends Activity {
             chooserIntent.putExtra(ActivityTaskManager.EXTRA_IGNORE_TARGET_SECURITY,
                     ignoreTargetSecurity);
             chooserIntent.putExtra(Intent.EXTRA_USER_ID, userId);
+            chooserIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT
+                    | Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
             startActivity(chooserIntent);
         } catch (RemoteException e) {
             Log.e(TAG, e.toString());
