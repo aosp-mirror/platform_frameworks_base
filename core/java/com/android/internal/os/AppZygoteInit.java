@@ -23,6 +23,8 @@ import android.util.Log;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Startup class for an Application zygote process.
@@ -70,9 +72,21 @@ class AppZygoteInit {
         protected void handlePreloadApp(ApplicationInfo appInfo) {
             Log.i(TAG, "Beginning application preload for " + appInfo.packageName);
             LoadedApk loadedApk = new LoadedApk(null, appInfo, null, null, false, true, false);
-            // Initialize the classLoader
             ClassLoader loader = loadedApk.getClassLoader();
-
+            Class<?> cl;
+            Method m;
+            try {
+                cl = Class.forName(appInfo.packageName + ".ZygotePreload", true, loader);
+                m = cl.getMethod("doPreload");
+                m.setAccessible(true);
+                m.invoke(null);
+            } catch (ClassNotFoundException e) {
+                // Don't treat this as an error since an app may not want to do any preloads
+                Log.w(TAG, "No ZygotePreload class found for " + appInfo.packageName);
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                Log.e(TAG, "AppZygote application preload failed for "
+                        + appInfo.packageName, e);
+            }
             try {
                 DataOutputStream socketOut = getSocketOutputStream();
                 socketOut.writeInt(loader != null ? 1 : 0);
