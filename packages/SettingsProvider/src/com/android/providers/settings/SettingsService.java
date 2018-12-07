@@ -309,8 +309,8 @@ final public class SettingsService extends Binder {
             try {
                 Bundle arg = new Bundle();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                Bundle result =
-                        provider.call(resolveCallingPackage(), callListCommand, null, arg);
+                Bundle result = provider.call(resolveCallingPackage(), Settings.AUTHORITY,
+                        callListCommand, null, arg);
                 lines.addAll(result.getStringArrayList(SettingsProvider.RESULT_SETTINGS_LIST));
                 Collections.sort(lines);
             } catch (RemoteException e) {
@@ -334,7 +334,8 @@ final public class SettingsService extends Binder {
             try {
                 Bundle arg = new Bundle();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                Bundle b = provider.call(resolveCallingPackage(), callGetCommand, key, arg);
+                Bundle b = provider.call(resolveCallingPackage(), Settings.AUTHORITY,
+                        callGetCommand, key, arg);
                 if (b != null) {
                     result = b.getPairValue();
                 }
@@ -371,7 +372,8 @@ final public class SettingsService extends Binder {
                 if (makeDefault) {
                     arg.putBoolean(Settings.CALL_METHOD_MAKE_DEFAULT_KEY, true);
                 }
-                provider.call(resolveCallingPackage(), callPutCommand, key, arg);
+                provider.call(resolveCallingPackage(), Settings.AUTHORITY,
+                        callPutCommand, key, arg);
             } catch (RemoteException e) {
                 throw new RuntimeException("Failed in IPC", e);
             }
@@ -394,8 +396,8 @@ final public class SettingsService extends Binder {
             try {
                 Bundle arg = new Bundle();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                Bundle result =
-                        provider.call(resolveCallingPackage(), callDeleteCommand, key, arg);
+                Bundle result = provider.call(resolveCallingPackage(), Settings.AUTHORITY,
+                        callDeleteCommand, key, arg);
                 return result.getInt(SettingsProvider.RESULT_ROWS_DELETED);
             } catch (RemoteException e) {
                 throw new RuntimeException("Failed in IPC", e);
@@ -421,7 +423,7 @@ final public class SettingsService extends Binder {
                 }
                 String packageName = mPackageName != null ? mPackageName : resolveCallingPackage();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                provider.call(packageName, callResetCommand, null, arg);
+                provider.call(packageName, Settings.AUTHORITY, callResetCommand, null, arg);
             } catch (RemoteException e) {
                 throw new RuntimeException("Failed in IPC", e);
             }

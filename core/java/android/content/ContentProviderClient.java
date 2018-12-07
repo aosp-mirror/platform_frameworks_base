@@ -65,7 +65,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * on the ContentProviderClient those calls are made from until you are finished
  * with the data they have returned.
  */
-public class ContentProviderClient implements AutoCloseable {
+public class ContentProviderClient implements ContentInterface, AutoCloseable {
     private static final String TAG = "ContentProviderClient";
 
     @GuardedBy("ContentProviderClient.class")
@@ -76,6 +76,7 @@ public class ContentProviderClient implements AutoCloseable {
     private final IContentProvider mContentProvider;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String mPackageName;
+    private final String mAuthority;
     private final boolean mStable;
 
     private final AtomicBoolean mClosed = new AtomicBoolean();
@@ -86,12 +87,20 @@ public class ContentProviderClient implements AutoCloseable {
 
     /** {@hide} */
     @VisibleForTesting
-    public ContentProviderClient(
-            ContentResolver contentResolver, IContentProvider contentProvider, boolean stable) {
+    public ContentProviderClient(ContentResolver contentResolver, IContentProvider contentProvider,
+            boolean stable) {
+        // Only used for testing, so use a fake authority
+        this(contentResolver, contentProvider, "unknown", stable);
+    }
+
+    /** {@hide} */
+    public ContentProviderClient(ContentResolver contentResolver, IContentProvider contentProvider,
+            String authority, boolean stable) {
         mContentResolver = contentResolver;
         mContentProvider = contentProvider;
         mPackageName = contentResolver.mPackageName;
 
+        mAuthority = authority;
         mStable = stable;
 
         mCloseGuard.open("close");
@@ -153,6 +162,7 @@ public class ContentProviderClient implements AutoCloseable {
     }
 
     /** See {@link ContentProvider#query ContentProvider.query} */
+    @Override
     public @Nullable Cursor query(@NonNull Uri uri, @Nullable String[] projection,
             Bundle queryArgs, @Nullable CancellationSignal cancellationSignal)
                     throws RemoteException {
@@ -183,6 +193,7 @@ public class ContentProviderClient implements AutoCloseable {
     }
 
     /** See {@link ContentProvider#getType ContentProvider.getType} */
+    @Override
     public @Nullable String getType(@NonNull Uri url) throws RemoteException {
         Preconditions.checkNotNull(url, "url");
 
@@ -200,6 +211,7 @@ public class ContentProviderClient implements AutoCloseable {
     }
 
     /** See {@link ContentProvider#getStreamTypes ContentProvider.getStreamTypes} */
+    @Override
     public @Nullable String[] getStreamTypes(@NonNull Uri url, @NonNull String mimeTypeFilter)
             throws RemoteException {
         Preconditions.checkNotNull(url, "url");
@@ -219,6 +231,7 @@ public class ContentProviderClient implements AutoCloseable {
     }
 
     /** See {@link ContentProvider#canonicalize} */
+    @Override
     public final @Nullable Uri canonicalize(@NonNull Uri url) throws RemoteException {
         Preconditions.checkNotNull(url, "url");
 
@@ -236,6 +249,7 @@ public class ContentProviderClient implements AutoCloseable {
     }
 
     /** See {@link ContentProvider#uncanonicalize} */
+    @Override
     public final @Nullable Uri uncanonicalize(@NonNull Uri url) throws RemoteException {
         Preconditions.checkNotNull(url, "url");
 
@@ -253,6 +267,7 @@ public class ContentProviderClient implements AutoCloseable {
     }
 
     /** See {@link ContentProvider#refresh} */
+    @Override
     public boolean refresh(Uri url, @Nullable Bundle args,
             @Nullable CancellationSignal cancellationSignal) throws RemoteException {
         Preconditions.checkNotNull(url, "url");
@@ -277,6 +292,7 @@ public class ContentProviderClient implements AutoCloseable {
     }
 
     /** See {@link ContentProvider#insert ContentProvider.insert} */
+    @Override
     public @Nullable Uri insert(@NonNull Uri url, @Nullable ContentValues initialValues)
             throws RemoteException {
         Preconditions.checkNotNull(url, "url");
@@ -295,6 +311,7 @@ public class ContentProviderClient implements AutoCloseable {
     }
 
     /** See {@link ContentProvider#bulkInsert ContentProvider.bulkInsert} */
+    @Override
     public int bulkInsert(@NonNull Uri url, @NonNull ContentValues[] initialValues)
             throws RemoteException {
         Preconditions.checkNotNull(url, "url");
@@ -314,6 +331,7 @@ public class ContentProviderClient implements AutoCloseable {
     }
 
     /** See {@link ContentProvider#delete ContentProvider.delete} */
+    @Override
     public int delete(@NonNull Uri url, @Nullable String selection,
             @Nullable String[] selectionArgs) throws RemoteException {
         Preconditions.checkNotNull(url, "url");
@@ -332,6 +350,7 @@ public class ContentProviderClient implements AutoCloseable {
     }
 
     /** See {@link ContentProvider#update ContentProvider.update} */
+    @Override
     public int update(@NonNull Uri url, @Nullable ContentValues values, @Nullable String selection,
             @Nullable String[] selectionArgs) throws RemoteException {
         Preconditions.checkNotNull(url, "url");
@@ -368,6 +387,7 @@ public class ContentProviderClient implements AutoCloseable {
      * you use the {@link ContentResolver#openFileDescriptor
      * ContentResolver.openFileDescriptor} API instead.
      */
+    @Override
     public @Nullable ParcelFileDescriptor openFile(@NonNull Uri url, @NonNull String mode,
             @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
         Preconditions.checkNotNull(url, "url");
@@ -411,6 +431,7 @@ public class ContentProviderClient implements AutoCloseable {
      * you use the {@link ContentResolver#openAssetFileDescriptor
      * ContentResolver.openAssetFileDescriptor} API instead.
      */
+    @Override
     public @Nullable AssetFileDescriptor openAssetFile(@NonNull Uri url, @NonNull String mode,
             @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
         Preconditions.checkNotNull(url, "url");
@@ -446,8 +467,15 @@ public class ContentProviderClient implements AutoCloseable {
     public final @Nullable AssetFileDescriptor openTypedAssetFileDescriptor(@NonNull Uri uri,
             @NonNull String mimeType, @Nullable Bundle opts, @Nullable CancellationSignal signal)
                     throws RemoteException, FileNotFoundException {
+        return openTypedAssetFile(uri, mimeType, opts, signal);
+    }
+
+    @Override
+    public final @Nullable AssetFileDescriptor openTypedAssetFile(@NonNull Uri uri,
+            @NonNull String mimeTypeFilter, @Nullable Bundle opts,
+            @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
         Preconditions.checkNotNull(uri, "uri");
-        Preconditions.checkNotNull(mimeType, "mimeType");
+        Preconditions.checkNotNull(mimeTypeFilter, "mimeTypeFilter");
 
         beforeRemote();
         try {
@@ -458,7 +486,7 @@ public class ContentProviderClient implements AutoCloseable {
                 signal.setRemote(remoteSignal);
             }
             return mContentProvider.openTypedAssetFile(
-                    mPackageName, uri, mimeType, opts, remoteSignal);
+                    mPackageName, uri, mimeTypeFilter, opts, remoteSignal);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -472,12 +500,20 @@ public class ContentProviderClient implements AutoCloseable {
     /** See {@link ContentProvider#applyBatch ContentProvider.applyBatch} */
     public @NonNull ContentProviderResult[] applyBatch(
             @NonNull ArrayList<ContentProviderOperation> operations)
-                    throws RemoteException, OperationApplicationException {
+            throws RemoteException, OperationApplicationException {
+        return applyBatch(mAuthority, operations);
+    }
+
+    /** See {@link ContentProvider#applyBatch ContentProvider.applyBatch} */
+    @Override
+    public @NonNull ContentProviderResult[] applyBatch(@NonNull String authority,
+            @NonNull ArrayList<ContentProviderOperation> operations)
+            throws RemoteException, OperationApplicationException {
         Preconditions.checkNotNull(operations, "operations");
 
         beforeRemote();
         try {
-            return mContentProvider.applyBatch(mPackageName, operations);
+            return mContentProvider.applyBatch(mPackageName, authority, operations);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -491,11 +527,19 @@ public class ContentProviderClient implements AutoCloseable {
     /** See {@link ContentProvider#call(String, String, Bundle)} */
     public @Nullable Bundle call(@NonNull String method, @Nullable String arg,
             @Nullable Bundle extras) throws RemoteException {
+        return call(mAuthority, method, arg, extras);
+    }
+
+    /** See {@link ContentProvider#call(String, String, Bundle)} */
+    @Override
+    public @Nullable Bundle call(@NonNull String authority, @NonNull String method,
+            @Nullable String arg, @Nullable Bundle extras) throws RemoteException {
+        Preconditions.checkNotNull(authority, "authority");
         Preconditions.checkNotNull(method, "method");
 
         beforeRemote();
         try {
-            return mContentProvider.call(mPackageName, method, arg, extras);
+            return mContentProvider.call(mPackageName, authority, method, arg, extras);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);

@@ -80,7 +80,7 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     @Override
-    public ContentProviderResult[] applyBatch(String callingPackage,
+    public ContentProviderResult[] applyBatch(String callingPackage, String authority,
             ArrayList<ContentProviderOperation> operations) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
@@ -103,8 +103,8 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     @Override
-    public Bundle call(String callingPackage, String method, String request, Bundle args)
-            throws RemoteException {
+    public Bundle call(String callingPackage, String authority, String method, String request,
+            Bundle args) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 

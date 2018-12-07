@@ -363,7 +363,8 @@ public class TileUtils {
             return null;
         }
         try {
-            return provider.call(context.getPackageName(), method, uriString, null);
+            return provider.call(context.getPackageName(), uri.getAuthority(),
+                    method, uriString, null);
         } catch (RemoteException e) {
             return null;
         }

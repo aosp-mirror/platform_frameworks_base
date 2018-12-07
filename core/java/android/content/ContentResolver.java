@@ -52,7 +52,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
@@ -88,7 +87,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
  * developer guide.</p>
  */
-public abstract class ContentResolver {
+public abstract class ContentResolver implements ContentInterface {
     /**
      * Enables logic that supports deprecation of {@code _data} columns,
      * typically by replacing values with fake paths that the OS then offers to
@@ -655,6 +654,7 @@ public abstract class ContentResolver {
      * using the content:// scheme.
      * @return A MIME type for the content, or null if the URL is invalid or the type is unknown
      */
+    @Override
     public final @Nullable String getType(@NonNull Uri url) {
         Preconditions.checkNotNull(url, "url");
 
@@ -708,6 +708,7 @@ public abstract class ContentResolver {
      * data streams that match the given mimeTypeFilter.  If there are none,
      * null is returned.
      */
+    @Override
     public @Nullable String[] getStreamTypes(@NonNull Uri url, @NonNull String mimeTypeFilter) {
         Preconditions.checkNotNull(url, "url");
         Preconditions.checkNotNull(mimeTypeFilter, "mimeTypeFilter");
@@ -835,6 +836,7 @@ public abstract class ContentResolver {
      * @return A Cursor object, which is positioned before the first entry, or null
      * @see Cursor
      */
+    @Override
     public final @Nullable Cursor query(final @RequiresPermission.Read @NonNull Uri uri,
             @Nullable String[] projection, @Nullable Bundle queryArgs,
             @Nullable CancellationSignal cancellationSignal) {
@@ -935,6 +937,7 @@ public abstract class ContentResolver {
      *
      * @see #uncanonicalize
      */
+    @Override
     public final @Nullable Uri canonicalize(@NonNull Uri url) {
         Preconditions.checkNotNull(url, "url");
         IContentProvider provider = acquireProvider(url);
@@ -971,6 +974,7 @@ public abstract class ContentResolver {
      *
      * @see #canonicalize
      */
+    @Override
     public final @Nullable Uri uncanonicalize(@NonNull Uri url) {
         Preconditions.checkNotNull(url, "url");
         IContentProvider provider = acquireProvider(url);
@@ -1005,6 +1009,7 @@ public abstract class ContentResolver {
      *            canceled the refresh request.
      * @return true if the provider actually tried refreshing.
      */
+    @Override
     public final boolean refresh(@NonNull Uri url, @Nullable Bundle args,
             @Nullable CancellationSignal cancellationSignal) {
         Preconditions.checkNotNull(url, "url");
@@ -1116,6 +1121,12 @@ public abstract class ContentResolver {
         }
     }
 
+    @Override
+    public final @Nullable ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode,
+            @Nullable CancellationSignal signal) throws FileNotFoundException {
+        return openFileDescriptor(uri, mode, signal);
+    }
+
     /**
      * Open a raw file descriptor to access data under a URI.  This
      * is like {@link #openAssetFileDescriptor(Uri, String)}, but uses the
@@ -1219,6 +1230,12 @@ public abstract class ContentResolver {
         }
 
         throw new FileNotFoundException("Not a whole file");
+    }
+
+    @Override
+    public final @Nullable AssetFileDescriptor openAssetFile(@NonNull Uri uri, @NonNull String mode,
+            @Nullable CancellationSignal signal) throws FileNotFoundException {
+        return openAssetFileDescriptor(uri, mode, signal);
     }
 
     /**
@@ -1423,6 +1440,13 @@ public abstract class ContentResolver {
                 }
             }
         }
+    }
+
+    @Override
+    public final @Nullable AssetFileDescriptor openTypedAssetFile(@NonNull Uri uri,
+            @NonNull String mimeTypeFilter, @Nullable Bundle opts,
+            @Nullable CancellationSignal signal) throws FileNotFoundException {
+        return openTypedAssetFileDescriptor(uri, mimeTypeFilter, opts, signal);
     }
 
     /**
@@ -1634,6 +1658,7 @@ public abstract class ContentResolver {
      *               the field. Passing an empty ContentValues will create an empty row.
      * @return the URL of the newly created row.
      */
+    @Override
     public final @Nullable Uri insert(@RequiresPermission.Write @NonNull Uri url,
                 @Nullable ContentValues values) {
         Preconditions.checkNotNull(url, "url");
@@ -1672,6 +1697,7 @@ public abstract class ContentResolver {
      * @throws RemoteException thrown if a RemoteException is encountered while attempting
      *   to communicate with a remote provider.
      */
+    @Override
     public @NonNull ContentProviderResult[] applyBatch(@NonNull String authority,
             @NonNull ArrayList<ContentProviderOperation> operations)
                     throws RemoteException, OperationApplicationException {
@@ -1698,6 +1724,7 @@ public abstract class ContentResolver {
      *               the field. Passing null will create an empty row.
      * @return the number of newly created rows.
      */
+    @Override
     public final int bulkInsert(@RequiresPermission.Write @NonNull Uri url,
                 @NonNull ContentValues[] values) {
         Preconditions.checkNotNull(url, "url");
@@ -1731,6 +1758,7 @@ public abstract class ContentResolver {
                     (excluding the WHERE itself).
      * @return The number of rows deleted.
      */
+    @Override
     public final int delete(@RequiresPermission.Write @NonNull Uri url, @Nullable String where,
             @Nullable String[] selectionArgs) {
         Preconditions.checkNotNull(url, "url");
@@ -1766,6 +1794,7 @@ public abstract class ContentResolver {
      * @return the number of rows updated.
      * @throws NullPointerException if uri or values are null
      */
+    @Override
     public final int update(@RequiresPermission.Write @NonNull Uri uri,
             @Nullable ContentValues values, @Nullable String where,
             @Nullable String[] selectionArgs) {
@@ -1805,14 +1834,20 @@ public abstract class ContentResolver {
      */
     public final @Nullable Bundle call(@NonNull Uri uri, @NonNull String method,
             @Nullable String arg, @Nullable Bundle extras) {
-        Preconditions.checkNotNull(uri, "uri");
+        return call(uri.getAuthority(), method, arg, extras);
+    }
+
+    @Override
+    public final @Nullable Bundle call(@NonNull String authority, @NonNull String method,
+            @Nullable String arg, @Nullable Bundle extras) {
+        Preconditions.checkNotNull(authority, "authority");
         Preconditions.checkNotNull(method, "method");
-        IContentProvider provider = acquireProvider(uri);
+        IContentProvider provider = acquireProvider(authority);
         if (provider == null) {
-            throw new IllegalArgumentException("Unknown URI " + uri);
+            throw new IllegalArgumentException("Unknown authority " + authority);
         }
         try {
-            final Bundle res = provider.call(mPackageName, method, arg, extras);
+            final Bundle res = provider.call(mPackageName, authority, method, arg, extras);
             Bundle.setDefusable(res, true);
             return res;
         } catch (RemoteException e) {
@@ -1918,7 +1953,7 @@ public abstract class ContentResolver {
         Preconditions.checkNotNull(uri, "uri");
         IContentProvider provider = acquireProvider(uri);
         if (provider != null) {
-            return new ContentProviderClient(this, provider, true);
+            return new ContentProviderClient(this, provider, uri.getAuthority(), true);
         }
         return null;
     }
@@ -1939,7 +1974,7 @@ public abstract class ContentResolver {
         Preconditions.checkNotNull(name, "name");
         IContentProvider provider = acquireProvider(name);
         if (provider != null) {
-            return new ContentProviderClient(this, provider, true);
+            return new ContentProviderClient(this, provider, name, true);
         }
 
         return null;
@@ -1966,7 +2001,7 @@ public abstract class ContentResolver {
         Preconditions.checkNotNull(uri, "uri");
         IContentProvider provider = acquireUnstableProvider(uri);
         if (provider != null) {
-            return new ContentProviderClient(this, provider, false);
+            return new ContentProviderClient(this, provider, uri.getAuthority(), false);
         }
 
         return null;
@@ -1993,7 +2028,7 @@ public abstract class ContentResolver {
         Preconditions.checkNotNull(name, "name");
         IContentProvider provider = acquireUnstableProvider(name);
         if (provider != null) {
-            return new ContentProviderClient(this, provider, false);
+            return new ContentProviderClient(this, provider, name, false);
         }
 
         return null;
