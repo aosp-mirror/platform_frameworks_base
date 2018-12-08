@@ -32,14 +32,19 @@ import android.testing.TestableLooper;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.AmbientPulseManager;
+import com.android.systemui.statusbar.notification.AlertTransferListener;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -49,13 +54,15 @@ import java.util.HashMap;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule();
+    @Rule public MockitoRule rule = MockitoJUnit.rule();
 
     private NotificationGroupAlertTransferHelper mGroupAlertTransferHelper;
     private NotificationGroupManager mGroupManager;
     private AmbientPulseManager mAmbientPulseManager;
     private HeadsUpManager mHeadsUpManager;
+    @Mock private NotificationEntryManager mNotificationEntryManager;
+    @Captor private ArgumentCaptor<AlertTransferListener> mListenerCaptor;
+    private AlertTransferListener mAlertTransferListener;
     private final HashMap<String, Entry> mPendingEntries = new HashMap<>();
     private final NotificationGroupTestHelper mGroupTestHelper =
             new NotificationGroupTestHelper(mContext);
@@ -67,15 +74,19 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mDependency.injectTestDependency(AmbientPulseManager.class, mAmbientPulseManager);
         mHeadsUpManager = new HeadsUpManager(mContext) {};
 
+        when(mNotificationEntryManager.getPendingNotificationsIterator())
+                .thenReturn(mPendingEntries.values());
+
         mGroupManager = new NotificationGroupManager();
         mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
 
         mGroupAlertTransferHelper = new NotificationGroupAlertTransferHelper();
         mGroupAlertTransferHelper.setHeadsUpManager(mHeadsUpManager);
-        mGroupAlertTransferHelper.setPendingEntries(mPendingEntries);
 
-        mGroupManager.addOnGroupChangeListener(mGroupAlertTransferHelper);
+        mGroupAlertTransferHelper.bind(mNotificationEntryManager, mGroupManager);
+        verify(mNotificationEntryManager).setAlertTransferListener(mListenerCaptor.capture());
+        mAlertTransferListener = mListenerCaptor.getValue();
         mHeadsUpManager.addListener(mGroupAlertTransferHelper);
         mAmbientPulseManager.addListener(mGroupAlertTransferHelper);
     }
@@ -110,7 +121,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
         // Add second child notification so that summary is no longer suppressed.
         mPendingEntries.put(childEntry2.key, childEntry2);
-        mGroupAlertTransferHelper.onPendingEntryAdded(childEntry2);
+        mAlertTransferListener.onPendingEntryAdded(childEntry2);
         mGroupManager.onEntryAdded(childEntry2);
 
         // The alert state should transfer back to the summary as there is now more than one
@@ -137,7 +148,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
         // Add second child notification so that summary is no longer suppressed.
         mPendingEntries.put(childEntry2.key, childEntry2);
-        mGroupAlertTransferHelper.onPendingEntryAdded(childEntry2);
+        mAlertTransferListener.onPendingEntryAdded(childEntry2);
         mGroupManager.onEntryAdded(childEntry2);
 
         // Dozing changed so no reason to re-alert summary.
@@ -175,7 +186,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
         when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
             .thenReturn(true);
-        mGroupAlertTransferHelper.onInflationFinished(childEntry);
+        mAlertTransferListener.onEntryReinflated(childEntry);
 
         // Alert is immediately removed from summary, and we show child as its content is inflated.
         assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
@@ -199,13 +210,13 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
         // Add second child notification so that summary is no longer suppressed.
         mPendingEntries.put(childEntry2.key, childEntry2);
-        mGroupAlertTransferHelper.onPendingEntryAdded(childEntry2);
+        mAlertTransferListener.onPendingEntryAdded(childEntry2);
         mGroupManager.onEntryAdded(childEntry2);
 
         // Child entry finishes its inflation.
         when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
             .thenReturn(true);
-        mGroupAlertTransferHelper.onInflationFinished(childEntry);
+        mAlertTransferListener.onEntryReinflated(childEntry);
 
         verify(childEntry.getRow(), times(1)).freeContentViewWhenSafe(mHeadsUpManager
             .getContentFlag());
@@ -225,7 +236,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
 
-        mGroupAlertTransferHelper.cleanUpPendingAlertInfo(childEntry.key);
+        mAlertTransferListener.onEntryRemoved(childEntry);
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
     }
