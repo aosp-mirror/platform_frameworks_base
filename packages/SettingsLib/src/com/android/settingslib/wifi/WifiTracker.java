@@ -45,6 +45,7 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 import android.widget.Toast;
 
 import androidx.annotation.GuardedBy;
@@ -573,9 +574,52 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 accessPoints.add(accessPoint);
             }
 
+            List<ScanResult> cachedScanResults = new ArrayList<>(mScanResultCache.values());
+
+            // Add a unique Passpoint R1 AccessPoint for each Passpoint profile's FQDN.
+            List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>> passpointConfigsAndScans =
+                    mWifiManager.getAllMatchingWifiConfigs(cachedScanResults);
+            Set<String> seenFQDNs = new ArraySet<>();
+            for (Pair<WifiConfiguration,
+                    Map<Integer, List<ScanResult>>> pairing : passpointConfigsAndScans) {
+                WifiConfiguration config = pairing.first;
+
+                // TODO: Prioritize home networks before roaming networks
+                List<ScanResult> scanResults = new ArrayList<>();
+
+                List<ScanResult> homeScans =
+                        pairing.second.get(WifiManager.PASSPOINT_HOME_NETWORK);
+                List<ScanResult> roamingScans =
+                        pairing.second.get(WifiManager.PASSPOINT_ROAMING_NETWORK);
+
+                if (homeScans == null) {
+                    homeScans = new ArrayList<>();
+                }
+                if (roamingScans == null) {
+                    roamingScans = new ArrayList<>();
+                }
+
+                scanResults.addAll(homeScans);
+                scanResults.addAll(roamingScans);
+
+                if (seenFQDNs.add(config.FQDN)) {
+                    int bestRssi = Integer.MIN_VALUE;
+                    for (ScanResult result : scanResults) {
+                        if (result.level >= bestRssi) {
+                            bestRssi = result.level;
+                            config.SSID = AccessPoint.convertToQuotedString(result.SSID);
+                        }
+                    }
+
+                    AccessPoint accessPoint = new AccessPoint(mContext, config);
+                    accessPoint.setScanResults(scanResults);
+                    accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
+                    accessPoints.add(accessPoint);
+                }
+            }
+
             // If there were no scan results, create an AP for the currently connected network (if
             // it exists).
-            // TODO(b/b/73076869): Add support for passpoint (ephemeral) networks
             if (accessPoints.isEmpty() && connectionConfig != null) {
                 AccessPoint activeAp = new AccessPoint(mContext, connectionConfig);
                 activeAp.update(connectionConfig, mLastInfo, mLastNetworkInfo);
