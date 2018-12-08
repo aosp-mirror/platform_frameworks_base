@@ -81,7 +81,8 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setGlobalPrivateDns(ComponentName who, int mode, String privateDnsHost) {
+    public int setGlobalPrivateDns(ComponentName who, int mode, String privateDnsHost) {
+        return DevicePolicyManager.PRIVATE_DNS_SET_ERROR_FAILURE_SETTING;
     }
 
     @Override
