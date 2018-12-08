@@ -983,6 +983,11 @@ package android.provider {
     field public static final android.net.Uri CORP_CONTENT_URI;
   }
 
+  public final class MediaStore {
+    method public static void deleteContributedMedia(android.content.Context, java.lang.String);
+    method public static long getContributedMediaSize(android.content.Context, java.lang.String);
+  }
+
   public final class Settings {
     field public static final java.lang.String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
   }

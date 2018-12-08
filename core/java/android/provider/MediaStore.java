@@ -16,11 +16,15 @@
 
 package android.provider;
 
+import android.annotation.BytesLong;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.AppGlobals;
@@ -101,6 +105,11 @@ public final class MediaStore {
     public static final String GET_DOCUMENT_URI_CALL = "get_document_uri";
     /** {@hide} */
     public static final String GET_MEDIA_URI_CALL = "get_media_uri";
+
+    /** {@hide} */
+    public static final String GET_CONTRIBUTED_MEDIA_CALL = "get_contributed_media";
+    /** {@hide} */
+    public static final String DELETE_CONTRIBUTED_MEDIA_CALL = "delete_contributed_media";
 
     /**
      * This is for internal use by the media scanner only.
@@ -2861,6 +2870,49 @@ public final class MediaStore {
             in.putParcelableList(DocumentsContract.EXTRA_URI_PERMISSIONS, uriPermissions);
             final Bundle out = client.call(GET_MEDIA_URI_CALL, null, in);
             return out.getParcelable(DocumentsContract.EXTRA_URI);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Calculate size of media contributed by given package under the calling
+     * user. The meaning of "contributed" means it won't automatically be
+     * deleted when the app is uninstalled.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA)
+    public static @BytesLong long getContributedMediaSize(Context context, String packageName) {
+        try (ContentProviderClient client = context.getContentResolver()
+                .acquireContentProviderClient(AUTHORITY)) {
+            final Bundle in = new Bundle();
+            in.putString(Intent.EXTRA_PACKAGE_NAME, packageName);
+            final Bundle out = client.call(GET_CONTRIBUTED_MEDIA_CALL, null, in);
+            return out.getLong(Intent.EXTRA_INDEX);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Delete all media contributed by given package under the calling user. The
+     * meaning of "contributed" means it won't automatically be deleted when the
+     * app is uninstalled.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA)
+    public static void deleteContributedMedia(Context context, String packageName) {
+        try (ContentProviderClient client = context.getContentResolver()
+                .acquireContentProviderClient(AUTHORITY)) {
+            final Bundle in = new Bundle();
+            in.putString(Intent.EXTRA_PACKAGE_NAME, packageName);
+            client.call(DELETE_CONTRIBUTED_MEDIA_CALL, null, in);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
