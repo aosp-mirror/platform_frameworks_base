@@ -1036,6 +1036,10 @@ package android.bluetooth.le {
 
 package android.content {
 
+  public class ContentProviderClient implements java.lang.AutoCloseable android.content.ContentInterface {
+    method public void setDetectNotResponding(long);
+  }
+
   public abstract class Context {
     method public boolean bindServiceAsUser(android.content.Intent, android.content.ServiceConnection, int, android.os.UserHandle);
     method public abstract android.content.Context createCredentialProtectedStorageContext();

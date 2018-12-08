@@ -299,6 +299,10 @@ package android.bluetooth {
 
 package android.content {
 
+  public class ContentProviderClient implements java.lang.AutoCloseable android.content.ContentInterface {
+    method public void setDetectNotResponding(long);
+  }
+
   public abstract class ContentResolver implements android.content.ContentInterface {
     method public static java.lang.String[] getSyncAdapterPackagesForAuthorityAsUser(java.lang.String, int);
   }
