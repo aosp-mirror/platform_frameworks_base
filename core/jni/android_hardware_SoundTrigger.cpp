@@ -225,7 +225,8 @@ void JNISoundTriggerCallback::onRecognitionEvent(struct sound_trigger_recognitio
                                     gAudioFormatCstor,
                                     audioFormatFromNative(event->audio_config.format),
                                     event->audio_config.sample_rate,
-                                    inChannelMaskFromNative(event->audio_config.channel_mask));
+                                    inChannelMaskFromNative(event->audio_config.channel_mask),
+                                    (jint)0 /* channelIndexMask */);
 
     }
     if (event->type == SOUND_MODEL_TYPE_KEYPHRASE) {
