@@ -105,7 +105,7 @@ final public class SettingsService extends Binder {
             RESET,
         }
 
-        int mUser = -1;     // unspecified
+        int mUser = UserHandle.USER_NULL;
         CommandVerb mVerb = CommandVerb.UNSPECIFIED;
         String mTable = null;
         String mKey = null;
@@ -132,15 +132,15 @@ final public class SettingsService extends Binder {
             String arg = cmd;
             do {
                 if ("--user".equals(arg)) {
-                    if (mUser != -1) {
-                        // --user specified more than once; invalid
+                    if (mUser != UserHandle.USER_NULL) {
+                        perr.println("Invalid user: --user specified more than once");
                         break;
                     }
-                    arg = getNextArgRequired();
-                    if ("current".equals(arg) || "cur".equals(arg)) {
-                        mUser = UserHandle.USER_CURRENT;
-                    } else {
-                        mUser = Integer.parseInt(arg);
+                    mUser = UserHandle.parseUserArg(getNextArgRequired());
+
+                    if (mUser == UserHandle.USER_ALL) {
+                        perr.println("Invalid user: all");
+                        return -1;
                     }
                 } else if (mVerb == CommandVerb.UNSPECIFIED) {
                     if ("get".equalsIgnoreCase(arg)) {
@@ -254,15 +254,12 @@ final public class SettingsService extends Binder {
                 return -1;
             }
 
-            if (mUser == UserHandle.USER_CURRENT) {
+            if (mUser == UserHandle.USER_NULL || mUser == UserHandle.USER_CURRENT) {
                 try {
                     mUser = ActivityManager.getService().getCurrentUser().id;
                 } catch (RemoteException e) {
                     throw new RuntimeException("Failed in IPC", e);
                 }
-            }
-            if (mUser < 0) {
-                mUser = UserHandle.USER_SYSTEM;
             }
             UserManager userManager = UserManager.get(mProvider.getContext());
             if (userManager.getUserInfo(mUser) == null) {
