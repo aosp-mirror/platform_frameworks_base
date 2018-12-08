@@ -24,7 +24,6 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 
-import android.util.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -46,6 +45,7 @@ public class NavigationPrototypeController extends ContentObserver {
     static final int ACTION_QUICKSTEP = 1;
     static final int ACTION_QUICKSCRUB = 2;
     static final int ACTION_BACK = 3;
+    static final int ACTION_QUICKSWITCH = 4;
 
     private OnPrototypeChangedListener mListener;
 
@@ -53,7 +53,7 @@ public class NavigationPrototypeController extends ContentObserver {
      * Each index corresponds to a different action set in QuickStepController
      * {@see updateSwipeLTRBackSetting}
      */
-    private int[] mActionMap = new int[4];
+    private int[] mActionMap = new int[6];
 
     private final Context mContext;
 

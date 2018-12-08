@@ -56,6 +56,11 @@ public class NavigationBackAction extends NavigationGestureAction {
     }
 
     @Override
+    public boolean allowHitTargetToMoveOverDrag() {
+        return true;
+    }
+
+    @Override
     public boolean canPerformAction() {
         return mProxySender.getBackButtonAlpha() > 0;
     }

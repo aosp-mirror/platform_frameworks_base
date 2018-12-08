@@ -61,6 +61,10 @@ import org.mockito.MockitoAnnotations;
 @RunWithLooper
 @SmallTest
 public class QuickStepControllerTest extends SysuiTestCase {
+    private static final int NAVBAR_WIDTH = 1000;
+    private static final int NAVBAR_HEIGHT = 300;
+    private static final int EDGE_THRESHOLD = 100;
+
     private QuickStepController mController;
     private NavigationBarView mNavigationBarView;
     private StatusBar mStatusBar;
@@ -73,6 +77,8 @@ public class QuickStepControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         final ButtonDispatcher backButton = mock(ButtonDispatcher.class);
         mResources = mock(Resources.class);
+        doReturn(EDGE_THRESHOLD).when(mResources)
+                .getDimensionPixelSize(R.dimen.navigation_bar_edge_swipe_threshold);
 
         mProxyService = mock(OverviewProxyService.class);
         mProxy = mock(IOverviewProxy.Stub.class);
@@ -109,7 +115,8 @@ public class QuickStepControllerTest extends SysuiTestCase {
     public void testNoGesturesWhenSwipeUpDisabled() throws Exception {
         doReturn(false).when(mProxyService).shouldShowSwipeUpUI();
         mController.setGestureActions(mockAction(true), null /* swipeDownAction */,
-                null /* swipeLeftAction */, null /* swipeRightAction */);
+                null /* swipeLeftAction */, null /* swipeRightAction */,  null /* leftEdgeSwipe */,
+                null /* rightEdgeSwipe */);
 
         MotionEvent ev = event(MotionEvent.ACTION_DOWN, 1, 1);
         assertFalse(mController.onInterceptTouchEvent(ev));
@@ -124,7 +131,8 @@ public class QuickStepControllerTest extends SysuiTestCase {
         // Add enabled gesture action
         NavigationGestureAction action = mockAction(true);
         mController.setGestureActions(action, null /* swipeDownAction */,
-                null /* swipeLeftAction */, null /* swipeRightAction */);
+                null /* swipeLeftAction */, null /* swipeRightAction */, null /* leftEdgeSwipe */,
+                null /* rightEdgeSwipe */);
 
         assertFalse(mController.onInterceptTouchEvent(ev));
         verify(mNavigationBarView, times(1)).requestUnbufferedDispatch(ev);
@@ -140,7 +148,8 @@ public class QuickStepControllerTest extends SysuiTestCase {
 
         // Add enabled gesture action
         mController.setGestureActions(mockAction(true), null /* swipeDownAction */,
-                null /* swipeLeftAction */, null /* swipeRightAction */);
+                null /* swipeLeftAction */, null /* swipeRightAction */, null /* leftEdgeSwipe */,
+                null /* rightEdgeSwipe */);
 
         // Set the gesture on deadzone
         doReturn(null).when(mProxyService).getProxy();
@@ -165,7 +174,8 @@ public class QuickStepControllerTest extends SysuiTestCase {
     @Test
     public void testOnTouchIgnoredDownEventAfterOnIntercept() {
         mController.setGestureActions(mockAction(true), null /* swipeDownAction */,
-                null /* swipeLeftAction */, null /* swipeRightAction */);
+                null /* swipeLeftAction */, null /* swipeRightAction */, null /* leftEdgeSwipe */,
+                null /* rightEdgeSwipe */);
 
         MotionEvent ev = event(MotionEvent.ACTION_DOWN, 1, 1);
         assertFalse(touch(ev));
@@ -178,29 +188,45 @@ public class QuickStepControllerTest extends SysuiTestCase {
 
     @Test
     public void testGesturesCallCorrectAction() throws Exception {
+        doReturn(NAVBAR_WIDTH).when(mNavigationBarView).getWidth();
+        doReturn(NAVBAR_HEIGHT).when(mNavigationBarView).getHeight();
+
         NavigationGestureAction swipeUp = mockAction(true);
         NavigationGestureAction swipeDown = mockAction(true);
         NavigationGestureAction swipeLeft = mockAction(true);
         NavigationGestureAction swipeRight = mockAction(true);
-        mController.setGestureActions(swipeUp, swipeDown, swipeLeft, swipeRight);
+        NavigationGestureAction swipeLeftFromEdge = mockAction(true);
+        NavigationGestureAction swipeRightFromEdge = mockAction(true);
+        mController.setGestureActions(swipeUp, swipeDown, swipeLeft, swipeRight, swipeLeftFromEdge,
+                swipeRightFromEdge);
 
         // Swipe Up
         assertGestureTriggersAction(swipeUp, 1, 100, 5, 1);
         // Swipe Down
         assertGestureTriggersAction(swipeDown, 1, 1, 5, 100);
         // Swipe Left
-        assertGestureTriggersAction(swipeLeft, 100, 1, 5, 1);
+        assertGestureTriggersAction(swipeLeft, NAVBAR_WIDTH / 2, 1, 5, 1);
         // Swipe Right
-        assertGestureTriggersAction(swipeRight, 1, 1, 100, 5);
+        assertGestureTriggersAction(swipeRight, NAVBAR_WIDTH / 2, 1, NAVBAR_WIDTH, 5);
+        // Swipe Left from Edge
+        assertGestureTriggersAction(swipeLeftFromEdge, NAVBAR_WIDTH, 1, 5, 1);
+        // Swipe Right from Edge
+        assertGestureTriggersAction(swipeRightFromEdge, 0, 1, NAVBAR_WIDTH, 5);
     }
 
     @Test
     public void testGesturesCallCorrectActionLandscape() throws Exception {
+        doReturn(NAVBAR_HEIGHT).when(mNavigationBarView).getWidth();
+        doReturn(NAVBAR_WIDTH).when(mNavigationBarView).getHeight();
+
         NavigationGestureAction swipeUp = mockAction(true);
         NavigationGestureAction swipeDown = mockAction(true);
         NavigationGestureAction swipeLeft = mockAction(true);
         NavigationGestureAction swipeRight = mockAction(true);
-        mController.setGestureActions(swipeUp, swipeDown, swipeLeft, swipeRight);
+        NavigationGestureAction swipeLeftFromEdge = mockAction(true);
+        NavigationGestureAction swipeRightFromEdge = mockAction(true);
+        mController.setGestureActions(swipeUp, swipeDown, swipeLeft, swipeRight, swipeLeftFromEdge,
+                swipeRightFromEdge);
 
         // In landscape
         mController.setBarState(false /* isRTL */, NAV_BAR_RIGHT);
@@ -208,34 +234,50 @@ public class QuickStepControllerTest extends SysuiTestCase {
         // Swipe Up
         assertGestureTriggersAction(swipeRight, 1, 100, 5, 1);
         // Swipe Down
-        assertGestureTriggersAction(swipeLeft, 1, 1, 5, 100);
+        assertGestureTriggersAction(swipeLeft, 1, NAVBAR_WIDTH / 2, 5, NAVBAR_WIDTH);
         // Swipe Left
         assertGestureTriggersAction(swipeUp, 100, 1, 5, 1);
         // Swipe Right
         assertGestureTriggersAction(swipeDown, 1, 1, 100, 5);
+        // Swipe Up from Edge
+        assertGestureTriggersAction(swipeRightFromEdge, 1, NAVBAR_WIDTH, 5, 0);
+        // Swipe Down from Edge
+        assertGestureTriggersAction(swipeLeftFromEdge, 0, 1, 0, NAVBAR_WIDTH);
     }
 
     @Test
     public void testGesturesCallCorrectActionSeascape() throws Exception {
+        doReturn(NAVBAR_HEIGHT).when(mNavigationBarView).getWidth();
+        doReturn(NAVBAR_WIDTH).when(mNavigationBarView).getHeight();
+
         mController.setBarState(false /* isRTL */, NAV_BAR_LEFT);
         NavigationGestureAction swipeUp = mockAction(true);
         NavigationGestureAction swipeDown = mockAction(true);
         NavigationGestureAction swipeLeft = mockAction(true);
         NavigationGestureAction swipeRight = mockAction(true);
-        mController.setGestureActions(swipeUp, swipeDown, swipeLeft, swipeRight);
+        NavigationGestureAction swipeLeftFromEdge = mockAction(true);
+        NavigationGestureAction swipeRightFromEdge = mockAction(true);
+        mController.setGestureActions(swipeUp, swipeDown, swipeLeft, swipeRight, swipeLeftFromEdge,
+                swipeRightFromEdge);
 
         // Swipe Up
-        assertGestureTriggersAction(swipeLeft, 1, 100, 5, 1);
+        assertGestureTriggersAction(swipeLeft, 1, NAVBAR_WIDTH / 2, 5, 1);
         // Swipe Down
-        assertGestureTriggersAction(swipeRight, 1, 1, 5, 100);
+        assertGestureTriggersAction(swipeRight, 1, NAVBAR_WIDTH / 2, 5, NAVBAR_WIDTH);
         // Swipe Left
         assertGestureTriggersAction(swipeDown, 100, 1, 5, 1);
         // Swipe Right
         assertGestureTriggersAction(swipeUp, 1, 1, 100, 5);
+        // Swipe Up from Edge
+        assertGestureTriggersAction(swipeLeftFromEdge, 1, NAVBAR_WIDTH, 5, 0);
+        // Swipe Down from Edge
+        assertGestureTriggersAction(swipeRightFromEdge, 0, 1, 0, NAVBAR_WIDTH);
     }
 
     @Test
     public void testGesturesCallCorrectActionRTL() throws Exception {
+        doReturn(NAVBAR_WIDTH).when(mNavigationBarView).getWidth();
+        doReturn(NAVBAR_HEIGHT).when(mNavigationBarView).getHeight();
         mController.setBarState(true /* isRTL */, NAV_BAR_BOTTOM);
 
         // The swipe gestures below are for LTR, so RTL in portrait will be swapped
@@ -243,20 +285,29 @@ public class QuickStepControllerTest extends SysuiTestCase {
         NavigationGestureAction swipeDown = mockAction(true);
         NavigationGestureAction swipeLeft = mockAction(true);
         NavigationGestureAction swipeRight = mockAction(true);
-        mController.setGestureActions(swipeUp, swipeDown, swipeLeft, swipeRight);
+        NavigationGestureAction swipeLeftFromEdge = mockAction(true);
+        NavigationGestureAction swipeRightFromEdge = mockAction(true);
+        mController.setGestureActions(swipeUp, swipeDown, swipeLeft, swipeRight, swipeLeftFromEdge,
+                swipeRightFromEdge);
 
         // Swipe Up in RTL
         assertGestureTriggersAction(swipeUp, 1, 100, 5, 1);
         // Swipe Down in RTL
         assertGestureTriggersAction(swipeDown, 1, 1, 5, 100);
         // Swipe Left in RTL
-        assertGestureTriggersAction(swipeRight, 100, 1, 5, 1);
+        assertGestureTriggersAction(swipeRight, NAVBAR_WIDTH / 2, 1, 5, 1);
         // Swipe Right in RTL
-        assertGestureTriggersAction(swipeLeft, 1, 1, 100, 5);
+        assertGestureTriggersAction(swipeLeft, NAVBAR_WIDTH / 2, 1, NAVBAR_WIDTH, 0);
+        // Swipe Left from Edge
+        assertGestureTriggersAction(swipeRightFromEdge, NAVBAR_WIDTH, 1, 5, 1);
+        // Swipe Right from Edge
+        assertGestureTriggersAction(swipeLeftFromEdge, 0, 1, NAVBAR_WIDTH, 5);
     }
 
     @Test
     public void testGesturesCallCorrectActionLandscapeRTL() throws Exception {
+        doReturn(NAVBAR_HEIGHT).when(mNavigationBarView).getWidth();
+        doReturn(NAVBAR_WIDTH).when(mNavigationBarView).getHeight();
         mController.setBarState(true /* isRTL */, NAV_BAR_RIGHT);
 
         // The swipe gestures below are for LTR, so RTL in landscape will be swapped
@@ -264,20 +315,29 @@ public class QuickStepControllerTest extends SysuiTestCase {
         NavigationGestureAction swipeDown = mockAction(true);
         NavigationGestureAction swipeLeft = mockAction(true);
         NavigationGestureAction swipeRight = mockAction(true);
-        mController.setGestureActions(swipeUp, swipeDown, swipeLeft, swipeRight);
+        NavigationGestureAction swipeLeftFromEdge = mockAction(true);
+        NavigationGestureAction swipeRightFromEdge = mockAction(true);
+        mController.setGestureActions(swipeUp, swipeDown, swipeLeft, swipeRight, swipeLeftFromEdge,
+                swipeRightFromEdge);
 
         // Swipe Up
-        assertGestureTriggersAction(swipeLeft, 1, 100, 5, 1);
+        assertGestureTriggersAction(swipeLeft, 1, NAVBAR_WIDTH / 2, 5, 1);
         // Swipe Down
-        assertGestureTriggersAction(swipeRight, 1, 1, 5, 100);
+        assertGestureTriggersAction(swipeRight, 1, NAVBAR_WIDTH / 2, 5, NAVBAR_WIDTH);
         // Swipe Left
         assertGestureTriggersAction(swipeUp, 100, 1, 5, 1);
         // Swipe Right
         assertGestureTriggersAction(swipeDown, 1, 1, 100, 5);
+        // Swipe Up from Edge
+        assertGestureTriggersAction(swipeLeftFromEdge, 1, NAVBAR_WIDTH, 5, 0);
+        // Swipe Down from Edge
+        assertGestureTriggersAction(swipeRightFromEdge, 0, 1, 0, NAVBAR_WIDTH);
     }
 
     @Test
     public void testGesturesCallCorrectActionSeascapeRTL() throws Exception {
+        doReturn(NAVBAR_HEIGHT).when(mNavigationBarView).getWidth();
+        doReturn(NAVBAR_WIDTH).when(mNavigationBarView).getHeight();
         mController.setBarState(true /* isRTL */, NAV_BAR_LEFT);
 
         // The swipe gestures below are for LTR, so RTL in seascape will be swapped
@@ -285,16 +345,23 @@ public class QuickStepControllerTest extends SysuiTestCase {
         NavigationGestureAction swipeDown = mockAction(true);
         NavigationGestureAction swipeLeft = mockAction(true);
         NavigationGestureAction swipeRight = mockAction(true);
-        mController.setGestureActions(swipeUp, swipeDown, swipeLeft, swipeRight);
+        NavigationGestureAction swipeLeftFromEdge = mockAction(true);
+        NavigationGestureAction swipeRightFromEdge = mockAction(true);
+        mController.setGestureActions(swipeUp, swipeDown, swipeLeft, swipeRight, swipeLeftFromEdge,
+                swipeRightFromEdge);
 
         // Swipe Up
-        assertGestureTriggersAction(swipeRight, 1, 100, 5, 1);
+        assertGestureTriggersAction(swipeRight, 1, NAVBAR_WIDTH / 2, 5, 1);
         // Swipe Down
-        assertGestureTriggersAction(swipeLeft, 1, 1, 5, 100);
+        assertGestureTriggersAction(swipeLeft, 1, NAVBAR_WIDTH / 2, 5, NAVBAR_WIDTH);
         // Swipe Left
         assertGestureTriggersAction(swipeDown, 100, 1, 5, 1);
         // Swipe Right
         assertGestureTriggersAction(swipeUp, 1, 1, 100, 5);
+        // Swipe Up from Edge
+        assertGestureTriggersAction(swipeRightFromEdge, 1, NAVBAR_WIDTH, 5, 0);
+        // Swipe Down from Edge
+        assertGestureTriggersAction(swipeLeftFromEdge, 0, 1, 0, NAVBAR_WIDTH);
     }
 
     @Test
@@ -305,7 +372,8 @@ public class QuickStepControllerTest extends SysuiTestCase {
         // Add enabled gesture action
         NavigationGestureAction action = mockAction(true);
         mController.setGestureActions(action, null /* swipeDownAction */,
-                null /* swipeLeftAction */, null /* swipeRightAction */);
+                null /* swipeLeftAction */, null /* swipeRightAction */, null /* leftEdgeSwipe */,
+                null /* rightEdgeSwipe */);
 
         // Touch down to begin swipe
         MotionEvent downEvent = event(MotionEvent.ACTION_DOWN, 1, 100);
@@ -326,7 +394,8 @@ public class QuickStepControllerTest extends SysuiTestCase {
         NavigationGestureAction action = mockAction(true);
         doReturn(false).when(action).canRunWhenNotificationsShowing();
         mController.setGestureActions(action, null /* swipeDownAction */,
-                null /* swipeLeftAction */, null /* swipeRightAction */);
+                null /* swipeLeftAction */, null /* swipeRightAction */, null /* leftEdgeSwipe */,
+                null /* rightEdgeSwipe */);
 
         // Show the notifications
         doReturn(false).when(mNavigationBarView).isNotificationsFullyCollapsed();
@@ -351,7 +420,8 @@ public class QuickStepControllerTest extends SysuiTestCase {
     public void testActionCannotPerform() throws Exception {
         NavigationGestureAction action = mockAction(true);
         mController.setGestureActions(action, null /* swipeDownAction */,
-                null /* swipeLeftAction */, null /* swipeRightAction */);
+                null /* swipeLeftAction */, null /* swipeRightAction */, null /* leftEdgeSwipe */,
+                null /* rightEdgeSwipe */);
 
         // Cannot perform action
         doReturn(false).when(action).canPerformAction();
@@ -374,13 +444,17 @@ public class QuickStepControllerTest extends SysuiTestCase {
 
     @Test
     public void testQuickScrub() throws Exception {
+        doReturn(NAVBAR_WIDTH).when(mNavigationBarView).getWidth();
+        doReturn(NAVBAR_HEIGHT).when(mNavigationBarView).getHeight();
         QuickScrubAction action = spy(new QuickScrubAction(mNavigationBarView, mProxyService));
         mController.setGestureActions(null /* swipeUpAction */, null /* swipeDownAction */,
-                null /* swipeLeftAction */, action);
+                null /* swipeLeftAction */, action, null /* leftEdgeSwipe */,
+                null /* rightEdgeSwipe */);
+        int x = NAVBAR_WIDTH / 2;
         int y = 20;
 
         // Set the layout and other padding to make sure the scrub fraction is calculated correctly
-        action.onLayout(true, 0, 0, 400, 100);
+        action.onLayout(true, 0, 0, NAVBAR_WIDTH, NAVBAR_HEIGHT);
         doReturn(0).when(mNavigationBarView).getPaddingLeft();
         doReturn(0).when(mNavigationBarView).getPaddingRight();
         doReturn(0).when(mNavigationBarView).getPaddingStart();
@@ -393,14 +467,14 @@ public class QuickStepControllerTest extends SysuiTestCase {
         doReturn(true).when(mNavigationBarView).isQuickScrubEnabled();
 
         // Touch down
-        MotionEvent downEvent = event(MotionEvent.ACTION_DOWN, 0, y);
+        MotionEvent downEvent = event(MotionEvent.ACTION_DOWN, x, y);
         assertFalse(touch(downEvent));
         assertNull(mController.getCurrentAction());
         verify(mProxy, times(1)).onPreMotionEvent(mNavigationBarView.getDownHitTarget());
         verify(mProxy, times(1)).onMotionEvent(downEvent);
 
         // Move to start trigger action from gesture
-        MotionEvent moveEvent1 = event(MotionEvent.ACTION_MOVE, 100, y);
+        MotionEvent moveEvent1 = event(MotionEvent.ACTION_MOVE, x + 100, y);
         assertTrue(touch(moveEvent1));
         assertEquals(action, mController.getCurrentAction());
         verify(action, times(1)).onGestureStart(moveEvent1);
@@ -410,11 +484,13 @@ public class QuickStepControllerTest extends SysuiTestCase {
         verify(mProxy, never()).onMotionEvent(moveEvent1);
 
         // Move again for scrub
-        MotionEvent moveEvent2 = event(MotionEvent.ACTION_MOVE, 200, y);
+        float fraction = 3f / 4;
+        x = (int) (NAVBAR_WIDTH * fraction);
+        MotionEvent moveEvent2 = event(MotionEvent.ACTION_MOVE, x, y);
         assertTrue(touch(moveEvent2));
         assertEquals(action, mController.getCurrentAction());
-        verify(action, times(1)).onGestureMove(200, y);
-        verify(mProxy, times(1)).onQuickScrubProgress(1f / 2);
+        verify(action, times(1)).onGestureMove(x, y);
+        verify(mProxy, times(1)).onQuickScrubProgress(fraction);
         verify(mProxy, never()).onMotionEvent(moveEvent2);
 
         // Action up
@@ -430,7 +506,8 @@ public class QuickStepControllerTest extends SysuiTestCase {
     public void testQuickStep() throws Exception {
         QuickStepAction action = new QuickStepAction(mNavigationBarView, mProxyService);
         mController.setGestureActions(action, null /* swipeDownAction */,
-                null /* swipeLeftAction */, null /* swipeRightAction */);
+                null /* swipeLeftAction */, null /* swipeRightAction */, null /* leftEdgeSwipe */,
+                null /* rightEdgeSwipe */);
 
         // Notifications are up, should prevent quickstep
         doReturn(false).when(mNavigationBarView).isNotificationsFullyCollapsed();
@@ -466,7 +543,8 @@ public class QuickStepControllerTest extends SysuiTestCase {
     public void testLongPressPreventDetection() throws Exception {
         NavigationGestureAction action = mockAction(true);
         mController.setGestureActions(action, null /* swipeDownAction */,
-                null /* swipeLeftAction */, null /* swipeRightAction */);
+                null /* swipeLeftAction */, null /* swipeRightAction */, null /* leftEdgeSwipe */,
+                null /* rightEdgeSwipe */);
 
         // Start the drag up
         assertFalse(touch(MotionEvent.ACTION_DOWN, 100, 1));
@@ -488,23 +566,21 @@ public class QuickStepControllerTest extends SysuiTestCase {
 
     @Test
     public void testHitTargetDragged() throws Exception {
-        final int navbarWidth = 1000;
-        final int navbarHeight = 1000;
         ButtonDispatcher button = mock(ButtonDispatcher.class);
-        FakeLocationView buttonView = spy(new FakeLocationView(mContext, navbarWidth / 2,
-                navbarHeight / 2));
+        FakeLocationView buttonView = spy(new FakeLocationView(mContext, NAVBAR_WIDTH / 2,
+                NAVBAR_HEIGHT / 2));
         doReturn(buttonView).when(button).getCurrentView();
 
         NavigationGestureAction action = mockAction(true);
-        mController.setGestureActions(action, action, action, action);
+        mController.setGestureActions(action, action, action, action, action, action);
 
         // Setup getting the hit target
         doReturn(HIT_TARGET_HOME).when(action).requiresTouchDownHitTarget();
-        doReturn(true).when(action).requiresDragWithHitTarget();
+        doReturn(true).when(action).allowHitTargetToMoveOverDrag();
         doReturn(HIT_TARGET_HOME).when(mNavigationBarView).getDownHitTarget();
         doReturn(button).when(mNavigationBarView).getHomeButton();
-        doReturn(navbarWidth).when(mNavigationBarView).getWidth();
-        doReturn(navbarHeight).when(mNavigationBarView).getHeight();
+        doReturn(NAVBAR_WIDTH).when(mNavigationBarView).getWidth();
+        doReturn(NAVBAR_HEIGHT).when(mNavigationBarView).getHeight();
 
         // Portrait
         assertGestureDragsHitTargetAllDirections(buttonView, false /* isRTL */, NAV_BAR_BOTTOM);

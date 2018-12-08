@@ -112,7 +112,7 @@ public abstract class NavigationGestureAction {
     /**
      * @return whether or not to move the button that started gesture over with user input drag
      */
-    public boolean requiresDragWithHitTarget() {
+    public boolean allowHitTargetToMoveOverDrag() {
         return false;
     }
 
@@ -139,9 +139,9 @@ public abstract class NavigationGestureAction {
      * Tell if action is enabled. Compared to {@link #canPerformAction()} this is based on settings
      * if the action is disabled for a particular gesture. For example a back action can be enabled
      * however if there is nothing to back to then {@link #canPerformAction()} should return false.
-     * In this way if the action requires {@link #requiresDragWithHitTarget()} then if enabled, the
-     * button can be dragged with a large dampening factor during the gesture but will not activate
-     * the action.
+     * In this way if the action requires {@link #allowHitTargetToMoveOverDrag()} then if enabled,
+     * the button can be dragged with a large dampening factor during the gesture but will not
+     * activate the action.
      * @return true if this action is enabled and can run
      */
     public abstract boolean isEnabled();
