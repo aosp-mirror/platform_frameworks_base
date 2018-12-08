@@ -16,14 +16,13 @@
 
 package android.os;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.opengl.EGL14;
-import android.os.Build;
-import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -37,6 +36,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /** @hide */
 public class GraphicsEnvironment {
@@ -67,7 +71,7 @@ public class GraphicsEnvironment {
      */
     public void setup(Context context, Bundle coreSettings) {
         setupGpuLayers(context, coreSettings);
-        setupAngle(context, coreSettings);
+        setupAngle(context, context.getPackageName());
         chooseDriver(context, coreSettings);
     }
 
@@ -192,24 +196,101 @@ public class GraphicsEnvironment {
         setLayerPaths(mClassLoader, layerPaths);
     }
 
+    enum OpenGlDriverChoice {
+        DEFAULT,
+        NATIVE,
+        ANGLE
+    }
+
+    private static final Map<OpenGlDriverChoice, String> sDriverMap = buildMap();
+    private static Map<OpenGlDriverChoice, String> buildMap() {
+        Map<OpenGlDriverChoice, String> map = new HashMap<>();
+        map.put(OpenGlDriverChoice.DEFAULT, "default");
+        map.put(OpenGlDriverChoice.ANGLE, "angle");
+        map.put(OpenGlDriverChoice.NATIVE, "native");
+
+        return map;
+    }
+
+
+    private static List<String> getGlobalSettingsString(Context context, String globalSetting) {
+        List<String> valueList = null;
+        ContentResolver contentResolver = context.getContentResolver();
+        String settingsValue = Settings.Global.getString(contentResolver, globalSetting);
+
+        if (settingsValue != null) {
+            valueList = new ArrayList<>(Arrays.asList(settingsValue.split(",")));
+        } else {
+            valueList = new ArrayList<>();
+        }
+
+        return valueList;
+    }
+
+    private static int getGlobalSettingsPkgIndex(String pkgName,
+                                                 List<String> globalSettingsDriverPkgs) {
+        for (int pkgIndex = 0; pkgIndex < globalSettingsDriverPkgs.size(); pkgIndex++) {
+            if (globalSettingsDriverPkgs.get(pkgIndex).equals(pkgName)) {
+                return pkgIndex;
+            }
+        }
+
+        return -1;
+    }
+
+    private static String getDriverForPkg(Context context, String packageName) {
+        try {
+            ContentResolver contentResolver = context.getContentResolver();
+            int allUseAngle = Settings.Global.getInt(contentResolver,
+                    Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE);
+            if (allUseAngle == 1) {
+                return sDriverMap.get(OpenGlDriverChoice.ANGLE);
+            }
+        } catch (Settings.SettingNotFoundException e) {
+            // Do nothing and move on
+        }
+
+        List<String> globalSettingsDriverPkgs =
+                getGlobalSettingsString(context,
+                        Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS);
+        List<String> globalSettingsDriverValues =
+                getGlobalSettingsString(context,
+                        Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES);
+
+        // Make sure we have a good package name
+        if ((packageName == null) || (packageName.isEmpty())) {
+            return sDriverMap.get(OpenGlDriverChoice.DEFAULT);
+        }
+        // Make sure we have good settings to use
+        if (globalSettingsDriverPkgs.isEmpty() || globalSettingsDriverValues.isEmpty()
+                || (globalSettingsDriverPkgs.size() != globalSettingsDriverValues.size())) {
+            Log.w(TAG,
+                    "Global.Settings values are invalid: "
+                        + "globalSettingsDriverPkgs.size = "
+                            + globalSettingsDriverPkgs.size() + ", "
+                        + "globalSettingsDriverValues.size = "
+                            + globalSettingsDriverValues.size());
+            return sDriverMap.get(OpenGlDriverChoice.DEFAULT);
+        }
+
+        int pkgIndex = getGlobalSettingsPkgIndex(packageName, globalSettingsDriverPkgs);
+
+        if (pkgIndex < 0) {
+            return sDriverMap.get(OpenGlDriverChoice.DEFAULT);
+        }
+
+        return globalSettingsDriverValues.get(pkgIndex);
+    }
+
     /**
      * Pass ANGLE details down to trigger enable logic
      */
-    private static void setupAngle(Context context, Bundle coreSettings) {
+    private void setupAngle(Context context, String packageName) {
+        String devOptIn = getDriverForPkg(context, packageName);
 
-        String angleEnabledApp =
-                coreSettings.getString(Settings.Global.ANGLE_ENABLED_APP);
-
-        String packageName = context.getPackageName();
-
-        boolean devOptIn = false;
-        if ((angleEnabledApp != null && packageName != null)
-                && (!angleEnabledApp.isEmpty() && !packageName.isEmpty())
-                && angleEnabledApp.equals(packageName)) {
-
-            Log.i(TAG, packageName + " opted in for ANGLE via Developer Setting");
-
-            devOptIn = true;
+        if (DEBUG) {
+            Log.v(TAG, "ANGLE Developer option for '" + packageName + "' "
+                    + "set to: '" + devOptIn + "'");
         }
 
         ApplicationInfo angleInfo;
@@ -303,8 +384,7 @@ public class GraphicsEnvironment {
         // Further opt-in logic is handled in native, so pass relevant info down
         // TODO: Move the ANGLE selection logic earlier so we don't need to keep these
         //       file descriptors open.
-        setAngleInfo(paths, packageName, devOptIn,
-                     rulesFd, rulesOffset, rulesLength);
+        setAngleInfo(paths, packageName, devOptIn, rulesFd, rulesOffset, rulesLength);
     }
 
     /**
@@ -452,6 +532,6 @@ public class GraphicsEnvironment {
     private static native void setDebugLayersGLES(String layers);
     private static native void setDriverPath(String path);
     private static native void setAngleInfo(String path, String appPackage,
-                                            boolean devOptIn, FileDescriptor rulesFd,
+                                            String devOptIn, FileDescriptor rulesFd,
                                             long rulesOffset, long rulesLength);
 }

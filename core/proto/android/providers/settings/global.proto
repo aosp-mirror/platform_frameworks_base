@@ -417,16 +417,20 @@ message GlobalSettingsProto {
         // Ordered GPU debug layer list for Vulkan
         // i.e. <layer1>:<layer2>:...:<layerN>
         optional SettingProto debug_layers = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        // App will load ANGLE instead of native GLES drivers.
-        optional SettingProto angle_enabled_app = 3;
+        // ANGLE - Force all PKGs to use ANGLE, regardless of any other settings
+        optional SettingProto angle_gl_driver_all_angle = 3;
+        // ANGLE - List of PKGs that specify an OpenGL driver
+        optional SettingProto angle_gl_driver_selection_pkgs = 4;
+        // ANGLE - Corresponding OpenGL driver selection for the PKG
+        optional SettingProto angle_gl_driver_selection_values = 5;
         // App that can provide layer libraries.
-        optional SettingProto debug_layer_app = 4;
+        optional SettingProto debug_layer_app = 6;
         // Ordered GPU debug layer list for GLES
         // i.e. <layer1>:<layer2>:...:<layerN>
-        optional SettingProto debug_layers_gles = 5;
+        optional SettingProto debug_layers_gles = 7;
         // App opt in to load updated graphics driver instead of
         // native graphcis driver through developer options.
-        optional SettingProto updated_gfx_driver_dev_opt_in_app = 6;
+        optional SettingProto updated_gfx_driver_dev_opt_in_app = 8;
     }
     optional Gpu gpu = 59;
 

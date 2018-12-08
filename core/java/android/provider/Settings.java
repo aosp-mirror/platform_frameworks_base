@@ -11878,10 +11878,26 @@ public final class Settings {
         public static final String GPU_DEBUG_APP = "gpu_debug_app";
 
         /**
-         * App should try to use ANGLE
+         * Force all PKGs to use ANGLE, regardless of any other settings
+         * The value is a boolean (1 or 0).
          * @hide
          */
-        public static final String ANGLE_ENABLED_APP = "angle_enabled_app";
+        public static final String GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE =
+                "angle_gl_driver_all_angle";
+
+        /**
+         * List of PKGs that have an OpenGL driver selected
+         * @hide
+         */
+        public static final String GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS =
+                "angle_gl_driver_selection_pkgs";
+
+        /**
+         * List of selected OpenGL drivers, corresponding to the PKGs in GLOBAL_SETTINGS_DRIVER_PKGS
+         * @hide
+         */
+        public static final String GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES =
+                "angle_gl_driver_selection_values";
 
         /**
          * App that is selected to use updated graphics driver.
