@@ -799,6 +799,10 @@ public class PermissionManagerService {
                     continue;
                 }
 
+                if (bp.isRemoved()) {
+                    continue;
+                }
+
                 // Limit ephemeral apps to ephemeral allowed permissions.
                 if (pkg.applicationInfo.isInstantApp() && !bp.isInstant()) {
                     if (DEBUG_PERMISSIONS) {

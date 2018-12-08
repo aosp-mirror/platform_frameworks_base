@@ -189,6 +189,11 @@ public final class BasePermission {
         return (protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
                 == PermissionInfo.PROTECTION_DANGEROUS;
     }
+
+    public boolean isRemoved() {
+        return perm.info != null && (perm.info.flags & PermissionInfo.FLAG_REMOVED) != 0;
+    }
+
     public boolean isSignature() {
         return (protectionLevel & PermissionInfo.PROTECTION_MASK_BASE) ==
                 PermissionInfo.PROTECTION_SIGNATURE;

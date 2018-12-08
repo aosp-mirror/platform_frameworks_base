@@ -18302,6 +18302,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 continue;
             }
 
+            if (bp.isRemoved()) {
+                continue;
+            }
+
             // If shared user we just reset the state to which only this app contributed.
             if (ps.sharedUser != null) {
                 boolean used = false;
