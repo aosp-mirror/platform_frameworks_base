@@ -954,7 +954,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @Override
     public void onStartUser(int userHandle) {
-        mStartedUsers = ArrayUtils.appendInt(mStartedUsers, userHandle);
+        synchronized (mLock) {
+            mStartedUsers = ArrayUtils.appendInt(mStartedUsers, userHandle);
+        }
         // Let's kick any outstanding jobs for this user.
         mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
     }
@@ -967,7 +969,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @Override
     public void onStopUser(int userHandle) {
-        mStartedUsers = ArrayUtils.removeInt(mStartedUsers, userHandle);
+        synchronized (mLock) {
+            mStartedUsers = ArrayUtils.removeInt(mStartedUsers, userHandle);
+        }
     }
 
     /**
@@ -2150,8 +2154,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         final boolean jobExists = mJobs.containsJob(job);
 
-        final int userId = job.getUserId();
-        final boolean userStarted = ArrayUtils.contains(mStartedUsers, userId);
+        final boolean userStarted = areUsersStartedLocked(job);
 
         if (DEBUG) {
             Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
@@ -2239,7 +2242,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         try {
             componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
                     job.getServiceComponent(), PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                    userId) != null);
+                    job.getUserId()) != null);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -3052,6 +3055,13 @@ public class JobSchedulerService extends com.android.server.SystemService
                     printed = true;
                     pw.println("user-stopped");
                 }
+                if (!ArrayUtils.contains(mStartedUsers, js.getSourceUserId())) {
+                    if (printed) {
+                        pw.print(" ");
+                    }
+                    printed = true;
+                    pw.println("source-user-stopped");
+                }
                 if (mBackingUpUids.indexOfKey(js.getSourceUid()) >= 0) {
                     if (printed) {
                         pw.print(" ");
@@ -3203,7 +3213,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     pw.print(" (job=");
                     pw.print(job.isReady());
                     pw.print(" user=");
-                    pw.print(ArrayUtils.contains(mStartedUsers, job.getUserId()));
+                    pw.print(areUsersStartedLocked(job));
                     pw.print(" !pending=");
                     pw.print(!mPendingJobs.contains(job));
                     pw.print(" !active=");
@@ -3373,7 +3383,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_READY,
                             job.isReady());
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_USER_STARTED,
-                            ArrayUtils.contains(mStartedUsers, job.getUserId()));
+                            areUsersStartedLocked(job));
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_PENDING,
                             mPendingJobs.contains(job));
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_CURRENTLY_ACTIVE,
