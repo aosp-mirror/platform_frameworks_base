@@ -25,6 +25,7 @@ import android.telephony.PhoneCapability;
 import android.telephony.PhysicalChannelConfig;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
+import android.telephony.emergency.EmergencyNumber;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 
@@ -78,6 +79,7 @@ interface ITelephonyRegistry {
     void notifyCarrierNetworkChange(in boolean active);
     void notifyUserMobileDataStateChangedForPhoneId(in int phoneId, in int subId, in boolean state);
     void notifyPhoneCapabilityChanged(in PhoneCapability capability);
-    void notifyRadioPowerStateChanged(in int state);
     void notifyPreferredDataSubIdChanged(int preferredSubId);
+    void notifyRadioPowerStateChanged(in int state);
+    void notifyEmergencyNumberList(in List<EmergencyNumber> emergencyNumberList);
 }
