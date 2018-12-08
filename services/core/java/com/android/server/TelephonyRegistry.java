@@ -47,6 +47,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.emergency.EmergencyNumber;
 import android.util.LocalLog;
 import android.util.StatsLog;
 
@@ -1661,6 +1662,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             handleRemoveListLocked();
         }
+    }
+
+
+    @Override
+    public void notifyEmergencyNumberList(List<EmergencyNumber> emergencyNumberList) {
+        // TODO checkPermission, modify Listener constent documentation
+        // TODO implement multisim emergency number list update in listener
+        // TODO implement PhoneStateListenerTest
     }
 
 
