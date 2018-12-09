@@ -24,9 +24,9 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
-import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_WIFI_P2P;
 import static android.net.NetworkCapabilities.RESTRICTED_CAPABILITIES;
@@ -45,7 +45,6 @@ import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
-
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -455,6 +454,62 @@ public class NetworkCapabilitiesTest {
             nc2.addUnwantedCapability(cap);
         }
         assertEquals(nc1, nc2);
+    }
+
+    @Test
+    public void testSetNetworkSpecifierOnMultiTransportNc() {
+        // Sequence 1: Transport + Transport + NetworkSpecifier
+        NetworkCapabilities nc1 = new NetworkCapabilities();
+        nc1.addTransportType(TRANSPORT_CELLULAR).addTransportType(TRANSPORT_WIFI);
+        try {
+            nc1.setNetworkSpecifier(new StringNetworkSpecifier("specs"));
+            fail("Cannot set NetworkSpecifier on a NetworkCapability with multiple transports!");
+        } catch (IllegalStateException expected) {
+            // empty
+        }
+
+        // Sequence 2: Transport + NetworkSpecifier + Transport
+        NetworkCapabilities nc2 = new NetworkCapabilities();
+        nc2.addTransportType(TRANSPORT_CELLULAR).setNetworkSpecifier(
+                new StringNetworkSpecifier("specs"));
+        try {
+            nc2.addTransportType(TRANSPORT_WIFI);
+            fail("Cannot set NetworkSpecifier on a NetworkCapability with multiple transports!");
+        } catch (IllegalStateException expected) {
+            // empty
+        }
+    }
+
+    @Test
+    public void testSetTransportInfoOnMultiTransportNc() {
+        // Sequence 1: Transport + Transport + TransportInfo
+        NetworkCapabilities nc1 = new NetworkCapabilities();
+        nc1.addTransportType(TRANSPORT_CELLULAR).addTransportType(TRANSPORT_WIFI)
+                .setTransportInfo(new TransportInfo() {});
+
+        // Sequence 2: Transport + NetworkSpecifier + Transport
+        NetworkCapabilities nc2 = new NetworkCapabilities();
+        nc2.addTransportType(TRANSPORT_CELLULAR).setTransportInfo(new TransportInfo() {})
+                .addTransportType(TRANSPORT_WIFI);
+    }
+
+    @Test
+    public void testCombineTransportInfo() {
+        NetworkCapabilities nc1 = new NetworkCapabilities();
+        nc1.setTransportInfo(new TransportInfo() {
+            // empty
+        });
+        NetworkCapabilities nc2 = new NetworkCapabilities();
+        nc2.setTransportInfo(new TransportInfo() {
+            // empty
+        });
+
+        try {
+            nc1.combineCapabilities(nc2);
+            fail("Should not be able to combine NetworkCaabilities which contain TransportInfos");
+        } catch (IllegalStateException expected) {
+            // empty
+        }
     }
 
     private void assertEqualsThroughMarshalling(NetworkCapabilities netCap) {
