@@ -4533,6 +4533,11 @@ package android.provider {
     field public static final int FLAG_REMOVABLE_USB = 524288; // 0x80000
   }
 
+  public final class MediaStore {
+    method public static void deleteContributedMedia(android.content.Context, java.lang.String);
+    method public static long getContributedMediaSize(android.content.Context, java.lang.String);
+  }
+
   public abstract class SearchIndexableData {
     ctor public SearchIndexableData();
     ctor public SearchIndexableData(android.content.Context);
