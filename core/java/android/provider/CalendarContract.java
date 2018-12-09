@@ -717,7 +717,7 @@ public final class CalendarContract {
          * <p>This uri will return an empty cursor if the calling user is not a parent profile
          * of a work profile, or cross profile calendar is disabled in Settings, or this uri is
          * queried from a package that is not whitelisted by profile owner of the work profile via
-         * {@link DevicePolicyManager.addCrossProfileCalendarPackage(ComponentName, String)}.
+         * {@link DevicePolicyManager#addCrossProfileCalendarPackage(ComponentName, String)}.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
          * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED
@@ -1708,7 +1708,7 @@ public final class CalendarContract {
          * <p>This uri will return an empty cursor if the calling user is not a parent profile
          * of a work profile, or cross profile calendar is disabled in Settings, or this uri is
          * queried from a package that is not whitelisted by profile owner of the work profile via
-         * {@link DevicePolicyManager.addCrossProfileCalendarPackage(ComponentName, String)}.
+         * {@link DevicePolicyManager#addCrossProfileCalendarPackage(ComponentName, String)}.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
          * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED
@@ -1919,7 +1919,7 @@ public final class CalendarContract {
          * of a work profile, or cross profile calendar for the work profile is disabled in
          * Settings, or this uri is queried from a package that is not whitelisted by
          * profile owner of the work profile via
-         * {@link DevicePolicyManager.addCrossProfileCalendarPackage(ComponentName, String)}.
+         * {@link DevicePolicyManager#addCrossProfileCalendarPackage(ComponentName, String)}.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
          * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED
