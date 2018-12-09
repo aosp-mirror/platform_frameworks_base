@@ -196,6 +196,15 @@ public class DumpUtils {
         }
     }
 
+    private static void writeContaminantPresenceStatus(@NonNull DualDumpOutputStream dump,
+            @NonNull String idName, long id, int contaminantPresenceStatus) {
+        if (dump.isProto()) {
+            dump.write(idName, id, contaminantPresenceStatus);
+        } else {
+            dump.write(idName, id,
+                    UsbPort.contaminantPresenceStatusToString(contaminantPresenceStatus));
+        }
+    }
 
     public static void writePortStatus(@NonNull DualDumpOutputStream dump, @NonNull String idName,
             long id, @NonNull UsbPortStatus status) {
@@ -231,6 +240,10 @@ public class DumpUtils {
                     dataRole);
             dump.end(roleCombinationToken);
         }
+
+        writeContaminantPresenceStatus(dump, "contaminant_presence_status",
+                UsbPortStatusProto.CONTAMINANT_PRESENCE_STATUS,
+                status.getContaminantDetectionStatus());
 
         dump.end(token);
     }

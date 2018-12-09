@@ -854,6 +854,20 @@ public class UsbManager {
     }
 
     /**
+     * Enables USB port contaminant detection algorithm.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    void enableContaminantDetection(@NonNull UsbPort port, boolean enable) {
+        try {
+            mService.enableContaminantDetection(port.getId(), enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Sets the component that will handle USB device connection.
      * <p>
      * Setting component allows to specify external USB host manager to handle use cases, where

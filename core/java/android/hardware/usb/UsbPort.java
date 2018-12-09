@@ -16,6 +16,10 @@
 
 package android.hardware.usb;
 
+import static android.hardware.usb.UsbPortStatus.CONTAMINANT_DETECTION_DETECTED;
+import static android.hardware.usb.UsbPortStatus.CONTAMINANT_DETECTION_DISABLED;
+import static android.hardware.usb.UsbPortStatus.CONTAMINANT_DETECTION_NOT_DETECTED;
+import static android.hardware.usb.UsbPortStatus.CONTAMINANT_DETECTION_NOT_SUPPORTED;
 import static android.hardware.usb.UsbPortStatus.DATA_ROLE_DEVICE;
 import static android.hardware.usb.UsbPortStatus.DATA_ROLE_HOST;
 import static android.hardware.usb.UsbPortStatus.DATA_ROLE_NONE;
@@ -48,16 +52,21 @@ public final class UsbPort {
     private final String mId;
     private final int mSupportedModes;
     private final UsbManager mUsbManager;
+    private final int mSupportedContaminantProtectionModes;
+    private final boolean mSupportsEnableContaminantPresenceProtection;
+    private final boolean mSupportsEnableContaminantPresenceDetection;
 
     private static final int NUM_DATA_ROLES = Constants.PortDataRole.NUM_DATA_ROLES;
-
     /**
      * Points to the first power role in the IUsb HAL.
      */
     private static final int POWER_ROLE_OFFSET = Constants.PortPowerRole.NONE;
 
     /** @hide */
-    public UsbPort(@NonNull UsbManager usbManager, @NonNull String id, int supportedModes) {
+    public UsbPort(@NonNull UsbManager usbManager, @NonNull String id, int supportedModes,
+            int supportedContaminantProtectionModes,
+            boolean supportsEnableContaminantPresenceProtection,
+            boolean supportsEnableContaminantPresenceDetection) {
         Preconditions.checkNotNull(id);
         Preconditions.checkFlagsArgument(supportedModes,
                 MODE_DFP | MODE_UFP | MODE_AUDIO_ACCESSORY | MODE_DEBUG_ACCESSORY);
@@ -65,6 +74,11 @@ public final class UsbPort {
         mUsbManager = usbManager;
         mId = id;
         mSupportedModes = supportedModes;
+        mSupportedContaminantProtectionModes = supportedContaminantProtectionModes;
+        mSupportsEnableContaminantPresenceProtection =
+                supportsEnableContaminantPresenceProtection;
+        mSupportsEnableContaminantPresenceDetection =
+                supportsEnableContaminantPresenceDetection;
     }
 
     /**
@@ -91,6 +105,36 @@ public final class UsbPort {
      */
     public int getSupportedModes() {
         return mSupportedModes;
+    }
+
+   /**
+     * Gets the supported port proctection modes when the port is contaminated.
+     * <p>
+     * The actual mode of the port is decided by the hardware
+     * </p>
+     *
+     * @hide
+     */
+    public int getSupportedContaminantProtectionModes() {
+        return mSupportedContaminantProtectionModes;
+    }
+
+   /**
+     * Tells if UsbService can enable/disable contaminant presence protection.
+     *
+     * @hide
+     */
+    public boolean supportsEnableContaminantPresenceProtection() {
+        return mSupportsEnableContaminantPresenceProtection;
+    }
+
+   /**
+     * Tells if UsbService can enable/disable contaminant presence detection.
+     *
+     * @hide
+     */
+    public boolean supportsEnableContaminantPresenceDetection() {
+        return mSupportsEnableContaminantPresenceDetection;
     }
 
     /**
@@ -130,6 +174,12 @@ public final class UsbPort {
         mUsbManager.setPortRoles(this, powerRole, dataRole);
     }
 
+    /**
+     * @hide
+     **/
+    public void enableContaminantDetection(boolean enable) {
+        mUsbManager.enableContaminantDetection(this, enable);
+    }
     /**
      * Combines one power and one data role together into a unique value with
      * exactly one bit set.  This can be used to efficiently determine whether
@@ -206,6 +256,22 @@ public final class UsbPort {
     }
 
     /** @hide */
+    public static String contaminantPresenceStatusToString(int contaminantPresenceStatus) {
+        switch (contaminantPresenceStatus) {
+            case CONTAMINANT_DETECTION_NOT_SUPPORTED:
+                return "not-supported";
+            case CONTAMINANT_DETECTION_DISABLED:
+                return "disabled";
+            case CONTAMINANT_DETECTION_DETECTED:
+                return "detected";
+            case CONTAMINANT_DETECTION_NOT_DETECTED:
+                return "not detected";
+            default:
+                return Integer.toString(contaminantPresenceStatus);
+        }
+    }
+
+    /** @hide */
     public static String roleCombinationsToString(int combo) {
         StringBuilder result = new StringBuilder();
         result.append("[");
@@ -264,6 +330,11 @@ public final class UsbPort {
 
     @Override
     public String toString() {
-        return "UsbPort{id=" + mId + ", supportedModes=" + modeToString(mSupportedModes) + "}";
+        return "UsbPort{id=" + mId + ", supportedModes=" + modeToString(mSupportedModes)
+                + "supportedContaminantProtectionModes=" + mSupportedContaminantProtectionModes
+                + "supportsEnableContaminantPresenceProtection="
+                + mSupportsEnableContaminantPresenceProtection
+                + "supportsEnableContaminantPresenceDetection="
+                + mSupportsEnableContaminantPresenceDetection;
     }
 }

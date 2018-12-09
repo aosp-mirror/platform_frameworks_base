@@ -554,6 +554,21 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public void enableContaminantDetection(String portId, boolean enable) {
+        Preconditions.checkNotNull(portId, "portId must not be null");
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (mPortManager != null) {
+                mPortManager.enableContaminantDetection(portId, enable, null);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public void setUsbDeviceConnectionHandler(ComponentName usbDeviceConnectionHandler) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         synchronized (mLock) {
