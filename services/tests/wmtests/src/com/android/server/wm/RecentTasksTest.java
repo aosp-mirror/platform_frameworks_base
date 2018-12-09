@@ -875,8 +875,8 @@ public class RecentTasksTest extends ActivityTestsBase {
         }
 
         @Override
-        void initRootActivityContainerMocks(WindowManagerService wm) {
-            super.initRootActivityContainerMocks(wm);
+        void createDefaultDisplay() {
+            super.createDefaultDisplay();
             mDisplay = mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY);
             mOtherDisplay = TestActivityDisplay.create(mTestStackSupervisor, DEFAULT_DISPLAY + 1);
             mRootActivityContainer.addChild(mOtherDisplay, ActivityDisplay.POSITION_TOP);

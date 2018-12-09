@@ -149,10 +149,9 @@ public class WindowManagerServiceRule implements TestRule {
                 mService.onInitReady();
 
                 final Display display = mService.mDisplayManager.getDisplay(DEFAULT_DISPLAY);
-                final DisplayWindowController dcw = new DisplayWindowController(display, mService);
                 // Display creation is driven by the ActivityManagerService via
                 // ActivityStackSupervisor. We emulate those steps here.
-                mService.mRoot.createDisplayContent(display, dcw);
+                mService.mRoot.createDisplayContent(display, mock(ActivityDisplay.class));
             }
 
             private void removeServices() {

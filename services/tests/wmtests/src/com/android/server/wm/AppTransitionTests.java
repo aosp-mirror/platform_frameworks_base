@@ -80,7 +80,7 @@ public class AppTransitionTests extends WindowTestsBase {
     @Test
     public void testForceOverride() {
         mWm.prepareAppTransition(TRANSIT_KEYGUARD_UNOCCLUDE, false /* alwaysKeepCurrent */);
-        mDc.getController().prepareAppTransition(TRANSIT_ACTIVITY_OPEN,
+        mDc.prepareAppTransition(TRANSIT_ACTIVITY_OPEN,
                 false /* alwaysKeepCurrent */, 0 /* flags */, true /* forceOverride */);
         assertEquals(TRANSIT_ACTIVITY_OPEN, mDc.mAppTransition.getAppTransition());
     }
@@ -102,8 +102,8 @@ public class AppTransitionTests extends WindowTestsBase {
     @Test
     public void testAppTransitionStateForMultiDisplay() {
         // Create 2 displays & presume both display the state is ON for ready to display & animate.
-        final DisplayContent dc1 = createNewDisplayWithController(Display.STATE_ON);
-        final DisplayContent dc2 = createNewDisplayWithController(Display.STATE_ON);
+        final DisplayContent dc1 = createNewDisplay(Display.STATE_ON);
+        final DisplayContent dc2 = createNewDisplay(Display.STATE_ON);
 
         // Create 2 app window tokens to represent 2 activity window.
         final WindowTestUtils.TestAppWindowToken token1 = createTestAppWindowToken(dc1,
@@ -117,10 +117,10 @@ public class AppTransitionTests extends WindowTestsBase {
 
         // Simulate activity resume / finish flows to prepare app transition & set visibility,
         // make sure transition is set as expected for each display.
-        dc1.getController().prepareAppTransition(TRANSIT_ACTIVITY_OPEN,
+        dc1.prepareAppTransition(TRANSIT_ACTIVITY_OPEN,
                 false /* alwaysKeepCurrent */, 0 /* flags */, false /* forceOverride */);
         assertEquals(TRANSIT_ACTIVITY_OPEN, dc1.mAppTransition.getAppTransition());
-        dc2.getController().prepareAppTransition(TRANSIT_ACTIVITY_CLOSE,
+        dc2.prepareAppTransition(TRANSIT_ACTIVITY_CLOSE,
                 false /* alwaysKeepCurrent */, 0 /* flags */, false /* forceOverride */);
         assertEquals(TRANSIT_ACTIVITY_CLOSE, dc2.mAppTransition.getAppTransition());
         // One activity window is visible for resuming & the other activity window is invisible
@@ -138,8 +138,8 @@ public class AppTransitionTests extends WindowTestsBase {
     @Test
     public void testCleanAppTransitionWhenTaskStackReparent() {
         // Create 2 displays & presume both display the state is ON for ready to display & animate.
-        final DisplayContent dc1 = createNewDisplayWithController(Display.STATE_ON);
-        final DisplayContent dc2 = createNewDisplayWithController(Display.STATE_ON);
+        final DisplayContent dc1 = createNewDisplay(Display.STATE_ON);
+        final DisplayContent dc2 = createNewDisplay(Display.STATE_ON);
 
         final TaskStack stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
@@ -151,7 +151,7 @@ public class AppTransitionTests extends WindowTestsBase {
         dc1.mClosingApps.add(token1);
         assertTrue(dc1.mClosingApps.size() > 0);
 
-        dc1.getController().prepareAppTransition(TRANSIT_ACTIVITY_OPEN,
+        dc1.prepareAppTransition(TRANSIT_ACTIVITY_OPEN,
                 false /* alwaysKeepCurrent */, 0 /* flags */, false /* forceOverride */);
         assertEquals(TRANSIT_ACTIVITY_OPEN, dc1.mAppTransition.getAppTransition());
         assertTrue(dc1.mAppTransition.isTransitionSet());

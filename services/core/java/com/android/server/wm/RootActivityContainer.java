@@ -914,7 +914,7 @@ class RootActivityContainer extends ConfigurationContainer
     void executeAppTransitionForAllDisplay() {
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            display.getWindowContainerController().executeAppTransition();
+            display.mDisplayContent.executeAppTransition();
         }
     }
 
@@ -1254,9 +1254,8 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     // TODO: remove after object merge with RootWindowContainer
-    void onChildPositionChanged(DisplayWindowController childController, int position) {
+    void onChildPositionChanged(ActivityDisplay display, int position) {
         // Assume AM lock is held from positionChildAt of controller in each hierarchy.
-        final ActivityDisplay display = getActivityDisplay(childController.getDisplayId());
         if (display != null) {
             positionChildAt(display, position);
         }
@@ -1281,8 +1280,7 @@ class RootActivityContainer extends ConfigurationContainer
     @VisibleForTesting
     void addChild(ActivityDisplay activityDisplay, int position) {
         positionChildAt(activityDisplay, position);
-        mRootWindowContainer.positionChildAt(position,
-                activityDisplay.getWindowContainerController().mContainer);
+        mRootWindowContainer.positionChildAt(position, activityDisplay.mDisplayContent);
     }
 
     void removeChild(ActivityDisplay activityDisplay) {

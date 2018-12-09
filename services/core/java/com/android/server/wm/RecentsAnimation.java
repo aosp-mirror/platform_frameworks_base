@@ -93,12 +93,12 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "RecentsAnimation#startRecentsActivity");
 
         // TODO(multi-display) currently only support recents animation in default display.
-        final DisplayWindowController dwc =
-                mService.mRootActivityContainer.getDefaultDisplay().getWindowContainerController();
+        final DisplayContent dc =
+                mService.mRootActivityContainer.getDefaultDisplay().mDisplayContent;
         if (!mWindowManager.canStartRecentsAnimation()) {
             notifyAnimationCancelBeforeStart(recentsAnimationRunner);
             if (DEBUG) Slog.d(TAG, "Can't start recents animation, nextAppTransition="
-                        + dwc.getPendingAppTransition());
+                        + dc.mAppTransition.getAppTransition());
             return;
         }
 

@@ -174,7 +174,7 @@ class KeyguardController {
         mWindowManager.deferSurfaceLayout();
         try {
             setKeyguardGoingAway(true);
-            mRootActivityContainer.getDefaultDisplay().getWindowContainerController()
+            mRootActivityContainer.getDefaultDisplay().mDisplayContent
                     .prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
                             false /* alwaysKeepCurrent */, convertTransitFlags(flags),
                             false /* forceOverride */);
@@ -302,7 +302,7 @@ class KeyguardController {
         if (isKeyguardLocked()) {
             mWindowManager.deferSurfaceLayout();
             try {
-                mRootActivityContainer.getDefaultDisplay().getWindowContainerController()
+                mRootActivityContainer.getDefaultDisplay().mDisplayContent
                         .prepareAppTransition(resolveOccludeTransit(),
                                 false /* alwaysKeepCurrent */, 0 /* flags */,
                                 true /* forceOverride */);
@@ -332,11 +332,11 @@ class KeyguardController {
 
         // If we are about to unocclude the Keyguard, but we can dismiss it without security,
         // we immediately dismiss the Keyguard so the activity gets shown without a flicker.
-        final DisplayWindowController dwc =
-                mRootActivityContainer.getDefaultDisplay().getWindowContainerController();
+        final DisplayContent dc =
+                mRootActivityContainer.getDefaultDisplay().mDisplayContent;
         if (mKeyguardShowing && canDismissKeyguard()
-                && dwc.getPendingAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE) {
-            dwc.prepareAppTransition(mBeforeUnoccludeTransit, false /* alwaysKeepCurrent */,
+                && dc.mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE) {
+            dc.prepareAppTransition(mBeforeUnoccludeTransit, false /* alwaysKeepCurrent */,
                     0 /* flags */, true /* forceOverride */);
             mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
             mWindowManager.executeAppTransition();
@@ -355,10 +355,10 @@ class KeyguardController {
     }
 
     private int resolveOccludeTransit() {
-        final DisplayWindowController dwc =
-                mRootActivityContainer.getDefaultDisplay().getWindowContainerController();
+        final DisplayContent dc =
+                mService.mRootActivityContainer.getDefaultDisplay().mDisplayContent;
         if (mBeforeUnoccludeTransit != TRANSIT_UNSET
-                && dwc.getPendingAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE
+                && dc.mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE
                 // TODO(b/113840485): Handle app transition for individual display.
                 && isDisplayOccluded(DEFAULT_DISPLAY)) {
 
@@ -369,7 +369,7 @@ class KeyguardController {
         } else if (!isDisplayOccluded(DEFAULT_DISPLAY)) {
 
             // Save transit in case we dismiss/occlude Keyguard shortly after.
-            mBeforeUnoccludeTransit = dwc.getPendingAppTransition();
+            mBeforeUnoccludeTransit = dc.mAppTransition.getAppTransition();
             return TRANSIT_KEYGUARD_UNOCCLUDE;
         } else {
             return TRANSIT_KEYGUARD_OCCLUDE;

@@ -58,8 +58,8 @@ public class WindowTestUtils {
     public static class TestDisplayContent extends DisplayContent {
 
         private TestDisplayContent(Display display, WindowManagerService service,
-                DisplayWindowController controller) {
-            super(display, service, controller);
+                ActivityDisplay activityDisplay) {
+            super(display, service, activityDisplay);
         }
 
         /**

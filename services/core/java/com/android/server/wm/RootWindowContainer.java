@@ -224,7 +224,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return null;
     }
 
-    DisplayContent createDisplayContent(final Display display, DisplayWindowController controller) {
+    DisplayContent createDisplayContent(final Display display, ActivityDisplay activityDisplay) {
         final int displayId = display.getDisplayId();
 
         // In select scenarios, it is possible that a DisplayContent will be created on demand
@@ -233,17 +233,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final DisplayContent existing = getDisplayContent(displayId);
 
         if (existing != null) {
-            initializeDisplayOverrideConfiguration(controller, existing);
-            existing.setController(controller);
+            existing.mAcitvityDisplay = activityDisplay;
+            existing.initializeDisplayOverrideConfiguration();
             return existing;
         }
 
-        final DisplayContent dc = new DisplayContent(display, mWmService, controller);
+        final DisplayContent dc = new DisplayContent(display, mWmService, activityDisplay);
 
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
 
         mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(dc);
-        initializeDisplayOverrideConfiguration(controller, dc);
+        dc.initializeDisplayOverrideConfiguration();
 
         if (mWmService.mDisplayManagerInternal != null) {
             mWmService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
@@ -254,19 +254,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mWmService.reconfigureDisplayLocked(dc);
 
         return dc;
-    }
-
-    /**
-     * The display content may have configuration set from {@link #DisplayWindowSettings}. This
-     * callback let the owner of container know there is existing configuration to prevent the
-     * values from being replaced by the initializing {@link #ActivityDisplay}.
-     */
-    private void initializeDisplayOverrideConfiguration(DisplayWindowController controller,
-            DisplayContent displayContent) {
-        if (controller != null && controller.mListener != null) {
-            controller.mListener.onInitializeOverrideConfiguration(
-                    displayContent.getRequestedOverrideConfiguration());
-        }
     }
 
     boolean isLayoutNeeded() {
@@ -1040,7 +1027,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void positionChildAt(int position, DisplayContent child, boolean includingParents) {
         super.positionChildAt(position, child, includingParents);
         if (mRootActivityContainer != null) {
-            mRootActivityContainer.onChildPositionChanged(child.getController(), position);
+            mRootActivityContainer.onChildPositionChanged(child.mAcitvityDisplay, position);
         }
     }
 
