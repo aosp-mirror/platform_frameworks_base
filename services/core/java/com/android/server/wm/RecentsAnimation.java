@@ -47,7 +47,7 @@ import android.view.IRecentsAnimationRunner;
 
 import com.android.server.LocalServices;
 import com.android.server.am.AssistDataRequester;
-import com.android.server.intelligence.IntelligenceManagerInternal;
+import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallbacks;
 
 import java.util.List;
@@ -93,12 +93,12 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "RecentsAnimation#startRecentsActivity");
 
         // TODO(multi-display) currently only support recents animation in default display.
-        final DisplayWindowController dwc =
-                mService.mRootActivityContainer.getDefaultDisplay().getWindowContainerController();
+        final DisplayContent dc =
+                mService.mRootActivityContainer.getDefaultDisplay().mDisplayContent;
         if (!mWindowManager.canStartRecentsAnimation()) {
             notifyAnimationCancelBeforeStart(recentsAnimationRunner);
             if (DEBUG) Slog.d(TAG, "Can't start recents animation, nextAppTransition="
-                        + dwc.getPendingAppTransition());
+                        + dc.mAppTransition.getAppTransition());
             return;
         }
 
@@ -225,8 +225,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 public void onAssistDataReceivedLocked(Bundle data, int activityIndex,
                         int activityCount) {
                     // Try to notify the intelligence service first
-                    final IntelligenceManagerInternal imService =
-                            LocalServices.getService(IntelligenceManagerInternal.class);
+                    final ContentCaptureManagerInternal imService =
+                            LocalServices.getService(ContentCaptureManagerInternal.class);
                     final IBinder activityToken = topActivities.get(activityIndex);
                     if (imService == null
                             || !imService.sendActivityAssistData(userId, activityToken, data)) {
@@ -236,8 +236,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 }
             };
         } else {
-            final IntelligenceManagerInternal imService =
-                    LocalServices.getService(IntelligenceManagerInternal.class);
+            final ContentCaptureManagerInternal imService =
+                    LocalServices.getService(ContentCaptureManagerInternal.class);
             if (imService == null) {
                 // There is no intelligence service, so there is no point requesting assist data
                 return;

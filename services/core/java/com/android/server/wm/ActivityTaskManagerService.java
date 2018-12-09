@@ -1738,7 +1738,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             if (self.isState(
                     ActivityStack.ActivityState.RESUMED, ActivityStack.ActivityState.PAUSING)) {
-                self.getDisplay().getWindowContainerController().overridePendingAppTransition(
+                self.getDisplay().mDisplayContent.mAppTransition.overridePendingAppTransition(
                         packageName, enterAnim, exitAnim, null);
             }
 
@@ -3073,12 +3073,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // Get top display of front most application.
         final ActivityStack focusedStack = getTopDisplayFocusedStack();
         if (focusedStack != null) {
-            final DisplayWindowController dwc =
-                    focusedStack.getDisplay().getWindowContainerController();
-            dwc.prepareAppTransition(TRANSIT_TASK_IN_PLACE, false);
-            dwc.overridePendingAppTransitionInPlace(activityOptions.getPackageName(),
+            final DisplayContent dc = focusedStack.getDisplay().mDisplayContent;
+            dc.prepareAppTransition(TRANSIT_TASK_IN_PLACE, false);
+            dc.mAppTransition.overrideInPlaceAppTransition(activityOptions.getPackageName(),
                     activityOptions.getCustomInPlaceResId());
-            dwc.executeAppTransition();
+            dc.executeAppTransition();
         }
     }
 
@@ -4708,26 +4707,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    void writeSleepStateToProto(ProtoOutputStream proto) {
+    private void writeSleepStateToProto(ProtoOutputStream proto, int wakeFullness,
+            boolean testPssMode) {
+        final long sleepToken = proto.start(ActivityManagerServiceDumpProcessesProto.SLEEP_STATUS);
+        proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.WAKEFULNESS,
+                PowerManagerInternal.wakefulnessToProtoEnum(wakeFullness));
         for (ActivityTaskManagerInternal.SleepToken st : mRootActivityContainer.mSleepTokens) {
             proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.SLEEP_TOKENS,
                     st.toString());
         }
-
-        if (mRunningVoice != null) {
-            final long vrToken = proto.start(
-                    ActivityManagerServiceDumpProcessesProto.RUNNING_VOICE);
-            proto.write(ActivityManagerServiceDumpProcessesProto.Voice.SESSION,
-                    mRunningVoice.toString());
-            mVoiceWakeLock.writeToProto(
-                    proto, ActivityManagerServiceDumpProcessesProto.Voice.WAKELOCK);
-            proto.end(vrToken);
-        }
-
         proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.SLEEPING, mSleeping);
         proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.SHUTTING_DOWN,
                 mShuttingDown);
-        mVrController.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.VR_CONTROLLER);
+        proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.TEST_PSS_MODE,
+                testPssMode);
+        proto.end(sleepToken);
     }
 
     int getCurrentUserId() {
@@ -5775,17 +5769,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (activityDisplay == null) {
                     return;
                 }
-                final DisplayWindowController dwc = activityDisplay.getWindowContainerController();
-                final boolean wasTransitionSet = dwc.getPendingAppTransition() != TRANSIT_NONE;
+                final DisplayContent dc = activityDisplay.mDisplayContent;
+                final boolean wasTransitionSet =
+                        dc.mAppTransition.getAppTransition() != TRANSIT_NONE;
                 if (!wasTransitionSet) {
-                    dwc.prepareAppTransition(TRANSIT_NONE, false /* alwaysKeepCurrent */);
+                    dc.prepareAppTransition(TRANSIT_NONE, false /* alwaysKeepCurrent */);
                 }
                 mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
 
                 // If there was a transition set already we don't want to interfere with it as we
                 // might be starting it too early.
                 if (!wasTransitionSet) {
-                    dwc.executeAppTransition();
+                    dc.executeAppTransition();
                 }
             }
             if (callback != null) {
@@ -6275,18 +6270,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     finishInstrumentationCallback.run();
                 }
 
-                mWindowManager.deferSurfaceLayout();
-                try {
-                    if (!restarting && hasVisibleActivities
-                            && !mRootActivityContainer.resumeFocusedStacksTopActivities()) {
-                        // If there was nothing to resume, and we are not already restarting this
-                        // process, but there is a visible activity that is hosted by the process...
-                        // then make sure all visible activities are running, taking care of
-                        // restarting this process.
-                        mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+                if (!restarting && hasVisibleActivities) {
+                    mWindowManager.deferSurfaceLayout();
+                    try {
+                        if (!mRootActivityContainer.resumeFocusedStacksTopActivities()) {
+                            // If there was nothing to resume, and we are not already restarting
+                            // this process, but there is a visible activity that is hosted by the
+                            // process...then make sure all visible activities are running, taking
+                            // care of restarting this process.
+                            mRootActivityContainer.ensureActivitiesVisible(null, 0,
+                                    !PRESERVE_WINDOWS);
+                        }
+                    } finally {
+                        mWindowManager.continueSurfaceLayout();
                     }
-                } finally {
-                    mWindowManager.continueSurfaceLayout();
                 }
             }
         }
@@ -6606,12 +6603,24 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void writeProcessesToProto(ProtoOutputStream proto, String dumpPackage) {
+        public void writeProcessesToProto(ProtoOutputStream proto, String dumpPackage,
+                int wakeFullness, boolean testPssMode) {
             synchronized (mGlobalLock) {
                 if (dumpPackage == null) {
                     getGlobalConfiguration().writeToProto(proto, GLOBAL_CONFIGURATION);
                     proto.write(CONFIG_WILL_CHANGE, getTopDisplayFocusedStack().mConfigWillChange);
-                    writeSleepStateToProto(proto);
+                    writeSleepStateToProto(proto, wakeFullness, testPssMode);
+                    if (mRunningVoice != null) {
+                        final long vrToken = proto.start(
+                                ActivityManagerServiceDumpProcessesProto.RUNNING_VOICE);
+                        proto.write(ActivityManagerServiceDumpProcessesProto.Voice.SESSION,
+                                mRunningVoice.toString());
+                        mVoiceWakeLock.writeToProto(
+                                proto, ActivityManagerServiceDumpProcessesProto.Voice.WAKELOCK);
+                        proto.end(vrToken);
+                    }
+                    mVrController.writeToProto(proto,
+                            ActivityManagerServiceDumpProcessesProto.VR_CONTROLLER);
                     if (mController != null) {
                         final long token = proto.start(CONTROLLER);
                         proto.write(CONTROLLER, mController.toString());

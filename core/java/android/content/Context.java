@@ -3003,6 +3003,11 @@ public abstract class Context {
      * how the process will be managed in some cases based on those flags.  Currently only
      * works on isolated processes (will be ignored for non-isolated processes).
      *
+     * <p>Note that this call does not take immediate effect, but will be applied the next
+     * time the impacted process is adjusted for some other reason.  Typically you would
+     * call this before then calling a new {@link #bindIsolatedService} on the service
+     * of interest, with that binding causing the process to be shuffled accordingly.</p>
+     *
      * @param conn The connection interface previously supplied to bindService().  This
      *             parameter must not be null.
      * @param group A group to put this connection's process in.  Upon calling here, this
@@ -3934,13 +3939,12 @@ public abstract class Context {
     public static final String AUTOFILL_MANAGER_SERVICE = "autofill";
 
     /**
-     * Official published name of the smart suggestions service.
+     * Official published name of the content capture service.
      *
      * @hide
      * @see #getSystemService(String)
      */
-    // TODO(b/111276913): rename string (will require SELinux change first)
-    public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "intelligence";
+    public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
 
     /**
      * Use with {@link #getSystemService(String)} to access the

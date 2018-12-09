@@ -16,26 +16,10 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.NotificationTestHelper;
-
-import android.content.Context;
-import android.support.test.filters.FlakyTest;
-import android.support.test.filters.SmallTest;
-import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
-import android.view.View;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,13 +29,31 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.support.test.filters.FlakyTest;
+import android.support.test.filters.SmallTest;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.view.View;
+
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.util.Assert;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 /**
  * Tests for {@link NotificationBlockingHelperManager}.
  */
 @SmallTest
 @FlakyTest
 @org.junit.runner.RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
 
     private NotificationBlockingHelperManager mBlockingHelperManager;
@@ -65,6 +67,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        Assert.sMainLooper = TestableLooper.get(this).getLooper();
         MockitoAnnotations.initMocks(this);
         when(mGutsManager.openGuts(
                 any(View.class),

@@ -105,7 +105,7 @@ import java.util.Objects;
  * developer guide.</p>
  * </div>
  */
-public abstract class ContentProvider implements ComponentCallbacks2 {
+public abstract class ContentProvider implements ContentInterface, ComponentCallbacks2 {
 
     private static final String TAG = "ContentProvider";
 
@@ -324,7 +324,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
 
         @Override
-        public ContentProviderResult[] applyBatch(String callingPkg,
+        public ContentProviderResult[] applyBatch(String callingPkg, String authority,
                 ArrayList<ContentProviderOperation> operations)
                 throws OperationApplicationException {
             int numOperations = operations.size();
@@ -356,7 +356,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             Trace.traceBegin(TRACE_TAG_DATABASE, "applyBatch");
             final String original = setCallingPackage(callingPkg);
             try {
-                ContentProviderResult[] results = ContentProvider.this.applyBatch(operations);
+                ContentProviderResult[] results = ContentProvider.this.applyBatch(authority,
+                        operations);
                 if (results != null) {
                     for (int i = 0; i < results.length ; i++) {
                         if (userIds[i] != UserHandle.USER_CURRENT) {
@@ -444,13 +445,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
 
         @Override
-        public Bundle call(
-                String callingPkg, String method, @Nullable String arg, @Nullable Bundle extras) {
+        public Bundle call(String callingPkg, String authority, String method, @Nullable String arg,
+                @Nullable Bundle extras) {
             Bundle.setDefusable(extras, true);
             Trace.traceBegin(TRACE_TAG_DATABASE, "call");
             final String original = setCallingPackage(callingPkg);
             try {
-                return ContentProvider.this.call(method, arg, extras);
+                return ContentProvider.this.call(authority, method, arg, extras);
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -586,7 +587,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         private int noteProxyOp(String callingPkg, int op) {
             if (op != AppOpsManager.OP_NONE) {
                 int mode = mAppOpsManager.noteProxyOp(op, callingPkg);
-                return mode == MODE_DEFAULT ? interpretDefaultAppOpMode(op) : mode;
+                int nonDefaultMode = mode == MODE_DEFAULT ? interpretDefaultAppOpMode(op) : mode;
+                if (mode == MODE_DEFAULT && nonDefaultMode == MODE_IGNORED) {
+                    Log.w(TAG, "Denying access for " + callingPkg + " to " + getClass().getName()
+                            + " (" + AppOpsManager.opToName(op)
+                            + " = " + AppOpsManager.opToName(mode) + ")");
+                }
+                return mode == MODE_DEFAULT ? nonDefaultMode : mode;
             }
 
             return AppOpsManager.MODE_ALLOWED;
@@ -1249,6 +1256,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *            or {@code null}.
      * @return a Cursor or {@code null}.
      */
+    @Override
     public @Nullable Cursor query(@NonNull Uri uri, @Nullable String[] projection,
             @Nullable Bundle queryArgs, @Nullable CancellationSignal cancellationSignal) {
         queryArgs = queryArgs != null ? queryArgs : Bundle.EMPTY;
@@ -1287,6 +1295,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @param uri the URI to query.
      * @return a MIME type string, or {@code null} if there is no type.
      */
+    @Override
     public abstract @Nullable String getType(@NonNull Uri uri);
 
     /**
@@ -1319,6 +1328,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @return Return the canonical representation of <var>url</var>, or null if
      * canonicalization of that Uri is not supported.
      */
+    @Override
     public @Nullable Uri canonicalize(@NonNull Uri url) {
         return null;
     }
@@ -1337,6 +1347,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * the data identified by the canonical representation can not be found in
      * the current environment.
      */
+    @Override
     public @Nullable Uri uncanonicalize(@NonNull Uri url) {
         return url;
     }
@@ -1363,6 +1374,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *            canceled the refresh request.
      * @return true if the provider actually tried refreshing.
      */
+    @Override
     public boolean refresh(Uri uri, @Nullable Bundle args,
             @Nullable CancellationSignal cancellationSignal) {
         return false;
@@ -1397,6 +1409,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *     This must not be {@code null}.
      * @return The URI for the newly inserted item.
      */
+    @Override
     public abstract @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues values);
 
     /**
@@ -1414,6 +1427,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *    This must not be {@code null}.
      * @return The number of values that were inserted.
      */
+    @Override
     public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
         int numValues = values.length;
         for (int i = 0; i < numValues; i++) {
@@ -1442,6 +1456,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @return The number of rows affected.
      * @throws SQLException
      */
+    @Override
     public abstract int delete(@NonNull Uri uri, @Nullable String selection,
             @Nullable String[] selectionArgs);
 
@@ -1462,6 +1477,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @param selection An optional filter to match rows to update.
      * @return the number of rows affected.
      */
+    @Override
     public abstract int update(@NonNull Uri uri, @Nullable ContentValues values,
             @Nullable String selection, @Nullable String[] selectionArgs);
 
@@ -1598,6 +1614,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @see #getType(android.net.Uri)
      * @see ParcelFileDescriptor#parseMode(String)
      */
+    @Override
     public @Nullable ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode,
             @Nullable CancellationSignal signal) throws FileNotFoundException {
         return openFile(uri, mode);
@@ -1717,6 +1734,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @see #openFileHelper(Uri, String)
      * @see #getType(android.net.Uri)
      */
+    @Override
     public @Nullable AssetFileDescriptor openAssetFile(@NonNull Uri uri, @NonNull String mode,
             @Nullable CancellationSignal signal) throws FileNotFoundException {
         return openAssetFile(uri, mode);
@@ -1783,6 +1801,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @see #openTypedAssetFile(Uri, String, Bundle)
      * @see ClipDescription#compareMimeTypes(String, String)
      */
+    @Override
     public @Nullable String[] getStreamTypes(@NonNull Uri uri, @NonNull String mimeTypeFilter) {
         return null;
     }
@@ -1899,6 +1918,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @see #openAssetFile(Uri, String)
      * @see ClipDescription#compareMimeTypes(String, String)
      */
+    @Override
     public @Nullable AssetFileDescriptor openTypedAssetFile(@NonNull Uri uri,
             @NonNull String mimeTypeFilter, @Nullable Bundle opts,
             @Nullable CancellationSignal signal) throws FileNotFoundException {
@@ -2053,6 +2073,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @throws OperationApplicationException thrown if any operation fails.
      * @see ContentProviderOperation#apply
      */
+    @Override
+    public @NonNull ContentProviderResult[] applyBatch(@NonNull String authority,
+            @NonNull ArrayList<ContentProviderOperation> operations)
+                    throws OperationApplicationException {
+        return applyBatch(operations);
+    }
+
     public @NonNull ContentProviderResult[] applyBatch(
             @NonNull ArrayList<ContentProviderOperation> operations)
                     throws OperationApplicationException {
@@ -2082,6 +2109,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @return provider-defined return value.  May be {@code null}, which is also
      *   the default for providers which don't implement any call methods.
      */
+    @Override
+    public @Nullable Bundle call(@NonNull String authority, @NonNull String method,
+            @Nullable String arg, @Nullable Bundle extras) {
+        return call(method, arg, extras);
+    }
+
     public @Nullable Bundle call(@NonNull String method, @Nullable String arg,
             @Nullable Bundle extras) {
         return null;
@@ -2127,6 +2160,19 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         writer.println("nothing to dump");
     }
 
+    private void validateIncomingAuthority(String authority) throws SecurityException {
+        if (!matchesOurAuthorities(getAuthorityWithoutUserId(authority))) {
+            String message = "The authority " + authority + " does not match the one of the "
+                    + "contentProvider: ";
+            if (mAuthority != null) {
+                message += mAuthority;
+            } else {
+                message += Arrays.toString(mAuthorities);
+            }
+            throw new SecurityException(message);
+        }
+    }
+
     /** @hide */
     @VisibleForTesting
     public Uri validateIncomingUri(Uri uri) throws SecurityException {
@@ -2138,16 +2184,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                         + mContext.getUserId() + " with a uri belonging to user " + userId);
             }
         }
-        if (!matchesOurAuthorities(getAuthorityWithoutUserId(auth))) {
-            String message = "The authority of the uri " + uri + " does not match the one of the "
-                    + "contentProvider: ";
-            if (mAuthority != null) {
-                message += mAuthority;
-            } else {
-                message += Arrays.toString(mAuthorities);
-            }
-            throw new SecurityException(message);
-        }
+        validateIncomingAuthority(auth);
 
         // Normalize the path by removing any empty path segments, which can be
         // a source of security issues.

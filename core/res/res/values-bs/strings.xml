@@ -137,14 +137,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> WiFi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Pozivanje putem WiFi-ja | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Pozivanje putem WiFi-ja"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"WiFi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Pozivanje putem WIFi-ja"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Isključeno"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferira se WiFi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferira se mobilna mreža"</string>
@@ -536,6 +532,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Omogućava aplikaciji da čita lokacije iz vaše kolekcije medija."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Aplikacija <xliff:g id="APP">%s</xliff:g> traži autentifikaciju."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biometrijski hardver nije dostupan"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Nije prepoznato"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Otkriven je djelomičan otisak prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nije uspjela obrada otiska prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Senzor za otisak prsta je prljav. Očistite ga i pokušajte ponovo."</string>
@@ -543,7 +544,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Prst je uklonjen presporo. Pokušajte ponovo."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"Nije prepoznato"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Otisak prsta je potvrđen"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Lice je provjereno"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Lice je provjereno, pritisnite dugme za potvrdu"</string>
@@ -599,14 +599,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Omogućava aplikaciji izmjenu postavki sinhroniziranja za račun. Naprimjer, ovim se može omogućiti sinhroniziranje aplikacije People sa računom."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"čitanje statistike sinhroniziranja"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Omogućava aplikaciji čitanje statistike sinhroniziranja za račun, uključujući historiju događaja sinhroniziranja i količinu sinhroniziranih podataka."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"čitanje sadržaja USB pohrane"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"čitanje sadržaja SD kartice"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Omogućava aplikaciji čitanje sadržaja USB pohrane."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Omogućava aplikaciji čitanje sadržaja SD kartice."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"mijenjanje ili brisanje sadržaja USB pohrane"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"mijenjanje ili brisanje sadržaja SD kartice"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Dozvoljava pisanje na USB pohranu."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Dozvoljava aplikaciji pisanje na SD karticu."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"čita sadržaj vaše dijeljene pohrane"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"Omogućava aplikaciji čitanje sadržaja vaše dijeljenje pohrane."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"mijenja ili briše sadržaj vaše dijeljene pohrane"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"Omogućava aplikaciji da piše sadržaj vaše dijeljene pohrane."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"Uputi/primi SIP pozive"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Dozvoljava aplikaciji upućivanje i prijem SIP poziva."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"registriraj nove telekom SMS veze"</string>
@@ -1125,6 +1121,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Zakažite događaj za odabrano vrijeme"</string>
     <string name="view_flight" msgid="7691640491425680214">"Prati"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Pratite odabrani let"</string>
+    <string name="translate" msgid="9218619809342576858">"Prevedi"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"Prevedi odabrani tekst"</string>
+    <string name="define" msgid="7394820043869954211">"Definirajte"</string>
+    <string name="define_desc" msgid="7910883642444919726">"Definiranje odabranog teksta"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ponestaje prostora za pohranu"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Neke funkcije sistema možda neće raditi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nema dovoljno prostora za sistem. Obezbijedite 250MB slobodnog prostora i ponovo pokrenite uređaj."</string>
@@ -1485,8 +1485,7 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> od <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Gotovo"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Brisanje USB pohrane..."</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"Brisanje SD kartice..."</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"Brisanje dijeljene pohrane…"</string>
     <string name="share" msgid="1778686618230011964">"Podijelite"</string>
     <string name="find" msgid="4808270900322985960">"Pronađi"</string>
     <string name="websearch" msgid="4337157977400211589">"Internet pretraživanje"</string>
@@ -1868,8 +1867,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS zahtjev je promijenjen u USSD zahtjev"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Promijenjeno u novi SS zahtjev"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil za posao"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"Upozoreni"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Proširi"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Suzi"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"aktiviraj/deaktiviraj proširenje"</string>

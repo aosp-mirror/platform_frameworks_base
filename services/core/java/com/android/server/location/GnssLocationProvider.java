@@ -762,7 +762,7 @@ public class GnssLocationProvider extends LocationProviderInterface
                 looper, this);
         mHandler.post(mGnssSatelliteBlacklistHelper::updateSatelliteBlacklist);
         mGnssBatchingProvider = new GnssBatchingProvider();
-        mGnssGeofenceProvider = new GnssGeofenceProvider(looper);
+        mGnssGeofenceProvider = new GnssGeofenceProvider();
     }
 
     /**
@@ -1824,7 +1824,7 @@ public class GnssLocationProvider extends LocationProviderInterface
     /**
      * Converts the GPS HAL status to the internal Geofence Hardware status.
      */
-    private int getGeofenceStatus(int status) {
+    private static int getGeofenceStatus(int status) {
         switch (status) {
             case GPS_GEOFENCE_OPERATION_SUCCESS:
                 return GeofenceHardware.GEOFENCE_SUCCESS;
@@ -1849,75 +1849,87 @@ public class GnssLocationProvider extends LocationProviderInterface
      */
     private void reportGeofenceTransition(int geofenceId, Location location, int transition,
             long transitionTimestamp) {
-        if (mGeofenceHardwareImpl == null) {
-            mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
-        }
+        mHandler.post(() -> {
+            if (mGeofenceHardwareImpl == null) {
+                mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
+            }
 
-        mGeofenceHardwareImpl.reportGeofenceTransition(
-                geofenceId,
-                location,
-                transition,
-                transitionTimestamp,
-                GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE,
-                FusedBatchOptions.SourceTechnologies.GNSS);
+            mGeofenceHardwareImpl.reportGeofenceTransition(
+                    geofenceId,
+                    location,
+                    transition,
+                    transitionTimestamp,
+                    GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE,
+                    FusedBatchOptions.SourceTechnologies.GNSS);
+        });
     }
 
     /**
      * called from native code to report GPS status change.
      */
     private void reportGeofenceStatus(int status, Location location) {
-        if (mGeofenceHardwareImpl == null) {
-            mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
-        }
-        int monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_UNAVAILABLE;
-        if (status == GPS_GEOFENCE_AVAILABLE) {
-            monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_AVAILABLE;
-        }
-        mGeofenceHardwareImpl.reportGeofenceMonitorStatus(
-                GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE,
-                monitorStatus,
-                location,
-                FusedBatchOptions.SourceTechnologies.GNSS);
+        mHandler.post(() -> {
+            if (mGeofenceHardwareImpl == null) {
+                mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
+            }
+            int monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_UNAVAILABLE;
+            if (status == GPS_GEOFENCE_AVAILABLE) {
+                monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_AVAILABLE;
+            }
+            mGeofenceHardwareImpl.reportGeofenceMonitorStatus(
+                    GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE,
+                    monitorStatus,
+                    location,
+                    FusedBatchOptions.SourceTechnologies.GNSS);
+        });
     }
 
     /**
      * called from native code - Geofence Add callback
      */
     private void reportGeofenceAddStatus(int geofenceId, int status) {
-        if (mGeofenceHardwareImpl == null) {
-            mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
-        }
-        mGeofenceHardwareImpl.reportGeofenceAddStatus(geofenceId, getGeofenceStatus(status));
+        mHandler.post(() -> {
+            if (mGeofenceHardwareImpl == null) {
+                mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
+            }
+            mGeofenceHardwareImpl.reportGeofenceAddStatus(geofenceId, getGeofenceStatus(status));
+        });
     }
 
     /**
      * called from native code - Geofence Remove callback
      */
     private void reportGeofenceRemoveStatus(int geofenceId, int status) {
-        if (mGeofenceHardwareImpl == null) {
-            mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
-        }
-        mGeofenceHardwareImpl.reportGeofenceRemoveStatus(geofenceId, getGeofenceStatus(status));
+        mHandler.post(() -> {
+            if (mGeofenceHardwareImpl == null) {
+                mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
+            }
+            mGeofenceHardwareImpl.reportGeofenceRemoveStatus(geofenceId, getGeofenceStatus(status));
+        });
     }
 
     /**
      * called from native code - Geofence Pause callback
      */
     private void reportGeofencePauseStatus(int geofenceId, int status) {
-        if (mGeofenceHardwareImpl == null) {
-            mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
-        }
-        mGeofenceHardwareImpl.reportGeofencePauseStatus(geofenceId, getGeofenceStatus(status));
+        mHandler.post(() -> {
+            if (mGeofenceHardwareImpl == null) {
+                mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
+            }
+            mGeofenceHardwareImpl.reportGeofencePauseStatus(geofenceId, getGeofenceStatus(status));
+        });
     }
 
     /**
      * called from native code - Geofence Resume callback
      */
     private void reportGeofenceResumeStatus(int geofenceId, int status) {
-        if (mGeofenceHardwareImpl == null) {
-            mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
-        }
-        mGeofenceHardwareImpl.reportGeofenceResumeStatus(geofenceId, getGeofenceStatus(status));
+        mHandler.post(() -> {
+            if (mGeofenceHardwareImpl == null) {
+                mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
+            }
+            mGeofenceHardwareImpl.reportGeofenceResumeStatus(geofenceId, getGeofenceStatus(status));
+        });
     }
 
     //=============================================================

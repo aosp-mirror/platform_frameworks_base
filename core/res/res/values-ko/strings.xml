@@ -70,7 +70,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"3자 통화"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"원하지 않는 통화 수신 거부"</string>
     <string name="CndMmi" msgid="3116446237081575808">"통화 번호 전달"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"응답 거부"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"방해 금지 모드"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"발신자 번호가 기본적으로 제한됨으로 설정됩니다. 다음 통화: 제한됨"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"발신자 번호가 기본적으로 제한됨으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한됨"</string>
@@ -136,14 +136,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi 통화 | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi 통화"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi 통화"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"꺼짐"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi를 기본으로 설정"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"모바일에 최적화됨"</string>
@@ -533,6 +529,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"앱에서 미디어 컬렉션의 위치를 읽도록 허용합니다."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> 애플리케이션에서 인증을 요청합니다"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"생체 인식 하드웨어를 사용할 수 없음"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"인식할 수 없음"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"지문이 일부만 인식되었습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"지문 센서를 깨끗이 닦고 다시 시도하세요."</string>
@@ -540,7 +541,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"인식할 수 없음"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"지문이 인증됨"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"얼굴이 인증되었습니다"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"얼굴이 인증되었습니다. 확인을 누르세요"</string>
@@ -596,14 +596,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"앱이 계정의 동기화 설정을 수정할 수 있도록 허용합니다. 예를 들어, 계정에서 주소록 앱을 동기화할 목적으로 앱이 사용될 수 있습니다."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"동기화 통계 읽기"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"앱이 동기화된 일정의 기록이나 동기화된 데이터의 양 등을 포함하여 계정의 동기화 통계를 읽을 수 있도록 허용합니다."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB 저장소의 콘텐츠 읽기"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD 카드의 콘텐츠 읽기"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"앱이 USB 저장소의 콘텐츠를 읽을 수 있도록 허용합니다."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"앱이 SD 카드의 콘텐츠를 읽을 수 있도록 허용합니다."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB 저장소의 콘텐츠 수정 또는 삭제"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD 카드의 콘텐츠 수정 또는 삭제"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"앱이 USB 저장소에 쓸 수 있도록 허용합니다."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"앱이 SD 카드에 쓸 수 있도록 허용합니다."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"공유 저장공간의 콘텐츠 읽기"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"앱이 공유 저장공간의 콘텐츠를 읽도록 허용합니다."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"공유 저장공간의 콘텐츠 수정 또는 삭제"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"앱이 공유 저장공간의 콘텐츠에 쓰도록 허용합니다."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP 통화 발신/수신"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"앱에서 SIP 통화를 발신 및 수신하도록 허용"</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"새로운 통신 SIM 연결 등록"</string>
@@ -648,8 +644,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"보유자가 이동통신사 메시지 서비스의 최상위 인터페이스에 고정할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"이동통신사 서비스 사용"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"권한을 가진 애플리케이션에서 이동통신사 서비스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"알림 일시중지에 접근"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"앱에 알림 일시중지 설정을 읽고 작성하도록 허용합니다."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"방해 금지 모드에 접근"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"앱에서 방해 금지 모드 설정을 읽고 작성하도록 허용합니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"화면 잠금 해제 시도 모니터링"</string>
@@ -1105,6 +1101,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"선택한 시간의 일정 예약"</string>
     <string name="view_flight" msgid="7691640491425680214">"추적"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"선택한 항공편 추적"</string>
+    <string name="translate" msgid="9218619809342576858">"번역"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"선택한 텍스트 번역"</string>
+    <string name="define" msgid="7394820043869954211">"정의"</string>
+    <string name="define_desc" msgid="7910883642444919726">"선택한 텍스트 정의"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"저장 공간이 부족함"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"일부 시스템 기능이 작동하지 않을 수 있습니다."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"시스템의 저장 공간이 부족합니다. 250MB의 여유 공간이 확보한 후 다시 시작하세요."</string>
@@ -1460,8 +1460,7 @@
       <item quantity="one">검색결과 1개</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"완료"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB 저장소 지우는 중..."</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD 카드 지우는 중..."</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"공유 저장공간 지우는 중…"</string>
     <string name="share" msgid="1778686618230011964">"공유"</string>
     <string name="find" msgid="4808270900322985960">"찾기"</string>
     <string name="websearch" msgid="4337157977400211589">"웹 검색"</string>
@@ -1772,8 +1771,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"관리자에 의해 설치되었습니다."</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"관리자에 의해 업데이트되었습니다."</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"관리자에 의해 삭제되었습니다."</string>
-    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"배터리 세이버를 사용하면 배터리 수명을 늘리기 위해 기기의 일부 기능이 사용 중지되며 앱이 제한됩니다. "<annotation id="url">"자세히 알아보기"</annotation></string>
-    <string name="battery_saver_description" msgid="769989536172631582">"배터리 세이버를 사용하면 배터리 수명을 늘리기 위해 기기의 일부 기능이 사용 중지되며 앱이 제한됩니다."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"절전 모드를 사용하면 배터리 수명을 늘리기 위해 기기의 일부 기능이 사용 중지되며 앱이 제한됩니다. "<annotation id="url">"자세히 알아보기"</annotation></string>
+    <string name="battery_saver_description" msgid="769989536172631582">"절전 모드를 사용하면 배터리 수명을 늘리기 위해 기기의 일부 기능이 사용 중지되며 앱이 제한됩니다."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"데이터 절약 모드를 사용할까요?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"사용 설정"</string>
@@ -1812,10 +1811,10 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>까지"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>(다음 알람)까지"</string>
     <string name="zen_mode_forever" msgid="931849471004038757">"사용 중지할 때까지"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"알림 일시중지 기능을 사용 중지할 때까지"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"방해 금지 모드를 사용 중지할 때까지"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"접기"</string>
-    <string name="zen_mode_feature_name" msgid="5254089399895895004">"알림 일시중지"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"방해 금지 모드"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"다운타임"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"평일 밤"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"주말"</string>
@@ -1833,8 +1832,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS 요청이 USSD 요청으로 변경됨"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"새 SS 요청으로 변경됨"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"직장 프로필"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"알림 전송됨"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"펼치기"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"접기"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"확장 전환"</string>
@@ -1958,10 +1956,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"전화 및 알림이 오면 진동이 사용됩니다."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"전화 및 알림 소리가 음소거됩니다."</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"시스템 변경사항"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"알림 일시중지"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"새로운 기능: 알림 일시중지 기능으로 알림 숨기기"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"방해 금지 모드"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"새로운 기능: 방해 금지 모드로 알림 숨기기"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"자세히 알아보고 변경하려면 탭하세요."</string>
-    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"알림 일시중지 변경"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"방해 금지 모드 변경"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"차단된 항목을 확인하려면 탭하세요."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"시스템"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"설정"</string>

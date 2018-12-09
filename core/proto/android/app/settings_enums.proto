@@ -38,6 +38,12 @@ enum PageId {
     // Unknown page. Should not be used in production code.
     PAGE_UNKNOWN = 0;
 
+    // OPEN: Settings > Connected Devices > Bluetooth > (click on details link for a paired device)
+    BLUETOOTH_DEVICE_DETAILS = 1009;
+
+    // OPEN: Settings > Connected devices > Bluetooth > Pair new device
+    BLUETOOTH_PAIRING = 1018;
+
     // OPEN: Settings homepage
     SETTINGS_HOMEPAGE = 1502;
 
@@ -67,5 +73,8 @@ enum PageId {
 
     // OPEN: Settings > Privacy
     TOP_LEVEL_PRIVACY = 1587;
+
+    // OPEN: Settings > Developer options > Disable > Info dialog
+    DIALOG_DISABLE_DEVELOPMENT_OPTIONS = 1591;
 }
 

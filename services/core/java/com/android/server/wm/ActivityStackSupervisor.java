@@ -818,7 +818,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 final ClientTransaction clientTransaction = ClientTransaction.obtain(
                         proc.getThread(), r.appToken);
 
-                final DisplayWindowController dwc = r.getDisplay().getWindowContainerController();
+                final DisplayContent dc = r.getDisplay().mDisplayContent;
                 clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),
                         System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
@@ -827,12 +827,12 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         mergedConfiguration.getOverrideConfiguration(), r.compat,
                         r.launchedFromPackage, task.voiceInteractor, proc.getReportedProcState(),
                         r.icicle, r.persistentState, results, newIntents,
-                        dwc.isNextTransitionForward(), profilerInfo));
+                        dc.isNextTransitionForward(), profilerInfo));
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
                 if (andResume) {
-                    lifecycleItem = ResumeActivityItem.obtain(dwc.isNextTransitionForward());
+                    lifecycleItem = ResumeActivityItem.obtain(dc.isNextTransitionForward());
                 } else {
                     lifecycleItem = PauseActivityItem.obtain();
                 }
@@ -2410,7 +2410,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return;
         }
 
-        scheduleUpdatePictureInPictureModeIfNeeded(task, stack.getOverrideBounds());
+        scheduleUpdatePictureInPictureModeIfNeeded(task, stack.getRequestedOverrideBounds());
     }
 
     void scheduleUpdatePictureInPictureModeIfNeeded(TaskRecord task, Rect targetStackBounds) {

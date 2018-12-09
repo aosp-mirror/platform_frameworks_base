@@ -48,7 +48,7 @@ import org.junit.runner.RunWith;
 @SmallTest
 @Ignore("failing")
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 public class DozeTriggersTest extends SysuiTestCase {
     private DozeTriggers mTriggers;
     private DozeMachine mMachine;

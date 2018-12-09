@@ -528,22 +528,6 @@ public class BinderCallsStatsTest {
     }
 
     @Test
-    public void testCallingUidUsedWhenWorkSourceNotSet() {
-        TestBinderCallsStats bcs = new TestBinderCallsStats();
-        bcs.setDetailedTracking(true);
-        bcs.workSourceUid = -1;
-
-        Binder binder = new Binder();
-        CallSession callSession = bcs.callStarted(binder, 1);
-        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
-
-        assertEquals(1, bcs.getExportedCallStats().size());
-        BinderCallsStats.ExportedCallStat stat = bcs.getExportedCallStats().get(0);
-        assertEquals(CALLING_UID, stat.workSourceUid);
-        assertEquals(CALLING_UID, stat.callingUid);
-    }
-
-    @Test
     public void testGetExportedStatsWithoutCalls() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         Binder binder = new Binder();
@@ -623,15 +607,15 @@ public class BinderCallsStatsTest {
         BinderCallsStats.ExportedCallStat debugEntry1 = callStats.get(0);
         assertEquals("", debugEntry1.className);
         assertEquals("__DEBUG_start_time_millis", debugEntry1.methodName);
-        assertTrue(startTime <= debugEntry1.maxReplySizeBytes);
+        assertTrue(startTime <= debugEntry1.latencyMicros);
         BinderCallsStats.ExportedCallStat debugEntry2 = callStats.get(1);
         assertEquals("", debugEntry2.className);
         assertEquals("__DEBUG_end_time_millis", debugEntry2.methodName);
-        assertTrue(debugEntry1.maxReplySizeBytes <= debugEntry2.maxReplySizeBytes);
+        assertTrue(debugEntry1.latencyMicros <= debugEntry2.latencyMicros);
         BinderCallsStats.ExportedCallStat debugEntry3 = callStats.get(2);
         assertEquals("", debugEntry3.className);
         assertEquals("__DEBUG_battery_time_millis", debugEntry3.methodName);
-        assertTrue(debugEntry3.maxReplySizeBytes >= 0);
+        assertTrue(debugEntry3.latencyMicros >= 0);
     }
 
     class TestBinderCallsStats extends BinderCallsStats {

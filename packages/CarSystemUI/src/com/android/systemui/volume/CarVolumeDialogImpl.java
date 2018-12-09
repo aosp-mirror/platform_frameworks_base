@@ -26,7 +26,6 @@ import android.app.KeyguardManager;
 import android.car.Car;
 import android.car.CarNotConnectedException;
 import android.car.media.CarAudioManager;
-import android.car.media.ICarVolumeCallback;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -106,9 +105,16 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     private ListItemAdapter mPagedListAdapter;
     private Car mCar;
     private CarAudioManager mCarAudioManager;
-    private final ICarVolumeCallback mVolumeChangeCallback = new ICarVolumeCallback.Stub() {
+    private final CarAudioManager.CarVolumeCallback mVolumeChangeCallback =
+            new CarAudioManager.CarVolumeCallback() {
         @Override
-        public void onGroupVolumeChanged(int groupId, int flags) {
+        public void onGroupVolumeChanged(int zoneId, int groupId, int flags) {
+            // TODO: Include zoneId into consideration.
+            // For instance
+            // - single display + single-zone, ignore zoneId
+            // - multi-display + single-zone, zoneId is fixed, may show volume bar on all displays
+            // - single-display + multi-zone, may show volume bar on primary display only
+            // - multi-display + multi-zone, may show volume bar on display specified by zoneId
             VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
             int value = getSeekbarValue(mCarAudioManager, groupId);
             // Do not update the progress if it is the same as before. When car audio manager sets
@@ -124,7 +130,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         }
 
         @Override
-        public void onMasterMuteChanged(int flags) {
+        public void onMasterMuteChanged(int zoneId, int flags) {
             // ignored
         }
     };
@@ -156,7 +162,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 if (mPagedListAdapter != null) {
                     mPagedListAdapter.notifyDataSetChanged();
                 }
-                mCarAudioManager.registerVolumeCallback(mVolumeChangeCallback.asBinder());
+                mCarAudioManager.registerCarVolumeCallback(mVolumeChangeCallback);
             } catch (CarNotConnectedException e) {
                 Log.e(TAG, "Car is not connected!", e);
             }
@@ -434,11 +440,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     }
 
     private void cleanupAudioManager() {
-        try {
-            mCarAudioManager.unregisterVolumeCallback(mVolumeChangeCallback.asBinder());
-        } catch (CarNotConnectedException e) {
-            Log.e(TAG, "Car is not connected!", e);
-        }
+        mCarAudioManager.unregisterCarVolumeCallback(mVolumeChangeCallback);
         mVolumeLineItems.clear();
         mCarAudioManager = null;
     }

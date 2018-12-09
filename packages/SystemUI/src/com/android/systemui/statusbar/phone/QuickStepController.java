@@ -76,7 +76,9 @@ public class QuickStepController implements GestureHelper {
     private static final int ACTION_SWIPE_DOWN_INDEX = 1;
     private static final int ACTION_SWIPE_LEFT_INDEX = 2;
     private static final int ACTION_SWIPE_RIGHT_INDEX = 3;
-    private static final int MAX_GESTURES = 4;
+    private static final int ACTION_SWIPE_LEFT_FROM_EDGE_INDEX = 4;
+    private static final int ACTION_SWIPE_RIGHT_FROM_EDGE_INDEX = 5;
+    private static final int MAX_GESTURES = 6;
 
     private NavigationBarView mNavigationBarView;
 
@@ -97,6 +99,7 @@ public class QuickStepController implements GestureHelper {
     private float mMaxDragLimit;
     private float mMinDragLimit;
     private float mDragDampeningFactor;
+    private float mEdgeSwipeThreshold;
 
     private NavigationGestureAction mCurrentAction;
     private NavigationGestureAction[] mGestureActions = new NavigationGestureAction[MAX_GESTURES];
@@ -128,15 +131,21 @@ public class QuickStepController implements GestureHelper {
      * @param swipeDownAction action after swiping down
      * @param swipeLeftAction action after swiping left
      * @param swipeRightAction action after swiping right
+     * @param swipeLeftFromEdgeAction action swiping left starting from the right side
+     * @param swipeRightFromEdgeAction action swiping right starting from the left side
      */
     public void setGestureActions(@Nullable NavigationGestureAction swipeUpAction,
             @Nullable NavigationGestureAction swipeDownAction,
             @Nullable NavigationGestureAction swipeLeftAction,
-            @Nullable NavigationGestureAction swipeRightAction) {
+            @Nullable NavigationGestureAction swipeRightAction,
+            @Nullable NavigationGestureAction swipeLeftFromEdgeAction,
+            @Nullable NavigationGestureAction swipeRightFromEdgeAction) {
         mGestureActions[ACTION_SWIPE_UP_INDEX] = swipeUpAction;
         mGestureActions[ACTION_SWIPE_DOWN_INDEX] = swipeDownAction;
         mGestureActions[ACTION_SWIPE_LEFT_INDEX] = swipeLeftAction;
         mGestureActions[ACTION_SWIPE_RIGHT_INDEX] = swipeRightAction;
+        mGestureActions[ACTION_SWIPE_LEFT_FROM_EDGE_INDEX] = swipeLeftFromEdgeAction;
+        mGestureActions[ACTION_SWIPE_RIGHT_FROM_EDGE_INDEX] = swipeRightFromEdgeAction;
 
         // Set the current state to all actions
         for (NavigationGestureAction action: mGestureActions) {
@@ -233,6 +242,8 @@ public class QuickStepController implements GestureHelper {
                 mNavigationBarView.transformMatrixToLocal(mTransformLocalMatrix);
                 mAllowGestureDetection = true;
                 mNotificationsVisibleOnDown = !mNavigationBarView.isNotificationsFullyCollapsed();
+                mEdgeSwipeThreshold = mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.navigation_bar_edge_swipe_threshold);
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -284,13 +295,17 @@ public class QuickStepController implements GestureHelper {
                         }
                     } else if (exceededSwipeHorizontalTouchSlop) {
                         if (mDragHPositive ? (posH < touchDownH) : (posH > touchDownH)) {
-                            // Swiping left (ltr) gesture
-                            tryToStartGesture(mGestureActions[ACTION_SWIPE_LEFT_INDEX],
-                                    true /* alignedWithNavBar */, event);
+                            // Swiping left (rtl) gesture
+                            int index = isEdgeSwipeAlongNavBar(touchDownH, !mDragHPositive)
+                                    ? ACTION_SWIPE_LEFT_FROM_EDGE_INDEX : ACTION_SWIPE_LEFT_INDEX;
+                            tryToStartGesture(mGestureActions[index], true /* alignedWithNavBar */,
+                                    event);
                         } else {
                             // Swiping right (ltr) gesture
-                            tryToStartGesture(mGestureActions[ACTION_SWIPE_RIGHT_INDEX],
-                                    true /* alignedWithNavBar */, event);
+                            int index = isEdgeSwipeAlongNavBar(touchDownH, mDragHPositive)
+                                    ? ACTION_SWIPE_RIGHT_FROM_EDGE_INDEX : ACTION_SWIPE_RIGHT_INDEX;
+                            tryToStartGesture(mGestureActions[index], true /* alignedWithNavBar */,
+                                    event);
                         }
                     }
                 }
@@ -331,6 +346,17 @@ public class QuickStepController implements GestureHelper {
             mCurrentAction = null;
         }
         return mCurrentAction != null || deadZoneConsumed;
+    }
+
+    private boolean isEdgeSwipeAlongNavBar(int touchDown, boolean dragPositiveDirection) {
+        // Detect edge swipe from side of 0 -> threshold
+        if (dragPositiveDirection) {
+            return touchDown < mEdgeSwipeThreshold;
+        }
+        // Detect edge swipe from side of size -> (size - threshold)
+        final int largeSide = isNavBarVertical()
+                ? mNavigationBarView.getHeight() : mNavigationBarView.getWidth();
+        return touchDown > largeSide - mEdgeSwipeThreshold;
     }
 
     private void handleDragHitTarget(int position, int touchDown) {
@@ -480,7 +506,7 @@ public class QuickStepController implements GestureHelper {
                 event.transform(mTransformLocalMatrix);
 
                 // Calculate the bounding limits of drag to avoid dragging off nav bar's window
-                if (action.requiresDragWithHitTarget() && mHitTarget != null) {
+                if (action.allowHitTargetToMoveOverDrag() && mHitTarget != null) {
                     final int[] buttonCenter = new int[2];
                     View button = mHitTarget.getCurrentView();
                     button.getLocationInWindow(buttonCenter);
@@ -505,7 +531,7 @@ public class QuickStepController implements GestureHelper {
 
             // Handle direction of the hit target drag from the axis that started the gesture
             // Also calculate the dampening factor, weaker dampening if there is an active action
-            if (action.requiresDragWithHitTarget()) {
+            if (action.allowHitTargetToMoveOverDrag()) {
                 if (alignedWithNavBar) {
                     mGestureHorizontalDragsButton = true;
                     mGestureVerticalDragsButton = false;

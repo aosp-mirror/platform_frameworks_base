@@ -408,6 +408,7 @@ class ActivityTestsBase {
             initialize(intentFirewall, intentController, looper);
             initRootActivityContainerMocks(wm);
             setWindowManager(wm);
+            createDefaultDisplay();
         }
 
         void initRootActivityContainerMocks(WindowManagerService wm) {
@@ -424,7 +425,9 @@ class ActivityTestsBase {
             // Called when moving activity to pinned stack.
             doNothing().when(mRootActivityContainer).ensureActivitiesVisible(any(), anyInt(),
                     anyBoolean());
+        }
 
+        void createDefaultDisplay() {
             // Create a default display and put a home stack on it so that we'll always have
             // something focusable.
             mDefaultDisplay = TestActivityDisplay.create(mStackSupervisor, DEFAULT_DISPLAY);
@@ -598,10 +601,8 @@ class ActivityTestsBase {
         }
 
         @Override
-        protected DisplayWindowController createWindowContainerController() {
-            DisplayWindowController out = mock(DisplayWindowController.class);
-            out.mContainer = WindowTestUtils.createTestDisplayContent();
-            return out;
+        protected DisplayContent createDisplayContent() {
+            return WindowTestUtils.createTestDisplayContent();
         }
 
         void removeAllTasks() {
@@ -616,6 +617,7 @@ class ActivityTestsBase {
 
     private static WindowManagerService prepareMockWindowManager() {
         final WindowManagerService service = mock(WindowManagerService.class);
+        service.mRoot = mock(RootWindowContainer.class);
 
         doAnswer((InvocationOnMock invocationOnMock) -> {
             final Runnable runnable = invocationOnMock.<Runnable>getArgument(0);

@@ -44,6 +44,7 @@ import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.Slog;
@@ -526,12 +527,24 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         adjustBoundsToAvoidConflict(display, inOutBounds);
     }
 
+    private int convertOrientationToScreenOrientation(int orientation) {
+        switch (orientation) {
+            case Configuration.ORIENTATION_LANDSCAPE:
+                return SCREEN_ORIENTATION_LANDSCAPE;
+            case Configuration.ORIENTATION_PORTRAIT:
+                return SCREEN_ORIENTATION_PORTRAIT;
+            default:
+                return SCREEN_ORIENTATION_UNSPECIFIED;
+        }
+    }
+
     private int resolveOrientation(@NonNull ActivityRecord root, @NonNull ActivityDisplay display,
             @NonNull Rect bounds) {
         int orientation = resolveOrientation(root);
 
         if (orientation == SCREEN_ORIENTATION_LOCKED) {
-            orientation = bounds.isEmpty() ? display.getConfiguration().orientation
+            orientation = bounds.isEmpty()
+                    ? convertOrientationToScreenOrientation(display.getConfiguration().orientation)
                     : orientationFromBounds(bounds);
             if (DEBUG) {
                 appendLog(bounds.isEmpty() ? "locked-orientation-from-display=" + orientation

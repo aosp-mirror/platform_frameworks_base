@@ -167,7 +167,7 @@ public class LooperStats implements Looper.Observer {
         final Entry entry = new Entry("__DEBUG_" + variableName);
         entry.messageCount = 1;
         entry.recordedMessageCount = 1;
-        entry.maxDelayMillis = value;
+        entry.totalLatencyMicro = value;
         return new ExportedEntry(entry);
     }
 

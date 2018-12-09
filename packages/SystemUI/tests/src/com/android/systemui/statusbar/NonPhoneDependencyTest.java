@@ -50,7 +50,7 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 @Ignore("b/118400112")
 public class NonPhoneDependencyTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
@@ -91,7 +91,7 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
                 mCheckSaveListener, mOnSettingsClickListener);
         notificationLogger.setUpWithContainer(mListContainer);
         mediaManager.setUpWithPresenter(mPresenter);
-        remoteInputManager.setUpWithPresenter(mPresenter, mRemoteInputManagerCallback,
+        remoteInputManager.setUpWithCallback(mRemoteInputManagerCallback,
                 mDelegate);
         lockscreenUserManager.setUpWithPresenter(mPresenter);
         viewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);

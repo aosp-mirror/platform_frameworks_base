@@ -454,6 +454,9 @@ const SkPath* RenderNode::getClippedOutline(const SkRect& clipRect) const {
 using StringBuffer = FatVector<char, 128>;
 
 template <typename... T>
+// TODO:__printflike(2, 3)
+// Doesn't work because the warning doesn't understand string_view and doesn't like that
+// it's not a C-style variadic function.
 static void format(StringBuffer& buffer, const std::string_view& format, T... args) {
     buffer.resize(buffer.capacity());
     while (1) {
@@ -468,19 +471,20 @@ static void format(StringBuffer& buffer, const std::string_view& format, T... ar
             buffer.resize(needed + 1);
             return;
         }
-        buffer.resize(buffer.size() * 2);
+        // If we're doing a heap alloc anyway might as well give it some slop
+        buffer.resize(needed + 100);
     }
 }
 
 void RenderNode::markDrawStart(SkCanvas& canvas) {
     StringBuffer buffer;
-    format(buffer, "RenderNode(id=%d, name='%s')", uniqueId(), getName());
+    format(buffer, "RenderNode(id=%" PRId64 ", name='%s')", uniqueId(), getName());
     canvas.drawAnnotation(SkRect::MakeWH(getWidth(), getHeight()), buffer.data(), nullptr);
 }
 
 void RenderNode::markDrawEnd(SkCanvas& canvas) {
     StringBuffer buffer;
-    format(buffer, "/RenderNode(id=%d, name='%s')", uniqueId(), getName());
+    format(buffer, "/RenderNode(id=%" PRId64 ", name='%s')", uniqueId(), getName());
     canvas.drawAnnotation(SkRect::MakeWH(getWidth(), getHeight()), buffer.data(), nullptr);
 }
 

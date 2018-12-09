@@ -618,7 +618,7 @@ public abstract class AutofillService extends Service {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return mInterface.asBinder();
         }
-        Log.w(TAG, "Tried to bind to wrong intent: " + intent);
+        Log.w(TAG, "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + ": " + intent);
         return null;
     }
 

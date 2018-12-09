@@ -328,6 +328,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private float mTranslationWhenRemoved;
     private boolean mWasChildInGroupWhenRemoved;
     private int mNotificationColorAmbient;
+    private NotificationInlineImageResolver mImageResolver;
 
     private SystemNotificationAsyncTask mSystemNotificationAsyncTask =
             new SystemNotificationAsyncTask();
@@ -1621,6 +1622,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mFalsingManager = FalsingManager.getInstance(context);
         mNotificationInflater = new NotificationInflater(this);
         mMenuRow = new NotificationMenuRow(mContext);
+        mImageResolver = new NotificationInlineImageResolver(context,
+                new NotificationInlineImageCache());
         initDimens();
     }
 
@@ -1655,6 +1658,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 res.getBoolean(R.bool.config_enableNonGroupedNotificationExpand);
         mShowGroupBackgroundWhenExpanded =
                 res.getBoolean(R.bool.config_showGroupNotificationBgWhenExpanded);
+    }
+
+    NotificationInlineImageResolver getImageResolver() {
+        return mImageResolver;
     }
 
     /**
@@ -2090,7 +2097,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     protected boolean shouldClipToActualHeight() {
-        return super.shouldClipToActualHeight() && !mExpandAnimationRunning && !mChildIsExpanding;
+        return super.shouldClipToActualHeight() && !mExpandAnimationRunning;
     }
 
     @Override
@@ -3134,6 +3141,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         pw.print(", alpha: " + getAlpha());
         pw.print(", translation: " + getTranslation());
         pw.print(", removed: " + isRemoved());
+        pw.print(", expandAnimationRunning: " + mExpandAnimationRunning);
         NotificationContentView showingLayout = getShowingLayout();
         pw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
         pw.println();
@@ -3147,6 +3155,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         pw.println();
         pw.println();
         if (mIsSummaryWithChildren) {
+            pw.print("  ChildrenContainer");
+            pw.print(" visibility: " + mChildrenContainer.getVisibility());
+            pw.print(", alpha: " + mChildrenContainer.getAlpha());
+            pw.print(", translationY: " + mChildrenContainer.getTranslationY());
+            pw.println();
             List<ExpandableNotificationRow> notificationChildren = getNotificationChildren();
             pw.println("  Children: " + notificationChildren.size());
             pw.println("  {");

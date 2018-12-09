@@ -136,14 +136,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> વાઇ-ફાઇ"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"વાઇ-ફાઇ કૉલિંગ | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"વાઇ-ફાઇ કૉલિંગ"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"વાઇ-ફાઇ"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"વાઇ-ફાઇ કૉલિંગ"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"બંધ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"વાઇ-ફાઇ પસંદ કર્યું"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"મોબાઇલને પસંદગી"</string>
@@ -533,6 +529,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"એપને તમારા મીડિયા સંગ્રહમાંથી સ્થાનો વાંચવાની મંજૂરી આપે છે."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> ઍપ પ્રમાણીકરણ કરવા માગે છે."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"બાયોમેટ્રિક હાર્ડવેર ઉપલબ્ધ નથી"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"ઓળખાયેલ નથી"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"આંશિક ફિંગરપ્રિન્ટ મળી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ફિંગરપ્રિન્ટ પ્રક્રિયા કરી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ફિંગરપ્રિન્ટ સેન્સર ગંદું છે. કૃપા કરીને સાફ કરો અને ફરી પ્રયાસ કરો."</string>
@@ -540,7 +541,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"આંગળી બહુ જ ધીમેથી ખસેડી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"ઓળખાયેલ નથી"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"ફિંગરપ્રિન્ટ પ્રમાણિત કરી"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"ચહેરા પ્રમાણિત"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"ચહેરા પ્રમાણિત, કૃપા કરીને કન્ફર્મ કરો"</string>
@@ -596,14 +596,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"એપ્લિકેશનને એકાઉન્ટ માટે સમન્વયન સેટિંગ્સ સંશોધિત કરવાની મંજૂરી આપે છે. ઉદાહરણ તરીકે, આનો ઉપયોગ એકાઉન્ટ સાથે લોકો એપ્લિકેશનના સમન્વયનને સક્ષમ કરવા માટે થઈ શકે છે."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"સમન્વયન આંકડા વાંચો"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"એપ્લિકેશનને સમન્વયન ઇવેન્ટ્સનો ઇતિહાસ અને કેટલો ડેટા સમન્વયિત થયો છે તે સહિત કોઈ એકાઉન્ટ માટેનાં સમન્વયન આંકડા વાંચવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"તમારા USB સંગ્રહની સામગ્રીઓ વાંચો"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"તમારા SD કાર્ડની સામગ્રીઓ વાંચો"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"એપ્લિકેશનને તમારા USB સંગ્રહની સામગ્રીઓ વાંચવાની મંજૂરી આપે છે."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"એપ્લિકેશનને તમારા SD કાર્ડની સામગ્રીઓ વાંચવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"તમારા USB સંગ્રહની સામગ્રીઓ સંશોધિત કરો અથવા કાઢી નાખો"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"તમારા SD કાર્ડની સામગ્રીઓ સંશોધિત કરો અથવા કાઢી નાખો"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"ઍપ્લિકેશનને USB સ્ટોરેજ પર લખવાની મંજૂરી આપે છે."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"એપ્લિકેશનને SD કાર્ડ પર લખવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"તમારા શેર કરેલા સ્ટોરેજના કન્ટેન્ટને વાંચો"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"શેર કરેલા સ્ટોરેજ કન્ટેન્ટને વાંચવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"શેર કરેલા સ્ટોરેજ કન્ટેન્ટમાં ફેરફાર કરો/ડિલીટ કરો"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"શેર કરેલા સ્ટોરેજ કન્ટેન્ટમાં લખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP કૉલ્સ કરો/પ્રાપ્ત કરો"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"એપ્લિકેશનને SIP કૉલ્સ કરવા અને પ્રાપ્ત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"નવા ટેલિકોમ સિમ કનેક્શન્સની નોંધણી કરો"</string>
@@ -1105,6 +1101,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"પસંદ કરેલ સમય માટે ઇવેન્ટ શેડ્યૂલ કરો"</string>
     <string name="view_flight" msgid="7691640491425680214">"ટ્રૅક કરો"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"પસંદ કરેલ ફ્લાઇટને ટ્રૅક કરો"</string>
+    <string name="translate" msgid="9218619809342576858">"અનુવાદ કરો"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"પસંદ કરેલી ટેક્સ્ટનો અનુવાદ કરો"</string>
+    <string name="define" msgid="7394820043869954211">"વ્યાખ્યાતિત કરો"</string>
+    <string name="define_desc" msgid="7910883642444919726">"પસંદ કરેલી ટેક્સ્ટને વ્યાખ્યાતિત કરો"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"સ્ટોરેજ સ્થાન સમાપ્ત થયું"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"કેટલાક સિસ્ટમ Tasks કામ કરી શકશે નહીં"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"સિસ્ટમ માટે પર્યાપ્ત સ્ટોરેજ નથી. ખાતરી કરો કે તમારી પાસે 250MB ખાલી સ્થાન છે અને ફરીથી પ્રારંભ કરો."</string>
@@ -1461,8 +1461,7 @@
       <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> માંથી <xliff:g id="INDEX">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"થઈ ગયું"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB સ્ટોરેજ ભૂસી રહ્યાં છીએ…"</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD કાર્ડ કાઢી નાખી રહ્યાં છે…"</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"શેર કરેલ સ્ટોરેજ ભૂસી રહ્યાં છીએ…"</string>
     <string name="share" msgid="1778686618230011964">"શેર કરો"</string>
     <string name="find" msgid="4808270900322985960">"શોધો"</string>
     <string name="websearch" msgid="4337157977400211589">"વેબ શોધ"</string>
@@ -1834,8 +1833,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS વિનંતીને USSD વિનંતીમાં બદલવામાં આવી છે"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"નવી SS વિનંતીમાં બદલવામાં આવી છે"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"કાર્યાલયની પ્રોફાઇલ"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"અલર્ટ કરેલ"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"વિસ્તૃત કરો"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"સંકુચિત કરો"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"વિસ્તરણ ટૉગલ કરો"</string>

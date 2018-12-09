@@ -19,13 +19,10 @@ package android.media;
 import android.annotation.NonNull;
 
 /**
- * @hide
  * Structure of data source descriptor for sources using callback.
  *
- * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)},
- * {@link MediaPlayer2#setNextDataSource(DataSourceDesc)} and
- * {@link MediaPlayer2#setNextDataSources(List<DataSourceDesc>)}
- * to set data source for playback.
+ * Used by {@link MediaPlayer2#setDataSource}, {@link MediaPlayer2#setNextDataSource} and
+ * {@link MediaPlayer2#setNextDataSources} to set data source for playback.
  *
  * <p>Users should use {@link Builder} to create {@link CallbackDataSourceDesc}.
  *
@@ -38,7 +35,6 @@ public class CallbackDataSourceDesc extends DataSourceDesc {
 
     /**
      * Return the DataSourceCallback of this data source.
-     * It's meaningful only when {@code getType} returns {@link #TYPE_CALLBACK}.
      * @return the DataSourceCallback of this data source
      */
     public DataSourceCallback getDataSourceCallback() {

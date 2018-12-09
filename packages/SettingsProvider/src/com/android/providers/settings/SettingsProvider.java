@@ -94,6 +94,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -147,6 +148,7 @@ public class SettingsProvider extends ContentProvider {
     private static final String TABLE_SYSTEM = "system";
     private static final String TABLE_SECURE = "secure";
     private static final String TABLE_GLOBAL = "global";
+    private static final String TABLE_CONFIG = "config";
 
     // Old tables no longer exist.
     private static final String TABLE_FAVORITES = "favorites";
@@ -414,9 +416,8 @@ public class SettingsProvider extends ContentProvider {
 
             case Settings.CALL_METHOD_PUT_CONFIG: {
                 String value = getSettingValue(args);
-                String tag = getSettingTag(args);
                 final boolean makeDefault = getSettingMakeDefault(args);
-                insertConfigSetting(name, value, tag, makeDefault, requestingUserId, false);
+                insertConfigSetting(name, value, null, makeDefault, requestingUserId, false);
                 break;
             }
 
@@ -444,8 +445,8 @@ public class SettingsProvider extends ContentProvider {
 
             case Settings.CALL_METHOD_RESET_CONFIG: {
                 final int mode = getResetModeEnforcingPermission(args);
-                String tag = getSettingTag(args);
-                resetConfigSetting(requestingUserId, mode, tag);
+                String prefix = getSettingPrefix(args);
+                resetConfigSetting(requestingUserId, mode, prefix);
                 break;
             }
 
@@ -463,15 +464,8 @@ public class SettingsProvider extends ContentProvider {
                 break;
             }
 
-            case Settings.CALL_METHOD_DELETE_SYSTEM: {
-                int rows = deleteSystemSetting(name, requestingUserId) ? 1 : 0;
-                Bundle result = new Bundle();
-                result.putInt(RESULT_ROWS_DELETED, rows);
-                return result;
-            }
-
-            case Settings.CALL_METHOD_DELETE_SECURE: {
-                int rows = deleteSecureSetting(name, requestingUserId, false) ? 1 : 0;
+            case Settings.CALL_METHOD_DELETE_CONFIG: {
+                int rows  = deleteConfigSetting(name, requestingUserId, false) ? 1 : 0;
                 Bundle result = new Bundle();
                 result.putInt(RESULT_ROWS_DELETED, rows);
                 return result;
@@ -484,10 +478,32 @@ public class SettingsProvider extends ContentProvider {
                 return result;
             }
 
-            case Settings.CALL_METHOD_LIST_SYSTEM: {
+            case Settings.CALL_METHOD_DELETE_SECURE: {
+                int rows = deleteSecureSetting(name, requestingUserId, false) ? 1 : 0;
+                Bundle result = new Bundle();
+                result.putInt(RESULT_ROWS_DELETED, rows);
+                return result;
+            }
+
+            case Settings.CALL_METHOD_DELETE_SYSTEM: {
+                int rows = deleteSystemSetting(name, requestingUserId) ? 1 : 0;
+                Bundle result = new Bundle();
+                result.putInt(RESULT_ROWS_DELETED, rows);
+                return result;
+            }
+
+            case Settings.CALL_METHOD_LIST_CONFIG: {
+                String prefix = getSettingPrefix(args);
+                Bundle result = new Bundle();
+                result.putSerializable(
+                        Settings.NameValueTable.VALUE, (HashMap) getAllConfigFlags(prefix));
+                return result;
+            }
+
+            case Settings.CALL_METHOD_LIST_GLOBAL: {
                 Bundle result = new Bundle();
                 result.putStringArrayList(RESULT_SETTINGS_LIST,
-                        buildSettingsList(getAllSystemSettings(requestingUserId, null)));
+                        buildSettingsList(getAllGlobalSettings(null)));
                 return result;
             }
 
@@ -498,10 +514,10 @@ public class SettingsProvider extends ContentProvider {
                 return result;
             }
 
-            case Settings.CALL_METHOD_LIST_GLOBAL: {
+            case Settings.CALL_METHOD_LIST_SYSTEM: {
                 Bundle result = new Bundle();
                 result.putStringArrayList(RESULT_SETTINGS_LIST,
-                        buildSettingsList(getAllGlobalSettings(null)));
+                        buildSettingsList(getAllSystemSettings(requestingUserId, null)));
                 return result;
             }
 
@@ -1061,41 +1077,80 @@ public class SettingsProvider extends ContentProvider {
                 MUTATION_OPERATION_INSERT, forceNotify, 0);
     }
 
-    private void resetConfigSetting(int requestingUserId, int mode, String tag) {
+    private boolean deleteConfigSetting(String name, int requestingUserId, boolean forceNotify) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "deleteConfigSetting(" + name + ", " + requestingUserId
+                    + ", " + forceNotify + ")");
+        }
+        return mutateConfigSetting(name, null, null, false, requestingUserId,
+                MUTATION_OPERATION_DELETE, forceNotify, 0);
+    }
+
+    private void resetConfigSetting(int requestingUserId, int mode, String prefix) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "resetConfigSetting(" + requestingUserId + ", "
-                    + mode + ", " + tag + ")");
+                    + mode + ", " + prefix + ")");
         }
-        mutateConfigSetting(null, null, tag, false, requestingUserId,
+        mutateConfigSetting(null, null, prefix, false, requestingUserId,
                 MUTATION_OPERATION_RESET, false, mode);
     }
 
-    private boolean mutateConfigSetting(String name, String value, String tag,
+    private boolean mutateConfigSetting(String name, String value, String prefix,
             boolean makeDefault, int requestingUserId, int operation, boolean forceNotify,
             int mode) {
         // TODO(b/117663715): check the new permission when it's added.
         // enforceWritePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
-
-        // Resolve the userId on whose behalf the call is made.
-        final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
 
         // Perform the mutation.
         synchronized (mLock) {
             switch (operation) {
                 case MUTATION_OPERATION_INSERT: {
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_CONFIG,
-                            UserHandle.USER_SYSTEM, name, value, tag, makeDefault,
+                            UserHandle.USER_SYSTEM, name, value, null, makeDefault,
                             getCallingPackage(), forceNotify, null);
+                }
+
+                case MUTATION_OPERATION_DELETE: {
+                    return mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_CONFIG,
+                            UserHandle.USER_SYSTEM, name, forceNotify, null);
                 }
 
                 case MUTATION_OPERATION_RESET: {
                     mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_CONFIG,
-                            UserHandle.USER_SYSTEM, getCallingPackage(), mode, tag);
+                            UserHandle.USER_SYSTEM, getCallingPackage(), mode, null, prefix);
                 } return true;
             }
         }
 
         return false;
+    }
+
+    private Map<String, String> getAllConfigFlags(@Nullable String prefix) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "getAllConfigFlags() for " + prefix);
+        }
+
+        synchronized (mLock) {
+            // Get the settings.
+            SettingsState settingsState = mSettingsRegistry.getSettingsLocked(
+                    SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
+
+            List<String> names = getSettingsNamesLocked(SETTINGS_TYPE_CONFIG,
+                    UserHandle.USER_SYSTEM);
+
+            final int nameCount = names.size();
+            Map<String, String> flagsToValues = new HashMap<>(names.size());
+
+            for (int i = 0; i < nameCount; i++) {
+                String name = names.get(i);
+                Setting setting = settingsState.getSettingLocked(name);
+                if (prefix == null || setting.getName().startsWith(prefix)) {
+                    flagsToValues.put(setting.getName(), setting.getValue());
+                }
+            }
+
+            return flagsToValues;
+        }
     }
 
     private Cursor getAllGlobalSettings(String[] projection) {
@@ -2085,6 +2140,13 @@ public class SettingsProvider extends ContentProvider {
         return (args != null) ? args.getString(Settings.CALL_METHOD_TAG_KEY) : null;
     }
 
+    private static String getSettingPrefix(Bundle args) {
+        String prefix = (args != null) ? args.getString(Settings.CALL_METHOD_PREFIX_KEY) : null;
+        // Append '/' to ensure we only match properties with this exact prefix.
+        // i.e. "foo" should match "foo/property" but not "foobar/property"
+        return prefix != null ? prefix + "/" : null;
+    }
+
     private static boolean getSettingMakeDefault(Bundle args) {
         return (args != null) && args.getBoolean(Settings.CALL_METHOD_MAKE_DEFAULT_KEY);
     }
@@ -2644,6 +2706,11 @@ public class SettingsProvider extends ContentProvider {
 
         public void resetSettingsLocked(int type, int userId, String packageName, int mode,
                 String tag) {
+            resetSettingsLocked(type, userId, packageName, mode, tag, null);
+        }
+
+        public void resetSettingsLocked(int type, int userId, String packageName, int mode,
+                String tag, @Nullable String prefix) {
             final int key = makeKey(type, userId);
             SettingsState settingsState = peekSettingsStateLocked(key);
             if (settingsState == null) {
@@ -2656,7 +2723,8 @@ public class SettingsProvider extends ContentProvider {
                         boolean someSettingChanged = false;
                         Setting setting = settingsState.getSettingLocked(name);
                         if (packageName.equals(setting.getPackageName())) {
-                            if (tag != null && !tag.equals(setting.getTag())) {
+                            if ((tag != null && !tag.equals(setting.getTag()))
+                                    || (prefix != null && !setting.getName().startsWith(prefix))) {
                                 continue;
                             }
                             if (settingsState.resetSettingLocked(name)) {
@@ -2676,6 +2744,9 @@ public class SettingsProvider extends ContentProvider {
                         Setting setting = settingsState.getSettingLocked(name);
                         if (!SettingsState.isSystemPackage(getContext(),
                                 setting.getPackageName())) {
+                            if (prefix != null && !setting.getName().startsWith(prefix)) {
+                                continue;
+                            }
                             if (settingsState.resetSettingLocked(name)) {
                                 someSettingChanged = true;
                                 notifyForSettingsChange(key, name);
@@ -2693,6 +2764,9 @@ public class SettingsProvider extends ContentProvider {
                         Setting setting = settingsState.getSettingLocked(name);
                         if (!SettingsState.isSystemPackage(getContext(),
                                 setting.getPackageName())) {
+                            if (prefix != null && !setting.getName().startsWith(prefix)) {
+                                continue;
+                            }
                             if (setting.isDefaultFromSystem()) {
                                 if (settingsState.resetSettingLocked(name)) {
                                     someSettingChanged = true;
@@ -2713,6 +2787,9 @@ public class SettingsProvider extends ContentProvider {
                     for (String name : settingsState.getSettingNamesLocked()) {
                         Setting setting = settingsState.getSettingLocked(name);
                         boolean someSettingChanged = false;
+                        if (prefix != null && !setting.getName().startsWith(prefix)) {
+                            continue;
+                        }
                         if (setting.isDefaultFromSystem()) {
                             if (settingsState.resetSettingLocked(name)) {
                                 someSettingChanged = true;

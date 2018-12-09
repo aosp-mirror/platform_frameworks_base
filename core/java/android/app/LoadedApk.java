@@ -57,6 +57,7 @@ import android.view.DisplayAdjustments;
 
 import com.android.internal.util.ArrayUtils;
 
+import dalvik.system.BaseDexClassLoader;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
@@ -949,6 +950,15 @@ public final class LoadedApk {
         if (!SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false)) {
             return;
         }
+
+        // If we use profiles, setup the dex reporter to notify package manager
+        // of any relevant dex loads. The idle maintenance job will use the information
+        // reported to optimize the loaded dex files.
+        // Note that we only need one global reporter per app.
+        // Make sure we do this before invoking app code for the first time so that we
+        // can capture the complete application startup.
+        BaseDexClassLoader.setReporter(DexLoadReporter.getInstance());
+
         // Only set up profile support if the loaded apk has the same uid as the
         // current process.
         // Currently, we do not support profiling across different apps.
@@ -1656,6 +1666,19 @@ public final class LoadedApk {
                 sd.validate(context, handler);
             }
             return sd.getIServiceConnection();
+        }
+    }
+
+    @UnsupportedAppUsage
+    public IServiceConnection lookupServiceDispatcher(ServiceConnection c,
+            Context context) {
+        synchronized (mServices) {
+            LoadedApk.ServiceDispatcher sd = null;
+            ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher> map = mServices.get(context);
+            if (map != null) {
+                sd = map.get(c);
+            }
+            return sd != null ? sd.getIServiceConnection() : null;
         }
     }
 

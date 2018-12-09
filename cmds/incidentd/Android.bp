@@ -53,6 +53,7 @@ cc_binary {
         "libprotoutil",
         "libservices",
         "libutils",
+        "libprotobuf-cpp-lite",
     ],
 
     init_rc: ["incidentd.rc"],

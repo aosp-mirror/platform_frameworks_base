@@ -136,14 +136,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> வைஃபை"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"வைஃபை அழைப்பு | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"வைஃபை அழைப்பு"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"வைஃபை"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"வைஃபை அழைப்பு"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ஆஃப்"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"வைஃபைக்கு முன்னுரிமை"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"மொபைல் தரவிற்கு முன்னுரிமை"</string>
@@ -533,6 +529,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"உங்களின் மீடியா தொகுப்பிலிருந்து இடங்களை அறிந்துகொள்ள ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g>ஐப் பயன்படுத்த அங்கீகாரத்தை உறுதிசெய்க."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"பயோமெட்ரிக் வன்பொருள் இல்லை"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"அடையாளங்காணபடவில்லை"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"கைரேகையை ஓரளவுதான் கண்டறிய முடிந்தது. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"கைரேகையைச் செயலாக்க முடியவில்லை. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"கைரேகை உணர்வியில் தூசி உள்ளது. சுத்தம் செய்து, முயலவும்."</string>
@@ -540,7 +541,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"விரலை மிகவும் மெதுவாக நகர்த்திவிட்டீர்கள். மீண்டும் முயற்சிக்கவும்."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"அடையாளங்காணபடவில்லை"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"கைரேகை அங்கீகரிக்கப்பட்டது"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"முகம் அங்கீகரிக்கப்பட்டது. ’உறுதிப்படுத்துக’ என்பதை அழுத்துக"</string>
@@ -596,14 +596,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"கணக்கிற்கான ஒத்திசைவு அமைப்புகளைத் திருத்த பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, பீப்பிள் பயன்பாட்டைக் கணக்குடன் ஒத்திசைவை இயக்குவதற்கு இது பயன்படுத்தப்படலாம்."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"ஒத்திசைவு புள்ளிவிவரங்களைப் படித்தல்"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"நிகழ்வுகள் ஒத்திசைவின் வரலாறு மற்றும் ஒத்திசைக்கப்பட்ட தரவு எவ்வளவு ஆகியன உட்பட, கணக்கிற்கான ஒத்திசைவு புள்ளிவிவரங்களைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"உங்கள் USB சேமிப்பிடத்தின் உள்ளடக்கங்களைப் படித்தல்"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"உங்கள் SD கார்டின் உள்ளடக்கங்களைப் படித்தல்"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"உங்கள் USB சேமிப்பிடத்தின் உள்ளடக்கங்களைப் படிக்கப் பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"உங்கள் SD கார்டின் உள்ளடக்கங்களைப் படிக்கப் பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"உங்கள் USB சேமிப்பிடத்தின் உள்ளடக்கங்களை மாற்றுதல் அல்லது நீக்குதல்"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"உங்கள் SD கார்டின் உள்ளடக்கங்களை மாற்றுதல் அல்லது நீக்குதல்"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"USB சேமிப்பகத்தில் எழுத, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"SD கார்டில் எழுத, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கங்களைப் பார்த்தல்"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கங்களைப் பார்க்க ஆப்ஸை அனுமதிக்கும்."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கங்களை மாற்றும் அல்லது நீக்கும்"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கத்தில் மாற்றங்களைச் செய்ய அனுமதிக்கும்."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP அழைப்புகளைச் செய்தல்/பெறுதல்"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP அழைப்புகளைச் செய்ய/பெற, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"புதிய நிறுவன சிம் இணைப்புகளைப் பதிவுசெய்தல்"</string>
@@ -1105,6 +1101,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"தேர்ந்தெடுத்த நேரத்திற்கு நிகழ்வைத் திட்டமிடும்"</string>
     <string name="view_flight" msgid="7691640491425680214">"கண்கானி"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"தேர்ந்தெடுத்த விமானத்தைக் கண்காணிக்கும்"</string>
+    <string name="translate" msgid="9218619809342576858">"மொழிபெயர்"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"தேர்ந்தெடுத்த உரையை மொழிபெயர்க்கும்"</string>
+    <string name="define" msgid="7394820043869954211">"விளக்குக"</string>
+    <string name="define_desc" msgid="7910883642444919726">"தேர்ந்தெடுத்த உரையை விளக்கும்"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"சேமிப்பிடம் குறைகிறது"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"சில அமைப்பு செயல்பாடுகள் வேலை செய்யாமல் போகலாம்"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"முறைமையில் போதுமான சேமிப்பகம் இல்லை. 250மெ.பை. அளவு காலி இடவசதி இருப்பதை உறுதிசெய்து மீண்டும் தொடங்கவும்."</string>
@@ -1461,8 +1461,7 @@
       <item quantity="one">1 பொருத்தம்</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"முடிந்தது"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB சேமிப்பிடத்தை அழிக்கிறது…"</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD கார்டை அழிக்கிறது…"</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"பகிர்ந்த சேமிப்பகத்தை அழிக்கிறது…"</string>
     <string name="share" msgid="1778686618230011964">"பகிர்"</string>
     <string name="find" msgid="4808270900322985960">"கண்டறி"</string>
     <string name="websearch" msgid="4337157977400211589">"இணையத் தேடல்"</string>
@@ -1834,8 +1833,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS கோரிக்கை, USSD கோரிக்கைக்கு மாற்றப்பட்டது"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"புதிய SS கோரிக்கைக்கு மாற்றப்பட்டது"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"பணி சுயவிவரம்"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"விழிப்பூட்டல் ஐகான்"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"விரிவாக்கும்"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"சுருக்கும்"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"விரிவாக்கத்தை நிலைமாற்றும்"</string>

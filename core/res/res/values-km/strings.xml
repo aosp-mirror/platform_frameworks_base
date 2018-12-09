@@ -136,14 +136,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"ការហៅតាម WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"ការហៅតាម Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"ការហៅតាម Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"បិទ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi ជាអាទិភាព"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ទិន្នន័យទូរសព្ទចល័តជាអាទិភាព"</string>
@@ -533,6 +529,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"អនុញ្ញាតឱ្យ​កម្មវិធី​អាន​ទីតាំង​ពីបណ្ដុំ​មេឌៀ​របស់​អ្នក។"</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"កម្មវិធី <xliff:g id="APP">%s</xliff:g> ចង់​ធ្វើ​កា​រផ្ទៀងផ្ទាត់។"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"មិនអាច​ប្រើឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ​បានទេ"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"មិនអាចសម្គាល់បានទេ"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"បានផ្តិតយកស្នាមម្រាមដៃមិនពេញលក្ខណៈ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ឧបករណ៍ផ្តិតម្រាមដៃប្រលាក់ហើយ។ សូមសម្អាត ហើយព្យាយាមម្តងទៀត។"</string>
@@ -540,7 +541,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ចលនាម្រាមដៃយឺតពេកហើយ។ សូមព្យាយាមម្តងទៀត។"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"មិនអាចសម្គាល់បានទេ"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"បាន​ផ្ទៀង​ផ្ទាត់​ស្នាម​ម្រាមដៃ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"បានផ្ទៀងផ្ទាត់​មុខ"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"បានផ្ទៀងផ្ទាត់​មុខ សូម​ចុច​បញ្ជាក់"</string>
@@ -596,14 +596,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ឲ្យ​កម្មវិធី​កែ​ការ​កំណត់​ធ្វើ​សម​កាល​កម្ម​សម្រាប់​គណនី។ ឧទាហរណ៍ វា​អាច​ត្រូវ​បាន​ប្រើ​ដើម្បី​បើក​ការ​ធ្វើ​សម​កាល​កម្ម​កម្មវិធី​របស់​មនុស្ស​ជា​មួយ​គណនី។"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"អាន​ស្ថិតិ​ធ្វើ​សម​កាល​កម្ម"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"ឲ្យ​កម្មវិធី​អាន​ស្ថានភាព​ធ្វើ​សម​កាល​កម្ម​សម្រាប់​គណនី រួមមាន​ព្រឹត្តិការណ៍​ប្រវត្តិ​ធ្វើ​សម​កាល​កម្ម ​និង​ទំហំ​ទិន្នន័យ​បាន​ធ្វើ​សម​កាល​កម្ម។"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"អាន​មាតិកា​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី​របស់​អ្នក"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"អាន​មាតិកា​​កាត​អេសឌី​របស់​អ្នក"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"ឲ្យ​កម្មវិធី​អាន​មាតិកា​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី​របស់​អ្នក។"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ដើម្បី​អាន​មាតិកា​​កាត​អេសឌី​​របស់​អ្នក​។"</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"កែ​ ឬ​លុប​មាតិកា​នៃ​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី​របស់​អ្នក"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"កែ ឬ​លុប​មាតិកា​កាត​អេសឌី"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"ឲ្យ​កម្មវិធី​សរសេរ​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី។"</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"ឲ្យ​​កម្មវិធី​សរសេរ​ទៅ​កាត​អេសឌី។"</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"អាន​ខ្លឹមសារនៃ​ទំហំផ្ទុករួម​របស់អ្នក"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"អនុញ្ញាតឱ្យ​កម្មវិធី​អានខ្លឹមសារនៃ​ទំហំផ្ទុករួម​របស់អ្នក។"</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"កែប្រែ ឬលុប​ខ្លឹមសារនៃ​ទំហំផ្ទុករួម​របស់អ្នក"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"អនុញ្ញាតឱ្យ​កម្មវិធី​សរសេរខ្លឹមសារនៃ​ទំហំផ្ទុករួម​របស់អ្នក។"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"បង្កើត/ទទួល ការ​ហៅ SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"​ឲ្យ​​កម្មវិធី បង្កើត និង​ទទួល​ការ​ហៅ SIP ។"</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"ចុះ​ឈ្មោះ​ការ​ភ្ជាប់​ស៊ី​ម​ទូរគមនាគមន៍​ថ្មី"</string>
@@ -1105,6 +1101,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"កំណត់​កាលវិភាគ​ព្រឹត្តិការណ៍​សម្រាប់ពេល​វេលាដែល​បាន​ជ្រើសរើស"</string>
     <string name="view_flight" msgid="7691640491425680214">"តាម​ដាន"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"តាមដាន​ជើង​ហោះហើរ​ដែល​បាន​ជ្រើសរើស"</string>
+    <string name="translate" msgid="9218619809342576858">"បកប្រែ"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"បកប្រែអត្ថបទដែលបានជ្រើសរើស"</string>
+    <string name="define" msgid="7394820043869954211">"កំណត់​អត្ថន័យ"</string>
+    <string name="define_desc" msgid="7910883642444919726">"កំណត់​អត្ថន័យ​ពាក្យដែល​បានជ្រើសរើស"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"អស់​ទំហំ​ផ្ទុក"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"មុខងារ​ប្រព័ន្ធ​មួយ​ចំនួន​អាច​មិន​ដំណើរការ​"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"មិន​មាន​ទំហំ​ផ្ទុក​​គ្រប់​គ្រាន់​សម្រាប់​ប្រព័ន្ធ​។ សូម​ប្រាកដ​ថា​អ្នក​មាន​ទំហំ​ទំនេរ​ 250MB ហើយ​ចាប់ផ្ដើម​ឡើង​វិញ។"</string>
@@ -1462,8 +1462,7 @@
       <item quantity="one">ការប្រកួត 1</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"រួចរាល់"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"កំពុង​លុប​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី..."</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"កំពុង​លុប​កាត​អេសឌី..."</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"កំពុងលុបទំហំផ្ទុករួម…"</string>
     <string name="share" msgid="1778686618230011964">"ចែក​រំលែក​"</string>
     <string name="find" msgid="4808270900322985960">"រក"</string>
     <string name="websearch" msgid="4337157977400211589">"ស្វែងរក​តាម​បណ្ដាញ"</string>
@@ -1835,8 +1834,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"សំណើ SS ត្រូវបាន​ប្ដូរ​ទៅ​សំណើ USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"បាន​ប្ដូរ​ទៅ​សំណើ SS ថ្មី"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ប្រវត្តិរូបការងារ"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"បាន​ជូនដំណឹង"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"ពង្រីក"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"លាក់"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"បិទ/បើកការពង្រីក"</string>

@@ -119,7 +119,7 @@ class Task extends WindowContainer<AppWindowToken> {
         mResizeMode = resizeMode;
         mSupportsPictureInPicture = supportsPictureInPicture;
         setController(controller);
-        setBounds(getOverrideBounds());
+        setBounds(getRequestedOverrideBounds());
         mTaskDescription = taskDescription;
 
         // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED).
@@ -369,7 +369,7 @@ class Task extends WindowContainer<AppWindowToken> {
      *                    the adjusted bounds's top.
      */
     void alignToAdjustedBounds(Rect adjustedBounds, Rect tempInsetBounds, boolean alignBottom) {
-        if (!isResizeable() || EMPTY.equals(getOverrideConfiguration())) {
+        if (!isResizeable() || EMPTY.equals(getRequestedOverrideConfiguration())) {
             return;
         }
 

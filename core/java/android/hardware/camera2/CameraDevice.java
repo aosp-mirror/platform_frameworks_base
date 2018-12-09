@@ -968,6 +968,36 @@ public abstract class CameraDevice implements AutoCloseable {
     public abstract void close();
 
     /**
+     * Checks whether a particular {@link SessionConfiguration} is supported by the camera device.
+     *
+     * <p>This method performs a runtime check of a given {@link SessionConfiguration}. The result
+     * confirms whether or not the passed session configuration can be successfully used to
+     * create a camera capture session using
+     * {@link CameraDevice#createCaptureSession(SessionConfiguration)}.
+     * </p>
+     *
+     * <p>The method can be called at any point before, during and after active capture session.
+     * It must not impact normal camera behavior in any way and must complete significantly
+     * faster than creating a regular or constrained capture session.</p>
+     *
+     * <p>Note that session parameters will be ignored and calls to
+     * {@link SessionConfiguration#setSessionParameters} are not required.</p>
+     *
+     * @return {@code true} if the given session configuration is supported by the camera device
+     *         {@code false} otherwise.
+     * @throws UnsupportedOperationException if the query operation is not supported by the camera
+     *                                       device
+     * @throws IllegalArgumentException if the session configuration is invalid
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     */
+    public boolean isSessionConfigurationSupported(
+            @NonNull SessionConfiguration sessionConfig) throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
+
+    /**
      * A callback objects for receiving updates about the state of a camera device.
      *
      * <p>A callback instance must be provided to the {@link CameraManager#openCamera} method to

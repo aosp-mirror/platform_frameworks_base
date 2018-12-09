@@ -264,8 +264,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // If we created a docked stack we want to resize it so it resizes all other stacks
             // in the system.
             getStackDockedModeBounds(null, null, mTmpRect2, mTmpRect3);
-            mStackSupervisor.resizeDockedStackLocked(
-                    getOverrideBounds(), mTmpRect2, mTmpRect2, null, null, PRESERVE_WINDOWS);
+            mStackSupervisor.resizeDockedStackLocked(getRequestedOverrideBounds(), mTmpRect2,
+                    mTmpRect2, null, null, PRESERVE_WINDOWS);
         }
         mRootActivityContainer.updateUIDsPresentOnDisplay();
     }
@@ -562,7 +562,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // Update bounds if applicable
         boolean hasNewOverrideBounds = false;
         // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
-        if (getOverrideWindowingMode() == WINDOWING_MODE_PINNED) {
+        if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_PINNED) {
             // Pinned calculation already includes rotation
             mTmpRect2.set(mTmpRect);
             hasNewOverrideBounds = getWindowContainerController().mContainer
@@ -574,7 +574,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 // bounds were on the pre-rotated display.
                 if (prevRotation != newRotation) {
                     mTmpRect2.set(mTmpRect);
-                    getDisplay().getWindowContainerController().mContainer
+                    getDisplay().mDisplayContent
                             .rotateBounds(newParentConfig.windowConfiguration.getBounds(),
                                     prevRotation, newRotation, mTmpRect2);
                     hasNewOverrideBounds = true;
@@ -589,8 +589,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         || prevScreenH != getConfiguration().screenHeightDp) {
                     // Use override windowing mode to prevent extra bounds changes if inheriting
                     // the mode.
-                    if (getOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                            || getOverrideWindowingMode()
+                    if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                            || getRequestedOverrideWindowingMode()
                             == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
                         mTmpRect2.set(mTmpRect);
                         getWindowContainerController().mContainer
@@ -602,14 +602,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
         if (getWindowingMode() != prevWindowingMode) {
             // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
-            if (getOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+            if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 getStackDockedModeBounds(null, null, mTmpRect2, mTmpRect3);
                 // immediately resize so docked bounds are available in onSplitScreenModeActivated
                 resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */);
-            } else if (getOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+            } else if (
+                    getRequestedOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
                 Rect dockedBounds = display.getSplitScreenPrimaryStack().getBounds();
-                final boolean isMinimizedDock = getDisplay().getWindowContainerController()
-                        .mContainer.getDockedDividerController().isMinimizedDock();
+                final boolean isMinimizedDock =
+                        getDisplay().mDisplayContent.getDockedDividerController().isMinimizedDock();
                 if (isMinimizedDock) {
                     TaskRecord topTask = display.getSplitScreenPrimaryStack().topTask();
                     if (topTask != null) {
@@ -672,7 +673,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     void setWindowingMode(int preferredWindowingMode, boolean animate, boolean showRecents,
             boolean enteringSplitScreenMode, boolean deferEnsuringVisibility, boolean creating) {
         final int currentMode = getWindowingMode();
-        final int currentOverrideMode = getOverrideWindowingMode();
+        final int currentOverrideMode = getRequestedOverrideWindowingMode();
         final ActivityDisplay display = getDisplay();
         final TaskRecord topTask = topTask();
         final ActivityStack splitScreenStack = display.getSplitScreenPrimaryStack();
@@ -725,7 +726,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // You are already in the window mode, so we can skip most of the work below. However,
             // it's possible that we have inherited the current windowing mode from a parent. So,
             // fulfill this method's contract by setting the override mode directly.
-            getOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
+            getRequestedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
             return;
         }
 
@@ -791,7 +792,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mWindowContainerController.getRawBounds(mTmpRect2);
             }
 
-            if (!Objects.equals(getOverrideBounds(), mTmpRect2)) {
+            if (!Objects.equals(getRequestedOverrideBounds(), mTmpRect2)) {
                 resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */);
             }
         } finally {
@@ -2713,16 +2714,16 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // that the previous one will be hidden soon.  This way it can know
         // to ignore it when computing the desired screen orientation.
         boolean anim = true;
-        final DisplayWindowController dwc = getDisplay().getWindowContainerController();
+        final DisplayContent dc = getDisplay().mDisplayContent;
         if (prev != null) {
             if (prev.finishing) {
                 if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                         "Prepare close transition: prev=" + prev);
                 if (mStackSupervisor.mNoAnimActivities.contains(prev)) {
                     anim = false;
-                    dwc.prepareAppTransition(TRANSIT_NONE, false);
+                    dc.prepareAppTransition(TRANSIT_NONE, false);
                 } else {
-                    dwc.prepareAppTransition(
+                    dc.prepareAppTransition(
                             prev.getTaskRecord() == next.getTaskRecord() ? TRANSIT_ACTIVITY_CLOSE
                                     : TRANSIT_TASK_CLOSE, false);
                 }
@@ -2732,9 +2733,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         "Prepare open transition: prev=" + prev);
                 if (mStackSupervisor.mNoAnimActivities.contains(next)) {
                     anim = false;
-                    dwc.prepareAppTransition(TRANSIT_NONE, false);
+                    dc.prepareAppTransition(TRANSIT_NONE, false);
                 } else {
-                    dwc.prepareAppTransition(
+                    dc.prepareAppTransition(
                             prev.getTaskRecord() == next.getTaskRecord() ? TRANSIT_ACTIVITY_OPEN
                                     : next.mLaunchTaskBehind ? TRANSIT_TASK_OPEN_BEHIND
                                             : TRANSIT_TASK_OPEN, false);
@@ -2744,9 +2745,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare open transition: no previous");
             if (mStackSupervisor.mNoAnimActivities.contains(next)) {
                 anim = false;
-                dwc.prepareAppTransition(TRANSIT_NONE, false);
+                dc.prepareAppTransition(TRANSIT_NONE, false);
             } else {
-                dwc.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false);
+                dc.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false);
             }
         }
 
@@ -2868,8 +2869,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 next.clearOptionsLocked();
                 transaction.setLifecycleStateRequest(
                         ResumeActivityItem.obtain(next.app.getReportedProcState(),
-                                getDisplay().getWindowContainerController()
-                                        .isNextTransitionForward()));
+                                getDisplay().mDisplayContent.isNextTransitionForward()));
                 mService.getLifecycleManager().scheduleTransaction(transaction);
 
                 if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "
@@ -3071,11 +3071,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         task.setFrontOfTask();
 
         if (!isHomeOrRecentsStack() || numActivities() > 0) {
-            final DisplayWindowController dwc = getDisplay().getWindowContainerController();
+            final DisplayContent dc = getDisplay().mDisplayContent;
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                     "Prepare open transition: starting " + r);
             if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-                dwc.prepareAppTransition(TRANSIT_NONE, keepCurTransition);
+                dc.prepareAppTransition(TRANSIT_NONE, keepCurTransition);
                 mStackSupervisor.mNoAnimActivities.add(r);
             } else {
                 int transit = TRANSIT_ACTIVITY_OPEN;
@@ -3094,7 +3094,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         transit = TRANSIT_TASK_OPEN;
                     }
                 }
-                dwc.prepareAppTransition(transit, keepCurTransition);
+                dc.prepareAppTransition(transit, keepCurTransition);
                 mStackSupervisor.mNoAnimActivities.remove(r);
             }
             boolean doShow = true;
@@ -3723,7 +3723,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         int taskNdx = mTaskHistory.indexOf(finishedTask);
         final TaskRecord task = finishedTask;
         int activityNdx = task.mActivities.indexOf(r);
-        getDisplay().getWindowContainerController().prepareAppTransition(
+        getDisplay().mDisplayContent.prepareAppTransition(
                 TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
         finishActivityLocked(r, Activity.RESULT_CANCELED, null, reason, false);
         finishedTask = task;
@@ -3889,7 +3889,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     mService.getTaskChangeNotificationController().notifyTaskRemovalStarted(
                             task.taskId);
                 }
-                getDisplay().getWindowContainerController().prepareAppTransition(transit, false);
+                getDisplay().mDisplayContent.prepareAppTransition(transit, false);
 
                 // Tell window manager to prepare for this one to be removed.
                 r.setVisibility(false);
@@ -3944,10 +3944,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     private void prepareActivityHideTransitionAnimation(ActivityRecord r, int transit) {
-        final DisplayWindowController dwc = getDisplay().getWindowContainerController();
-        dwc.prepareAppTransition(transit, false);
+        final DisplayContent dc = getDisplay().mDisplayContent;
+        dc.prepareAppTransition(transit, false);
         r.setVisibility(false);
-        dwc.executeAppTransition();
+        dc.executeAppTransition();
         if (!mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(r)) {
             mStackSupervisor.mActivitiesWaitingForVisibleActivity.add(r);
         }
@@ -4691,7 +4691,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 ActivityOptions.abort(options);
             }
         }
-        getDisplay().getWindowContainerController().prepareAppTransition(transit, false);
+        getDisplay().mDisplayContent.prepareAppTransition(transit, false);
     }
 
     private void updateTaskMovement(TaskRecord task, boolean toFront) {
@@ -4760,8 +4760,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to front transition: task=" + tr);
             if (noAnimation) {
-                getDisplay().getWindowContainerController().prepareAppTransition(
-                        TRANSIT_NONE, false);
+                getDisplay().mDisplayContent.prepareAppTransition(TRANSIT_NONE, false);
                 if (r != null) {
                     mStackSupervisor.mNoAnimActivities.add(r);
                 }
@@ -4843,8 +4842,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mTaskHistory.add(0, tr);
         updateTaskMovement(tr, false);
 
-        getDisplay().getWindowContainerController().prepareAppTransition(
-                TRANSIT_TASK_TO_BACK, false);
+        getDisplay().mDisplayContent.prepareAppTransition(TRANSIT_TASK_TO_BACK, false);
         moveToBack("moveTaskToBackLocked", tr);
 
         if (inPinnedWindowingMode()) {
@@ -4934,8 +4932,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     // For freeform stack we don't adjust the size of the tasks to match that
                     // of the stack, but we do try to make sure the tasks are still contained
                     // with the bounds of the stack.
-                    if (task.getOverrideBounds() != null) {
-                        mTmpRect2.set(task.getOverrideBounds());
+                    if (task.getRequestedOverrideBounds() != null) {
+                        mTmpRect2.set(task.getRequestedOverrideBounds());
                         fitWithinBounds(mTmpRect2, bounds);
                         task.updateOverrideConfiguration(mTmpRect2);
                     }
@@ -4946,9 +4944,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
             if (task.hasDisplayedBounds()) {
                 mTmpBounds.put(task.taskId, task.getDisplayedBounds());
-                mTmpInsetBounds.put(task.taskId, task.getOverrideBounds());
+                mTmpInsetBounds.put(task.taskId, task.getRequestedOverrideBounds());
             } else {
-                mTmpBounds.put(task.taskId, task.getOverrideBounds());
+                mTmpBounds.put(task.taskId, task.getRequestedOverrideBounds());
                 mTmpInsetBounds.put(task.taskId, null);
             }
         }
@@ -5169,7 +5167,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                             + r.intent.getComponent().flattenToShortString());
                     // Force the destroy to skip right to removal.
                     r.app = null;
-                    getDisplay().getWindowContainerController().prepareAppTransition(
+                    getDisplay().mDisplayContent.prepareAppTransition(
                             TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
                     finishCurrentActivityLocked(r, FINISH_IMMEDIATELY, false,
                             "handleAppCrashedLocked");
@@ -5191,7 +5189,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 pw.println("");
             }
             pw.println(prefix + "Task id #" + task.taskId);
-            pw.println(prefix + "mBounds=" + task.getOverrideBounds());
+            pw.println(prefix + "mBounds=" + task.getRequestedOverrideBounds());
             pw.println(prefix + "mMinWidth=" + task.mMinWidth);
             pw.println(prefix + "mMinHeight=" + task.mMinHeight);
             pw.println(prefix + "mLastNonFullscreenBounds=" + task.mLastNonFullscreenBounds);
@@ -5349,7 +5347,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (!mStackSupervisor.getLaunchParamsController()
                 .layoutTask(task, info.windowLayout, activity, source, options)
                 && !matchParentBounds() && task.isResizeable() && !isLockscreenShown) {
-            task.updateOverrideConfiguration(getOverrideBounds());
+            task.updateOverrideConfiguration(getRequestedOverrideBounds());
         }
         task.createWindowContainer(toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
         return task;
@@ -5507,7 +5505,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     void executeAppTransition(ActivityOptions options) {
-        getDisplay().getWindowContainerController().executeAppTransition();
+        getDisplay().mDisplayContent.executeAppTransition();
         ActivityOptions.abort(options);
     }
 
@@ -5541,7 +5539,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
         proto.write(DISPLAY_ID, mDisplayId);
         if (!matchParentBounds()) {
-            final Rect bounds = getOverrideBounds();
+            final Rect bounds = getRequestedOverrideBounds();
             bounds.writeToProto(proto, BOUNDS);
         }
 

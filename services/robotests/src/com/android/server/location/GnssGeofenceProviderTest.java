@@ -7,7 +7,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.os.Looper;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
@@ -44,7 +43,7 @@ public class GnssGeofenceProviderTest {
         when(mMockNative.pauseGeofence(anyInt())).thenReturn(true);
         when(mMockNative.removeGeofence(anyInt())).thenReturn(true);
         when(mMockNative.resumeGeofence(anyInt(), anyInt())).thenReturn(true);
-        mTestProvider = new GnssGeofenceProvider(Looper.myLooper(), mMockNative);
+        mTestProvider = new GnssGeofenceProvider(mMockNative);
         mTestProvider.addCircularHardwareGeofence(GEOFENCE_ID, LATITUDE,
                 LONGITUDE, RADIUS, LAST_TRANSITION, MONITOR_TRANSITIONS,
                 NOTIFICATION_RESPONSIVENESS,

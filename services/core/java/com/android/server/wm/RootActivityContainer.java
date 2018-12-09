@@ -864,7 +864,7 @@ class RootActivityContainer extends ConfigurationContainer
             // Resize the pinned stack to match the current size of the task the activity we are
             // going to be moving is currently contained in. We do this to have the right starting
             // animation bounds for the pinned stack to the desired bounds the caller wants.
-            resizeStack(stack, task.getOverrideBounds(), null /* tempTaskBounds */,
+            resizeStack(stack, task.getRequestedOverrideBounds(), null /* tempTaskBounds */,
                     null /* tempTaskInsetBounds */, !PRESERVE_WINDOWS,
                     true /* allowResizeInDockedMode */, !DEFER_RESUME);
 
@@ -914,7 +914,7 @@ class RootActivityContainer extends ConfigurationContainer
     void executeAppTransitionForAllDisplay() {
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            display.getWindowContainerController().executeAppTransition();
+            display.mDisplayContent.executeAppTransition();
         }
     }
 
@@ -1254,9 +1254,8 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     // TODO: remove after object merge with RootWindowContainer
-    void onChildPositionChanged(DisplayWindowController childController, int position) {
+    void onChildPositionChanged(ActivityDisplay display, int position) {
         // Assume AM lock is held from positionChildAt of controller in each hierarchy.
-        final ActivityDisplay display = getActivityDisplay(childController.getDisplayId());
         if (display != null) {
             positionChildAt(display, position);
         }
@@ -1281,8 +1280,7 @@ class RootActivityContainer extends ConfigurationContainer
     @VisibleForTesting
     void addChild(ActivityDisplay activityDisplay, int position) {
         positionChildAt(activityDisplay, position);
-        mRootWindowContainer.positionChildAt(position,
-                activityDisplay.getWindowContainerController().mContainer);
+        mRootWindowContainer.positionChildAt(position, activityDisplay.mDisplayContent);
     }
 
     void removeChild(ActivityDisplay activityDisplay) {
@@ -1297,7 +1295,7 @@ class RootActivityContainer extends ConfigurationContainer
             throw new IllegalArgumentException("No display found with id: " + displayId);
         }
 
-        return activityDisplay.getOverrideConfiguration();
+        return activityDisplay.getRequestedOverrideConfiguration();
     }
 
     void setDisplayOverrideConfiguration(Configuration overrideConfiguration, int displayId) {
@@ -1306,7 +1304,7 @@ class RootActivityContainer extends ConfigurationContainer
             throw new IllegalArgumentException("No display found with id: " + displayId);
         }
 
-        activityDisplay.onOverrideConfigurationChanged(overrideConfiguration);
+        activityDisplay.onRequestedOverrideConfigurationChanged(overrideConfiguration);
     }
 
     void prepareForShutdown() {
@@ -2161,7 +2159,7 @@ class RootActivityContainer extends ConfigurationContainer
         for (int i = 0; i < displayCount; i++) {
             final ActivityDisplay activityDisplay = mActivityDisplays.get(i);
             pw.print(prefix); pw.print("  "); pw.print(activityDisplay.mDisplayId); pw.print(": ");
-            pw.println(activityDisplay.getOverrideConfiguration());
+            pw.println(activityDisplay.getRequestedOverrideConfiguration());
         }
     }
 
@@ -2190,7 +2188,7 @@ class RootActivityContainer extends ConfigurationContainer
                         + ": type=" + activityTypeToString(stack.getActivityType())
                         + " mode=" + windowingModeToString(stack.getWindowingMode()));
                 pw.println("  isSleeping=" + stack.shouldSleepActivities());
-                pw.println("  mBounds=" + stack.getOverrideBounds());
+                pw.println("  mBounds=" + stack.getRequestedOverrideBounds());
 
                 printed |= stack.dumpActivitiesLocked(fd, pw, dumpAll, dumpClient, dumpPackage,
                         needSep);

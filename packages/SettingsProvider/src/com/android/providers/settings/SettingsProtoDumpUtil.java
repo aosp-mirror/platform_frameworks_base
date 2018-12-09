@@ -418,6 +418,12 @@ class SettingsProtoDumpUtil {
                 Settings.Global.CONTACTS_DATABASE_WAL_ENABLED,
                 GlobalSettingsProto.CONTACTS_DATABASE_WAL_ENABLED);
 
+        final long contentCaptureToken = p.start(GlobalSettingsProto.CONTENT_CAPTURE);
+        dumpSetting(s, p,
+                Settings.Global.CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED,
+                GlobalSettingsProto.ContentCapture.SERVICE_EXPLICITLY_ENABLED);
+        p.end(contentCaptureToken);
+
         final long dataToken = p.start(GlobalSettingsProto.DATA);
         // Settings.Global.DEFAULT_RESTRICT_BACKGROUND_DATA intentionally excluded.
         dumpSetting(s, p,
@@ -679,8 +685,14 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GPU_DEBUG_LAYERS,
                 GlobalSettingsProto.Gpu.DEBUG_LAYERS);
         dumpSetting(s, p,
-                Settings.Global.ANGLE_ENABLED_APP,
-                GlobalSettingsProto.Gpu.ANGLE_ENABLED_APP);
+                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE,
+                GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_ALL_ANGLE);
+        dumpSetting(s, p,
+                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS,
+                GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_SELECTION_PKGS);
+        dumpSetting(s, p,
+                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES,
+                GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_SELECTION_VALUES);
         dumpSetting(s, p,
                 Settings.Global.GPU_DEBUG_LAYER_APP,
                 GlobalSettingsProto.Gpu.DEBUG_LAYER_APP);
@@ -998,6 +1010,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
                 GlobalSettingsProto.Notification.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS);
+        dumpSetting(s, p,
+                Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
+                GlobalSettingsProto.Notification.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS);
         p.end(notificationToken);
 
         dumpSetting(s, p,
@@ -1164,12 +1179,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.SMART_SELECTION_UPDATE_METADATA_URL,
                 GlobalSettingsProto.SmartSelection.UPDATE_METADATA_URL);
         p.end(smartSelectToken);
-
-        final long smartSuggestionsToken = p.start(GlobalSettingsProto.SMART_SUGGESTIONS);
-        dumpSetting(s, p,
-                Settings.Global.SMART_SUGGESTIONS_SERVICE_EXPLICITLY_ENABLED,
-                GlobalSettingsProto.SmartSuggestions.SERVICE_EXPLICITLY_ENABLED);
-        p.end(smartSuggestionsToken);
 
         final long smsToken = p.start(GlobalSettingsProto.SMS);
         dumpSetting(s, p,

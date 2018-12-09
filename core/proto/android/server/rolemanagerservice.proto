@@ -1,0 +1,56 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package com.android.server.role;
+
+option java_multiple_files = true;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+message RoleManagerServiceDumpProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  // List of per-user states for all users.
+  repeated RoleUserStateProto user_states = 1;
+}
+
+message RoleUserStateProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  // The user id of this state.
+  optional int32 user_id = 1;
+
+  // The version of this state.
+  optional int32 version = 2;
+
+  // The hash of packages for this state.
+  optional string packages_hash = 3;
+
+  // The set of roles in this state.
+  repeated RoleProto roles = 4;
+}
+
+message RoleProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  // The name of this role, e.g. "android.app.role.DIALER".
+  optional string name = 1;
+
+  // The package names of the holders of this role.
+  repeated string holders = 2;
+}

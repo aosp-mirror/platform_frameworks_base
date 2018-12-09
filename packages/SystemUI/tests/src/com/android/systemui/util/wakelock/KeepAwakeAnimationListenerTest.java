@@ -20,11 +20,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.animation.Animator;
+import android.os.Looper;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +35,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner.class)
 public class KeepAwakeAnimationListenerTest extends SysuiTestCase {
     @Mock WakeLock mWakeLock;
@@ -41,6 +43,7 @@ public class KeepAwakeAnimationListenerTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        Assert.sMainLooper = TestableLooper.get(this).getLooper();
         MockitoAnnotations.initMocks(this);
         KeepAwakeAnimationListener.sWakeLock = mWakeLock;
         mKeepAwakeAnimationListener = new KeepAwakeAnimationListener(getContext());
@@ -54,5 +57,11 @@ public class KeepAwakeAnimationListenerTest extends SysuiTestCase {
 
         mKeepAwakeAnimationListener.onAnimationEnd((Animator) null);
         verify(mWakeLock).release();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void initThrows_onNonMainThread() {
+        Assert.sMainLooper = Looper.getMainLooper();
+        new KeepAwakeAnimationListener(getContext());
     }
 }

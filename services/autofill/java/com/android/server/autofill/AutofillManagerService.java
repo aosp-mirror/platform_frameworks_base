@@ -70,11 +70,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
-import com.android.server.AbstractMasterSystemService;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.autofill.ui.AutoFillUI;
-import com.android.server.intelligence.IntelligenceManagerInternal;
+import com.android.server.infra.AbstractMasterSystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -100,6 +99,7 @@ public final class AutofillManagerService
 
     private static final Object sLock = AutofillManagerService.class;
 
+    private static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 1_000 * 60 * 2; // 2 minutes
 
     /**
      * IME supports Smart Suggestions.
@@ -155,7 +155,7 @@ public final class AutofillManagerService
 
     private final AutofillCompatState mAutofillCompatState = new AutofillCompatState();
     private final LocalService mLocalService = new LocalService();
-    final IntelligenceManagerInternal mIntelligenceManagerInternal;
+    private final ActivityManagerInternal mAm;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -184,7 +184,7 @@ public final class AutofillManagerService
     public AutofillManagerService(Context context) {
         super(context, UserManager.DISALLOW_AUTOFILL);
         mUi = new AutoFillUI(ActivityThread.currentActivityThread().getSystemUiContext());
-        mIntelligenceManagerInternal = LocalServices.getService(IntelligenceManagerInternal.class);
+        mAm = LocalServices.getService(ActivityManagerInternal.class);
 
         setLogLevelFromSettings();
         setMaxPartitionsFromSettings();
@@ -286,6 +286,11 @@ public final class AutofillManagerService
 
     @SmartSuggestionMode int getSupportedSmartSuggestionModesLocked() {
         return mSupportedSmartSuggestionModes;
+    }
+
+    // Called by AutofillManagerServiceImpl, doesn't need to check permission
+    boolean isInstantServiceAllowed() {
+        return mAllowInstantService;
     }
 
     // Called by Shell command.
@@ -500,6 +505,39 @@ public final class AutofillManagerService
     void setFullScreenMode(@Nullable Boolean mode) {
         enforceCallingPermissionForManagement();
         sFullScreenMode = mode;
+    }
+
+    // Called by Shell command.
+    void setTemporaryAugmentedAutofillService(@UserIdInt int userId, @NonNull String serviceName,
+            int durationMs) {
+        Slog.i(mTag, "setTemporaryAugmentedAutofillService(" + userId + ") to " + serviceName
+                + " for " + durationMs + "ms");
+        enforceCallingPermissionForManagement();
+
+        Preconditions.checkNotNull(serviceName);
+        if (durationMs > MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS) {
+            throw new IllegalArgumentException("Max duration is "
+                    + MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS + " (called with " + durationMs + ")");
+        }
+
+        synchronized (mLock) {
+            final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
+            if (service != null) {
+                service.mAugmentedAutofillResolver.setTemporaryServiceLocked(serviceName,
+                        durationMs);
+            }
+        }
+    }
+
+    // Called by Shell command
+    void resetTemporaryAugmentedAutofillService(@UserIdInt int userId) {
+        enforceCallingPermissionForManagement();
+        synchronized (mLock) {
+            final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
+            if (service != null) {
+                service.mAugmentedAutofillResolver.resetTemporaryServiceLocked();
+            }
+        }
     }
 
     private void setLoggingLevelsLocked(boolean debug, boolean verbose) {
@@ -877,14 +915,9 @@ public final class AutofillManagerService
                 throw new IllegalArgumentException(packageName + " is not a valid package", e);
             }
 
-            // TODO(b/113281366): rather than always call AM here, call it on demand on
-            // getPreviousSessionsLocked()? That way we save space / time here, and don't set
-            // a callback on AM unnecessarily (see TODO below :-)
-            final ActivityManagerInternal am = LocalServices
-                    .getService(ActivityManagerInternal.class);
             // TODO(b/113281366): add a callback method on AM to be notified when a task is finished
             // so we can clean up sessions kept alive
-            final int taskId = am.getTaskIdForActivity(activityToken, false);
+            final int taskId = mAm.getTaskIdForActivity(activityToken, false);
             final int sessionId;
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);

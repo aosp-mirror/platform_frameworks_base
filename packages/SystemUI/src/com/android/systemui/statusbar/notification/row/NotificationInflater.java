@@ -33,6 +33,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.widget.ImageMessageConsumer;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor;
@@ -114,7 +115,7 @@ public class NotificationInflater {
     @InflationFlag
     private int mInflationFlags = REQUIRED_INFLATION_FLAGS;
 
-    private static final InflationExecutor EXECUTOR = new InflationExecutor();
+    static final InflationExecutor EXECUTOR = new InflationExecutor();
 
     private final ExpandableNotificationRow mRow;
     private boolean mIsLowPriority;
@@ -244,6 +245,10 @@ public class NotificationInflater {
         // Only inflate the ones that are set.
         reInflateFlags &= mInflationFlags;
         StatusBarNotification sbn = mRow.getEntry().notification;
+
+        // To check if the notification has inline image and preload inline image if necessary.
+        mRow.getImageResolver().preloadImages(sbn.getNotification());
+
         AsyncInflationTask task = new AsyncInflationTask(sbn, reInflateFlags, mCachedContentViews,
                 mRow, mIsLowPriority, mIsChildInGroup, mUsesIncreasedHeight,
                 mUsesIncreasedHeadsUpHeight, mRedactAmbient, mCallback, mRemoteViewClickHandler);
@@ -520,8 +525,14 @@ public class NotificationInflater {
             }
             return;
         }
-        RemoteViews.OnViewAppliedListener listener
-                = new RemoteViews.OnViewAppliedListener() {
+        RemoteViews.OnViewAppliedListener listener = new RemoteViews.OnViewAppliedListener() {
+
+            @Override
+            public void onViewInflated(View v) {
+                if (v instanceof ImageMessageConsumer) {
+                    ((ImageMessageConsumer) v).setImageResolver(row.getImageResolver());
+                }
+            }
 
             @Override
             public void onViewApplied(View v) {
@@ -851,6 +862,10 @@ public class NotificationInflater {
             mRow.getEntry().onInflationTaskFinished();
             mRow.onNotificationUpdated();
             mCallback.onAsyncInflationFinished(mRow.getEntry(), inflatedFlags);
+
+            // Notify the resolver that the inflation task has finished,
+            // try to purge unnecessary cached entries.
+            mRow.getImageResolver().purgeCache();
         }
 
         @Override

@@ -2,23 +2,23 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
-    <string name="action_use_network" msgid="6076184727448466030">"Dieses Netzwerk im Istzustand verwenden"</string>
-    <string name="action_do_not_use_network" msgid="4577366536956516683">"Dieses Netzwerk nicht verwenden"</string>
+    <string name="action_use_network" msgid="6076184727448466030">"Netzwerk im Istzustand verwenden"</string>
+    <string name="action_do_not_use_network" msgid="4577366536956516683">"Netzwerk nicht verwenden"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Im Netzwerk anmelden"</string>
     <string name="action_bar_title" msgid="5645564790486983117">"In %1$s anmelden"</string>
     <string name="ssl_error_warning" msgid="6653188881418638872">"Im Netzwerk, zu dem du eine Verbindung herstellen möchtest, liegen Sicherheitsprobleme vor."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Beispiel: Die Log-in-Seite gehört eventuell nicht zur angezeigten Organisation."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Trotzdem in einem Browser fortfahren"</string>
-    <string name="ok" msgid="1509280796718850364">"OK"</string>
-    <string name="page_info" msgid="4048529256302257195">"Seiteninfo"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"Adresse:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"Sicherheitswarnung"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"Zertifikat ansehen"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"Dieses Zertifikat wurde nicht von einer vertrauenswürdigen Stelle ausgegeben."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"Name der Website stimmt nicht mit dem Namen auf dem Zertifikat überein."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"Dieses Zertifikat ist abgelaufen."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"Dieses Zertifikat ist noch nicht gültig."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"Dieses Zertifikat weist ein ungültiges Datum auf."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"Dieses Zertifikat ist ungültig."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"Unbekannter Zertifikatfehler"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Dieses Zertifikat stammt nicht von einer vertrauenswürdigen Stelle."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Der Name der Website stimmt nicht mit dem Namen auf dem Zertifikat überein."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Dieses Zertifikat ist abgelaufen."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Dieses Zertifikat ist noch nicht gültig."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Dieses Zertifikat hat ein ungültiges Datum."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Dieses Zertifikat ist ungültig."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Unbekannter Zertifikatfehler."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Sicherheitswarnung"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Zertifikat ansehen"</string>
+    <string name="ok" msgid="2817931639040794018">"OK"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Adresse:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Seiteninformationen"</string>
 </resources>

@@ -1916,11 +1916,14 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activity action: Launch UI to review app uses of permissions.
      * <p>
-     * Input: Nothing
+     * Input: {@link #EXTRA_PERMISSION_NAME} specifies the permission name
+     * that will be displayed by the launched UI.
      * </p>
      * <p>
      * Output: Nothing.
      * </p>
+     *
+     * @see #EXTRA_PERMISSION_NAME
      *
      * @hide
      */
@@ -5239,6 +5242,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Optional CharSequence extra to provide a search query.
+     * The format of this query is dependent on the receiving application.
      *
      * <p>Applicable to {@link Intent} with actions:
      * <ul>

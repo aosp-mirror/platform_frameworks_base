@@ -136,14 +136,10 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> ৱাই-ফাই"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"ৱাই- ফাই কলিং | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
-    <skip />
-    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"ৱাই-ফাই কলিং"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"ৱাই-ফাই"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"ৱাই-ফাই কলিং"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"অফ হৈ আছে"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ৱাই-ফাইক অগ্ৰাধিকাৰ দিয়া হৈছে"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ম\'বাইলক অগ্ৰাধিকাৰ দিয়া হৈছে"</string>
@@ -533,6 +529,11 @@
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"এপক আপোনাৰ মিডিয়া সংগ্ৰহৰ অৱস্থান পঢ়িবলৈ দিয়ে।"</string>
     <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> এপে বিশ্বাসযোগ্যতাৰ প্ৰমাণ কৰিব বিচাৰে।"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"বায়োমেট্ৰিক হাৰ্ডৱেৰ উপলব্ধ নহয়"</string>
+    <!-- no translation found for biometric_error_user_canceled (2260175018114348727) -->
+    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"চিনাক্ত কৰিব পৰা নাই"</string>
+    <!-- no translation found for biometric_error_canceled (349665227864885880) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ফিংগাৰপ্ৰিণ্ট আংশিকভাৱে চিনাক্ত কৰা হৈছে। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ফিগাৰপ্ৰিণ্টৰ প্ৰক্ৰিয়া সম্পাদন কৰিবপৰা নগ\'ল। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো লেতেৰা হৈ আছে। অনুগ্ৰহ কৰি পৰিষ্কাৰ কৰি আকৌ চেষ্টা কৰক।"</string>
@@ -540,7 +541,6 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"আঙুলিৰ গতি অতি মন্থৰ আছিল। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"চিনাক্ত কৰিব পৰা নাই"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"ফিংগাৰপ্ৰিণ্টৰ সত্যাপন কৰা হ’ল"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ\'ল"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ\'ল, অনুগ্ৰহ কৰি ‘নিশ্চিত কৰক’ বুটামটো টিপক"</string>
@@ -596,14 +596,10 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"এপটোক কোনো একাউণ্টৰ ছিংক সম্পৰ্কীয় ছেটিংসমূহ সংশোধন কৰিবলৈ অনুমতি দিয়ে৷ উদাহৰণ স্বৰূপে, এই কাৰ্যক কোনো একাউণ্টৰ জৰিয়তে People এপটোৰ ছিংক সক্ষম কৰিবলৈ ব্যৱহাৰ কৰিব পাৰি৷"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"ছিংকৰ পৰিসংখ্যা পঢ়ক"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"ছিংকৰ কাৰ্যক্ৰমসমূহৰ ইতিহাস আৰু ছিংক কৰা ডেটাৰ পৰিমাণসহ কোনো একাউণ্টৰ ছিংকৰ তথ্য পঢ়িবলৈ এপক অনুমতি দিয়ে।"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"আপোনাৰ ইউএছবি সঞ্চয়াগাৰৰ সমলবোৰ পঢ়ক"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"আপোনাৰ এছডি কাৰ্ডৰ সমলবোৰ পঢ়ক"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"আপোনাৰ ইউএছবি সঞ্চয়াগাৰৰ সমলসমূহ পঢ়িবলৈ এপক অনুমতি দিয়ে।"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"আপোনাৰ এছডি কাৰ্ডৰ সমল পঢ়িবলৈ এপক অনুমতি দিয়ে।"</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"আপোনাৰ ইউএছবি সঞ্চয়াগাৰৰ সমলবোৰ সংশোধন কৰক বা মচক"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"আপোনাৰ এছডি কাৰ্ডৰ সমলবোৰ সংশোধন কৰক বা মচক"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"এপটোক ইউএছবি সঞ্চয়াগাৰত লিখাৰ অনুমতি দিয়ে।"</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"এপটোক এছডি কাৰ্ডত লিখাৰ অনুমতি দিয়ে।"</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা সঞ্চয়াগাৰৰ সমল পঢ়িব পাৰে"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা সঞ্চয়াগাৰৰ সমল পঢ়িবলৈ এপটোক অনুমতি দিয়ে।"</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা সঞ্চয়াগাৰৰ সমল সংশোধন কৰিব বা মচিব পাৰে"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা সঞ্চয়াগাৰৰ সমল লিখিবলৈ এপটোক অনুমতি দিয়ে।"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP কল কৰা/পোৱা"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"এপটোক SIP কলসমূহ কৰিবলৈ আৰু পাবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"নতুন টেলিকম ছিম সংযোগসমূহ পঞ্জীয়ন কৰা"</string>
@@ -1105,6 +1101,10 @@
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"বাছনি কৰা সময়ৰ বাবে কাৰ্যক্ৰমৰ তালিকা বনাওক"</string>
     <string name="view_flight" msgid="7691640491425680214">"ট্ৰেক কৰক"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"বাছনি কৰা বিমানটো ট্ৰেক কৰক"</string>
+    <string name="translate" msgid="9218619809342576858">"অনুবাদ কৰক"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"বাছনি কৰা পাঠ অনুবাদ কৰক"</string>
+    <string name="define" msgid="7394820043869954211">"সংজ্ঞা দিব পাৰে"</string>
+    <string name="define_desc" msgid="7910883642444919726">"বাছনি কৰা পাঠৰ সংজ্ঞা দিব পাৰে"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"সঞ্চয়াগাৰৰ খালী ঠাই শেষ হৈ আছে"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ছিষ্টেমৰ কিছুমান কাৰ্যকলাপে কাম নকৰিবও পাৰে"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ছিষ্টেমৰ বাবে পৰ্যাপ্ত খালী ঠাই নাই। আপোনাৰ ২৫০এম. বি. খালী ঠাই থকাটো নিশ্চিত কৰক আৰু ৰিষ্টাৰ্ট কৰক।"</string>
@@ -1461,8 +1461,7 @@
       <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g>ৰ <xliff:g id="INDEX">%d</xliff:g>টা</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"সম্পন্ন হ\'ল"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"ইউএছবি সঞ্চয়াগাৰৰ ডেটা মচি থকা হৈছে…"</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"এছডি কাৰ্ডৰ ডেটা মচি থকা হৈছে…"</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"শ্বেয়াৰ কৰি থোৱা সঞ্চয়াগাৰ মচি থকা হৈছে…"</string>
     <string name="share" msgid="1778686618230011964">"শ্বেয়াৰ কৰক"</string>
     <string name="find" msgid="4808270900322985960">"বিচাৰক"</string>
     <string name="websearch" msgid="4337157977400211589">"ৱেবত সন্ধান কৰক"</string>
@@ -1834,8 +1833,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS অনুৰোধ USSD অনুৰোধলৈ সলনি কৰা হ\'ল"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"নতুন SS অনুৰোধলৈ সলনি কৰা হ\'ল"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
-    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
-    <skip />
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"সতৰ্ক কৰা হ’ল"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"বিস্তাৰ কৰক"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"সংকুচিত কৰক"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"সম্প্ৰসাৰণ ট’গল কৰক"</string>

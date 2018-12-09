@@ -20,10 +20,12 @@ import static org.mockito.Mockito.verify;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +34,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 @SmallTest
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 @RunWith(AndroidTestingRunner.class)
 public class KeyguardStatusViewTest extends SysuiTestCase {
 
@@ -45,6 +47,7 @@ public class KeyguardStatusViewTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        Assert.sMainLooper = TestableLooper.get(this).getLooper();
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         mKeyguardStatusView =
                 (KeyguardStatusView) layoutInflater.inflate(R.layout.keyguard_status_view, null);

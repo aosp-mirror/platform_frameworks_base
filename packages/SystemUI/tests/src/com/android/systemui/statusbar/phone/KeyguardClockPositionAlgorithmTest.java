@@ -30,7 +30,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
 
     private static final int SCREEN_HEIGHT = 2000;

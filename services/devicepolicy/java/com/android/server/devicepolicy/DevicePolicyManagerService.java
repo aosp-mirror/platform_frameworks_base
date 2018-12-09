@@ -59,6 +59,8 @@ import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_OFF;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_UNKNOWN;
+import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_ERROR_FAILURE_SETTING;
+import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_SUCCESS;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
@@ -4890,14 +4892,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private boolean resetPasswordInternal(String password, long tokenHandle, byte[] token,
             int flags, int callingUid, int userHandle) {
         int quality;
+        final int realQuality;
         synchronized (getLockObject()) {
             quality = getPasswordQuality(null, userHandle, /* parent */ false);
             if (quality == DevicePolicyManager.PASSWORD_QUALITY_MANAGED) {
                 quality = PASSWORD_QUALITY_UNSPECIFIED;
             }
             final PasswordMetrics metrics = PasswordMetrics.computeForPassword(password);
+            realQuality = metrics.quality;
             if (quality != PASSWORD_QUALITY_UNSPECIFIED) {
-                final int realQuality = metrics.quality;
+
                 if (realQuality < quality
                         && quality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
                     Slog.w(LOG_TAG, "resetPassword: password quality 0x"
@@ -4984,7 +4988,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         try {
             if (token == null) {
                 if (!TextUtils.isEmpty(password)) {
-                    mLockPatternUtils.saveLockPassword(password, null, quality, userHandle);
+                    mLockPatternUtils.saveLockPassword(password, null, realQuality, userHandle);
                 } else {
                     mLockPatternUtils.clearLock(null, userHandle);
                 }
@@ -4993,7 +4997,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 result = mLockPatternUtils.setLockCredentialWithToken(password,
                         TextUtils.isEmpty(password) ? LockPatternUtils.CREDENTIAL_TYPE_NONE
                                 : LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                                quality, tokenHandle, token, userHandle);
+                        realQuality, tokenHandle, token, userHandle);
             }
             boolean requireEntry = (flags & DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY) != 0;
             if (requireEntry) {
@@ -13278,32 +13282,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setGlobalPrivateDns(@NonNull ComponentName who, int mode, String privateDnsHost) {
+    public int setGlobalPrivateDns(@NonNull ComponentName who, int mode, String privateDnsHost) {
         if (!mHasFeature) {
-            return;
+            return PRIVATE_DNS_SET_ERROR_FAILURE_SETTING;
         }
 
         Preconditions.checkNotNull(who, "ComponentName is null");
         enforceDeviceOwner(who);
 
+        final int returnCode;
+
         switch (mode) {
             case PRIVATE_DNS_MODE_OPPORTUNISTIC:
                 if (!TextUtils.isEmpty(privateDnsHost)) {
-                    throw new IllegalArgumentException("A DNS host should not be provided when " +
-                            "setting opportunistic mode.");
+                    throw new IllegalArgumentException(
+                            "Host provided for opportunistic mode, but is not needed.");
                 }
                 putPrivateDnsSettings(ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC, null);
-                break;
+                return PRIVATE_DNS_SET_SUCCESS;
             case PRIVATE_DNS_MODE_PROVIDER_HOSTNAME:
-                if (!NetworkUtils.isWeaklyValidatedHostname(privateDnsHost)) {
+                if (TextUtils.isEmpty(privateDnsHost)
+                        || !NetworkUtils.isWeaklyValidatedHostname(privateDnsHost)) {
                     throw new IllegalArgumentException(
-                            String.format("Provided hostname is not valid: %s", privateDnsHost));
+                            String.format("Provided hostname %s is not valid", privateDnsHost));
                 }
-                putPrivateDnsSettings(ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME,
+
+                // Connectivity check will have been performed in the DevicePolicyManager before
+                // the call here.
+                putPrivateDnsSettings(
+                        ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME,
                         privateDnsHost);
-                break;
+                return PRIVATE_DNS_SET_SUCCESS;
             default:
-                throw new IllegalArgumentException(String.format("Unsupported mode: %d", mode));
+                throw new IllegalArgumentException(
+                        String.format("Provided mode, %d, is not a valid mode.", mode));
         }
     }
 

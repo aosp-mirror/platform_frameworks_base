@@ -85,6 +85,15 @@ public class Binder implements IBinder {
     public static boolean LOG_RUNTIME_EXCEPTION = false; // DO NOT SUBMIT WITH TRUE
 
     /**
+     * Value to represents that a calling work source is not set.
+     *
+     * This constatnt needs to be kept in sync with IPCThreadState::kUnsetWorkSource.
+     *
+     * @hide
+     */
+    public static final int UNSET_WORKSOURCE = -1;
+
+    /**
      * Control whether dump() calls are allowed.
      */
     private static volatile String sDumpDisabled = null;
@@ -449,8 +458,6 @@ public class Binder implements IBinder {
      * }
      * </pre>
      *
-     * <p>The work source will be propagated for future outgoing binder transactions
-     * executed on this thread.
      * @hide
      **/
     @CriticalNative
@@ -912,6 +919,16 @@ public class Binder implements IBinder {
     // Entry point from android_util_Binder.cpp's onTransact
     private boolean execTransact(int code, long dataObj, long replyObj,
             int flags) {
+        final long origWorkSource = ThreadLocalWorkSource.setUid(Binder.getCallingUid());
+        try {
+            return execTransactInternal(code, dataObj, replyObj, flags);
+        } finally {
+            ThreadLocalWorkSource.restore(origWorkSource);
+        }
+    }
+
+    private boolean execTransactInternal(int code, long dataObj, long replyObj,
+            int flags) {
         // Make sure the observer won't change while processing a transaction.
         final BinderInternal.Observer observer = sObserver;
         final CallSession callSession =
@@ -925,7 +942,6 @@ public class Binder implements IBinder {
         // Log any exceptions as warnings, don't silently suppress them.
         // If the call was FLAG_ONEWAY then these exceptions disappear into the ether.
         final boolean tracingEnabled = Binder.isTracingEnabled();
-        final long origWorkSource = ThreadLocalWorkSource.setUid(Binder.getCallingUid());
         try {
             if (tracingEnabled) {
                 final String transactionName = getTransactionName(code);
@@ -952,7 +968,6 @@ public class Binder implements IBinder {
             }
             res = true;
         } finally {
-            ThreadLocalWorkSource.restore(origWorkSource);
             if (tracingEnabled) {
                 Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
             }
@@ -972,7 +987,6 @@ public class Binder implements IBinder {
         if (observer != null) {
             observer.callEnded(callSession, requestSizeBytes, replySizeBytes);
         }
-
         return res;
     }
 }

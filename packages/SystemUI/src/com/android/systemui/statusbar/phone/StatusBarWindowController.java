@@ -84,7 +84,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     }
 
     @VisibleForTesting
-    StatusBarWindowController(Context context, WindowManager windowManager,
+    public StatusBarWindowController(Context context, WindowManager windowManager,
             IActivityManager activityManager, DozeParameters dozeParameters) {
         mContext = context;
         mWindowManager = windowManager;

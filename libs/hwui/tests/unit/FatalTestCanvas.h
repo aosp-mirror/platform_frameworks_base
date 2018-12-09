@@ -30,18 +30,6 @@ public:
     void onDrawDRRect(const SkRRect&, const SkRRect&, const SkPaint&) {
         ADD_FAILURE() << "onDrawDRRect not expected in this test";
     }
-    void onDrawText(const void* text, size_t byteLength, SkScalar x, SkScalar y,
-                    const SkPaint& paint) {
-        ADD_FAILURE() << "onDrawText not expected in this test";
-    }
-    void onDrawPosText(const void* text, size_t byteLength, const SkPoint pos[],
-                       const SkPaint& paint) {
-        ADD_FAILURE() << "onDrawPosText not expected in this test";
-    }
-    void onDrawPosTextH(const void* text, size_t byteLength, const SkScalar xpos[], SkScalar constY,
-                        const SkPaint& paint) {
-        ADD_FAILURE() << "onDrawPosTextH not expected in this test";
-    }
     void onDrawTextRSXform(const void* text, size_t byteLength, const SkRSXform[],
                            const SkRect* cullRect, const SkPaint& paint) {
         ADD_FAILURE() << "onDrawTextRSXform not expected in this test";

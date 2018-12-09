@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.UserInfo;
-import android.os.Looper;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -58,7 +57,7 @@ import org.mockito.Mockito;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 public class QSSecurityFooterTest extends SysuiTestCase {
 
     private final String MANAGING_ORGANIZATION = "organization";
@@ -76,7 +75,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mDependency.injectTestDependency(SecurityController.class, mSecurityController);
-        mDependency.injectTestDependency(Dependency.BG_LOOPER, Looper.getMainLooper());
+        mDependency.injectTestDependency(Dependency.BG_LOOPER,
+                TestableLooper.get(this).getLooper());
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
                 new LayoutInflaterBuilder(mContext)
                         .replace("ImageView", TestableImageView.class)

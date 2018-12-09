@@ -557,7 +557,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            Bundle result = provider.call(null, mMethod, mArg, mExtras);
+            Bundle result = provider.call(null, mUri.getAuthority(), mMethod, mArg, mExtras);
             if (result != null) {
                 result.size(); // unpack
             }

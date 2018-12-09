@@ -25,7 +25,6 @@ import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -42,13 +41,13 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -79,13 +78,13 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             Dependency.get(StatusBarStateController.class);
     private final DeviceProvisionedController mDeviceProvisionedController =
             Dependency.get(DeviceProvisionedController.class);
-    private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
 
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
     private NotificationMenuRowPlugin.MenuItem mGutsMenuItem;
     private NotificationSafeToRemoveCallback mNotificationLifetimeFinishedCallback;
     private NotificationPresenter mPresenter;
+    private NotificationActivityStarter mNotificationActivityStarter;
     private NotificationListContainer mListContainer;
     private CheckSaveListener mCheckSaveListener;
     private OnSettingsClickListener mOnSettingsClickListener;
@@ -94,8 +93,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
 
     public NotificationGutsManager(Context context) {
         mContext = context;
-        Resources res = context.getResources();
-
         mAccessibilityManager = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
     }
@@ -107,6 +104,11 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mListContainer = listContainer;
         mCheckSaveListener = checkSave;
         mOnSettingsClickListener = onSettingsClick;
+    }
+
+    public void setNotificationActivityStarter(
+            NotificationActivityStarter notificationActivityStarter) {
+        mNotificationActivityStarter = notificationActivityStarter;
     }
 
     public void onDensityOrFontScaleChanged(NotificationData.Entry entry) {
@@ -127,7 +129,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         if (channel != null) {
             intent.putExtra(EXTRA_FRAGMENT_ARG_KEY, channel.getId());
         }
-        mPresenter.startNotificationGutsIntent(intent, appUid, row);
+        mNotificationActivityStarter.startNotificationGutsIntent(intent, appUid, row);
     }
 
     protected void startAppOpsSettingsActivity(String pkg, int uid, ArraySet<Integer> ops,
@@ -138,12 +140,12 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             } else {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
                 intent.setData(Uri.fromParts("package", pkg, null));
-                mPresenter.startNotificationGutsIntent(intent, uid, row);
+                mNotificationActivityStarter.startNotificationGutsIntent(intent, uid, row);
             }
         } else if (ops.contains(OP_CAMERA) || ops.contains(OP_RECORD_AUDIO)) {
             Intent intent = new Intent(Intent.ACTION_MANAGE_APP_PERMISSIONS);
             intent.putExtra(Intent.EXTRA_PACKAGE_NAME, pkg);
-            mPresenter.startNotificationGutsIntent(intent, uid, row);
+            mNotificationActivityStarter.startNotificationGutsIntent(intent, uid, row);
         }
     }
 
@@ -262,7 +264,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 (View v, Intent intent) -> {
                     mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_APP_NOTE_SETTINGS);
                     guts.resetFalsingCheck();
-                    mPresenter.startNotificationGutsIntent(intent, sbn.getUid(), row);
+                    mNotificationActivityStarter.startNotificationGutsIntent(intent, sbn.getUid(),
+                            row);
                 };
         boolean isForBlockingHelper = row.isBlockingHelperShowing();
 

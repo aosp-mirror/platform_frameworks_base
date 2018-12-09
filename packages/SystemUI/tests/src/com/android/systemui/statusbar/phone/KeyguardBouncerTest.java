@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -35,7 +36,6 @@ import android.testing.TestableLooper;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
-import android.content.res.ColorStateList;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView;
@@ -56,7 +56,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 public class KeyguardBouncerTest extends SysuiTestCase {
 
     @Mock
@@ -78,6 +78,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
         MockitoAnnotations.initMocks(this);
         DejankUtils.setImmediate(true);
         final ViewGroup container = new FrameLayout(getContext());

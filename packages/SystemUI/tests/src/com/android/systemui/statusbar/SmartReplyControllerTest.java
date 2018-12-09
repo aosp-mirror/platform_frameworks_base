@@ -76,7 +76,7 @@ public class SmartReplyControllerTest extends SysuiTestCase {
                 mSmartReplyController);
 
         mRemoteInputManager = new NotificationRemoteInputManager(mContext);
-        mRemoteInputManager.setUpWithPresenter(mPresenter, mCallback, mDelegate);
+        mRemoteInputManager.setUpWithCallback(mCallback, mDelegate);
         mNotification = new Notification.Builder(mContext, "")
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle("Title")

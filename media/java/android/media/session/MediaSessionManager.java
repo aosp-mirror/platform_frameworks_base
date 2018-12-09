@@ -96,15 +96,9 @@ public final class MediaSessionManager {
      * @return The binder object from the system
      * @hide
      */
-    @SystemApi
     public @NonNull ISession createSession(@NonNull MediaSession.CallbackStub cbStub,
-            @NonNull String tag, int userId) {
-        try {
-            return mService.createSession(mContext.getPackageName(), cbStub, tag, userId);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-        return null;
+            @NonNull String tag, int userId) throws RemoteException {
+        return mService.createSession(mContext.getPackageName(), cbStub, tag, userId);
     }
 
     /**
@@ -626,12 +620,24 @@ public final class MediaSessionManager {
         private final int mUid;
         private final IBinder mCallerBinder;
 
+        /**
+         * Create a new remote user information.
+         *
+         * @param packageName The package name of the remote user
+         * @param pid The pid of the remote user
+         * @param uid The uid of the remote user
+         */
         public RemoteUserInfo(@NonNull String packageName, int pid, int uid) {
             this(packageName, pid, uid, null);
         }
 
         /**
-         * @hide
+         * Create a new remote user information.
+         *
+         * @param packageName The package name of the remote user
+         * @param pid The pid of the remote user
+         * @param uid The uid of the remote user
+         * @param callerBinder The binder of the remote user. Can be {@code null}.
          */
         public RemoteUserInfo(String packageName, int pid, int uid, IBinder callerBinder) {
             mPackageName = packageName;

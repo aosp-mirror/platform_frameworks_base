@@ -30,13 +30,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @hide
  * Structure of data source descriptor for sources using URI.
  *
- * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)},
- * {@link MediaPlayer2#setNextDataSource(DataSourceDesc)} and
- * {@link MediaPlayer2#setNextDataSources(List<DataSourceDesc>)}
- * to set data source for playback.
+ * Used by {@link MediaPlayer2#setDataSource}, {@link MediaPlayer2#setNextDataSource} and
+ * {@link MediaPlayer2#setNextDataSources} to set data source for playback.
  *
  * <p>Users should use {@link Builder} to change {@link UriDataSourceDesc}.
  *

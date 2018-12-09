@@ -59,8 +59,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 
+import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
@@ -207,6 +210,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /** Unique identifier of this stack. */
     private final int mDisplayId;
 
+    // TODO: Remove once unification is complete.
+    ActivityDisplay mAcitvityDisplay;
+
     /** The containers below are the only child containers the display can have. */
     // Contains all window containers that are related to apps (Activities)
     private final TaskStackContainers mTaskStackContainers = new TaskStackContainers(mWmService);
@@ -227,7 +233,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private WindowState mTmpWindow;
     private WindowState mTmpWindow2;
-    private WindowAnimator mTmpWindowAnimator;
     private boolean mTmpRecoveringMemory;
     private boolean mUpdateImeTarget;
     private boolean mTmpInitial;
@@ -827,12 +832,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * initialize direct children.
      * @param display May not be null.
      * @param service You know.
-     * @param controller The controller for the display container.
+     * @param activityDisplay The ActivityDisplay for the display container.
      */
     DisplayContent(Display display, WindowManagerService service,
-            DisplayWindowController controller) {
+            ActivityDisplay activityDisplay) {
         super(service);
-        setController(controller);
+        mAcitvityDisplay = activityDisplay;
         if (service.mRoot.getDisplayContent(display.getDisplayId()) != null) {
             throw new IllegalArgumentException("Display with ID=" + display.getDisplayId()
                     + " already exists=" + service.mRoot.getDisplayContent(display.getDisplayId())
@@ -1020,11 +1025,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     @Override
-    DisplayWindowController getController() {
-        return (DisplayWindowController) super.getController();
-    }
-
-    @Override
     public Display getDisplay() {
         return mDisplay;
     }
@@ -1136,6 +1136,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return false;
         }
         return true;
+    }
+
+    /**
+     * The display content may have configuration set from {@link #DisplayWindowSettings}. This
+     * callback let the owner of container know there is existing configuration to prevent the
+     * values from being replaced by the initializing {@link #ActivityDisplay}.
+     */
+    void initializeDisplayOverrideConfiguration() {
+        if (mAcitvityDisplay != null) {
+            mAcitvityDisplay.onInitializeOverrideConfiguration(getRequestedOverrideConfiguration());
+        }
     }
 
     /** Notify the configuration change of this display. */
@@ -4686,6 +4697,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void prepareAppTransition(@WindowManager.TransitionType int transit,
+            boolean alwaysKeepCurrent) {
+        prepareAppTransition(transit, alwaysKeepCurrent, 0 /* flags */, false /* forceOverride */);
+    }
+
+    void prepareAppTransition(@WindowManager.TransitionType int transit,
             boolean alwaysKeepCurrent, @WindowManager.TransitionFlags int flags,
             boolean forceOverride) {
         final boolean prepared = mAppTransition.prepareAppTransitionLocked(
@@ -4735,6 +4751,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mWmService.mFocusMayChange = true;
 
         pendingLayoutChanges |= changes;
+    }
+
+    /** Check if pending app transition is for activity / task launch. */
+    boolean isNextTransitionForward() {
+        final int transit = mAppTransition.getAppTransition();
+        return transit == TRANSIT_ACTIVITY_OPEN
+                || transit == TRANSIT_TASK_OPEN
+                || transit == TRANSIT_TASK_TO_FRONT;
     }
 
     /**

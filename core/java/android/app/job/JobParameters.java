@@ -47,6 +47,8 @@ public class JobParameters implements Parcelable {
     public static final int REASON_TIMEOUT = JobProtoEnums.STOP_REASON_TIMEOUT; // 3.
     /** @hide */
     public static final int REASON_DEVICE_IDLE = JobProtoEnums.STOP_REASON_DEVICE_IDLE; // 4.
+    /** @hide */
+    public static final int REASON_DEVICE_THERMAL = JobProtoEnums.STOP_REASON_DEVICE_THERMAL; // 5.
 
     /** @hide */
     public static String getReasonName(int reason) {

@@ -112,6 +112,8 @@
     <string name="cancel" msgid="6442560571259935130">"Annuleren"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Gebied voor Help-berichten"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Bevestigen"</string>
+    <!-- no translation found for biometric_dialog_try_again (1900185172633183201) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Raak de vingerafdruksensor aan"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Vingerafdrukpictogram"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Jouw gezicht zoeken…"</string>
@@ -290,6 +292,8 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Invoer"</string>
+    <!-- no translation found for quick_settings_bluetooth_secondary_label_hearing_aids (4930931771490695395) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Inschakelen..."</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Helderheid"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automatisch draaien"</string>
@@ -596,19 +600,27 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Uit"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Met beheeropties voor meldingen met betrekking tot stroomverbruik kun je een belangrijkheidsniveau van 0 tot 5 instellen voor de meldingen van een app. \n\n"<b>"Niveau 5"</b>" \n- Boven aan de lijst met meldingen weergeven \n- Onderbreking op volledig scherm toestaan \n- Altijd korte weergave \n\n"<b>"Niveau 4"</b>" \n- Geen onderbreking op volledig scherm \n- Altijd korte weergave \n\n"<b>"Niveau 3"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n\n"<b>"Niveau 2"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n\n"<b>"Niveau 1"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n- Verbergen op vergrendelingsscherm en statusbalk \n- Onder aan de lijst met meldingen weergeven \n\n"<b>"Niveau 0"</b>" \n- Alle meldingen van de app blokkeren"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Meldingen"</string>
-    <string name="notification_channel_disabled" msgid="344536703863700565">"Deze meldingen worden niet meer weergegeven"</string>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Meldingen worden niet meer weergegeven"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Deze meldingen worden geminimaliseerd"</string>
     <string name="notification_channel_silenced" msgid="2877199534497961942">"Deze meldingen worden zonder geluid weergegeven"</string>
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Deze meldingen stellen je op de hoogte"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Meestal sluit je deze meldingen. \nWil je ze blijven weergeven?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Deze meldingen blijven weergeven?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Meldingen stoppen"</string>
+    <!-- no translation found for inline_block_button (8735843688021655065) -->
+    <skip />
     <string name="inline_keep_button" msgid="6665940297019018232">"Blijven weergeven"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimaliseren"</string>
     <string name="inline_silent_button_silent" msgid="4411510650503783646">"Zonder geluid weergeven"</string>
-    <string name="inline_silent_button_alert" msgid="2967599358027208807">"Weergeven en melden"</string>
+    <!-- no translation found for inline_silent_button_stay_silent (6308371431217601009) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (7961887853830826523) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_keep_alerting (327696842264359693) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Meldingen van deze app blijven weergeven?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Deze meldingen kunnen niet worden uitgeschakeld"</string>
+    <string name="notification_delegate_header" msgid="9167022191405284627">"via <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Deze app gebruikt de camera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Deze app gebruikt de microfoon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Deze app wordt over andere apps op je scherm heen weergegeven."</string>
@@ -855,16 +867,21 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Instellingen"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
+    <!-- no translation found for ongoing_privacy_chip_multiple_apps (1406406529558080714) -->
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> gebruikt je <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Apps gebruiken je <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"App openen"</string>
+    <!-- no translation found for ongoing_privacy_chip_content_multiple_apps_single_op (4871926099254314088) -->
     <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Annuleren"</string>
-    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"OK"</string>
-    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Instellingen"</string>
-    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g> gebruikt je <xliff:g id="TYPE">%2$s</xliff:g> gedurende de afgelopen <xliff:g id="TIME">%3$d</xliff:g> min"</string>
-    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g> gebruiken je <xliff:g id="TYPE">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g> gebruikt je <xliff:g id="TYPES_LIST">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"Details weergeven"</string>
+    <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"App die je <xliff:g id="TYPES_LIST">%s</xliff:g> gebruikt"</string>
+    <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Apps die je <xliff:g id="TYPES_LIST">%s</xliff:g> gebruiken"</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="2400503446627122483">" en "</string>
     <string name="privacy_type_camera" msgid="1676604631892420333">"camera"</string>
     <string name="privacy_type_location" msgid="6435497989657286700">"locatie"</string>
     <string name="privacy_type_microphone" msgid="4153045784928554506">"microfoon"</string>
+    <plurals name="ongoing_privacy_dialog_overflow_text" formatted="false" msgid="3441296594927649172">
+      <item quantity="other"><xliff:g id="NUM_APPS_1">%d</xliff:g> andere apps</item>
+      <item quantity="one"><xliff:g id="NUM_APPS_0">%d</xliff:g> andere app</item>
+    </plurals>
 </resources>

@@ -38,6 +38,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -52,6 +53,9 @@ import java.util.List;
  * support message dialog.
  */
 public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
+
+    private static final String LOG_TAG = "RestrictedLockUtils";
+
     /**
      * @return drawables for displaying with settings that are locked by a device admin.
      */
@@ -301,6 +305,42 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         if (dpm.getCrossProfileContactsSearchDisabled(userHandle)
                 && dpm.getCrossProfileCallerIdDisabled(userHandle)) {
             return admin;
+        }
+        return null;
+    }
+
+    /**
+     * @param userId user id of a managed profile.
+     * @return profile owner admin if cross profile calendar is disallowed.
+     */
+    public static EnforcedAdmin getCrossProfileCalendarEnforcingAdmin(Context context, int userId) {
+        final Context managedProfileContext = createPackageContextAsUser(
+                context, userId);
+        final DevicePolicyManager dpm = managedProfileContext.getSystemService(
+                DevicePolicyManager.class);
+        if (dpm == null) {
+            return null;
+        }
+        final EnforcedAdmin admin = getProfileOwner(context, userId);
+        if (admin == null) {
+            return null;
+        }
+        if (dpm.getCrossProfileCalendarPackages().isEmpty()) {
+            return admin;
+        }
+        return null;
+    }
+
+    /**
+     * @param userId user id of a managed profile.
+     * @return a context created from the given context for the given user, or null if it fails.
+     */
+    private static Context createPackageContextAsUser(Context context, int userId) {
+        try {
+            return context.createPackageContextAsUser(
+                    context.getPackageName(), 0 /* flags */, UserHandle.of(userId));
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(LOG_TAG, "Failed to create user context", e);
         }
         return null;
     }

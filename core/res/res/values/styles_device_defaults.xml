@@ -227,51 +227,100 @@ easier.
     <style name="Widget.DeviceDefault.Light.TimePicker" parent="Widget.Material.Light.TimePicker"/>
 
     <!-- Text Appearance Styles -->
-    <style name="TextAppearance.DeviceDefault" parent="TextAppearance.Material"/>
-    <style name="TextAppearance.DeviceDefault.Inverse" parent="TextAppearance.Material.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Large" parent="TextAppearance.Material.Large"/>
-    <style name="TextAppearance.DeviceDefault.Large.Inverse" parent="TextAppearance.Material.Large.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Medium" parent="TextAppearance.Material.Medium"/>
-    <style name="TextAppearance.DeviceDefault.Medium.Inverse" parent="TextAppearance.Material.Medium.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Small" parent="TextAppearance.Material.Small"/>
-    <style name="TextAppearance.DeviceDefault.Small.Inverse" parent="TextAppearance.Material.Small.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.SearchResult.Title" parent="TextAppearance.Material.SearchResult.Title"/>
-    <style name="TextAppearance.DeviceDefault.SearchResult.Subtitle" parent="TextAppearance.Material.SearchResult.Subtitle"/>
-    <style name="TextAppearance.DeviceDefault.Widget" parent="TextAppearance.Material.Widget"/>
-    <style name="TextAppearance.DeviceDefault.Widget.Button" parent="TextAppearance.Material.Widget.Button">
-        <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
-        <item name="textAllCaps">@bool/config_buttonTextAllCaps</item>
+    <style name="TextAppearance.DeviceDefault" parent="TextAppearance.Material">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
     </style>
-    <style name="TextAppearance.DeviceDefault.Widget.IconMenu.Item" parent="TextAppearance.Material.Widget.IconMenu.Item"/>
-    <style name="TextAppearance.DeviceDefault.Widget.TabWidget" parent="TextAppearance.Material.Widget.TabWidget"/>
-    <style name="TextAppearance.DeviceDefault.Widget.TextView" parent="TextAppearance.Material.Widget.TextView"/>
-    <style name="TextAppearance.DeviceDefault.Widget.TextView.PopupMenu" parent="TextAppearance.Material.Widget.TextView.PopupMenu"/>
-    <style name="TextAppearance.DeviceDefault.Widget.DropDownHint" parent="TextAppearance.Material.Widget.DropDownHint"/>
-    <style name="TextAppearance.DeviceDefault.Widget.DropDownItem" parent="TextAppearance.Material.Widget.DropDownItem"/>
-    <style name="TextAppearance.DeviceDefault.Widget.TextView.SpinnerItem" parent="TextAppearance.Material.Widget.TextView.SpinnerItem"/>
-    <style name="TextAppearance.DeviceDefault.Widget.EditText" parent="TextAppearance.Material.Widget.EditText"/>
-    <style name="TextAppearance.DeviceDefault.Widget.Button.Borderless.Colored" parent="TextAppearance.DeviceDefault.Widget.Button">
-        <item name="textColor">@color/btn_colored_borderless_text_material</item>
+    <style name="TextAppearance.DeviceDefault.Inverse" parent="TextAppearance.Material.Inverse">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
     </style>
-    <style name="TextAppearance.DeviceDefault.Widget.PopupMenu" parent="TextAppearance.Material.Widget.PopupMenu"/>
-    <style name="TextAppearance.DeviceDefault.Widget.PopupMenu.Large" parent="TextAppearance.Material.Widget.PopupMenu.Large"/>
-    <style name="TextAppearance.DeviceDefault.Widget.PopupMenu.Small" parent="TextAppearance.Material.Widget.PopupMenu.Small"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Title" parent="TextAppearance.Material.Widget.ActionBar.Title">
-        <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
+    <style name="TextAppearance.DeviceDefault.Large" parent="TextAppearance.Material.Large">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
     </style>
-
-    <!-- Notification Styles -->
+    <style name="TextAppearance.DeviceDefault.Large.Inverse" parent="TextAppearance.Material.Large.Inverse">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Medium" parent="TextAppearance.Material.Medium">
+        <item name="fontFamily">@string/config_bodyFontFamilyMedium</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Medium.Inverse" parent="TextAppearance.Material.Medium.Inverse">
+        <item name="fontFamily">@string/config_bodyFontFamilyMedium</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Small" parent="TextAppearance.Material.Small">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Small.Inverse" parent="TextAppearance.Material.Small.Inverse">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.SearchResult.Title" parent="TextAppearance.Material.SearchResult.Title">
+        <item name="fontFamily">@string/config_bodyFontFamilyMedium</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.SearchResult.Subtitle" parent="TextAppearance.Material.SearchResult.Subtitle">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
     <style name="TextAppearance.DeviceDefault.Notification" parent="TextAppearance.Material.Notification">
         <item name="fontFamily">@string/config_headlineFontFamily</item>
     </style>
     <style name="TextAppearance.DeviceDefault.Notification.Title" parent="TextAppearance.Material.Notification.Title">
         <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
     </style>
-    <style name="TextAppearance.DeviceDefault.Notification.Reply" parent="TextAppearance.Material.Notification.Reply" />
-
-    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle" parent="TextAppearance.Material.Widget.ActionBar.Subtitle"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Title" parent="TextAppearance.Material.Widget.ActionMode.Title"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle" parent="TextAppearance.Material.Widget.ActionMode.Subtitle"/>
+    <style name="TextAppearance.DeviceDefault.Notification.Reply" parent="TextAppearance.Material.Notification.Reply">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget" parent="TextAppearance.Material.Widget">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.Button" parent="TextAppearance.Material.Widget.Button">
+        <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
+        <item name="textAllCaps">@bool/config_buttonTextAllCaps</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.IconMenu.Item" parent="TextAppearance.Material.Widget.IconMenu.Item">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.TabWidget" parent="TextAppearance.Material.Widget.TabWidget">
+        <item name="fontFamily">@string/config_bodyFontFamilyMedium</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.TextView" parent="TextAppearance.Material.Widget.TextView">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.TextView.PopupMenu" parent="TextAppearance.Material.Widget.TextView.PopupMenu">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.DropDownHint" parent="TextAppearance.Material.Widget.DropDownHint">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.DropDownItem" parent="TextAppearance.Material.Widget.DropDownItem">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.TextView.SpinnerItem" parent="TextAppearance.Material.Widget.TextView.SpinnerItem">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.EditText" parent="TextAppearance.Material.Widget.EditText">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.Button.Borderless.Colored" parent="TextAppearance.DeviceDefault.Widget.Button">
+        <item name="textColor">@color/btn_colored_borderless_text_material</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.PopupMenu" parent="TextAppearance.Material.Widget.PopupMenu">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.PopupMenu.Large" parent="TextAppearance.Material.Widget.PopupMenu.Large">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.PopupMenu.Small" parent="TextAppearance.Material.Widget.PopupMenu.Small">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Title" parent="TextAppearance.Material.Widget.ActionBar.Title">
+        <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle" parent="TextAppearance.Material.Widget.ActionBar.Subtitle">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Title" parent="TextAppearance.Material.Widget.ActionMode.Title">
+        <item name="fontFamily">@string/config_bodyFontFamilyMedium</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle" parent="TextAppearance.Material.Widget.ActionMode.Subtitle">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
     <style name="TextAppearance.DeviceDefault.WindowTitle" parent="TextAppearance.Material.WindowTitle">
         <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
     </style>
@@ -279,15 +328,25 @@ easier.
         <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
     </style>
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
-    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Title.Inverse" parent="TextAppearance.Material.Widget.ActionBar.Title.Inverse"/>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Title.Inverse" parent="TextAppearance.Material.Widget.ActionBar.Title.Inverse">
+        <item name="fontFamily">@string/config_bodyFontFamilyMedium</item>
+    </style>
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
-    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle.Inverse" parent="TextAppearance.Material.Widget.ActionBar.Subtitle.Inverse"/>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle.Inverse" parent="TextAppearance.Material.Widget.ActionBar.Subtitle.Inverse">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
-    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Title.Inverse" parent="TextAppearance.Material.Widget.ActionMode.Title.Inverse"/>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Title.Inverse" parent="TextAppearance.Material.Widget.ActionMode.Title.Inverse">
+        <item name="fontFamily">@string/config_bodyFontFamilyMedium</item>
+    </style>
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
-    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle.Inverse" parent="TextAppearance.Material.Widget.ActionMode.Subtitle.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Menu" parent="TextAppearance.Material.Widget.ActionBar.Menu"/>
-    <style name="TextAppearance.DeviceDefault.Widget.Toolbar.Title" parent="TextAppearance.DeviceDefault.Widget.ActionBar.Title" />
+    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle.Inverse" parent="TextAppearance.Material.Widget.ActionMode.Subtitle.Inverse">
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Menu" parent="TextAppearance.Material.Widget.ActionBar.Menu">
+        <item name="fontFamily">@string/config_bodyFontFamilyMedium</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.Toolbar.Title" parent="TextAppearance.DeviceDefault.Widget.ActionBar.Title"/>
 
     <!-- Preference Styles -->
     <style name="Preference.DeviceDefault" parent="Preference.Material"/>

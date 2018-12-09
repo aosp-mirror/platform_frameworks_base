@@ -157,6 +157,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
+import android.view.contentcapture.ContentCaptureManager;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -166,7 +167,6 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.intelligence.ContentCaptureManager;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
@@ -799,8 +799,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     // Although these fields are specific to editable text, they are not added to Editor because
     // they are defined by the TextView's style and are theme-dependent.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     int mCursorDrawableRes;
+    private Drawable mCursorDrawable;
     // Note: this might be stale if setTextSelectHandleLeft is used. We could simplify the code
     // by removing it, but we would break apps targeting <= P that use it by reflection.
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -3640,6 +3641,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Returns the Drawable corresponding to the right handle used
      * for selecting text.
+     * Note that any change applied to the handle Drawable will not be visible
+     * until the handle is hidden and then drawn again.
      *
      * @return the right text selection handle drawable
      *
@@ -3652,6 +3655,58 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mTextSelectHandleRight = mContext.getDrawable(mTextSelectHandleRightRes);
         }
         return mTextSelectHandleRight;
+    }
+
+    /**
+     * Sets the Drawable corresponding to the text cursor. The Drawable defaults to the
+     * value of the textCursorDrawable attribute.
+     * Note that any change applied to the cursor Drawable will not be visible
+     * until the cursor is hidden and then drawn again.
+     *
+     * @see #setTextCursorDrawable(int)
+     * @attr ref android.R.styleable#TextView_textCursorDrawable
+     */
+    public void setTextCursorDrawable(@NonNull Drawable textCursorDrawable) {
+        Preconditions.checkNotNull(textCursorDrawable,
+                "The cursor drawable should not be null.");
+        mCursorDrawable = textCursorDrawable;
+        mCursorDrawableRes = 0;
+        if (mEditor != null) {
+            mEditor.loadCursorDrawable();
+        }
+    }
+
+    /**
+     * Sets the Drawable corresponding to the text cursor. The Drawable defaults to the
+     * value of the textCursorDrawable attribute.
+     * Note that any change applied to the cursor Drawable will not be visible
+     * until the cursor is hidden and then drawn again.
+     *
+     * @see #setTextCursorDrawable(Drawable)
+     * @attr ref android.R.styleable#TextView_textCursorDrawable
+     */
+    public void setTextCursorDrawable(@DrawableRes int textCursorDrawable) {
+        Preconditions.checkArgumentPositive(textCursorDrawable,
+                "The cursor drawable should be a valid drawable resource id.");
+        setTextCursorDrawable(mContext.getDrawable(textCursorDrawable));
+    }
+
+    /**
+     * Returns the Drawable corresponding to the text cursor.
+     * Note that any change applied to the cursor Drawable will not be visible
+     * until the cursor is hidden and then drawn again.
+     *
+     * @return the text cursor drawable
+     *
+     * @see #setTextCursorDrawable(Drawable)
+     * @see #setTextCursorDrawable(int)
+     * @attr ref android.R.styleable#TextView_textCursorDrawable
+     */
+    @Nullable public Drawable getTextCursorDrawable() {
+        if (mCursorDrawable == null && mCursorDrawableRes != 0) {
+            mCursorDrawable = mContext.getDrawable(mCursorDrawableRes);
+        }
+        return mCursorDrawable;
     }
 
     /**

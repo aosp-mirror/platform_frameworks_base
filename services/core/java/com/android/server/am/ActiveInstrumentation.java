@@ -133,7 +133,7 @@ class ActiveInstrumentation {
             proto.write(ActiveInstrumentationProto.TARGET_PROCESSES, p);
         }
         if (mTargetInfo != null) {
-            mTargetInfo.writeToProto(proto, ActiveInstrumentationProto.TARGET_INFO);
+            mTargetInfo.writeToProto(proto, ActiveInstrumentationProto.TARGET_INFO, 0);
         }
         proto.write(ActiveInstrumentationProto.PROFILE_FILE, mProfileFile);
         proto.write(ActiveInstrumentationProto.WATCHER, mWatcher.toString());

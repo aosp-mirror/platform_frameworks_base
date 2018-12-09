@@ -104,6 +104,11 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("  set bind-instant-service-allowed [true | false]");
             pw.println("    Sets whether binding to services provided by instant apps is allowed");
             pw.println("");
+            pw.println("  set temporary-augmented-service USER_ID [COMPONENT_NAME DURATION]");
+            pw.println("    Temporarily (for DURATION ms) changes the augmented autofill service "
+                    + "implementation.");
+            pw.println("    To reset, call with just the USER_ID argument.");
+            pw.println("");
             pw.println("  list sessions [--user USER_ID]");
             pw.println("    Lists all pending sessions.");
             pw.println("");
@@ -151,6 +156,8 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return setFullScreenMode(pw);
             case "bind-instant-service-allowed":
                 return setBindInstantService(pw);
+            case "temporary-augmented-service":
+                return setTemporaryAugmentedService(pw);
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -293,6 +300,20 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
         }
     }
 
+    private int setTemporaryAugmentedService(PrintWriter pw) {
+        final int userId = getNextIntArgRequired();
+        final String serviceName = getNextArg();
+        if (serviceName == null) {
+            mService.resetTemporaryAugmentedAutofillService(userId);
+            return 0;
+        }
+        final int duration = getNextIntArgRequired();
+        mService.setTemporaryAugmentedAutofillService(userId, serviceName, duration);
+        pw.println("AugmentedAutofillService temporarily set to " + serviceName + " for "
+                + duration + "ms");
+        return 0;
+    }
+
     private int requestDestroy(PrintWriter pw) {
         if (!isNextArgSessions(pw)) {
             return -1;
@@ -370,5 +391,9 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             return UserHandle.parseUserArg(getNextArgRequired());
         }
         return UserHandle.USER_ALL;
+    }
+
+    private int getNextIntArgRequired() {
+        return Integer.parseInt(getNextArgRequired());
     }
 }

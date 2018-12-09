@@ -299,7 +299,11 @@ package android.bluetooth {
 
 package android.content {
 
-  public abstract class ContentResolver {
+  public class ContentProviderClient implements java.lang.AutoCloseable android.content.ContentInterface {
+    method public void setDetectNotResponding(long);
+  }
+
+  public abstract class ContentResolver implements android.content.ContentInterface {
     method public static java.lang.String[] getSyncAdapterPackagesForAuthorityAsUser(java.lang.String, int);
   }
 
@@ -981,6 +985,11 @@ package android.provider {
 
   public static final class ContactsContract.RawContactsEntity implements android.provider.BaseColumns android.provider.ContactsContract.DataColumns android.provider.ContactsContract.RawContactsColumns {
     field public static final android.net.Uri CORP_CONTENT_URI;
+  }
+
+  public final class MediaStore {
+    method public static void deleteContributedMedia(android.content.Context, java.lang.String);
+    method public static long getContributedMediaSize(android.content.Context, java.lang.String);
   }
 
   public final class Settings {

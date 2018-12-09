@@ -129,6 +129,7 @@ Reporter::run_report_status_t Reporter::runReport(size_t* reportByteSize) {
     bool needMainFd = false;
     int mainFd = -1;
     int mainDest = -1;
+    int sectionCount = 0;
     HeaderSection headers;
     MetadataSection metadataSection;
     std::string buildType = android::base::GetProperty("ro.build.type", "");
@@ -180,12 +181,12 @@ Reporter::run_report_status_t Reporter::runReport(size_t* reportByteSize) {
     for (const Section** section = SECTION_LIST; *section; section++) {
         const int id = (*section)->id;
         if ((*section)->userdebugAndEngOnly && !isUserdebugOrEng) {
-            ALOGD("Skipping incident report section %d '%s' because it's limited to userdebug/eng",
+            VLOG("Skipping incident report section %d '%s' because it's limited to userdebug/eng",
                   id, (*section)->name.string());
             continue;
         }
         if (this->batch.containsSection(id)) {
-            ALOGD("Taking incident report section %d '%s'", id, (*section)->name.string());
+            VLOG("Taking incident report section %d '%s'", id, (*section)->name.string());
             for (ReportRequestSet::iterator it = batch.begin(); it != batch.end(); it++) {
                 if ((*it)->listener != NULL && (*it)->args.containsSection(id)) {
                     (*it)->listener->onReportSectionStatus(
@@ -198,11 +199,12 @@ Reporter::run_report_status_t Reporter::runReport(size_t* reportByteSize) {
             int64_t startTime = uptimeMillis();
             err = (*section)->Execute(&batch);
             int64_t endTime = uptimeMillis();
-            stats->set_success(err == NO_ERROR);
             stats->set_exec_duration_ms(endTime - startTime);
             if (err != NO_ERROR) {
                 ALOGW("Incident section %s (%d) failed: %s. Stopping report.",
                       (*section)->name.string(), id, strerror(-err));
+                // Execute() has already recorded this status. Only update if there's new failure.
+                stats->set_success(false);
                 goto DONE;
             }
             (*reportByteSize) += stats->report_size_bytes();
@@ -214,11 +216,13 @@ Reporter::run_report_status_t Reporter::runReport(size_t* reportByteSize) {
                             id, IIncidentReportStatusListener::STATUS_FINISHED);
                 }
             }
-            ALOGD("Finish incident report section %d '%s'", id, (*section)->name.string());
+            VLOG("Finish incident report section %d '%s'", id, (*section)->name.string());
+            sectionCount++;
         }
     }
 
 DONE:
+    ALOGD("Incident reporting took %d sections.", sectionCount);
     // Reports the metdadata when taking the incident report.
     if (!isTest) metadataSection.Execute(&batch);
 

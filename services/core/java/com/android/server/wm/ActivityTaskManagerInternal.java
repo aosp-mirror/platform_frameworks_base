@@ -402,7 +402,8 @@ public abstract class ActivityTaskManagerInternal {
             int wakefulness);
 
     /** Writes the current window process states to the proto stream. */
-    public abstract void writeProcessesToProto(ProtoOutputStream proto, String dumpPackage);
+    public abstract void writeProcessesToProto(ProtoOutputStream proto, String dumpPackage,
+            int wakeFullness, boolean testPssMode);
 
     /** Dump the current activities state. */
     public abstract boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,

@@ -3350,13 +3350,21 @@
     -->
     <string name="config_defaultTextClassifierPackage" translatable="false"></string>
 
-    <!-- The package name for the system's smart suggestion service.
+    <!-- The package name for the system's content capture service.
          This service must be trusted, as it can be activated without explicit consent of the user.
-         If no service with the specified name exists on the device, content capture and
-         smart suggestions will be disabled.
-         Example: "com.android.intelligence/.SmartSuggestionsService"
+         If no service with the specified name exists on the device, content capture will be
+         disabled.
+         Example: "com.android.contentcapture/.ContentcaptureService"
     -->
-    <string name="config_defaultSmartSuggestionsService" translatable="false"></string>
+    <string name="config_defaultContentCaptureService" translatable="false"></string>
+
+    <!-- The package name for the system's augmented autofill service.
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         If no service with the specified name exists on the device, augmented autofill wil be
+         disabled.
+         Example: "com.android.augmentedautofill/.AugmentedAutofillService"
+    -->
+    <string name="config_defaultAugmentedAutofillService" translatable="false"></string>
 
     <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
     <bool name="config_useDefaultFocusHighlight">true</bool>
@@ -3495,7 +3503,13 @@
     <!-- Controls whether system buttons use all caps for text -->
     <bool name="config_buttonTextAllCaps">true</bool>
     <!-- Name of the font family used for system surfaces where the font should use medium weight -->
-    <string name="config_headlineFontFamilyMedium">@string/font_family_button_material</string>
+    <string name="config_headlineFontFamilyMedium" translateable="false">@string/font_family_button_material</string>
+    <!-- Name of a font family to use for body text. -->
+    <string name="config_bodyFontFamily" translatable="false">sans-serif</string>
+    <!-- Name of a font family to use for light body text. -->
+    <string name="config_bodyFontFamilyLight" translatable="false">sans-serif-light</string>
+    <!-- Name of a font family to use for medium body text. -->
+    <string name="config_bodyFontFamilyMedium" translatable="false">sans-serif-medium</string>
 
     <!-- Size of icon shown beside a preference locked by admin -->
     <dimen name="config_restrictedIconSize">@dimen/restricted_icon_size_material</dimen>

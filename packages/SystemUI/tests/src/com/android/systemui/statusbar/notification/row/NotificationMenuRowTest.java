@@ -44,7 +44,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper()
+@RunWithLooper
 @SmallTest
 public class NotificationMenuRowTest extends LeakCheckedTest {
 

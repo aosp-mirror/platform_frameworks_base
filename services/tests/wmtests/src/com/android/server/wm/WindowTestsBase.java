@@ -339,7 +339,7 @@ class WindowTestsBase {
             final int stackId = ++sNextStackId;
             final StackWindowController controller = new StackWindowController(stackId, null,
                     dc.getDisplayId(), true /* onTop */, new Rect(), mWm);
-            controller.onOverrideConfigurationChanged(overrideConfig);
+            controller.onRequestedOverrideConfigurationChanged(overrideConfig);
             return controller;
         }
     }
@@ -360,21 +360,17 @@ class WindowTestsBase {
         final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                 displayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
         synchronized (mWm.mGlobalLock) {
-            return new DisplayContent(display, mWm, mock(DisplayWindowController.class));
+            return new DisplayContent(display, mWm, mock(ActivityDisplay.class));
         }
     }
 
     /**
      * Creates a {@link DisplayContent} with given display state and adds it to the system.
      *
-     * Unlike {@link #createNewDisplay()} that uses a mock {@link DisplayWindowController} to
-     * initialize {@link DisplayContent}, this method used real controller object when the test
-     * need to verify its related flows.
-     *
      * @param displayState For initializing the state of the display. See
      *                     {@link Display#getState()}.
      */
-    DisplayContent createNewDisplayWithController(int displayState) {
+    DisplayContent createNewDisplay(int displayState) {
         // Leverage main display info & initialize it with display state for given displayId.
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.copyFrom(mDisplayInfo);
@@ -382,11 +378,11 @@ class WindowTestsBase {
         final int displayId = sNextDisplayId++;
         final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                 displayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
-        final DisplayWindowController dcw = new DisplayWindowController(display, mWm);
         synchronized (mWm.mGlobalLock) {
             // Display creation is driven by DisplayWindowController via ActivityStackSupervisor.
             // We skip those steps here.
-            return mWm.mRoot.createDisplayContent(display, dcw);
+            final ActivityDisplay mockAd = mock(ActivityDisplay.class);
+            return mWm.mRoot.createDisplayContent(display, mockAd);
         }
     }
 

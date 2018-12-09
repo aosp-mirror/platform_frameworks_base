@@ -18,7 +18,7 @@
 
 #include "FdBuffer.h"
 
-#include <cutils/log.h>
+#include <log/log.h>
 #include <utils/SystemClock.h>
 
 #include <fcntl.h>
@@ -47,9 +47,13 @@ status_t FdBuffer::read(int fd, int64_t timeout) {
     while (true) {
         if (mBuffer.size() >= MAX_BUFFER_COUNT * BUFFER_SIZE) {
             mTruncated = true;
+            VLOG("Truncating data");
             break;
         }
-        if (mBuffer.writeBuffer() == NULL) return NO_MEMORY;
+        if (mBuffer.writeBuffer() == NULL) {
+            VLOG("No memory");
+            return NO_MEMORY;
+        }
 
         int64_t remainingTime = (mStartTime + timeout) - uptimeMillis();
         if (remainingTime <= 0) {
@@ -58,7 +62,7 @@ status_t FdBuffer::read(int fd, int64_t timeout) {
             break;
         }
 
-        int count = poll(&pfds, 1, remainingTime);
+        int count = TEMP_FAILURE_RETRY(poll(&pfds, 1, remainingTime));
         if (count == 0) {
             VLOG("timed out due to block calling poll");
             mTimedOut = true;
@@ -102,7 +106,10 @@ status_t FdBuffer::readFully(int fd) {
             VLOG("Truncating data");
             break;
         }
-        if (mBuffer.writeBuffer() == NULL) return NO_MEMORY;
+        if (mBuffer.writeBuffer() == NULL) {
+            VLOG("No memory");
+            return NO_MEMORY;
+        }
 
         ssize_t amt =
                 TEMP_FAILURE_RETRY(::read(fd, mBuffer.writeBuffer(), mBuffer.currentToWrite()));
@@ -144,10 +151,14 @@ status_t FdBuffer::readProcessedDataInStream(int fd, unique_fd toFd, unique_fd f
     // This is the buffer used to store processed data
     while (true) {
         if (mBuffer.size() >= MAX_BUFFER_COUNT * BUFFER_SIZE) {
+            VLOG("Truncating data");
             mTruncated = true;
             break;
         }
-        if (mBuffer.writeBuffer() == NULL) return NO_MEMORY;
+        if (mBuffer.writeBuffer() == NULL) {
+            VLOG("No memory");
+            return NO_MEMORY;
+        }
 
         int64_t remainingTime = (mStartTime + timeoutMs) - uptimeMillis();
         if (remainingTime <= 0) {
@@ -157,7 +168,7 @@ status_t FdBuffer::readProcessedDataInStream(int fd, unique_fd toFd, unique_fd f
         }
 
         // wait for any pfds to be ready to perform IO
-        int count = poll(pfds, 3, remainingTime);
+        int count = TEMP_FAILURE_RETRY(poll(pfds, 3, remainingTime));
         if (count == 0) {
             VLOG("timed out due to block calling poll");
             mTimedOut = true;

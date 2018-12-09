@@ -67,6 +67,7 @@ import android.os.IRemoteCallback;
 import android.os.IUserManager;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -331,6 +332,14 @@ class UserController implements Handler.Callback {
             if (mStartedUsers.get(userId) != uss) {
                 return;
             }
+        }
+        // Inform checkpointing systems of success
+        try {
+            getStorageManager().commitChanges();
+        } catch (Exception e) {
+            PowerManager pm = (PowerManager)
+                     mInjector.getContext().getSystemService(Context.POWER_SERVICE);
+            pm.reboot("Checkpoint commit failed");
         }
 
         // We always walk through all the user lifecycle states to send
@@ -1144,7 +1153,7 @@ class UserController implements Handler.Callback {
     /**
      * Attempt to unlock user without a credential token. This typically
      * succeeds when the device doesn't have credential-encrypted storage, or
-     * when the the credential-encrypted storage isn't tied to a user-provided
+     * when the credential-encrypted storage isn't tied to a user-provided
      * PIN or pattern.
      */
     private boolean maybeUnlockUser(final int userId) {

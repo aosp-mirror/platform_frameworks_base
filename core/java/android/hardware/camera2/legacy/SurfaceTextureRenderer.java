@@ -521,9 +521,10 @@ public class SurfaceTextureRenderer {
         clearState();
     }
 
-    private void makeCurrent(EGLSurface surface) {
+    private void makeCurrent(EGLSurface surface)
+            throws LegacyExceptionUtils.BufferQueueAbandonedException {
         EGL14.eglMakeCurrent(mEGLDisplay, surface, surface, mEGLContext);
-        checkEglError("makeCurrent");
+        checkEglDrawError("makeCurrent");
     }
 
     private boolean swapBuffers(EGLSurface surface)
@@ -554,6 +555,17 @@ public class SurfaceTextureRenderer {
             default:
                 throw new IllegalStateException(
                         "swapBuffers: EGL error: 0x" + Integer.toHexString(error));
+        }
+    }
+
+    private void checkEglDrawError(String msg)
+            throws LegacyExceptionUtils.BufferQueueAbandonedException {
+        int error;
+        if ((error = EGL14.eglGetError()) == EGL14.EGL_BAD_NATIVE_WINDOW) {
+            throw new LegacyExceptionUtils.BufferQueueAbandonedException();
+        }
+        if ((error = EGL14.eglGetError()) != EGL14.EGL_SUCCESS) {
+            throw new IllegalStateException(msg + ": EGL error: 0x" + Integer.toHexString(error));
         }
     }
 
@@ -709,8 +721,14 @@ public class SurfaceTextureRenderer {
         if (mConversionSurfaces.size() > 0) {
             configureEGLPbufferSurfaces(mConversionSurfaces);
         }
-        makeCurrent((mSurfaces.size() > 0) ? mSurfaces.get(0).eglSurface :
+
+        try {
+            makeCurrent((mSurfaces.size() > 0) ? mSurfaces.get(0).eglSurface :
                 mConversionSurfaces.get(0).eglSurface);
+        } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                Log.w(TAG, "Surface abandoned, skipping configuration... ", e);
+        }
+
         initializeGLState();
         mSurfaceTexture = new SurfaceTexture(getTextureId());
 
@@ -798,9 +816,9 @@ public class SurfaceTextureRenderer {
         }
         for (EGLSurfaceHolder holder : mConversionSurfaces) {
             if (LegacyCameraDevice.containsSurfaceId(holder.surface, targetSurfaceIds)) {
-                makeCurrent(holder.eglSurface);
                 // glReadPixels reads from the bottom of the buffer, so add an extra vertical flip
                 try {
+                    makeCurrent(holder.eglSurface);
                     drawFrame(mSurfaceTexture, holder.width, holder.height,
                             (mFacing == CameraCharacteristics.LENS_FACING_FRONT) ?
                                     FLIP_TYPE_BOTH : FLIP_TYPE_VERTICAL);

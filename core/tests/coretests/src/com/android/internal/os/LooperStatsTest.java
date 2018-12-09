@@ -442,15 +442,15 @@ public final class LooperStatsTest {
         LooperStats.ExportedEntry debugEntry1 = entries.get(1);
         assertThat(debugEntry1.handlerClassName).isEqualTo("");
         assertThat(debugEntry1.messageName).isEqualTo("__DEBUG_start_time_millis");
-        assertThat(debugEntry1.maxDelayMillis).isEqualTo(looperStats.getStartTimeMillis());
+        assertThat(debugEntry1.totalLatencyMicros).isEqualTo(looperStats.getStartTimeMillis());
         LooperStats.ExportedEntry debugEntry2 = entries.get(2);
         assertThat(debugEntry2.handlerClassName).isEqualTo("");
         assertThat(debugEntry2.messageName).isEqualTo("__DEBUG_end_time_millis");
-        assertThat(debugEntry2.maxDelayMillis).isAtLeast(looperStats.getStartTimeMillis());
+        assertThat(debugEntry2.totalLatencyMicros).isAtLeast(looperStats.getStartTimeMillis());
         LooperStats.ExportedEntry debugEntry3 = entries.get(3);
         assertThat(debugEntry3.handlerClassName).isEqualTo("");
         assertThat(debugEntry3.messageName).isEqualTo("__DEBUG_battery_time_millis");
-        assertThat(debugEntry3.maxDelayMillis).isAtLeast(0L);
+        assertThat(debugEntry3.totalLatencyMicros).isAtLeast(0L);
     }
 
     private static void assertThrows(Class<? extends Exception> exceptionClass, Runnable r) {

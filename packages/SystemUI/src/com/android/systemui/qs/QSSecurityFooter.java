@@ -79,7 +79,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         mFooterIcon = (ImageView) mRootView.findViewById(R.id.footer_icon);
         mFooterIconId = R.drawable.ic_info_outline;
         mContext = context;
-        mMainHandler = new Handler(Looper.getMainLooper());
+        mMainHandler = new Handler(Looper.myLooper());
         mActivityStarter = Dependency.get(ActivityStarter.class);
         mSecurityController = Dependency.get(SecurityController.class);
         mHandler = new H(Dependency.get(Dependency.BG_LOOPER));

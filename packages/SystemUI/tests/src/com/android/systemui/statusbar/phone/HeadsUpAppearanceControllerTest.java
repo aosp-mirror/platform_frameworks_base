@@ -23,18 +23,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.widget.TextView;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.NotificationTestHelper;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -43,7 +43,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
 
     private final NotificationStackScrollLayout mStackScroller =
@@ -58,6 +58,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
         NotificationTestHelper testHelper = new NotificationTestHelper(getContext());
         mFirst = testHelper.createRow();
         mDependency.injectTestDependency(DarkIconDispatcher.class, mDarkIconDispatcher);

@@ -1199,8 +1199,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         void setProfileProc(ProcessRecord profileProc) {
             mProfileProc = profileProc;
             if (mAtmInternal != null) {
-                mAtmInternal.setProfileProc(
-                        profileProc.getWindowProcessController());
+                mAtmInternal.setProfileProc(profileProc == null ? null
+                        : profileProc.getWindowProcessController());
             }
         }
 
@@ -9209,6 +9209,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             sdumper.dumpWithClient();
         }
+        if (dumpPackage == null) {
+            // Intentionally dropping the lock for this, because dumpBinderProxies() will make many
+            // outgoing binder calls to retrieve interface descriptors; while that is system code,
+            // there is nothing preventing an app from overriding this implementation by talking to
+            // the binder driver directly, and hang up system_server in the process. So, dump
+            // without locks held, and even then only when there is an unreasonably large number of
+            // proxies in the first place.
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpBinderProxies(pw, BINDER_PROXY_HIGH_WATERMARK /* minToDump */);
+        }
         synchronized(this) {
             pw.println();
             if (dumpAll) {
@@ -9273,19 +9286,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage, dumpAppId);
-        }
-        if (dumpPackage == null) {
-            // Intentionally dropping the lock for this, because dumpBinderProxies() will make many
-            // outgoing binder calls to retrieve interface descriptors; while that is system code,
-            // there is nothing preventing an app from overriding this implementation by talking to
-            // the binder driver directly, and hang up system_server in the process. So, dump
-            // without locks held, and even then only when there is an unreasonably large number of
-            // proxies in the first place.
-            pw.println();
-            if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-            }
-            dumpBinderProxies(pw, BINDER_PROXY_HIGH_WATERMARK /* minToDump */);
         }
     }
 
@@ -10266,7 +10266,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (dumpPackage != null && !r.pkgList.containsKey(dumpPackage)) {
                     continue;
                 }
-                r.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.PROCS);
+                r.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.PROCS, mProcessList.mLruProcesses.indexOf(r)
+                );
                 if (r.isPersistent()) {
                     numPers++;
                 }
@@ -10278,7 +10279,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (dumpPackage != null && !r.pkgList.containsKey(dumpPackage)) {
                 continue;
             }
-            r.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.ISOLATED_PROCS);
+            r.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.ISOLATED_PROCS,
+                    mProcessList.mLruProcesses.indexOf(r)
+            );
         }
 
         for (int i=0; i<mActiveInstrumentation.size(); i++) {
@@ -10376,7 +10379,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         writeProcessesToGcToProto(proto, ActivityManagerServiceDumpProcessesProto.GC_PROCS, dumpPackage);
         mAppErrors.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.APP_ERRORS, dumpPackage);
-        mAtmInternal.writeProcessesToProto(proto, dumpPackage);
+        mAtmInternal.writeProcessesToProto(proto, dumpPackage, mWakefulness, mTestPssMode);
 
         if (dumpPackage == null) {
             mUserController.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.USER_CONTROLLER);
@@ -10404,14 +10407,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mPendingTempWhitelist.valueAt(i).writeToProto(proto,
                         ActivityManagerServiceDumpProcessesProto.PENDING_TEMP_WHITELIST);
             }
-        }
-
-        if (dumpPackage == null) {
-            final long sleepToken = proto.start(ActivityManagerServiceDumpProcessesProto.SLEEP_STATUS);
-            proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.WAKEFULNESS,
-                    PowerManagerInternal.wakefulnessToProtoEnum(mWakefulness));
-            proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.TEST_PSS_MODE, mTestPssMode);
-            proto.end(sleepToken);
         }
 
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient

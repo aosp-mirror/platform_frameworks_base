@@ -15,9 +15,6 @@
  */
 package com.android.systemui.statusbar;
 
-import android.content.Intent;
-
-import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -37,12 +34,6 @@ public interface NotificationPresenter extends ExpandableNotificationRow.OnExpan
      * animations if this returns true.
      */
     boolean isPresenterFullyCollapsed();
-
-    /**
-     * Runs the given intent. The presenter may want to run some animations or close itself when
-     * this happens.
-     */
-    void startNotificationGutsIntent(Intent intent, int appUid, ExpandableNotificationRow row);
 
     /**
      * Refresh or remove lockscreen artwork from media metadata or the lockscreen wallpaper.
@@ -74,8 +65,7 @@ public interface NotificationPresenter extends ExpandableNotificationRow.OnExpan
     int getMaxNotificationsWhileLocked(boolean recompute);
 
     /**
-     * True if the presenter
-     * @return
+     * True if the presenter is currently locked.
      */
     default boolean isPresenterLocked() { return false; }
 
@@ -88,22 +78,4 @@ public interface NotificationPresenter extends ExpandableNotificationRow.OnExpan
      * @return true if the shade is collapsing.
      */
     boolean isCollapsing();
-
-    /**
-     * @return true if the shade is collapsing to show an activity over the lock screen
-     */
-    default public boolean isCollapsingToShowActivityOverLockscreen() {
-        return false;
-    }
-
-    /**
-     * Get the {@link ActivityLaunchAnimator} from the presenter so it can be queried by
-     * {@link com.android.systemui.statusbar.phone.StatusBar}
-     * @return the current animator
-     * @deprecated This is only here for now because StatusBar is still the ActivityLaunchAnimator
-     * callback but shouldn't be.
-     */
-    default public ActivityLaunchAnimator getActivityLaunchAnimator() {
-        return null;
-    }
 }

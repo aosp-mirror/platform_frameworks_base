@@ -29,6 +29,7 @@ import android.testing.LeakCheck;
 import android.util.Log;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.util.Assert;
 
 import org.junit.After;
 import org.junit.Before;
@@ -78,6 +79,8 @@ public abstract class SysuiTestCase {
     public void SysuiTeardown() {
         InstrumentationRegistry.registerInstance(mRealInstrumentation,
                 InstrumentationRegistry.getArguments());
+        // Reset the assert's main looper.
+        Assert.sMainLooper = Looper.getMainLooper();
     }
 
     protected LeakCheck getLeakCheck() {

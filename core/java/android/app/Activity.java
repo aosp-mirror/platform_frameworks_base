@@ -121,8 +121,8 @@ import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.autofill.AutofillPopupWindow;
 import android.view.autofill.IAutofillWindowPresenter;
-import android.view.intelligence.ContentCaptureEvent;
-import android.view.intelligence.ContentCaptureManager;
+import android.view.contentcapture.ContentCaptureEvent;
+import android.view.contentcapture.ContentCaptureManager;
 import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -1723,15 +1723,7 @@ public class Activity extends ContextThemeWrapper
         if (mAutoFillResetNeeded) {
             if (!mAutoFillIgnoreFirstResumePause) {
                 View focus = getCurrentFocus();
-                // On Activity rotation situation (mRestoredFromBundle is true),
-                // we should not call on AutofillManager in onResume()
-                // since the next Layout pass will do that.
-                // However, there are both cases where Activity#getCurrentFocus()
-                // will return null (window not preserved) and not null (window IS
-                // preserved), so we need to explicitly check for mRestoredFromBundle
-                // here.
-                if (!mRestoredFromBundle && focus != null
-                        && focus.canNotifyAutofillEnterExitEvent()) {
+                if (focus != null && focus.canNotifyAutofillEnterExitEvent()) {
                     // TODO: in Activity killed/recreated case, i.e. SessionLifecycleTest#
                     // testDatasetVisibleWhileAutofilledAppIsLifecycled: the View's initial
                     // window visibility after recreation is INVISIBLE in onResume() and next frame

@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationData;
@@ -72,7 +73,8 @@ public class BubbleController {
     private Point mDisplaySize;
 
     // Bubbles get added to the status bar view
-    private StatusBarWindowController mStatusBarWindowController;
+    @VisibleForTesting
+    protected StatusBarWindowController mStatusBarWindowController;
 
     // Used for determining view rect for touch interaction
     private Rect mTempRect = new Rect();
@@ -302,6 +304,11 @@ public class BubbleController {
         return mTempRect;
     }
 
+    @VisibleForTesting
+    public BubbleStackView getStackView() {
+        return mStackView;
+    }
+
     // TODO: factor in PIP location / maybe last place user had it
     /**
      * Gets an appropriate starting point to position the bubble stack.
@@ -342,13 +349,16 @@ public class BubbleController {
                 }
             }
         }
+        boolean isCall = Notification.CATEGORY_CALL.equals(n.getNotification().category)
+                && n.isOngoing();
+        boolean isMusic = n.getNotification().hasMediaSession();
+        boolean isImportantOngoing = isMusic || isCall;
 
         Class<? extends Notification.Style> style = n.getNotification().getNotificationStyle();
-        boolean isMessageType = Notification.MessagingStyle.class.equals(style)
-                || Notification.CATEGORY_MESSAGE.equals(n.getNotification().category)
-                || hasRemoteInput;
-        return (isMessageType && autoBubbleMessages)
-                || (n.isOngoing() && autoBubbleOngoing)
+        boolean isMessageType = Notification.CATEGORY_MESSAGE.equals(n.getNotification().category);
+        boolean isMessageStyle = Notification.MessagingStyle.class.equals(style);
+        return (((isMessageType && hasRemoteInput) || isMessageStyle) && autoBubbleMessages)
+                || (isImportantOngoing && autoBubbleOngoing)
                 || autoBubbleAll;
     }
 

@@ -57,7 +57,7 @@ import java.util.regex.Pattern;
  * messages and adapts the layout accordingly.
  */
 @RemoteViews.RemoteView
-public class MessagingLayout extends FrameLayout {
+public class MessagingLayout extends FrameLayout implements ImageMessageConsumer {
 
     private static final float COLOR_SHIFT_AMOUNT = 60;
     /**
@@ -95,6 +95,7 @@ public class MessagingLayout extends FrameLayout {
     private Person mUser;
     private CharSequence mNameReplacement;
     private boolean mDisplayImagesAtEnd;
+    private ImageResolver mImageResolver;
 
     public MessagingLayout(@NonNull Context context) {
         super(context);
@@ -165,6 +166,11 @@ public class MessagingLayout extends FrameLayout {
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
         bind(newMessages, newHistoricMessages, showSpinner);
+    }
+
+    @Override
+    public void setImageResolver(ImageResolver resolver) {
+        mImageResolver = resolver;
     }
 
     private void addRemoteInputHistoryToMessages(
@@ -463,12 +469,12 @@ public class MessagingLayout extends FrameLayout {
      */
     private List<MessagingMessage> createMessages(
             List<Notification.MessagingStyle.Message> newMessages, boolean historic) {
-        List<MessagingMessage> result = new ArrayList<>();;
+        List<MessagingMessage> result = new ArrayList<>();
         for (int i = 0; i < newMessages.size(); i++) {
             Notification.MessagingStyle.Message m = newMessages.get(i);
             MessagingMessage message = findAndRemoveMatchingMessage(m);
             if (message == null) {
-                message = MessagingMessage.createMessage(this, m);
+                message = MessagingMessage.createMessage(this, m, mImageResolver);
             }
             message.setIsHistoric(historic);
             result.add(message);

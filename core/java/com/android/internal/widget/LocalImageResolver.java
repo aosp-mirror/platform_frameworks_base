@@ -17,7 +17,6 @@
 package com.android.internal.widget;
 
 import android.annotation.Nullable;
-import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

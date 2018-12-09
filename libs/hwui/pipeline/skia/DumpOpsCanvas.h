@@ -82,18 +82,6 @@ protected:
         mOutput << mIdent << "drawDRRect" << std::endl;
     }
 
-    void onDrawText(const void*, size_t, SkScalar, SkScalar, const SkPaint&) override {
-        mOutput << mIdent << "drawText" << std::endl;
-    }
-
-    void onDrawPosText(const void*, size_t, const SkPoint[], const SkPaint&) override {
-        mOutput << mIdent << "drawPosText" << std::endl;
-    }
-
-    void onDrawPosTextH(const void*, size_t, const SkScalar[], SkScalar, const SkPaint&) override {
-        mOutput << mIdent << "drawPosTextH" << std::endl;
-    }
-
     void onDrawTextRSXform(const void*, size_t, const SkRSXform[], const SkRect*,
                            const SkPaint&) override {
         mOutput << mIdent << "drawTextRSXform" << std::endl;

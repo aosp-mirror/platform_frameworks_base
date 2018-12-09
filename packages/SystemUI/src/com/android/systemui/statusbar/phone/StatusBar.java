@@ -187,6 +187,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
+import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -578,7 +579,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private boolean mVibrateOnOpening;
     private VibratorHelper mVibratorHelper;
+    private ActivityLaunchAnimator mActivityLaunchAnimator;
     protected NotificationPresenter mPresenter;
+    private NotificationActivityStarter mNotificationActivityStarter;
     private boolean mPulsing;
 
     @Override
@@ -1014,13 +1017,23 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected void setUpPresenter() {
         // Set up the initial notification state.
+        mActivityLaunchAnimator = new ActivityLaunchAnimator(
+                mStatusBarWindow, this, mNotificationPanel,
+                (NotificationListContainer) mStackScroller);
+
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
-                mScrimController, this);
+                mScrimController, mActivityLaunchAnimator);
+
         mAppOpsController.addCallback(APP_OPS, this);
         mNotificationListener.setUpWithPresenter(mPresenter);
         mNotificationShelf.setOnActivatedListener(mPresenter);
         mRemoteInputManager.getController().addCallback(mStatusBarWindowController);
+
+        mNotificationActivityStarter = new StatusBarNotificationActivityStarter(
+                mContext, mNotificationPanel, mPresenter, mHeadsUpManager, mActivityLaunchAnimator);
+        mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
+        mEntryManager.setNotificationActivityStarter(mNotificationActivityStarter);
     }
 
     /**
@@ -1639,9 +1652,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onExpandAnimationTimedOut() {
-        ActivityLaunchAnimator animator = mPresenter.getActivityLaunchAnimator();
         if (mPresenter.isPresenterFullyCollapsed() && !mPresenter.isCollapsing()
-                && animator != null && !animator.isLaunchForActivity()) {
+                && mActivityLaunchAnimator != null
+                && !mActivityLaunchAnimator.isLaunchForActivity()) {
             onClosingFinished();
         } else {
             collapsePanel(true /* animate */);
@@ -1940,7 +1953,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         runPostCollapseRunnables();
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
-        if (!mPresenter.isCollapsingToShowActivityOverLockscreen()) {
+        if (!mNotificationActivityStarter.isCollapsingToShowActivityOverLockscreen()) {
             showBouncerIfKeyguard();
         } else if (DEBUG) {
             Log.d(TAG, "Not showing bouncer due to activity showing over lockscreen");
@@ -2527,7 +2540,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             }
             if (dismissShade) {
-                if (mExpandedVisible) {
+                if (mExpandedVisible && !mBouncerShowing) {
                     animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */,
                             true /* delayed*/);
                 } else {
@@ -3208,6 +3221,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.onAffordanceLaunchEnded();
         mNotificationPanel.animate().cancel();
         mNotificationPanel.setAlpha(1f);
+        updateScrimController();
         Trace.endSection();
         return staying;
     }

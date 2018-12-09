@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
+import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.storage.OnObbStateChangeListener.ERROR_ALREADY_MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.ERROR_COULD_NOT_MOUNT;
 import static android.os.storage.OnObbStateChangeListener.ERROR_COULD_NOT_UNMOUNT;
@@ -2524,6 +2526,19 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    /**
+     * Signal that checkpointing partitions should commit changes
+     */
+    @Override
+    public void commitChanges() throws RemoteException {
+        // Only the system process is permitted to commit checkpoints
+        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
+            throw new SecurityException("no permission to commit checkpoint changes");
+        }
+
+        mVold.commitChanges();
+    }
+
     @Override
     public String getPassword() throws RemoteException {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
@@ -2758,6 +2773,14 @@ class StorageManagerService extends IStorageManager.Stub
     public @Nullable ParcelFileDescriptor openProxyFileDescriptor(
             int mountId, int fileId, int mode) {
         Slog.v(TAG, "mountProxyFileDescriptor");
+
+        // We only support a narrow set of incoming mode flags
+        if ((mode & MODE_READ_WRITE) == MODE_READ_WRITE) {
+            mode = MODE_READ_WRITE;
+        } else {
+            mode = MODE_READ_ONLY;
+        }
+
         try {
             synchronized (mAppFuseLock) {
                 if (mAppFuseBridge == null) {

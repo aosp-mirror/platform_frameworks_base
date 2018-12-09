@@ -21,7 +21,9 @@ package android {
     field public static final java.lang.String BACKUP = "android.permission.BACKUP";
     field public static final java.lang.String BATTERY_STATS = "android.permission.BATTERY_STATS";
     field public static final java.lang.String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
+    field public static final java.lang.String BIND_AUGMENTED_AUTOFILL_SERVICE = "android.permission.BIND_AUGMENTED_AUTOFILL_SERVICE";
     field public static final deprecated java.lang.String BIND_CONNECTION_SERVICE = "android.permission.BIND_CONNECTION_SERVICE";
+    field public static final java.lang.String BIND_CONTENT_CAPTURE_SERVICE = "android.permission.BIND_CONTENT_CAPTURE_SERVICE";
     field public static final java.lang.String BIND_DIRECTORY_SEARCH = "android.permission.BIND_DIRECTORY_SEARCH";
     field public static final java.lang.String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
     field public static final java.lang.String BIND_IMS_SERVICE = "android.permission.BIND_IMS_SERVICE";
@@ -33,7 +35,6 @@ package android {
     field public static final java.lang.String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final java.lang.String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final java.lang.String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
-    field public static final java.lang.String BIND_SMART_SUGGESTIONS_SERVICE = "android.permission.BIND_SMART_SUGGESTIONS_SERVICE";
     field public static final java.lang.String BIND_SOUND_TRIGGER_DETECTION_SERVICE = "android.permission.BIND_SOUND_TRIGGER_DETECTION_SERVICE";
     field public static final java.lang.String BIND_TELEPHONY_DATA_SERVICE = "android.permission.BIND_TELEPHONY_DATA_SERVICE";
     field public static final java.lang.String BIND_TELEPHONY_NETWORK_SERVICE = "android.permission.BIND_TELEPHONY_NETWORK_SERVICE";
@@ -105,11 +106,11 @@ package android {
     field public static final java.lang.String MANAGE_AUTO_FILL = "android.permission.MANAGE_AUTO_FILL";
     field public static final java.lang.String MANAGE_CARRIER_OEM_UNLOCK_STATE = "android.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE";
     field public static final java.lang.String MANAGE_CA_CERTIFICATES = "android.permission.MANAGE_CA_CERTIFICATES";
+    field public static final java.lang.String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
     field public static final java.lang.String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
     field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final java.lang.String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final java.lang.String MANAGE_ROLE_HOLDERS = "android.permission.MANAGE_ROLE_HOLDERS";
-    field public static final java.lang.String MANAGE_SMART_SUGGESTIONS = "android.permission.MANAGE_SMART_SUGGESTIONS";
     field public static final java.lang.String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
     field public static final java.lang.String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
     field public static final java.lang.String MANAGE_USB = "android.permission.MANAGE_USB";
@@ -613,7 +614,12 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL";
     field public static final java.lang.String EXTRA_PROVISIONING_ORGANIZATION_NAME = "android.app.extra.PROVISIONING_ORGANIZATION_NAME";
     field public static final java.lang.String EXTRA_PROVISIONING_SUPPORT_URL = "android.app.extra.PROVISIONING_SUPPORT_URL";
+    field public static final java.lang.String EXTRA_PROVISIONING_TRIGGER = "android.app.extra.PROVISIONING_TRIGGER";
     field public static final java.lang.String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
+    field public static final int PROVISIONING_TRIGGER_CLOUD_ENROLLMENT = 1; // 0x1
+    field public static final int PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER = 3; // 0x3
+    field public static final int PROVISIONING_TRIGGER_QR_CODE = 2; // 0x2
+    field public static final int PROVISIONING_TRIGGER_UNSPECIFIED = 0; // 0x0
     field public static final int STATE_USER_PROFILE_COMPLETE = 4; // 0x4
     field public static final int STATE_USER_SETUP_COMPLETE = 2; // 0x2
     field public static final int STATE_USER_SETUP_FINALIZED = 3; // 0x3
@@ -1029,6 +1035,10 @@ package android.bluetooth.le {
 }
 
 package android.content {
+
+  public class ContentProviderClient implements java.lang.AutoCloseable android.content.ContentInterface {
+    method public void setDetectNotResponding(long);
+  }
 
   public abstract class Context {
     method public boolean bindServiceAsUser(android.content.Intent, android.content.ServiceConnection, int, android.os.UserHandle);
@@ -2919,6 +2929,13 @@ package android.media {
     field public static final int RADIO_TUNER = 1998; // 0x7ce
   }
 
+  public static class MediaTimestamp.Builder {
+    ctor public MediaTimestamp.Builder();
+    ctor public MediaTimestamp.Builder(android.media.MediaTimestamp);
+    method public android.media.MediaTimestamp build();
+    method public android.media.MediaTimestamp.Builder setMediaTimestamp(long, long, float);
+  }
+
   public class PlayerProxy {
     method public void pause();
     method public void setPan(float);
@@ -2926,6 +2943,20 @@ package android.media {
     method public void setVolume(float);
     method public void start();
     method public void stop();
+  }
+
+  public static class SubtitleData.Builder {
+    ctor public SubtitleData.Builder();
+    ctor public SubtitleData.Builder(android.media.SubtitleData);
+    method public android.media.SubtitleData build();
+    method public android.media.SubtitleData.Builder setSubtitleData(int, long, long, byte[]);
+  }
+
+  public static class TimedMetaData.Builder {
+    ctor public TimedMetaData.Builder();
+    ctor public TimedMetaData.Builder(android.media.TimedMetaData);
+    method public android.media.TimedMetaData build();
+    method public android.media.TimedMetaData.Builder setTimedMetaData(long, byte[]);
   }
 
 }
@@ -3015,7 +3046,6 @@ package android.media.audiopolicy {
 package android.media.session {
 
   public final class MediaSessionManager {
-    method public android.media.session.ISession createSession(android.media.session.MediaSession.CallbackStub, java.lang.String, int);
     method public void setOnMediaKeyListener(android.media.session.MediaSessionManager.OnMediaKeyListener, android.os.Handler);
     method public void setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, android.os.Handler);
   }
@@ -4492,6 +4522,26 @@ package android.provider {
     field public static final java.lang.String STATE = "state";
   }
 
+  public final class DocumentsContract {
+    method public static boolean isManageMode(android.net.Uri);
+    method public static android.net.Uri setManageMode(android.net.Uri);
+    field public static final java.lang.String ACTION_DOCUMENT_ROOT_SETTINGS = "android.provider.action.DOCUMENT_ROOT_SETTINGS";
+    field public static final java.lang.String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
+    field public static final java.lang.String EXTRA_SHOW_ADVANCED = "android.provider.extra.SHOW_ADVANCED";
+  }
+
+  public static final class DocumentsContract.Root {
+    field public static final int FLAG_ADVANCED = 65536; // 0x10000
+    field public static final int FLAG_HAS_SETTINGS = 131072; // 0x20000
+    field public static final int FLAG_REMOVABLE_SD = 262144; // 0x40000
+    field public static final int FLAG_REMOVABLE_USB = 524288; // 0x80000
+  }
+
+  public final class MediaStore {
+    method public static void deleteContributedMedia(android.content.Context, java.lang.String);
+    method public static long getContributedMediaSize(android.content.Context, java.lang.String);
+  }
+
   public abstract class SearchIndexableData {
     ctor public SearchIndexableData();
     ctor public SearchIndexableData(android.content.Context);
@@ -4654,18 +4704,18 @@ package android.provider {
   public static final class Telephony.Carriers implements android.provider.BaseColumns {
     field public static final java.lang.String APN_SET_ID = "apn_set_id";
     field public static final int CARRIER_EDITED = 4; // 0x4
-    field public static final java.lang.String EDITED = "edited";
-    field public static final java.lang.String MAX_CONNS = "max_conns";
-    field public static final java.lang.String MAX_CONNS_TIME = "max_conns_time";
-    field public static final java.lang.String MODEM_COGNITIVE = "modem_cognitive";
+    field public static final java.lang.String EDITED_STATUS = "edited";
+    field public static final java.lang.String MAX_CONNECTIONS = "max_conns";
+    field public static final java.lang.String MODEM_PERSIST = "modem_cognitive";
     field public static final java.lang.String MTU = "mtu";
-    field public static final int NO_SET_SET = 0; // 0x0
+    field public static final int NO_APN_SET_ID = 0; // 0x0
+    field public static final java.lang.String TIME_LIMIT_FOR_MAX_CONNECTIONS = "max_conns_time";
     field public static final int UNEDITED = 0; // 0x0
     field public static final int USER_DELETED = 2; // 0x2
     field public static final java.lang.String USER_EDITABLE = "user_editable";
     field public static final int USER_EDITED = 1; // 0x1
     field public static final java.lang.String USER_VISIBLE = "user_visible";
-    field public static final java.lang.String WAIT_TIME = "wait_time";
+    field public static final java.lang.String WAIT_TIME_RETRY = "wait_time";
   }
 
   public final class TimeZoneRulesDataContract {
@@ -4844,12 +4894,127 @@ package android.service.autofill {
 
 }
 
+package android.service.autofill.augmented {
+
+  public abstract class AugmentedAutofillService extends android.app.Service {
+    ctor public AugmentedAutofillService();
+    method public void onFillRequest(android.service.autofill.augmented.FillRequest, android.os.CancellationSignal, android.service.autofill.augmented.FillController, android.service.autofill.augmented.FillCallback);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.autofill.augmented.AugmentedAutofillService";
+  }
+
+  public final class FillCallback {
+    method public void onSuccess(android.service.autofill.augmented.FillResponse);
+  }
+
+  public final class FillController {
+    method public void autofill(java.util.List<android.util.Pair<android.view.autofill.AutofillId, android.view.autofill.AutofillValue>>);
+  }
+
+  public final class FillRequest {
+    method public android.content.ComponentName getActivityComponent();
+    method public android.view.autofill.AutofillId getFocusedId();
+    method public android.view.autofill.AutofillValue getFocusedValue();
+    method public android.service.autofill.augmented.PresentationParams getPresentationParams();
+    method public int getTaskId();
+  }
+
+  public final class FillResponse implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.autofill.augmented.FillResponse> CREATOR;
+  }
+
+  public static final class FillResponse.Builder {
+    ctor public FillResponse.Builder();
+    method public android.service.autofill.augmented.FillResponse build();
+    method public android.service.autofill.augmented.FillResponse.Builder setFillWindow(android.service.autofill.augmented.FillWindow);
+    method public android.service.autofill.augmented.FillResponse.Builder setIgnoredIds(java.util.List<android.view.autofill.AutofillId>);
+  }
+
+  public final class FillWindow implements java.lang.AutoCloseable {
+    ctor public FillWindow();
+    method public void destroy();
+    method public boolean update(android.service.autofill.augmented.PresentationParams.Area, android.view.View, long);
+    field public static final long FLAG_METADATA_ADDRESS = 1L; // 0x1L
+  }
+
+  public abstract class PresentationParams {
+    method public int getFlags();
+    method public android.service.autofill.augmented.PresentationParams.Area getFullArea();
+    method public android.service.autofill.augmented.PresentationParams.Area getSuggestionArea();
+    field public static final int FLAG_HINT_GRAVITY_BOTTOM = 2; // 0x2
+    field public static final int FLAG_HINT_GRAVITY_LEFT = 4; // 0x4
+    field public static final int FLAG_HINT_GRAVITY_RIGHT = 8; // 0x8
+    field public static final int FLAG_HINT_GRAVITY_TOP = 1; // 0x1
+    field public static final int FLAG_HOST_IME = 16; // 0x10
+    field public static final int FLAG_HOST_SYSTEM = 32; // 0x20
+  }
+
+  public static abstract class PresentationParams.Area {
+    method public android.graphics.Rect getBounds();
+    method public android.service.autofill.augmented.PresentationParams.Area getSubArea(android.graphics.Rect);
+  }
+
+}
+
 package android.service.carrier {
 
   public abstract class ApnService extends android.app.Service {
     ctor public ApnService();
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
+  }
+
+}
+
+package android.service.contentcapture {
+
+  public final class ContentCaptureEventsRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.util.List<android.view.contentcapture.ContentCaptureEvent> getEvents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.contentcapture.ContentCaptureEventsRequest> CREATOR;
+  }
+
+  public abstract class ContentCaptureService extends android.app.Service {
+    ctor public ContentCaptureService();
+    method public final java.util.Set<android.content.ComponentName> getContentCaptureDisabledActivities();
+    method public final java.util.Set<java.lang.String> getContentCaptureDisabledPackages();
+    method public void onActivitySnapshot(android.service.contentcapture.InteractionSessionId, android.service.contentcapture.SnapshotData);
+    method public abstract void onContentCaptureEventsRequest(android.service.contentcapture.InteractionSessionId, android.service.contentcapture.ContentCaptureEventsRequest);
+    method public void onCreateInteractionSession(android.service.contentcapture.InteractionContext, android.service.contentcapture.InteractionSessionId);
+    method public void onDestroyInteractionSession(android.service.contentcapture.InteractionSessionId);
+    method public final void setActivityContentCaptureEnabled(android.content.ComponentName, boolean);
+    method public final void setContentCaptureWhitelist(java.util.List<java.lang.String>, java.util.List<android.content.ComponentName>);
+    method public final void setPackageContentCaptureEnabled(java.lang.String, boolean);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
+  }
+
+  public final class InteractionContext implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.content.ComponentName getActivityComponent();
+    method public int getDisplayId();
+    method public int getFlags();
+    method public int getTaskId();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.contentcapture.InteractionContext> CREATOR;
+    field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
+    field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
+  }
+
+  public final class InteractionSessionId implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.contentcapture.InteractionSessionId> CREATOR;
+  }
+
+  public final class SnapshotData implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.app.assist.AssistContent getAssistContent();
+    method public android.os.Bundle getAssistData();
+    method public android.app.assist.AssistStructure getAssistStructure();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.contentcapture.SnapshotData> CREATOR;
   }
 
 }
@@ -4970,111 +5135,6 @@ package android.service.euicc {
     method public int getResult();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.euicc.GetEuiccProfileInfoListResult> CREATOR;
-  }
-
-}
-
-package android.service.intelligence {
-
-  public final class ContentCaptureEventsRequest implements android.os.Parcelable {
-    method public int describeContents();
-    method public java.util.List<android.view.intelligence.ContentCaptureEvent> getEvents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.intelligence.ContentCaptureEventsRequest> CREATOR;
-  }
-
-  public final class FillCallback {
-    method public void onSuccess(android.service.intelligence.FillResponse);
-  }
-
-  public final class FillController {
-    method public void autofill(java.util.List<android.util.Pair<android.view.autofill.AutofillId, android.view.autofill.AutofillValue>>);
-  }
-
-  public final class FillRequest {
-    method public android.view.autofill.AutofillValue getFocusedAutofillValue();
-    method public android.view.autofill.AutofillId getFocusedId();
-    method public android.service.intelligence.PresentationParams getPresentationParams();
-    method public android.service.intelligence.InteractionSessionId getSessionId();
-  }
-
-  public final class FillResponse implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.intelligence.FillResponse> CREATOR;
-  }
-
-  public static class FillResponse.Builder {
-    ctor public FillResponse.Builder();
-    method public android.service.intelligence.FillResponse build();
-    method public android.service.intelligence.FillResponse.Builder setFillWindow(android.service.intelligence.FillWindow);
-    method public android.service.intelligence.FillResponse.Builder setIgnoredIds(java.util.List<android.view.autofill.AutofillId>);
-  }
-
-  public final class FillWindow {
-    ctor public FillWindow();
-    method public void destroy();
-    method public boolean update(android.service.intelligence.PresentationParams.Area, android.view.View, long);
-    field public static final long FLAG_METADATA_ADDRESS = 1L; // 0x1L
-  }
-
-  public final class InteractionContext implements android.os.Parcelable {
-    method public int describeContents();
-    method public android.content.ComponentName getActivityComponent();
-    method public int getDisplayId();
-    method public int getFlags();
-    method public int getTaskId();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.intelligence.InteractionContext> CREATOR;
-    field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
-    field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
-  }
-
-  public final class InteractionSessionId implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.intelligence.InteractionSessionId> CREATOR;
-  }
-
-  public abstract class PresentationParams {
-    method public int getFlags();
-    method public android.service.intelligence.PresentationParams.Area getFullArea();
-    method public android.service.intelligence.PresentationParams.Area getSuggestionArea();
-    field public static final int FLAG_HINT_GRAVITY_BOTTOM = 2; // 0x2
-    field public static final int FLAG_HINT_GRAVITY_LEFT = 4; // 0x4
-    field public static final int FLAG_HINT_GRAVITY_RIGHT = 8; // 0x8
-    field public static final int FLAG_HINT_GRAVITY_TOP = 1; // 0x1
-    field public static final int FLAG_HOST_IME = 16; // 0x10
-    field public static final int FLAG_HOST_SYSTEM = 32; // 0x20
-  }
-
-  public static abstract class PresentationParams.Area {
-    method public android.graphics.Rect getBounds();
-    method public android.service.intelligence.PresentationParams.Area getSubArea(android.graphics.Rect);
-  }
-
-  public abstract class SmartSuggestionsService extends android.app.Service {
-    ctor public SmartSuggestionsService();
-    method public final java.util.Set<android.content.ComponentName> getContentCaptureDisabledActivities();
-    method public final java.util.Set<java.lang.String> getContentCaptureDisabledPackages();
-    method public void onActivitySnapshot(android.service.intelligence.InteractionSessionId, android.service.intelligence.SnapshotData);
-    method public abstract void onContentCaptureEventsRequest(android.service.intelligence.InteractionSessionId, android.service.intelligence.ContentCaptureEventsRequest);
-    method public void onCreateInteractionSession(android.service.intelligence.InteractionContext, android.service.intelligence.InteractionSessionId);
-    method public void onDestroyInteractionSession(android.service.intelligence.InteractionSessionId);
-    method public void onFillRequest(android.service.intelligence.InteractionSessionId, android.service.intelligence.FillRequest, android.os.CancellationSignal, android.service.intelligence.FillController, android.service.intelligence.FillCallback);
-    method public final void setActivityContentCaptureEnabled(android.content.ComponentName, boolean);
-    method public final void setContentCaptureWhitelist(java.util.List<java.lang.String>, java.util.List<android.content.ComponentName>);
-    method public final void setPackageContentCaptureEnabled(java.lang.String, boolean);
-    field public static final java.lang.String SERVICE_INTERFACE = "android.service.intelligence.SmartSuggestionsService";
-  }
-
-  public final class SnapshotData implements android.os.Parcelable {
-    method public int describeContents();
-    method public android.app.assist.AssistContent getAssistContent();
-    method public android.os.Bundle getAssistData();
-    method public android.app.assist.AssistStructure getAssistStructure();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.intelligence.SnapshotData> CREATOR;
   }
 
 }
@@ -7255,7 +7315,7 @@ package android.view.accessibility {
 
 }
 
-package android.view.intelligence {
+package android.view.contentcapture {
 
   public final class ContentCaptureEvent implements android.os.Parcelable {
     method public int describeContents();
@@ -7264,13 +7324,13 @@ package android.view.intelligence {
     method public android.view.autofill.AutofillId getId();
     method public java.lang.CharSequence getText();
     method public int getType();
-    method public android.view.intelligence.ViewNode getViewNode();
+    method public android.view.contentcapture.ViewNode getViewNode();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.view.intelligence.ContentCaptureEvent> CREATOR;
-    field public static final int TYPE_ACTIVITY_PAUSED = 3; // 0x3
-    field public static final int TYPE_ACTIVITY_RESUMED = 2; // 0x2
-    field public static final int TYPE_ACTIVITY_STARTED = 1; // 0x1
-    field public static final int TYPE_ACTIVITY_STOPPED = 4; // 0x4
+    field public static final android.os.Parcelable.Creator<android.view.contentcapture.ContentCaptureEvent> CREATOR;
+    field public static final deprecated int TYPE_ACTIVITY_PAUSED = 3; // 0x3
+    field public static final deprecated int TYPE_ACTIVITY_RESUMED = 2; // 0x2
+    field public static final deprecated int TYPE_ACTIVITY_STARTED = 1; // 0x1
+    field public static final deprecated int TYPE_ACTIVITY_STOPPED = 4; // 0x4
     field public static final int TYPE_VIEW_APPEARED = 5; // 0x5
     field public static final int TYPE_VIEW_DISAPPEARED = 6; // 0x6
     field public static final int TYPE_VIEW_TEXT_CHANGED = 7; // 0x7
@@ -7357,22 +7417,8 @@ package android.webkit {
     ctor public SslErrorHandler();
   }
 
-  public abstract class TokenBindingService {
+  public abstract deprecated class TokenBindingService {
     ctor public TokenBindingService();
-    method public abstract void deleteAllKeys(android.webkit.ValueCallback<java.lang.Boolean>);
-    method public abstract void deleteKey(android.net.Uri, android.webkit.ValueCallback<java.lang.Boolean>);
-    method public abstract void enableTokenBinding();
-    method public static android.webkit.TokenBindingService getInstance();
-    method public abstract void getKey(android.net.Uri, java.lang.String[], android.webkit.ValueCallback<android.webkit.TokenBindingService.TokenBindingKey>);
-    field public static final java.lang.String KEY_ALGORITHM_ECDSAP256 = "ECDSAP256";
-    field public static final java.lang.String KEY_ALGORITHM_RSA2048_PKCS_1_5 = "RSA2048_PKCS_1.5";
-    field public static final java.lang.String KEY_ALGORITHM_RSA2048_PSS = "RSA2048PSS";
-  }
-
-  public static abstract class TokenBindingService.TokenBindingKey {
-    ctor public TokenBindingService.TokenBindingKey();
-    method public abstract java.lang.String getAlgorithm();
-    method public abstract java.security.KeyPair getKeyPair();
   }
 
   public class WebChromeClient {
@@ -7502,7 +7548,7 @@ package android.webkit {
     method public abstract android.webkit.GeolocationPermissions getGeolocationPermissions();
     method public abstract android.webkit.ServiceWorkerController getServiceWorkerController();
     method public abstract android.webkit.WebViewFactoryProvider.Statics getStatics();
-    method public abstract android.webkit.TokenBindingService getTokenBindingService();
+    method public abstract deprecated android.webkit.TokenBindingService getTokenBindingService();
     method public abstract android.webkit.TracingController getTracingController();
     method public abstract android.webkit.WebIconDatabase getWebIconDatabase();
     method public abstract android.webkit.WebStorage getWebStorage();

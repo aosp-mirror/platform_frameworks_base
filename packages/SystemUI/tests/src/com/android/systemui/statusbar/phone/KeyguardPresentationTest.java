@@ -20,21 +20,20 @@ import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.LayoutInflater;
-import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 public class KeyguardPresentationTest extends SysuiTestCase {
     @Test
     public void testInflation_doesntCrash() {
+        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
         LayoutInflater inflater = LayoutInflater.from(getContext());
         inflater.inflate(R.layout.keyguard_presentation, null);
     }

@@ -1680,6 +1680,11 @@ public final class Settings {
      */
     public static final String CALL_METHOD_TAG_KEY = "_tag";
 
+    /**
+     * @hide - String argument extra to the fast-path call()-based requests
+     */
+    public static final String CALL_METHOD_PREFIX_KEY = "_prefix";
+
     /** @hide - Private call() method to write to 'system' table */
     public static final String CALL_METHOD_PUT_SYSTEM = "PUT_system";
 
@@ -1701,14 +1706,17 @@ public final class Settings {
     /** @hide - Private call() method to delete from the 'global' table */
     public static final String CALL_METHOD_DELETE_GLOBAL = "DELETE_global";
 
+    /** @hide - Private call() method to reset to defaults the 'configuration' table */
+    public static final String CALL_METHOD_DELETE_CONFIG = "DELETE_config";
+
+    /** @hide - Private call() method to reset to defaults the 'secure' table */
+    public static final String CALL_METHOD_RESET_SECURE = "RESET_secure";
+
     /** @hide - Private call() method to reset to defaults the 'global' table */
     public static final String CALL_METHOD_RESET_GLOBAL = "RESET_global";
 
     /** @hide - Private call() method to reset to defaults the 'configuration' table */
     public static final String CALL_METHOD_RESET_CONFIG = "RESET_config";
-
-    /** @hide - Private call() method to reset to defaults the 'secure' table */
-    public static final String CALL_METHOD_RESET_SECURE = "RESET_secure";
 
     /** @hide - Private call() method to query the 'system' table */
     public static final String CALL_METHOD_LIST_SYSTEM = "LIST_system";
@@ -1718,6 +1726,9 @@ public final class Settings {
 
     /** @hide - Private call() method to query the 'global' table */
     public static final String CALL_METHOD_LIST_GLOBAL = "LIST_global";
+
+    /** @hide - Private call() method to reset to defaults the 'configuration' table */
+    public static final String CALL_METHOD_LIST_CONFIG = "LIST_config";
 
     /**
      * Activity Extra: Limit available options in launched activity based on the given authority.
@@ -2044,7 +2055,8 @@ public final class Settings {
                     arg.putBoolean(CALL_METHOD_MAKE_DEFAULT_KEY, true);
                 }
                 IContentProvider cp = mProviderHolder.getProvider(cr);
-                cp.call(cr.getPackageName(), mCallSetCommand, name, arg);
+                cp.call(cr.getPackageName(), mProviderHolder.mUri.getAuthority(),
+                        mCallSetCommand, name, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't set key " + name + " in " + mUri, e);
                 return false;
@@ -2117,12 +2129,14 @@ public final class Settings {
                     if (Settings.isInSystemServer() && Binder.getCallingUid() != Process.myUid()) {
                         final long token = Binder.clearCallingIdentity();
                         try {
-                            b = cp.call(cr.getPackageName(), mCallGetCommand, name, args);
+                            b = cp.call(cr.getPackageName(), mProviderHolder.mUri.getAuthority(),
+                                    mCallGetCommand, name, args);
                         } finally {
                             Binder.restoreCallingIdentity(token);
                         }
                     } else {
-                        b = cp.call(cr.getPackageName(), mCallGetCommand, name, args);
+                        b = cp.call(cr.getPackageName(), mProviderHolder.mUri.getAuthority(),
+                                mCallGetCommand, name, args);
                     }
                     if (b != null) {
                         String value = b.getString(Settings.NameValueTable.VALUE);
@@ -4252,6 +4266,7 @@ public final class Settings {
             PUBLIC_SETTINGS.add(BLUETOOTH_DISCOVERABILITY_TIMEOUT);
             PUBLIC_SETTINGS.add(NEXT_ALARM_FORMATTED);
             PUBLIC_SETTINGS.add(FONT_SCALE);
+            PUBLIC_SETTINGS.add(SYSTEM_LOCALES);
             PUBLIC_SETTINGS.add(DIM_SCREEN);
             PUBLIC_SETTINGS.add(SCREEN_OFF_TIMEOUT);
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS);
@@ -5111,7 +5126,8 @@ public final class Settings {
                 }
                 arg.putInt(CALL_METHOD_RESET_MODE_KEY, mode);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), CALL_METHOD_RESET_SECURE, null, arg);
+                cp.call(resolver.getPackageName(), sProviderHolder.mUri.getAuthority(),
+                        CALL_METHOD_RESET_SECURE, null, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset do defaults for " + CONTENT_URI, e);
             }
@@ -11862,10 +11878,26 @@ public final class Settings {
         public static final String GPU_DEBUG_APP = "gpu_debug_app";
 
         /**
-         * App should try to use ANGLE
+         * Force all PKGs to use ANGLE, regardless of any other settings
+         * The value is a boolean (1 or 0).
          * @hide
          */
-        public static final String ANGLE_ENABLED_APP = "angle_enabled_app";
+        public static final String GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE =
+                "angle_gl_driver_all_angle";
+
+        /**
+         * List of PKGs that have an OpenGL driver selected
+         * @hide
+         */
+        public static final String GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS =
+                "angle_gl_driver_selection_pkgs";
+
+        /**
+         * List of selected OpenGL drivers, corresponding to the PKGs in GLOBAL_SETTINGS_DRIVER_PKGS
+         * @hide
+         */
+        public static final String GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES =
+                "angle_gl_driver_selection_values";
 
         /**
          * App that is selected to use updated graphics driver.
@@ -12839,7 +12871,7 @@ public final class Settings {
 
         /**
          * Property used by {@code com.android.server.SystemServer} on start to decide whether
-         * the Smart Suggestions service should be created or not
+         * the Content Capture service should be created or not
          *
          * <p>By default it should *NOT* be set (in which case the decision is based on whether
          * the OEM provides an implementation for the service), but it can be overridden to:
@@ -12851,8 +12883,8 @@ public final class Settings {
          *
          * @hide
          */
-        public static final String SMART_SUGGESTIONS_SERVICE_EXPLICITLY_ENABLED =
-                "smart_suggestions_service_explicitly_enabled";
+        public static final String CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED =
+                "content_capture_service_explicitly_enabled";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -13146,7 +13178,8 @@ public final class Settings {
                 }
                 arg.putInt(CALL_METHOD_RESET_MODE_KEY, mode);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), CALL_METHOD_RESET_GLOBAL, null, arg);
+                cp.call(resolver.getPackageName(), sProviderHolder.mUri.getAuthority(),
+                        CALL_METHOD_RESET_GLOBAL, null, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset do defaults for " + CONTENT_URI, e);
             }
@@ -13670,6 +13703,22 @@ public final class Settings {
                 "smart_replies_in_notifications_flags";
 
         /**
+         * Configuration flags for the automatic generation of smart replies and smart actions in
+         * notifications. This is encoded as a key=value list, separated by commas. Ex:
+         * "generate_replies=false,generate_actions=true".
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * generate_replies                 (boolean)
+         * generate_actions                 (boolean)
+         * </pre>
+         * @hide
+         */
+        public static final String SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS =
+                "smart_suggestions_in_notifications_flags";
+
+        /**
          * If nonzero, crashes in foreground processes will bring up a dialog.
          * Otherwise, the process will be silently killed.
          * @hide
@@ -13925,7 +13974,8 @@ public final class Settings {
                 }
                 arg.putInt(CALL_METHOD_RESET_MODE_KEY, RESET_MODE_PACKAGE_DEFAULTS);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), CALL_METHOD_RESET_CONFIG, null, arg);
+                cp.call(resolver.getPackageName(), sProviderHolder.mUri.getAuthority(),
+                        CALL_METHOD_RESET_CONFIG, null, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset to defaults for " + CONTENT_URI, e);
             }

@@ -21,7 +21,7 @@
 
 #include <android-base/file.h>
 #include <android/util/protobuf.h>
-#include <cutils/log.h>
+#include <log/log.h>
 
 namespace android {
 namespace os {
@@ -96,7 +96,12 @@ status_t PrivacyBuffer::stripField(const Privacy* parentPolicy, const PrivacySpe
     uint64_t token = mProto.start(encode_field_id(policy));
     while (mData.rp()->pos() - start != msgSize) {
         status_t err = stripField(policy, spec, depth + 1);
-        if (err != NO_ERROR) return err;
+        if (err != NO_ERROR) {
+            VLOG("Bad value when stripping id %d, wiretype %d, tag %#x, depth %d, size %d, "
+                "relative pos %zu, ", fieldId, read_wire_type(fieldTag), fieldTag, depth,
+                msgSize, mData.rp()->pos() - start);
+            return err;
+        }
     }
     mProto.end(token);
     return NO_ERROR;
@@ -117,9 +122,13 @@ status_t PrivacyBuffer::strip(const PrivacySpec& spec) {
     }
     while (mData.hasNext()) {
         status_t err = stripField(mPolicy, spec, 0);
-        if (err != NO_ERROR) return err;
+        if (err != NO_ERROR) return err; // Error logged in stripField.
     }
-    if (mData.bytesRead() != mData.size()) return BAD_VALUE;
+    if (mData.bytesRead() != mData.size()) {
+        VLOG("Buffer corrupted: expect %zu bytes, read %zu bytes",
+            mData.size(), mData.bytesRead());
+        return BAD_VALUE;
+    }
     mSize = mProto.size();
     mData.rp()->rewind();  // rewind the read pointer back to beginning after the strip.
     return NO_ERROR;

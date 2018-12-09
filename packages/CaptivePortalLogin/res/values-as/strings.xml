@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"আপুনি সংযোগ কৰিবলৈ চেষ্টা কৰি থকা নেটৱৰ্কটোত সুৰক্ষাজনিত সমস্যা আছে।"</string>
     <string name="ssl_error_example" msgid="647898534624078900">"উদাহৰণস্বৰূপে, আপোনাক দেখুওৱা লগ ইনৰ পৃষ্ঠাটো প্ৰতিষ্ঠানটোৰ নিজা নহ\'বও পাৰে।"</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"তথাপি ব্ৰাউজাৰৰ জৰিয়তে অব্যাহত ৰাখক"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"এই প্ৰমাণপত্ৰখন কোনো বিশ্বাসী কর্তৃপক্ষৰ নহয়।"</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"ৱেবচাইটটোৰ নাম আৰু প্ৰমাণপত্ৰখনত থকা নামটোৰ মিল নাই।"</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"এই প্ৰমাণপত্ৰখনৰ ম্যাদ উকলি গৈছে।"</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"এই প্ৰমাণপত্ৰখন এই পর্যন্ত মান্য হোৱা নাই।"</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"এই প্ৰমাণপত্ৰখনত থকা তাৰিখটো মান্য নহয়।"</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"এই প্ৰমাণপত্ৰখন মান্য নহয়।"</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"প্ৰমাণপত্ৰত অজ্ঞাত আসোঁৱাহ।"</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"সুৰক্ষা সম্পর্কীয় সতৰ্কতা"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"প্ৰমাণপত্ৰ চাওক"</string>
+    <string name="ok" msgid="2817931639040794018">"ঠিক আছে"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"ঠিকনা:"</string>
+    <string name="page_info" msgid="4416941086705172545">"পৃষ্ঠাৰ তথ্য"</string>
 </resources>

@@ -34,6 +34,7 @@ import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
 import "frameworks/base/core/proto/android/server/fingerprint.proto";
 import "frameworks/base/core/proto/android/server/jobscheduler.proto";
 import "frameworks/base/core/proto/android/server/powermanagerservice.proto";
+import "frameworks/base/core/proto/android/server/rolemanagerservice.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
@@ -306,6 +307,11 @@ message IncidentProto {
         (section).type = SECTION_DUMPSYS,
         (section).args = "stats --proto",
         (section).userdebug_and_eng_only = true
+    ];
+
+    optional com.android.server.role.RoleManagerServiceDumpProto role = 3024 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "role --proto"
     ];
 
     // Reserved for OEMs.

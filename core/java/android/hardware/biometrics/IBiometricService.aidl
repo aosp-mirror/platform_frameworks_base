@@ -48,4 +48,7 @@ interface IBiometricService {
     // Notify BiometricService when <Biometric>Service is ready to start the prepared client.
     // Client lifecycle is still managed in <Biometric>Service.
     void onReadyForAuthentication(int cookie, boolean requireConfirmation, int userId);
+
+    // Reset the timeout when user authenticates with strong auth (e.g. PIN, pattern or password)
+    void resetTimeout(in byte [] token);
 }
