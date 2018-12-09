@@ -6609,6 +6609,18 @@ message MetricsEvent {
     // OS: Q
     DIALOG_DISABLE_DEVELOPMENT_OPTIONS = 1591;
 
+    // Tag for an ACTION: QS -> Tile click / Secondary click / long press
+    //    indicating the StatusBarState when menu was pulled down
+    // CATEGORY: QUICK_SETTINGS
+    // OS: Q
+    FIELD_STATUS_BAR_STATE = 1592;
+
+    // Tag for an ACTION: QS -> Tile click / Secondary click / long press
+    //    indicating whether current state is full QS
+    // CATEGORY: QUICK_SETTINGS
+    // OS: Q
+    FIELD_IS_FULL_QS = 1593;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
