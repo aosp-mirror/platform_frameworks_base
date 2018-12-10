@@ -474,7 +474,7 @@ public class NetworkCapabilitiesTest {
                 new StringNetworkSpecifier("specs"));
         try {
             nc2.addTransportType(TRANSPORT_WIFI);
-            fail("Cannot set NetworkSpecifier on a NetworkCapability with multiple transports!");
+            fail("Cannot set a second TransportType of a network which has a NetworkSpecifier!");
         } catch (IllegalStateException expected) {
             // empty
         }
@@ -500,16 +500,23 @@ public class NetworkCapabilitiesTest {
             // empty
         });
         NetworkCapabilities nc2 = new NetworkCapabilities();
+        // new TransportInfo so that object is not #equals to nc1's TransportInfo (that's where
+        // combine fails)
         nc2.setTransportInfo(new TransportInfo() {
             // empty
         });
 
         try {
             nc1.combineCapabilities(nc2);
-            fail("Should not be able to combine NetworkCaabilities which contain TransportInfos");
+            fail("Should not be able to combine NetworkCabilities which contain TransportInfos");
         } catch (IllegalStateException expected) {
             // empty
         }
+
+        // verify that can combine with identical TransportInfo objects
+        NetworkCapabilities nc3 = new NetworkCapabilities();
+        nc3.setTransportInfo(nc1.getTransportInfo());
+        nc1.combineCapabilities(nc3);
     }
 
     private void assertEqualsThroughMarshalling(NetworkCapabilities netCap) {
