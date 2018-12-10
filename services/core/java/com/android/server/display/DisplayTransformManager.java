@@ -23,7 +23,6 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -68,7 +67,7 @@ public class DisplayTransformManager {
      * SurfaceFlinger display color (managed, unmanaged, etc.).
      */
     private static final int SURFACE_FLINGER_TRANSACTION_DISPLAY_COLOR = 1023;
-    private static final int SURFACE_FLINGER_TRANSACTION_QUERY_WIDE_COLOR = 1030;
+    private static final int SURFACE_FLINGER_TRANSACTION_QUERY_COLOR_MANAGED = 1030;
 
     private static final String PERSISTENT_PROPERTY_SATURATION = "persist.sys.sf.color_saturation";
     private static final String PERSISTENT_PROPERTY_DISPLAY_COLOR = "persist.sys.sf.native_mode";
@@ -270,8 +269,8 @@ public class DisplayTransformManager {
     }
 
     /**
-     * Returns whether the screen is wide color gamut via SurfaceFlinger's
-     * {@link #SURFACE_FLINGER_TRANSACTION_QUERY_WIDE_COLOR}.
+     * Returns whether the screen is color managed via SurfaceFlinger's
+     * {@link #SURFACE_FLINGER_TRANSACTION_QUERY_COLOR_MANAGED}.
      */
     public boolean isDeviceColorManaged() {
         final IBinder flinger = ServiceManager.getService(SURFACE_FLINGER);
@@ -280,10 +279,10 @@ public class DisplayTransformManager {
             final Parcel reply = Parcel.obtain();
             data.writeInterfaceToken("android.ui.ISurfaceComposer");
             try {
-                flinger.transact(SURFACE_FLINGER_TRANSACTION_QUERY_WIDE_COLOR, data, reply, 0);
+                flinger.transact(SURFACE_FLINGER_TRANSACTION_QUERY_COLOR_MANAGED, data, reply, 0);
                 return reply.readBoolean();
             } catch (RemoteException ex) {
-                Log.e(TAG, "Failed to query wide color support", ex);
+                Slog.e(TAG, "Failed to query wide color support", ex);
             } finally {
                 data.recycle();
                 reply.recycle();
@@ -305,7 +304,7 @@ public class DisplayTransformManager {
             try {
                 flinger.transact(SURFACE_FLINGER_TRANSACTION_SATURATION, data, null, 0);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Failed to set saturation", ex);
+                Slog.e(TAG, "Failed to set saturation", ex);
             } finally {
                 data.recycle();
             }
@@ -325,7 +324,7 @@ public class DisplayTransformManager {
             try {
                 flinger.transact(SURFACE_FLINGER_TRANSACTION_DISPLAY_COLOR, data, null, 0);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Failed to set display color", ex);
+                Slog.e(TAG, "Failed to set display color", ex);
             } finally {
                 data.recycle();
             }
@@ -336,7 +335,7 @@ public class DisplayTransformManager {
         try {
             ActivityTaskManager.getService().updateConfiguration(null);
         } catch (RemoteException e) {
-            Log.e(TAG, "Could not update configuration", e);
+            Slog.e(TAG, "Could not update configuration", e);
         }
     }
 }
