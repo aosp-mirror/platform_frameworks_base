@@ -374,11 +374,12 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     public abstract String toString();
 
     /**
-     * Return a string representation of the URI that is safe to print
-     * to logs and other places where PII should be avoided.
-     * @hide
+     * Return a string representation of this URI that has common forms of PII redacted,
+     * making it safer to use for logging purposes.  For example, {@code tel:800-466-4411} is
+     * returned as {@code tel:xxx-xxx-xxxx} and {@code http://example.com/path/to/item/} is
+     * returned as {@code http://example.com/...}.
+     * @return the common forms PII redacted string of this URI
      */
-    @UnsupportedAppUsage
     public String toSafeString() {
         String scheme = getScheme();
         String ssp = getSchemeSpecificPart();
