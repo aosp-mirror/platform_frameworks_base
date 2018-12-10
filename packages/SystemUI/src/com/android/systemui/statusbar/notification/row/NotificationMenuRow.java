@@ -641,8 +641,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         NotificationInfo infoContent = (NotificationInfo) LayoutInflater.from(context).inflate(
                 R.layout.notification_info, null, false);
         int iconResId = isCurrentlySilent
-                ? R.drawable.ic_notifications_alert
-                : R.drawable.ic_notifications_silence;
+                ? R.drawable.ic_notifications_silence
+                : R.drawable.ic_notifications_alert;
         return new NotificationMenuItem(context, infoDescription, infoContent, iconResId);
     }
 
