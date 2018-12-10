@@ -1321,7 +1321,8 @@ public final class JobStatus {
                 pw.print(prefix); pw.println("  PERSISTED");
             }
             if (job.getPriority() != 0) {
-                pw.print(prefix); pw.print("  Priority: "); pw.println(job.getPriority());
+                pw.print(prefix); pw.print("  Priority: ");
+                pw.println(JobInfo.getPriorityString(job.getPriority()));
             }
             if (job.getFlags() != 0) {
                 pw.print(prefix); pw.print("  Flags: ");
