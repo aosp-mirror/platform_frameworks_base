@@ -57,10 +57,14 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Handles various NotificationGuts related tasks, such as binding guts to a row, opening and
  * closing guts, and keeping track of the currently exposed notification guts.
  */
+@Singleton
 public class NotificationGutsManager implements Dumpable, NotificationLifetimeExtender {
     private static final String TAG = "NotificationGutsManager";
 
@@ -91,6 +95,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     @VisibleForTesting
     protected String mKeyToRemoveOnGutsClosed;
 
+    @Inject
     public NotificationGutsManager(Context context) {
         mContext = context;
         mAccessibilityManager = (AccessibilityManager)

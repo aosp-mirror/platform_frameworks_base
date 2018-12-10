@@ -39,9 +39,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * A class to handle notifications and their corresponding groups.
  */
+@Singleton
 public class NotificationGroupManager implements OnHeadsUpChangedListener,
         OnAmbientChangedListener, StateListener {
 
@@ -54,6 +58,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     private AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
     private boolean mIsUpdatingUnchangedGroup;
 
+    @Inject
     public NotificationGroupManager() {
         Dependency.get(StatusBarStateController.class).addCallback(this);
     }

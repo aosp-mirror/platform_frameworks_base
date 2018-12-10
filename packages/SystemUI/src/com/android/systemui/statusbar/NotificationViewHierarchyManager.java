@@ -41,6 +41,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * NotificationViewHierarchyManager manages updating the view hierarchy of notification views based
  * on their group structure. For example, if a notification becomes bundled with another,
@@ -48,6 +51,7 @@ import java.util.Stack;
  * tell NotificationListContainer which notifications to display, and inform it of changes to those
  * notifications that might affect their display.
  */
+@Singleton
 public class NotificationViewHierarchyManager {
     private static final String TAG = "NotificationViewHierarchyManager";
 
@@ -123,6 +127,7 @@ public class NotificationViewHierarchyManager {
         return mShadeController;
     }
 
+    @Inject
     public NotificationViewHierarchyManager(Context context) {
         Resources res = context.getResources();
         mAlwaysExpandNonGroupedNotification =

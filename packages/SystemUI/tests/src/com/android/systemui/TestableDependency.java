@@ -29,9 +29,10 @@ public class TestableDependency extends Dependency {
             mComponents = ((SysuiTestableContext) context).getComponents();
         }
         mContext = context;
-        if (SystemUIFactory.getInstance() == null) {
-            SystemUIFactory.createFromConfig(context);
-        }
+        SystemUIFactory.createFromConfig(context);
+        SystemUIFactory.getInstance().getRootComponent()
+                .createDependency()
+                .createSystemUI(this);
         start();
     }
 

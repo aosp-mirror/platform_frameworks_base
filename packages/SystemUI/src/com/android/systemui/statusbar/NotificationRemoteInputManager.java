@@ -59,12 +59,16 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Class for handling remote input state over a set of notifications. This class handles things
  * like keeping notifications temporarily that were cancelled as a response to a remote input
  * interaction, keeping track of notifications to remove when NotificationPresenter is collapsed,
  * and handling clicks on remote views.
  */
+@Singleton
 public class NotificationRemoteInputManager implements Dumpable {
     public static final boolean ENABLE_REMOTE_INPUT =
             SystemProperties.getBoolean("debug.enable_remote_input", true);
@@ -229,6 +233,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         return mShadeController;
     }
 
+    @Inject
     public NotificationRemoteInputManager(Context context) {
         mContext = context;
         mBarService = IStatusBarService.Stub.asInterface(

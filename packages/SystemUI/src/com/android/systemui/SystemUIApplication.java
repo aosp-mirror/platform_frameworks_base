@@ -170,7 +170,11 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
             Class cls;
             try {
                 cls = Class.forName(clsName);
-                mServices[i] = (SystemUI) cls.newInstance();
+                Object o = cls.newInstance();
+                if (o instanceof SystemUI.Injector) {
+                    o = ((SystemUI.Injector) o).apply(this);
+                }
+                mServices[i] = (SystemUI) o;
             } catch(ClassNotFoundException ex){
                 throw new RuntimeException(ex);
             } catch (IllegalAccessException ex) {

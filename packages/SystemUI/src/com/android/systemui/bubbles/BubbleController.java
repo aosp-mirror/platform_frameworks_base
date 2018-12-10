@@ -42,12 +42,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Bubbles are a special type of content that can "float" on top of other apps or System UI.
  * Bubbles can be expanded to show more content.
  *
  * The controller manages addition, removal, and visible state of bubbles on screen.
  */
+@Singleton
 public class BubbleController {
     private static final int MAX_BUBBLES = 5; // TODO: actually enforce this
 
@@ -117,6 +121,7 @@ public class BubbleController {
         void onBubbleExpandChanged(boolean isExpanding, float amount);
     }
 
+    @Inject
     public BubbleController(Context context) {
         mContext = context;
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
