@@ -16,8 +16,8 @@ android_library {
         "SettingsLibAppPreference",
         "SettingsLibSearchWidget",
         "SettingsLibSettingsSpinner",
-        "SettingsLibLayoutPreference",
-        "SettingsLibActionButtonsPreference",
+        "SettingsLayoutPreference",
+        "ActionButtonsPreference",
     ],
 
     // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
