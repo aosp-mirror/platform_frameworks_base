@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.permissionpresenterservice;
+package android.permission;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
@@ -24,8 +24,6 @@ import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.permission.IRuntimePermissionPresenter;
-import android.content.pm.permission.RuntimePermissionPresentationInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -39,13 +37,11 @@ import java.util.List;
  * a single permission in the UI but may be composed of several individual
  * permissions.
  *
+ * @see RuntimePermissionPresenter
  * @see RuntimePermissionPresentationInfo
  *
  * @hide
- *
- * @deprecated use {@link android.permission.RuntimePermissionPresenterService} instead
  */
-@Deprecated
 @SystemApi
 public abstract class RuntimePermissionPresenterService extends Service {
 
@@ -55,10 +51,7 @@ public abstract class RuntimePermissionPresenterService extends Service {
      * presenter service.
      */
     public static final String SERVICE_INTERFACE =
-            "android.permissionpresenterservice.RuntimePermissionPresenterService";
-
-    private static final String KEY_RESULT =
-            "android.content.pm.permission.RuntimePermissionPresenter.key.result";
+            "android.permission.RuntimePermissionPresenterService";
 
     // No need for locking - always set first and never modified
     private Handler mHandler;
@@ -73,8 +66,10 @@ public abstract class RuntimePermissionPresenterService extends Service {
      * Gets the runtime permissions for an app.
      *
      * @param packageName The package for which to query.
+     *
+     * @return descriptions of the runtime permissions of the app
      */
-    public abstract List<RuntimePermissionPresentationInfo> onGetAppPermissions(
+    public abstract @NonNull List<RuntimePermissionPresentationInfo> onGetAppPermissions(
             @NonNull String packageName);
 
     /**
@@ -95,7 +90,8 @@ public abstract class RuntimePermissionPresenterService extends Service {
                 checkNotNull(callback, "callback");
 
                 mHandler.sendMessage(
-                        obtainMessage(RuntimePermissionPresenterService::getAppPermissions,
+                        obtainMessage(
+                                RuntimePermissionPresenterService::getAppPermissions,
                                 RuntimePermissionPresenterService.this, packageName, callback));
             }
 
@@ -105,7 +101,8 @@ public abstract class RuntimePermissionPresenterService extends Service {
                 checkNotNull(permissionName, "permissionName");
 
                 mHandler.sendMessage(
-                        obtainMessage(RuntimePermissionPresenterService::onRevokeRuntimePermission,
+                        obtainMessage(
+                                RuntimePermissionPresenterService::onRevokeRuntimePermission,
                                 RuntimePermissionPresenterService.this, packageName,
                                 permissionName));
             }
@@ -116,7 +113,7 @@ public abstract class RuntimePermissionPresenterService extends Service {
         List<RuntimePermissionPresentationInfo> permissions = onGetAppPermissions(packageName);
         if (permissions != null && !permissions.isEmpty()) {
             Bundle result = new Bundle();
-            result.putParcelableList(KEY_RESULT, permissions);
+            result.putParcelableList(RuntimePermissionPresenter.KEY_RESULT, permissions);
             callback.sendResult(result);
         } else {
             callback.sendResult(null);

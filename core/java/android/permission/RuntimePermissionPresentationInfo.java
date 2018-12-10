@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.content.pm.permission;
+package android.permission;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -29,11 +29,7 @@ import android.os.Parcelable;
  * coarse and fine platform permissions.
  *
  * @hide
- *
- * @deprecated Not used anymore. Use {@link android.permission.RuntimePermissionPresentationInfo}
- * instead
  */
-@Deprecated
 @SystemApi
 public final class RuntimePermissionPresentationInfo implements Parcelable {
     private static final int FLAG_GRANTED = 1 << 0;

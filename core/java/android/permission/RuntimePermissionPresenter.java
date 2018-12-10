@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.content.pm.permission;
+package android.permission;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
@@ -30,7 +30,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
-import android.permissionpresenterservice.RuntimePermissionPresenterService;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -60,20 +59,17 @@ public final class RuntimePermissionPresenter {
      * @hide
      */
     public static final String KEY_RESULT =
-            "android.content.pm.permission.RuntimePermissionPresenter.key.result";
+            "android.permission.RuntimePermissionPresenter.key.result";
 
     /**
      * Listener for delivering a result.
      */
-    public static abstract class OnResultCallback {
+    public interface OnResultCallback {
         /**
          * The result for {@link #getAppPermissions(String, OnResultCallback, Handler)}.
          * @param permissions The permissions list.
          */
-        public void onGetAppPermissions(@NonNull
-                List<RuntimePermissionPresentationInfo> permissions) {
-            /* do nothing - stub */
-        }
+        void onGetAppPermissions(@NonNull List<RuntimePermissionPresentationInfo> permissions);
     }
 
     private static final Object sLock = new Object();
@@ -152,7 +148,7 @@ public final class RuntimePermissionPresenter {
         @GuardedBy("mLock")
         private boolean mBound;
 
-        public RemoteService(Context context) {
+        RemoteService(Context context) {
             super(context.getMainLooper(), null, false);
             mContext = context;
         }

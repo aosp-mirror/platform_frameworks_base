@@ -1399,7 +1399,7 @@ package android.content.pm.dex {
 
 package android.content.pm.permission {
 
-  public final class RuntimePermissionPresentationInfo implements android.os.Parcelable {
+  public final deprecated class RuntimePermissionPresentationInfo implements android.os.Parcelable {
     ctor public RuntimePermissionPresentationInfo(java.lang.CharSequence, boolean, boolean);
     method public int describeContents();
     method public java.lang.CharSequence getLabel();
@@ -4412,11 +4412,30 @@ package android.permission {
     method public int getTargetSdk();
   }
 
+  public final class RuntimePermissionPresentationInfo implements android.os.Parcelable {
+    ctor public RuntimePermissionPresentationInfo(java.lang.CharSequence, boolean, boolean);
+    method public int describeContents();
+    method public java.lang.CharSequence getLabel();
+    method public boolean isGranted();
+    method public boolean isStandard();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionPresentationInfo> CREATOR;
+  }
+
+  public abstract class RuntimePermissionPresenterService extends android.app.Service {
+    ctor public RuntimePermissionPresenterService();
+    method public final void attachBaseContext(android.content.Context);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(java.lang.String);
+    method public abstract void onRevokeRuntimePermission(java.lang.String, java.lang.String);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.permission.RuntimePermissionPresenterService";
+  }
+
 }
 
 package android.permissionpresenterservice {
 
-  public abstract class RuntimePermissionPresenterService extends android.app.Service {
+  public abstract deprecated class RuntimePermissionPresenterService extends android.app.Service {
     ctor public RuntimePermissionPresenterService();
     method public final void attachBaseContext(android.content.Context);
     method public final android.os.IBinder onBind(android.content.Intent);
