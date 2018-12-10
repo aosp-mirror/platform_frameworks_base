@@ -2807,8 +2807,6 @@ Lcom/android/internal/telephony/CommandsInterface;->acknowledgeLastIncomingGsmSm
 Lcom/android/internal/telephony/CommandsInterface;->changeBarringPassword(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroid/os/Message;)V
 Lcom/android/internal/telephony/CommandsInterface;->deleteSmsOnRuim(ILandroid/os/Message;)V
 Lcom/android/internal/telephony/CommandsInterface;->deleteSmsOnSim(ILandroid/os/Message;)V
-Lcom/android/internal/telephony/CommandsInterface;->dial(Ljava/lang/String;ILandroid/os/Message;)V
-Lcom/android/internal/telephony/CommandsInterface;->dial(Ljava/lang/String;ILcom/android/internal/telephony/UUSInfo;Landroid/os/Message;)V
 Lcom/android/internal/telephony/CommandsInterface;->exitEmergencyCallbackMode(Landroid/os/Message;)V
 Lcom/android/internal/telephony/CommandsInterface;->getBasebandVersion(Landroid/os/Message;)V
 Lcom/android/internal/telephony/CommandsInterface;->getCdmaBroadcastConfig(Landroid/os/Message;)V
@@ -3820,8 +3818,6 @@ Lcom/android/internal/telephony/TelephonyCapabilities;->supportsAdn(I)Z
 Lcom/android/internal/telephony/TelephonyProperties;->PROPERTY_ICC_OPERATOR_NUMERIC:Ljava/lang/String;
 Lcom/android/internal/telephony/test/InterpreterEx;-><init>(Ljava/lang/String;)V
 Lcom/android/internal/telephony/test/SimulatedCommands;->acceptCall(Landroid/os/Message;)V
-Lcom/android/internal/telephony/test/SimulatedCommands;->dial(Ljava/lang/String;ILandroid/os/Message;)V
-Lcom/android/internal/telephony/test/SimulatedCommands;->dial(Ljava/lang/String;ILcom/android/internal/telephony/UUSInfo;Landroid/os/Message;)V
 Lcom/android/internal/telephony/test/SimulatedCommands;->mDcSuccess:Z
 Lcom/android/internal/telephony/test/SimulatedCommands;->resultFail(Landroid/os/Message;Ljava/lang/Object;Ljava/lang/Throwable;)V
 Lcom/android/internal/telephony/test/SimulatedCommands;->resultSuccess(Landroid/os/Message;Ljava/lang/Object;)V
