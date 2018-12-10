@@ -23,8 +23,6 @@
 #include <nativehelper/JniConstants.h>
 #include "core_jni_helpers.h"
 
-#include <nativehelper/ScopedBytes.h>
-
 #include <utils/Log.h>
 #include <media/AudioSystem.h>
 #include <media/AudioTrack.h>
@@ -712,7 +710,7 @@ static jint android_media_AudioTrack_writeArray(JNIEnv *env, jobject thiz,
 
 // ----------------------------------------------------------------------------
 static jint android_media_AudioTrack_write_native_bytes(JNIEnv *env,  jobject thiz,
-        jbyteArray javaBytes, jint byteOffset, jint sizeInBytes,
+        jobject javaByteBuffer, jint byteOffset, jint sizeInBytes,
         jint javaAudioFormat, jboolean isWriteBlocking) {
     //ALOGV("android_media_AudioTrack_write_native_bytes(offset=%d, sizeInBytes=%d) called",
     //    offsetInBytes, sizeInBytes);
@@ -723,13 +721,14 @@ static jint android_media_AudioTrack_write_native_bytes(JNIEnv *env,  jobject th
         return (jint)AUDIO_JAVA_INVALID_OPERATION;
     }
 
-    ScopedBytesRO bytes(env, javaBytes);
-    if (bytes.get() == NULL) {
+    const jbyte* bytes =
+            reinterpret_cast<const jbyte*>(env->GetDirectBufferAddress(javaByteBuffer));
+    if (bytes == NULL) {
         ALOGE("Error retrieving source of audio data to play, can't play");
         return (jint)AUDIO_JAVA_BAD_VALUE;
     }
 
-    jint written = writeToTrack(lpTrack, javaAudioFormat, bytes.get(), byteOffset,
+    jint written = writeToTrack(lpTrack, javaAudioFormat, bytes, byteOffset,
             sizeInBytes, isWriteBlocking == JNI_TRUE /* blocking */);
 
     return written;
@@ -1308,7 +1307,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_release",       "()V",      (void *)android_media_AudioTrack_release},
     {"native_write_byte",    "([BIIIZ)I",(void *)android_media_AudioTrack_writeArray<jbyteArray>},
     {"native_write_native_bytes",
-                             "(Ljava/lang/Object;IIIZ)I",
+                             "(Ljava/nio/ByteBuffer;IIIZ)I",
                                          (void *)android_media_AudioTrack_write_native_bytes},
     {"native_write_short",   "([SIIIZ)I",(void *)android_media_AudioTrack_writeArray<jshortArray>},
     {"native_write_float",   "([FIIIZ)I",(void *)android_media_AudioTrack_writeArray<jfloatArray>},
