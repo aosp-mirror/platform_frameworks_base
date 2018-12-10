@@ -141,6 +141,7 @@ public class VibratorService extends IVibratorService.Stub
     private boolean mLowPowerMode;
     private int mHapticFeedbackIntensity;
     private int mNotificationIntensity;
+    private int mRingIntensity;
 
     native static boolean vibratorExists();
     native static void vibratorInit();
@@ -426,6 +427,10 @@ public class VibratorService extends IVibratorService.Stub
 
             mContext.getContentResolver().registerContentObserver(
                     Settings.System.getUriFor(Settings.System.NOTIFICATION_VIBRATION_INTENSITY),
+                    true, mSettingObserver, UserHandle.USER_ALL);
+
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.RING_VIBRATION_INTENSITY),
                     true, mSettingObserver, UserHandle.USER_ALL);
 
             mContext.registerReceiver(new BroadcastReceiver() {
@@ -747,7 +752,9 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     private int getCurrentIntensityLocked(Vibration vib) {
-        if (vib.isNotification() || vib.isRingtone()){
+        if (vib.isRingtone()) {
+            return mRingIntensity;
+        } else if (vib.isNotification()) {
             return mNotificationIntensity;
         } else if (vib.isHapticFeedback()) {
             return mHapticFeedbackIntensity;
@@ -769,7 +776,9 @@ public class VibratorService extends IVibratorService.Stub
         }
 
         final int defaultIntensity;
-        if (vib.isNotification() || vib.isRingtone()) {
+        if (vib.isRingtone()) {
+            defaultIntensity = mVibrator.getDefaultRingVibrationIntensity();
+        } else if (vib.isNotification()) {
             defaultIntensity = mVibrator.getDefaultNotificationVibrationIntensity();
         } else if (vib.isHapticFeedback()) {
             defaultIntensity = mVibrator.getDefaultHapticFeedbackIntensity();
@@ -932,6 +941,9 @@ public class VibratorService extends IVibratorService.Stub
         mNotificationIntensity = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 mVibrator.getDefaultNotificationVibrationIntensity(), UserHandle.USER_CURRENT);
+        mRingIntensity = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.RING_VIBRATION_INTENSITY,
+                mVibrator.getDefaultRingVibrationIntensity(), UserHandle.USER_CURRENT);
     }
 
     @Override
@@ -1280,6 +1292,7 @@ public class VibratorService extends IVibratorService.Stub
             pw.println("  mLowPowerMode=" + mLowPowerMode);
             pw.println("  mHapticFeedbackIntensity=" + mHapticFeedbackIntensity);
             pw.println("  mNotificationIntensity=" + mNotificationIntensity);
+            pw.println("  mRingIntensity=" + mRingIntensity);
             pw.println("");
             pw.println("  Previous vibrations:");
             for (VibrationInfo info : mPreviousVibrations) {

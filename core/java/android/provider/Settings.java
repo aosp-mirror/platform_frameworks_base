@@ -3377,6 +3377,22 @@ public final class Settings {
          */
         public static final String NOTIFICATION_VIBRATION_INTENSITY =
                 "notification_vibration_intensity";
+        /**
+         * The intensity of ringtone vibrations, if configurable.
+         *
+         * Not all devices are capable of changing their vibration intensity; on these devices
+         * there will likely be no difference between the various vibration intensities except for
+         * intensity 0 (off) and the rest.
+         *
+         * <b>Values:</b><br/>
+         * 0 - Vibration is disabled<br/>
+         * 1 - Weak vibrations<br/>
+         * 2 - Medium vibrations<br/>
+         * 3 - Strong vibrations
+         * @hide
+         */
+        public static final String RING_VIBRATION_INTENSITY =
+                "ring_vibration_intensity";
 
         /**
          * The intensity of haptic feedback vibrations, if configurable.
@@ -4246,6 +4262,7 @@ public final class Settings {
             ACCELEROMETER_ROTATION,
             SHOW_BATTERY_PERCENT,
             NOTIFICATION_VIBRATION_INTENSITY,
+            RING_VIBRATION_INTENSITY,
             HAPTIC_FEEDBACK_INTENSITY,
             DISPLAY_COLOR_MODE,
             ALARM_ALERT,
@@ -4397,6 +4414,7 @@ public final class Settings {
             VALIDATORS.put(MUTE_STREAMS_AFFECTED, MUTE_STREAMS_AFFECTED_VALIDATOR);
             VALIDATORS.put(VIBRATE_ON, VIBRATE_ON_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_VALIDATOR);
+            VALIDATORS.put(RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_VALIDATOR);
             VALIDATORS.put(HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_VALIDATOR);
             VALIDATORS.put(RINGTONE, RINGTONE_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_SOUND, NOTIFICATION_SOUND_VALIDATOR);
