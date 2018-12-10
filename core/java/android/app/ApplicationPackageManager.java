@@ -2974,6 +2974,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public String getWellbeingPackageName() {
+        try {
+            return mPM.getWellbeingPackageName();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
     public boolean isPackageStateProtected(String packageName, int userId) {
         try {
             return mPM.isPackageStateProtected(packageName, userId);

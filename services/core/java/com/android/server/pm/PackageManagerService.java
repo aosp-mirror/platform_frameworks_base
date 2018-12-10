@@ -1301,6 +1301,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mSetupWizardPackage;
     final @Nullable String mStorageManagerPackage;
     final @Nullable String mSystemTextClassifierPackage;
+    final @Nullable String mWellbeingPackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
@@ -2789,6 +2790,8 @@ public class PackageManagerService extends IPackageManager.Stub
             mComponentResolver.fixProtectedFilterPriorities();
 
             mSystemTextClassifierPackage = getSystemTextClassifierPackageName();
+
+            mWellbeingPackage = getWellbeingPackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -19564,6 +19567,11 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
+    public String getWellbeingPackageName() {
+        return mContext.getString(R.string.config_defaultWellbeingPackage);
+    }
+
+    @Override
     public void setApplicationEnabledSetting(String appPackageName,
             int newState, int flags, int userId, String callingPackage) {
         if (!sUserManager.exists(userId)) return;
@@ -22719,6 +22727,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return mSystemTextClassifierPackage;
                 case PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER:
                     return mRequiredPermissionControllerPackage;
+                case PackageManagerInternal.PACKAGE_WELLBEING:
+                    return mWellbeingPackage;
             }
             return null;
         }

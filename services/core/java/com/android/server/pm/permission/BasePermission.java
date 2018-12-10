@@ -235,6 +235,9 @@ public final class BasePermission {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER)
                 != 0;
     }
+    public boolean isWellbeing() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_WELLBEING) != 0;
+    }
 
     public void transfer(@NonNull String origPackageName, @NonNull String newPackageName) {
         if (!origPackageName.equals(sourcePackageName)) {
