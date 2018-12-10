@@ -49,6 +49,8 @@ const int FIELD_ID_TIME_BASE = 9;
 const int FIELD_ID_BUCKET_SIZE = 10;
 const int FIELD_ID_DIMENSION_PATH_IN_WHAT = 11;
 const int FIELD_ID_DIMENSION_PATH_IN_CONDITION = 12;
+const int FIELD_ID_IS_ACTIVE = 13;
+
 // for CountMetricDataWrapper
 const int FIELD_ID_DATA = 1;
 // for CountMetricData
@@ -151,10 +153,13 @@ void CountMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     } else {
         flushIfNeededLocked(dumpTimeNs);
     }
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_IS_ACTIVE, isActiveLocked());
+
+
     if (mPastBuckets.empty()) {
         return;
     }
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_TIME_BASE, (long long)mTimeBaseNs);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_BUCKET_SIZE, (long long)mBucketSizeNs);
 

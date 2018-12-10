@@ -119,7 +119,8 @@ TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit) {
 
     ConfigMetricsReport report = GetReports(service.mProcessor, start + 3);
     // Expect no metrics since the bucket has not finished yet.
-    EXPECT_EQ(0, report.metrics_size());
+    EXPECT_EQ(1, report.metrics_size());
+    EXPECT_EQ(0, report.metrics(0).count_metrics().data_size());
 }
 
 TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp) {
@@ -138,7 +139,8 @@ TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp) {
     service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
 
     ConfigMetricsReport report = GetReports(service.mProcessor, start + 4);
-    EXPECT_EQ(0, report.metrics_size());
+    EXPECT_EQ(1, report.metrics_size());
+    EXPECT_EQ(0, report.metrics(0).count_metrics().data_size());
 }
 
 TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade) {

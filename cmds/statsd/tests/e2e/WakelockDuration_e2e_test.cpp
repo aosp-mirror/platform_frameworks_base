@@ -262,7 +262,8 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration1) 
     // When using ProtoOutputStream, if nothing written to a sub msg, it won't be treated as
     // one. It was previsouly 1 because we had a fake onDumpReport which calls add_metric() by
     // itself.
-    EXPECT_EQ(0, reports.reports(0).metrics_size());
+    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    EXPECT_EQ(0, reports.reports(0).metrics(0).duration_metrics().data_size());
 }
 
 TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration2) {

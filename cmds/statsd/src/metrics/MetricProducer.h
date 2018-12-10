@@ -223,6 +223,10 @@ protected:
 
     void activateLocked(int activationTrackerIndex, int64_t elapsedTimestampNs);
 
+    inline bool isActiveLocked() const {
+        return mIsActive;
+    }
+
     /**
      * Flushes the current bucket if the eventTime is after the current bucket's end time. This will
        also flush the current partial bucket in memory.
