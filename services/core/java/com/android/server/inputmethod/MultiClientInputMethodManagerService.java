@@ -1541,6 +1541,13 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
+        public void showInputMethodPickerFromSystem(
+                IInputMethodClient client, int auxiliarySubtypeMode, int displayId) {
+            reportNotSupported();
+        }
+
+        @BinderThread
+        @Override
         public void showInputMethodAndSubtypeEnablerFromClient(
                 IInputMethodClient client, String inputMethodId) {
             reportNotSupported();

@@ -64,6 +64,8 @@ interface IInputMethodManager {
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);
+    void showInputMethodPickerFromSystem(in IInputMethodClient client, int auxiliarySubtypeMode,
+            int displayId);
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
     boolean isInputMethodPickerShownForTest();
     // TODO(Bug 114488811): this can be removed once we deprecate special null token rule.

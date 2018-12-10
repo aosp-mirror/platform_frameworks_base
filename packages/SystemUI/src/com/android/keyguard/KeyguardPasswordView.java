@@ -193,7 +193,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
             public void onClick(View v) {
                 mCallback.userActivity(); // Leave the screen on a bit longer
                 // Do not show auxiliary subtypes in password lock screen.
-                mImm.showInputMethodPicker(false /* showAuxiliarySubtypes */);
+                mImm.showInputMethodPickerFromSystem(false /* showAuxiliarySubtypes */,
+                        getContext().getDisplayId());
             }
         });
 

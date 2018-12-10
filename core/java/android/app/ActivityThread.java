@@ -2281,6 +2281,15 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    /**
+     * Create the context instance base on system resources & display information which used for UI.
+     * @param displayId The ID of the display where the UI is shown.
+     * @see ContextImpl#createSystemUiContext(ContextImpl, int)
+     */
+    public ContextImpl createSystemUiContext(int displayId) {
+        return ContextImpl.createSystemUiContext(getSystemUiContext(), displayId);
+    }
+
     public void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
         synchronized (this) {
             getSystemContext().installSystemApplicationInfo(info, classLoader);
