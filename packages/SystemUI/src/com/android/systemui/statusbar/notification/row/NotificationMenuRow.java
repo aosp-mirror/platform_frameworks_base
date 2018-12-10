@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.notification.StatusBarNotification;
+import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +48,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnClickListener,
         ExpandableNotificationRow.LayoutListener {
@@ -74,6 +76,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private MenuItem mSnoozeItem;
     private ArrayList<MenuItem> mLeftMenuItems;
     private ArrayList<MenuItem> mRightMenuItems;
+    private final Map<View, MenuItem> mMenuItemsByView = new ArrayMap<>();
     private OnMenuEventListener mMenuListener;
 
     private ValueAnimator mFadeAnimator;
@@ -287,6 +290,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private void populateMenuViews() {
         if (mMenuContainer != null) {
             mMenuContainer.removeAllViews();
+            mMenuItemsByView.clear();
         } else {
             mMenuContainer = new FrameLayout(mContext);
         }
@@ -486,10 +490,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         final int centerY = v.getHeight() / 2;
         final int x = mIconLocation[0] - mParentLocation[0] + centerX;
         final int y = mIconLocation[1] - mParentLocation[1] + centerY;
-        final int index = mMenuContainer.indexOfChild(v);
-        if (mMenuListener != null) {
-            mMenuListener.onMenuClicked(mParent, x, y,
-                    (mOnLeft ? mLeftMenuItems : mRightMenuItems).get(index));
+        if (mMenuItemsByView.containsKey(v)) {
+            mMenuListener.onMenuClicked(mParent, x, y, mMenuItemsByView.get(v));
         }
     }
 
@@ -665,6 +667,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             lp.height = mHorizSpaceForIcon;
             menuView.setLayoutParams(lp);
         }
+        mMenuItemsByView.put(menuView, item);
     }
 
     @VisibleForTesting
