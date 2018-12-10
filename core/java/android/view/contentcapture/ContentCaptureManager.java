@@ -422,7 +422,7 @@ public final class ContentCaptureManager {
 
     /** @hide */
     public void dump(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.println("IntelligenceManager");
+        pw.print(prefix); pw.println("ContentCaptureManager");
         final String prefix2 = prefix + "  ";
         pw.print(prefix2); pw.print("mContext: "); pw.println(mContext);
         pw.print(prefix2); pw.print("user: "); pw.println(mContext.getUserId());
