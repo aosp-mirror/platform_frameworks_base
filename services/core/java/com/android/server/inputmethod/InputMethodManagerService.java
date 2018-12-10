@@ -3120,9 +3120,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     private boolean switchToPreviousInputMethod(IBinder token) {
-        if (!calledFromValidUser()) {
-            return false;
-        }
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return false;
@@ -3195,9 +3192,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     private boolean switchToNextInputMethod(IBinder token, boolean onlyCurrentIme) {
-        if (!calledFromValidUser()) {
-            return false;
-        }
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return false;
@@ -3215,9 +3209,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     private boolean shouldOfferSwitchingToNextInputMethod(@NonNull IBinder token) {
-        if (!calledFromValidUser()) {
-            return false;
-        }
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return false;
@@ -3362,9 +3353,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     private void hideMySoftInput(@NonNull IBinder token, int flags) {
-        if (!calledFromValidUser()) {
-            return;
-        }
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -3380,9 +3368,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     private void showMySoftInput(@NonNull IBinder token, int flags) {
-        if (!calledFromValidUser()) {
-            return;
-        }
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -4534,10 +4519,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     private IInputContentUriToken createInputContentUriToken(@Nullable IBinder token,
             @Nullable Uri contentUri, @Nullable String packageName) {
-        if (!calledFromValidUser()) {
-            return null;
-        }
-
         if (token == null) {
             throw new NullPointerException("token");
         }
@@ -4591,9 +4572,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     private void reportFullscreenMode(IBinder token, boolean fullscreen) {
-        if (!calledFromValidUser()) {
-            return;
-        }
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
