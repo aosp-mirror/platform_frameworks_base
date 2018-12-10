@@ -97,6 +97,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter {
     private final AccessibilityManager mAccessibilityManager;
     private final KeyguardManager mKeyguardManager;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final int mMaxAllowedKeyguardNotifications;
     private final IStatusBarService mBarService;
     private boolean mReinflateNotificationsOnUserSwitched;
@@ -113,13 +114,15 @@ public class StatusBarNotificationPresenter implements NotificationPresenter {
             ViewGroup stackScroller,
             DozeScrimController dozeScrimController,
             ScrimController scrimController,
-            ActivityLaunchAnimator activityLaunchAnimator) {
+            ActivityLaunchAnimator activityLaunchAnimator,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         mContext = context;
         mNotificationPanel = panel;
         mHeadsUpManager = headsUp;
         mCommandQueue = getComponent(context, CommandQueue.class);
         mAboveShelfObserver = new AboveShelfObserver(stackScroller);
         mActivityLaunchAnimator = activityLaunchAnimator;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mAboveShelfObserver.setListener(statusBarWindow.findViewById(
                 R.id.notification_container_parent));
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -365,6 +368,12 @@ public class StatusBarNotificationPresenter implements NotificationPresenter {
     @Override
     public boolean isDeviceInVrMode() {
         return mVrMode;
+    }
+
+    @Override
+    public boolean isPresenterLocked() {
+        return mStatusBarKeyguardViewManager.isShowing()
+                && mStatusBarKeyguardViewManager.isSecure();
     }
 
     private void onLockedNotificationImportanceChange(OnDismissAction dismissAction) {

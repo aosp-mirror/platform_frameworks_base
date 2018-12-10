@@ -70,7 +70,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationPanelView.class), mock(HeadsUpManagerPhone.class),
                 statusBarWindowView, mock(NotificationListContainerViewGroup.class),
                 mock(DozeScrimController.class), mock(ScrimController.class),
-                mock(ActivityLaunchAnimator.class));
+                mock(ActivityLaunchAnimator.class), mock(StatusBarKeyguardViewManager.class));
     }
 
     @Test
