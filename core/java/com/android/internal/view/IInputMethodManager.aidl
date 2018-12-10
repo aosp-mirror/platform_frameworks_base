@@ -74,8 +74,6 @@ interface IInputMethodManager {
     boolean notifySuggestionPicked(in SuggestionSpan span, String originalString, int index);
     InputMethodSubtype getCurrentInputMethodSubtype();
     boolean setCurrentInputMethodSubtype(in InputMethodSubtype subtype);
-    // TODO(Bug 114488811): this can be removed once we deprecate special null token rule.
-    boolean switchToPreviousInputMethod(in IBinder token);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     // This is kept due to @UnsupportedAppUsage.
     // TODO(Bug 113914148): Consider removing this.

@@ -3119,12 +3119,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public boolean switchToPreviousInputMethod(IBinder token) {
+    @BinderThread
+    private boolean switchToPreviousInputMethod(IBinder token) {
         if (!calledFromValidUser()) {
             return false;
         }
         synchronized (mMethodMap) {
+            if (!calledWithValidToken(token)) {
+                return false;
+            }
             final Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
             final InputMethodInfo lastImi;
             if (lastIme != null) {

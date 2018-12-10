@@ -2520,16 +2520,6 @@ public final class InputMethodManager {
      */
     @Deprecated
     public boolean switchToLastInputMethod(IBinder imeToken) {
-        if (imeToken == null) {
-            // Note: null token is allowed for callers that have WRITE_SECURE_SETTINGS permission.
-            // Thus we cannot always rely on InputMethodPrivilegedOperationsRegistry unfortunately.
-            // TODO(Bug 114488811): Consider deprecating null token rule.
-            try {
-                return mService.switchToPreviousInputMethod(imeToken);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
         return InputMethodPrivilegedOperationsRegistry.get(imeToken).switchToPreviousInputMethod();
     }
 

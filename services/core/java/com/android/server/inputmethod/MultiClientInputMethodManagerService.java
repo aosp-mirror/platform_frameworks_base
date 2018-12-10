@@ -1595,13 +1595,6 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public boolean switchToPreviousInputMethod(IBinder token) {
-            reportNotSupported();
-            return false;
-        }
-
-        @BinderThread
-        @Override
         public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
             reportNotSupported();
         }
