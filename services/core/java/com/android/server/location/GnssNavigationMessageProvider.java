@@ -16,6 +16,7 @@
 
 package com.android.server.location;
 
+import android.content.Context;
 import android.location.GnssNavigationMessage;
 import android.location.IGnssNavigationMessageListener;
 import android.os.Handler;
@@ -39,13 +40,14 @@ public abstract class GnssNavigationMessageProvider
     private final GnssNavigationMessageProviderNative mNative;
     private boolean mCollectionStarted;
 
-    protected GnssNavigationMessageProvider(Handler handler) {
-        this(handler, new GnssNavigationMessageProviderNative());
+    protected GnssNavigationMessageProvider(Context context, Handler handler) {
+        this(context, handler, new GnssNavigationMessageProviderNative());
     }
 
     @VisibleForTesting
-    GnssNavigationMessageProvider(Handler handler, GnssNavigationMessageProviderNative aNative) {
-        super(handler, TAG);
+    GnssNavigationMessageProvider(Context context, Handler handler,
+            GnssNavigationMessageProviderNative aNative) {
+        super(context, handler, TAG);
         mNative = aNative;
     }
 
@@ -84,15 +86,10 @@ public abstract class GnssNavigationMessageProvider
     }
 
     public void onNavigationMessageAvailable(final GnssNavigationMessage event) {
-        ListenerOperation<IGnssNavigationMessageListener> operation =
-                new ListenerOperation<IGnssNavigationMessageListener>() {
-                    @Override
-                    public void execute(IGnssNavigationMessageListener listener)
-                            throws RemoteException {
-                        listener.onGnssNavigationMessageReceived(event);
-                    }
-                };
-        foreach(operation);
+        foreach((IGnssNavigationMessageListener listener, int uid, String packageName) -> {
+                    listener.onGnssNavigationMessageReceived(event);
+                }
+        );
     }
 
     public void onCapabilitiesUpdated(boolean isGnssNavigationMessageSupported) {
@@ -138,7 +135,8 @@ public abstract class GnssNavigationMessageProvider
         }
 
         @Override
-        public void execute(IGnssNavigationMessageListener listener) throws RemoteException {
+        public void execute(IGnssNavigationMessageListener listener,
+                int uid, String packageName) throws RemoteException {
             listener.onStatusChanged(mStatus);
         }
     }

@@ -31,8 +31,6 @@ import android.location.FusedBatchOptions;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
 import android.location.GnssStatus;
-import android.location.IGnssStatusListener;
-import android.location.IGnssStatusProvider;
 import android.location.IGpsGeofenceHardware;
 import android.location.ILocationManager;
 import android.location.INetInitiatedListener;
@@ -382,7 +380,7 @@ public class GnssLocationProvider extends LocationProviderInterface
     private final Context mContext;
     private final ILocationManager mILocationManager;
     private final LocationExtras mLocationExtras = new LocationExtras();
-    private final GnssStatusListenerHelper mListenerHelper;
+    private final GnssStatusListenerHelper mGnssStatusListenerHelper;
     private final GnssSatelliteBlacklistHelper mGnssSatelliteBlacklistHelper;
     private final GnssMeasurementsProvider mGnssMeasurementsProvider;
     private final GnssNavigationMessageProvider mGnssNavigationMessageProvider;
@@ -443,20 +441,8 @@ public class GnssLocationProvider extends LocationProviderInterface
     // GNSS Metrics
     private GnssMetrics mGnssMetrics;
 
-    private final IGnssStatusProvider mGnssStatusProvider = new IGnssStatusProvider.Stub() {
-        @Override
-        public void registerGnssStatusCallback(IGnssStatusListener callback) {
-            mListenerHelper.addListener(callback);
-        }
-
-        @Override
-        public void unregisterGnssStatusCallback(IGnssStatusListener callback) {
-            mListenerHelper.removeListener(callback);
-        }
-    };
-
-    public IGnssStatusProvider getGnssStatusProvider() {
-        return mGnssStatusProvider;
+    public GnssStatusListenerHelper getGnssStatusProvider() {
+        return mGnssStatusListenerHelper;
     }
 
     public IGpsGeofenceHardware getGpsGeofenceProxy() {
@@ -730,7 +716,7 @@ public class GnssLocationProvider extends LocationProviderInterface
                 mNetInitiatedListener,
                 mSuplEsEnabled);
 
-        mListenerHelper = new GnssStatusListenerHelper(mHandler) {
+        mGnssStatusListenerHelper = new GnssStatusListenerHelper(mContext, mHandler) {
             @Override
             protected boolean isAvailableInPlatform() {
                 return isSupported();
@@ -749,7 +735,7 @@ public class GnssLocationProvider extends LocationProviderInterface
             }
         };
 
-        mGnssNavigationMessageProvider = new GnssNavigationMessageProvider(mHandler) {
+        mGnssNavigationMessageProvider = new GnssNavigationMessageProvider(mContext, mHandler) {
             @Override
             protected boolean isGpsEnabled() {
                 return isEnabled();
@@ -1473,7 +1459,7 @@ public class GnssLocationProvider extends LocationProviderInterface
             }
 
             // notify status listeners
-            mListenerHelper.onFirstFix(mTimeToFirstFix);
+            mGnssStatusListenerHelper.onFirstFix(mTimeToFirstFix);
         }
 
         if (mSingleShot) {
@@ -1527,7 +1513,7 @@ public class GnssLocationProvider extends LocationProviderInterface
         }
 
         if (wasNavigating != mNavigating) {
-            mListenerHelper.onStatusChanged(mNavigating);
+            mGnssStatusListenerHelper.onStatusChanged(mNavigating);
 
             // send an intent to notify that the GPS has been enabled or disabled
             Intent intent = new Intent(LocationManager.GPS_ENABLED_CHANGE_ACTION);
@@ -1563,7 +1549,7 @@ public class GnssLocationProvider extends LocationProviderInterface
     }
 
     private void handleReportSvStatus(SvStatusInfo info) {
-        mListenerHelper.onSvStatusChanged(
+        mGnssStatusListenerHelper.onSvStatusChanged(
                 info.mSvCount,
                 info.mSvidWithFlags,
                 info.mCn0s,
@@ -1636,7 +1622,7 @@ public class GnssLocationProvider extends LocationProviderInterface
         if (!mItarSpeedLimitExceeded) {
             int length = native_read_nmea(mNmeaBuffer, mNmeaBuffer.length);
             String nmea = new String(mNmeaBuffer, 0 /* offset */, length);
-            mListenerHelper.onNmeaReceived(timestamp, nmea);
+            mGnssStatusListenerHelper.onNmeaReceived(timestamp, nmea);
         }
     }
 

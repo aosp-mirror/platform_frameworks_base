@@ -442,7 +442,6 @@ java_defaults {
         "location/java/android/location/IGeocodeProvider.aidl",
         "location/java/android/location/IGeofenceProvider.aidl",
         "location/java/android/location/IGnssStatusListener.aidl",
-        "location/java/android/location/IGnssStatusProvider.aidl",
         "location/java/android/location/IGnssMeasurementsListener.aidl",
         "location/java/android/location/IGnssNavigationMessageListener.aidl",
         "location/java/android/location/ILocationListener.aidl",

@@ -47,7 +47,6 @@ import android.location.IBatchedLocationCallback;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
 import android.location.IGnssStatusListener;
-import android.location.IGnssStatusProvider;
 import android.location.IGpsGeofenceHardware;
 import android.location.ILocationListener;
 import android.location.ILocationManager;
@@ -92,6 +91,7 @@ import com.android.server.location.GnssBatchingProvider;
 import com.android.server.location.GnssLocationProvider;
 import com.android.server.location.GnssMeasurementsProvider;
 import com.android.server.location.GnssNavigationMessageProvider;
+import com.android.server.location.GnssStatusListenerHelper;
 import com.android.server.location.LocationBlacklist;
 import com.android.server.location.LocationFudger;
 import com.android.server.location.LocationProviderInterface;
@@ -182,7 +182,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private ActivityManager mActivityManager;
     private UserManager mUserManager;
     private GeocoderProxy mGeocodeProvider;
-    private IGnssStatusProvider mGnssStatusProvider;
+    private GnssStatusListenerHelper mGnssStatusProvider;
     private INetInitiatedListener mNetInitiatedListener;
     private LocationWorkerHandler mLocationHandler;
     private PassiveProvider mPassiveProvider;  // track passive provider for special cases
@@ -463,14 +463,16 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             for (Entry<IBinder, Identity> entry : mGnssMeasurementsListeners.entrySet()) {
-                if (entry.getValue().mUid == uid) {
+                Identity callerIdentity = entry.getValue();
+                if (callerIdentity.mUid == uid) {
                     if (D) {
                         Log.d(TAG, "gnss measurements listener from uid " + uid
                                 + " is now " + (foreground ? "foreground" : "background)"));
                     }
                     if (foreground || isThrottlingExemptLocked(entry.getValue())) {
                         mGnssMeasurementsProvider.addListener(
-                                IGnssMeasurementsListener.Stub.asInterface(entry.getKey()));
+                                IGnssMeasurementsListener.Stub.asInterface(entry.getKey()),
+                                callerIdentity.mUid, callerIdentity.mPackageName);
                     } else {
                         mGnssMeasurementsProvider.removeListener(
                                 IGnssMeasurementsListener.Stub.asInterface(entry.getKey()));
@@ -479,7 +481,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             for (Entry<IBinder, Identity> entry : mGnssNavigationMessageListeners.entrySet()) {
-                if (entry.getValue().mUid == uid) {
+                Identity callerIdentity = entry.getValue();
+                if (callerIdentity.mUid == uid) {
                     if (D) {
                         Log.d(TAG, "gnss navigation message listener from uid "
                                 + uid + " is now "
@@ -487,13 +490,16 @@ public class LocationManagerService extends ILocationManager.Stub {
                     }
                     if (foreground || isThrottlingExemptLocked(entry.getValue())) {
                         mGnssNavigationMessageProvider.addListener(
-                                IGnssNavigationMessageListener.Stub.asInterface(entry.getKey()));
+                                IGnssNavigationMessageListener.Stub.asInterface(entry.getKey()),
+                                callerIdentity.mUid, callerIdentity.mPackageName);
                     } else {
                         mGnssNavigationMessageProvider.removeListener(
                                 IGnssNavigationMessageListener.Stub.asInterface(entry.getKey()));
                     }
                 }
             }
+
+            // TODO(b/120449926): The GNSS status listeners should be handled similar to the above.
         }
     }
 
@@ -2444,31 +2450,20 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
-
     @Override
     public boolean registerGnssStatusCallback(IGnssStatusListener callback, String packageName) {
         if (!hasGnssPermissions(packageName) || mGnssStatusProvider == null) {
             return false;
         }
 
-        try {
-            mGnssStatusProvider.registerGnssStatusCallback(callback);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "mGpsStatusProvider.registerGnssStatusCallback failed", e);
-            return false;
-        }
-        return true;
+        // TODO(b/120449926): The GNSS status listeners should be handled similar to the GNSS
+        // measurements listeners.
+        return mGnssStatusProvider.addListener(callback, Binder.getCallingUid(), packageName);
     }
 
     @Override
     public void unregisterGnssStatusCallback(IGnssStatusListener callback) {
-        synchronized (mLock) {
-            try {
-                mGnssStatusProvider.unregisterGnssStatusCallback(callback);
-            } catch (Exception e) {
-                Slog.e(TAG, "mGpsStatusProvider.unregisterGnssStatusCallback failed", e);
-            }
-        }
+        mGnssStatusProvider.removeListener(callback);
     }
 
     @Override
@@ -2481,13 +2476,15 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mLock) {
             Identity callerIdentity
                     = new Identity(Binder.getCallingUid(), Binder.getCallingPid(), packageName);
+            // TODO(b/120481270): Register for client death notification and update map.
             mGnssMeasurementsListeners.put(listener.asBinder(), callerIdentity);
             long identity = Binder.clearCallingIdentity();
             try {
                 if (isThrottlingExemptLocked(callerIdentity)
                         || isImportanceForeground(
                         mActivityManager.getPackageImportance(packageName))) {
-                    return mGnssMeasurementsProvider.addListener(listener);
+                    return mGnssMeasurementsProvider.addListener(listener,
+                            callerIdentity.mUid, callerIdentity.mPackageName);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -2518,13 +2515,15 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mLock) {
             Identity callerIdentity
                     = new Identity(Binder.getCallingUid(), Binder.getCallingPid(), packageName);
+            // TODO(b/120481270): Register for client death notification and update map.
             mGnssNavigationMessageListeners.put(listener.asBinder(), callerIdentity);
             long identity = Binder.clearCallingIdentity();
             try {
                 if (isThrottlingExemptLocked(callerIdentity)
                         || isImportanceForeground(
                         mActivityManager.getPackageImportance(packageName))) {
-                    return mGnssNavigationMessageProvider.addListener(listener);
+                    return mGnssNavigationMessageProvider.addListener(listener,
+                            callerIdentity.mUid, callerIdentity.mPackageName);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);

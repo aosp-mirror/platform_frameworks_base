@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 
 /**
  * Unit tests for {@link GnssNavigationMessageProvider}.
@@ -33,8 +34,8 @@ public class GnssNavigationMessageProviderTest {
         when(mMockNative.startNavigationMessageCollection()).thenReturn(true);
         when(mMockNative.stopNavigationMessageCollection()).thenReturn(true);
 
-        mTestProvider = new GnssNavigationMessageProvider(new Handler(Looper.myLooper()),
-                mMockNative) {
+        mTestProvider = new GnssNavigationMessageProvider(RuntimeEnvironment.application,
+                new Handler(Looper.myLooper()), mMockNative) {
             @Override
             public boolean isGpsEnabled() {
                 return true;
