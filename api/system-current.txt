@@ -298,6 +298,7 @@ package android.app {
     method public void killUid(int, java.lang.String);
     method public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method public static void setPersistentVrThread(int);
+    method public boolean switchUser(android.os.UserHandle);
   }
 
   public static abstract interface ActivityManager.OnUidImportanceListener {

@@ -527,9 +527,21 @@ public class UserManagerTest extends AndroidTestCase {
         UserInfo user = createUser("User", 0);
         assertNotNull(user);
         // Switch to the user just created.
-        switchUser(user.id);
+        switchUser(user.id, null, true);
         // Switch back to the starting user.
-        switchUser(startUser);
+        switchUser(startUser, null, true);
+    }
+
+    @LargeTest
+    public void testSwitchUserByHandle() {
+        ActivityManager am = getContext().getSystemService(ActivityManager.class);
+        final int startUser = am.getCurrentUser();
+        UserInfo user = createUser("User", 0);
+        assertNotNull(user);
+        // Switch to the user just created.
+        switchUser(-1, user.getUserHandle(), false);
+        // Switch back to the starting user.
+        switchUser(-1, UserHandle.of(startUser), false);
     }
 
     @MediumTest
@@ -567,10 +579,20 @@ public class UserManagerTest extends AndroidTestCase {
         }
     }
 
-    private void switchUser(int userId) {
+    /**
+     * @param userId value will be used to call switchUser(int) only if ignoreHandle is false.
+     * @param user value will be used to call switchUser(UserHandle) only if ignoreHandle is true.
+     * @param ignoreHandle if true, switchUser(int) will be called with the provided userId,
+     *                     else, switchUser(UserHandle) will be called with the provided user.
+     */
+    private void switchUser(int userId, UserHandle user, boolean ignoreHandle) {
         synchronized (mUserSwitchLock) {
             ActivityManager am = getContext().getSystemService(ActivityManager.class);
-            am.switchUser(userId);
+            if (ignoreHandle) {
+                am.switchUser(userId);
+            } else {
+                am.switchUser(user);
+            }
             long time = System.currentTimeMillis();
             try {
                 mUserSwitchLock.wait(SWITCH_USER_TIMEOUT_MILLIS);
@@ -579,7 +601,8 @@ public class UserManagerTest extends AndroidTestCase {
                 return;
             }
             if (System.currentTimeMillis() - time > SWITCH_USER_TIMEOUT_MILLIS) {
-                fail("Timeout waiting for the user switch to u" + userId);
+                fail("Timeout waiting for the user switch to u"
+                        + (ignoreHandle ? userId : user.getIdentifier()));
             }
         }
     }
