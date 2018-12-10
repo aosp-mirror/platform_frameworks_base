@@ -16,6 +16,8 @@
 
 package android.app.admin;
 
+import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.stats.devicepolicy.nano.StringList;
 import android.util.StatsLog;
 
@@ -34,7 +36,7 @@ import com.android.internal.util.Preconditions;
  *
  * DevicePolicyEventLogger
  *     .createEvent(DevicePolicyEnums.USER_RESTRICTION_CHANGED)
- *     .setAdminPackageName(who)
+ *     .setAdmin(who)
  *     .setString(key)
  *     .setBoolean(enabledFromThisOwner)
  *     .write();
@@ -170,8 +172,16 @@ public final class DevicePolicyEventLogger {
     /**
      * Sets the package name of the admin application.
      */
-    public DevicePolicyEventLogger setAdminPackageName(String packageName) {
+    public DevicePolicyEventLogger setAdmin(@Nullable String packageName) {
         mAdminPackageName = packageName;
+        return this;
+    }
+
+    /**
+     * Retrieves the package name of the admin application from the {@link ComponentName}.
+     */
+    public DevicePolicyEventLogger setAdmin(@Nullable ComponentName componentName) {
+        mAdminPackageName = (componentName != null ? componentName.getPackageName() : null);
         return this;
     }
 
