@@ -17,6 +17,7 @@
 package android.app.role;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 
 /**
  * Callback for a {@link RoleManager} request.
@@ -24,6 +25,7 @@ import android.annotation.SystemApi;
  * @hide
  */
 @SystemApi
+@TestApi
 public interface RoleManagerCallback {
 
     /**
