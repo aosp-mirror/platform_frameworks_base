@@ -323,6 +323,7 @@ class ActivityStarter {
         WaitResult waitResult;
         int filterCallingUid;
         PendingIntentRecord originatingPendingIntent;
+        boolean allowBackgroundActivityStart;
 
         /**
          * If set to {@code true}, allows this activity start to look into
@@ -380,6 +381,7 @@ class ActivityStarter {
             allowPendingRemoteAnimationRegistryLookup = true;
             filterCallingUid = UserHandle.USER_NULL;
             originatingPendingIntent = null;
+            allowBackgroundActivityStart = false;
         }
 
         /**
@@ -419,6 +421,7 @@ class ActivityStarter {
                     = request.allowPendingRemoteAnimationRegistryLookup;
             filterCallingUid = request.filterCallingUid;
             originatingPendingIntent = request.originatingPendingIntent;
+            allowBackgroundActivityStart = request.allowBackgroundActivityStart;
         }
     }
 
@@ -504,7 +507,7 @@ class ActivityStarter {
                         mRequest.activityOptions, mRequest.ignoreTargetSecurity, mRequest.userId,
                         mRequest.inTask, mRequest.reason,
                         mRequest.allowPendingRemoteAnimationRegistryLookup,
-                        mRequest.originatingPendingIntent);
+                        mRequest.originatingPendingIntent, mRequest.allowBackgroundActivityStart);
             } else {
                 return startActivity(mRequest.caller, mRequest.intent, mRequest.ephemeralIntent,
                         mRequest.resolvedType, mRequest.activityInfo, mRequest.resolveInfo,
@@ -515,7 +518,7 @@ class ActivityStarter {
                         mRequest.ignoreTargetSecurity, mRequest.componentSpecified,
                         mRequest.outActivity, mRequest.inTask, mRequest.reason,
                         mRequest.allowPendingRemoteAnimationRegistryLookup,
-                        mRequest.originatingPendingIntent);
+                        mRequest.originatingPendingIntent, mRequest.allowBackgroundActivityStart);
             }
         } finally {
             onExecutionComplete();
@@ -548,7 +551,7 @@ class ActivityStarter {
             SafeActivityOptions options, boolean ignoreTargetSecurity, boolean componentSpecified,
             ActivityRecord[] outActivity, TaskRecord inTask, String reason,
             boolean allowPendingRemoteAnimationRegistryLookup,
-            PendingIntentRecord originatingPendingIntent) {
+            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
 
         if (TextUtils.isEmpty(reason)) {
             throw new IllegalArgumentException("Need to specify a reason.");
@@ -561,7 +564,8 @@ class ActivityStarter {
                 aInfo, rInfo, voiceSession, voiceInteractor, resultTo, resultWho, requestCode,
                 callingPid, callingUid, callingPackage, realCallingPid, realCallingUid, startFlags,
                 options, ignoreTargetSecurity, componentSpecified, mLastStartActivityRecord,
-                inTask, allowPendingRemoteAnimationRegistryLookup, originatingPendingIntent);
+                inTask, allowPendingRemoteAnimationRegistryLookup, originatingPendingIntent,
+                allowBackgroundActivityStart);
 
         if (outActivity != null) {
             // mLastStartActivityRecord[0] is set in the call to startActivity above.
@@ -592,7 +596,7 @@ class ActivityStarter {
             SafeActivityOptions options,
             boolean ignoreTargetSecurity, boolean componentSpecified, ActivityRecord[] outActivity,
             TaskRecord inTask, boolean allowPendingRemoteAnimationRegistryLookup,
-            PendingIntentRecord originatingPendingIntent) {
+            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
         int err = ActivityManager.START_SUCCESS;
         // Pull the optional Ephemeral Installer-only bundle out of the options early.
         final Bundle verificationBundle
@@ -742,7 +746,7 @@ class ActivityStarter {
         // on START_ABORTED
         if (!abort) {
             abort |= shouldAbortBackgroundActivityStart(callingUid, callingPackage, realCallingUid,
-                    callerApp);
+                    callerApp, originatingPendingIntent, allowBackgroundActivityStart);
         }
 
         // Merge the two options bundles, while realCallerOptions takes precedence.
@@ -890,7 +894,8 @@ class ActivityStarter {
     }
 
     private boolean shouldAbortBackgroundActivityStart(int callingUid, final String callingPackage,
-            int realCallingUid, WindowProcessController callerApp) {
+            int realCallingUid, WindowProcessController callerApp,
+            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
         if (mService.isBackgroundActivityStartsEnabled()) {
             return false;
         }
@@ -902,12 +907,25 @@ class ActivityStarter {
         if (callerApp != null && callerApp.hasForegroundActivities()) {
             return false;
         }
-        // don't abort if the callingUid is in the foreground
-        if (isUidForeground(callingUid)) {
+        // don't abort if the callingUid is in the foreground or is a persistent system process
+        if (isUidForeground(callingUid) || isUidPersistentSystemProcess(callingUid)) {
             return false;
         }
-        // don't abort if the realCallingUid is in the foreground and callingUid isn't
-        if ((realCallingUid != callingUid) && isUidForeground(realCallingUid)) {
+        // take realCallingUid into consideration
+        if (realCallingUid != callingUid) {
+            // don't abort if the realCallingUid is in the foreground and callingUid isn't
+            if (isUidForeground(realCallingUid)) {
+                return false;
+            }
+            // if the realCallingUid is a persistent system process, abort if the IntentSender
+            // wasn't whitelisted to start an activity
+            if (isUidPersistentSystemProcess(realCallingUid) && (originatingPendingIntent != null)
+                    && allowBackgroundActivityStart) {
+                return false;
+            }
+        }
+        // don't abort if the caller is currently temporarily whitelisted
+        if (callerApp != null && callerApp.areBackgroundActivityStartsAllowed()) {
             return false;
         }
         // don't abort if the caller has the same uid as the recents component
@@ -924,10 +942,15 @@ class ActivityStarter {
         return true;
     }
 
-    /** Returns true if uid has a visible window or its process is in top or persistent state. */
+    /** Returns true if uid has a visible window or its process is in a top state. */
     private boolean isUidForeground(int uid) {
-        return (mService.getUidStateLocked(uid) <= ActivityManager.PROCESS_STATE_TOP)
+        return (mService.getUidStateLocked(uid) == ActivityManager.PROCESS_STATE_TOP)
             || mService.mWindowManager.isAnyWindowVisibleForUid(uid);
+    }
+
+    /** Returns true if uid is in a persistent state. */
+    private boolean isUidPersistentSystemProcess(int uid) {
+        return (mService.getUidStateLocked(uid) <= ActivityManager.PROCESS_STATE_PERSISTENT_UI);
     }
 
     private void maybeLogActivityStart(int callingUid, String callingPackage, int realCallingUid,
@@ -1049,7 +1072,7 @@ class ActivityStarter {
             Configuration globalConfig, SafeActivityOptions options, boolean ignoreTargetSecurity,
             int userId, TaskRecord inTask, String reason,
             boolean allowPendingRemoteAnimationRegistryLookup,
-            PendingIntentRecord originatingPendingIntent) {
+            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -1195,7 +1218,8 @@ class ActivityStarter {
                     voiceSession, voiceInteractor, resultTo, resultWho, requestCode, callingPid,
                     callingUid, callingPackage, realCallingPid, realCallingUid, startFlags, options,
                     ignoreTargetSecurity, componentSpecified, outRecord, inTask, reason,
-                    allowPendingRemoteAnimationRegistryLookup, originatingPendingIntent);
+                    allowPendingRemoteAnimationRegistryLookup, originatingPendingIntent,
+                    allowBackgroundActivityStart);
 
             Binder.restoreCallingIdentity(origId);
 
@@ -2728,6 +2752,11 @@ class ActivityStarter {
 
     ActivityStarter setOriginatingPendingIntent(PendingIntentRecord originatingPendingIntent) {
         mRequest.originatingPendingIntent = originatingPendingIntent;
+        return this;
+    }
+
+    ActivityStarter setAllowBackgroundActivityStart(boolean allowBackgroundActivityStart) {
+        mRequest.allowBackgroundActivityStart = allowBackgroundActivityStart;
         return this;
     }
 

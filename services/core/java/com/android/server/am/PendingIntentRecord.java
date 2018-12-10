@@ -34,6 +34,7 @@ import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.TimeUtils;
 
@@ -48,6 +49,9 @@ import java.util.Objects;
 public final class PendingIntentRecord extends IIntentSender.Stub {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "PendingIntentRecord" : TAG_AM;
 
+    public static final int FLAG_ACTIVITY_SENDER = 1 << 0;
+    public static final int FLAG_BROADCAST_SENDER = 1 << 1;
+
     final PendingIntentController controller;
     final Key key;
     final int uid;
@@ -56,6 +60,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     boolean canceled = false;
     private ArrayMap<IBinder, Long> whitelistDuration;
     private RemoteCallbackList<IResultReceiver> mCancelCallbacks;
+    private ArraySet<IBinder> mAllowBgActivityStartsForActivitySender = new ArraySet<>();
+    private ArraySet<IBinder> mAllowBgActivityStartsForBroadcastSender = new ArraySet<>();
 
     String stringName;
     String lastTagPrefix;
@@ -214,6 +220,16 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         this.stringName = null;
     }
 
+    void setAllowBgActivityStarts(IBinder token, int flags) {
+        if (token == null) return;
+        if ((flags & FLAG_ACTIVITY_SENDER) != 0) {
+            mAllowBgActivityStartsForActivitySender.add(token);
+        }
+        if ((flags & FLAG_BROADCAST_SENDER) != 0) {
+            mAllowBgActivityStartsForBroadcastSender.add(token);
+        }
+    }
+
     public void registerCancelListenerLocked(IResultReceiver receiver) {
         if (mCancelCallbacks == null) {
             mCancelCallbacks = new RemoteCallbackList<>();
@@ -370,14 +386,16 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                             res = controller.mAtmInternal.startActivitiesInPackage(
                                     uid, key.packageName, allIntents, allResolvedTypes, resultTo,
                                     mergedOptions, userId, false /* validateIncomingUser */,
-                                    this /* originatingPendingIntent */);
+                                    this /* originatingPendingIntent */,
+                                    mAllowBgActivityStartsForActivitySender.contains(whitelistToken));
                         } else {
                             res = controller.mAtmInternal.startActivityInPackage(
                                     uid, callingPid, callingUid, key.packageName, finalIntent,
                                     resolvedType, resultTo, resultWho, requestCode, 0,
                                     mergedOptions, userId, null, "PendingIntentRecord",
                                     false /* validateIncomingUser */,
-                                    this /* originatingPendingIntent */);
+                                    this /* originatingPendingIntent */,
+                                    mAllowBgActivityStartsForActivitySender.contains(whitelistToken));
                         }
                     } catch (RuntimeException e) {
                         Slog.w(TAG, "Unable to send startActivity intent", e);
@@ -394,7 +412,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                         int sent = controller.mAmInternal.broadcastIntentInPackage(key.packageName,
                                 uid, finalIntent, resolvedType, finishedReceiver, code, null, null,
                                 requiredPermission, options, (finishedReceiver != null),
-                                false, userId);
+                                false, userId,
+                                mAllowBgActivityStartsForBroadcastSender.contains(whitelistToken));
                         if (sent == ActivityManager.BROADCAST_SUCCESS) {
                             sendFinish = false;
                         }

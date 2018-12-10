@@ -249,6 +249,9 @@ final class ProcessRecord implements WindowProcessListener {
     final ArrayMap<String, ContentProviderRecord> pubProviders = new ArrayMap<>();
     // All ContentProviderRecord process is using
     final ArrayList<ContentProviderConnection> conProviders = new ArrayList<>();
+    // A set of tokens that currently contribute to this process being temporarily whitelisted
+    // to start activities even if it's not in the foreground
+    final ArraySet<Binder> mAllowBackgroundActivityStartsTokens = new ArraySet<>();
 
     String isolatedEntryPoint;  // Class to run on start if this is a special isolated process.
     String[] isolatedEntryPointArgs; // Arguments to pass to isolatedEntryPoint's main().
@@ -1133,6 +1136,17 @@ final class ProcessRecord implements WindowProcessListener {
 
     boolean isUsingWrapper() {
         return mUsingWrapper;
+    }
+
+    void addAllowBackgroundActivityStartsToken(Binder entity) {
+        mAllowBackgroundActivityStartsTokens.add(entity);
+        mWindowProcessController.setAllowBackgroundActivityStarts(true);
+    }
+
+    void removeAllowBackgroundActivityStartsToken(Binder entity) {
+        mAllowBackgroundActivityStartsTokens.remove(entity);
+        mWindowProcessController.setAllowBackgroundActivityStarts(
+                !mAllowBackgroundActivityStartsTokens.isEmpty());
     }
 
     void setActiveInstrumentation(ActiveInstrumentation instr) {

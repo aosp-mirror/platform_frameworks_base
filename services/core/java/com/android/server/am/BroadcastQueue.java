@@ -287,6 +287,9 @@ public final class BroadcastQueue {
         r.curApp = app;
         app.curReceivers.add(r);
         app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);
+        if (r.allowBackgroundActivityStarts) {
+            app.addAllowBackgroundActivityStartsToken(r);
+        }
         mService.mProcessList.updateLruProcessLocked(app, false, null);
         if (!skipOomAdj) {
             mService.updateOomAdjLocked();
@@ -415,6 +418,9 @@ public final class BroadcastQueue {
         if (state == BroadcastRecord.IDLE) {
             Slog.w(TAG, "finishReceiver [" + mQueueName + "] called but state is IDLE");
         }
+        if (r.allowBackgroundActivityStarts) {
+            r.curApp.removeAllowBackgroundActivityStartsToken(r);
+         }
         // If we're abandoning this broadcast before any receivers were actually spun up,
         // nextReceiver is zero; in which case time-to-process bookkeeping doesn't apply.
         if (r.nextReceiver > 0) {

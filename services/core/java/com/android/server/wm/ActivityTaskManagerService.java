@@ -960,7 +960,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // TODO: Switch to user app stacks here.
         return getActivityStartController().startActivities(caller, -1, callingPackage, intents,
                 resolvedTypes, resultTo, SafeActivityOptions.fromBundle(bOptions), userId, reason,
-                null /* originatingPendingIntent */);
+                null /* originatingPendingIntent */, false /* allowBackgroundActivityStart */);
     }
 
     @Override
@@ -5787,18 +5787,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         packageUid, packageName,
                         intents, resolvedTypes, null /* resultTo */,
                         SafeActivityOptions.fromBundle(bOptions), userId,
-                        false /* validateIncomingUser */, null /* originatingPendingIntent */);
+                        false /* validateIncomingUser */, null /* originatingPendingIntent */,
+                        false /* allowBackgroundActivityStart */);
             }
         }
 
         @Override
         public int startActivitiesInPackage(int uid, String callingPackage, Intent[] intents,
                 String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
-                boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent) {
+                boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
+                boolean allowBackgroundActivityStart) {
             synchronized (mGlobalLock) {
                 return getActivityStartController().startActivitiesInPackage(uid, callingPackage,
                         intents, resolvedTypes, resultTo, options, userId, validateIncomingUser,
-                        originatingPendingIntent);
+                        originatingPendingIntent, allowBackgroundActivityStart);
             }
         }
 
@@ -5807,12 +5809,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
                 String resultWho, int requestCode, int startFlags, SafeActivityOptions options,
                 int userId, TaskRecord inTask, String reason, boolean validateIncomingUser,
-                PendingIntentRecord originatingPendingIntent) {
+                PendingIntentRecord originatingPendingIntent,
+                boolean allowBackgroundActivityStart) {
             synchronized (mGlobalLock) {
                 return getActivityStartController().startActivityInPackage(uid, realCallingPid,
                         realCallingUid, callingPackage, intent, resolvedType, resultTo, resultWho,
                         requestCode, startFlags, options, userId, inTask, reason,
-                        validateIncomingUser, originatingPendingIntent);
+                        validateIncomingUser, originatingPendingIntent,
+                        allowBackgroundActivityStart);
             }
         }
 
