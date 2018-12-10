@@ -599,7 +599,6 @@ java_defaults {
         ":libupdate_engine_aidl",
 
         ":storaged_aidl",
-        ":netd_aidl",
         ":vold_aidl",
         ":installd_aidl",
         ":dumpstate_aidl",
