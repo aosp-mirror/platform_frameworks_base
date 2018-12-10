@@ -192,6 +192,17 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     @TestApi
     public static final int PROTECTION_FLAG_WELLBEING = 0x20000;
 
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding to the
+     * {@code documenter} value of {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int PROTECTION_FLAG_DOCUMENTER = 0x40000;
+
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PROTECTION_FLAG_" }, value = {
             PROTECTION_FLAG_PRIVILEGED,
@@ -209,6 +220,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
             PROTECTION_FLAG_VENDOR_PRIVILEGED,
             PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER,
             PROTECTION_FLAG_WELLBEING,
+            PROTECTION_FLAG_DOCUMENTER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtectionFlags {}
@@ -400,6 +412,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_WELLBEING) != 0) {
             protLevel += "|wellbeing";
+        }
+        if ((level & PermissionInfo.PROTECTION_FLAG_DOCUMENTER) != 0) {
+            protLevel += "|documenter";
         }
         return protLevel;
     }

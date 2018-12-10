@@ -54,6 +54,7 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_SYSTEM_TEXT_CLASSIFIER = 5;
     public static final int PACKAGE_PERMISSION_CONTROLLER = 6;
     public static final int PACKAGE_WELLBEING = 7;
+    public static final int PACKAGE_DOCUMENTER = 8;
     @IntDef(value = {
         PACKAGE_SYSTEM,
         PACKAGE_SETUP_WIZARD,
@@ -63,6 +64,7 @@ public abstract class PackageManagerInternal {
         PACKAGE_SYSTEM_TEXT_CLASSIFIER,
         PACKAGE_PERMISSION_CONTROLLER,
         PACKAGE_WELLBEING,
+        PACKAGE_DOCUMENTER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KnownPackage {}

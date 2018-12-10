@@ -10,6 +10,8 @@ package android {
     field public static final java.lang.String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final java.lang.String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final java.lang.String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
+    field public static final java.lang.String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
+    field public static final java.lang.String WRITE_OBB = "android.permission.WRITE_OBB";
   }
 
 }
@@ -372,6 +374,7 @@ package android.content.pm {
   }
 
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    field public static final int PROTECTION_FLAG_DOCUMENTER = 262144; // 0x40000
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 32768; // 0x8000
     field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
