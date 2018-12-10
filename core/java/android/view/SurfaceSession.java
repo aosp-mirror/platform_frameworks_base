@@ -30,7 +30,6 @@ public final class SurfaceSession {
     private long mNativeClient; // SurfaceComposerClient*
 
     private static native long nativeCreate();
-    private static native long nativeCreateScoped(long surfacePtr);
     private static native void nativeDestroy(long ptr);
     private static native void nativeKill(long ptr);
 
@@ -38,15 +37,6 @@ public final class SurfaceSession {
     @UnsupportedAppUsage
     public SurfaceSession() {
         mNativeClient = nativeCreate();
-    }
-
-    public SurfaceSession(Surface root) {
-        synchronized (root.mLock) {
-            if (root.mNativeObject == 0) {
-                throw new IllegalStateException("Surface is not initialized or has been released");
-            }
-            mNativeClient = nativeCreateScoped(root.mNativeObject);
-        }
     }
 
     /* no user serviceable parts here ... */

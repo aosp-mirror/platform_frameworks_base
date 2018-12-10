@@ -111,6 +111,7 @@ class TaskSnapshotSurface implements StartingSurface {
     private static final String TITLE_FORMAT = "SnapshotStartingWindow for taskId=%s";
     private final Window mWindow;
     private final Surface mSurface;
+    private SurfaceControl mSurfaceControl;
     private SurfaceControl mChildSurfaceControl;
     private final IWindowSession mSession;
     private final WindowManagerService mService;
@@ -136,7 +137,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final Window window = new Window();
         final IWindowSession session = WindowManagerGlobal.getWindowSession();
         window.setSession(session);
-        final Surface surface = new Surface();
+        final SurfaceControl surfaceControl = new SurfaceControl();
         final Rect tmpRect = new Rect();
         final DisplayCutout.ParcelableWrapper tmpCutout = new DisplayCutout.ParcelableWrapper();
         final Rect tmpFrame = new Rect();
@@ -213,14 +214,14 @@ class TaskSnapshotSurface implements StartingSurface {
             // Local call.
         }
         final TaskSnapshotSurface snapshotSurface = new TaskSnapshotSurface(service, window,
-                surface, snapshot, layoutParams.getTitle(), backgroundColor, statusBarColor,
+                surfaceControl, snapshot, layoutParams.getTitle(), backgroundColor, statusBarColor,
                 navigationBarColor, sysUiVis, windowFlags, windowPrivateFlags, taskBounds,
                 currentOrientation);
         window.setOuter(snapshotSurface);
         try {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,
                     tmpFrame, tmpRect, tmpContentInsets, tmpRect, tmpStableInsets, tmpRect, tmpRect,
-                    tmpCutout, tmpMergedConfiguration, surface, mTmpInsetsState);
+                    tmpCutout, tmpMergedConfiguration, surfaceControl, mTmpInsetsState);
         } catch (RemoteException e) {
             // Local call.
         }
@@ -230,15 +231,16 @@ class TaskSnapshotSurface implements StartingSurface {
     }
 
     @VisibleForTesting
-    TaskSnapshotSurface(WindowManagerService service, Window window, Surface surface,
+    TaskSnapshotSurface(WindowManagerService service, Window window, SurfaceControl surfaceControl,
             TaskSnapshot snapshot, CharSequence title, int backgroundColor, int statusBarColor,
             int navigationBarColor, int sysUiVis, int windowFlags, int windowPrivateFlags,
             Rect taskBounds, int currentOrientation) {
         mService = service;
+        mSurface = new Surface();
         mHandler = new Handler(mService.mH.getLooper());
         mSession = WindowManagerGlobal.getWindowSession();
         mWindow = window;
-        mSurface = surface;
+        mSurfaceControl = surfaceControl;
         mSnapshot = snapshot;
         mTitle = title;
         mBackgroundPaint.setColor(backgroundColor != 0 ? backgroundColor : WHITE);
@@ -281,6 +283,8 @@ class TaskSnapshotSurface implements StartingSurface {
 
     private void drawSnapshot() {
         final GraphicBuffer buffer = mSnapshot.getSnapshot();
+        mSurface.copyFrom(mSurfaceControl);
+
         if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Drawing snapshot surface sizeMismatch="
                 + mSizeMismatch);
         if (mSizeMismatch) {
@@ -310,13 +314,14 @@ class TaskSnapshotSurface implements StartingSurface {
         if (!mSurface.isValid()) {
             throw new IllegalStateException("mSurface does not hold a valid surface.");
         }
-        final SurfaceSession session = new SurfaceSession(mSurface);
+        final SurfaceSession session = new SurfaceSession();
 
         // Keep a reference to it such that it doesn't get destroyed when finalized.
         mChildSurfaceControl = new SurfaceControl.Builder(session)
                 .setName(mTitle + " - task-snapshot-surface")
                 .setBufferSize(buffer.getWidth(), buffer.getHeight())
                 .setFormat(buffer.getFormat())
+                .setParent(mSurfaceControl)
                 .build();
         Surface surface = new Surface();
         surface.copyFrom(mChildSurfaceControl);

@@ -912,8 +912,10 @@ static jlong nativeCopyFromSurfaceControl(JNIEnv* env, jclass clazz, jlong surfa
     if (surface == nullptr) {
         return 0;
     }
-    surface->incStrong((void *)nativeCreate);
-    return reinterpret_cast<jlong>(surface.get());
+
+    sp<SurfaceControl> newSurface = new SurfaceControl(surface);
+    newSurface->incStrong((void *)nativeCreate);
+    return reinterpret_cast<jlong>(newSurface.get());
 }
 
 static void nativeWriteToParcel(JNIEnv* env, jclass clazz,

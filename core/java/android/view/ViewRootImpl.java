@@ -432,6 +432,7 @@ public final class ViewRootImpl implements ViewParent,
     // Surface can never be reassigned or cleared (use Surface.clear()).
     @UnsupportedAppUsage
     public final Surface mSurface = new Surface();
+    private final SurfaceControl mSurfaceControl = new SurfaceControl();
 
     /**
      * Child surface of {@code mSurface} with the same bounds as its parent, and crop bounds
@@ -1526,7 +1527,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     public void createBoundsSurface(int zOrderLayer) {
         if (mSurfaceSession == null) {
-            mSurfaceSession = new SurfaceSession(mSurface);
+            mSurfaceSession = new SurfaceSession();
         }
         if (mBoundsSurfaceControl != null && mBoundsSurface.isValid()) {
             return; // surface control for bounds surface already exists.
@@ -1534,6 +1535,7 @@ public final class ViewRootImpl implements ViewParent,
 
         mBoundsSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
                 .setName("Bounds for - " + getTitle().toString())
+                .setParent(mSurfaceControl)
                 .build();
 
         setBoundsSurfaceCrop();
@@ -1567,6 +1569,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private void destroySurface() {
         mSurface.release();
+        mSurfaceControl.release();
+
         mSurfaceSession = null;
 
         if (mBoundsSurfaceControl != null) {
@@ -6801,7 +6805,12 @@ public final class ViewRootImpl implements ViewParent,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
                 mTmpFrame, mPendingOverscanInsets, mPendingContentInsets, mPendingVisibleInsets,
                 mPendingStableInsets, mPendingOutsets, mPendingBackDropFrame, mPendingDisplayCutout,
-                mPendingMergedConfiguration, mSurface, mTempInsets);
+                mPendingMergedConfiguration, mSurfaceControl, mTempInsets);
+        if (mSurfaceControl.isValid()) {
+            mSurface.copyFrom(mSurfaceControl);
+        } else {
+            destroySurface();
+        }
 
         mPendingAlwaysConsumeNavBar =
                 (relayoutResult & WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_NAV_BAR) != 0;
@@ -8481,6 +8490,10 @@ public final class ViewRootImpl implements ViewParent,
      */
     public void reportActivityRelaunched() {
         mActivityRelaunched = true;
+    }
+
+    public SurfaceControl getSurfaceControl() {
+        return mSurfaceControl;
     }
 
     /**

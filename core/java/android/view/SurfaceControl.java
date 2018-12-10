@@ -683,7 +683,13 @@ public class SurfaceControl implements Parcelable {
         mName = in.readString();
         mWidth = in.readInt();
         mHeight = in.readInt();
-        mNativeObject = nativeReadFromParcel(in);
+
+        release();
+        if (in.readInt() != 0) {
+            mNativeObject = nativeReadFromParcel(in);
+        } else {
+            mNativeObject = 0;
+        }
     }
 
     @Override
@@ -696,7 +702,16 @@ public class SurfaceControl implements Parcelable {
         dest.writeString(mName);
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
+        if (mNativeObject == 0) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+        }
         nativeWriteToParcel(mNativeObject, dest);
+
+        if ((flags & Parcelable.PARCELABLE_WRITE_RETURN_VALUE) != 0) {
+            release();
+        }
     }
 
     /**
@@ -777,6 +792,10 @@ public class SurfaceControl implements Parcelable {
     private void checkNotReleased() {
         if (mNativeObject == 0) throw new NullPointerException(
                 "mNativeObject is null. Have you called release() already?");
+    }
+
+    public boolean isValid() {
+        return mNativeObject != 0;
     }
 
     /*
