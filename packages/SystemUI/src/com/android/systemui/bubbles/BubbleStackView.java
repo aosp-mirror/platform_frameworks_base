@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.RectF;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,7 +53,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     private Point mDisplaySize;
 
     private FrameLayout mBubbleContainer;
-    private FrameLayout mExpandedViewContainer;
+    private BubbleExpandedViewContainer mExpandedViewContainer;
 
     private int mBubbleSize;
     private int mBubblePadding;
@@ -111,7 +112,9 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
 
         int padding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
-        mExpandedViewContainer = new FrameLayout(context);
+        mExpandedViewContainer = (BubbleExpandedViewContainer)
+                LayoutInflater.from(context).inflate(R.layout.bubble_expanded_view,
+                        this /* parent */, false /* attachToRoot */);
         mExpandedViewContainer.setElevation(elevation);
         mExpandedViewContainer.setPadding(padding, padding, padding, padding);
         mExpandedViewContainer.setClipChildren(false);
@@ -390,16 +393,19 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             ExpandableNotificationRow row = mExpandedBubble.getRowView();
             if (!row.equals(mExpandedViewContainer.getChildAt(0))) {
                 // Different expanded view than what we have
-                mExpandedViewContainer.removeAllViews();
+                mExpandedViewContainer.setExpandedView(null);
             }
-            mExpandedViewContainer.addView(row);
+            int pointerPosition = mExpandedBubble.getPosition().x
+                    + (mExpandedBubble.getWidth() / 2);
+            mExpandedViewContainer.setPointerPosition(pointerPosition);
+            mExpandedViewContainer.setExpandedView(row);
         }
     }
 
     private void applyCurrentState() {
         mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
         if (!mIsExpanded) {
-            mExpandedViewContainer.removeAllViews();
+            mExpandedViewContainer.setExpandedView(null);
         } else {
             mExpandedViewContainer.setTranslationY(mBubbleContainer.getHeight());
             ExpandableNotificationRow row = mExpandedBubble.getRowView();
