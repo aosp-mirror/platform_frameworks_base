@@ -18,7 +18,7 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string name="display_cutout_emulation_overlay">Narrow display cutout</string>
+    <string name="display_cutout_emulation_overlay">Narrow cutout</string>
 
 </resources>
 

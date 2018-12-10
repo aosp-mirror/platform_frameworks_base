@@ -1005,7 +1005,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppTransition.registerListenerLocked(mActivityManagerAppTransitionNotifier);
 
         final AnimationHandler animationHandler = new AnimationHandler();
-        animationHandler.setProvider(new SfVsyncFrameCallbackProvider());
         mBoundsAnimationController = new BoundsAnimationController(context, mAppTransition,
                 AnimationThread.getHandler(), animationHandler);
 
@@ -6217,6 +6216,17 @@ public class WindowManagerService extends IWindowManager.Stub
             if (appWindow != null) {
                 mUnknownAppVisibilityController.notifyAppResumedFinished(appWindow);
             }
+        }
+    }
+
+    /**
+     * Returns true if the callingUid has any window currently visible to the user.
+     */
+    public boolean isAnyWindowVisibleForUid(int callingUid) {
+        synchronized (mWindowMap) {
+            return mRoot.forAllWindows(w -> {
+                return w.getOwningUid() == callingUid && w.isVisible();
+            }, true /* traverseTopToBottom */);
         }
     }
 

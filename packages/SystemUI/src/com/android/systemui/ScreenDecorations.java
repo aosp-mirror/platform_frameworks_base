@@ -39,10 +39,13 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.SystemProperties;
 import android.provider.Settings.Secure;
 import androidx.annotation.VisibleForTesting;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -57,6 +60,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.android.internal.util.Preconditions;
 import com.android.systemui.RegionInterceptingFrameLayout.RegionInterceptableView;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
@@ -74,6 +78,9 @@ import com.android.systemui.util.leak.RotationUtils;
  * for antialiasing and emulation purposes.
  */
 public class ScreenDecorations extends SystemUI implements Tunable {
+    private static final boolean DEBUG = false;
+    private static final String TAG = "ScreenDecorations";
+
     public static final String SIZE = "sysui_rounded_size";
     public static final String PADDING = "sysui_rounded_content_padding";
     private static final boolean DEBUG_SCREENSHOT_ROUNDED_CORNERS =
@@ -82,9 +89,9 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private DisplayManager mDisplayManager;
     private DisplayManager.DisplayListener mDisplayListener;
 
-    private int mRoundedDefault;
-    private int mRoundedDefaultTop;
-    private int mRoundedDefaultBottom;
+    @VisibleForTesting protected int mRoundedDefault;
+    @VisibleForTesting protected int mRoundedDefaultTop;
+    @VisibleForTesting protected int mRoundedDefaultBottom;
     private View mOverlay;
     private View mBottomOverlay;
     private float mDensity;
@@ -93,24 +100,28 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private DisplayCutoutView mCutoutTop;
     private DisplayCutoutView mCutoutBottom;
     private boolean mPendingRotationChange;
+    private Handler mHandler;
 
     @Override
     public void start() {
+        mHandler = startHandlerThread();
+        mHandler.post(this::startOnScreenDecorationsThread);
+        setupStatusBarPaddingIfNeeded();
+    }
+
+    @VisibleForTesting
+    Handler startHandlerThread() {
+        HandlerThread thread = new HandlerThread("ScreenDecorations");
+        thread.start();
+        return thread.getThreadHandler();
+    }
+
+    private void startOnScreenDecorationsThread() {
+        mRotation = RotationUtils.getExactRotation(mContext);
         mWindowManager = mContext.getSystemService(WindowManager.class);
-        mRoundedDefault = mContext.getResources().getDimensionPixelSize(
-                R.dimen.rounded_corner_radius);
-        mRoundedDefaultTop = mContext.getResources().getDimensionPixelSize(
-                R.dimen.rounded_corner_radius_top);
-        mRoundedDefaultBottom = mContext.getResources().getDimensionPixelSize(
-                R.dimen.rounded_corner_radius_bottom);
+        updateRoundedCornerRadii();
         if (hasRoundedCorners() || shouldDrawCutout()) {
             setupDecorations();
-        }
-
-        int padding = mContext.getResources().getDimensionPixelSize(
-                R.dimen.rounded_corner_content_padding);
-        if (padding != 0) {
-            setupPadding(padding);
         }
 
         mDisplayListener = new DisplayManager.DisplayListener() {
@@ -126,8 +137,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
             @Override
             public void onDisplayChanged(int displayId) {
-                if (mOverlay != null && mBottomOverlay != null
-                        && mRotation != RotationUtils.getExactRotation(mContext)) {
+                final int newRotation = RotationUtils.getExactRotation(mContext);
+                if (mOverlay != null && mBottomOverlay != null && mRotation != newRotation) {
                     // We cannot immediately update the orientation. Otherwise
                     // WindowManager is still deferring layout until it has finished dispatching
                     // the config changes, which may cause divergence between what we draw
@@ -136,20 +147,24 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                     // - we are trying to redraw. This because WM resized our window and told us to.
                     // - the config change has been dispatched, so WM is no longer deferring layout.
                     mPendingRotationChange = true;
-                    mOverlay.getViewTreeObserver().addOnPreDrawListener(
-                            new RestartingPreDrawListener(mOverlay));
-                    mBottomOverlay.getViewTreeObserver().addOnPreDrawListener(
-                            new RestartingPreDrawListener(mBottomOverlay));
+                    if (DEBUG) {
+                        Log.i(TAG, "Rotation changed, deferring " + newRotation + ", staying at "
+                                + mRotation);
+                    }
 
+                    mOverlay.getViewTreeObserver().addOnPreDrawListener(
+                            new RestartingPreDrawListener(mOverlay, newRotation));
+                    mBottomOverlay.getViewTreeObserver().addOnPreDrawListener(
+                            new RestartingPreDrawListener(mBottomOverlay, newRotation));
                 }
                 updateOrientation();
             }
         };
 
-        mRotation = -1;
         mDisplayManager = (DisplayManager) mContext.getSystemService(
                 Context.DISPLAY_SERVICE);
-        mDisplayManager.registerDisplayListener(mDisplayListener, null);
+        mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
+        updateOrientation();
     }
 
     private void setupDecorations() {
@@ -179,10 +194,11 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         mWindowManager.getDefaultDisplay().getMetrics(metrics);
         mDensity = metrics.density;
 
-        Dependency.get(TunerService.class).addTunable(this, SIZE);
+        Dependency.get(Dependency.MAIN_HANDLER).post(
+                () -> Dependency.get(TunerService.class).addTunable(this, SIZE));
 
         // Watch color inversion and invert the overlay as needed.
-        SecureSetting setting = new SecureSetting(mContext, Dependency.get(Dependency.MAIN_HANDLER),
+        SecureSetting setting = new SecureSetting(mContext, mHandler,
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
@@ -215,18 +231,38 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                         .start();
             }
         });
+
+        mOverlay.getViewTreeObserver().addOnPreDrawListener(
+                new ValidatingPreDrawListener(mOverlay));
+        mBottomOverlay.getViewTreeObserver().addOnPreDrawListener(
+                new ValidatingPreDrawListener(mBottomOverlay));
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
-        mPendingRotationChange = false;
-        updateOrientation();
-        if (shouldDrawCutout() && mOverlay == null) {
-            setupDecorations();
-        }
+        mHandler.post(() -> {
+            int oldRotation = mRotation;
+            mPendingRotationChange = false;
+            updateOrientation();
+            updateRoundedCornerRadii();
+            if (DEBUG) Log.i(TAG, "onConfigChanged from rot " + oldRotation + " to " + mRotation);
+            if (shouldDrawCutout() && mOverlay == null) {
+                setupDecorations();
+            }
+            if (mOverlay != null) {
+                // Updating the layout params ensures that ViewRootImpl will call relayoutWindow(),
+                // which ensures that the forced seamless rotation will end, even if we updated
+                // the rotation before window manager was ready (and was still waiting for sending
+                // the updated rotation).
+                updateLayoutParams();
+            }
+        });
     }
 
-    protected void updateOrientation() {
+    private void updateOrientation() {
+        Preconditions.checkState(mHandler.getLooper().getThread() == Thread.currentThread(),
+                "must call on " + mHandler.getLooper().getThread()
+                        + ", but was " + Thread.currentThread());
         if (mPendingRotationChange) {
             return;
         }
@@ -238,6 +274,26 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 updateLayoutParams();
                 updateViews();
             }
+        }
+    }
+
+    private void updateRoundedCornerRadii() {
+        final int newRoundedDefault = mContext.getResources().getDimensionPixelSize(
+                R.dimen.rounded_corner_radius);
+        final int newRoundedDefaultTop = mContext.getResources().getDimensionPixelSize(
+                R.dimen.rounded_corner_radius_top);
+        final int newRoundedDefaultBottom = mContext.getResources().getDimensionPixelSize(
+                R.dimen.rounded_corner_radius_bottom);
+
+        final boolean roundedCornersChanged = mRoundedDefault != newRoundedDefault
+                || mRoundedDefaultBottom != newRoundedDefaultBottom
+                || mRoundedDefaultTop != newRoundedDefaultTop;
+
+        if (roundedCornersChanged) {
+            mRoundedDefault = newRoundedDefault;
+            mRoundedDefaultTop = newRoundedDefaultTop;
+            mRoundedDefaultBottom = newRoundedDefaultBottom;
+            onTuningChanged(SIZE, null);
         }
     }
 
@@ -306,7 +362,19 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout);
     }
 
-    private void setupPadding(int padding) {
+
+    private void setupStatusBarPaddingIfNeeded() {
+        // TODO: This should be moved to a more appropriate place, as it is not related to the
+        // screen decorations overlay.
+        int padding = mContext.getResources().getDimensionPixelSize(
+                R.dimen.rounded_corner_content_padding);
+        if (padding != 0) {
+            setupStatusBarPadding(padding);
+        }
+
+    }
+
+    private void setupStatusBarPadding(int padding) {
         // Add some padding to all the content near the edge of the screen.
         StatusBar sb = getComponent(StatusBar.class);
         View statusBar = (sb != null ? sb.getStatusBarWindow() : null);
@@ -375,30 +443,32 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (mOverlay == null) return;
-        if (SIZE.equals(key)) {
-            int size = mRoundedDefault;
-            int sizeTop = mRoundedDefaultTop;
-            int sizeBottom = mRoundedDefaultBottom;
-            if (newValue != null) {
-                try {
-                    size = (int) (Integer.parseInt(newValue) * mDensity);
-                } catch (Exception e) {
+        mHandler.post(() -> {
+            if (mOverlay == null) return;
+            if (SIZE.equals(key)) {
+                int size = mRoundedDefault;
+                int sizeTop = mRoundedDefaultTop;
+                int sizeBottom = mRoundedDefaultBottom;
+                if (newValue != null) {
+                    try {
+                        size = (int) (Integer.parseInt(newValue) * mDensity);
+                    } catch (Exception e) {
+                    }
                 }
-            }
 
-            if (sizeTop == 0) {
-                sizeTop = size;
-            }
-            if (sizeBottom == 0) {
-                sizeBottom = size;
-            }
+                if (sizeTop == 0) {
+                    sizeTop = size;
+                }
+                if (sizeBottom == 0) {
+                    sizeBottom = size;
+                }
 
-            setSize(mOverlay.findViewById(R.id.left), sizeTop);
-            setSize(mOverlay.findViewById(R.id.right), sizeTop);
-            setSize(mBottomOverlay.findViewById(R.id.left), sizeBottom);
-            setSize(mBottomOverlay.findViewById(R.id.right), sizeBottom);
-        }
+                setSize(mOverlay.findViewById(R.id.left), sizeTop);
+                setSize(mOverlay.findViewById(R.id.right), sizeTop);
+                setSize(mBottomOverlay.findViewById(R.id.left), sizeBottom);
+                setSize(mBottomOverlay.findViewById(R.id.right), sizeBottom);
+            }
+        });
     }
 
     private void setSize(View view, int pixelSize) {
@@ -457,6 +527,11 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             mVisibilityChangedListener = visibilityChangedListener;
             mDecorations = decorations;
             setId(R.id.display_cutout);
+            if (DEBUG) {
+                getViewTreeObserver().addOnDrawListener(() -> Log.i(TAG,
+                        (mInitialStart ? "OverlayTop" : "OverlayBottom")
+                                + " drawn in rot " + mRotation));
+            }
         }
 
         public void setColor(int color) {
@@ -692,20 +767,66 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private class RestartingPreDrawListener implements ViewTreeObserver.OnPreDrawListener {
 
         private final View mView;
+        private final int mTargetRotation;
 
-        private RestartingPreDrawListener(View view) {
+        private RestartingPreDrawListener(View view, int targetRotation) {
+            mView = view;
+            mTargetRotation = targetRotation;
+        }
+
+        @Override
+        public boolean onPreDraw() {
+            mView.getViewTreeObserver().removeOnPreDrawListener(this);
+
+            if (mTargetRotation == mRotation) {
+                if (DEBUG) {
+                    Log.i(TAG, (mView == mOverlay ? "OverlayTop" : "OverlayBottom")
+                            + " already in target rot "
+                            + mTargetRotation + ", allow draw without restarting it");
+                }
+                return true;
+            }
+
+            mPendingRotationChange = false;
+            // This changes the window attributes - we need to restart the traversal for them to
+            // take effect.
+            updateOrientation();
+            if (DEBUG) {
+                Log.i(TAG, (mView == mOverlay ? "OverlayTop" : "OverlayBottom")
+                        + " restarting listener fired, restarting draw for rot " + mRotation);
+            }
+            mView.invalidate();
+            return false;
+        }
+    }
+
+    /**
+     * A pre-draw listener, that validates that the rotation we draw in matches the displays
+     * rotation before continuing the draw.
+     *
+     * This is to prevent a race condition, where we have not received the display changed event
+     * yet, and would thus draw in an old orientation.
+     */
+    private class ValidatingPreDrawListener implements ViewTreeObserver.OnPreDrawListener {
+
+        private final View mView;
+
+        public ValidatingPreDrawListener(View view) {
             mView = view;
         }
 
         @Override
         public boolean onPreDraw() {
-            mPendingRotationChange = false;
-            mView.getViewTreeObserver().removeOnPreDrawListener(this);
-            // This changes the window attributes - we need to restart the traversal for them to
-            // take effect.
-            updateOrientation();
-            mView.invalidate();
-            return false;
+            final int displayRotation = RotationUtils.getExactRotation(mContext);
+            if (displayRotation != mRotation && !mPendingRotationChange) {
+                if (DEBUG) {
+                    Log.i(TAG, "Drawing rot " + mRotation + ", but display is at rot "
+                            + displayRotation + ". Restarting draw");
+                }
+                mView.invalidate();
+                return false;
+            }
+            return true;
         }
     }
 }
