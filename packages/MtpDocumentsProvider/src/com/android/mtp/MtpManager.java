@@ -200,7 +200,7 @@ class MtpManager {
             }
             if (objectInfo.getFormat() != MtpConstants.FORMAT_ASSOCIATION) {
                 if (!device.sendObject(sendObjectInfoResult.getObjectHandle(),
-                        sendObjectInfoResult.getCompressedSize(), source)) {
+                        sendObjectInfoResult.getCompressedSizeLong(), source)) {
                     throw new IOException("Failed to send contents of a document");
                 }
             }
