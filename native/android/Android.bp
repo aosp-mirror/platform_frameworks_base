@@ -49,6 +49,7 @@ cc_library_shared {
         "sharedmem.cpp",
         "storage_manager.cpp",
         "surface_texture.cpp",
+        "surface_control.cpp",
         "system_fonts.cpp",
         "trace.cpp",
     ],
