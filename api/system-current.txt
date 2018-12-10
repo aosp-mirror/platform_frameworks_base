@@ -5967,6 +5967,7 @@ package android.telephony {
     method public int getVoiceActivationState();
     method public boolean handlePinMmi(java.lang.String);
     method public boolean handlePinMmiForSubscriber(int, java.lang.String);
+    method public boolean isCurrentPotentialEmergencyNumber(java.lang.String);
     method public boolean isDataConnectivityPossible();
     method public deprecated boolean isIdle();
     method public deprecated boolean isOffhook();

@@ -9454,8 +9454,13 @@ public class TelephonyManager {
     /**
      * Get the emergency number list based on current locale, sim, default, modem and network.
      *
-     * <p>The emergency number {@link EmergencyNumber} with higher display priority is located at
-     * the smaller index in the returned list.
+     * <p>In each returned list, the emergency number {@link EmergencyNumber} coming from higher
+     * priority sources will be located at the smaller index; the priority order of sources are:
+     * {@link EmergencyNumber#EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING} >
+     * {@link EmergencyNumber#EMERGENCY_NUMBER_SOURCE_SIM} >
+     * {@link EmergencyNumber#EMERGENCY_NUMBER_SOURCE_DATABASE} >
+     * {@link EmergencyNumber#EMERGENCY_NUMBER_SOURCE_DEFAULT} >
+     * {@link EmergencyNumber#EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG}
      *
      * <p>The subscriptions which the returned list would be based on, are all the active
      * subscriptions, no matter which subscription could be used to create TelephonyManager.
@@ -9464,8 +9469,9 @@ public class TelephonyManager {
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @return Map including the key as the active subscription ID (Note: if there is no active
-     * subscription, the key is {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}) and the value
-     * as the list of {@link EmergencyNumber}; null if this information is not available.
+     * subscription, the key is {@link SubscriptionManager#getDefaultSubscriptionId}) and the value
+     * as the list of {@link EmergencyNumber}; null if this information is not available; or throw
+     * a SecurityException if the caller does not have the permission.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     @Nullable
@@ -9486,8 +9492,13 @@ public class TelephonyManager {
      * Get the per-category emergency number list based on current locale, sim, default, modem
      * and network.
      *
-     * <p>The emergency number {@link EmergencyNumber} with higher display priority is located at
-     * the smaller index in the returned list.
+     * <p>In each returned list, the emergency number {@link EmergencyNumber} coming from higher
+     * priority sources will be located at the smaller index; the priority order of sources are:
+     * {@link EmergencyNumber#EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING} >
+     * {@link EmergencyNumber#EMERGENCY_NUMBER_SOURCE_SIM} >
+     * {@link EmergencyNumber#EMERGENCY_NUMBER_SOURCE_DATABASE} >
+     * {@link EmergencyNumber#EMERGENCY_NUMBER_SOURCE_DEFAULT} >
+     * {@link EmergencyNumber#EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG}
      *
      * <p>The subscriptions which the returned list would be based on, are all the active
      * subscriptions, no matter which subscription could be used to create TelephonyManager.
@@ -9508,8 +9519,9 @@ public class TelephonyManager {
      * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AIEC} </li>
      * </ol>
      * @return Map including the key as the active subscription ID (Note: if there is no active
-     * subscription, the key is {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}) and the value
-     * as the list of {@link EmergencyNumber}; null if this information is not available.
+     * subscription, the key is {@link SubscriptionManager#getDefaultSubscriptionId}) and the value
+     * as the list of {@link EmergencyNumber}; null if this information is not available; or throw
+     * a SecurityException if the caller does not have the permission.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     @Nullable
@@ -9556,7 +9568,44 @@ public class TelephonyManager {
             if (telephony == null) {
                 return false;
             }
-            return telephony.isCurrentEmergencyNumber(number);
+            return telephony.isCurrentEmergencyNumber(number, true);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "isCurrentEmergencyNumber RemoteException", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the supplied number is an emergency number based on current locale, sim, default,
+     * modem and network.
+     *
+     * <p> Specifically, this method will return {@code true} if the specified number is an
+     * emergency number, *or* if the number simply starts with the same digits as any current
+     * emergency number.
+     *
+     * <p>The subscriptions which the identification would be based on, are all the active
+     * subscriptions, no matter which subscription could be used to create TelephonyManager.
+     *
+     * <p>Requires permission: {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or
+     * that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @param number - the number to look up
+     * @return {@code true} if the given number is an emergency number or it simply starts with
+     * the same digits of any current emergency number based on current locale, sim, modem and
+     * network; {@code false} if it is not; or throw an SecurityException if the caller does not
+     * have the required permission/privileges
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isCurrentPotentialEmergencyNumber(@NonNull String number) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                return false;
+            }
+            return telephony.isCurrentEmergencyNumber(number, false);
         } catch (RemoteException ex) {
             Log.e(TAG, "isCurrentEmergencyNumber RemoteException", ex);
         }
