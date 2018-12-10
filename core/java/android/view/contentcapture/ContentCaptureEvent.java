@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemClock;
 import android.view.autofill.AutofillId;
 
 import com.android.internal.util.Preconditions;
@@ -41,54 +40,18 @@ public final class ContentCaptureEvent implements Parcelable {
     public static final int TYPE_ACTIVITY_CREATED = -1;
 
     /**
-     * Called when the activity is started.
-     *
-     * @deprecated - TODO(b/111276913): we should abstract the Activity lifecycle concepts into
-     * something related to a session and/or domain.
-     */
-    @Deprecated
-    public static final int TYPE_ACTIVITY_STARTED  = 1;
-
-    /**
-     * Called when the activity is resumed.
-     *
-     * @deprecated - TODO(b/111276913): we should abstract the Activity lifecycle concepts into
-     * something related to a session and/or domain.
-     */
-    @Deprecated
-    public static final int TYPE_ACTIVITY_RESUMED = 2;
-
-    /**
-     * Called when the activity is paused.
-     *
-     * @deprecated - TODO(b/111276913): we should abstract the Activity lifecycle concepts into
-     * something related to a session and/or domain.
-     */
-    @Deprecated
-    public static final int TYPE_ACTIVITY_PAUSED = 3;
-
-    /**
-     * Called when the activity is stopped.
-     *
-     * @deprecated - TODO(b/111276913): we should abstract the Activity lifecycle concepts into
-     * something related to a session and/or domain.
-     */
-    @Deprecated
-    public static final int TYPE_ACTIVITY_STOPPED  = 4;
-
-    /**
      * Called when a node has been added to the screen and is visible to the user.
      *
      * <p>The metadata of the node is available through {@link #getViewNode()}.
      */
-    public static final int TYPE_VIEW_APPEARED = 5;
+    public static final int TYPE_VIEW_APPEARED = 1;
 
     /**
      * Called when a node has been removed from the screen and is not visible to the user anymore.
      *
      * <p>The id of the node is available through {@link #getId()}.
      */
-    public static final int TYPE_VIEW_DISAPPEARED = 6;
+    public static final int TYPE_VIEW_DISAPPEARED = 2;
 
     /**
      * Called when the text of a node has been changed.
@@ -96,16 +59,12 @@ public final class ContentCaptureEvent implements Parcelable {
      * <p>The id of the node is available through {@link #getId()}, and the new text is
      * available through {@link #getText()}.
      */
-    public static final int TYPE_VIEW_TEXT_CHANGED = 7;
+    public static final int TYPE_VIEW_TEXT_CHANGED = 3;
 
     // TODO(b/111276913): add event to indicate when FLAG_SECURE was changed?
 
     /** @hide */
     @IntDef(prefix = { "TYPE_" }, value = {
-            TYPE_ACTIVITY_STARTED,
-            TYPE_ACTIVITY_PAUSED,
-            TYPE_ACTIVITY_RESUMED,
-            TYPE_ACTIVITY_STOPPED,
             TYPE_VIEW_APPEARED,
             TYPE_VIEW_DISAPPEARED,
             TYPE_VIEW_TEXT_CHANGED
@@ -130,7 +89,7 @@ public final class ContentCaptureEvent implements Parcelable {
 
     /** @hide */
     public ContentCaptureEvent(int type, int flags) {
-        this(type, SystemClock.uptimeMillis(), flags);
+        this(type, System.currentTimeMillis(), flags);
     }
 
     /** @hide */
@@ -159,9 +118,7 @@ public final class ContentCaptureEvent implements Parcelable {
     /**
      * Gets the type of the event.
      *
-     * @return one of {@link #TYPE_ACTIVITY_STARTED}, {@link #TYPE_ACTIVITY_RESUMED},
-     * {@link #TYPE_ACTIVITY_PAUSED}, {@link #TYPE_ACTIVITY_STOPPED},
-     * {@link #TYPE_VIEW_APPEARED}, {@link #TYPE_VIEW_DISAPPEARED},
+     * @return one of {@link #TYPE_VIEW_APPEARED}, {@link #TYPE_VIEW_DISAPPEARED},
      * or {@link #TYPE_VIEW_TEXT_CHANGED}.
      */
     public @EventType int getType() {
@@ -169,7 +126,7 @@ public final class ContentCaptureEvent implements Parcelable {
     }
 
     /**
-     * Gets when the event was generated, in ms.
+     * Gets when the event was generated, in millis since epoch.
      */
     public long getEventTime() {
         return mEventTime;
@@ -179,7 +136,7 @@ public final class ContentCaptureEvent implements Parcelable {
      * Gets optional flags associated with the event.
      *
      * @return either {@code 0} or
-     * {@link android.view.contentcapture.ContentCaptureManager#FLAG_USER_INPUT}.
+     * {@link android.view.contentcapture.ContentCaptureSession#FLAG_USER_INPUT}.
      */
     public int getFlags() {
         return mFlags;
@@ -295,14 +252,6 @@ public final class ContentCaptureEvent implements Parcelable {
     /** @hide */
     public static String getTypeAsString(@EventType int type) {
         switch (type) {
-            case TYPE_ACTIVITY_STARTED:
-                return "ACTIVITY_STARTED";
-            case TYPE_ACTIVITY_RESUMED:
-                return "ACTIVITY_RESUMED";
-            case TYPE_ACTIVITY_PAUSED:
-                return "ACTIVITY_PAUSED";
-            case TYPE_ACTIVITY_STOPPED:
-                return "ACTIVITY_STOPPED";
             case TYPE_VIEW_APPEARED:
                 return "VIEW_APPEARED";
             case TYPE_VIEW_DISAPPEARED:

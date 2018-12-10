@@ -17,6 +17,7 @@
 package android.view.contentcapture;
 
 import android.content.ComponentName;
+import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
 import android.os.IBinder;
 
@@ -29,7 +30,8 @@ import java.util.List;
  */
 oneway interface IContentCaptureManager {
     void startSession(int userId, IBinder activityToken, in ComponentName componentName,
-                      String sessionId, int flags, in IResultReceiver result);
+                      String sessionId, in ContentCaptureContext clientContext, int flags,
+                      in IResultReceiver result);
     void finishSession(int userId, String sessionId, in List<ContentCaptureEvent> events);
     void sendEvents(int userId, in String sessionId, in List<ContentCaptureEvent> events);
 }

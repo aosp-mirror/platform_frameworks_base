@@ -192,6 +192,17 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
     }
 
     /**
+     * Helper to get {@link #flattenToShortString()} in a {@link ComponentName} reference that can
+     * be {@code null}.
+     *
+     * @hide
+     */
+    @Nullable
+    public static String flattenToShortString(@Nullable ComponentName componentName) {
+        return componentName == null ? null : componentName.flattenToShortString();
+    }
+
+    /**
      * Return a String that unambiguously describes both the package and
      * class names contained in the ComponentName.  You can later recover
      * the ComponentName from this string through

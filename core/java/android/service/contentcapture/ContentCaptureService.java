@@ -29,7 +29,9 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
+import android.view.contentcapture.ContentCaptureSessionId;
 
 import java.util.List;
 import java.util.Set;
@@ -45,7 +47,7 @@ public abstract class ContentCaptureService extends Service {
 
     private static final String TAG = ContentCaptureService.class.getSimpleName();
 
-    // TODO(b/111330312): STOPSHIP use dynamic value, or change to false
+    // TODO(b/121044306): STOPSHIP use dynamic value, or change to false
     static final boolean DEBUG = true;
     static final boolean VERBOSE = false;
 
@@ -64,15 +66,15 @@ public abstract class ContentCaptureService extends Service {
     private final IContentCaptureService mInterface = new IContentCaptureService.Stub() {
 
         @Override
-        public void onSessionLifecycle(InteractionContext context, String sessionId)
+        public void onSessionLifecycle(ContentCaptureContext context, String sessionId)
                 throws RemoteException {
             if (context != null) {
                 mHandler.sendMessage(
-                        obtainMessage(ContentCaptureService::handleOnCreateInteractionSession,
+                        obtainMessage(ContentCaptureService::handleOnCreateSession,
                                 ContentCaptureService.this, context, sessionId));
             } else {
                 mHandler.sendMessage(
-                        obtainMessage(ContentCaptureService::handleOnDestroyInteractionSession,
+                        obtainMessage(ContentCaptureService::handleOnDestroySession,
                                 ContentCaptureService.this, sessionId));
             }
         }
@@ -175,15 +177,15 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
-     * Creates a new interaction session.
+     * Creates a new content capture session.
      *
-     * @param context interaction context
+     * @param context content capture context
      * @param sessionId the session's Id
      */
-    public void onCreateInteractionSession(@NonNull InteractionContext context,
-            @NonNull InteractionSessionId sessionId) {
+    public void onCreateContentCaptureSession(@NonNull ContentCaptureContext context,
+            @NonNull ContentCaptureSessionId sessionId) {
         if (VERBOSE) {
-            Log.v(TAG, "onCreateInteractionSession(id=" + sessionId + ", ctx=" + context + ")");
+            Log.v(TAG, "onCreateContentCaptureSession(id=" + sessionId + ", ctx=" + context + ")");
         }
     }
 
@@ -194,7 +196,7 @@ public abstract class ContentCaptureService extends Service {
      * @param sessionId the session's Id
      * @param request the events
      */
-    public abstract void onContentCaptureEventsRequest(@NonNull InteractionSessionId sessionId,
+    public abstract void onContentCaptureEventsRequest(@NonNull ContentCaptureSessionId sessionId,
             @NonNull ContentCaptureEventsRequest request);
 
     /**
@@ -203,39 +205,39 @@ public abstract class ContentCaptureService extends Service {
      * @param sessionId the session's Id
      * @param snapshotData the data
      */
-    public void onActivitySnapshot(@NonNull InteractionSessionId sessionId,
+    public void onActivitySnapshot(@NonNull ContentCaptureSessionId sessionId,
             @NonNull SnapshotData snapshotData) {}
 
     /**
-     * Destroys the interaction session.
+     * Destroys the content capture session.
      *
      * @param sessionId the id of the session to destroy
      */
-    public void onDestroyInteractionSession(@NonNull InteractionSessionId sessionId) {
+    public void onDestroyContentCaptureSession(@NonNull ContentCaptureSessionId sessionId) {
         if (VERBOSE) {
-            Log.v(TAG, "onDestroyInteractionSession(id=" + sessionId + ")");
+            Log.v(TAG, "onDestroyContentCaptureSession(id=" + sessionId + ")");
         }
     }
 
     //TODO(b/111276913): consider caching the InteractionSessionId for the lifetime of the session,
     // so we don't need to create a temporary InteractionSessionId for each event.
 
-    private void handleOnCreateInteractionSession(@NonNull InteractionContext context,
+    private void handleOnCreateSession(@NonNull ContentCaptureContext context,
             @NonNull String sessionId) {
-        onCreateInteractionSession(context, new InteractionSessionId(sessionId));
+        onCreateContentCaptureSession(context, new ContentCaptureSessionId(sessionId));
     }
 
     private void handleOnContentCaptureEventsRequest(@NonNull String sessionId,
             @NonNull ContentCaptureEventsRequest request) {
-        onContentCaptureEventsRequest(new InteractionSessionId(sessionId), request);
+        onContentCaptureEventsRequest(new ContentCaptureSessionId(sessionId), request);
     }
 
     private void handleOnActivitySnapshot(@NonNull String sessionId,
             @NonNull SnapshotData snapshotData) {
-        onActivitySnapshot(new InteractionSessionId(sessionId), snapshotData);
+        onActivitySnapshot(new ContentCaptureSessionId(sessionId), snapshotData);
     }
 
-    private void handleOnDestroyInteractionSession(@NonNull String sessionId) {
-        onDestroyInteractionSession(new InteractionSessionId(sessionId));
+    private void handleOnDestroySession(@NonNull String sessionId) {
+        onDestroyContentCaptureSession(new ContentCaptureSessionId(sessionId));
     }
 }

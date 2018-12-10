@@ -33,6 +33,7 @@ import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
+import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
 import android.view.contentcapture.IContentCaptureManager;
 
@@ -165,7 +166,8 @@ public final class ContentCaptureManagerService extends
         @Override
         public void startSession(@UserIdInt int userId, @NonNull IBinder activityToken,
                 @NonNull ComponentName componentName, @NonNull String sessionId,
-                int flags, @NonNull IResultReceiver result) {
+                @Nullable ContentCaptureContext clientContext, int flags,
+                @NonNull IResultReceiver result) {
             Preconditions.checkNotNull(activityToken);
             Preconditions.checkNotNull(componentName);
             Preconditions.checkNotNull(sessionId);
@@ -180,7 +182,7 @@ public final class ContentCaptureManagerService extends
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, componentName, taskId, displayId,
-                        sessionId, flags, mAllowInstantService, result);
+                        sessionId, clientContext, flags, mAllowInstantService, result);
             }
         }
 
