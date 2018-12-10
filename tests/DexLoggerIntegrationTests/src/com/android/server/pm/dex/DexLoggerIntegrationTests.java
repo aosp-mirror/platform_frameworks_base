@@ -18,20 +18,23 @@ package com.android.server.pm.dex;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.UiAutomation;
 import android.content.Context;
+import android.os.ParcelFileDescriptor;
+import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.util.EventLog;
+
 import dalvik.system.DexClassLoader;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -40,6 +43,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Integration tests for {@link com.android.server.pm.dex.DexLogger}.
@@ -47,10 +51,10 @@ import java.util.List;
  * The setup for the test dynamically loads code in a jar extracted
  * from our assets (a secondary dex file).
  *
- * We then use adb to trigger secondary dex file reconcilation (and
- * wait for it to complete). As a side-effect of this DexLogger should
- * be notified of the file and should log the hash of the file's name
- * and content.  We verify that this message appears in the event log.
+ * We then use shell commands to trigger dynamic code logging (and wait
+ * for it to complete). This causes DexLogger to log the hash of the
+ * file's name and content.  We verify that this message appears in
+ * the event log.
  *
  * Run with "atest DexLoggerIntegrationTests".
  */
@@ -58,29 +62,89 @@ import java.util.List;
 @RunWith(JUnit4.class)
 public final class DexLoggerIntegrationTests {
 
-    private static final String PACKAGE_NAME = "com.android.frameworks.dexloggertest";
-
     // Event log tag used for SNET related events
     private static final int SNET_TAG = 0x534e4554;
+
     // Subtag used to distinguish dynamic code loading events
     private static final String DCL_SUBTAG = "dcl";
 
-    // Obtained via "echo -n copied.jar | sha256sum"
-    private static final String EXPECTED_NAME_HASH =
-            "1B6C71DB26F36582867432CCA12FB6A517470C9F9AABE9198DD4C5C030D6DC0C";
+    // All the tags we care about
+    private static final int[] TAG_LIST = new int[] { SNET_TAG };
 
-    private static String expectedContentHash;
+    // This is {@code DynamicCodeLoggingService#JOB_ID}
+    private static final int DYNAMIC_CODE_LOGGING_JOB_ID = 2030028;
+
+    private static Context sContext;
+    private static int sMyUid;
 
     @BeforeClass
-    public static void setUpAll() throws Exception {
-        Context context = InstrumentationRegistry.getTargetContext();
+    public static void setUpAll() {
+        sContext = InstrumentationRegistry.getTargetContext();
+        sMyUid = android.os.Process.myUid();
+    }
+
+    @Before
+    public void primeEventLog() {
+        // Force a round trip to logd to make sure everything is up to date.
+        // Without this the first test passes and others don't - we don't see new events in the
+        // log. The exact reason is unclear.
+        EventLog.writeEvent(SNET_TAG, "Dummy event");
+    }
+
+    @Test
+    public void testDexLoggerGeneratesEvents() throws Exception {
+        File privateCopyFile = fileForJar("copied.jar");
+        // Obtained via "echo -n copied.jar | sha256sum"
+        String expectedNameHash =
+                "1B6C71DB26F36582867432CCA12FB6A517470C9F9AABE9198DD4C5C030D6DC0C";
+        String expectedContentHash = copyAndHashJar(privateCopyFile);
+
+        // Feed the jar to a class loader and make sure it contains what we expect.
+        ClassLoader parentClassLoader = sContext.getClass().getClassLoader();
+        ClassLoader loader =
+                new DexClassLoader(privateCopyFile.toString(), null, null, parentClassLoader);
+        loader.loadClass("com.android.dcl.Simple");
+
+        // And make sure we log events about it
+        long previousEventNanos = mostRecentEventTimeNanos();
+        runDexLogger();
+
+        assertDclLoggedSince(previousEventNanos, expectedNameHash, expectedContentHash);
+    }
+
+    @Test
+
+    public void testDexLoggerGeneratesEvents_unknownClassLoader() throws Exception {
+        File privateCopyFile = fileForJar("copied2.jar");
+        String expectedNameHash =
+                "202158B6A3169D78F1722487205A6B036B3F2F5653FDCFB4E74710611AC7EB93";
+        String expectedContentHash = copyAndHashJar(privateCopyFile);
+
+        // This time make sure an unknown class loader is an ancestor of the class loader we use.
+        ClassLoader knownClassLoader = sContext.getClass().getClassLoader();
+        ClassLoader unknownClassLoader = new UnknownClassLoader(knownClassLoader);
+        ClassLoader loader =
+                new DexClassLoader(privateCopyFile.toString(), null, null, unknownClassLoader);
+        loader.loadClass("com.android.dcl.Simple");
+
+        // And make sure we log events about it
+        long previousEventNanos = mostRecentEventTimeNanos();
+        runDexLogger();
+
+        assertDclLoggedSince(previousEventNanos, expectedNameHash, expectedContentHash);
+    }
+
+    private static File fileForJar(String name) {
+        return new File(sContext.getDir("jars", Context.MODE_PRIVATE), name);
+    }
+
+    private static String copyAndHashJar(File copyTo) throws Exception {
         MessageDigest hasher = MessageDigest.getInstance("SHA-256");
 
         // Copy the jar from our Java resources to a private data directory
-        File privateCopy = new File(context.getDir("jars", Context.MODE_PRIVATE), "copied.jar");
         Class<?> thisClass = DexLoggerIntegrationTests.class;
         try (InputStream input = thisClass.getResourceAsStream("/javalib.jar");
-                OutputStream output = new FileOutputStream(privateCopy)) {
+                OutputStream output = new FileOutputStream(copyTo)) {
             byte[] buffer = new byte[1024];
             while (true) {
                 int numRead = input.read(buffer);
@@ -92,42 +156,63 @@ public final class DexLoggerIntegrationTests {
             }
         }
 
-        // Remember the SHA-256 of the file content to check that it is the same as
-        // the value we see logged.
+        // Compute the SHA-256 of the file content so we can check that it is the same as the value
+        // we see logged.
         Formatter formatter = new Formatter();
         for (byte b : hasher.digest()) {
             formatter.format("%02X", b);
         }
-        expectedContentHash = formatter.toString();
 
-        // Feed the jar to a class loader and make sure it contains what we expect.
-        ClassLoader loader =
-                new DexClassLoader(
-                    privateCopy.toString(), null, null, context.getClass().getClassLoader());
-        loader.loadClass("com.android.dcl.Simple");
+        return formatter.toString();
     }
 
-    @Test
-    public void testDexLoggerReconcileGeneratesEvents() throws Exception {
-        int[] tagList = new int[] { SNET_TAG };
+    private static long mostRecentEventTimeNanos() throws Exception {
         List<EventLog.Event> events = new ArrayList<>();
 
-        // There may already be events in the event log - figure out the most recent one
-        EventLog.readEvents(tagList, events);
-        long previousEventNanos =
-                events.isEmpty() ? 0 : events.get(events.size() - 1).getTimeNanos();
-        events.clear();
+        EventLog.readEvents(TAG_LIST, events);
+        return events.isEmpty() ? 0 : events.get(events.size() - 1).getTimeNanos();
+    }
 
-        Process process = Runtime.getRuntime().exec(
-            "cmd package reconcile-secondary-dex-files " + PACKAGE_NAME);
-        int exitCode = process.waitFor();
-        assertThat(exitCode).isEqualTo(0);
+    private static void runDexLogger() throws Exception {
+        // This forces {@code DynamicCodeLoggingService} to start now.
+        runCommand("cmd jobscheduler run -f android " + DYNAMIC_CODE_LOGGING_JOB_ID);
+        // Wait for the job to have run.
+        long startTime = SystemClock.elapsedRealtime();
+        while (true) {
+            String response = runCommand(
+                    "cmd jobscheduler get-job-state android " + DYNAMIC_CODE_LOGGING_JOB_ID);
+            if (!response.contains("pending") && !response.contains("active")) {
+                break;
+            }
+            if (SystemClock.elapsedRealtime() - startTime > TimeUnit.SECONDS.toMillis(10)) {
+                throw new AssertionError("Job has not completed: " + response);
+            }
+            SystemClock.sleep(100);
+        }
+    }
 
-        int myUid = android.os.Process.myUid();
-        String expectedMessage = EXPECTED_NAME_HASH + " " + expectedContentHash;
+    private static String runCommand(String command) throws Exception {
+        ByteArrayOutputStream response = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1000];
+        UiAutomation ui = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+        ParcelFileDescriptor fd = ui.executeShellCommand(command);
+        try (InputStream input = new ParcelFileDescriptor.AutoCloseInputStream(fd)) {
+            while (true) {
+                int count = input.read(buffer);
+                if (count == -1) {
+                    break;
+                }
+                response.write(buffer, 0, count);
+            }
+        }
+        return response.toString("UTF-8");
+    }
 
-        EventLog.readEvents(tagList, events);
-        boolean found = false;
+    private static void assertDclLoggedSince(long previousEventNanos, String expectedNameHash,
+            String expectedContentHash) throws Exception {
+        List<EventLog.Event> events = new ArrayList<>();
+        EventLog.readEvents(TAG_LIST, events);
+        int found = 0;
         for (EventLog.Event event : events) {
             if (event.getTimeNanos() <= previousEventNanos) {
                 continue;
@@ -140,15 +225,28 @@ public final class DexLoggerIntegrationTests {
                 continue;
             }
             int uid = (int) data[1];
-            if (uid != myUid) {
+            if (uid != sMyUid) {
                 continue;
             }
 
             String message = (String) data[2];
-            assertThat(message).isEqualTo(expectedMessage);
-            found = true;
+            if (!message.startsWith(expectedNameHash)) {
+                continue;
+            }
+
+            assertThat(message).endsWith(expectedContentHash);
+            ++found;
         }
 
-        assertThat(found).isTrue();
+        assertThat(found).isEqualTo(1);
+    }
+
+    /**
+     * A class loader that does nothing useful, but importantly doesn't extend BaseDexClassLoader.
+     */
+    private static class UnknownClassLoader extends ClassLoader {
+        UnknownClassLoader(ClassLoader parent) {
+            super(parent);
+        }
     }
 }

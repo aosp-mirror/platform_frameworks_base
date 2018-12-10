@@ -304,7 +304,6 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.ArtManagerService;
-import com.android.server.pm.dex.DexLogger;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
@@ -2168,10 +2167,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mPackageDexOptimizer = new PackageDexOptimizer(installer, mInstallLock, context,
                 "*dexopt*");
-        DexManager.Listener dexManagerListener = DexLogger.getListener(this,
-                installer, mInstallLock);
-        mDexManager = new DexManager(mContext, this, mPackageDexOptimizer, installer, mInstallLock,
-                dexManagerListener);
+        mDexManager = new DexManager(mContext, this, mPackageDexOptimizer, installer, mInstallLock);
         mArtManagerService = new ArtManagerService(mContext, this, installer, mInstallLock);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
@@ -9215,7 +9211,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /**
      * Reconcile the information we have about the secondary dex files belonging to
-     * {@code packagName} and the actual dex files. For all dex files that were
+     * {@code packageName} and the actual dex files. For all dex files that were
      * deleted, update the internal records and delete the generated oat files.
      */
     @Override

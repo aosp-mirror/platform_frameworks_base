@@ -16,14 +16,20 @@
 
 package com.android.server.pm.dex;
 
-import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
+import static com.android.server.pm.dex.PackageDynamicCodeLoading.FILE_TYPE_DEX;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
 import android.os.storage.StorageManager;
 
 import androidx.test.filters.SmallTest;
@@ -43,13 +49,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.mockito.quality.Strictness;
-
-import java.util.Arrays;
+import org.mockito.stubbing.Stubber;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class DexLoggerTests {
-    private static final String PACKAGE_NAME = "package.name";
+    private static final String OWNING_PACKAGE_NAME = "package.name";
     private static final String VOLUME_UUID = "volUuid";
     private static final String DEX_PATH = "/bar/foo.jar";
     private static final int STORAGE_FLAGS = StorageManager.FLAG_STORAGE_DE;
@@ -66,6 +71,7 @@ public class DexLoggerTests {
     };
     private static final String CONTENT_HASH =
             "0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F20";
+    private static final byte[] EMPTY_BYTES = {};
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
 
@@ -73,92 +79,191 @@ public class DexLoggerTests {
     @Mock Installer mInstaller;
     private final Object mInstallLock = new Object();
 
-    private DexManager.Listener mListener;
+    private PackageDynamicCodeLoading mPackageDynamicCodeLoading;
+    private DexLogger mDexLogger;
 
     private final ListMultimap<Integer, String> mMessagesForUid = ArrayListMultimap.create();
+    private boolean mWriteTriggered = false;
+    private static final String EXPECTED_MESSAGE_WITH_CONTENT_HASH =
+            DEX_FILENAME_HASH + " " + CONTENT_HASH;
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
+        // Disable actually attempting to do file writes.
+        mPackageDynamicCodeLoading = new PackageDynamicCodeLoading() {
+            @Override
+            void maybeWriteAsync() {
+                mWriteTriggered = true;
+            }
+
+            @Override
+            protected void writeNow(Void data) {
+                throw new AssertionError("These tests should never call this method.");
+            }
+        };
+
         // For test purposes capture log messages as well as sending to the event log.
-        mListener = new DexLogger(mPM, mInstaller, mInstallLock) {
-                @Override
+        mDexLogger = new DexLogger(mPM, mInstaller, mInstallLock, mPackageDynamicCodeLoading) {
+            @Override
                 void writeDclEvent(int uid, String message) {
                     super.writeDclEvent(uid, message);
                     mMessagesForUid.put(uid, message);
                 }
             };
+
+        // Make the owning package exist in our mock PackageManager.
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.deviceProtectedDataDir = "/bar";
+        appInfo.uid = OWNER_UID;
+        appInfo.volumeUuid = VOLUME_UUID;
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.applicationInfo = appInfo;
+
+        doReturn(packageInfo).when(mPM)
+                .getPackageInfo(OWNING_PACKAGE_NAME, /*flags*/ 0, OWNER_USER_ID);
     }
 
     @Test
-    public void testSingleAppWithFileHash() throws Exception {
-        doReturn(CONTENT_HASH_BYTES).when(mInstaller).hashSecondaryDexFile(
-            DEX_PATH, PACKAGE_NAME, OWNER_UID, VOLUME_UUID, STORAGE_FLAGS);
+    public void testOneLoader_ownFile_withFileHash() throws Exception {
+        whenFileIsHashed(DEX_PATH, doReturn(CONTENT_HASH_BYTES));
 
-        runOnReconcile();
+        recordLoad(OWNING_PACKAGE_NAME, DEX_PATH);
+        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
-        assertThat(mMessagesForUid.keySet()).containsExactly(OWNER_UID);
-        String expectedMessage = DEX_FILENAME_HASH + " " + CONTENT_HASH;
-        assertThat(mMessagesForUid).containsEntry(OWNER_UID, expectedMessage);
+        assertThat(mMessagesForUid.keys()).containsExactly(OWNER_UID);
+        assertThat(mMessagesForUid).containsEntry(OWNER_UID, EXPECTED_MESSAGE_WITH_CONTENT_HASH);
+
+        assertThat(mWriteTriggered).isFalse();
+        assertThat(mDexLogger.getAllPackagesWithDynamicCodeLoading())
+                .containsExactly(OWNING_PACKAGE_NAME);
     }
 
     @Test
-    public void testSingleAppNoFileHash() throws Exception {
-        doReturn(new byte[] { }).when(mInstaller).hashSecondaryDexFile(
-            DEX_PATH, PACKAGE_NAME, OWNER_UID, VOLUME_UUID, STORAGE_FLAGS);
+    public void testOneLoader_ownFile_noFileHash() throws Exception {
+        whenFileIsHashed(DEX_PATH, doReturn(EMPTY_BYTES));
 
-        runOnReconcile();
+        recordLoad(OWNING_PACKAGE_NAME, DEX_PATH);
+        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
-        assertThat(mMessagesForUid.keySet()).containsExactly(OWNER_UID);
+        assertThat(mMessagesForUid.keys()).containsExactly(OWNER_UID);
         assertThat(mMessagesForUid).containsEntry(OWNER_UID, DEX_FILENAME_HASH);
+
+        // File should be removed from the DCL list, since we can't hash it.
+        assertThat(mWriteTriggered).isTrue();
+        assertThat(mDexLogger.getAllPackagesWithDynamicCodeLoading()).isEmpty();
     }
 
     @Test
-    public void testSingleAppHashFails() throws Exception {
-        doThrow(new InstallerException("Testing failure")).when(mInstaller).hashSecondaryDexFile(
-            DEX_PATH, PACKAGE_NAME, OWNER_UID, VOLUME_UUID, STORAGE_FLAGS);
+    public void testOneLoader_ownFile_hashingFails() throws Exception {
+        whenFileIsHashed(DEX_PATH, doThrow(new InstallerException("Intentional failure for test")));
 
-        runOnReconcile();
+        recordLoad(OWNING_PACKAGE_NAME, DEX_PATH);
+        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
+
+        assertThat(mMessagesForUid.keys()).containsExactly(OWNER_UID);
+        assertThat(mMessagesForUid).containsEntry(OWNER_UID, DEX_FILENAME_HASH);
+
+        // File should be removed from the DCL list, since we can't hash it.
+        assertThat(mWriteTriggered).isTrue();
+        assertThat(mDexLogger.getAllPackagesWithDynamicCodeLoading()).isEmpty();
+    }
+
+    @Test
+    public void testOneLoader_ownFile_unknownPath() {
+        recordLoad(OWNING_PACKAGE_NAME, "other/path");
+        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
         assertThat(mMessagesForUid).isEmpty();
+        assertThat(mWriteTriggered).isTrue();
+        assertThat(mDexLogger.getAllPackagesWithDynamicCodeLoading()).isEmpty();
     }
 
     @Test
-    public void testOtherApps() throws Exception {
-        doReturn(CONTENT_HASH_BYTES).when(mInstaller).hashSecondaryDexFile(
-            DEX_PATH, PACKAGE_NAME, OWNER_UID, VOLUME_UUID, STORAGE_FLAGS);
+    public void testOneLoader_differentOwner() throws Exception {
+        whenFileIsHashed(DEX_PATH, doReturn(CONTENT_HASH_BYTES));
+        setPackageUid("other.package.name", 1001);
 
-        // Simulate three packages from two different UIDs
-        String packageName1 = "other1.package.name";
-        String packageName2 = "other2.package.name";
-        String packageName3 = "other3.package.name";
-        int uid1 = 1001;
-        int uid2 = 1002;
+        recordLoad("other.package.name", DEX_PATH);
+        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
-        doReturn(uid1).when(mPM).getPackageUid(packageName1, 0, OWNER_USER_ID);
-        doReturn(uid2).when(mPM).getPackageUid(packageName2, 0, OWNER_USER_ID);
-        doReturn(uid1).when(mPM).getPackageUid(packageName3, 0, OWNER_USER_ID);
-
-        runOnReconcile(packageName1, packageName2, packageName3);
-
-        assertThat(mMessagesForUid.keySet()).containsExactly(OWNER_UID, uid1, uid2);
-
-        String expectedMessage = DEX_FILENAME_HASH + " " + CONTENT_HASH;
-        assertThat(mMessagesForUid).containsEntry(OWNER_UID, expectedMessage);
-        assertThat(mMessagesForUid).containsEntry(uid1, expectedMessage);
-        assertThat(mMessagesForUid).containsEntry(uid2, expectedMessage);
+        assertThat(mMessagesForUid.keys()).containsExactly(1001);
+        assertThat(mMessagesForUid).containsEntry(1001, EXPECTED_MESSAGE_WITH_CONTENT_HASH);
+        assertThat(mWriteTriggered).isFalse();
     }
 
-    private void runOnReconcile(String... otherPackageNames) {
-        ApplicationInfo appInfo = new ApplicationInfo();
-        appInfo.packageName = PACKAGE_NAME;
-        appInfo.volumeUuid = VOLUME_UUID;
-        appInfo.uid = OWNER_UID;
+    @Test
+    public void testOneLoader_differentOwner_uninstalled() throws Exception {
+        whenFileIsHashed(DEX_PATH, doReturn(CONTENT_HASH_BYTES));
+        setPackageUid("other.package.name", -1);
 
-        boolean isUsedByOtherApps = otherPackageNames.length > 0;
-        DexUseInfo dexUseInfo = new DexUseInfo(
-            isUsedByOtherApps, OWNER_USER_ID, /* classLoaderContext */ null, /* loaderIsa */ null);
-        dexUseInfo.getLoadingPackages().addAll(Arrays.asList(otherPackageNames));
+        recordLoad("other.package.name", DEX_PATH);
+        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
-        mListener.onReconcileSecondaryDexFile(appInfo, dexUseInfo, DEX_PATH, STORAGE_FLAGS);
+        assertThat(mMessagesForUid).isEmpty();
+        assertThat(mWriteTriggered).isFalse();
+    }
+
+    @Test
+    public void testMultipleLoadersAndFiles() throws Exception {
+        String otherDexPath = "/bar/nosuchdir/foo.jar";
+        whenFileIsHashed(DEX_PATH, doReturn(CONTENT_HASH_BYTES));
+        whenFileIsHashed(otherDexPath, doReturn(EMPTY_BYTES));
+        setPackageUid("other.package.name1", 1001);
+        setPackageUid("other.package.name2", 1002);
+
+        recordLoad("other.package.name1", DEX_PATH);
+        recordLoad("other.package.name1", otherDexPath);
+        recordLoad("other.package.name2", DEX_PATH);
+        recordLoad(OWNING_PACKAGE_NAME, DEX_PATH);
+        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
+
+        assertThat(mMessagesForUid.keys()).containsExactly(1001, 1001, 1002, OWNER_UID);
+        assertThat(mMessagesForUid).containsEntry(1001, EXPECTED_MESSAGE_WITH_CONTENT_HASH);
+        assertThat(mMessagesForUid).containsEntry(1001, DEX_FILENAME_HASH);
+        assertThat(mMessagesForUid).containsEntry(1002, EXPECTED_MESSAGE_WITH_CONTENT_HASH);
+        assertThat(mMessagesForUid).containsEntry(OWNER_UID, EXPECTED_MESSAGE_WITH_CONTENT_HASH);
+
+        assertThat(mWriteTriggered).isTrue();
+        assertThat(mDexLogger.getAllPackagesWithDynamicCodeLoading())
+                .containsExactly(OWNING_PACKAGE_NAME);
+
+        // Check the DexLogger caching is working
+        verify(mPM, atMost(1)).getPackageInfo(OWNING_PACKAGE_NAME, /*flags*/ 0, OWNER_USER_ID);
+    }
+
+    @Test
+    public void testUnknownOwner() {
+        reset(mPM);
+        recordLoad(OWNING_PACKAGE_NAME, DEX_PATH);
+        mDexLogger.logDynamicCodeLoading("other.package.name");
+
+        assertThat(mMessagesForUid).isEmpty();
+        assertThat(mWriteTriggered).isFalse();
+        verifyZeroInteractions(mPM);
+    }
+
+    @Test
+    public void testUninstalledPackage() {
+        reset(mPM);
+        recordLoad(OWNING_PACKAGE_NAME, DEX_PATH);
+        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
+
+        assertThat(mMessagesForUid).isEmpty();
+        assertThat(mWriteTriggered).isTrue();
+        assertThat(mDexLogger.getAllPackagesWithDynamicCodeLoading()).isEmpty();
+    }
+
+    private void setPackageUid(String packageName, int uid) throws Exception {
+        doReturn(uid).when(mPM).getPackageUid(packageName, /*flags*/ 0, OWNER_USER_ID);
+    }
+
+    private void whenFileIsHashed(String dexPath, Stubber stubber) throws Exception {
+        stubber.when(mInstaller).hashSecondaryDexFile(
+                dexPath, OWNING_PACKAGE_NAME, OWNER_UID, VOLUME_UUID, STORAGE_FLAGS);
+    }
+
+    private void recordLoad(String loadingPackageName, String dexPath) {
+        mPackageDynamicCodeLoading.record(
+                OWNING_PACKAGE_NAME, dexPath, FILE_TYPE_DEX, OWNER_USER_ID, loadingPackageName);
     }
 }

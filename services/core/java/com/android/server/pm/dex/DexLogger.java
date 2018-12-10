@@ -18,29 +18,32 @@ package com.android.server.pm.dex;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
+import android.os.FileUtils;
 import android.os.RemoteException;
-
-import android.util.ArraySet;
+import android.os.storage.StorageManager;
 import android.util.ByteStringUtils;
 import android.util.EventLog;
 import android.util.PackageUtils;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.dex.PackageDynamicCodeLoading.DynamicCodeFile;
+import com.android.server.pm.dex.PackageDynamicCodeLoading.PackageDynamicCode;
 
 import java.io.File;
+import java.util.Map;
 import java.util.Set;
-
-import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
 
 /**
  * This class is responsible for logging data about secondary dex files.
  * The data logged includes hashes of the name and content of each file.
  */
-public class DexLogger implements DexManager.Listener {
+public class DexLogger {
     private static final String TAG = "DexLogger";
 
     // Event log tag & subtag used for SafetyNet logging of dynamic
@@ -49,75 +52,172 @@ public class DexLogger implements DexManager.Listener {
     private static final String DCL_SUBTAG = "dcl";
 
     private final IPackageManager mPackageManager;
+    private final PackageDynamicCodeLoading mPackageDynamicCodeLoading;
     private final Object mInstallLock;
     @GuardedBy("mInstallLock")
     private final Installer mInstaller;
 
-    public static DexManager.Listener getListener(IPackageManager pms,
-            Installer installer, Object installLock) {
-        return new DexLogger(pms, installer, installLock);
+    public DexLogger(IPackageManager pms, Installer installer, Object installLock) {
+        this(pms, installer, installLock, new PackageDynamicCodeLoading());
     }
 
     @VisibleForTesting
-    /*package*/ DexLogger(IPackageManager pms, Installer installer, Object installLock) {
+    DexLogger(IPackageManager pms, Installer installer, Object installLock,
+            PackageDynamicCodeLoading packageDynamicCodeLoading) {
         mPackageManager = pms;
+        mPackageDynamicCodeLoading = packageDynamicCodeLoading;
         mInstaller = installer;
         mInstallLock = installLock;
     }
 
-    /**
-     * Compute and log hashes of the name and content of a secondary dex file.
-     */
-    @Override
-    public void onReconcileSecondaryDexFile(ApplicationInfo appInfo, DexUseInfo dexUseInfo,
-            String dexPath, int storageFlags) {
-        int ownerUid = appInfo.uid;
+    public Set<String> getAllPackagesWithDynamicCodeLoading() {
+        return mPackageDynamicCodeLoading.getAllPackagesWithDynamicCodeLoading();
+    }
 
-        byte[] hash = null;
-        synchronized(mInstallLock) {
-            try {
-                hash = mInstaller.hashSecondaryDexFile(dexPath, appInfo.packageName,
-                        ownerUid, appInfo.volumeUuid, storageFlags);
-            } catch (InstallerException e) {
-                Slog.e(TAG, "Got InstallerException when hashing dex " + dexPath +
-                        " : " + e.getMessage());
-            }
-        }
-        if (hash == null) {
+    /**
+     * Write information about code dynamically loaded by {@code packageName} to the event log.
+     */
+    public void logDynamicCodeLoading(String packageName) {
+        PackageDynamicCode info = getPackageDynamicCodeInfo(packageName);
+        if (info == null) {
             return;
         }
 
-        String dexFileName = new File(dexPath).getName();
-        String message = PackageUtils.computeSha256Digest(dexFileName.getBytes());
-        // Valid SHA256 will be 256 bits, 32 bytes.
-        if (hash.length == 32) {
-            message = message + ' ' + ByteStringUtils.toHexString(hash);
-        }
+        SparseArray<ApplicationInfo> appInfoByUser = new SparseArray<>();
+        boolean needWrite = false;
 
-        writeDclEvent(ownerUid, message);
+        for (Map.Entry<String, DynamicCodeFile> fileEntry : info.mFileUsageMap.entrySet()) {
+            String filePath = fileEntry.getKey();
+            DynamicCodeFile fileInfo = fileEntry.getValue();
+            int userId = fileInfo.mUserId;
 
-        if (dexUseInfo.isUsedByOtherApps()) {
-            Set<String> otherPackages = dexUseInfo.getLoadingPackages();
-            Set<Integer> otherUids = new ArraySet<>(otherPackages.size());
-            for (String otherPackageName : otherPackages) {
+            int index = appInfoByUser.indexOfKey(userId);
+            ApplicationInfo appInfo;
+            if (index >= 0) {
+                appInfo = appInfoByUser.get(userId);
+            } else {
+                appInfo = null;
+
                 try {
-                    int otherUid = mPackageManager.getPackageUid(
-                        otherPackageName, /*flags*/0, dexUseInfo.getOwnerUserId());
-                    if (otherUid != -1 && otherUid != ownerUid) {
-                        otherUids.add(otherUid);
-                    }
-                } catch (RemoteException ignore) {
+                    PackageInfo ownerInfo =
+                            mPackageManager.getPackageInfo(packageName, /*flags*/ 0, userId);
+                    appInfo = ownerInfo == null ? null : ownerInfo.applicationInfo;
+                } catch (RemoteException ignored) {
                     // Can't happen, we're local.
                 }
+                appInfoByUser.put(userId, appInfo);
+                if (appInfo == null) {
+                    Slog.d(TAG, "Could not find package " + packageName + " for user " + userId);
+                    // Package has probably been uninstalled for user.
+                    needWrite |= mPackageDynamicCodeLoading.removeUserPackage(packageName, userId);
+                }
             }
-            for (int otherUid : otherUids) {
-                writeDclEvent(otherUid, message);
+
+            if (appInfo == null) {
+                continue;
             }
+
+            int storageFlags;
+            if (appInfo.deviceProtectedDataDir != null
+                    && FileUtils.contains(appInfo.deviceProtectedDataDir, filePath)) {
+                storageFlags = StorageManager.FLAG_STORAGE_DE;
+            } else if (appInfo.credentialProtectedDataDir != null
+                    && FileUtils.contains(appInfo.credentialProtectedDataDir, filePath)) {
+                storageFlags = StorageManager.FLAG_STORAGE_CE;
+            } else {
+                Slog.e(TAG, "Could not infer CE/DE storage for path " + filePath);
+                needWrite |= mPackageDynamicCodeLoading.removeFile(packageName, filePath, userId);
+                continue;
+            }
+
+            byte[] hash = null;
+            synchronized (mInstallLock) {
+                try {
+                    hash = mInstaller.hashSecondaryDexFile(filePath, packageName, appInfo.uid,
+                            appInfo.volumeUuid, storageFlags);
+                } catch (InstallerException e) {
+                    Slog.e(TAG, "Got InstallerException when hashing file " + filePath
+                            + ": " + e.getMessage());
+                }
+            }
+
+            String fileName = new File(filePath).getName();
+            String message = PackageUtils.computeSha256Digest(fileName.getBytes());
+
+            // Valid SHA256 will be 256 bits, 32 bytes.
+            if (hash != null && hash.length == 32) {
+                message = message + ' ' + ByteStringUtils.toHexString(hash);
+            } else {
+                Slog.d(TAG, "Got no hash for " + filePath);
+                // File has probably been deleted.
+                needWrite |= mPackageDynamicCodeLoading.removeFile(packageName, filePath, userId);
+            }
+
+            for (String loadingPackageName : fileInfo.mLoadingPackages) {
+                int loadingUid = -1;
+                if (loadingPackageName.equals(packageName)) {
+                    loadingUid = appInfo.uid;
+                } else {
+                    try {
+                        loadingUid = mPackageManager.getPackageUid(loadingPackageName, /*flags*/ 0,
+                                userId);
+                    } catch (RemoteException ignored) {
+                        // Can't happen, we're local.
+                    }
+                }
+
+                if (loadingUid != -1) {
+                    writeDclEvent(loadingUid, message);
+                }
+            }
+        }
+
+        if (needWrite) {
+            mPackageDynamicCodeLoading.maybeWriteAsync();
         }
     }
 
     @VisibleForTesting
-    /*package*/ void writeDclEvent(int uid, String message) {
+    PackageDynamicCode getPackageDynamicCodeInfo(String packageName) {
+        return mPackageDynamicCodeLoading.getPackageDynamicCodeInfo(packageName);
+    }
+
+    @VisibleForTesting
+    void writeDclEvent(int uid, String message) {
         EventLog.writeEvent(SNET_TAG, DCL_SUBTAG, uid, message);
+    }
+
+    void record(int loaderUserId, String dexPath,
+            String owningPackageName, String loadingPackageName) {
+        if (mPackageDynamicCodeLoading.record(owningPackageName, dexPath,
+                PackageDynamicCodeLoading.FILE_TYPE_DEX, loaderUserId,
+                loadingPackageName)) {
+            mPackageDynamicCodeLoading.maybeWriteAsync();
+        }
+    }
+
+    void clear() {
+        mPackageDynamicCodeLoading.clear();
+    }
+
+    void removePackage(String packageName) {
+        if (mPackageDynamicCodeLoading.removePackage(packageName)) {
+            mPackageDynamicCodeLoading.maybeWriteAsync();
+        }
+    }
+
+    void removeUserPackage(String packageName, int userId) {
+        if (mPackageDynamicCodeLoading.removeUserPackage(packageName, userId)) {
+            mPackageDynamicCodeLoading.maybeWriteAsync();
+        }
+    }
+
+    void readAndSync(Map<String, Set<Integer>> packageToUsersMap) {
+        mPackageDynamicCodeLoading.read();
+        mPackageDynamicCodeLoading.syncData(packageToUsersMap);
+    }
+
+    void writeNow() {
+        mPackageDynamicCodeLoading.writeNow();
     }
 }
