@@ -30,6 +30,7 @@ import android.os.Parcelable;
 import android.text.SpannedString;
 import android.util.ArraySet;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -654,6 +655,8 @@ public final class ConversationActions implements Parcelable {
         @NonNull
         @Hint
         private final List<String> mHints;
+        @Nullable
+        private String mCallingPackageName;
 
         private Request(
                 @NonNull List<Message> conversation,
@@ -666,15 +669,26 @@ public final class ConversationActions implements Parcelable {
             mHints = hints;
         }
 
-        private Request(Parcel in) {
+        private static Request readFromParcel(Parcel in) {
             List<Message> conversation = new ArrayList<>();
             in.readParcelableList(conversation, null);
-            mConversation = Collections.unmodifiableList(conversation);
-            mTypeConfig = in.readParcelable(null);
-            mMaxSuggestions = in.readInt();
+
+            TypeConfig typeConfig = in.readParcelable(null);
+
+            int maxSuggestions = in.readInt();
+
             List<String> hints = new ArrayList<>();
             in.readStringList(hints);
-            mHints = Collections.unmodifiableList(hints);
+
+            String callingPackageName = in.readString();
+
+            Request request = new Request(
+                    conversation,
+                    typeConfig,
+                    maxSuggestions,
+                    hints);
+            request.setCallingPackageName(callingPackageName);
+            return request;
         }
 
         @Override
@@ -683,6 +697,7 @@ public final class ConversationActions implements Parcelable {
             parcel.writeParcelable(mTypeConfig, flags);
             parcel.writeInt(mMaxSuggestions);
             parcel.writeStringList(mHints);
+            parcel.writeString(mCallingPackageName);
         }
 
         @Override
@@ -694,7 +709,7 @@ public final class ConversationActions implements Parcelable {
                 new Creator<Request>() {
                     @Override
                     public Request createFromParcel(Parcel in) {
-                        return new Request(in);
+                        return readFromParcel(in);
                     }
 
                     @Override
@@ -728,6 +743,26 @@ public final class ConversationActions implements Parcelable {
         @Hint
         public List<String> getHints() {
             return mHints;
+        }
+
+        /**
+         * Sets the name of the package that is sending this request.
+         * <p>
+         * Package-private for SystemTextClassifier's use.
+         * @hide
+         */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void setCallingPackageName(@Nullable String callingPackageName) {
+            mCallingPackageName = callingPackageName;
+        }
+
+        /**
+         * Returns the name of the package that sent this request.
+         * This returns {@code null} if no calling package name is set.
+         */
+        @Nullable
+        public String getCallingPackageName() {
+            return mCallingPackageName;
         }
 
         /** Builder object to construct the {@link Request} object. */

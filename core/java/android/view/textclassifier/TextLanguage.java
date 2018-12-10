@@ -26,6 +26,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.util.Locale;
@@ -90,7 +91,7 @@ public final class TextLanguage implements Parcelable {
      * confidence to low confidence.
      *
      * @throws IndexOutOfBoundsException if the specified index is out of range.
-     * @see #getLocaleCount() for the number of locales available.
+     * @see #getLocaleHypothesisCount() for the number of locales available.
      */
     @NonNull
     public ULocale getLocale(int index) {
@@ -222,11 +223,12 @@ public final class TextLanguage implements Parcelable {
         };
 
         private final CharSequence mText;
-        private final Bundle mBundle;
+        private final Bundle mExtra;
+        @Nullable private String mCallingPackageName;
 
         private Request(CharSequence text, Bundle bundle) {
             mText = text;
-            mBundle = bundle;
+            mExtra = bundle;
         }
 
         /**
@@ -238,6 +240,25 @@ public final class TextLanguage implements Parcelable {
         }
 
         /**
+         * Sets the name of the package that is sending this request.
+         * Package-private for SystemTextClassifier's use.
+         * @hide
+         */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void setCallingPackageName(@Nullable String callingPackageName) {
+            mCallingPackageName = callingPackageName;
+        }
+
+        /**
+         * Returns the name of the package that sent this request.
+         * This returns null if no calling package name is set.
+         */
+        @Nullable
+        public String getCallingPackageName() {
+            return mCallingPackageName;
+        }
+
+        /**
          * Returns a bundle containing non-structured extra information about this request.
          *
          * <p><b>NOTE: </b>Each call to this method returns a new bundle copy so clients should
@@ -246,7 +267,7 @@ public final class TextLanguage implements Parcelable {
          */
         @NonNull
         public Bundle getExtras() {
-            return mBundle.deepCopy();
+            return mExtra.deepCopy();
         }
 
         @Override
@@ -257,13 +278,18 @@ public final class TextLanguage implements Parcelable {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeCharSequence(mText);
-            dest.writeBundle(mBundle);
+            dest.writeString(mCallingPackageName);
+            dest.writeBundle(mExtra);
         }
 
         private static Request readFromParcel(Parcel in) {
-            return new Request(
-                    in.readCharSequence(),
-                    in.readBundle());
+            final CharSequence text = in.readCharSequence();
+            final String callingPackageName = in.readString();
+            final Bundle extra = in.readBundle();
+
+            final Request request = new Request(text, extra);
+            request.setCallingPackageName(callingPackageName);
+            return request;
         }
 
         /**

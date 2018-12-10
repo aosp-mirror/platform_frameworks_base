@@ -189,6 +189,7 @@ public class TextClassificationTest {
                 Instant.ofEpochMilli(946771200000L),  // 2000-01-02
                 ZoneId.of("UTC"));
         final String text = "text";
+        final String packageName = "packageName";
 
         final TextClassification.Request reference =
                 new TextClassification.Request.Builder(text, 0, text.length())
@@ -196,6 +197,7 @@ public class TextClassificationTest {
                         .setReferenceTime(referenceTime)
                         .setExtras(BUNDLE)
                         .build();
+        reference.setCallingPackageName(packageName);
 
         // Parcel and unparcel.
         final Parcel parcel = Parcel.obtain();
@@ -204,12 +206,13 @@ public class TextClassificationTest {
         final TextClassification.Request result =
                 TextClassification.Request.CREATOR.createFromParcel(parcel);
 
-        assertEquals(text, result.getText());
+        assertEquals(text, result.getText().toString());
         assertEquals(0, result.getStartIndex());
         assertEquals(text.length(), result.getEndIndex());
         assertEquals(referenceTime, result.getReferenceTime());
         assertEquals("en-US,de-DE", result.getDefaultLocales().toLanguageTags());
         assertEquals(referenceTime, result.getReferenceTime());
         assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
+        assertEquals(packageName, result.getCallingPackageName());
     }
 }
