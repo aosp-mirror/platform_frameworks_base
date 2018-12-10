@@ -516,6 +516,9 @@ public final class FillResponse implements Parcelable {
         /**
          * Sets a specific {@link UserData} for field classification for this request only.
          *
+         * <p>Any fields in this UserData will override corresponding fields in the generic
+         * UserData object
+         *
          * @return this builder
          * @throws IllegalStateException if the FillResponse
          * {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)

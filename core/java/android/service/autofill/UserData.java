@@ -48,7 +48,7 @@ import java.util.ArrayList;
  * Defines the user data used for
  * <a href="AutofillService.html#FieldClassification">field classification</a>.
  */
-public final class UserData implements Parcelable {
+public final class UserData implements FieldClassificationUserData, Parcelable {
 
     private static final String TAG = "UserData";
 
@@ -86,11 +86,13 @@ public final class UserData implements Parcelable {
      * {@link Match#getScore()} match scores}.
      */
     @Nullable
+    @Override
     public String getFieldClassificationAlgorithm() {
         return mDefaultAlgorithm;
     }
 
     /** @hide */
+    @Override
     public Bundle getDefaultFieldClassificationArgs() {
         return mDefaultArgs;
     }
@@ -104,6 +106,7 @@ public final class UserData implements Parcelable {
      * @return String name of algorithm, null if none found.
      */
     @Nullable
+    @Override
     public String getFieldClassificationAlgorithmForCategory(@NonNull String categoryId) {
         Preconditions.checkNotNull(categoryId);
         if (mCategoryAlgorithms == null || !mCategoryAlgorithms.containsKey(categoryId)) {
@@ -120,22 +123,26 @@ public final class UserData implements Parcelable {
     }
 
     /** @hide */
+    @Override
     public String[] getCategoryIds() {
         return mCategoryIds;
     }
 
     /** @hide */
+    @Override
     public String[] getValues() {
         return mValues;
     }
 
     /** @hide */
     @TestApi
+    @Override
     public ArrayMap<String, String> getFieldClassificationAlgorithms() {
         return mCategoryAlgorithms;
     }
 
     /** @hide */
+    @Override
     public ArrayMap<String, Bundle> getFieldClassificationArgs() {
         return mCategoryArgs;
     }
