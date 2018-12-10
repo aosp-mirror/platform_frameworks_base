@@ -148,7 +148,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         when(mTransportManager.getTransportCurrentDestinationString(eq(mTransportName)))
                 .thenReturn("destinationString");
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         String destination = backupManagerService.getDestinationString(mTransportName);
 
@@ -164,7 +164,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         when(mTransportManager.getTransportCurrentDestinationString(eq(mTransportName)))
                 .thenThrow(TransportNotRegisteredException.class);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         String destination = backupManagerService.getDestinationString(mTransportName);
 
@@ -180,7 +180,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
         when(mTransportManager.getTransportCurrentDestinationString(eq(mTransportName)))
                 .thenThrow(TransportNotRegisteredException.class);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
                 SecurityException.class,
@@ -195,7 +195,7 @@ public class UserBackupManagerServiceTest {
     public void testIsAppEligibleForBackup_whenAppNotEligible() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         setUpCurrentTransport(mTransportManager, mTransport);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         boolean result = backupManagerService.isAppEligibleForBackup(PACKAGE_1);
 
@@ -211,7 +211,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         TransportMock transportMock = setUpCurrentTransport(mTransportManager, backupTransport());
         ShadowAppBackupUtils.setAppRunningAndEligibleForBackupWithTransport(PACKAGE_1);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         boolean result = backupManagerService.isAppEligibleForBackup(PACKAGE_1);
 
@@ -229,7 +229,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
         setUpCurrentTransport(mTransportManager, mTransport);
         ShadowAppBackupUtils.setAppRunningAndEligibleForBackupWithTransport(PACKAGE_1);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
                 SecurityException.class,
@@ -246,7 +246,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         TransportMock transportMock = setUpCurrentTransport(mTransportManager, mTransport);
         ShadowAppBackupUtils.setAppRunningAndEligibleForBackupWithTransport(PACKAGE_1);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         String[] filtered =
                 backupManagerService.filterAppsEligibleForBackup(
@@ -264,7 +264,7 @@ public class UserBackupManagerServiceTest {
     @Test
     public void testFilterAppsEligibleForBackup_whenNoneIsEligible() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         String[] filtered =
                 backupManagerService.filterAppsEligibleForBackup(
@@ -281,7 +281,7 @@ public class UserBackupManagerServiceTest {
     public void testFilterAppsEligibleForBackup_withoutPermission() throws Exception {
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
         setUpCurrentTransport(mTransportManager, mTransport);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
                 SecurityException.class,
@@ -319,7 +319,7 @@ public class UserBackupManagerServiceTest {
     public void testSelectBackupTransport() throws Exception {
         setUpForSelectTransport();
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         String oldTransport =
                 backupManagerService.selectBackupTransport(mNewTransport.transportName);
@@ -338,7 +338,7 @@ public class UserBackupManagerServiceTest {
     public void testSelectBackupTransport_withoutPermission() throws Exception {
         setUpForSelectTransport();
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
                 SecurityException.class,
@@ -356,7 +356,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         when(mTransportManager.registerAndSelectTransport(eq(mNewTransportComponent)))
                 .thenReturn(BackupManager.SUCCESS);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         ISelectBackupTransportCallback callback = mock(ISelectBackupTransportCallback.class);
 
         backupManagerService.selectBackupTransportAsync(mNewTransportComponent, callback);
@@ -380,7 +380,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         when(mTransportManager.registerAndSelectTransport(eq(mNewTransportComponent)))
                 .thenReturn(BackupManager.ERROR_TRANSPORT_UNAVAILABLE);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         ISelectBackupTransportCallback callback = mock(ISelectBackupTransportCallback.class);
 
         backupManagerService.selectBackupTransportAsync(mNewTransportComponent, callback);
@@ -402,7 +402,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         when(mTransportManager.registerAndSelectTransport(eq(newTransportComponent)))
                 .thenReturn(BackupManager.SUCCESS);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         ISelectBackupTransportCallback callback = mock(ISelectBackupTransportCallback.class);
 
         backupManagerService.selectBackupTransportAsync(newTransportComponent, callback);
@@ -421,7 +421,7 @@ public class UserBackupManagerServiceTest {
     public void testSelectBackupTransportAsync_withoutPermission() throws Exception {
         setUpForSelectTransport();
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         ComponentName newTransportComponent = mNewTransport.getTransportComponent();
 
         expectThrows(
@@ -445,7 +445,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         when(mTransportManager.getCurrentTransportComponent())
                 .thenReturn(mTransport.getTransportComponent());
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         ComponentName transportComponent = backupManagerService.getCurrentTransportComponent();
 
@@ -460,7 +460,7 @@ public class UserBackupManagerServiceTest {
     public void testGetCurrentTransportComponent_whenNoTransportSelected() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         when(mTransportManager.getCurrentTransportComponent()).thenReturn(null);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         ComponentName transportComponent = backupManagerService.getCurrentTransportComponent();
 
@@ -476,7 +476,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         when(mTransportManager.getCurrentTransportComponent())
                 .thenThrow(TransportNotRegisteredException.class);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         ComponentName transportComponent = backupManagerService.getCurrentTransportComponent();
 
@@ -490,7 +490,7 @@ public class UserBackupManagerServiceTest {
     @Test
     public void testGetCurrentTransportComponent_withoutPermission() throws Exception {
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(SecurityException.class, backupManagerService::getCurrentTransportComponent);
     }
@@ -525,7 +525,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         Intent configurationIntent = new Intent();
         Intent dataManagementIntent = new Intent();
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         backupManagerService.updateTransportAttributes(
                 mTransportUid,
@@ -556,7 +556,7 @@ public class UserBackupManagerServiceTest {
             throws Exception {
         setUpForUpdateTransportAttributes();
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
                 SecurityException.class,
@@ -581,7 +581,7 @@ public class UserBackupManagerServiceTest {
             throws Exception {
         setUpForUpdateTransportAttributes();
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
                 RuntimeException.class,
@@ -605,7 +605,7 @@ public class UserBackupManagerServiceTest {
     public void testUpdateTransportAttributes_whenNameNull_throwsException() throws Exception {
         setUpForUpdateTransportAttributes();
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
                 RuntimeException.class,
@@ -630,7 +630,7 @@ public class UserBackupManagerServiceTest {
             throws Exception {
         setUpForUpdateTransportAttributes();
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
                 RuntimeException.class,
@@ -657,7 +657,7 @@ public class UserBackupManagerServiceTest {
                     throws Exception {
         setUpForUpdateTransportAttributes();
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
                 RuntimeException.class,
@@ -696,7 +696,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         Intent configurationIntent = new Intent();
         Intent dataManagementIntent = new Intent();
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         backupManagerService.updateTransportAttributes(
                 mTransportUid,
@@ -727,7 +727,7 @@ public class UserBackupManagerServiceTest {
             throws Exception {
         setUpForUpdateTransportAttributes();
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
                 SecurityException.class,
@@ -766,7 +766,7 @@ public class UserBackupManagerServiceTest {
     @Test
     public void testRequestBackup_whenPermissionDenied() throws Exception {
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
                 SecurityException.class,
@@ -780,7 +780,7 @@ public class UserBackupManagerServiceTest {
     @Test
     public void testRequestBackup_whenPackagesNull() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
                 IllegalArgumentException.class,
@@ -796,7 +796,7 @@ public class UserBackupManagerServiceTest {
     @Test
     public void testRequestBackup_whenPackagesEmpty() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(
                 IllegalArgumentException.class,
@@ -811,7 +811,7 @@ public class UserBackupManagerServiceTest {
     @Test
     public void testRequestBackup_whenBackupDisabled() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         backupManagerService.setEnabled(false);
 
         int result = backupManagerService.requestBackup(new String[] {PACKAGE_1}, mObserver, 0);
@@ -828,7 +828,7 @@ public class UserBackupManagerServiceTest {
     @Test
     public void testRequestBackup_whenNotProvisioned() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         backupManagerService.setProvisioned(false);
 
         int result = backupManagerService.requestBackup(new String[] {PACKAGE_1}, mObserver, 0);
@@ -846,7 +846,7 @@ public class UserBackupManagerServiceTest {
     public void testRequestBackup_whenTransportNotRegistered() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         setUpCurrentTransport(mTransportManager, mTransport.unregistered());
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         backupManagerService.setEnabled(true);
         backupManagerService.setProvisioned(true);
 
@@ -866,7 +866,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         mShadowPackageManager.addPackage(PACKAGE_1);
         setUpCurrentTransport(mTransportManager, mTransport);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         backupManagerService.setEnabled(true);
         backupManagerService.setProvisioned(true);
         // Haven't set PACKAGE_1 as eligible
@@ -934,7 +934,7 @@ public class UserBackupManagerServiceTest {
     @Config(shadows = {ShadowBinder.class, ShadowKeyValueBackupJob.class})
     public void testBackupNow_clearsCallingIdentityForJobScheduler() {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         setUpPowerManager(backupManagerService);
         ShadowBinder.setCallingUid(1);
 
@@ -952,7 +952,7 @@ public class UserBackupManagerServiceTest {
     @Config(shadows = {ShadowBinder.class, ShadowKeyValueBackupJobException.class})
     public void testBackupNow_whenExceptionThrown_restoresCallingIdentity() {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         setUpPowerManager(backupManagerService);
         ShadowBinder.setCallingUid(1);
 
@@ -963,54 +963,170 @@ public class UserBackupManagerServiceTest {
     }
 
     private UserBackupManagerService createBackupManagerServiceForRequestBackup() {
-        UserBackupManagerService backupManagerService = createInitializedBackupManagerService();
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
         backupManagerService.setEnabled(true);
         backupManagerService.setProvisioned(true);
         return backupManagerService;
     }
 
     /**
-     * Test verifying that {@link UserBackupManagerService#UserBackupManagerService(Context,
+     * Test verifying that {@link UserBackupManagerService#createAndInitializeService(Context,
      * Trampoline, HandlerThread, File, File, TransportManager)} posts a transport registration task
-     * to the backup handler thread.
+     * to the backup thread.
      */
     @Test
-    public void testConstructor_postRegisterTransports() {
+    public void testCreateAndInitializeService_postRegisterTransports() {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
 
-        createBackupManagerService();
-
-        mShadowBackupLooper.runToEndOfTasks();
-        verify(mTransportManager).registerTransports();
-    }
-
-    /**
-     * Test verifying that the {@link UserBackupManagerService#UserBackupManagerService(Context,
-     * Trampoline, HandlerThread, File, File, TransportManager)} does not directly register
-     * transports in its own thread.
-     */
-    @Test
-    public void testConstructor_doesNotRegisterTransportsSynchronously() {
-        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-
-        createBackupManagerService();
-
-        // Operations posted to mBackupThread only run with mShadowBackupLooper.runToEndOfTasks()
-        verify(mTransportManager, never()).registerTransports();
-    }
-
-    private UserBackupManagerService createBackupManagerService() {
-        return new UserBackupManagerService(
+        UserBackupManagerService.createAndInitializeService(
                 mContext,
                 new Trampoline(mContext),
                 mBackupThread,
                 mBaseStateDir,
                 mDataDir,
                 mTransportManager);
+
+        mShadowBackupLooper.runToEndOfTasks();
+        verify(mTransportManager).registerTransports();
     }
 
-    private UserBackupManagerService createInitializedBackupManagerService() {
-        return BackupManagerServiceTestUtils.createInitializedUserBackupManagerService(
+    /**
+     * Test verifying that {@link UserBackupManagerService#createAndInitializeService(Context,
+     * Trampoline, HandlerThread, File, File, TransportManager)} does not directly register
+     * transports on the main thread.
+     */
+    @Test
+    public void testCreateAndInitializeService_doesNotRegisterTransportsSynchronously() {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+
+        UserBackupManagerService.createAndInitializeService(
+                mContext,
+                new Trampoline(mContext),
+                mBackupThread,
+                mBaseStateDir,
+                mDataDir,
+                mTransportManager);
+
+        // Operations posted to mBackupThread only run with mShadowBackupLooper.runToEndOfTasks()
+        verify(mTransportManager, never()).registerTransports();
+    }
+
+    /**
+     * Test checking non-null argument on {@link
+     * UserBackupManagerService#createAndInitializeService(Context, Trampoline, HandlerThread, File,
+     * File, TransportManager)}.
+     */
+    @Test
+    public void testCreateAndInitializeService_withNullContext_throws() {
+        expectThrows(
+                NullPointerException.class,
+                () ->
+                        UserBackupManagerService.createAndInitializeService(
+                                /* context */ null,
+                                new Trampoline(mContext),
+                                mBackupThread,
+                                mBaseStateDir,
+                                mDataDir,
+                                mTransportManager));
+    }
+
+    /**
+     * Test checking non-null argument on {@link
+     * UserBackupManagerService#createAndInitializeService(Context, Trampoline, HandlerThread, File,
+     * File, TransportManager)}.
+     */
+    @Test
+    public void testCreateAndInitializeService_withNullTrampoline_throws() {
+        expectThrows(
+                NullPointerException.class,
+                () ->
+                        UserBackupManagerService.createAndInitializeService(
+                                mContext,
+                                /* trampoline */ null,
+                                mBackupThread,
+                                mBaseStateDir,
+                                mDataDir,
+                                mTransportManager));
+    }
+
+    /**
+     * Test checking non-null argument on {@link
+     * UserBackupManagerService#createAndInitializeService(Context, Trampoline, HandlerThread, File,
+     * File, TransportManager)}.
+     */
+    @Test
+    public void testCreateAndInitializeService_withNullBackupThread_throws() {
+        expectThrows(
+                NullPointerException.class,
+                () ->
+                        UserBackupManagerService.createAndInitializeService(
+                                mContext,
+                                new Trampoline(mContext),
+                                /* backupThread */ null,
+                                mBaseStateDir,
+                                mDataDir,
+                                mTransportManager));
+    }
+
+    /**
+     * Test checking non-null argument on {@link
+     * UserBackupManagerService#createAndInitializeService(Context, Trampoline, HandlerThread, File,
+     * File, TransportManager)}.
+     */
+    @Test
+    public void testCreateAndInitializeService_withNullStateDir_throws() {
+        expectThrows(
+                NullPointerException.class,
+                () ->
+                        UserBackupManagerService.createAndInitializeService(
+                                mContext,
+                                new Trampoline(mContext),
+                                mBackupThread,
+                                /* baseStateDir */ null,
+                                mDataDir,
+                                mTransportManager));
+    }
+
+    /**
+     * Test checking non-null argument on {@link
+     * UserBackupManagerService#createAndInitializeService(Context, Trampoline, HandlerThread, File,
+     * File, TransportManager)}.
+     */
+    @Test
+    public void testCreateAndInitializeService_withNullDataDir_throws() {
+        expectThrows(
+                NullPointerException.class,
+                () ->
+                        UserBackupManagerService.createAndInitializeService(
+                                mContext,
+                                new Trampoline(mContext),
+                                mBackupThread,
+                                mBaseStateDir,
+                                /* dataDir */ null,
+                                mTransportManager));
+    }
+
+    /**
+     * Test checking non-null argument on {@link
+     * UserBackupManagerService#createAndInitializeService(Context, Trampoline, HandlerThread, File,
+     * File, TransportManager)}.
+     */
+    @Test
+    public void testCreateAndInitializeService_withNullTransportManager_throws() {
+        expectThrows(
+                NullPointerException.class,
+                () ->
+                        UserBackupManagerService.createAndInitializeService(
+                                mContext,
+                                new Trampoline(mContext),
+                                mBackupThread,
+                                mBaseStateDir,
+                                mDataDir,
+                                /* transportManager */ null));
+    }
+
+    private UserBackupManagerService createUserBackupManagerServiceAndRunTasks() {
+        return BackupManagerServiceTestUtils.createUserBackupManagerServiceAndRunTasks(
                 mContext, mBackupThread, mBaseStateDir, mDataDir, mTransportManager);
     }
 

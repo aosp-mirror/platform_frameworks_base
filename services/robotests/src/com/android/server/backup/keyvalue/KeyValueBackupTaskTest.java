@@ -25,12 +25,9 @@ import static android.app.backup.BackupManager.SUCCESS;
 import static android.app.backup.ForwardingBackupAgent.forward;
 
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createBackupWakeLock;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils
-        .createInitializedUserBackupManagerService;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils
-        .setUpBackupManagerServiceBasics;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils
-        .setUpBinderCallerAndApplicationAsSystem;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createUserBackupManagerServiceAndRunTasks;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBackupManagerServiceBasics;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBinderCallerAndApplicationAsSystem;
 import static com.android.server.backup.testing.PackageData.PM_PACKAGE;
 import static com.android.server.backup.testing.PackageData.fullBackupPackage;
 import static com.android.server.backup.testing.PackageData.keyValuePackage;
@@ -226,9 +223,8 @@ public class KeyValueBackupTaskTest {
         // Needed to be able to use a real BMS instead of a mock
         setUpBinderCallerAndApplicationAsSystem(mApplication);
         mBackupManagerService =
-                spy(
-                        createInitializedUserBackupManagerService(
-                                mContext, mBaseStateDir, mDataDir, mTransportManager));
+                spy(createUserBackupManagerServiceAndRunTasks(
+                        mContext, mBaseStateDir, mDataDir, mTransportManager));
         setUpBackupManagerServiceBasics(
                 mBackupManagerService,
                 mApplication,

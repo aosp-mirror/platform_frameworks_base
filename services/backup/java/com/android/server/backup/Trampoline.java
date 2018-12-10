@@ -137,7 +137,7 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     protected BackupManagerService createBackupManagerService() {
-        return BackupManagerService.create(mContext, this, mHandlerThread);
+        return new BackupManagerService(mContext, this, mHandlerThread);
     }
 
     /**

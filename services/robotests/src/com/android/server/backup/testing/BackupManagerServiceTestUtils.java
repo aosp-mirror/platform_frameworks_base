@@ -52,23 +52,36 @@ import java.util.concurrent.atomic.AtomicReference;
 /** Test utils for {@link UserBackupManagerService} and friends. */
 public class BackupManagerServiceTestUtils {
     /**
-     * If the class-under-test is going to execute methods as the system, it's a good idea to also
-     * call {@link #setUpBinderCallerAndApplicationAsSystem(Application)} before this method.
+     * Creates an instance of {@link UserBackupManagerService} with a new backup thread and runs
+     * tasks that were posted to it during instantiation.
+     *
+     * <p>If the class-under-test is going to execute methods as the system, it's a good idea to
+     * also call {@link #setUpBinderCallerAndApplicationAsSystem(Application)} before this method.
+     *
+     * @see #createUserBackupManagerServiceAndRunTasks(Context, HandlerThread, File, File,
+     *     TransportManager)
      */
-    public static UserBackupManagerService createInitializedUserBackupManagerService(
+    public static UserBackupManagerService createUserBackupManagerServiceAndRunTasks(
             Context context, File baseStateDir, File dataDir, TransportManager transportManager) {
-        return createInitializedUserBackupManagerService(
+        return createUserBackupManagerServiceAndRunTasks(
                 context, startBackupThread(null), baseStateDir, dataDir, transportManager);
     }
 
-    public static UserBackupManagerService createInitializedUserBackupManagerService(
+    /**
+     * Creates an instance of {@link UserBackupManagerService} with the supplied backup thread
+     * {@code backupThread} and runs tasks that were posted to it during instantiation.
+     *
+     * <p>If the class-under-test is going to execute methods as the system, it's a good idea to
+     * also call {@link #setUpBinderCallerAndApplicationAsSystem(Application)} before this method.
+     */
+    public static UserBackupManagerService createUserBackupManagerServiceAndRunTasks(
             Context context,
             HandlerThread backupThread,
             File baseStateDir,
             File dataDir,
             TransportManager transportManager) {
         UserBackupManagerService backupManagerService =
-                new UserBackupManagerService(
+                UserBackupManagerService.createAndInitializeService(
                         context,
                         new Trampoline(context),
                         backupThread,
