@@ -1,5 +1,5 @@
 android_library {
-    name: "SettingsLayoutPreference",
+    name: "SettingsLibLayoutPreference",
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
