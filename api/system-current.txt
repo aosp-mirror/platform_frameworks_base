@@ -850,6 +850,8 @@ package android.app.backup {
     method public int restoreAll(long, android.app.backup.RestoreObserver);
     method public int restorePackage(java.lang.String, android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor);
     method public int restorePackage(java.lang.String, android.app.backup.RestoreObserver);
+    method public int restoreSome(long, android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor, java.lang.String[]);
+    method public int restoreSome(long, android.app.backup.RestoreObserver, java.lang.String[]);
   }
 
   public class RestoreSet implements android.os.Parcelable {

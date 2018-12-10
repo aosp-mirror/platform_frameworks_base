@@ -143,8 +143,6 @@ public class RestoreSession {
      * @param packages The set of packages for which to attempt a restore.  Regardless of
      *   the contents of the actual back-end dataset named by {@code token}, only
      *   applications mentioned in this list will have their data restored.
-     *
-     * @hide
      */
     public int restoreSome(long token, RestoreObserver observer, BackupManagerMonitor monitor,
             String[] packages) {
@@ -181,8 +179,6 @@ public class RestoreSession {
      * @param packages The set of packages for which to attempt a restore.  Regardless of
      *   the contents of the actual back-end dataset named by {@code token}, only
      *   applications mentioned in this list will have their data restored.
-     *
-     * @hide
      */
     public int restoreSome(long token, RestoreObserver observer, String[] packages) {
         return restoreSome(token, observer, null, packages);
