@@ -30,6 +30,7 @@ import "frameworks/base/core/proto/android/server/enums.proto";
 import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
+import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
@@ -159,6 +160,15 @@ message Atom {
         PhenotypeFlagStateChanged phenotype_flag_state_changed = 101;
         BinaryPushStateChanged binary_push_state_changed = 102;
         DevicePolicyEvent device_policy_event = 103;
+        DocsUIFileOperationCanceledReported docs_ui_file_op_canceled = 104;
+        DocsUIFileOperationCopyMoveModeReported docs_ui_file_op_copy_move_mode_reported = 105;
+        DocsUIFileOperationFailureReported docs_ui_file_op_failure = 106;
+        DocsUIFileOperationReported docs_ui_provider_file_op = 107;
+        DocsUIInvalidScopedAccessRequestReported docs_ui_invalid_scoped_access_request = 108;
+        DocsUILaunchReported docs_ui_launch_reported = 109;
+        DocsUIRootVisitedReported docs_ui_root_visited = 110;
+        DocsUIStartupMsReported docs_ui_startup_ms = 111;
+        DocsUIUserActionReported docs_ui_user_action_reported = 112;
     }
 
     // Pulled events will start at field 10000.
@@ -3466,4 +3476,104 @@ message DevicePolicyEvent {
     optional uint64 time_period_millis = 5;
     // A parameter specifying a list of package names, bundle extras or string parameters.
     optional android.stats.devicepolicy.StringList string_list_value = 6 [(log_mode) = MODE_BYTES];
+}
+
+/**
+ * Logs when DocumentsUI is started, and how. Call this when DocumentsUI first starts up.
+ *
+ * Logged from:
+ *     package/app/DocumentsUI/src/com/android/documentsui/Metrics.java
+ */
+message DocsUILaunchReported {
+    optional android.stats.docsui.LaunchAction launch_action = 1;
+    optional bool has_initial_uri = 2;
+    optional android.stats.docsui.MimeType mime_type = 3;
+    optional android.stats.docsui.Root initial_root = 4;
+}
+
+/**
+ * Logs root/app visited event in file managers/picker. Call this when the user
+ * taps on root/app in hamburger menu.
+ *
+ * Logged from:
+ *     package/app/DocumentsUI/src/com/android/documentsui/Metrics.java
+ */
+message DocsUIRootVisitedReported {
+    optional android.stats.docsui.ContextScope scope = 1;
+    optional android.stats.docsui.Root root = 2;
+}
+
+/**
+ * Logs file operation stats. Call this when a file operation has completed.
+ *
+ * Logged from:
+ *     package/app/DocumentsUI/src/com/android/documentsui/Metrics.java
+ */
+message DocsUIFileOperationReported {
+    optional android.stats.docsui.Provider provider = 1;
+    optional android.stats.docsui.FileOperation file_op = 2;
+}
+
+/**
+ * Logs file operation stats. Call this when a copy/move operation has completed with a specific
+ * mode.
+ *
+ * Logged from:
+ *     package/app/DocumentsUI/src/com/android/documentsui/Metrics.java
+ */
+message DocsUIFileOperationCopyMoveModeReported {
+    optional android.stats.docsui.FileOperation file_op = 1;
+    optional android.stats.docsui.CopyMoveOpMode mode = 2;
+}
+
+
+/**
+ * Logs file sub operation stats. Call this when a file operation has failed.
+ *
+ * Logged from:
+ *     package/app/DocumentsUI/src/com/android/documentsui/Metrics.java
+ */
+message DocsUIFileOperationFailureReported {
+    optional android.stats.docsui.Authority authority = 1;
+    optional android.stats.docsui.SubFileOperation sub_op = 2;
+}
+
+/**
+* Logs the cancellation of a file operation. Call this when a job is canceled
+*
+* Logged from:
+*     package/app/DocumentsUI/src/com/android/documentsui/Metrics.java
+*/
+message DocsUIFileOperationCanceledReported {
+    optional android.stats.docsui.FileOperation file_op = 1;
+}
+
+/**
+ * Logs startup time in milliseconds.
+ *
+ * Logged from:
+ *     package/app/DocumentsUI/src/com/android/documentsui/Metrics.java
+ */
+message DocsUIStartupMsReported {
+    optional int32 startup_millis = 1;
+}
+
+/**
+ * Logs the action that was started by user.
+ *
+ * Logged from:
+ *     package/app/DocumentsUI/src/com/android/documentsui/Metrics.java
+ */
+message DocsUIUserActionReported {
+    optional android.stats.docsui.UserAction action = 1;
+}
+
+/**
+ * Logs the invalid type when invalid scoped access is requested.
+ *
+ * Logged from:
+ *     package/app/DocumentsUI/src/com/android/documentsui/ScopedAccessMetrics.java
+ */
+message DocsUIInvalidScopedAccessRequestReported {
+    optional android.stats.docsui.InvalidScopedAccess type = 1;
 }
