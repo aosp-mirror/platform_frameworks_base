@@ -33,19 +33,34 @@ import java.util.Set;
  * Represents signed configuration.
  *
  * <p>This configuration should only be used if the signature has already been verified.
+ *
+ * This class also parses signed config from JSON. The format expected is:
+ * <pre>
+ * {
+ *   "version": 1
+ *   "config": [
+ *     {
+ *       "min_sdk": 28,
+ *       "max_sdk": 29,
+ *       "values": {
+ *         "key": "value",
+ *         "key2": "value2"
+ *         ...
+ *       }
+ *     },
+ *     ...
+ *   ],
+ * }
+ * </pre>
  */
 public class SignedConfig {
 
     private static final String KEY_VERSION = "version";
     private static final String KEY_CONFIG = "config";
 
-    private static final String CONFIG_KEY_MIN_SDK = "minSdk";
-    private static final String CONFIG_KEY_MAX_SDK = "maxSdk";
+    private static final String CONFIG_KEY_MIN_SDK = "min_sdk";
+    private static final String CONFIG_KEY_MAX_SDK = "max_sdk";
     private static final String CONFIG_KEY_VALUES = "values";
-    // TODO it may be better to use regular key/value pairs in a JSON object, rather than an array
-    // of objects with the 2 keys below.
-    private static final String CONFIG_KEY_KEY = "key";
-    private static final String CONFIG_KEY_VALUE = "value";
 
     /**
      * Represents config values targeting an SDK range.
@@ -141,14 +156,10 @@ public class SignedConfig {
             throws JSONException, InvalidConfigException {
         int minSdk = json.getInt(CONFIG_KEY_MIN_SDK);
         int maxSdk = json.getInt(CONFIG_KEY_MAX_SDK);
-        JSONArray valueArray = json.getJSONArray(CONFIG_KEY_VALUES);
+        JSONObject valuesJson = json.getJSONObject(CONFIG_KEY_VALUES);
         Map<String, String> values = new HashMap<>();
-        for (int i = 0; i < valueArray.length(); ++i) {
-            JSONObject keyValuePair = valueArray.getJSONObject(i);
-            String key = keyValuePair.getString(CONFIG_KEY_KEY);
-            Object valueObject = keyValuePair.has(CONFIG_KEY_VALUE)
-                    ? keyValuePair.get(CONFIG_KEY_VALUE)
-                    : null;
+        for (String key : valuesJson.keySet()) {
+            Object valueObject = valuesJson.get(key);
             String value = valueObject == JSONObject.NULL || valueObject == null
                             ? null
                             : valueObject.toString();
