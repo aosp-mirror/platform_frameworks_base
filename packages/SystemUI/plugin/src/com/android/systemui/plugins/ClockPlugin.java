@@ -18,6 +18,8 @@ import android.view.View;
 
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
+import java.util.TimeZone;
+
 /**
  * This plugin is used to replace main clock in keyguard.
  */
@@ -55,4 +57,9 @@ public interface ClockPlugin extends Plugin {
      * @param darkAmount Amount of transition to doze: 1f for doze and 0f for awake.
      */
     default void setDarkAmount(float darkAmount) {}
+
+    /**
+     * Notifies that the time zone has changed.
+     */
+    default void onTimeZoneChanged(TimeZone timeZone) {}
 }
