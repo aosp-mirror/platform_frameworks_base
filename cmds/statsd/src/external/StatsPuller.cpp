@@ -59,15 +59,21 @@ bool StatsPuller::Pull(const int64_t elapsedTimeNs, std::vector<std::shared_ptr<
     mLastPullTimeNs = elapsedTimeNs;
     int64_t pullStartTimeNs = getElapsedRealtimeNs();
     bool ret = PullInternal(&mCachedData);
+    if (!ret) {
+        mCachedData.clear();
+        return false;
+    }
     StatsdStats::getInstance().notePullTime(mTagId, getElapsedRealtimeNs() - pullStartTimeNs);
     for (const shared_ptr<LogEvent>& data : mCachedData) {
         data->setElapsedTimestampNs(elapsedTimeNs);
         data->setLogdWallClockTimestampNs(wallClockTimeNs);
     }
-    if (ret && mCachedData.size() > 0) {
+
+    if (mCachedData.size() > 0) {
         mapAndMergeIsolatedUidsToHostUid(mCachedData, mUidMap, mTagId);
         (*data) = mCachedData;
     }
+
     StatsdStats::getInstance().notePullDelay(mTagId, getElapsedRealtimeNs() - elapsedTimeNs);
     return ret;
 }
