@@ -17,9 +17,10 @@ package com.android.systemui.qs.tileimpl;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_CLICK;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_LONG_PRESS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_SECONDARY_CLICK;
-import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_CONTEXT;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_IS_FULL_QS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_POSITION;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_VALUE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_STATUS_BAR_STATE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
@@ -52,6 +53,7 @@ import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.PagedTileLayout.TilePage;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QuickStatusBarHeader;
+import com.android.systemui.statusbar.StatusBarStateController;
 
 import java.util.ArrayList;
 
@@ -61,6 +63,8 @@ import java.util.ArrayList;
  * State management done on a looper provided by the host.  Tiles should update state in
  * handleUpdateState.  Callbacks affecting state should use refreshState to trigger another
  * state update pass on tile looper.
+ *
+ * @param <TState> see above
  */
 public abstract class QSTileImpl<TState extends State> implements QSTile {
     protected final String TAG = "Tile." + getClass().getSimpleName();
@@ -76,6 +80,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
     private final ArraySet<Object> mListeners = new ArraySet<>();
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    private final StatusBarStateController
+            mStatusBarStateController = Dependency.get(StatusBarStateController.class);
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final Object mStaleListener = new Object();
@@ -172,17 +178,23 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     }
 
     public void click() {
-        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_CLICK).setType(TYPE_ACTION)));
+        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_CLICK).setType(TYPE_ACTION)
+                .addTaggedData(FIELD_STATUS_BAR_STATE,
+                        mStatusBarStateController.getState())));
         mHandler.sendEmptyMessage(H.CLICK);
     }
 
     public void secondaryClick() {
-        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_SECONDARY_CLICK).setType(TYPE_ACTION)));
+        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_SECONDARY_CLICK).setType(TYPE_ACTION)
+                .addTaggedData(FIELD_STATUS_BAR_STATE,
+                        mStatusBarStateController.getState())));
         mHandler.sendEmptyMessage(H.SECONDARY_CLICK);
     }
 
     public void longClick() {
-        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_LONG_PRESS).setType(TYPE_ACTION)));
+        mMetricsLogger.write(populate(new LogMaker(ACTION_QS_LONG_PRESS).setType(TYPE_ACTION)
+                .addTaggedData(FIELD_STATUS_BAR_STATE,
+                        mStatusBarStateController.getState())));
         mHandler.sendEmptyMessage(H.LONG_CLICK);
 
         Prefs.putInt(
@@ -196,7 +208,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
             logMaker.addTaggedData(FIELD_QS_VALUE, ((BooleanState) mState).value ? 1 : 0);
         }
         return logMaker.setSubtype(getMetricsCategory())
-                .addTaggedData(FIELD_CONTEXT, mIsFullQs)
+                .addTaggedData(FIELD_IS_FULL_QS, mIsFullQs)
                 .addTaggedData(FIELD_QS_POSITION, mHost.indexOf(mTileSpec));
     }
 
