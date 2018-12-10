@@ -1657,7 +1657,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * @param token The window token given to the input method when it was started.
      * @return true if and only if non-null valid token is specified.
      */
-    private boolean calledWithValidToken(@Nullable IBinder token) {
+    @GuardedBy("mMethodMap")
+    private boolean calledWithValidTokenLocked(@Nullable IBinder token) {
         if (token == null && Binder.getCallingPid() == Process.myPid()) {
             if (DEBUG) {
                 // TODO(b/34851776): Basically it's the caller's fault if we reach here.
@@ -2238,7 +2239,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private void updateStatusIcon(@NonNull IBinder token, String packageName,
             @DrawableRes int iconId) {
         synchronized (mMethodMap) {
-            if (!calledWithValidToken(token)) {
+            if (!calledWithValidTokenLocked(token)) {
                 return;
             }
             final long ident = Binder.clearCallingIdentity();
@@ -2341,11 +2342,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     @SuppressWarnings("deprecation")
     private void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
-        if (!calledWithValidToken(token)) {
-            return;
-        }
-
         synchronized (mMethodMap) {
+            if (!calledWithValidTokenLocked(token)) {
+                return;
+            }
             mImeWindowVis = vis;
             mBackDisposition = backDisposition;
             updateSystemUiLocked(token, vis, backDisposition);
@@ -2376,11 +2376,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     private void reportStartInput(IBinder token, IBinder startInputToken) {
-        if (!calledWithValidToken(token)) {
-            return;
-        }
-
         synchronized (mMethodMap) {
+            if (!calledWithValidTokenLocked(token)) {
+                return;
+            }
             final IBinder targetWindow = mImeTargetWindowMap.get(startInputToken);
             if (targetWindow != null && mLastImeTargetWindow != targetWindow) {
                 mWindowManagerInternal.updateInputMethodTargetWindow(token, targetWindow);
@@ -2391,7 +2390,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // Caution! This method is called in this class. Handle multi-user carefully
     private void updateSystemUiLocked(IBinder token, int vis, int backDisposition) {
-        if (!calledWithValidToken(token)) {
+        if (!calledWithValidTokenLocked(token)) {
             return;
         }
 
@@ -3125,7 +3124,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         synchronized (mMethodMap) {
-            if (!calledWithValidToken(token)) {
+            if (!calledWithValidTokenLocked(token)) {
                 return false;
             }
             final Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
@@ -3200,7 +3199,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         synchronized (mMethodMap) {
-            if (!calledWithValidToken(token)) {
+            if (!calledWithValidTokenLocked(token)) {
                 return false;
             }
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
@@ -3220,7 +3219,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         synchronized (mMethodMap) {
-            if (!calledWithValidToken(token)) {
+            if (!calledWithValidTokenLocked(token)) {
                 return false;
             }
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
@@ -3367,7 +3366,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
         synchronized (mMethodMap) {
-            if (!calledWithValidToken(token)) {
+            if (!calledWithValidTokenLocked(token)) {
                 return;
             }
             long ident = Binder.clearCallingIdentity();
@@ -3385,7 +3384,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
         synchronized (mMethodMap) {
-            if (!calledWithValidToken(token)) {
+            if (!calledWithValidTokenLocked(token)) {
                 return;
             }
             long ident = Binder.clearCallingIdentity();
@@ -4596,7 +4595,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
         synchronized (mMethodMap) {
-            if (!calledWithValidToken(token)) {
+            if (!calledWithValidTokenLocked(token)) {
                 return;
             }
             if (mCurClient != null && mCurClient.client != null) {
