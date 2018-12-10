@@ -63,6 +63,7 @@ LOCAL_MODULE := privapp_whitelist_com.android.systemui
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_RELATIVE_PATH := permissions
 LOCAL_MODULE_STEM := com.android.systemui.xml
+LOCAL_PRODUCT_MODULE := true
 LOCAL_SRC_FILES := com.android.systemui.xml
 include $(BUILD_PREBUILT)
 
