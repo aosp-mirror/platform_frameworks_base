@@ -36,7 +36,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
-import android.hardware.display.ColorDisplayManager;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -1443,11 +1442,9 @@ public final class SystemServer {
             mSystemServiceManager.startService(TwilightService.class);
             traceEnd();
 
-            if (ColorDisplayManager.isNightDisplayAvailable(context)) {
-                traceBeginAndSlog("StartColorDisplay");
-                mSystemServiceManager.startService(ColorDisplayService.class);
-                traceEnd();
-            }
+            traceBeginAndSlog("StartColorDisplay");
+            mSystemServiceManager.startService(ColorDisplayService.class);
+            traceEnd();
 
             traceBeginAndSlog("StartJobScheduler");
             mSystemServiceManager.startService(JobSchedulerService.class);
