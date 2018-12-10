@@ -11258,7 +11258,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                 == UsesPermissionInfo.USAGE_UNDEFINED
                             || upi.getDataRetention() == UsesPermissionInfo.RETENTION_UNDEFINED) {
                         // STOPSHIP: Make this throw
-                        Slog.wtf(TAG, "Package " + pkg.packageName + " does not provide usage "
+                        Slog.e(TAG, "Package " + pkg.packageName + " does not provide usage "
                                 + "information for permission " + upi.getPermission()
                                 + ". This will be a fatal error in Q.");
                     }
