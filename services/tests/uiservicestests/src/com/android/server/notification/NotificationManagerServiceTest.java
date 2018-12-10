@@ -20,6 +20,7 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREG
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.EXTRA_BLOCKED_STATE;
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
@@ -183,7 +184,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     Resources mResources;
 
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
-            TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
+            TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
     @Mock
     private NotificationListeners mListeners;
     @Mock private NotificationAssistants mAssistants;
@@ -430,7 +431,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCreateNotificationChannels_SingleChannel() throws Exception {
         final NotificationChannel channel =
-                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
+                new NotificationChannel("id", "name", IMPORTANCE_DEFAULT);
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(channel)));
         final NotificationChannel createdChannel =
@@ -452,9 +453,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCreateNotificationChannels_TwoChannels() throws Exception {
         final NotificationChannel channel1 =
-                new NotificationChannel("id1", "name", NotificationManager.IMPORTANCE_DEFAULT);
+                new NotificationChannel("id1", "name", IMPORTANCE_DEFAULT);
         final NotificationChannel channel2 =
-                new NotificationChannel("id2", "name", NotificationManager.IMPORTANCE_DEFAULT);
+                new NotificationChannel("id2", "name", IMPORTANCE_DEFAULT);
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(channel1, channel2)));
         assertTrue(mBinderService.getNotificationChannel(PKG, "id1") != null);
@@ -465,7 +466,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testCreateNotificationChannels_SecondCreateDoesNotChangeImportance()
             throws Exception {
         final NotificationChannel channel =
-                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
+                new NotificationChannel("id", "name", IMPORTANCE_DEFAULT);
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(channel)));
 
@@ -476,14 +477,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 new ParceledListSlice(Arrays.asList(dupeChannel)));
         final NotificationChannel createdChannel =
                 mBinderService.getNotificationChannel(PKG, "id");
-        assertEquals(NotificationManager.IMPORTANCE_DEFAULT, createdChannel.getImportance());
+        assertEquals(IMPORTANCE_DEFAULT, createdChannel.getImportance());
     }
 
     @Test
     public void testCreateNotificationChannels_SecondCreateAllowedToDowngradeImportance()
             throws Exception {
         final NotificationChannel channel =
-                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
+                new NotificationChannel("id", "name", IMPORTANCE_DEFAULT);
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(channel)));
 
@@ -501,7 +502,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testCreateNotificationChannels_CannotDowngradeImportanceIfAlreadyUpdated()
             throws Exception {
         final NotificationChannel channel =
-                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
+                new NotificationChannel("id", "name", IMPORTANCE_DEFAULT);
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(channel)));
 
@@ -524,14 +525,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testCreateNotificationChannels_IdenticalChannelsInListIgnoresSecond()
             throws Exception {
         final NotificationChannel channel1 =
-                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
+                new NotificationChannel("id", "name", IMPORTANCE_DEFAULT);
         final NotificationChannel channel2 =
                 new NotificationChannel("id", "name", IMPORTANCE_HIGH);
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(channel1, channel2)));
         final NotificationChannel createdChannel =
                 mBinderService.getNotificationChannel(PKG, "id");
-        assertEquals(NotificationManager.IMPORTANCE_DEFAULT, createdChannel.getImportance());
+        assertEquals(IMPORTANCE_DEFAULT, createdChannel.getImportance());
     }
 
     @Test
@@ -756,13 +757,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testBlockedNotifications_blockedByAssistant() throws Exception {
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
 
         NotificationChannel channel = new NotificationChannel("id", "name",
                 NotificationManager.IMPORTANCE_HIGH);
         NotificationRecord r = generateNotificationRecord(channel);
         mService.addEnqueuedNotification(r);
 
-        r.setAssistantImportance(IMPORTANCE_NONE);
+        Bundle bundle = new Bundle();
+        bundle.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_NONE);
+        Adjustment adjustment = new Adjustment(
+                r.sbn.getPackageName(), r.getKey(), bundle, "", r.getUser().getIdentifier());
+        mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
 
         NotificationManagerService.PostNotificationRunnable runnable =
                 mService.new PostNotificationRunnable(r.getKey());
@@ -1814,7 +1820,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
         when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
-try {
+        try {
             mBinderService.getNotificationChannelGroupsFromPrivilegedListener(
                     null, PKG, Process.myUserHandle());
             fail("listeners that don't have a companion device shouldn't be able to call this");
@@ -2617,7 +2623,7 @@ try {
     }
 
     @Test
-    public void testAssistantIBlockingTriggersCancel() throws Exception {
+    public void testAssistantBlockingTriggersCancel() throws Exception {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
         NotificationManagerService.WorkerHandler handler = mock(
@@ -2654,6 +2660,43 @@ try {
         mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
 
         assertEquals(USER_SENTIMENT_NEGATIVE, r.getUserSentiment());
+    }
+
+    @Test
+    public void testApplyEnqueuedAdjustmentFromAssistant_importance_onTime() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addEnqueuedNotification(r);
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(true);
+
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_LOW);
+        Adjustment adjustment = new Adjustment(
+                r.sbn.getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
+        mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
+
+        assertEquals(IMPORTANCE_LOW, r.getImportance());
+    }
+
+    @Test
+    public void testApplyEnqueuedAdjustmentFromAssistant_importance_tooLate() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(true);
+
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_LOW);
+        Adjustment adjustment = new Adjustment(
+                r.sbn.getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
+        mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
+
+        assertEquals(IMPORTANCE_DEFAULT, r.getImportance());
+        assertFalse(r.hasAdjustment(Adjustment.KEY_IMPORTANCE));
     }
 
     @Test
@@ -2856,7 +2899,7 @@ try {
     @Test
     public void updateUriPermissions_update() throws Exception {
         NotificationChannel c = new NotificationChannel(
-                TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
+                TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
         c.setSound(null, Notification.AUDIO_ATTRIBUTES_DEFAULT);
         Message message1 = new Message("", 0, "");
         message1.setData("",

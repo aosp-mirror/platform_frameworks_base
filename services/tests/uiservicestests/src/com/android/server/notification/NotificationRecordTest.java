@@ -760,6 +760,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
 
         record.setAssistantImportance(IMPORTANCE_LOW);
+        record.calculateImportance();
         assertEquals(IMPORTANCE_LOW, record.getImportance());
 
         // assistant ignored if user expressed preference
@@ -767,6 +768,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
         channel.lockFields(USER_LOCKED_IMPORTANCE);
 
         record.setAssistantImportance(IMPORTANCE_LOW);
+        record.calculateImportance();
         assertEquals(channel.getImportance(), record.getImportance());
     }
 
@@ -779,6 +781,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
 
         record.setAssistantImportance(IMPORTANCE_LOW);
+        record.calculateImportance();
         assertEquals(IMPORTANCE_LOW, record.getImportance());
 
         record.updateNotificationChannel(
