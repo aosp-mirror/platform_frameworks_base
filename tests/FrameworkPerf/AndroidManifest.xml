@@ -13,7 +13,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name="SchedulerService">
+        <service android:name="SchedulerService"
+            android:foregroundServiceType="sync">
         </service>
         <service android:name="TestService" android:process=":test">
         </service>
