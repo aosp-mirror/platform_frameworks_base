@@ -1617,7 +1617,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     // Check whether or not this is a valid IPC. Assumes an IPC is valid when either
     // 1) it comes from the system process
     // 2) the calling process' user id is identical to the current user id IMMS thinks.
-    private boolean calledFromValidUser() {
+    @GuardedBy("mMethodMap")
+    private boolean calledFromValidUserLocked() {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserId(uid);
         if (DEBUG) {
@@ -1699,11 +1700,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private List<InputMethodInfo> getInputMethodList(final boolean isVrOnly) {
-        // TODO: Make this work even for non-current users?
-        if (!calledFromValidUser()) {
-            return Collections.emptyList();
-        }
         synchronized (mMethodMap) {
+            // TODO: Make this work even for non-current users?
+            if (!calledFromValidUserLocked()) {
+                return Collections.emptyList();
+            }
             ArrayList<InputMethodInfo> methodList = new ArrayList<>();
             for (InputMethodInfo info : mMethodList) {
 
@@ -1717,11 +1718,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public List<InputMethodInfo> getEnabledInputMethodList() {
-        // TODO: Make this work even for non-current users?
-        if (!calledFromValidUser()) {
-            return Collections.emptyList();
-        }
         synchronized (mMethodMap) {
+            // TODO: Make this work even for non-current users?
+            if (!calledFromValidUserLocked()) {
+                return Collections.emptyList();
+            }
             return mSettings.getEnabledInputMethodListLocked();
         }
     }
@@ -1733,11 +1734,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
             boolean allowsImplicitlySelectedSubtypes) {
-        // TODO: Make this work even for non-current users?
-        if (!calledFromValidUser()) {
-            return Collections.emptyList();
-        }
         synchronized (mMethodMap) {
+            // TODO: Make this work even for non-current users?
+            if (!calledFromValidUserLocked()) {
+                return Collections.emptyList();
+            }
             final InputMethodInfo imi;
             if (imiId == null && mCurMethodId != null) {
                 imi = mMethodMap.get(mCurMethodId);
@@ -2449,10 +2450,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public void registerSuggestionSpansForNotification(SuggestionSpan[] spans) {
-        if (!calledFromValidUser()) {
-            return;
-        }
         synchronized (mMethodMap) {
+            if (!calledFromValidUserLocked()) {
+                return;
+            }
             final InputMethodInfo currentImi = mMethodMap.get(mCurMethodId);
             for (int i = 0; i < spans.length; ++i) {
                 SuggestionSpan ss = spans[i];
@@ -2465,10 +2466,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public boolean notifySuggestionPicked(SuggestionSpan span, String originalString, int index) {
-        if (!calledFromValidUser()) {
-            return false;
-        }
         synchronized (mMethodMap) {
+            if (!calledFromValidUserLocked()) {
+                return false;
+            }
             final InputMethodInfo targetImi = mSecureSuggestionSpans.get(span);
             // TODO: Do not send the intent if the process of the targetImi is already dead.
             if (targetImi != null) {
@@ -2632,13 +2633,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public boolean showSoftInput(IInputMethodClient client, int flags,
             ResultReceiver resultReceiver) {
-        if (!calledFromValidUser()) {
-            return false;
-        }
         int uid = Binder.getCallingUid();
-        long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mMethodMap) {
+        synchronized (mMethodMap) {
+            if (!calledFromValidUserLocked()) {
+                return false;
+            }
+            final long ident = Binder.clearCallingIdentity();
+            try {
                 if (mCurClient == null || client == null
                         || mCurClient.client.asBinder() != client.asBinder()) {
                     // We need to check if this is the current client with
@@ -2656,9 +2657,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
                 return showCurrentInputLocked(flags, resultReceiver);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -2717,13 +2718,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public boolean hideSoftInput(IInputMethodClient client, int flags,
             ResultReceiver resultReceiver) {
-        if (!calledFromValidUser()) {
-            return false;
-        }
         int uid = Binder.getCallingUid();
-        long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mMethodMap) {
+        synchronized (mMethodMap) {
+            if (!calledFromValidUserLocked()) {
+                return false;
+            }
+            final long ident = Binder.clearCallingIdentity();
+            try {
                 if (mCurClient == null || client == null
                         || mCurClient.client.asBinder() != client.asBinder()) {
                     // We need to check if this is the current client with
@@ -2744,9 +2745,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                 if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
                 return hideCurrentInputLocked(flags, resultReceiver);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -2826,14 +2827,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             @SoftInputModeFlags int softInputMode, int windowFlags, EditorInfo attribute,
             IInputContext inputContext, @MissingMethodFlags int missingMethods,
             int unverifiedTargetSdkVersion) {
-        // Needs to check the validity before clearing calling identity
-        final boolean calledFromValidUser = calledFromValidUser();
         InputBindResult res = null;
-        long ident = Binder.clearCallingIdentity();
-        try {
+        synchronized (mMethodMap) {
+            // Needs to check the validity before clearing calling identity
+            final boolean calledFromValidUser = calledFromValidUserLocked();
             final int windowDisplayId =
                     mWindowManagerInternal.getDisplayIdForWindow(windowToken);
-            synchronized (mMethodMap) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
                 if (DEBUG) Slog.v(TAG, "startInputOrWindowGainedFocusInternal: reason="
                         + InputMethodDebug.startInputReasonToString(startInputReason)
                         + " client=" + client.asBinder()
@@ -3022,9 +3023,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         res = InputBindResult.NULL_EDITOR_INFO;
                     }
                 }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
 
         return res;
@@ -3055,10 +3056,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void showInputMethodPickerFromClient(
             IInputMethodClient client, int auxiliarySubtypeMode) {
-        if (!calledFromValidUser()) {
-            return;
-        }
         synchronized (mMethodMap) {
+            if (!calledFromValidUserLocked()) {
+                return;
+            }
             if(!canShowInputMethodPickerLocked(client)) {
                 Slog.w(TAG, "Ignoring showInputMethodPickerFromClient of uid "
                         + Binder.getCallingUid() + ": " + client);
@@ -3083,18 +3084,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public void setInputMethod(IBinder token, String id) {
-        if (!calledFromValidUser()) {
-            return;
+        synchronized (mMethodMap) {
+            if (!calledFromValidUserLocked()) {
+                return;
+            }
+            setInputMethodWithSubtypeIdLocked(token, id, NOT_A_SUBTYPE_ID);
         }
-        setInputMethodWithSubtypeId(token, id, NOT_A_SUBTYPE_ID);
     }
 
     @Override
     public void setInputMethodAndSubtype(IBinder token, String id, InputMethodSubtype subtype) {
-        if (!calledFromValidUser()) {
-            return;
-        }
         synchronized (mMethodMap) {
+            if (!calledFromValidUserLocked()) {
+                return;
+            }
             if (subtype != null) {
                 setInputMethodWithSubtypeIdLocked(token, id,
                         InputMethodUtils.getSubtypeIdFromHashCode(mMethodMap.get(id),
@@ -3108,11 +3111,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void showInputMethodAndSubtypeEnablerFromClient(
             IInputMethodClient client, String inputMethodId) {
-        // TODO(yukawa): Should we verify the display ID?
-        if (!calledFromValidUser()) {
-            return;
-        }
         synchronized (mMethodMap) {
+            // TODO(yukawa): Should we verify the display ID?
+            if (!calledFromValidUserLocked()) {
+                return;
+            }
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageO(
                     MSG_SHOW_IM_SUBTYPE_ENABLER, inputMethodId));
         }
@@ -3224,10 +3227,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public InputMethodSubtype getLastInputMethodSubtype() {
-        if (!calledFromValidUser()) {
-            return null;
-        }
         synchronized (mMethodMap) {
+            if (!calledFromValidUserLocked()) {
+                return null;
+            }
             final Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
             // TODO: Handle the case of the last IME with no subtypes
             if (lastIme == null || TextUtils.isEmpty(lastIme.first)
@@ -3250,13 +3253,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
-        if (!calledFromValidUser()) {
-            return;
-        }
         // By this IPC call, only a process which shares the same uid with the IME can add
         // additional input method subtypes to the IME.
         if (TextUtils.isEmpty(imiId) || subtypes == null) return;
         synchronized (mMethodMap) {
+            if (!calledFromValidUserLocked()) {
+                return;
+            }
             if (!mSystemReady) {
                 return;
             }
@@ -3319,12 +3322,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (imi != null) {
                 mSwitchingController.onUserActionLocked(imi, mCurrentSubtype);
             }
-        }
-    }
-
-    private void setInputMethodWithSubtypeId(IBinder token, String id, int subtypeId) {
-        synchronized (mMethodMap) {
-            setInputMethodWithSubtypeIdLocked(token, id, subtypeId);
         }
     }
 
@@ -4182,11 +4179,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @Override
     public InputMethodSubtype getCurrentInputMethodSubtype() {
-        // TODO: Make this work even for non-current users?
-        if (!calledFromValidUser()) {
-            return null;
-        }
         synchronized (mMethodMap) {
+            // TODO: Make this work even for non-current users?
+            if (!calledFromValidUserLocked()) {
+                return null;
+            }
             return getCurrentInputMethodSubtypeLocked();
         }
     }
@@ -4261,11 +4258,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
-        // TODO: Make this work even for non-current users?
-        if (!calledFromValidUser()) {
-            return false;
-        }
         synchronized (mMethodMap) {
+            // TODO: Make this work even for non-current users?
+            if (!calledFromValidUserLocked()) {
+                return false;
+            }
             if (subtype != null && mCurMethodId != null) {
                 InputMethodInfo imi = mMethodMap.get(mCurMethodId);
                 int subtypeId = InputMethodUtils.getSubtypeIdFromHashCode(imi, subtype.hashCode());
