@@ -3191,8 +3191,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public boolean switchToNextInputMethod(IBinder token, boolean onlyCurrentIme) {
+    @BinderThread
+    private boolean switchToNextInputMethod(IBinder token, boolean onlyCurrentIme) {
         if (!calledFromValidUser()) {
             return false;
         }

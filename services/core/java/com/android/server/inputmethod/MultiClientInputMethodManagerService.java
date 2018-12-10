@@ -1602,13 +1602,6 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public boolean switchToNextInputMethod(IBinder token, boolean onlyCurrentIme) {
-            reportNotSupported();
-            return false;
-        }
-
-        @BinderThread
-        @Override
         public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
             reportNotSupported();
         }
