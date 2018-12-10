@@ -16,12 +16,12 @@
 
 package com.android.location.provider;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.location.LocationRequest;
 
 import com.android.internal.location.ProviderRequest;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class is an interface to Provider Requests for unbundled applications.
@@ -44,6 +44,10 @@ public final class ProviderRequestUnbundled {
 
     public long getInterval() {
         return mRequest.interval;
+    }
+
+    public boolean getForceLocation() {
+        return mRequest.forceLocation;
     }
 
     /**

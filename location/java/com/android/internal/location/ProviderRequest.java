@@ -16,14 +16,14 @@
 
 package com.android.internal.location;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.annotation.UnsupportedAppUsage;
 import android.location.LocationRequest;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.TimeUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /** @hide */
 public final class ProviderRequest implements Parcelable {
@@ -34,6 +34,13 @@ public final class ProviderRequest implements Parcelable {
     /** The smallest requested interval */
     @UnsupportedAppUsage
     public long interval = Long.MAX_VALUE;
+
+    /**
+     * When this flag is true, providers should ignore all location settings, user consents, power
+     * restrictions or any other restricting factors and always satisfy this request to the best of
+     * their ability. This flag should only be used in event of an emergency.
+     */
+    public boolean forceLocation = false;
 
     /**
      * Whether provider shall make stronger than normal tradeoffs to substantially restrict power

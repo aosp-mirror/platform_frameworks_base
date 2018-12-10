@@ -451,6 +451,7 @@ java_defaults {
         "location/java/android/location/IGpsGeofenceHardware.aidl",
         "location/java/android/location/INetInitiatedListener.aidl",
         "location/java/com/android/internal/location/ILocationProvider.aidl",
+        "location/java/com/android/internal/location/ILocationProviderManager.aidl",
         "media/java/android/media/IAudioFocusDispatcher.aidl",
         "media/java/android/media/IAudioRoutesObserver.aidl",
         "media/java/android/media/IAudioService.aidl",

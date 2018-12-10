@@ -17,13 +17,9 @@
 package com.android.server.location;
 
 import android.location.Criteria;
-import android.location.ILocationManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.WorkSource;
-import android.util.Log;
 
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
@@ -38,41 +34,20 @@ import java.io.PrintWriter;
  *
  * {@hide}
  */
-public class PassiveProvider extends LocationProviderInterface {
-    private static final String TAG = "PassiveProvider";
+public class PassiveProvider extends AbstractLocationProvider {
 
     private static final ProviderProperties PROPERTIES = new ProviderProperties(
             false, false, false, false, false, false, false,
             Criteria.POWER_LOW, Criteria.ACCURACY_COARSE);
 
-    private final ILocationManager mLocationManager;
     private boolean mReportLocation;
 
-    public PassiveProvider(ILocationManager locationManager) {
-        mLocationManager = locationManager;
-    }
+    public PassiveProvider(LocationProviderManager locationProviderManager) {
+        super(locationProviderManager, true);
 
-    @Override
-    public String getName() {
-        return LocationManager.PASSIVE_PROVIDER;
-    }
+        mReportLocation = false;
 
-    @Override
-    public ProviderProperties getProperties() {
-        return PROPERTIES;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
-    public void enable() {
-    }
-
-    @Override
-    public void disable() {
+        setProperties(PROPERTIES);
     }
 
     @Override
@@ -82,22 +57,15 @@ public class PassiveProvider extends LocationProviderInterface {
 
     public void updateLocation(Location location) {
         if (mReportLocation) {
-            try {
-                // pass the location back to the location manager
-                mLocationManager.reportLocation(location, true);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException calling reportLocation");
-            }
+            reportLocation(location);
         }
     }
 
     @Override
-    public boolean sendExtraCommand(String command, Bundle extras) {
-        return false;
-    }
+    public void sendExtraCommand(String command, Bundle extras) {}
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("mReportLocation=" + mReportLocation);
+        pw.println(" report location=" + mReportLocation);
     }
 }

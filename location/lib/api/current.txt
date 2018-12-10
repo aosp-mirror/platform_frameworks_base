@@ -8,14 +8,18 @@ package com.android.location.provider {
   public abstract class LocationProviderBase {
     ctor public LocationProviderBase(java.lang.String, com.android.location.provider.ProviderPropertiesUnbundled);
     method public android.os.IBinder getBinder();
-    method public abstract void onDisable();
-    method public void onDump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
-    method public abstract void onEnable();
-    method public deprecated int onGetStatus(android.os.Bundle);
-    method public deprecated long onGetStatusUpdateTime();
-    method public boolean onSendExtraCommand(java.lang.String, android.os.Bundle);
-    method public abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
-    method public final void reportLocation(android.location.Location);
+    method public boolean isEnabled();
+    method protected deprecated void onDisable();
+    method protected void onDump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
+    method protected deprecated void onEnable();
+    method protected deprecated int onGetStatus(android.os.Bundle);
+    method protected deprecated long onGetStatusUpdateTime();
+    method protected void onInit();
+    method protected boolean onSendExtraCommand(java.lang.String, android.os.Bundle);
+    method protected abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
+    method public void reportLocation(android.location.Location);
+    method public void setEnabled(boolean);
+    method public void setProperties(com.android.location.provider.ProviderPropertiesUnbundled);
     field public static final java.lang.String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
     field public static final java.lang.String FUSED_PROVIDER = "fused";
   }
@@ -38,6 +42,7 @@ package com.android.location.provider {
   }
 
   public final class ProviderRequestUnbundled {
+    method public boolean getForceLocation();
     method public long getInterval();
     method public java.util.List<com.android.location.provider.LocationRequestUnbundled> getLocationRequests();
     method public boolean getReportLocation();
