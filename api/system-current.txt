@@ -4333,6 +4333,7 @@ package android.os {
   }
 
   public class UserManager {
+    method public boolean canSwitchUsers();
     method public void clearSeedAccountData();
     method public android.os.UserHandle getProfileParent(android.os.UserHandle);
     method public java.lang.String getSeedAccountName();
@@ -4348,6 +4349,7 @@ package android.os {
     method public boolean isManagedProfile(int);
     method public boolean isPrimaryUser();
     method public boolean isRestrictedProfile();
+    method public boolean removeUser(android.os.UserHandle);
     field public static final java.lang.String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
     field public static final deprecated java.lang.String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
     field public static final java.lang.String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";
