@@ -132,7 +132,8 @@ public abstract class CellInfo implements Parcelable {
     /** Connection status is unknown. */
     public static final int CONNECTION_UNKNOWN = Integer.MAX_VALUE;
 
-    private int mCellConnectionStatus = CONNECTION_NONE;
+    /** A cell connection status */
+    private int mCellConnectionStatus;
 
     // True if device is mRegistered to the mobile network
     private boolean mRegistered;
@@ -144,6 +145,7 @@ public abstract class CellInfo implements Parcelable {
     protected CellInfo() {
         this.mRegistered = false;
         this.mTimeStamp = Long.MAX_VALUE;
+        mCellConnectionStatus = CONNECTION_NONE;
     }
 
     /** @hide */
@@ -300,4 +302,44 @@ public abstract class CellInfo implements Parcelable {
             return new CellInfo[size];
         }
     };
+
+    /** @hide */
+    protected CellInfo(android.hardware.radio.V1_0.CellInfo ci) {
+        this.mRegistered = ci.registered;
+        this.mTimeStamp = ci.timeStamp;
+        this.mCellConnectionStatus = CONNECTION_UNKNOWN;
+    }
+
+    /** @hide */
+    protected CellInfo(android.hardware.radio.V1_2.CellInfo ci) {
+        this.mRegistered = ci.registered;
+        this.mTimeStamp = ci.timeStamp;
+        this.mCellConnectionStatus = ci.connectionStatus;
+    }
+
+    /** @hide */
+    public static CellInfo create(android.hardware.radio.V1_0.CellInfo ci) {
+        if (ci == null) return null;
+        switch(ci.cellInfoType) {
+            case android.hardware.radio.V1_0.CellInfoType.GSM: return new CellInfoGsm(ci);
+            case android.hardware.radio.V1_0.CellInfoType.CDMA: return new CellInfoCdma(ci);
+            case android.hardware.radio.V1_0.CellInfoType.LTE: return new CellInfoLte(ci);
+            case android.hardware.radio.V1_0.CellInfoType.WCDMA: return new CellInfoWcdma(ci);
+            case android.hardware.radio.V1_0.CellInfoType.TD_SCDMA: return new CellInfoTdscdma(ci);
+            default: return null;
+        }
+    }
+
+    /** @hide */
+    public static CellInfo create(android.hardware.radio.V1_2.CellInfo ci) {
+        if (ci == null) return null;
+        switch(ci.cellInfoType) {
+            case android.hardware.radio.V1_0.CellInfoType.GSM: return new CellInfoGsm(ci);
+            case android.hardware.radio.V1_0.CellInfoType.CDMA: return new CellInfoCdma(ci);
+            case android.hardware.radio.V1_0.CellInfoType.LTE: return new CellInfoLte(ci);
+            case android.hardware.radio.V1_0.CellInfoType.WCDMA: return new CellInfoWcdma(ci);
+            case android.hardware.radio.V1_0.CellInfoType.TD_SCDMA: return new CellInfoTdscdma(ci);
+            default: return null;
+        }
+    }
 }

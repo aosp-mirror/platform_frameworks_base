@@ -16,7 +16,6 @@
 
 package android.telephony;
 
-import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.telephony.cdma.CdmaCellLocation;
 
@@ -71,30 +70,13 @@ public final class CellIdentityCdma extends CellIdentity {
      *        to 2592000
      * @param lat Latitude is a decimal number ranges from -1296000
      *        to 1296000
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public CellIdentityCdma(int nid, int sid, int bid, int lon, int lat) {
-        this(nid, sid, bid, lon, lat, null, null);
-    }
-
-    /**
-     * public constructor
-     * @param nid Network Id 0..65535
-     * @param sid CDMA System Id 0..32767
-     * @param bid Base Station Id 0..65535
-     * @param lon Longitude is a decimal number ranges from -2592000
-     *        to 2592000
-     * @param lat Latitude is a decimal number ranges from -1296000
-     *        to 1296000
      * @param alphal long alpha Operator Name String or Enhanced Operator Name String
      * @param alphas short alpha Operator Name String or Enhanced Operator Name String
      *
      * @hide
      */
-    public CellIdentityCdma(int nid, int sid, int bid, int lon, int lat, String alphal,
-                             String alphas) {
+    public CellIdentityCdma(
+            int nid, int sid, int bid, int lon, int lat, String alphal, String alphas) {
         super(TAG, CellInfo.TYPE_CDMA, null, null, alphal, alphas);
         mNetworkId = nid;
         mSystemId = sid;
@@ -105,6 +87,17 @@ public final class CellIdentityCdma extends CellIdentity {
         } else {
             mLongitude = mLatitude = CellInfo.UNAVAILABLE;
         }
+    }
+
+    /** @hide */
+    public CellIdentityCdma(android.hardware.radio.V1_0.CellIdentityCdma cid) {
+        this(cid.networkId, cid.systemId, cid.baseStationId, cid.longitude, cid.latitude, "", "");
+    }
+
+    /** @hide */
+    public CellIdentityCdma(android.hardware.radio.V1_2.CellIdentityCdma cid) {
+        this(cid.base.networkId, cid.base.systemId, cid.base.baseStationId, cid.base.longitude,
+                cid.base.latitude, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort);
     }
 
     private CellIdentityCdma(CellIdentityCdma cid) {
