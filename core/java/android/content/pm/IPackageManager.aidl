@@ -36,6 +36,7 @@ import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.KeySet;
+import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
@@ -680,4 +681,8 @@ interface IPackageManager {
     boolean isPackageStateProtected(String packageName, int userId);
 
     void sendDeviceCustomizationReadyBroadcast();
+
+    List<ModuleInfo> getInstalledModules(int flags);
+
+    ModuleInfo getModuleInfo(String packageName, int flags);
 }

@@ -1,0 +1,5 @@
+<module-metadata>
+  <module name="@string/module_1_name" packageName="com.android.module1" isHidden="false"
+    attribute1="attribute1" attribute2="attribute2" />
+  <module name="@string/module_2_name" packageName="com.android.module2" isHidden="true"/>
+</module-metadata>

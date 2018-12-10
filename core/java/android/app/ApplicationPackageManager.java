@@ -794,12 +794,25 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public List<ModuleInfo> getInstalledModules(int flags) {
-        return null;
+        try {
+            return mPM.getInstalledModules(flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @Override
     public ModuleInfo getModuleInfo(String packageName, int flags) throws NameNotFoundException {
-        return null;
+        try {
+            ModuleInfo mi = mPM.getModuleInfo(packageName, flags);
+            if (mi != null) {
+                return mi;
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        throw new NameNotFoundException("No module info for package: " + packageName);
     }
 
     @SuppressWarnings("unchecked")
@@ -3002,7 +3015,6 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
-    @Override
     public void sendDeviceCustomizationReadyBroadcast() {
         try {
             mPM.sendDeviceCustomizationReadyBroadcast();
