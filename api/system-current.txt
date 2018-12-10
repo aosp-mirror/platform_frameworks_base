@@ -5439,6 +5439,7 @@ package android.telephony {
     field public static final int NETWORK_TYPE_BITMASK_HSUPA = 512; // 0x200
     field public static final int NETWORK_TYPE_BITMASK_LTE = 8192; // 0x2000
     field public static final int NETWORK_TYPE_BITMASK_LTE_CA = 524288; // 0x80000
+    field public static final int NETWORK_TYPE_BITMASK_NR = 1048576; // 0x100000
     field public static final int NETWORK_TYPE_BITMASK_TD_SCDMA = 131072; // 0x20000
     field public static final int NETWORK_TYPE_BITMASK_UMTS = 8; // 0x8
     field public static final int NETWORK_TYPE_BITMASK_UNKNOWN = 1; // 0x1
