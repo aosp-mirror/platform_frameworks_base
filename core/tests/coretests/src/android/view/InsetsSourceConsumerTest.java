@@ -53,7 +53,7 @@ public class InsetsSourceConsumerTest {
                 .setName("testSurface")
                 .build();
         mConsumer = new InsetsSourceConsumer(TYPE_TOP_BAR, new InsetsState(),
-                () -> mMockTransaction);
+                () -> mMockTransaction, mMockController);
         mConsumer.setControl(new InsetsSourceControl(TYPE_TOP_BAR, mLeash));
     }
 
