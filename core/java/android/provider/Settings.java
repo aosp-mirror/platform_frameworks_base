@@ -13926,13 +13926,6 @@ public final class Settings {
         /**
          * Store a name/value pair into the database.
          * <p>
-         * The method takes an optional tag to associate with the setting which can be used to clear
-         * only settings made by your package and associated with this tag by passing the tag to
-         * {@link #resetToDefaults(ContentResolver, String)}. The value of this setting can be
-         * overridden by future calls to this or other put methods, and the tag provided in those
-         * calls, which may be null, will override the tag provided in this call. Any call to a put
-         * method which does not accept a tag will effectively set the tag to null.
-         * </p><p>
          * Also the method takes an argument whether to make the value the default for this setting.
          * If the system already specified a default value, then the one passed in here will
          * <strong>not</strong> be set as the default.
@@ -13941,46 +13934,47 @@ public final class Settings {
          * @param resolver to access the database with.
          * @param name to store.
          * @param value to associate with the name.
-         * @param tag to associated with the setting.
          * @param makeDefault whether to make the value the default one.
          * @return true if the value was set, false on database errors.
          *
-         * @see #resetToDefaults(ContentResolver, String)
+         * @see #resetToDefaults(ContentResolver, int, String)
          *
          * @hide
          */
         // TODO(b/117663715): require a new write permission restricted to a single source
         @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-        static boolean putString(@NonNull ContentResolver resolver,
-                @NonNull String name, @Nullable String value, @Nullable String tag,
-                boolean makeDefault) {
-            return sNameValueCache.putStringForUser(resolver, name, value, tag, makeDefault,
+        static boolean putString(@NonNull ContentResolver resolver, @NonNull String name,
+                @Nullable String value, boolean makeDefault) {
+            return sNameValueCache.putStringForUser(resolver, name, value, null, makeDefault,
                     resolver.getUserId());
         }
 
         /**
-         * Reset the settings to their defaults. This would reset <strong>only</strong> settings set
-         * by the caller's package. Passing in the optional tag will reset only settings changed by
-         * your package and associated with this tag.
+         * Reset the values to their defaults.
+         * <p>
+         * The method accepts an optional prefix parameter. If provided, only pairs with a name that
+         * starts with the exact prefix will be reset. Otherwise all will be reset.
          *
          * @param resolver Handle to the content resolver.
-         * @param tag Optional tag which should be associated with the settings to reset.
+         * @param resetMode The reset mode to use.
+         * @param prefix Optionally, to limit which which pairs are reset.
          *
-         * @see #putString(ContentResolver, String, String, String, boolean)
+         * @see #putString(ContentResolver, String, String, boolean)
          *
          * @hide
          */
         // TODO(b/117663715): require a new write permission restricted to a single source
         @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-        static void resetToDefaults(@NonNull ContentResolver resolver,
-                @Nullable String tag) {
+        static void resetToDefaults(@NonNull ContentResolver resolver, @ResetMode int resetMode,
+                @Nullable String prefix) {
             try {
                 Bundle arg = new Bundle();
                 arg.putInt(CALL_METHOD_USER_KEY, resolver.getUserId());
-                if (tag != null) {
-                    arg.putString(CALL_METHOD_TAG_KEY, tag);
+                arg.putInt(Settings.CALL_METHOD_RESET_MODE_KEY, resetMode);
+                if (prefix != null) {
+                    arg.putString(Settings.CALL_METHOD_PREFIX_KEY, prefix);
                 }
-                arg.putInt(CALL_METHOD_RESET_MODE_KEY, RESET_MODE_PACKAGE_DEFAULTS);
+                arg.putInt(CALL_METHOD_RESET_MODE_KEY, resetMode);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
                 cp.call(resolver.getPackageName(), sProviderHolder.mUri.getAuthority(),
                         CALL_METHOD_RESET_CONFIG, null, arg);

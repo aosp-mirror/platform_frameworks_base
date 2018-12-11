@@ -418,7 +418,7 @@ public class SettingsProvider extends ContentProvider {
             case Settings.CALL_METHOD_PUT_CONFIG: {
                 String value = getSettingValue(args);
                 final boolean makeDefault = getSettingMakeDefault(args);
-                insertConfigSetting(name, value, null, makeDefault, requestingUserId, false);
+                insertConfigSetting(name, value, makeDefault);
                 break;
             }
 
@@ -447,7 +447,7 @@ public class SettingsProvider extends ContentProvider {
             case Settings.CALL_METHOD_RESET_CONFIG: {
                 final int mode = getResetModeEnforcingPermission(args);
                 String prefix = getSettingPrefix(args);
-                resetConfigSetting(requestingUserId, mode, prefix);
+                resetConfigSetting(mode, prefix);
                 break;
             }
 
@@ -466,7 +466,7 @@ public class SettingsProvider extends ContentProvider {
             }
 
             case Settings.CALL_METHOD_DELETE_CONFIG: {
-                int rows  = deleteConfigSetting(name, requestingUserId, false) ? 1 : 0;
+                int rows  = deleteConfigSetting(name) ? 1 : 0;
                 Bundle result = new Bundle();
                 result.putInt(RESULT_ROWS_DELETED, rows);
                 return result;
@@ -1067,38 +1067,33 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private boolean insertConfigSetting(String name, String value, String tag,
-            boolean makeDefault, int requestingUserId, boolean forceNotify) {
+    private boolean insertConfigSetting(String name, String value, boolean makeDefault) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "insertConfigSetting(" + name + ", " + value  + ", "
-                    + ", " + tag + ", " + makeDefault + ", " + requestingUserId
-                    + ", " + forceNotify + ")");
+                    + makeDefault + ")");
         }
-        return mutateConfigSetting(name, value, tag, makeDefault, requestingUserId,
-                MUTATION_OPERATION_INSERT, forceNotify, 0);
+        return mutateConfigSetting(name, value, null, makeDefault,
+                MUTATION_OPERATION_INSERT, 0);
     }
 
-    private boolean deleteConfigSetting(String name, int requestingUserId, boolean forceNotify) {
+    private boolean deleteConfigSetting(String name) {
         if (DEBUG) {
-            Slog.v(LOG_TAG, "deleteConfigSetting(" + name + ", " + requestingUserId
-                    + ", " + forceNotify + ")");
+            Slog.v(LOG_TAG, "deleteConfigSetting(" + name + ")");
         }
-        return mutateConfigSetting(name, null, null, false, requestingUserId,
-                MUTATION_OPERATION_DELETE, forceNotify, 0);
+        return mutateConfigSetting(name, null, null, false,
+                MUTATION_OPERATION_DELETE, 0);
     }
 
-    private void resetConfigSetting(int requestingUserId, int mode, String prefix) {
+    private void resetConfigSetting(int mode, String prefix) {
         if (DEBUG) {
-            Slog.v(LOG_TAG, "resetConfigSetting(" + requestingUserId + ", "
-                    + mode + ", " + prefix + ")");
+            Slog.v(LOG_TAG, "resetConfigSetting(" + mode + ", " + prefix + ")");
         }
-        mutateConfigSetting(null, null, prefix, false, requestingUserId,
-                MUTATION_OPERATION_RESET, false, mode);
+        mutateConfigSetting(null, null, prefix, false,
+                MUTATION_OPERATION_RESET, mode);
     }
 
     private boolean mutateConfigSetting(String name, String value, String prefix,
-            boolean makeDefault, int requestingUserId, int operation, boolean forceNotify,
-            int mode) {
+            boolean makeDefault, int operation, int mode) {
         // TODO(b/117663715): check the new permission when it's added.
         // enforceWritePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
 
@@ -1107,13 +1102,13 @@ public class SettingsProvider extends ContentProvider {
             switch (operation) {
                 case MUTATION_OPERATION_INSERT: {
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_CONFIG,
-                            UserHandle.USER_SYSTEM, name, value, null, makeDefault,
-                            getCallingPackage(), forceNotify, null);
+                            UserHandle.USER_SYSTEM, name, value, null, makeDefault, true,
+                            getCallingPackage(), false, null);
                 }
 
                 case MUTATION_OPERATION_DELETE: {
                     return mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_CONFIG,
-                            UserHandle.USER_SYSTEM, name, forceNotify, null);
+                            UserHandle.USER_SYSTEM, name, false, null);
                 }
 
                 case MUTATION_OPERATION_RESET: {
@@ -2631,13 +2626,20 @@ public class SettingsProvider extends ContentProvider {
         public boolean insertSettingLocked(int type, int userId, String name, String value,
                 String tag, boolean makeDefault, String packageName, boolean forceNotify,
                 Set<String> criticalSettings) {
+            return insertSettingLocked(type, userId, name, value, tag, makeDefault, false,
+                    packageName, forceNotify, criticalSettings);
+        }
+
+        public boolean insertSettingLocked(int type, int userId, String name, String value,
+                String tag, boolean makeDefault, boolean forceNonSystemPackage, String packageName,
+                boolean forceNotify, Set<String> criticalSettings) {
             final int key = makeKey(type, userId);
 
             boolean success = false;
             SettingsState settingsState = peekSettingsStateLocked(key);
             if (settingsState != null) {
                 success = settingsState.insertSettingLocked(name, value,
-                        tag, makeDefault, packageName);
+                        tag, makeDefault, forceNonSystemPackage, packageName);
             }
 
             if (success && criticalSettings != null && criticalSettings.contains(name)) {

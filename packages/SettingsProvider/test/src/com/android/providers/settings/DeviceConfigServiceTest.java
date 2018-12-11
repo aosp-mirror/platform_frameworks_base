@@ -17,9 +17,8 @@
 package com.android.providers.settings;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
-
-import static org.junit.Assert.assertNotNull;
 
 import android.content.ContentResolver;
 import android.net.Uri;
@@ -147,10 +146,10 @@ public class DeviceConfigServiceTest {
     }
 
     @Test
-    public void testReset_setUntrustedDefault() throws Exception {
+    public void testReset() throws Exception {
         String newValue = "value2";
 
-        // make sValue the untrusted default (set by root)
+        // make sValue the default value
         executeShellCommand(
                 "device_config put " + sNamespace + " " + sKey + " " + sValue + " default");
         // make newValue the current value
@@ -159,38 +158,17 @@ public class DeviceConfigServiceTest {
         String result = getFromContentProvider(mContentResolver, sNamespace, sKey);
         assertEquals(newValue, result);
 
+        // reset values that were set by untrusted packages
         executeShellCommand("device_config reset untrusted_defaults " + sNamespace);
         result = getFromContentProvider(mContentResolver, sNamespace, sKey);
-        // back to the default
+        // the default value has been restored
         assertEquals(sValue, result);
 
+        // clear values that were set by untrusted packages
         executeShellCommand("device_config reset trusted_defaults " + sNamespace);
         result = getFromContentProvider(mContentResolver, sNamespace, sKey);
-        // not trusted default was set
+        // even the default value is gone now
         assertNull(result);
-    }
-
-    @Test
-    public void testReset_setTrustedDefault() throws Exception {
-        String newValue = "value2";
-
-        // make sValue the trusted default (set by system)
-        putWithContentProvider(mContentResolver, sNamespace, sKey, sValue, true);
-        // make newValue the current value
-        executeShellCommand(
-                "device_config put " + sNamespace + " " + sKey + " " + newValue);
-        String result = getFromContentProvider(mContentResolver, sNamespace, sKey);
-        assertEquals(newValue, result);
-
-        executeShellCommand("device_config reset untrusted_defaults " + sNamespace);
-        result = getFromContentProvider(mContentResolver, sNamespace, sKey);
-        // back to the default
-        assertEquals(sValue, result);
-
-        executeShellCommand("device_config reset trusted_defaults " + sNamespace);
-        result = getFromContentProvider(mContentResolver, sNamespace, sKey);
-        // our trusted default is still set
-        assertEquals(sValue, result);
     }
 
     private static void executeShellCommand(String command) throws IOException {
@@ -212,8 +190,7 @@ public class DeviceConfigServiceTest {
         if (makeDefault) {
             args.putBoolean(Settings.CALL_METHOD_MAKE_DEFAULT_KEY, true);
         }
-        resolver.call(
-                CONFIG_CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, compositeName, args);
+        resolver.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, compositeName, args);
     }
 
     private static String getFromContentProvider(ContentResolver resolver, String namespace,
