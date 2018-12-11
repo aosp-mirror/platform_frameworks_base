@@ -22,7 +22,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.robolectric.Shadows.shadowOf;
+import static org.testng.Assert.expectThrows;
 
+import android.annotation.UserIdInt;
 import android.app.Application;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
@@ -32,11 +35,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
 import com.android.server.backup.testing.BackupManagerServiceTestUtils;
 import com.android.server.backup.testing.TransportData;
+import com.android.server.testing.shadows.ShadowBinder;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +50,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowContextWrapper;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -51,14 +59,19 @@ import java.io.PrintWriter;
 
 /** Tests for the user-aware backup/restore system service {@link BackupManagerService}. */
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowBinder.class})
 @Presubmit
 public class BackupManagerServiceTest {
     private static final String TEST_PACKAGE = "package";
     private static final String TEST_TRANSPORT = "transport";
 
+    private static final int NON_USER_SYSTEM = UserHandle.USER_SYSTEM + 1;
+
+    private ShadowContextWrapper mShadowContext;
     @Mock private UserBackupManagerService mUserBackupManagerService;
     private BackupManagerService mBackupManagerService;
     private Context mContext;
+    @UserIdInt private int mUserId;
 
     /** Initialize {@link BackupManagerService}. */
     @Before
@@ -67,12 +80,23 @@ public class BackupManagerServiceTest {
 
         Application application = RuntimeEnvironment.application;
         mContext = application;
+        mShadowContext = shadowOf(application);
+        mUserId = NON_USER_SYSTEM;
         mBackupManagerService =
                 new BackupManagerService(
                         application,
                         new Trampoline(application),
                         BackupManagerServiceTestUtils.startBackupThread(null));
         mBackupManagerService.setUserBackupManagerService(mUserBackupManagerService);
+    }
+
+    /**
+     * Clean up and reset state that was created for testing {@link BackupManagerService}
+     * operations.
+     */
+    @After
+    public void tearDown() throws Exception {
+        ShadowBinder.reset();
     }
 
     /**
@@ -274,11 +298,41 @@ public class BackupManagerServiceTest {
     // ---------------------------------------------
     // Settings tests
     // ---------------------------------------------
+    /**
+     * Test verifying that {@link BackupManagerService#setBackupEnabled(int, boolean)} throws a
+     * {@link SecurityException} if the caller does not have INTERACT_ACROSS_USERS_FULL permission.
+     */
+    @Test
+    public void setBackupEnabled_withoutPermission_throwsSecurityException() {
+        mShadowContext.denyPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        expectThrows(
+                SecurityException.class,
+                () -> mBackupManagerService.setBackupEnabled(mUserId, true));
+    }
+
+    /**
+     * Test verifying that {@link BackupManagerService#setBackupEnabled(int, boolean)} does not
+     * require the caller to have INTERACT_ACROSS_USERS_FULL permission when the calling user id is
+     * the same as the target user id.
+     */
+    @Test
+    public void setBackupEnabled_whenCallingUserIsTargetUser_doesntNeedPermission() {
+        ShadowBinder.setCallingUserHandle(UserHandle.of(mUserId));
+        mShadowContext.denyPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        mBackupManagerService.setBackupEnabled(mUserId, true);
+
+        verify(mUserBackupManagerService).setBackupEnabled(true);
+    }
+
 
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void setBackupEnabled_callsSetBackupEnabledForUser() throws Exception {
-        mBackupManagerService.setBackupEnabled(true);
+        mShadowContext.grantPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        mBackupManagerService.setBackupEnabled(mUserId, true);
 
         verify(mUserBackupManagerService).setBackupEnabled(true);
     }
@@ -299,10 +353,25 @@ public class BackupManagerServiceTest {
         verify(mUserBackupManagerService).setBackupProvisioned(true);
     }
 
+    /**
+     * Test verifying that {@link BackupManagerService#isBackupEnabled(int)} throws a
+     * {@link SecurityException} if the caller does not have INTERACT_ACROSS_USERS_FULL permission.
+     */
+    @Test
+    public void testIsBackupEnabled_withoutPermission_throwsSecurityException() {
+        mShadowContext.denyPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        expectThrows(
+                SecurityException.class,
+                () -> mBackupManagerService.isBackupEnabled(mUserId));
+    }
+
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testIsBackupEnabled_callsIsBackupEnabledForUser() throws Exception {
-        mBackupManagerService.isBackupEnabled();
+        mShadowContext.grantPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        mBackupManagerService.isBackupEnabled(mUserId);
 
         verify(mUserBackupManagerService).isBackupEnabled();
     }
@@ -330,30 +399,81 @@ public class BackupManagerServiceTest {
         verify(mUserBackupManagerService).filterAppsEligibleForBackup(packages);
     }
 
+    /**
+     * Test verifying that {@link BackupManagerService#backupNow(int)} throws a
+     * {@link SecurityException} if the caller does not have INTERACT_ACROSS_USERS_FULL permission.
+     */
+    @Test
+    public void testBackupNow_withoutPermission_throwsSecurityException() {
+        mShadowContext.denyPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        expectThrows(
+                SecurityException.class,
+                () -> mBackupManagerService.backupNow(mUserId));
+    }
+
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testBackupNow_callsBackupNowForUser() throws Exception {
-        mBackupManagerService.backupNow();
+        mShadowContext.grantPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        mBackupManagerService.backupNow(mUserId);
 
         verify(mUserBackupManagerService).backupNow();
     }
 
-    /** Test that the backup service routes methods correctly to the user that requests it. */
+    /**
+     * Test verifying that {@link BackupManagerService#requestBackup(int, String[], IBackupObserver,
+     * IBackupManagerMonitor, int)} throws a {@link SecurityException} if the caller does not have
+     * INTERACT_ACROSS_USERS_FULL permission.
+     */
     @Test
-    public void testRequestBackup_callsRequestBackupForUser() throws Exception {
+    public void testRequestBackup_withoutPermission_throwsSecurityException() {
+        mShadowContext.denyPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
         String[] packages = {TEST_PACKAGE};
         IBackupObserver observer = mock(IBackupObserver.class);
         IBackupManagerMonitor monitor = mock(IBackupManagerMonitor.class);
 
-        mBackupManagerService.requestBackup(packages, observer, monitor, /* flags */ 0);
+        expectThrows(
+                SecurityException.class,
+                () -> mBackupManagerService.requestBackup(mUserId, packages, observer, monitor, 0));
+    }
+
+
+    /** Test that the backup service routes methods correctly to the user that requests it. */
+    @Test
+    public void testRequestBackup_callsRequestBackupForUser() throws Exception {
+        mShadowContext.grantPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        String[] packages = {TEST_PACKAGE};
+        IBackupObserver observer = mock(IBackupObserver.class);
+        IBackupManagerMonitor monitor = mock(IBackupManagerMonitor.class);
+
+        mBackupManagerService.requestBackup(mUserId, packages, observer, monitor,
+                /* flags */ 0);
 
         verify(mUserBackupManagerService).requestBackup(packages, observer, monitor, /* flags */ 0);
     }
 
+    /**
+     * Test verifying that {@link BackupManagerService#cancelBackups(int)} throws a
+     * {@link SecurityException} if the caller does not have INTERACT_ACROSS_USERS_FULL permission.
+     */
+    @Test
+    public void testCancelBackups_withoutPermission_throwsSecurityException() {
+        mShadowContext.denyPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        expectThrows(
+                SecurityException.class,
+                () -> mBackupManagerService.cancelBackups(mUserId));
+    }
+
+
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testCancelBackups_callsCancelBackupsForUser() throws Exception {
-        mBackupManagerService.cancelBackups();
+        mShadowContext.grantPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+
+        mBackupManagerService.cancelBackups(mUserId);
 
         verify(mUserBackupManagerService).cancelBackups();
     }

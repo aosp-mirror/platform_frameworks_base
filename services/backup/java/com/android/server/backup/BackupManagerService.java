@@ -16,7 +16,9 @@
 
 package com.android.server.backup;
 
+import android.Manifest;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
@@ -30,6 +32,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -79,6 +82,7 @@ public class BackupManagerService {
         return sInstance;
     }
 
+    private final Context mContext;
     private UserBackupManagerService mUserBackupManagerService;
 
     /** Instantiate a new instance of {@link BackupManagerService}. */
@@ -91,9 +95,24 @@ public class BackupManagerService {
             transportWhitelist = Collections.emptySet();
         }
 
+        mContext = context;
         mUserBackupManagerService =
                 UserBackupManagerService.createAndInitializeService(
                         context, trampoline, backupThread, transportWhitelist);
+    }
+
+    /**
+     * If {@code userId} is different from the calling user id, then the caller must hold the
+     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     *
+     * @param userId User id on which the backup operation is being requested.
+     * @param message A message to include in the exception if it is thrown.
+     */
+    private void enforceCallingPermissionOnUserId(int userId, String message) {
+        if (Binder.getCallingUserHandle().getIdentifier() != userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
+        }
     }
 
     // TODO(b/118520567): Remove when tests are modified to use per-user instance.
@@ -314,7 +333,8 @@ public class BackupManagerService {
     // ---------------------------------------------
 
     /** Enable/disable the backup service. This is user-configurable via backup settings. */
-    public void setBackupEnabled(boolean enable) {
+    public void setBackupEnabled(@UserIdInt int userId, boolean enable) {
+        enforceCallingPermissionOnUserId(userId, "setBackupEnabled");
         mUserBackupManagerService.setBackupEnabled(enable);
     }
 
@@ -331,7 +351,8 @@ public class BackupManagerService {
     /**
      * Return {@code true} if the backup mechanism is currently enabled, else returns {@code false}.
      */
-    public boolean isBackupEnabled() {
+    public boolean isBackupEnabled(@UserIdInt int userId) {
+        enforceCallingPermissionOnUserId(userId, "isBackupEnabled");
         return mUserBackupManagerService.isBackupEnabled();
     }
 
@@ -355,7 +376,8 @@ public class BackupManagerService {
      * Run a backup pass immediately for any key-value backup applications that have declared that
      * they have pending updates.
      */
-    public void backupNow() {
+    public void backupNow(@UserIdInt int userId) {
+        enforceCallingPermissionOnUserId(userId, "backupNow");
         mUserBackupManagerService.backupNow();
     }
 
@@ -364,12 +386,18 @@ public class BackupManagerService {
      * IBackupManagerMonitor} for receiving events during the operation.
      */
     public int requestBackup(
-            String[] packages, IBackupObserver observer, IBackupManagerMonitor monitor, int flags) {
+            @UserIdInt int userId,
+            String[] packages,
+            IBackupObserver observer,
+            IBackupManagerMonitor monitor,
+            int flags) {
+        enforceCallingPermissionOnUserId(userId, "requestBackup");
         return mUserBackupManagerService.requestBackup(packages, observer, monitor, flags);
     }
 
     /** Cancel all running backup operations. */
-    public void cancelBackups() {
+    public void cancelBackups(@UserIdInt int userId) {
+        enforceCallingPermissionOnUserId(userId, "cancelBackups");
         mUserBackupManagerService.cancelBackups();
     }
 
@@ -533,8 +561,10 @@ public class BackupManagerService {
             stage.renameTo(enableFile);
             // will be synced immediately by the try-with-resources call to close()
         } catch (IOException | RuntimeException e) {
-            Slog.e(TAG, "Unable to record backup enable state; reverting to disabled: "
-                    + e.getMessage());
+            Slog.e(
+                    TAG,
+                    "Unable to record backup enable state; reverting to disabled: "
+                            + e.getMessage());
             enableFile.delete();
             stage.delete();
         }

@@ -17,9 +17,11 @@
 package com.android.server.testing.shadows;
 
 import android.os.Binder;
+import android.os.UserHandle;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.annotation.Resetter;
 
 /**
  * Extends {@link org.robolectric.shadows.ShadowBinder} with {@link Binder#clearCallingIdentity()}
@@ -30,6 +32,7 @@ import org.robolectric.annotation.Implements;
 public class ShadowBinder extends org.robolectric.shadows.ShadowBinder {
     public static final Integer LOCAL_UID = 1000;
     private static Integer originalCallingUid;
+    private static UserHandle sCallingUserHandle;
 
     @Implementation
     protected static long clearCallingIdentity() {
@@ -41,5 +44,31 @@ public class ShadowBinder extends org.robolectric.shadows.ShadowBinder {
     @Implementation
     protected static void restoreCallingIdentity(long token) {
         setCallingUid(originalCallingUid);
+    }
+
+    public static void setCallingUserHandle(UserHandle userHandle) {
+        sCallingUserHandle = userHandle;
+    }
+
+    /**
+     * Shadows {@link Binder#getCallingUserHandle()}. If {@link ShadowBinder#sCallingUserHandle}
+     * is set, return that; otherwise mimic the default implementation.
+     */
+    @Implementation
+    public static UserHandle getCallingUserHandle() {
+        if (sCallingUserHandle != null) {
+            return sCallingUserHandle;
+        } else {
+            return UserHandle.of(UserHandle.getUserId(getCallingUid()));
+        }
+    }
+
+    /**
+     * Clean up and reset state that was created for testing.
+     */
+    @Resetter
+    public static void reset() {
+        sCallingUserHandle = null;
+        org.robolectric.shadows.ShadowBinder.reset();
     }
 }
