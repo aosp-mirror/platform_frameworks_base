@@ -242,6 +242,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.provider.MediaStore;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.security.KeyStore;
@@ -17936,7 +17937,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 final int removedUserId = (user != null) ? user.getIdentifier()
                         : UserHandle.USER_ALL;
 
-                clearPackageStateForUserLIF(ps, removedUserId, outInfo);
+                clearPackageStateForUserLIF(ps, removedUserId, outInfo, flags);
                 markPackageUninstalledForUserLPw(ps, user);
                 scheduleWritePackageRestrictionsLocked(user);
                 return;
@@ -17966,7 +17967,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // we need to do is clear this user's data and save that
                     // it is uninstalled.
                     if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
-                    clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo);
+                    clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo, flags);
                     scheduleWritePackageRestrictionsLocked(user);
                     return;
                 } else {
@@ -17982,7 +17983,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // we need to do is clear this user's data and save that
                 // it is uninstalled.
                 if (DEBUG_REMOVE) Slog.d(TAG, "Deleting system app");
-                clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo);
+                clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo, flags);
                 scheduleWritePackageRestrictionsLocked(user);
                 return;
             }
@@ -18099,7 +18100,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void clearPackageStateForUserLIF(PackageSetting ps, int userId,
-            PackageRemovedInfo outInfo) {
+            PackageRemovedInfo outInfo, int flags) {
         final PackageParser.Package pkg;
         synchronized (mPackages) {
             pkg = mPackages.get(ps.name);
@@ -18123,6 +18124,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     scheduleWritePackageRestrictionsLocked(nextUserId);
                 }
                 resetUserChangesToRuntimePermissionsAndFlagsLPw(ps, nextUserId);
+            }
+            // Also delete contributed media, when requested
+            if ((flags & PackageManager.DELETE_CONTRIBUTED_MEDIA) != 0) {
+                try {
+                    MediaStore.deleteContributedMedia(mContext, ps.name, UserHandle.of(nextUserId));
+                } catch (IOException e) {
+                    Slog.w(TAG, "Failed to delete contributed media for " + ps.name, e);
+                }
             }
         }
 

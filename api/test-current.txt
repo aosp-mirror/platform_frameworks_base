@@ -1006,8 +1006,8 @@ package android.provider {
   }
 
   public final class MediaStore {
-    method public static void deleteContributedMedia(android.content.Context, java.lang.String);
-    method public static long getContributedMediaSize(android.content.Context, java.lang.String);
+    method public static void deleteContributedMedia(android.content.Context, java.lang.String, android.os.UserHandle) throws java.io.IOException;
+    method public static long getContributedMediaSize(android.content.Context, java.lang.String, android.os.UserHandle) throws java.io.IOException;
   }
 
   public final class Settings {
