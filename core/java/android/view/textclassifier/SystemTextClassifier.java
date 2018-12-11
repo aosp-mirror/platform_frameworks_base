@@ -147,6 +147,18 @@ public final class SystemTextClassifier implements TextClassifier {
     }
 
     @Override
+    public void onTextClassifierEvent(@NonNull TextClassifierEvent event) {
+        Preconditions.checkNotNull(event);
+        Utils.checkMainThread();
+
+        try {
+            mManagerService.onTextClassifierEvent(mSessionId, event);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Error reporting textclassifier event.", e);
+        }
+    }
+
+    @Override
     public TextLanguage detectLanguage(TextLanguage.Request request) {
         Preconditions.checkNotNull(request);
         Utils.checkMainThread();

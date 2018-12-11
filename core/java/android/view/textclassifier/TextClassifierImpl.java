@@ -341,6 +341,11 @@ public final class TextClassifierImpl implements TextClassifier {
         }
     }
 
+    @Override
+    public void onTextClassifierEvent(@NonNull TextClassifierEvent event) {
+        // TODO: Implement.
+    }
+
     /** @inheritDoc */
     @Override
     public TextLanguage detectLanguage(@NonNull TextLanguage.Request request) {
