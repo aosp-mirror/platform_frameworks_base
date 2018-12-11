@@ -784,18 +784,6 @@ java_library {
     ],
 }
 
-// A host library containing the inspector annotations for inspector-annotation-processor.
-java_library_host {
-    name: "inspector-annotation",
-    srcs: [
-        "core/java/android/view/inspector/InspectableNodeName.java",
-        "core/java/android/view/inspector/InspectableProperty.java",
-        // Needed for the ResourceId.ID_NULL constant
-        "core/java/android/content/res/ResourceId.java",
-        "core/java/android/annotation/AnyRes.java",
-    ],
-}
-
 // A host library including just UnsupportedAppUsage.java so that the annotation
 // processor can also use this annotation.
 java_library_host {
