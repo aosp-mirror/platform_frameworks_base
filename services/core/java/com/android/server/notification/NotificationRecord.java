@@ -21,10 +21,8 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEUTRAL;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_POSITIVE;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -609,6 +607,17 @@ public final class NotificationRecord {
                 mIsAppImportanceLocked, this.sbn.getNotification());
     }
 
+    public boolean hasAdjustment(String key) {
+        synchronized (mAdjustments) {
+            for (Adjustment adjustment : mAdjustments) {
+                if (adjustment.getSignals().containsKey(key)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void addAdjustment(Adjustment adjustment) {
         synchronized (mAdjustments) {
             mAdjustments.add(adjustment);
@@ -669,18 +678,6 @@ public final class NotificationRecord {
                             .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_SMART_REPLIES,
                                     getSmartReplies().size()));
                 }
-            }
-            applyImportanceFromAdjustments();
-        }
-    }
-
-    /**
-     * Update importance from the adjustment.
-     */
-    public void applyImportanceFromAdjustments() {
-        synchronized (mAdjustments) {
-            for (Adjustment adjustment : mAdjustments) {
-                Bundle signals = adjustment.getSignals();
                 if (signals.containsKey(Adjustment.KEY_IMPORTANCE)) {
                     int importance = signals.getInt(Adjustment.KEY_IMPORTANCE);
                     importance = Math.max(IMPORTANCE_UNSPECIFIED, importance);
@@ -752,6 +749,8 @@ public final class NotificationRecord {
      */
     public void setSystemImportance(int importance) {
         mSystemImportance = importance;
+        // System importance is only changed in enqueue, so it's ok for us to calculate the
+        // importance directly instead of waiting for signal extractor.
         calculateImportance();
     }
 
@@ -762,7 +761,16 @@ public final class NotificationRecord {
      */
     public void setAssistantImportance(int importance) {
         mAssistantImportance = importance;
-        calculateImportance();
+        // Unlike the system importance, the assistant importance can change on posted
+        // notifications, so don't calculateImportance() here, but wait for the signal extractors.
+    }
+
+    /**
+     * Returns the importance set by the assistant, or IMPORTANCE_UNSPECIFIED if the assistant
+     * hasn't set it.
+     */
+    public int getAssistantImportance() {
+        return mAssistantImportance;
     }
 
     /**
@@ -774,7 +782,8 @@ public final class NotificationRecord {
         if (getChannel().hasUserSetImportance()) {
             mImportanceExplanation = "user";
         }
-        if (!getChannel().hasUserSetImportance() && mAssistantImportance != IMPORTANCE_UNSPECIFIED) {
+        if (!getChannel().hasUserSetImportance()
+                && mAssistantImportance != IMPORTANCE_UNSPECIFIED) {
             mImportance = mAssistantImportance;
             mImportanceExplanation = "asst";
         }

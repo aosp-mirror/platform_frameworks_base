@@ -3621,12 +3621,19 @@ public class NotificationManagerService extends SystemService {
                                 && mAssistants.isSameUser(token, r.getUserId())) {
                             applyAdjustment(r, adjustment);
                             r.applyAdjustments();
+                            // importance is checked at the beginning of the
+                            // PostNotificationRunnable, before the signal extractors are run, so
+                            // calculate the final importance here
+                            r.calculateImportance();
                             foundEnqueued = true;
                             break;
                         }
                     }
                     if (!foundEnqueued) {
                         // adjustment arrived too late to apply to enqueued; apply to posted
+                        // However, since the notification is now posted and may have alerted,
+                        // ignore any importance related adjustments
+                        adjustment.getSignals().remove(Adjustment.KEY_IMPORTANCE);
                         applyAdjustmentFromAssistant(token, adjustment);
                     }
                 }
@@ -3656,8 +3663,12 @@ public class NotificationManagerService extends SystemService {
                         NotificationRecord r = mNotificationsByKey.get(adjustment.getKey());
                         if (r != null && mAssistants.isSameUser(token, r.getUserId())) {
                             applyAdjustment(r, adjustment);
-                            r.applyImportanceFromAdjustments();
-                            if (r.getImportance() == IMPORTANCE_NONE) {
+                            // If the assistant has blocked the notification, cancel it
+                            // This will trigger a sort, so we don't have to explicitly ask for
+                            // one here.
+                            if (adjustment.getSignals().containsKey(Adjustment.KEY_IMPORTANCE)
+                                    && adjustment.getSignals().getInt(Adjustment.KEY_IMPORTANCE)
+                                    == IMPORTANCE_NONE) {
                                 cancelNotificationsFromListener(token, new String[]{r.getKey()});
                             } else {
                                 needsSort = true;
@@ -4758,7 +4769,6 @@ public class NotificationManagerService extends SystemService {
                             enqueueStatus);
                 }
 
-                mRankingHelper.extractSignals(r);
                 // tell the assistant service about the notification
                 if (mAssistants.isEnabled()) {
                     mAssistants.onNotificationEnqueuedLocked(r);
@@ -4842,7 +4852,7 @@ public class NotificationManagerService extends SystemService {
                                 | Notification.FLAG_NO_CLEAR;
                     }
 
-                    applyZenModeLocked(r);
+                    mRankingHelper.extractSignals(r);
                     mRankingHelper.sort(mNotificationList);
 
                     if (!r.isHidden()) {
@@ -5627,6 +5637,7 @@ public class NotificationManagerService extends SystemService {
             ArrayList<Integer> suppressVisuallyBefore = new ArrayList<>(N);
             ArrayList<ArrayList<Notification.Action>> systemSmartActionsBefore = new ArrayList<>(N);
             ArrayList<ArrayList<CharSequence>> smartRepliesBefore = new ArrayList<>(N);
+            int[] importancesBefore = new int[N];
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
                 orderBefore.add(r.getKey());
@@ -5640,6 +5651,7 @@ public class NotificationManagerService extends SystemService {
                 suppressVisuallyBefore.add(r.getSuppressedVisualEffects());
                 systemSmartActionsBefore.add(r.getSystemGeneratedSmartActions());
                 smartRepliesBefore.add(r.getSmartReplies());
+                importancesBefore[i] = r.getImportance();
                 mRankingHelper.extractSignals(r);
             }
             mRankingHelper.sort(mNotificationList);
@@ -5657,7 +5669,8 @@ public class NotificationManagerService extends SystemService {
                         r.getSuppressedVisualEffects())
                         || !Objects.equals(systemSmartActionsBefore.get(i),
                                 r.getSystemGeneratedSmartActions())
-                        || !Objects.equals(smartRepliesBefore.get(i), r.getSmartReplies())) {
+                        || !Objects.equals(smartRepliesBefore.get(i), r.getSmartReplies())
+                        || importancesBefore[i] != r.getImportance()) {
                     mHandler.scheduleSendRankingUpdate();
                     return;
                 }
