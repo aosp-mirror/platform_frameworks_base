@@ -107,12 +107,6 @@ interface IWindowManager
       */
     void endProlongedAnimations();
 
-    // Re-evaluate the current orientation from the caller's state.
-    // If there is a change, the new Configuration is returned and the
-    // caller must call setNewConfiguration() sometime later.
-    Configuration updateOrientationFromAppTokens(in Configuration currentConfig,
-            IBinder freezeThisOneIfNeeded, int displayId);
-
     void startFreezingScreen(int exitAnim, int enterAnim);
     void stopFreezingScreen();
 

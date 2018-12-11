@@ -597,11 +597,15 @@ class RootActivityContainer extends ConfigurationContainer
 
         // Force-update the orientation from the WindowManager, since we need the true configuration
         // to send to the client now.
-        final Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                getDisplayOverrideConfiguration(displayId),
-                starting != null && starting.mayFreezeScreenLocked(starting.app)
-                        ? starting.appToken : null,
-                displayId, true /* forceUpdate */);
+        final DisplayContent displayContent = mRootWindowContainer.getDisplayContent(displayId);
+        Configuration config = null;
+        if (displayContent != null) {
+            config = displayContent.updateOrientationFromAppTokens(
+                    getDisplayOverrideConfiguration(displayId),
+                    starting != null && starting.mayFreezeScreenLocked(starting.app)
+                            ? starting.appToken : null,
+                    true /* forceUpdate */);
+        }
         if (starting != null && markFrozenIfConfigChanged && config != null) {
             starting.frozenBeforeDestroy = true;
         }

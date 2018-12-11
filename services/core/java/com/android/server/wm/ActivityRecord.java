@@ -2486,36 +2486,20 @@ final class ActivityRecord extends ConfigurationContainer {
     }
 
     void setRequestedOrientation(int requestedOrientation) {
-        final int displayId = getDisplayId();
-        final Configuration displayConfig =
-                mRootActivityContainer.getDisplayOverrideConfiguration(displayId);
-
-        final Configuration config = setOrientation(requestedOrientation,
-                displayId, displayConfig, mayFreezeScreenLocked(app));
-        if (config != null) {
-            frozenBeforeDestroy = true;
-            if (!mAtmService.updateDisplayOverrideConfigurationLocked(config, this,
-                    false /* deferResume */, displayId)) {
-                mRootActivityContainer.resumeFocusedStacksTopActivities();
-            }
-        }
+        setOrientation(requestedOrientation, mayFreezeScreenLocked(app));
         mAtmService.getTaskChangeNotificationController().notifyActivityRequestedOrientationChanged(
                 task.taskId, requestedOrientation);
     }
 
-    Configuration setOrientation(int requestedOrientation, int displayId,
-            Configuration displayConfig, boolean freezeScreenIfNeeded) {
+    private void setOrientation(int requestedOrientation, boolean freezeScreenIfNeeded) {
         if (mAppWindowToken == null) {
             Slog.w(TAG_WM,
                     "Attempted to set orientation of non-existing app token: " + appToken);
-            return null;
+            return;
         }
 
-        mAppWindowToken.setOrientation(requestedOrientation);
-
         final IBinder binder = freezeScreenIfNeeded ? appToken.asBinder() : null;
-        return mAtmService.mWindowManager.updateOrientationFromAppTokens(displayConfig, binder,
-                displayId);
+        mAppWindowToken.setOrientation(requestedOrientation, binder, this);
     }
 
     int getOrientation() {

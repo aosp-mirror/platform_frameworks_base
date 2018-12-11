@@ -27,6 +27,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyFloat;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
@@ -38,8 +39,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -559,8 +562,7 @@ public class WindowContainerTests extends WindowTestsBase {
         builder.setLayer(2).setIsVisible(true);
         final TestWindowContainer visibleUnspecifiedRootChildChildFillsParent =
                 visibleUnspecifiedRootChild.addChildWindow(builder);
-        visibleUnspecifiedRootChildChildFillsParent.setOrientation(
-                SCREEN_ORIENTATION_PORTRAIT);
+        visibleUnspecifiedRootChildChildFillsParent.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
         assertEquals(SCREEN_ORIENTATION_PORTRAIT,
                 visibleUnspecifiedRootChildChildFillsParent.getOrientation());
         assertEquals(SCREEN_ORIENTATION_UNSET, visibleUnspecifiedRootChild.getOrientation());
@@ -722,6 +724,19 @@ public class WindowContainerTests extends WindowTestsBase {
 
         // Make sure the child propagates resize through onParentResize when no bounds set.
         verify(grandChild, times(1)).onParentResize();
+    }
+
+    @Test
+    public void testOnDescendantOrientationRequestChangedPropagation() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
+        final TestWindowContainer root = spy(builder.build());
+
+        final IBinder binder = mock(IBinder.class);
+        final ActivityRecord activityRecord = mock(ActivityRecord.class);
+        final TestWindowContainer child = root.addChildWindow();
+
+        child.setOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED, binder, activityRecord);
+        verify(root).onDescendantOrientationChanged(binder, activityRecord);
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */

@@ -44,6 +44,7 @@ import android.app.ActivityManager.TaskDescription;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -326,6 +327,23 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
         mRotation = rotation;
 
         return boundsChange;
+    }
+
+    @Override
+    public boolean onDescendantOrientationChanged(IBinder freezeDisplayToken,
+            ConfigurationContainer requestingContainer) {
+        if (super.onDescendantOrientationChanged(freezeDisplayToken, requestingContainer)) {
+            return true;
+        }
+
+        // No one in higher hierarchy handles this request, let's adjust our bounds to fulfill
+        // it if possible.
+        // TODO: Move to TaskRecord after unification is done.
+        if (mTaskRecord != null) {
+            mTaskRecord.onConfigurationChanged(mTaskRecord.getParent().getConfiguration());
+            return true;
+        }
+        return false;
     }
 
     void resize(boolean relayout, boolean forced) {

@@ -31,10 +31,12 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.util.Pools;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -698,8 +700,58 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
+    /**
+     * Called when this container or one of its descendants changed its requested orientation, and
+     * wants this container to handle it or pass it to its parent.
+     *
+     * @param freezeDisplayToken freeze this app window token if display needs to freeze
+     * @param requestingContainer the container which orientation request has changed
+     * @return {@code true} if handled; {@code false} otherwise.
+     */
+    boolean onDescendantOrientationChanged(@Nullable IBinder freezeDisplayToken,
+            @Nullable ConfigurationContainer requestingContainer) {
+        final WindowContainer parent = getParent();
+        if (parent == null) {
+            return false;
+        }
+        return parent.onDescendantOrientationChanged(freezeDisplayToken,
+                requestingContainer);
+    }
+
+    /**
+     * Calls {@link #setOrientation(int, IBinder, ActivityRecord)} with {@code null} to the last 2
+     * parameters.
+     *
+     * @param orientation the specified orientation.
+     */
     void setOrientation(int orientation) {
+        setOrientation(orientation, null /* freezeDisplayToken */,
+                null /* ActivityRecord */);
+    }
+
+    /**
+     * Sets the specified orientation of this container. It percolates this change upward along the
+     * hierarchy to let each level of the hierarchy a chance to respond to it.
+     *
+     * @param orientation the specified orientation. Needs to be one of {@link
+     *      android.content.pm.ActivityInfo.ScreenOrientation}.
+     * @param freezeDisplayToken uses this token to freeze display if orientation change is not
+     *                           done. Display will not be frozen if this is {@code null}, which
+     *                           should only happen in tests.
+     * @param requestingContainer the container which orientation request has changed. Mostly used
+     *                            to ensure it gets correct configuration.
+     */
+    void setOrientation(int orientation, @Nullable IBinder freezeDisplayToken,
+            @Nullable ConfigurationContainer requestingContainer) {
+        final boolean changed = mOrientation != orientation;
         mOrientation = orientation;
+        if (!changed) {
+            return;
+        }
+        final WindowContainer parent = getParent();
+        if (parent != null) {
+            onDescendantOrientationChanged(freezeDisplayToken, requestingContainer);
+        }
     }
 
     int getOrientation() {
