@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import android.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -32,15 +33,15 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.Rlog;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.i18n.phonenumbers.geocoding.PhoneNumberOfflineGeocoder;
 import com.android.i18n.phonenumbers.NumberParseException;
 import com.android.i18n.phonenumbers.PhoneNumberUtil;
 import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
-import android.telephony.SubscriptionManager;
+import com.android.i18n.phonenumbers.geocoding.PhoneNumberOfflineGeocoder;
 
 import java.util.Locale;
 
@@ -111,6 +112,9 @@ public class CallerInfo {
     public boolean needUpdate;
     public Uri contactRefUri;
     public String lookupKey;
+
+    public ComponentName preferredPhoneAccountComponent;
+    public String preferredPhoneAccountId;
 
     public long userType;
 
@@ -262,6 +266,17 @@ public class CallerInfo {
                     info.contactDisplayPhotoUri = Uri.parse(cursor.getString(columnIndex));
                 } else {
                     info.contactDisplayPhotoUri = null;
+                }
+
+                columnIndex = cursor.getColumnIndex(Data.PREFERRED_PHONE_ACCOUNT_COMPONENT_NAME);
+                if ((columnIndex != -1) && (cursor.getString(columnIndex) != null)) {
+                    info.preferredPhoneAccountComponent =
+                            ComponentName.unflattenFromString(cursor.getString(columnIndex));
+                }
+
+                columnIndex = cursor.getColumnIndex(Data.PREFERRED_PHONE_ACCOUNT_ID);
+                if ((columnIndex != -1) && (cursor.getString(columnIndex) != null)) {
+                    info.preferredPhoneAccountId = cursor.getString(columnIndex);
                 }
 
                 // look for the custom ringtone, create from the string stored
