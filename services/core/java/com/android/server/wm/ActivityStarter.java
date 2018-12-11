@@ -2506,8 +2506,9 @@ class ActivityStarter {
             // full resolution.
             mLaunchParams.mPreferredDisplayId =
                     mPreferredDisplayId != DEFAULT_DISPLAY ? mPreferredDisplayId : INVALID_DISPLAY;
+            final boolean onTop = aOptions == null || !aOptions.getAvoidMoveToFront();
             final ActivityStack stack =
-                    mRootActivityContainer.getLaunchStack(r, aOptions, task, ON_TOP, mLaunchParams);
+                    mRootActivityContainer.getLaunchStack(r, aOptions, task, onTop, mLaunchParams);
             mLaunchParams.mPreferredDisplayId = mPreferredDisplayId;
             return stack;
         }
