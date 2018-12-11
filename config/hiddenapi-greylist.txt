@@ -1716,10 +1716,6 @@ Landroid/widget/QuickContactBadge$QueryHandler;-><init>(Landroid/widget/QuickCon
 Landroid/widget/RelativeLayout$DependencyGraph$Node;-><init>()V
 Landroid/widget/RemoteViews$OnClickHandler;-><init>()V
 Landroid/widget/ScrollBarDrawable;-><init>()V
-Lcom/android/i18n/phonenumbers/Phonenumber$PhoneNumber$CountryCodeSource;->values()[Lcom/android/i18n/phonenumbers/Phonenumber$PhoneNumber$CountryCodeSource;
-Lcom/android/i18n/phonenumbers/PhoneNumberUtil$MatchType;->values()[Lcom/android/i18n/phonenumbers/PhoneNumberUtil$MatchType;
-Lcom/android/i18n/phonenumbers/PhoneNumberUtil$PhoneNumberFormat;->values()[Lcom/android/i18n/phonenumbers/PhoneNumberUtil$PhoneNumberFormat;
-Lcom/android/i18n/phonenumbers/PhoneNumberUtil$PhoneNumberType;->values()[Lcom/android/i18n/phonenumbers/PhoneNumberUtil$PhoneNumberType;
 Lcom/android/ims/ImsCall;->deflect(Ljava/lang/String;)V
 Lcom/android/ims/ImsCall;->isMultiparty()Z
 Lcom/android/ims/ImsCall;->reject(I)V
