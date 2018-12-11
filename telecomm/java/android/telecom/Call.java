@@ -123,8 +123,19 @@ public final class Call {
      * The key to retrieve the optional {@code PhoneAccount}s Telecom can bundle with its Call
      * extras. Used to pass the phone accounts to display on the front end to the user in order to
      * select phone accounts to (for example) place a call.
+     * @deprecated Use the list from {@link #EXTRA_SUGGESTED_PHONE_ACCOUNTS} instead.
      */
+    @Deprecated
     public static final String AVAILABLE_PHONE_ACCOUNTS = "selectPhoneAccountAccounts";
+
+    /**
+     * Key for extra used to pass along a list of {@link PhoneAccountSuggestion}s to the in-call
+     * UI when a call enters the {@link #STATE_SELECT_PHONE_ACCOUNT} state. The list included here
+     * will have the same length and be in the same order as the list passed with
+     * {@link #AVAILABLE_PHONE_ACCOUNTS}.
+     */
+    public static final String EXTRA_SUGGESTED_PHONE_ACCOUNTS =
+            "android.telecom.extra.SUGGESTED_PHONE_ACCOUNTS";
 
     /**
      * Extra key used to indicate the time (in milliseconds since midnight, January 1, 1970 UTC)
