@@ -33,13 +33,11 @@ import android.app.Application;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.os.Build;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -86,8 +84,7 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
 
     @Mock INotificationManager mNoMan;
     @Mock AtomicFile mFile;
-    @Mock
-    IPackageManager mPackageManager;
+    @Mock IPackageManager mPackageManager;
 
     Assistant mAssistant;
     Application mApplication;
@@ -108,20 +105,26 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
                 new Intent("android.service.notification.NotificationAssistantService");
         startIntent.setPackage("android.ext.services");
 
-        // To bypass real calls to global settings values, set the Settings values here.
-        Settings.Global.putFloat(mContext.getContentResolver(),
-                Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT, 0.8f);
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.BLOCKING_HELPER_STREAK_LIMIT, 2);
         mApplication = (Application) InstrumentationRegistry.getInstrumentation().
                 getTargetContext().getApplicationContext();
         // Force the test to use the correct application instead of trying to use a mock application
         setApplication(mApplication);
-        bindService(startIntent);
+
+        setupService();
         mAssistant = getService();
+
+        // Override the AssistantSettings factory.
+        mAssistant.mSettingsFactory = AssistantSettings::createForTesting;
+
+        bindService(startIntent);
+
+        mAssistant.mSettings.mDismissToViewRatioLimit = 0.8f;
+        mAssistant.mSettings.mStreakLimit = 2;
+        mAssistant.mSettings.mNewInterruptionModel = true;
         mAssistant.setNoMan(mNoMan);
         mAssistant.setFile(mFile);
         mAssistant.setPackageManager(mPackageManager);
+
         ApplicationInfo info = mock(ApplicationInfo.class);
         when(mPackageManager.getApplicationInfo(anyString(), anyInt(), anyInt()))
                 .thenReturn(info);
@@ -408,6 +411,8 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         mAssistant.writeXml(serializer);
 
         Assistant assistant = new Assistant();
+        // onCreate is not invoked, so settings won't be initialised, unless we do it here.
+        assistant.mSettings = mAssistant.mSettings;
         assistant.readXml(new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray())));
 
         assertEquals(ci1, assistant.getImpressions(key1));
@@ -417,8 +422,6 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
 
     @Test
     public void testSettingsProviderUpdate() {
-        ContentResolver resolver = mApplication.getContentResolver();
-
         // Set up channels
         String key = mAssistant.getKey("pkg1", 1, "channel1");
         ChannelImpressions ci = new ChannelImpressions();
@@ -435,19 +438,11 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         assertEquals(false, ci.shouldTriggerBlock());
 
         // Update settings values.
-        float newDismissToViewRatioLimit = 0f;
-        int newStreakLimit = 0;
-        Settings.Global.putFloat(resolver,
-                Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT,
-                newDismissToViewRatioLimit);
-        Settings.Global.putInt(resolver,
-                Settings.Global.BLOCKING_HELPER_STREAK_LIMIT, newStreakLimit);
+        mAssistant.mSettings.mDismissToViewRatioLimit = 0f;
+        mAssistant.mSettings.mStreakLimit = 0;
 
         // Notify for the settings values we updated.
-        mAssistant.mSettingsObserver.onChange(false, Settings.Global.getUriFor(
-                Settings.Global.BLOCKING_HELPER_STREAK_LIMIT));
-        mAssistant.mSettingsObserver.onChange(false, Settings.Global.getUriFor(
-                Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT));
+        mAssistant.mSettings.mOnUpdateRunnable.run();
 
         // With the new threshold, the blocking helper should be triggered.
         assertEquals(true, ci.shouldTriggerBlock());
