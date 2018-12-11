@@ -361,6 +361,7 @@
     <!-- The height of the qs customize header. Should be (28dp - qs_tile_margin_top_bottom). -->
     <dimen name="qs_customize_header_min_height">40dp</dimen>
     <dimen name="qs_tile_margin_top">18dp</dimen>
+    <dimen name="qs_tile_background_size">40dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <!-- Maximum width of quick quick settings panel. Defaults to MATCH_PARENT-->
     <dimen name="qs_quick_layout_width">-1px</dimen>

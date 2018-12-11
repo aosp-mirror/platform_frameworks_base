@@ -19,14 +19,19 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Path;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.PathShape;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.PathParser;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +51,7 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState;
 public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
 
     private static final String TAG = "QSTileBaseView";
+    private static final int ICON_MASK_ID = com.android.internal.R.string.config_icon_mask;
     private final H mHandler = new H();
     private final int[] mLocInScreen = new int[2];
     private final FrameLayout mIconFrame;
@@ -62,6 +68,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     private final int mColorInactive;
     private final int mColorDisabled;
     private int mCircleColor;
+    private int mBgSize;
 
     public QSTileBaseView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -71,15 +78,23 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         super(context);
         // Default to Quick Tile padding, and QSTileView will specify its own padding.
         int padding = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_padding);
-
         mIconFrame = new FrameLayout(context);
         mIconFrame.setForegroundGravity(Gravity.CENTER);
         int size = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
         addView(mIconFrame, new LayoutParams(size, size));
         mBg = new ImageView(getContext());
+        Path path = new Path(PathParser.createPathFromPathData(
+                context.getResources().getString(ICON_MASK_ID)));
+        float pathSize = AdaptiveIconDrawable.MASK_SIZE;
+        PathShape p = new PathShape(path, pathSize, pathSize);
+        ShapeDrawable d = new ShapeDrawable(p);
+        int bgSize = context.getResources().getDimensionPixelSize(R.dimen.qs_tile_background_size);
+        d.setIntrinsicHeight(bgSize);
+        d.setIntrinsicWidth(bgSize);
         mBg.setScaleType(ScaleType.FIT_CENTER);
-        mBg.setImageResource(R.drawable.ic_qs_circle);
-        mIconFrame.addView(mBg);
+        mBg.setImageDrawable(d);
+        mIconFrame.addView(mBg, ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
         mIcon = icon;
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -107,7 +122,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         setFocusable(true);
     }
 
-    public View getBgCicle() {
+    public View getBgCircle() {
         return mBg;
     }
 
@@ -303,6 +318,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
 
     private class H extends Handler {
         private static final int STATE_CHANGED = 1;
+
         public H() {
             super(Looper.getMainLooper());
         }
