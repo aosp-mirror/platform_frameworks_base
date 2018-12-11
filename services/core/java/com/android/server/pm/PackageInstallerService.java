@@ -486,9 +486,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 if (!PackageHelper.fitsOnInternal(mContext, params)) {
                     throw new IOException("No suitable internal storage available");
                 }
-            } else {
+            } else if ((params.installFlags & PackageManager.INSTALL_FORCE_VOLUME_UUID) != 0) {
                 // For now, installs to adopted media are treated as internal from
                 // an install flag point-of-view.
+                params.installFlags |= PackageManager.INSTALL_INTERNAL;
+            } else {
                 params.installFlags |= PackageManager.INSTALL_INTERNAL;
 
                 // Resolve best location for install, based on combination of
