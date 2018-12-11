@@ -32,7 +32,9 @@ import android.service.usb.UsbConnectionRecordProto;
 import android.service.usb.UsbHostManagerProto;
 import android.service.usb.UsbIsHeadsetProto;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
@@ -86,6 +88,7 @@ public class UsbHostManager {
     private int mNumConnects;    // TOTAL # of connect/disconnect
     private final LinkedList<ConnectionRecord> mConnections = new LinkedList<ConnectionRecord>();
     private ConnectionRecord mLastConnect;
+    private final ArrayMap<String, ConnectionRecord> mConnected = new ArrayMap<>();
 
     /*
      * ConnectionRecord
@@ -300,6 +303,11 @@ public class UsbHostManager {
         if (mode != ConnectionRecord.DISCONNECT) {
             mLastConnect = rec;
         }
+        if (mode == ConnectionRecord.CONNECT) {
+            mConnected.put(deviceAddress, rec);
+        } else if (mode == ConnectionRecord.DISCONNECT) {
+            mConnected.remove(deviceAddress);
+        }
     }
 
     private void logUsbDevice(UsbDescriptorParser descriptorParser) {
@@ -408,6 +416,14 @@ public class UsbHostManager {
                 // Tracking
                 addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT,
                         parser.getRawDescriptors());
+
+                // Stats collection
+                if (parser.hasAudioInterface()) {
+                    StatsLog.write(StatsLog.USB_DEVICE_ATTACHED, newDevice.getVendorId(),
+                            newDevice.getProductId(), parser.hasAudioInterface(),
+                            parser.hasHIDInterface(), parser.hasStorageInterface(),
+                            StatsLog.USB_DEVICE_ATTACHED__STATE__STATE_CONNECTED, 0);
+                }
             }
         }
 
@@ -432,9 +448,22 @@ public class UsbHostManager {
                 mUsbAlsaManager.usbDeviceRemoved(deviceAddress);
                 mSettingsManager.usbDeviceRemoved(device);
                 getCurrentUserSettings().usbDeviceRemoved(device);
-
+                ConnectionRecord current = mConnected.get(deviceAddress);
                 // Tracking
                 addConnectionRecord(deviceAddress, ConnectionRecord.DISCONNECT, null);
+
+                if (current != null) {
+                    UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress,
+                            current.mDescriptors);
+                    if (parser.hasAudioInterface()) {
+                        // Stats collection
+                        StatsLog.write(StatsLog.USB_DEVICE_ATTACHED, device.getVendorId(),
+                                device.getProductId(), parser.hasAudioInterface(),
+                                parser.hasHIDInterface(),  parser.hasStorageInterface(),
+                                StatsLog.USB_DEVICE_ATTACHED__STATE__STATE_DISCONNECTED,
+                                System.currentTimeMillis() - current.mTimestamp);
+                    }
+                }
             } else {
                 Slog.d(TAG, "Removed device at " + deviceAddress + " was already gone");
             }
