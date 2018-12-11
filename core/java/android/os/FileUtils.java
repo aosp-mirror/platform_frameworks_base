@@ -66,6 +66,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -714,6 +717,57 @@ public class FileUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Compute the digest of the given file using the requested algorithm.
+     *
+     * @param algorithm Any valid algorithm accepted by
+     *            {@link MessageDigest#getInstance(String)}.
+     * @hide
+     */
+    public static byte[] digest(@NonNull File file, @NonNull String algorithm)
+            throws IOException, NoSuchAlgorithmException {
+        try (FileInputStream in = new FileInputStream(file)) {
+            return digest(in, algorithm);
+        }
+    }
+
+    /**
+     * Compute the digest of the given file using the requested algorithm.
+     *
+     * @param algorithm Any valid algorithm accepted by
+     *            {@link MessageDigest#getInstance(String)}.
+     * @hide
+     */
+    public static byte[] digest(@NonNull InputStream in, @NonNull String algorithm)
+            throws IOException, NoSuchAlgorithmException {
+        // TODO: implement kernel optimizations
+        return digestInternalUserspace(in, algorithm);
+    }
+
+    /**
+     * Compute the digest of the given file using the requested algorithm.
+     *
+     * @param algorithm Any valid algorithm accepted by
+     *            {@link MessageDigest#getInstance(String)}.
+     * @hide
+     */
+    public static byte[] digest(FileDescriptor fd, String algorithm)
+            throws IOException, NoSuchAlgorithmException {
+        // TODO: implement kernel optimizations
+        return digestInternalUserspace(new FileInputStream(fd), algorithm);
+    }
+
+    private static byte[] digestInternalUserspace(InputStream in, String algorithm)
+            throws IOException, NoSuchAlgorithmException {
+        final MessageDigest digest = MessageDigest.getInstance(algorithm);
+        try (DigestInputStream digestStream = new DigestInputStream(in, digest)) {
+            final byte[] buffer = new byte[8192];
+            while (digestStream.read(buffer) != -1) {
+            }
+        }
+        return digest.digest();
     }
 
     /**
