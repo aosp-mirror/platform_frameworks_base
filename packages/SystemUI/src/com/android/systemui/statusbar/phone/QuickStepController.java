@@ -296,13 +296,15 @@ public class QuickStepController implements GestureHelper {
                     } else if (exceededSwipeHorizontalTouchSlop) {
                         if (mDragHPositive ? (posH < touchDownH) : (posH > touchDownH)) {
                             // Swiping left (rtl) gesture
-                            int index = isEdgeSwipeAlongNavBar(touchDownH, !mDragHPositive)
+                            int index = mGestureActions[ACTION_SWIPE_LEFT_FROM_EDGE_INDEX] != null
+                                        && isEdgeSwipeAlongNavBar(touchDownH, !mDragHPositive)
                                     ? ACTION_SWIPE_LEFT_FROM_EDGE_INDEX : ACTION_SWIPE_LEFT_INDEX;
                             tryToStartGesture(mGestureActions[index], true /* alignedWithNavBar */,
                                     event);
                         } else {
                             // Swiping right (ltr) gesture
-                            int index = isEdgeSwipeAlongNavBar(touchDownH, mDragHPositive)
+                            int index = mGestureActions[ACTION_SWIPE_RIGHT_FROM_EDGE_INDEX] != null
+                                        && isEdgeSwipeAlongNavBar(touchDownH, mDragHPositive)
                                     ? ACTION_SWIPE_RIGHT_FROM_EDGE_INDEX : ACTION_SWIPE_RIGHT_INDEX;
                             tryToStartGesture(mGestureActions[index], true /* alignedWithNavBar */,
                                     event);
