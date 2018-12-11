@@ -798,6 +798,12 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon qızmağa başlayır"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Telefon soyuyana kimi bəzi funksiyalar məhdudlaşdırılır"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonunuz avtomatik olaraq soyumağa başlayacaq. Telefon istifadəsinə davam edə bilərsiniz, lakin sürəti yavaşlaya bilər.\n\nTelefonunuz soyuduqdan sonra normal işləyəcək."</string>
+    <!-- no translation found for high_temp_alarm_title (442812040762745210) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (519359725058131592) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_help_care_steps (3631075329318070726) -->
+    <skip />
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Sol qısayol"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Sağ qısayol"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Sol qısayol kiliddən çıxır"</string>

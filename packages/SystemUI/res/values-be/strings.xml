@@ -810,6 +810,12 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Тэлефон награваецца"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Некаторыя функцыі абмежаваны, пакуль тэлефон астывае"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ваш тэлефон аўтаматычна паспрабуе астыць. Вы можаце па-ранейшаму карыстацца сваім тэлефонам, але ён можа працаваць больш павольна.\n\nПасля таго як ваш тэлефон астыне, ён будзе працаваць у звычайным рэжыме."</string>
+    <!-- no translation found for high_temp_alarm_title (442812040762745210) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (519359725058131592) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_help_care_steps (3631075329318070726) -->
+    <skip />
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Ярлык \"улева\""</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Ярлык \"управа\""</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Разблакіроўка таксама ярлыком \"улева\""</string>
