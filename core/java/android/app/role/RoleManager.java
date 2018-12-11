@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -212,6 +213,7 @@ public final class RoleManager {
     @NonNull
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
     @SystemApi
+    @TestApi
     public List<String> getRoleHolders(@NonNull String roleName) {
         return getRoleHoldersAsUser(roleName, Process.myUserHandle());
     }
@@ -239,6 +241,7 @@ public final class RoleManager {
     @NonNull
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
     @SystemApi
+    @TestApi
     public List<String> getRoleHoldersAsUser(@NonNull String roleName, @NonNull UserHandle user) {
         Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
         Preconditions.checkNotNull(user, "user cannot be null");
@@ -273,6 +276,7 @@ public final class RoleManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
     @SystemApi
+    @TestApi
     public void addRoleHolderAsUser(@NonNull String roleName, @NonNull String packageName,
             @NonNull UserHandle user, @CallbackExecutor @NonNull Executor executor,
             @NonNull RoleManagerCallback callback) {
@@ -312,6 +316,7 @@ public final class RoleManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
     @SystemApi
+    @TestApi
     public void removeRoleHolderAsUser(@NonNull String roleName, @NonNull String packageName,
             @NonNull UserHandle user, @CallbackExecutor @NonNull Executor executor,
             @NonNull RoleManagerCallback callback) {
@@ -350,6 +355,7 @@ public final class RoleManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
     @SystemApi
+    @TestApi
     public void clearRoleHoldersAsUser(@NonNull String roleName, @NonNull UserHandle user,
             @CallbackExecutor @NonNull Executor executor, @NonNull RoleManagerCallback callback) {
         Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");

@@ -208,9 +208,14 @@ class SettingsProtoDumpUtil {
                 GlobalSettingsProto.Autofill.MAX_VISIBLE_DATASETS);
         p.end(autofillToken);
 
+        final long backupToken = p.start(GlobalSettingsProto.BACKUP);
         dumpSetting(s, p,
                 Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS,
-                GlobalSettingsProto.BACKUP_AGENT_TIMEOUT_PARAMETERS);
+                GlobalSettingsProto.Backup.BACKUP_AGENT_TIMEOUT_PARAMETERS);
+        dumpSetting(s, p,
+                Settings.Global.BACKUP_MULTI_USER_ENABLED,
+                GlobalSettingsProto.Backup.BACKUP_MULTI_USER_ENABLED);
+        p.end(backupToken);
 
         final long batteryToken = p.start(GlobalSettingsProto.BATTERY);
         dumpSetting(s, p,

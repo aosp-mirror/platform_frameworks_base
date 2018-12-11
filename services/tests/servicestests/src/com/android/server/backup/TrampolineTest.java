@@ -23,6 +23,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -43,9 +44,13 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.provider.Settings;
+import android.test.mock.MockContentResolver;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -97,6 +102,7 @@ public class TrampolineTest {
     private FileDescriptor mFileDescriptorStub = new FileDescriptor();
 
     private TrampolineTestable mTrampoline;
+    private MockContentResolver mContentResolver;
 
     @Before
     public void setUp() {
@@ -110,11 +116,33 @@ public class TrampolineTest {
         when(mSuppressFileMock.getParentFile()).thenReturn(mSuppressFileParentMock);
 
         mTrampoline = new TrampolineTestable(mContextMock);
+
+        mContentResolver = new MockContentResolver();
+        mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
+        when(mContextMock.getContentResolver()).thenReturn(mContentResolver);
     }
 
     @Test
     public void constructor_createsSuppressFileDirectory() {
         verify(mSuppressFileParentMock).mkdirs();
+    }
+
+    @Test
+    public void startServiceForUser_whenMultiUserSettingDisabled_isIgnored() {
+        Settings.Global.putInt(mContentResolver, Settings.Global.BACKUP_MULTI_USER_ENABLED, 0);
+
+        mTrampoline.startServiceForUser(10);
+
+        verify(mBackupManagerServiceMock, never()).startServiceForUser(10);
+    }
+
+    @Test
+    public void startServiceForUser_whenMultiUserSettingEnabled_callsBackupManagerService() {
+        Settings.Global.putInt(mContentResolver, Settings.Global.BACKUP_MULTI_USER_ENABLED, 1);
+
+        mTrampoline.startServiceForUser(10);
+
+        verify(mBackupManagerServiceMock).startServiceForUser(10);
     }
 
     @Test

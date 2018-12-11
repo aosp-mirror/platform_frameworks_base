@@ -3676,6 +3676,18 @@ public class ActivityManager {
     }
 
     /**
+     * Returns whether switching to provided user was successful.
+     *
+     * @param user the user to switch to.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public boolean switchUser(UserHandle user) {
+        return switchUser(user.getIdentifier());
+    }
+
+    /**
      * Logs out current current foreground user by switching to the system user and stopping the
      * user being switched from.
      * @hide

@@ -6621,6 +6621,12 @@ message MetricsEvent {
     // OS: Q
     FIELD_IS_FULL_QS = 1593;
 
+    // ACTION: Display folding state was changed
+    // CATEGORY: OTHER
+    //   SUBTYPE: 1 if display is folded, 0 if not.
+    // OS: Q
+    ACTION_DISPLAY_FOLD = 1594;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.

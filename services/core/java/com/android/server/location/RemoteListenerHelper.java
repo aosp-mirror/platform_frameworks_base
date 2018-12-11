@@ -17,6 +17,8 @@
 package com.android.server.location;
 
 import android.annotation.NonNull;
+import android.app.AppOpsManager;
+import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -46,6 +48,9 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
 
     private final Map<IBinder, LinkedListener> mListenerMap = new HashMap<>();
 
+    protected final Context mContext;
+    protected final AppOpsManager mAppOps;
+
     private volatile boolean mIsRegistered;  // must access only on handler thread, or read-only
 
     private boolean mHasIsSupported;
@@ -53,10 +58,12 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
 
     private int mLastReportedResult = RESULT_UNKNOWN;
 
-    protected RemoteListenerHelper(Handler handler, String name) {
+    protected RemoteListenerHelper(Context context, Handler handler, String name) {
         Preconditions.checkNotNull(name);
         mHandler = handler;
         mTag = name;
+        mContext = context;
+        mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
     }
 
     // read-only access for a dump() thread assured via volatile
@@ -64,10 +71,10 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         return mIsRegistered;
     }
 
-    public boolean addListener(@NonNull TListener listener) {
+    public boolean addListener(@NonNull TListener listener, int uid, String packageName) {
         Preconditions.checkNotNull(listener, "Attempted to register a 'null' listener.");
         IBinder binder = listener.asBinder();
-        LinkedListener deathListener = new LinkedListener(listener);
+        LinkedListener deathListener = new LinkedListener(listener, uid, packageName);
         synchronized (mListenerMap) {
             if (mListenerMap.containsKey(binder)) {
                 // listener already added
@@ -102,7 +109,7 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
                 // asynchronously in the future
                 return true;
             }
-            post(listener, getHandlerOperation(result));
+            post(deathListener, getHandlerOperation(result));
         }
         return true;
     }
@@ -130,7 +137,7 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
     protected abstract ListenerOperation<TListener> getHandlerOperation(int result);
 
     protected interface ListenerOperation<TListener extends IInterface> {
-        void execute(TListener listener) throws RemoteException;
+        void execute(TListener listener, int uid, String packageName) throws RemoteException;
     }
 
     protected void foreach(ListenerOperation<TListener> operation) {
@@ -170,15 +177,28 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         }
     }
 
-    private void foreachUnsafe(ListenerOperation<TListener> operation) {
-        for (LinkedListener linkedListener : mListenerMap.values()) {
-            post(linkedListener.getUnderlyingListener(), operation);
+    protected boolean hasPermission(int uid, String packageName) {
+        return mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, uid, packageName)
+                == AppOpsManager.MODE_ALLOWED;
+    }
+
+    protected void logPermissionDisabledEventNotReported(String tag, String packageName,
+            String event) {
+        if (Log.isLoggable(tag, Log.DEBUG)) {
+            Log.d(tag, "Location permission disabled. Skipping " + event + " reporting for app: "
+                    + packageName);
         }
     }
 
-    private void post(TListener listener, ListenerOperation<TListener> operation) {
+    private void foreachUnsafe(ListenerOperation<TListener> operation) {
+        for (LinkedListener linkedListener : mListenerMap.values()) {
+            post(linkedListener, operation);
+        }
+    }
+
+    private void post(LinkedListener linkedListener, ListenerOperation<TListener> operation) {
         if (operation != null) {
-            mHandler.post(new HandlerRunnable(listener, operation));
+            mHandler.post(new HandlerRunnable(linkedListener, operation));
         }
     }
 
@@ -193,13 +213,9 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
                 }
                 if (!mIsRegistered) {
                     // post back a failure
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            synchronized (mListenerMap) {
-                                ListenerOperation<TListener> operation = getHandlerOperation(registrationState);
-                                foreachUnsafe(operation);
-                            }
+                    mHandler.post(() -> {
+                        synchronized (mListenerMap) {
+                            foreachUnsafe(getHandlerOperation(registrationState));
                         }
                     });
                 }
@@ -208,16 +224,14 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
     }
 
     private void tryUnregister() {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (!mIsRegistered) {
-                    return;
+        mHandler.post(() -> {
+                    if (!mIsRegistered) {
+                        return;
+                    }
+                    unregisterFromService();
+                    mIsRegistered = false;
                 }
-                unregisterFromService();
-                mIsRegistered = false;
-            }
-        });
+        );
     }
 
     private int calculateCurrentResultUnsafe() {
@@ -240,14 +254,13 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
 
     private class LinkedListener implements IBinder.DeathRecipient {
         private final TListener mListener;
+        private final int mUid;
+        private final String mPackageName;
 
-        public LinkedListener(@NonNull TListener listener) {
+        LinkedListener(@NonNull TListener listener, int uid, String packageName) {
             mListener = listener;
-        }
-
-        @NonNull
-        public TListener getUnderlyingListener() {
-            return mListener;
+            mUid = uid;
+            mPackageName = packageName;
         }
 
         @Override
@@ -258,18 +271,19 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
     }
 
     private class HandlerRunnable implements Runnable {
-        private final TListener mListener;
+        private final LinkedListener mLinkedListener;
         private final ListenerOperation<TListener> mOperation;
 
-        public HandlerRunnable(TListener listener, ListenerOperation<TListener> operation) {
-            mListener = listener;
+        HandlerRunnable(LinkedListener linkedListener, ListenerOperation<TListener> operation) {
+            mLinkedListener = linkedListener;
             mOperation = operation;
         }
 
         @Override
         public void run() {
             try {
-                mOperation.execute(mListener);
+                mOperation.execute(mLinkedListener.mListener, mLinkedListener.mUid,
+                        mLinkedListener.mPackageName);
             } catch (RemoteException e) {
                 Log.v(mTag, "Error in monitored listener.", e);
             }

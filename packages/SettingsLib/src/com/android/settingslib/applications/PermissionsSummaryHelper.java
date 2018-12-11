@@ -17,8 +17,8 @@ package com.android.settingslib.applications;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.content.pm.permission.RuntimePermissionPresentationInfo;
-import android.content.pm.permission.RuntimePermissionPresenter;
+import android.permission.RuntimePermissionPresentationInfo;
+import android.permission.RuntimePermissionPresenter;
 
 import java.text.Collator;
 import java.util.ArrayList;

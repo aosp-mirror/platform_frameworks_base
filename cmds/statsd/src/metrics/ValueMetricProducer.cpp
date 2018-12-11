@@ -52,6 +52,7 @@ const int FIELD_ID_TIME_BASE = 9;
 const int FIELD_ID_BUCKET_SIZE = 10;
 const int FIELD_ID_DIMENSION_PATH_IN_WHAT = 11;
 const int FIELD_ID_DIMENSION_PATH_IN_CONDITION = 12;
+const int FIELD_ID_IS_ACTIVE = 13;
 // for ValueMetricDataWrapper
 const int FIELD_ID_DATA = 1;
 const int FIELD_ID_SKIPPED = 2;
@@ -72,17 +73,15 @@ const int FIELD_ID_BUCKET_NUM = 4;
 const int FIELD_ID_START_BUCKET_ELAPSED_MILLIS = 5;
 const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 6;
 
+const Value ZERO_LONG((int64_t)0);
+const Value ZERO_DOUBLE((int64_t)0);
+
 // ValueMetric has a minimum bucket size of 10min so that we don't pull too frequently
-ValueMetricProducer::ValueMetricProducer(const ConfigKey& key,
-                                         const ValueMetric& metric,
-                                         const int conditionIndex,
-                                         const sp<ConditionWizard>& conditionWizard,
-                                         const int whatMatcherIndex,
-                                         const sp<EventMatcherWizard>& matcherWizard,
-                                         const int pullTagId,
-                                         const int64_t timeBaseNs,
-                                         const int64_t startTimeNs,
-                                         const sp<StatsPullerManager>& pullerManager)
+ValueMetricProducer::ValueMetricProducer(
+        const ConfigKey& key, const ValueMetric& metric, const int conditionIndex,
+        const sp<ConditionWizard>& conditionWizard, const int whatMatcherIndex,
+        const sp<EventMatcherWizard>& matcherWizard, const int pullTagId, const int64_t timeBaseNs,
+        const int64_t startTimeNs, const sp<StatsPullerManager>& pullerManager)
     : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, conditionWizard),
       mWhatMatcherIndex(whatMatcherIndex),
       mEventMatcherWizard(matcherWizard),
@@ -102,7 +101,9 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key,
       mAggregationType(metric.aggregation_type()),
       mUseDiff(metric.has_use_diff() ? metric.use_diff() : (mIsPulled ? true : false)),
       mValueDirection(metric.value_direction()),
-      mSkipZeroDiffOutput(metric.skip_zero_diff_output()) {
+      mSkipZeroDiffOutput(metric.skip_zero_diff_output()),
+      mUseZeroDefaultBase(metric.use_zero_default_base()),
+      mHasGlobalBase(false) {
     int64_t bucketSizeMills = 0;
     if (metric.has_bucket()) {
         bucketSizeMills = TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket());
@@ -190,10 +191,12 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     } else {
         flushIfNeededLocked(dumpTimeNs);
     }
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_IS_ACTIVE, isActiveLocked());
+
     if (mPastBuckets.empty() && mSkippedBuckets.empty()) {
         return;
     }
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_TIME_BASE, (long long)mTimeBaseNs);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_BUCKET_SIZE, (long long)mBucketSizeNs);
     // Fills the dimension path if not slicing by ALL.
@@ -302,6 +305,15 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     }
 }
 
+void ValueMetricProducer::resetBase() {
+    for (auto& slice : mCurrentSlicedBucket) {
+        for (auto& interval : slice.second) {
+            interval.hasBase = false;
+        }
+    }
+    mHasGlobalBase = false;
+}
+
 void ValueMetricProducer::onConditionChangedLocked(const bool condition,
                                                    const int64_t eventTimeNs) {
     if (eventTimeNs < mCurrentBucketStartTimeNs) {
@@ -317,13 +329,10 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
         pullAndMatchEventsLocked(eventTimeNs);
     }
 
-    // when condition change from true to false, clear diff base
+    // when condition change from true to false, clear diff base but don't
+    // reset other counters as we may accumulate more value in the bucket.
     if (mUseDiff && mCondition && !condition) {
-        for (auto& slice : mCurrentSlicedBucket) {
-            for (auto& interval : slice.second) {
-                interval.hasBase = false;
-            }
-        }
+        resetBase();
     }
 
     mCondition = condition;
@@ -332,15 +341,17 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
 void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
     vector<std::shared_ptr<LogEvent>> allData;
     if (mPullerManager->Pull(mPullTagId, timestampNs, &allData)) {
-        if (allData.size() == 0) {
-            return;
-        }
         for (const auto& data : allData) {
             if (mEventMatcherWizard->matchLogEvent(
                 *data, mWhatMatcherIndex) == MatchingState::kMatched) {
                 onMatchedLogEventLocked(mWhatMatcherIndex, *data);
             }
         }
+        mHasGlobalBase = true;
+    } else {
+        // for pulled data, every pull is needed. So we reset the base if any
+        // pull fails.
+        resetBase();
     }
 }
 
@@ -376,6 +387,7 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
                 onMatchedLogEventLocked(mWhatMatcherIndex, *data);
             }
         }
+        mHasGlobalBase = true;
     } else {
         VLOG("No need to commit data on condition false.");
     }
@@ -486,11 +498,18 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
         }
 
         if (mUseDiff) {
-            // no base. just update base and return.
             if (!interval.hasBase) {
-                interval.base = value;
-                interval.hasBase = true;
-                return;
+                if (mHasGlobalBase && mUseZeroDefaultBase) {
+                    // The bucket has global base. This key does not.
+                    // Optionally use zero as base.
+                    interval.base = (value.type == LONG ? ZERO_LONG : ZERO_DOUBLE);
+                    interval.hasBase = true;
+                } else {
+                    // no base. just update base and return.
+                    interval.base = value;
+                    interval.hasBase = true;
+                    return;
+                }
             }
             Value diff;
             switch (mValueDirection) {
@@ -580,11 +599,7 @@ void ValueMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
     if (numBucketsForward > 1) {
         VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
         // take base again in future good bucket.
-        for (auto& slice : mCurrentSlicedBucket) {
-            for (auto& interval : slice.second) {
-                interval.hasBase = false;
-            }
-        }
+        resetBase();
     }
     VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
          (long long)mCurrentBucketStartTimeNs);

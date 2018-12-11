@@ -27,7 +27,6 @@ import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -38,8 +37,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -82,11 +79,11 @@ public class BackupManagerService {
         return sInstance;
     }
 
-    /** Helper to create the {@link BackupManagerService} instance. */
-    public static BackupManagerService create(
-            Context context,
-            Trampoline parent,
-            HandlerThread backupThread) {
+    private UserBackupManagerService mUserBackupManagerService;
+
+    /** Instantiate a new instance of {@link BackupManagerService}. */
+    public BackupManagerService(
+            Context context, Trampoline trampoline, HandlerThread backupThread) {
         // Set up our transport options and initialize the default transport
         SystemConfig systemConfig = SystemConfig.getInstance();
         Set<ComponentName> transportWhitelist = systemConfig.getBackupTransportWhitelist();
@@ -94,50 +91,9 @@ public class BackupManagerService {
             transportWhitelist = Collections.emptySet();
         }
 
-        String transport =
-                Settings.Secure.getString(
-                        context.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT);
-        if (TextUtils.isEmpty(transport)) {
-            transport = null;
-        }
-        if (DEBUG) {
-            Slog.v(TAG, "Starting with transport " + transport);
-        }
-        TransportManager transportManager =
-                new TransportManager(
-                        context,
-                        transportWhitelist,
-                        transport);
-
-        // If encrypted file systems is enabled or disabled, this call will return the
-        // correct directory.
-        File baseStateDir = new File(Environment.getDataDirectory(), "backup");
-
-        // This dir on /cache is managed directly in init.rc
-        File dataDir = new File(Environment.getDownloadCacheDirectory(), "backup_stage");
-
-        return new BackupManagerService(
-                context,
-                parent,
-                backupThread,
-                baseStateDir,
-                dataDir,
-                transportManager);
-    }
-
-    private UserBackupManagerService mUserBackupManagerService;
-
-    /** Instantiate a new instance of {@link BackupManagerService}. */
-    public BackupManagerService(
-            Context context,
-            Trampoline trampoline,
-            HandlerThread backupThread,
-            File baseStateDir,
-            File dataDir,
-            TransportManager transportManager) {
         mUserBackupManagerService =
-                new UserBackupManagerService(
-                        context, trampoline, backupThread, baseStateDir, dataDir, transportManager);
+                UserBackupManagerService.createAndInitializeService(
+                        context, trampoline, backupThread, transportWhitelist);
     }
 
     // TODO(b/118520567): Remove when tests are modified to use per-user instance.
@@ -151,30 +107,6 @@ public class BackupManagerService {
      * a background thread to keep the unlock time down.
      */
     public void unlockSystemUser() {
-        // Migrate legacy setting
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup migrate");
-        if (!backupSettingMigrated(UserHandle.USER_SYSTEM)) {
-            if (DEBUG) {
-                Slog.i(TAG, "Backup enable apparently not migrated");
-            }
-            ContentResolver resolver = sInstance.getContext().getContentResolver();
-            int enableState = Settings.Secure.getIntForUser(resolver,
-                    Settings.Secure.BACKUP_ENABLED, -1, UserHandle.USER_SYSTEM);
-            if (enableState >= 0) {
-                if (DEBUG) {
-                    Slog.i(TAG, "Migrating enable state " + (enableState != 0));
-                }
-                writeBackupEnableState(enableState != 0, UserHandle.USER_SYSTEM);
-                Settings.Secure.putStringForUser(resolver,
-                        Settings.Secure.BACKUP_ENABLED, null, UserHandle.USER_SYSTEM);
-            } else {
-                if (DEBUG) {
-                    Slog.i(TAG, "Backup not yet configured; retaining null enable state");
-                }
-            }
-        }
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup enable");
         try {
             sInstance.setBackupEnabled(readBackupEnableState(UserHandle.USER_SYSTEM));
@@ -182,6 +114,15 @@ public class BackupManagerService {
             // can't happen; it's a local object
         }
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    /**
+     * Starts the backup service for user {@code userId} by creating a new instance of {@link
+     * UserBackupManagerService} and registering it with this service.
+     */
+    // TODO(b/120212806): Add UserBackupManagerService initialization logic.
+    void startServiceForUser(int userId) {
+        // Intentionally empty.
     }
 
     /*
@@ -563,12 +504,6 @@ public class BackupManagerService {
         mUserBackupManagerService.dump(fd, pw, args);
     }
 
-    private static boolean backupSettingMigrated(int userId) {
-        File base = new File(Environment.getDataDirectory(), "backup");
-        File enableFile = new File(base, BACKUP_ENABLE_FILE);
-        return enableFile.exists();
-    }
-
     private static boolean readBackupEnableState(int userId) {
         File base = new File(Environment.getDataDirectory(), "backup");
         File enableFile = new File(base, BACKUP_ENABLE_FILE);
@@ -598,14 +533,8 @@ public class BackupManagerService {
             stage.renameTo(enableFile);
             // will be synced immediately by the try-with-resources call to close()
         } catch (IOException | RuntimeException e) {
-            // Whoops; looks like we're doomed.  Roll everything out, disabled,
-            // including the legacy state.
             Slog.e(TAG, "Unable to record backup enable state; reverting to disabled: "
                     + e.getMessage());
-
-            ContentResolver resolver = sInstance.getContext().getContentResolver();
-            Settings.Secure.putStringForUser(resolver,
-                    Settings.Secure.BACKUP_ENABLED, null, userId);
             enableFile.delete();
             stage.delete();
         }
@@ -626,7 +555,9 @@ public class BackupManagerService {
         @Override
         public void onUnlockUser(int userId) {
             if (userId == UserHandle.USER_SYSTEM) {
-                sInstance.unlockSystemUser();
+                sInstance.initializeServiceAndUnlockSystemUser();
+            } else {
+                sInstance.startServiceForUser(userId);
             }
         }
     }

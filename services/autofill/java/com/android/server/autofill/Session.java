@@ -1238,7 +1238,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
-        final UserData userData = mService.getUserData();
+        final UserData packageUserData = lastResponse.getUserData();
+
+        final UserData userData;
+        if (packageUserData != null) {
+            // Replace default userData
+            userData = packageUserData;
+        } else {
+            userData = mService.getUserData();
+        }
 
         for (int i = 0; i < mViewStates.size(); i++) {
             final ViewState viewState = mViewStates.valueAt(i);

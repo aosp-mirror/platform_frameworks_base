@@ -265,6 +265,7 @@ java_defaults {
         "core/java/android/os/storage/IStorageEventListener.aidl",
         "core/java/android/os/storage/IStorageShutdownObserver.aidl",
         "core/java/android/os/storage/IObbActionListener.aidl",
+        "core/java/android/permission/IRuntimePermissionPresenter.aidl",
         "core/java/android/rolecontrollerservice/IRoleControllerService.aidl",
         ":keystore_aidl",
         "core/java/android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl",
@@ -442,7 +443,6 @@ java_defaults {
         "location/java/android/location/IGeocodeProvider.aidl",
         "location/java/android/location/IGeofenceProvider.aidl",
         "location/java/android/location/IGnssStatusListener.aidl",
-        "location/java/android/location/IGnssStatusProvider.aidl",
         "location/java/android/location/IGnssMeasurementsListener.aidl",
         "location/java/android/location/IGnssNavigationMessageListener.aidl",
         "location/java/android/location/ILocationListener.aidl",
@@ -451,6 +451,7 @@ java_defaults {
         "location/java/android/location/IGpsGeofenceHardware.aidl",
         "location/java/android/location/INetInitiatedListener.aidl",
         "location/java/com/android/internal/location/ILocationProvider.aidl",
+        "location/java/com/android/internal/location/ILocationProviderManager.aidl",
         "media/java/android/media/IAudioFocusDispatcher.aidl",
         "media/java/android/media/IAudioRoutesObserver.aidl",
         "media/java/android/media/IAudioService.aidl",
@@ -633,7 +634,6 @@ java_defaults {
         ":libupdate_engine_aidl",
 
         ":storaged_aidl",
-        ":netd_aidl",
         ":vold_aidl",
         ":installd_aidl",
         ":dumpstate_aidl",
@@ -1617,6 +1617,7 @@ droidstubs {
     ],
     dex_mapping_filename: "dex-mapping.txt",
     args: metalava_framework_docs_args +
+        " --hide ReferencesHidden " +
         " --show-unannotated " +
         " --show-annotation android.annotation.SystemApi " +
         " --show-annotation android.annotation.TestApi "

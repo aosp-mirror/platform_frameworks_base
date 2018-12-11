@@ -799,6 +799,10 @@ public class PermissionManagerService {
                     continue;
                 }
 
+                if (bp.isRemoved()) {
+                    continue;
+                }
+
                 // Limit ephemeral apps to ephemeral allowed permissions.
                 if (pkg.applicationInfo.isInstantApp() && !bp.isInstant()) {
                     if (DEBUG_PERMISSIONS) {
@@ -1635,6 +1639,12 @@ public class PermissionManagerService {
                             PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER,
                             UserHandle.USER_SYSTEM))) {
                 // Special permissions for the system default text classifier.
+                allowed = true;
+            }
+            if (!allowed && bp.isWellbeing()
+                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
+                    PackageManagerInternal.PACKAGE_WELLBEING, UserHandle.USER_SYSTEM))) {
+                // Special permission granted only to the OEM specified wellbeing app
                 allowed = true;
             }
         }

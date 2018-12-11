@@ -1541,6 +1541,13 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
+        public void showInputMethodPickerFromSystem(
+                IInputMethodClient client, int auxiliarySubtypeMode, int displayId) {
+            reportNotSupported();
+        }
+
+        @BinderThread
+        @Override
         public void showInputMethodAndSubtypeEnablerFromClient(
                 IInputMethodClient client, String inputMethodId) {
             reportNotSupported();
@@ -1589,20 +1596,6 @@ public final class MultiClientInputMethodManagerService {
         @BinderThread
         @Override
         public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
-            reportNotSupported();
-            return false;
-        }
-
-        @BinderThread
-        @Override
-        public boolean switchToPreviousInputMethod(IBinder token) {
-            reportNotSupported();
-            return false;
-        }
-
-        @BinderThread
-        @Override
-        public boolean switchToNextInputMethod(IBinder token, boolean onlyCurrentIme) {
             reportNotSupported();
             return false;
         }

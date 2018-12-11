@@ -276,6 +276,23 @@ package android.app.backup {
 
 }
 
+package android.app.role {
+
+  public final class RoleManager {
+    method public void addRoleHolderAsUser(java.lang.String, java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
+    method public void clearRoleHoldersAsUser(java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
+    method public java.util.List<java.lang.String> getRoleHolders(java.lang.String);
+    method public java.util.List<java.lang.String> getRoleHoldersAsUser(java.lang.String, android.os.UserHandle);
+    method public void removeRoleHolderAsUser(java.lang.String, java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
+  }
+
+  public abstract interface RoleManagerCallback {
+    method public abstract void onFailure();
+    method public abstract void onSuccess();
+  }
+
+}
+
 package android.app.usage {
 
   public class NetworkStatsManager {
@@ -357,6 +374,7 @@ package android.content.pm {
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 32768; // 0x8000
+    field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
     field public java.lang.String backgroundPermission;
   }
 

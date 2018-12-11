@@ -78,6 +78,15 @@ public class CarrierConfigManager {
     // system image, that can be added in packages/apps/CarrierConfig.
 
     /**
+     * Specifies a value that identifies the version of the carrier configuration that is
+     * currently in use. This string is displayed on the UI.
+     * The format of the string is not specified.
+     * @hide
+     */
+    public static final String KEY_CARRIER_CONFIG_VERSION_STRING =
+            "carrier_config_version_string";
+
+    /**
      * This flag specifies whether VoLTE availability is based on provisioning. By default this is
      * false.
      */
@@ -2392,6 +2401,7 @@ public class CarrierConfigManager {
 
     static {
         sDefaults = new PersistableBundle();
+        sDefaults.putString(KEY_CARRIER_CONFIG_VERSION_STRING, "");
         sDefaults.putBoolean(KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_DEFLECT_IMS_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_PLAY_REMOTE_HOLD_TONE_BOOL, false);

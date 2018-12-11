@@ -109,7 +109,15 @@ message GlobalSettingsProto {
     }
     optional Autofill autofill = 140;
 
-    optional SettingProto backup_agent_timeout_parameters = 18;
+    reserved 18; // Used to be backup_agent_timeout_parameters
+
+    message Backup {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto backup_agent_timeout_parameters = 1;
+        optional SettingProto backup_multi_user_enabled = 2;
+    }
+    optional Backup backup = 146;
 
     message Battery {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -1007,5 +1015,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 146;
+    // Next tag = 147;
 }

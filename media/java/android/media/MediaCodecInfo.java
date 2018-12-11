@@ -2516,6 +2516,8 @@ public final class MediaCodecInfo {
                         case CodecProfileLevel.VP9Profile3:
                         case CodecProfileLevel.VP9Profile2HDR:
                         case CodecProfileLevel.VP9Profile3HDR:
+                        case CodecProfileLevel.VP9Profile2HDR10Plus:
+                        case CodecProfileLevel.VP9Profile3HDR10Plus:
                             break;
                         default:
                             Log.w(TAG, "Unrecognized profile "
@@ -2608,7 +2610,9 @@ public final class MediaCodecInfo {
                     switch (profileLevel.profile) {
                         case CodecProfileLevel.HEVCProfileMain:
                         case CodecProfileLevel.HEVCProfileMain10:
+                        case CodecProfileLevel.HEVCProfileMainStill:
                         case CodecProfileLevel.HEVCProfileMain10HDR10:
+                        case CodecProfileLevel.HEVCProfileMain10HDR10Plus:
                             break;
                         default:
                             Log.w(TAG, "Unrecognized profile "
@@ -2999,6 +3003,8 @@ public final class MediaCodecInfo {
         // HDR profiles also support passing HDR metadata
         public static final int VP9Profile2HDR = 0x1000;
         public static final int VP9Profile3HDR = 0x2000;
+        public static final int VP9Profile2HDR10Plus = 0x4000;
+        public static final int VP9Profile3HDR10Plus = 0x8000;
 
         // from OMX_VIDEO_VP9LEVELTYPE
         public static final int VP9Level1  = 0x1;
@@ -3021,6 +3027,7 @@ public final class MediaCodecInfo {
         public static final int HEVCProfileMain10      = 0x02;
         public static final int HEVCProfileMainStill   = 0x04;
         public static final int HEVCProfileMain10HDR10 = 0x1000;
+        public static final int HEVCProfileMain10HDR10Plus = 0x2000;
 
         // from OMX_VIDEO_HEVCLEVELTYPE
         public static final int HEVCMainTierLevel1  = 0x1;

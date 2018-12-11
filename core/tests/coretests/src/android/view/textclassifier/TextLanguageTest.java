@@ -69,10 +69,12 @@ public final class TextLanguageTest {
         final String bundleKey = "experiment.str";
         final Bundle bundle = new Bundle();
         bundle.putString(bundleKey, "bundle");
+        final String packageName = "packageName";
 
         final TextLanguage.Request reference = new TextLanguage.Request.Builder(text)
                 .setExtras(bundle)
                 .build();
+        reference.setCallingPackageName(packageName);
 
         final Parcel parcel = Parcel.obtain();
         reference.writeToParcel(parcel, 0);
@@ -81,5 +83,6 @@ public final class TextLanguageTest {
 
         assertEquals(text, result.getText());
         assertEquals("bundle", result.getExtras().getString(bundleKey));
+        assertEquals(packageName, result.getCallingPackageName());
     }
 }

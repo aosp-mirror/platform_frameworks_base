@@ -1537,14 +1537,11 @@ public class LocationManager {
      * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
      * allowed} for your app.
      * @throws IllegalArgumentException if no provider with the given name exists
+     *
+     * @deprecated This function has always been a no-op, and may be removed in the future.
      */
-    public void clearTestProviderLocation(String provider) {
-        try {
-            mService.clearTestProviderLocation(provider, mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
+    @Deprecated
+    public void clearTestProviderLocation(String provider) {}
 
     /**
      * Sets a mock enabled value for the given provider.  This value will be used in place
@@ -1575,13 +1572,12 @@ public class LocationManager {
      * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
      * allowed} for your app.
      * @throws IllegalArgumentException if no provider with the given name exists
+     *
+     * @deprecated Use {@link #setTestProviderEnabled(String, boolean)} instead.
      */
+    @Deprecated
     public void clearTestProviderEnabled(String provider) {
-        try {
-            mService.clearTestProviderEnabled(provider, mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        setTestProviderEnabled(provider, true);
     }
 
     /**

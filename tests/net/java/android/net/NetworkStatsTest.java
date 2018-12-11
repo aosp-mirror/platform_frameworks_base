@@ -448,22 +448,58 @@ public class NetworkStatsTest {
     }
 
     @Test
-    public void testWithoutUid() throws Exception {
-        final NetworkStats before = new NetworkStats(TEST_START, 3)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 128L, 8L, 0L, 2L, 20L)
-                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, 512L, 32L, 0L, 0L, 0L)
-                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, 64L, 4L, 0L, 0L, 0L)
-                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, 512L, 32L, 0L, 0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, 128L, 8L, 0L, 0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, 128L, 8L, 0L, 0L, 0L);
+    public void testRemoveUids() throws Exception {
+        final NetworkStats before = new NetworkStats(TEST_START, 3);
 
-        final NetworkStats after = before.withoutUids(new int[] { 100 });
-        assertEquals(6, before.size());
-        assertEquals(2, after.size());
-        assertValues(after, 0, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                DEFAULT_NETWORK_NO, 128L, 8L, 0L, 0L, 0L);
-        assertValues(after, 1, TEST_IFACE, 101, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO,
-                DEFAULT_NETWORK_NO, 128L, 8L, 0L, 0L, 0L);
+        // Test 0 item stats.
+        NetworkStats after = before.clone();
+        after.removeUids(new int[0]);
+        assertEquals(0, after.size());
+        after.removeUids(new int[] {100});
+        assertEquals(0, after.size());
+
+        // Test 1 item stats.
+        before.addValues(TEST_IFACE, 99, SET_DEFAULT, TAG_NONE, 1L, 128L, 0L, 2L, 20L);
+        after = before.clone();
+        after.removeUids(new int[0]);
+        assertEquals(1, after.size());
+        assertValues(after, 0, TEST_IFACE, 99, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 1L, 128L, 0L, 2L, 20L);
+        after.removeUids(new int[] {99});
+        assertEquals(0, after.size());
+
+        // Append remaining test items.
+        before.addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 2L, 64L, 0L, 2L, 20L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, 4L, 32L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, 8L, 16L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, 16L, 8L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, 32L, 4L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, 64L, 2L, 0L, 0L, 0L);
+        assertEquals(7, before.size());
+
+        // Test remove with empty uid list.
+        after = before.clone();
+        after.removeUids(new int[0]);
+        assertValues(after.getTotalIncludingTags(null), 127L, 254L, 0L, 4L, 40L);
+
+        // Test remove uids don't exist in stats.
+        after.removeUids(new int[] {98, 0, Integer.MIN_VALUE, Integer.MAX_VALUE});
+        assertValues(after.getTotalIncludingTags(null), 127L, 254L, 0L, 4L, 40L);
+
+        // Test remove all uids.
+        after.removeUids(new int[] {99, 100, 100, 101});
+        assertEquals(0, after.size());
+
+        // Test remove in the middle.
+        after = before.clone();
+        after.removeUids(new int[] {100});
+        assertEquals(3, after.size());
+        assertValues(after, 0, TEST_IFACE, 99, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 1L, 128L, 0L, 2L, 20L);
+        assertValues(after, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 32L, 4L, 0L, 0L, 0L);
+        assertValues(after, 2, TEST_IFACE, 101, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 64L, 2L, 0L, 0L, 0L);
     }
 
     @Test

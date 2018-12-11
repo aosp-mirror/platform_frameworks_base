@@ -5380,6 +5380,10 @@ public class PackageParser {
         s.info.splitName =
                 sa.getNonConfigurationString(R.styleable.AndroidManifestService_splitName, 0);
 
+        s.info.mForegroundServiceType = sa.getInt(
+                com.android.internal.R.styleable.AndroidManifestService_foregroundServiceType,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_UNSPECIFIED);
+
         s.info.flags = 0;
         if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestService_stopWithTask,

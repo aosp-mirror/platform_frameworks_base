@@ -50,9 +50,9 @@ android_test {
         "liblog",
         "liblzma",
         "libnativehelper",
-        "libnetdaidl",
         "libui",
         "libunwindstack",
         "libutils",
+        "netd_aidl_interface-cpp",
     ],
 }

@@ -189,6 +189,11 @@ public final class BasePermission {
         return (protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
                 == PermissionInfo.PROTECTION_DANGEROUS;
     }
+
+    public boolean isRemoved() {
+        return perm.info != null && (perm.info.flags & PermissionInfo.FLAG_REMOVED) != 0;
+    }
+
     public boolean isSignature() {
         return (protectionLevel & PermissionInfo.PROTECTION_MASK_BASE) ==
                 PermissionInfo.PROTECTION_SIGNATURE;
@@ -234,6 +239,9 @@ public final class BasePermission {
     public boolean isSystemTextClassifier() {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER)
                 != 0;
+    }
+    public boolean isWellbeing() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_WELLBEING) != 0;
     }
 
     public void transfer(@NonNull String origPackageName, @NonNull String newPackageName) {

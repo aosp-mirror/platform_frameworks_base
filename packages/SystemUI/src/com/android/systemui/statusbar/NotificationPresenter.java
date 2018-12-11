@@ -67,7 +67,7 @@ public interface NotificationPresenter extends ExpandableNotificationRow.OnExpan
     /**
      * True if the presenter is currently locked.
      */
-    default boolean isPresenterLocked() { return false; }
+    boolean isPresenterLocked();
 
     /**
      * Called when the row states are updated by {@link NotificationViewHierarchyManager}.

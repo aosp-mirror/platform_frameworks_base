@@ -107,7 +107,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 && recentsComponent.equals(intent.getComponent())
                         ? ACTIVITY_TYPE_RECENTS
                         : ACTIVITY_TYPE_HOME;
-        final ActivityStack targetStack = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
+        ActivityStack targetStack = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
                 mTargetActivityType);
         ActivityRecord targetActivity = getTargetActivity(targetStack, intent.getComponent());
         final boolean hasExistingActivity = targetActivity != null;
@@ -153,7 +153,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                             "startRecentsActivity");
                 }
             } else {
-                // No recents activity
+                // No recents activity, create the new recents activity bottom most
                 ActivityOptions options = ActivityOptions.makeBasic();
                 options.setLaunchActivityType(mTargetActivityType);
                 options.setAvoidMoveToFront();
@@ -166,11 +166,20 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         .setActivityOptions(SafeActivityOptions.fromBundle(options.toBundle()))
                         .setMayWait(userId)
                         .execute();
+
+                // Move the recents activity into place for the animation
+                targetActivity = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
+                        mTargetActivityType).getTopActivity();
+                targetStack = targetActivity.getActivityStack();
+                mDefaultDisplay.moveStackBehindBottomMostVisibleStack(targetStack);
+                if (DEBUG) {
+                    Slog.d(TAG, "Moved stack=" + targetStack + " behind stack="
+                            + mDefaultDisplay.getStackAbove(targetStack));
+                }
+
                 mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
                 mWindowManager.executeAppTransition();
 
-                targetActivity = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
-                        mTargetActivityType).getTopActivity();
 
                 // TODO: Maybe wait for app to draw in this particular case?
 

@@ -5511,7 +5511,12 @@ public class NotificationManagerService extends SystemService {
     {
         mHandler.removeCallbacksAndMessages(r);
         Message m = Message.obtain(mHandler, MESSAGE_DURATION_REACHED, r);
-        long delay = r.duration == Toast.LENGTH_LONG ? LONG_DELAY : SHORT_DELAY;
+        int delay = r.duration == Toast.LENGTH_LONG ? LONG_DELAY : SHORT_DELAY;
+        // Accessibility users may need longer timeout duration. This api compares original delay
+        // with user's preference and return longer one. It returns original delay if there's no
+        // preference.
+        delay = mAccessibilityManager.getRecommendedTimeoutMillis(delay,
+                AccessibilityManager.FLAG_CONTENT_TEXT);
         mHandler.sendMessageDelayed(m, delay);
     }
 

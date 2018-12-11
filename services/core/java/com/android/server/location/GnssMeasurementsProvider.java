@@ -38,7 +38,6 @@ public abstract class GnssMeasurementsProvider extends
     private static final String TAG = "GnssMeasurementsProvider";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private final Context mContext;
     private final GnssMeasurementProviderNative mNative;
 
     private boolean mIsCollectionStarted;
@@ -51,8 +50,7 @@ public abstract class GnssMeasurementsProvider extends
     @VisibleForTesting
     GnssMeasurementsProvider(Context context, Handler handler,
             GnssMeasurementProviderNative aNative) {
-        super(handler, TAG);
-        mContext = context;
+        super(context, handler, TAG);
         mNative = aNative;
     }
 
@@ -98,9 +96,13 @@ public abstract class GnssMeasurementsProvider extends
     }
 
     public void onMeasurementsAvailable(final GnssMeasurementsEvent event) {
-        ListenerOperation<IGnssMeasurementsListener> operation =
-                listener -> listener.onGnssMeasurementsReceived(event);
-        foreach(operation);
+        foreach((IGnssMeasurementsListener listener, int uid, String packageName) -> {
+            if (!hasPermission(uid, packageName)) {
+                logPermissionDisabledEventNotReported(TAG, packageName, "GNSS measurements");
+                return;
+            }
+            listener.onGnssMeasurementsReceived(event);
+        });
     }
 
     public void onCapabilitiesUpdated(boolean isGnssMeasurementsSupported) {
@@ -149,7 +151,8 @@ public abstract class GnssMeasurementsProvider extends
         }
 
         @Override
-        public void execute(IGnssMeasurementsListener listener) throws RemoteException {
+        public void execute(IGnssMeasurementsListener listener,
+                int uid, String packageName) throws RemoteException {
             listener.onStatusChanged(mStatus);
         }
     }

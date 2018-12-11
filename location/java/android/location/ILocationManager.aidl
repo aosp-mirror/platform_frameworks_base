@@ -96,9 +96,7 @@ interface ILocationManager
     void addTestProvider(String name, in ProviderProperties properties, String opPackageName);
     void removeTestProvider(String provider, String opPackageName);
     void setTestProviderLocation(String provider, in Location loc, String opPackageName);
-    void clearTestProviderLocation(String provider, String opPackageName);
     void setTestProviderEnabled(String provider, boolean enabled, String opPackageName);
-    void clearTestProviderEnabled(String provider, String opPackageName);
 
     // --- deprecated ---
     void setTestProviderStatus(String provider, int status, in Bundle extras, long updateTime,
@@ -108,12 +106,8 @@ interface ILocationManager
 
     // --- internal ---
 
-    // Used by location providers to tell the location manager when it has a new location.
-    // Passive is true if the location is coming from the passive provider, in which case
-    // it need not be shared with other providers.
+    // --- deprecated ---
     void reportLocation(in Location location, boolean passive);
-
-    // Used when a (initially Gnss) Location batch arrives
     void reportLocationBatch(in List<Location> locations);
 
     // for reporting callback completion

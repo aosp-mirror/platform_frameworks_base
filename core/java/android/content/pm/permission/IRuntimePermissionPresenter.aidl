@@ -22,6 +22,8 @@ import android.os.RemoteCallback;
  * Interface for communication with the permission presenter service.
  *
  * @hide
+ * @deprecated Only available to keep
+ *             android.permissionpresenterservice.RuntimePermissionPresenterService functional
  */
 oneway interface IRuntimePermissionPresenter {
     void getAppPermissions(String packageName, in RemoteCallback callback);

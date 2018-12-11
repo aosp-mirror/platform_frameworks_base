@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.permission.IRuntimePermissionPresenter;
 import android.content.pm.permission.RuntimePermissionPresentationInfo;
-import android.content.pm.permission.RuntimePermissionPresenter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -40,11 +39,13 @@ import java.util.List;
  * a single permission in the UI but may be composed of several individual
  * permissions.
  *
- * @see RuntimePermissionPresenter
  * @see RuntimePermissionPresentationInfo
  *
  * @hide
+ *
+ * @deprecated use {@link android.permission.RuntimePermissionPresenterService} instead
  */
+@Deprecated
 @SystemApi
 public abstract class RuntimePermissionPresenterService extends Service {
 
@@ -55,6 +56,9 @@ public abstract class RuntimePermissionPresenterService extends Service {
      */
     public static final String SERVICE_INTERFACE =
             "android.permissionpresenterservice.RuntimePermissionPresenterService";
+
+    private static final String KEY_RESULT =
+            "android.content.pm.permission.RuntimePermissionPresenter.key.result";
 
     // No need for locking - always set first and never modified
     private Handler mHandler;
@@ -112,7 +116,7 @@ public abstract class RuntimePermissionPresenterService extends Service {
         List<RuntimePermissionPresentationInfo> permissions = onGetAppPermissions(packageName);
         if (permissions != null && !permissions.isEmpty()) {
             Bundle result = new Bundle();
-            result.putParcelableList(RuntimePermissionPresenter.KEY_RESULT, permissions);
+            result.putParcelableList(KEY_RESULT, permissions);
             callback.sendResult(result);
         } else {
             callback.sendResult(null);

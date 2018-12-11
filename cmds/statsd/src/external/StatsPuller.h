@@ -39,6 +39,7 @@ public:
 
     // Pulls the data. The returned data will have elapsedTimeNs set as timeNs
     // and will have wallClockTimeNs set as current wall clock time.
+    // Return true if the pull is successful.
     bool Pull(const int64_t timeNs, std::vector<std::shared_ptr<LogEvent>>* data);
 
     // Clear cache immediately

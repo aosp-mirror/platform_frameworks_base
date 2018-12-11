@@ -7,6 +7,7 @@ package android {
     field public static final java.lang.String ACCESS_CHECKIN_PROPERTIES = "android.permission.ACCESS_CHECKIN_PROPERTIES";
     field public static final java.lang.String ACCESS_DRM_CERTIFICATES = "android.permission.ACCESS_DRM_CERTIFICATES";
     field public static final deprecated java.lang.String ACCESS_FM_RADIO = "android.permission.ACCESS_FM_RADIO";
+    field public static final java.lang.String ACCESS_INSTANT_APPS = "android.permission.ACCESS_INSTANT_APPS";
     field public static final java.lang.String ACCESS_MOCK_LOCATION = "android.permission.ACCESS_MOCK_LOCATION";
     field public static final java.lang.String ACCESS_MTP = "android.permission.ACCESS_MTP";
     field public static final java.lang.String ACCESS_NETWORK_CONDITIONS = "android.permission.ACCESS_NETWORK_CONDITIONS";
@@ -298,6 +299,7 @@ package android.app {
     method public void killUid(int, java.lang.String);
     method public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method public static void setPersistentVrThread(int);
+    method public boolean switchUser(android.os.UserHandle);
   }
 
   public static abstract interface ActivityManager.OnUidImportanceListener {
@@ -314,7 +316,6 @@ package android.app {
     method public android.app.AppOpsManager.HistoricalPackageOps getHistoricalPackagesOps(int, java.lang.String, java.lang.String[], long, long);
     method public static java.lang.String[] getOpStrs();
     method public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, java.lang.String, int[]);
-    method public java.util.List<android.app.AppOpsManager.PackageOps> getPackagesForOpStrs(java.lang.String[]);
     method public static int opToDefaultMode(java.lang.String);
     method public static java.lang.String opToPermission(java.lang.String);
     method public void setMode(java.lang.String, int, java.lang.String, int);
@@ -850,6 +851,8 @@ package android.app.backup {
     method public int restoreAll(long, android.app.backup.RestoreObserver);
     method public int restorePackage(java.lang.String, android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor);
     method public int restorePackage(java.lang.String, android.app.backup.RestoreObserver);
+    method public int restoreSome(long, android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor, java.lang.String[]);
+    method public int restoreSome(long, android.app.backup.RestoreObserver, java.lang.String[]);
   }
 
   public class RestoreSet implements android.os.Parcelable {
@@ -1250,6 +1253,7 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(java.lang.String);
     method public abstract int getIntentVerificationStatusAsUser(java.lang.String, int);
     method public abstract int getPermissionFlags(java.lang.String, java.lang.String, android.os.UserHandle);
+    method public java.lang.String getWellbeingPackageName();
     method public abstract void grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract int installExistingPackage(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int installExistingPackage(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -1352,6 +1356,7 @@ package android.content.pm {
     field public static final int FLAG_REMOVED = 2; // 0x2
     field public static final int PROTECTION_FLAG_OEM = 16384; // 0x4000
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
+    field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
     field public java.lang.String backgroundPermission;
     field public int requestRes;
   }
@@ -1396,7 +1401,7 @@ package android.content.pm.dex {
 
 package android.content.pm.permission {
 
-  public final class RuntimePermissionPresentationInfo implements android.os.Parcelable {
+  public final deprecated class RuntimePermissionPresentationInfo implements android.os.Parcelable {
     ctor public RuntimePermissionPresentationInfo(java.lang.CharSequence, boolean, boolean);
     method public int describeContents();
     method public java.lang.CharSequence getLabel();
@@ -4333,6 +4338,7 @@ package android.os {
   }
 
   public class UserManager {
+    method public boolean canSwitchUsers();
     method public void clearSeedAccountData();
     method public android.os.UserHandle getProfileParent(android.os.UserHandle);
     method public java.lang.String getSeedAccountName();
@@ -4348,6 +4354,7 @@ package android.os {
     method public boolean isManagedProfile(int);
     method public boolean isPrimaryUser();
     method public boolean isRestrictedProfile();
+    method public boolean removeUser(android.os.UserHandle);
     field public static final java.lang.String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
     field public static final deprecated java.lang.String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
     field public static final java.lang.String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";
@@ -4407,11 +4414,30 @@ package android.permission {
     method public int getTargetSdk();
   }
 
+  public final class RuntimePermissionPresentationInfo implements android.os.Parcelable {
+    ctor public RuntimePermissionPresentationInfo(java.lang.CharSequence, boolean, boolean);
+    method public int describeContents();
+    method public java.lang.CharSequence getLabel();
+    method public boolean isGranted();
+    method public boolean isStandard();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionPresentationInfo> CREATOR;
+  }
+
+  public abstract class RuntimePermissionPresenterService extends android.app.Service {
+    ctor public RuntimePermissionPresenterService();
+    method public final void attachBaseContext(android.content.Context);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(java.lang.String);
+    method public abstract void onRevokeRuntimePermission(java.lang.String, java.lang.String);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.permission.RuntimePermissionPresenterService";
+  }
+
 }
 
 package android.permissionpresenterservice {
 
-  public abstract class RuntimePermissionPresenterService extends android.app.Service {
+  public abstract deprecated class RuntimePermissionPresenterService extends android.app.Service {
     ctor public RuntimePermissionPresenterService();
     method public final void attachBaseContext(android.content.Context);
     method public final android.os.IBinder onBind(android.content.Intent);
@@ -5944,6 +5970,7 @@ package android.telephony {
     method public int getVoiceActivationState();
     method public boolean handlePinMmi(java.lang.String);
     method public boolean handlePinMmiForSubscriber(int, java.lang.String);
+    method public boolean isCurrentPotentialEmergencyNumber(java.lang.String);
     method public boolean isDataConnectivityPossible();
     method public deprecated boolean isIdle();
     method public deprecated boolean isOffhook();

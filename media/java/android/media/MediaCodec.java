@@ -3308,6 +3308,55 @@ final public class MediaCodec {
     public static final String PARAMETER_KEY_REQUEST_SYNC_FRAME = "request-sync";
 
     /**
+     * Set the HDR10+ metadata on the next queued input frame.
+     *
+     * Provide a byte array of data that's conforming to the
+     * user_data_registered_itu_t_t35() syntax of SEI message for ST 2094-40.
+     *<p>
+     * For decoders:
+     *<p>
+     * When a decoder is configured for one of the HDR10+ profiles that uses
+     * out-of-band metadata (such as {@link
+     * MediaCodecInfo.CodecProfileLevel#VP9Profile2HDR10Plus} or {@link
+     * MediaCodecInfo.CodecProfileLevel#VP9Profile3HDR10Plus}), this
+     * parameter sets the HDR10+ metadata on the next input buffer queued
+     * to the decoder. A decoder supporting these profiles must propagate
+     * the metadata to the format of the output buffer corresponding to this
+     * particular input buffer (under key {@link MediaFormat#KEY_HDR10_PLUS_INFO}).
+     * The metadata should be applied to that output buffer and the buffers
+     * following it (in display order), until the next output buffer (in
+     * display order) upon which an HDR10+ metadata is set.
+     *<p>
+     * This parameter shouldn't be set if the decoder is not configured for
+     * an HDR10+ profile that uses out-of-band metadata. In particular,
+     * it shouldn't be set for HDR10+ profiles that uses in-band metadata
+     * where the metadata is embedded in the input buffers, for example
+     * {@link MediaCodecInfo.CodecProfileLevel#HEVCProfileMain10HDR10Plus}.
+     *<p>
+     * For encoders:
+     *<p>
+     * When an encoder is configured for one of the HDR10+ profiles and the
+     * operates in byte buffer input mode (instead of surface input mode),
+     * this parameter sets the HDR10+ metadata on the next input buffer queued
+     * to the encoder. For the HDR10+ profiles that uses out-of-band metadata
+     * (such as {@link MediaCodecInfo.CodecProfileLevel#VP9Profile2HDR10Plus},
+     * or {@link MediaCodecInfo.CodecProfileLevel#VP9Profile3HDR10Plus}),
+     * the metadata must be propagated to the format of the output buffer
+     * corresponding to this particular input buffer (under key {@link
+     * MediaFormat#KEY_HDR10_PLUS_INFO}). For the HDR10+ profiles that uses
+     * in-band metadata (such as {@link
+     * MediaCodecInfo.CodecProfileLevel#HEVCProfileMain10HDR10Plus}), the
+     * metadata info must be embedded in the corresponding output buffer itself.
+     *<p>
+     * This parameter shouldn't be set if the encoder is not configured for
+     * an HDR10+ profile, or if it's operating in surface input mode.
+     *<p>
+     *
+     * @see MediaFormat#KEY_HDR10_PLUS_INFO
+     */
+    public static final String PARAMETER_KEY_HDR10_PLUS_INFO = MediaFormat.KEY_HDR10_PLUS_INFO;
+
+    /**
      * Communicate additional parameter changes to the component instance.
      * <b>Note:</b> Some of these parameter changes may silently fail to apply.
      *
@@ -3325,7 +3374,14 @@ final public class MediaCodec {
         int i = 0;
         for (final String key: params.keySet()) {
             keys[i] = key;
-            values[i] = params.get(key);
+            Object value = params.get(key);
+
+            // Bundle's byte array is a byte[], JNI layer only takes ByteBuffer
+            if (value instanceof byte[]) {
+                values[i] = ByteBuffer.wrap((byte[])value);
+            } else {
+                values[i] = value;
+            }
             ++i;
         }
 

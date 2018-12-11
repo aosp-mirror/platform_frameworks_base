@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.google.android.collect.Sets;
 
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class KeyguardStatusView extends GridLayout implements
         ConfigurationController.ConfigurationListener, View.OnLayoutChangeListener {
@@ -82,6 +83,11 @@ public class KeyguardStatusView extends GridLayout implements
         @Override
         public void onTimeChanged() {
             refreshTime();
+        }
+
+        @Override
+        public void onTimeZoneChanged(TimeZone timeZone) {
+            updateTimeZone(timeZone);
         }
 
         @Override
@@ -280,6 +286,10 @@ public class KeyguardStatusView extends GridLayout implements
 
     private void refreshTime() {
         mClockView.refresh();
+    }
+
+    private void updateTimeZone(TimeZone timeZone) {
+        mClockView.onTimeZoneChanged(timeZone);
     }
 
     private void refreshFormat() {

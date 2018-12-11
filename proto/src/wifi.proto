@@ -1344,6 +1344,27 @@ message WifiPowerStats {
 
   // Amount of time wifi is in tx (ms)
   optional int64 tx_time_ms = 5;
+
+  // Amount of time kernel is active because of wifi data (ms)
+  optional int64 wifi_kernel_active_time_ms = 6;
+
+  // Number of packets sent (tx)
+  optional int64 num_packets_tx = 7;
+
+  // Number of bytes sent (tx)
+  optional int64 num_bytes_tx = 8;
+
+  // Number of packets received (rx)
+  optional int64 num_packets_rx = 9;
+
+  // Number of bytes sent (rx)
+  optional int64 num_bytes_rx = 10;
+
+  // Amount of time wifi is in sleep (ms)
+  optional int64 sleep_time_ms = 11;
+
+  // Amount of time wifi is scanning (ms)
+  optional int64 scan_time_ms = 12;
 }
 
 // Metrics for Wifi Wake

@@ -64,6 +64,8 @@ interface IInputMethodManager {
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);
+    void showInputMethodPickerFromSystem(in IInputMethodClient client, int auxiliarySubtypeMode,
+            int displayId);
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
     boolean isInputMethodPickerShownForTest();
     // TODO(Bug 114488811): this can be removed once we deprecate special null token rule.
@@ -74,10 +76,6 @@ interface IInputMethodManager {
     boolean notifySuggestionPicked(in SuggestionSpan span, String originalString, int index);
     InputMethodSubtype getCurrentInputMethodSubtype();
     boolean setCurrentInputMethodSubtype(in InputMethodSubtype subtype);
-    // TODO(Bug 114488811): this can be removed once we deprecate special null token rule.
-    boolean switchToPreviousInputMethod(in IBinder token);
-    // TODO(Bug 114488811): this can be removed once we deprecate special null token rule.
-    boolean switchToNextInputMethod(in IBinder token, boolean onlyCurrentIme);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     // This is kept due to @UnsupportedAppUsage.
     // TODO(Bug 113914148): Consider removing this.

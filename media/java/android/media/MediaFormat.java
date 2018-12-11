@@ -910,6 +910,27 @@ public final class MediaFormat {
     public static final String KEY_HDR_STATIC_INFO = "hdr-static-info";
 
     /**
+     * An optional key describing the HDR10+ metadata of the video content.
+     *
+     * The associated value is a ByteBuffer containing HDR10+ metadata conforming to the
+     * user_data_registered_itu_t_t35() syntax of SEI message for ST 2094-40. This key will
+     * be present on:
+     *<p>
+     * - The formats of output buffers of a decoder configured for HDR10+ profiles (such as
+     *   {@link MediaCodecInfo.CodecProfileLevel#VP9Profile2HDR10Plus}, {@link
+     *   MediaCodecInfo.CodecProfileLevel#VP9Profile3HDR10Plus} or {@link
+     *   MediaCodecInfo.CodecProfileLevel#HEVCProfileMain10HDR10Plus}), or
+     *<p>
+     * - The formats of output buffers of an encoder configured for an HDR10+ profiles that
+     *   uses out-of-band metadata (such as {@link
+     *   MediaCodecInfo.CodecProfileLevel#VP9Profile2HDR10Plus} or {@link
+     *   MediaCodecInfo.CodecProfileLevel#VP9Profile3HDR10Plus}).
+     *
+     * @see MediaCodec#PARAMETER_KEY_HDR10_PLUS_INFO
+     */
+    public static final String KEY_HDR10_PLUS_INFO = "hdr10-plus-info";
+
+    /**
      * A key describing a unique ID for the content of a media track.
      *
      * <p>This key is used by {@link MediaExtractor}. Some extractors provide multiple encodings

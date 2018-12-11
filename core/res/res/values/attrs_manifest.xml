@@ -268,6 +268,9 @@
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to the system default text classifier -->
         <flag name="textClassifier" value="0x10000" />
+        <!-- Additional flag from base permission type: this permission will be granted to the
+             wellbeing app, as defined by the OEM. -->
+        <flag name="wellbeing" value="0x20000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
@@ -1394,6 +1397,29 @@
 
     <attr name="usesNonSdkApi" format="boolean" />
 
+    <!-- Specify the type of foreground service. Apps targeting API
+     {@link android.os.Build.VERSION_CODES#Q} or later must specify foreground service type,
+     otherwise a SecurityException is thrown when
+     {@link android.app.Service#startForeground(int, Notification)} on this service is called.
+    -->
+    <attr name="foregroundServiceType">
+        <!-- Data (photo, file, account) upload/download, backup/restore, import/export, fetch,
+        transfer over network between device and cloud.  -->
+        <enum name="sync" value="1" />
+        <!-- Music, video, news or other media play. -->
+        <enum name="mediaPlay" value="2" />
+        <!-- Ongoing phone call or video conference. -->
+        <enum name="phoneCall" value="3" />
+        <!-- GPS, map, navigation location update. -->
+        <enum name="location" value="4" />
+        <!-- Auto, bluetooth, TV or other devices connection, monitoring and interaction. -->
+        <enum name="deviceCompanion" value="5" />
+        <!-- Process that should not be interrupted, including installation, setup, photo
+        compression etc. -->
+        <enum name="ongoingProcess" value="6" />
+    </attr>
+
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -2242,6 +2268,8 @@
              recommended to measure memory usage under typical workloads to determine
              whether it makes sense to use this flag. -->
         <attr name="useAppZygote" format="boolean" />
+        <!-- If this is a foreground service, specify its category. -->
+        <attr name="foregroundServiceType" />
     </declare-styleable>
 
     <!-- The <code>receiver</code> tag declares an
