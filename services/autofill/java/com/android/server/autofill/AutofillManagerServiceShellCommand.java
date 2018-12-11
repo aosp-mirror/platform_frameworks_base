@@ -233,7 +233,7 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
         final String value2 = getNextArgRequired();
 
         final CountDownLatch latch = new CountDownLatch(1);
-        mService.getScore(algorithm, value1, value2, new RemoteCallback((result) -> {
+        mService.calculateScore(algorithm, value1, value2, new RemoteCallback((result) -> {
             final Scores scores = result.getParcelable(EXTRA_SCORES);
             if (scores == null) {
                 pw.println("no score");

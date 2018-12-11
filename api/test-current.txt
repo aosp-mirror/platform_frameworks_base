@@ -1093,6 +1093,15 @@ package android.security.keystore {
 
 package android.service.autofill {
 
+  public abstract class AutofillFieldClassificationService extends android.app.Service {
+    method public android.os.IBinder onBind(android.content.Intent);
+    field public static final java.lang.String REQUIRED_ALGORITHM_EDIT_DISTANCE = "EDIT_DISTANCE";
+    field public static final java.lang.String REQUIRED_ALGORITHM_EXACT_MATCH = "EXACT_MATCH";
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.autofill.AutofillFieldClassificationService";
+    field public static final java.lang.String SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS = "android.autofill.field_classification.available_algorithms";
+    field public static final java.lang.String SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM = "android.autofill.field_classification.default_algorithm";
+  }
+
   public final class CharSequenceTransformation extends android.service.autofill.InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
     method public void apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int) throws java.lang.Exception;
   }
@@ -1147,6 +1156,10 @@ package android.service.autofill {
 
   public final class TextValueSanitizer extends android.service.autofill.InternalSanitizer implements android.os.Parcelable android.service.autofill.Sanitizer {
     method public android.view.autofill.AutofillValue sanitize(android.view.autofill.AutofillValue);
+  }
+
+  public final class UserData implements android.os.Parcelable {
+    method public android.util.ArrayMap<java.lang.String, java.lang.String> getFieldClassificationAlgorithms();
   }
 
   public abstract interface ValueFinder {

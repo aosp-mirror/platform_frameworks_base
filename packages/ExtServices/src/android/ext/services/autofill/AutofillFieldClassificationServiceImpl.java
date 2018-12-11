@@ -15,8 +15,6 @@
  */
 package android.ext.services.autofill;
 
-import static android.ext.services.autofill.EditDistanceScorer.DEFAULT_ALGORITHM;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
@@ -26,27 +24,72 @@ import android.view.autofill.AutofillValue;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AutofillFieldClassificationServiceImpl extends AutofillFieldClassificationService {
 
     private static final String TAG = "AutofillFieldClassificationServiceImpl";
 
+    private static final String DEFAULT_ALGORITHM = REQUIRED_ALGORITHM_EDIT_DISTANCE;
+
     @Nullable
     @Override
-    public float[][] onGetScores(@Nullable String algorithmName,
-            @Nullable Bundle algorithmArgs, @NonNull List<AutofillValue> actualValues,
-            @NonNull List<String> userDataValues) {
+    /** @hide */
+    public float[][] onCalculateScores(@NonNull List<AutofillValue> actualValues,
+            @NonNull List<String> userDataValues, @NonNull List<String> categoryIds,
+            @Nullable String defaultAlgorithm, @Nullable Bundle defaultArgs,
+            @Nullable Map algorithms, @Nullable Map args) {
         if (ArrayUtils.isEmpty(actualValues) || ArrayUtils.isEmpty(userDataValues)) {
-            Log.w(TAG, "getScores(): empty currentvalues (" + actualValues + ") or userValues ("
-                    + userDataValues + ")");
+            Log.w(TAG, "calculateScores(): empty currentvalues (" + actualValues
+                    + ") or userValues (" + userDataValues + ")");
             return null;
         }
-        if (algorithmName != null && !algorithmName.equals(DEFAULT_ALGORITHM)) {
-            Log.w(TAG, "Ignoring invalid algorithm (" + algorithmName + ") and using "
-                    + DEFAULT_ALGORITHM + " instead");
-        }
 
-        return EditDistanceScorer.getScores(actualValues, userDataValues);
+        return calculateScores(actualValues, userDataValues, categoryIds, defaultAlgorithm,
+                defaultArgs, (HashMap<String, String>) algorithms,
+                (HashMap<String, Bundle>) args);
+    }
+
+    /** @hide */
+    public float[][] calculateScores(@NonNull List<AutofillValue> actualValues,
+            @NonNull List<String> userDataValues, @NonNull List<String> categoryIds,
+            @Nullable String defaultAlgorithm, @Nullable Bundle defaultArgs,
+            @Nullable HashMap<String, String> algorithms,
+            @Nullable HashMap<String, Bundle> args) {
+        final int actualValuesSize = actualValues.size();
+        final int userDataValuesSize = userDataValues.size();
+        final float[][] scores = new float[actualValuesSize][userDataValuesSize];
+
+        for (int j = 0; j < userDataValuesSize; j++) {
+            final String categoryId = categoryIds.get(j);
+            String algorithmName = defaultAlgorithm;
+            Bundle arg = defaultArgs;
+            if (algorithms != null && algorithms.containsKey(categoryId)) {
+                algorithmName = algorithms.get(categoryId);
+            }
+            if (args != null && args.containsKey(categoryId)) {
+                arg = args.get(categoryId);
+            }
+
+            if (algorithmName == null || (!algorithmName.equals(DEFAULT_ALGORITHM)
+                    && !algorithmName.equals(REQUIRED_ALGORITHM_EXACT_MATCH))) {
+                Log.w(TAG, "algorithmName is " + algorithmName + ", defaulting to "
+                        + DEFAULT_ALGORITHM);
+                algorithmName = DEFAULT_ALGORITHM;
+            }
+
+            for (int i = 0; i < actualValuesSize; i++) {
+                if (algorithmName.equals(DEFAULT_ALGORITHM)) {
+                    scores[i][j] = EditDistanceScorer.calculateScore(actualValues.get(i),
+                            userDataValues.get(j));
+                } else {
+                    scores[i][j] = ExactMatch.calculateScore(actualValues.get(i),
+                            userDataValues.get(j), arg);
+                }
+            }
+        }
+        return scores;
     }
 }

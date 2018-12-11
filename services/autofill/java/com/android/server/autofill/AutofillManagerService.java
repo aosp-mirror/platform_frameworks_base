@@ -484,15 +484,15 @@ public final class AutofillManagerService
     }
 
     // Called by Shell command.
-    void getScore(@Nullable String algorithmName, @NonNull String value1,
+    void calculateScore(@Nullable String algorithmName, @NonNull String value1,
             @NonNull String value2, @NonNull RemoteCallback callback) {
         enforceCallingPermissionForManagement();
 
         final FieldClassificationStrategy strategy =
                 new FieldClassificationStrategy(getContext(), UserHandle.USER_CURRENT);
 
-        strategy.getScores(callback, algorithmName, null,
-                Arrays.asList(AutofillValue.forText(value1)), new String[] { value2 });
+        strategy.calculateScores(callback, Arrays.asList(AutofillValue.forText(value1)),
+                new String[] { value2 }, null, algorithmName, null, null, null);
     }
 
     // Called by Shell command.
