@@ -25,6 +25,8 @@ import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.ViewRootImpl;
 
+import java.util.function.Consumer;
+
 /**
  * Helper class to apply surface transactions in sync with RenderThread.
  */
@@ -76,6 +78,35 @@ public class SyncRtSurfaceTransactionApplier {
 
     public static void applyParams(TransactionCompat t, SurfaceParams params) {
         applyParams(t.mTransaction, params, t.mTmpValues);
+    }
+
+    /**
+     * Creates an instance of SyncRtSurfaceTransactionApplier, deferring until the target view is
+     * attached if necessary.
+     */
+    public static void create(final View targetView,
+            final Consumer<SyncRtSurfaceTransactionApplier> callback) {
+        if (targetView == null) {
+            // No target view, no applier
+            callback.accept(null);
+        } else if (targetView.getViewRootImpl() != null) {
+            // Already attached, we're good to go
+            callback.accept(new SyncRtSurfaceTransactionApplier(targetView));
+        } else {
+            // Haven't been attached before we can get the view root
+            targetView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    targetView.removeOnAttachStateChangeListener(this);
+                    callback.accept(new SyncRtSurfaceTransactionApplier(targetView));
+                }
+
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                    // Do nothing
+                }
+            });
+        }
     }
 
     private static void applyParams(Transaction t, SurfaceParams params, float[] tmpFloat9) {
