@@ -29,7 +29,6 @@ import android.view.contentcapture.ContentCaptureEvent;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.contentcapture.RemoteContentCaptureService.ContentCaptureServiceCallbacks;
-import com.android.server.infra.AbstractRemoteService;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -124,22 +123,11 @@ final class ContentCaptureSession implements ContentCaptureServiceCallbacks {
         }
     }
 
-    @Override // from RemoteScreenObservationServiceCallbacks
-    public void onServiceDied(AbstractRemoteService<?> service) {
+    @Override // from RemoteContentCaptureServiceCallbacks
+    public void onServiceDied(@NonNull RemoteContentCaptureService service) {
         // TODO(b/111276913): implement (remove session from PerUserSession?)
         if (mService.isDebug()) {
             Slog.d(TAG, "onServiceDied() for " + mId);
-        }
-        synchronized (mLock) {
-            removeSelfLocked(/* notifyRemoteService= */ false);
-        }
-    }
-
-    @Override // from RemoteScreenObservationServiceCallbacks
-    public void onFailureOrTimeout(boolean timedOut) {
-        // TODO(b/111276913): log metrics on whether timed out or not
-        if (mService.isDebug()) {
-            Slog.d(TAG, "onFailureOrTimeout(" + mId + "): timed out=" + timedOut);
         }
         synchronized (mLock) {
             removeSelfLocked(/* notifyRemoteService= */ false);
