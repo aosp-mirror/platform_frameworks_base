@@ -967,6 +967,14 @@ package android.telecom {
     ctor public PhoneAccountSuggestion(android.telecom.PhoneAccountHandle, int, boolean);
   }
 
+  public class PhoneAccountSuggestionService extends android.app.Service {
+    ctor public PhoneAccountSuggestionService();
+    method public void onAccountSuggestionRequest(java.lang.String);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public final void suggestPhoneAccounts(java.lang.String, java.util.List<android.telecom.PhoneAccountSuggestion>);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.telecom.PhoneAccountSuggestionService";
+  }
+
 }
 
 package android.telephony {
