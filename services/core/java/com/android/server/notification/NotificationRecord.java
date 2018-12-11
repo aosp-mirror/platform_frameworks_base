@@ -21,10 +21,8 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEUTRAL;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_POSITIVE;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -134,6 +132,9 @@ public final class NotificationRecord {
     // user
     private long mInterruptionTimeMs;
 
+    // The most recent time the notification made noise or buzzed the device, or -1 if it did not.
+    private long mLastAudiblyAlertedMs;
+
     // Is this record an update of an old record?
     public boolean isUpdate;
     private int mPackagePriority;
@@ -174,7 +175,6 @@ public final class NotificationRecord {
     private final NotificationStats mStats;
     private int mUserSentiment;
     private boolean mIsInterruptive;
-    private boolean mAudiblyAlerted;
     private boolean mTextChanged;
     private boolean mRecordedInterruption;
     private int mNumberOfSmartRepliesAdded;
@@ -1042,7 +1042,7 @@ public final class NotificationRecord {
     }
 
     public void setAudiblyAlerted(boolean audiblyAlerted) {
-        mAudiblyAlerted = audiblyAlerted;
+        mLastAudiblyAlertedMs = audiblyAlerted ? System.currentTimeMillis() : -1;
     }
 
     public void setTextChanged(boolean textChanged) {
@@ -1061,9 +1061,9 @@ public final class NotificationRecord {
         return mIsInterruptive;
     }
 
-    /** Returns true if the notification audibly alerted the user. */
-    public boolean getAudiblyAlerted() {
-        return mAudiblyAlerted;
+    /** Returns the time the notification audibly alerted the user. */
+    public long getLastAudiblyAlertedMs() {
+        return mLastAudiblyAlertedMs;
     }
 
     protected void setPeopleOverride(ArrayList<String> people) {

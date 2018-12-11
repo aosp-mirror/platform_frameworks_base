@@ -16,12 +16,9 @@
 
 package com.android.server.notification;
 
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEGATIVE;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEUTRAL;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_POSITIVE;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -92,7 +89,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             assertEquals(getShowBadge(i), ranking.canShowBadge());
             assertEquals(getUserSentiment(i), ranking.getUserSentiment());
             assertEquals(getHidden(i), ranking.isSuspended());
-            assertEquals(audiblyAlerted(i), ranking.audiblyAlerted());
+            assertEquals(lastAudiblyAlerted(i), ranking.getLastAudiblyAlertedMillis());
             assertActionsEqual(getSmartActions(key, i), ranking.getSmartActions());
             assertEquals(getSmartReplies(key, i), ranking.getSmartReplies());
         }
@@ -113,7 +110,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         Bundle mHidden = new Bundle();
         Bundle smartActions = new Bundle();
         Bundle smartReplies = new Bundle();
-        Bundle audiblyAlerted = new Bundle();
+        Bundle lastAudiblyAlerted = new Bundle();
         Bundle noisy = new Bundle();
 
         for (int i = 0; i < mKeys.length; i++) {
@@ -134,14 +131,14 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             mHidden.putBoolean(key, getHidden(i));
             smartActions.putParcelableArrayList(key, getSmartActions(key, i));
             smartReplies.putCharSequenceArrayList(key, getSmartReplies(key, i));
-            audiblyAlerted.putBoolean(key, audiblyAlerted(i));
+            lastAudiblyAlerted.putLong(key, lastAudiblyAlerted(i));
             noisy.putBoolean(key, getNoisy(i));
         }
         NotificationRankingUpdate update = new NotificationRankingUpdate(mKeys,
                 interceptedKeys.toArray(new String[0]), visibilityOverrides,
                 suppressedVisualEffects, importance, explanation, overrideGroupKeys,
                 channels, overridePeople, snoozeCriteria, showBadge, userSentiment, mHidden,
-                smartActions, smartReplies, audiblyAlerted, noisy);
+                smartActions, smartReplies, lastAudiblyAlerted, noisy);
         return update;
     }
 
@@ -193,8 +190,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         return index % 2 == 0;
     }
 
-    private boolean audiblyAlerted(int index) {
-        return index < 2;
+    private long lastAudiblyAlerted(int index) {
+        return index * 2000;
     }
 
     private boolean getNoisy(int index) {

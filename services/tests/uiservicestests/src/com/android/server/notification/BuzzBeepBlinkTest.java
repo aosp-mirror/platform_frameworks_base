@@ -27,6 +27,8 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -417,7 +419,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyLights();
         assertTrue(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -430,7 +432,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verifyNeverVibrate();
         verify(mAccessibilityService, times(1)).sendAccessibilityEvent(any(), anyInt());
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -441,7 +443,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyBeep();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -452,7 +454,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyNeverBeep();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -490,7 +492,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verifyNeverBeep();
         verifyNeverVibrate();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -503,7 +505,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verifyNeverBeep();
         verifyNeverVibrate();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -520,7 +522,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verifyBeepLooped();
         verify(mAccessibilityService, times(2)).sendAccessibilityEvent(any(), anyInt());
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -549,7 +551,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyNeverStopAudio();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -563,9 +565,9 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyNeverStopAudio();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
         assertFalse(s.isInterruptive());
-        assertFalse(s.getAudiblyAlerted());
+        assertEquals(-1, s.getLastAudiblyAlertedMs());
     }
 
     /**
@@ -602,7 +604,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(s); // this no longer owns the stream
         verifyNeverStopAudio();
         assertTrue(other.isInterruptive());
-        assertTrue(other.getAudiblyAlerted());
+        assertNotEquals(-1, other.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -628,14 +630,14 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // set up internal state
         mService.buzzBeepBlinkLocked(r);
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
         Mockito.reset(mRingtonePlayer);
 
         // quiet update should stop making noise
         mService.buzzBeepBlinkLocked(s);
         verifyStopAudio();
         assertFalse(s.isInterruptive());
-        assertFalse(s.getAudiblyAlerted());
+        assertEquals(-1, s.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -647,14 +649,14 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // set up internal state
         mService.buzzBeepBlinkLocked(r);
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
         Mockito.reset(mRingtonePlayer);
 
         // stop making noise - this is a weird corner case, but quiet should override once
         mService.buzzBeepBlinkLocked(s);
         verifyStopAudio();
         assertFalse(s.isInterruptive());
-        assertFalse(s.getAudiblyAlerted());
+        assertEquals(-1, s.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -671,7 +673,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verify(mService, times(1)).playInCallNotification();
         verifyNeverBeep(); // doesn't play normal beep
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -691,7 +693,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
                 eq(effect), anyString(),
                 (AudioAttributes) anyObject());
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -709,7 +711,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verifyNeverVibrate();
         verifyBeepLooped();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -729,7 +731,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verify(mRingtonePlayer, never()).playAsync
                 (anyObject(), anyObject(), anyBoolean(), anyObject());
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -746,7 +748,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyDelayedVibrateLooped();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -758,7 +760,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verifyNeverBeep();
         verifyVibrate();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -768,7 +770,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         verifyVibrateLooped();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -784,7 +786,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         verifyVibrate();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -795,7 +797,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyNeverBeep();
         assertFalse(child.isInterruptive());
-        assertFalse(child.getAudiblyAlerted());
+        assertEquals(-1, child.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -808,7 +810,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verifyBeepLooped();
         // summaries are never interruptive for notification counts
         assertFalse(summary.isInterruptive());
-        assertTrue(summary.getAudiblyAlerted());
+        assertNotEquals(-1, summary.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -819,7 +821,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyBeepLooped();
         assertTrue(nonGroup.isInterruptive());
-        assertTrue(nonGroup.getAudiblyAlerted());
+        assertNotEquals(-1, nonGroup.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -831,7 +833,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyNeverBeep();
         assertFalse(summary.isInterruptive());
-        assertFalse(summary.getAudiblyAlerted());
+        assertEquals(-1, summary.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -842,7 +844,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyBeepLooped();
         assertTrue(child.isInterruptive());
-        assertTrue(child.getAudiblyAlerted());
+        assertNotEquals(-1, child.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -853,7 +855,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyBeepLooped();
         assertTrue(nonGroup.isInterruptive());
-        assertTrue(nonGroup.getAudiblyAlerted());
+        assertNotEquals(-1, nonGroup.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -864,7 +866,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyBeepLooped();
         assertTrue(group.isInterruptive());
-        assertTrue(group.getAudiblyAlerted());
+        assertNotEquals(-1, group.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -877,13 +879,13 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         Mockito.reset(mVibrator);
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
 
         // update should not beep
         mService.buzzBeepBlinkLocked(s);
         verifyNeverVibrate();
         assertFalse(s.isInterruptive());
-        assertFalse(s.getAudiblyAlerted());
+        assertEquals(-1, s.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -896,7 +898,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyNeverStopVibrate();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -910,9 +912,9 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyNeverStopVibrate();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
         assertFalse(s.isInterruptive());
-        assertFalse(s.getAudiblyAlerted());
+        assertEquals(-1, s.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -931,11 +933,11 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(s); // this no longer owns the stream
         verifyNeverStopVibrate();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
         assertTrue(other.isInterruptive());
-        assertTrue(other.getAudiblyAlerted());
+        assertNotEquals(-1, other.getLastAudiblyAlertedMs());
         assertFalse(s.isInterruptive());
-        assertFalse(s.getAudiblyAlerted());
+        assertEquals(-1, s.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -951,7 +953,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(other);
         verifyNeverStopVibrate();
         assertFalse(other.isInterruptive());
-        assertFalse(other.getAudiblyAlerted());
+        assertEquals(-1, other.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -968,9 +970,9 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(s);
         verifyStopVibrate();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
         assertFalse(s.isInterruptive());
-        assertFalse(s.getAudiblyAlerted());
+        assertEquals(-1, s.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -987,9 +989,9 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(s);
         verifyStopVibrate();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
         assertFalse(s.isInterruptive());
-        assertFalse(s.getAudiblyAlerted());
+        assertEquals(-1, s.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1007,9 +1009,9 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(s);
         verifyStopVibrate();
         assertTrue(r.isInterruptive());
-        assertTrue(r.getAudiblyAlerted());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
         assertFalse(s.isInterruptive());
-        assertFalse(s.getAudiblyAlerted());
+        assertEquals(-1, s.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1027,7 +1029,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         verifyNeverBeep();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1039,7 +1041,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         verifyNeverBeep();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1082,7 +1084,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         verifyNeverBeep();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1116,7 +1118,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         verifyNeverLights();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1126,7 +1128,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         verifyNeverLights();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1135,7 +1137,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         verifyLights();
         assertTrue(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
 
         r = getLightsOnceNotification();
         r.isUpdate = true;
@@ -1143,7 +1145,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // checks that lights happened once, i.e. this new call didn't trigger them again
         verifyLights();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1153,7 +1155,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         verifyNeverLights();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1162,7 +1164,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         verifyNeverLights();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1172,7 +1174,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         verifyNeverLights();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1182,7 +1184,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         verifyNeverLights();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1192,7 +1194,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         verifyNeverLights();
         assertFalse(r.isInterruptive());
-        assertFalse(r.getAudiblyAlerted());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1203,7 +1205,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyNeverLights();
         assertFalse(child.isInterruptive());
-        assertFalse(child.getAudiblyAlerted());
+        assertEquals(-1, child.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1216,7 +1218,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verifyLights();
         // summaries should never count for interruptiveness counts
         assertFalse(summary.isInterruptive());
-        assertFalse(summary.getAudiblyAlerted());
+        assertEquals(-1, summary.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1227,7 +1229,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyLights();
         assertTrue(nonGroup.isInterruptive());
-        assertFalse(nonGroup.getAudiblyAlerted());
+        assertEquals(-1, nonGroup.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1239,7 +1241,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyNeverLights();
         assertFalse(summary.isInterruptive());
-        assertFalse(summary.getAudiblyAlerted());
+        assertEquals(-1, summary.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1250,7 +1252,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyLights();
         assertTrue(child.isInterruptive());
-        assertFalse(child.getAudiblyAlerted());
+        assertEquals(-1, child.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1261,7 +1263,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyLights();
         assertTrue(nonGroup.isInterruptive());
-        assertFalse(nonGroup.getAudiblyAlerted());
+        assertEquals(-1, nonGroup.getLastAudiblyAlertedMs());
     }
 
     @Test
@@ -1272,7 +1274,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         verifyLights();
         assertTrue(group.isInterruptive());
-        assertFalse(group.getAudiblyAlerted());
+        assertEquals(-1, group.getLastAudiblyAlertedMs());
     }
 
     static class VibrateRepeatMatcher implements ArgumentMatcher<VibrationEffect> {

@@ -1603,15 +1603,15 @@ public class NotificationContentView extends FrameLayout {
     }
 
     /** Sets whether the notification being displayed audibly alerted the user. */
-    public void setAudiblyAlerted(boolean audiblyAlerted) {
+    public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
         if (mContractedChild != null && mContractedWrapper.getNotificationHeader() != null) {
-            mContractedWrapper.getNotificationHeader().setAudiblyAlerted(audiblyAlerted);
+            mContractedWrapper.getNotificationHeader().setRecentlyAudiblyAlerted(audiblyAlerted);
         }
         if (mExpandedChild != null && mExpandedWrapper.getNotificationHeader() != null) {
-            mExpandedWrapper.getNotificationHeader().setAudiblyAlerted(audiblyAlerted);
+            mExpandedWrapper.getNotificationHeader().setRecentlyAudiblyAlerted(audiblyAlerted);
         }
         if (mHeadsUpChild != null && mHeadsUpWrapper.getNotificationHeader() != null) {
-            mHeadsUpWrapper.getNotificationHeader().setAudiblyAlerted(audiblyAlerted);
+            mHeadsUpWrapper.getNotificationHeader().setRecentlyAudiblyAlerted(audiblyAlerted);
         }
     }
 
