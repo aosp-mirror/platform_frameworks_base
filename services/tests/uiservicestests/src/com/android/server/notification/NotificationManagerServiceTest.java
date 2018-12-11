@@ -238,6 +238,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         protected void reportUserInteraction(NotificationRecord r) {
             return;
         }
+
+        @Override
+        protected void handleSavePolicyFile() {
+            return;
+        }
     }
 
     private class TestableToastCallback extends ITransientNotification.Stub {
@@ -1809,8 +1814,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
         when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
-
-        try {
+try {
             mBinderService.getNotificationChannelGroupsFromPrivilegedListener(
                     null, PKG, Process.myUserHandle());
             fail("listeners that don't have a companion device shouldn't be able to call this");
