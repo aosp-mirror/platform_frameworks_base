@@ -206,6 +206,8 @@ message UsbPortInfoProto {
     optional bool can_change_mode = 3;
     optional bool can_change_power_role = 4;
     optional bool can_change_data_role = 5;
+    optional int64 connected_at_millis = 6;
+    optional int64 last_connect_duration_millis = 7;
 }
 
 message UsbPortProto {

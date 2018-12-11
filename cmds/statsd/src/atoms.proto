@@ -1265,14 +1265,18 @@ message BluetoothConnectionStateChanged {
  * Logs when something is plugged into or removed from the USB-C connector.
  *
  * Logged from:
- *  Vendor USB HAL.
+ *  UsbService
  */
 message UsbConnectorStateChanged {
     enum State {
-      DISCONNECTED = 0;
-      CONNECTED = 1;
+        STATE_DISCONNECTED = 0;
+        STATE_CONNECTED = 1;
     }
     optional State state = 1;
+    optional string id = 2;
+    // Last active session in ms.
+    // 0 when the port is in connected state.
+    optional int64 last_connect_duration_millis = 3;
 }
 
 /**
