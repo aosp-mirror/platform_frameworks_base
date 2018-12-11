@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.tests.rcs;
+package com.android.tests.ims;
 
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.ims.RcsMessageStore;

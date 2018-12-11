@@ -16,13 +16,28 @@
 
 package android.telephony.ims.aidl;
 
+import android.telephony.ims.RcsParticipant;
+import android.telephony.ims.Rcs1To1Thread;
+import android.telephony.ims.RcsThreadQueryContinuationToken;
+import android.telephony.ims.RcsThreadQueryParameters;
+import android.telephony.ims.RcsThreadQueryResult;
+
 /**
  * RPC definition between RCS storage APIs and phone process.
  * {@hide}
  */
 interface IRcs {
     // RcsMessageStore APIs
+    RcsThreadQueryResult getRcsThreads(in RcsThreadQueryParameters queryParameters);
+
+    RcsThreadQueryResult getRcsThreadsWithToken(
+        in RcsThreadQueryContinuationToken continuationToken);
+
     void deleteThread(int threadId);
+
+    Rcs1To1Thread createRcs1To1Thread(in RcsParticipant participant);
+
+    RcsParticipant createRcsParticipant(String canonicalAddress);
 
     // RcsThread APIs
     int getMessageCount(int rcsThreadId);
