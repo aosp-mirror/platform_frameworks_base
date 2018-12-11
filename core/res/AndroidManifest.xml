@@ -2171,6 +2171,13 @@
     <permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
         android:protectionLevel="signature|installer" />
 
+    <!-- @SystemApi Allows an application to start an activity within its managed profile from
+         the personal profile.
+         This permission is not available to third party applications.
+         @hide -->
+    <permission android:name="android.permission.INTERACT_ACROSS_PROFILES"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi @hide Allows an application to call APIs that allow it to query and manage
          users on the device. This permission is not available to
          third party applications. -->
