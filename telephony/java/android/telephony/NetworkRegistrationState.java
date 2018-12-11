@@ -219,12 +219,13 @@ public class NetworkRegistrationState implements Parcelable {
     public NetworkRegistrationState(int domain, int transportType, int regState,
             int accessNetworkTechnology, int rejectCause, boolean emergencyOnly,
             int[] availableServices, @Nullable CellIdentity cellIdentity, int maxDataCalls,
-            boolean isDcNrRestricted, boolean isNrAvailable) {
+            boolean isDcNrRestricted, boolean isNrAvailable, boolean isEndcAvailable) {
         this(domain, transportType, regState, accessNetworkTechnology, rejectCause, emergencyOnly,
                 availableServices, cellIdentity);
 
         mDataSpecificStates = new DataSpecificRegistrationStates(
-                maxDataCalls, isDcNrRestricted, isNrAvailable);
+                maxDataCalls, isDcNrRestricted, isNrAvailable, isEndcAvailable);
+        updateNrStatus(mDataSpecificStates);
     }
 
     protected NetworkRegistrationState(Parcel source) {
@@ -446,6 +447,34 @@ public class NetworkRegistrationState implements Parcelable {
         dest.writeParcelable(mVoiceSpecificStates, 0);
         dest.writeParcelable(mDataSpecificStates, 0);
         dest.writeInt(mNrStatus);
+    }
+
+    /**
+     * Use the 5G NR Non-Standalone indicators from the network registration state to update the
+     * NR status. There are 3 indicators in the network registration state:
+     *
+     * 1. if E-UTRA-NR Dual Connectivity (EN-DC) is supported by the primary serving cell.
+     * 2. if NR is supported by the selected PLMN.
+     * 3. if the use of dual connectivity with NR is restricted.
+     *
+     * The network has 5G NR capability if E-UTRA-NR Dual Connectivity is supported by the primary
+     * serving cell.
+     *
+     * The use of NR 5G is not restricted If the network has 5G NR capability and both the use of
+     * DCNR is not restricted and NR is supported by the selected PLMN. Otherwise the use of 5G
+     * NR is restricted.
+     *
+     * @param state data specific registration state contains the 5G NR indicators.
+     */
+    private void updateNrStatus(DataSpecificRegistrationStates state) {
+        mNrStatus = NR_STATUS_NONE;
+        if (state.isEnDcAvailable) {
+            if (!state.isDcNrRestricted && state.isNrAvailable) {
+                mNrStatus = NR_STATUS_NOT_RESTRICTED;
+            } else {
+                mNrStatus = NR_STATUS_RESTRICTED;
+            }
+        }
     }
 
     public static final Parcelable.Creator<NetworkRegistrationState> CREATOR =
