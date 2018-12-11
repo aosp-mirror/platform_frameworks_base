@@ -998,4 +998,6 @@
     <dimen name="bubble_pointer_height">4dp</dimen>
     <!-- Width of the triangle that points to the expanded bubble -->
     <dimen name="bubble_pointer_width">6dp</dimen>
+    <!-- Extra padding around the dismiss target for bubbles -->
+    <dimen name="bubble_dismiss_slop">16dp</dimen>
 </resources>
