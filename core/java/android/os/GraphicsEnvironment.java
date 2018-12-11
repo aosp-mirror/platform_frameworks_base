@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -71,7 +70,7 @@ public class GraphicsEnvironment {
      */
     public void setup(Context context, Bundle coreSettings) {
         setupGpuLayers(context, coreSettings);
-        setupAngle(context, context.getPackageName());
+        setupAngle(context, coreSettings, context.getPackageName());
         chooseDriver(context, coreSettings);
     }
 
@@ -213,10 +212,9 @@ public class GraphicsEnvironment {
     }
 
 
-    private static List<String> getGlobalSettingsString(Context context, String globalSetting) {
+    private static List<String> getGlobalSettingsString(Bundle bundle, String globalSetting) {
         List<String> valueList = null;
-        ContentResolver contentResolver = context.getContentResolver();
-        String settingsValue = Settings.Global.getString(contentResolver, globalSetting);
+        String settingsValue = bundle.getString(globalSetting);
 
         if (settingsValue != null) {
             valueList = new ArrayList<>(Arrays.asList(settingsValue.split(",")));
@@ -238,23 +236,18 @@ public class GraphicsEnvironment {
         return -1;
     }
 
-    private static String getDriverForPkg(Context context, String packageName) {
-        try {
-            ContentResolver contentResolver = context.getContentResolver();
-            int allUseAngle = Settings.Global.getInt(contentResolver,
-                    Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE);
-            if (allUseAngle == 1) {
-                return sDriverMap.get(OpenGlDriverChoice.ANGLE);
-            }
-        } catch (Settings.SettingNotFoundException e) {
-            // Do nothing and move on
+    private static String getDriverForPkg(Bundle bundle, String packageName) {
+        String allUseAngle =
+                bundle.getString(Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE);
+        if ((allUseAngle != null) && allUseAngle.equals("1")) {
+            return sDriverMap.get(OpenGlDriverChoice.ANGLE);
         }
 
         List<String> globalSettingsDriverPkgs =
-                getGlobalSettingsString(context,
+                getGlobalSettingsString(bundle,
                         Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS);
         List<String> globalSettingsDriverValues =
-                getGlobalSettingsString(context,
+                getGlobalSettingsString(bundle,
                         Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES);
 
         // Make sure we have a good package name
@@ -285,8 +278,8 @@ public class GraphicsEnvironment {
     /**
      * Pass ANGLE details down to trigger enable logic
      */
-    private void setupAngle(Context context, String packageName) {
-        String devOptIn = getDriverForPkg(context, packageName);
+    private void setupAngle(Context context, Bundle bundle, String packageName) {
+        String devOptIn = getDriverForPkg(bundle, packageName);
 
         if (DEBUG) {
             Log.v(TAG, "ANGLE Developer option for '" + packageName + "' "
