@@ -11,6 +11,7 @@ LIBCORE_PACKAGES="\
   android.system \
   com.android.bouncycastle \
   com.android.conscrypt \
+  com.android.i18n.phonenumbers \
   com.android.okhttp \
   com.sun \
   dalvik \
