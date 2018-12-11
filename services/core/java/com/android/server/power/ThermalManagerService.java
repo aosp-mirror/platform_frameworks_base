@@ -453,14 +453,15 @@ public class ThermalManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
+                    pw.println("IsStatusOverride: " + mIsStatusOverride);
                     pw.println("ThermalEventListeners:");
                     mThermalEventListeners.dump(pw, "\t");
                     pw.println("ThermalStatusListeners:");
                     mThermalStatusListeners.dump(pw, "\t");
-                    pw.println("Thermal Status: " + Integer.toString(mStatus));
+                    pw.println("Thermal Status: " + mStatus);
                     pw.println("Cached temperatures:");
                     dumpTemperaturesLocked(pw, "\t", mTemperatureMap.values());
-                    pw.println("HAL Ready: " + Boolean.toString(mHalReady));
+                    pw.println("HAL Ready: " + mHalReady);
                     if (mHalReady) {
                         pw.println("HAL connection:");
                         mHalWrapper.dump(pw, "\t");
@@ -532,7 +533,7 @@ public class ThermalManagerService extends SystemService {
                     return -1;
                 }
                 if (!Temperature.isValidStatus(status)) {
-                    pw.println("Invalid status: " + Integer.toString(status));
+                    pw.println("Invalid status: " + status);
                     return -1;
                 }
                 synchronized (mLock) {
