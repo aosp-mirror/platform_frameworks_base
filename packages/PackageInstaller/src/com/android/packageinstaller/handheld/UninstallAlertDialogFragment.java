@@ -16,6 +16,9 @@
 
 package com.android.packageinstaller.handheld;
 
+import static android.text.format.Formatter.formatFileSize;
+
+import android.annotation.NonNull;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -24,13 +27,40 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.MediaStore;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.TextView;
 
 import com.android.packageinstaller.R;
 import com.android.packageinstaller.UninstallerActivity;
 
+import java.io.IOException;
+import java.util.List;
+
 public class UninstallAlertDialogFragment extends DialogFragment implements
         DialogInterface.OnClickListener {
+
+    private CheckBox mClearContributedFiles;
+
+    /**
+     * Get number of bytes of the combined files contributed by the package.
+     *
+     * @param pkg The package that might have contibuted files.
+     * @param user The user the package belongs to.
+     *
+     * @return The number of bytes.
+     */
+    private long getContributedMediaSize(@NonNull String pkg, @NonNull UserHandle user) {
+        try {
+            return MediaStore.getContributedMediaSize(getContext(), pkg, user);
+        } catch (IOException e) {
+            return 0;
+        }
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -76,14 +106,44 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
         dialogBuilder.setTitle(appLabel);
         dialogBuilder.setPositiveButton(android.R.string.ok, this);
         dialogBuilder.setNegativeButton(android.R.string.cancel, this);
-        dialogBuilder.setMessage(messageBuilder.toString());
+
+        String pkg = dialogInfo.appInfo.packageName;
+        long contributedFileSize = 0;
+        if (dialogInfo.allUsers) {
+            List<UserInfo> users = userManager.getUsers();
+
+            int numUsers = users.size();
+            for (int i = 0; i < numUsers; i++) {
+                UserHandle user = UserHandle.of(users.get(i).id);
+
+                contributedFileSize += getContributedMediaSize(pkg, user);
+            }
+        } else {
+            contributedFileSize = getContributedMediaSize(pkg, dialogInfo.user);
+        }
+
+        if (contributedFileSize == 0) {
+            dialogBuilder.setMessage(messageBuilder.toString());
+        } else {
+            LayoutInflater inflater = getContext().getSystemService(LayoutInflater.class);
+            ViewGroup content = (ViewGroup) inflater.inflate(R.layout.uninstall_content_view, null);
+
+            ((TextView) content.requireViewById(R.id.message)).setText(messageBuilder.toString());
+            mClearContributedFiles = content.requireViewById(R.id.checkbox);
+            mClearContributedFiles.setText(getString(R.string.uninstall_remove_contributed_files,
+                            formatFileSize(getContext(), contributedFileSize)));
+
+            dialogBuilder.setView(content);
+        }
+
         return dialogBuilder.create();
     }
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
         if (which == Dialog.BUTTON_POSITIVE) {
-            ((UninstallerActivity) getActivity()).startUninstallProgress();
+            ((UninstallerActivity) getActivity()).startUninstallProgress(
+                    mClearContributedFiles != null && mClearContributedFiles.isChecked());
         } else {
             ((UninstallerActivity) getActivity()).dispatchAborted();
         }

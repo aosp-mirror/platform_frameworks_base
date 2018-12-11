@@ -50,6 +50,8 @@ public class UninstallUninstalling extends Activity implements
             "com.android.packageinstaller.ACTION_UNINSTALL_COMMIT";
 
     static final String EXTRA_APP_LABEL = "com.android.packageinstaller.extra.APP_LABEL";
+    static final String EXTRA_CLEAR_CONTRIBUTED_FILES =
+            "com.android.packageinstaller.extra.CLEAR_CONTRIBUTED_FILES";
 
     private int mUninstallId;
     private ApplicationInfo mAppInfo;
@@ -72,6 +74,8 @@ public class UninstallUninstalling extends Activity implements
             if (savedInstanceState == null) {
                 boolean allUsers = getIntent().getBooleanExtra(Intent.EXTRA_UNINSTALL_ALL_USERS,
                         false);
+                boolean clearContributedFiles = getIntent().getBooleanExtra(
+                        EXTRA_CLEAR_CONTRIBUTED_FILES, false);
                 UserHandle user = getIntent().getParcelableExtra(Intent.EXTRA_USER);
 
                 // Show dialog, which is the whole UI
@@ -95,12 +99,15 @@ public class UninstallUninstalling extends Activity implements
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(this, mUninstallId,
                         broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+                int flags = allUsers ? PackageManager.DELETE_ALL_USERS : 0;
+                flags |= clearContributedFiles ? PackageManager.DELETE_CONTRIBUTED_MEDIA : 0;
+
                 try {
                     ActivityThread.getPackageManager().getPackageInstaller().uninstall(
                             new VersionedPackage(mAppInfo.packageName,
                                     PackageManager.VERSION_CODE_HIGHEST),
-                            getPackageName(), allUsers ? PackageManager.DELETE_ALL_USERS : 0,
-                            pendingIntent.getIntentSender(), user.getIdentifier());
+                            getPackageName(), flags, pendingIntent.getIntentSender(),
+                            user.getIdentifier());
                 } catch (RemoteException e) {
                     e.rethrowFromSystemServer();
                 }
