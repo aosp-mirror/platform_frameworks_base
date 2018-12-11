@@ -508,6 +508,21 @@ package android.provider {
     field public static final deprecated java.lang.String TIMESTAMP = "timestamp";
   }
 
+  public final class DocumentsContract {
+    method public static android.net.Uri copyDocument(android.content.ContentResolver, android.net.Uri, android.net.Uri) throws java.io.FileNotFoundException;
+    method public static android.net.Uri createDocument(android.content.ContentResolver, android.net.Uri, java.lang.String, java.lang.String) throws java.io.FileNotFoundException;
+    method public static android.content.IntentSender createWebLinkIntent(android.content.ContentResolver, android.net.Uri, android.os.Bundle) throws java.io.FileNotFoundException;
+    method public static boolean deleteDocument(android.content.ContentResolver, android.net.Uri) throws java.io.FileNotFoundException;
+    method public static void ejectRoot(android.content.ContentResolver, android.net.Uri);
+    method public static android.provider.DocumentsContract.Path findDocumentPath(android.content.ContentResolver, android.net.Uri) throws java.io.FileNotFoundException;
+    method public static android.os.Bundle getDocumentMetadata(android.content.ContentResolver, android.net.Uri) throws java.io.FileNotFoundException;
+    method public static android.graphics.Bitmap getDocumentThumbnail(android.content.ContentResolver, android.net.Uri, android.graphics.Point, android.os.CancellationSignal) throws java.io.FileNotFoundException;
+    method public static boolean isChildDocument(android.content.ContentResolver, android.net.Uri, android.net.Uri) throws java.io.FileNotFoundException;
+    method public static android.net.Uri moveDocument(android.content.ContentResolver, android.net.Uri, android.net.Uri, android.net.Uri) throws java.io.FileNotFoundException;
+    method public static boolean removeDocument(android.content.ContentResolver, android.net.Uri, android.net.Uri) throws java.io.FileNotFoundException;
+    method public static android.net.Uri renameDocument(android.content.ContentResolver, android.net.Uri, java.lang.String) throws java.io.FileNotFoundException;
+  }
+
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field public static final deprecated java.lang.String CONTACT_METADATA_SYNC = "contact_metadata_sync";
   }
