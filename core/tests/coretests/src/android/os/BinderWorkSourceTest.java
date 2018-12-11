@@ -163,4 +163,24 @@ public class BinderWorkSourceTest {
         // Initial work source restored.
         assertEquals(UID, Binder.getCallingWorkSourceUid());
     }
+
+    @Test
+    public void workSourceProvider_default() throws Exception {
+        Binder.clearCallingWorkSource();
+        mService.clearWorkSourceProvider();
+        assertEquals(Process.myUid(), mService.getThreadLocalWorkSourceUid());
+    }
+
+    @Test
+    public void workSourceProvider_customProvider() throws Exception {
+        Binder.clearCallingWorkSource();
+        mService.clearWorkSourceProvider();
+        // Calling uid should not be used.
+        mService.setWorkSourceProvider(SECOND_UID);
+        try {
+            assertEquals(SECOND_UID, mService.getThreadLocalWorkSourceUid());
+        } finally {
+            mService.clearWorkSourceProvider();
+        }
+    }
 }

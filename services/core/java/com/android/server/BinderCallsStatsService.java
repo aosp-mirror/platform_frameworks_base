@@ -28,7 +28,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Process;
 import android.os.SystemProperties;
-import android.os.ThreadLocalWorkSource;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
@@ -36,12 +35,10 @@ import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.AppIdToPackageMap;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
-import com.android.internal.os.BinderInternal.CallSession;
 import com.android.internal.os.CachedDeviceState;
 
 import java.io.FileDescriptor;
@@ -57,10 +54,10 @@ public class BinderCallsStatsService extends Binder {
             = "persist.sys.binder_calls_detailed_tracking";
 
     /** Resolves the work source of an incoming binder transaction. */
-    static class WorkSourceProvider {
+    static class AuthorizedWorkSourceProvider implements BinderInternal.WorkSourceProvider {
         private ArraySet<Integer> mAppIdWhitelist;
 
-        WorkSourceProvider() {
+        AuthorizedWorkSourceProvider() {
             mAppIdWhitelist = new ArraySet<>();
         }
 
@@ -100,7 +97,7 @@ public class BinderCallsStatsService extends Binder {
             final ArraySet<Integer> whitelist = new ArraySet<>();
 
             // We trust our own process.
-            whitelist.add(Process.myUid());
+            whitelist.add(UserHandle.getAppId(Process.myUid()));
             // We only need to initialize it once. UPDATE_DEVICE_STATS is a system permission.
             final PackageManager pm = context.getPackageManager();
             final String[] permissions = { android.Manifest.permission.UPDATE_DEVICE_STATS };
@@ -122,41 +119,6 @@ public class BinderCallsStatsService extends Binder {
         }
     }
 
-    /** Observer for all system server incoming binder transactions. */
-    @VisibleForTesting
-    static class BinderCallsObserver implements BinderInternal.Observer {
-        private final BinderInternal.Observer mBinderCallsStats;
-        private final WorkSourceProvider mWorkSourceProvider;
-
-        BinderCallsObserver(BinderInternal.Observer callsStats,
-                WorkSourceProvider workSourceProvider) {
-            mBinderCallsStats = callsStats;
-            mWorkSourceProvider = workSourceProvider;
-        }
-
-        @Override
-        public CallSession callStarted(Binder binder, int code) {
-            // We depend on the code in Binder#execTransact to reset the state of
-            // ThreadLocalWorkSource
-            setThreadLocalWorkSourceUid(mWorkSourceProvider.resolveWorkSourceUid());
-            return mBinderCallsStats.callStarted(binder, code);
-        }
-
-        @Override
-        public void callEnded(CallSession s, int parcelRequestSize, int parcelReplySize) {
-            mBinderCallsStats.callEnded(s, parcelRequestSize, parcelReplySize);
-        }
-
-        @Override
-        public void callThrewException(CallSession s, Exception exception) {
-            mBinderCallsStats.callThrewException(s, exception);
-        }
-
-        protected void setThreadLocalWorkSourceUid(int uid) {
-            ThreadLocalWorkSource.setUid(uid);
-        }
-    }
-
     /** Listens for flag changes. */
     private static class SettingsObserver extends ContentObserver {
         private static final String SETTINGS_ENABLED_KEY = "enabled";
@@ -170,16 +132,16 @@ public class BinderCallsStatsService extends Binder {
         private final Context mContext;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
         private final BinderCallsStats mBinderCallsStats;
-        private final BinderCallsObserver mBinderCallsObserver;
+        private final AuthorizedWorkSourceProvider mWorkSourceProvider;
 
         SettingsObserver(Context context, BinderCallsStats binderCallsStats,
-                BinderCallsObserver observer) {
+                AuthorizedWorkSourceProvider workSourceProvider) {
             super(BackgroundThread.getHandler());
             mContext = context;
             context.getContentResolver().registerContentObserver(mUri, false, this,
                     UserHandle.USER_SYSTEM);
             mBinderCallsStats = binderCallsStats;
-            mBinderCallsObserver = observer;
+            mWorkSourceProvider = workSourceProvider;
             // Always kick once to ensure that we match current state
             onChange();
         }
@@ -217,12 +179,14 @@ public class BinderCallsStatsService extends Binder {
                     mParser.getBoolean(SETTINGS_ENABLED_KEY, BinderCallsStats.ENABLED_DEFAULT);
             if (mEnabled != enabled) {
                 if (enabled) {
-                    Binder.setObserver(mBinderCallsObserver);
+                    Binder.setObserver(mBinderCallsStats);
                     Binder.setProxyTransactListener(
                             new Binder.PropagateWorkSourceTransactListener());
+                    Binder.setWorkSourceProvider(mWorkSourceProvider);
                 } else {
                     Binder.setObserver(null);
                     Binder.setProxyTransactListener(null);
+                    Binder.setWorkSourceProvider(Binder::getCallingUid);
                 }
                 mEnabled = enabled;
                 mBinderCallsStats.reset();
@@ -265,7 +229,7 @@ public class BinderCallsStatsService extends Binder {
     public static class LifeCycle extends SystemService {
         private BinderCallsStatsService mService;
         private BinderCallsStats mBinderCallsStats;
-        private WorkSourceProvider mWorkSourceProvider;
+        private AuthorizedWorkSourceProvider mWorkSourceProvider;
 
         public LifeCycle(Context context) {
             super(context);
@@ -274,11 +238,9 @@ public class BinderCallsStatsService extends Binder {
         @Override
         public void onStart() {
             mBinderCallsStats = new BinderCallsStats(new BinderCallsStats.Injector());
-            mWorkSourceProvider = new WorkSourceProvider();
-            BinderCallsObserver binderCallsObserver =
-                    new BinderCallsObserver(mBinderCallsStats, mWorkSourceProvider);
+            mWorkSourceProvider = new AuthorizedWorkSourceProvider();
             mService = new BinderCallsStatsService(
-                    mBinderCallsStats, binderCallsObserver, mWorkSourceProvider);
+                    mBinderCallsStats, mWorkSourceProvider);
             publishLocalService(Internal.class, new Internal(mBinderCallsStats));
             publishBinderService("binder_calls_stats", mService);
             boolean detailedTrackingEnabled = SystemProperties.getBoolean(
@@ -308,18 +270,16 @@ public class BinderCallsStatsService extends Binder {
 
     private SettingsObserver mSettingsObserver;
     private final BinderCallsStats mBinderCallsStats;
-    private final BinderCallsObserver mBinderCallsObserver;
-    private final WorkSourceProvider mWorkSourceProvider;
+    private final AuthorizedWorkSourceProvider mWorkSourceProvider;
 
-    BinderCallsStatsService(BinderCallsStats binderCallsStats, BinderCallsObserver observer,
-            WorkSourceProvider workSourceProvider) {
+    BinderCallsStatsService(BinderCallsStats binderCallsStats,
+            AuthorizedWorkSourceProvider workSourceProvider) {
         mBinderCallsStats = binderCallsStats;
-        mBinderCallsObserver = observer;
         mWorkSourceProvider = workSourceProvider;
     }
 
     public void systemReady(Context context) {
-        mSettingsObserver = new SettingsObserver(context, mBinderCallsStats, mBinderCallsObserver);
+        mSettingsObserver = new SettingsObserver(context, mBinderCallsStats, mWorkSourceProvider);
     }
 
     public void reset() {
@@ -339,7 +299,7 @@ public class BinderCallsStatsService extends Binder {
                     pw.println("binder_calls_stats reset.");
                     return;
                 } else if ("--enable".equals(arg)) {
-                    Binder.setObserver(mBinderCallsObserver);
+                    Binder.setObserver(mBinderCallsStats);
                     return;
                 } else if ("--disable".equals(arg)) {
                     Binder.setObserver(null);

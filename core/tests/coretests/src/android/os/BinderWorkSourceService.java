@@ -25,8 +25,24 @@ import android.content.Intent;
 public class BinderWorkSourceService extends Service {
     private final IBinderWorkSourceService.Stub mBinder =
             new IBinderWorkSourceService.Stub() {
+        public int getBinderCallingUid() {
+            return Binder.getCallingUid();
+        }
+
         public int getIncomingWorkSourceUid() {
             return Binder.getCallingWorkSourceUid();
+        }
+
+        public int getThreadLocalWorkSourceUid() {
+            return ThreadLocalWorkSource.getUid();
+        }
+
+        public void setWorkSourceProvider(int uid) {
+            Binder.setWorkSourceProvider(() -> uid);
+        }
+
+        public void clearWorkSourceProvider() {
+            Binder.setWorkSourceProvider(Binder::getCallingUid);
         }
     };
 

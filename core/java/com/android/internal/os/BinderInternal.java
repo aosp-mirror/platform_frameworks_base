@@ -22,7 +22,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.EventLog;
-import android.util.Log;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.Preconditions;
@@ -86,6 +85,22 @@ public class BinderInternal {
         boolean exceptionThrown;
     }
 
+
+    /**
+     * Responsible for resolving a work source.
+     */
+    @FunctionalInterface
+    public interface WorkSourceProvider {
+        /**
+         * <p>This method is called in a critical path of the binder transaction.
+         * <p>The implementation should never execute a binder call since it is called during a
+         * binder transaction.
+         *
+         * @return the uid of the process to attribute the binder transaction to.
+         */
+        int resolveWorkSourceUid();
+    }
+
     /**
      * Allows to track various steps of an API call.
      */
@@ -95,14 +110,16 @@ public class BinderInternal {
          *
          * @return a CallSession to pass to the callEnded method.
          */
-        CallSession callStarted(Binder binder, int code);
+        CallSession callStarted(Binder binder, int code, int workSourceUid);
 
         /**
          * Called when a binder call stops.
          *
-         * <li>This method will be called even when an exception is thrown.
+         * <li>This method will be called even when an exception is thrown by the binder stub
+         * implementation.
          */
-        void callEnded(CallSession s, int parcelRequestSize, int parcelReplySize);
+        void callEnded(CallSession s, int parcelRequestSize, int parcelReplySize,
+                int workSourceUid);
 
         /**
          * Called if an exception is thrown while executing the binder transaction.

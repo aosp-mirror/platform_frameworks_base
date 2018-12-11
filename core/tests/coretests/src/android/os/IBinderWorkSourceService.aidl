@@ -18,4 +18,8 @@ package android.os;
 
 interface IBinderWorkSourceService {
     int getIncomingWorkSourceUid();
+    int getBinderCallingUid();
+    int getThreadLocalWorkSourceUid();
+    void setWorkSourceProvider(int uid);
+    void clearWorkSourceProvider();
 }
