@@ -16,6 +16,7 @@
 
 package android.permission;
 
+import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -62,14 +63,29 @@ public final class RuntimePermissionPresenter {
             "android.permission.RuntimePermissionPresenter.key.result";
 
     /**
-     * Listener for delivering a result.
+     * Listener for delivering the result of {@link #getAppPermissions}.
      */
-    public interface OnResultCallback {
+    public interface OnGetAppPermissionResultCallback {
         /**
-         * The result for {@link #getAppPermissions(String, OnResultCallback, Handler)}.
+         * The result for {@link #getAppPermissions(String, OnGetAppPermissionResultCallback,
+         * Handler)}.
+         *
          * @param permissions The permissions list.
          */
         void onGetAppPermissions(@NonNull List<RuntimePermissionPresentationInfo> permissions);
+    }
+
+    /**
+     * Listener for delivering the result of {@link #countPermissionApps}.
+     */
+    public interface OnCountPermissionAppsResultCallback {
+        /**
+         * The result for {@link #countPermissionApps(List, boolean,
+         * OnCountPermissionAppsResultCallback, Handler)}.
+         *
+         * @param numApps The number of apps that have one of the permissions
+         */
+        void onCountPermissionApps(int numApps);
     }
 
     private static final Object sLock = new Object();
@@ -106,7 +122,7 @@ public final class RuntimePermissionPresenter {
      * @param handler Handler on which to invoke the callback.
      */
     public void getAppPermissions(@NonNull String packageName,
-            @NonNull OnResultCallback callback, @Nullable Handler handler) {
+            @NonNull OnGetAppPermissionResultCallback callback, @Nullable Handler handler) {
         checkNotNull(packageName);
         checkNotNull(callback);
 
@@ -127,6 +143,25 @@ public final class RuntimePermissionPresenter {
 
         mRemoteService.processMessage(obtainMessage(RemoteService::revokeAppPermissions,
                 mRemoteService, packageName, permissionName));
+    }
+
+    /**
+     * Count how many apps have one of a set of permissions.
+     *
+     * @param permissionNames The permissions the app might have
+     * @param countOnlyGranted Count an app only if the permission is granted to the app
+     * @param countSystem Also count system apps
+     * @param callback Callback to receive the result
+     * @param handler Handler on which to invoke the callback
+     */
+    public void countPermissionApps(@NonNull List<String> permissionNames,
+            boolean countOnlyGranted, boolean countSystem,
+            @NonNull OnCountPermissionAppsResultCallback callback, @Nullable Handler handler) {
+        checkCollectionElementsNotNull(permissionNames, "permissionNames");
+        checkNotNull(callback);
+
+        mRemoteService.processMessage(obtainMessage(RemoteService::countPermissionApps,
+                mRemoteService, permissionNames, countOnlyGranted, countSystem, callback, handler));
     }
 
     private static final class RemoteService
@@ -184,7 +219,7 @@ public final class RuntimePermissionPresenter {
         }
 
         private void getAppPermissions(@NonNull String packageName,
-                @NonNull OnResultCallback callback, @Nullable Handler handler) {
+                @NonNull OnGetAppPermissionResultCallback callback, @Nullable Handler handler) {
             final IRuntimePermissionPresenter remoteInstance;
             synchronized (mLock) {
                 remoteInstance = mRemoteInstance;
@@ -235,6 +270,45 @@ public final class RuntimePermissionPresenter {
             } catch (RemoteException re) {
                 Log.e(TAG, "Error getting app permissions", re);
             }
+
+            synchronized (mLock) {
+                scheduleNextMessageIfNeededLocked();
+            }
+        }
+
+        private void countPermissionApps(@NonNull List<String> permissionNames,
+                boolean countOnlyGranted, boolean countSystem,
+                @NonNull OnCountPermissionAppsResultCallback callback, @Nullable Handler handler) {
+            final IRuntimePermissionPresenter remoteInstance;
+
+            synchronized (mLock) {
+                remoteInstance = mRemoteInstance;
+            }
+            if (remoteInstance == null) {
+                return;
+            }
+
+            try {
+                remoteInstance.countPermissionApps(permissionNames, countOnlyGranted, countSystem,
+                        new RemoteCallback(result -> {
+                            final int numApps;
+                            if (result != null) {
+                                numApps = result.getInt(KEY_RESULT);
+                            } else {
+                                numApps = 0;
+                            }
+
+                            if (handler != null) {
+                                handler.post(() -> callback.onCountPermissionApps(numApps));
+                            } else {
+                                callback.onCountPermissionApps(numApps);
+                            }
+                        }, this));
+            } catch (RemoteException re) {
+                Log.e(TAG, "Error counting permission apps", re);
+            }
+
+            scheduleUnbind();
 
             synchronized (mLock) {
                 scheduleNextMessageIfNeededLocked();
