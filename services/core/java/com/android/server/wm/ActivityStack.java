@@ -1797,7 +1797,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // focus). Also if there is an active pinned stack - we always want to notify it about
         // task stack changes, because its positioning may depend on it.
         if (mStackSupervisor.mAppVisibilitiesChangedSinceLastPause
-                || getDisplay().hasPinnedStack()) {
+                || (getDisplay() != null && getDisplay().hasPinnedStack())) {
             mService.getTaskChangeNotificationController().notifyTaskStackChanged();
             mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = false;
         }
