@@ -189,7 +189,7 @@ public class QuickStepController implements GestureHelper {
                 mNavigationBarView.getDownHitTarget() == HIT_TARGET_DEAD_ZONE;
         if (mOverviewEventSender.getProxy() == null || (!mNavigationBarView.isQuickScrubEnabled()
                 && !mNavigationBarView.isQuickStepSwipeUpEnabled())) {
-            return false;
+            return deadZoneConsumed;
         }
         mNavigationBarView.requestUnbufferedDispatch(event);
 

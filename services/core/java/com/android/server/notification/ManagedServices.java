@@ -175,6 +175,10 @@ abstract public class ManagedServices {
         }
     }
 
+    protected int getBindFlags() {
+        return BIND_AUTO_CREATE | BIND_FOREGROUND_SERVICE | BIND_ALLOW_WHITELIST_MANAGEMENT;
+    }
+
     protected void onServiceRemovedLocked(ManagedServiceInfo removed) { }
 
     private ManagedServiceInfo newServiceInfo(IInterface service,
@@ -1022,9 +1026,9 @@ abstract public class ManagedServices {
                 }
             };
             if (!mContext.bindServiceAsUser(intent,
-                serviceConnection,
-                BIND_AUTO_CREATE | BIND_FOREGROUND_SERVICE | BIND_ALLOW_WHITELIST_MANAGEMENT,
-                new UserHandle(userid))) {
+                    serviceConnection,
+                    getBindFlags(),
+                    new UserHandle(userid))) {
                 mServicesBinding.remove(servicesBindingTag);
                 Slog.w(TAG, "Unable to bind " + getCaption() + " service: " + intent);
                 return;

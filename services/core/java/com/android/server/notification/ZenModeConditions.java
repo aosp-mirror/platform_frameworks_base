@@ -19,13 +19,14 @@ package com.android.server.notification;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.service.notification.Condition;
-import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -36,7 +37,9 @@ public class ZenModeConditions implements ConditionProviders.Callback {
 
     private final ZenModeHelper mHelper;
     private final ConditionProviders mConditionProviders;
-    private final ArrayMap<Uri, ComponentName> mSubscriptions = new ArrayMap<>();
+
+    @VisibleForTesting
+    protected final ArrayMap<Uri, ComponentName> mSubscriptions = new ArrayMap<>();
 
     private boolean mFirstEvaluation = true;
 
@@ -59,7 +62,8 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         pw.print(prefix); pw.print("mSubscriptions="); pw.println(mSubscriptions);
     }
 
-    public void evaluateConfig(ZenModeConfig config, boolean processSubscriptions) {
+    public void evaluateConfig(ZenModeConfig config, ComponentName trigger,
+            boolean processSubscriptions) {
         if (config == null) return;
         if (config.manualRule != null && config.manualRule.condition != null
                 && !config.manualRule.isTrueOrUnknown()) {
@@ -67,9 +71,9 @@ public class ZenModeConditions implements ConditionProviders.Callback {
             config.manualRule = null;
         }
         final ArraySet<Uri> current = new ArraySet<>();
-        evaluateRule(config.manualRule, current, processSubscriptions);
+        evaluateRule(config.manualRule, current, null, processSubscriptions);
         for (ZenRule automaticRule : config.automaticRules.values()) {
-            evaluateRule(automaticRule, current, processSubscriptions);
+            evaluateRule(automaticRule, current, trigger, processSubscriptions);
             updateSnoozing(automaticRule);
         }
 
@@ -102,7 +106,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
     @Override
     public void onServiceAdded(ComponentName component) {
         if (DEBUG) Log.d(TAG, "onServiceAdded " + component);
-        mHelper.setConfig(mHelper.getConfig(), "zmc.onServiceAdded");
+        mHelper.setConfig(mHelper.getConfig(), component, "zmc.onServiceAdded");
     }
 
     @Override
@@ -110,17 +114,22 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         if (DEBUG) Log.d(TAG, "onConditionChanged " + id + " " + condition);
         ZenModeConfig config = mHelper.getConfig();
         if (config == null) return;
+        ComponentName trigger = null;
         boolean updated = updateCondition(id, condition, config.manualRule);
         for (ZenRule automaticRule : config.automaticRules.values()) {
             updated |= updateCondition(id, condition, automaticRule);
             updated |= updateSnoozing(automaticRule);
+            if (updated) {
+                trigger = automaticRule.component;
+            }
         }
         if (updated) {
-            mHelper.setConfig(config, "conditionChanged");
+            mHelper.setConfig(config, trigger, "conditionChanged");
         }
     }
 
-    private void evaluateRule(ZenRule rule, ArraySet<Uri> current, boolean processSubscriptions) {
+    private void evaluateRule(ZenRule rule, ArraySet<Uri> current, ComponentName trigger,
+            boolean processSubscriptions) {
         if (rule == null || rule.conditionId == null) return;
         final Uri id = rule.conditionId;
         boolean isSystemCondition = false;
@@ -146,7 +155,9 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         if (current != null) {
             current.add(id);
         }
-        if (processSubscriptions) {
+        if (processSubscriptions && ((trigger != null && trigger.equals(rule.component))
+                || isSystemCondition)) {
+            if (DEBUG) Log.d(TAG, "Subscribing to " + rule.component);
             if (mConditionProviders.subscribeIfNecessary(rule.component, rule.conditionId)) {
                 synchronized (mSubscriptions) {
                     mSubscriptions.put(rule.conditionId, rule.component);

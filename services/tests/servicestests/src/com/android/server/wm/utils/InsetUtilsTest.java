@@ -16,6 +16,11 @@
 
 package com.android.server.wm.utils;
 
+import static android.hardware.camera2.params.OutputConfiguration.ROTATION_90;
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_180;
+import static android.view.Surface.ROTATION_270;
+
 import static junit.framework.Assert.assertEquals;
 
 import android.graphics.Rect;
@@ -38,6 +43,30 @@ public class InsetUtilsTest {
         final Rect rect2 = new Rect(50, 60, 70, 80);
         InsetUtils.addInsets(rect1, rect2);
         assertEquals(new Rect(60, 80, 100, 120), rect1);
+    }
+
+    @Test
+    public void rotate() {
+        final Rect original = new Rect(1, 2, 3, 4);
+
+        assertEquals("rot0", original, rotateCopy(original, ROTATION_0));
+
+        final Rect rot90 = rotateCopy(original, ROTATION_90);
+        assertEquals("rot90", new Rect(2, 3, 4, 1), rot90);
+
+        final Rect rot180 = rotateCopy(original, ROTATION_180);
+        assertEquals("rot180", new Rect(3, 4, 1, 2), rot180);
+        assertEquals("rot90(rot90)=rot180", rotateCopy(rot90, ROTATION_90), rot180);
+
+        final Rect rot270 = rotateCopy(original, ROTATION_270);
+        assertEquals("rot270", new Rect(4, 1, 2, 3), rot270);
+        assertEquals("rot90(rot180)=rot270", rotateCopy(rot180, ROTATION_90), rot270);
+    }
+
+    private static Rect rotateCopy(Rect insets, int rotationDelta) {
+        final Rect copy = new Rect(insets);
+        InsetUtils.rotateInsets(copy, rotationDelta);
+        return copy;
     }
 }
 

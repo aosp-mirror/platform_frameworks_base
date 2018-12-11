@@ -21,6 +21,7 @@ import static android.view.Surface.ROTATION_90;
 
 import android.graphics.Matrix;
 import android.view.DisplayInfo;
+import android.view.Surface.Rotation;
 
 import com.android.server.wm.utils.CoordinateTransforms;
 
@@ -62,6 +63,16 @@ public class ForcedSeamlessRotator {
      */
     public void unrotate(WindowToken token) {
         token.getPendingTransaction().setMatrix(token.getSurfaceControl(), mTransform, mFloat9);
+    }
+
+    /**
+     * Returns the rotation of the display before it started rotating.
+     *
+     * @return the old rotation of the display
+     */
+    @Rotation
+    public int getOldRotation() {
+        return mOldRotation;
     }
 
     /**

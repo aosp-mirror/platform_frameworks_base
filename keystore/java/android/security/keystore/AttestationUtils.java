@@ -22,9 +22,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Build;
 import android.security.KeyStore;
-import android.security.KeyStoreException;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keymaster.KeymasterDefs;
@@ -117,6 +117,40 @@ public abstract class AttestationUtils {
     @NonNull public static KeymasterArguments prepareAttestationArguments(Context context,
             @NonNull int[] idTypes, @NonNull byte[] attestationChallenge) throws
             DeviceIdAttestationException {
+        return prepareAttestationArguments(context, idTypes,attestationChallenge, Build.BRAND);
+    }
+
+    /**
+     * Prepares Keymaster Arguments with attestation data for misprovisioned Pixel 2 device.
+     * See http://go/keyAttestationFailure and http://b/69471841 for more info.
+     * @hide should only be used by KeyChain.
+     */
+    @NonNull public static KeymasterArguments prepareAttestationArgumentsIfMisprovisioned(
+            Context context, @NonNull int[] idTypes, @NonNull byte[] attestationChallenge) throws
+            DeviceIdAttestationException {
+        if (!isPotentiallyMisprovisionedDevice(context)) {
+            return null;
+        }
+        Resources resources = context.getResources();
+        String misprovisionedBrand = resources.getString(
+                com.android.internal.R.string.config_misprovisionedBrandValue);
+        return prepareAttestationArguments(
+                    context, idTypes, attestationChallenge, misprovisionedBrand);
+    }
+
+    @NonNull private static boolean isPotentiallyMisprovisionedDevice(Context context) {
+        Resources resources = context.getResources();
+        String misprovisionedModel = resources.getString(
+                com.android.internal.R.string.config_misprovisionedDeviceModel);
+        String misprovisionedBrand = resources.getString(
+                com.android.internal.R.string.config_misprovisionedBrandValue);
+
+        return (Build.MODEL.equals(misprovisionedModel));
+    }
+
+    @NonNull private static KeymasterArguments prepareAttestationArguments(Context context,
+            @NonNull int[] idTypes, @NonNull byte[] attestationChallenge, String brand) throws
+            DeviceIdAttestationException {
         // Check method arguments, retrieve requested device IDs and prepare attestation arguments.
         if (attestationChallenge == null) {
             throw new NullPointerException("Missing attestation challenge");
@@ -169,7 +203,7 @@ public abstract class AttestationUtils {
             }
         }
         attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_BRAND,
-                Build.BRAND.getBytes(StandardCharsets.UTF_8));
+                brand.getBytes(StandardCharsets.UTF_8));
         attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_DEVICE,
                 Build.DEVICE.getBytes(StandardCharsets.UTF_8));
         attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_PRODUCT,
