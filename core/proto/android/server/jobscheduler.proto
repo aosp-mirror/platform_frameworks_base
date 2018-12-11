@@ -416,7 +416,8 @@ message StateControllerProto {
 
             optional int64 start_time_elapsed = 1;
             optional int64 end_time_elapsed = 2;
-            optional int32 job_count = 3;
+            // The number of background jobs that ran during this session.
+            optional int32 bg_job_count = 3;
         }
 
         message Timer {
@@ -427,8 +428,9 @@ message StateControllerProto {
             optional bool is_active = 2;
             // The time this timer last became active. Only valid if is_active is true.
             optional int64 start_time_elapsed = 3;
-            // How many are currently running. Valid only if the device is_active is true.
-            optional int32 job_count = 4;
+            // How many background jobs are currently running. Valid only if the device is_active
+            // is true.
+            optional int32 bg_job_count = 4;
             // All of the jobs that the Timer is currently tracking.
             repeated JobStatusShortInfoProto running_jobs = 5;
         }

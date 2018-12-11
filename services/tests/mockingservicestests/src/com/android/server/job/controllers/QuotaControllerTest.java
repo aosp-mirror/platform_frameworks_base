@@ -775,6 +775,139 @@ public class QuotaControllerTest {
         assertEquals(expected, mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
     }
 
+    /** Tests that TimingSessions are saved properly when all the jobs are background jobs. */
+    @Test
+    public void testTimerTracking_AllBackground() {
+        setDischarging();
+
+        JobStatus jobStatus = createJobStatus("testTimerTracking_AllBackground", 1);
+        mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
+
+        assertNull(mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        List<TimingSession> expected = new ArrayList<>();
+
+        // Test single job.
+        long start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.prepareForExecutionLocked(jobStatus);
+        advanceElapsedClock(5 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobStatus, null, false);
+        expected.add(createTimingSession(start, 5 * SECOND_IN_MILLIS, 1));
+        assertEquals(expected, mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        // Test overlapping jobs.
+        JobStatus jobStatus2 = createJobStatus("testTimerTracking_AllBackground", 2);
+        mQuotaController.maybeStartTrackingJobLocked(jobStatus2, null);
+
+        JobStatus jobStatus3 = createJobStatus("testTimerTracking_AllBackground", 3);
+        mQuotaController.maybeStartTrackingJobLocked(jobStatus3, null);
+
+        advanceElapsedClock(SECOND_IN_MILLIS);
+
+        start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
+        mQuotaController.prepareForExecutionLocked(jobStatus);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.prepareForExecutionLocked(jobStatus2);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobStatus, null, false);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.prepareForExecutionLocked(jobStatus3);
+        advanceElapsedClock(20 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobStatus3, null, false);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobStatus2, null, false);
+        expected.add(createTimingSession(start, MINUTE_IN_MILLIS, 3));
+        assertEquals(expected, mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+    }
+
+    /** Tests that Timers don't count foreground jobs. */
+    @Test
+    public void testTimerTracking_AllForeground() {
+        setDischarging();
+
+        JobStatus jobStatus = createJobStatus("testTimerTracking_AllForeground", 1);
+        jobStatus.uidActive = true;
+        mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
+
+        assertNull(mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        mQuotaController.prepareForExecutionLocked(jobStatus);
+        advanceElapsedClock(5 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobStatus, null, false);
+        assertNull(mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+    }
+
+    /**
+     * Tests that Timers properly track overlapping foreground and background jobs.
+     */
+    @Test
+    public void testTimerTracking_ForegroundAndBackground() {
+        setDischarging();
+
+        JobStatus jobBg1 = createJobStatus("testTimerTracking_ForegroundAndBackground", 1);
+        JobStatus jobBg2 = createJobStatus("testTimerTracking_ForegroundAndBackground", 2);
+        JobStatus jobFg3 = createJobStatus("testTimerTracking_ForegroundAndBackground", 3);
+        jobFg3.uidActive = true;
+        mQuotaController.maybeStartTrackingJobLocked(jobBg1, null);
+        mQuotaController.maybeStartTrackingJobLocked(jobBg2, null);
+        mQuotaController.maybeStartTrackingJobLocked(jobFg3, null);
+        assertNull(mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+        List<TimingSession> expected = new ArrayList<>();
+
+        // UID starts out inactive.
+        long start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.prepareForExecutionLocked(jobBg1);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobBg1, jobBg1, true);
+        expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
+        assertEquals(expected, mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        advanceElapsedClock(SECOND_IN_MILLIS);
+
+        // Bg job starts while inactive, spans an entire active session, and ends after the
+        // active session.
+        // Fg job starts after the bg job and ends before the bg job.
+        // Entire bg job duration should be counted since it started before active session. However,
+        // count should only be 1 since Timer shouldn't count fg jobs.
+        start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.maybeStartTrackingJobLocked(jobBg2, null);
+        mQuotaController.prepareForExecutionLocked(jobBg2);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.prepareForExecutionLocked(jobFg3);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobFg3, null, false);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobBg2, null, false);
+        expected.add(createTimingSession(start, 30 * SECOND_IN_MILLIS, 1));
+        assertEquals(expected, mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        advanceElapsedClock(SECOND_IN_MILLIS);
+
+        // Bg job 1 starts, then fg job starts. Bg job 1 job ends. Shortly after, uid goes
+        // "inactive" and then bg job 2 starts. Then fg job ends.
+        // This should result in two TimingSessions with a count of one each.
+        start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.maybeStartTrackingJobLocked(jobBg1, null);
+        mQuotaController.maybeStartTrackingJobLocked(jobBg2, null);
+        mQuotaController.maybeStartTrackingJobLocked(jobFg3, null);
+        mQuotaController.prepareForExecutionLocked(jobBg1);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.prepareForExecutionLocked(jobFg3);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobBg1, jobBg1, true);
+        expected.add(createTimingSession(start, 20 * SECOND_IN_MILLIS, 1));
+        advanceElapsedClock(10 * SECOND_IN_MILLIS); // UID "inactive" now
+        start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.prepareForExecutionLocked(jobBg2);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobFg3, null, false);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mQuotaController.maybeStopTrackingJobLocked(jobBg2, null, false);
+        expected.add(createTimingSession(start, 20 * SECOND_IN_MILLIS, 1));
+        assertEquals(expected, mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+    }
+
     /**
      * Tests that a job is properly updated and JobSchedulerService is notified when a job reaches
      * its quota.
