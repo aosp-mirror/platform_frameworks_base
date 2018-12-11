@@ -244,6 +244,9 @@ public final class BasePermission {
     public boolean isWellbeing() {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_WELLBEING) != 0;
     }
+    public boolean isDocumenter() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_DOCUMENTER) != 0;
+    }
 
     public void transfer(@NonNull String origPackageName, @NonNull String newPackageName) {
         if (!origPackageName.equals(sourcePackageName)) {

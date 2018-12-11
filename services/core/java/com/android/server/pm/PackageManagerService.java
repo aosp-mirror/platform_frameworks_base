@@ -1298,6 +1298,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mStorageManagerPackage;
     final @Nullable String mSystemTextClassifierPackage;
     final @Nullable String mWellbeingPackage;
+    final @Nullable String mDocumenterPackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
@@ -2781,6 +2782,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mSystemTextClassifierPackage = getSystemTextClassifierPackageName();
 
             mWellbeingPackage = getWellbeingPackageName();
+            mDocumenterPackage = getDocumenterPackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -19567,6 +19569,22 @@ public class PackageManagerService extends IPackageManager.Stub
         return mContext.getString(R.string.config_defaultTextClassifierPackage);
     }
 
+    private @Nullable String getDocumenterPackageName() {
+        final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null,
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
+                        | MATCH_DISABLED_COMPONENTS,
+                UserHandle.myUserId());
+        if (matches.size() == 1) {
+            return matches.get(0).getComponentInfo().packageName;
+        } else {
+            Slog.e(TAG, "There should probably be exactly one documenter; found "
+                    + matches.size() + ": matches=" + matches);
+            return null;
+        }
+    }
+
     @Override
     public String getWellbeingPackageName() {
         return mContext.getString(R.string.config_defaultWellbeingPackage);
@@ -22730,6 +22748,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return mRequiredPermissionControllerPackage;
                 case PackageManagerInternal.PACKAGE_WELLBEING:
                     return mWellbeingPackage;
+                case PackageManagerInternal.PACKAGE_DOCUMENTER:
+                    return mDocumenterPackage;
             }
             return null;
         }

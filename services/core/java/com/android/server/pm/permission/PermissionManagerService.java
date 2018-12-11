@@ -1647,6 +1647,13 @@ public class PermissionManagerService {
                 // Special permission granted only to the OEM specified wellbeing app
                 allowed = true;
             }
+            if (!allowed && bp.isDocumenter()
+                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
+                            PackageManagerInternal.PACKAGE_DOCUMENTER, UserHandle.USER_SYSTEM))) {
+                // If this permission is to be granted to the documenter and
+                // this app is the documenter, then it gets the permission.
+                allowed = true;
+            }
         }
         return allowed;
     }
