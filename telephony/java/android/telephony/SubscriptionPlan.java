@@ -45,7 +45,6 @@ import java.util.Objects;
  * @see SubscriptionManager#setSubscriptionPlans(int, java.util.List)
  * @see SubscriptionManager#getSubscriptionPlans(int)
  */
-@SystemApi
 public final class SubscriptionPlan implements Parcelable {
     /** {@hide} */
     @IntDef(prefix = "LIMIT_BEHAVIOR_", value = {
