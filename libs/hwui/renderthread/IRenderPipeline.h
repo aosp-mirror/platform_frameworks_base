@@ -59,15 +59,15 @@ public:
     virtual MakeCurrentResult makeCurrent() = 0;
     virtual Frame getFrame() = 0;
     virtual bool draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
-                      const LightGeometry& lightGeometry,
-                      LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
-                      bool opaque, const LightInfo& lightInfo,
+                      const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
+                      const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
                       const std::vector<sp<RenderNode>>& renderNodes,
                       FrameInfoVisualizer* profiler) = 0;
     virtual bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
                              FrameInfo* currentFrameInfo, bool* requireSwap) = 0;
     virtual DeferredLayerUpdater* createTextureLayer() = 0;
-    virtual bool setSurface(ANativeWindow* window, SwapBehavior swapBehavior, ColorMode colorMode) = 0;
+    virtual bool setSurface(ANativeWindow* window, SwapBehavior swapBehavior,
+                            ColorMode colorMode) = 0;
     virtual void onStop() = 0;
     virtual bool isSurfaceReady() = 0;
     virtual bool isContextReady() = 0;
@@ -85,6 +85,8 @@ public:
     virtual SkColorType getSurfaceColorType() const = 0;
     virtual sk_sp<SkColorSpace> getSurfaceColorSpace() = 0;
     virtual GrSurfaceOrigin getSurfaceOrigin() = 0;
+    virtual void setPictureCapturedCallback(
+            const std::function<void(sk_sp<SkPicture>&&)>& callback) = 0;
 
     virtual ~IRenderPipeline() {}
 };

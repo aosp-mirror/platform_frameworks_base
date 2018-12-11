@@ -184,6 +184,10 @@ public:
         mFrameCompleteCallbacks.push_back(std::move(func));
     }
 
+    void setPictureCapturedCallback(const std::function<void(sk_sp<SkPicture>&&)>& callback) {
+        mRenderPipeline->setPictureCapturedCallback(callback);
+    }
+
     void setForceDark(bool enable) {
         mUseForceDark = enable;
     }

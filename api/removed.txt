@@ -239,8 +239,8 @@ package android.graphics {
   }
 
   public class Picture {
-    method @Deprecated public static android.graphics.Picture createFromStream(java.io.InputStream);
-    method @Deprecated public void writeToStream(java.io.OutputStream);
+    method @Deprecated public static android.graphics.Picture createFromStream(@NonNull java.io.InputStream);
+    method @Deprecated public void writeToStream(@NonNull java.io.OutputStream);
   }
 
   @Deprecated public class PixelXorXfermode extends android.graphics.Xfermode {

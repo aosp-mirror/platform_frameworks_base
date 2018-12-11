@@ -48,6 +48,7 @@
 #include <FrameInfo.h>
 #include <FrameMetricsObserver.h>
 #include <IContextFactory.h>
+#include <Picture.h>
 #include <Properties.h>
 #include <PropertyValuesAnimatorSet.h>
 #include <RenderNode.h>
@@ -69,6 +70,11 @@ struct {
     jfieldID messageQueue;
     jmethodID callback;
 } gFrameMetricsObserverClassInfo;
+
+struct {
+    jclass clazz;
+    jmethodID invokePictureCapturedCallback;
+} gHardwareRenderer;
 
 struct {
     jmethodID onFrameDraw;
@@ -905,6 +911,27 @@ private:
     jobject mObject;
 };
 
+static void android_view_ThreadedRenderer_setPictureCapturedCallbackJNI(JNIEnv* env,
+        jobject clazz, jlong proxyPtr, jobject pictureCallback) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    if (!pictureCallback) {
+        proxy->setPictureCapturedCallback(nullptr);
+    } else {
+        JavaVM* vm = nullptr;
+        LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
+        auto globalCallbackRef = std::make_shared<JGlobalRefHolder>(vm,
+                env->NewGlobalRef(pictureCallback));
+        proxy->setPictureCapturedCallback([globalCallbackRef](sk_sp<SkPicture>&& picture) {
+            JNIEnv* env = getenv(globalCallbackRef->vm());
+            Picture* wrapper = new Picture{std::move(picture)};
+            env->CallStaticVoidMethod(gHardwareRenderer.clazz,
+                    gHardwareRenderer.invokePictureCapturedCallback,
+                    static_cast<jlong>(reinterpret_cast<intptr_t>(wrapper)),
+                    globalCallbackRef->object());
+        });
+    }
+}
+
 static void android_view_ThreadedRenderer_setFrameCallback(JNIEnv* env,
         jobject clazz, jlong proxyPtr, jobject frameCallback) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -1145,6 +1172,8 @@ static const JNINativeMethod gMethods[] = {
     { "nRemoveRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_removeRenderNode},
     { "nDrawRenderNode", "(JJ)V", (void*) android_view_ThreadedRendererd_drawRenderNode},
     { "nSetContentDrawBounds", "(JIIII)V", (void*)android_view_ThreadedRenderer_setContentDrawBounds},
+    { "nSetPictureCaptureCallback", "(JLandroid/graphics/HardwareRenderer$PictureCapturedCallback;)V",
+            (void*) android_view_ThreadedRenderer_setPictureCapturedCallbackJNI },
     { "nSetFrameCallback", "(JLandroid/graphics/HardwareRenderer$FrameDrawingCallback;)V",
             (void*)android_view_ThreadedRenderer_setFrameCallback},
     { "nSetFrameCompleteCallback", "(JLandroid/graphics/HardwareRenderer$FrameCompleteCallback;)V",
@@ -1197,6 +1226,13 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
     jclass metricsClass = FindClassOrDie(env, "android/view/FrameMetrics");
     gFrameMetricsObserverClassInfo.timingDataBuffer = GetFieldIDOrDie(
             env, metricsClass, "mTimingData", "[J");
+
+    jclass hardwareRenderer = FindClassOrDie(env,
+            "android/graphics/HardwareRenderer");
+    gHardwareRenderer.clazz = reinterpret_cast<jclass>(env->NewGlobalRef(hardwareRenderer));
+    gHardwareRenderer.invokePictureCapturedCallback = GetStaticMethodIDOrDie(env, hardwareRenderer,
+            "invokePictureCapturedCallback",
+            "(JLandroid/graphics/HardwareRenderer$PictureCapturedCallback;)V");
 
     jclass frameCallbackClass = FindClassOrDie(env,
             "android/graphics/HardwareRenderer$FrameDrawingCallback");

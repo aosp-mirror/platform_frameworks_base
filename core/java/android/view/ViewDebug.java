@@ -17,17 +17,21 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.HardwareRenderer;
 import android.graphics.Picture;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -48,16 +52,20 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 
 /**
  * Various debugging/tracing tools related to {@link View} and the view hierarchy.
@@ -739,6 +747,123 @@ public class ViewDebug {
     /** @hide */
     public static void outputDisplayList(View root, View target) {
         root.getViewRootImpl().outputDisplayList(target);
+    }
+
+    private static class PictureCallbackHandler implements AutoCloseable,
+            HardwareRenderer.PictureCapturedCallback, Runnable {
+        private final HardwareRenderer mRenderer;
+        private final Function<Picture, Boolean> mCallback;
+        private final Executor mExecutor;
+        private final ReentrantLock mLock = new ReentrantLock(false);
+        private final ArrayDeque<Picture> mQueue = new ArrayDeque<>(3);
+        private boolean mStopListening;
+        private Thread mRenderThread;
+
+        private PictureCallbackHandler(HardwareRenderer renderer,
+                Function<Picture, Boolean> callback, Executor executor) {
+            mRenderer = renderer;
+            mCallback = callback;
+            mExecutor = executor;
+            mRenderer.setPictureCaptureCallback(this);
+        }
+
+        @Override
+        public void close() {
+            mLock.lock();
+            mStopListening = true;
+            mLock.unlock();
+            mRenderer.setPictureCaptureCallback(null);
+        }
+
+        @Override
+        public void onPictureCaptured(Picture picture) {
+            mLock.lock();
+            if (mStopListening) {
+                mLock.unlock();
+                mRenderer.setPictureCaptureCallback(null);
+                return;
+            }
+            if (mRenderThread == null) {
+                mRenderThread = Thread.currentThread();
+            }
+            Picture toDestroy = null;
+            if (mQueue.size() == 3) {
+                toDestroy = mQueue.removeLast();
+            }
+            mQueue.add(picture);
+            mLock.unlock();
+            if (toDestroy == null) {
+                mExecutor.execute(this);
+            } else {
+                toDestroy.close();
+            }
+        }
+
+        @Override
+        public void run() {
+            mLock.lock();
+            final Picture picture = mQueue.poll();
+            final boolean isStopped = mStopListening;
+            mLock.unlock();
+            if (Thread.currentThread() == mRenderThread) {
+                close();
+                throw new IllegalStateException(
+                        "ViewDebug#startRenderingCommandsCapture must be given an executor that "
+                        + "invokes asynchronously");
+            }
+            if (isStopped) {
+                picture.close();
+                return;
+            }
+            final boolean keepReceiving = mCallback.apply(picture);
+            if (!keepReceiving) {
+                close();
+            }
+        }
+    }
+
+    /**
+     * Begins capturing the entire rendering commands for the view tree referenced by the given
+     * view. The view passed may be any View in the tree as long as it is attached. That is,
+     * {@link View#isAttachedToWindow()} must be true.
+     *
+     * Every time a frame is rendered a Picture will be passed to the given callback via the given
+     * executor. As long as the callback returns 'true' it will continue to receive new frames.
+     * The system will only invoke the callback at a rate that the callback is able to keep up with.
+     * That is, if it takes 48ms for the callback to complete and there is a 60fps animation running
+     * then the callback will only receive 33% of the frames produced.
+     *
+     * This method must be called on the same thread as the View tree.
+     *
+     * @param tree The View tree to capture the rendering commands.
+     * @param callback The callback to invoke on every frame produced. Should return true to
+     *                 continue receiving new frames, false to stop capturing.
+     * @param executor The executor to invoke the callback on. Recommend using a background thread
+     *                 to avoid stalling the UI thread. Must be an asynchronous invoke or an
+     *                 exception will be thrown.
+     * @return a closeable that can be used to stop capturing. May be invoked on any thread. Note
+     * that the callback may continue to receive another frame or two depending on thread timings.
+     * Returns null if the capture stream cannot be started, such as if there's no
+     * HardwareRenderer for the given view tree.
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public static AutoCloseable startRenderingCommandsCapture(View tree, Executor executor,
+            Function<Picture, Boolean> callback) {
+        final View.AttachInfo attachInfo = tree.mAttachInfo;
+        if (attachInfo == null) {
+            throw new IllegalArgumentException("Given view isn't attached");
+        }
+        if (attachInfo.mHandler.getLooper() != Looper.myLooper()) {
+            throw new IllegalStateException("Called on the wrong thread."
+                    + " Must be called on the thread that owns the given View");
+        }
+        final HardwareRenderer renderer = attachInfo.mThreadedRenderer;
+        if (renderer != null) {
+            return new PictureCallbackHandler(renderer, callback, executor);
+        }
+        return null;
     }
 
     private static void capture(View root, final OutputStream clientStream, String parameter)

@@ -114,6 +114,8 @@ public:
     ANDROID_API void removeRenderNode(RenderNode* node);
     ANDROID_API void drawRenderNode(RenderNode* node);
     ANDROID_API void setContentDrawBounds(int left, int top, int right, int bottom);
+    ANDROID_API void setPictureCapturedCallback(
+            const std::function<void(sk_sp<SkPicture>&&)>& callback);
     ANDROID_API void setFrameCallback(std::function<void(int64_t)>&& callback);
     ANDROID_API void setFrameCompleteCallback(std::function<void(int64_t)>&& callback);
 
