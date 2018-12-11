@@ -96,7 +96,7 @@ class PackageDynamicCodeLoading extends AbstractStatsBase<Void> {
      * @param ownerUserId the user id which runs the code loading the file
      * @param loadingPackageName the package performing the load
      * @return whether new information has been recorded
-     * @throw IllegalArgumentException if clearly invalid information is detected
+     * @throws IllegalArgumentException if clearly invalid information is detected
      */
     boolean record(String owningPackageName, String filePath, int fileType, int ownerUserId,
             String loadingPackageName) {
