@@ -74,6 +74,9 @@ public class RoleUserState {
     private final int mUserId;
 
     @NonNull
+    private final Callback mCallback;
+
+    @NonNull
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
@@ -100,12 +103,14 @@ public class RoleUserState {
     private final Handler mWriteHandler = new Handler(BackgroundThread.getHandler().getLooper());
 
     /**
-     * Create a new instance of user state, and read its state from disk if previously persisted.
+     * Create a new user state, and read its state from disk if previously persisted.
      *
-     * @param userId the user id for the new user state
+     * @param userId the user id for this user state
+     * @param callback the callback for this user state
      */
-    public RoleUserState(@UserIdInt int userId) {
+    public RoleUserState(@UserIdInt int userId, @NonNull Callback callback) {
         mUserId = userId;
+        mCallback = callback;
 
         readFile();
     }
@@ -116,6 +121,7 @@ public class RoleUserState {
     public int getVersion() {
         synchronized (mLock) {
             throwIfDestroyedLocked();
+
             return mVersion;
         }
     }
@@ -128,6 +134,7 @@ public class RoleUserState {
     public void setVersion(int version) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
+
             if (mVersion == version) {
                 return;
             }
@@ -156,6 +163,7 @@ public class RoleUserState {
     public void setPackagesHash(@Nullable String packagesHash) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
+
             if (Objects.equals(mPackagesHash, packagesHash)) {
                 return;
             }
@@ -174,6 +182,7 @@ public class RoleUserState {
     public boolean isRoleAvailable(@NonNull String roleName) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
+
             return mRoles.containsKey(roleName);
         }
     }
@@ -189,6 +198,7 @@ public class RoleUserState {
     public ArraySet<String> getRoleHolders(@NonNull String roleName) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
+
             return new ArraySet<>(mRoles.get(roleName));
         }
     }
@@ -201,29 +211,34 @@ public class RoleUserState {
     public void setRoleNames(@NonNull List<String> roleNames) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
+
             boolean changed = false;
+
             for (int i = mRoles.size() - 1; i >= 0; i--) {
                 String roleName = mRoles.keyAt(i);
+
                 if (!roleNames.contains(roleName)) {
                     ArraySet<String> packageNames = mRoles.valueAt(i);
                     if (!packageNames.isEmpty()) {
-                        Slog.e(LOG_TAG,
-                                "Holders of a removed role should have been cleaned up, role: "
-                                        + roleName + ", holders: " + packageNames);
+                        Slog.e(LOG_TAG, "Holders of a removed role should have been cleaned up,"
+                                + " role: " + roleName + ", holders: " + packageNames);
                     }
                     mRoles.removeAt(i);
                     changed = true;
                 }
             }
+
             int roleNamesSize = roleNames.size();
             for (int i = 0; i < roleNamesSize; i++) {
                 String roleName = roleNames.get(i);
+
                 if (!mRoles.containsKey(roleName)) {
                     mRoles.put(roleName, new ArraySet<>());
                     Slog.i(LOG_TAG, "Added new role: " + roleName);
                     changed = true;
                 }
             }
+
             if (changed) {
                 scheduleWriteFileLocked();
             }
@@ -241,20 +256,27 @@ public class RoleUserState {
      */
     @CheckResult
     public boolean addRoleHolder(@NonNull String roleName, @NonNull String packageName) {
+        boolean changed;
+
         synchronized (mLock) {
             throwIfDestroyedLocked();
+
             ArraySet<String> roleHolders = mRoles.get(roleName);
             if (roleHolders == null) {
                 Slog.e(LOG_TAG, "Cannot add role holder for unknown role, role: " + roleName
                         + ", package: " + packageName);
                 return false;
             }
-            boolean changed = roleHolders.add(packageName);
+            changed = roleHolders.add(packageName);
             if (changed) {
                 scheduleWriteFileLocked();
             }
-            return true;
         }
+
+        if (changed) {
+            mCallback.onRoleHoldersChanged(roleName, mUserId);
+        }
+        return true;
     }
 
     /**
@@ -268,20 +290,28 @@ public class RoleUserState {
      */
     @CheckResult
     public boolean removeRoleHolder(@NonNull String roleName, @NonNull String packageName) {
+        boolean changed;
+
         synchronized (mLock) {
             throwIfDestroyedLocked();
+
             ArraySet<String> roleHolders = mRoles.get(roleName);
             if (roleHolders == null) {
                 Slog.e(LOG_TAG, "Cannot remove role holder for unknown role, role: " + roleName
                         + ", package: " + packageName);
                 return false;
             }
-            boolean changed = roleHolders.remove(packageName);
+
+            changed = roleHolders.remove(packageName);
             if (changed) {
                 scheduleWriteFileLocked();
             }
-            return true;
         }
+
+        if (changed) {
+            mCallback.onRoleHoldersChanged(roleName, mUserId);
+        }
+        return true;
     }
 
     /**
@@ -520,8 +550,8 @@ public class RoleUserState {
     }
 
     /**
-     * Destroy this state and delete the corresponding file. Any pending writes to the file will be
-     * cancelled and any future interaction with this state will throw an exception.
+     * Destroy this user state and delete the corresponding file. Any pending writes to the file
+     * will be cancelled, and any future interaction with this state will throw an exception.
      */
     public void destroy() {
         synchronized (mLock) {
@@ -541,5 +571,19 @@ public class RoleUserState {
 
     private static @NonNull File getFile(@UserIdInt int userId) {
         return new File(Environment.getUserSystemDirectory(userId), ROLES_FILE_NAME);
+    }
+
+    /**
+     * Callback for a user state.
+     */
+    public interface Callback {
+
+        /**
+         * Called when the holders of roles are changed.
+         *
+         * @param roleName the name of the role whose holders are changed
+         * @param userId the user id for this role holder change
+         */
+        void onRoleHoldersChanged(@NonNull String roleName, @UserIdInt int userId);
     }
 }
