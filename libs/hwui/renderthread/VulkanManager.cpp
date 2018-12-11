@@ -831,6 +831,11 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
 
     createBuffers(surface, surfaceFormat, extent);
 
+    // The window content is not updated (frozen) until a buffer of the window size is received.
+    // This prevents temporary stretching of the window after it is resized, but before the first
+    // buffer with new size is enqueued.
+    native_window_set_scaling_mode(surface->mNativeWindow, NATIVE_WINDOW_SCALING_MODE_FREEZE);
+
     return true;
 }
 
