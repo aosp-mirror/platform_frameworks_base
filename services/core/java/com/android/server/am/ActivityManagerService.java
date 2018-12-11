@@ -17532,8 +17532,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         // how many slots we have for background processes; we may want
         // to put multiple processes in a slot of there are enough of
         // them.
-        int numSlots = (ProcessList.CACHED_APP_MAX_ADJ
-                - ProcessList.CACHED_APP_MIN_ADJ + 1) / 2;
+        final int numSlots = (ProcessList.CACHED_APP_MAX_ADJ
+                - ProcessList.CACHED_APP_MIN_ADJ + 1) / 2
+                / ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
         int numEmptyProcs = N - mNumNonCachedProcs - mNumCachedHiddenProcs;
         if (numEmptyProcs > cachedProcessLimit) {
             // If there are more empty processes than our limit on cached
@@ -17544,17 +17545,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             // instead of a gazillion empty processes.
             numEmptyProcs = cachedProcessLimit;
         }
-        int emptyFactor = numEmptyProcs/numSlots;
+        int emptyFactor = (numEmptyProcs + numSlots - 1) / numSlots;
         if (emptyFactor < 1) emptyFactor = 1;
-        int cachedFactor = (mNumCachedHiddenProcs > 0 ? mNumCachedHiddenProcs : 1)/numSlots;
+        int cachedFactor = (mNumCachedHiddenProcs > 0 ? (mNumCachedHiddenProcs + numSlots - 1) : 1)
+                / numSlots;
         if (cachedFactor < 1) cachedFactor = 1;
-        int stepCached = 0;
-        int stepEmpty = 0;
+        int stepCached = -1;
+        int stepEmpty = -1;
         int numCached = 0;
         int numCachedExtraGroup = 0;
         int numEmpty = 0;
         int numTrimming = 0;
         int lastCachedGroup = 0;
+        int lastCachedGroupImportance = 0;
         int lastCachedGroupUid = 0;
 
         mNumNonCachedProcs = 0;
@@ -17563,9 +17566,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         // First update the OOM adjustment for each of the
         // application processes based on their current state.
         int curCachedAdj = ProcessList.CACHED_APP_MIN_ADJ;
-        int nextCachedAdj = curCachedAdj+1;
-        int curEmptyAdj = ProcessList.CACHED_APP_MIN_ADJ;
-        int nextEmptyAdj = curEmptyAdj+2;
+        int nextCachedAdj = curCachedAdj + (ProcessList.CACHED_APP_IMPORTANCE_LEVELS * 2);
+        int curCachedImpAdj = 0;
+        int curEmptyAdj = ProcessList.CACHED_APP_MIN_ADJ + ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
+        int nextEmptyAdj = curEmptyAdj + (ProcessList.CACHED_APP_IMPORTANCE_LEVELS * 2);
 
         boolean retryCycles = false;
 
@@ -17590,27 +17594,61 @@ public class ActivityManagerService extends IActivityManager.Stub
                         case PROCESS_STATE_CACHED_ACTIVITY:
                         case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
                         case ActivityManager.PROCESS_STATE_CACHED_RECENT:
-                            // This process is a cached process holding activities...
-                            // assign it the next cached value for that type, and then
-                            // step that cached level.
-                            app.setCurRawAdj(curCachedAdj);
-                            app.curAdj = app.modifyRawOomAdj(curCachedAdj);
-                            if (DEBUG_LRU && false) Slog.d(TAG_LRU, "Assigning activity LRU #" + i
-                                    + " adj: " + app.curAdj + " (curCachedAdj=" + curCachedAdj
-                                    + ")");
-                            if (curCachedAdj != nextCachedAdj) {
+                            // Figure out the next cached level, taking into account groups.
+                            boolean inGroup = false;
+                            if (app.connectionGroup != 0) {
+                                if (lastCachedGroupUid == app.uid
+                                        && lastCachedGroup == app.connectionGroup) {
+                                    // This is in the same group as the last process, just tweak
+                                    // adjustment by importance.
+                                    if (app.connectionImportance > lastCachedGroupImportance) {
+                                        lastCachedGroupImportance = app.connectionImportance;
+                                        if (curCachedAdj < nextCachedAdj
+                                                && curCachedAdj < ProcessList.CACHED_APP_MAX_ADJ) {
+                                            curCachedImpAdj++;
+                                        }
+                                    }
+                                    inGroup = true;
+                                } else {
+                                    lastCachedGroupUid = app.uid;
+                                    lastCachedGroup = app.connectionGroup;
+                                    lastCachedGroupImportance = app.connectionImportance;
+                                }
+                            }
+                            if (!inGroup && curCachedAdj != nextCachedAdj) {
                                 stepCached++;
+                                curCachedImpAdj = 0;
                                 if (stepCached >= cachedFactor) {
                                     stepCached = 0;
                                     curCachedAdj = nextCachedAdj;
-                                    nextCachedAdj += 2;
+                                    nextCachedAdj += ProcessList.CACHED_APP_IMPORTANCE_LEVELS * 2;
                                     if (nextCachedAdj > ProcessList.CACHED_APP_MAX_ADJ) {
                                         nextCachedAdj = ProcessList.CACHED_APP_MAX_ADJ;
                                     }
                                 }
                             }
+                            // This process is a cached process holding activities...
+                            // assign it the next cached value for that type, and then
+                            // step that cached level.
+                            app.setCurRawAdj(curCachedAdj + curCachedImpAdj);
+                            app.curAdj = app.modifyRawOomAdj(curCachedAdj + curCachedImpAdj);
+                            if (DEBUG_LRU && false) Slog.d(TAG_LRU, "Assigning activity LRU #" + i
+                                    + " adj: " + app.curAdj + " (curCachedAdj=" + curCachedAdj
+                                    + " curCachedImpAdj=" + curCachedImpAdj + ")");
                             break;
                         default:
+                            // Figure out the next cached level.
+                            if (curEmptyAdj != nextEmptyAdj) {
+                                stepEmpty++;
+                                if (stepEmpty >= emptyFactor) {
+                                    stepEmpty = 0;
+                                    curEmptyAdj = nextEmptyAdj;
+                                    nextEmptyAdj += ProcessList.CACHED_APP_IMPORTANCE_LEVELS * 2;
+                                    if (nextEmptyAdj > ProcessList.CACHED_APP_MAX_ADJ) {
+                                        nextEmptyAdj = ProcessList.CACHED_APP_MAX_ADJ;
+                                    }
+                                }
+                            }
                             // For everything else, assign next empty cached process
                             // level and bump that up.  Note that this means that
                             // long-running services that have dropped down to the
@@ -17621,22 +17659,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                             if (DEBUG_LRU && false) Slog.d(TAG_LRU, "Assigning empty LRU #" + i
                                     + " adj: " + app.curAdj + " (curEmptyAdj=" + curEmptyAdj
                                     + ")");
-                            if (curEmptyAdj != nextEmptyAdj) {
-                                stepEmpty++;
-                                if (stepEmpty >= emptyFactor) {
-                                    stepEmpty = 0;
-                                    curEmptyAdj = nextEmptyAdj;
-                                    nextEmptyAdj += 2;
-                                    if (nextEmptyAdj > ProcessList.CACHED_APP_MAX_ADJ) {
-                                        nextEmptyAdj = ProcessList.CACHED_APP_MAX_ADJ;
-                                    }
-                                }
-                            }
                             break;
                     }
                 }
-
-
             }
         }
 
@@ -17667,6 +17692,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
+
+        lastCachedGroup = lastCachedGroupUid = 0;
 
         for (int i=N-1; i>=0; i--) {
             ProcessRecord app = mProcessList.mLruProcesses.get(i);
