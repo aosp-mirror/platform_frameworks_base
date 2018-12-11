@@ -39,6 +39,7 @@ import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
 import android.provider.MetadataReader;
+import android.system.Int64Ref;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -53,6 +54,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -122,18 +129,56 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             throw new FileNotFoundException("Can't find the file for documentId: " + documentId);
         }
 
+        final String mimeType = getDocumentType(documentId);
+        if (Document.MIME_TYPE_DIR.equals(mimeType)) {
+            final Int64Ref treeCount = new Int64Ref(0);
+            final Int64Ref treeSize = new Int64Ref(0);
+            try {
+                final Path path = FileSystems.getDefault().getPath(file.getAbsolutePath());
+                Files.walkFileTree(path, new FileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                        treeCount.value += 1;
+                        treeSize.value += attrs.size();
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult visitFileFailed(Path file, IOException exc) {
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+            } catch (IOException e) {
+                Log.e(TAG, "An error occurred retrieving the metadata", e);
+                return null;
+            }
+
+            final Bundle res = new Bundle();
+            res.putLong(DocumentsContract.METADATA_TREE_COUNT, treeCount.value);
+            res.putLong(DocumentsContract.METADATA_TREE_SIZE, treeSize.value);
+            return res;
+        }
+
         if (!file.isFile()) {
             Log.w(TAG, "Can't stream non-regular file. Returning empty metadata.");
             return null;
         }
-
         if (!file.canRead()) {
             Log.w(TAG, "Can't stream non-readable file. Returning empty metadata.");
             return null;
         }
-
-        String mimeType = getDocumentType(documentId);
         if (!MetadataReader.isSupportedMimeType(mimeType)) {
+            Log.w(TAG, "Unsupported type " + mimeType + ". Returning empty metadata.");
             return null;
         }
 
@@ -562,7 +607,8 @@ public abstract class FileSystemProvider extends DocumentsProvider {
     }
 
     protected boolean typeSupportsMetadata(String mimeType) {
-        return MetadataReader.isSupportedMimeType(mimeType);
+        return MetadataReader.isSupportedMimeType(mimeType)
+                || Document.MIME_TYPE_DIR.equals(mimeType);
     }
 
     protected final File getFileForDocId(String docId) throws FileNotFoundException {

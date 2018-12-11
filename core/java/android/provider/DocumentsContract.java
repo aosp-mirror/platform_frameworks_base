@@ -244,16 +244,32 @@ public final class DocumentsContract {
      * Get string array identifies the type or types of metadata returned
      * using DocumentsContract#getDocumentMetadata.
      *
-     * @see #getDocumentMetadata(ContentResolver, Uri)
+     * @see #getDocumentMetadata(ContentInterface, Uri)
      */
     public static final String METADATA_TYPES = "android:documentMetadataTypes";
 
     /**
      * Get Exif information using DocumentsContract#getDocumentMetadata.
      *
-     * @see #getDocumentMetadata(ContentResolver, Uri)
+     * @see #getDocumentMetadata(ContentInterface, Uri)
      */
     public static final String METADATA_EXIF = "android:documentExif";
+
+    /**
+     * Get total count of all documents currently stored under the given
+     * directory tree. Only valid for {@link Document#MIME_TYPE_DIR} documents.
+     *
+     * @see #getDocumentMetadata(ContentInterface, Uri)
+     */
+    public static final String METADATA_TREE_COUNT = "android:metadataTreeCount";
+
+    /**
+     * Get total size of all documents currently stored under the given
+     * directory tree. Only valid for {@link Document#MIME_TYPE_DIR} documents.
+     *
+     * @see #getDocumentMetadata(ContentInterface, Uri)
+     */
+    public static final String METADATA_TREE_SIZE = "android:metadataTreeSize";
 
     /**
      * Constants related to a document, including {@link Cursor} column names
@@ -519,7 +535,7 @@ public final class DocumentsContract {
          * using DocumentsContract#getDocumentMetadata
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#getDocumentMetadata(ContentResolver, Uri)
+         * @see DocumentsContract#getDocumentMetadata(ContentInterface, Uri)
          */
         public static final int FLAG_SUPPORTS_METADATA = 1 << 14;
     }
