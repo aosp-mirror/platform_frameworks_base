@@ -17,8 +17,10 @@
 package com.android.server.signedconfig;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -36,6 +38,30 @@ class SignedConfigApplicator {
                     Settings.Global.HIDDEN_API_POLICY,
                     Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS
             )));
+
+    private static final Map<String, String> HIDDEN_API_POLICY_KEY_MAP = makeMap(
+            "DEFAULT", String.valueOf(ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT),
+            "DISABLED", String.valueOf(ApplicationInfo.HIDDEN_API_ENFORCEMENT_DISABLED),
+            "JUST_WARN", String.valueOf(ApplicationInfo.HIDDEN_API_ENFORCEMENT_JUST_WARN),
+            "ENABLED", String.valueOf(ApplicationInfo.HIDDEN_API_ENFORCEMENT_ENABLED)
+    );
+
+    private static final Map<String, Map<String, String>> KEY_VALUE_MAPPERS = makeMap(
+            Settings.Global.HIDDEN_API_POLICY, HIDDEN_API_POLICY_KEY_MAP
+    );
+
+    private static <K, V> Map<K, V> makeMap(Object... keyValuePairs) {
+        if (keyValuePairs.length % 2 != 0) {
+            throw new IllegalArgumentException();
+        }
+        final int len = keyValuePairs.length / 2;
+        ArrayMap<K, V> m = new ArrayMap<>(len);
+        for (int i = 0; i < len;  ++i) {
+            m.put((K) keyValuePairs[i * 2], (V) keyValuePairs[(i * 2) + 1]);
+        }
+        return Collections.unmodifiableMap(m);
+
+    }
 
     private final Context mContext;
     private final String mSourcePackage;
@@ -75,7 +101,7 @@ class SignedConfigApplicator {
         }
         SignedConfig config;
         try {
-            config = SignedConfig.parse(configStr, ALLOWED_KEYS);
+            config = SignedConfig.parse(configStr, ALLOWED_KEYS, KEY_VALUE_MAPPERS);
         } catch (InvalidConfigException e) {
             Slog.e(TAG, "Failed to parse config from package " + mSourcePackage, e);
             return;

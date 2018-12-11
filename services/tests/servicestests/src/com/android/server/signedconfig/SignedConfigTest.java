@@ -20,7 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
+
+import android.util.ArrayMap;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -33,6 +36,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -46,10 +50,25 @@ public class SignedConfigTest {
         return Sets.newHashSet(values);
     }
 
+    private static <K, V> Map<K, V> mapOf(Object... keyValuePairs) {
+        if (keyValuePairs.length % 2 != 0) {
+            throw new IllegalArgumentException();
+        }
+        final int len = keyValuePairs.length / 2;
+        ArrayMap<K, V> m = new ArrayMap<>(len);
+        for (int i = 0; i < len;  ++i) {
+            m.put((K) keyValuePairs[i * 2], (V) keyValuePairs[(i * 2) + 1]);
+        }
+        return Collections.unmodifiableMap(m);
+
+    }
+
+
     @Test
     public void testParsePerSdkConfigSdkMinMax() throws JSONException, InvalidConfigException {
         JSONObject json = new JSONObject("{\"minSdk\":2, \"maxSdk\": 3, \"values\": []}");
-        SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(json, emptySet());
+        SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(json, emptySet(),
+                emptyMap());
         assertThat(config.minSdk).isEqualTo(2);
         assertThat(config.maxSdk).isEqualTo(3);
     }
@@ -58,7 +77,7 @@ public class SignedConfigTest {
     public void testParsePerSdkConfigNoMinSdk() throws JSONException {
         JSONObject json = new JSONObject("{\"maxSdk\": 3, \"values\": []}");
         try {
-            SignedConfig.parsePerSdkConfig(json, emptySet());
+            SignedConfig.parsePerSdkConfig(json, emptySet(), emptyMap());
             fail("Expected InvalidConfigException or JSONException");
         } catch (JSONException | InvalidConfigException e) {
             // expected
@@ -69,7 +88,7 @@ public class SignedConfigTest {
     public void testParsePerSdkConfigNoMaxSdk() throws JSONException {
         JSONObject json = new JSONObject("{\"minSdk\": 1, \"values\": []}");
         try {
-            SignedConfig.parsePerSdkConfig(json, emptySet());
+            SignedConfig.parsePerSdkConfig(json, emptySet(), emptyMap());
             fail("Expected InvalidConfigException or JSONException");
         } catch (JSONException | InvalidConfigException e) {
             // expected
@@ -80,7 +99,7 @@ public class SignedConfigTest {
     public void testParsePerSdkConfigNoValues() throws JSONException {
         JSONObject json = new JSONObject("{\"minSdk\": 1, \"maxSdk\": 3}");
         try {
-            SignedConfig.parsePerSdkConfig(json, emptySet());
+            SignedConfig.parsePerSdkConfig(json, emptySet(), emptyMap());
             fail("Expected InvalidConfigException or JSONException");
         } catch (JSONException | InvalidConfigException e) {
             // expected
@@ -88,10 +107,10 @@ public class SignedConfigTest {
     }
 
     @Test
-    public void testParsePerSdkConfigSdkNullMinSdk() throws JSONException, InvalidConfigException {
+    public void testParsePerSdkConfigSdkNullMinSdk() throws JSONException {
         JSONObject json = new JSONObject("{\"minSdk\":null, \"maxSdk\": 3, \"values\": []}");
         try {
-            SignedConfig.parsePerSdkConfig(json, emptySet());
+            SignedConfig.parsePerSdkConfig(json, emptySet(), emptyMap());
             fail("Expected InvalidConfigException or JSONException");
         } catch (JSONException | InvalidConfigException e) {
             // expected
@@ -99,10 +118,10 @@ public class SignedConfigTest {
     }
 
     @Test
-    public void testParsePerSdkConfigSdkNullMaxSdk() throws JSONException, InvalidConfigException {
+    public void testParsePerSdkConfigSdkNullMaxSdk() throws JSONException {
         JSONObject json = new JSONObject("{\"minSdk\":1, \"maxSdk\": null, \"values\": []}");
         try {
-            SignedConfig.parsePerSdkConfig(json, emptySet());
+            SignedConfig.parsePerSdkConfig(json, emptySet(), emptyMap());
             fail("Expected InvalidConfigException or JSONException");
         } catch (JSONException | InvalidConfigException e) {
             // expected
@@ -113,7 +132,7 @@ public class SignedConfigTest {
     public void testParsePerSdkConfigNullValues() throws JSONException {
         JSONObject json = new JSONObject("{\"minSdk\": 1, \"maxSdk\": 3, \"values\": null}");
         try {
-            SignedConfig.parsePerSdkConfig(json, emptySet());
+            SignedConfig.parsePerSdkConfig(json, emptySet(), emptyMap());
             fail("Expected InvalidConfigException or JSONException");
         } catch (JSONException | InvalidConfigException e) {
             // expected
@@ -124,7 +143,8 @@ public class SignedConfigTest {
     public void testParsePerSdkConfigZeroValues()
             throws JSONException, InvalidConfigException {
         JSONObject json = new JSONObject("{\"minSdk\": 1, \"maxSdk\": 3, \"values\": []}");
-        SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(json, setOf("a", "b"));
+        SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(json, setOf("a", "b"),
+                emptyMap());
         assertThat(config.values).hasSize(0);
     }
 
@@ -133,8 +153,20 @@ public class SignedConfigTest {
             throws JSONException, InvalidConfigException {
         JSONObject json = new JSONObject(
                 "{\"minSdk\": 1, \"maxSdk\": 1, \"values\": [{\"key\":\"a\", \"value\": \"1\"}]}");
-        SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(json, setOf("a", "b"));
+        SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(json, setOf("a", "b"),
+                emptyMap());
         assertThat(config.values).containsExactly("a", "1");
+    }
+
+    @Test
+    public void testParsePerSdkConfigSingleKeyNullValue()
+            throws JSONException, InvalidConfigException {
+        JSONObject json = new JSONObject(
+                "{\"minSdk\": 1, \"maxSdk\": 1, \"values\": [{\"key\":\"a\", \"value\": null}]}");
+        SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(json, setOf("a", "b"),
+                emptyMap());
+        assertThat(config.values.keySet()).containsExactly("a");
+        assertThat(config.values.get("a")).isNull();
     }
 
     @Test
@@ -144,7 +176,7 @@ public class SignedConfigTest {
                 "{\"minSdk\": 1, \"maxSdk\": 1, \"values\": [{\"key\":\"a\", \"value\": \"1\"}, "
                         + "{\"key\":\"c\", \"value\": \"2\"}]}");
         SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(
-                json, setOf("a", "b", "c"));
+                json, setOf("a", "b", "c"), emptyMap());
         assertThat(config.values).containsExactly("a", "1", "c", "2");
     }
 
@@ -153,7 +185,7 @@ public class SignedConfigTest {
         JSONObject json = new JSONObject(
                 "{\"minSdk\": 1, \"maxSdk\": 1, \"values\": [{\"key\":\"a\", \"value\": \"1\"}]}");
         try {
-            SignedConfig.parsePerSdkConfig(json, setOf("b"));
+            SignedConfig.parsePerSdkConfig(json, setOf("b"), emptyMap());
             fail("Expected InvalidConfigException or JSONException");
         } catch (JSONException | InvalidConfigException e) {
             // expected
@@ -161,11 +193,67 @@ public class SignedConfigTest {
     }
 
     @Test
+    public void testParsePerSdkConfigSingleKeyWithMap()
+            throws JSONException, InvalidConfigException {
+        JSONObject json = new JSONObject(
+                "{\"minSdk\": 1, \"maxSdk\": 1, \"values\": [{\"key\":\"a\", \"value\": \"1\"}]}");
+        SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(json, setOf("a"),
+                mapOf("a", mapOf("1", "one")));
+        assertThat(config.values).containsExactly("a", "one");
+    }
+
+    @Test
+    public void testParsePerSdkConfigSingleKeyWithMapInvalidValue() throws JSONException {
+        JSONObject json = new JSONObject(
+                "{\"minSdk\": 1, \"maxSdk\": 1, \"values\": [{\"key\":\"a\", \"value\": \"2\"}]}");
+        try {
+            SignedConfig.parsePerSdkConfig(json, setOf("b"), mapOf("a", mapOf("1", "one")));
+            fail("Expected InvalidConfigException");
+        } catch (InvalidConfigException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void testParsePerSdkConfigMultiKeysWithMap()
+            throws JSONException, InvalidConfigException {
+        JSONObject json = new JSONObject(
+                "{\"minSdk\": 1, \"maxSdk\": 1, \"values\": [{\"key\":\"a\", \"value\": \"1\"},"
+                + "{\"key\":\"b\", \"value\": \"1\"}]}");
+        SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(json, setOf("a", "b"),
+                mapOf("a", mapOf("1", "one")));
+        assertThat(config.values).containsExactly("a", "one", "b", "1");
+    }
+
+    @Test
+    public void testParsePerSdkConfigSingleKeyWithMapToNull()
+            throws JSONException, InvalidConfigException {
+        JSONObject json = new JSONObject(
+                "{\"minSdk\": 1, \"maxSdk\": 1, \"values\": [{\"key\":\"a\", \"value\": \"1\"}]}");
+        SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(json, setOf("a"),
+                mapOf("a", mapOf("1", null)));
+        assertThat(config.values).containsExactly("a", null);
+    }
+
+    @Test
+    public void testParsePerSdkConfigSingleKeyWithMapFromNull()
+            throws JSONException, InvalidConfigException {
+        assertThat(mapOf(null, "allitnil")).containsExactly(null, "allitnil");
+        assertThat(mapOf(null, "allitnil").containsKey(null)).isTrue();
+        JSONObject json = new JSONObject(
+                "{\"minSdk\": 1, \"maxSdk\": 1, \"values\": [{\"key\":\"a\", \"value\": null}]}");
+        SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(json, setOf("a"),
+                mapOf("a", mapOf(null, "allitnil")));
+        assertThat(config.values).containsExactly("a", "allitnil");
+    }
+
+    @Test
     public void testParsePerSdkConfigSingleKeyNoValue()
             throws JSONException, InvalidConfigException {
         JSONObject json = new JSONObject(
                 "{\"minSdk\": 1, \"maxSdk\": 1, \"values\": [{\"key\":\"a\"}]}");
-        SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(json, setOf("a", "b"));
+        SignedConfig.PerSdkConfig config = SignedConfig.parsePerSdkConfig(json, setOf("a", "b"),
+                emptyMap());
         assertThat(config.values).containsExactly("a", null);
     }
 
@@ -173,7 +261,7 @@ public class SignedConfigTest {
     public void testParsePerSdkConfigValuesInvalid() throws JSONException  {
         JSONObject json = new JSONObject("{\"minSdk\": 1, \"maxSdk\": 1,  \"values\": \"foo\"}");
         try {
-            SignedConfig.parsePerSdkConfig(json, emptySet());
+            SignedConfig.parsePerSdkConfig(json, emptySet(), emptyMap());
             fail("Expected InvalidConfigException or JSONException");
         } catch (JSONException | InvalidConfigException e) {
             // expected
@@ -184,7 +272,7 @@ public class SignedConfigTest {
     public void testParsePerSdkConfigConfigEntryInvalid() throws JSONException {
         JSONObject json = new JSONObject("{\"minSdk\": 1, \"maxSdk\": 1,  \"values\": [1, 2]}");
         try {
-            SignedConfig.parsePerSdkConfig(json, emptySet());
+            SignedConfig.parsePerSdkConfig(json, emptySet(), emptyMap());
             fail("Expected InvalidConfigException or JSONException");
         } catch (JSONException | InvalidConfigException e) {
             // expected
@@ -195,7 +283,7 @@ public class SignedConfigTest {
     public void testParsePerSdkConfigConfigEntryNull() throws JSONException {
         JSONObject json = new JSONObject("{\"minSdk\": 1, \"maxSdk\": 1,  \"values\": [null]}");
         try {
-            SignedConfig.parsePerSdkConfig(json, emptySet());
+            SignedConfig.parsePerSdkConfig(json, emptySet(), emptyMap());
             fail("Expected InvalidConfigException or JSONException");
         } catch (JSONException | InvalidConfigException e) {
             // expected
@@ -205,14 +293,15 @@ public class SignedConfigTest {
     @Test
     public void testParseVersion() throws InvalidConfigException {
         SignedConfig config = SignedConfig.parse(
-                "{\"version\": 1, \"config\": []}", emptySet());
+                "{\"version\": 1, \"config\": []}", emptySet(), emptyMap());
         assertThat(config.version).isEqualTo(1);
     }
 
     @Test
     public void testParseVersionInvalid() {
         try {
-            SignedConfig.parse("{\"version\": \"notanint\", \"config\": []}", emptySet());
+            SignedConfig.parse("{\"version\": \"notanint\", \"config\": []}", emptySet(),
+                    emptyMap());
             fail("Expected InvalidConfigException");
         } catch (InvalidConfigException e) {
             //expected
@@ -222,7 +311,7 @@ public class SignedConfigTest {
     @Test
     public void testParseNoVersion() {
         try {
-            SignedConfig.parse("{\"config\": []}", emptySet());
+            SignedConfig.parse("{\"config\": []}", emptySet(), emptyMap());
             fail("Expected InvalidConfigException");
         } catch (InvalidConfigException e) {
             //expected
@@ -232,7 +321,7 @@ public class SignedConfigTest {
     @Test
     public void testParseNoConfig() {
         try {
-            SignedConfig.parse("{\"version\": 1}", emptySet());
+            SignedConfig.parse("{\"version\": 1}", emptySet(), emptyMap());
             fail("Expected InvalidConfigException");
         } catch (InvalidConfigException e) {
             //expected
@@ -242,7 +331,7 @@ public class SignedConfigTest {
     @Test
     public void testParseConfigNull() {
         try {
-            SignedConfig.parse("{\"version\": 1, \"config\": null}", emptySet());
+            SignedConfig.parse("{\"version\": 1, \"config\": null}", emptySet(), emptyMap());
             fail("Expected InvalidConfigException");
         } catch (InvalidConfigException e) {
             //expected
@@ -252,7 +341,7 @@ public class SignedConfigTest {
     @Test
     public void testParseVersionNull() {
         try {
-            SignedConfig.parse("{\"version\": null, \"config\": []}", emptySet());
+            SignedConfig.parse("{\"version\": null, \"config\": []}", emptySet(), emptyMap());
             fail("Expected InvalidConfigException");
         } catch (InvalidConfigException e) {
             //expected
@@ -262,7 +351,7 @@ public class SignedConfigTest {
     @Test
     public void testParseConfigInvalidEntry() {
         try {
-            SignedConfig.parse("{\"version\": 1, \"config\": [{}]}", emptySet());
+            SignedConfig.parse("{\"version\": 1, \"config\": [{}]}", emptySet(), emptyMap());
             fail("Expected InvalidConfigException");
         } catch (InvalidConfigException e) {
             //expected
@@ -273,7 +362,7 @@ public class SignedConfigTest {
     public void testParseSdkConfigSingle() throws InvalidConfigException {
         SignedConfig config = SignedConfig.parse(
                 "{\"version\": 1, \"config\":[{\"minSdk\": 1, \"maxSdk\": 1, \"values\": []}]}",
-                emptySet());
+                emptySet(), emptyMap());
         assertThat(config.perSdkConfig).hasSize(1);
     }
 
@@ -281,7 +370,8 @@ public class SignedConfigTest {
     public void testParseSdkConfigMultiple() throws InvalidConfigException {
         SignedConfig config = SignedConfig.parse(
                 "{\"version\": 1, \"config\":[{\"minSdk\": 1, \"maxSdk\": 1, \"values\": []}, "
-                        + "{\"minSdk\": 2, \"maxSdk\": 2, \"values\": []}]}", emptySet());
+                        + "{\"minSdk\": 2, \"maxSdk\": 2, \"values\": []}]}", emptySet(),
+                emptyMap());
         assertThat(config.perSdkConfig).hasSize(2);
     }
 
@@ -314,7 +404,6 @@ public class SignedConfigTest {
         SignedConfig config = new SignedConfig(0, Arrays.asList(sdk13, sdk46));
         assertThat(config.getMatchingConfig(2)).isEqualTo(sdk13);
     }
-
     @Test
     public void testGetMatchingConfigNoMatch() {
         SignedConfig.PerSdkConfig sdk1 = new SignedConfig.PerSdkConfig(
