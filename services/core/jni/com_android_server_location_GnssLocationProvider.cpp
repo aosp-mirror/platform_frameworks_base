@@ -856,7 +856,7 @@ struct GnssMeasurementCallback : public IGnssMeasurementCallback_V2_0 {
 
 Return<void> GnssMeasurementCallback::gnssMeasurementCb_2_0(
         const IGnssMeasurementCallback_V2_0::GnssData& data) {
-    // TODO(b/119571122): implement gnssMeasurementCb_2_0
+    translateAndSetGnssData(data);
     return Void();
 }
 
@@ -894,9 +894,8 @@ size_t GnssMeasurementCallback::getMeasurementCount<IGnssMeasurementCallback_V1_
     return data.measurementCount;
 }
 
-template<>
-size_t GnssMeasurementCallback::getMeasurementCount<IGnssMeasurementCallback_V1_1::GnssData>
-        (const IGnssMeasurementCallback_V1_1::GnssData& data) {
+template<class T>
+size_t GnssMeasurementCallback::getMeasurementCount(const T& data) {
     return data.measurements.size();
 }
 
@@ -956,6 +955,17 @@ void GnssMeasurementCallback::translateSingleGnssMeasurement
     SET(AccumulatedDeltaRangeState,
             (static_cast<int32_t>(measurement_V1_1->accumulatedDeltaRangeState) |
             ADR_STATE_HALF_CYCLE_REPORTED));
+}
+
+// Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
+template<>
+void GnssMeasurementCallback::translateSingleGnssMeasurement
+        <IGnssMeasurementCallback_V2_0::GnssMeasurement>(
+        const IGnssMeasurementCallback_V2_0::GnssMeasurement* measurement_V2_0,
+        JavaObject& object) {
+    translateSingleGnssMeasurement(&(measurement_V2_0->v1_1), object);
+
+    SET(CodeType, (static_cast<int32_t>(measurement_V2_0->codeType)));
 }
 
 jobject GnssMeasurementCallback::translateGnssClock(
