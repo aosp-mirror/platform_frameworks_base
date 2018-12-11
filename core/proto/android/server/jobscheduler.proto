@@ -242,6 +242,8 @@ message ConstantsProto {
         // expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
         // WINDOW_SIZE_MS.
         optional int64 rare_window_size_ms = 6;
+        // The maximum amount of time an app can have its jobs running within a 24 hour window.
+        optional int64 max_execution_time_ms = 7;
     }
     optional QuotaController quota_controller = 24;
 }

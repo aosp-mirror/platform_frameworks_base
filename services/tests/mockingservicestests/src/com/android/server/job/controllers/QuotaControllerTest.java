@@ -30,6 +30,7 @@ import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,6 +63,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
+import com.android.server.job.controllers.QuotaController.ExecutionStats;
 import com.android.server.job.controllers.QuotaController.TimingSession;
 
 import org.junit.After;
@@ -131,13 +133,18 @@ public class QuotaControllerTest {
         doReturn(mock(PackageManagerInternal.class))
                 .when(() -> LocalServices.getService(PackageManagerInternal.class));
 
-        // Freeze the clocks at this moment in time
+        // Freeze the clocks at 24 hours after this moment in time. Several tests create sessions
+        // in the past, and QuotaController sometimes floors values at 0, so if the test time
+        // causes sessions with negative timestamps, they will fail.
         JobSchedulerService.sSystemClock =
-                Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
-        JobSchedulerService.sUptimeMillisClock =
-                Clock.fixed(SystemClock.uptimeMillisClock().instant(), ZoneOffset.UTC);
-        JobSchedulerService.sElapsedRealtimeClock =
-                Clock.fixed(SystemClock.elapsedRealtimeClock().instant(), ZoneOffset.UTC);
+                getAdvancedClock(Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC),
+                        24 * HOUR_IN_MILLIS);
+        JobSchedulerService.sUptimeMillisClock = getAdvancedClock(
+                Clock.fixed(SystemClock.uptimeMillisClock().instant(), ZoneOffset.UTC),
+                24 * HOUR_IN_MILLIS);
+        JobSchedulerService.sElapsedRealtimeClock = getAdvancedClock(
+                Clock.fixed(SystemClock.elapsedRealtimeClock().instant(), ZoneOffset.UTC),
+                24 * HOUR_IN_MILLIS);
 
         // Initialize real objects.
         // Capture the listeners.
@@ -291,9 +298,17 @@ public class QuotaControllerTest {
         mQuotaController.saveTimingSession(0, "com.android.test.stay", two);
         mQuotaController.saveTimingSession(0, "com.android.test.stay", one);
 
+        ExecutionStats expectedStats = new ExecutionStats();
+        expectedStats.invalidTimeElapsed = now + 24 * HOUR_IN_MILLIS;
+        expectedStats.windowSizeMs = 24 * HOUR_IN_MILLIS;
+
         mQuotaController.onAppRemovedLocked("com.android.test.remove", 10001);
         assertNull(mQuotaController.getTimingSessions(0, "com.android.test.remove"));
         assertEquals(expected, mQuotaController.getTimingSessions(0, "com.android.test.stay"));
+        assertEquals(expectedStats,
+                mQuotaController.getExecutionStatsLocked(0, "com.android.test.remove", RARE_INDEX));
+        assertNotEquals(expectedStats,
+                mQuotaController.getExecutionStatsLocked(0, "com.android.test.stay", RARE_INDEX));
     }
 
     @Test
@@ -318,13 +333,21 @@ public class QuotaControllerTest {
         mQuotaController.saveTimingSession(10, "com.android.test", two);
         mQuotaController.saveTimingSession(10, "com.android.test", one);
 
+        ExecutionStats expectedStats = new ExecutionStats();
+        expectedStats.invalidTimeElapsed = now + 24 * HOUR_IN_MILLIS;
+        expectedStats.windowSizeMs = 24 * HOUR_IN_MILLIS;
+
         mQuotaController.onUserRemovedLocked(0);
         assertNull(mQuotaController.getTimingSessions(0, "com.android.test"));
         assertEquals(expected, mQuotaController.getTimingSessions(10, "com.android.test"));
+        assertEquals(expectedStats,
+                mQuotaController.getExecutionStatsLocked(0, "com.android.test", RARE_INDEX));
+        assertNotEquals(expectedStats,
+                mQuotaController.getExecutionStatsLocked(10, "com.android.test", RARE_INDEX));
     }
 
     @Test
-    public void testGetTrailingExecutionTimeLocked_NoTimer() {
+    public void testUpdateExecutionStatsLocked_NoTimer() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
         // Added in chronological order.
         mQuotaController.saveTimingSession(0, "com.android.test",
@@ -340,32 +363,288 @@ public class QuotaControllerTest {
         mQuotaController.saveTimingSession(0, "com.android.test",
                 createTimingSession(now - 5 * MINUTE_IN_MILLIS, 4 * MINUTE_IN_MILLIS, 3));
 
-        assertEquals(0, mQuotaController.getTrailingExecutionTimeLocked(0, "com.android.test",
-                MINUTE_IN_MILLIS));
-        assertEquals(2 * MINUTE_IN_MILLIS,
-                mQuotaController.getTrailingExecutionTimeLocked(0, "com.android.test",
-                        3 * MINUTE_IN_MILLIS));
-        assertEquals(4 * MINUTE_IN_MILLIS,
-                mQuotaController.getTrailingExecutionTimeLocked(0, "com.android.test",
-                        5 * MINUTE_IN_MILLIS));
-        assertEquals(4 * MINUTE_IN_MILLIS,
-                mQuotaController.getTrailingExecutionTimeLocked(0, "com.android.test",
-                        49 * MINUTE_IN_MILLIS));
-        assertEquals(5 * MINUTE_IN_MILLIS,
-                mQuotaController.getTrailingExecutionTimeLocked(0, "com.android.test",
-                        50 * MINUTE_IN_MILLIS));
-        assertEquals(6 * MINUTE_IN_MILLIS,
-                mQuotaController.getTrailingExecutionTimeLocked(0, "com.android.test",
-                        HOUR_IN_MILLIS));
-        assertEquals(11 * MINUTE_IN_MILLIS,
-                mQuotaController.getTrailingExecutionTimeLocked(0, "com.android.test",
-                        2 * HOUR_IN_MILLIS));
-        assertEquals(12 * MINUTE_IN_MILLIS,
-                mQuotaController.getTrailingExecutionTimeLocked(0, "com.android.test",
-                        3 * HOUR_IN_MILLIS));
-        assertEquals(22 * MINUTE_IN_MILLIS,
-                mQuotaController.getTrailingExecutionTimeLocked(0, "com.android.test",
-                        6 * HOUR_IN_MILLIS));
+        // Test an app that hasn't had any activity.
+        ExecutionStats expectedStats = new ExecutionStats();
+        ExecutionStats inputStats = new ExecutionStats();
+
+        inputStats.windowSizeMs = expectedStats.windowSizeMs = 12 * HOUR_IN_MILLIS;
+        // Invalid time is now +24 hours since there are no sessions at all for the app.
+        expectedStats.invalidTimeElapsed = now + 24 * HOUR_IN_MILLIS;
+        mQuotaController.updateExecutionStatsLocked(0, "com.android.test.not.run", inputStats);
+        assertEquals(expectedStats, inputStats);
+
+        inputStats.windowSizeMs = expectedStats.windowSizeMs = MINUTE_IN_MILLIS;
+        // Invalid time is now +18 hours since there are no sessions in the window but the earliest
+        // session is 6 hours ago.
+        expectedStats.invalidTimeElapsed = now + 18 * HOUR_IN_MILLIS;
+        expectedStats.executionTimeInWindowMs = 0;
+        expectedStats.bgJobCountInWindow = 0;
+        expectedStats.executionTimeInMaxPeriodMs = 22 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 15;
+        mQuotaController.updateExecutionStatsLocked(0, "com.android.test", inputStats);
+        assertEquals(expectedStats, inputStats);
+
+        inputStats.windowSizeMs = expectedStats.windowSizeMs = 3 * MINUTE_IN_MILLIS;
+        // Invalid time is now since the session straddles the window cutoff time.
+        expectedStats.invalidTimeElapsed = now;
+        expectedStats.executionTimeInWindowMs = 2 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 3;
+        expectedStats.executionTimeInMaxPeriodMs = 22 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 15;
+        mQuotaController.updateExecutionStatsLocked(0, "com.android.test", inputStats);
+        assertEquals(expectedStats, inputStats);
+
+        inputStats.windowSizeMs = expectedStats.windowSizeMs = 5 * MINUTE_IN_MILLIS;
+        // Invalid time is now since the start of the session is at the very edge of the window
+        // cutoff time.
+        expectedStats.invalidTimeElapsed = now;
+        expectedStats.executionTimeInWindowMs = 4 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 3;
+        expectedStats.executionTimeInMaxPeriodMs = 22 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 15;
+        mQuotaController.updateExecutionStatsLocked(0, "com.android.test", inputStats);
+        assertEquals(expectedStats, inputStats);
+
+        inputStats.windowSizeMs = expectedStats.windowSizeMs = 49 * MINUTE_IN_MILLIS;
+        // Invalid time is now +44 minutes since the earliest session in the window is now-5
+        // minutes.
+        expectedStats.invalidTimeElapsed = now + 44 * MINUTE_IN_MILLIS;
+        expectedStats.executionTimeInWindowMs = 4 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 3;
+        expectedStats.executionTimeInMaxPeriodMs = 22 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 15;
+        mQuotaController.updateExecutionStatsLocked(0, "com.android.test", inputStats);
+        assertEquals(expectedStats, inputStats);
+
+        inputStats.windowSizeMs = expectedStats.windowSizeMs = 50 * MINUTE_IN_MILLIS;
+        // Invalid time is now since the session is at the very edge of the window cutoff time.
+        expectedStats.invalidTimeElapsed = now;
+        expectedStats.executionTimeInWindowMs = 5 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 4;
+        expectedStats.executionTimeInMaxPeriodMs = 22 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 15;
+        mQuotaController.updateExecutionStatsLocked(0, "com.android.test", inputStats);
+        assertEquals(expectedStats, inputStats);
+
+        inputStats.windowSizeMs = expectedStats.windowSizeMs = HOUR_IN_MILLIS;
+        // Invalid time is now since the start of the session is at the very edge of the window
+        // cutoff time.
+        expectedStats.invalidTimeElapsed = now;
+        expectedStats.executionTimeInWindowMs = 6 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 5;
+        expectedStats.executionTimeInMaxPeriodMs = 22 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 15;
+        mQuotaController.updateExecutionStatsLocked(0, "com.android.test", inputStats);
+        assertEquals(expectedStats, inputStats);
+
+        inputStats.windowSizeMs = expectedStats.windowSizeMs = 2 * HOUR_IN_MILLIS;
+        // Invalid time is now since the session straddles the window cutoff time.
+        expectedStats.invalidTimeElapsed = now;
+        expectedStats.executionTimeInWindowMs = 11 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 10;
+        expectedStats.executionTimeInMaxPeriodMs = 22 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 15;
+        expectedStats.quotaCutoffTimeElapsed = now - (2 * HOUR_IN_MILLIS - MINUTE_IN_MILLIS)
+                + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
+        mQuotaController.updateExecutionStatsLocked(0, "com.android.test", inputStats);
+        assertEquals(expectedStats, inputStats);
+
+        inputStats.windowSizeMs = expectedStats.windowSizeMs = 3 * HOUR_IN_MILLIS;
+        // Invalid time is now +59 minutes since the earliest session in the window is now-121
+        // minutes.
+        expectedStats.invalidTimeElapsed = now + 59 * MINUTE_IN_MILLIS;
+        expectedStats.executionTimeInWindowMs = 12 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 10;
+        expectedStats.executionTimeInMaxPeriodMs = 22 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 15;
+        expectedStats.quotaCutoffTimeElapsed = now - (2 * HOUR_IN_MILLIS - MINUTE_IN_MILLIS)
+                + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
+        mQuotaController.updateExecutionStatsLocked(0, "com.android.test", inputStats);
+        assertEquals(expectedStats, inputStats);
+
+        inputStats.windowSizeMs = expectedStats.windowSizeMs = 6 * HOUR_IN_MILLIS;
+        // Invalid time is now since the start of the session is at the very edge of the window
+        // cutoff time.
+        expectedStats.invalidTimeElapsed = now;
+        expectedStats.executionTimeInWindowMs = 22 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 15;
+        expectedStats.executionTimeInMaxPeriodMs = 22 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 15;
+        expectedStats.quotaCutoffTimeElapsed = now - (2 * HOUR_IN_MILLIS - MINUTE_IN_MILLIS)
+                + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
+        mQuotaController.updateExecutionStatsLocked(0, "com.android.test", inputStats);
+        assertEquals(expectedStats, inputStats);
+
+        // Make sure invalidTimeElapsed is set correctly when it's dependent on the max period.
+        mQuotaController.getTimingSessions(0, "com.android.test")
+                .add(0,
+                        createTimingSession(now - (23 * HOUR_IN_MILLIS), MINUTE_IN_MILLIS, 3));
+        inputStats.windowSizeMs = expectedStats.windowSizeMs = 8 * HOUR_IN_MILLIS;
+        // Invalid time is now +1 hour since the earliest session in the max period is 1 hour
+        // before the end of the max period cutoff time.
+        expectedStats.invalidTimeElapsed = now + HOUR_IN_MILLIS;
+        expectedStats.executionTimeInWindowMs = 22 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 15;
+        expectedStats.executionTimeInMaxPeriodMs = 23 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 18;
+        expectedStats.quotaCutoffTimeElapsed = now - (2 * HOUR_IN_MILLIS - MINUTE_IN_MILLIS)
+                + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
+        mQuotaController.updateExecutionStatsLocked(0, "com.android.test", inputStats);
+        assertEquals(expectedStats, inputStats);
+
+        mQuotaController.getTimingSessions(0, "com.android.test")
+                .add(0,
+                        createTimingSession(now - (24 * HOUR_IN_MILLIS + MINUTE_IN_MILLIS),
+                                2 * MINUTE_IN_MILLIS, 2));
+        inputStats.windowSizeMs = expectedStats.windowSizeMs = 8 * HOUR_IN_MILLIS;
+        // Invalid time is now since the earlist session straddles the max period cutoff time.
+        expectedStats.invalidTimeElapsed = now;
+        expectedStats.executionTimeInWindowMs = 22 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 15;
+        expectedStats.executionTimeInMaxPeriodMs = 24 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 20;
+        expectedStats.quotaCutoffTimeElapsed = now - (2 * HOUR_IN_MILLIS - MINUTE_IN_MILLIS)
+                + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
+        mQuotaController.updateExecutionStatsLocked(0, "com.android.test", inputStats);
+        assertEquals(expectedStats, inputStats);
+    }
+
+    /**
+     * Tests that getExecutionStatsLocked returns the correct stats.
+     */
+    @Test
+    public void testGetExecutionStatsLocked_Values() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(now - (23 * HOUR_IN_MILLIS), 10 * MINUTE_IN_MILLIS, 5));
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(now - (7 * HOUR_IN_MILLIS), 10 * MINUTE_IN_MILLIS, 5));
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(now - (2 * HOUR_IN_MILLIS), 10 * MINUTE_IN_MILLIS, 5));
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(now - (6 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5));
+
+        ExecutionStats expectedStats = new ExecutionStats();
+
+        // Active
+        expectedStats.windowSizeMs = 10 * MINUTE_IN_MILLIS;
+        expectedStats.invalidTimeElapsed = now + 4 * MINUTE_IN_MILLIS;
+        expectedStats.executionTimeInWindowMs = 3 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 5;
+        expectedStats.executionTimeInMaxPeriodMs = 33 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 20;
+        assertEquals(expectedStats,
+                mQuotaController.getExecutionStatsLocked(0, "com.android.test", ACTIVE_INDEX));
+
+        // Working
+        expectedStats.windowSizeMs = 2 * HOUR_IN_MILLIS;
+        expectedStats.invalidTimeElapsed = now;
+        expectedStats.executionTimeInWindowMs = 13 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 10;
+        expectedStats.executionTimeInMaxPeriodMs = 33 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 20;
+        expectedStats.quotaCutoffTimeElapsed = now - (2 * HOUR_IN_MILLIS - 3 * MINUTE_IN_MILLIS)
+                + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
+        assertEquals(expectedStats,
+                mQuotaController.getExecutionStatsLocked(0, "com.android.test", WORKING_INDEX));
+
+        // Frequent
+        expectedStats.windowSizeMs = 8 * HOUR_IN_MILLIS;
+        expectedStats.invalidTimeElapsed = now + HOUR_IN_MILLIS;
+        expectedStats.executionTimeInWindowMs = 23 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 15;
+        expectedStats.executionTimeInMaxPeriodMs = 33 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 20;
+        expectedStats.quotaCutoffTimeElapsed = now - (2 * HOUR_IN_MILLIS - 3 * MINUTE_IN_MILLIS)
+                + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
+        assertEquals(expectedStats,
+                mQuotaController.getExecutionStatsLocked(0, "com.android.test", FREQUENT_INDEX));
+
+        // Rare
+        expectedStats.windowSizeMs = 24 * HOUR_IN_MILLIS;
+        expectedStats.invalidTimeElapsed = now + HOUR_IN_MILLIS;
+        expectedStats.executionTimeInWindowMs = 33 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow = 20;
+        expectedStats.executionTimeInMaxPeriodMs = 33 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInMaxPeriod = 20;
+        expectedStats.quotaCutoffTimeElapsed = now - (2 * HOUR_IN_MILLIS - 3 * MINUTE_IN_MILLIS)
+                + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
+        assertEquals(expectedStats,
+                mQuotaController.getExecutionStatsLocked(0, "com.android.test", RARE_INDEX));
+    }
+
+    /**
+     * Tests that getExecutionStatsLocked properly caches the stats and returns the cached object.
+     */
+    @Test
+    public void testGetExecutionStatsLocked_Caching() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(now - (23 * HOUR_IN_MILLIS), 10 * MINUTE_IN_MILLIS, 5));
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(now - (7 * HOUR_IN_MILLIS), 10 * MINUTE_IN_MILLIS, 5));
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(now - (2 * HOUR_IN_MILLIS), 10 * MINUTE_IN_MILLIS, 5));
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(now - (6 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5));
+        final ExecutionStats originalStatsActive = mQuotaController.getExecutionStatsLocked(0,
+                "com.android.test", ACTIVE_INDEX);
+        final ExecutionStats originalStatsWorking = mQuotaController.getExecutionStatsLocked(0,
+                "com.android.test", WORKING_INDEX);
+        final ExecutionStats originalStatsFrequent = mQuotaController.getExecutionStatsLocked(0,
+                "com.android.test", FREQUENT_INDEX);
+        final ExecutionStats originalStatsRare = mQuotaController.getExecutionStatsLocked(0,
+                "com.android.test", RARE_INDEX);
+
+        // Advance clock so that the working stats shouldn't be the same.
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+        // Change frequent bucket size so that the stats need to be recalculated.
+        mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS = 6 * HOUR_IN_MILLIS;
+        mQuotaController.onConstantsUpdatedLocked();
+
+        ExecutionStats expectedStats = new ExecutionStats();
+        expectedStats.windowSizeMs = originalStatsActive.windowSizeMs;
+        expectedStats.invalidTimeElapsed = originalStatsActive.invalidTimeElapsed;
+        expectedStats.executionTimeInWindowMs = originalStatsActive.executionTimeInWindowMs;
+        expectedStats.bgJobCountInWindow = originalStatsActive.bgJobCountInWindow;
+        expectedStats.executionTimeInMaxPeriodMs = originalStatsActive.executionTimeInMaxPeriodMs;
+        expectedStats.bgJobCountInMaxPeriod = originalStatsActive.bgJobCountInMaxPeriod;
+        expectedStats.quotaCutoffTimeElapsed = originalStatsActive.quotaCutoffTimeElapsed;
+        final ExecutionStats newStatsActive = mQuotaController.getExecutionStatsLocked(0,
+                "com.android.test", ACTIVE_INDEX);
+        // Stats for the same bucket should use the same object.
+        assertTrue(originalStatsActive == newStatsActive);
+        assertEquals(expectedStats, newStatsActive);
+
+        expectedStats.windowSizeMs = originalStatsWorking.windowSizeMs;
+        expectedStats.invalidTimeElapsed = originalStatsWorking.invalidTimeElapsed;
+        expectedStats.executionTimeInWindowMs = originalStatsWorking.executionTimeInWindowMs;
+        expectedStats.bgJobCountInWindow = originalStatsWorking.bgJobCountInWindow;
+        expectedStats.quotaCutoffTimeElapsed = originalStatsWorking.quotaCutoffTimeElapsed;
+        final ExecutionStats newStatsWorking = mQuotaController.getExecutionStatsLocked(0,
+                "com.android.test", WORKING_INDEX);
+        assertTrue(originalStatsWorking == newStatsWorking);
+        assertNotEquals(expectedStats, newStatsWorking);
+
+        expectedStats.windowSizeMs = originalStatsFrequent.windowSizeMs;
+        expectedStats.invalidTimeElapsed = originalStatsFrequent.invalidTimeElapsed;
+        expectedStats.executionTimeInWindowMs = originalStatsFrequent.executionTimeInWindowMs;
+        expectedStats.bgJobCountInWindow = originalStatsFrequent.bgJobCountInWindow;
+        expectedStats.quotaCutoffTimeElapsed = originalStatsFrequent.quotaCutoffTimeElapsed;
+        final ExecutionStats newStatsFrequent = mQuotaController.getExecutionStatsLocked(0,
+                "com.android.test", FREQUENT_INDEX);
+        assertTrue(originalStatsFrequent == newStatsFrequent);
+        assertNotEquals(expectedStats, newStatsFrequent);
+
+        expectedStats.windowSizeMs = originalStatsRare.windowSizeMs;
+        expectedStats.invalidTimeElapsed = originalStatsRare.invalidTimeElapsed;
+        expectedStats.executionTimeInWindowMs = originalStatsRare.executionTimeInWindowMs;
+        expectedStats.bgJobCountInWindow = originalStatsRare.bgJobCountInWindow;
+        expectedStats.quotaCutoffTimeElapsed = originalStatsRare.quotaCutoffTimeElapsed;
+        final ExecutionStats newStatsRare = mQuotaController.getExecutionStatsLocked(0,
+                "com.android.test", RARE_INDEX);
+        assertTrue(originalStatsRare == newStatsRare);
+        assertEquals(expectedStats, newStatsRare);
     }
 
     @Test
@@ -391,6 +670,56 @@ public class QuotaControllerTest {
         mQuotaController.maybeScheduleCleanupAlarmLocked();
         verify(mAlarmManager, times(1))
                 .set(anyInt(), eq(end + 24 * HOUR_IN_MILLIS), eq(TAG_CLEANUP), any(), any());
+    }
+
+    @Test
+    public void testMaybeScheduleStartAlarmLocked_Active() {
+        // saveTimingSession calls maybeScheduleCleanupAlarmLocked which interferes with these tests
+        // because it schedules an alarm too. Prevent it from doing so.
+        spyOn(mQuotaController);
+        doNothing().when(mQuotaController).maybeScheduleCleanupAlarmLocked();
+
+        // Active window size is 10 minutes.
+        final int standbyBucket = ACTIVE_INDEX;
+
+        // No sessions saved yet.
+        mQuotaController.maybeScheduleStartAlarmLocked(SOURCE_USER_ID, SOURCE_PACKAGE,
+                standbyBucket);
+        verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        // Test with timing sessions out of window but still under max execution limit.
+        final long expectedAlarmTime =
+                (now - 18 * HOUR_IN_MILLIS) + 24 * HOUR_IN_MILLIS
+                        + mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS;
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - 18 * HOUR_IN_MILLIS, HOUR_IN_MILLIS, 1));
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - 12 * HOUR_IN_MILLIS, HOUR_IN_MILLIS, 1));
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - 7 * HOUR_IN_MILLIS, HOUR_IN_MILLIS, 1));
+        mQuotaController.maybeScheduleStartAlarmLocked(SOURCE_USER_ID, SOURCE_PACKAGE,
+                standbyBucket);
+        verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - 2 * HOUR_IN_MILLIS, 55 * MINUTE_IN_MILLIS, 1));
+        mQuotaController.maybeScheduleStartAlarmLocked(SOURCE_USER_ID, SOURCE_PACKAGE,
+                standbyBucket);
+        verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+        JobStatus jobStatus = createJobStatus("testMaybeScheduleStartAlarmLocked_Active", 1);
+        mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
+        mQuotaController.prepareForExecutionLocked(jobStatus);
+        advanceElapsedClock(5 * MINUTE_IN_MILLIS);
+        // Timer has only been going for 5 minutes in the past 10 minutes, which is under the window
+        // size limit, but the total execution time for the past 24 hours is 6 hours, so the job no
+        // longer has quota.
+        assertEquals(0, mQuotaController.getRemainingExecutionTimeLocked(jobStatus));
+        mQuotaController.maybeScheduleStartAlarmLocked(SOURCE_USER_ID, SOURCE_PACKAGE,
+                standbyBucket);
+        verify(mAlarmManager, times(1)).set(anyInt(), eq(expectedAlarmTime), eq(TAG_QUOTA_CHECK),
+                any(), any());
     }
 
     @Test
@@ -620,6 +949,124 @@ public class QuotaControllerTest {
         inOrder.verify(mAlarmManager, times(1)).cancel(any(AlarmManager.OnAlarmListener.class));
     }
 
+
+    /**
+     * Tests that the start alarm is properly rescheduled if the earliest session that contributes
+     * to the app being out of quota contributes less than the quota buffer time.
+     */
+    @Test
+    public void testMaybeScheduleStartAlarmLocked_SmallRollingQuota_DefaultValues() {
+        // Use the default values
+        runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_AllowedTimeCheck();
+        mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE).clear();
+        runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_MaxTimeCheck();
+    }
+
+    @Test
+    public void testMaybeScheduleStartAlarmLocked_SmallRollingQuota_UpdatedBufferSize() {
+        // Make sure any new value is used correctly.
+        mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS *= 2;
+        mQuotaController.onConstantsUpdatedLocked();
+        runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_AllowedTimeCheck();
+        mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE).clear();
+        runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_MaxTimeCheck();
+    }
+
+    @Test
+    public void testMaybeScheduleStartAlarmLocked_SmallRollingQuota_UpdatedAllowedTime() {
+        // Make sure any new value is used correctly.
+        mConstants.QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS /= 2;
+        mQuotaController.onConstantsUpdatedLocked();
+        runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_AllowedTimeCheck();
+        mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE).clear();
+        runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_MaxTimeCheck();
+    }
+
+    @Test
+    public void testMaybeScheduleStartAlarmLocked_SmallRollingQuota_UpdatedMaxTime() {
+        // Make sure any new value is used correctly.
+        mConstants.QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS /= 2;
+        mQuotaController.onConstantsUpdatedLocked();
+        runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_AllowedTimeCheck();
+        mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE).clear();
+        runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_MaxTimeCheck();
+    }
+
+    @Test
+    public void testMaybeScheduleStartAlarmLocked_SmallRollingQuota_UpdatedEverything() {
+        // Make sure any new value is used correctly.
+        mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS *= 2;
+        mConstants.QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS /= 2;
+        mConstants.QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS /= 2;
+        mQuotaController.onConstantsUpdatedLocked();
+        runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_AllowedTimeCheck();
+        mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE).clear();
+        runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_MaxTimeCheck();
+    }
+
+    private void runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_AllowedTimeCheck() {
+        // saveTimingSession calls maybeScheduleCleanupAlarmLocked which interferes with these tests
+        // because it schedules an alarm too. Prevent it from doing so.
+        spyOn(mQuotaController);
+        doNothing().when(mQuotaController).maybeScheduleCleanupAlarmLocked();
+
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        // Working set window size is 2 hours.
+        final int standbyBucket = WORKING_INDEX;
+        final long contributionMs = mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS / 2;
+        final long remainingTimeMs =
+                mConstants.QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS - contributionMs;
+
+        // Session straddles edge of bucket window. Only the contribution should be counted towards
+        // the quota.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (2 * HOUR_IN_MILLIS + 3 * MINUTE_IN_MILLIS),
+                        3 * MINUTE_IN_MILLIS + contributionMs, 3));
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - HOUR_IN_MILLIS, remainingTimeMs, 2));
+        // Expected alarm time should be when the app will have QUOTA_BUFFER_MS time of quota, which
+        // is 2 hours + (QUOTA_BUFFER_MS - contributionMs) after the start of the second session.
+        final long expectedAlarmTime = now - HOUR_IN_MILLIS + 2 * HOUR_IN_MILLIS
+                + (mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS - contributionMs);
+        mQuotaController.maybeScheduleStartAlarmLocked(SOURCE_USER_ID, SOURCE_PACKAGE,
+                standbyBucket);
+        verify(mAlarmManager, times(1))
+                .set(anyInt(), eq(expectedAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
+    }
+
+
+    private void runTestMaybeScheduleStartAlarmLocked_SmallRollingQuota_MaxTimeCheck() {
+        // saveTimingSession calls maybeScheduleCleanupAlarmLocked which interferes with these tests
+        // because it schedules an alarm too. Prevent it from doing so.
+        spyOn(mQuotaController);
+        doNothing().when(mQuotaController).maybeScheduleCleanupAlarmLocked();
+
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        // Working set window size is 2 hours.
+        final int standbyBucket = WORKING_INDEX;
+        final long contributionMs = mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS / 2;
+        final long remainingTimeMs =
+                mConstants.QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS - contributionMs;
+
+        // Session straddles edge of 24 hour window. Only the contribution should be counted towards
+        // the quota.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (24 * HOUR_IN_MILLIS + 3 * MINUTE_IN_MILLIS),
+                        3 * MINUTE_IN_MILLIS + contributionMs, 3));
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - 20 * HOUR_IN_MILLIS, remainingTimeMs, 300));
+        // Expected alarm time should be when the app will have QUOTA_BUFFER_MS time of quota, which
+        // is 24 hours + (QUOTA_BUFFER_MS - contributionMs) after the start of the second session.
+        final long expectedAlarmTime = now - 20 * HOUR_IN_MILLIS
+                //+ mConstants.QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS
+                + 24 * HOUR_IN_MILLIS
+                + (mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS - contributionMs);
+        mQuotaController.maybeScheduleStartAlarmLocked(SOURCE_USER_ID, SOURCE_PACKAGE,
+                standbyBucket);
+        verify(mAlarmManager, times(1))
+                .set(anyInt(), eq(expectedAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
+    }
+
     /** Tests that QuotaController doesn't throttle if throttling is turned off. */
     @Test
     public void testThrottleToggling() throws Exception {
@@ -652,6 +1099,7 @@ public class QuotaControllerTest {
         mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS = 30 * MINUTE_IN_MILLIS;
         mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS = 45 * MINUTE_IN_MILLIS;
         mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS = 60 * MINUTE_IN_MILLIS;
+        mConstants.QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS = 3 * HOUR_IN_MILLIS;
 
         mQuotaController.onConstantsUpdatedLocked();
 
@@ -662,6 +1110,7 @@ public class QuotaControllerTest {
         assertEquals(45 * MINUTE_IN_MILLIS,
                 mQuotaController.getBucketWindowSizes()[FREQUENT_INDEX]);
         assertEquals(60 * MINUTE_IN_MILLIS, mQuotaController.getBucketWindowSizes()[RARE_INDEX]);
+        assertEquals(3 * HOUR_IN_MILLIS, mQuotaController.getMaxExecutionTimeMs());
     }
 
     @Test
@@ -673,6 +1122,7 @@ public class QuotaControllerTest {
         mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS = -MINUTE_IN_MILLIS;
         mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS = -MINUTE_IN_MILLIS;
         mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS = -MINUTE_IN_MILLIS;
+        mConstants.QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS = -MINUTE_IN_MILLIS;
 
         mQuotaController.onConstantsUpdatedLocked();
 
@@ -682,6 +1132,7 @@ public class QuotaControllerTest {
         assertEquals(MINUTE_IN_MILLIS, mQuotaController.getBucketWindowSizes()[WORKING_INDEX]);
         assertEquals(MINUTE_IN_MILLIS, mQuotaController.getBucketWindowSizes()[FREQUENT_INDEX]);
         assertEquals(MINUTE_IN_MILLIS, mQuotaController.getBucketWindowSizes()[RARE_INDEX]);
+        assertEquals(HOUR_IN_MILLIS, mQuotaController.getMaxExecutionTimeMs());
 
         // Test larger than a day. Controller should cap at one day.
         mConstants.QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS = 25 * HOUR_IN_MILLIS;
@@ -690,6 +1141,7 @@ public class QuotaControllerTest {
         mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS = 25 * HOUR_IN_MILLIS;
         mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS = 25 * HOUR_IN_MILLIS;
         mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS = 25 * HOUR_IN_MILLIS;
+        mConstants.QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS = 25 * HOUR_IN_MILLIS;
 
         mQuotaController.onConstantsUpdatedLocked();
 
@@ -699,6 +1151,7 @@ public class QuotaControllerTest {
         assertEquals(24 * HOUR_IN_MILLIS, mQuotaController.getBucketWindowSizes()[WORKING_INDEX]);
         assertEquals(24 * HOUR_IN_MILLIS, mQuotaController.getBucketWindowSizes()[FREQUENT_INDEX]);
         assertEquals(24 * HOUR_IN_MILLIS, mQuotaController.getBucketWindowSizes()[RARE_INDEX]);
+        assertEquals(24 * HOUR_IN_MILLIS, mQuotaController.getMaxExecutionTimeMs());
     }
 
     /** Tests that TimingSessions aren't saved when the device is charging. */
