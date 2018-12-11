@@ -99,6 +99,7 @@ public class SettingsBackupTest {
     private static final Set<String> BACKUP_BLACKLISTED_GLOBAL_SETTINGS =
             newHashSet(
                     Settings.Global.ACTIVITY_MANAGER_CONSTANTS,
+                    Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED,
                     Settings.Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED,
                     Settings.Global.ADB_ENABLED,
                     Settings.Global.ADD_USERS_WHEN_LOCKED,

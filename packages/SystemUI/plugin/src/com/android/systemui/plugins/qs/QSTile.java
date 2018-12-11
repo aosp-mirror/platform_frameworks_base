@@ -43,7 +43,7 @@ public interface QSTile {
     boolean isAvailable();
     void setTileSpec(String tileSpec);
 
-    void clearState();
+    @Deprecated default void clearState() {}
     void refreshState();
 
     void addCallback(Callback callback);

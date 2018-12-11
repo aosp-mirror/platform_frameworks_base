@@ -1647,7 +1647,6 @@ public class KeyguardViewMediator extends SystemUI {
             resetKeyguardDonePendingLocked();
         }
 
-        mUpdateMonitor.clearFailedUnlockAttempts();
         mUpdateMonitor.clearFingerprintRecognized();
 
         if (mGoingToSleep) {

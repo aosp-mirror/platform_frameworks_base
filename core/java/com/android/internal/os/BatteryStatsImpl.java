@@ -4031,7 +4031,9 @@ public class BatteryStatsImpl extends BatteryStats {
         try {
             IBatteryPropertiesRegistrar registrar = IBatteryPropertiesRegistrar.Stub.asInterface(
                     ServiceManager.getService("batteryproperties"));
-            registrar.scheduleUpdate();
+            if (registrar != null) {
+                registrar.scheduleUpdate();
+            }
         } catch (RemoteException e) {
             // Ignore.
         }

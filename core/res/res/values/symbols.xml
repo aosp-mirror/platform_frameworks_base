@@ -310,6 +310,7 @@
   <java-symbol type="bool" name="config_allowAnimationsInLowPowerMode" />
   <java-symbol type="bool" name="config_useDevInputEventForAudioJack" />
   <java-symbol type="bool" name="config_safe_media_volume_enabled" />
+  <java-symbol type="bool" name="config_safe_media_disable_on_volume_up" />
   <java-symbol type="bool" name="config_camera_sound_forced" />
   <java-symbol type="bool" name="config_dontPreferApn" />
   <java-symbol type="bool" name="config_restartRadioAfterProvisioning" />
@@ -338,6 +339,7 @@
   <java-symbol type="bool" name="config_wifi_framework_use_single_radio_chain_scan_results_network_selection" />
   <java-symbol type="bool" name="config_wifi_only_link_same_credential_configurations" />
   <java-symbol type="bool" name="config_wifi_framework_enable_sar_tx_power_limit" />
+  <java-symbol type="bool" name="config_wifi_framework_enable_soft_ap_sar_tx_power_limit" />
   <java-symbol type="bool" name="config_wifi_framework_enable_body_proximity_sar_tx_power_limit" />
   <java-symbol type="string" name="config_wifi_sar_sensor_type" />
   <java-symbol type="integer" name="config_wifi_framework_sar_free_space_event_id" />
@@ -3406,11 +3408,18 @@
   <java-symbol type="integer" name="config_defaultHapticFeedbackIntensity" />
   <java-symbol type="integer" name="config_defaultNotificationVibrationIntensity" />
 
+  <java-symbol type="bool" name="config_maskMainBuiltInDisplayCutout" />
+
   <java-symbol type="array" name="config_disableApksUnlessMatchedSku_apk_list" />
   <java-symbol type="array" name="config_disableApkUnlessMatchedSku_skus_list" />
+
+  <java-symbol type="string" name="config_misprovisionedDeviceModel" />
+  <java-symbol type="string" name="config_misprovisionedBrandValue" />
 
   <!-- For Bluetooth AbsoluteVolume -->
   <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index1" />
   <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index2" />
   <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index3" />
+
+  <java-symbol type="string" name="config_defaultAssistantComponentName" />
 </resources>

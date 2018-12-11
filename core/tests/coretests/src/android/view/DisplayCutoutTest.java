@@ -19,6 +19,7 @@ package android.view;
 import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.DisplayCutout.fromSpec;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
@@ -217,6 +218,19 @@ public class DisplayCutoutTest {
     public void fromSpec_wontCacheIfDensityChanges() {
         DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 2f);
         assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f), not(sameInstance(cached)));
+    }
+
+    @Test
+    public void fromSpec_setsSafeInsets_top() {
+        DisplayCutout cutout = fromSpec("M -50,0 v 20 h 100 v -20 z", 200, 400, 2f);
+        assertThat(cutout.getSafeInsets(), equalTo(new Rect(0, 20, 0, 0)));
+    }
+
+    @Test
+    public void fromSpec_setsSafeInsets_top_and_bottom() {
+        DisplayCutout cutout = fromSpec("M -50,0 v 20 h 100 v -20 z"
+                + "@bottom M -50,0 v -10,0 h 100 v 20 z", 200, 400, 2f);
+        assertThat(cutout.getSafeInsets(), equalTo(new Rect(0, 20, 0, 10)));
     }
 
     @Test

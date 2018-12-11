@@ -306,6 +306,7 @@ please see themes_device_defaults.xml.
         <item name="quickContactBadgeStyleSmallWindowLarge">@style/Widget.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@style/Widget.ListPopupWindow</item>
         <item name="popupMenuStyle">@style/Widget.PopupMenu</item>
+        <item name="popupTheme">@null</item>
         <item name="activityChooserViewStyle">@style/Widget.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.FragmentBreadCrumbs</item>
         <item name="contextPopupMenuStyle">?attr/popupMenuStyle</item>
