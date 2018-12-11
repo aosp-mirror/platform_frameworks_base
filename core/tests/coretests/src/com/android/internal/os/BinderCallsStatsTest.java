@@ -484,7 +484,7 @@ public class BinderCallsStatsTest {
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
 
         PrintWriter pw = new PrintWriter(new StringWriter());
-        bcs.dump(pw, new HashMap<>(), true);
+        bcs.dump(pw, new AppIdToPackageMap(new HashMap<>()), true);
     }
 
     @Test

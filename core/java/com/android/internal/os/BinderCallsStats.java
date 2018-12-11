@@ -22,7 +22,6 @@ import android.os.Binder;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.ThreadLocalWorkSource;
-import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.Pair;
@@ -356,14 +355,13 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     /** Writes the collected statistics to the supplied {@link PrintWriter}.*/
-    public void dump(PrintWriter pw, Map<Integer, String> appIdToPkgNameMap, boolean verbose) {
+    public void dump(PrintWriter pw, AppIdToPackageMap packageMap, boolean verbose) {
         synchronized (mLock) {
-            dumpLocked(pw, appIdToPkgNameMap, verbose);
+            dumpLocked(pw, packageMap, verbose);
         }
     }
 
-    private void dumpLocked(PrintWriter pw, Map<Integer, String> appIdToPkgNameMap,
-            boolean verbose) {
+    private void dumpLocked(PrintWriter pw, AppIdToPackageMap packageMap, boolean verbose) {
         long totalCallsCount = 0;
         long totalRecordedCallsCount = 0;
         long totalCpuTime = 0;
@@ -397,9 +395,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
         for (ExportedCallStat e : exportedCallStats) {
             sb.setLength(0);
             sb.append("    ")
-                    .append(uidToString(e.callingUid, appIdToPkgNameMap))
+                    .append(packageMap.mapUid(e.callingUid))
                     .append(',')
-                    .append(uidToString(e.workSourceUid, appIdToPkgNameMap))
+                    .append(packageMap.mapUid(e.workSourceUid))
                     .append(',').append(e.className)
                     .append('#').append(e.methodName)
                     .append(',').append(e.screenInteractive)
@@ -420,7 +418,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         final List<UidEntry> summaryEntries = verbose ? entries
                 : getHighestValues(entries, value -> value.cpuTimeMicros, 0.9);
         for (UidEntry entry : summaryEntries) {
-            String uidStr = uidToString(entry.workSourceUid, appIdToPkgNameMap);
+            String uidStr = packageMap.mapUid(entry.workSourceUid);
             pw.println(String.format("  %10d %3.0f%% %8d %8d %s",
                     entry.cpuTimeMicros, 100d * entry.cpuTimeMicros / totalCpuTime,
                     entry.recordedCallCount, entry.callCount, uidStr));
@@ -446,13 +444,6 @@ public class BinderCallsStats implements BinderInternal.Observer {
             pw.println("");
             pw.println("/!\\ Displayed data is sampled. See sampling interval at the top.");
         }
-    }
-
-    private static String uidToString(int uid, Map<Integer, String> pkgNameMap) {
-        final int appId = UserHandle.getAppId(uid);
-        final String pkgName = pkgNameMap == null ? null : pkgNameMap.get(appId);
-        final String uidStr = UserHandle.formatUid(uid);
-        return pkgName == null ? uidStr : pkgName + '/' + uidStr;
     }
 
     protected long getThreadTimeMicro() {
