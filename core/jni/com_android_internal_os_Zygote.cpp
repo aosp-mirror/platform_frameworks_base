@@ -276,15 +276,17 @@ static void EnableDebugger() {
     }
   }
 
-  // We don't want core dumps, though, so set the soft limit on core dump size
-  // to 0 without changing the hard limit.
-  rlimit rl;
-  if (getrlimit(RLIMIT_CORE, &rl) == -1) {
-    ALOGE("getrlimit(RLIMIT_CORE) failed");
-  } else {
-    rl.rlim_cur = 0;
-    if (setrlimit(RLIMIT_CORE, &rl) == -1) {
-      ALOGE("setrlimit(RLIMIT_CORE) failed");
+  // Set the core dump size to zero unless wanted (see also coredump_setup in build/envsetup.sh).
+  if (!GetBoolProperty("persist.zygote.core_dump", false)) {
+    // Set the soft limit on core dump size to 0 without changing the hard limit.
+    rlimit rl;
+    if (getrlimit(RLIMIT_CORE, &rl) == -1) {
+      ALOGE("getrlimit(RLIMIT_CORE) failed");
+    } else {
+      rl.rlim_cur = 0;
+      if (setrlimit(RLIMIT_CORE, &rl) == -1) {
+        ALOGE("setrlimit(RLIMIT_CORE) failed");
+      }
     }
   }
 }
