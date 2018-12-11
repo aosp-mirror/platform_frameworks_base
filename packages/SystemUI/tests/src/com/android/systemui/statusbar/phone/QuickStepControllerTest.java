@@ -601,6 +601,25 @@ public class QuickStepControllerTest extends SysuiTestCase {
         assertGestureDragsHitTargetAllDirections(buttonView, true /* isRTL */, NAV_BAR_LEFT);
     }
 
+    @Test
+    public void testNoEdgeActionsTriggerNormalActions() {
+        doReturn(NAVBAR_WIDTH).when(mNavigationBarView).getWidth();
+        doReturn(NAVBAR_HEIGHT).when(mNavigationBarView).getHeight();
+
+        NavigationGestureAction swipeUp = mockAction(true);
+        NavigationGestureAction swipeDown = mockAction(true);
+        NavigationGestureAction swipeLeft = mockAction(true);
+        NavigationGestureAction swipeRight = mockAction(true);
+        mController.setGestureActions(swipeUp, swipeDown, swipeLeft, swipeRight,
+                null /* swipeLeftFromEdgeAction */,
+                null /* swipeLeftFromEdgeAction */);
+
+        // Swipe Left from Edge
+        assertGestureTriggersAction(swipeLeft, NAVBAR_WIDTH, 1, 5, 1);
+        // Swipe Right from Edge
+        assertGestureTriggersAction(swipeRight, 0, 1, NAVBAR_WIDTH, 5);
+    }
+
     private void assertGestureDragsHitTargetAllDirections(View buttonView, boolean isRTL,
             int navPos) {
         mController.setBarState(isRTL, navPos);
@@ -664,7 +683,6 @@ public class QuickStepControllerTest extends SysuiTestCase {
         // Reset button state
         reset(buttonView);
     }
-
 
     private MotionEvent event(int action, float x, float y) {
         final MotionEvent event = mock(MotionEvent.class);
