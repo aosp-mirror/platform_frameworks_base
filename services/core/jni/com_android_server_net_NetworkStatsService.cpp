@@ -34,7 +34,6 @@
 #include "netdbpf/BpfNetworkStats.h"
 
 using android::bpf::Stats;
-using android::bpf::hasBpfSupport;
 using android::bpf::bpfGetUidStats;
 using android::bpf::bpfGetIfaceStats;
 
