@@ -1082,13 +1082,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
 
         if (!canStartArcUpdateAction(message.getSource(), true)) {
-            if (getAvrDeviceInfo() == null) {
+            HdmiDeviceInfo avrDeviceInfo = getAvrDeviceInfo();
+            if (avrDeviceInfo == null) {
                 // AVR may not have been discovered yet. Delay the message processing.
                 mDelayedMessageBuffer.add(message);
                 return true;
             }
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
-            if (!isConnectedToArcPort(message.getSource())) {
+            if (!isConnectedToArcPort(avrDeviceInfo.getPhysicalAddress())) {
                 displayOsd(OSD_MESSAGE_ARC_CONNECTED_INVALID_PORT);
             }
             return true;
