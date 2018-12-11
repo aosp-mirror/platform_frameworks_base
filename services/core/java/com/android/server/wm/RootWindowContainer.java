@@ -79,6 +79,7 @@ import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 /** Root {@link WindowContainer} for the device. */
@@ -122,7 +123,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     // The ID of the display which is responsible for receiving display-unspecified key and pointer
     // events.
-    int mTopFocusedDisplayId = INVALID_DISPLAY;
+    private int mTopFocusedDisplayId = INVALID_DISPLAY;
+
+    // Map from the PID to the top most app which has a focused window of the process.
+    final HashMap<Integer, AppWindowToken> mTopFocusedAppByProcess = new HashMap<>();
 
     // Only a separate transaction until we separate the apply surface changes
     // transaction from the global transaction.
@@ -157,50 +161,32 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
+        mTopFocusedAppByProcess.clear();
         boolean changed = false;
         int topFocusedDisplayId = INVALID_DISPLAY;
-
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final DisplayContent dc = mChildren.get(i);
-            changed |= dc.updateFocusedWindowLocked(mode, updateInputWindows,
-                    topFocusedDisplayId != INVALID_DISPLAY /* focusFound */);
-            if (topFocusedDisplayId == INVALID_DISPLAY && dc.mCurrentFocus != null) {
-                topFocusedDisplayId = dc.getDisplayId();
+            changed |= dc.updateFocusedWindowLocked(mode, updateInputWindows);
+            final WindowState newFocus = dc.mCurrentFocus;
+            if (newFocus != null) {
+                final int pidOfNewFocus = newFocus.mSession.mPid;
+                if (mTopFocusedAppByProcess.get(pidOfNewFocus) == null) {
+                    mTopFocusedAppByProcess.put(pidOfNewFocus, newFocus.mAppToken);
+                }
+                if (topFocusedDisplayId == INVALID_DISPLAY) {
+                    topFocusedDisplayId = dc.getDisplayId();
+                }
             }
         }
         if (topFocusedDisplayId == INVALID_DISPLAY) {
             topFocusedDisplayId = DEFAULT_DISPLAY;
         }
-        // TODO(b/118865114): Review if need callback top focus display change to view component.
-        // (i.e. Activity or View)
-        // Currently we only tracked topFocusedDisplayChanged for notifying InputMethodManager via
-        // ViewRootImpl.windowFocusChanged to refocus IME window when top display focus changed
-        // but window focus remain the same case.
-        // It may need to review if any use case that need to add new callback for reporting
-        // this change.
-        final boolean topFocusedDisplayChanged =
-                mTopFocusedDisplayId != topFocusedDisplayId && mode == UPDATE_FOCUS_NORMAL;
         if (mTopFocusedDisplayId != topFocusedDisplayId) {
             mTopFocusedDisplayId = topFocusedDisplayId;
-            mWmService.mInputManager.setFocusedDisplay(mTopFocusedDisplayId);
+            mWmService.mInputManager.setFocusedDisplay(topFocusedDisplayId);
             if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "New topFocusedDisplayId="
-                    + mTopFocusedDisplayId);
+                    + topFocusedDisplayId);
         }
-
-        // Report window focus or top display focus changed through REPORT_FOCUS_CHANGE.
-        forAllDisplays((dc) -> {
-            final boolean windowFocusChanged =
-                    dc.mCurrentFocus != null && dc.mCurrentFocus != dc.mLastFocus;
-            final boolean isTopFocusedDisplay =
-                    topFocusedDisplayChanged && dc.getDisplayId() == mTopFocusedDisplayId;
-            if (windowFocusChanged || isTopFocusedDisplay) {
-                final Message msg = mWmService.mH.obtainMessage(
-                        WindowManagerService.H.REPORT_FOCUS_CHANGE, dc);
-                msg.arg1 = topFocusedDisplayChanged ? 1 : 0;
-                mWmService.mH.sendMessage(msg);
-            }
-        });
-
         return changed;
     }
 

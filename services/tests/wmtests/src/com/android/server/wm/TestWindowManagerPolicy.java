@@ -170,6 +170,10 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public void setTopFocusedDisplay(int displayId) {
+    }
+
+    @Override
     public void applyKeyguardPolicyLw(WindowState win, WindowState imeTarget) {
     }
 

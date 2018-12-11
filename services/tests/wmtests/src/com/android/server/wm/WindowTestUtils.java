@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.view.Display;
 import android.view.IApplicationToken;
@@ -174,6 +175,7 @@ public class WindowTestUtils {
                     return null;
                 }
             }, new ComponentName("", ""), false, dc, true /* fillsParent */);
+            mTargetSdk = Build.VERSION_CODES.CUR_DEVELOPMENT;
         }
 
         TestAppWindowToken(WindowManagerService service, IApplicationToken token,

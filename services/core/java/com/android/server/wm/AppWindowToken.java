@@ -91,6 +91,7 @@ import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -733,6 +734,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     boolean windowsAreFocusable() {
+        if (mTargetSdk < Build.VERSION_CODES.Q) {
+            final int pid = mActivityRecord != null
+                    ? (mActivityRecord.app != null ? mActivityRecord.app.getPid() : 0) : 0;
+            final AppWindowToken topFocusedAppOfMyProcess =
+                    mWmService.mRoot.mTopFocusedAppByProcess.get(pid);
+            if (topFocusedAppOfMyProcess != null && topFocusedAppOfMyProcess != this) {
+                // For the apps below Q, there can be only one app which has the focused window per
+                // process, because legacy apps may not be ready for a multi-focus system.
+                return false;
+            }
+        }
         return getWindowConfiguration().canReceiveKeys() || mAlwaysFocusable;
     }
 

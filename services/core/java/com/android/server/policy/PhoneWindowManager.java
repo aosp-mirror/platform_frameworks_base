@@ -599,6 +599,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean mAodShowing;
 
+    private boolean mPerDisplayFocusEnabled = false;
+    private int mTopFocusedDisplayId = INVALID_DISPLAY;
+
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
@@ -1811,6 +1814,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHandleVolumeKeysInWM = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_handleVolumeKeysInWindowManager);
 
+        mPerDisplayFocusEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_perDisplayFocusEnabled);
+
         readConfigurationDependentBehaviors();
 
         mAccessibilityManager = (AccessibilityManager) context.getSystemService(
@@ -2542,6 +2548,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public long interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags) {
+        final long result = interceptKeyBeforeDispatchingInner(win, event, policyFlags);
+        if (result == 0 && !mPerDisplayFocusEnabled
+                && event.getDisplayId() != mTopFocusedDisplayId) {
+            // Someone tries to send a key event to a display which doesn't have a focused window.
+            // We drop the event here, or it will cause ANR.
+            // TODO (b/121057974): The user may be confused about why the key doesn't work, so we
+            // may need to deal with this problem.
+            return -1;
+        }
+        return result;
+    }
+
+    private long interceptKeyBeforeDispatchingInner(WindowState win, KeyEvent event,
+            int policyFlags) {
         final boolean keyguardOn = keyguardOn();
         final int keyCode = event.getKeyCode();
         final int repeatCount = event.getRepeatCount();
@@ -3120,6 +3140,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         return false;
+    }
+
+    @Override
+    public void setTopFocusedDisplay(int displayId) {
+        mTopFocusedDisplayId = displayId;
     }
 
     @Override

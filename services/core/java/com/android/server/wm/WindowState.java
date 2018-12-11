@@ -2866,13 +2866,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Report a focus change.  Must be called with no locks held, and consistently
      * from the same serialized thread (such as dispatched from a handler).
      */
-    void reportFocusChangedSerialized(boolean focused, boolean inTouchMode,
-            boolean reportToClient) {
+    void reportFocusChangedSerialized(boolean focused, boolean inTouchMode) {
         try {
-            mClient.windowFocusChanged(focused, inTouchMode, reportToClient);
+            mClient.windowFocusChanged(focused, inTouchMode);
         } catch (RemoteException e) {
         }
-        if (mFocusCallbacks != null && reportToClient) {
+        if (mFocusCallbacks != null) {
             final int N = mFocusCallbacks.beginBroadcast();
             for (int i=0; i<N; i++) {
                 IWindowFocusObserver obs = mFocusCallbacks.getBroadcastItem(i);
