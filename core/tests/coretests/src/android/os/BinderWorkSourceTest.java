@@ -125,8 +125,10 @@ public class BinderWorkSourceTest {
         Binder.setCallingWorkSourceUid(UID);
         long token = Binder.clearCallingWorkSource();
         Binder.restoreCallingWorkSource(token);
+        assertEquals(UID, Binder.getCallingWorkSourceUid());
 
         assertEquals(UID, mService.getIncomingWorkSourceUid());
+        // Still the same after the binder transaction.
         assertEquals(UID, Binder.getCallingWorkSourceUid());
     }
 
