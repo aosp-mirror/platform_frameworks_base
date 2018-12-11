@@ -51,6 +51,8 @@ public class PipDismissViewController {
 
     // Used for dismissing a bubble -- bubble should be in the target to be considered a dismiss
     private View mTargetView;
+    private int mTargetSlop;
+    private Point mWindowSize;
     private int[] mLoc = new int[2];
     private boolean mIntersecting;
     private Vibrator mVibe;
@@ -69,12 +71,14 @@ public class PipDismissViewController {
             // Determine sizes for the view
             final Rect stableInsets = new Rect();
             WindowManagerWrapper.getInstance().getStableInsets(stableInsets);
-            final Point windowSize = new Point();
-            mWindowManager.getDefaultDisplay().getRealSize(windowSize);
+            mWindowSize = new Point();
+            mWindowManager.getDefaultDisplay().getRealSize(mWindowSize);
             final int gradientHeight = mContext.getResources().getDimensionPixelSize(
                     R.dimen.pip_dismiss_gradient_height);
             final int bottomMargin = mContext.getResources().getDimensionPixelSize(
                     R.dimen.pip_dismiss_text_bottom_margin);
+            mTargetSlop = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.bubble_dismiss_slop);
 
             // Create a new view for the dismiss target
             LayoutInflater inflater = LayoutInflater.from(mContext);
@@ -96,7 +100,7 @@ public class PipDismissViewController {
             // Add the target to the window
             LayoutParams lp =  new LayoutParams(
                     LayoutParams.MATCH_PARENT, gradientHeight,
-                    0, windowSize.y - gradientHeight,
+                    0, mWindowSize.y - gradientHeight,
                     LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                     LayoutParams.FLAG_LAYOUT_IN_SCREEN
                             | LayoutParams.FLAG_NOT_TOUCHABLE
@@ -112,7 +116,7 @@ public class PipDismissViewController {
 
 
     /**
-     * Updates the dismiss target based on location of the view.
+     * Updates the dismiss target based on location of the view, only used for bubbles not for PIP.
      *
      * @return whether the view is within the dismiss target.
      */
@@ -127,18 +131,19 @@ public class PipDismissViewController {
             mTargetView.getLocationOnScreen(mLoc);
             Rect targetRect = new Rect(mLoc[0], mLoc[1], mLoc[0] + mTargetView.getWidth(),
                     mLoc[1] + mTargetView.getHeight());
+            expandRect(targetRect, mTargetSlop);
             boolean intersecting = targetRect.intersect(viewRect);
-            if (intersecting && !mIntersecting) {
+            if (intersecting != mIntersecting) {
                 // TODO: is this the right effect?
-                mVibe.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_CLICK));
-                mIntersecting = true;
+                mVibe.vibrate(VibrationEffect.get(intersecting
+                        ? VibrationEffect.EFFECT_CLICK
+                        : VibrationEffect.EFFECT_TICK));
             }
             mIntersecting = intersecting;
             return intersecting;
         }
         return false;
     }
-
 
     /**
      * Shows the dismiss target.
@@ -171,5 +176,12 @@ public class PipDismissViewController {
                     })
                     .start();
         }
+    }
+
+    private void expandRect(Rect outRect, int expandAmount) {
+        outRect.left = Math.max(0, outRect.left - expandAmount);
+        outRect.top = Math.max(0, outRect.top - expandAmount);
+        outRect.right = Math.min(mWindowSize.x, outRect.right + expandAmount);
+        outRect.bottom = Math.min(mWindowSize.y, outRect.bottom + expandAmount);
     }
 }
