@@ -175,7 +175,7 @@ struct SecurityLevels {
 
 struct OfflineLicenseState {
     jint kOfflineLicenseStateUsable;
-    jint kOfflineLicenseStateInactive;
+    jint kOfflineLicenseStateReleased;
     jint kOfflineLicenseStateUnknown;
 } gOfflineLicenseStates;
 
@@ -797,10 +797,10 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     GET_STATIC_FIELD_ID(field, clazz, "SECURITY_LEVEL_HW_SECURE_ALL", "I");
     gSecurityLevels.kSecurityLevelHwSecureAll = env->GetStaticIntField(clazz, field);
 
-    GET_STATIC_FIELD_ID(field, clazz, "OFFLINE_LICENSE_USABLE", "I");
+    GET_STATIC_FIELD_ID(field, clazz, "OFFLINE_LICENSE_STATE_USABLE", "I");
     gOfflineLicenseStates.kOfflineLicenseStateUsable = env->GetStaticIntField(clazz, field);
-    GET_STATIC_FIELD_ID(field, clazz, "OFFLINE_LICENSE_INACTIVE", "I");
-    gOfflineLicenseStates.kOfflineLicenseStateInactive = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "OFFLINE_LICENSE_STATE_RELEASED", "I");
+    gOfflineLicenseStates.kOfflineLicenseStateReleased = env->GetStaticIntField(clazz, field);
     GET_STATIC_FIELD_ID(field, clazz, "OFFLINE_LICENSE_STATE_UNKNOWN", "I");
     gOfflineLicenseStates.kOfflineLicenseStateUnknown = env->GetStaticIntField(clazz, field);
 
@@ -1581,8 +1581,8 @@ static jint android_media_MediaDrm_getOfflineLicenseState(JNIEnv *env,
     switch(state) {
     case DrmPlugin::kOfflineLicenseStateUsable:
         return gOfflineLicenseStates.kOfflineLicenseStateUsable;
-    case DrmPlugin::kOfflineLicenseStateInactive:
-        return gOfflineLicenseStates.kOfflineLicenseStateInactive;
+    case DrmPlugin::kOfflineLicenseStateReleased:
+        return gOfflineLicenseStates.kOfflineLicenseStateReleased;
     default:
         return gOfflineLicenseStates.kOfflineLicenseStateUnknown;
     }
