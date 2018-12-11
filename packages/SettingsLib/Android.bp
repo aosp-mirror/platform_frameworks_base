@@ -18,6 +18,7 @@ android_library {
         "SettingsLibSettingsSpinner",
         "SettingsLayoutPreference",
         "ActionButtonsPreference",
+        "SettingsLibEntityHeaderWidgets",
     ],
 
     // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
