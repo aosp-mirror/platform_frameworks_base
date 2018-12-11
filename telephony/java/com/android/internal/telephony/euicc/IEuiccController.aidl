@@ -24,22 +24,25 @@ import android.telephony.euicc.EuiccInfo;
 
 /** @hide */
 interface IEuiccController {
-    oneway void continueOperation(in Intent resolutionIntent, in Bundle resolutionExtras);
-    oneway void getDownloadableSubscriptionMetadata(in DownloadableSubscription subscription,
+    oneway void continueOperation(int cardId, in Intent resolutionIntent,
+            in Bundle resolutionExtras);
+    oneway void getDownloadableSubscriptionMetadata(int cardId,
+            in DownloadableSubscription subscription,
         String callingPackage, in PendingIntent callbackIntent);
-    oneway void getDefaultDownloadableSubscriptionList(
+    oneway void getDefaultDownloadableSubscriptionList(int cardId,
         String callingPackage, in PendingIntent callbackIntent);
-    String getEid();
-    int getOtaStatus();
-    oneway void downloadSubscription(in DownloadableSubscription subscription,
-        boolean switchAfterDownload, String callingPackage, in Bundle resolvedBundle, in PendingIntent callbackIntent);
-    EuiccInfo getEuiccInfo();
-    oneway void deleteSubscription(int subscriptionId, String callingPackage,
+    String getEid(int cardId);
+    int getOtaStatus(int cardId);
+    oneway void downloadSubscription(int cardId, in DownloadableSubscription subscription,
+        boolean switchAfterDownload, String callingPackage, in Bundle resolvedBundle,
         in PendingIntent callbackIntent);
-    oneway void switchToSubscription(int subscriptionId, String callingPackage,
+    EuiccInfo getEuiccInfo(int cardId);
+    oneway void deleteSubscription(int cardId, int subscriptionId, String callingPackage,
         in PendingIntent callbackIntent);
-    oneway void updateSubscriptionNickname(int subscriptionId, String nickname,
+    oneway void switchToSubscription(int cardId, int subscriptionId, String callingPackage,
+        in PendingIntent callbackIntent);
+    oneway void updateSubscriptionNickname(int cardId, int subscriptionId, String nickname,
         String callingPackage, in PendingIntent callbackIntent);
-    oneway void eraseSubscriptions(in PendingIntent callbackIntent);
-    oneway void retainSubscriptionsForFactoryReset(in PendingIntent callbackIntent);
+    oneway void eraseSubscriptions(int cardId, in PendingIntent callbackIntent);
+    oneway void retainSubscriptionsForFactoryReset(int cardId, in PendingIntent callbackIntent);
 }
