@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
@@ -2978,7 +2979,12 @@ public abstract class ContentResolver implements ContentInterface {
         }
     }
 
-    /** {@hide} */
+    /**
+     * Put the cache with the key.
+     *
+     * @param key the key to add
+     * @param value the value to add
+     */
     public void putCache(Uri key, Bundle value) {
         try {
             getContentService().putCache(mContext.getPackageName(), key, value,
@@ -2988,7 +2994,13 @@ public abstract class ContentResolver implements ContentInterface {
         }
     }
 
-    /** {@hide} */
+    /**
+     * Get the cache with the key.
+     *
+     * @param key the key to get the value
+     * @return the matched value. If the key doesn't exist, will return null.
+     * @see #putCache(Uri, Bundle)
+     */
     public Bundle getCache(Uri key) {
         try {
             final Bundle bundle = getContentService().getCache(mContext.getPackageName(), key,
@@ -3176,7 +3188,14 @@ public abstract class ContentResolver implements ContentInterface {
         return mContext.getUserId();
     }
 
-    /** @hide */
+    /**
+     * Get the system drawable of the mime type.
+     *
+     * @param mimeType the requested mime type
+     * @return the matched drawable
+     * @hide
+     */
+    @SystemApi
     public Drawable getTypeDrawable(String mimeType) {
         return MimeIconUtils.loadMimeIcon(mContext, mimeType);
     }
