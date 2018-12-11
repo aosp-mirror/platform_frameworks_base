@@ -191,7 +191,8 @@ public final class BasePermission {
     }
 
     public boolean isRemoved() {
-        return perm.info != null && (perm.info.flags & PermissionInfo.FLAG_REMOVED) != 0;
+        return perm != null && perm.info != null
+                && (perm.info.flags & PermissionInfo.FLAG_REMOVED) != 0;
     }
 
     public boolean isSignature() {
