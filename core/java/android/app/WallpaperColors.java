@@ -18,7 +18,7 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.SystemApi;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -56,6 +56,7 @@ public final class WallpaperColors implements Parcelable {
      * eg. A launcher may set its text color to black if this flag is specified.
      * @hide
      */
+    @SystemApi
     public static final int HINT_SUPPORTS_DARK_TEXT = 1 << 0;
 
     /**
@@ -64,6 +65,7 @@ public final class WallpaperColors implements Parcelable {
      * eg. A launcher may set its drawer color to black if this flag is specified.
      * @hide
      */
+    @SystemApi
     public static final int HINT_SUPPORTS_DARK_THEME = 1 << 1;
 
     /**
@@ -234,7 +236,7 @@ public final class WallpaperColors implements Parcelable {
      * @see WallpaperColors#fromDrawable(Drawable)
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public WallpaperColors(@NonNull Color primaryColor, @Nullable Color secondaryColor,
             @Nullable Color tertiaryColor, int colorHints) {
 
@@ -349,7 +351,7 @@ public final class WallpaperColors implements Parcelable {
      * @return True if dark text is supported.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public int getColorHints() {
         return mColorHints;
     }
