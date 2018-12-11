@@ -1841,6 +1841,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void dispatchApplyInsets(View host) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "dispatchApplyInsets");
         WindowInsets insets = getWindowInsets(true /* forceConstruct */);
         final boolean dispatchCutout = (mWindowAttributes.layoutInDisplayCutoutMode
                 == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS);
@@ -1850,6 +1851,7 @@ public final class ViewRootImpl implements ViewParent,
             insets = insets.consumeDisplayCutout();
         }
         host.dispatchApplyWindowInsets(insets);
+        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
 
     InsetsController getInsetsController() {
