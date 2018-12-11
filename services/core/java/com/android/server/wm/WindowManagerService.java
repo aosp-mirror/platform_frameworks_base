@@ -2817,7 +2817,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public boolean isShowingDream() {
         synchronized (mGlobalLock) {
-            // TODO: fix this when dream can be shown on non-default display.
+            // TODO(b/123372519): Fix this when dream can be shown on non-default display.
             return getDefaultDisplayContentLocked().getDisplayPolicy().isShowingDreamLw();
         }
     }
