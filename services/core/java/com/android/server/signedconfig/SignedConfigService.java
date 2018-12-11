@@ -85,7 +85,8 @@ public class SignedConfigService {
                 Slog.d(TAG, "Got signed config: " + config);
                 Slog.d(TAG, "Got config signature: " + signature);
             }
-            SignedConfigApplicator.applyConfig(mContext, config, signature);
+            new SignedConfigApplicator(mContext, packageName).applyConfig(
+                    config, signature);
         } else {
             if (DBG) Slog.d(TAG, "Package has no config/signature.");
         }
