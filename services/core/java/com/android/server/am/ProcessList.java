@@ -137,8 +137,12 @@ public final class ProcessList {
 
     // This is a process only hosting activities that are not visible,
     // so it can be killed without any disruption.
-    static final int CACHED_APP_MAX_ADJ = 906;
+    static final int CACHED_APP_MAX_ADJ = 999;
     static final int CACHED_APP_MIN_ADJ = 900;
+
+    // Number of levels we have available for different service connection group importance
+    // levels.
+    static final int CACHED_APP_IMPORTANCE_LEVELS = 5;
 
     // The B list of SERVICE_ADJ -- these are the old and decrepit
     // services that aren't as shiny and interesting as the ones in the A list.
