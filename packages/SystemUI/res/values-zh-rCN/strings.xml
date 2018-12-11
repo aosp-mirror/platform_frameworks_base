@@ -798,6 +798,12 @@
     <string name="high_temp_title" msgid="4589508026407318374">"手机温度上升中"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"手机降温时，部分功能的使用会受限制"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"您的手机将自动尝试降温。您依然可以使用您的手机，但是手机运行速度可能会更慢。\n\n手机降温后，就会恢复正常的运行速度。"</string>
+    <!-- no translation found for high_temp_alarm_title (442812040762745210) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (519359725058131592) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_help_care_steps (3631075329318070726) -->
+    <skip />
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"向左快捷方式"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"向右快捷方式"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"向左快捷方式也可以解锁设备"</string>

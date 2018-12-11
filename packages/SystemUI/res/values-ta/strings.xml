@@ -121,7 +121,7 @@
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"சிக்னல் இரண்டு கோட்டில் உள்ளது."</string>
     <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"சிக்னல் மூன்று கோட்டில் உள்ளது."</string>
     <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"சிக்னல் முழுமையாக உள்ளது."</string>
-    <string name="accessibility_no_data" msgid="4791966295096867555">"தரவு சிக்னல் இல்லை."</string>
+    <string name="accessibility_no_data" msgid="4791966295096867555">"டேட்டா சிக்னல் இல்லை."</string>
     <string name="accessibility_data_one_bar" msgid="1415625833238273628">"தரவு சிக்னல் ஒரு கோட்டில் உள்ளது."</string>
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"தரவின் சிக்னல் இரண்டு கோடு வரை உள்ளது."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"தரவு சிக்னல் மூன்று கோட்டில் உள்ளது."</string>
@@ -798,6 +798,12 @@
     <string name="high_temp_title" msgid="4589508026407318374">"மொபைல் சூடாகிறது"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"மொபைலின் வெப்ப அளவு குறையும் போது, சில அம்சங்களைப் பயன்படுத்த முடியாது"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"உங்கள் மொபைலின் வெப்ப அளவு தானாகவே குறையும். தொடர்ந்து நீங்கள் மொபைலைப் பயன்படுத்தலாம், ஆனால் அதன் வேகம் குறைவாக இருக்கக்கூடும்.\n\nமொபைலின் வெப்ப அளவு குறைந்தவுடன், அது இயல்பு நிலையில் இயங்கும்."</string>
+    <!-- no translation found for high_temp_alarm_title (442812040762745210) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (519359725058131592) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_help_care_steps (3631075329318070726) -->
+    <skip />
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"இடப்புறக் குறுக்குவழி"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"வலப்புறக் குறுக்குவழி"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"இடப்புறக் குறுக்குவழி மூலமாகவும் திறக்கும்"</string>
