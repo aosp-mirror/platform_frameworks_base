@@ -1226,7 +1226,8 @@ public class Build {
      * null (if, for instance, the radio is not currently on).
      */
     public static String getRadioVersion() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_BASEBAND_VERSION, null);
+        String propVal = SystemProperties.get(TelephonyProperties.PROPERTY_BASEBAND_VERSION);
+        return TextUtils.isEmpty(propVal) ? null : propVal;
     }
 
     private static String getString(String property) {
