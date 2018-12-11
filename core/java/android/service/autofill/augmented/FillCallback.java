@@ -15,10 +15,13 @@
  */
 package android.service.autofill.augmented;
 
+import static android.service.autofill.augmented.AugmentedAutofillService.DEBUG;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy;
+import android.util.Log;
 
 /**
  * Callback used to indicate at {@link FillRequest} has been fulfilled.
@@ -27,6 +30,9 @@ import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy
  */
 @SystemApi
 public final class FillCallback {
+
+    private static final String TAG = FillCallback.class.getSimpleName();
+
     private final AutofillProxy mProxy;
 
     FillCallback(@NonNull AutofillProxy proxy) {
@@ -40,7 +46,11 @@ public final class FillCallback {
      * could not provide autofill for the request.
      */
     public void onSuccess(@Nullable FillResponse response) {
+        if (DEBUG) Log.d(TAG, "onSuccess(): " + response);
+
         mProxy.report(AutofillProxy.REPORT_EVENT_ON_SUCCESS);
+        if (response == null) return;
+
         final FillWindow fillWindow = response.getFillWindow();
         if (fillWindow != null) {
             fillWindow.show();
