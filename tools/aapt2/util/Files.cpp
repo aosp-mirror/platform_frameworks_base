@@ -165,7 +165,7 @@ void AppendPath(std::string* base, StringPiece part) {
 
 std::string PackageToPath(const StringPiece& package) {
   std::string out_path;
-  for (StringPiece part : util::Tokenize(package, '.')) {
+  for (const StringPiece& part : util::Tokenize(package, '.')) {
     AppendPath(&out_path, part);
   }
   return out_path;

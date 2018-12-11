@@ -537,7 +537,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
         }
         noReportMetricIds.insert(no_report_metric);
     }
-    for (auto it : allMetricProducers) {
+    for (const auto& it : allMetricProducers) {
         uidMap.addListener(it);
     }
     return true;
