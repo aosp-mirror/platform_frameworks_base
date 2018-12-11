@@ -200,4 +200,7 @@ public abstract class PowerManagerInternal {
      * PowerHint defined in android/hardware/power/<version 1.0 & up>/IPower.h
      */
     public abstract void powerHint(int hintId, int data);
+
+    /** Returns whether there hasn't been a user activity event for the given number of ms. */
+    public abstract boolean wasDeviceIdleFor(long ms);
 }

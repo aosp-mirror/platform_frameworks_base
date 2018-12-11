@@ -10239,4 +10239,73 @@ public class DevicePolicyManager {
         }
         return Collections.emptySet();
     }
+
+    /**
+     * Returns whether the device is being used as a managed kiosk, as defined in the CDD. As of
+     * this release, these requirements are as follows:
+     * <ul>
+     *     <li>The device is in Lock Task (therefore there is also a Device Owner app on the
+     *     device)</li>
+     *     <li>The Lock Task feature {@link DevicePolicyManager#LOCK_TASK_FEATURE_SYSTEM_INFO} is
+     *     not enabled, so the system info in the status bar is not visible</li>
+     *     <li>The device does not have a secure lock screen (e.g. it has no lock screen or has
+     *     swipe-to-unlock)</li>
+     *     <li>The device is not in the middle of an ephemeral user session</li>
+     * </ul>
+     *
+     * <p>Publicly-accessible dedicated devices don't have the same privacy model as
+     * personally-used devices. In particular, user consent popups don't make sense as a barrier to
+     * accessing persistent data on these devices since the user giving consent and the user whose
+     * data is on the device are unlikely to be the same. These consent popups prevent the true
+     * remote management of these devices.
+     *
+     * <p>This condition is not sufficient to cover APIs that would access data that only lives for
+     * the duration of the user's session, since the user has an expectation of privacy in these
+     * conditions that more closely resembles use of a personal device. In those cases, see {@link
+     * #isUnattendedManagedKiosk()}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public boolean isManagedKiosk() {
+        throwIfParentInstance("isManagedKiosk");
+        if (mService != null) {
+            try {
+                return mService.isManagedKiosk();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether the device is being used as an unattended managed kiosk, as defined in the
+     * CDD. As of this release, these requirements are as follows:
+     * <ul>
+     *     <li>The device is being used as a managed kiosk, as defined in the CDD and verified at
+     *     {@link #isManagedKiosk()}</li>
+     *     <li>The device has not received user input for at least 30 minutes</li>
+     * </ul>
+     *
+     * <p>See {@link #isManagedKiosk()} for context. This is a stronger requirement that also
+     * ensures that the device hasn't been interacted with recently, making it an appropriate check
+     * for privacy-sensitive APIs that wouldn't be appropriate during an active user session.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public boolean isUnattendedManagedKiosk() {
+        throwIfParentInstance("isUnattendedManagedKiosk");
+        if (mService != null) {
+            try {
+                return mService.isUnattendedManagedKiosk();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
 }

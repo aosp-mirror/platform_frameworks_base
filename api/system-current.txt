@@ -599,6 +599,8 @@ package android.app.admin {
     method public boolean isDeviceManaged();
     method public boolean isDeviceProvisioned();
     method public boolean isDeviceProvisioningConfigApplied();
+    method public boolean isManagedKiosk();
+    method public boolean isUnattendedManagedKiosk();
     method public void notifyPendingSystemUpdate(long);
     method public void notifyPendingSystemUpdate(long, boolean);
     method public boolean packageHasActiveAdmins(java.lang.String);
