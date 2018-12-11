@@ -326,7 +326,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         if (mSurfaceControl != null) {
-            mPendingTransaction.destroy(mSurfaceControl);
+            mPendingTransaction.reparent(mSurfaceControl, null);
 
             // Merge to parent transaction to ensure the transactions on this WindowContainer are
             // applied in native even if WindowContainer is removed.

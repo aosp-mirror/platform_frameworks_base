@@ -158,7 +158,6 @@ public class SurfaceControl implements Parcelable {
     private static native void nativeSeverChildren(long transactionObj, long nativeObject);
     private static native void nativeSetOverrideScalingMode(long transactionObj, long nativeObject,
             int scalingMode);
-    private static native void nativeDestroy(long transactionObj, long nativeObject);
     private static native IBinder nativeGetHandle(long nativeObject);
     private static native boolean nativeGetTransformToDisplayInverse(long nativeObject);
 
@@ -1768,30 +1767,6 @@ public class SurfaceControl implements Parcelable {
             } else {
                 nativeSetFlags(mNativeObject, sc.mNativeObject, 0, SURFACE_OPAQUE);
             }
-            return this;
-        }
-
-        /**
-         * Same as {@link #destroy()} except this is invoked in a transaction instead of
-         * immediately.
-         */
-        public Transaction destroy(SurfaceControl sc) {
-            sc.checkNotReleased();
-
-            /**
-             * Perhaps it's safer to transfer the close guard to the Transaction
-             * but then we have a whole wonky scenario regarding merging, multiple
-             * close-guards per transaction etc...the whole scenario is kind of wonky
-             * and it seems really we'd like to just be able to call release here
-             * but the WindowManager has some code that looks like
-             * --- destroyInTransaction(a)
-             * --- reparentChildrenInTransaction(a)
-             * so we need to ensure the SC remains valid until the transaction
-             * is applied.
-             */
-            sc.mCloseGuard.close();
-
-            nativeDestroy(mNativeObject, sc.mNativeObject);
             return this;
         }
 

@@ -129,7 +129,7 @@ class Dimmer {
             final DimAnimatable dimAnimatable = new DimAnimatable(dimLayer);
             mSurfaceAnimator = new SurfaceAnimator(dimAnimatable, () -> {
                 if (!mDimming) {
-                    dimAnimatable.getPendingTransaction().destroy(mDimLayer);
+                    dimAnimatable.getPendingTransaction().reparent(mDimLayer, null);
                 }
             }, mHost.mWmService);
         }
@@ -300,7 +300,7 @@ class Dimmer {
 
         if (!mDimState.mDimming) {
             if (!mDimState.mAnimateExit) {
-                t.destroy(mDimState.mDimLayer);
+                t.reparent(mDimState.mDimLayer, null);
             } else {
                 startDimExit(mLastRequestedDimContainer, mDimState.mSurfaceAnimator, t);
             }
