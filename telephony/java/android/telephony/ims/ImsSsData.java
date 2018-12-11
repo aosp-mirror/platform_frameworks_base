@@ -65,12 +65,34 @@ public final class ImsSsData implements Parcelable {
     public static final int SS_INCOMING_BARRING_DN = 21;
     public static final int SS_INCOMING_BARRING_ANONYMOUS = 22;
 
+
+    /**@hide*/
+    @IntDef(flag = true, prefix = {"SS_"}, value = {
+            SS_ACTIVATION,
+            SS_DEACTIVATION,
+            SS_INTERROGATION,
+            SS_REGISTRATION,
+            SS_ERASURE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RequestType{}
+
     //Supplementary Service Request Types
     public static final int SS_ACTIVATION = 0;
     public static final int SS_DEACTIVATION = 1;
     public static final int SS_INTERROGATION = 2;
     public static final int SS_REGISTRATION = 3;
     public static final int SS_ERASURE = 4;
+
+    /**@hide*/
+    @IntDef(flag = true, prefix = {"SS_"}, value = {
+            SS_ALL_TELE_AND_BEARER_SERVICES,
+            SS_ALL_TELESEVICES,
+            SS_TELEPHONY,
+            SS_ALL_DATA_TELESERVICES,
+            SS_SMS_SERVICES,
+            SS_ALL_TELESERVICES_EXCEPT_SMS})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TeleserviceType{}
 
     // Supplementary Service Teleservice Type
     public static final int SS_ALL_TELE_AND_BEARER_SERVICES = 0;
@@ -191,21 +213,6 @@ public final class ImsSsData implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceType{}
 
-    /** @hide */
-    @IntDef(flag = true, prefix = { "SERVICE_CLASS" }, value = {
-            SERVICE_CLASS_NONE,
-            SERVICE_CLASS_VOICE,
-            SERVICE_CLASS_DATA,
-            SERVICE_CLASS_FAX,
-            SERVICE_CLASS_SMS,
-            SERVICE_CLASS_DATA_CIRCUIT_SYNC,
-            SERVICE_CLASS_DATA_CIRCUIT_ASYNC,
-            SERVICE_CLASS_DATA_PACKET_ACCESS,
-            SERVICE_CLASS_DATA_PAD
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ServiceClass{}
-
     /**
      * The Service type of this Supplementary service.
      * @hide
@@ -221,7 +228,7 @@ public final class ImsSsData implements Parcelable {
      *     {@link #SS_ERASURE}
      * @hide
      */
-    public final int requestType;
+    public final @RequestType int requestType;
 
     /**
      * Supplementary Service teleservice type:
@@ -234,14 +241,14 @@ public final class ImsSsData implements Parcelable {
      *
      * @hide
      */
-    public final int teleserviceType;
+    public final @TeleserviceType int teleserviceType;
 
     /**
      * Supplementary Service service class.
      *
      * @hide
      */
-    public final @ServiceClass int serviceClass;
+    public final @ServiceClassFlags int serviceClass;
 
     /**
      * Result of Supplementary Service operation. Valid values are:
@@ -285,7 +292,7 @@ public final class ImsSsData implements Parcelable {
          * @see #build()
          */
         public Builder(@ServiceType int serviceType, int requestType, int teleserviceType,
-                @ServiceClass int serviceClass, int result) {
+                @ServiceClassFlags int serviceClass, int result) {
             mImsSsData = new ImsSsData(serviceType, requestType, teleserviceType, serviceClass,
                     result);
         }
@@ -294,7 +301,7 @@ public final class ImsSsData implements Parcelable {
          * Set the array of {@link ImsSsInfo}s that are associated with this supplementary service
          * data.
          */
-        public Builder setSuppServiceInfo(@NonNull ImsSsInfo[] imsSsInfos) {
+        public @NonNull Builder setSuppServiceInfo(@NonNull ImsSsInfo[] imsSsInfos) {
             mImsSsData.mImsSsInfo = imsSsInfos;
             return this;
         }
@@ -303,7 +310,8 @@ public final class ImsSsData implements Parcelable {
          * Set the array of {@link ImsCallForwardInfo}s that are associated with this supplementary
          * service data.
          */
-        public Builder setCallForwardingInfo(@NonNull ImsCallForwardInfo[] imsCallForwardInfos) {
+        public @NonNull Builder setCallForwardingInfo(
+                @NonNull ImsCallForwardInfo[] imsCallForwardInfos) {
             mImsSsData.mCfInfo = imsCallForwardInfos;
             return this;
         }
@@ -311,7 +319,7 @@ public final class ImsSsData implements Parcelable {
         /**
          * @return an {@link ImsSsData} containing optional parameters.
          */
-        public ImsSsData build() {
+        public @NonNull ImsSsData build() {
             return mImsSsData;
         }
     }
@@ -337,7 +345,7 @@ public final class ImsSsData implements Parcelable {
      *               success, or ImsReasonInfo code if the result is a failure.
      */
     public ImsSsData(@ServiceType int serviceType, int requestType, int teleserviceType,
-            @ServiceClass int serviceClass, int result) {
+            @ServiceClassFlags int serviceClass, int result) {
         this.serviceType = serviceType;
         this.requestType = requestType;
         this.teleserviceType = teleserviceType;
@@ -449,14 +457,9 @@ public final class ImsSsData implements Parcelable {
     }
 
     /**
-     * Supplementary Service request Type:
-     *     {@link #SS_ACTIVATION),
-     *     {@link #SS_DEACTIVATION},
-     *     {@link #SS_INTERROGATION},
-     *     {@link #SS_REGISTRATION},
-     *     {@link #SS_ERASURE}
+     * Supplementary Service request Type.
      */
-    public int getRequestType() {
+    public @RequestType int getRequestType() {
         return requestType;
     }
 
@@ -468,31 +471,25 @@ public final class ImsSsData implements Parcelable {
     }
 
     /**
-     * Supplementary Service teleservice type:
-     *     {@link #SS_ALL_TELE_AND_BEARER_SERVICES},
-     *     {@link #SS_ALL_TELESEVICES},
-     *     {@link #SS_TELEPHONY},
-     *     {@link #SS_ALL_DATA_TELESERVICES},
-     *     {@link #SS_SMS_SERVICES},
-     *     {@link #SS_ALL_TELESERVICES_EXCEPT_SMS}
+     * Supplementary Service teleservice type.
      */
-    public int getTeleserviceType() {
+    public @TeleserviceType int getTeleserviceType() {
         return teleserviceType;
     }
 
     /**
      * Supplementary Service service class.
      */
-    public @ServiceClass int getServiceClass() {
+    public @ServiceClassFlags int getServiceClass() {
         return serviceClass;
     }
 
     /**
      * Result of Supplementary Service operation. Valid values are:
      *     {@link #RESULT_SUCCESS} if the result is success, or
-     *     {@link ImsReasonInfo} CODE_* code if the result is a failure.
+     *     {@link ImsReasonInfo.UtReason} code if the result is a failure.
      */
-    public int getResult() {
+    public @ImsReasonInfo.UtReason int getResult() {
         return result;
     }
 
