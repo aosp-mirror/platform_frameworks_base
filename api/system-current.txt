@@ -4510,6 +4510,18 @@ package android.provider {
     field public static final java.lang.String STATE = "state";
   }
 
+  public final class DeviceConfig {
+    method public static void addOnPropertyChangedListener(java.lang.String, java.util.concurrent.Executor, android.provider.DeviceConfig.OnPropertyChangedListener);
+    method public static java.lang.String getProperty(java.lang.String, java.lang.String);
+    method public static void removeOnPropertyChangedListener(android.provider.DeviceConfig.OnPropertyChangedListener);
+    method public static void resetToDefaults(int, java.lang.String);
+    method public static boolean setProperty(java.lang.String, java.lang.String, java.lang.String, boolean);
+  }
+
+  public static abstract interface DeviceConfig.OnPropertyChangedListener {
+    method public abstract void onPropertyChanged(java.lang.String, java.lang.String, java.lang.String);
+  }
+
   public final class DocumentsContract {
     method public static boolean isManageMode(android.net.Uri);
     method public static android.net.Uri setManageMode(android.net.Uri);

@@ -63,6 +63,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
@@ -194,13 +195,6 @@ public class SettingsProvider extends ContentProvider {
     private static final Set<String> OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS = new ArraySet<>();
     private static final Set<String> OVERLAY_ALLOWED_SYSTEM_INSTANT_APP_SETTINGS = new ArraySet<>();
     private static final Set<String> OVERLAY_ALLOWED_SECURE_INSTANT_APP_SETTINGS = new ArraySet<>();
-
-    /**
-     * TODO(b/113100523): Move this to DeviceConfig.java when it is added, and expose it as a System
-     *     API.
-     */
-    private static final Uri CONFIG_CONTENT_URI =
-            Uri.parse("content://" + Settings.AUTHORITY + "/config");
 
     static {
         for (String name : Resources.getSystem().getStringArray(
@@ -3148,8 +3142,8 @@ public class SettingsProvider extends ContentProvider {
 
         private Uri getNotificationUriFor(int key, String name) {
             if (isConfigSettingsKey(key)) {
-                return (name != null) ? Uri.withAppendedPath(CONFIG_CONTENT_URI, name)
-                        : CONFIG_CONTENT_URI;
+                return (name != null) ? Uri.withAppendedPath(DeviceConfig.CONTENT_URI, name)
+                        : DeviceConfig.CONTENT_URI;
             } else if (isGlobalSettingsKey(key)) {
                 return (name != null) ? Uri.withAppendedPath(Settings.Global.CONTENT_URI, name)
                         : Settings.Global.CONTENT_URI;

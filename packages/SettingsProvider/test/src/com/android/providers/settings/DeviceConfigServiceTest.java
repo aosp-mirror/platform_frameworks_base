@@ -21,8 +21,8 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
 import android.content.ContentResolver;
-import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -43,12 +43,6 @@ import java.io.InputStream;
  */
 @RunWith(AndroidJUnit4.class)
 public class DeviceConfigServiceTest {
-    /**
-     * TODO(b/113100523): Move this to DeviceConfig.java when it is added, and expose it as a System
-     *     API.
-     */
-    private static final Uri CONFIG_CONTENT_URI =
-            Uri.parse("content://" + Settings.AUTHORITY + "/config");
     private static final String sNamespace = "namespace1";
     private static final String sKey = "key1";
     private static final String sValue = "value1";
@@ -152,7 +146,7 @@ public class DeviceConfigServiceTest {
         // make sValue the default value
         executeShellCommand(
                 "device_config put " + sNamespace + " " + sKey + " " + sValue + " default");
-        // make newValue the current value
+        // make newValue the current value (as set by a trusted package)
         executeShellCommand(
                 "device_config put " + sNamespace + " " + sKey + " " + newValue);
         String result = getFromContentProvider(mContentResolver, sNamespace, sKey);
@@ -161,14 +155,14 @@ public class DeviceConfigServiceTest {
         // reset values that were set by untrusted packages
         executeShellCommand("device_config reset untrusted_defaults " + sNamespace);
         result = getFromContentProvider(mContentResolver, sNamespace, sKey);
-        // the default value has been restored
-        assertEquals(sValue, result);
+        // the current value was set by a trusted package, so it's not reset
+        assertEquals(newValue, result);
 
-        // clear values that were set by untrusted packages
+        // reset values that were set by untrusted or trusted packages
         executeShellCommand("device_config reset trusted_defaults " + sNamespace);
         result = getFromContentProvider(mContentResolver, sNamespace, sKey);
-        // even the default value is gone now
-        assertNull(result);
+        // the default value has been restored
+        assertEquals(sValue, result);
     }
 
     private static void executeShellCommand(String command) throws IOException {
@@ -190,14 +184,15 @@ public class DeviceConfigServiceTest {
         if (makeDefault) {
             args.putBoolean(Settings.CALL_METHOD_MAKE_DEFAULT_KEY, true);
         }
-        resolver.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, compositeName, args);
+        resolver.call(
+                DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, compositeName, args);
     }
 
     private static String getFromContentProvider(ContentResolver resolver, String namespace,
             String key) {
         String compositeName = namespace + "/" + key;
         Bundle result = resolver.call(
-                CONFIG_CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, compositeName, null);
+                DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, compositeName, null);
         assertNotNull(result);
         return result.getString(Settings.NameValueTable.VALUE);
     }
@@ -206,7 +201,7 @@ public class DeviceConfigServiceTest {
             String key) {
         String compositeName = namespace + "/" + key;
         Bundle result = resolver.call(
-                CONFIG_CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, compositeName, null);
+                DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, compositeName, null);
         assertNotNull(result);
         return compositeName.equals(result.getString(Settings.NameValueTable.VALUE));
     }
