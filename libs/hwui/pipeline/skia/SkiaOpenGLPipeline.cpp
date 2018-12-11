@@ -162,21 +162,16 @@ bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBeh
         mEglSurface = EGL_NO_SURFACE;
     }
 
+    setSurfaceColorProperties(colorMode);
+
     if (surface) {
         mRenderThread.requireGlContext();
-        auto newSurface = mEglManager.createSurface(surface, colorMode);
+        auto newSurface = mEglManager.createSurface(surface, colorMode, mSurfaceColorGamut);
         if (!newSurface) {
             return false;
         }
         mEglSurface = newSurface.unwrap();
     }
-
-    if (colorMode == ColorMode::SRGB) {
-        mSurfaceColorType = SkColorType::kN32_SkColorType;
-    } else if (colorMode == ColorMode::WideColorGamut) {
-        mSurfaceColorType = SkColorType::kRGBA_F16_SkColorType;
-    }
-    mSurfaceColorSpace = SkColorSpace::MakeSRGB();
 
     if (mEglSurface != EGL_NO_SURFACE) {
         const bool preserveBuffer = (swapBehavior != SwapBehavior::kSwap_discardBuffer);

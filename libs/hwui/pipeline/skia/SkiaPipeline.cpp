@@ -17,6 +17,7 @@
 #include "SkiaPipeline.h"
 
 #include <SkImageEncoder.h>
+#include <SkImageInfo.h>
 #include <SkImagePriv.h>
 #include <SkOverdrawCanvas.h>
 #include <SkOverdrawColorFilter.h>
@@ -451,6 +452,20 @@ void SkiaPipeline::dumpResourceCacheUsage() const {
                 bytes * (1.0f / (1024.0f * 1024.0f)), maxBytes * (1.0f / (1024.0f * 1024.0f)));
 
     ALOGD("%s", log.c_str());
+}
+
+void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
+    if (colorMode == ColorMode::SRGB) {
+        mSurfaceColorType = SkColorType::kN32_SkColorType;
+        mSurfaceColorGamut = SkColorSpace::Gamut::kSRGB_Gamut;
+        mSurfaceColorSpace = SkColorSpace::MakeSRGB();
+    } else if (colorMode == ColorMode::WideColorGamut) {
+        mSurfaceColorType = DeviceInfo::get()->getWideColorType();
+        mSurfaceColorGamut = DeviceInfo::get()->getWideColorGamut();
+        mSurfaceColorSpace = DeviceInfo::get()->getWideColorSpace();
+    } else {
+        LOG_ALWAYS_FATAL("Unreachable: unsupported color mode.");
+    }
 }
 
 // Overdraw debugging
