@@ -994,4 +994,8 @@
     <dimen name="bubble_icon_size">24dp</dimen>
     <!-- Default height of the expanded view shown when the bubble is expanded -->
     <dimen name="bubble_expanded_default_height">400dp</dimen>
+    <!-- Height of the triangle that points to the expanded bubble -->
+    <dimen name="bubble_pointer_height">4dp</dimen>
+    <!-- Width of the triangle that points to the expanded bubble -->
+    <dimen name="bubble_pointer_width">6dp</dimen>
 </resources>
