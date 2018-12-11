@@ -944,10 +944,11 @@ public class Tethering extends BaseNetworkObserver {
     public boolean hasTetherableConfiguration() {
         final TetheringConfiguration cfg = mConfig;
         final boolean hasDownstreamConfiguration =
-                (cfg.tetherableUsbRegexs.length != 0) ||
-                (cfg.tetherableWifiRegexs.length != 0) ||
-                (cfg.tetherableBluetoothRegexs.length != 0);
-        final boolean hasUpstreamConfiguration = !cfg.preferredUpstreamIfaceTypes.isEmpty();
+                (cfg.tetherableUsbRegexs.length != 0)
+                || (cfg.tetherableWifiRegexs.length != 0)
+                || (cfg.tetherableBluetoothRegexs.length != 0);
+        final boolean hasUpstreamConfiguration = !cfg.preferredUpstreamIfaceTypes.isEmpty()
+                || cfg.chooseUpstreamAutomatically;
 
         return hasDownstreamConfiguration && hasUpstreamConfiguration;
     }
