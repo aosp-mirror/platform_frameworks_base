@@ -1,4 +1,4 @@
-# Copyright (C) 2016 The Android Open Source Project
+# Copyright (C) 2018 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-###################################################################
-# FrameworksServicesLib app just for Robolectric test target      #
-###################################################################
 LOCAL_PATH := $(call my-dir)
 
+###################################################################
+# BackupFrameworksServicesLib app just for Robolectric test target      #
+###################################################################
 include $(CLEAR_VARS)
 
-LOCAL_PACKAGE_NAME := FrameworksServicesLib
+LOCAL_PACKAGE_NAME := BackupFrameworksServicesLib
 LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_MODULE_TAGS := optional
 
@@ -35,17 +35,16 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 include $(BUILD_PACKAGE)
 
 ###################################################################
-# FrameworksServicesLib Robolectric test target.                  #
+# BackupFrameworksServicesLib Robolectric test target.                  #
 ###################################################################
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := FrameworksServicesRoboTests
+LOCAL_MODULE := BackupFrameworksServicesRoboTests
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src) \
-    $(call all-java-files-under, backup/src)
+    $(call all-java-files-under, ../src/com/android/server/testing/shadows)
 
-LOCAL_RESOURCE_DIR := \
-    $(LOCAL_PATH)/res
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 LOCAL_JAVA_RESOURCE_DIRS := config
 
@@ -58,21 +57,21 @@ LOCAL_JAVA_LIBRARIES := \
     truth-prebuilt \
     testng
 
-LOCAL_INSTRUMENTATION_FOR := FrameworksServicesLib
+LOCAL_INSTRUMENTATION_FOR := BackupFrameworksServicesLib
 
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 ###################################################################
-# FrameworksServicesLib runner target to run the previous target. #
+# BackupFrameworksServicesLib runner target to run the previous target. #
 ###################################################################
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := RunFrameworksServicesRoboTests
+LOCAL_MODULE := RunBackupFrameworksServicesRoboTests
 
 LOCAL_JAVA_LIBRARIES := \
-    FrameworksServicesRoboTests \
+    BackupFrameworksServicesRoboTests \
     platform-test-annotations \
     robolectric_android-all-stub \
     Robolectric_all-target \
@@ -80,15 +79,6 @@ LOCAL_JAVA_LIBRARIES := \
     truth-prebuilt \
     testng
 
-LOCAL_TEST_PACKAGE := FrameworksServicesLib
-
-LOCAL_ROBOTEST_FILES := $(call find-files-in-subdirs,$(LOCAL_PATH)/src,*Test.java,.) \
-    $(call find-files-in-subdirs,$(LOCAL_PATH)/backup/src,*Test.java,.)
+LOCAL_TEST_PACKAGE := BackupFrameworksServicesLib
 
 include external/robolectric-shadows/run_robotests.mk
-
-###################################################################
-# include subdir Android.mk files
-###################################################################
-include $(CLEAR_VARS)
-include $(call all-makefiles-under,$(LOCAL_PATH))
