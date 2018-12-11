@@ -6097,6 +6097,7 @@ package android.telephony {
     method public boolean getEmergencyCallbackMode();
     method public java.lang.String getIsimDomain();
     method public int getPreferredNetworkType(int);
+    method public int getPreferredNetworkTypeBitmap();
     method public int getRadioPowerState();
     method public int getSimApplicationState();
     method public int getSimCardState();
@@ -6125,6 +6126,7 @@ package android.telephony {
     method public void setDataActivationState(int);
     method public deprecated void setDataEnabled(int, boolean);
     method public void setDataRoamingEnabled(boolean);
+    method public boolean setPreferredNetworkTypeBitmap(int);
     method public boolean setRadio(boolean);
     method public boolean setRadioPower(boolean);
     method public void setSimPowerState(int);
