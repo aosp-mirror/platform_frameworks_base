@@ -200,8 +200,6 @@ public final class ViewRootImpl implements ViewParent,
     static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList();
     static boolean sFirstDrawComplete = false;
 
-    private FrameDrawingCallback mNextRtFrameCallback;
-
     /**
      * Callback for notifying about global configuration changes.
      */
@@ -1052,7 +1050,9 @@ public final class ViewRootImpl implements ViewParent,
      * @param callback The callback to register.
      */
     public void registerRtFrameCallback(FrameDrawingCallback callback) {
-        mNextRtFrameCallback = callback;
+        if (mAttachInfo.mThreadedRenderer != null) {
+            mAttachInfo.mThreadedRenderer.registerRtFrameCallback(callback);
+        }
     }
 
     @UnsupportedAppUsage
@@ -3534,10 +3534,7 @@ public final class ViewRootImpl implements ViewParent,
 
                 useAsyncReport = true;
 
-                // draw(...) might invoke post-draw, which might register the next callback already.
-                final FrameDrawingCallback callback = mNextRtFrameCallback;
-                mNextRtFrameCallback = null;
-                mAttachInfo.mThreadedRenderer.draw(mView, mAttachInfo, this, callback);
+                mAttachInfo.mThreadedRenderer.draw(mView, mAttachInfo, this);
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
                 // wrong (an invalidate posted right before we destroyed the hardware surface

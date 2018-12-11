@@ -299,6 +299,8 @@ public final class ThreadedRenderer extends HardwareRenderer {
     private boolean mEnabled;
     private boolean mRequested = true;
 
+    private FrameDrawingCallback mNextRtFrameCallback;
+
     ThreadedRenderer(Context context, boolean translucent, String name) {
         super();
         setName(name);
@@ -432,6 +434,17 @@ public final class ThreadedRenderer extends HardwareRenderer {
     }
 
     /**
+     * Registers a callback to be executed when the next frame is being drawn on RenderThread. This
+     * callback will be executed on a RenderThread worker thread, and only used for the next frame
+     * and thus it will only fire once.
+     *
+     * @param callback The callback to register.
+     */
+    void registerRtFrameCallback(FrameDrawingCallback callback) {
+        mNextRtFrameCallback = callback;
+    }
+
+    /**
      * Destroys all hardware rendering resources associated with the specified
      * view hierarchy.
      *
@@ -562,6 +575,15 @@ public final class ThreadedRenderer extends HardwareRenderer {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "Record View#draw()");
         updateViewTreeDisplayList(view);
 
+        // Consume and set the frame callback after we dispatch draw to the view above, but before
+        // onPostDraw below which may reset the callback for the next frame.  This ensures that
+        // updates to the frame callback during scroll handling will also apply in this frame.
+        final FrameDrawingCallback callback = mNextRtFrameCallback;
+        mNextRtFrameCallback = null;
+        if (callback != null) {
+            setFrameCallback(callback);
+        }
+
         if (mRootNodeNeedsUpdate || !mRootNode.hasDisplayList()) {
             RecordingCanvas canvas = mRootNode.startRecording(mSurfaceWidth, mSurfaceHeight);
             try {
@@ -619,10 +641,8 @@ public final class ThreadedRenderer extends HardwareRenderer {
      *
      * @param view The view to draw.
      * @param attachInfo AttachInfo tied to the specified view.
-     * @param callbacks Callbacks invoked when drawing happens.
      */
-    void draw(View view, AttachInfo attachInfo, DrawCallbacks callbacks,
-            FrameDrawingCallback frameDrawingCallback) {
+    void draw(View view, AttachInfo attachInfo, DrawCallbacks callbacks) {
         final Choreographer choreographer = attachInfo.mViewRootImpl.mChoreographer;
         choreographer.mFrameInfo.markDrawStart();
 
@@ -642,9 +662,6 @@ public final class ThreadedRenderer extends HardwareRenderer {
             attachInfo.mPendingAnimatingRenderNodes = null;
         }
 
-        if (frameDrawingCallback != null) {
-            setFrameCallback(frameDrawingCallback);
-        }
         int syncResult = syncAndDrawFrame(choreographer.mFrameInfo);
         if ((syncResult & SYNC_LOST_SURFACE_REWARD_IF_FOUND) != 0) {
             setEnabled(false);
