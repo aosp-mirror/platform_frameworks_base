@@ -82,6 +82,7 @@ public final class ImsSsInfo implements Parcelable {
      */
     public static final int SERVICE_PROVISIONED = 1;
 
+    /**@hide*/
     @IntDef(value = {
             CLIR_OUTGOING_DEFAULT,
             CLIR_OUTGOING_INVOCATION,
@@ -141,6 +142,7 @@ public final class ImsSsInfo implements Parcelable {
      */
     public static final int CLIR_STATUS_TEMPORARILY_ALLOWED = 4;
 
+    /**@hide*/
     @IntDef(value = {
             CLIR_STATUS_NOT_PROVISIONED,
             CLIR_STATUS_PROVISIONED_PERMANENT,
@@ -184,7 +186,7 @@ public final class ImsSsInfo implements Parcelable {
          * Set the ICB number for IMS call barring.
          * @param number The number in E.164 international format.
          */
-        public Builder setIncomingCommunicationBarringNumber(@NonNull String number) {
+        public @NonNull Builder setIncomingCommunicationBarringNumber(@NonNull String number) {
             mImsSsInfo.mIcbNum = number;
             return this;
         }
@@ -192,7 +194,7 @@ public final class ImsSsInfo implements Parcelable {
         /**
          * Set the provisioning status for a Supplementary Service interrogation response.
          */
-        public Builder setProvisionStatus(@ServiceProvisionStatus int provisionStatus) {
+        public @NonNull Builder setProvisionStatus(@ServiceProvisionStatus int provisionStatus) {
             mImsSsInfo.mProvisionStatus = provisionStatus;
             return this;
         }
@@ -201,7 +203,7 @@ public final class ImsSsInfo implements Parcelable {
          * Set the Calling Line Identification Restriction (CLIR) status for a supplementary service
          * interrogation response.
          */
-        public Builder setClirInterrogationStatus(@ClirInterrogationStatus int status) {
+        public @NonNull Builder setClirInterrogationStatus(@ClirInterrogationStatus int status) {
             mImsSsInfo.mClirInterrogationStatus = status;
             return this;
         }
@@ -209,7 +211,7 @@ public final class ImsSsInfo implements Parcelable {
         /**
          * Set the Calling line identification Restriction (CLIR) state for outgoing calls.
          */
-        public Builder setClirOutgoingState(@ClirOutgoingState int state) {
+        public @NonNull Builder setClirOutgoingState(@ClirOutgoingState int state) {
             mImsSsInfo.mClirOutgoingState = state;
             return this;
         }
@@ -217,7 +219,7 @@ public final class ImsSsInfo implements Parcelable {
         /**
          * @return a built {@link ImsSsInfo} containing optional the parameters that were set.
          */
-        public ImsSsInfo build() {
+        public @NonNull ImsSsInfo build() {
             return mImsSsInfo;
         }
     }

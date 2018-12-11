@@ -16,10 +16,14 @@
 
 package android.telephony.ims;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * This class enables an application to get details on why a method call failed.
@@ -30,158 +34,292 @@ import android.os.Parcelable;
 public final class ImsReasonInfo implements Parcelable {
 
     /**
-     * Specific code of each types
+     * The Reason is unspecified.
      */
     public static final int CODE_UNSPECIFIED = 0;
 
-    /**
-     * LOCAL
-     */
+
+    // LOCAL
+
     // IMS -> Telephony
-    // The passed argument is an invalid
+    /**
+     * The passed argument is invalid.
+     */
     public static final int CODE_LOCAL_ILLEGAL_ARGUMENT = 101;
-    // The operation is invoked in invalid call state
+    /**
+     * The operation was invoked while in an invalid call state.
+     */
     public static final int CODE_LOCAL_ILLEGAL_STATE = 102;
-    // IMS service internal error
+    /**
+     * IMS service internal error
+     */
     public static final int CODE_LOCAL_INTERNAL_ERROR = 103;
-    // IMS service goes down (service connection is lost)
+    /**
+     * ImsService has crashed (service connection is lost).
+     */
     public static final int CODE_LOCAL_IMS_SERVICE_DOWN = 106;
-    // No pending incoming call exists
+    /**
+     * No pending incoming call exists
+     */
     public static final int CODE_LOCAL_NO_PENDING_CALL = 107;
-    // IMS Call ended during conference merge process
+    /**
+     * IMS Call ended during conference merge process
+     */
     public static final int CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE = 108;
 
     // IMS -> Telephony
-    // Service unavailable; by power off
+    /**
+     * Service unavailable; radio power off
+     */
     public static final int CODE_LOCAL_POWER_OFF = 111;
-    // Service unavailable; by low battery
+    /**
+     * Service unavailable; low battery
+     */
     public static final int CODE_LOCAL_LOW_BATTERY = 112;
-    // Service unavailable; by out of service (data service state)
+    /**
+     * Service unavailable; out of service (data service state)
+     */
     public static final int CODE_LOCAL_NETWORK_NO_SERVICE = 121;
-    // Service unavailable; by no LTE coverage
-    // (VoLTE is not supported even though IMS is registered)
+    /**
+     * Service unavailable; no LTE coverage
+     * (VoLTE is not supported even though IMS is registered)
+     */
     public static final int CODE_LOCAL_NETWORK_NO_LTE_COVERAGE = 122;
-    // Service unavailable; by located in roaming area
+    /**
+     * Service unavailable; located in roaming area
+     */
     public static final int CODE_LOCAL_NETWORK_ROAMING = 123;
-    // Service unavailable; by IP changed
+    /**
+     * Service unavailable; IP changed
+     */
     public static final int CODE_LOCAL_NETWORK_IP_CHANGED = 124;
-    // Service unavailable; other
+    /**
+     * Service unavailable; for an unspecified reason
+     */
     public static final int CODE_LOCAL_SERVICE_UNAVAILABLE = 131;
-    // Service unavailable; IMS connection is lost (IMS is not registered)
+    /**
+     * Service unavailable; IMS is not registered
+     */
     public static final int CODE_LOCAL_NOT_REGISTERED = 132;
 
     // IMS <-> Telephony
-    // Max call exceeded
+    /**
+     * Maximum number of simultaneous calls exceeded
+     */
     public static final int CODE_LOCAL_CALL_EXCEEDED = 141;
     // IMS <- Telephony
-    // Call busy
+    /**
+     * The call is busy.
+     */
     public static final int CODE_LOCAL_CALL_BUSY = 142;
-    // Call decline
+    /**
+     * The Call has been declined locally on this device.
+     */
     public static final int CODE_LOCAL_CALL_DECLINE = 143;
     // IMS -> Telephony
-    // SRVCC is in progress
+    /**
+     * Can not complete call; an SRVCC is in progress.
+     */
     public static final int CODE_LOCAL_CALL_VCC_ON_PROGRESSING = 144;
-    // Resource reservation is failed (QoS precondition)
+    /**
+     * Can not complete call; resource reservation is failed (QoS precondition)
+     */
     public static final int CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED = 145;
-    // Retry CS call; VoLTE service can't be provided by the network or remote end
-    // Resolve the extra code(EXTRA_CODE_CALL_RETRY_*) if the below code is set
+    /**
+     * VoLTE service can't be provided by the network or remote end, retry the call.
+     * Resolve the extra code provided in (EXTRA_CODE_CALL_RETRY_*) if the below code is set
+     */
     public static final int CODE_LOCAL_CALL_CS_RETRY_REQUIRED = 146;
-    // Retry VoLTE call; VoLTE service can't be provided by the network temporarily
+    /**
+     * VoLTE service can't be provided by the network temporarily, retry the call.
+     */
     public static final int CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED = 147;
-    // IMS call is already terminated (in TERMINATED state)
+    /**
+     * IMS call is already terminated (in TERMINATED state).
+     */
     public static final int CODE_LOCAL_CALL_TERMINATED = 148;
-    // Handover not feasible
+    /**
+     * Call was disconnected because a handover is not feasible due to network conditions.
+     */
     public static final int CODE_LOCAL_HO_NOT_FEASIBLE = 149;
 
-    /**
+    /*
      * TIMEOUT (IMS -> Telephony)
      */
-    // 1xx waiting timer is expired after sending INVITE request (MO only)
+    /**
+     * 1xx waiting timer is expired after sending INVITE request (MO calls only)
+     */
     public static final int CODE_TIMEOUT_1XX_WAITING = 201;
-    // User no answer during call setup operation (MO/MT)
-    // MO : 200 OK to INVITE request is not received,
-    // MT : No action from user after alerting the call
+    /**
+     * User didn't answer during call setup operation (MO/MT)
+     * MO : 200 OK to INVITE request is not received,
+     * MT : No action from user after alerting the call
+     */
     public static final int CODE_TIMEOUT_NO_ANSWER = 202;
-    // User no answer during call update operation (MO/MT)
-    // MO : 200 OK to re-INVITE request is not received,
-    // MT : No action from user after alerting the call
+    /**
+     * User no answer during call update operation (MO/MT)
+     * MO : 200 OK to re-INVITE request is not received,
+     * MT : No action from user after alerting the call
+     */
     public static final int CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE = 203;
 
-    //Call was blocked by call barring
+    /**
+     * The call was blocked by call barring configuration.
+     */
     public static final int CODE_CALL_BARRED = 240;
 
-    //Call failures for FDN
+    /**
+     * The operation is restricted to fixed dialing numbers only.
+     */
     public static final int CODE_FDN_BLOCKED = 241;
 
-    // Network does not accept the emergency call request because IMEI was used as identification
-    // and this capability is not supported by the network.
+    /**
+     * Network rejected the emergency call request because IMEI was used as identification
+     * and this capability is not supported by the network.
+     */
     public static final int CODE_IMEI_NOT_ACCEPTED = 243;
 
     //STK CC errors
+    /**
+     * Stk Call Control modified DIAL request to USSD request.
+     */
     public static final int CODE_DIAL_MODIFIED_TO_USSD = 244;
+    /**
+     * Stk Call Control modified DIAL request to SS request.
+     */
     public static final int CODE_DIAL_MODIFIED_TO_SS = 245;
+    /**
+     * Stk Call Control modified DIAL request to DIAL with modified data.
+     */
     public static final int CODE_DIAL_MODIFIED_TO_DIAL = 246;
+    /**
+     * Stk Call Control modified DIAL request to Video DIAL request.
+     */
     public static final int CODE_DIAL_MODIFIED_TO_DIAL_VIDEO = 247;
+    /**
+     * Stk Call Control modified Video DIAL request to DIAL request.
+     */
     public static final int CODE_DIAL_VIDEO_MODIFIED_TO_DIAL = 248;
+    /**
+     * Stk Call Control modified Video DIAL request to Video DIAL request.
+     */
     public static final int CODE_DIAL_VIDEO_MODIFIED_TO_DIAL_VIDEO = 249;
+    /**
+     * Stk Call Control modified Video DIAL request to SS request.
+     */
     public static final int CODE_DIAL_VIDEO_MODIFIED_TO_SS = 250;
+    /**
+     * Stk Call Control modified Video DIAL request to USSD request.
+     */
     public static final int CODE_DIAL_VIDEO_MODIFIED_TO_USSD = 251;
 
-    /**
+    /*
      * STATUSCODE (SIP response code) (IMS -> Telephony)
      */
     // 3xx responses
-    // SIP request is redirected
+    /**
+     * SIP 3xx response: SIP request is redirected
+     */
     public static final int CODE_SIP_REDIRECTED = 321;
     // 4xx responses
-    // 400 : Bad Request
+    /**
+     * Sip 400 response : Bad Request
+     */
     public static final int CODE_SIP_BAD_REQUEST = 331;
-    // 403 : Forbidden
+    /**
+     * Sip 403 response : Forbidden
+     */
     public static final int CODE_SIP_FORBIDDEN = 332;
-    // 404 : Not Found
+    /**
+     * Sip 404 response : Not Found
+     */
     public static final int CODE_SIP_NOT_FOUND = 333;
-    // 415 : Unsupported Media Type
-    // 416 : Unsupported URI Scheme
-    // 420 : Bad Extension
+    /**
+     * Not supported, because of one of the following:
+     * SIP response 415 : Unsupported Media Type,
+     * SIP response 416 : Unsupported URI Scheme,
+     * SIP response 420 : Bad Extension
+     */
     public static final int CODE_SIP_NOT_SUPPORTED = 334;
-    // 408 : Request Timeout
+    /**
+     * SIP response 408 : Request Timeout.
+     */
     public static final int CODE_SIP_REQUEST_TIMEOUT = 335;
-    // 480 : Temporarily Unavailable
+    /**
+     * SIP response 480 : Temporarily Unavailable
+     */
     public static final int CODE_SIP_TEMPRARILY_UNAVAILABLE = 336;
-    // 484 : Address Incomplete
+    /**
+     * SIP response 484 : Address Incomplete
+     */
     public static final int CODE_SIP_BAD_ADDRESS = 337;
-    // 486 : Busy Here
-    // 600 : Busy Everywhere
+    /**
+     * Returned a busy response, may be one of the following:
+     * SIP response 486 : Busy Here,
+     * SIP response 600 : Busy Everywhere
+     */
     public static final int CODE_SIP_BUSY = 338;
-    // 487 : Request Terminated
+    /**
+     * SIP response 487 : Request Terminated
+     */
     public static final int CODE_SIP_REQUEST_CANCELLED = 339;
-    // 406 : Not Acceptable
-    // 488 : Not Acceptable Here
-    // 606 : Not Acceptable
+    /**
+     * Received a not acceptable response, will be one of the following:
+     * SIP response 406 : Not Acceptable
+     * SIP response 488 : Not Acceptable Here
+     * SIP response 606 : Not Acceptable
+     */
     public static final int CODE_SIP_NOT_ACCEPTABLE = 340;
-    // 410 : Gone
-    // 604 : Does Not Exist Anywhere
+    /**
+     * Received a not acceptable response, will be one of the following:
+     * SIP response 410 : Gone
+     * SIP response 604 : Does Not Exist Anywhere
+     */
     public static final int CODE_SIP_NOT_REACHABLE = 341;
-    // Others
+    /**
+     * Received another unspecified error SIP response from the client.
+     */
     public static final int CODE_SIP_CLIENT_ERROR = 342;
-    // 481 Transaction Does Not Exist
+    /**
+     * SIP response 481: Transaction Does Not Exist
+     */
     public static final int CODE_SIP_TRANSACTION_DOES_NOT_EXIST = 343;
     // 5xx responses
-    // 501 : Server Internal Error
+    /**
+     * SIP response 501 : Server Internal Error
+     */
     public static final int CODE_SIP_SERVER_INTERNAL_ERROR = 351;
-    // 503 : Service Unavailable
+    /**
+     * SIP response 503 : Service Unavailable
+     */
     public static final int CODE_SIP_SERVICE_UNAVAILABLE = 352;
-    // 504 : Server Time-out
+    /**
+     * SIP response 504 : Server Time-out
+     */
     public static final int CODE_SIP_SERVER_TIMEOUT = 353;
-    // Others
+    /**
+     * Received an unspecified SIP server error response.
+     */
     public static final int CODE_SIP_SERVER_ERROR = 354;
     // 6xx responses
-    // 603 : Decline
+    /**
+     * 603 : Decline
+     */
     public static final int CODE_SIP_USER_REJECTED = 361;
-    // Others
+    /**
+     * Unspecified 6xx error.
+     */
     public static final int CODE_SIP_GLOBAL_ERROR = 362;
-    // Emergency failure
+
+    /**
+     * Emergency call failed in the modem with a temporary fail cause and should be redialed on this
+     * slot.
+     */
     public static final int CODE_EMERGENCY_TEMP_FAILURE = 363;
+    /**
+     * Emergency call failed in the modem with a permanent fail cause and should not be redialed on
+     * this slot. If there are any other slots available for emergency calling, try those.
+     */
     public static final int CODE_EMERGENCY_PERM_FAILURE = 364;
 
     /**
@@ -193,82 +331,149 @@ public final class ImsReasonInfo implements Parcelable {
      */
     public static final int CODE_SIP_USER_MARKED_UNWANTED = 365;
 
-    /**
+    /*
      * MEDIA (IMS -> Telephony)
      */
-    // Media resource initialization failed
+    /**
+     * Media resource initialization failed
+     */
     public static final int CODE_MEDIA_INIT_FAILED = 401;
-    // RTP timeout (no audio / video traffic in the session)
+    /**
+     * RTP timeout (no audio / video traffic in the session)
+     */
     public static final int CODE_MEDIA_NO_DATA = 402;
-    // Media is not supported; so dropped the call
+    /**
+     * Media is not supported; so dropped the call
+     */
     public static final int CODE_MEDIA_NOT_ACCEPTABLE = 403;
-    // Unknown media related errors
+    /**
+     * Unspecified media related error.
+     */
     public static final int CODE_MEDIA_UNSPECIFIED = 404;
 
-    /**
+    /*
      * USER
      */
     // Telephony -> IMS
-    // User triggers the call end
+    /**
+     * User triggers the call to be terminated.
+     */
     public static final int CODE_USER_TERMINATED = 501;
-    // No action while an incoming call is ringing
+    /**
+     * No action was taken while an incoming call was ringing.
+     */
     public static final int CODE_USER_NOANSWER = 502;
-    // User ignores an incoming call
+    /**
+     * User ignored an incoming call.
+     */
     public static final int CODE_USER_IGNORE = 503;
-    // User declines an incoming call
+    /**
+     * User declined an incoming call.
+     */
     public static final int CODE_USER_DECLINE = 504;
-    // Device declines/ends a call due to low battery
+    /**
+     * Device declined/ended a call due to a low battery condition.
+     */
     public static final int CODE_LOW_BATTERY = 505;
-    // Device declines call due to blacklisted call ID
+    /**
+     * Device declined a call due to a blacklisted caller ID.
+     */
     public static final int CODE_BLACKLISTED_CALL_ID = 506;
     // IMS -> Telephony
-    // The call is terminated by the network or remote user
+    /**
+     * The call has been terminated by the network or remote user.
+     */
     public static final int CODE_USER_TERMINATED_BY_REMOTE = 510;
 
-    /**
-     * Extra codes for the specific code value
-     * This value can be referred when the code is CODE_LOCAL_CALL_CS_RETRY_REQUIRED.
-     */
-    // Try to connect CS call; normal
-    public static final int EXTRA_CODE_CALL_RETRY_NORMAL = 1;
-    // Try to connect CS call without the notification to user
-    public static final int EXTRA_CODE_CALL_RETRY_SILENT_REDIAL = 2;
-    // Try to connect CS call by the settings of the menu
-    public static final int EXTRA_CODE_CALL_RETRY_BY_SETTINGS = 3;
-
-    /**
+    /*
      * UT
      */
+    /**
+     * UT is currently not supported on this device.
+     */
     public static final int CODE_UT_NOT_SUPPORTED = 801;
+    /**
+     * UT services are currently not available on this device.
+     */
     public static final int CODE_UT_SERVICE_UNAVAILABLE = 802;
+    /**
+     * The requested UT operation is not allowed.
+     */
     public static final int CODE_UT_OPERATION_NOT_ALLOWED = 803;
+    /**
+     * The UT request resulted in a network error.
+     */
     public static final int CODE_UT_NETWORK_ERROR = 804;
+    /**
+     * The password entered for UT operations does not match the stored password.
+     */
     public static final int CODE_UT_CB_PASSWORD_MISMATCH = 821;
     //STK CC errors
+    /**
+     * Sim Toolkit Call Control modified the UT operation to a dial command.
+     */
     public static final int CODE_UT_SS_MODIFIED_TO_DIAL = 822;
+    /**
+     * Sim Toolkit Call Control modified the UT operation to a USSD command.
+     */
     public static final int CODE_UT_SS_MODIFIED_TO_USSD = 823;
+    /**
+     * Sim Toolkit Call Control modified the UT operation to another supplementary service command.
+     */
     public static final int CODE_UT_SS_MODIFIED_TO_SS = 824;
+    /**
+     * Sim Toolkit Call Control modified the UT operation to a video call dial command.
+     */
     public static final int CODE_UT_SS_MODIFIED_TO_DIAL_VIDEO = 825;
 
+    /**@hide*/
+    @IntDef(value = {
+            CODE_UT_NOT_SUPPORTED,
+            CODE_UT_SERVICE_UNAVAILABLE,
+            CODE_UT_OPERATION_NOT_ALLOWED,
+            CODE_UT_NETWORK_ERROR,
+            CODE_UT_CB_PASSWORD_MISMATCH,
+            CODE_UT_SS_MODIFIED_TO_DIAL,
+            CODE_UT_SS_MODIFIED_TO_USSD,
+            CODE_UT_SS_MODIFIED_TO_SS,
+            CODE_UT_SS_MODIFIED_TO_DIAL_VIDEO
+    }, prefix = "CODE_UT_")
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UtReason {}
+
     /**
-     * ECBM
+     * Emergency callback mode is not supported.
      */
     public static final int CODE_ECBM_NOT_SUPPORTED = 901;
 
     /**
-     * Fail code used to indicate that Multi-endpoint is not supported by the Ims framework.
+     * Fail code used to indicate that Multi-endpoint is not supported by the IMS framework.
      */
     public static final int CODE_MULTIENDPOINT_NOT_SUPPORTED = 902;
 
     /**
-     * Ims Registration error code
+     * IMS Registration error code
      */
     public static final int CODE_REGISTRATION_ERROR = 1000;
 
-    /**
+    /*
      * CALL DROP error codes (Call could drop because of many reasons like Network not available,
      *  handover, failed, etc)
      */
+    /**
+     * MT call has ended due to a release from the network because the call was answered elsewhere.
+     */
+    public static final int CODE_ANSWERED_ELSEWHERE = 1014;
+
+    /**
+     * For MultiEndpoint - Call Pull request has failed.
+     */
+    public static final int CODE_CALL_PULL_OUT_OF_SYNC = 1015;
+
+    /**
+     * For MultiEndpoint - Call has been pulled from primary to secondary.
+     */
+    public static final int CODE_CALL_END_CAUSE_CALL_PULL = 1016;
 
     /**
      * CALL DROP error code for the case when a device is ePDG capable and when the user is on an
@@ -279,46 +484,35 @@ public final class ImsReasonInfo implements Parcelable {
     public static final int CODE_CALL_DROP_IWLAN_TO_LTE_UNAVAILABLE = 1100;
 
     /**
-     * MT call has ended due to a release from the network
-     * because the call was answered elsewhere
-     */
-    public static final int CODE_ANSWERED_ELSEWHERE = 1014;
-
-    /**
-     * For MultiEndpoint - Call Pull request has failed
-     */
-    public static final int CODE_CALL_PULL_OUT_OF_SYNC = 1015;
-
-    /**
-     * For MultiEndpoint - Call has been pulled from primary to secondary
-     */
-    public static final int CODE_CALL_END_CAUSE_CALL_PULL = 1016;
-
-    /**
-     * Supplementary services (HOLD/RESUME) failure error codes.
-     * Values for Supplemetary services failure - Failed, Cancelled and Re-Invite collision.
+     * Supplementary Services (HOLD/RESUME) - the command failed.
      */
     public static final int CODE_SUPP_SVC_FAILED = 1201;
+    /**
+     * Supplementary Services (HOLD/RESUME) - the command was cancelled.
+     */
     public static final int CODE_SUPP_SVC_CANCELLED = 1202;
+    /**
+     * Supplementary Services (HOLD/RESUME) - the command resulted in a re-invite collision.
+     */
     public static final int CODE_SUPP_SVC_REINVITE_COLLISION = 1203;
 
     /**
-     * DPD Procedure received no response or send failed
+     * DPD Procedure received no response or send failed.
      */
     public static final int CODE_IWLAN_DPD_FAILURE = 1300;
 
     /**
-     * Establishment of the ePDG Tunnel Failed
+     * Establishment of the ePDG Tunnel Failed.
      */
     public static final int CODE_EPDG_TUNNEL_ESTABLISH_FAILURE = 1400;
 
     /**
-     * Re-keying of the ePDG Tunnel Failed; may not always result in teardown
+     * Re-keying of the ePDG Tunnel Failed; may not always result in teardown.
      */
     public static final int CODE_EPDG_TUNNEL_REKEY_FAILURE = 1401;
 
     /**
-     * Connection to the packet gateway is lost
+     * Connection to the packet gateway is lost.
      */
     public static final int CODE_EPDG_TUNNEL_LOST_CONNECTION = 1402;
 
@@ -571,8 +765,10 @@ public final class ImsReasonInfo implements Parcelable {
      */
     public static final int CODE_REJECT_ONGOING_CS_CALL = 1621;
 
-    /* OEM specific error codes. To be used by OEMs when they don't want to
-   reveal error code which would be replaced by ERROR_UNSPECIFIED */
+    /*
+     * OEM specific error codes. To be used by OEMs when they don't want to reveal error code which
+     * would be replaced by ERROR_UNSPECIFIED.
+     */
     public static final int CODE_OEM_CAUSE_1 = 0xf001;
     public static final int CODE_OEM_CAUSE_2 = 0xf002;
     public static final int CODE_OEM_CAUSE_3 = 0xf003;
@@ -595,6 +791,33 @@ public final class ImsReasonInfo implements Parcelable {
      */
     public static final String EXTRA_MSG_SERVICE_NOT_AUTHORIZED
             = "Forbidden. Not Authorized for Service";
+
+
+    /*
+     * Extra codes for the specific code value
+     * This value can be referred when the code is CODE_LOCAL_CALL_CS_RETRY_REQUIRED.
+     */
+    /**
+     * An extra that may be populated when the {@link CODE_LOCAL_CALL_CS_RETRY_REQUIRED} result has
+     * been returned.
+     * <p>
+     * Try to connect the call using CS
+     */
+    public static final int EXTRA_CODE_CALL_RETRY_NORMAL = 1;
+    /**
+     * An extra that may be populated when the {@link CODE_LOCAL_CALL_CS_RETRY_REQUIRED} result has
+     * been returned.
+     * <p>
+     * Try to connect the call using CS and do not notify the user.
+     */
+    public static final int EXTRA_CODE_CALL_RETRY_SILENT_REDIAL = 2;
+    /**
+     * An extra that may be populated when the {@link CODE_LOCAL_CALL_CS_RETRY_REQUIRED} result has
+     * been returned.
+     * <p>
+     * Try to connect the call using CS by using the settings.
+     */
+    public static final int EXTRA_CODE_CALL_RETRY_BY_SETTINGS = 3;
 
 
     // For main reason code
@@ -638,29 +861,28 @@ public final class ImsReasonInfo implements Parcelable {
     }
 
     /**
-     *
+     * @return an integer representing more information about the completion of an operation.
      */
     public int getCode() {
         return mCode;
     }
 
     /**
-     *
+     * @return an optional OEM specified code that provides extra information.
      */
     public int getExtraCode() {
         return mExtraCode;
     }
 
     /**
-     *
+     * @return an optional OEM specified string that provides extra information about the operation
+     * result.
      */
     public String getExtraMessage() {
         return mExtraMessage;
     }
 
     /**
-     * Returns the string format of {@link ImsReasonInfo}
-     *
      * @return the string format of {@link ImsReasonInfo}
      */
     public String toString() {
