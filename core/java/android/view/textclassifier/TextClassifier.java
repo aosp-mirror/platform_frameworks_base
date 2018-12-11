@@ -349,7 +349,7 @@ public interface TextClassifier {
             @NonNull ConversationActions.Request request) {
         Preconditions.checkNotNull(request);
         Utils.checkMainThread();
-        return new ConversationActions(Collections.emptyList());
+        return new ConversationActions(Collections.emptyList(), null);
     }
 
     /**

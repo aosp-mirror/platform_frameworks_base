@@ -387,7 +387,10 @@ public final class TextClassifierImpl implements TextClassifier {
 
             Collection<String> expectedTypes = resolveActionTypesFromRequest(request);
             List<ConversationActions.ConversationAction> conversationActions = new ArrayList<>();
-            int maxSuggestions = Math.min(request.getMaxSuggestions(), nativeSuggestions.length);
+            int maxSuggestions = nativeSuggestions.length;
+            if (request.getMaxSuggestions() > 0) {
+                maxSuggestions = Math.min(request.getMaxSuggestions(), nativeSuggestions.length);
+            }
             for (int i = 0; i < maxSuggestions; i++) {
                 ActionsSuggestionsModel.ActionSuggestion nativeSuggestion = nativeSuggestions[i];
                 String actionType = nativeSuggestion.getActionType();
@@ -400,7 +403,7 @@ public final class TextClassifierImpl implements TextClassifier {
                                 .setConfidenceScore(nativeSuggestion.getScore())
                                 .build());
             }
-            return new ConversationActions(conversationActions);
+            return new ConversationActions(conversationActions, /*id*/ null);
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.
             Log.e(LOG_TAG, "Error suggesting conversation actions.", t);
