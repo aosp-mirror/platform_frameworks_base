@@ -41,11 +41,14 @@ import java.util.Map;
 
 /**
  * Tests for {@link SettingsToPropertiesMapper}
+ *
+ *  Build/Install/Run:
+ *  atest FrameworksServicesTests:SettingsToPropertiesMapperTest
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SettingsToPropertiesMapperTest {
-    private static final String NAME_VALID_CHARACTERS_REGEX = "^[\\w\\.\\-@:]*$";
+    private static final String NAME_VALID_CHARACTERS_REGEX = "^[\\w\\-@:]*$";
     private static final String[] TEST_MAPPING = new String[] {
             Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS
     };
@@ -77,7 +80,28 @@ public class SettingsToPropertiesMapperTest {
             }
             if (!globalSetting.matches(NAME_VALID_CHARACTERS_REGEX)) {
                 Assert.fail(globalSetting + " contains invalid characters. "
-                        + "Only alphanumeric characters, '.', '-', '@', ':' and '_' are valid.");
+                        + "Only alphanumeric characters, '-', '@', ':' and '_' are valid.");
+            }
+        }
+    }
+
+    @Test
+    public void validateRegisteredDeviceConfigScopes() {
+        HashSet<String> hashSet = new HashSet<>();
+        for (String deviceConfigScope : SettingsToPropertiesMapper.sDeviceConfigScopes) {
+            if (hashSet.contains(deviceConfigScope)) {
+                Assert.fail("deviceConfigScope "
+                        + deviceConfigScope
+                        + " is registered more than once in "
+                        + "SettingsToPropertiesMapper.sDeviceConfigScopes.");
+            }
+            hashSet.add(deviceConfigScope);
+            if (TextUtils.isEmpty(deviceConfigScope)) {
+                Assert.fail("empty deviceConfigScope registered.");
+            }
+            if (!deviceConfigScope.matches(NAME_VALID_CHARACTERS_REGEX)) {
+                Assert.fail(deviceConfigScope + " contains invalid characters. "
+                        + "Only alphanumeric characters, '-', '@', ':' and '_' are valid.");
             }
         }
     }
@@ -98,8 +122,7 @@ public class SettingsToPropertiesMapperTest {
                 Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS, "testValue2");
         mTestMapper.updatePropertyFromSetting(
                 Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS,
-                systemPropertyName,
-                true);
+                systemPropertyName);
         propValue = mTestMapper.systemPropertiesGet(systemPropertyName);
         Assert.assertEquals("testValue2", propValue);
 
@@ -107,8 +130,7 @@ public class SettingsToPropertiesMapperTest {
                 Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS, null);
         mTestMapper.updatePropertyFromSetting(
                 Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS,
-                systemPropertyName,
-                true);
+                systemPropertyName);
         propValue = mTestMapper.systemPropertiesGet(systemPropertyName);
         Assert.assertEquals("", propValue);
     }

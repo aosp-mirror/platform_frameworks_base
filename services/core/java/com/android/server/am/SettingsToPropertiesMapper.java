@@ -19,8 +19,10 @@ package com.android.server.am;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.SystemProperties;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -61,13 +63,18 @@ class SettingsToPropertiesMapper {
     // Add the global setting you want to push to native level as experiment flag into this list.
     //
     // NOTE: please grant write permission system property prefix
-    // with format persist.experiment.[experiment_category_name]. in system_server.te and grant read
-    // permission in the corresponding .te file your feature belongs to.
+    // with format persist.device_config.global_settings.[flag_name] in system_server.te and grant
+    // read permission in the corresponding .te file your feature belongs to.
     @VisibleForTesting
     static final String[] sGlobalSettings = new String[] {
             Settings.Global.NATIVE_FLAGS_HEALTH_CHECK_ENABLED,
     };
 
+    // All the flags under the listed DeviceConfig scopes will be synced to native level.
+    //
+    // NOTE: please grant write permission system property prefix
+    // with format persist.device_config.[device_config_scope]. in system_server.te and grant read
+    // permission in the corresponding .te file your feature belongs to.
     @VisibleForTesting
     static final String[] sDeviceConfigScopes = new String[] {
     };
@@ -104,19 +111,31 @@ class SettingsToPropertiesMapper {
             ContentObserver co = new ContentObserver(null) {
                 @Override
                 public void onChange(boolean selfChange) {
-                    updatePropertyFromSetting(globalSetting, propName, true);
+                    updatePropertyFromSetting(globalSetting, propName);
                 }
             };
 
             // only updating on starting up when no native flags reset is performed during current
             // booting.
             if (!isNativeFlagsResetPerformed()) {
-                updatePropertyFromSetting(globalSetting, propName, true);
+                updatePropertyFromSetting(globalSetting, propName);
             }
             mContentResolver.registerContentObserver(settingUri, false, co);
         }
 
-        // TODO: address sDeviceConfigScopes after DeviceConfig APIs are available.
+        for (String deviceConfigScope : mDeviceConfigScopes) {
+            DeviceConfig.addOnPropertyChangedListener(
+                    deviceConfigScope,
+                    AsyncTask.THREAD_POOL_EXECUTOR,
+                    (String scope, String name, String value) -> {
+                        String propertyName = makePropertyName(scope, name);
+                        if (propertyName == null) {
+                            log("unable to construct system property for " + scope + "/" + name);
+                            return;
+                        }
+                        setProperty(propertyName, value);
+                    });
+        }
     }
 
     public static SettingsToPropertiesMapper start(ContentResolver contentResolver) {
@@ -182,15 +201,6 @@ class SettingsToPropertiesMapper {
         }
 
         return propertyName;
-    }
-
-    private String getSetting(String name, boolean isGlobalSetting) {
-        if (isGlobalSetting) {
-            return Settings.Global.getString(mContentResolver, name);
-        } else {
-            // TODO: complete the code after DeviceConfig APIs implemented.
-            return null;
-        }
     }
 
     private void setProperty(String key, String value) {
@@ -259,8 +269,8 @@ class SettingsToPropertiesMapper {
     }
 
     @VisibleForTesting
-    void updatePropertyFromSetting(String settingName, String propName, boolean isGlobalSetting) {
-        String settingValue = getSetting(settingName, isGlobalSetting);
+    void updatePropertyFromSetting(String settingName, String propName) {
+        String settingValue = Settings.Global.getString(mContentResolver, settingName);
         setProperty(propName, settingValue);
     }
 }
