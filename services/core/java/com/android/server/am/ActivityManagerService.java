@@ -18962,7 +18962,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ProcessMemoryState processMemoryState =
                             new ProcessMemoryState(uid,
                                     r.processName,
-                                    r.maxAdj,
+                                    r.curAdj,
                                     memoryStat.pgfault,
                                     memoryStat.pgmajfault,
                                     memoryStat.rssInBytes,
