@@ -58,7 +58,7 @@ public final class FillRequest {
      */
     @NonNull
     public AutofillId getFocusedId() {
-        return mProxy.focusedId;
+        return mProxy.getFocusedId();
     }
 
     /**
@@ -66,7 +66,7 @@ public final class FillRequest {
      */
     @NonNull
     public AutofillValue getFocusedValue() {
-        return mProxy.focusedValue;
+        return mProxy.getFocusedValue();
     }
 
     /**
@@ -82,6 +82,6 @@ public final class FillRequest {
     @Override
     public String toString() {
         return "FillRequest[act=" + getActivityComponent().flattenToShortString()
-                + ", id=" + mProxy.focusedId + "]";
+                + ", id=" + mProxy.getFocusedId() + "]";
     }
 }
