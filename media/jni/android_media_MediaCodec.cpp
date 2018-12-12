@@ -752,6 +752,13 @@ void JMediaCodec::setVideoScalingMode(int mode) {
     }
 }
 
+void JMediaCodec::selectAudioPresentation(const int32_t presentationId, const int32_t programId) {
+    sp<AMessage> msg = new AMessage;
+    msg->setInt32("audio-presentation-presentation-id", presentationId);
+    msg->setInt32("audio-presentation-program-id", programId);
+    (void)mCodec->setParameters(msg);
+}
+
 static jthrowable createCodecException(
         JNIEnv *env, status_t err, int32_t actionCode, const char *msg = NULL) {
     ScopedLocalRef<jclass> clazz(
@@ -1874,6 +1881,18 @@ static void android_media_MediaCodec_setVideoScalingMode(
     codec->setVideoScalingMode(mode);
 }
 
+static void android_media_MediaCodec_setAudioPresentation(
+        JNIEnv *env, jobject thiz, jint presentationId, jint programId) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return;
+    }
+
+    codec->selectAudioPresentation((int32_t)presentationId, (int32_t)programId);
+}
+
 static void android_media_MediaCodec_native_init(JNIEnv *env) {
     ScopedLocalRef<jclass> clazz(
             env, env->FindClass("android/media/MediaCodec"));
@@ -2182,6 +2201,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "setVideoScalingMode", "(I)V",
       (void *)android_media_MediaCodec_setVideoScalingMode },
+
+    { "native_setAudioPresentation", "(II)V",
+      (void *)android_media_MediaCodec_setAudioPresentation },
 
     { "native_init", "()V", (void *)android_media_MediaCodec_native_init },
 
