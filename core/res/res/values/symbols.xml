@@ -1988,6 +1988,10 @@
   <java-symbol type="string" name="wifi_available_content_failed_to_connect" />
   <java-symbol type="string" name="wifi_available_action_connect" />
   <java-symbol type="string" name="wifi_available_action_all_networks" />
+  <java-symbol type="string" name="wifi_suggestion_title" />
+  <java-symbol type="string" name="wifi_suggestion_content" />
+  <java-symbol type="string" name="wifi_suggestion_action_allow_app" />
+  <java-symbol type="string" name="wifi_suggestion_action_disallow_app" />
   <java-symbol type="string" name="wifi_wakeup_onboarding_title" />
   <java-symbol type="string" name="wifi_wakeup_onboarding_subtext" />
   <java-symbol type="string" name="wifi_wakeup_onboarding_action_disable" />
