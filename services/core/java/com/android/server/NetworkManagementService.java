@@ -951,18 +951,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     // INetworkManagementService members
     //
     @Override
-    public INetd getNetdService() throws RemoteException {
-        final CountDownLatch connectedSignal = mConnectedSignal;
-        if (connectedSignal != null) {
-            try {
-                connectedSignal.await();
-            } catch (InterruptedException ignored) {}
-        }
-
-        return mNetdService;
-    }
-
-    @Override
     public String[] listInterfaces() {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {

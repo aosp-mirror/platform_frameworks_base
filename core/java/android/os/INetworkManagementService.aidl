@@ -18,7 +18,6 @@
 package android.os;
 
 import android.net.InterfaceConfiguration;
-import android.net.INetd;
 import android.net.INetworkManagementEventObserver;
 import android.net.ITetheringStatsProvider;
 import android.net.Network;
@@ -45,11 +44,6 @@ interface INetworkManagementService
      * Unregister an observer from receiving events.
      */
     void unregisterObserver(INetworkManagementEventObserver obs);
-
-    /**
-     * Retrieve an INetd to talk to netd.
-     */
-    INetd getNetdService();
 
     /**
      * Returns a list of currently known network interfaces

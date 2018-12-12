@@ -653,7 +653,6 @@ java_defaults {
             "frameworks/av/media/libaudioclient/aidl",
             "frameworks/native/aidl/gui",
             "system/core/storaged/binder",
-            "system/netd/server/binder",
             "system/vold/binder",
             "system/bt/binder",
             "system/security/keystore/binder",
