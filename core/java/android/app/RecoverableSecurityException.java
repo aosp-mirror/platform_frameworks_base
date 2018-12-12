@@ -16,15 +16,13 @@
 
 package android.app;
 
-import android.content.ContentProvider;
-import android.content.ContentResolver;
+import android.annotation.NonNull;
 import android.content.Context;
-import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 /**
  * Specialization of {@link SecurityException} that contains additional
@@ -35,18 +33,11 @@ import com.android.internal.util.Preconditions;
  * authentication credentials, or granting access.
  * <p>
  * If the receiving app is actively involved with the user, it should present
- * the contained recovery details to help the user make forward progress. The
- * {@link #showAsDialog(Activity)} and
- * {@link #showAsNotification(Context, String)} methods are provided as a
- * convenience, but receiving apps are encouraged to use
- * {@link #getUserMessage()} and {@link #getUserAction()} to integrate in a more
- * natural way if relevant.
+ * the contained recovery details to help the user make forward progress.
  * <p class="note">
  * Note: legacy code that receives this exception may treat it as a general
  * {@link SecurityException}, and thus there is no guarantee that the messages
  * contained will be shown to the end user.
- *
- * @hide
  */
 public final class RecoverableSecurityException extends SecurityException implements Parcelable {
     private static final String TAG = "RecoverableSecurityException";
@@ -78,51 +69,26 @@ public final class RecoverableSecurityException extends SecurityException implem
      *            apps that observe {@link Activity#RESULT_OK} may choose to
      *            immediately retry their operation.
      */
-    public RecoverableSecurityException(Throwable cause, CharSequence userMessage,
-            RemoteAction userAction) {
+    public RecoverableSecurityException(@NonNull Throwable cause, @NonNull CharSequence userMessage,
+            @NonNull RemoteAction userAction) {
         super(cause.getMessage());
-        mUserMessage = Preconditions.checkNotNull(userMessage);
-        mUserAction = Preconditions.checkNotNull(userAction);
-    }
-
-    /** {@hide} */
-    @Deprecated
-    public RecoverableSecurityException(Throwable cause, CharSequence userMessage,
-            CharSequence userActionTitle, PendingIntent userAction) {
-        this(cause, userMessage,
-                new RemoteAction(
-                        Icon.createWithResource("android",
-                                com.android.internal.R.drawable.ic_restart),
-                        userActionTitle, userActionTitle, userAction));
+        mUserMessage = Objects.requireNonNull(userMessage);
+        mUserAction = Objects.requireNonNull(userAction);
     }
 
     /**
      * Return short message describing the issue for end user audiences, which
      * may be shown in a notification or dialog.
      */
-    public CharSequence getUserMessage() {
+    public @NonNull CharSequence getUserMessage() {
         return mUserMessage;
     }
 
     /**
      * Return primary action that will initiate the recovery.
      */
-    public RemoteAction getUserAction() {
+    public @NonNull RemoteAction getUserAction() {
         return mUserAction;
-    }
-
-    /** @removed */
-    @Deprecated
-    public void showAsNotification(Context context) {
-        final NotificationManager nm = context.getSystemService(NotificationManager.class);
-
-        // Create a channel per-sender, since we don't want one poorly behaved
-        // remote app to cause all of our notifications to be blocked
-        final String channelId = TAG + "_" + mUserAction.getActionIntent().getCreatorUid();
-        nm.createNotificationChannel(new NotificationChannel(channelId, TAG,
-                NotificationManager.IMPORTANCE_DEFAULT));
-
-        showAsNotification(context, channelId);
     }
 
     /**
@@ -142,6 +108,7 @@ public final class RecoverableSecurityException extends SecurityException implem
      * @param channelId the {@link NotificationChannel} to use, which must have
      *            been already created using
      *            {@link NotificationManager#createNotificationChannel}.
+     * @hide
      */
     public void showAsNotification(Context context, String channelId) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
@@ -167,6 +134,8 @@ public final class RecoverableSecurityException extends SecurityException implem
      * <p>
      * This method will only display the most recent exception from any single
      * remote UID; dialogs from older exceptions will always be replaced.
+     *
+     * @hide
      */
     public void showAsDialog(Activity activity) {
         final LocalDialog dialog = new LocalDialog();

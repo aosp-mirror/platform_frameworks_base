@@ -1054,7 +1054,7 @@ package android.content {
     method public void setDetectNotResponding(long);
   }
 
-  public abstract class ContentResolver {
+  public abstract class ContentResolver implements android.content.ContentInterface {
     method public android.graphics.drawable.Drawable getTypeDrawable(java.lang.String);
   }
 
