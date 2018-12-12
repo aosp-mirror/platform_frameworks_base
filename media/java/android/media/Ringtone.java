@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -60,6 +61,8 @@ public class Ringtone {
 
     private final Context mContext;
     private final AudioManager mAudioManager;
+    private VolumeShaper.Configuration mVolumeShaperConfig;
+    private VolumeShaper mVolumeShaper;
 
     /**
      * Flag indicating if we're allowed to fall back to remote playback using
@@ -302,6 +305,18 @@ public class Ringtone {
      */
     @UnsupportedAppUsage
     public void setUri(Uri uri) {
+        setUri(uri, null);
+    }
+
+    /**
+     * Set {@link Uri} to be used for ringtone playback. Attempts to open
+     * locally, otherwise will delegate playback to remote
+     * {@link IRingtonePlayer}. Add {@link VolumeShaper} if required.
+     *
+     * @hide
+     */
+    public void setUri(Uri uri, @Nullable VolumeShaper.Configuration volumeShaperConfig) {
+        mVolumeShaperConfig = volumeShaperConfig;
         destroyLocalPlayer();
 
         mUri = uri;
@@ -318,6 +333,9 @@ public class Ringtone {
             mLocalPlayer.setAudioAttributes(mAudioAttributes);
             synchronized (mPlaybackSettingsLock) {
                 applyPlaybackProperties_sync();
+            }
+            if (mVolumeShaperConfig != null) {
+                mVolumeShaper = mLocalPlayer.createVolumeShaper(mVolumeShaperConfig);
             }
             mLocalPlayer.prepare();
 
@@ -412,6 +430,9 @@ public class Ringtone {
         }
         mLocalPlayer.setOnCompletionListener(mCompletionListener);
         mLocalPlayer.start();
+        if (mVolumeShaper != null) {
+            mVolumeShaper.apply(VolumeShaper.Operation.PLAY);
+        }
     }
 
     /**
@@ -457,6 +478,9 @@ public class Ringtone {
                         mLocalPlayer.setAudioAttributes(mAudioAttributes);
                         synchronized (mPlaybackSettingsLock) {
                             applyPlaybackProperties_sync();
+                        }
+                        if (mVolumeShaperConfig != null) {
+                            mVolumeShaper = mLocalPlayer.createVolumeShaper(mVolumeShaperConfig);
                         }
                         mLocalPlayer.prepare();
                         startLocalPlayer();
