@@ -3710,6 +3710,12 @@ public class PackageParser {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_USES_NON_SDK_API;
         }
 
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_hasFragileUserData,
+                false)) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HAS_FRAGILE_USER_DATA;
+        }
+
         if (outError[0] == null) {
             CharSequence pname;
             if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.FROYO) {

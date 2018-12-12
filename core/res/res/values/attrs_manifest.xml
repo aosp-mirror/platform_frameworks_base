@@ -1603,6 +1603,9 @@
         <!-- Declares that this application should be invoked without non-SDK API enforcement -->
         <attr name="usesNonSdkApi" />
 
+        <!-- If {@code true} the user is prompted to keep the app's data on uninstall -->
+        <attr name="hasFragileUserData" />
+
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or

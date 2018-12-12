@@ -2930,6 +2930,7 @@
         <public name="dataRetentionTime" />
         <public name="selectionDividerHeight" />
         <public name="foregroundServiceType" />
+        <public name="hasFragileUserData" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">

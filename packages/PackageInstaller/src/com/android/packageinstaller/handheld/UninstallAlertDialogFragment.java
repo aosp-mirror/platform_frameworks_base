@@ -16,21 +16,30 @@
 
 package com.android.packageinstaller.handheld;
 
+import static android.os.storage.StorageManager.convert;
 import static android.text.format.Formatter.formatFileSize;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.usage.StorageStats;
+import android.app.usage.StorageStatsManager;
 import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -43,23 +52,118 @@ import java.util.List;
 
 public class UninstallAlertDialogFragment extends DialogFragment implements
         DialogInterface.OnClickListener {
+    private static final String LOG_TAG = UninstallAlertDialogFragment.class.getSimpleName();
 
-    private CheckBox mClearContributedFiles;
+    private @Nullable CheckBox mClearContributedFiles;
+    private @Nullable CheckBox mKeepData;
 
     /**
-     * Get number of bytes of the combined files contributed by the package.
+     * Get number of bytes of the files contributed by the package.
      *
-     * @param pkg The package that might have contibuted files.
+     * @param pkg The package that might have contributed files.
      * @param user The user the package belongs to.
      *
      * @return The number of bytes.
      */
-    private long getContributedMediaSize(@NonNull String pkg, @NonNull UserHandle user) {
+    private long getContributedMediaSizeForUser(@NonNull String pkg, @NonNull UserHandle user) {
         try {
             return MediaStore.getContributedMediaSize(getContext(), pkg, user);
         } catch (IOException e) {
+            Log.e(LOG_TAG, "Cannot determine amount of contributes files for " + pkg
+                    + " (user " + user + ")", e);
             return 0;
         }
+    }
+
+    /**
+     * Get number of bytes of the files contributed by the package.
+     *
+     * @param pkg The package that might have contributed files.
+     * @param user The user the package belongs to or {@code null} if files of all users should be
+     *             counted.
+     *
+     * @return The number of bytes.
+     */
+    private long getContributedMediaSize(@NonNull String pkg, @Nullable UserHandle user) {
+        UserManager userManager = getContext().getSystemService(UserManager.class);
+
+        long contributedFileSize = 0;
+
+        if (user == null) {
+            List<UserInfo> users = userManager.getUsers();
+
+            int numUsers = users.size();
+            for (int i = 0; i < numUsers; i++) {
+                contributedFileSize += getContributedMediaSizeForUser(pkg,
+                        UserHandle.of(users.get(i).id));
+            }
+        } else {
+            contributedFileSize = getContributedMediaSizeForUser(pkg, user);
+        }
+
+        return contributedFileSize;
+    }
+
+    /**
+     * Get number of bytes of the app data of the package.
+     *
+     * @param pkg The package that might have app data.
+     * @param user The user the package belongs to
+     *
+     * @return The number of bytes.
+     */
+    private long getAppDataSizeForUser(@NonNull String pkg, @NonNull UserHandle user) {
+        StorageManager storageManager = getContext().getSystemService(StorageManager.class);
+        StorageStatsManager storageStatsManager =
+                getContext().getSystemService(StorageStatsManager.class);
+
+        List<StorageVolume> volumes = storageManager.getStorageVolumes();
+        long appDataSize = 0;
+
+        int numVolumes = volumes.size();
+        for (int i = 0; i < numVolumes; i++) {
+            StorageStats stats;
+            try {
+                stats = storageStatsManager.queryStatsForPackage(convert(volumes.get(i).getUuid()),
+                        pkg, user);
+            } catch (PackageManager.NameNotFoundException | IOException e) {
+                Log.e(LOG_TAG, "Cannot determine amount of app data for " + pkg + " on "
+                        + volumes.get(i) + " (user " + user + ")", e);
+                continue;
+            }
+
+            appDataSize += stats.getDataBytes();
+        }
+
+        return appDataSize;
+    }
+
+    /**
+     * Get number of bytes of the app data of the package.
+     *
+     * @param pkg The package that might have app data.
+     * @param user The user the package belongs to or {@code null} if files of all users should be
+     *             counted.
+     *
+     * @return The number of bytes.
+     */
+    private long getAppDataSize(@NonNull String pkg, @Nullable UserHandle user) {
+        UserManager userManager = getContext().getSystemService(UserManager.class);
+
+        long appDataSize = 0;
+
+        if (user == null) {
+            List<UserInfo> users = userManager.getUsers();
+
+            int numUsers = users.size();
+            for (int i = 0; i < numUsers; i++) {
+                appDataSize += getAppDataSizeForUser(pkg, UserHandle.of(users.get(i).id));
+            }
+        } else {
+            appDataSize = getAppDataSizeForUser(pkg, user);
+        }
+
+        return appDataSize;
     }
 
     @Override
@@ -108,30 +212,46 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
         dialogBuilder.setNegativeButton(android.R.string.cancel, this);
 
         String pkg = dialogInfo.appInfo.packageName;
-        long contributedFileSize = 0;
-        if (dialogInfo.allUsers) {
-            List<UserInfo> users = userManager.getUsers();
+        long contributedFileSize = getContributedMediaSize(pkg,
+                dialogInfo.allUsers ? null : dialogInfo.user);
 
-            int numUsers = users.size();
-            for (int i = 0; i < numUsers; i++) {
-                UserHandle user = UserHandle.of(users.get(i).id);
+        boolean suggestToKeepAppData;
+        try {
+            PackageInfo pkgInfo = pm.getPackageInfo(pkg, 0);
 
-                contributedFileSize += getContributedMediaSize(pkg, user);
-            }
-        } else {
-            contributedFileSize = getContributedMediaSize(pkg, dialogInfo.user);
+            suggestToKeepAppData = pkgInfo.applicationInfo.hasFragileUserData();
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(LOG_TAG, "Cannot check hasFragileUserData for " + pkg, e);
+            suggestToKeepAppData = false;
         }
 
-        if (contributedFileSize == 0) {
+        long appDataSize = 0;
+        if (suggestToKeepAppData) {
+            appDataSize = getAppDataSize(pkg, dialogInfo.allUsers ? null : dialogInfo.user);
+        }
+
+        if (contributedFileSize == 0 && appDataSize == 0) {
             dialogBuilder.setMessage(messageBuilder.toString());
         } else {
             LayoutInflater inflater = getContext().getSystemService(LayoutInflater.class);
             ViewGroup content = (ViewGroup) inflater.inflate(R.layout.uninstall_content_view, null);
 
             ((TextView) content.requireViewById(R.id.message)).setText(messageBuilder.toString());
-            mClearContributedFiles = content.requireViewById(R.id.checkbox);
-            mClearContributedFiles.setText(getString(R.string.uninstall_remove_contributed_files,
-                            formatFileSize(getContext(), contributedFileSize)));
+
+            if (contributedFileSize != 0) {
+                mClearContributedFiles = content.requireViewById(R.id.clearContributedFiles);
+                mClearContributedFiles.setVisibility(View.VISIBLE);
+                mClearContributedFiles.setText(
+                        getString(R.string.uninstall_remove_contributed_files,
+                                formatFileSize(getContext(), contributedFileSize)));
+            }
+
+            if (appDataSize != 0) {
+                mKeepData = content.requireViewById(R.id.keepData);
+                mKeepData.setVisibility(View.VISIBLE);
+                mKeepData.setText(getString(R.string.uninstall_keep_data,
+                        formatFileSize(getContext(), appDataSize)));
+            }
 
             dialogBuilder.setView(content);
         }
@@ -143,7 +263,8 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
     public void onClick(DialogInterface dialog, int which) {
         if (which == Dialog.BUTTON_POSITIVE) {
             ((UninstallerActivity) getActivity()).startUninstallProgress(
-                    mClearContributedFiles != null && mClearContributedFiles.isChecked());
+                    mClearContributedFiles != null && mClearContributedFiles.isChecked(),
+                    mKeepData != null && mKeepData.isChecked());
         } else {
             ((UninstallerActivity) getActivity()).dispatchAborted();
         }
