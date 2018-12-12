@@ -447,7 +447,11 @@ class ActivityTestsBase {
         }
 
         @Override
-        void updateUsageStats(ActivityRecord component, boolean resumed) {
+        void updateBatteryStats(ActivityRecord component, boolean resumed) {
+        }
+
+        @Override
+        void updateActivityUsageStats(ActivityRecord activity, int event) {
         }
 
         @Override

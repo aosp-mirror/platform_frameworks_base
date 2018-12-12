@@ -16,13 +16,15 @@
 
 package android.app.usage;
 
-import static android.app.usage.UsageEvents.Event.CONTINUE_PREVIOUS_DAY;
+import static android.app.usage.UsageEvents.Event.ACTIVITY_DESTROYED;
+import static android.app.usage.UsageEvents.Event.ACTIVITY_PAUSED;
+import static android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED;
+import static android.app.usage.UsageEvents.Event.ACTIVITY_STOPPED;
 import static android.app.usage.UsageEvents.Event.CONTINUING_FOREGROUND_SERVICE;
 import static android.app.usage.UsageEvents.Event.END_OF_DAY;
+import static android.app.usage.UsageEvents.Event.FLUSH_TO_DISK;
 import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_START;
 import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_STOP;
-import static android.app.usage.UsageEvents.Event.MOVE_TO_BACKGROUND;
-import static android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND;
 import static android.app.usage.UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE;
 
 import android.annotation.SystemApi;
@@ -31,6 +33,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
+import android.util.SparseIntArray;
 
 /**
  * Contains usage statistics for an app package for a specific
@@ -57,11 +60,18 @@ public final class UsageStats implements Parcelable {
     public long mEndTimeStamp;
 
     /**
-     * Last time used by the user with an explicit action (notification, activity launch)
+     * Last time an activity is at foreground (have focus), this is corresponding to
+     * {@link android.app.usage.UsageEvents.Event#ACTIVITY_RESUMED} event.
      * {@hide}
      */
     @UnsupportedAppUsage
     public long mLastTimeUsed;
+
+    /**
+     * Last time an activity is visible.
+     * @hide
+     */
+    public long mLastTimeVisible;
 
     /**
      * Total time this package's activity is in foreground.
@@ -69,6 +79,12 @@ public final class UsageStats implements Parcelable {
      */
     @UnsupportedAppUsage
     public long mTotalTimeInForeground;
+
+    /**
+     * Total time this package's activity is visible.
+     * {@hide}
+     */
+    public long mTotalTimeVisible;
 
     /**
      * Last time foreground service is started.
@@ -93,31 +109,32 @@ public final class UsageStats implements Parcelable {
      */
     public int mAppLaunchCount;
 
-    /** Last activity MOVE_TO_FOREGROUND or MOVE_TO_BACKGROUND event.
+    /** Last activity ACTIVITY_RESUMED or ACTIVITY_PAUSED event.
      * {@hide}
-     * @deprecated use {@link #mLastForegroundActivityEventMap} instead.
+     * @deprecated use {@link #mActivities} instead.
      */
     @UnsupportedAppUsage
     @Deprecated
     public int mLastEvent;
 
     /**
-     * If an activity is in foreground, it has one entry in this map.
-     * When activity moves to background, it is removed from this map.
-     * Key is activity class name.
-     * Value is last time this activity MOVE_TO_FOREGROUND or MOVE_TO_BACKGROUND event.
+     * If an activity is visible(onStart(), onPause() states) or in foreground (onResume() state),
+     * it has one entry in this map. When an activity becomes invisible (onStop() or onDestroy()),
+     * it is removed from this map.
+     * Key is instanceId of the activity (ActivityRecode appToken hashCode)..
+     * Value is this activity's last event, one of ACTIVITY_RESUMED or
+     * ACTIVITY_PAUSED.
      * {@hide}
      */
-    public ArrayMap<String, Integer> mLastForegroundActivityEventMap = new ArrayMap<>();
-
+    public SparseIntArray mActivities = new SparseIntArray();
     /**
      * If a foreground service is started, it has one entry in this map.
-     * When a foreground service is stopped, it is removed from this map.
+     * When a foreground service is stopped, it is removed from this set.
      * Key is foreground service class name.
-     * Value is last foreground service FOREGROUND_SERVICE_START ot FOREGROUND_SERVICE_STOP event.
+     * Value is the foreground service's last event, it is FOREGROUND_SERVICE_START.
      * {@hide}
      */
-    public ArrayMap<String, Integer> mLastForegroundServiceEventMap = new ArrayMap<>();
+    public ArrayMap<String, Integer> mForegroundServices = new ArrayMap<>();
 
     /**
      * {@hide}
@@ -135,14 +152,16 @@ public final class UsageStats implements Parcelable {
         mBeginTimeStamp = stats.mBeginTimeStamp;
         mEndTimeStamp = stats.mEndTimeStamp;
         mLastTimeUsed = stats.mLastTimeUsed;
+        mLastTimeVisible = stats.mLastTimeVisible;
         mLastTimeForegroundServiceUsed = stats.mLastTimeForegroundServiceUsed;
         mTotalTimeInForeground = stats.mTotalTimeInForeground;
+        mTotalTimeVisible = stats.mTotalTimeVisible;
         mTotalTimeForegroundServiceUsed = stats.mTotalTimeForegroundServiceUsed;
         mLaunchCount = stats.mLaunchCount;
         mAppLaunchCount = stats.mAppLaunchCount;
         mLastEvent = stats.mLastEvent;
-        mLastForegroundActivityEventMap = stats.mLastForegroundActivityEventMap;
-        mLastForegroundServiceEventMap = stats.mLastForegroundServiceEventMap;
+        mActivities = stats.mActivities;
+        mForegroundServices = stats.mForegroundServices;
         mChooserCounts = stats.mChooserCounts;
     }
 
@@ -191,10 +210,25 @@ public final class UsageStats implements Parcelable {
     }
 
     /**
+     * Get the last time this package's activity is visible in the UI, measured in milliseconds
+     * since the epoch.
+     */
+    public long getLastTimeVisible() {
+        return mLastTimeVisible;
+    }
+
+    /**
      * Get the total time this package spent in the foreground, measured in milliseconds.
      */
     public long getTotalTimeInForeground() {
         return mTotalTimeInForeground;
+    }
+
+    /**
+     * Get the total time this package's activity is visible in the UI, measured in milliseconds.
+     */
+    public long getTotalTimeVisible() {
+        return mTotalTimeVisible;
     }
 
     /**
@@ -222,6 +256,20 @@ public final class UsageStats implements Parcelable {
     @SystemApi
     public int getAppLaunchCount() {
         return mAppLaunchCount;
+    }
+
+    private void mergeEventMap(SparseIntArray left, SparseIntArray right) {
+        final int size = right.size();
+        for (int i = 0; i < size; i++) {
+            final int instanceId = right.keyAt(i);
+            final int event = right.valueAt(i);
+            final int index = left.indexOfKey(instanceId);
+            if (index >= 0) {
+                left.put(instanceId, Math.max(left.valueAt(index), event));
+            } else {
+                left.put(instanceId, event);
+            }
+        }
     }
 
     private void mergeEventMap(ArrayMap<String, Integer> left, ArrayMap<String, Integer> right) {
@@ -255,15 +303,17 @@ public final class UsageStats implements Parcelable {
         if (right.mBeginTimeStamp > mBeginTimeStamp) {
             // Even though incoming UsageStat begins after this one, its last time used fields
             // may somehow be empty or chronologically preceding the older UsageStat.
-            mergeEventMap(mLastForegroundActivityEventMap, right.mLastForegroundActivityEventMap);
-            mergeEventMap(mLastForegroundServiceEventMap, right.mLastForegroundServiceEventMap);
+            mergeEventMap(mActivities, right.mActivities);
+            mergeEventMap(mForegroundServices, right.mForegroundServices);
             mLastTimeUsed = Math.max(mLastTimeUsed, right.mLastTimeUsed);
+            mLastTimeVisible = Math.max(mLastTimeVisible, right.mLastTimeVisible);
             mLastTimeForegroundServiceUsed = Math.max(mLastTimeForegroundServiceUsed,
                     right.mLastTimeForegroundServiceUsed);
         }
         mBeginTimeStamp = Math.min(mBeginTimeStamp, right.mBeginTimeStamp);
         mEndTimeStamp = Math.max(mEndTimeStamp, right.mEndTimeStamp);
         mTotalTimeInForeground += right.mTotalTimeInForeground;
+        mTotalTimeVisible += right.mTotalTimeVisible;
         mTotalTimeForegroundServiceUsed += right.mTotalTimeForegroundServiceUsed;
         mLaunchCount += right.mLaunchCount;
         mAppLaunchCount += right.mAppLaunchCount;
@@ -290,36 +340,76 @@ public final class UsageStats implements Parcelable {
     }
 
     /**
-     * Tell if an event indicate activity is in foreground or not.
-     * @param event the activity event.
-     * @return true if activity is in foreground, false otherwise.
-     * @hide
+     * Tell if any activity is in foreground.
+     * @return
      */
-    private boolean isActivityInForeground(int event) {
-        return event == MOVE_TO_FOREGROUND
-                || event == CONTINUE_PREVIOUS_DAY;
+    private boolean hasForegroundActivity() {
+        final int size = mActivities.size();
+        for (int i = 0; i < size; i++) {
+            if (mActivities.valueAt(i) == ACTIVITY_RESUMED) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * Tell if an event indicate foreground sevice is started or not.
-     * @param event the foreground service event.
-     * @return true if foreground service is started, false if stopped.
-     * @hide
+     * Tell if any activity is visible.
+     * @return
      */
-    private boolean isForegroundServiceStarted(int event) {
-        return event == FOREGROUND_SERVICE_START
-                || event == CONTINUING_FOREGROUND_SERVICE;
+    private boolean hasVisibleActivity() {
+        final int size = mActivities.size();
+        for (int i = 0; i < size; i++) {
+            final int type = mActivities.valueAt(i);
+            if (type == ACTIVITY_RESUMED
+                    || type == ACTIVITY_PAUSED) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * If any activity in foreground or any foreground service is started, the app is considered in
-     * use.
-     * @return true if in use, false otherwise.
-     * @hide
+     * Tell if any foreground service is started.
+     * @return
      */
-    private boolean isAppInUse() {
-        return !mLastForegroundActivityEventMap.isEmpty()
-                || !mLastForegroundServiceEventMap.isEmpty();
+    private boolean anyForegroundServiceStarted() {
+        return !mForegroundServices.isEmpty();
+    }
+
+    /**
+     * Increment total time in foreground and update last time in foreground.
+     * @param timeStamp current timestamp.
+     */
+    private void incrementTimeUsed(long timeStamp) {
+        if (timeStamp > mLastTimeUsed) {
+            mTotalTimeInForeground += timeStamp - mLastTimeUsed;
+            mLastTimeUsed = timeStamp;
+        }
+    }
+
+    /**
+     * Increment total time visible and update last time visible.
+     * @param timeStamp current timestmap.
+     */
+    private void incrementTimeVisible(long timeStamp) {
+        if (timeStamp > mLastTimeVisible) {
+            mTotalTimeVisible += timeStamp - mLastTimeVisible;
+            mLastTimeVisible = timeStamp;
+        }
+    }
+
+    /**
+     * Increment total time foreground service is used and update last time foreground service is
+     * used.
+     * @param timeStamp current timestamp.
+     */
+    private void incrementServiceTimeUsed(long timeStamp) {
+        if (timeStamp > mLastTimeForegroundServiceUsed) {
+            mTotalTimeForegroundServiceUsed +=
+                    timeStamp - mLastTimeForegroundServiceUsed;
+            mLastTimeForegroundServiceUsed = timeStamp;
+        }
     }
 
     /**
@@ -327,33 +417,63 @@ public final class UsageStats implements Parcelable {
      * @param className className of the activity.
      * @param timeStamp timeStamp of the event.
      * @param eventType type of the event.
+     * @param instanceId hashCode of the ActivityRecord's appToken.
      * @hide
      */
-    private void updateForegroundActivity(String className, long timeStamp, int eventType) {
-        if (eventType != MOVE_TO_BACKGROUND
-                && eventType != MOVE_TO_FOREGROUND
-                && eventType != END_OF_DAY) {
+    private void updateActivity(String className, long timeStamp, int eventType, int instanceId) {
+        if (eventType != ACTIVITY_RESUMED
+                && eventType != ACTIVITY_PAUSED
+                && eventType != ACTIVITY_STOPPED
+                && eventType != ACTIVITY_DESTROYED) {
             return;
         }
 
-        final Integer lastEvent = mLastForegroundActivityEventMap.get(className);
-        if (lastEvent != null) {
-            if (isActivityInForeground(lastEvent)) {
-                if (timeStamp > mLastTimeUsed) {
-                    mTotalTimeInForeground += timeStamp - mLastTimeUsed;
+        // update usage.
+        final int index = mActivities.indexOfKey(instanceId);
+        if (index >= 0) {
+            final int lastEvent = mActivities.valueAt(index);
+            switch (lastEvent) {
+                case ACTIVITY_RESUMED:
+                    incrementTimeUsed(timeStamp);
+                    incrementTimeVisible(timeStamp);
+                    break;
+                case ACTIVITY_PAUSED:
+                    incrementTimeVisible(timeStamp);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // update current event.
+        switch(eventType) {
+            case ACTIVITY_RESUMED:
+                if (!hasVisibleActivity()) {
+                    // this is the first visible activity.
+                    mLastTimeUsed = timeStamp;
+                    mLastTimeVisible = timeStamp;
+                } else if (!hasForegroundActivity()) {
+                    // this is the first foreground activity.
                     mLastTimeUsed = timeStamp;
                 }
-            }
-            if (eventType == MOVE_TO_BACKGROUND) {
-                mLastForegroundActivityEventMap.remove(className);
-            } else {
-                mLastForegroundActivityEventMap.put(className, eventType);
-            }
-        } else if (eventType == MOVE_TO_FOREGROUND) {
-            if (!isAppInUse()) {
-                mLastTimeUsed = timeStamp;
-            }
-            mLastForegroundActivityEventMap.put(className, eventType);
+                mActivities.put(instanceId, eventType);
+                break;
+            case ACTIVITY_PAUSED:
+                if (!hasVisibleActivity()) {
+                    // this is the first visible activity.
+                    mLastTimeVisible = timeStamp;
+                }
+                mActivities.put(instanceId, eventType);
+                break;
+            case ACTIVITY_STOPPED:
+                mActivities.put(instanceId, eventType);
+                break;
+            case ACTIVITY_DESTROYED:
+                // remove activity from the map.
+                mActivities.delete(instanceId);
+                break;
+            default:
+                break;
         }
     }
 
@@ -366,80 +486,97 @@ public final class UsageStats implements Parcelable {
      */
     private void updateForegroundService(String className, long timeStamp, int eventType) {
         if (eventType != FOREGROUND_SERVICE_STOP
-                && eventType != FOREGROUND_SERVICE_START
-                && eventType != ROLLOVER_FOREGROUND_SERVICE) {
+                && eventType != FOREGROUND_SERVICE_START) {
             return;
         }
-        final Integer lastEvent = mLastForegroundServiceEventMap.get(className);
+        final Integer lastEvent = mForegroundServices.get(className);
+        // update usage.
         if (lastEvent != null) {
-            if (isForegroundServiceStarted(lastEvent)) {
-                if (timeStamp > mLastTimeForegroundServiceUsed) {
-                    mTotalTimeForegroundServiceUsed +=
-                            timeStamp - mLastTimeForegroundServiceUsed;
+            switch (lastEvent) {
+                case FOREGROUND_SERVICE_START:
+                case CONTINUING_FOREGROUND_SERVICE:
+                    incrementServiceTimeUsed(timeStamp);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // update current event.
+        switch (eventType) {
+            case FOREGROUND_SERVICE_START:
+                if (!anyForegroundServiceStarted()) {
                     mLastTimeForegroundServiceUsed = timeStamp;
                 }
-            }
-            if (eventType == FOREGROUND_SERVICE_STOP) {
-                mLastForegroundServiceEventMap.remove(className);
-            } else {
-                mLastForegroundServiceEventMap.put(className, eventType);
-            }
-        } else if (eventType == FOREGROUND_SERVICE_START) {
-            if (!isAppInUse()) {
-                mLastTimeForegroundServiceUsed = timeStamp;
-            }
-            mLastForegroundServiceEventMap.put(className, eventType);
+                mForegroundServices.put(className, eventType);
+                break;
+            case FOREGROUND_SERVICE_STOP:
+                mForegroundServices.remove(className);
+                break;
+            default:
+                break;
         }
     }
 
     /**
      * Update the UsageStats by a activity or foreground service event.
-     * @param className class name of a activity or foreground service, could be null to mark
-     *                  END_OF_DAY or rollover.
+     * @param className class name of a activity or foreground service, could be null to if this
+     *                  is sent to all activities/services in this package.
      * @param timeStamp Epoch timestamp in milliseconds.
      * @param eventType event type as in {@link UsageEvents.Event}
+     * @param instanceId if className is an activity, the hashCode of ActivityRecord's appToken.
+     *                 if className is not an activity, instanceId is not used.
      * @hide
      */
-    public void update(String className, long timeStamp, int eventType) {
+    public void update(String className, long timeStamp, int eventType, int instanceId) {
         switch(eventType) {
-            case MOVE_TO_BACKGROUND:
-            case MOVE_TO_FOREGROUND:
-                updateForegroundActivity(className, timeStamp, eventType);
+            case ACTIVITY_RESUMED:
+            case ACTIVITY_PAUSED:
+            case ACTIVITY_STOPPED:
+            case ACTIVITY_DESTROYED:
+                updateActivity(className, timeStamp, eventType, instanceId);
                 break;
             case END_OF_DAY:
-                // END_OF_DAY means updating all activities.
-                final int size = mLastForegroundActivityEventMap.size();
-                for (int i = 0; i < size; i++) {
-                    final String name = mLastForegroundActivityEventMap.keyAt(i);
-                    updateForegroundActivity(name, timeStamp, eventType);
+                // END_OF_DAY updates all activities.
+                if (hasForegroundActivity()) {
+                    incrementTimeUsed(timeStamp);
+                }
+                if (hasVisibleActivity()) {
+                    incrementTimeVisible(timeStamp);
                 }
                 break;
-            case CONTINUE_PREVIOUS_DAY:
-                mLastTimeUsed = timeStamp;
-                mLastForegroundActivityEventMap.put(className, eventType);
-                break;
-            case FOREGROUND_SERVICE_STOP:
             case FOREGROUND_SERVICE_START:
+            case FOREGROUND_SERVICE_STOP:
                 updateForegroundService(className, timeStamp, eventType);
                 break;
             case ROLLOVER_FOREGROUND_SERVICE:
-                // ROLLOVER_FOREGROUND_SERVICE means updating all foreground services.
-                final int size2 = mLastForegroundServiceEventMap.size();
-                for (int i = 0; i < size2; i++) {
-                    final String name = mLastForegroundServiceEventMap.keyAt(i);
-                    updateForegroundService(name, timeStamp, eventType);
+                // ROLLOVER_FOREGROUND_SERVICE updates all foreground services.
+                if (anyForegroundServiceStarted()) {
+                    incrementServiceTimeUsed(timeStamp);
                 }
                 break;
             case CONTINUING_FOREGROUND_SERVICE:
                 mLastTimeForegroundServiceUsed = timeStamp;
-                mLastForegroundServiceEventMap.put(className, eventType);
+                mForegroundServices.put(className, eventType);
+                break;
+            case FLUSH_TO_DISK:
+                // update usage of all active activities/services.
+                if (hasForegroundActivity()) {
+                    incrementTimeUsed(timeStamp);
+                }
+                if (hasVisibleActivity()) {
+                    incrementTimeVisible(timeStamp);
+                }
+                if (anyForegroundServiceStarted()) {
+                    incrementServiceTimeUsed(timeStamp);
+                }
                 break;
             default:
                 break;
         }
         mEndTimeStamp = timeStamp;
 
-        if (eventType == MOVE_TO_FOREGROUND) {
+        if (eventType == ACTIVITY_RESUMED) {
             mLaunchCount += 1;
         }
     }
@@ -455,8 +592,10 @@ public final class UsageStats implements Parcelable {
         dest.writeLong(mBeginTimeStamp);
         dest.writeLong(mEndTimeStamp);
         dest.writeLong(mLastTimeUsed);
+        dest.writeLong(mLastTimeVisible);
         dest.writeLong(mLastTimeForegroundServiceUsed);
         dest.writeLong(mTotalTimeInForeground);
+        dest.writeLong(mTotalTimeVisible);
         dest.writeLong(mTotalTimeForegroundServiceUsed);
         dest.writeInt(mLaunchCount);
         dest.writeInt(mAppLaunchCount);
@@ -477,21 +616,26 @@ public final class UsageStats implements Parcelable {
         }
         dest.writeBundle(allCounts);
 
-        final Bundle foregroundActivityEventBundle = new Bundle();
-        final int foregroundEventSize = mLastForegroundActivityEventMap.size();
-        for (int i = 0; i < foregroundEventSize; i++) {
-            foregroundActivityEventBundle.putInt(mLastForegroundActivityEventMap.keyAt(i),
-                    mLastForegroundActivityEventMap.valueAt(i));
-        }
-        dest.writeBundle(foregroundActivityEventBundle);
+        writeSparseIntArray(dest, mActivities);
+        dest.writeBundle(eventMapToBundle(mForegroundServices));
+    }
 
-        final Bundle foregroundServiceEventBundle = new Bundle();
-        final int foregroundServiceEventSize = mLastForegroundServiceEventMap.size();
-        for (int i = 0; i < foregroundServiceEventSize; i++) {
-            foregroundServiceEventBundle.putInt(mLastForegroundServiceEventMap.keyAt(i),
-                    mLastForegroundServiceEventMap.valueAt(i));
+    private void writeSparseIntArray(Parcel dest, SparseIntArray arr) {
+        final int size = arr.size();
+        dest.writeInt(size);
+        for (int i = 0; i < size; i++) {
+            dest.writeInt(arr.keyAt(i));
+            dest.writeInt(arr.valueAt(i));
         }
-        dest.writeBundle(foregroundServiceEventBundle);
+    }
+
+    private Bundle eventMapToBundle(ArrayMap<String, Integer> eventMap) {
+        final Bundle bundle = new Bundle();
+        final int size = eventMap.size();
+        for (int i = 0; i < size; i++) {
+            bundle.putInt(eventMap.keyAt(i), eventMap.valueAt(i));
+        }
+        return bundle;
     }
 
     public static final Creator<UsageStats> CREATOR = new Creator<UsageStats>() {
@@ -502,8 +646,10 @@ public final class UsageStats implements Parcelable {
             stats.mBeginTimeStamp = in.readLong();
             stats.mEndTimeStamp = in.readLong();
             stats.mLastTimeUsed = in.readLong();
+            stats.mLastTimeVisible = in.readLong();
             stats.mLastTimeForegroundServiceUsed = in.readLong();
             stats.mTotalTimeInForeground = in.readLong();
+            stats.mTotalTimeVisible = in.readLong();
             stats.mTotalTimeForegroundServiceUsed = in.readLong();
             stats.mLaunchCount = in.readInt();
             stats.mAppLaunchCount = in.readInt();
@@ -527,12 +673,21 @@ public final class UsageStats implements Parcelable {
                     }
                 }
             }
-            readBundleToEventMap(stats.mLastForegroundActivityEventMap, in.readBundle());
-            readBundleToEventMap(stats.mLastForegroundServiceEventMap, in.readBundle());
+            readSparseIntArray(in, stats.mActivities);
+            readBundleToEventMap(in.readBundle(), stats.mForegroundServices);
             return stats;
         }
 
-        private void readBundleToEventMap(ArrayMap<String, Integer> eventMap, Bundle bundle) {
+        private void readSparseIntArray(Parcel in, SparseIntArray arr) {
+            final int size = in.readInt();
+            for (int i = 0; i < size; i++) {
+                final int key = in.readInt();
+                final int value = in.readInt();
+                arr.put(key, value);
+            }
+        }
+
+        private void readBundleToEventMap(Bundle bundle, ArrayMap<String, Integer> eventMap) {
             if (bundle != null) {
                 for (String className : bundle.keySet()) {
                     final int event = bundle.getInt(className);

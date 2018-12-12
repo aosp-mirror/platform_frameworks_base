@@ -1617,7 +1617,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             try {
                 EventLogTags.writeAmPauseActivity(prev.mUserId, System.identityHashCode(prev),
                         prev.shortComponentName, "userLeaving=" + userLeaving);
-                mService.updateUsageStats(prev, false);
 
                 mService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
                         prev.appToken, PauseActivityItem.obtain(prev.finishing, userLeaving,
@@ -4649,9 +4648,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                                     r.mUserId, System.identityHashCode(r),
                                     r.getTaskRecord().taskId, r.shortComponentName,
                                     "proc died without state saved");
-                            if (r.getState() == RESUMED) {
-                                mService.updateUsageStats(r, false);
-                            }
                         }
                     } else {
                         // We have the current state for this activity, so

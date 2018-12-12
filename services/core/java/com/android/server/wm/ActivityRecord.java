@@ -96,6 +96,7 @@ import static com.android.server.am.ActivityRecordProto.TRANSLUCENT;
 import static com.android.server.am.ActivityRecordProto.VISIBLE;
 import static com.android.server.am.EventLogTags.AM_RELAUNCH_ACTIVITY;
 import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
+import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
@@ -122,8 +123,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
-import static com.android.server.wm.ActivityTaskManagerService
-        .RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -157,6 +157,7 @@ import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.PipModeChangeItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.WindowVisibilityItem;
+import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -1797,6 +1798,18 @@ final class ActivityRecord extends ConfigurationContainer {
                 return;
             }
             mAppWindowToken.detachChildren();
+        }
+
+        if (state == RESUMED) {
+            mAtmService.updateBatteryStats(this, true);
+            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_RESUMED);
+        } else if (state == PAUSED) {
+            mAtmService.updateBatteryStats(this, false);
+            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_PAUSED);
+        } else if (state == STOPPED) {
+            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_STOPPED);
+        } else if (state == DESTROYED) {
+            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_DESTROYED);
         }
     }
 

@@ -842,8 +842,8 @@ public class AppStandbyController {
             final boolean previouslyIdle = mAppIdleHistory.isIdle(
                     event.mPackage, userId, elapsedRealtime);
             // Inform listeners if necessary
-            if ((event.mEventType == UsageEvents.Event.MOVE_TO_FOREGROUND
-                    || event.mEventType == UsageEvents.Event.MOVE_TO_BACKGROUND
+            if ((event.mEventType == UsageEvents.Event.ACTIVITY_RESUMED
+                    || event.mEventType == UsageEvents.Event.ACTIVITY_PAUSED
                     || event.mEventType == UsageEvents.Event.SYSTEM_INTERACTION
                     || event.mEventType == UsageEvents.Event.USER_INTERACTION
                     || event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN
@@ -894,8 +894,8 @@ public class AppStandbyController {
 
     private int usageEventToSubReason(int eventType) {
         switch (eventType) {
-            case UsageEvents.Event.MOVE_TO_FOREGROUND: return REASON_SUB_USAGE_MOVE_TO_FOREGROUND;
-            case UsageEvents.Event.MOVE_TO_BACKGROUND: return REASON_SUB_USAGE_MOVE_TO_BACKGROUND;
+            case UsageEvents.Event.ACTIVITY_RESUMED: return REASON_SUB_USAGE_MOVE_TO_FOREGROUND;
+            case UsageEvents.Event.ACTIVITY_PAUSED: return REASON_SUB_USAGE_MOVE_TO_BACKGROUND;
             case UsageEvents.Event.SYSTEM_INTERACTION: return REASON_SUB_USAGE_SYSTEM_INTERACTION;
             case UsageEvents.Event.USER_INTERACTION: return REASON_SUB_USAGE_USER_INTERACTION;
             case UsageEvents.Event.NOTIFICATION_SEEN: return REASON_SUB_USAGE_NOTIFICATION_SEEN;

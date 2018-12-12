@@ -16,6 +16,12 @@
 
 package com.android.server.usage;
 
+import static android.app.usage.UsageEvents.Event.CHOOSER_ACTION;
+import static android.app.usage.UsageEvents.Event.CONFIGURATION_CHANGE;
+import static android.app.usage.UsageEvents.Event.FLUSH_TO_DISK;
+import static android.app.usage.UsageEvents.Event.NOTIFICATION_INTERRUPTION;
+import static android.app.usage.UsageEvents.Event.SHORTCUT_INVOCATION;
+
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -28,10 +34,10 @@ import android.app.usage.ConfigurationStats;
 import android.app.usage.EventStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageEvents;
-import android.app.usage.UsageStatsManager;
-import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
+import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -75,9 +81,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A service that collects, aggregates, and persists application usage data.
@@ -106,6 +110,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_FLUSH_TO_DISK = 1;
     static final int MSG_REMOVE_USER = 2;
     static final int MSG_UID_STATE_CHANGED = 3;
+    static final int MSG_REPORT_EVENT_TO_ALL_USERID = 4;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -135,12 +140,10 @@ public class UsageStatsService extends SystemService implements
                 @Override
                 public void onAppIdleStateChanged(String packageName, int userId, boolean idle,
                         int bucket, int reason) {
-                    Event event = new Event();
-                    event.mEventType = Event.STANDBY_BUCKET_CHANGED;
+                    Event event = new Event(Event.STANDBY_BUCKET_CHANGED,
+                            SystemClock.elapsedRealtime());
                     event.mBucketAndReason = (bucket << 16) | (reason & 0xFFFF);
                     event.mPackage = packageName;
-                    // This will later be converted to system time.
-                    event.mTimeStamp = SystemClock.elapsedRealtime();
                     mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
                 }
 
@@ -397,7 +400,7 @@ public class UsageStatsService extends SystemService implements
      * Assuming the event's timestamp is measured in milliseconds since boot,
      * convert it to a system wall time.
      */
-    private void convertToSystemTimeLocked(UsageEvents.Event event) {
+    private void convertToSystemTimeLocked(Event event) {
         event.mTimeStamp = Math.max(0, event.mTimeStamp - mRealTimeSnapshot) + mSystemTimeSnapshot;
     }
 
@@ -406,7 +409,6 @@ public class UsageStatsService extends SystemService implements
      */
     void shutdown() {
         synchronized (mLock) {
-            mHandler.removeMessages(MSG_REPORT_EVENT);
             flushToDiskLocked();
         }
     }
@@ -414,7 +416,7 @@ public class UsageStatsService extends SystemService implements
     /**
      * Called by the Binder stub.
      */
-    void reportEvent(UsageEvents.Event event, int userId) {
+    void reportEvent(Event event, int userId) {
         synchronized (mLock) {
             final long timeNow = checkAndGetTimeLocked();
             final long elapsedRealtime = SystemClock.elapsedRealtime();
@@ -431,14 +433,14 @@ public class UsageStatsService extends SystemService implements
 
             mAppStandby.reportEvent(event, elapsedRealtime, userId);
             switch (event.mEventType) {
-                case Event.MOVE_TO_FOREGROUND:
+                case Event.ACTIVITY_RESUMED:
                     try {
                         mAppTimeLimit.noteUsageStart(event.getPackageName(), userId);
                     } catch (IllegalArgumentException iae) {
                         Slog.e(TAG, "Failed to note usage start", iae);
                     }
                     break;
-                case Event.MOVE_TO_BACKGROUND:
+                case Event.ACTIVITY_PAUSED:
                     try {
                         mAppTimeLimit.noteUsageStop(event.getPackageName(), userId);
                     } catch (IllegalArgumentException iae) {
@@ -450,10 +452,31 @@ public class UsageStatsService extends SystemService implements
     }
 
     /**
-     * Called by the Binder stub.
+     * Some events like FLUSH_TO_DISK need to be sent to all userId.
+     * @param event
+     */
+    void reportEventToAllUserId(Event event) {
+        synchronized (mLock) {
+            final int userCount = mUserState.size();
+            for (int i = 0; i < userCount; i++) {
+                Event copy = new Event(event);
+                reportEvent(copy, mUserState.keyAt(i));
+            }
+        }
+    }
+
+    /**
+     * Called by the Handler for message MSG_FLUSH_TO_DISK.
      */
     void flushToDisk() {
         synchronized (mLock) {
+            // Before flush to disk, report FLUSH_TO_DISK event to signal UsageStats to update app
+            // usage. In case of abrupt power shutdown like battery drain or cold temperature,
+            // all UsageStats has correct data up to last flush to disk.
+            // The FLUSH_TO_DISK event is an internal event, it will not show up in IntervalStats'
+            // EventList.
+            Event event = new Event(FLUSH_TO_DISK, SystemClock.elapsedRealtime());
+            reportEventToAllUserId(event);
             flushToDiskLocked();
         }
     }
@@ -656,9 +679,11 @@ public class UsageStatsService extends SystemService implements
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_REPORT_EVENT:
-                    reportEvent((UsageEvents.Event) msg.obj, msg.arg1);
+                    reportEvent((Event) msg.obj, msg.arg1);
                     break;
-
+                case MSG_REPORT_EVENT_TO_ALL_USERID:
+                    reportEventToAllUserId((Event) msg.obj);
+                    break;
                 case MSG_FLUSH_TO_DISK:
                     flushToDisk();
                     break;
@@ -1120,20 +1145,11 @@ public class UsageStatsService extends SystemService implements
                 return;
             }
 
-            UsageEvents.Event event = new UsageEvents.Event();
+            Event event = new Event(CHOOSER_ACTION, SystemClock.elapsedRealtime());
             event.mPackage = packageName;
-
-            // This will later be converted to system time.
-            event.mTimeStamp = SystemClock.elapsedRealtime();
-
-            event.mEventType = Event.CHOOSER_ACTION;
-
             event.mAction = action;
-
             event.mContentType = contentType;
-
             event.mContentAnnotations = annotations;
-
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
         }
 
@@ -1251,37 +1267,29 @@ public class UsageStatsService extends SystemService implements
     private final class LocalService extends UsageStatsManagerInternal {
 
         @Override
-        public void reportEvent(ComponentName component, int userId, int eventType) {
+        public void reportEvent(ComponentName component, int userId, int eventType,
+                int instanceId) {
             if (component == null) {
                 Slog.w(TAG, "Event reported without a component name");
                 return;
             }
 
-            UsageEvents.Event event = new UsageEvents.Event();
+            Event event = new Event(eventType, SystemClock.elapsedRealtime());
             event.mPackage = component.getPackageName();
             event.mClass = component.getClassName();
-
-            // This will later be converted to system time.
-            event.mTimeStamp = SystemClock.elapsedRealtime();
-
-            event.mEventType = eventType;
+            event.mInstanceId = instanceId;
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
         }
 
         @Override
         public void reportEvent(String packageName, int userId, int eventType) {
             if (packageName == null) {
-                Slog.w(TAG, "Event reported without a package name");
+                Slog.w(TAG, "Event reported without a package name, eventType:" + eventType);
                 return;
             }
 
-            UsageEvents.Event event = new UsageEvents.Event();
+            Event event = new Event(eventType, SystemClock.elapsedRealtime());
             event.mPackage = packageName;
-
-            // This will later be converted to system time.
-            event.mTimeStamp = SystemClock.elapsedRealtime();
-
-            event.mEventType = eventType;
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
         }
 
@@ -1292,13 +1300,8 @@ public class UsageStatsService extends SystemService implements
                 return;
             }
 
-            UsageEvents.Event event = new UsageEvents.Event();
+            Event event = new Event(CONFIGURATION_CHANGE, SystemClock.elapsedRealtime());
             event.mPackage = "android";
-
-            // This will later be converted to system time.
-            event.mTimeStamp = SystemClock.elapsedRealtime();
-
-            event.mEventType = UsageEvents.Event.CONFIGURATION_CHANGE;
             event.mConfiguration = new Configuration(config);
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
         }
@@ -1311,14 +1314,9 @@ public class UsageStatsService extends SystemService implements
                 return;
             }
 
-            UsageEvents.Event event = new UsageEvents.Event();
+            Event event = new Event(NOTIFICATION_INTERRUPTION, SystemClock.elapsedRealtime());
             event.mPackage = packageName.intern();
             event.mNotificationChannelId = channelId.intern();
-
-            // This will later be converted to system time.
-            event.mTimeStamp = SystemClock.elapsedRealtime();
-
-            event.mEventType = Event.NOTIFICATION_INTERRUPTION;
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
         }
 
@@ -1329,14 +1327,9 @@ public class UsageStatsService extends SystemService implements
                 return;
             }
 
-            UsageEvents.Event event = new UsageEvents.Event();
+            Event event = new Event(SHORTCUT_INVOCATION, SystemClock.elapsedRealtime());
             event.mPackage = packageName.intern();
             event.mShortcutId = shortcutId.intern();
-
-            // This will later be converted to system time.
-            event.mTimeStamp = SystemClock.elapsedRealtime();
-
-            event.mEventType = Event.SHORTCUT_INVOCATION;
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
         }
 
@@ -1372,7 +1365,7 @@ public class UsageStatsService extends SystemService implements
             // This method *WILL* do IO work, but we must block until it is finished or else
             // we might not shutdown cleanly. This is ok to do with the 'am' lock held, because
             // we are shutting down.
-            shutdown();
+            UsageStatsService.this.shutdown();
         }
 
         @Override

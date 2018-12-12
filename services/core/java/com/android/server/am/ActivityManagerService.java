@@ -2724,47 +2724,86 @@ public class ActivityManagerService extends IActivityManager.Stub
         return (ai.flags&ApplicationInfo.FLAG_PERSISTENT) != 0;
     }
 
-    void updateUsageStats(ComponentName activity, int uid, int userId, boolean resumed) {
+    /**
+     * Update battery stats on the activity' usage.
+     * @param activity
+     * @param uid
+     * @param userId
+     * @param resumed
+     */
+    void updateBatteryStats(ComponentName activity, int uid, int userId, boolean resumed) {
         if (DEBUG_SWITCH) {
             Slog.d(TAG_SWITCH,
-                    "updateUsageStats: comp=" + activity + "res=" + resumed);
+                    "updateBatteryStats: comp=" + activity + "res=" + resumed);
         }
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         StatsLog.write(StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
-            uid, activity.getPackageName(),
-            activity.getShortClassName(), resumed ?
-                        StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__FOREGROUND :
+                uid, activity.getPackageName(), activity.getShortClassName(),
+                resumed ? StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__FOREGROUND :
                         StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__BACKGROUND);
-        if (resumed) {
-            if (mUsageStatsService != null) {
-                mUsageStatsService.reportEvent(activity, userId,
-                        UsageEvents.Event.MOVE_TO_FOREGROUND);
-
-            }
-            synchronized (stats) {
+        synchronized (stats) {
+            if (resumed) {
                 stats.noteActivityResumedLocked(uid);
-            }
-        } else {
-            if (mUsageStatsService != null) {
-                mUsageStatsService.reportEvent(activity, userId,
-                        UsageEvents.Event.MOVE_TO_BACKGROUND);
-            }
-            synchronized (stats) {
+            } else {
                 stats.noteActivityPausedLocked(uid);
             }
         }
     }
 
+    /**
+     * Update UsageStas on the activity's usage.
+     * @param activity
+     * @param userId
+     * @param event
+     * @param appToken ActivityRecord's appToken.
+     */
+    public void updateActivityUsageStats(ComponentName activity, int userId, int event,
+            IBinder appToken) {
+        if (DEBUG_SWITCH) {
+            Slog.d(TAG_SWITCH, "updateActivityUsageStats: comp="
+                    + activity + " hash=" + appToken.hashCode() + " event=" + event);
+        }
+        synchronized (this) {
+            if (mUsageStatsService != null) {
+                mUsageStatsService.reportEvent(activity, userId, event, appToken.hashCode());
+            }
+        }
+    }
+
+    /**
+     * Update UsageStats on this package's usage.
+     * @param packageName
+     * @param userId
+     * @param event
+     */
+    public void updateActivityUsageStats(String packageName, int userId, int event) {
+        if (DEBUG_SWITCH) {
+            Slog.d(TAG_SWITCH, "updateActivityUsageStats: package="
+                    + packageName + " event=" + event);
+        }
+        synchronized (this) {
+            if (mUsageStatsService != null) {
+                mUsageStatsService.reportEvent(packageName, userId, event);
+            }
+        }
+    }
+
+    /**
+     * Update Usages on this foreground service's usage.
+     * @param service
+     * @param userId
+     * @param started
+     */
     void updateForegroundServiceUsageStats(ComponentName service, int userId, boolean started) {
         if (DEBUG_SWITCH) {
             Slog.d(TAG_SWITCH, "updateForegroundServiceUsageStats: comp="
-                    + service + "started=" + started);
+                    + service + " started=" + started);
         }
         synchronized (this) {
             if (mUsageStatsService != null) {
                 mUsageStatsService.reportEvent(service, userId,
                         started ? UsageEvents.Event.FOREGROUND_SERVICE_START
-                                : UsageEvents.Event.FOREGROUND_SERVICE_STOP);
+                                : UsageEvents.Event.FOREGROUND_SERVICE_STOP, 0);
             }
         }
     }
@@ -19068,9 +19107,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void updateUsageStats(ComponentName activity, int uid, int userId, boolean resumed) {
+        public void updateBatteryStats(ComponentName activity, int uid, int userId,
+                boolean resumed) {
             synchronized (ActivityManagerService.this) {
-                ActivityManagerService.this.updateUsageStats(activity, uid, userId, resumed);
+                ActivityManagerService.this.updateBatteryStats(activity, uid, userId, resumed);
+            }
+        }
+
+        @Override
+        public void updateActivityUsageStats(ComponentName activity, int userId, int event,
+                IBinder appToken) {
+            synchronized (ActivityManagerService.this) {
+                ActivityManagerService.this.updateActivityUsageStats(activity, userId, event,
+                        appToken);
             }
         }
 

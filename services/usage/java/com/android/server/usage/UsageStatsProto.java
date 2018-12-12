@@ -135,6 +135,15 @@ final class UsageStatsProto {
                     stats.mTotalTimeForegroundServiceUsed = proto.readLong(
                             IntervalStatsProto.UsageStats.TOTAL_TIME_SERVICE_USED_MS);
                     break;
+                case (int) IntervalStatsProto.UsageStats.LAST_TIME_VISIBLE_MS:
+                    // Time attributes stored is an offset of the beginTime.
+                    stats.mLastTimeVisible = statsOut.beginTime + proto.readLong(
+                            IntervalStatsProto.UsageStats.LAST_TIME_VISIBLE_MS);
+                    break;
+                case (int) IntervalStatsProto.UsageStats.TOTAL_TIME_VISIBLE_MS:
+                    stats.mTotalTimeVisible = proto.readLong(
+                            IntervalStatsProto.UsageStats.TOTAL_TIME_VISIBLE_MS);
+                    break;
             }
         }
         if (stats.mLastTimeUsed == 0) {
@@ -337,6 +346,11 @@ final class UsageStatsProto {
                 usageStats.mLastTimeForegroundServiceUsed - stats.beginTime);
         proto.write(IntervalStatsProto.UsageStats.TOTAL_TIME_SERVICE_USED_MS,
                 usageStats.mTotalTimeForegroundServiceUsed);
+        // Time attributes stored as an offset of the beginTime.
+        proto.write(IntervalStatsProto.UsageStats.LAST_TIME_VISIBLE_MS,
+                usageStats.mLastTimeVisible - stats.beginTime);
+        proto.write(IntervalStatsProto.UsageStats.TOTAL_TIME_VISIBLE_MS,
+                usageStats.mTotalTimeVisible);
         proto.write(IntervalStatsProto.UsageStats.APP_LAUNCH_COUNT, usageStats.mAppLaunchCount);
         writeChooserCounts(proto, usageStats);
         proto.end(token);
@@ -427,6 +441,7 @@ final class UsageStatsProto {
         proto.write(IntervalStatsProto.Event.TIME_MS, event.mTimeStamp - stats.beginTime);
         proto.write(IntervalStatsProto.Event.FLAGS, event.mFlags);
         proto.write(IntervalStatsProto.Event.TYPE, event.mEventType);
+        proto.write(IntervalStatsProto.Event.INSTANCE_ID, event.mInstanceId);
         switch (event.mEventType) {
             case UsageEvents.Event.CONFIGURATION_CHANGE:
                 if (event.mConfiguration != null) {
