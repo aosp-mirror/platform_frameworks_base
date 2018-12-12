@@ -41,6 +41,7 @@ import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
+import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -182,6 +183,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     public static final int UNREACHABLE_RSSI = Integer.MIN_VALUE;
 
+    public static final String KEY_PREFIX_AP = "AP:";
+    public static final String KEY_PREFIX_FQDN = "FQDN:";
+    public static final String KEY_PREFIX_OSU = "OSU:";
+
     private final Context mContext;
 
     private String ssid;
@@ -204,9 +209,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
     @Speed private int mSpeed = Speed.NONE;
     private boolean mIsScoredNetworkMetered = false;
 
-    // used to co-relate internal vs returned accesspoint.
-    int mId;
-
     /**
      * Information associated with the {@link PasspointConfiguration}.  Only maintaining
      * the relevant info to preserve spaces.
@@ -215,6 +217,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private String mProviderFriendlyName;
 
     private boolean mIsCarrierAp = false;
+
+    private OsuProvider mOsuProvider;
     /**
      * The EAP type {@link WifiEnterpriseConfig.Eap} associated with this AP if it is a carrier AP.
      */
@@ -280,14 +284,18 @@ public class AccessPoint implements Comparable<AccessPoint> {
         // Calculate required fields
         updateKey();
         updateRssi();
-
-        mId = sLastId.incrementAndGet();
     }
 
+    /**
+     * Creates an AccessPoint with only a WifiConfiguration. This is used for the saved networks
+     * page.
+     *
+     * Passpoint Credential AccessPoints should be created with this.
+     * Make sure to call setScanResults after constructing with this.
+     */
     public AccessPoint(Context context, WifiConfiguration config) {
         mContext = context;
         loadConfig(config);
-        mId = sLastId.incrementAndGet();
     }
 
     /**
@@ -298,7 +306,19 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mContext = context;
         mFqdn = config.getHomeSp().getFqdn();
         mProviderFriendlyName = config.getHomeSp().getFriendlyName();
-        mId = sLastId.incrementAndGet();
+    }
+
+    /**
+     * Initialize an AccessPoint object for a Passpoint OSU Provider.
+     * Make sure to call setScanResults after constructing with this.
+     */
+    public AccessPoint(Context context, OsuProvider provider) {
+        mContext = context;
+        mOsuProvider = provider;
+        mRssi = 1;
+        // TODO: This placeholder SSID is here to avoid null pointer exceptions.
+        ssid = "<OsuProvider AP SSID goes here>";
+        updateKey();
     }
 
     AccessPoint(Context context, Collection<ScanResult> results) {
@@ -324,8 +344,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mIsCarrierAp = firstResult.isCarrierAp;
         mCarrierApEapType = firstResult.carrierApEapType;
         mCarrierName = firstResult.carrierName;
-
-        mId = sLastId.incrementAndGet();
     }
 
     @VisibleForTesting void loadConfig(WifiConfiguration config) {
@@ -344,14 +362,19 @@ public class AccessPoint implements Comparable<AccessPoint> {
         StringBuilder builder = new StringBuilder();
 
         if (isPasspoint()) {
-            builder.append(mConfig.FQDN);
-        } else if (TextUtils.isEmpty(getSsidStr())) {
-            builder.append(getBssid());
-        } else {
-            builder.append(getSsidStr());
+            builder.append(KEY_PREFIX_FQDN).append(mConfig.FQDN);
+        } else if (isOsuProvider()) {
+            builder.append(KEY_PREFIX_OSU).append(mOsuProvider.getOsuSsid());
+            builder.append(',').append(mOsuProvider.getServerUri());
+        } else { // Non-Passpoint AP
+            builder.append(KEY_PREFIX_AP);
+            if (TextUtils.isEmpty(getSsidStr())) {
+                builder.append(getBssid());
+            } else {
+                builder.append(getSsidStr());
+            }
+            builder.append(',').append(getSecurity());
         }
-
-        builder.append(',').append(getSecurity());
         mKey = builder.toString();
     }
 
@@ -396,8 +419,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return difference;
         }
 
-        // Sort by ssid.
-        difference = getSsidStr().compareToIgnoreCase(other.getSsidStr());
+        // Sort by title.
+        difference = getTitle().compareToIgnoreCase(other.getTitle());
         if (difference != 0) {
             return difference;
         }
@@ -595,6 +618,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public static String getKey(ScanResult result) {
         StringBuilder builder = new StringBuilder();
 
+        builder.append(KEY_PREFIX_AP);
         if (TextUtils.isEmpty(result.SSID)) {
             builder.append(result.BSSID);
         } else {
@@ -609,14 +633,17 @@ public class AccessPoint implements Comparable<AccessPoint> {
         StringBuilder builder = new StringBuilder();
 
         if (config.isPasspoint()) {
-            builder.append(config.FQDN);
-        } else if (TextUtils.isEmpty(config.SSID)) {
-            builder.append(config.BSSID);
+            builder.append(KEY_PREFIX_FQDN).append(config.FQDN);
         } else {
-            builder.append(removeDoubleQuotes(config.SSID));
+            builder.append(KEY_PREFIX_AP);
+            if (TextUtils.isEmpty(config.SSID)) {
+                builder.append(config.BSSID);
+            } else {
+                builder.append(removeDoubleQuotes(config.SSID));
+            }
+            builder.append(',').append(getSecurity(config));
         }
 
-        builder.append(',').append(getSecurity(config));
         return builder.toString();
     }
 
@@ -839,6 +866,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public String getTitle() {
         if (isPasspoint()) {
             return mConfig.providerFriendlyName;
+        } else if (isOsuProvider()) {
+            return mOsuProvider.getFriendlyName();
         } else {
             return getSsidStr();
         }
@@ -976,6 +1005,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     /**
+     * Return true if this AccessPoint represents an OSU Provider.
+     */
+    public boolean isOsuProvider() {
+        return mOsuProvider != null;
+    }
+
+    /**
      * Return whether the given {@link WifiInfo} is for this access point.
      * If the current AP does not have a network Id then the config is used to
      * match based on SSID and security.
@@ -1065,8 +1101,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
     void setScanResults(Collection<ScanResult> scanResults) {
 
         // Validate scan results are for current AP only by matching SSID/BSSID
-        // Passpoint R1 networks are not bound to a specific SSID/BSSID, so skip this for passpoint.
-        if (!isPasspoint()) {
+        // Passpoint networks are not bound to a specific SSID/BSSID, so skip this for passpoint.
+        if (!isPasspoint() && !isOsuProvider()) {
             String key = getKey();
             for (ScanResult result : scanResults) {
                 String scanResultKey = AccessPoint.getKey(result);
@@ -1119,7 +1155,17 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
     }
 
-    /** Attempt to update the AccessPoint and return true if an update occurred. */
+    /**
+     * Attempt to update the AccessPoint with the current connection info.
+     * This is used to set an AccessPoint to the active one if the connection info matches, or
+     * conversely to set an AccessPoint to inactive if the connection info does not match. The RSSI
+     * is also updated upon a match. Listeners will be notified if an update occurred.
+     *
+     * This is called in {@link WifiTracker#updateAccessPoints} as well as in callbacks for handling
+     * NETWORK_STATE_CHANGED_ACTION, RSSI_CHANGED_ACTION, and onCapabilitiesChanged in WifiTracker.
+     *
+     * Returns true if an update occurred.
+     */
     public boolean update(
             @Nullable WifiConfiguration config, WifiInfo info, NetworkInfo networkInfo) {
 

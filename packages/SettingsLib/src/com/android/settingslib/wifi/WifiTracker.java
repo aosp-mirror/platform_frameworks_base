@@ -35,6 +35,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.WifiNetworkScoreCache.CacheListener;
+import android.net.wifi.hotspot2.OsuProvider;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -584,7 +585,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                     Map<Integer, List<ScanResult>>> pairing : passpointConfigsAndScans) {
                 WifiConfiguration config = pairing.first;
 
-                // TODO: Prioritize home networks before roaming networks
+                // TODO(b/118705403): Prioritize home networks before roaming networks
                 List<ScanResult> scanResults = new ArrayList<>();
 
                 List<ScanResult> homeScans =
@@ -617,6 +618,23 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                     accessPoints.add(accessPoint);
                 }
             }
+
+            // Add Passpoint OSU Provider AccessPoints
+            // TODO(b/118705403): filter out OSU Providers which we already have credentials from.
+            Map<OsuProvider, List<ScanResult>> providersAndScans =
+                    mWifiManager.getMatchingOsuProviders(cachedScanResults);
+            for (OsuProvider provider : providersAndScans.keySet()) {
+                AccessPoint accessPointOsu = new AccessPoint(mContext, provider);
+                // TODO(b/118705403): accessPointOsu.setScanResults(Matching ScanResult with best
+                // RSSI)
+                // TODO(b/118705403): Figure out if we would need to update an OSU AP (this will be
+                // used if we need to display it at the top of the picker as the "active" AP).
+                // Otherwise, OSU APs should ignore attempts to update the active connection
+                // info.
+                // accessPointOsu.update(connectionConfig, mLastInfo, mLastNetworkInfo);
+                accessPoints.add(accessPointOsu);
+            }
+
 
             // If there were no scan results, create an AP for the currently connected network (if
             // it exists).
