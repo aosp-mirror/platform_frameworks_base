@@ -60,6 +60,7 @@ import java.net.URL;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -67,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -399,8 +401,7 @@ public class MediaPlayer2 implements AutoCloseable
         clearSourceInfos();
 
         // Modular DRM clean up
-        mOnDrmConfigHelper = null;
-        synchronized (mDrmEventCbLock) {
+        synchronized (mDrmEventCallbackLock) {
             mDrmEventCallbackRecords.clear();
         }
 
@@ -2889,7 +2890,7 @@ public class MediaPlayer2 implements AutoCloseable
     }
 
     private void sendDrmEvent(final DrmEventNotifier notifier) {
-        synchronized (mDrmEventCbLock) {
+        synchronized (mDrmEventCallbackLock) {
             try {
                 for (Pair<Executor, DrmEventCallback> cb : mDrmEventCallbackRecords) {
                     cb.first.execute(() -> notifier.notify(cb.second));
@@ -2901,12 +2902,28 @@ public class MediaPlayer2 implements AutoCloseable
         }
     }
 
+    private <T> T sendDrmEventWait(final DrmEventNotifier<T> notifier)
+            throws InterruptedException, ExecutionException {
+        synchronized (mDrmEventCallbackLock) {
+            mDrmEventCallbackRecords.get(0);
+            for (Pair<Executor, DrmEventCallback> cb : mDrmEventCallbackRecords) {
+                CompletableFuture<T> ret = new CompletableFuture<>();
+                cb.first.execute(() -> ret.complete(notifier.notifyWait(cb.second)));
+                return ret.get();
+            }
+        }
+        return null;
+    }
+
     private interface EventNotifier {
         void notify(EventCallback callback);
     }
 
-    private interface DrmEventNotifier {
-        void notify(DrmEventCallback callback);
+    private interface DrmEventNotifier<T> {
+        default void notify(DrmEventCallback callback) { }
+        default T notifyWait(DrmEventCallback callback) {
+            return null;
+        }
     }
 
     /* Do not change these values without updating their counterparts
@@ -3351,73 +3368,209 @@ public class MediaPlayer2 implements AutoCloseable
     // Modular DRM begin
 
     /**
-     * Interface definition of a callback to be invoked when the app
-     * can do DRM configuration (get/set properties) before the session
-     * is opened. This facilitates configuration of the properties, like
-     * 'securityLevel', which has to be set after DRM scheme creation but
-     * before the DRM session is opened.
+     * An immutable structure per {@link DataSourceDesc} with settings required to initiate a DRM
+     * protected playback session.
      *
-     * The only allowed DRM calls in this listener are
-     * {@link MediaPlayer2#getDrmPropertyString(DataSourceDesc, String)}
-     * and {@link MediaPlayer2#setDrmPropertyString(DataSourceDesc, String, String)}.
-     * @hide
+     * @see DrmPreparationInfo.Builder
      */
-    public interface OnDrmConfigHelper {
+    public static final class DrmPreparationInfo {
+
         /**
-         * Called to give the app the opportunity to configure DRM before the session is created
-         *
-         * @param mp the {@code MediaPlayer2} associated with this callback
-         * @param dsd the DataSourceDesc of this data source
+         * Mutable builder to create a {@link MediaPlayer2.DrmPreparationInfo} object.
          */
-        public void onDrmConfig(MediaPlayer2 mp, DataSourceDesc dsd);
-    }
+        public static final class Builder {
 
-    /**
-     * Register a callback to be invoked for configuration of the DRM object before
-     * the session is created.
-     * The callback will be invoked synchronously during the execution
-     * of {@link #prepareDrm}.
-     *
-     * @param listener the callback that will be run
-     * @hide
-     */
-    // This is a synchronous call.
-    public void setOnDrmConfigHelper(OnDrmConfigHelper listener) {
-        mOnDrmConfigHelper = listener;
-    }
+            private UUID mUUID;
+            private byte[] mKeySetId;
+            private byte[] mInitData;
+            private String mMimeType;
+            private int mKeyType;
+            private Map<String, String> mOptionalParameters;
 
-    private OnDrmConfigHelper mOnDrmConfigHelper;
+            /**
+             * Set UUID of the crypto scheme selected to decrypt content. An UUID can be retrieved from
+             * the source listening to {@link MediaPlayer2.DrmEventCallback#onDrmInfo}.
+             *
+             * @param uuid of selected crypto scheme
+             * @return this
+             */
+            public Builder setUuid(@NonNull UUID uuid) {
+                this.mUUID = uuid;
+                return this;
+            }
+
+            /**
+             * Set identifier of a persisted offline key obtained from
+             * {@link MediaPlayer2.DrmEventCallback#onDrmPrepared(MediaPlayer2, DataSourceDesc, int, byte[])}.
+             *
+             * A {@code keySetId} can be used to restore persisted offline keys into a new playback
+             * session of a DRM protected data source. When {@code keySetId} is set, {@code initData},
+             * {@code mimeType}, {@code keyType}, {@code optionalParameters} are ignored.
+             *
+             * @param keySetId identifier of a persisted offline key
+             * @return this
+             */
+            public Builder setKeySetId(@Nullable byte[] keySetId) {
+                this.mKeySetId = keySetId;
+                return this;
+            }
+
+            /**
+             * Set container-specific DRM initialization data. Its meaning is interpreted based on
+             * {@code mimeType}. For example, it could contain the content ID, key ID or other data
+             * obtained from the content metadata that is required to generate a
+             * {@link MediaDrm.KeyRequest}.
+             *
+             * @param initData container-specific DRM initialization data
+             * @return this
+             */
+            public Builder setInitData(@Nullable byte[] initData) {
+                this.mInitData = initData;
+                return this;
+            }
+
+            /**
+             * Set mime type of the content
+             *
+             * @param mimeType mime type to the content
+             * @return this
+             */
+            public Builder setMimeType(@Nullable String mimeType) {
+                this.mMimeType = mimeType;
+                return this;
+            }
+
+            /**
+             * Set type of the key request. The request may be to acquire keys
+             * for streaming, {@link MediaDrm#KEY_TYPE_STREAMING}, or for offline content,
+             * {@link MediaDrm#KEY_TYPE_OFFLINE}. Releasing previously acquired keys
+             * ({@link MediaDrm#KEY_TYPE_RELEASE}) is not allowed.
+             *
+             * @param keyType type of the key request
+             * @return this
+             */
+            public Builder setKeyType(@MediaPlayer2.MediaDrmKeyType int keyType) {
+                this.mKeyType = keyType;
+                return this;
+            }
+
+            /**
+             * Set optional parameters to be included in a {@link MediaDrm.KeyRequest} message sent to
+             * the license server.
+             *
+             * @param optionalParameters optional parameters to be included in a key request
+             * @return this
+             */
+            public Builder setOptionalParameters(
+                    @Nullable Map<String, String> optionalParameters) {
+                this.mOptionalParameters = optionalParameters;
+                return this;
+            }
+
+            /**
+             * @return an immutable {@link MediaPlayer2.DrmPreparationInfo} representing the settings of this builder
+             */
+            public MediaPlayer2.DrmPreparationInfo build() {
+                return new MediaPlayer2.DrmPreparationInfo(mUUID, mKeySetId, mInitData, mMimeType, mKeyType,
+                        mOptionalParameters);
+            }
+
+        }
+
+        private final UUID mUUID;
+        private final byte[] mKeySetId;
+        private final byte[] mInitData;
+        private final String mMimeType;
+        private final int mKeyType;
+        private final Map<String, String> mOptionalParameters;
+
+        private DrmPreparationInfo(UUID mUUID, byte[] mKeySetId, byte[] mInitData, String mMimeType,
+                int mKeyType, Map<String, String> optionalParameters) {
+            this.mUUID = mUUID;
+            this.mKeySetId = mKeySetId;
+            this.mInitData = mInitData;
+            this.mMimeType = mMimeType;
+            this.mKeyType = mKeyType;
+            this.mOptionalParameters = optionalParameters;
+        }
+
+    }
 
     /**
      * Interface definition for callbacks to be invoked when the player has the corresponding
      * DRM events.
-     * @hide
      */
     public static class DrmEventCallback {
         /**
-         * Called to indicate DRM info is available
+         * Called to indicate DRM info is available. Return a {@link DrmPreparationInfo} object that
+         * bundles DRM initialization parameters.
          *
          * @param mp the {@code MediaPlayer2} associated with this callback
-         * @param dsd the DataSourceDesc of this data source
-         * @param drmInfo DRM info of the source including PSSH, and subset
-         *                of crypto schemes supported by this device
+         * @param dsd the {@link DataSourceDesc} of this data source
+         * @param drmInfo DRM info of the source including PSSH, and subset of crypto schemes
+         *        supported by this device
+         * @return a {@link DrmPreparationInfo} object to initialize DRM playback, or null to skip
+         *         DRM initialization
          */
-        public void onDrmInfo(MediaPlayer2 mp, DataSourceDesc dsd, DrmInfo drmInfo) { }
+        public DrmPreparationInfo onDrmInfo(MediaPlayer2 mp, DataSourceDesc dsd, DrmInfo drmInfo) {
+            return null;
+        }
 
         /**
-         * Called to notify the client that {@link MediaPlayer2#prepareDrm(DataSourceDesc, UUID)}
-         * is finished and ready for key request/response.
+         * Called to notify the client that {@code mp} is ready to decrypt DRM protected data source
+         * {@code dsd}
          *
          * @param mp the {@code MediaPlayer2} associated with this callback
-         * @param dsd the DataSourceDesc of this data source
+         * @param dsd the {@link DataSourceDesc} of this data source
          * @param status the result of DRM preparation.
+         * @param keySetId optional identifier that can be used to restore DRM playback initiated
+         *        with a {@link MediaDrm#KEY_TYPE_OFFLINE} key request.
+         *
+         * @see DrmPreparationInfo.Builder#setKeySetId(byte[])
          */
-        public void onDrmPrepared(
-                MediaPlayer2 mp, DataSourceDesc dsd, @PrepareDrmStatusCode int status) { }
+        public void onDrmPrepared(@NonNull MediaPlayer2 mp, @NonNull DataSourceDesc dsd,
+                @PrepareDrmStatusCode int status, @Nullable byte[] keySetId) { }
+
+        /**
+         * Called to give the app the opportunity to configure DRM before the session is created.
+         *
+         * This facilitates configuration of the properties, like 'securityLevel', which
+         * has to be set after DRM scheme creation but before the DRM session is opened.
+         *
+         * The only allowed DRM calls in this listener are
+         * {@link MediaDrm#getPropertyString(String)},
+         * {@link MediaDrm#getPropertyByteArray(String)},
+         * {@link MediaDrm#setPropertyString(String, String)},
+         * {@link MediaDrm#setPropertyByteArray(String, byte[])},
+         * {@link MediaDrm#setOnExpirationUpdateListener},
+         * and {@link MediaDrm#setOnKeyStatusChangeListener}.
+         *
+         * @param mp the {@code MediaPlayer2} associated with this callback
+         * @param dsd the {@link DataSourceDesc} of this data source
+         * @param drm handle to get/set DRM properties and listeners for this data source
+         */
+        public void onDrmConfig(@NonNull MediaPlayer2 mp, @NonNull DataSourceDesc dsd,
+                @NonNull MediaDrm drm) { }
+
+        /**
+         * Called to indicate the DRM session for {@code dsd} is ready for key request/response
+         *
+         * @param mp the {@code MediaPlayer2} associated with this callback
+         * @param dsd the {@link DataSourceDesc} of this data source
+         * @param request a {@link MediaDrm.KeyRequest} prepared using the
+         *        {@link DrmPreparationInfo} returned from
+         *        {@link #onDrmInfo(MediaPlayer2, DataSourceDesc, DrmInfo)}
+         * @return the response to {@code request} (from license server)
+         */
+        public byte[] onDrmKeyRequest(@NonNull MediaPlayer2 mp, @NonNull DataSourceDesc dsd,
+                @NonNull MediaDrm.KeyRequest request) {
+            return null;
+        }
+
     }
 
-    private final Object mDrmEventCbLock = new Object();
-    private ArrayList<Pair<Executor, DrmEventCallback>> mDrmEventCallbackRecords =
+    private final Object mDrmEventCallbackLock = new Object();
+    private List<Pair<Executor, DrmEventCallback>> mDrmEventCallbackRecords =
             new ArrayList<Pair<Executor, DrmEventCallback>>();
 
     /**
@@ -3425,10 +3578,9 @@ public class MediaPlayer2 implements AutoCloseable
      *
      * @param eventCallback the callback that will be run
      * @param executor the executor through which the callback should be invoked
-     * @hide
      */
     // This is a synchronous call.
-    public void registerDrmEventCallback(@NonNull @CallbackExecutor Executor executor,
+    public void setDrmEventCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull DrmEventCallback eventCallback) {
         if (eventCallback == null) {
             throw new IllegalArgumentException("Illegal null EventCallback");
@@ -3437,8 +3589,9 @@ public class MediaPlayer2 implements AutoCloseable
             throw new IllegalArgumentException(
                     "Illegal null Executor for the EventCallback");
         }
-        synchronized (mDrmEventCbLock) {
-            mDrmEventCallbackRecords.add(new Pair(executor, eventCallback));
+        synchronized (mDrmEventCallbackLock) {
+            mDrmEventCallbackRecords = Collections.singletonList(
+                    new Pair<Executor, DrmEventCallback>(executor, eventCallback));
         }
     }
 
@@ -3450,7 +3603,7 @@ public class MediaPlayer2 implements AutoCloseable
      */
     // This is a synchronous call.
     public void unregisterDrmEventCallback(DrmEventCallback eventCallback) {
-        synchronized (mDrmEventCbLock) {
+        synchronized (mDrmEventCallbackLock) {
             for (Pair<Executor, DrmEventCallback> cb : mDrmEventCallbackRecords) {
                 if (cb.second == eventCallback) {
                     mDrmEventCallbackRecords.remove(cb);
@@ -3564,7 +3717,7 @@ public class MediaPlayer2 implements AutoCloseable
     /**
      * Prepares the DRM for the given data source
      * <p>
-     * If {@link OnDrmConfigHelper} is registered, it will be called during
+     * If {@link DrmEventCallback} is registered, it will be called during
      * preparation to allow configuration of the DRM properties before opening the
      * DRM session. It should be used only for a series of
      * {@link #getDrmPropertyString(DataSourceDesc, String)} and
@@ -3587,8 +3740,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @param dsd The DRM protected data source
      *
      * @param uuid The UUID of the crypto scheme. If not known beforehand, it can be retrieved
-     * from the source through {@link #getDrmInfo(DataSourceDesc)} or registering a
-     * {@link DrmEventCallback#onDrmInfo}.
+     * from the source listening to {@link DrmEventCallback#onDrmInfo}.
      *
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      * @hide
@@ -3661,8 +3813,8 @@ public class MediaPlayer2 implements AutoCloseable
                     sendDrmEvent(new DrmEventNotifier() {
                         @Override
                         public void notify(DrmEventCallback callback) {
-                            callback.onDrmPrepared(
-                                    MediaPlayer2.this, dsd, prepareDrmStatus);
+                            callback.onDrmPrepared(MediaPlayer2.this, dsd, prepareDrmStatus,
+                                    /* TODO: keySetId */ null);
                         }
                     });
 
@@ -3876,7 +4028,6 @@ public class MediaPlayer2 implements AutoCloseable
 
     /**
      * Encapsulates the DRM properties of the source.
-     * @hide
      */
     public static final class DrmInfo {
         private Map<UUID, byte[]> mMapPssh;
@@ -4013,10 +4164,8 @@ public class MediaPlayer2 implements AutoCloseable
     };  // DrmInfo
 
     /**
-     * Thrown when a DRM method is called before preparing a DRM scheme through
-     * {@link MediaPlayer2#prepareDrm(DataSourceDesc, UUID)}.
+     * Thrown when a DRM method is called when there is no active DRM session.
      * Extends MediaDrm.MediaDrmException
-     * @hide
      */
     public static final class NoDrmSchemeException extends MediaDrmException {
         public NoDrmSchemeException(String detailMessage) {
@@ -4291,9 +4440,9 @@ public class MediaPlayer2 implements AutoCloseable
         }
 
         void prepare(UUID uuid) throws UnsupportedSchemeException,
-                ResourceBusyException, NotProvisionedException {
-            final OnDrmConfigHelper onDrmConfigHelper = mOnDrmConfigHelper;
-            Log.v(TAG, "prepareDrm: uuid: " + uuid + " mOnDrmConfigHelper: " + onDrmConfigHelper);
+                ResourceBusyException, NotProvisionedException, InterruptedException,
+                ExecutionException {
+            Log.v(TAG, "prepareDrm: uuid: " + uuid);
 
             synchronized (this) {
                 if (mActiveDrmUUID != null) {
@@ -4334,9 +4483,13 @@ public class MediaPlayer2 implements AutoCloseable
             }  // synchronized
 
             // call the callback outside the lock
-            if (onDrmConfigHelper != null)  {
-                onDrmConfigHelper.onDrmConfig(MediaPlayer2.this, mDSD);
-            }
+            sendDrmEventWait(new DrmEventNotifier<Void>() {
+                @Override
+                public Void notifyWait(DrmEventCallback callback) {
+                    callback.onDrmConfig(MediaPlayer2.this, mDSD, mDrmObj);
+                    return null;
+                }
+            });
 
             synchronized (this) {
                 mDrmConfigAllowed = false;
@@ -4506,7 +4659,7 @@ public class MediaPlayer2 implements AutoCloseable
                 @Override
                 public void notify(DrmEventCallback callback) {
                     callback.onDrmPrepared(
-                            MediaPlayer2.this, mDSD, finalStatus);
+                            MediaPlayer2.this, mDSD, finalStatus, /* TODO: keySetId */ null);
                 }
             });
 
