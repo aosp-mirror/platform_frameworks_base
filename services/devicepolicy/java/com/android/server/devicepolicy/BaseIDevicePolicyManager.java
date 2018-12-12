@@ -136,4 +136,10 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public boolean isUnattendedManagedKiosk() {
         return false;
     }
+
+    @Override
+    public boolean startViewCalendarEventInManagedProfile(String packageName, long eventId,
+            long start, long end, boolean allDay, int flags) {
+        return false;
+    }
 }

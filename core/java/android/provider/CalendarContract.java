@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.UnsupportedAppUsage;
@@ -40,6 +41,8 @@ import android.os.RemoteException;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
+
+import com.android.internal.util.Preconditions;
 
 /**
  * <p>
@@ -129,6 +132,13 @@ public final class CalendarContract {
         "android.provider.calendar.action.HANDLE_CUSTOM_EVENT";
 
     /**
+     * Action used to help apps show calendar events in the managed profile.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_VIEW_WORK_CALENDAR_EVENT =
+            "android.provider.calendar.action.VIEW_WORK_CALENDAR_EVENT";
+
+    /**
      * Intent Extras key: {@link EventsColumns#CUSTOM_APP_URI} for the event in
      * the {@link #ACTION_HANDLE_CUSTOM_EVENT} intent
      */
@@ -151,6 +161,11 @@ public final class CalendarContract {
      * all-day event by default
      */
     public static final String EXTRA_EVENT_ALL_DAY = "allDay";
+
+    /**
+     * Intent Extras key: The id of an event.
+     */
+    public static final String EXTRA_EVENT_ID = "id";
 
     /**
      * This authority is used for writing to or querying from the calendar
@@ -193,6 +208,43 @@ public final class CalendarContract {
      * This utility class cannot be instantiated
      */
     private CalendarContract() {}
+
+    /**
+     * Starts an activity to view calendar events in the managed profile.
+     *
+     * When this API is called, the system will attempt to start an activity
+     * in the managed profile with an intent targeting the same caller package.
+     * The intent will have its action set to
+     * {@link CalendarContract#ACTION_VIEW_WORK_CALENDAR_EVENT} and contain extras
+     * corresponding to the API's arguments. A calendar app intending to support
+     * cross profile events viewing should handle this intent, parse the arguments
+     * and show the appropriate UI.
+     *
+     * @param context the context.
+     * @param eventId the id of the event to be viewed. Will be put into {@link #EXTRA_EVENT_ID}
+     *                field of the intent.
+     * @param start the start time of the event. Will be put into {@link #EXTRA_EVENT_BEGIN_TIME}
+     *              field of the intent.
+     * @param end the end time of the event. Will be put into {@link #EXTRA_EVENT_END_TIME} field
+     *            of the intent.
+     * @param allDay if the event is an all-day event. Will be put into
+     *               {@link #EXTRA_EVENT_ALL_DAY} field of the intent.
+     * @param flags flags to be set on the intent via {@link Intent#setFlags}
+     * @return {@code true} if the activity is started successfully. {@code false} otherwise.
+     *
+     * @see #EXTRA_EVENT_ID
+     * @see #EXTRA_EVENT_BEGIN_TIME
+     * @see #EXTRA_EVENT_END_TIME
+     * @see #EXTRA_EVENT_ALL_DAY
+     */
+    public static boolean startViewCalendarEventInManagedProfile(@NonNull Context context,
+            long eventId, long start, long end, boolean allDay, int flags) {
+        Preconditions.checkNotNull(context, "Context is null");
+        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        return dpm.startViewCalendarEventInManagedProfile(eventId, start,
+                end, allDay, flags);
+    }
 
     /**
      * Generic columns for use by sync adapters. The specific functions of these
@@ -695,7 +747,7 @@ public final class CalendarContract {
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/calendars");
 
         /**
-         * The content:// style URL for querying Calendars table in the work profile. Appending a
+         * The content:// style URL for querying Calendars table in the managed profile. Appending a
          * calendar id using {@link ContentUris#withAppendedId(Uri, long)} will
          * specify a single calendar.
          *
@@ -715,9 +767,9 @@ public final class CalendarContract {
          * projection of the query to this uri that are not contained in the above list.
          *
          * <p>This uri will return an empty cursor if the calling user is not a parent profile
-         * of a work profile, or cross profile calendar is disabled in Settings, or this uri is
-         * queried from a package that is not whitelisted by profile owner of the work profile via
-         * {@link DevicePolicyManager#addCrossProfileCalendarPackage(ComponentName, String)}.
+         * of a managed profile, or cross profile calendar is disabled in Settings, or this uri is
+         * queried from a package that is not whitelisted by profile owner of the managed profile
+         * via {@link DevicePolicyManager#addCrossProfileCalendarPackage(ComponentName, String)}.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
          * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED
@@ -1673,7 +1725,7 @@ public final class CalendarContract {
                 Uri.parse("content://" + AUTHORITY + "/events");
 
         /**
-         * The content:// style URL for querying Events table in the work profile. Appending an
+         * The content:// style URL for querying Events table in the managed profile. Appending an
          * event id using {@link ContentUris#withAppendedId(Uri, long)} will
          * specify a single event.
          *
@@ -1706,9 +1758,9 @@ public final class CalendarContract {
          * projection of the query to this uri that are not contained in the above list.
          *
          * <p>This uri will return an empty cursor if the calling user is not a parent profile
-         * of a work profile, or cross profile calendar is disabled in Settings, or this uri is
-         * queried from a package that is not whitelisted by profile owner of the work profile via
-         * {@link DevicePolicyManager#addCrossProfileCalendarPackage(ComponentName, String)}.
+         * of a managed profile, or cross profile calendar is disabled in Settings, or this uri is
+         * queried from a package that is not whitelisted by profile owner of the managed profile
+         * via {@link DevicePolicyManager#addCrossProfileCalendarPackage(ComponentName, String)}.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
          * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED
@@ -1896,7 +1948,7 @@ public final class CalendarContract {
             Uri.parse("content://" + AUTHORITY + "/instances/searchbyday");
 
         /**
-         * The content:// style URL for querying an instance range in the work profile.
+         * The content:// style URL for querying an instance range in the managed profile.
          * It supports similar semantics as {@link #CONTENT_URI}.
          *
          * <p>The following columns plus the columns that are whitelisted by
@@ -1916,9 +1968,9 @@ public final class CalendarContract {
          * projection of the query to this uri that are not contained in the above list.
          *
          * <p>This uri will return an empty cursor if the calling user is not a parent profile
-         * of a work profile, or cross profile calendar for the work profile is disabled in
+         * of a managed profile, or cross profile calendar for the managed profile is disabled in
          * Settings, or this uri is queried from a package that is not whitelisted by
-         * profile owner of the work profile via
+         * profile owner of the managed profile via
          * {@link DevicePolicyManager#addCrossProfileCalendarPackage(ComponentName, String)}.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
@@ -1929,7 +1981,7 @@ public final class CalendarContract {
 
         /**
          * The content:// style URL for querying an instance range by Julian
-         * Day in the work profile. It supports similar semantics as {@link #CONTENT_BY_DAY_URI}
+         * Day in the managed profile. It supports similar semantics as {@link #CONTENT_BY_DAY_URI}
          * and performs similar checks as {@link #ENTERPRISE_CONTENT_URI}.
          */
         public static final Uri ENTERPRISE_CONTENT_BY_DAY_URI =
@@ -1937,7 +1989,7 @@ public final class CalendarContract {
 
         /**
          * The content:// style URL for querying an instance range with a search
-         * term in the work profile. It supports similar semantics as {@link #CONTENT_SEARCH_URI}
+         * term in the managed profile. It supports similar semantics as {@link #CONTENT_SEARCH_URI}
          * and performs similar checks as {@link #ENTERPRISE_CONTENT_URI}.
          */
         public static final Uri ENTERPRISE_CONTENT_SEARCH_URI =
@@ -1945,7 +1997,7 @@ public final class CalendarContract {
 
         /**
          * The content:// style URL for querying an instance range with a search
-         * term in the work profile. It supports similar semantics as
+         * term in the managed profile. It supports similar semantics as
          * {@link #CONTENT_SEARCH_BY_DAY_URI} and performs similar checks as
          * {@link #ENTERPRISE_CONTENT_URI}.
          */
