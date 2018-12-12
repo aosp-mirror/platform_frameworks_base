@@ -1638,46 +1638,6 @@ public class NotificationManager {
             return true;
         }
 
-        /**
-         * @hide
-         */
-        public static boolean areAnyScreenOffEffectsSuppressed(int effects) {
-            for (int i = 0; i < SCREEN_OFF_SUPPRESSED_EFFECTS.length; i++) {
-                final int effect = SCREEN_OFF_SUPPRESSED_EFFECTS[i];
-                if ((effects & effect) != 0) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /**
-         * @hide
-         */
-        public static boolean areAnyScreenOnEffectsSuppressed(int effects) {
-            for (int i = 0; i < SCREEN_ON_SUPPRESSED_EFFECTS.length; i++) {
-                final int effect = SCREEN_ON_SUPPRESSED_EFFECTS[i];
-                if ((effects & effect) != 0) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /**
-         * @hide
-         */
-        public static int toggleScreenOffEffectsSuppressed(int currentEffects, boolean suppress) {
-            return toggleEffects(currentEffects, SCREEN_OFF_SUPPRESSED_EFFECTS, suppress);
-        }
-
-        /**
-         * @hide
-         */
-        public static int toggleScreenOnEffectsSuppressed(int currentEffects, boolean suppress) {
-            return toggleEffects(currentEffects, SCREEN_ON_SUPPRESSED_EFFECTS, suppress);
-        }
-
         private static int toggleEffects(int currentEffects, int[] effects, boolean suppress) {
             for (int i = 0; i < effects.length; i++) {
                 final int effect = effects[i];
@@ -1835,6 +1795,41 @@ public class NotificationManager {
         /** @hide **/
         public int allowMessagesFrom() {
             return priorityMessageSenders;
+        }
+
+        /** @hide **/
+        public boolean showFullScreenIntents() {
+            return (suppressedVisualEffects & SUPPRESSED_EFFECT_FULL_SCREEN_INTENT) == 0;
+        }
+
+        /** @hide **/
+        public boolean showLights() {
+            return (suppressedVisualEffects & SUPPRESSED_EFFECT_LIGHTS) == 0;
+        }
+
+        /** @hide **/
+        public boolean showPeeking() {
+            return (suppressedVisualEffects & SUPPRESSED_EFFECT_PEEK) == 0;
+        }
+
+        /** @hide **/
+        public boolean showStatusBarIcons() {
+            return (suppressedVisualEffects & SUPPRESSED_EFFECT_STATUS_BAR) == 0;
+        }
+
+        /** @hide **/
+        public boolean showAmbient() {
+            return (suppressedVisualEffects & SUPPRESSED_EFFECT_AMBIENT) == 0;
+        }
+
+        /** @hide **/
+        public boolean showBadges() {
+            return (suppressedVisualEffects & SUPPRESSED_EFFECT_BADGE) == 0;
+        }
+
+        /** @hide **/
+        public boolean showInNotificationList() {
+            return (suppressedVisualEffects & SUPPRESSED_EFFECT_NOTIFICATION_LIST) == 0;
         }
 
         /**
