@@ -135,15 +135,13 @@ class RollbackTestUtils {
         assertStatusSuccess(LocalIntentSender.getIntentSenderResult());
     }
 
-    // TODO: Unused
-    static void adoptShellPermissionIdentity() {
+    static void adoptShellPermissionIdentity(String... permissions) {
         InstrumentationRegistry
             .getInstrumentation()
             .getUiAutomation()
-            .adoptShellPermissionIdentity();
+            .adoptShellPermissionIdentity(permissions);
     }
 
-    // TODO: Unused
     static void dropShellPermissionIdentity() {
         InstrumentationRegistry
             .getInstrumentation()

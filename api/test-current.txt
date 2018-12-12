@@ -329,11 +329,6 @@ package android.content {
     method public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillCompatibilityEnabled(boolean);
-    field public static final java.lang.String ROLLBACK_SERVICE = "rollback";
-  }
-
-  public class Intent implements java.lang.Cloneable android.os.Parcelable {
-    field public static final java.lang.String ACTION_PACKAGE_ROLLBACK_EXECUTED = "android.intent.action.PACKAGE_ROLLBACK_EXECUTED";
   }
 
 }
@@ -354,10 +349,6 @@ package android.content.pm {
 
   public class LauncherApps {
     ctor public LauncherApps(android.content.Context);
-  }
-
-  public static class PackageInstaller.SessionParams implements android.os.Parcelable {
-    method public void setEnableRollback();
   }
 
   public abstract class PackageManager {
@@ -403,42 +394,6 @@ package android.content.res {
 
   public final class Configuration implements java.lang.Comparable android.os.Parcelable {
     field public final android.app.WindowConfiguration windowConfiguration;
-  }
-
-}
-
-package android.content.rollback {
-
-  public final class PackageRollbackInfo implements android.os.Parcelable {
-    ctor public PackageRollbackInfo(java.lang.String, android.content.rollback.PackageRollbackInfo.PackageVersion, android.content.rollback.PackageRollbackInfo.PackageVersion);
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.rollback.PackageRollbackInfo> CREATOR;
-    field public final android.content.rollback.PackageRollbackInfo.PackageVersion higherVersion;
-    field public final android.content.rollback.PackageRollbackInfo.PackageVersion lowerVersion;
-    field public final java.lang.String packageName;
-  }
-
-  public static class PackageRollbackInfo.PackageVersion {
-    ctor public PackageRollbackInfo.PackageVersion(long);
-    field public final long versionCode;
-  }
-
-  public final class RollbackInfo implements android.os.Parcelable {
-    ctor public RollbackInfo(android.content.rollback.PackageRollbackInfo);
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.rollback.RollbackInfo> CREATOR;
-    field public final android.content.rollback.PackageRollbackInfo targetPackage;
-  }
-
-  public final class RollbackManager {
-    method public void executeRollback(android.content.rollback.RollbackInfo, android.content.IntentSender);
-    method public void expireRollbackForPackage(java.lang.String);
-    method public android.content.rollback.RollbackInfo getAvailableRollback(java.lang.String);
-    method public java.util.List<java.lang.String> getPackagesWithAvailableRollbacks();
-    method public java.util.List<android.content.rollback.RollbackInfo> getRecentlyExecutedRollbacks();
-    method public void reloadPersistedData();
   }
 
 }

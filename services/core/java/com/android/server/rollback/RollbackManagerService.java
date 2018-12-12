@@ -16,6 +16,7 @@
 
 package com.android.server.rollback;
 
+import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -42,7 +43,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.SELinux;
 import android.util.Log;
 
@@ -203,6 +203,10 @@ public class RollbackManagerService extends IRollbackManager.Stub {
 
     @Override
     public RollbackInfo getAvailableRollback(String packageName) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_ROLLBACKS,
+                "getAvailableRollback");
+
         PackageRollbackInfo.PackageVersion installedVersion =
                 getInstalledPackageVersion(packageName);
         if (installedVersion == null) {
@@ -228,6 +232,10 @@ public class RollbackManagerService extends IRollbackManager.Stub {
 
     @Override
     public StringParceledListSlice getPackagesWithAvailableRollbacks() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_ROLLBACKS,
+                "getPackagesWithAvailableRollbacks");
+
         // TODO: This may return packages whose rollback is out of date or
         // expired.  Presumably that's okay because the package rollback could
         // be expired anyway between when the caller calls this method and
@@ -245,6 +253,10 @@ public class RollbackManagerService extends IRollbackManager.Stub {
 
     @Override
     public ParceledListSlice<RollbackInfo> getRecentlyExecutedRollbacks() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_ROLLBACKS,
+                "getRecentlyExecutedRollbacks");
+
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
             List<RollbackInfo> rollbacks = new ArrayList<>(mRecentlyExecutedRollbacks);
@@ -255,11 +267,13 @@ public class RollbackManagerService extends IRollbackManager.Stub {
     @Override
     public void executeRollback(RollbackInfo rollback, String callerPackageName,
             IntentSender statusReceiver) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_ROLLBACKS,
+                "executeRollback");
+
         final int callingUid = Binder.getCallingUid();
-        if ((callingUid != Process.SHELL_UID) && (callingUid != Process.ROOT_UID)) {
-            AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
-            appOps.checkPackage(callingUid, callerPackageName);
-        }
+        AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+        appOps.checkPackage(callingUid, callerPackageName);
 
         getHandler().post(() ->
                 executeRollbackInternal(rollback, callerPackageName, statusReceiver));
@@ -362,10 +376,8 @@ public class RollbackManagerService extends IRollbackManager.Stub {
             addRecentlyExecutedRollback(rollback);
             sendSuccess(statusReceiver);
 
-            // TODO: Restrict permissions for who can listen for this
-            // broadcast?
             Intent broadcast = new Intent(Intent.ACTION_PACKAGE_ROLLBACK_EXECUTED,
-                    Uri.fromParts("package", packageName, null));
+                    Uri.fromParts("package", packageName, Manifest.permission.MANAGE_ROLLBACKS));
 
             // TODO: This call emits the warning "Calling a method in the
             // system process without a qualified user". Fix that.
@@ -379,6 +391,10 @@ public class RollbackManagerService extends IRollbackManager.Stub {
 
     @Override
     public void reloadPersistedData() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_ROLLBACKS,
+                "reloadPersistedData");
+
         synchronized (mLock) {
             mAvailableRollbacks = null;
             mRecentlyExecutedRollbacks = null;
@@ -388,6 +404,10 @@ public class RollbackManagerService extends IRollbackManager.Stub {
 
     @Override
     public void expireRollbackForPackage(String packageName) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_ROLLBACKS,
+                "expireRollbackForPackage");
+
         // TODO: Should this take a package version number in addition to
         // package name? For now, just remove all rollbacks matching the
         // package name. This method is only currently used to facilitate

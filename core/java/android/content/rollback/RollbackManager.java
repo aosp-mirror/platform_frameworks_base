@@ -18,8 +18,9 @@ package android.content.rollback;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.content.Context;
 import android.content.IntentSender;
 import android.os.RemoteException;
@@ -33,12 +34,10 @@ import java.util.List;
  * used to initiate rollback of those packages for a limited time period after
  * upgrade.
  *
- * TODO: Require an appropriate permission for apps to use these APIs.
- *
  * @see PackageInstaller.SessionParams#setEnableRollback()
- * @hide TODO: hidden, @TestApi until we decide on public vs. @SystemApi.
+ * @hide
  */
-@TestApi
+@SystemApi
 @SystemService(Context.ROLLBACK_SERVICE)
 public final class RollbackManager {
     private final String mCallerPackageName;
@@ -63,7 +62,10 @@ public final class RollbackManager {
      * @param packageName name of the package to get the availble RollbackInfo for.
      * @return the rollback available for the package, or null if no rollback
      *         is available for the package.
+     * @throws SecurityException if the caller does not have the
+     *            MANAGE_ROLLBACKS permission.
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
     public @Nullable RollbackInfo getAvailableRollback(@NonNull String packageName) {
         try {
             return mBinder.getAvailableRollback(packageName);
@@ -78,7 +80,10 @@ public final class RollbackManager {
      * about the rollback available for a particular package.
      *
      * @return the names of packages that are available for rollback.
+     * @throws SecurityException if the caller does not have the
+     *            MANAGE_ROLLBACKS permission.
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
     public @NonNull List<String> getPackagesWithAvailableRollbacks() {
         try {
             return mBinder.getPackagesWithAvailableRollbacks().getList();
@@ -103,7 +108,10 @@ public final class RollbackManager {
      * rolled back from.
      *
      * @return the recently executed rollbacks
+     * @throws SecurityException if the caller does not have the
+     *            MANAGE_ROLLBACKS permission.
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
     public @NonNull List<RollbackInfo> getRecentlyExecutedRollbacks() {
         try {
             return mBinder.getRecentlyExecutedRollbacks().getList();
@@ -127,7 +135,10 @@ public final class RollbackManager {
      *
      * @param rollback to execute
      * @param statusReceiver where to deliver the results
+     * @throws SecurityException if the caller does not have the
+     *            MANAGE_ROLLBACKS permission.
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
     public void executeRollback(@NonNull RollbackInfo rollback,
             @NonNull IntentSender statusReceiver) {
         try {
@@ -143,9 +154,10 @@ public final class RollbackManager {
      * across device reboot, by simulating what happens on reboot without
      * actually rebooting the device.
      *
-     * @hide
+     * @throws SecurityException if the caller does not have the
+     *            MANAGE_ROLLBACKS permission.
      */
-    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
     public void reloadPersistedData() {
         try {
             mBinder.reloadPersistedData();
@@ -160,10 +172,10 @@ public final class RollbackManager {
      * expiring rollback data.
      *
      * @param packageName the name of the package to expire data for.
-     *
-     * @hide
+     * @throws SecurityException if the caller does not have the
+     *            MANAGE_ROLLBACKS permission.
      */
-    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
     public void expireRollbackForPackage(@NonNull String packageName) {
         try {
             mBinder.expireRollbackForPackage(packageName);

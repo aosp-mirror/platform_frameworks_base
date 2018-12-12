@@ -24,7 +24,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -1428,9 +1427,9 @@ public class PackageInstaller {
 
         /**
          * Request that rollbacks be enabled for the given upgrade.
-         * @hide TODO: hidden, @TestApi until we decide on public vs. @SystemApi.
+         * @hide
          */
-        @TestApi
+        @SystemApi
         public void setEnableRollback() {
             installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
         }

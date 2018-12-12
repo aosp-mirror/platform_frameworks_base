@@ -94,6 +94,7 @@ package android {
     field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final java.lang.String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final java.lang.String MANAGE_ROLE_HOLDERS = "android.permission.MANAGE_ROLE_HOLDERS";
+    field public static final java.lang.String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
     field public static final java.lang.String MANAGE_SENSOR_PRIVACY = "android.permission.MANAGE_SENSOR_PRIVACY";
     field public static final java.lang.String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
     field public static final java.lang.String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
@@ -1038,6 +1039,7 @@ package android.content {
     field public static final java.lang.String OEM_LOCK_SERVICE = "oem_lock";
     field public static final java.lang.String PERMISSION_SERVICE = "permission";
     field public static final java.lang.String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
+    field public static final java.lang.String ROLLBACK_SERVICE = "rollback";
     field public static final java.lang.String SECURE_ELEMENT_SERVICE = "secure_element";
     field public static final java.lang.String STATS_MANAGER = "stats";
     field public static final java.lang.String SYSTEM_UPDATE_SERVICE = "system_update";
@@ -1069,6 +1071,7 @@ package android.content {
     field public static final java.lang.String ACTION_MANAGE_PERMISSIONS = "android.intent.action.MANAGE_PERMISSIONS";
     field public static final java.lang.String ACTION_MANAGE_PERMISSION_APPS = "android.intent.action.MANAGE_PERMISSION_APPS";
     field public static final java.lang.String ACTION_MASTER_CLEAR_NOTIFICATION = "android.intent.action.MASTER_CLEAR_NOTIFICATION";
+    field public static final java.lang.String ACTION_PACKAGE_ROLLBACK_EXECUTED = "android.intent.action.PACKAGE_ROLLBACK_EXECUTED";
     field public static final java.lang.String ACTION_PRE_BOOT_COMPLETED = "android.intent.action.PRE_BOOT_COMPLETED";
     field public static final java.lang.String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
     field public static final java.lang.String ACTION_RESOLVE_INSTANT_APP_PACKAGE = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
@@ -1204,6 +1207,7 @@ package android.content.pm {
     method public void setAllocateAggressive(boolean);
     method public void setAllowDowngrade(boolean);
     method public void setDontKillApp(boolean);
+    method public void setEnableRollback();
     method public void setGrantedRuntimePermissions(java.lang.String[]);
     method public void setInstallAsInstantApp(boolean);
     method public void setInstallAsVirtualPreload();
@@ -1394,6 +1398,41 @@ package android.content.pm.permission {
     method public boolean isStandard();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.content.pm.permission.RuntimePermissionPresentationInfo> CREATOR;
+  }
+
+}
+
+package android.content.rollback {
+
+  public final class PackageRollbackInfo implements android.os.Parcelable {
+    ctor public PackageRollbackInfo(java.lang.String, android.content.rollback.PackageRollbackInfo.PackageVersion, android.content.rollback.PackageRollbackInfo.PackageVersion);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.content.rollback.PackageRollbackInfo> CREATOR;
+    field public final android.content.rollback.PackageRollbackInfo.PackageVersion higherVersion;
+    field public final android.content.rollback.PackageRollbackInfo.PackageVersion lowerVersion;
+    field public final java.lang.String packageName;
+  }
+
+  public static class PackageRollbackInfo.PackageVersion {
+    ctor public PackageRollbackInfo.PackageVersion(long);
+    field public final long versionCode;
+  }
+
+  public final class RollbackInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.content.rollback.RollbackInfo> CREATOR;
+    field public final android.content.rollback.PackageRollbackInfo targetPackage;
+  }
+
+  public final class RollbackManager {
+    method public void executeRollback(android.content.rollback.RollbackInfo, android.content.IntentSender);
+    method public void expireRollbackForPackage(java.lang.String);
+    method public android.content.rollback.RollbackInfo getAvailableRollback(java.lang.String);
+    method public java.util.List<java.lang.String> getPackagesWithAvailableRollbacks();
+    method public java.util.List<android.content.rollback.RollbackInfo> getRecentlyExecutedRollbacks();
+    method public void reloadPersistedData();
   }
 
 }

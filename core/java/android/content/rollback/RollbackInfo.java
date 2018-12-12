@@ -16,7 +16,7 @@
 
 package android.content.rollback;
 
-import android.annotation.TestApi;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,9 +24,9 @@ import android.os.Parcelable;
  * Information about a set of packages that can be, or already have been
  * rolled back together.
  *
- * @hide TODO: hidden, @TestApi until we decide on public vs. @SystemApi.
+ * @hide
  */
-@TestApi
+@SystemApi
 public final class RollbackInfo implements Parcelable {
 
     /**
@@ -39,6 +39,7 @@ public final class RollbackInfo implements Parcelable {
     // TODO: Add a flag to indicate if reboot is required, when rollback of
     // staged installs is supported.
 
+    /** @hide */
     public RollbackInfo(PackageRollbackInfo targetPackage) {
         this.targetPackage = targetPackage;
     }
