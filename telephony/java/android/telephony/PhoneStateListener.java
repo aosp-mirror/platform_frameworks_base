@@ -184,14 +184,17 @@ public class PhoneStateListener {
     public static final int LISTEN_PRECISE_CALL_STATE                       = 0x00000800;
 
     /**
-     * Listen for precise changes and fails on the data connection (cellular).
+     * Listen for {@link PreciseDataConnectionState} on the data connection (cellular).
+     *
      * {@more}
      * Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
      * READ_PRECISE_PHONE_STATE}
      *
      * @see #onPreciseDataConnectionStateChanged
+     *
      * @hide
      */
+    @SystemApi
     public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE            = 0x00001000;
 
     /**
@@ -564,10 +567,11 @@ public class PhoneStateListener {
 
     /**
      * Callback invoked when data connection state changes with precise information.
+     * @param dataConnectionState {@link PreciseDataConnectionState}
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public void onPreciseDataConnectionStateChanged(
             PreciseDataConnectionState dataConnectionState) {
         // default implementation empty
