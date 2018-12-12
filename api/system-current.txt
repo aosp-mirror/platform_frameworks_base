@@ -5061,6 +5061,87 @@ package android.telephony {
     field public static final java.lang.String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
   }
 
+  public final class DataFailCause {
+    field public static final int ACTIVATION_REJECT_GGSN = 30; // 0x1e
+    field public static final int ACTIVATION_REJECT_UNSPECIFIED = 31; // 0x1f
+    field public static final int ACTIVE_PDP_CONTEXT_MAX_NUMBER_REACHED = 65; // 0x41
+    field public static final int APN_TYPE_CONFLICT = 112; // 0x70
+    field public static final int AUTH_FAILURE_ON_EMERGENCY_CALL = 122; // 0x7a
+    field public static final int COMPANION_IFACE_IN_USE = 118; // 0x76
+    field public static final int CONDITIONAL_IE_ERROR = 100; // 0x64
+    field public static final int EMERGENCY_IFACE_ONLY = 116; // 0x74
+    field public static final int EMM_ACCESS_BARRED = 115; // 0x73
+    field public static final int EMM_ACCESS_BARRED_INFINITE_RETRY = 121; // 0x79
+    field public static final int ERROR_UNSPECIFIED = 65535; // 0xffff
+    field public static final int ESM_INFO_NOT_RECEIVED = 53; // 0x35
+    field public static final int FEATURE_NOT_SUPP = 40; // 0x28
+    field public static final int FILTER_SEMANTIC_ERROR = 44; // 0x2c
+    field public static final int FILTER_SYTAX_ERROR = 45; // 0x2d
+    field public static final int GPRS_REGISTRATION_FAIL = -2; // 0xfffffffe
+    field public static final int IFACE_AND_POL_FAMILY_MISMATCH = 120; // 0x78
+    field public static final int IFACE_MISMATCH = 117; // 0x75
+    field public static final int INSUFFICIENT_RESOURCES = 26; // 0x1a
+    field public static final int INTERNAL_CALL_PREEMPT_BY_HIGH_PRIO_APN = 114; // 0x72
+    field public static final int INVALID_MANDATORY_INFO = 96; // 0x60
+    field public static final int INVALID_PCSCF_ADDR = 113; // 0x71
+    field public static final int INVALID_TRANSACTION_ID = 81; // 0x51
+    field public static final int IP_ADDRESS_MISMATCH = 119; // 0x77
+    field public static final int LLC_SNDCP = 25; // 0x19
+    field public static final int LOST_CONNECTION = 65540; // 0x10004
+    field public static final int MESSAGE_INCORRECT_SEMANTIC = 95; // 0x5f
+    field public static final int MESSAGE_TYPE_UNSUPPORTED = 97; // 0x61
+    field public static final int MISSING_UNKNOWN_APN = 27; // 0x1b
+    field public static final int MSG_AND_PROTOCOL_STATE_UNCOMPATIBLE = 101; // 0x65
+    field public static final int MSG_TYPE_NONCOMPATIBLE_STATE = 98; // 0x62
+    field public static final int MULTI_CONN_TO_SAME_PDN_NOT_ALLOWED = 55; // 0x37
+    field public static final int NAS_SIGNALLING = 14; // 0xe
+    field public static final int NETWORK_FAILURE = 38; // 0x26
+    field public static final int NONE = 0; // 0x0
+    field public static final int NSAPI_IN_USE = 35; // 0x23
+    field public static final int OEM_DCFAILCAUSE_1 = 4097; // 0x1001
+    field public static final int OEM_DCFAILCAUSE_10 = 4106; // 0x100a
+    field public static final int OEM_DCFAILCAUSE_11 = 4107; // 0x100b
+    field public static final int OEM_DCFAILCAUSE_12 = 4108; // 0x100c
+    field public static final int OEM_DCFAILCAUSE_13 = 4109; // 0x100d
+    field public static final int OEM_DCFAILCAUSE_14 = 4110; // 0x100e
+    field public static final int OEM_DCFAILCAUSE_15 = 4111; // 0x100f
+    field public static final int OEM_DCFAILCAUSE_2 = 4098; // 0x1002
+    field public static final int OEM_DCFAILCAUSE_3 = 4099; // 0x1003
+    field public static final int OEM_DCFAILCAUSE_4 = 4100; // 0x1004
+    field public static final int OEM_DCFAILCAUSE_5 = 4101; // 0x1005
+    field public static final int OEM_DCFAILCAUSE_6 = 4102; // 0x1006
+    field public static final int OEM_DCFAILCAUSE_7 = 4103; // 0x1007
+    field public static final int OEM_DCFAILCAUSE_8 = 4104; // 0x1008
+    field public static final int OEM_DCFAILCAUSE_9 = 4105; // 0x1009
+    field public static final int ONLY_IPV4_ALLOWED = 50; // 0x32
+    field public static final int ONLY_IPV6_ALLOWED = 51; // 0x33
+    field public static final int ONLY_SINGLE_BEARER_ALLOWED = 52; // 0x34
+    field public static final int OPERATOR_BARRED = 8; // 0x8
+    field public static final int PDN_CONN_DOES_NOT_EXIST = 54; // 0x36
+    field public static final int PDP_WITHOUT_ACTIVE_TFT = 46; // 0x2e
+    field public static final int PREF_RADIO_TECH_CHANGED = -4; // 0xfffffffc
+    field public static final int PROTOCOL_ERRORS = 111; // 0x6f
+    field public static final int QOS_NOT_ACCEPTED = 37; // 0x25
+    field public static final int RADIO_NOT_AVAILABLE = 65537; // 0x10001
+    field public static final int RADIO_POWER_OFF = -5; // 0xfffffffb
+    field public static final int REGISTRATION_FAIL = -1; // 0xffffffff
+    field public static final int REGULAR_DEACTIVATION = 36; // 0x24
+    field public static final int SERVICE_OPTION_NOT_SUBSCRIBED = 33; // 0x21
+    field public static final int SERVICE_OPTION_NOT_SUPPORTED = 32; // 0x20
+    field public static final int SERVICE_OPTION_OUT_OF_ORDER = 34; // 0x22
+    field public static final int SIGNAL_LOST = -3; // 0xfffffffd
+    field public static final int TETHERED_CALL_ACTIVE = -6; // 0xfffffffa
+    field public static final int TFT_SEMANTIC_ERROR = 41; // 0x29
+    field public static final int TFT_SYTAX_ERROR = 42; // 0x2a
+    field public static final int UMTS_REACTIVATION_REQ = 39; // 0x27
+    field public static final int UNKNOWN = 65536; // 0x10000
+    field public static final int UNKNOWN_INFO_ELEMENT = 99; // 0x63
+    field public static final int UNKNOWN_PDP_ADDRESS_TYPE = 28; // 0x1c
+    field public static final int UNKNOWN_PDP_CONTEXT = 43; // 0x2b
+    field public static final int UNSUPPORTED_APN_IN_CURRENT_PLMN = 66; // 0x42
+    field public static final int USER_AUTHENTICATION = 29; // 0x1d
+  }
+
   public class DisconnectCause {
     field public static final int ALREADY_DIALING = 72; // 0x48
     field public static final int ANSWERED_ELSEWHERE = 52; // 0x34
@@ -5228,11 +5309,13 @@ package android.telephony {
   public class PhoneStateListener {
     method public void onCallDisconnectCauseChanged(int, int);
     method public void onPreciseCallStateChanged(android.telephony.PreciseCallState);
+    method public void onPreciseDataConnectionStateChanged(android.telephony.PreciseDataConnectionState);
     method public void onRadioPowerStateChanged(int);
     method public void onSrvccStateChanged(int);
     method public void onVoiceActivationStateChanged(int);
     field public static final int LISTEN_CALL_DISCONNECT_CAUSES = 33554432; // 0x2000000
     field public static final int LISTEN_PRECISE_CALL_STATE = 2048; // 0x800
+    field public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 4096; // 0x1000
     field public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000
     field public static final int LISTEN_SRVCC_STATE_CHANGED = 16384; // 0x4000
     field public static final int LISTEN_VOICE_ACTIVATION_STATE = 131072; // 0x20000
@@ -5255,6 +5338,16 @@ package android.telephony {
     field public static final int PRECISE_CALL_STATE_INCOMING = 5; // 0x5
     field public static final int PRECISE_CALL_STATE_NOT_VALID = -1; // 0xffffffff
     field public static final int PRECISE_CALL_STATE_WAITING = 6; // 0x6
+  }
+
+  public final class PreciseDataConnectionState implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getDataConnectionApn();
+    method public int getDataConnectionApnTypeBitMask();
+    method public int getDataConnectionFailCause();
+    method public int getDataConnectionState();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.PreciseDataConnectionState> CREATOR;
   }
 
   public class PreciseDisconnectCause {
