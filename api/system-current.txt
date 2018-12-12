@@ -18,6 +18,7 @@ package android {
     field public static final java.lang.String ALLOW_ANY_CODEC_FOR_PLAYBACK = "android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK";
     field public static final java.lang.String AMBIENT_WALLPAPER = "android.permission.AMBIENT_WALLPAPER";
     field public static final java.lang.String BACKUP = "android.permission.BACKUP";
+    field public static final java.lang.String BIND_ATTENTION_SERVICE = "android.permission.BIND_ATTENTION_SERVICE";
     field public static final java.lang.String BIND_AUGMENTED_AUTOFILL_SERVICE = "android.permission.BIND_AUGMENTED_AUTOFILL_SERVICE";
     field public static final deprecated java.lang.String BIND_CONNECTION_SERVICE = "android.permission.BIND_CONNECTION_SERVICE";
     field public static final java.lang.String BIND_CONTENT_CAPTURE_SERVICE = "android.permission.BIND_CONTENT_CAPTURE_SERVICE";
@@ -5397,6 +5398,28 @@ package android.service.appprediction {
     method public void onStartPredictionUpdates();
     method public void onStopPredictionUpdates();
     method public final void updatePredictions(android.app.prediction.AppPredictionSessionId, java.util.List<android.app.prediction.AppTarget>);
+  }
+
+}
+
+package android.service.attention {
+
+  public abstract class AttentionService extends android.app.Service {
+    ctor public AttentionService();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onCancelAttentionCheck(int);
+    method public abstract void onCheckAttention(int, android.service.attention.AttentionService.AttentionCallback);
+    field public static final int ATTENTION_FAILURE_PREEMPTED = 2; // 0x2
+    field public static final int ATTENTION_FAILURE_TIMED_OUT = 3; // 0x3
+    field public static final int ATTENTION_FAILURE_UNKNOWN = 4; // 0x4
+    field public static final int ATTENTION_SUCCESS_ABSENT = 0; // 0x0
+    field public static final int ATTENTION_SUCCESS_PRESENT = 1; // 0x1
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.attention.AttentionService";
+  }
+
+  public static final class AttentionService.AttentionCallback {
+    method public void onFailure(int, int);
+    method public void onSuccess(int, int, long);
   }
 
 }

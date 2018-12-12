@@ -357,6 +357,8 @@ java_defaults {
         "core/java/android/service/textclassifier/ITextLanguageCallback.aidl",
         "core/java/android/service/textclassifier/ITextLinksCallback.aidl",
         "core/java/android/service/textclassifier/ITextSelectionCallback.aidl",
+        "core/java/android/service/attention/IAttentionService.aidl",
+        "core/java/android/service/attention/IAttentionCallback.aidl",
         "core/java/android/view/accessibility/IAccessibilityInteractionConnection.aidl",
         "core/java/android/view/accessibility/IAccessibilityInteractionConnectionCallback.aidl",
         "core/java/android/view/accessibility/IAccessibilityManager.aidl",
