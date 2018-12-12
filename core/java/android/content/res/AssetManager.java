@@ -203,11 +203,13 @@ public final class AssetManager implements AutoCloseable {
             if (FEATURE_FLAG_IDMAP2) {
                 final String[] systemIdmapPaths =
                     nativeCreateIdmapsForStaticOverlaysTargetingAndroid();
-                if (systemIdmapPaths == null) {
-                    throw new IOException("idmap2 scan failed");
-                }
-                for (String idmapPath : systemIdmapPaths) {
-                    apkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, true /*system*/));
+                if (systemIdmapPaths != null) {
+                    for (String idmapPath : systemIdmapPaths) {
+                        apkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, true /*system*/));
+                    }
+                } else {
+                    Log.w(TAG, "'idmap2 --scan' failed: no static=\"true\" overlays targeting "
+                            + "\"android\" will be loaded");
                 }
             } else {
                 nativeVerifySystemIdmaps();
