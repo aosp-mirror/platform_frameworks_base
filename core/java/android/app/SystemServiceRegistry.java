@@ -109,6 +109,7 @@ import android.net.wifi.rtt.WifiRttManager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
+import android.os.BugreportManager;
 import android.os.Build;
 import android.os.DeviceIdleManager;
 import android.os.DropBoxManager;
@@ -116,6 +117,7 @@ import android.os.HardwarePropertiesManager;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
 import android.os.IDeviceIdleController;
+import android.os.IDumpstate;
 import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
 import android.os.IRecoverySystem;
@@ -971,6 +973,16 @@ final class SystemServiceRegistry {
             public IncidentManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 return new IncidentManager(ctx);
             }});
+
+        registerService(Context.BUGREPORT_SERVICE, BugreportManager.class,
+                new CachedServiceFetcher<BugreportManager>() {
+                    @Override
+                    public BugreportManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(Context.BUGREPORT_SERVICE);
+                        return new BugreportManager(ctx.getOuterContext(),
+                                IDumpstate.Stub.asInterface(b));
+                    }});
 
         registerService(Context.AUTOFILL_MANAGER_SERVICE, AutofillManager.class,
                 new CachedServiceFetcher<AutofillManager>() {
