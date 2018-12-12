@@ -218,88 +218,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                 return false;
             }
 
-            ViewParent p = view.getParent();
-            RemoteInputView riv = null;
-            while (p != null) {
-                if (p instanceof View) {
-                    View pv = (View) p;
-                    if (pv.isRootNamespace()) {
-                        riv = findRemoteInputView(pv);
-                        break;
-                    }
-                }
-                p = p.getParent();
-            }
-            ExpandableNotificationRow row = null;
-            while (p != null) {
-                if (p instanceof ExpandableNotificationRow) {
-                    row = (ExpandableNotificationRow) p;
-                    break;
-                }
-                p = p.getParent();
-            }
-
-            if (row == null) {
-                return false;
-            }
-
-            row.setUserExpanded(true);
-
-            if (!mLockscreenUserManager.shouldAllowLockscreenRemoteInput()) {
-                final int userId = pendingIntent.getCreatorUserHandle().getIdentifier();
-                if (mLockscreenUserManager.isLockscreenPublicMode(userId)) {
-                    mCallback.onLockedRemoteInput(row, view);
-                    return true;
-                }
-                if (mUserManager.getUserInfo(userId).isManagedProfile()
-                        && mKeyguardManager.isDeviceLocked(userId)) {
-                    mCallback.onLockedWorkRemoteInput(userId, row, view);
-                    return true;
-                }
-            }
-
-            if (riv == null) {
-                riv = findRemoteInputView(row.getPrivateLayout().getExpandedChild());
-                if (riv == null) {
-                    return false;
-                }
-                if (!row.getPrivateLayout().getExpandedChild().isShown()) {
-                    mCallback.onMakeExpandedVisibleForRemoteInput(row, view);
-                    return true;
-                }
-            }
-
-            int width = view.getWidth();
-            if (view instanceof TextView) {
-                // Center the reveal on the text which might be off-center from the TextView
-                TextView tv = (TextView) view;
-                if (tv.getLayout() != null) {
-                    int innerWidth = (int) tv.getLayout().getLineWidth(0);
-                    innerWidth += tv.getCompoundPaddingLeft() + tv.getCompoundPaddingRight();
-                    width = Math.min(width, innerWidth);
-                }
-            }
-            int cx = view.getLeft() + width / 2;
-            int cy = view.getTop() + view.getHeight() / 2;
-            int w = riv.getWidth();
-            int h = riv.getHeight();
-            int r = Math.max(
-                    Math.max(cx + cy, cx + (h - cy)),
-                    Math.max((w - cx) + cy, (w - cx) + (h - cy)));
-
-            riv.setRevealParameters(cx, cy, r);
-            riv.setPendingIntent(pendingIntent);
-            riv.setRemoteInput(inputs, input);
-            riv.focusAnimated();
-
-            return true;
-        }
-
-        private RemoteInputView findRemoteInputView(View v) {
-            if (v == null) {
-                return null;
-            }
-            return (RemoteInputView) v.findViewWithTag(RemoteInputView.VIEW_TAG);
+            return activateRemoteInput(view, inputs, input, pendingIntent);
         }
     };
 
@@ -352,6 +271,102 @@ public class NotificationRemoteInputManager implements Dumpable {
                     rebuildNotificationWithRemoteInput(entry, reply, true /* showSpinner */);
             mEntryManager.updateNotification(newSbn, null /* ranking */);
         });
+    }
+
+    /**
+     * Activates a given {@link RemoteInput}
+     *
+     * @param view The view of the action button or suggestion chip that was tapped.
+     * @param inputs The remote inputs that need to be sent to the app.
+     * @param input The remote input that needs to be activated.
+     * @param pendingIntent The pending intent to be sent to the app.
+     * @return Whether the {@link RemoteInput} was activated.
+     */
+    public boolean activateRemoteInput(View view, RemoteInput[] inputs, RemoteInput input,
+            PendingIntent pendingIntent) {
+
+        ViewParent p = view.getParent();
+        RemoteInputView riv = null;
+        while (p != null) {
+            if (p instanceof View) {
+                View pv = (View) p;
+                if (pv.isRootNamespace()) {
+                    riv = findRemoteInputView(pv);
+                    break;
+                }
+            }
+            p = p.getParent();
+        }
+        ExpandableNotificationRow row = null;
+        while (p != null) {
+            if (p instanceof ExpandableNotificationRow) {
+                row = (ExpandableNotificationRow) p;
+                break;
+            }
+            p = p.getParent();
+        }
+
+        if (row == null) {
+            return false;
+        }
+
+        row.setUserExpanded(true);
+
+        if (!mLockscreenUserManager.shouldAllowLockscreenRemoteInput()) {
+            final int userId = pendingIntent.getCreatorUserHandle().getIdentifier();
+            if (mLockscreenUserManager.isLockscreenPublicMode(userId)) {
+                mCallback.onLockedRemoteInput(row, view);
+                return true;
+            }
+            if (mUserManager.getUserInfo(userId).isManagedProfile()
+                    && mKeyguardManager.isDeviceLocked(userId)) {
+                mCallback.onLockedWorkRemoteInput(userId, row, view);
+                return true;
+            }
+        }
+
+        if (riv == null) {
+            riv = findRemoteInputView(row.getPrivateLayout().getExpandedChild());
+            if (riv == null) {
+                return false;
+            }
+            if (!row.getPrivateLayout().getExpandedChild().isShown()) {
+                mCallback.onMakeExpandedVisibleForRemoteInput(row, view);
+                return true;
+            }
+        }
+
+        int width = view.getWidth();
+        if (view instanceof TextView) {
+            // Center the reveal on the text which might be off-center from the TextView
+            TextView tv = (TextView) view;
+            if (tv.getLayout() != null) {
+                int innerWidth = (int) tv.getLayout().getLineWidth(0);
+                innerWidth += tv.getCompoundPaddingLeft() + tv.getCompoundPaddingRight();
+                width = Math.min(width, innerWidth);
+            }
+        }
+        int cx = view.getLeft() + width / 2;
+        int cy = view.getTop() + view.getHeight() / 2;
+        int w = riv.getWidth();
+        int h = riv.getHeight();
+        int r = Math.max(
+                Math.max(cx + cy, cx + (h - cy)),
+                Math.max((w - cx) + cy, (w - cx) + (h - cy)));
+
+        riv.setRevealParameters(cx, cy, r);
+        riv.setPendingIntent(pendingIntent);
+        riv.setRemoteInput(inputs, input);
+        riv.focusAnimated();
+
+        return true;
+    }
+
+    private RemoteInputView findRemoteInputView(View v) {
+        if (v == null) {
+            return null;
+        }
+        return (RemoteInputView) v.findViewWithTag(RemoteInputView.VIEW_TAG);
     }
 
     /**
