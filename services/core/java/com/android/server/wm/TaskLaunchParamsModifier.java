@@ -709,7 +709,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
 
         final List<TaskRecord> tasksToCheck = new ArrayList<>();
         for (int i = 0; i < display.getChildCount(); ++i) {
-            ActivityStack<?> stack = display.getChildAt(i);
+            final ActivityStack stack = display.getChildAt(i);
             if (!stack.inFreeformWindowingMode()) {
                 continue;
             }

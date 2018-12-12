@@ -2307,13 +2307,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         out.set(mDisplayFrames.mStable);
     }
 
-    TaskStack createStack(int stackId, boolean onTop, StackWindowController controller) {
-        if (DEBUG_STACK) Slog.d(TAG_WM, "Create new stackId=" + stackId + " on displayId="
-                + mDisplayId);
+    void setStackOnDisplay(int stackId, boolean onTop, TaskStack stack) {
+        if (DEBUG_STACK) {
+            Slog.d(TAG_WM, "Create new stackId=" + stackId + " on displayId=" + mDisplayId);
+        }
 
-        final TaskStack stack = new TaskStack(mWmService, stackId, controller);
         mTaskStackContainers.addStackToDisplay(stack, onTop);
-        return stack;
     }
 
     void moveStackToDisplay(TaskStack stack, boolean onTop) {
@@ -4015,7 +4014,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         /**
          * Adds the stack to this container.
-         * @see DisplayContent#createStack(int, boolean, StackWindowController)
          */
         void addStackToDisplay(TaskStack stack, boolean onTop) {
             addStackReferenceIfNeeded(stack);

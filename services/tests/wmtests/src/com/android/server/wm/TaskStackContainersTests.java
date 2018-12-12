@@ -47,8 +47,8 @@ public class TaskStackContainersTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mPinnedStack = createStackControllerOnStackOnDisplay(
-                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mDisplayContent).mContainer;
+        mPinnedStack = createTaskStackOnDisplay(
+                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
         // Stack should contain visible app window to be considered visible.
         final Task pinnedTask = createTaskInStack(mPinnedStack, 0 /* userId */);
         assertFalse(mPinnedStack.isVisible());

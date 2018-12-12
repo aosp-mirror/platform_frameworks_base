@@ -68,7 +68,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         setupActivityTaskManagerService();
-        mStack = new StackBuilder(mRootActivityContainer).build();
+        mStack = (TestActivityStack) new StackBuilder(mRootActivityContainer).build();
         mTask = mStack.getChildAt(0);
         mActivity = mTask.getTopActivity();
     }
