@@ -33,6 +33,7 @@ import android.text.format.Time;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -40,6 +41,7 @@ import com.android.server.LocalServices;
 import com.android.server.job.GrantedUriPermissions;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.job.JobSchedulerService;
+import com.android.server.job.JobServerProtoEnums;
 import com.android.server.job.JobStatusDumpProto;
 import com.android.server.job.JobStatusShortInfoProto;
 
@@ -79,6 +81,28 @@ public final class JobStatus {
     static final int CONSTRAINT_DEVICE_NOT_DOZING = 1<<25;
     static final int CONSTRAINT_WITHIN_QUOTA = 1 << 24;
     static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1<<22;
+
+    /**
+     * The constraints that we want to log to statsd.
+     *
+     * Constraints that can be inferred from other atoms have been excluded to avoid logging too
+     * much information and to reduce redundancy:
+     *
+     * * CONSTRAINT_CHARGING can be inferred with PluggedStateChanged (Atom #32)
+     * * CONSTRAINT_BATTERY_NOT_LOW can be inferred with BatteryLevelChanged (Atom #30)
+     * * CONSTRAINT_CONNECTIVITY can be partially inferred with ConnectivityStateChanged
+     * (Atom #98) and BatterySaverModeStateChanged (Atom #20).
+     * * CONSTRAINT_DEVICE_NOT_DOZING can be mostly inferred with DeviceIdleModeStateChanged
+     * (Atom #21)
+     * * CONSTRAINT_BACKGROUND_NOT_RESTRICTED can be inferred with BatterySaverModeStateChanged
+     * (Atom #20)
+     */
+    private static final int STATSD_CONSTRAINTS_TO_LOG = CONSTRAINT_CONTENT_TRIGGER
+            | CONSTRAINT_DEADLINE
+            | CONSTRAINT_IDLE
+            | CONSTRAINT_STORAGE_NOT_LOW
+            | CONSTRAINT_TIMING_DELAY
+            | CONSTRAINT_WITHIN_QUOTA;
 
     // Soft override: ignore constraints like time that don't affect API availability
     public static final int OVERRIDE_SOFT = 1;
@@ -976,6 +1000,12 @@ public final class JobStatus {
         }
         satisfiedConstraints = (satisfiedConstraints&~constraint) | (state ? constraint : 0);
         mSatisfiedConstraintsOfInterest = satisfiedConstraints & CONSTRAINTS_OF_INTEREST;
+        if ((STATSD_CONSTRAINTS_TO_LOG & constraint) != 0) {
+            StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_CONSTRAINT_CHANGED,
+                    sourceUid, null, getBatteryName(), getProtoConstraint(constraint),
+                    state ? StatsLog.SCHEDULED_JOB_CONSTRAINT_CHANGED__STATE__SATISFIED
+                            : StatsLog.SCHEDULED_JOB_CONSTRAINT_CHANGED__STATE__UNSATISFIED);
+        }
         return true;
     }
 
@@ -1228,37 +1258,70 @@ public final class JobStatus {
         }
     }
 
+    /** Returns a {@link JobServerProtoEnums.Constraint} enum value for the given constraint. */
+    private int getProtoConstraint(int constraint) {
+        switch (constraint) {
+            case CONSTRAINT_BACKGROUND_NOT_RESTRICTED:
+                return JobServerProtoEnums.CONSTRAINT_BACKGROUND_NOT_RESTRICTED;
+            case CONSTRAINT_BATTERY_NOT_LOW:
+                return JobServerProtoEnums.CONSTRAINT_BATTERY_NOT_LOW;
+            case CONSTRAINT_CHARGING:
+                return JobServerProtoEnums.CONSTRAINT_CHARGING;
+            case CONSTRAINT_CONNECTIVITY:
+                return JobServerProtoEnums.CONSTRAINT_CONNECTIVITY;
+            case CONSTRAINT_CONTENT_TRIGGER:
+                return JobServerProtoEnums.CONSTRAINT_CONTENT_TRIGGER;
+            case CONSTRAINT_DEADLINE:
+                return JobServerProtoEnums.CONSTRAINT_DEADLINE;
+            case CONSTRAINT_DEVICE_NOT_DOZING:
+                return JobServerProtoEnums.CONSTRAINT_DEVICE_NOT_DOZING;
+            case CONSTRAINT_IDLE:
+                return JobServerProtoEnums.CONSTRAINT_IDLE;
+            case CONSTRAINT_STORAGE_NOT_LOW:
+                return JobServerProtoEnums.CONSTRAINT_STORAGE_NOT_LOW;
+            case CONSTRAINT_TIMING_DELAY:
+                return JobServerProtoEnums.CONSTRAINT_TIMING_DELAY;
+            case CONSTRAINT_WITHIN_QUOTA:
+                return JobServerProtoEnums.CONSTRAINT_WITHIN_QUOTA;
+            default:
+                return JobServerProtoEnums.CONSTRAINT_UNKNOWN;
+        }
+    }
+
     /** Writes constraints to the given repeating proto field. */
     void dumpConstraints(ProtoOutputStream proto, long fieldId, int constraints) {
         if ((constraints & CONSTRAINT_CHARGING) != 0) {
-            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_CHARGING);
+            proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_CHARGING);
         }
         if ((constraints & CONSTRAINT_BATTERY_NOT_LOW) != 0) {
-            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_BATTERY_NOT_LOW);
+            proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_BATTERY_NOT_LOW);
         }
         if ((constraints & CONSTRAINT_STORAGE_NOT_LOW) != 0) {
-            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_STORAGE_NOT_LOW);
+            proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_STORAGE_NOT_LOW);
         }
         if ((constraints & CONSTRAINT_TIMING_DELAY) != 0) {
-            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_TIMING_DELAY);
+            proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_TIMING_DELAY);
         }
         if ((constraints & CONSTRAINT_DEADLINE) != 0) {
-            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_DEADLINE);
+            proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_DEADLINE);
         }
         if ((constraints & CONSTRAINT_IDLE) != 0) {
-            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_IDLE);
+            proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_IDLE);
         }
         if ((constraints & CONSTRAINT_CONNECTIVITY) != 0) {
-            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_CONNECTIVITY);
+            proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_CONNECTIVITY);
         }
         if ((constraints & CONSTRAINT_CONTENT_TRIGGER) != 0) {
-            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_CONTENT_TRIGGER);
+            proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_CONTENT_TRIGGER);
         }
         if ((constraints & CONSTRAINT_DEVICE_NOT_DOZING) != 0) {
-            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_DEVICE_NOT_DOZING);
+            proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_DEVICE_NOT_DOZING);
         }
         if ((constraints & CONSTRAINT_WITHIN_QUOTA) != 0) {
-            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_WITHIN_QUOTA);
+            proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_WITHIN_QUOTA);
+        }
+        if ((constraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) != 0) {
+            proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_BACKGROUND_NOT_RESTRICTED);
         }
     }
 

@@ -18,6 +18,9 @@ syntax = "proto2";
 
 package android.app.job;
 
+// This file is for JobScheduler enums inside the app directory. If you're
+// adding enums for system-server-side code, use the file in
+// frameworks/base/core/proto/android/server/job.
 option java_outer_classname = "JobProtoEnums";
 option java_multiple_files = true;
 
