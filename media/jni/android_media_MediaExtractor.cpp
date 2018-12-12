@@ -500,17 +500,17 @@ static jlong android_media_MediaExtractor_getSampleTime(
 
     if (extractor == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return -1ll;
+        return -1LL;
     }
 
     int64_t sampleTimeUs;
     status_t err = extractor->getSampleTime(&sampleTimeUs);
 
     if (err == ERROR_END_OF_STREAM) {
-        return -1ll;
+        return -1LL;
     } else if (err != OK) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return -1ll;
+        return -1LL;
     }
 
     return (jlong) sampleTimeUs;
@@ -522,17 +522,17 @@ static jlong android_media_MediaExtractor_getSampleSize(
 
     if (extractor == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return -1ll;
+        return -1LL;
     }
 
     size_t sampleSize;
     status_t err = extractor->getSampleSize(&sampleSize);
 
     if (err == ERROR_END_OF_STREAM) {
-        return -1ll;
+        return -1LL;
     } else if (err != OK) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return -1ll;
+        return -1LL;
     }
 
     return (jlong) sampleSize;
@@ -858,13 +858,13 @@ static jlong android_media_MediaExtractor_getCachedDurationUs(
 
     if (extractor == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return -1ll;
+        return -1LL;
     }
 
     int64_t cachedDurationUs;
     bool eos;
     if (!extractor->getCachedDuration(&cachedDurationUs, &eos)) {
-        return -1ll;
+        return -1LL;
     }
 
     return (jlong) cachedDurationUs;

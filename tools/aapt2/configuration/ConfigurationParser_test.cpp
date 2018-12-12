@@ -230,7 +230,7 @@ TEST_F(ConfigurationParserTest, ValidateFile) {
                                       test::ParseConfigOrDie("fr"), test::ParseConfigOrDie("de")));
   ASSERT_TRUE(a1.android_sdk);
   ASSERT_TRUE(a1.android_sdk.value().min_sdk_version);
-  EXPECT_EQ(a1.android_sdk.value().min_sdk_version, 19l);
+  EXPECT_EQ(a1.android_sdk.value().min_sdk_version, 19L);
   EXPECT_THAT(a1.textures, SizeIs(1ul));
   EXPECT_THAT(a1.features, SizeIs(1ul));
 
@@ -250,7 +250,7 @@ TEST_F(ConfigurationParserTest, ValidateFile) {
                           test::ParseConfigOrDie("fr-rCA")));
   ASSERT_TRUE(a2.android_sdk);
   ASSERT_TRUE(a2.android_sdk.value().min_sdk_version);
-  EXPECT_EQ(a2.android_sdk.value().min_sdk_version, 19l);
+  EXPECT_EQ(a2.android_sdk.value().min_sdk_version, 19L);
   EXPECT_THAT(a2.textures, SizeIs(1ul));
   EXPECT_THAT(a2.features, SizeIs(1ul));
 }

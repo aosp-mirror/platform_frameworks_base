@@ -155,7 +155,7 @@ def dump_representative_locales(representative_locales):
     print
     print 'std::unordered_set<uint64_t> REPRESENTATIVE_LOCALES({'
     for locale in sorted(representative_locales):
-        print '    0x%08Xllu, // %s' % (
+        print '    0x%08XLLU, // %s' % (
             pack_to_uint64(locale),
             locale)
     print '});'

@@ -34,11 +34,11 @@ inline uint32_t packLocale(const char* language, const char* region) {
 }
 
 inline uint32_t dropRegion(uint32_t packed_locale) {
-    return packed_locale & 0xFFFF0000lu;
+    return packed_locale & 0xFFFF0000LU;
 }
 
 inline bool hasRegion(uint32_t packed_locale) {
-    return (packed_locale & 0x0000FFFFlu) != 0;
+    return (packed_locale & 0x0000FFFFLU) != 0;
 }
 
 const size_t SCRIPT_LENGTH = 4;
@@ -122,9 +122,9 @@ inline bool isRepresentative(uint32_t language_and_region, const char* script) {
     return (REPRESENTATIVE_LOCALES.count(packed_locale) != 0);
 }
 
-const uint32_t US_SPANISH = 0x65735553lu; // es-US
-const uint32_t MEXICAN_SPANISH = 0x65734D58lu; // es-MX
-const uint32_t LATIN_AMERICAN_SPANISH = 0x6573A424lu; // es-419
+const uint32_t US_SPANISH = 0x65735553LU; // es-US
+const uint32_t MEXICAN_SPANISH = 0x65734D58LU; // es-MX
+const uint32_t LATIN_AMERICAN_SPANISH = 0x6573A424LU; // es-419
 
 // The two locales es-US and es-MX are treated as special fallbacks for es-419.
 // If there is no es-419, they are considered its equivalent.
@@ -225,8 +225,8 @@ void localeDataComputeScript(char out[4], const char* language, const char* regi
 }
 
 const uint32_t ENGLISH_STOP_LIST[2] = {
-    0x656E0000lu, // en
-    0x656E8400lu, // en-001
+    0x656E0000LU, // en
+    0x656E8400LU, // en-001
 };
 const char ENGLISH_CHARS[2] = {'e', 'n'};
 const char LATIN_CHARS[4] = {'L', 'a', 't', 'n'};
