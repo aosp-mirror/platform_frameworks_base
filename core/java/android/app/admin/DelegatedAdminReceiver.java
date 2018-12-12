@@ -63,8 +63,8 @@ public class DelegatedAdminReceiver extends BroadcastReceiver {
      *
      * <p> This callback is only applicable if the delegated app has
      * {@link DevicePolicyManager#DELEGATION_CERT_SELECTION} capability. Additionally, it must
-     * declare an intent fitler for {@link #ACTION_CHOOSE_PRIVATE_KEY_ALIAS} in the receiver's
-     * manifest in order to receive this callback.
+     * declare an intent fitler for {@link DeviceAdminReceiver#ACTION_CHOOSE_PRIVATE_KEY_ALIAS}
+     * in the receiver's manifest in order to receive this callback.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
@@ -91,8 +91,8 @@ public class DelegatedAdminReceiver extends BroadcastReceiver {
      *
      * <p> This callback is only applicable if the delegated app has
      * {@link DevicePolicyManager#DELEGATION_NETWORK_LOGGING} capability. Additionally, it must
-     * declare an intent fitler for {@link #ACTION_NETWORK_LOGS_AVAILABLE} in the receiver's
-     * manifest in order to receive this callback.
+     * declare an intent fitler for {@link DeviceAdminReceiver#ACTION_NETWORK_LOGS_AVAILABLE} in the
+     * receiver's manifest in order to receive this callback.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
