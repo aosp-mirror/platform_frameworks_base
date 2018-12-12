@@ -10359,7 +10359,7 @@ public class DevicePolicyManager {
      * @param flags flags to be set for the intent
      * @return {@code true} if the activity is started successfully. {@code false} otherwise.
      *
-     * @see CalendarContract#startViewCalenderEventInManagedProfile(Context, String, long, long,
+     * @see CalendarContract#startViewCalendarEventInManagedProfile(Context, String, long, long,
      * long, boolean, int)
      *
      * @hide
