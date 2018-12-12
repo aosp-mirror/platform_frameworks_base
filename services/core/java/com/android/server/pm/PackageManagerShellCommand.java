@@ -2284,6 +2284,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--multi-package":
                     sessionParams.setMultiPackage();
                     break;
+                case "--staged":
+                    sessionParams.setStaged();
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -2853,7 +2856,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
         pw.println("       [--preload] [--instantapp] [--full] [--dont-kill]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [--apex] [-S BYTES]");
-        pw.println("       [--multi-package]");
+        pw.println("       [--multi-package] [--staged]");
         pw.println("    Like \"install\", but starts an install session.  Use \"install-write\"");
         pw.println("    to push data into the session, and \"install-commit\" to finish.");
         pw.println("");
