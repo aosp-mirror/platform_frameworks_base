@@ -17,7 +17,6 @@
 package android.service.notification;
 
 import android.annotation.SdkConstant;
-import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.INotificationManager;
@@ -107,7 +106,6 @@ public abstract class ConditionProviderService extends Service {
      */
     abstract public void onConnected();
 
-    @SystemApi
     public void onRequestConditions(int relevance) {}
 
     /**

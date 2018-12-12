@@ -365,7 +365,6 @@ public final class SmsManager {
      *
      * @see #sendTextMessage(String, String, String, PendingIntent, PendingIntent)
      */
-    @SystemApi
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(allOf = {
             android.Manifest.permission.MODIFY_PHONE_STATE,
