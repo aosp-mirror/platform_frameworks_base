@@ -136,7 +136,7 @@ public class PluginInstanceManager<T extends Plugin> {
         ArrayList<PluginInfo> plugins = new ArrayList<PluginInfo>(mPluginHandler.mPlugins);
         for (PluginInfo info : plugins) {
             if (className.startsWith(info.mPackage)) {
-                disable(info);
+                disable(info, PluginEnabler.DISABLED_FROM_EXPLICIT_CRASH);
                 disableAny = true;
             }
         }
@@ -146,12 +146,13 @@ public class PluginInstanceManager<T extends Plugin> {
     public boolean disableAll() {
         ArrayList<PluginInfo> plugins = new ArrayList<PluginInfo>(mPluginHandler.mPlugins);
         for (int i = 0; i < plugins.size(); i++) {
-            disable(plugins.get(i));
+            disable(plugins.get(i), PluginEnabler.DISABLED_FROM_SYSTEM_CRASH);
         }
         return plugins.size() != 0;
     }
 
-    private void disable(PluginInfo info) {
+    private void disable(PluginInfo info,
+            @PluginEnabler.DisableReason int reason) {
         // Live by the sword, die by the sword.
         // Misbehaving plugins get disabled and won't come back until uninstall/reinstall.
 
@@ -162,9 +163,9 @@ public class PluginInstanceManager<T extends Plugin> {
             // Don't disable whitelisted plugins as they are a part of the OS.
             return;
         }
-        Log.w(TAG, "Disabling plugin " + info.mPackage + "/" + info.mClass);
-        mManager.getPluginEnabler().setEnabled(new ComponentName(info.mPackage, info.mClass),
-                false);
+        ComponentName pluginComponent = new ComponentName(info.mPackage, info.mClass);
+        Log.w(TAG, "Disabling plugin " + pluginComponent.flattenToShortString());
+        mManager.getPluginEnabler().setDisabled(pluginComponent, reason);
     }
 
     public <T> boolean dependsOn(Plugin p, Class<T> cls) {

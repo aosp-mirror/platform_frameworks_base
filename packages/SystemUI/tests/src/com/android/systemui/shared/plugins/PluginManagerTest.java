@@ -27,7 +27,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -82,17 +81,18 @@ public class PluginManagerTest extends SysuiTestCase {
                 .thenReturn(mMockPluginInstance);
 
         mMockPackageManager = mock(PackageManager.class);
-        mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, true,
+        mPluginManager = new PluginManagerImpl(
+                getContext(), mMockFactory, true,
                 mMockExceptionHandler, new PluginInitializerImpl() {
-            @Override
-            public String[] getWhitelistedPlugins(Context context) {
-                return new String[0];
-            }
+                    @Override
+                    public String[] getWhitelistedPlugins(Context context) {
+                        return new String[0];
+                    }
 
-            @Override
-            public PluginEnabler getPluginEnabler(Context context) {
-                return new PluginEnablerImpl(mMockPackageManager);
-            }
+                    @Override
+                    public PluginEnabler getPluginEnabler(Context context) {
+                        return new PluginEnablerImpl(context, mMockPackageManager);
+                    }
         });
         resetExceptionHandler();
         mMockListener = mock(PluginListener.class);
