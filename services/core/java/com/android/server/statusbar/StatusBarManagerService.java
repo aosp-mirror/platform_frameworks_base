@@ -718,12 +718,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             disabledData += " }";
             final UiState state = getUiState(displayId);
 
-            Log.d(TAG, "disabledlocked (b/113914868): displayId=" + displayId + "net1=" + net1
+            Log.d(TAG, "disabledlocked (b/113914868): displayId=" + displayId + ", net1=" + net1
                     + ", mDisabled1=" + state.mDisabled1 + ", token=" + token
                     + ", mDisableRecords=" + mDisableRecords.size() + " => " + disabledData);
         }
         final UiState state = getUiState(displayId);
-        if (state.disableEquals(net1, net2)) {
+        if (!state.disableEquals(net1, net2)) {
             state.setDisabled(net1, net2);
             mHandler.post(() -> mNotificationDelegate.onSetDisabled(net1));
             if (mBar != null) {
