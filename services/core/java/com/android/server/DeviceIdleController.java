@@ -43,6 +43,7 @@ import android.net.ConnectivityManager;
 import android.net.INetworkPolicyManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
@@ -521,9 +522,10 @@ public class DeviceIdleController extends SystemService
                     updateConnectivityState(intent);
                 } break;
                 case Intent.ACTION_BATTERY_CHANGED: {
+                    boolean present = intent.getBooleanExtra(BatteryManager.EXTRA_PRESENT, true);
+                    boolean plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
                     synchronized (DeviceIdleController.this) {
-                        int plugged = intent.getIntExtra("plugged", 0);
-                        updateChargingLocked(plugged != 0);
+                        updateChargingLocked(present && plugged);
                     }
                 } break;
                 case Intent.ACTION_PACKAGE_REMOVED: {
