@@ -164,7 +164,6 @@ import android.net.NetworkUtils;
 import android.net.ProxyInfo;
 import android.net.Uri;
 import android.net.metrics.IpConnectivityLog;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Build;
@@ -11828,16 +11827,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long ident = mInjector.binderClearCallingIdentity();
         try {
-            final WifiInfo wifiInfo = mInjector.getWifiManager().getConnectionInfo();
-            if (wifiInfo == null) {
+            String[] macAddresses = mInjector.getWifiManager().getFactoryMacAddresses();
+            if (macAddresses == null) {
                 return null;
             }
-            final String result = wifiInfo.hasRealMacAddress() ? wifiInfo.getMacAddress() : null;
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.GET_WIFI_MAC_ADDRESS)
                     .setAdmin(admin)
                     .write();
-            return result;
+            return macAddresses.length > 0 ? macAddresses[0] : null;
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
