@@ -6448,7 +6448,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @SystemApi
+    @TestApi
     public String getWellbeingPackageName() {
         throw new UnsupportedOperationException(
                 "getWellbeingPackageName not implemented in subclass");
