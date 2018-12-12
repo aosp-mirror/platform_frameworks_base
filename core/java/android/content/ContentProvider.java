@@ -1062,12 +1062,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * Implement this to handle query requests where the arguments are packed into a {@link Bundle}.
      * Arguments may include traditional SQL style query arguments. When present these
      * should be handled  according to the contract established in
-     * {@link #query(Uri, String[], String, String[], String, CancellationSignal).
+     * {@link #query(Uri, String[], String, String[], String, CancellationSignal)}.
      *
      * <p>Traditional SQL arguments can be found in the bundle using the following keys:
-     * <li>{@link ContentResolver#QUERY_ARG_SQL_SELECTION}
-     * <li>{@link ContentResolver#QUERY_ARG_SQL_SELECTION_ARGS}
-     * <li>{@link ContentResolver#QUERY_ARG_SQL_SORT_ORDER}
+     * <li>{@link android.content.ContentResolver#QUERY_ARG_SQL_SELECTION}
+     * <li>{@link android.content.ContentResolver#QUERY_ARG_SQL_SELECTION_ARGS}
+     * <li>{@link android.content.ContentResolver#QUERY_ARG_SQL_SORT_ORDER}
      *
      * <p>This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
@@ -1124,8 +1124,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         return cursor;</pre>
      * <p>
-     * @see #query(Uri, String[], String, String[], String, CancellationSignal) for
-     *     implementation details.
+     * See {@link #query(Uri, String[], String, String[], String, CancellationSignal)}
+     * for implementation details.
      *
      * @param uri The URI to query. This will be the full URI sent by the client.
      * @param projection The list of columns to put into the cursor.
