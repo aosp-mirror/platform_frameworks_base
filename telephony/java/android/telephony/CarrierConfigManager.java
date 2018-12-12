@@ -87,7 +87,6 @@ public class CarrierConfigManager {
      * Specifies a value that identifies the version of the carrier configuration that is
      * currently in use. This string is displayed on the UI.
      * The format of the string is not specified.
-     * @hide
      */
     public static final String KEY_CARRIER_CONFIG_VERSION_STRING =
             "carrier_config_version_string";
