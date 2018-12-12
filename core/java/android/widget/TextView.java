@@ -10209,7 +10209,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // ContentCapture
-        if (isImportantForContentCapture() && isTextEditable()) {
+        if (isLaidOut() && isImportantForContentCapture() && isTextEditable()) {
             final ContentCaptureManager cm = mContext.getSystemService(ContentCaptureManager.class);
             if (cm != null && cm.isContentCaptureEnabled()) {
                 // TODO(b/111276913): pass flags when edited by user / add CTS test
