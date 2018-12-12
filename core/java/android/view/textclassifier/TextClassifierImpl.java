@@ -374,7 +374,8 @@ public final class TextClassifierImpl implements TextClassifier {
                 return mFallback.suggestConversationActions(request);
             }
             ActionsSuggestionsModel.ConversationMessage[] nativeMessages =
-                    ActionsSuggestionsHelper.toNativeMessages(request.getConversation());
+                    ActionsSuggestionsHelper.toNativeMessages(request.getConversation(),
+                            this::detectLanguageTagsFromText);
             if (nativeMessages.length == 0) {
                 return mFallback.suggestConversationActions(request);
             }
@@ -405,6 +406,26 @@ public final class TextClassifierImpl implements TextClassifier {
             Log.e(LOG_TAG, "Error suggesting conversation actions.", t);
         }
         return mFallback.suggestConversationActions(request);
+    }
+
+    @Nullable
+    private String detectLanguageTagsFromText(CharSequence text) {
+        TextLanguage.Request request = new TextLanguage.Request.Builder(text).build();
+        TextLanguage textLanguage = detectLanguage(request);
+        int localeHypothesisCount = textLanguage.getLocaleHypothesisCount();
+        List<String> languageTags = new ArrayList<>();
+        // TODO: Reconsider this and probably make the score threshold configurable.
+        for (int i = 0; i < localeHypothesisCount; i++) {
+            ULocale locale = textLanguage.getLocale(i);
+            if (textLanguage.getConfidenceScore(locale) < 0.5) {
+                break;
+            }
+            languageTags.add(locale.toLanguageTag());
+        }
+        if (languageTags.isEmpty()) {
+            return LocaleList.getDefault().toLanguageTags();
+        }
+        return String.join(",", languageTags);
     }
 
     private Collection<String> resolveActionTypesFromRequest(ConversationActions.Request request) {

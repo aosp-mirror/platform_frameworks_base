@@ -18,6 +18,7 @@ package android.ext.services.notification;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.app.Person;
 import android.app.RemoteAction;
 import android.content.Context;
 import android.os.Bundle;
@@ -31,8 +32,14 @@ import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,6 +57,8 @@ public class SmartActionsHelper {
     private static final int MAX_ACTIONS_PER_LINK = 1;
     private static final int MAX_SMART_ACTIONS = 3;
     private static final int MAX_SUGGESTED_REPLIES = 3;
+    // TODO: Make this configurable.
+    private static final int MAX_MESSAGES_TO_EXTRACT = 5;
 
     private static final ConversationActions.TypeConfig TYPE_CONFIG =
             new ConversationActions.TypeConfig.Builder().setIncludedTypes(
@@ -64,9 +73,6 @@ public class SmartActionsHelper {
 
     /**
      * Adds action adjustments based on the notification contents.
-     *
-     * TODO: Once we have a API in {@link TextClassificationManager} to predict smart actions
-     * from notification text / message, we can replace most of the code here by consuming that API.
      */
     @NonNull
     ArrayList<Notification.Action> suggestActions(@Nullable Context context,
@@ -84,9 +90,13 @@ public class SmartActionsHelper {
         if (tcm == null) {
             return EMPTY_ACTION_LIST;
         }
+        List<ConversationActions.Message> messages = extractMessages(entry.getNotification());
+        if (messages.isEmpty()) {
+            return EMPTY_ACTION_LIST;
+        }
+        // TODO: Move to TextClassifier.suggestConversationActions once it is ready.
         return suggestActionsFromText(
-                tcm,
-                getMostSalientActionText(entry.getNotification()), MAX_SMART_ACTIONS);
+                tcm, messages.get(messages.size() - 1).getText(), MAX_SMART_ACTIONS);
     }
 
     ArrayList<CharSequence> suggestReplies(@Nullable Context context,
@@ -104,14 +114,12 @@ public class SmartActionsHelper {
         if (tcm == null) {
             return EMPTY_REPLY_LIST;
         }
-        CharSequence text = getMostSalientActionText(entry.getNotification());
-        ConversationActions.Message message =
-                new ConversationActions.Message.Builder()
-                        .setText(text)
-                        .build();
-
+        List<ConversationActions.Message> messages = extractMessages(entry.getNotification());
+        if (messages.isEmpty()) {
+            return EMPTY_REPLY_LIST;
+        }
         ConversationActions.Request request =
-                new ConversationActions.Request.Builder(Collections.singletonList(message))
+                new ConversationActions.Request.Builder(messages)
                         .setMaxSuggestions(MAX_SUGGESTED_REPLIES)
                         .setHints(HINTS)
                         .setTypeConfig(TYPE_CONFIG)
@@ -138,10 +146,6 @@ public class SmartActionsHelper {
         Notification notification = entry.getNotification();
         String pkg = entry.getSbn().getPackageName();
         if (!Process.myUserHandle().equals(entry.getSbn().getUser())) {
-            return false;
-        }
-        if (notification.actions != null
-                && notification.actions.length >= Notification.MAX_ACTION_BUTTONS) {
             return false;
         }
         if ((notification.flags & FLAG_MASK_INELGIBILE_FOR_ACTIONS) != 0) {
@@ -176,21 +180,41 @@ public class SmartActionsHelper {
 
     /** Returns the text most salient for action extraction in a notification. */
     @Nullable
-    private CharSequence getMostSalientActionText(@NonNull Notification notification) {
-        /* If it's messaging style, use the most recent message. */
-        // TODO: Use the last few X messages instead and take the Person object into consideration.
+    private List<ConversationActions.Message> extractMessages(@NonNull Notification notification) {
         Parcelable[] messages = notification.extras.getParcelableArray(Notification.EXTRA_MESSAGES);
-        if (messages != null && messages.length != 0) {
-            Bundle lastMessage = (Bundle) messages[messages.length - 1];
-            CharSequence lastMessageText =
-                    lastMessage.getCharSequence(Notification.MessagingStyle.Message.KEY_TEXT);
-            if (!TextUtils.isEmpty(lastMessageText)) {
-                return lastMessageText;
+        if (messages == null || messages.length == 0) {
+            return Arrays.asList(new ConversationActions.Message.Builder(
+                    ConversationActions.Message.PERSON_USER_REMOTE)
+                    .setText(notification.extras.getCharSequence(Notification.EXTRA_TEXT))
+                    .build());
+        }
+        Person localUser = notification.extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON);
+        Deque<ConversationActions.Message> extractMessages = new ArrayDeque<>();
+        for (int i = messages.length - 1; i >= 0; i--) {
+            Notification.MessagingStyle.Message message =
+                    Notification.MessagingStyle.Message.getMessageFromBundle((Bundle) messages[i]);
+            if (message == null) {
+                continue;
+            }
+            Person senderPerson = message.getSenderPerson();
+            // Skip encoding once the sender is missing as it is important to distinguish
+            // local user and remote user when generating replies.
+            if (senderPerson == null) {
+                break;
+            }
+            Person author = localUser != null && localUser.equals(senderPerson)
+                    ? ConversationActions.Message.PERSON_USER_LOCAL : senderPerson;
+            extractMessages.push(new ConversationActions.Message.Builder(author)
+                    .setText(message.getText())
+                    .setReferenceTime(
+                            ZonedDateTime.ofInstant(Instant.ofEpochMilli(message.getTimestamp()),
+                                    ZoneOffset.systemDefault()))
+                    .build());
+            if (extractMessages.size() >= MAX_MESSAGES_TO_EXTRACT) {
+                break;
             }
         }
-
-        // Fall back to using the normal text.
-        return notification.extras.getCharSequence(Notification.EXTRA_TEXT);
+        return new ArrayList<>(extractMessages);
     }
 
     /** Returns a list of actions to act on entities in a given piece of text. */

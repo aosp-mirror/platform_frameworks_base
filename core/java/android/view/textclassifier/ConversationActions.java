@@ -349,17 +349,31 @@ public final class ConversationActions implements Parcelable {
         /**
          * Represents the local user.
          *
-         * @see Builder#setAuthor(Person)
+         * @see Builder#Builder(Person)
          */
         public static final Person PERSON_USER_LOCAL =
                 new Person.Builder()
                         .setKey("text-classifier-conversation-actions-local-user")
                         .build();
 
+        /**
+         * Represents the remote user.
+         * <p>
+         * If possible, you are suggested to create a {@link Person} object that can identify
+         * the remote user better, so that the underlying model could differentiate between
+         * different remote users.
+         *
+         * @see Builder#Builder(Person)
+         */
+        public static final Person PERSON_USER_REMOTE =
+                new Person.Builder()
+                        .setKey("text-classifier-conversation-actions-remote-user")
+                        .build();
+
         @Nullable
         private final Person mAuthor;
         @Nullable
-        private final ZonedDateTime mComposeTime;
+        private final ZonedDateTime mReferenceTime;
         @Nullable
         private final CharSequence mText;
         @NonNull
@@ -367,18 +381,18 @@ public final class ConversationActions implements Parcelable {
 
         private Message(
                 @Nullable Person author,
-                @Nullable ZonedDateTime composeTime,
+                @Nullable ZonedDateTime referenceTime,
                 @Nullable CharSequence text,
                 @NonNull Bundle bundle) {
             mAuthor = author;
-            mComposeTime = composeTime;
+            mReferenceTime = referenceTime;
             mText = text;
             mExtras = Preconditions.checkNotNull(bundle);
         }
 
         private Message(Parcel in) {
             mAuthor = in.readParcelable(null);
-            mComposeTime =
+            mReferenceTime =
                     in.readInt() == 0
                             ? null
                             : ZonedDateTime.parse(
@@ -390,9 +404,9 @@ public final class ConversationActions implements Parcelable {
         @Override
         public void writeToParcel(Parcel parcel, int flags) {
             parcel.writeParcelable(mAuthor, flags);
-            parcel.writeInt(mComposeTime != null ? 1 : 0);
-            if (mComposeTime != null) {
-                parcel.writeString(mComposeTime.format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
+            parcel.writeInt(mReferenceTime != null ? 1 : 0);
+            if (mReferenceTime != null) {
+                parcel.writeString(mReferenceTime.format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
             }
             parcel.writeCharSequence(mText);
             parcel.writeBundle(mExtras);
@@ -417,15 +431,18 @@ public final class ConversationActions implements Parcelable {
                 };
 
         /** Returns the person that composed the message. */
-        @Nullable
+        @NonNull
         public Person getAuthor() {
             return mAuthor;
         }
 
-        /** Returns the compose time of the message. */
+        /**
+         * Returns the reference time of the message, for example it could be the compose or send
+         * time of this message.
+         */
         @Nullable
-        public ZonedDateTime getTime() {
-            return mComposeTime;
+        public ZonedDateTime getReferenceTime() {
+            return mReferenceTime;
         }
 
         /** Returns the text of the message. */
@@ -451,34 +468,38 @@ public final class ConversationActions implements Parcelable {
             @Nullable
             private Person mAuthor;
             @Nullable
-            private ZonedDateTime mComposeTime;
+            private ZonedDateTime mReferenceTime;
             @Nullable
             private CharSequence mText;
             @Nullable
             private Bundle mExtras;
 
             /**
-             * Sets the person who composed this message.
-             * <p>
-             * Use {@link #PERSON_USER_LOCAL} to represent the local user.
+             * Constructs a builder.
+             *
+             * @param author the person that composed the message, use {@link #PERSON_USER_LOCAL}
+             *               to represent the local user. If it is not possible to identify the
+             *               remote user that the local user is conversing with, use
+             *               {@link #PERSON_USER_REMOTE} to represent a remote user.
              */
-            @NonNull
-            public Builder setAuthor(@Nullable Person author) {
-                mAuthor = author;
-                return this;
+            public Builder(@NonNull Person author) {
+                mAuthor = Preconditions.checkNotNull(author);
             }
 
-            /** Sets the text of this message */
+            /** Sets the text of this message. */
             @NonNull
             public Builder setText(@Nullable CharSequence text) {
                 mText = text;
                 return this;
             }
 
-            /** Sets the compose time of this message */
+            /**
+             * Sets the reference time of this message, for example it could be the compose or send
+             * time of this message.
+             */
             @NonNull
-            public Builder setComposeTime(@Nullable ZonedDateTime composeTime) {
-                mComposeTime = composeTime;
+            public Builder setReferenceTime(@Nullable ZonedDateTime referenceTime) {
+                mReferenceTime = referenceTime;
                 return this;
             }
 
@@ -494,7 +515,7 @@ public final class ConversationActions implements Parcelable {
             public Message build() {
                 return new Message(
                         mAuthor,
-                        mComposeTime,
+                        mReferenceTime,
                         mText == null ? null : new SpannedString(mText),
                         mExtras == null ? new Bundle() : mExtras.deepCopy());
             }
