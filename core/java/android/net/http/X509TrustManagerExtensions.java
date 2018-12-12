@@ -16,7 +16,6 @@
 
 package android.net.http;
 
-import android.annotation.SystemApi;
 import android.security.net.config.UserCertificateSource;
 
 import com.android.org.conscrypt.TrustManagerImpl;
@@ -133,7 +132,6 @@ public class X509TrustManagerExtensions {
      * Returns {@code true} if the TrustManager uses the same trust configuration for the provided
      * hostnames.
      */
-    @SystemApi
     public boolean isSameTrustConfiguration(String hostname1, String hostname2) {
         if (mIsSameTrustConfiguration == null) {
             return true;
