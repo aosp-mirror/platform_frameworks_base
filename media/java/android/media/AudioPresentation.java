@@ -254,6 +254,22 @@ public final class AudioPresentation {
                 mLabels.hashCode());
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName() + " ");
+        sb.append("{ presentation id=" + mPresentationId);
+        sb.append(", program id=" + mProgramId);
+        sb.append(", language=" + mLanguage);
+        sb.append(", labels=" + mLabels);
+        sb.append(", mastering indication=" + mMasteringIndication);
+        sb.append(", audio description=" + mAudioDescriptionAvailable);
+        sb.append(", spoken subtitles=" + mSpokenSubtitlesAvailable);
+        sb.append(", dialogue enhancement=" + mDialogueEnhancementAvailable);
+        sb.append(" }");
+        return sb.toString();
+    }
+
     /**
      * A builder class for creating {@link AudioPresentation} objects.
      */
