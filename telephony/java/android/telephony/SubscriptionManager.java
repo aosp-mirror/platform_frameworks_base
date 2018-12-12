@@ -2403,7 +2403,7 @@ public class SubscriptionManager {
      *
      * Caller will either have {@link android.Manifest.permission#MODIFY_PHONE_STATE}
      * permission or had carrier privilege permission on the subscriptions:
-     * {@link TelephonyManager#hasCarrierPrivileges(int)} or
+     * {@link TelephonyManager#hasCarrierPrivileges()} or
      * {@link #canManageSubscription(SubscriptionInfo)}
      *
      * @throws SecurityException if the caller doesn't meet the requirements
@@ -2441,7 +2441,7 @@ public class SubscriptionManager {
      *
      * Caller will either have {@link android.Manifest.permission#MODIFY_PHONE_STATE}
      * permission or had carrier privilege permission on the subscriptions:
-     * {@link TelephonyManager#hasCarrierPrivileges(int)} or
+     * {@link TelephonyManager#hasCarrierPrivileges()} or
      * {@link #canManageSubscription(SubscriptionInfo)}
      *
      * @throws SecurityException if the caller doesn't meet the requirements
@@ -2477,7 +2477,7 @@ public class SubscriptionManager {
      *
      * Caller will either have {@link android.Manifest.permission#READ_PHONE_STATE}
      * permission or had carrier privilege permission on the subscription.
-     * {@link TelephonyManager#hasCarrierPrivileges(int)}
+     * {@link TelephonyManager#hasCarrierPrivileges()}
      *
      * @throws SecurityException if the caller doesn't meet the requirements
      *             outlined above.
