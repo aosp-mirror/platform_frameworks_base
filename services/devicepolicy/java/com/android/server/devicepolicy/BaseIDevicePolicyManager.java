@@ -126,4 +126,14 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public List<String> getCrossProfileCalendarPackagesForUser(int userHandle) {
         return Collections.emptyList();
     }
+
+    @Override
+    public boolean isManagedKiosk() {
+        return false;
+    }
+
+    @Override
+    public boolean isUnattendedManagedKiosk() {
+        return false;
+    }
 }

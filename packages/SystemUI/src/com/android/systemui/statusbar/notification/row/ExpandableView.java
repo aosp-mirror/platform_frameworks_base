@@ -21,7 +21,6 @@ import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -60,10 +59,11 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     private ViewGroup mTransientContainer;
     private boolean mInShelf;
     private boolean mTransformingInShelf;
-    @Nullable private ExpandableViewState mViewState;
+    private final ExpandableViewState mViewState;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mViewState = createExpandableViewState();
     }
 
     @Override
@@ -536,11 +536,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     /** Sets {@link ExpandableViewState} to default state. */
     public ExpandableViewState resetViewState() {
-        // TODO(http://b/119762423): Move the null check to getViewState().
-        if (mViewState == null) {
-            mViewState = createExpandableViewState();
-        }
-
         // initialize with the default values of the view
         mViewState.height = getIntrinsicHeight();
         mViewState.gone = getVisibility() == View.GONE;
@@ -573,9 +568,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     /** Applies internal {@link ExpandableViewState} to this view. */
     public void applyViewState() {
-        if (mViewState == null) {
-            Log.wtf(TAG, "No child state was found when applying this state to the hostView");
-        } else if (!mViewState.gone) {
+        if (!mViewState.gone) {
             mViewState.applyToView(this);
         }
     }

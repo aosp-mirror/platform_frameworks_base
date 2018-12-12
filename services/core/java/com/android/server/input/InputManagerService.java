@@ -1951,6 +1951,11 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
+    private int getPointerDisplayId() {
+        return mWindowManagerCallbacks.getPointerDisplayId();
+    }
+
+    // Native callback.
     private String[] getKeyboardLayoutOverlay(InputDeviceIdentifier identifier) {
         if (!mSystemReady) {
             return null;
@@ -2017,6 +2022,8 @@ public class InputManagerService extends IInputManager.Stub
                 KeyEvent event, int policyFlags);
 
         public int getPointerLayer();
+
+        public int getPointerDisplayId();
     }
 
     /**

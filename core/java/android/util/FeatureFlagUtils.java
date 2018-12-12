@@ -42,12 +42,15 @@ public class FeatureFlagUtils {
     static {
         DEFAULT_FLAGS = new HashMap<>();
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
-        DEFAULT_FLAGS.put("settings_systemui_theme", "true");
         DEFAULT_FLAGS.put("settings_dynamic_homepage", "true");
         DEFAULT_FLAGS.put("settings_mobile_network_v2", "true");
-        DEFAULT_FLAGS.put("settings_seamless_transfer", "false");
-        DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
         DEFAULT_FLAGS.put("settings_network_and_internet_v2", "false");
+        DEFAULT_FLAGS.put("settings_seamless_transfer", "false");
+        DEFAULT_FLAGS.put("settings_systemui_theme", "true");
+        DEFAULT_FLAGS.put("settings_wifi_dpp", "false");
+        DEFAULT_FLAGS.put("settings_wifi_mac_randomization", "false");
+        DEFAULT_FLAGS.put("settings_wifi_sharing", "false");
+        DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
         DEFAULT_FLAGS.put(SAFETY_HUB, "false");
         DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
     }

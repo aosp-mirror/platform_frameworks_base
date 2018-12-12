@@ -31,6 +31,7 @@ import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyEventLogger;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -73,6 +74,7 @@ import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.storage.StorageManager;
 import android.security.GateKeeper;
 import android.service.gatekeeper.IGateKeeperService;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.util.AtomicFile;
 import android.util.IntArray;
 import android.util.Log;
@@ -100,6 +102,8 @@ import com.android.server.am.UserState;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import libcore.io.IoUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -120,8 +124,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-
-import libcore.io.IoUtils;
 
 /**
  * Service for {@link UserManager}.
@@ -173,6 +175,8 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TAG_ENTRY = "entry";
     private static final String TAG_VALUE = "value";
     private static final String TAG_SEED_ACCOUNT_OPTIONS = "seedAccountOptions";
+    private static final String TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL =
+            "lastRequestQuietModeEnabledCall";
     private static final String ATTR_KEY = "key";
     private static final String ATTR_VALUE_TYPE = "type";
     private static final String ATTR_MULTIPLE = "m";
@@ -267,6 +271,16 @@ public class UserManagerService extends IUserManager.Stub {
 
         /** Elapsed realtime since boot when the user was unlocked. */
         long unlockRealtime;
+
+        private long mLastRequestQuietModeEnabledMillis;
+
+        void setLastRequestQuietModeEnabledMillis(long millis) {
+            mLastRequestQuietModeEnabledMillis = millis;
+        }
+
+        long getLastRequestQuietModeEnabledMillis() {
+            return mLastRequestQuietModeEnabledMillis;
+        }
 
         void clearSeedAccountData() {
             seedAccountName = null;
@@ -389,8 +403,8 @@ public class UserManagerService extends IUserManager.Stub {
             final IntentSender target = intent.getParcelableExtra(Intent.EXTRA_INTENT);
             final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_ID, UserHandle.USER_NULL);
             // Call setQuietModeEnabled on bg thread to avoid ANR
-            BackgroundThread.getHandler()
-                    .post(() -> setQuietModeEnabled(userHandle, false, target));
+            BackgroundThread.getHandler().post(() ->
+                    setQuietModeEnabled(userHandle, false, target, /* callingPackage */ null));
         }
     };
 
@@ -834,21 +848,24 @@ public class UserManagerService extends IUserManager.Stub {
         ensureCanModifyQuietMode(callingPackage, Binder.getCallingUid(), target != null);
         final long identity = Binder.clearCallingIdentity();
         try {
+            boolean result = false;
             if (enableQuietMode) {
-                setQuietModeEnabled(userHandle, true /* enableQuietMode */, target);
-                return true;
+                setQuietModeEnabled(
+                        userHandle, true /* enableQuietMode */, target, callingPackage);
+                result = true;
             } else {
                 boolean needToShowConfirmCredential =
                         mLockPatternUtils.isSecure(userHandle)
                                 && !StorageManager.isUserKeyUnlocked(userHandle);
                 if (needToShowConfirmCredential) {
                     showConfirmCredentialToDisableQuietMode(userHandle, target);
-                    return false;
                 } else {
-                    setQuietModeEnabled(userHandle, false /* enableQuietMode */, target);
-                    return true;
+                    setQuietModeEnabled(
+                            userHandle, false /* enableQuietMode */, target, callingPackage);
+                    result = true;
                 }
             }
+            return result;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -894,8 +911,8 @@ public class UserManagerService extends IUserManager.Stub {
                 + "default launcher nor has MANAGE_USERS/MODIFY_QUIET_MODE permission");
     }
 
-    private void setQuietModeEnabled(
-            int userHandle, boolean enableQuietMode, IntentSender target) {
+    private void setQuietModeEnabled(int userHandle, boolean enableQuietMode,
+            IntentSender target, @Nullable String callingPackage) {
         final UserInfo profile, parent;
         final UserData profileUserData;
         synchronized (mUsersLock) {
@@ -927,12 +944,35 @@ public class UserManagerService extends IUserManager.Stub {
                 ActivityManager.getService().startUserInBackgroundWithListener(
                         userHandle, callback);
             }
+            logQuietModeEnabled(userHandle, enableQuietMode, callingPackage);
         } catch (RemoteException e) {
             // Should not happen, same process.
             e.rethrowAsRuntimeException();
         }
         broadcastProfileAvailabilityChanges(profile.getUserHandle(), parent.getUserHandle(),
                 enableQuietMode);
+    }
+
+    private void logQuietModeEnabled(int userHandle, boolean enableQuietMode,
+            @Nullable String callingPackage) {
+        UserData userData;
+        synchronized (mUsersLock) {
+            userData = getUserDataLU(userHandle);
+        }
+        if (userData == null) {
+            return;
+        }
+        final long now = System.currentTimeMillis();
+        final long period = (userData.getLastRequestQuietModeEnabledMillis() != 0L
+                ? now - userData.getLastRequestQuietModeEnabledMillis()
+                : now - userData.info.creationTime);
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.REQUEST_QUIET_MODE_ENABLED)
+                .setStrings(callingPackage)
+                .setBoolean(enableQuietMode)
+                .setTimePeriod(period)
+                .write();
+        userData.setLastRequestQuietModeEnabledMillis(now);
     }
 
     @Override
@@ -2314,6 +2354,12 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.endTag(null, TAG_SEED_ACCOUNT_OPTIONS);
         }
 
+        if (userData.getLastRequestQuietModeEnabledMillis() != 0L) {
+            serializer.startTag(/* namespace */ null, TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL);
+            serializer.text(String.valueOf(userData.getLastRequestQuietModeEnabledMillis()));
+            serializer.endTag(/* namespace */ null, TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL);
+        }
+
         serializer.endTag(null, TAG_USER);
 
         serializer.endDocument();
@@ -2408,6 +2454,7 @@ public class UserManagerService extends IUserManager.Stub {
         String iconPath = null;
         long creationTime = 0L;
         long lastLoggedInTime = 0L;
+        long lastRequestQuietModeEnabledTimestamp = 0L;
         String lastLoggedInFingerprint = null;
         int profileGroupId = UserInfo.NO_PROFILE_GROUP_ID;
         int profileBadge = 0;
@@ -2494,6 +2541,11 @@ public class UserManagerService extends IUserManager.Stub {
                 } else if (TAG_SEED_ACCOUNT_OPTIONS.equals(tag)) {
                     seedAccountOptions = PersistableBundle.restoreFromXml(parser);
                     persistSeedData = true;
+                } else if (TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL.equals(tag)) {
+                    type = parser.next();
+                    if (type == XmlPullParser.TEXT) {
+                        lastRequestQuietModeEnabledTimestamp = Long.parseLong(parser.getText());
+                    }
                 }
             }
         }
@@ -2518,6 +2570,7 @@ public class UserManagerService extends IUserManager.Stub {
         userData.seedAccountType = seedAccountType;
         userData.persistSeedData = persistSeedData;
         userData.seedAccountOptions = seedAccountOptions;
+        userData.setLastRequestQuietModeEnabledMillis(lastRequestQuietModeEnabledTimestamp);
 
         synchronized (mRestrictionsLock) {
             if (baseRestrictions != null) {

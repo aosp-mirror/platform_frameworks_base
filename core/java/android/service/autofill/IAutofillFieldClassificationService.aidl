@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.RemoteCallback;
 import android.view.autofill.AutofillValue;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service used to calculate match scores for Autofill Field Classification.
@@ -27,6 +28,8 @@ import java.util.List;
  * @hide
  */
 oneway interface IAutofillFieldClassificationService {
-    void getScores(in RemoteCallback callback, String algorithmName, in Bundle algorithmArgs,
-                   in List<AutofillValue> actualValues, in String[] userDataValues);
+    void calculateScores(in RemoteCallback callback, in List<AutofillValue> actualValues,
+                         in String[] userDataValues, in String[] categoryIds,
+                         in String defaultAlgorithm, in Bundle defaultArgs,
+                         in Map algorithms, in Map args);
 }

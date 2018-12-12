@@ -37,6 +37,7 @@ import android.os.PowerSaveState;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.app.IBatteryStats;
@@ -192,5 +193,20 @@ public class PowerManagerServiceTest extends AndroidTestCase {
             PowerManager.GO_TO_SLEEP_REASON_APPLICATION, PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
 
         assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+    }
+
+    @MediumTest
+    public void testWasDeviceIdleFor_true() {
+        int interval = 1000;
+        mService.onUserActivity();
+        SystemClock.sleep(interval);
+        assertThat(mService.wasDeviceIdleForInternal(interval)).isTrue();
+    }
+
+    @SmallTest
+    public void testWasDeviceIdleFor_false() {
+        int interval = 1000;
+        mService.onUserActivity();
+        assertThat(mService.wasDeviceIdleForInternal(interval)).isFalse();
     }
 }

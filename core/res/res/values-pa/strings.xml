@@ -1083,7 +1083,7 @@
     <string name="deleteText" msgid="6979668428458199034">"ਮਿਟਾਓ"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ਇਨਪੁੱਟ ਵਿਧੀ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ਟੈਕਸਟ ਕਿਰਿਆਵਾਂ"</string>
-    <string name="email" msgid="4560673117055050403">"ਈਮੇਲ ਕਰੋ"</string>
+    <string name="email" msgid="4560673117055050403">"ਈਮੇਲ ਖੋਲ੍ਹੋ"</string>
     <string name="email_desc" msgid="3638665569546416795">"ਚੁਣੇ ਹੋਏ ਪਤੇ \'ਤੇ ਈਮੇਲ ਭੇਜੋ"</string>
     <string name="dial" msgid="1253998302767701559">"ਕਾਲ ਕਰੋ"</string>
     <string name="dial_desc" msgid="6573723404985517250">"ਚੁਣੇ ਗਏ ਫ਼ੋਨ ਨੰਬਰ \'ਤੇ ਕਾਲ ਕਰੋ"</string>
@@ -1097,11 +1097,11 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"ਸੰਪਰਕਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="view_calendar" msgid="979609872939597838">"ਦੇਖੋ"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"ਕੈਲੰਡਰ ਵਿੱਚ ਚੁਣਿਆ ਗਿਆ ਸਮਾਂ ਦੇਖੋ"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"ਸਮਾਂ-ਸੂਚੀ"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"ਸਮਾਂ-ਸੂਚੀ ਬਣਾਓ"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"ਚੁਣੇ ਗਏ ਸਮੇਂ ਲਈ ਇਵੈਂਟ ਦੀ ਸਮਾਂ-ਸੂਚੀ ਬਣਾਓ"</string>
     <string name="view_flight" msgid="7691640491425680214">"ਟਰੈਕ ਕਰੋ"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ਚੁਣੀ ਗਈ ਉਡਾਣ ਨੂੰ ਟਰੈਕ ਕਰੋ"</string>
-    <string name="translate" msgid="9218619809342576858">"ਅਨੁਵਾਦ"</string>
+    <string name="translate" msgid="9218619809342576858">"ਅਨੁਵਾਦ ਕਰੋ"</string>
     <string name="translate_desc" msgid="4502367770068777202">"ਚੋਣਵੀਂ ਲਿਖਤ ਦਾ ਅਨੁਵਾਦ ਕਰੋ"</string>
     <string name="define" msgid="7394820043869954211">"ਪਰਿਭਾਸ਼ਾ ਦਿਓ"</string>
     <string name="define_desc" msgid="7910883642444919726">"ਚੋਣਵੀਂ ਲਿਖਤ ਦਾ ਅਨੁਵਾਦ ਕਰੋ"</string>

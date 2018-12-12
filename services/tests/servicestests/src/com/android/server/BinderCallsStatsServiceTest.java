@@ -18,7 +18,6 @@ package com.android.server;
 
 import static org.junit.Assert.assertEquals;
 
-import android.os.Binder;
 import android.os.Process;
 import android.platform.test.annotations.Presubmit;
 
@@ -26,9 +25,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.os.BinderInternal;
-import com.android.internal.os.BinderInternal.CallSession;
-import com.android.server.BinderCallsStatsService.WorkSourceProvider;
+import com.android.server.BinderCallsStatsService.AuthorizedWorkSourceProvider;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +36,7 @@ import org.junit.runner.RunWith;
 public class BinderCallsStatsServiceTest {
     @Test
     public void weTrustOurselves() {
-        WorkSourceProvider workSourceProvider = new WorkSourceProvider() {
+        AuthorizedWorkSourceProvider workSourceProvider = new AuthorizedWorkSourceProvider() {
             protected int getCallingUid() {
                 return Process.myUid();
             }
@@ -55,7 +52,7 @@ public class BinderCallsStatsServiceTest {
 
     @Test
     public void workSourceSetIfCallerHasPermission() {
-        WorkSourceProvider workSourceProvider = new WorkSourceProvider() {
+        AuthorizedWorkSourceProvider workSourceProvider = new AuthorizedWorkSourceProvider() {
             protected int getCallingUid() {
                 // System process uid which as UPDATE_DEVICE_STATS.
                 return 1001;
@@ -72,7 +69,7 @@ public class BinderCallsStatsServiceTest {
 
     @Test
     public void workSourceResolvedToCallingUid() {
-        WorkSourceProvider workSourceProvider = new WorkSourceProvider() {
+        AuthorizedWorkSourceProvider workSourceProvider = new AuthorizedWorkSourceProvider() {
             protected int getCallingUid() {
                 // UID without permissions.
                 return Integer.MAX_VALUE;
@@ -85,41 +82,5 @@ public class BinderCallsStatsServiceTest {
         workSourceProvider.systemReady(InstrumentationRegistry.getContext());
 
         assertEquals(Integer.MAX_VALUE, workSourceProvider.resolveWorkSourceUid());
-    }
-
-    @Test
-    public void workSourceSet() {
-        TestObserver observer = new TestObserver();
-        observer.callStarted(new Binder(), 0);
-        assertEquals(true, observer.workSourceSet);
-    }
-
-    static class TestObserver extends BinderCallsStatsService.BinderCallsObserver {
-        public boolean workSourceSet = false;
-
-        TestObserver() {
-            super(new NoopObserver(), new WorkSourceProvider());
-        }
-
-        @Override
-        protected void setThreadLocalWorkSourceUid(int uid) {
-            workSourceSet = true;
-        }
-    }
-
-
-    static class NoopObserver implements BinderInternal.Observer {
-        @Override
-        public CallSession callStarted(Binder binder, int code) {
-            return null;
-        }
-
-        @Override
-        public void callEnded(CallSession s, int parcelRequestSize, int parcelReplySize) {
-        }
-
-        @Override
-        public void callThrewException(CallSession s, Exception exception) {
-        }
     }
 }

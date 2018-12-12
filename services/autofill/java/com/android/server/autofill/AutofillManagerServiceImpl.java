@@ -76,7 +76,6 @@ import com.android.server.autofill.AutofillManagerService.SmartSuggestionMode;
 import com.android.server.autofill.RemoteAugmentedAutofillService.RemoteAugmentedAutofillServiceCallbacks;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.infra.AbstractPerUserSystemService;
-import com.android.server.infra.AbstractRemoteService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 import com.android.server.infra.SecureSettingsServiceNameResolver;
 
@@ -1031,8 +1030,7 @@ final class AutofillManagerServiceImpl
                 return null;
             }
             final ComponentName componentName = RemoteAugmentedAutofillService.getComponentName(
-                    getContext(), serviceName, mUserId,
-                    mAugmentedAutofillResolver.isTemporaryLocked());
+                    serviceName, mUserId, mAugmentedAutofillResolver.isTemporaryLocked());
             if (componentName == null) return null;
             if (sVerbose) {
                 Slog.v(TAG, "getRemoteAugmentedAutofillServiceLocked(): " + componentName);
@@ -1041,8 +1039,7 @@ final class AutofillManagerServiceImpl
             mRemoteAugmentedAutofillService = new RemoteAugmentedAutofillService(getContext(),
                     componentName, mUserId, new RemoteAugmentedAutofillServiceCallbacks() {
                         @Override
-                        public void onServiceDied(
-                                AbstractRemoteService<? extends AbstractRemoteService<?>> service) {
+                        public void onServiceDied(@NonNull RemoteAugmentedAutofillService service) {
                             // TODO(b/111330312): properly implement
                             Slog.w(TAG, "remote augmented autofill service died");
                         }

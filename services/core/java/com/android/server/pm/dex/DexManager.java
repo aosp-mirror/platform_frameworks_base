@@ -16,6 +16,11 @@
 
 package com.android.server.pm.dex;
 
+import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
+import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
+import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
+import static com.android.server.pm.dex.PackageDynamicCodeLoading.PackageDynamicCode;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -26,9 +31,9 @@ import android.database.ContentObserver;
 import android.os.Build;
 import android.os.FileUtils;
 import android.os.RemoteException;
-import android.os.storage.StorageManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.provider.Settings.Global;
 import android.util.Log;
 import android.util.Slog;
@@ -48,17 +53,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
-
-import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
-import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
-import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
 
 /**
  * This class keeps track of how dex files are used.
@@ -88,6 +89,12 @@ public class DexManager {
     // PackageDexUsage handles the actual I/O operations. It is responsible to
     // encode and save the dex usage data.
     private final PackageDexUsage mPackageDexUsage;
+
+    // PackageDynamicCodeLoading handles recording of dynamic code loading -
+    // which is similar to PackageDexUsage but records a different aspect of the data.
+    // (It additionally includes DEX files loaded with unsupported class loaders, and doesn't
+    // record class loaders or ISAs.)
+    private final PackageDynamicCodeLoading mPackageDynamicCodeLoading;
 
     private final IPackageManager mPackageManager;
     private final PackageDexOptimizer mPackageDexOptimizer;
@@ -126,14 +133,15 @@ public class DexManager {
 
     public DexManager(Context context, IPackageManager pms, PackageDexOptimizer pdo,
             Installer installer, Object installLock, Listener listener) {
-      mContext = context;
-      mPackageCodeLocationsCache = new HashMap<>();
-      mPackageDexUsage = new PackageDexUsage();
-      mPackageManager = pms;
-      mPackageDexOptimizer = pdo;
-      mInstaller = installer;
-      mInstallLock = installLock;
-      mListener = listener;
+        mContext = context;
+        mPackageCodeLocationsCache = new HashMap<>();
+        mPackageDexUsage = new PackageDexUsage();
+        mPackageDynamicCodeLoading = new PackageDynamicCodeLoading();
+        mPackageManager = pms;
+        mPackageDexOptimizer = pdo;
+        mInstaller = installer;
+        mInstallLock = installLock;
+        mListener = listener;
     }
 
     public void systemReady() {
@@ -207,7 +215,6 @@ public class DexManager {
                 Slog.i(TAG, loadingAppInfo.packageName +
                         " uses unsupported class loader in " + classLoaderNames);
             }
-            return;
         }
 
         int dexPathIndex = 0;
@@ -236,15 +243,24 @@ public class DexManager {
                     continue;
                 }
 
-                // Record dex file usage. If the current usage is a new pattern (e.g. new secondary,
-                // or UsedByOtherApps), record will return true and we trigger an async write
-                // to disk to make sure we don't loose the data in case of a reboot.
+                if (mPackageDynamicCodeLoading.record(searchResult.mOwningPackageName, dexPath,
+                        PackageDynamicCodeLoading.FILE_TYPE_DEX, loaderUserId,
+                        loadingAppInfo.packageName)) {
+                    mPackageDynamicCodeLoading.maybeWriteAsync();
+                }
 
-                String classLoaderContext = classLoaderContexts[dexPathIndex];
-                if (mPackageDexUsage.record(searchResult.mOwningPackageName,
-                        dexPath, loaderUserId, loaderIsa, isUsedByOtherApps, primaryOrSplit,
-                        loadingAppInfo.packageName, classLoaderContext)) {
-                    mPackageDexUsage.maybeWriteAsync();
+                if (classLoaderContexts != null) {
+
+                    // Record dex file usage. If the current usage is a new pattern (e.g. new
+                    // secondary, or UsedByOtherApps), record will return true and we trigger an
+                    // async write to disk to make sure we don't loose the data in case of a reboot.
+
+                    String classLoaderContext = classLoaderContexts[dexPathIndex];
+                    if (mPackageDexUsage.record(searchResult.mOwningPackageName,
+                            dexPath, loaderUserId, loaderIsa, isUsedByOtherApps, primaryOrSplit,
+                            loadingAppInfo.packageName, classLoaderContext)) {
+                        mPackageDexUsage.maybeWriteAsync();
+                    }
                 }
             } else {
                 // If we can't find the owner of the dex we simply do not track it. The impact is
@@ -268,8 +284,8 @@ public class DexManager {
             loadInternal(existingPackages);
         } catch (Exception e) {
             mPackageDexUsage.clear();
-            Slog.w(TAG, "Exception while loading package dex usage. " +
-                    "Starting with a fresh state.", e);
+            mPackageDynamicCodeLoading.clear();
+            Slog.w(TAG, "Exception while loading. Starting with a fresh state.", e);
         }
     }
 
@@ -311,15 +327,24 @@ public class DexManager {
      * all usage information for the package will be removed.
      */
     public void notifyPackageDataDestroyed(String packageName, int userId) {
-        boolean updated = userId == UserHandle.USER_ALL
-            ? mPackageDexUsage.removePackage(packageName)
-            : mPackageDexUsage.removeUserPackage(packageName, userId);
         // In case there was an update, write the package use info to disk async.
-        // Note that we do the writing here and not in PackageDexUsage in order to be
+        // Note that we do the writing here and not in the lower level classes in order to be
         // consistent with other methods in DexManager (e.g. reconcileSecondaryDexFiles performs
         // multiple updates in PackageDexUsage before writing it).
-        if (updated) {
-            mPackageDexUsage.maybeWriteAsync();
+        if (userId == UserHandle.USER_ALL) {
+            if (mPackageDexUsage.removePackage(packageName)) {
+                mPackageDexUsage.maybeWriteAsync();
+            }
+            if (mPackageDynamicCodeLoading.removePackage(packageName)) {
+                mPackageDynamicCodeLoading.maybeWriteAsync();
+            }
+        } else {
+            if (mPackageDexUsage.removeUserPackage(packageName, userId)) {
+                mPackageDexUsage.maybeWriteAsync();
+            }
+            if (mPackageDynamicCodeLoading.removeUserPackage(packageName, userId)) {
+                mPackageDynamicCodeLoading.maybeWriteAsync();
+            }
         }
     }
 
@@ -388,8 +413,23 @@ public class DexManager {
             }
         }
 
-        mPackageDexUsage.read();
-        mPackageDexUsage.syncData(packageToUsersMap, packageToCodePaths);
+        try {
+            mPackageDexUsage.read();
+            mPackageDexUsage.syncData(packageToUsersMap, packageToCodePaths);
+        } catch (Exception e) {
+            mPackageDexUsage.clear();
+            Slog.w(TAG, "Exception while loading package dex usage. "
+                    + "Starting with a fresh state.", e);
+        }
+
+        try {
+            mPackageDynamicCodeLoading.read();
+            mPackageDynamicCodeLoading.syncData(packageToUsersMap);
+        } catch (Exception e) {
+            mPackageDynamicCodeLoading.clear();
+            Slog.w(TAG, "Exception while loading package dynamic code usage. "
+                    + "Starting with a fresh state.", e);
+        }
     }
 
     /**
@@ -415,8 +455,14 @@ public class DexManager {
      * TODO(calin): maybe we should not (prune) so we can have an accurate view when we try
      * to access the package use.
      */
+    @VisibleForTesting
     /*package*/ boolean hasInfoOnPackage(String packageName) {
         return mPackageDexUsage.getPackageUseInfo(packageName) != null;
+    }
+
+    @VisibleForTesting
+    /*package*/ PackageDynamicCode getPackageDynamicCodeInfo(String packageName) {
+        return mPackageDynamicCodeLoading.getPackageDynamicCodeInfo(packageName);
     }
 
     /**
@@ -652,7 +698,7 @@ public class DexManager {
             // to load dex files through it.
             try {
                 String dexPathReal = PackageManagerServiceUtils.realpath(new File(dexPath));
-                if (dexPathReal != dexPath) {
+                if (!dexPath.equals(dexPathReal)) {
                     Slog.d(TAG, "Dex loaded with symlink. dexPath=" +
                             dexPath + " dexPathReal=" + dexPathReal);
                 }
@@ -675,6 +721,7 @@ public class DexManager {
      */
     public void writePackageDexUsageNow() {
         mPackageDexUsage.writeNow();
+        mPackageDynamicCodeLoading.writeNow();
     }
 
     private void registerSettingObserver() {

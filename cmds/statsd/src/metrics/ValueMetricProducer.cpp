@@ -432,6 +432,26 @@ bool ValueMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
     return false;
 }
 
+bool ValueMetricProducer::hitFullBucketGuardRailLocked(const MetricDimensionKey& newKey) {
+    // ===========GuardRail==============
+    // 1. Report the tuple count if the tuple count > soft limit
+    if (mCurrentFullBucket.find(newKey) != mCurrentFullBucket.end()) {
+        return false;
+    }
+    if (mCurrentFullBucket.size() > mDimensionSoftLimit - 1) {
+        size_t newTupleCount = mCurrentFullBucket.size() + 1;
+        // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
+        if (newTupleCount > mDimensionHardLimit) {
+            ALOGE("ValueMetric %lld dropping data for full bucket dimension key %s",
+                  (long long)mMetricId,
+                  newKey.toString().c_str());
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool getDoubleOrLong(const LogEvent& event, const Matcher& matcher, Value& ret) {
     for (const FieldValue& value : event.getValues()) {
         if (value.mField.matches(matcher)) {
@@ -496,6 +516,7 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
             VLOG("Failed to get value %d from event %s", i, event.ToString().c_str());
             return;
         }
+        interval.seenNewData = true;
 
         if (mUseDiff) {
             if (!interval.hasBase) {
@@ -648,6 +669,9 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
         // Accumulate partial buckets with current value and then send to anomaly tracker.
         if (mCurrentFullBucket.size() > 0) {
             for (const auto& slice : mCurrentSlicedBucket) {
+                if (hitFullBucketGuardRailLocked(slice.first)) {
+                    continue;
+                }
                 // TODO: fix this when anomaly can accept double values
                 mCurrentFullBucket[slice.first] += slice.second[0].value.long_value;
             }
@@ -679,11 +703,21 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
         }
     }
 
-    // Reset counters
-    for (auto& slice : mCurrentSlicedBucket) {
-        for (auto& interval : slice.second) {
+    for (auto it = mCurrentSlicedBucket.begin(); it != mCurrentSlicedBucket.end();) {
+        bool obsolete = true;
+        for (auto& interval : it->second) {
             interval.hasValue = false;
             interval.sampleSize = 0;
+            if (interval.seenNewData) {
+                obsolete = false;
+            }
+            interval.seenNewData = false;
+        }
+
+        if (obsolete) {
+            it = mCurrentSlicedBucket.erase(it);
+        } else {
+            it++;
         }
     }
 }

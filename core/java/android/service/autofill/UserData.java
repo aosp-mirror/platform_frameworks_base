@@ -24,6 +24,7 @@ import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.service.autofill.FieldClassification.Match;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.autofill.AutofillManager;
@@ -57,28 +59,57 @@ public final class UserData implements Parcelable {
     private static final int DEFAULT_MAX_VALUE_LENGTH = 100;
 
     private final String mId;
-    private final String mAlgorithm;
-    private final Bundle mAlgorithmArgs;
     private final String[] mCategoryIds;
     private final String[] mValues;
 
+    private final String mDefaultAlgorithm;
+    private final Bundle mDefaultArgs;
+    private final ArrayMap<String, String> mCategoryAlgorithms;
+    private final ArrayMap<String, Bundle> mCategoryArgs;
+
     private UserData(Builder builder) {
         mId = builder.mId;
-        mAlgorithm = builder.mAlgorithm;
-        mAlgorithmArgs = builder.mAlgorithmArgs;
         mCategoryIds = new String[builder.mCategoryIds.size()];
         builder.mCategoryIds.toArray(mCategoryIds);
         mValues = new String[builder.mValues.size()];
         builder.mValues.toArray(mValues);
+        builder.mValues.toArray(mValues);
+
+        mDefaultAlgorithm = builder.mDefaultAlgorithm;
+        mDefaultArgs = builder.mDefaultArgs;
+        mCategoryAlgorithms = builder.mCategoryAlgorithms;
+        mCategoryArgs = builder.mCategoryArgs;
     }
 
     /**
-     * Gets the name of the algorithm that is used to calculate
-     * {@link Match#getScore() match scores}.
+     * Gets the name of the default algorithm that is used to calculate
+     * {@link Match#getScore()} match scores}.
      */
     @Nullable
     public String getFieldClassificationAlgorithm() {
-        return mAlgorithm;
+        return mDefaultAlgorithm;
+    }
+
+    /** @hide */
+    public Bundle getDefaultFieldClassificationArgs() {
+        return mDefaultArgs;
+    }
+
+    /**
+     * Gets the name of the algorithm corresponding to the specific autofill category
+     * that is used to calculate {@link Match#getScore() match scores}
+     *
+     * @param categoryId autofill field category
+     *
+     * @return String name of algorithm, null if none found.
+     */
+    @Nullable
+    public String getFieldClassificationAlgorithmForCategory(@NonNull String categoryId) {
+        Preconditions.checkNotNull(categoryId);
+        if (mCategoryAlgorithms == null || !mCategoryAlgorithms.containsKey(categoryId)) {
+            return null;
+        }
+        return mCategoryAlgorithms.get(categoryId);
     }
 
     /**
@@ -86,11 +117,6 @@ public final class UserData implements Parcelable {
      */
     public String getId() {
         return mId;
-    }
-
-    /** @hide */
-    public Bundle getAlgorithmArgs() {
-        return mAlgorithmArgs;
     }
 
     /** @hide */
@@ -104,11 +130,29 @@ public final class UserData implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
+    public ArrayMap<String, String> getFieldClassificationAlgorithms() {
+        return mCategoryAlgorithms;
+    }
+
+    /** @hide */
+    public ArrayMap<String, Bundle> getFieldClassificationArgs() {
+        return mCategoryArgs;
+    }
+
+    /** @hide */
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("id: "); pw.print(mId);
-        pw.print(prefix); pw.print("Algorithm: "); pw.print(mAlgorithm);
-        pw.print(" Args: "); pw.println(mAlgorithmArgs);
-
+        pw.print(prefix); pw.print("Default Algorithm: "); pw.print(mDefaultAlgorithm);
+        pw.print(prefix); pw.print("Default Args"); pw.print(mDefaultArgs);
+        if (mCategoryAlgorithms != null && mCategoryAlgorithms.size() > 0) {
+            pw.print(prefix); pw.print("Algorithms per category: ");
+            for (int i = 0; i < mCategoryAlgorithms.size(); i++) {
+                pw.print(prefix); pw.print(prefix); pw.print(mCategoryAlgorithms.keyAt(i));
+                pw.print(": "); pw.println(Helper.getRedacted(mCategoryAlgorithms.valueAt(i)));
+                pw.print("args="); pw.print(mCategoryArgs.get(mCategoryAlgorithms.keyAt(i)));
+            }
+        }
         // Cannot disclose field ids or values because they could contain PII
         pw.print(prefix); pw.print("Field ids size: "); pw.println(mCategoryIds.length);
         for (int i = 0; i < mCategoryIds.length; i++) {
@@ -139,15 +183,19 @@ public final class UserData implements Parcelable {
         private final String mId;
         private final ArrayList<String> mCategoryIds;
         private final ArrayList<String> mValues;
-        private String mAlgorithm;
-        private Bundle mAlgorithmArgs;
+        private String mDefaultAlgorithm;
+        private Bundle mDefaultArgs;
+
+        // Map of autofill field categories to fleid classification algorithms and args
+        private ArrayMap<String, String> mCategoryAlgorithms;
+        private ArrayMap<String, Bundle> mCategoryArgs;
+
         private boolean mDestroyed;
 
         // Non-persistent array used to limit the number of unique ids.
         private final ArraySet<String> mUniqueCategoryIds;
         // Non-persistent array used to ignore duplaicated value/category pairs.
         private final ArraySet<String> mUniqueValueCategoryPairs;
-
 
         /**
          * Creates a new builder for the user data used for <a href="#FieldClassification">field
@@ -169,7 +217,7 @@ public final class UserData implements Parcelable {
          * {@link AutofillManager#getUserData()}).
          *
          * @param value value of the user data.
-         * @param categoryId string used to identify the category the value is associated with.
+         * @param categoryId autofill field category.
          *
          * @throws IllegalArgumentException if any of the following occurs:
          * <ul>
@@ -189,13 +237,15 @@ public final class UserData implements Parcelable {
             mCategoryIds = new ArrayList<>(maxUserDataSize);
             mValues = new ArrayList<>(maxUserDataSize);
             mUniqueValueCategoryPairs = new ArraySet<>(maxUserDataSize);
+
             mUniqueCategoryIds = new ArraySet<>(getMaxCategoryCount());
 
             addMapping(value, categoryId);
         }
 
         /**
-         * Sets the algorithm used for <a href="#FieldClassification">field classification</a>.
+         * Sets the default algorithm used for
+         * <a href="#FieldClassification">field classification</a>.
          *
          * <p>The currently available algorithms can be retrieve through
          * {@link AutofillManager#getAvailableFieldClassificationAlgorithms()}.
@@ -212,8 +262,40 @@ public final class UserData implements Parcelable {
         public Builder setFieldClassificationAlgorithm(@Nullable String name,
                 @Nullable Bundle args) {
             throwIfDestroyed();
-            mAlgorithm = name;
-            mAlgorithmArgs = args;
+            mDefaultAlgorithm = name;
+            mDefaultArgs = args;
+            return this;
+        }
+
+        /**
+         * Sets the algorithm used for <a href="#FieldClassification">field classification</a>
+         * for the specified category.
+         *
+         * <p>The currently available algorithms can be retrieved through
+         * {@link AutofillManager#getAvailableFieldClassificationAlgorithms()}.
+         *
+         * <p>If not set, the
+         * {@link AutofillManager#getDefaultFieldClassificationAlgorithm() default algorithm} is
+         * used instead.
+         *
+         * @param categoryId autofill field category.
+         * @param name name of the algorithm or {@code null} to used default.
+         * @param args optional arguments to the algorithm.
+         *
+         * @return this builder
+         */
+        public Builder setFieldClassificationAlgorithmForCategory(@NonNull String categoryId,
+                @Nullable String name, @Nullable Bundle args) {
+            throwIfDestroyed();
+            Preconditions.checkNotNull(categoryId);
+            if (mCategoryAlgorithms == null) {
+                mCategoryAlgorithms = new ArrayMap<>(getMaxCategoryCount());
+            }
+            if (mCategoryArgs == null) {
+                mCategoryArgs = new ArrayMap<>(getMaxCategoryCount());
+            }
+            mCategoryAlgorithms.put(categoryId, name);
+            mCategoryArgs.put(categoryId, args);
             return this;
         }
 
@@ -317,8 +399,7 @@ public final class UserData implements Parcelable {
     public String toString() {
         if (!sDebug) return super.toString();
 
-        final StringBuilder builder = new StringBuilder("UserData: [id=").append(mId)
-                .append(", algorithm=").append(mAlgorithm);
+        final StringBuilder builder = new StringBuilder("UserData: [id=").append(mId);
         // Cannot disclose category ids or values because they could contain PII
         builder.append(", categoryIds=");
         Helper.appendRedacted(builder, mCategoryIds);
@@ -341,8 +422,10 @@ public final class UserData implements Parcelable {
         parcel.writeString(mId);
         parcel.writeStringArray(mCategoryIds);
         parcel.writeStringArray(mValues);
-        parcel.writeString(mAlgorithm);
-        parcel.writeBundle(mAlgorithmArgs);
+        parcel.writeString(mDefaultAlgorithm);
+        parcel.writeBundle(mDefaultArgs);
+        parcel.writeMap(mCategoryAlgorithms);
+        parcel.writeMap(mCategoryArgs);
     }
 
     public static final Parcelable.Creator<UserData> CREATOR =
@@ -355,10 +438,28 @@ public final class UserData implements Parcelable {
             final String id = parcel.readString();
             final String[] categoryIds = parcel.readStringArray();
             final String[] values = parcel.readStringArray();
+            final String defaultAlgorithm = parcel.readString();
+            final Bundle defaultArgs = parcel.readBundle();
+            final ArrayMap<String, String> categoryAlgorithms = new ArrayMap<>();
+            parcel.readMap(categoryAlgorithms, String.class.getClassLoader());
+            final ArrayMap<String, Bundle> categoryArgs = new ArrayMap<>();
+            parcel.readMap(categoryArgs, Bundle.class.getClassLoader());
+
             final Builder builder = new Builder(id, values[0], categoryIds[0])
-                    .setFieldClassificationAlgorithm(parcel.readString(), parcel.readBundle());
+                    .setFieldClassificationAlgorithm(defaultAlgorithm, defaultArgs);
+
             for (int i = 1; i < categoryIds.length; i++) {
-                builder.add(values[i], categoryIds[i]);
+                String categoryId = categoryIds[i];
+                builder.add(values[i], categoryId);
+            }
+
+            final int size = categoryAlgorithms.size();
+            if (size > 0) {
+                for (int i = 0; i < size; i++) {
+                    final String categoryId = categoryAlgorithms.keyAt(i);
+                    builder.setFieldClassificationAlgorithmForCategory(categoryId,
+                            categoryAlgorithms.valueAt(i), categoryArgs.get(categoryId));
+                }
             }
             return builder.build();
         }

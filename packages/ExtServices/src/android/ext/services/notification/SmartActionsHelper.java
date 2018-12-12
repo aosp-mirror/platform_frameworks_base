@@ -69,8 +69,11 @@ public class SmartActionsHelper {
      * from notification text / message, we can replace most of the code here by consuming that API.
      */
     @NonNull
-    ArrayList<Notification.Action> suggestActions(
-            @Nullable Context context, @NonNull NotificationEntry entry) {
+    ArrayList<Notification.Action> suggestActions(@Nullable Context context,
+            @NonNull NotificationEntry entry, @NonNull AssistantSettings settings) {
+        if (!settings.mGenerateActions) {
+            return EMPTY_ACTION_LIST;
+        }
         if (!isEligibleForActionAdjustment(entry)) {
             return EMPTY_ACTION_LIST;
         }
@@ -86,8 +89,11 @@ public class SmartActionsHelper {
                 getMostSalientActionText(entry.getNotification()), MAX_SMART_ACTIONS);
     }
 
-    ArrayList<CharSequence> suggestReplies(
-            @Nullable Context context, @NonNull NotificationEntry entry) {
+    ArrayList<CharSequence> suggestReplies(@Nullable Context context,
+            @NonNull NotificationEntry entry, @NonNull AssistantSettings settings) {
+        if (!settings.mGenerateReplies) {
+            return EMPTY_REPLY_LIST;
+        }
         if (!isEligibleForReplyAdjustment(entry)) {
             return EMPTY_REPLY_LIST;
         }

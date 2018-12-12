@@ -244,16 +244,32 @@ public final class DocumentsContract {
      * Get string array identifies the type or types of metadata returned
      * using DocumentsContract#getDocumentMetadata.
      *
-     * @see #getDocumentMetadata(ContentResolver, Uri)
+     * @see #getDocumentMetadata(ContentInterface, Uri)
      */
     public static final String METADATA_TYPES = "android:documentMetadataTypes";
 
     /**
      * Get Exif information using DocumentsContract#getDocumentMetadata.
      *
-     * @see #getDocumentMetadata(ContentResolver, Uri)
+     * @see #getDocumentMetadata(ContentInterface, Uri)
      */
     public static final String METADATA_EXIF = "android:documentExif";
+
+    /**
+     * Get total count of all documents currently stored under the given
+     * directory tree. Only valid for {@link Document#MIME_TYPE_DIR} documents.
+     *
+     * @see #getDocumentMetadata(ContentInterface, Uri)
+     */
+    public static final String METADATA_TREE_COUNT = "android:metadataTreeCount";
+
+    /**
+     * Get total size of all documents currently stored under the given
+     * directory tree. Only valid for {@link Document#MIME_TYPE_DIR} documents.
+     *
+     * @see #getDocumentMetadata(ContentInterface, Uri)
+     */
+    public static final String METADATA_TREE_SIZE = "android:metadataTreeSize";
 
     /**
      * Constants related to a document, including {@link Cursor} column names
@@ -519,7 +535,7 @@ public final class DocumentsContract {
          * using DocumentsContract#getDocumentMetadata
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#getDocumentMetadata(ContentResolver, Uri)
+         * @see DocumentsContract#getDocumentMetadata(ContentInterface, Uri)
          */
         public static final int FLAG_SUPPORTS_METADATA = 1 << 14;
     }
@@ -1259,6 +1275,12 @@ public final class DocumentsContract {
         }
     }
 
+    /** @removed */
+    public static Bitmap getDocumentThumbnail(ContentResolver content, Uri documentUri, Point size,
+            CancellationSignal signal) throws FileNotFoundException {
+        return getDocumentThumbnail((ContentInterface) content, documentUri, size, signal);
+    }
+
     /**
      * Create a new document with given MIME type and display name.
      *
@@ -1285,6 +1307,11 @@ public final class DocumentsContract {
         }
     }
 
+    /** @removed */
+    public static Uri createDocument(ContentResolver content, Uri parentDocumentUri,
+            String mimeType, String displayName) throws FileNotFoundException {
+        return createDocument((ContentInterface) content, parentDocumentUri, mimeType, displayName);
+    }
 
     /**
      * Test if a document is descendant (child, grandchild, etc) from the given
@@ -1318,6 +1345,12 @@ public final class DocumentsContract {
         }
     }
 
+    /** @removed */
+    public static boolean isChildDocument(ContentResolver content, Uri parentDocumentUri,
+            Uri childDocumentUri) throws FileNotFoundException {
+        return isChildDocument((ContentInterface) content, parentDocumentUri, childDocumentUri);
+    }
+
     /**
      * Change the display name of an existing document.
      * <p>
@@ -1349,6 +1382,12 @@ public final class DocumentsContract {
         }
     }
 
+    /** @removed */
+    public static Uri renameDocument(ContentResolver content, Uri documentUri,
+            String displayName) throws FileNotFoundException {
+        return renameDocument((ContentInterface) content, documentUri, displayName);
+    }
+
     /**
      * Delete the given document.
      *
@@ -1369,6 +1408,12 @@ public final class DocumentsContract {
             rethrowIfNecessary(e);
             return false;
         }
+    }
+
+    /** @removed */
+    public static boolean deleteDocument(ContentResolver content, Uri documentUri)
+            throws FileNotFoundException {
+        return deleteDocument((ContentInterface) content, documentUri);
     }
 
     /**
@@ -1394,6 +1439,12 @@ public final class DocumentsContract {
             rethrowIfNecessary(e);
             return null;
         }
+    }
+
+    /** @removed */
+    public static Uri copyDocument(ContentResolver content, Uri sourceDocumentUri,
+            Uri targetParentDocumentUri) throws FileNotFoundException {
+        return copyDocument((ContentInterface) content, sourceDocumentUri, targetParentDocumentUri);
     }
 
     /**
@@ -1423,6 +1474,13 @@ public final class DocumentsContract {
         }
     }
 
+    /** @removed */
+    public static Uri moveDocument(ContentResolver content, Uri sourceDocumentUri,
+            Uri sourceParentDocumentUri, Uri targetParentDocumentUri) throws FileNotFoundException {
+        return moveDocument((ContentInterface) content, sourceDocumentUri, sourceParentDocumentUri,
+                targetParentDocumentUri);
+    }
+
     /**
      * Removes the given document from a parent directory.
      *
@@ -1450,6 +1508,12 @@ public final class DocumentsContract {
         }
     }
 
+    /** @removed */
+    public static boolean removeDocument(ContentResolver content, Uri documentUri,
+            Uri parentDocumentUri) throws FileNotFoundException {
+        return removeDocument((ContentInterface) content, documentUri, parentDocumentUri);
+    }
+
     /**
      * Ejects the given root. It throws {@link IllegalStateException} when ejection failed.
      *
@@ -1465,6 +1529,11 @@ public final class DocumentsContract {
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
+    }
+
+    /** @removed */
+    public static void ejectRoot(ContentResolver content, Uri rootUri) {
+        ejectRoot((ContentInterface) content, rootUri);
     }
 
     /**
@@ -1512,6 +1581,12 @@ public final class DocumentsContract {
         }
     }
 
+    /** @removed */
+    public static Bundle getDocumentMetadata(ContentResolver content, Uri documentUri)
+            throws FileNotFoundException {
+        return getDocumentMetadata((ContentInterface) content, documentUri);
+    }
+
     /**
      * Finds the canonical path from the top of the document tree.
      *
@@ -1541,6 +1616,12 @@ public final class DocumentsContract {
             rethrowIfNecessary(e);
             return null;
         }
+    }
+
+    /** @removed */
+    public static Path findDocumentPath(ContentResolver content, Uri treeUri)
+            throws FileNotFoundException {
+        return findDocumentPath((ContentInterface) content, treeUri);
     }
 
     /**
@@ -1614,6 +1695,12 @@ public final class DocumentsContract {
             rethrowIfNecessary(e);
             return null;
         }
+    }
+
+    /** @removed */
+    public static IntentSender createWebLinkIntent(ContentResolver content, Uri uri,
+            Bundle options) throws FileNotFoundException {
+        return createWebLinkIntent((ContentInterface) content, uri, options);
     }
 
     /**

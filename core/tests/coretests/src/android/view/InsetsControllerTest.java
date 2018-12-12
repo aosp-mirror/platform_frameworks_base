@@ -19,6 +19,7 @@ package android.view;
 import static android.view.InsetsState.TYPE_TOP_BAR;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
+import static org.mockito.Mockito.mock;
 
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.FlakyTest;
@@ -33,7 +34,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class InsetsControllerTest {
 
-    private InsetsController mController = new InsetsController();
+    private InsetsController mController = new InsetsController(mock(ViewRootImpl.class));
 
     private SurfaceSession mSession = new SurfaceSession();
     private SurfaceControl mLeash;

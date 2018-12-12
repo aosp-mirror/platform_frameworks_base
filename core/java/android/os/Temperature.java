@@ -70,6 +70,7 @@ public final class Temperature implements Parcelable {
             TYPE_BCL_VOLTAGE,
             TYPE_BCL_CURRENT,
             TYPE_BCL_PERCENTAGE,
+            TYPE_NPU,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
@@ -85,6 +86,7 @@ public final class Temperature implements Parcelable {
     public static final int TYPE_BCL_VOLTAGE = TemperatureType.BCL_VOLTAGE;
     public static final int TYPE_BCL_CURRENT = TemperatureType.BCL_CURRENT;
     public static final int TYPE_BCL_PERCENTAGE = TemperatureType.BCL_PERCENTAGE;
+    public static final int TYPE_NPU = TemperatureType.NPU;
 
     /**
      * Verify a valid temperature type.
@@ -92,7 +94,7 @@ public final class Temperature implements Parcelable {
      * @return true if a temperature type is valid otherwise false.
      */
     public static boolean isValidType(@Type int type) {
-        return type >= TYPE_UNKNOWN && type <= TYPE_BCL_PERCENTAGE;
+        return type >= TYPE_UNKNOWN && type <= TYPE_NPU;
     }
 
     /**

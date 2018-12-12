@@ -16,13 +16,32 @@
 
 package android.os;
 
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+
 import android.content.Context;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.uiautomator.UiDevice;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import org.junit.After;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class PowerManagerTest extends AndroidTestCase {
 
     private PowerManager mPm;
+    private UiDevice mUiDevice;
+    private Executor mExec = Executors.newSingleThreadExecutor();
+    @Mock
+    private PowerManager.ThermalStatusCallback mCallback;
+    private static final long CALLBACK_TIMEOUT_MILLI_SEC = 5000;
 
     /**
      * Setup any common data for the upcoming tests.
@@ -30,7 +49,18 @@ public class PowerManagerTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        MockitoAnnotations.initMocks(this);
+        mUiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         mPm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mUiDevice.executeShellCommand("cmd thermalservice override-status 0");
+    }
+
+    /**
+     * Reset data for the upcoming tests.
+     */
+    @After
+    public void tearDown() throws Exception {
+        mUiDevice.executeShellCommand("cmd thermalservice reset");
     }
 
     /**
@@ -136,5 +166,36 @@ public class PowerManagerTest extends AndroidTestCase {
         assertFalse(wl.isHeld());
 
         // TODO: Threaded test (needs handler) to make sure timed wakelocks work too
+    }
+
+    @Test
+    public void testGetThermalStatus() throws Exception {
+        int status = 0;
+        assertEquals(status, mPm.getCurrentThermalStatus());
+        status = 3;
+        mUiDevice.executeShellCommand("cmd thermalservice override-status "
+                + Integer.toString(status));
+        assertEquals(status, mPm.getCurrentThermalStatus());
+    }
+
+    @Test
+    public void testThermalStatusCallback() throws Exception {
+        mPm.registerThermalStatusCallback(mCallback, mExec);
+        verify(mCallback, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onStatusChange(0);
+        reset(mCallback);
+        int status = 3;
+        mUiDevice.executeShellCommand("cmd thermalservice override-status "
+                + Integer.toString(status));
+        verify(mCallback, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onStatusChange(status);
+        reset(mCallback);
+        mPm.unregisterThermalStatusCallback(mCallback);
+        status = 2;
+        mUiDevice.executeShellCommand("cmd thermalservice override-status "
+                + Integer.toString(status));
+        verify(mCallback, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(0)).onStatusChange(status);
+
     }
 }

@@ -12,7 +12,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     mockito-target-minus-junit4 \
     espresso-core \
     truth-prebuilt \
-    testables
+    testables \
+    testng
 
 # Include all test java files.
 LOCAL_SRC_FILES := $(call all-java-files-under, src)

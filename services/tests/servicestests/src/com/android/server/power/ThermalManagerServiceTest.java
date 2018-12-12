@@ -281,6 +281,10 @@ public class ThermalManagerServiceTest {
         mFakeHal.mCallback.onValues(newSkin);
         verify(mIPowerManagerMock, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).shutdown(false, PowerManager.SHUTDOWN_THERMAL_STATE, false);
+        Temperature newBattery = new Temperature(60, Temperature.TYPE_BATTERY, "batt", status);
+        mFakeHal.mCallback.onValues(newBattery);
+        verify(mIPowerManagerMock, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).shutdown(false, PowerManager.SHUTDOWN_BATTERY_THERMAL_STATE, false);
     }
 
     @Test

@@ -80,11 +80,18 @@ public final class Adjustment implements Parcelable {
      * Data type: int, one of importance values e.g.
      * {@link android.app.NotificationManager#IMPORTANCE_MIN}.
      *
-     * If used from
-     * {@link NotificationAssistantService#onNotificationEnqueued(StatusBarNotification)}, it can
-     * block a notification from appearing or silence it. If used from
-     * {@link NotificationAssistantService#adjustNotification(Adjustment)}, it can visually
-     * demote a notification.
+     * <p> If used from
+     * {@link NotificationAssistantService#onNotificationEnqueued(StatusBarNotification)}, and
+     * received before the notification is posted, it can block a notification from appearing or
+     * silence it. Importance adjustments received too late from
+     * {@link NotificationAssistantService#onNotificationEnqueued(StatusBarNotification)} will be
+     * ignored.
+     * </p>
+     * <p>If used from
+     * {@link NotificationAssistantService#adjustNotification(Adjustment)}, it can
+     * visually demote or cancel a notification, but use this with care if they notification was
+     * recently posted because the notification may already have made noise.
+     * </p>
      */
     public static final String KEY_IMPORTANCE = "key_importance";
 

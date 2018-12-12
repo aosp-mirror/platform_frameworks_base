@@ -48,7 +48,7 @@ public class SignedConfig {
     private static final String CONFIG_KEY_VALUE = "value";
 
     /**
-     * Represents config values targetting to an SDK range.
+     * Represents config values targeting an SDK range.
      */
     public static class PerSdkConfig {
         public final int minSdk;
@@ -90,11 +90,24 @@ public class SignedConfig {
     /**
      * Parse configuration from an APK.
      *
-     * @param config config as read from the APK metadata.
+     * @param config Config string as read from the APK metadata.
+     * @param allowedKeys Set of allowed keys in the config. Any key/value mapping for a key not in
+     *                    this set will result in an {@link InvalidConfigException} being thrown.
+     * @param keyValueMappers Mappings for values per key. The keys in the top level map should be
+     *                        a subset of {@code allowedKeys}. The keys in the inner map indicate
+     *                        the set of allowed values for that keys value. This map will be
+     *                        applied to the value in the configuration. This is intended to allow
+     *                        enum-like values to be encoded as strings in the configuration, and
+     *                        mapped back to integers when the configuration is parsed.
+     *
+     *                        <p>Any config key with a value that does not appear in the
+     *                        corresponding map will result in an {@link InvalidConfigException}
+     *                        being thrown.
      * @return Parsed configuration.
      * @throws InvalidConfigException If there's a problem parsing the config.
      */
-    public static SignedConfig parse(String config, Set<String> allowedKeys)
+    public static SignedConfig parse(String config, Set<String> allowedKeys,
+            Map<String, Map<String, String>> keyValueMappers)
             throws InvalidConfigException {
         try {
             JSONObject json = new JSONObject(config);
@@ -103,7 +116,8 @@ public class SignedConfig {
             JSONArray perSdkConfig = json.getJSONArray(KEY_CONFIG);
             List<PerSdkConfig> parsedConfigs = new ArrayList<>();
             for (int i = 0; i < perSdkConfig.length(); ++i) {
-                parsedConfigs.add(parsePerSdkConfig(perSdkConfig.getJSONObject(i), allowedKeys));
+                parsedConfigs.add(parsePerSdkConfig(perSdkConfig.getJSONObject(i), allowedKeys,
+                        keyValueMappers));
             }
 
             return new SignedConfig(version, parsedConfigs);
@@ -113,8 +127,17 @@ public class SignedConfig {
 
     }
 
+    private static CharSequence quoted(Object s) {
+        if (s == null) {
+            return "null";
+        } else {
+            return "\"" + s + "\"";
+        }
+    }
+
     @VisibleForTesting
-    static PerSdkConfig parsePerSdkConfig(JSONObject json, Set<String> allowedKeys)
+    static PerSdkConfig parsePerSdkConfig(JSONObject json, Set<String> allowedKeys,
+            Map<String, Map<String, String>> keyValueMappers)
             throws JSONException, InvalidConfigException {
         int minSdk = json.getInt(CONFIG_KEY_MIN_SDK);
         int maxSdk = json.getInt(CONFIG_KEY_MAX_SDK);
@@ -123,11 +146,22 @@ public class SignedConfig {
         for (int i = 0; i < valueArray.length(); ++i) {
             JSONObject keyValuePair = valueArray.getJSONObject(i);
             String key = keyValuePair.getString(CONFIG_KEY_KEY);
-            String value = keyValuePair.has(CONFIG_KEY_VALUE)
-                    ? keyValuePair.getString(CONFIG_KEY_VALUE)
+            Object valueObject = keyValuePair.has(CONFIG_KEY_VALUE)
+                    ? keyValuePair.get(CONFIG_KEY_VALUE)
                     : null;
+            String value = valueObject == JSONObject.NULL || valueObject == null
+                            ? null
+                            : valueObject.toString();
             if (!allowedKeys.contains(key)) {
                 throw new InvalidConfigException("Config key " + key + " is not allowed");
+            }
+            if (keyValueMappers.containsKey(key)) {
+                Map<String, String> mapper = keyValueMappers.get(key);
+                if (!mapper.containsKey(value)) {
+                    throw new InvalidConfigException(
+                            "Config key " + key + " contains unsupported value " + quoted(value));
+                }
+                value = mapper.get(value);
             }
             values.put(key, value);
         }

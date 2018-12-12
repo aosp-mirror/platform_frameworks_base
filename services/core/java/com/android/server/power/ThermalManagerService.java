@@ -250,14 +250,29 @@ public class ThermalManagerService extends SystemService {
         }
     }
 
+    private void shutdownIfNeededLocked(Temperature temperature) {
+        if (temperature.getStatus() != Temperature.THROTTLING_SHUTDOWN) {
+            return;
+        }
+        switch (temperature.getType()) {
+            case Temperature.TYPE_CPU:
+                // Fall through
+            case Temperature.TYPE_GPU:
+                // Fall through
+            case Temperature.TYPE_NPU:
+                // Fall through
+            case Temperature.TYPE_SKIN:
+                mPowerManager.shutdown(false, PowerManager.SHUTDOWN_THERMAL_STATE, false);
+                break;
+            case Temperature.TYPE_BATTERY:
+                mPowerManager.shutdown(false, PowerManager.SHUTDOWN_BATTERY_THERMAL_STATE, false);
+                break;
+        }
+    }
+
     private void onTemperatureChanged(Temperature temperature, boolean sendStatus) {
         synchronized (mLock) {
-            // Thermal Shutdown for Skin temperature
-            if (temperature.getStatus() == Temperature.THROTTLING_SHUTDOWN
-                    && temperature.getType() == Temperature.TYPE_SKIN) {
-                mPowerManager.shutdown(false, PowerManager.SHUTDOWN_THERMAL_STATE, false);
-            }
-
+            shutdownIfNeededLocked(temperature);
             Temperature old = mTemperatureMap.put(temperature.getName(), temperature);
             if (old != null) {
                 if (old.getStatus() != temperature.getStatus()) {
@@ -300,6 +315,8 @@ public class ThermalManagerService extends SystemService {
     final IThermalService.Stub mService = new IThermalService.Stub() {
         @Override
         public boolean registerThermalEventListener(IThermalEventListener listener) {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
             synchronized (mLock) {
                 final long token = Binder.clearCallingIdentity();
                 try {
@@ -320,6 +337,8 @@ public class ThermalManagerService extends SystemService {
         @Override
         public boolean registerThermalEventListenerWithType(IThermalEventListener listener,
                 int type) {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
             synchronized (mLock) {
                 final long token = Binder.clearCallingIdentity();
                 try {
@@ -339,6 +358,8 @@ public class ThermalManagerService extends SystemService {
 
         @Override
         public boolean unregisterThermalEventListener(IThermalEventListener listener) {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
             synchronized (mLock) {
                 final long token = Binder.clearCallingIdentity();
                 try {
@@ -351,6 +372,8 @@ public class ThermalManagerService extends SystemService {
 
         @Override
         public List<Temperature> getCurrentTemperatures() {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
             final long token = Binder.clearCallingIdentity();
             try {
                 if (!mHalReady) {
@@ -364,6 +387,8 @@ public class ThermalManagerService extends SystemService {
 
         @Override
         public List<Temperature> getCurrentTemperaturesWithType(int type) {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
             final long token = Binder.clearCallingIdentity();
             try {
                 if (!mHalReady) {
@@ -428,14 +453,15 @@ public class ThermalManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
+                    pw.println("IsStatusOverride: " + mIsStatusOverride);
                     pw.println("ThermalEventListeners:");
                     mThermalEventListeners.dump(pw, "\t");
                     pw.println("ThermalStatusListeners:");
                     mThermalStatusListeners.dump(pw, "\t");
-                    pw.println("Thermal Status: " + Integer.toString(mStatus));
+                    pw.println("Thermal Status: " + mStatus);
                     pw.println("Cached temperatures:");
                     dumpTemperaturesLocked(pw, "\t", mTemperatureMap.values());
-                    pw.println("HAL Ready: " + Boolean.toString(mHalReady));
+                    pw.println("HAL Ready: " + mHalReady);
                     if (mHalReady) {
                         pw.println("HAL connection:");
                         mHalWrapper.dump(pw, "\t");
@@ -507,7 +533,7 @@ public class ThermalManagerService extends SystemService {
                     return -1;
                 }
                 if (!Temperature.isValidStatus(status)) {
-                    pw.println("Invalid status: " + Integer.toString(status));
+                    pw.println("Invalid status: " + status);
                     return -1;
                 }
                 synchronized (mLock) {

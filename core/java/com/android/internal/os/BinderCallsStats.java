@@ -21,8 +21,6 @@ import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.Process;
 import android.os.SystemClock;
-import android.os.ThreadLocalWorkSource;
-import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.Pair;
@@ -62,7 +60,11 @@ public class BinderCallsStats implements BinderInternal.Observer {
     private static final int CALL_SESSIONS_POOL_SIZE = 100;
     private static final int MAX_EXCEPTION_COUNT_SIZE = 50;
     private static final String EXCEPTION_COUNT_OVERFLOW_NAME = "overflow";
+    // Default values for overflow entry. The work source uid does not use a default value in order
+    // to have on overflow entry per work source uid.
     private static final Class<? extends Binder> OVERFLOW_BINDER = OverflowBinder.class;
+    private static final boolean OVERFLOW_SCREEN_INTERACTIVE = false;
+    private static final int OVERFLOW_DIRECT_CALLING_UID = -1;
     private static final int OVERFLOW_TRANSACTION_CODE = -1;
 
     // Whether to collect all the data: cpu + exceptions + reply/request sizes.
@@ -106,7 +108,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     @Override
     @Nullable
-    public CallSession callStarted(Binder binder, int code) {
+    public CallSession callStarted(Binder binder, int code, int workSourceUid) {
         if (mDeviceState == null || mDeviceState.isCharging()) {
             return null;
         }
@@ -130,19 +132,21 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     @Override
-    public void callEnded(@Nullable CallSession s, int parcelRequestSize, int parcelReplySize) {
+    public void callEnded(@Nullable CallSession s, int parcelRequestSize,
+            int parcelReplySize, int workSourceUid) {
         if (s == null) {
             return;
         }
 
-        processCallEnded(s, parcelRequestSize, parcelReplySize);
+        processCallEnded(s, parcelRequestSize, parcelReplySize, workSourceUid);
 
         if (mCallSessionsPool.size() < CALL_SESSIONS_POOL_SIZE) {
             mCallSessionsPool.add(s);
         }
     }
 
-    private void processCallEnded(CallSession s, int parcelRequestSize, int parcelReplySize) {
+    private void processCallEnded(CallSession s,
+            int parcelRequestSize, int parcelReplySize, int workSourceUid) {
         // Non-negative time signals we need to record data for this call.
         final boolean recordCall = s.cpuTimeStarted >= 0;
         final long duration;
@@ -155,7 +159,6 @@ public class BinderCallsStats implements BinderInternal.Observer {
             latencyDuration = 0;
         }
         final int callingUid = getCallingUid();
-        final int workSourceUid = getWorkSourceUid();
 
         synchronized (mLock) {
             // This was already checked in #callStart but check again while synchronized.
@@ -356,14 +359,13 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     /** Writes the collected statistics to the supplied {@link PrintWriter}.*/
-    public void dump(PrintWriter pw, Map<Integer, String> appIdToPkgNameMap, boolean verbose) {
+    public void dump(PrintWriter pw, AppIdToPackageMap packageMap, boolean verbose) {
         synchronized (mLock) {
-            dumpLocked(pw, appIdToPkgNameMap, verbose);
+            dumpLocked(pw, packageMap, verbose);
         }
     }
 
-    private void dumpLocked(PrintWriter pw, Map<Integer, String> appIdToPkgNameMap,
-            boolean verbose) {
+    private void dumpLocked(PrintWriter pw, AppIdToPackageMap packageMap, boolean verbose) {
         long totalCallsCount = 0;
         long totalRecordedCallsCount = 0;
         long totalCpuTime = 0;
@@ -397,9 +399,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
         for (ExportedCallStat e : exportedCallStats) {
             sb.setLength(0);
             sb.append("    ")
-                    .append(uidToString(e.callingUid, appIdToPkgNameMap))
+                    .append(packageMap.mapUid(e.callingUid))
                     .append(',')
-                    .append(uidToString(e.workSourceUid, appIdToPkgNameMap))
+                    .append(packageMap.mapUid(e.workSourceUid))
                     .append(',').append(e.className)
                     .append('#').append(e.methodName)
                     .append(',').append(e.screenInteractive)
@@ -420,7 +422,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         final List<UidEntry> summaryEntries = verbose ? entries
                 : getHighestValues(entries, value -> value.cpuTimeMicros, 0.9);
         for (UidEntry entry : summaryEntries) {
-            String uidStr = uidToString(entry.workSourceUid, appIdToPkgNameMap);
+            String uidStr = packageMap.mapUid(entry.workSourceUid);
             pw.println(String.format("  %10d %3.0f%% %8d %8d %s",
                     entry.cpuTimeMicros, 100d * entry.cpuTimeMicros / totalCpuTime,
                     entry.recordedCallCount, entry.callCount, uidStr));
@@ -448,23 +450,12 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
     }
 
-    private static String uidToString(int uid, Map<Integer, String> pkgNameMap) {
-        final int appId = UserHandle.getAppId(uid);
-        final String pkgName = pkgNameMap == null ? null : pkgNameMap.get(appId);
-        final String uidStr = UserHandle.formatUid(uid);
-        return pkgName == null ? uidStr : pkgName + '/' + uidStr;
-    }
-
     protected long getThreadTimeMicro() {
         return SystemClock.currentThreadTimeMicro();
     }
 
     protected int getCallingUid() {
         return Binder.getCallingUid();
-    }
-
-    protected int getWorkSourceUid() {
-        return ThreadLocalWorkSource.getUid();
     }
 
     protected long getElapsedRealtimeMicro() {
@@ -669,14 +660,16 @@ public class BinderCallsStats implements BinderInternal.Observer {
             // Only create CallStat if it's a new entry, otherwise update existing instance.
             if (mapCallStat == null) {
                 if (maxCallStatsReached) {
-                    mapCallStat = get(callingUid, OVERFLOW_BINDER, OVERFLOW_TRANSACTION_CODE,
-                            screenInteractive);
+                    mapCallStat = get(OVERFLOW_DIRECT_CALLING_UID, OVERFLOW_BINDER,
+                            OVERFLOW_TRANSACTION_CODE, OVERFLOW_SCREEN_INTERACTIVE);
                     if (mapCallStat != null) {
                         return mapCallStat;
                     }
 
+                    callingUid = OVERFLOW_DIRECT_CALLING_UID;
                     binderClass = OVERFLOW_BINDER;
                     transactionCode = OVERFLOW_TRANSACTION_CODE;
+                    screenInteractive = OVERFLOW_SCREEN_INTERACTIVE;
                 }
 
                 mapCallStat = new CallStat(callingUid, binderClass, transactionCode,

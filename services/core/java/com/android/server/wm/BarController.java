@@ -219,7 +219,7 @@ public class BarController {
     }
 
     private boolean updateStateLw(final int state) {
-        if (state != mState) {
+        if (mWin != null && state != mState) {
             mState = state;
             if (DEBUG) Slog.d(mTag, "mState: " + StatusBarManager.windowStateToString(state));
             mHandler.post(new Runnable() {

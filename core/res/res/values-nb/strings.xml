@@ -1265,7 +1265,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"en ukjent nettverkstype"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kan ikke koble til Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" har en dårlig Internett-tilkobling."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" har en dårlig internettilkobling."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Vil du tillat tilkoblingen?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Appen %1$s vil koble til Wi-Fi-nettverket %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"En app"</string>

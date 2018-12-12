@@ -86,11 +86,6 @@ import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageParser.isApkFile;
-import static android.content.pm.SharedLibraryNames.ANDROID_HIDL_BASE;
-import static android.content.pm.SharedLibraryNames.ANDROID_HIDL_MANAGER;
-import static android.content.pm.SharedLibraryNames.ANDROID_TEST_BASE;
-import static android.content.pm.SharedLibraryNames.ANDROID_TEST_MOCK;
-import static android.content.pm.SharedLibraryNames.ANDROID_TEST_RUNNER;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
@@ -242,6 +237,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.provider.MediaStore;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.security.KeyStore;
@@ -1302,6 +1298,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mStorageManagerPackage;
     final @Nullable String mSystemTextClassifierPackage;
     final @Nullable String mWellbeingPackage;
+    final @Nullable String mDocumenterPackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
@@ -2094,28 +2091,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    @GuardedBy("mPackages")
-    private void setupBuiltinSharedLibraryDependenciesLocked() {
-        // Builtin libraries don't have versions.
-        long version = SharedLibraryInfo.VERSION_UNDEFINED;
-
-        SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(ANDROID_HIDL_MANAGER, version);
-        if (libraryInfo != null) {
-            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_HIDL_BASE, version));
-        }
-
-        libraryInfo = getSharedLibraryInfoLPr(ANDROID_TEST_RUNNER, version);
-        if (libraryInfo != null) {
-            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_TEST_MOCK, version));
-            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_TEST_BASE, version));
-        }
-
-        libraryInfo = getSharedLibraryInfoLPr(ANDROID_TEST_MOCK, version);
-        if (libraryInfo != null) {
-            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_TEST_BASE, version));
-        }
-    }
-
     public PackageManagerService(Context context, Installer installer,
             boolean factoryTest, boolean onlyCore) {
         LockGuard.installLock(mPackages, LockGuard.INDEX_PACKAGES);
@@ -2223,17 +2198,32 @@ public class PackageManagerService extends IPackageManager.Stub
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
             mInstantAppRegistry = new InstantAppRegistry(this);
 
-            ArrayMap<String, String> libConfig = systemConfig.getSharedLibraries();
+            ArrayMap<String, SystemConfig.SharedLibraryEntry> libConfig
+                    = systemConfig.getSharedLibraries();
             final int builtInLibCount = libConfig.size();
             for (int i = 0; i < builtInLibCount; i++) {
                 String name = libConfig.keyAt(i);
-                String path = libConfig.valueAt(i);
-                addSharedLibraryLPw(path, null, null, name, SharedLibraryInfo.VERSION_UNDEFINED,
-                        SharedLibraryInfo.TYPE_BUILTIN, PLATFORM_PACKAGE_NAME, 0);
+                SystemConfig.SharedLibraryEntry entry = libConfig.valueAt(i);
+                addSharedLibraryLPw(entry.filename, null, null, name,
+                        SharedLibraryInfo.VERSION_UNDEFINED, SharedLibraryInfo.TYPE_BUILTIN,
+                        PLATFORM_PACKAGE_NAME, 0);
             }
-            // Builtin libraries cannot encode their dependency where they are
-            // defined, so fix that now.
-            setupBuiltinSharedLibraryDependenciesLocked();
+
+            // Now that we have added all the libraries, iterate again to add dependency
+            // information IFF their dependencies are added.
+            long undefinedVersion = SharedLibraryInfo.VERSION_UNDEFINED;
+            for (int i = 0; i < builtInLibCount; i++) {
+                String name = libConfig.keyAt(i);
+                SystemConfig.SharedLibraryEntry entry = libConfig.valueAt(i);
+                final int dependencyCount = entry.dependencies.length;
+                for (int j = 0; j < dependencyCount; j++) {
+                    final SharedLibraryInfo dependency =
+                        getSharedLibraryInfoLPr(entry.dependencies[j], undefinedVersion);
+                    if (dependency != null) {
+                        getSharedLibraryInfoLPr(name, undefinedVersion).addDependency(dependency);
+                    }
+                }
+            }
 
             SELinuxMMAC.readInstallPolicy();
 
@@ -2792,6 +2782,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mSystemTextClassifierPackage = getSystemTextClassifierPackageName();
 
             mWellbeingPackage = getWellbeingPackageName();
+            mDocumenterPackage = getDocumenterPackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -17936,7 +17927,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 final int removedUserId = (user != null) ? user.getIdentifier()
                         : UserHandle.USER_ALL;
 
-                clearPackageStateForUserLIF(ps, removedUserId, outInfo);
+                clearPackageStateForUserLIF(ps, removedUserId, outInfo, flags);
                 markPackageUninstalledForUserLPw(ps, user);
                 scheduleWritePackageRestrictionsLocked(user);
                 return;
@@ -17966,7 +17957,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // we need to do is clear this user's data and save that
                     // it is uninstalled.
                     if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
-                    clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo);
+                    clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo, flags);
                     scheduleWritePackageRestrictionsLocked(user);
                     return;
                 } else {
@@ -17982,7 +17973,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // we need to do is clear this user's data and save that
                 // it is uninstalled.
                 if (DEBUG_REMOVE) Slog.d(TAG, "Deleting system app");
-                clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo);
+                clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo, flags);
                 scheduleWritePackageRestrictionsLocked(user);
                 return;
             }
@@ -18099,7 +18090,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void clearPackageStateForUserLIF(PackageSetting ps, int userId,
-            PackageRemovedInfo outInfo) {
+            PackageRemovedInfo outInfo, int flags) {
         final PackageParser.Package pkg;
         synchronized (mPackages) {
             pkg = mPackages.get(ps.name);
@@ -18123,6 +18114,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     scheduleWritePackageRestrictionsLocked(nextUserId);
                 }
                 resetUserChangesToRuntimePermissionsAndFlagsLPw(ps, nextUserId);
+            }
+            // Also delete contributed media, when requested
+            if ((flags & PackageManager.DELETE_CONTRIBUTED_MEDIA) != 0) {
+                try {
+                    MediaStore.deleteContributedMedia(mContext, ps.name, UserHandle.of(nextUserId));
+                } catch (IOException e) {
+                    Slog.w(TAG, "Failed to delete contributed media for " + ps.name, e);
+                }
             }
         }
 
@@ -19568,6 +19567,22 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public String getSystemTextClassifierPackageName() {
         return mContext.getString(R.string.config_defaultTextClassifierPackage);
+    }
+
+    private @Nullable String getDocumenterPackageName() {
+        final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null,
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
+                        | MATCH_DISABLED_COMPONENTS,
+                UserHandle.myUserId());
+        if (matches.size() == 1) {
+            return matches.get(0).getComponentInfo().packageName;
+        } else {
+            Slog.e(TAG, "There should probably be exactly one documenter; found "
+                    + matches.size() + ": matches=" + matches);
+            return null;
+        }
     }
 
     @Override
@@ -22733,6 +22748,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return mRequiredPermissionControllerPackage;
                 case PackageManagerInternal.PACKAGE_WELLBEING:
                     return mWellbeingPackage;
+                case PackageManagerInternal.PACKAGE_DOCUMENTER:
+                    return mDocumenterPackage;
             }
             return null;
         }

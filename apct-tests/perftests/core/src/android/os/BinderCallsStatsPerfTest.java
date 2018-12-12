@@ -39,6 +39,7 @@ import org.junit.runner.RunWith;
 @LargeTest
 public class BinderCallsStatsPerfTest {
     private static final int DEFAULT_BUCKET_SIZE = 1000;
+    private static final int WORKSOURCE_UID = 1;
     static class FakeCpuTimeBinderCallsStats extends BinderCallsStats {
         private int mTimeMs;
 
@@ -117,8 +118,8 @@ public class BinderCallsStatsPerfTest {
         Binder b = new Binder();
         while (state.keepRunning()) {
             for (int i = 0; i < 10000; i++) {
-                CallSession s = mBinderCallsStats.callStarted(b, i % maxBucketSize);
-                mBinderCallsStats.callEnded(s, 0, 0);
+                CallSession s = mBinderCallsStats.callStarted(b, i % maxBucketSize, WORKSOURCE_UID);
+                mBinderCallsStats.callEnded(s, 0, 0, WORKSOURCE_UID);
             }
         }
     }

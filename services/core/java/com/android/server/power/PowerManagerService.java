@@ -3221,6 +3221,20 @@ public final class PowerManagerService extends SystemService
         mNativeWrapper.nativeSendPowerHint(hintId, data);
     }
 
+    @VisibleForTesting
+    boolean wasDeviceIdleForInternal(long ms) {
+        synchronized (mLock) {
+            return mLastUserActivityTime + ms < SystemClock.uptimeMillis();
+        }
+    }
+
+    @VisibleForTesting
+    void onUserActivity() {
+        synchronized (mLock) {
+            mLastUserActivityTime = SystemClock.uptimeMillis();
+        }
+    }
+
     /**
      * Low-level function turn the device off immediately, without trying
      * to be clean.  Most people should use {@link ShutdownThread} for a clean shutdown.
@@ -4873,6 +4887,11 @@ public final class PowerManagerService extends SystemService
         @Override
         public void powerHint(int hintId, int data) {
             powerHintInternal(hintId, data);
+        }
+
+        @Override
+        public boolean wasDeviceIdleFor(long ms) {
+            return wasDeviceIdleForInternal(ms);
         }
     }
 }

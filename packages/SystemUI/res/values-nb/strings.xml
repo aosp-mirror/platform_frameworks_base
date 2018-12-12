@@ -785,7 +785,7 @@
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Lukk hurtiginnstillingene."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Alarm er angitt."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Logget på som <xliff:g id="ID_1">%s</xliff:g>"</string>
-    <string name="data_connection_no_internet" msgid="4503302451650972989">"Ingen Internett-tilkobling"</string>
+    <string name="data_connection_no_internet" msgid="4503302451650972989">"Ingen internettilkobling"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Åpne informasjonen."</string>
     <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"Utilgjengelig fordi <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Åpne <xliff:g id="ID_1">%s</xliff:g>-innstillingene."</string>

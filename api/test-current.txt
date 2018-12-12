@@ -10,6 +10,8 @@ package android {
     field public static final java.lang.String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final java.lang.String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final java.lang.String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
+    field public static final java.lang.String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
+    field public static final java.lang.String WRITE_OBB = "android.permission.WRITE_OBB";
   }
 
 }
@@ -372,6 +374,7 @@ package android.content.pm {
   }
 
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    field public static final int PROTECTION_FLAG_DOCUMENTER = 262144; // 0x40000
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 32768; // 0x8000
     field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
@@ -1006,8 +1009,8 @@ package android.provider {
   }
 
   public final class MediaStore {
-    method public static void deleteContributedMedia(android.content.Context, java.lang.String);
-    method public static long getContributedMediaSize(android.content.Context, java.lang.String);
+    method public static void deleteContributedMedia(android.content.Context, java.lang.String, android.os.UserHandle) throws java.io.IOException;
+    method public static long getContributedMediaSize(android.content.Context, java.lang.String, android.os.UserHandle) throws java.io.IOException;
   }
 
   public final class Settings {
@@ -1093,6 +1096,15 @@ package android.security.keystore {
 
 package android.service.autofill {
 
+  public abstract class AutofillFieldClassificationService extends android.app.Service {
+    method public android.os.IBinder onBind(android.content.Intent);
+    field public static final java.lang.String REQUIRED_ALGORITHM_EDIT_DISTANCE = "EDIT_DISTANCE";
+    field public static final java.lang.String REQUIRED_ALGORITHM_EXACT_MATCH = "EXACT_MATCH";
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.autofill.AutofillFieldClassificationService";
+    field public static final java.lang.String SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS = "android.autofill.field_classification.available_algorithms";
+    field public static final java.lang.String SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM = "android.autofill.field_classification.default_algorithm";
+  }
+
   public final class CharSequenceTransformation extends android.service.autofill.InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
     method public void apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int) throws java.lang.Exception;
   }
@@ -1147,6 +1159,10 @@ package android.service.autofill {
 
   public final class TextValueSanitizer extends android.service.autofill.InternalSanitizer implements android.os.Parcelable android.service.autofill.Sanitizer {
     method public android.view.autofill.AutofillValue sanitize(android.view.autofill.AutofillValue);
+  }
+
+  public final class UserData implements android.os.Parcelable {
+    method public android.util.ArrayMap<java.lang.String, java.lang.String> getFieldClassificationAlgorithms();
   }
 
   public abstract interface ValueFinder {
@@ -1265,6 +1281,10 @@ package android.telecom {
 
   public final class CallAudioState implements android.os.Parcelable {
     ctor public CallAudioState(boolean, int, int, android.bluetooth.BluetoothDevice, java.util.Collection<android.bluetooth.BluetoothDevice>);
+  }
+
+  public final class PhoneAccountSuggestion implements android.os.Parcelable {
+    ctor public PhoneAccountSuggestion(android.telecom.PhoneAccountHandle, int, boolean);
   }
 
 }

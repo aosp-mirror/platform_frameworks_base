@@ -32,7 +32,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy;
 import android.service.autofill.augmented.PresentationParams.SystemPopupPresentationParams;
 import android.util.Log;
 import android.util.Pair;
@@ -172,7 +171,9 @@ public abstract class AugmentedAutofillService extends Service {
             mAutofillProxies.put(sessionId,  proxy);
         } else {
             // TODO(b/111330312): figure out if it's ok to reuse the proxy; add logging
+            // TODO(b/111330312): also make sure to cover scenario on CTS test
             if (DEBUG) Log.d(TAG, "Reusing proxy for session " + sessionId);
+            proxy.update(focusedId, focusedValue);
         }
         // TODO(b/111330312): set cancellation signal
         final CancellationSignal cancellationSignal = null;
@@ -248,8 +249,10 @@ public abstract class AugmentedAutofillService extends Service {
         private final IFillCallback mCallback;
         public final int taskId;
         public final ComponentName componentName;
-        public final AutofillId focusedId;
-        public final AutofillValue focusedValue;
+        @GuardedBy("mLock")
+        private AutofillId mFocusedId;
+        @GuardedBy("mLock")
+        private AutofillValue mFocusedValue;
 
         // Objects used to log metrics
         private final long mRequestTime;
@@ -272,8 +275,8 @@ public abstract class AugmentedAutofillService extends Service {
             mCallback = callback;
             this.taskId = taskId;
             this.componentName = componentName;
-            this.focusedId = focusedId;
-            this.focusedValue = focusedValue;
+            this.mFocusedId = focusedId;
+            this.mFocusedValue = focusedValue;
             this.mRequestTime = requestTime;
             // TODO(b/111330312): linkToDeath
         }
@@ -286,13 +289,13 @@ public abstract class AugmentedAutofillService extends Service {
                 }
                 Rect rect;
                 try {
-                    rect = mClient.getViewCoordinates(focusedId);
+                    rect = mClient.getViewCoordinates(mFocusedId);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "Could not get coordinates for " + focusedId);
+                    Log.w(TAG, "Could not get coordinates for " + mFocusedId);
                     return null;
                 }
                 if (rect == null) {
-                    if (DEBUG) Log.d(TAG, "getViewCoordinates(" + focusedId + ") returned null");
+                    if (DEBUG) Log.d(TAG, "getViewCoordinates(" + mFocusedId + ") returned null");
                     return null;
                 }
                 mSmartSuggestion = new SystemPopupPresentationParams(this, rect);
@@ -322,6 +325,28 @@ public abstract class AugmentedAutofillService extends Service {
         public FillWindow getFillWindow() {
             synchronized (mLock) {
                 return mFillWindow;
+            }
+        }
+
+        private void update(@NonNull AutofillId focusedId, @NonNull AutofillValue focusedValue) {
+            synchronized (mLock) {
+                // TODO(b/111330312): should we close the popupwindow if the focused id changed?
+                mFocusedId = focusedId;
+                mFocusedValue = focusedValue;
+            }
+        }
+
+        @NonNull
+        public AutofillId getFocusedId() {
+            synchronized (mLock) {
+                return mFocusedId;
+            }
+        }
+
+        @NonNull
+        public AutofillValue getFocusedValue() {
+            synchronized (mLock) {
+                return mFocusedValue;
             }
         }
 
@@ -372,9 +397,9 @@ public abstract class AugmentedAutofillService extends Service {
             pw.print(prefix); pw.print("taskId: "); pw.println(taskId);
             pw.print(prefix); pw.print("component: ");
             pw.println(componentName.flattenToShortString());
-            pw.print(prefix); pw.print("focusedId: "); pw.println(focusedId);
-            if (focusedValue != null) {
-                pw.print(prefix); pw.print("focusedValue: "); pw.println(focusedValue);
+            pw.print(prefix); pw.print("focusedId: "); pw.println(mFocusedId);
+            if (mFocusedValue != null) {
+                pw.print(prefix); pw.print("focusedValue: "); pw.println(mFocusedValue);
             }
             pw.print(prefix); pw.print("client: "); pw.println(mClient);
             final String prefix2 = prefix + "  ";

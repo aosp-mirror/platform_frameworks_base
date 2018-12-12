@@ -19,6 +19,7 @@ package com.android.server.infra;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.IInterface;
 import android.util.Slog;
 
 import java.io.PrintWriter;
@@ -29,21 +30,21 @@ import java.util.ArrayList;
  * bound.
  *
  * @param <S> the concrete remote service class
- *
+ * @param <I> the interface of the binder service
  * @hide
  */
-public abstract class AbstractMultiplePendingRequestsRemoteService<
-        S extends AbstractMultiplePendingRequestsRemoteService<S>>
-        extends AbstractRemoteService<S> {
+public abstract class AbstractMultiplePendingRequestsRemoteService<S
+        extends AbstractMultiplePendingRequestsRemoteService<S, I>, I extends IInterface>
+        extends AbstractRemoteService<S, I> {
 
     private final int mInitialCapacity;
 
-    protected ArrayList<PendingRequest<S>> mPendingRequests;
+    protected ArrayList<PendingRequest<S, I>> mPendingRequests;
 
     public AbstractMultiplePendingRequestsRemoteService(@NonNull Context context,
             @NonNull String serviceInterface, @NonNull ComponentName componentName, int userId,
-            @NonNull VultureCallback callback, boolean bindInstantServiceAllowed, boolean verbose,
-            int initialCapacity) {
+            @NonNull VultureCallback<S> callback, boolean bindInstantServiceAllowed,
+            boolean verbose, int initialCapacity) {
         super(context, serviceInterface, componentName, userId, callback, bindInstantServiceAllowed,
                 verbose);
         mInitialCapacity = initialCapacity;
@@ -84,7 +85,7 @@ public abstract class AbstractMultiplePendingRequestsRemoteService<
     }
 
     @Override // from AbstractRemoteService
-    void handlePendingRequestWhileUnBound(@NonNull PendingRequest<S> pendingRequest) {
+    void handlePendingRequestWhileUnBound(@NonNull PendingRequest<S, I> pendingRequest) {
         if (mPendingRequests == null) {
             mPendingRequests = new ArrayList<>(mInitialCapacity);
         }

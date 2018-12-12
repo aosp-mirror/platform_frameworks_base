@@ -22,5 +22,6 @@
     <string name="autofill_field_classification_default_algorithm">EDIT_DISTANCE</string>
     <string-array name="autofill_field_classification_available_algorithms">
         <item>EDIT_DISTANCE</item>
+        <item>EXACT_MATCH</item>
     </string-array>
 </resources>

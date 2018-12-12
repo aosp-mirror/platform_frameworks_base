@@ -26,7 +26,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.IInterface;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.augmented.AugmentedAutofillService;
@@ -43,7 +42,8 @@ import com.android.internal.os.IResultReceiver;
 import com.android.server.infra.AbstractSinglePendingRequestRemoteService;
 
 final class RemoteAugmentedAutofillService
-        extends AbstractSinglePendingRequestRemoteService<RemoteAugmentedAutofillService> {
+        extends AbstractSinglePendingRequestRemoteService<RemoteAugmentedAutofillService,
+            IAugmentedAutofillService> {
 
     private static final String TAG = RemoteAugmentedAutofillService.class.getSimpleName();
 
@@ -51,20 +51,16 @@ final class RemoteAugmentedAutofillService
     private static final long TIMEOUT_IDLE_BIND_MILLIS = 2 * DateUtils.MINUTE_IN_MILLIS;
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 2 * DateUtils.SECOND_IN_MILLIS;
 
-    private final RemoteAugmentedAutofillServiceCallbacks mCallbacks;
-    private IAugmentedAutofillService mService;
-
     RemoteAugmentedAutofillService(Context context, ComponentName serviceName,
             int userId, RemoteAugmentedAutofillServiceCallbacks callbacks,
             boolean bindInstantServiceAllowed, boolean verbose) {
         super(context, AugmentedAutofillService.SERVICE_INTERFACE, serviceName, userId, callbacks,
                 bindInstantServiceAllowed, verbose);
-        mCallbacks = callbacks;
     }
 
     @Nullable
-    public static ComponentName getComponentName(@NonNull Context context,
-            @NonNull String componentName, @UserIdInt int userId, boolean isTemporary) {
+    public static ComponentName getComponentName(@NonNull String componentName,
+            @UserIdInt int userId, boolean isTemporary) {
         int flags = PackageManager.GET_META_DATA;
         if (!isTemporary) {
             flags |= PackageManager.MATCH_SYSTEM_ONLY;
@@ -88,9 +84,8 @@ final class RemoteAugmentedAutofillService
     }
 
     @Override // from AbstractRemoteService
-    protected IInterface getServiceInterface(IBinder service) {
-        mService = IAugmentedAutofillService.Stub.asInterface(service);
-        return mService;
+    protected IAugmentedAutofillService getServiceInterface(IBinder service) {
+        return IAugmentedAutofillService.Stub.asInterface(service);
     }
 
     @Override // from AbstractRemoteService
@@ -109,7 +104,6 @@ final class RemoteAugmentedAutofillService
     public void onRequestAutofillLocked(int sessionId, @NonNull IAutoFillManagerClient client,
             int taskId, @NonNull ComponentName activityComponent, @NonNull AutofillId focusedId,
             @Nullable AutofillValue focusedValue) {
-        cancelScheduledUnbind();
         scheduleRequest(new PendingAutofillRequest(this, sessionId, client, taskId,
                 activityComponent, focusedId, focusedValue));
     }
@@ -118,12 +112,12 @@ final class RemoteAugmentedAutofillService
      * Called by {@link Session} when it's time to destroy all augmented autofill requests.
      */
     public void onDestroyAutofillWindowsRequest(int sessionId) {
-        cancelScheduledUnbind();
-        scheduleRequest(new PendingDestroyAutofillWindowsRequest(this, sessionId));
+        scheduleAsyncRequest((s) -> s.onDestroyFillWindowRequest(sessionId));
     }
 
+    // TODO(b/111330312): inline into PendingAutofillRequest if it doesn't have any other subclass
     private abstract static class MyPendingRequest
-            extends PendingRequest<RemoteAugmentedAutofillService> {
+            extends PendingRequest<RemoteAugmentedAutofillService, IAugmentedAutofillService> {
         protected final int mSessionId;
 
         private MyPendingRequest(@NonNull RemoteAugmentedAutofillService service, int sessionId) {
@@ -196,38 +190,8 @@ final class RemoteAugmentedAutofillService
 
     }
 
-    private static final class PendingDestroyAutofillWindowsRequest extends MyPendingRequest {
-
-        protected PendingDestroyAutofillWindowsRequest(
-                @NonNull RemoteAugmentedAutofillService service, @NonNull int sessionId) {
-            super(service, sessionId);
-        }
-
-        @Override
-        public void run() {
-            final RemoteAugmentedAutofillService remoteService = getService();
-            if (remoteService == null) return;
-
-            try {
-                remoteService.mService.onDestroyFillWindowRequest(mSessionId);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "exception handling onDestroyAutofillWindowsRequest() for "
-                        + mSessionId + ": " + e);
-            } finally {
-                // Service is not calling back, so we finish right away.
-                finish();
-            }
-        }
-
-        @Override
-        protected void onTimeout(RemoteAugmentedAutofillService remoteService) {
-            // Should not happen because we called finish() on run(), although currently it might
-            // be called if the service is destroyed while showing it.
-            Slog.e(TAG, "timed out: " + this);
-        }
-    }
-
-    public interface RemoteAugmentedAutofillServiceCallbacks extends VultureCallback {
+    public interface RemoteAugmentedAutofillServiceCallbacks
+            extends VultureCallback<RemoteAugmentedAutofillService> {
         // NOTE: so far we don't need to notify the callback implementation (an inner class on
         // AutofillManagerServiceImpl) of the request results (success, timeouts, etc..), so this
         // callback interface is empty.

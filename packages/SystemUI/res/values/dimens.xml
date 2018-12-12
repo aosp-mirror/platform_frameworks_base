@@ -361,6 +361,7 @@
     <!-- The height of the qs customize header. Should be (28dp - qs_tile_margin_top_bottom). -->
     <dimen name="qs_customize_header_min_height">40dp</dimen>
     <dimen name="qs_tile_margin_top">18dp</dimen>
+    <dimen name="qs_tile_background_size">40dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <!-- Maximum width of quick quick settings panel. Defaults to MATCH_PARENT-->
     <dimen name="qs_quick_layout_width">-1px</dimen>
@@ -993,4 +994,10 @@
     <dimen name="bubble_icon_size">24dp</dimen>
     <!-- Default height of the expanded view shown when the bubble is expanded -->
     <dimen name="bubble_expanded_default_height">400dp</dimen>
+    <!-- Height of the triangle that points to the expanded bubble -->
+    <dimen name="bubble_pointer_height">4dp</dimen>
+    <!-- Width of the triangle that points to the expanded bubble -->
+    <dimen name="bubble_pointer_width">6dp</dimen>
+    <!-- Extra padding around the dismiss target for bubbles -->
+    <dimen name="bubble_dismiss_slop">16dp</dimen>
 </resources>

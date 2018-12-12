@@ -285,7 +285,7 @@ public class UninstallerActivity extends Activity {
         fragment.show(ft, "dialog");
     }
 
-    public void startUninstallProgress() {
+    public void startUninstallProgress(boolean clearContributedFiles) {
         boolean returnResult = getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
         CharSequence label = mDialogInfo.appInfo.loadSafeLabel(getPackageManager());
 
@@ -310,6 +310,8 @@ public class UninstallerActivity extends Activity {
             newIntent.putExtra(Intent.EXTRA_UNINSTALL_ALL_USERS, mDialogInfo.allUsers);
             newIntent.putExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO, mDialogInfo.appInfo);
             newIntent.putExtra(UninstallUninstalling.EXTRA_APP_LABEL, label);
+            newIntent.putExtra(UninstallUninstalling.EXTRA_CLEAR_CONTRIBUTED_FILES,
+                    clearContributedFiles);
             newIntent.putExtra(PackageInstaller.EXTRA_CALLBACK, mDialogInfo.callback);
 
             if (returnResult) {
@@ -358,12 +360,14 @@ public class UninstallerActivity extends Activity {
             try {
                 Log.i(TAG, "Uninstalling extras=" + broadcastIntent.getExtras());
 
+                int flags = mDialogInfo.allUsers ? PackageManager.DELETE_ALL_USERS : 0;
+                flags |= clearContributedFiles ? PackageManager.DELETE_CONTRIBUTED_MEDIA : 0;
+
                 ActivityThread.getPackageManager().getPackageInstaller().uninstall(
                         new VersionedPackage(mDialogInfo.appInfo.packageName,
                                 PackageManager.VERSION_CODE_HIGHEST),
-                        getPackageName(), mDialogInfo.allUsers
-                                ? PackageManager.DELETE_ALL_USERS : 0,
-                        pendingIntent.getIntentSender(), mDialogInfo.user.getIdentifier());
+                        getPackageName(), flags, pendingIntent.getIntentSender(),
+                        mDialogInfo.user.getIdentifier());
             } catch (Exception e) {
                 notificationManager.cancel(uninstallId);
 

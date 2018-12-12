@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
@@ -50,6 +49,7 @@ import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
@@ -70,6 +70,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * The Media provider contains meta data for all available media on both internal
@@ -1046,6 +1047,20 @@ public final class MediaStore {
                 getContentUri("external");
 
         /**
+         * The MIME type for this table.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/download";
+
+        /**
+         * Regex that matches paths that needs to be considered part of downloads collection.
+         * @hide
+         */
+        public static final Pattern PATTERN_DOWNLOADS_FILE = Pattern.compile(
+                "(?i)^/storage/[^/]+/(?:[0-9]+/)?(?:Android/sandbox/[^/]+/)?Download/.+");
+        private static final Pattern PATTERN_DOWNLOADS_DIRECTORY = Pattern.compile(
+                "(?i)^/storage/[^/]+/(?:[0-9]+/)?(?:Android/sandbox/[^/]+/)?Download/?");
+
+        /**
          * Get the content:// style URI for the downloads table on the
          * given volume.
          *
@@ -1060,6 +1075,16 @@ public final class MediaStore {
         /** @hide */
         public static Uri getContentUriForPath(@NonNull String path) {
             return getContentUri(getVolumeNameForPath(path));
+        }
+
+        /** @hide */
+        public static boolean isDownload(@NonNull String path) {
+            return PATTERN_DOWNLOADS_FILE.matcher(path).matches();
+        }
+
+        /** @hide */
+        public static boolean isDownloadDir(@NonNull String path) {
+            return PATTERN_DOWNLOADS_DIRECTORY.matcher(path).matches();
         }
     }
 
@@ -2882,18 +2907,24 @@ public final class MediaStore {
      *
      * @hide
      */
-    @SystemApi
     @TestApi
     @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA)
-    public static @BytesLong long getContributedMediaSize(Context context, String packageName) {
-        try (ContentProviderClient client = context.getContentResolver()
-                .acquireContentProviderClient(AUTHORITY)) {
-            final Bundle in = new Bundle();
-            in.putString(Intent.EXTRA_PACKAGE_NAME, packageName);
-            final Bundle out = client.call(GET_CONTRIBUTED_MEDIA_CALL, null, in);
-            return out.getLong(Intent.EXTRA_INDEX);
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+    public static @BytesLong long getContributedMediaSize(Context context, String packageName,
+            UserHandle user) throws IOException {
+        final UserManager um = context.getSystemService(UserManager.class);
+        if (um.isUserUnlocked(user) && um.isUserRunning(user)) {
+            try {
+                final ContentResolver resolver = context
+                        .createPackageContextAsUser(packageName, 0, user).getContentResolver();
+                final Bundle in = new Bundle();
+                in.putString(Intent.EXTRA_PACKAGE_NAME, packageName);
+                final Bundle out = resolver.call(AUTHORITY, GET_CONTRIBUTED_MEDIA_CALL, null, in);
+                return out.getLong(Intent.EXTRA_INDEX);
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        } else {
+            throw new IOException("User " + user + " must be unlocked and running");
         }
     }
 
@@ -2904,17 +2935,23 @@ public final class MediaStore {
      *
      * @hide
      */
-    @SystemApi
     @TestApi
     @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA)
-    public static void deleteContributedMedia(Context context, String packageName) {
-        try (ContentProviderClient client = context.getContentResolver()
-                .acquireContentProviderClient(AUTHORITY)) {
-            final Bundle in = new Bundle();
-            in.putString(Intent.EXTRA_PACKAGE_NAME, packageName);
-            client.call(DELETE_CONTRIBUTED_MEDIA_CALL, null, in);
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+    public static void deleteContributedMedia(Context context, String packageName,
+            UserHandle user) throws IOException {
+        final UserManager um = context.getSystemService(UserManager.class);
+        if (um.isUserUnlocked(user) && um.isUserRunning(user)) {
+            try {
+                final ContentResolver resolver = context
+                        .createPackageContextAsUser(packageName, 0, user).getContentResolver();
+                final Bundle in = new Bundle();
+                in.putString(Intent.EXTRA_PACKAGE_NAME, packageName);
+                resolver.call(AUTHORITY, DELETE_CONTRIBUTED_MEDIA_CALL, null, in);
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        } else {
+            throw new IOException("User " + user + " must be unlocked and running");
         }
     }
 }

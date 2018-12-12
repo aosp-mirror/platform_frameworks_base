@@ -107,6 +107,7 @@ static struct {
     jmethodID getLongPressTimeout;
     jmethodID getPointerLayer;
     jmethodID getPointerIcon;
+    jmethodID getPointerDisplayId;
     jmethodID getKeyboardLayoutOverlay;
     jmethodID getDeviceAlias;
     jmethodID getTouchCalibrationForInputDevice;
@@ -174,15 +175,6 @@ static void loadSystemIconAsSprite(JNIEnv* env, jobject contextObj, int32_t styl
     loadSystemIconAsSpriteWithPointerIcon(env, contextObj, style, &pointerIcon, outSpriteIcon);
 }
 
-static void updatePointerControllerFromViewport(
-        sp<PointerController> controller, const DisplayViewport* const viewport) {
-    if (controller != nullptr && viewport != nullptr) {
-        const int32_t width = viewport->logicalRight - viewport->logicalLeft;
-        const int32_t height = viewport->logicalBottom - viewport->logicalTop;
-        controller->setDisplayViewport(width, height, viewport->orientation);
-    }
-}
-
 enum {
     WM_ACTION_PASS_TO_USER = 1,
 };
@@ -242,6 +234,7 @@ public:
             jfloatArray matrixArr);
     virtual TouchAffineTransformation getTouchAffineTransformation(
             const std::string& inputDeviceDescriptor, int32_t surfaceRotation);
+    virtual void updatePointerDisplay();
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
@@ -314,10 +307,11 @@ private:
 
     std::atomic<bool> mInteractive;
 
-    void updateInactivityTimeoutLocked(const sp<PointerController>& controller);
+    void updateInactivityTimeoutLocked();
     void handleInterceptActions(jint wmActions, nsecs_t when, uint32_t& policyFlags);
     void ensureSpriteControllerLocked();
-
+    const DisplayViewport* findDisplayViewportLocked(int32_t displayId);
+    int32_t getPointerDisplayId();
     static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
 
     static inline JNIEnv* jniEnv() {
@@ -391,9 +385,10 @@ bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const c
     return false;
 }
 
-static const DisplayViewport* findInternalViewport(const std::vector<DisplayViewport>& viewports) {
-    for (const DisplayViewport& v : viewports) {
-        if (v.type == ViewportType::VIEWPORT_INTERNAL) {
+const DisplayViewport* NativeInputManager::findDisplayViewportLocked(int32_t displayId)
+        REQUIRES(mLock) {
+    for (const DisplayViewport& v : mLocked.viewports) {
+        if (v.displayId == displayId) {
             return &v;
         }
     }
@@ -420,20 +415,10 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
         }
     }
 
-    const DisplayViewport* newInternalViewport = findInternalViewport(viewports);
-    {
+    { // acquire lock
         AutoMutex _l(mLock);
-        const DisplayViewport* oldInternalViewport = findInternalViewport(mLocked.viewports);
-        // Internal viewport has changed if there wasn't one earlier, and there is one now, or,
-        // if they are different.
-        const bool internalViewportChanged = (newInternalViewport != nullptr) &&
-                (oldInternalViewport == nullptr || (*oldInternalViewport != *newInternalViewport));
-        if (internalViewportChanged) {
-            sp<PointerController> controller = mLocked.pointerController.promote();
-            updatePointerControllerFromViewport(controller, newInternalViewport);
-        }
         mLocked.viewports = viewports;
-    }
+    } // release lock
 
     mInputManager->getReader()->requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_DISPLAY_INFO);
@@ -556,13 +541,41 @@ sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32
 
         controller = new PointerController(this, mLooper, mLocked.spriteController);
         mLocked.pointerController = controller;
-
-        const DisplayViewport* internalViewport = findInternalViewport(mLocked.viewports);
-        updatePointerControllerFromViewport(controller, internalViewport);
-
-        updateInactivityTimeoutLocked(controller);
+        updateInactivityTimeoutLocked();
     }
+
     return controller;
+}
+
+int32_t NativeInputManager::getPointerDisplayId() {
+    JNIEnv* env = jniEnv();
+    jint pointerDisplayId = env->CallIntMethod(mServiceObj,
+            gServiceClassInfo.getPointerDisplayId);
+    if (checkAndClearExceptionFromCallback(env, "getPointerDisplayId")) {
+        pointerDisplayId = ADISPLAY_ID_DEFAULT;
+    }
+
+    return pointerDisplayId;
+}
+
+void NativeInputManager::updatePointerDisplay() {
+    ATRACE_CALL();
+
+    jint pointerDisplayId = getPointerDisplayId();
+
+    AutoMutex _l(mLock);
+    sp<PointerController> controller = mLocked.pointerController.promote();
+    if (controller != nullptr) {
+        const DisplayViewport* viewport = findDisplayViewportLocked(pointerDisplayId);
+        if (viewport == nullptr) {
+            ALOGW("Can't find pointer display viewport, fallback to default display.");
+            viewport = findDisplayViewportLocked(ADISPLAY_ID_DEFAULT);
+        }
+
+        if (viewport != nullptr) {
+            controller->setDisplayViewport(*viewport);
+        }
+    }
 }
 
 void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
@@ -821,16 +834,16 @@ void NativeInputManager::setSystemUiVisibility(int32_t visibility) {
 
     if (mLocked.systemUiVisibility != visibility) {
         mLocked.systemUiVisibility = visibility;
-
-        sp<PointerController> controller = mLocked.pointerController.promote();
-        if (controller != nullptr) {
-            updateInactivityTimeoutLocked(controller);
-        }
+        updateInactivityTimeoutLocked();
     }
 }
 
-void NativeInputManager::updateInactivityTimeoutLocked(const sp<PointerController>& controller)
-        REQUIRES(mLock) {
+void NativeInputManager::updateInactivityTimeoutLocked() REQUIRES(mLock) {
+    sp<PointerController> controller = mLocked.pointerController.promote();
+    if (controller == nullptr) {
+        return;
+    }
+
     bool lightsOut = mLocked.systemUiVisibility & ASYSTEM_UI_VISIBILITY_STATUS_BAR_HIDDEN;
     controller->setInactivityTimeout(lightsOut
             ? PointerController::INACTIVITY_TIMEOUT_SHORT
@@ -1823,6 +1836,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.getPointerIcon, clazz,
             "getPointerIcon", "()Landroid/view/PointerIcon;");
+
+    GET_METHOD_ID(gServiceClassInfo.getPointerDisplayId, clazz,
+            "getPointerDisplayId", "()I");
 
     GET_METHOD_ID(gServiceClassInfo.getKeyboardLayoutOverlay, clazz,
             "getKeyboardLayoutOverlay",

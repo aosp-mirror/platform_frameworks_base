@@ -6755,8 +6755,8 @@ public class Activity extends ContextThemeWrapper
                 case "--autofill":
                     dumpAutofillManager(prefix, writer);
                     return;
-                case "--intelligence":
-                    dumpIntelligenceManager(prefix, writer);
+                case "--contentcapture":
+                    dumpContentCaptureManager(prefix, writer);
                     return;
             }
         }
@@ -6788,7 +6788,7 @@ public class Activity extends ContextThemeWrapper
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);
 
         dumpAutofillManager(prefix, writer);
-        dumpIntelligenceManager(prefix, writer);
+        dumpContentCaptureManager(prefix, writer);
 
         ResourcesManager.getInstance().dump(prefix, writer);
     }
@@ -6804,12 +6804,12 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    void dumpIntelligenceManager(String prefix, PrintWriter writer) {
-        final ContentCaptureManager im = getContentCaptureManager();
-        if (im != null) {
-            im.dump(prefix, writer);
+    void dumpContentCaptureManager(String prefix, PrintWriter writer) {
+        final ContentCaptureManager cm = getContentCaptureManager();
+        if (cm != null) {
+            cm.dump(prefix, writer);
         } else {
-            writer.print(prefix); writer.println("No IntelligenceManager");
+            writer.print(prefix); writer.println("No ContentCaptureManager");
         }
     }
 

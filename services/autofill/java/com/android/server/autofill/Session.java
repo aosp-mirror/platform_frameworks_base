@@ -98,7 +98,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.autofill.AutofillManagerService.SmartSuggestionMode;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
-import com.android.server.infra.AbstractRemoteService;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -909,7 +908,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // VultureCallback
     @Override
-    public void onServiceDied(AbstractRemoteService<? extends AbstractRemoteService<?>> service) {
+    public void onServiceDied(@NonNull RemoteFillService service) {
         Slog.w(TAG, "removing session because service died");
         forceRemoveSelfLocked();
     }
@@ -1402,6 +1401,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final String[] userValues = userData.getValues();
         final String[] categoryIds = userData.getCategoryIds();
 
+        final String defaultAlgorithm = userData.getFieldClassificationAlgorithm();
+        final Bundle defaultArgs = userData.getDefaultFieldClassificationArgs();
+
+        final ArrayMap<String, String> algorithms = userData.getFieldClassificationAlgorithms();
+        final ArrayMap<String, Bundle> args = userData.getFieldClassificationArgs();
+
         // Sanity check
         if (userValues == null || categoryIds == null || userValues.length != categoryIds.length) {
             final int valuesLength = userValues == null ? -1 : userValues.length;
@@ -1417,8 +1422,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final ArrayList<FieldClassification> detectedFieldClassifications = new ArrayList<>(
                 maxFieldsSize);
 
-        final String algorithm = userData.getFieldClassificationAlgorithm();
-        final Bundle algorithmArgs = userData.getAlgorithmArgs();
         final int viewsSize = viewStates.size();
 
         // First, we get all scores.
@@ -1505,7 +1508,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     mComponentName, mCompatMode);
         });
 
-        fcStrategy.getScores(callback, algorithm, algorithmArgs, currentValues, userValues);
+        fcStrategy.calculateScores(callback, currentValues, userValues, categoryIds,
+                defaultAlgorithm, defaultArgs, algorithms, args);
     }
 
     /**

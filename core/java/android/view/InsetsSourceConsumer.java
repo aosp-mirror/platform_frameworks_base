@@ -33,27 +33,31 @@ public class InsetsSourceConsumer {
     private final Supplier<Transaction> mTransactionSupplier;
     private final @InternalInsetType int mType;
     private final InsetsState mState;
-    private @Nullable InsetsSourceControl mControl;
+    private final InsetsController mController;
+    private @Nullable InsetsSourceControl mSourceControl;
     private boolean mHidden;
 
     public InsetsSourceConsumer(@InternalInsetType int type, InsetsState state,
-            Supplier<Transaction> transactionSupplier) {
+            Supplier<Transaction> transactionSupplier, InsetsController controller) {
         mType = type;
         mState = state;
         mTransactionSupplier = transactionSupplier;
+        mController = controller;
     }
 
     public void setControl(@Nullable InsetsSourceControl control) {
-        if (mControl == control) {
+        if (mSourceControl == control) {
             return;
         }
-        mControl = control;
+        mSourceControl = control;
         applyHiddenToControl();
+        applyLocalVisibilityOverride();
+        mController.notifyVisibilityChanged();
     }
 
     @VisibleForTesting
     public InsetsSourceControl getControl() {
-        return mControl;
+        return mSourceControl;
     }
 
     int getType() {
@@ -70,25 +74,36 @@ public class InsetsSourceConsumer {
         setHidden(true);
     }
 
+    void applyLocalVisibilityOverride() {
+
+        // If we don't have control, we are not able to change the visibility.
+        if (mSourceControl == null) {
+            return;
+        }
+        mState.getSource(mType).setVisible(!mHidden);
+    }
+
     private void setHidden(boolean hidden) {
         if (mHidden == hidden) {
             return;
         }
         mHidden = hidden;
         applyHiddenToControl();
+        applyLocalVisibilityOverride();
+        mController.notifyVisibilityChanged();
     }
 
     private void applyHiddenToControl() {
-        if (mControl == null) {
+        if (mSourceControl == null) {
             return;
         }
 
         // TODO: Animation
         final Transaction t = mTransactionSupplier.get();
         if (mHidden) {
-            t.hide(mControl.getLeash());
+            t.hide(mSourceControl.getLeash());
         } else {
-            t.show(mControl.getLeash());
+            t.show(mSourceControl.getLeash());
         }
         t.apply();
     }

@@ -448,6 +448,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final long MINIMUM_STRONG_AUTH_TIMEOUT_MS = TimeUnit.HOURS.toMillis(1);
 
     /**
+     * The amount of ms that a managed kiosk must go without user interaction to be considered
+     * unattended.
+     */
+    private static final int UNATTENDED_MANAGED_KIOSK_MS = 30000;
+
+    /**
      * Strings logged with {@link
      * com.android.internal.logging.nano.MetricsProto.MetricsEvent#PROVISIONING_ENTRY_POINT_ADB}.
      */
@@ -5140,7 +5146,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mInjector.binderRestoreCallingIdentity(ident);
         }
 
-        mInjector.getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
+        getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
                 UserHandle.USER_SYSTEM, timeMs);
     }
 
@@ -5159,7 +5165,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         policy.mLastMaximumTimeToLock = timeMs;
 
-        mInjector.getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
+        getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
                 userId, policy.mLastMaximumTimeToLock);
     }
 
@@ -13576,5 +13582,80 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public boolean isManagedKiosk() {
+        if (!mHasFeature) {
+            return false;
+        }
+        enforceManageUsers();
+        long id = mInjector.binderClearCallingIdentity();
+        try {
+            return isManagedKioskInternal();
+        } catch (RemoteException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    @Override
+    public boolean isUnattendedManagedKiosk() {
+        if (!mHasFeature) {
+            return false;
+        }
+        enforceManageUsers();
+        long id = mInjector.binderClearCallingIdentity();
+        try {
+            return isManagedKioskInternal()
+                    && getPowerManagerInternal().wasDeviceIdleFor(UNATTENDED_MANAGED_KIOSK_MS);
+        } catch (RemoteException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    /**
+     * Returns whether the device is currently being used as a publicly-accessible dedicated device.
+     * Assumes that feature checks and permission checks have already been performed, and that the
+     * calling identity has been cleared.
+     */
+    private boolean isManagedKioskInternal() throws RemoteException {
+        return mOwners.hasDeviceOwner()
+                && mInjector.getIActivityManager().getLockTaskModeState()
+                        == ActivityManager.LOCK_TASK_MODE_LOCKED
+                && !isLockTaskFeatureEnabled(DevicePolicyManager.LOCK_TASK_FEATURE_SYSTEM_INFO)
+                && !deviceHasKeyguard()
+                && !inEphemeralUserSession();
+    }
+
+    private boolean isLockTaskFeatureEnabled(int lockTaskFeature) throws RemoteException {
+        int lockTaskFeatures =
+                getUserData(mInjector.getIActivityManager().getCurrentUser().id).mLockTaskFeatures;
+        return (lockTaskFeatures & lockTaskFeature) == lockTaskFeature;
+    }
+
+    private boolean deviceHasKeyguard() {
+        for (UserInfo userInfo : mUserManager.getUsers()) {
+            if (mLockPatternUtils.isSecure(userInfo.id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean inEphemeralUserSession() {
+        for (UserInfo userInfo : mUserManager.getUsers()) {
+            if (mInjector.getUserManager().isUserEphemeral(userInfo.id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private PowerManagerInternal getPowerManagerInternal() {
+        return mInjector.getPowerManagerInternal();
     }
 }

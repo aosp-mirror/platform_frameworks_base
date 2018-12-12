@@ -16,6 +16,7 @@
 
 package android.permission;
 
+import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -81,6 +82,18 @@ public abstract class RuntimePermissionPresenterService extends Service {
     public abstract void onRevokeRuntimePermission(@NonNull String packageName,
             @NonNull String permissionName);
 
+    /**
+     * Count how many apps have one of a set of permissions.
+     *
+     * @param permissionNames The permissions the app might have
+     * @param countOnlyGranted Count an app only if the permission is granted to the app
+     * @param countSystem Also count system apps
+     *
+     * @return the number of apps that have one of the permissions
+     */
+    public abstract int onCountPermissionApps(@NonNull List<String> permissionNames,
+            boolean countOnlyGranted, boolean countSystem);
+
     @Override
     public final IBinder onBind(Intent intent) {
         return new IRuntimePermissionPresenter.Stub() {
@@ -106,6 +119,19 @@ public abstract class RuntimePermissionPresenterService extends Service {
                                 RuntimePermissionPresenterService.this, packageName,
                                 permissionName));
             }
+
+            @Override
+            public void countPermissionApps(List<String> permissionNames, boolean countOnlyGranted,
+                    boolean countSystem, RemoteCallback callback) {
+                checkCollectionElementsNotNull(permissionNames, "permissionNames");
+                checkNotNull(callback, "callback");
+
+                mHandler.sendMessage(
+                        obtainMessage(
+                                RuntimePermissionPresenterService::countPermissionApps,
+                                RuntimePermissionPresenterService.this, permissionNames,
+                                countOnlyGranted, countSystem, callback));
+            }
         };
     }
 
@@ -118,5 +144,14 @@ public abstract class RuntimePermissionPresenterService extends Service {
         } else {
             callback.sendResult(null);
         }
+    }
+
+    private void countPermissionApps(@NonNull List<String> permissionNames,
+            boolean countOnlyGranted, boolean countSystem, @NonNull RemoteCallback callback) {
+        int numApps = onCountPermissionApps(permissionNames, countOnlyGranted, countSystem);
+
+        Bundle result = new Bundle();
+        result.putInt(RuntimePermissionPresenter.KEY_RESULT, numApps);
+        callback.sendResult(result);
     }
 }

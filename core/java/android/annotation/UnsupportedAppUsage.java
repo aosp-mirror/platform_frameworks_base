@@ -26,16 +26,32 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that a class member, that is not part of the SDK, is used by apps.
- * Since the member is not part of the SDK, such use is not supported.
+ * Indicates that this non-SDK interface is used by apps. A non-SDK interface is a
+ * class member (field or method) that is not part of the public SDK. Since the
+ * member is not part of the SDK, usage by apps is not supported.
  *
- * <p>This annotation acts as a heads up that changing a given method or field
+ * <h2>If you are an Android App developer</h2>
+ *
+ * This annotation indicates that you may be able to access the member, but that
+ * this access is discouraged and not supported by Android. If there is a value
+ * for {@link #maxTargetSdk()} on the annotation, access will be restricted based
+ * on the {@code targetSdkVersion} value set in your manifest.
+ *
+ * <p>Fields and methods annotated with this are likely to be restricted, changed
+ * or removed in future Android releases. If you rely on these members for
+ * functionality that is not otherwise supported by Android, consider filing a
+ * <a href="http://g.co/dev/appcompat">feature request</a>.
+ *
+ * <h2>If you are an Android OS developer</h2>
+ *
+ * This annotation acts as a heads up that changing a given method or field
  * may affect apps, potentially breaking them when the next Android version is
  * released. In some cases, for members that are heavily used, this annotation
  * may imply restrictions on changes to the member.
  *
  * <p>This annotation also results in access to the member being permitted by the
- * runtime, with a warning being generated in debug builds.
+ * runtime, with a warning being generated in debug builds. Which apps can access
+ * the member is determined by the value of {@link #maxTargetSdk()}.
  *
  * <p>For more details, see go/UnsupportedAppUsage.
  *
