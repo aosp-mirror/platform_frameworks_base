@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
-import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
@@ -175,7 +174,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyQuickDoze_DefaultValueCorrect() {
-        testServiceDefaultValue_Off(ServiceType.QUICK_DOZE);
+        testServiceDefaultValue_On(ServiceType.QUICK_DOZE);
     }
 
     @SmallTest

@@ -111,7 +111,7 @@ public class BatterySaverPolicy extends ContentObserver {
             false, /* enableAdjustBrightness */
             false, /* enableDataSaver */
             true,  /* enableFirewall */
-            false, /* enableQuickDoze */
+            true, /* enableQuickDoze */
             new ArrayMap<>(), /* filesForInteractive */
             new ArrayMap<>(), /* filesForNoninteractive */
             true, /* forceAllAppsStandby */
