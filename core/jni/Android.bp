@@ -263,6 +263,7 @@ cc_library_shared {
         "libEGL",
         "libGLESv1_CM",
         "libGLESv2",
+        "libGLESv3",
         "libvulkan",
         "libziparchive",
         "libETC1",
