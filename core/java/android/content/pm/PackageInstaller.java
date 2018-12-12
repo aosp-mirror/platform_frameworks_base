@@ -145,6 +145,15 @@ public class PackageInstaller {
     public static final String ACTION_SESSION_COMMITTED =
             "android.content.pm.action.SESSION_COMMITTED";
 
+    /**
+     * Broadcast Action: Send information about a staged install session when its state is updated.
+     * <p>
+     * The associated session information is defined in {@link #EXTRA_SESSION}.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SESSION_UPDATED =
+            "android.content.pm.action.SESSION_UPDATED";
+
     /** {@hide} */
     public static final String ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL";
 
