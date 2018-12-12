@@ -19,6 +19,7 @@ package android.telephony;
 import static android.net.NetworkPolicyManager.OVERRIDE_CONGESTED;
 import static android.net.NetworkPolicyManager.OVERRIDE_UNMETERED;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
@@ -2405,16 +2406,21 @@ public class SubscriptionManager {
      * together, some of them may be invisible to the users, etc.
      *
      * Caller will either have {@link android.Manifest.permission#MODIFY_PHONE_STATE}
-     * permission or can manage all subscriptions in the list, according to their
-     * acess rules.
+     * permission or had carrier privilege permission on the subscriptions:
+     * {@link TelephonyManager#hasCarrierPrivileges(int)} or
+     * {@link #canManageSubscription(SubscriptionInfo)}
+     *
+     * @throws SecurityException if the caller doesn't meet the requirements
+     *             outlined above.
      *
      * @param subIdList list of subId that will be in the same group
      * @return groupUUID a UUID assigned to the subscription group. It returns
      * null if fails.
      *
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public String setSubscriptionGroup(int[] subIdList) {
+    public @Nullable String setSubscriptionGroup(@NonNull int[] subIdList) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         if (VDBG) {
             logd("[setSubscriptionGroup]+ subIdList:" + Arrays.toString(subIdList));
@@ -2431,6 +2437,80 @@ public class SubscriptionManager {
         }
 
         return groupUUID;
+    }
+
+    /**
+     * Remove a list of subscriptions from their subscription group.
+     * See {@link #setSubscriptionGroup(int[])} for more details.
+     *
+     * Caller will either have {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * permission or had carrier privilege permission on the subscriptions:
+     * {@link TelephonyManager#hasCarrierPrivileges(int)} or
+     * {@link #canManageSubscription(SubscriptionInfo)}
+     *
+     * @throws SecurityException if the caller doesn't meet the requirements
+     *             outlined above.
+     *
+     * @param subIdList list of subId that need removing from their groups.
+     * @return whether the operation succeeds.
+     *
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean removeSubscriptionsFromGroup(@NonNull int[] subIdList) {
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        if (VDBG) {
+            logd("[removeSubscriptionsFromGroup]+ subIdList:" + Arrays.toString(subIdList));
+        }
+
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                return iSub.removeSubscriptionsFromGroup(subIdList, pkgForDebug);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        return false;
+    }
+
+    /**
+     * Get subscriptionInfo list of subscriptions that are in the same group of given subId.
+     * See {@link #setSubscriptionGroup(int[])} for more details.
+     *
+     * Caller will either have {@link android.Manifest.permission#READ_PHONE_STATE}
+     * permission or had carrier privilege permission on the subscription.
+     * {@link TelephonyManager#hasCarrierPrivileges(int)}
+     *
+     * @throws SecurityException if the caller doesn't meet the requirements
+     *             outlined above.
+     *
+     * @param subId of which list of subInfo from the same group will be returned.
+     * @return list of subscriptionInfo that belong to the same group, including the given
+     * subscription itself. It will return null if the subscription doesn't exist or it
+     * doesn't belong to any group.
+     *
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    public @Nullable List<SubscriptionInfo> getSubscriptionsInGroup(int subId) {
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        if (VDBG) {
+            logd("[getSubscriptionsInGroup]+ subId:" + subId);
+        }
+
+        List<SubscriptionInfo> result = null;
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                result = iSub.getSubscriptionsInGroup(subId, pkgForDebug);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        return result;
     }
 
     /**
