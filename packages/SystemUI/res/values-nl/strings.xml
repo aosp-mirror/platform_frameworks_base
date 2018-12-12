@@ -651,7 +651,7 @@
       <item quantity="other">%d minuten</item>
       <item quantity="one">%d minuut</item>
     </plurals>
-    <string name="battery_panel_title" msgid="7944156115535366613">"Accugebruik"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Batterijgebruik"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterijbesparing niet beschikbaar tijdens opladen"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterijbesparing"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Vermindert de prestaties en achtergrondgegevens"</string>
