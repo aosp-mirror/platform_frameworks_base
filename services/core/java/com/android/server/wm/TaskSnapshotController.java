@@ -191,9 +191,7 @@ class TaskSnapshotController {
                 } else {
                     mCache.putSnapshot(task, snapshot);
                     mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
-                    if (task.getController() != null) {
-                        task.getController().reportSnapshotChanged(snapshot);
-                    }
+                    task.onSnapshotChanged(snapshot);
                 }
             }
         }

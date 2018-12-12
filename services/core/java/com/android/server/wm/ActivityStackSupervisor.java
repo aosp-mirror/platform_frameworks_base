@@ -1868,7 +1868,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         stack.addTask(task, onTop, "restoreRecentTask");
         // TODO: move call for creation here and other place into Stack.addTask()
-        task.createWindowContainer(onTop, true /* showForAllUsers */);
+        task.createTask(onTop, true /* showForAllUsers */);
         if (DEBUG_RECENTS) Slog.v(TAG_RECENTS,
                 "Added restored task=" + task + " to stack=" + stack);
         final ArrayList<ActivityRecord> activities = task.mActivities;

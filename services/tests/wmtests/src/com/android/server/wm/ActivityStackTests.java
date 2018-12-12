@@ -82,17 +82,17 @@ public class ActivityStackTests extends ActivityTestsBase {
 
     @Test
     public void testEmptyTaskCleanupOnRemove() {
-        assertNotNull(mTask.getWindowContainerController());
+        assertNotNull(mTask.getTask());
         mStack.removeTask(mTask, "testEmptyTaskCleanupOnRemove", REMOVE_TASK_MODE_DESTROYING);
-        assertNull(mTask.getWindowContainerController());
+        assertNull(mTask.getTask());
     }
 
     @Test
     public void testOccupiedTaskCleanupOnRemove() {
         final ActivityRecord r = new ActivityBuilder(mService).setTask(mTask).build();
-        assertNotNull(mTask.getWindowContainerController());
+        assertNotNull(mTask.getTask());
         mStack.removeTask(mTask, "testOccupiedTaskCleanupOnRemove", REMOVE_TASK_MODE_DESTROYING);
-        assertNotNull(mTask.getWindowContainerController());
+        assertNotNull(mTask.getTask());
     }
 
     @Test

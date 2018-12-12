@@ -345,7 +345,7 @@ class ActivityTestsBase {
                 mStack.moveToFront("test");
                 mStack.addTask(task, true, "creating test task");
                 task.setStack(mStack);
-                task.setWindowContainerController();
+                task.setTask();
             }
 
             task.touchActiveTime();
@@ -361,12 +361,12 @@ class ActivityTestsBase {
             }
 
             @Override
-            void createWindowContainer(boolean onTop, boolean showForAllUsers) {
-                setWindowContainerController();
+            void createTask(boolean onTop, boolean showForAllUsers) {
+                setTask();
             }
 
-            private void setWindowContainerController() {
-                setWindowContainerController(mock(TaskWindowContainerController.class));
+            private void setTask() {
+                setTask(mock(Task.class));
             }
         }
     }

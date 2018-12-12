@@ -41,17 +41,14 @@ public class StackWindowControllerTests extends WindowTestsBase {
     public void testRemoveContainer() {
         final StackWindowController stackController =
                 createStackControllerOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTaskWindowContainerController taskController =
-                new WindowTestUtils.TestTaskWindowContainerController(stackController);
+        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stackController);
 
         final TaskStack stack = stackController.mContainer;
-        final Task task = taskController.mContainer;
         assertNotNull(stack);
         assertNotNull(task);
         stackController.removeContainer();
         // Assert that the container was removed.
         assertNull(stackController.mContainer);
-        assertNull(taskController.mContainer);
         assertNull(stack.getDisplayContent());
         assertNull(task.getDisplayContent());
         assertNull(task.mStack);
@@ -61,11 +58,9 @@ public class StackWindowControllerTests extends WindowTestsBase {
     public void testRemoveContainer_deferRemoval() {
         final StackWindowController stackController =
                 createStackControllerOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTaskWindowContainerController taskController =
-                new WindowTestUtils.TestTaskWindowContainerController(stackController);
+        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stackController);
 
         final TaskStack stack = stackController.mContainer;
-        final WindowTestUtils.TestTask task = (WindowTestUtils.TestTask) taskController.mContainer;
         // Stack removal is deferred if one of its child is animating.
         task.setLocalIsAnimating(true);
 
@@ -75,11 +70,12 @@ public class StackWindowControllerTests extends WindowTestsBase {
         // the stack window container is removed.
         assertNull(stackController.mContainer);
         assertNull(stack.getController());
-        assertNotNull(taskController.mContainer);
-        assertNotNull(task.getController());
+        assertNotNull(task);
 
         stack.removeImmediately();
-        assertNull(taskController.mContainer);
+        // After removing, the task will be isolated.
+        assertNull(task.getParent());
+        assertEquals(task.getChildCount(), 0);
         assertNull(task.getController());
     }
 
@@ -89,9 +85,7 @@ public class StackWindowControllerTests extends WindowTestsBase {
         final StackWindowController stack1Controller =
                 createStackControllerOnDisplay(mDisplayContent);
         final TaskStack stack1 = stack1Controller.mContainer;
-        final WindowTestUtils.TestTaskWindowContainerController taskController =
-                new WindowTestUtils.TestTaskWindowContainerController(stack1Controller);
-        final WindowTestUtils.TestTask task1 = (WindowTestUtils.TestTask) taskController.mContainer;
+        final WindowTestUtils.TestTask task1 = WindowTestUtils.createTestTask(stack1Controller);
         task1.mOnDisplayChangedCalled = false;
 
         // Create second display and put second stack on it.
