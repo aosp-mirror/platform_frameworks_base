@@ -24,7 +24,6 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.Intent.CATEGORY_HOME;
@@ -20141,11 +20140,6 @@ public class PackageManagerService extends IPackageManager.Stub
             public int getMountMode(int uid, String packageName) {
                 if (Process.isIsolated(uid)) {
                     return Zygote.MOUNT_EXTERNAL_NONE;
-                }
-                if (StorageManager.hasIsolatedStorage()) {
-                    return checkUidPermission(WRITE_MEDIA_STORAGE, uid) == PERMISSION_GRANTED
-                            ? Zygote.MOUNT_EXTERNAL_FULL
-                            : Zygote.MOUNT_EXTERNAL_WRITE;
                 }
                 if (checkUidPermission(READ_EXTERNAL_STORAGE, uid) == PERMISSION_DENIED) {
                     return Zygote.MOUNT_EXTERNAL_DEFAULT;

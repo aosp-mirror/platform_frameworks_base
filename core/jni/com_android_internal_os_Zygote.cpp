@@ -99,7 +99,8 @@ enum MountExternalKind {
   MOUNT_EXTERNAL_DEFAULT = 1,
   MOUNT_EXTERNAL_READ = 2,
   MOUNT_EXTERNAL_WRITE = 3,
-  MOUNT_EXTERNAL_FULL = 4,
+  MOUNT_EXTERNAL_INSTALLER = 4,
+  MOUNT_EXTERNAL_FULL = 5,
 };
 
 // Must match values in com.android.internal.os.Zygote.
@@ -444,6 +445,22 @@ static bool createPkgSandbox(uid_t uid, const std::string& package_name, std::st
     return true;
 }
 
+static bool bindMount(const std::string& sourceDir, const std::string& targetDir,
+        std::string* error_msg) {
+    if (TEMP_FAILURE_RETRY(mount(sourceDir.c_str(), targetDir.c_str(),
+            nullptr, MS_BIND | MS_REC, nullptr)) == -1) {
+        *error_msg = CREATE_ERROR("Failed to mount %s to %s: %s",
+                sourceDir.c_str(), targetDir.c_str(), strerror(errno));
+        return false;
+    }
+    if (TEMP_FAILURE_RETRY(mount(nullptr, targetDir.c_str(),
+            nullptr, MS_SLAVE | MS_REC, nullptr)) == -1) {
+        *error_msg = CREATE_ERROR("Failed to set MS_SLAVE for %s", targetDir.c_str());
+        return false;
+    }
+    return true;
+}
+
 static bool mountPkgSpecificDir(const std::string& mntSourceRoot,
         const std::string& mntTargetRoot, const std::string& packageName,
         const char* dirName, std::string* error_msg) {
@@ -451,22 +468,12 @@ static bool mountPkgSpecificDir(const std::string& mntSourceRoot,
             mntSourceRoot.c_str(), dirName, packageName.c_str());
     std::string mntTargetDir = StringPrintf("%s/Android/%s/%s",
             mntTargetRoot.c_str(), dirName, packageName.c_str());
-    if (TEMP_FAILURE_RETRY(mount(mntSourceDir.c_str(), mntTargetDir.c_str(),
-            nullptr, MS_BIND | MS_REC, nullptr)) == -1) {
-        *error_msg = CREATE_ERROR("Failed to mount %s to %s: %s",
-                mntSourceDir.c_str(), mntTargetDir.c_str(), strerror(errno));
-        return false;
-    }
-    if (TEMP_FAILURE_RETRY(mount(nullptr, mntTargetDir.c_str(),
-            nullptr, MS_SLAVE | MS_REC, nullptr)) == -1) {
-        *error_msg = CREATE_ERROR("Failed to set MS_SLAVE for %s", mntTargetDir.c_str());
-        return false;
-    }
-    return true;
+    return bindMount(mntSourceDir, mntTargetDir, error_msg);
 }
 
 static bool preparePkgSpecificDirs(const std::vector<std::string>& packageNames,
-        const std::vector<std::string>& volumeLabels, userid_t userId, std::string* error_msg) {
+        const std::vector<std::string>& volumeLabels, bool mountAllObbs,
+        userid_t userId, std::string* error_msg) {
     for (auto& label : volumeLabels) {
         std::string mntSource = StringPrintf("/mnt/runtime/write/%s", label.c_str());
         std::string mntTarget = StringPrintf("/storage/%s", label.c_str());
@@ -477,7 +484,14 @@ static bool preparePkgSpecificDirs(const std::vector<std::string>& packageNames,
         for (auto& package : packageNames) {
             mountPkgSpecificDir(mntSource, mntTarget, package, "data", error_msg);
             mountPkgSpecificDir(mntSource, mntTarget, package, "media", error_msg);
-            mountPkgSpecificDir(mntSource, mntTarget, package, "obb", error_msg);
+            if (!mountAllObbs) {
+                mountPkgSpecificDir(mntSource, mntTarget, package, "obb", error_msg);
+            }
+        }
+        if (mountAllObbs) {
+            StringAppendF(&mntSource, "/Android/obb");
+            StringAppendF(&mntTarget, "/Android/obb");
+            bindMount(mntSource, mntTarget, error_msg);
         }
     }
     return true;
@@ -498,7 +512,7 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
         storageSource = "/mnt/runtime/read";
     } else if (mount_mode == MOUNT_EXTERNAL_WRITE) {
         storageSource = "/mnt/runtime/write";
-    } else if (mount_mode != MOUNT_EXTERNAL_FULL && !force_mount_namespace) {
+    } else if (mount_mode == MOUNT_EXTERNAL_NONE && !force_mount_namespace) {
         // Sane default of no storage visible
         return true;
     }
@@ -566,12 +580,28 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
                         pkgSandboxDir.c_str(), strerror(errno));
                 return false;
             }
+            if (access("/storage/obb_mount", F_OK) == 0) {
+                if (mount_mode != MOUNT_EXTERNAL_INSTALLER) {
+                    remove("/storage/obb_mount");
+                }
+            } else {
+                if (mount_mode == MOUNT_EXTERNAL_INSTALLER) {
+                    int fd = TEMP_FAILURE_RETRY(open("/storage/obb_mount",
+                            O_RDWR | O_CREAT, 0660));
+                    if (fd == -1) {
+                        *error_msg = CREATE_ERROR("Couldn't create /storage/obb_mount: %s",
+                                strerror(errno));
+                        return false;
+                    }
+                    close(fd);
+                }
+            }
             // If the sandbox was already created by vold, only then set up the bind mounts for
             // pkg specific directories. Otherwise, leave as is and bind mounts will be taken
             // care of by vold later.
             if (sandboxAlreadyCreated) {
                 if (!preparePkgSpecificDirs(packages_for_uid, visible_vol_ids,
-                        user_id, error_msg)) {
+                        mount_mode == MOUNT_EXTERNAL_INSTALLER, user_id, error_msg)) {
                     return false;
                 }
             }

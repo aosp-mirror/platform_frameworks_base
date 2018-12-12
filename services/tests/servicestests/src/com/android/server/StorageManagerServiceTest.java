@@ -29,14 +29,16 @@ import android.content.pm.PackageManagerInternal;
 import android.os.UserManagerInternal;
 import android.os.storage.StorageManagerInternal;
 
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
+import com.android.internal.os.Zygote;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -97,15 +99,15 @@ public class StorageManagerServiceTest {
         when(mPm.getPackagesForUid(eq(UID_GREY))).thenReturn(new String[] { PKG_GREY });
         when(mPm.getPackagesForUid(eq(UID_COLORS))).thenReturn(new String[] { PKG_RED, PKG_BLUE });
 
-        setIsAppStorageSandboxed(PID_BLUE, UID_COLORS, true);
-        setIsAppStorageSandboxed(PID_GREY, UID_GREY, true);
-        setIsAppStorageSandboxed(PID_RED, UID_COLORS, true);
+        setStorageMountMode(PID_BLUE, UID_COLORS, Zygote.MOUNT_EXTERNAL_WRITE);
+        setStorageMountMode(PID_GREY, UID_GREY, Zygote.MOUNT_EXTERNAL_WRITE);
+        setStorageMountMode(PID_RED, UID_COLORS, Zygote.MOUNT_EXTERNAL_WRITE);
 
         mService = new StorageManagerService(mContext);
     }
 
-    private void setIsAppStorageSandboxed(int pid, int uid, boolean sandboxed) {
-        when(mAmi.isAppStorageSandboxed(pid, uid)).thenReturn(sandboxed);
+    private void setStorageMountMode(int pid, int uid, int mountMode) {
+        when(mAmi.getStorageMountMode(pid, uid)).thenReturn(mountMode);
     }
 
     @Test
@@ -210,7 +212,7 @@ public class StorageManagerServiceTest {
 
     @Test
     public void testPackageNotSandboxed() throws Exception {
-        setIsAppStorageSandboxed(PID_RED, UID_COLORS, false);
+        setStorageMountMode(PID_RED, UID_COLORS, Zygote.MOUNT_EXTERNAL_FULL);
 
         // Both app and system have the same view
         assertTranslation(
@@ -222,6 +224,29 @@ public class StorageManagerServiceTest {
                 "/storage/emulated/0/Android/sandbox/com.grey/bar.jpg",
                 "/storage/emulated/0/Android/sandbox/com.grey/bar.jpg",
                 PID_RED, UID_COLORS);
+    }
+
+    @Test
+    public void testInstallerPackage() throws Exception {
+        setStorageMountMode(PID_GREY, UID_GREY, Zygote.MOUNT_EXTERNAL_INSTALLER);
+
+        assertTranslation(
+                "/storage/emulated/0/Android/obb/com.grey/foo.jpg",
+                "/storage/emulated/0/Android/obb/com.grey/foo.jpg",
+                PID_GREY, UID_GREY);
+        assertTranslation(
+                "/storage/emulated/0/Android/obb/com.blue/bar.jpg",
+                "/storage/emulated/0/Android/obb/com.blue/bar.jpg",
+                PID_GREY, UID_GREY);
+
+        assertTranslation(
+                "/storage/emulated/0/Android/data/com.grey/foo.jpg",
+                "/storage/emulated/0/Android/data/com.grey/foo.jpg",
+                PID_GREY, UID_GREY);
+        assertTranslation(
+                "/storage/emulated/0/Android/sandbox/com.grey/Android/data/com.blue/bar.jpg",
+                "/storage/emulated/0/Android/data/com.blue/bar.jpg",
+                PID_GREY, UID_GREY);
     }
 
     private void assertTranslation(String system, String sandbox,

@@ -288,6 +288,6 @@ public abstract class ActivityManagerInternal {
     public abstract void setDebugFlagsForStartingActivity(ActivityInfo aInfo, int startFlags,
             ProfilerInfo profilerInfo, Object wmLock);
 
-    /** Checks if process running with given pid has access to full external storage or not */
-    public abstract boolean isAppStorageSandboxed(int pid, int uid);
+    /** Returns mount mode for process running with given pid */
+    public abstract int getStorageMountMode(int pid, int uid);
 }
