@@ -1445,11 +1445,11 @@ public class UserManager {
      * background user; the result here does not distinguish between the two.
      *
      * <p>Note prior to Android Nougat MR1 (SDK version <= 24;
-     * {@link android.os.Build.VERSION_CODES#N), this API required a system permission
+     * {@link android.os.Build.VERSION_CODES#N}, this API required a system permission
      * in order to check other profile's status.
      * Since Android Nougat MR1 (SDK version >= 25;
-     * {@link android.os.Build.VERSION_CODES#N_MR1)), the restriction has been relaxed, and now
-     * it'll accept any {@link UserHandle} within the same profile group as the caller.
+     * {@link android.os.Build.VERSION_CODES#N_MR1}), the restriction has been relaxed, and now
+     * it'll accept any {@link android.os.UserHandle} within the same profile group as the caller.
      *
      * @param user The user to retrieve the running state for.
      */
@@ -1474,11 +1474,11 @@ public class UserManager {
      * (but is not yet fully stopped, and still running some code).
      *
      * <p>Note prior to Android Nougat MR1 (SDK version <= 24;
-     * {@link android.os.Build.VERSION_CODES#N), this API required a system permission
+     * {@link android.os.Build.VERSION_CODES#N}, this API required a system permission
      * in order to check other profile's status.
      * Since Android Nougat MR1 (SDK version >= 25;
-     * {@link android.os.Build.VERSION_CODES#N_MR1)), the restriction has been relaxed, and now
-     * it'll accept any {@link UserHandle} within the same profile group as the caller.
+     * {@link android.os.Build.VERSION_CODES#N_MR1}), the restriction has been relaxed, and now
+     * it'll accept any {@link android.os.UserHandle} within the same profile group as the caller.
      *
      * @param user The user to retrieve the running state for.
      */
