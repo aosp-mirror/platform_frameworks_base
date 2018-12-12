@@ -29,6 +29,9 @@ import android.util.Slog;
 
 import com.android.server.LocalServices;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 /**
  * Signed config service. This is not an Android Service, but just owns a broadcast receiver for
  * receiving package install and update notifications from the package manager.
@@ -81,6 +84,13 @@ public class SignedConfigService {
                 && metaData.containsKey(KEY_CONFIG_SIGNATURE)) {
             String config = metaData.getString(KEY_CONFIG);
             String signature = metaData.getString(KEY_CONFIG_SIGNATURE);
+            try {
+                // Base64 encoding is standard (not URL safe) encoding: RFC4648
+                config = new String(Base64.getDecoder().decode(config), StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException iae) {
+                Slog.e(TAG, "Failed to base64 decode config from " + packageName);
+                return;
+            }
             if (DBG) {
                 Slog.d(TAG, "Got signed config: " + config);
                 Slog.d(TAG, "Got config signature: " + signature);
