@@ -27,24 +27,29 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.os.BatteryManager;
 import android.os.Environment;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.StatsLog;
 
-import com.android.server.pm.dex.DexManager;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.PinnerService;
+import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * {@hide}
@@ -289,6 +294,50 @@ public class BackgroundDexOptService extends JobService {
         return result;
     }
 
+    /**
+     * Get the size of the directory. It uses recursion to go over all files.
+     * @param f
+     * @return
+     */
+    private long getDirectorySize(File f) {
+        long size = 0;
+        if (f.isDirectory()) {
+            for (File file: f.listFiles()) {
+                size += getDirectorySize(file);
+            }
+        } else {
+            size = f.length();
+        }
+        return size;
+    }
+
+    /**
+     * Get the size of a package.
+     * @param pkg
+     */
+    private long getPackageSize(PackageManagerService pm, String pkg) {
+        PackageInfo info = pm.getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
+        long size = 0;
+        if (info != null && info.applicationInfo != null) {
+            File path = Paths.get(info.applicationInfo.sourceDir).toFile();
+            if (path.isFile()) {
+                path = path.getParentFile();
+            }
+            size += getDirectorySize(path);
+            if (!ArrayUtils.isEmpty(info.applicationInfo.splitSourceDirs)) {
+                for (String splitSourceDir : info.applicationInfo.splitSourceDirs) {
+                    path = Paths.get(splitSourceDir).toFile();
+                    if (path.isFile()) {
+                        path = path.getParentFile();
+                    }
+                    size += getDirectorySize(path);
+                }
+            }
+            return size;
+        }
+        return 0;
+    }
+
     private int optimizePackages(PackageManagerService pm, ArraySet<String> pkgs,
             long lowStorageThreshold, boolean is_for_primary_dex,
             ArraySet<String> failedPackageNames) {
@@ -315,8 +364,10 @@ public class BackgroundDexOptService extends JobService {
 
             int reason;
             boolean downgrade;
+            long package_size_before = 0; //used when the app is downgraded
             // Downgrade unused packages.
             if (unusedPackages.contains(pkg) && shouldDowngrade) {
+                package_size_before = getPackageSize(pm, pkg);
                 // This applies for system apps or if packages location is not a directory, i.e.
                 // monolithic install.
                 if (is_for_primary_dex && !pm.canHaveOatDir(pkg)) {
@@ -365,6 +416,10 @@ public class BackgroundDexOptService extends JobService {
                 // Dexopt succeeded, remove package from the list of failing ones.
                 synchronized (failedPackageNames) {
                     failedPackageNames.remove(pkg);
+                }
+                if (downgrade) {
+                    StatsLog.write(StatsLog.APP_DOWNGRADED, pkg, package_size_before,
+                            getPackageSize(pm, pkg), /*aggressive=*/ false);
                 }
             }
         }
