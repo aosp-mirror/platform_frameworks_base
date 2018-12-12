@@ -282,9 +282,11 @@ public abstract class BiometricServiceBase extends SystemService
 
         public EnrollClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
                 IBinder token, ServiceListener listener, int userId, int groupId,
-                byte[] cryptoToken, boolean restricted, String owner) {
+                byte[] cryptoToken, boolean restricted, String owner,
+                final int[] disabledFeatures) {
             super(context, getMetrics(), daemon, halDeviceId, token, listener,
-                    userId, groupId, cryptoToken, restricted, owner, getBiometricUtils());
+                    userId, groupId, cryptoToken, restricted, owner, getBiometricUtils(),
+                    disabledFeatures);
         }
 
         @Override
@@ -408,7 +410,8 @@ public abstract class BiometricServiceBase extends SystemService
         int cancel() throws RemoteException;
         int remove(int groupId, int biometricId) throws RemoteException;
         int enumerate() throws RemoteException;
-        int enroll(byte[] cryptoToken, int groupId, int timeout) throws RemoteException;
+        int enroll(byte[] cryptoToken, int groupId, int timeout,
+                ArrayList<Integer> disabledFeatures) throws RemoteException;
     }
 
     /**

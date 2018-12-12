@@ -144,7 +144,7 @@ public class FingerprintService extends BiometricServiceBase {
             final int groupId = userId; // default group for fingerprint enrollment
             final EnrollClientImpl client = new EnrollClientImpl(getContext(), mDaemonWrapper,
                     mHalDeviceId, token, new ServiceListenerImpl(receiver), mCurrentUserId, groupId,
-                    cryptoToken, restricted, opPackageName);
+                    cryptoToken, restricted, opPackageName, new int[0] /* disabledFeatures */);
 
             enrollInternal(client, userId);
         }
@@ -716,7 +716,8 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override
-        public int enroll(byte[] cryptoToken, int groupId, int timeout) throws RemoteException {
+        public int enroll(byte[] cryptoToken, int groupId, int timeout,
+                ArrayList<Integer> disabledFeatures) throws RemoteException {
             IBiometricsFingerprint daemon = getFingerprintDaemon();
             if (daemon == null) {
                 Slog.w(TAG, "enroll(): no fingerprint HAL!");

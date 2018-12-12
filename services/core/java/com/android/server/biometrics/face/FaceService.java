@@ -113,17 +113,17 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public void enroll(final IBinder token, final byte[] cryptoToken, final int userId,
-                final IFaceServiceReceiver receiver, final int flags,
-                final String opPackageName) {
+        public void enroll(final IBinder token, final byte[] cryptoToken,
+                final IFaceServiceReceiver receiver, final String opPackageName,
+                final int[] disabledFeatures) {
             checkPermission(MANAGE_BIOMETRIC);
 
             final boolean restricted = isRestricted();
             final EnrollClientImpl client = new EnrollClientImpl(getContext(), mDaemonWrapper,
                     mHalDeviceId, token, new ServiceListenerImpl(receiver), mCurrentUserId,
-                    0 /* groupId */, cryptoToken, restricted, opPackageName);
+                    0 /* groupId */, cryptoToken, restricted, opPackageName, disabledFeatures);
 
-            enrollInternal(client, userId);
+            enrollInternal(client, UserHandle.getCallingUserId());
         }
 
         @Override // Binder call
@@ -333,7 +333,7 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public int setRequireAttention(boolean requireAttention, final byte[] token) {
+        public int setFeature(int feature, boolean enabled, final byte[] token) {
             checkPermission(MANAGE_BIOMETRIC);
 
             final ArrayList<Byte> byteToken = new ArrayList<>();
@@ -343,10 +343,11 @@ public class FaceService extends BiometricServiceBase {
 
             int result;
             try {
-                result = mDaemon != null ? mDaemon.setRequireAttention(requireAttention, byteToken)
+                result = mDaemon != null ? mDaemon.setFeature(feature, enabled, byteToken)
                         : Status.INTERNAL_ERROR;
             } catch (RemoteException e) {
-                Slog.e(getTag(), "Unable to setRequireAttention to " + requireAttention, e);
+                Slog.e(getTag(), "Unable to set feature: " + feature + " to enabled:" + enabled,
+                        e);
                 result = Status.INTERNAL_ERROR;
             }
 
@@ -354,17 +355,12 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public boolean getRequireAttention(final byte[] token) {
+        public boolean getFeature(int feature) {
             checkPermission(MANAGE_BIOMETRIC);
-
-            final ArrayList<Byte> byteToken = new ArrayList<>();
-            for (int i = 0; i < token.length; i++) {
-                byteToken.add(token[i]);
-            }
 
             boolean result = true;
             try {
-                result = mDaemon != null ? mDaemon.getRequireAttention(byteToken).value : true;
+                result = mDaemon != null ? mDaemon.getFeature(feature) : true;
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Unable to getRequireAttention", e);
             }
@@ -612,7 +608,8 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public int enroll(byte[] cryptoToken, int groupId, int timeout) throws RemoteException {
+        public int enroll(byte[] cryptoToken, int groupId, int timeout,
+                ArrayList<Integer> disabledFeatures) throws RemoteException {
             IBiometricsFace daemon = getFaceDaemon();
             if (daemon == null) {
                 Slog.w(TAG, "enroll(): no face HAL!");
@@ -623,7 +620,7 @@ public class FaceService extends BiometricServiceBase {
                 token.add(cryptoToken[i]);
             }
             // TODO: plumb requireAttention down from framework
-            return daemon.enroll(token, timeout, true /* requireAttention */);
+            return daemon.enroll(token, timeout, disabledFeatures);
         }
     };
 
