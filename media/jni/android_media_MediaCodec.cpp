@@ -72,7 +72,10 @@ static struct CryptoErrorCodes {
     jint cryptoErrorResourceBusy;
     jint cryptoErrorInsufficientOutputProtection;
     jint cryptoErrorSessionNotOpened;
+    jint cryptoErrorInsufficientSecurity;
     jint cryptoErrorUnsupportedOperation;
+    jint cryptoErrorFrameTooLarge;
+    jint cryptoErrorLostState;
 } gCryptoErrorCodes;
 
 static struct CodecActionCodes {
@@ -1005,9 +1008,21 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
             err = gCryptoErrorCodes.cryptoErrorSessionNotOpened;
             defaultMsg = "Attempted to use a closed session";
             break;
+        case ERROR_DRM_INSUFFICIENT_SECURITY:
+            err = gCryptoErrorCodes.cryptoErrorInsufficientSecurity;
+            defaultMsg = "Required security level is not met";
+            break;
         case ERROR_DRM_CANNOT_HANDLE:
             err = gCryptoErrorCodes.cryptoErrorUnsupportedOperation;
             defaultMsg = "Operation not supported in this configuration";
+            break;
+        case ERROR_DRM_FRAME_TOO_LARGE:
+            err = gCryptoErrorCodes.cryptoErrorFrameTooLarge;
+            defaultMsg = "Decrytped frame exceeds size of output buffer";
+            break;
+        case ERROR_DRM_SESSION_LOST_STATE:
+            err = gCryptoErrorCodes.cryptoErrorLostState;
+            defaultMsg = "Session state was lost, open a new session and retry";
             break;
         default:  /* Other negative DRM error codes go out as is. */
             break;
@@ -1994,9 +2009,24 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
     gCryptoErrorCodes.cryptoErrorSessionNotOpened =
         env->GetStaticIntField(clazz.get(), field);
 
+    field = env->GetStaticFieldID(clazz.get(), "ERROR_INSUFFICIENT_SECURITY", "I");
+    CHECK(field != NULL);
+    gCryptoErrorCodes.cryptoErrorInsufficientSecurity =
+        env->GetStaticIntField(clazz.get(), field);
+
     field = env->GetStaticFieldID(clazz.get(), "ERROR_UNSUPPORTED_OPERATION", "I");
     CHECK(field != NULL);
     gCryptoErrorCodes.cryptoErrorUnsupportedOperation =
+        env->GetStaticIntField(clazz.get(), field);
+
+    field = env->GetStaticFieldID(clazz.get(), "ERROR_FRAME_TOO_LARGE", "I");
+    CHECK(field != NULL);
+    gCryptoErrorCodes.cryptoErrorFrameTooLarge =
+        env->GetStaticIntField(clazz.get(), field);
+
+    field = env->GetStaticFieldID(clazz.get(), "ERROR_LOST_STATE", "I");
+    CHECK(field != NULL);
+    gCryptoErrorCodes.cryptoErrorLostState =
         env->GetStaticIntField(clazz.get(), field);
 
     clazz.reset(env->FindClass("android/media/MediaCodec$CodecException"));
