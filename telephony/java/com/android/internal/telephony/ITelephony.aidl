@@ -1482,6 +1482,19 @@ interface ITelephony {
     SignalStrength getSignalStrength(int subId);
 
     /**
+     * Get the card ID of the default eUICC card. If there is no eUICC, returns
+     * {@link #INVALID_CARD_ID}.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param subId subscription ID used for authentication
+     * @param callingPackage package making the call
+     * @return card ID of the default eUICC card.
+     * @hide
+     */
+    int getCardIdForDefaultEuicc(int subId, String callingPackage); 
+
+    /**
      * Get slot info for all the UICC slots.
      * @return UiccSlotInfo array.
      * @hide
