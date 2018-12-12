@@ -16,6 +16,8 @@
 
 package android.processor.view.inspector;
 
+import android.processor.view.inspector.InspectableClassModel.Property;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.fail;
@@ -59,6 +61,54 @@ public class InspectionCompanionGeneratorTest {
         mModel = new InspectableClassModel(
                 ClassName.get("com.android.inspectable", "Outer", "Inner"));
         assertGeneratedFileEquals("NestedClass");
+    }
+
+    @Test
+    public void testSimpleProperties() {
+        addProperty("boolean", Property.Type.BOOLEAN, "getBoolean");
+        addProperty("byte", Property.Type.BYTE, "getByte");
+        addProperty("char", Property.Type.CHAR, "getChar");
+        addProperty("double", Property.Type.DOUBLE, "getDouble");
+        addProperty("float", Property.Type.FLOAT, "getFloat");
+        addProperty("int", Property.Type.INT, "getInt");
+        addProperty("long", Property.Type.LONG, "getLong");
+        addProperty("short", Property.Type.SHORT, "getShort");
+
+        addProperty("object", Property.Type.OBJECT, "getObject");
+        addProperty("color", Property.Type.COLOR, "getColor");
+        addProperty("gravity", Property.Type.GRAVITY, "getGravity");
+
+        assertGeneratedFileEquals("SimpleProperties");
+    }
+
+    @Test
+    public void testNoAttributeId() {
+        final Property property = new Property("noAttributeProperty");
+        property.setType(Property.Type.INT);
+        property.setGetter("getNoAttributeProperty");
+        property.setAttributeIdInferrableFromR(false);
+        mModel.putProperty(property);
+
+        assertGeneratedFileEquals("NoAttributeId");
+    }
+
+    @Test
+    public void testSuppliedAttributeId() {
+        final Property property = new Property("suppliedAttributeProperty");
+        property.setType(Property.Type.INT);
+        property.setGetter("getSuppliedAttributeProperty");
+        property.setAttributeId(0xdecafbad);
+        mModel.putProperty(property);
+
+        assertGeneratedFileEquals("SuppliedAttributeId");
+    }
+
+    private Property addProperty(String name, Property.Type type, String getter) {
+        final Property property = new Property(name);
+        property.setType(type);
+        property.setGetter(getter);
+        mModel.putProperty(property);
+        return property;
     }
 
     private void assertGeneratedFileEquals(String fileName) {

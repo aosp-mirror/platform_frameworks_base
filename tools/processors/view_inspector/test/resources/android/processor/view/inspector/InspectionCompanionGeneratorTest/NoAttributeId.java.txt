@@ -1,10 +1,10 @@
 package com.android.inspectable;
 
+import android.content.res.ResourceId;
 import android.view.inspector.InspectionCompanion;
 import android.view.inspector.PropertyMapper;
 import android.view.inspector.PropertyReader;
 import java.lang.Override;
-import java.lang.String;
 
 /**
  * Inspection companion for {@link TestInspectable}.
@@ -18,8 +18,14 @@ public final class TestInspectable$$InspectionCompanion implements InspectionCom
      */
     private boolean mPropertiesMapped = false;
 
+    /**
+     * Property ID of {@code noAttributeProperty}.
+     */
+    private int mNoAttributePropertyId;
+
     @Override
     public void mapProperties(PropertyMapper propertyMapper) {
+        mNoAttributePropertyId = propertyMapper.mapInt("noAttributeProperty", ResourceId.ID_NULL);
         mPropertiesMapped = true;
     }
 
@@ -28,10 +34,6 @@ public final class TestInspectable$$InspectionCompanion implements InspectionCom
         if (!mPropertiesMapped) {
             throw new InspectionCompanion.UninitializedPropertyMapException();
         }
-    }
-
-    @Override
-    public String getNodeName() {
-        return "NodeName";
+        propertyReader.readInt(mNoAttributePropertyId, inspectable.getNoAttributeProperty());
     }
 }
