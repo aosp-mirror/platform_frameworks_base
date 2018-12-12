@@ -976,7 +976,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @return The bearer-specific signal strength.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public int getSignalStrength() {
         return mSignalStrength;
     }

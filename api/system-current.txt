@@ -3095,7 +3095,20 @@ package android.net {
     ctor public LinkAddress(java.lang.String);
   }
 
+  public final class LinkProperties implements android.os.Parcelable {
+    ctor public LinkProperties();
+    method public boolean addRoute(android.net.RouteInfo);
+    method public void clear();
+    method public void setDnsServers(java.util.Collection<java.net.InetAddress>);
+    method public void setDomains(java.lang.String);
+    method public void setHttpProxy(android.net.ProxyInfo);
+    method public void setInterfaceName(java.lang.String);
+    method public void setLinkAddresses(java.util.Collection<android.net.LinkAddress>);
+    method public void setMtu(int);
+  }
+
   public final class NetworkCapabilities implements android.os.Parcelable {
+    method public int getSignalStrength();
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
   }
 
@@ -3113,6 +3126,10 @@ package android.net {
     ctor public NetworkRecommendationProvider(android.content.Context, java.util.concurrent.Executor);
     method public final android.os.IBinder getBinder();
     method public abstract void onRequestScores(android.net.NetworkKey[]);
+  }
+
+  public static class NetworkRequest.Builder {
+    method public android.net.NetworkRequest.Builder setSignalStrength(int);
   }
 
   public class NetworkScoreManager {
