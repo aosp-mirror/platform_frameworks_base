@@ -5152,6 +5152,15 @@ public class AudioManager {
         return reportedSurroundFormats;
     }
 
+    /**
+     * Return if audio haptic coupled playback is supported or not.
+     *
+     * @return whether audio haptic playback supported.
+     */
+    public static boolean isHapticPlaybackSupported() {
+        return AudioSystem.isHapticPlaybackSupported();
+    }
+
 
     //---------------------------------------------------------
     // Inner classes
