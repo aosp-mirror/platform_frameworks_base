@@ -1215,6 +1215,7 @@ package android.content.pm {
     method public abstract boolean arePermissionsIndividuallyControlled();
     method public boolean canSuspendPackage(java.lang.String);
     method public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(java.lang.String);
+    method public android.content.pm.ApplicationInfo getApplicationInfoAsUser(java.lang.String, int, android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.dex.ArtManager getArtManager();
     method public abstract java.lang.String getDefaultBrowserPackageNameAsUser(int);
     method public java.lang.CharSequence getHarmfulAppWarning(java.lang.String);
@@ -1230,6 +1231,9 @@ package android.content.pm {
     method public abstract int installExistingPackage(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int installExistingPackage(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceiversAsUser(android.content.Intent, int, android.os.UserHandle);
+    method public java.util.List<android.content.pm.ResolveInfo> queryIntentActivitiesAsUser(android.content.Intent, int, android.os.UserHandle);
+    method public java.util.List<android.content.pm.ResolveInfo> queryIntentContentProvidersAsUser(android.content.Intent, int, android.os.UserHandle);
+    method public java.util.List<android.content.pm.ResolveInfo> queryIntentServicesAsUser(android.content.Intent, int, android.os.UserHandle);
     method public abstract void registerDexModule(java.lang.String, android.content.pm.PackageManager.DexModuleRegisterCallback);
     method public abstract void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public deprecated void replacePreferredActivity(android.content.IntentFilter, int, java.util.List<android.content.ComponentName>, android.content.ComponentName);
