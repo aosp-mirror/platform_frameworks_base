@@ -2093,10 +2093,9 @@
 
     <!-- @hide Allows an application to cache content.
          <p>Not for use by third-party applications.
-         <p>Protection level: signature
     -->
     <permission android:name="android.permission.CACHE_CONTENT"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|documenter" />
 
     <!-- @SystemApi @hide
          Allows an application to aggressively allocate disk space.
