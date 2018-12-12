@@ -46,6 +46,8 @@ import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayTransactionListener;
 import android.hardware.display.DisplayViewport;
+import android.hardware.display.DisplayedContentSample;
+import android.hardware.display.DisplayedContentSamplingAttributes;
 import android.hardware.display.IDisplayManager;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -1241,6 +1243,29 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    @VisibleForTesting
+    DisplayedContentSamplingAttributes getDisplayedContentSamplingAttributesInternal(
+            int displayId) {
+        IBinder displayToken = SurfaceControl.getBuiltInDisplay(displayId);
+        return SurfaceControl.getDisplayedContentSamplingAttributes(displayToken);
+    }
+
+    @VisibleForTesting
+    boolean setDisplayedContentSamplingEnabledInternal(
+            int displayId, boolean enable, int componentMask, int maxFrames) {
+        IBinder displayToken = SurfaceControl.getBuiltInDisplay(displayId);
+        return SurfaceControl.setDisplayedContentSamplingEnabled(
+                displayToken, enable, componentMask, maxFrames);
+    }
+
+    @VisibleForTesting
+    DisplayedContentSample getDisplayedContentSampleInternal(int displayId,
+            long maxFrames, long timestamp) {
+        IBinder displayToken = SurfaceControl.getBuiltInDisplay(displayId);
+        return SurfaceControl.getDisplayedContentSample(
+            displayToken, maxFrames, timestamp);
+    }
+
     private void clearViewportsLocked() {
         mViewports.clear();
     }
@@ -2331,5 +2356,25 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
         }
+
+        @Override
+        public DisplayedContentSamplingAttributes getDisplayedContentSamplingAttributes(
+                int displayId) {
+            return getDisplayedContentSamplingAttributesInternal(displayId);
+        }
+
+        @Override
+        public boolean setDisplayedContentSamplingEnabled(
+                int displayId, boolean enable, int componentMask, int maxFrames) {
+            return setDisplayedContentSamplingEnabledInternal(
+                    displayId, enable, componentMask, maxFrames);
+        }
+
+        @Override
+        public DisplayedContentSample getDisplayedContentSample(int displayId,
+                long maxFrames, long timestamp) {
+            return getDisplayedContentSampleInternal(displayId, maxFrames, timestamp);
+        }
+
     }
 }

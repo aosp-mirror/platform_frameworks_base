@@ -18,11 +18,21 @@ package com.android.server.display;
 
 import static com.android.server.display.VirtualDisplayAdapter.UNIQUE_ID_PREFIX;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.Curve;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayViewport;
+import android.hardware.display.DisplayedContentSample;
+import android.hardware.display.DisplayedContentSamplingAttributes;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.input.InputManagerInternal;
 import android.os.Handler;
@@ -31,9 +41,9 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 
-import androidx.test.runner.AndroidJUnit4;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -49,17 +59,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
+import java.util.stream.LongStream;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -395,6 +396,43 @@ public class DisplayManagerServiceTest {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);
         displayManager.validateBrightnessConfiguration(null);
+    }
+
+    /**
+     * Tests that collection of display color sampling results are sensible.
+     */
+    @Test
+    public void testDisplayedContentSampling() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        registerDefaultDisplays(displayManager);
+
+        DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(0);
+        assertNotNull(ddi);
+
+        DisplayedContentSamplingAttributes attr =
+                displayManager.getDisplayedContentSamplingAttributesInternal(0);
+        if (attr == null) return; //sampling not supported on device, skip remainder of test.
+
+        boolean enabled = displayManager.setDisplayedContentSamplingEnabledInternal(0, true, 0, 0);
+        assertTrue(!enabled);
+
+        displayManager.setDisplayedContentSamplingEnabledInternal(0, false, 0, 0);
+        DisplayedContentSample sample = displayManager.getDisplayedContentSampleInternal(0, 0, 0);
+        assertNotNull(sample);
+
+        long numPixels = ddi.width * ddi.height * sample.getNumFrames();
+        long[] samples = sample.getSampleComponent(DisplayedContentSample.ColorComponent.CHANNEL0);
+        assertTrue(samples.length == 0 || LongStream.of(samples).sum() == numPixels);
+
+        samples = sample.getSampleComponent(DisplayedContentSample.ColorComponent.CHANNEL1);
+        assertTrue(samples.length == 0 || LongStream.of(samples).sum() == numPixels);
+
+        samples = sample.getSampleComponent(DisplayedContentSample.ColorComponent.CHANNEL2);
+        assertTrue(samples.length == 0 || LongStream.of(samples).sum() == numPixels);
+
+        samples = sample.getSampleComponent(DisplayedContentSample.ColorComponent.CHANNEL3);
+        assertTrue(samples.length == 0 || LongStream.of(samples).sum() == numPixels);
     }
 
     private void registerDefaultDisplays(DisplayManagerService displayManager) {

@@ -16,6 +16,7 @@
 
 package android.hardware.display;
 
+import android.annotation.Nullable;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -193,6 +194,44 @@ public abstract class DisplayManagerInternal {
      * Notifies the display manager that resource overlays have changed.
      */
     public abstract void onOverlayChanged();
+
+    /**
+     * Get the attributes available for display color sampling.
+     * @param displayId id of the display to collect the sample from.
+     *
+     * @return The attributes the display supports, or null if sampling is not supported.
+     */
+    @Nullable
+    public abstract DisplayedContentSamplingAttributes getDisplayedContentSamplingAttributes(
+            int displayId);
+
+    /**
+     * Enable or disable the collection of color samples.
+     *
+     * @param displayId id of the display to collect the sample from.
+     * @param componentMask a bitmask of the color channels to collect samples for, or zero for all
+     *                      available.
+     * @param maxFrames maintain a ringbuffer of the last maxFrames.
+     * @param enable True to enable, False to disable.
+     *
+     * @return True if sampling was enabled, false if failure.
+     */
+    public abstract boolean setDisplayedContentSamplingEnabled(
+            int displayId, boolean enable, int componentMask, int maxFrames);
+
+    /**
+     * Accesses the color histogram statistics of displayed frames on devices that support sampling.
+     *
+     * @param displayId id of the display to collect the sample from
+     * @param maxFrames limit the statistics to the last maxFrames number of frames.
+     * @param timestamp discard statistics that were collected prior to timestamp, where timestamp
+     *                  is given as CLOCK_MONOTONIC.
+     * @return The statistics representing a histogram of the color distribution of the frames
+     *         displayed on-screen, or null if sampling is not supported.
+    */
+    @Nullable
+    public abstract DisplayedContentSample getDisplayedContentSample(
+            int displayId, long maxFrames, long timestamp);
 
     /**
      * Describes the requested power state of the display.
