@@ -121,6 +121,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private static final int MENU_VIEW_INDEX = 0;
     private static final String TAG = "ExpandableNotifRow";
     public static final float DEFAULT_HEADER_VISIBLE_AMOUNT = 1.0f;
+    private boolean mUpdateBackgroundOnUpdate;
 
     /**
      * Listener for when {@link ExpandableNotificationRow} is laid out.
@@ -587,6 +588,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateIconVisibilities();
         updateShelfIconColor();
         updateRippleAllowed();
+        if (mUpdateBackgroundOnUpdate) {
+            mUpdateBackgroundOnUpdate = false;
+            updateBackgroundColors();
+        }
     }
 
     /** Called when the notification's ranking was changed (but nothing else changed). */
@@ -1208,9 +1213,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    @Override
     public void onUiModeChanged() {
-        super.onUiModeChanged();
+        mUpdateBackgroundOnUpdate = true;
         reInflateViews();
         if (mChildrenContainer != null) {
             for (ExpandableNotificationRow child : mChildrenContainer.getNotificationChildren()) {

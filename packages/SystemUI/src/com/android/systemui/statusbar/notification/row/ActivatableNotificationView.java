@@ -225,7 +225,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         initDimens();
     }
 
-    public void onUiModeChanged() {
+    protected void updateBackgroundColors() {
         updateColors();
         initBackground();
         updateBackgroundTint();
