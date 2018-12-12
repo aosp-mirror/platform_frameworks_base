@@ -1351,6 +1351,18 @@ package android.content.pm {
     field public int requestRes;
   }
 
+  public class ShortcutManager {
+    method public java.util.List<android.content.pm.ShortcutManager.ShareShortcutInfo> getShareTargets(android.content.IntentFilter);
+  }
+
+  public static final class ShortcutManager.ShareShortcutInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.content.pm.ShortcutInfo getShortcutInfo();
+    method public android.content.ComponentName getTargetComponent();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.content.pm.ShortcutManager.ShareShortcutInfo> CREATOR;
+  }
+
   public final class SuspendDialogInfo implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);

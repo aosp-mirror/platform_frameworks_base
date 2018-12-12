@@ -46,6 +46,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
 import android.content.res.Resources;
@@ -2146,6 +2147,23 @@ public class ShortcutService extends IShortcutService.Stub {
             return getShortcutsWithQueryLocked(
                     packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
                     ShortcutInfo::isPinnedVisible);
+        }
+    }
+
+    @Override
+    public ParceledListSlice<ShortcutManager.ShareShortcutInfo> getShareTargets(String packageName,
+            IntentFilter filter, @UserIdInt int userId) {
+        verifyCaller(packageName, userId);
+
+        synchronized (mLock) {
+            throwIfUserLockedL(userId);
+
+            final List<ShortcutManager.ShareShortcutInfo> shortcutInfoList = new ArrayList<>();
+
+            final ShortcutUser user = getUserShortcutsLocked(userId);
+            user.forAllPackages(p -> shortcutInfoList.addAll(p.getMatchingShareTargets(filter)));
+
+            return new ParceledListSlice<>(shortcutInfoList);
         }
     }
 

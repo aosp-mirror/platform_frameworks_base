@@ -16,6 +16,7 @@
 package android.content.pm;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
@@ -72,4 +73,7 @@ interface IShortcutService {
     void applyRestore(in byte[] payload, int user);
 
     boolean isRequestPinItemSupported(int user, int requestType);
+
+    // System API used by framework's ShareSheet (ChooserActivity)
+    ParceledListSlice getShareTargets(String packageName, in IntentFilter filter, int userId);
 }
