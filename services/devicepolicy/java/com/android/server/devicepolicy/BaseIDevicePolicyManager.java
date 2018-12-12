@@ -99,6 +99,11 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public void grantDeviceIdsAccessToProfileOwner(ComponentName who, int userId) { }
 
     @Override
+    public int getPasswordComplexity() {
+        return DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
+    }
+
+    @Override
     public void installUpdateFromFile(ComponentName admin,
             ParcelFileDescriptor updateFileDescriptor, StartInstallingUpdateCallback listener) {}
 

@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
@@ -1380,6 +1381,73 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SET_NEW_PASSWORD
             = "android.app.action.SET_NEW_PASSWORD";
+
+    /**
+     * Constant for {@link #getPasswordComplexity()}: no password.
+     *
+     * <p>Note that these complexity constants are ordered so that higher values are more complex.
+     */
+    public static final int PASSWORD_COMPLEXITY_NONE = 0;
+
+    /**
+     * Constant for {@link #getPasswordComplexity()}: password satisfies one of the following:
+     * <ul>
+     * <li>pattern
+     * <li>PIN with repeating (4444) or ordered (1234, 4321, 2468) sequences
+     * </ul>
+     *
+     * <p>Note that these complexity constants are ordered so that higher values are more complex.
+     *
+     * @see #PASSWORD_QUALITY_SOMETHING
+     * @see #PASSWORD_QUALITY_NUMERIC
+     */
+    public static final int PASSWORD_COMPLEXITY_LOW = 0x10000;
+
+    /**
+     * Constant for {@link #getPasswordComplexity()}: password satisfies one of the following:
+     * <ul>
+     * <li>PIN with <b>no</b> repeating (4444) or ordered (1234, 4321, 2468) sequences, length at
+     * least 4
+     * <li>alphabetic, length at least 4
+     * <li>alphanumeric, length at least 4
+     * </ul>
+     *
+     * <p>Note that these complexity constants are ordered so that higher values are more complex.
+     *
+     * @see #PASSWORD_QUALITY_NUMERIC_COMPLEX
+     * @see #PASSWORD_QUALITY_ALPHABETIC
+     * @see #PASSWORD_QUALITY_ALPHANUMERIC
+     */
+    public static final int PASSWORD_COMPLEXITY_MEDIUM = 0x30000;
+
+    /**
+     * Constant for {@link #getPasswordComplexity()}: password satisfies one of the following:
+     * <ul>
+     * <li>PIN with <b>no</b> repeating (4444) or ordered (1234, 4321, 2468) sequences, length at
+     * least 4
+     * <li>alphabetic, length at least 6
+     * <li>alphanumeric, length at least 6
+     * </ul>
+     *
+     * <p>Note that these complexity constants are ordered so that higher values are more complex.
+     *
+     * @see #PASSWORD_QUALITY_NUMERIC_COMPLEX
+     * @see #PASSWORD_QUALITY_ALPHABETIC
+     * @see #PASSWORD_QUALITY_ALPHANUMERIC
+     */
+    public static final int PASSWORD_COMPLEXITY_HIGH = 0x50000;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"PASSWORD_COMPLEXITY_"}, value = {
+            PASSWORD_COMPLEXITY_NONE,
+            PASSWORD_COMPLEXITY_LOW,
+            PASSWORD_COMPLEXITY_MEDIUM,
+            PASSWORD_COMPLEXITY_HIGH,
+    })
+    public @interface PasswordComplexity {}
 
     /**
      * Activity action: have the user enter a new password for the parent profile.
@@ -3103,6 +3171,33 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns how complex the current user's screen lock is.
+     *
+     * <p>Note that when called from a profile which uses an unified challenge with its parent, the
+     * screen lock complexity of the parent will be returned. However, this API does not support
+     * explicitly querying the parent profile screen lock complexity via {@link
+     * #getParentProfileInstance}.
+     *
+     * @throws IllegalStateException if the user is not unlocked.
+     * @throws SecurityException if the calling application does not have the permission
+     *                           {@link permission#GET_AND_REQUEST_SCREEN_LOCK_COMPLEXITY}
+     */
+    @PasswordComplexity
+    @RequiresPermission(android.Manifest.permission.GET_AND_REQUEST_SCREEN_LOCK_COMPLEXITY)
+    public int getPasswordComplexity() {
+        throwIfParentInstance("getPasswordComplexity");
+        if (mService == null) {
+            return PASSWORD_COMPLEXITY_NONE;
+        }
+
+        try {
+            return mService.getPasswordComplexity();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
