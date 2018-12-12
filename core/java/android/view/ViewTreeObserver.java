@@ -18,7 +18,6 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Rect;
@@ -749,7 +748,6 @@ public final class ViewTreeObserver {
      *
      * @param callback The callback to invoke when the frame is committed.
      */
-    @TestApi
     public void registerFrameCommitCallback(@NonNull Runnable callback) {
         checkIsAlive();
         if (mOnFrameCommitListeners == null) {
@@ -772,7 +770,6 @@ public final class ViewTreeObserver {
      *         not be invoked. If false is returned then the callback was either never added
      *         or may already be pending execution and was unable to be removed
      */
-    @TestApi
     public boolean unregisterFrameCommitCallback(@NonNull Runnable callback) {
         checkIsAlive();
         if (mOnFrameCommitListeners == null) {

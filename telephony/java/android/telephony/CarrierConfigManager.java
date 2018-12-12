@@ -403,7 +403,6 @@ public class CarrierConfigManager {
      * @see SubscriptionManager#getSubscriptionPlans(int)
      * @see SubscriptionManager#setSubscriptionPlans(int, java.util.List)
      */
-    @SystemApi
     public static final String KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING =
             "config_plans_package_override_string";
 

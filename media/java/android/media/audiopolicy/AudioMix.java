@@ -81,14 +81,12 @@ public class AudioMix {
      * An audio mix behavior where the output of the mix is sent to the original destination of
      * the audio signal, i.e. an output device for an output mix, or a recording for an input mix.
      */
-    @SystemApi
     public static final int ROUTE_FLAG_RENDER    = 0x1;
     /**
      * An audio mix behavior where the output of the mix is rerouted back to the framework and
      * is accessible for injection or capture through the {@link AudioTrack} and {@link AudioRecord}
      * APIs.
      */
-    @SystemApi
     public static final int ROUTE_FLAG_LOOP_BACK = 0x1 << 1;
 
     private static final int ROUTE_FLAG_SUPPORTED = ROUTE_FLAG_RENDER | ROUTE_FLAG_LOOP_BACK;
@@ -113,31 +111,23 @@ public class AudioMix {
 
     // MIX_STATE_* values to keep in sync with frameworks/av/include/media/AudioPolicy.h
     /**
-     * @hide
      * State of a mix before its policy is enabled.
      */
-    @SystemApi
     public static final int MIX_STATE_DISABLED = -1;
     /**
-     * @hide
      * State of a mix when there is no audio to mix.
      */
-    @SystemApi
     public static final int MIX_STATE_IDLE = 0;
     /**
-     * @hide
      * State of a mix that is actively mixing audio.
      */
-    @SystemApi
     public static final int MIX_STATE_MIXING = 1;
 
     /**
-     * @hide
      * The current mixing state.
      * @return one of {@link #MIX_STATE_DISABLED}, {@link #MIX_STATE_IDLE},
      *          {@link #MIX_STATE_MIXING}.
      */
-    @SystemApi
     public int getMixState() {
         return mMixState;
     }
@@ -201,9 +191,7 @@ public class AudioMix {
 
     /**
      * Builder class for {@link AudioMix} objects
-     *
      */
-    @SystemApi
     public static class Builder {
         private AudioMixingRule mRule = null;
         private AudioFormat mFormat = null;
@@ -224,7 +212,6 @@ public class AudioMix {
          * @param rule a non-null {@link AudioMixingRule} instance.
          * @throws IllegalArgumentException
          */
-        @SystemApi
         public Builder(AudioMixingRule rule)
                 throws IllegalArgumentException {
             if (rule == null) {
@@ -284,7 +271,6 @@ public class AudioMix {
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        @SystemApi
         public Builder setFormat(AudioFormat format)
                 throws IllegalArgumentException {
             if (format == null) {
@@ -302,7 +288,6 @@ public class AudioMix {
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        @SystemApi
         public Builder setRouteFlags(@RouteFlags int routeFlags)
                 throws IllegalArgumentException {
             if (routeFlags == 0) {
@@ -329,7 +314,6 @@ public class AudioMix {
          * @return the same Builder instance
          * @throws IllegalArgumentException
          */
-        @SystemApi
         public Builder setDevice(@NonNull AudioDeviceInfo device) throws IllegalArgumentException {
             if (device == null) {
                 throw new IllegalArgumentException("Illegal null AudioDeviceInfo argument");
@@ -347,7 +331,6 @@ public class AudioMix {
          * @return a new {@link AudioMix} object
          * @throws IllegalArgumentException if no {@link AudioMixingRule} has been set.
          */
-        @SystemApi
         public AudioMix build() throws IllegalArgumentException {
             if (mRule == null) {
                 throw new IllegalArgumentException("Illegal null AudioMixingRule");

@@ -4,7 +4,6 @@ package android {
     field public static final java.lang.String ACCESS_AMBIENT_LIGHT_STATS = "android.permission.ACCESS_AMBIENT_LIGHT_STATS";
     field public static final java.lang.String ACCESS_BROADCAST_RADIO = "android.permission.ACCESS_BROADCAST_RADIO";
     field public static final java.lang.String ACCESS_CACHE_FILESYSTEM = "android.permission.ACCESS_CACHE_FILESYSTEM";
-    field public static final java.lang.String ACCESS_CHECKIN_PROPERTIES = "android.permission.ACCESS_CHECKIN_PROPERTIES";
     field public static final java.lang.String ACCESS_DRM_CERTIFICATES = "android.permission.ACCESS_DRM_CERTIFICATES";
     field public static final deprecated java.lang.String ACCESS_FM_RADIO = "android.permission.ACCESS_FM_RADIO";
     field public static final java.lang.String ACCESS_INSTANT_APPS = "android.permission.ACCESS_INSTANT_APPS";
@@ -14,14 +13,11 @@ package android {
     field public static final java.lang.String ACCESS_NOTIFICATIONS = "android.permission.ACCESS_NOTIFICATIONS";
     field public static final java.lang.String ACCESS_SHORTCUTS = "android.permission.ACCESS_SHORTCUTS";
     field public static final java.lang.String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
-    field public static final java.lang.String ACCOUNT_MANAGER = "android.permission.ACCOUNT_MANAGER";
     field public static final java.lang.String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final java.lang.String ALLOCATE_AGGRESSIVE = "android.permission.ALLOCATE_AGGRESSIVE";
     field public static final java.lang.String ALLOW_ANY_CODEC_FOR_PLAYBACK = "android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK";
     field public static final java.lang.String AMBIENT_WALLPAPER = "android.permission.AMBIENT_WALLPAPER";
     field public static final java.lang.String BACKUP = "android.permission.BACKUP";
-    field public static final java.lang.String BATTERY_STATS = "android.permission.BATTERY_STATS";
-    field public static final java.lang.String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
     field public static final java.lang.String BIND_AUGMENTED_AUTOFILL_SERVICE = "android.permission.BIND_AUGMENTED_AUTOFILL_SERVICE";
     field public static final deprecated java.lang.String BIND_CONNECTION_SERVICE = "android.permission.BIND_CONNECTION_SERVICE";
     field public static final java.lang.String BIND_CONTENT_CAPTURE_SERVICE = "android.permission.BIND_CONTENT_CAPTURE_SERVICE";
@@ -32,7 +28,6 @@ package android {
     field public static final java.lang.String BIND_NETWORK_RECOMMENDATION_SERVICE = "android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE";
     field public static final java.lang.String BIND_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final java.lang.String BIND_PRINT_RECOMMENDATION_SERVICE = "android.permission.BIND_PRINT_RECOMMENDATION_SERVICE";
-    field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
     field public static final java.lang.String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final java.lang.String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final java.lang.String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
@@ -42,18 +37,13 @@ package android {
     field public static final java.lang.String BIND_TEXTCLASSIFIER_SERVICE = "android.permission.BIND_TEXTCLASSIFIER_SERVICE";
     field public static final java.lang.String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final java.lang.String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
-    field public static final java.lang.String BLUETOOTH_PRIVILEGED = "android.permission.BLUETOOTH_PRIVILEGED";
     field public static final java.lang.String BRICK = "android.permission.BRICK";
     field public static final java.lang.String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final deprecated java.lang.String BROADCAST_NETWORK_PRIVILEGED = "android.permission.BROADCAST_NETWORK_PRIVILEGED";
-    field public static final java.lang.String CALL_PRIVILEGED = "android.permission.CALL_PRIVILEGED";
     field public static final java.lang.String CAMERA_DISABLE_TRANSMIT_LED = "android.permission.CAMERA_DISABLE_TRANSMIT_LED";
     field public static final java.lang.String CAPTURE_AUDIO_HOTWORD = "android.permission.CAPTURE_AUDIO_HOTWORD";
-    field public static final java.lang.String CAPTURE_AUDIO_OUTPUT = "android.permission.CAPTURE_AUDIO_OUTPUT";
     field public static final java.lang.String CAPTURE_TV_INPUT = "android.permission.CAPTURE_TV_INPUT";
     field public static final java.lang.String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
-    field public static final java.lang.String CHANGE_COMPONENT_ENABLED_STATE = "android.permission.CHANGE_COMPONENT_ENABLED_STATE";
-    field public static final java.lang.String CHANGE_CONFIGURATION = "android.permission.CHANGE_CONFIGURATION";
     field public static final java.lang.String CHANGE_DEVICE_IDLE_TEMP_WHITELIST = "android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST";
     field public static final java.lang.String CLEAR_APP_USER_DATA = "android.permission.CLEAR_APP_USER_DATA";
     field public static final java.lang.String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
@@ -63,22 +53,15 @@ package android {
     field public static final java.lang.String CONTROL_DISPLAY_SATURATION = "android.permission.CONTROL_DISPLAY_SATURATION";
     field public static final java.lang.String CONTROL_INCALL_EXPERIENCE = "android.permission.CONTROL_INCALL_EXPERIENCE";
     field public static final java.lang.String CONTROL_KEYGUARD_SECURE_NOTIFICATIONS = "android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS";
-    field public static final java.lang.String CONTROL_LOCATION_UPDATES = "android.permission.CONTROL_LOCATION_UPDATES";
     field public static final java.lang.String CONTROL_VPN = "android.permission.CONTROL_VPN";
     field public static final java.lang.String CRYPT_KEEPER = "android.permission.CRYPT_KEEPER";
-    field public static final java.lang.String DELETE_CACHE_FILES = "android.permission.DELETE_CACHE_FILES";
-    field public static final java.lang.String DELETE_PACKAGES = "android.permission.DELETE_PACKAGES";
     field public static final java.lang.String DEVICE_POWER = "android.permission.DEVICE_POWER";
-    field public static final java.lang.String DIAGNOSTIC = "android.permission.DIAGNOSTIC";
     field public static final java.lang.String DISPATCH_PROVISIONING_MESSAGE = "android.permission.DISPATCH_PROVISIONING_MESSAGE";
-    field public static final java.lang.String DUMP = "android.permission.DUMP";
     field public static final java.lang.String FORCE_BACK = "android.permission.FORCE_BACK";
     field public static final java.lang.String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
-    field public static final java.lang.String GET_ACCOUNTS_PRIVILEGED = "android.permission.GET_ACCOUNTS_PRIVILEGED";
     field public static final java.lang.String GET_APP_OPS_STATS = "android.permission.GET_APP_OPS_STATS";
     field public static final java.lang.String GET_PROCESS_STATE_AND_OOM_SCORE = "android.permission.GET_PROCESS_STATE_AND_OOM_SCORE";
     field public static final java.lang.String GET_TOP_ACTIVITY_INFO = "android.permission.GET_TOP_ACTIVITY_INFO";
-    field public static final java.lang.String GLOBAL_SEARCH = "android.permission.GLOBAL_SEARCH";
     field public static final java.lang.String GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS = "android.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS";
     field public static final java.lang.String GRANT_RUNTIME_PERMISSIONS = "android.permission.GRANT_RUNTIME_PERMISSIONS";
     field public static final java.lang.String HARDWARE_TEST = "android.permission.HARDWARE_TEST";
@@ -86,8 +69,6 @@ package android {
     field public static final java.lang.String HIDE_NON_SYSTEM_OVERLAY_WINDOWS = "android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS";
     field public static final java.lang.String INJECT_EVENTS = "android.permission.INJECT_EVENTS";
     field public static final java.lang.String INSTALL_GRANT_RUNTIME_PERMISSIONS = "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS";
-    field public static final java.lang.String INSTALL_LOCATION_PROVIDER = "android.permission.INSTALL_LOCATION_PROVIDER";
-    field public static final java.lang.String INSTALL_PACKAGES = "android.permission.INSTALL_PACKAGES";
     field public static final java.lang.String INSTALL_PACKAGE_UPDATES = "android.permission.INSTALL_PACKAGE_UPDATES";
     field public static final java.lang.String INSTALL_SELF_UPDATES = "android.permission.INSTALL_SELF_UPDATES";
     field public static final java.lang.String INTENT_FILTER_VERIFICATION_AGENT = "android.permission.INTENT_FILTER_VERIFICATION_AGENT";
@@ -98,7 +79,6 @@ package android {
     field public static final java.lang.String INVOKE_CARRIER_SETUP = "android.permission.INVOKE_CARRIER_SETUP";
     field public static final java.lang.String KILL_UID = "android.permission.KILL_UID";
     field public static final java.lang.String LOCAL_MAC_ADDRESS = "android.permission.LOCAL_MAC_ADDRESS";
-    field public static final java.lang.String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
     field public static final java.lang.String LOCK_DEVICE = "android.permission.LOCK_DEVICE";
     field public static final java.lang.String LOOP_RADIO = "android.permission.LOOP_RADIO";
     field public static final java.lang.String MANAGE_ACCESSIBILITY = "android.permission.MANAGE_ACCESSIBILITY";
@@ -118,18 +98,13 @@ package android {
     field public static final java.lang.String MANAGE_USB = "android.permission.MANAGE_USB";
     field public static final java.lang.String MANAGE_USERS = "android.permission.MANAGE_USERS";
     field public static final java.lang.String MANAGE_USER_OEM_UNLOCK_STATE = "android.permission.MANAGE_USER_OEM_UNLOCK_STATE";
-    field public static final java.lang.String MASTER_CLEAR = "android.permission.MASTER_CLEAR";
-    field public static final java.lang.String MEDIA_CONTENT_CONTROL = "android.permission.MEDIA_CONTENT_CONTROL";
     field public static final java.lang.String MODIFY_APPWIDGET_BIND_PERMISSIONS = "android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS";
     field public static final java.lang.String MODIFY_AUDIO_ROUTING = "android.permission.MODIFY_AUDIO_ROUTING";
     field public static final java.lang.String MODIFY_CELL_BROADCASTS = "android.permission.MODIFY_CELL_BROADCASTS";
     field public static final java.lang.String MODIFY_DAY_NIGHT_MODE = "android.permission.MODIFY_DAY_NIGHT_MODE";
     field public static final deprecated java.lang.String MODIFY_NETWORK_ACCOUNTING = "android.permission.MODIFY_NETWORK_ACCOUNTING";
     field public static final java.lang.String MODIFY_PARENTAL_CONTROLS = "android.permission.MODIFY_PARENTAL_CONTROLS";
-    field public static final java.lang.String MODIFY_PHONE_STATE = "android.permission.MODIFY_PHONE_STATE";
     field public static final java.lang.String MODIFY_QUIET_MODE = "android.permission.MODIFY_QUIET_MODE";
-    field public static final java.lang.String MOUNT_FORMAT_FILESYSTEMS = "android.permission.MOUNT_FORMAT_FILESYSTEMS";
-    field public static final java.lang.String MOUNT_UNMOUNT_FILESYSTEMS = "android.permission.MOUNT_UNMOUNT_FILESYSTEMS";
     field public static final java.lang.String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
     field public static final java.lang.String NETWORK_MANAGED_PROVISIONING = "android.permission.NETWORK_MANAGED_PROVISIONING";
     field public static final java.lang.String NETWORK_SETUP_WIZARD = "android.permission.NETWORK_SETUP_WIZARD";
@@ -138,7 +113,6 @@ package android {
     field public static final java.lang.String OBSERVE_APP_USAGE = "android.permission.OBSERVE_APP_USAGE";
     field public static final java.lang.String OBSERVE_ROLE_HOLDERS = "android.permission.OBSERVE_ROLE_HOLDERS";
     field public static final java.lang.String OVERRIDE_WIFI_CONFIG = "android.permission.OVERRIDE_WIFI_CONFIG";
-    field public static final java.lang.String PACKAGE_USAGE_STATS = "android.permission.PACKAGE_USAGE_STATS";
     field public static final java.lang.String PACKAGE_VERIFICATION_AGENT = "android.permission.PACKAGE_VERIFICATION_AGENT";
     field public static final java.lang.String PEERS_MAC_ADDRESS = "android.permission.PEERS_MAC_ADDRESS";
     field public static final java.lang.String PERFORM_CDMA_PROVISIONING = "android.permission.PERFORM_CDMA_PROVISIONING";
@@ -151,7 +125,6 @@ package android {
     field public static final java.lang.String READ_CONTENT_RATING_SYSTEMS = "android.permission.READ_CONTENT_RATING_SYSTEMS";
     field public static final java.lang.String READ_DREAM_STATE = "android.permission.READ_DREAM_STATE";
     field public static final java.lang.String READ_INSTALL_SESSIONS = "android.permission.READ_INSTALL_SESSIONS";
-    field public static final java.lang.String READ_LOGS = "android.permission.READ_LOGS";
     field public static final java.lang.String READ_NETWORK_USAGE_HISTORY = "android.permission.READ_NETWORK_USAGE_HISTORY";
     field public static final java.lang.String READ_OEM_UNLOCK_STATE = "android.permission.READ_OEM_UNLOCK_STATE";
     field public static final java.lang.String READ_PRINT_SERVICES = "android.permission.READ_PRINT_SERVICES";
@@ -163,7 +136,6 @@ package android {
     field public static final java.lang.String READ_WALLPAPER_INTERNAL = "android.permission.READ_WALLPAPER_INTERNAL";
     field public static final java.lang.String READ_WIFI_CREDENTIAL = "android.permission.READ_WIFI_CREDENTIAL";
     field public static final java.lang.String REAL_GET_TASKS = "android.permission.REAL_GET_TASKS";
-    field public static final java.lang.String REBOOT = "android.permission.REBOOT";
     field public static final java.lang.String RECEIVE_DATA_ACTIVITY_CHANGE = "android.permission.RECEIVE_DATA_ACTIVITY_CHANGE";
     field public static final java.lang.String RECEIVE_DEVICE_CUSTOMIZATION_READY = "android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY";
     field public static final java.lang.String RECEIVE_EMERGENCY_BROADCAST = "android.permission.RECEIVE_EMERGENCY_BROADCAST";
@@ -181,27 +153,19 @@ package android {
     field public static final java.lang.String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final java.lang.String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
     field public static final java.lang.String SEND_DEVICE_CUSTOMIZATION_READY = "android.permission.SEND_DEVICE_CUSTOMIZATION_READY";
-    field public static final java.lang.String SEND_RESPOND_VIA_MESSAGE = "android.permission.SEND_RESPOND_VIA_MESSAGE";
     field public static final java.lang.String SEND_SHOW_SUSPENDED_APP_DETAILS = "android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS";
     field public static final java.lang.String SEND_SMS_NO_CONFIRMATION = "android.permission.SEND_SMS_NO_CONFIRMATION";
     field public static final java.lang.String SERIAL_PORT = "android.permission.SERIAL_PORT";
     field public static final java.lang.String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
-    field public static final java.lang.String SET_ALWAYS_FINISH = "android.permission.SET_ALWAYS_FINISH";
-    field public static final java.lang.String SET_ANIMATION_SCALE = "android.permission.SET_ANIMATION_SCALE";
-    field public static final java.lang.String SET_DEBUG_APP = "android.permission.SET_DEBUG_APP";
     field public static final java.lang.String SET_HARMFUL_APP_WARNINGS = "android.permission.SET_HARMFUL_APP_WARNINGS";
     field public static final java.lang.String SET_MEDIA_KEY_LISTENER = "android.permission.SET_MEDIA_KEY_LISTENER";
     field public static final java.lang.String SET_ORIENTATION = "android.permission.SET_ORIENTATION";
     field public static final java.lang.String SET_POINTER_SPEED = "android.permission.SET_POINTER_SPEED";
-    field public static final java.lang.String SET_PROCESS_LIMIT = "android.permission.SET_PROCESS_LIMIT";
     field public static final java.lang.String SET_SCREEN_COMPATIBILITY = "android.permission.SET_SCREEN_COMPATIBILITY";
-    field public static final java.lang.String SET_TIME = "android.permission.SET_TIME";
     field public static final java.lang.String SET_VOLUME_KEY_LONG_PRESS_LISTENER = "android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER";
     field public static final java.lang.String SET_WALLPAPER_COMPONENT = "android.permission.SET_WALLPAPER_COMPONENT";
     field public static final java.lang.String SHOW_KEYGUARD_MESSAGE = "android.permission.SHOW_KEYGUARD_MESSAGE";
     field public static final java.lang.String SHUTDOWN = "android.permission.SHUTDOWN";
-    field public static final java.lang.String SIGNAL_PERSISTENT_PROCESSES = "android.permission.SIGNAL_PERSISTENT_PROCESSES";
-    field public static final java.lang.String STATUS_BAR = "android.permission.STATUS_BAR";
     field public static final java.lang.String STOP_APP_SWITCHES = "android.permission.STOP_APP_SWITCHES";
     field public static final java.lang.String SUBSTITUTE_NOTIFICATION_APP_NAME = "android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME";
     field public static final java.lang.String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
@@ -210,18 +174,14 @@ package android {
     field public static final java.lang.String TV_VIRTUAL_REMOTE_CONTROLLER = "android.permission.TV_VIRTUAL_REMOTE_CONTROLLER";
     field public static final java.lang.String UNLIMITED_SHORTCUTS_API_CALLS = "android.permission.UNLIMITED_SHORTCUTS_API_CALLS";
     field public static final java.lang.String UPDATE_APP_OPS_STATS = "android.permission.UPDATE_APP_OPS_STATS";
-    field public static final java.lang.String UPDATE_DEVICE_STATS = "android.permission.UPDATE_DEVICE_STATS";
     field public static final java.lang.String UPDATE_LOCK = "android.permission.UPDATE_LOCK";
     field public static final java.lang.String UPDATE_TIME_ZONE_RULES = "android.permission.UPDATE_TIME_ZONE_RULES";
     field public static final java.lang.String USER_ACTIVITY = "android.permission.USER_ACTIVITY";
     field public static final java.lang.String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
-    field public static final java.lang.String WRITE_APN_SETTINGS = "android.permission.WRITE_APN_SETTINGS";
     field public static final java.lang.String WRITE_DREAM_STATE = "android.permission.WRITE_DREAM_STATE";
     field public static final java.lang.String WRITE_EMBEDDED_SUBSCRIPTIONS = "android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS";
-    field public static final java.lang.String WRITE_GSERVICES = "android.permission.WRITE_GSERVICES";
     field public static final java.lang.String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
     field public static final java.lang.String WRITE_OBB = "android.permission.WRITE_OBB";
-    field public static final java.lang.String WRITE_SECURE_SETTINGS = "android.permission.WRITE_SECURE_SETTINGS";
   }
 
   public static final class Manifest.permission_group {
@@ -582,10 +542,6 @@ package android.app {
 
 package android.app.admin {
 
-  public class DeviceAdminReceiver extends android.content.BroadcastReceiver {
-    method public deprecated void onReadyForUserInitialization(android.content.Context, android.content.Intent);
-  }
-
   public class DevicePolicyManager {
     method public java.lang.String getDeviceOwner();
     method public android.content.ComponentName getDeviceOwnerComponentOnAnyUser();
@@ -634,10 +590,7 @@ package android.app.admin {
   }
 
   public final class SystemUpdatePolicy implements android.os.Parcelable {
-    method public int describeContents();
     method public android.app.admin.SystemUpdatePolicy.InstallationOption getInstallationOptionAt(long);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.admin.SystemUpdatePolicy> CREATOR;
     field public static final int TYPE_PAUSE = 4; // 0x4
   }
 
@@ -3251,7 +3204,6 @@ package android.media.tv {
     method public void addBlockedRating(android.media.tv.TvContentRating);
     method public boolean captureFrame(java.lang.String, android.view.Surface, android.media.tv.TvStreamConfig);
     method public java.util.List<android.media.tv.TvStreamConfig> getAvailableTvStreamConfigList(java.lang.String);
-    method public java.util.List<android.media.tv.TvContentRating> getBlockedRatings();
     method public java.util.List<android.media.tv.TvInputHardwareInfo> getHardwareList();
     method public java.util.List<android.media.tv.TvContentRatingSystemInfo> getTvContentRatingSystemList();
     method public boolean isSingleSessionActive();
@@ -3497,11 +3449,9 @@ package android.net {
   }
 
   public class TrafficStats {
-    method public static void clearThreadStatsUid();
     method public static void setThreadStatsTagApp();
     method public static void setThreadStatsTagBackup();
     method public static void setThreadStatsTagRestore();
-    method public static void setThreadStatsUid(int);
   }
 
   public class VpnService extends android.app.Service {
@@ -3519,14 +3469,6 @@ package android.net {
     field public static final android.os.Parcelable.Creator<android.net.WifiKey> CREATOR;
     field public final java.lang.String bssid;
     field public final java.lang.String ssid;
-  }
-
-}
-
-package android.net.http {
-
-  public class X509TrustManagerExtensions {
-    method public boolean isSameTrustConfiguration(java.lang.String, java.lang.String);
   }
 
 }
@@ -3754,7 +3696,6 @@ package android.net.wifi {
     method public java.util.List<android.net.wifi.WifiConfiguration> getPrivilegedConfiguredNetworks();
     method public android.net.wifi.WifiConfiguration getWifiApConfiguration();
     method public int getWifiApState();
-    method public boolean isDeviceToApRttSupported();
     method public boolean isDeviceToDeviceRttSupported();
     method public boolean isPortableHotspotSupported();
     method public boolean isWifiApEnabled();
@@ -5205,28 +5146,6 @@ package android.service.notification {
     field public static final java.lang.String KEY_USER_SENTIMENT = "key_user_sentiment";
   }
 
-  public final class Condition implements android.os.Parcelable {
-    ctor public Condition(android.net.Uri, java.lang.String, java.lang.String, java.lang.String, int, int, int);
-    method public android.service.notification.Condition copy();
-    method public static boolean isValidId(android.net.Uri, java.lang.String);
-    method public static android.net.Uri.Builder newId(android.content.Context);
-    method public static java.lang.String relevanceToString(int);
-    method public static java.lang.String stateToString(int);
-    field public static final int FLAG_RELEVANT_ALWAYS = 2; // 0x2
-    field public static final int FLAG_RELEVANT_NOW = 1; // 0x1
-    field public static final java.lang.String SCHEME = "condition";
-    field public static final int STATE_ERROR = 3; // 0x3
-    field public static final int STATE_UNKNOWN = 2; // 0x2
-    field public final int flags;
-    field public final int icon;
-    field public final java.lang.String line1;
-    field public final java.lang.String line2;
-  }
-
-  public abstract class ConditionProviderService extends android.app.Service {
-    method public void onRequestConditions(int);
-  }
-
   public abstract class NotificationAssistantService extends android.service.notification.NotificationListenerService {
     ctor public NotificationAssistantService();
     method public final void adjustNotification(android.service.notification.Adjustment);
@@ -5709,7 +5628,6 @@ package android.telecom {
     method public void clearPhoneAccounts();
     method public android.telecom.TelecomAnalytics dumpAnalytics();
     method public void enablePhoneAccount(android.telecom.PhoneAccountHandle, boolean);
-    method public boolean endCall();
     method public java.util.List<android.telecom.PhoneAccountHandle> getAllPhoneAccountHandles();
     method public java.util.List<android.telecom.PhoneAccount> getAllPhoneAccounts();
     method public int getAllPhoneAccountsCount();
@@ -5721,7 +5639,6 @@ package android.telecom {
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
     method public boolean isInEmergencyCall();
     method public boolean isRinging();
-    method public boolean isTtySupported();
     method public boolean setDefaultDialer(java.lang.String);
     field public static final java.lang.String EXTRA_CALL_BACK_INTENT = "android.telecom.extra.CALL_BACK_INTENT";
     field public static final java.lang.String EXTRA_CLEAR_MISSED_CALLS_INTENT = "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
@@ -5746,7 +5663,6 @@ package android.telephony {
     method public void overrideConfig(int, android.os.PersistableBundle);
     method public void updateConfigForPhoneId(int, java.lang.String);
     field public static final java.lang.String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
-    field public static final java.lang.String KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING = "config_plans_package_override_string";
   }
 
   public class MbmsDownloadSession implements java.lang.AutoCloseable {
@@ -5861,7 +5777,6 @@ package android.telephony {
 
   public final class SmsManager {
     method public void sendMultipartTextMessageWithoutPersisting(java.lang.String, java.lang.String, java.util.List<java.lang.String>, java.util.List<android.app.PendingIntent>, java.util.List<android.app.PendingIntent>);
-    method public void sendTextMessageWithoutPersisting(java.lang.String, java.lang.String, java.lang.String, android.app.PendingIntent, android.app.PendingIntent);
     field public static final int RESULT_CANCELLED = 23; // 0x17
     field public static final int RESULT_ENCODING_ERROR = 18; // 0x12
     field public static final int RESULT_ERROR_FDN_CHECK_FAILURE = 6; // 0x6
@@ -5888,15 +5803,9 @@ package android.telephony {
 
   public class SubscriptionManager {
     method public java.util.List<android.telephony.SubscriptionInfo> getAvailableSubscriptionInfoList();
-    method public java.util.List<android.telephony.SubscriptionPlan> getSubscriptionPlans(int);
     method public void requestEmbeddedSubscriptionInfoListRefresh();
     method public void setDefaultDataSubId(int);
     method public void setDefaultSmsSubId(int);
-    method public void setSubscriptionOverrideCongested(int, boolean, long);
-    method public void setSubscriptionOverrideUnmetered(int, boolean, long);
-    method public void setSubscriptionPlans(int, java.util.List<android.telephony.SubscriptionPlan>);
-    field public static final java.lang.String ACTION_MANAGE_SUBSCRIPTION_PLANS = "android.telephony.action.MANAGE_SUBSCRIPTION_PLANS";
-    field public static final java.lang.String ACTION_REFRESH_SUBSCRIPTION_PLANS = "android.telephony.action.REFRESH_SUBSCRIPTION_PLANS";
     field public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
     field public static final android.net.Uri VT_ENABLED_CONTENT_URI;
     field public static final android.net.Uri WFC_ENABLED_CONTENT_URI;
@@ -5905,37 +5814,10 @@ package android.telephony {
     field public static final android.net.Uri WFC_ROAMING_MODE_CONTENT_URI;
   }
 
-  public final class SubscriptionPlan implements android.os.Parcelable {
-    method public java.util.Iterator<android.util.Range<java.time.ZonedDateTime>> cycleIterator();
-    method public int describeContents();
-    method public int getDataLimitBehavior();
-    method public long getDataLimitBytes();
-    method public long getDataUsageBytes();
-    method public long getDataUsageTime();
-    method public java.lang.CharSequence getSummary();
-    method public java.lang.CharSequence getTitle();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final long BYTES_UNKNOWN = -1L; // 0xffffffffffffffffL
-    field public static final long BYTES_UNLIMITED = 9223372036854775807L; // 0x7fffffffffffffffL
-    field public static final android.os.Parcelable.Creator<android.telephony.SubscriptionPlan> CREATOR;
-    field public static final int LIMIT_BEHAVIOR_BILLED = 1; // 0x1
-    field public static final int LIMIT_BEHAVIOR_DISABLED = 0; // 0x0
-    field public static final int LIMIT_BEHAVIOR_THROTTLED = 2; // 0x2
-    field public static final int LIMIT_BEHAVIOR_UNKNOWN = -1; // 0xffffffff
-    field public static final long TIME_UNKNOWN = -1L; // 0xffffffffffffffffL
-  }
-
   public static class SubscriptionPlan.Builder {
-    method public android.telephony.SubscriptionPlan build();
-    method public static android.telephony.SubscriptionPlan.Builder createNonrecurring(java.time.ZonedDateTime, java.time.ZonedDateTime);
-    method public static android.telephony.SubscriptionPlan.Builder createRecurring(java.time.ZonedDateTime, java.time.Period);
     method public static deprecated android.telephony.SubscriptionPlan.Builder createRecurringDaily(java.time.ZonedDateTime);
     method public static deprecated android.telephony.SubscriptionPlan.Builder createRecurringMonthly(java.time.ZonedDateTime);
     method public static deprecated android.telephony.SubscriptionPlan.Builder createRecurringWeekly(java.time.ZonedDateTime);
-    method public android.telephony.SubscriptionPlan.Builder setDataLimit(long, int);
-    method public android.telephony.SubscriptionPlan.Builder setDataUsage(long, long);
-    method public android.telephony.SubscriptionPlan.Builder setSummary(java.lang.CharSequence);
-    method public android.telephony.SubscriptionPlan.Builder setTitle(java.lang.CharSequence);
   }
 
   public final class TelephonyHistogram implements android.os.Parcelable {

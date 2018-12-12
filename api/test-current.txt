@@ -5,7 +5,6 @@ package android {
     field public static final java.lang.String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final java.lang.String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final java.lang.String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
-    field public static final java.lang.String CHANGE_CONFIGURATION = "android.permission.CHANGE_CONFIGURATION";
     field public static final java.lang.String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
     field public static final java.lang.String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final java.lang.String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
@@ -1708,11 +1707,6 @@ package android.view {
     method public static int getHoverTooltipHideTimeout();
     method public static int getHoverTooltipShowTimeout();
     method public static int getLongPressTooltipHideTimeout();
-  }
-
-  public final class ViewTreeObserver {
-    method public void registerFrameCommitCallback(java.lang.Runnable);
-    method public boolean unregisterFrameCommitCallback(java.lang.Runnable);
   }
 
   public abstract interface WindowManager implements android.view.ViewManager {

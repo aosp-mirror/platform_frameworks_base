@@ -2062,7 +2062,6 @@ public class WifiManager {
     /**
      * @return true if this adapter supports Device-to-AP RTT
      */
-    @SystemApi
     public boolean isDeviceToApRttSupported() {
         return isFeatureSupported(WIFI_FEATURE_D2AP_RTT);
     }
