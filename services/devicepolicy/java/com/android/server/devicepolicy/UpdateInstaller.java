@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.StartInstallingUpdateCallback;
 import android.content.Context;
@@ -26,6 +27,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.util.Log;
 
 import java.io.File;
@@ -132,6 +134,10 @@ abstract class UpdateInstaller {
 
     protected void notifyCallbackOnError(int errorCode, String errorMessage) {
         cleanupUpdateFile();
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.INSTALL_SYSTEM_UPDATE_ERROR)
+                .setInt(errorCode)
+                .write();
         try {
             mCallback.onStartInstallingUpdateError(errorCode, errorMessage);
         } catch (RemoteException e) {
