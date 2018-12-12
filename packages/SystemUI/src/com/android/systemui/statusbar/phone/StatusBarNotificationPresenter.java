@@ -37,6 +37,8 @@ import android.widget.TextView;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.widget.MessagingGroup;
+import com.android.internal.widget.MessagingMessage;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
@@ -62,9 +64,11 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
-public class StatusBarNotificationPresenter implements NotificationPresenter {
+public class StatusBarNotificationPresenter implements NotificationPresenter,
+        ConfigurationController.ConfigurationListener {
 
     private final LockscreenGestureLogger mLockscreenGestureLogger =
             Dependency.get(LockscreenGestureLogger.class);
@@ -168,9 +172,13 @@ public class StatusBarNotificationPresenter implements NotificationPresenter {
 
             onUserSwitched(mLockscreenUserManager.getCurrentUserId());
         });
+        Dependency.get(ConfigurationController.class).addCallback(this);
     }
 
+    @Override
     public void onDensityOrFontScaleChanged() {
+        MessagingMessage.dropCache();
+        MessagingGroup.dropCache();
         if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
             mEntryManager.updateNotificationsOnDensityOrFontScaleChanged();
         } else {
