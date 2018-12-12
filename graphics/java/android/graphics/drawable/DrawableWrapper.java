@@ -65,7 +65,7 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
      */
     public DrawableWrapper(@Nullable Drawable dr) {
         mState = null;
-        mDrawable = dr;
+        setDrawable(dr);
     }
 
     /**
