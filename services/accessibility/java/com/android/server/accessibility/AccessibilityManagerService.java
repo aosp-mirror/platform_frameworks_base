@@ -2466,6 +2466,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
+     * AIDL-exposed method. System only.
+     * Gets accessibility window id from window token.
+     *
+     * @param windowToken Window token to get accessibility window id.
+     * @return Accessibility window id for the window token. Returns -1 if no such token is
+     *   registered.
+     */
+    @Override
+    public int getAccessibilityWindowId(IBinder windowToken) {
+        synchronized (mLock) {
+            if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
+                throw new SecurityException("Only SYSTEM can call getAccessibilityWindowId");
+            }
+
+            return findWindowIdLocked(windowToken);
+        }
+    }
+
+    /**
      * Get the recommended timeout of interactive controls and non-interactive controls.
      *
      * @return A long for pair of {@code int}s. First integer for interactive one, and second

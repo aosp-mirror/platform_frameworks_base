@@ -1004,6 +1004,36 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Returns accessibility window id from window token. Accessibility window id is the one
+     * returned from AccessibilityWindowInfo.getId(). Only available for the system process.
+     *
+     * @param windowToken Window token to find accessibility window id.
+     * @return Accessibility window id for the window token.
+     *   AccessibilityWindowInfo.UNDEFINED_WINDOW_ID if accessibility window id not available for
+     *   the token.
+     * @hide
+     */
+    @SystemApi
+    public int getAccessibilityWindowId(IBinder windowToken) {
+        if (windowToken == null) {
+            return AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+        }
+
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+            }
+        }
+        try {
+            return service.getAccessibilityWindowId(windowToken);
+        } catch (RemoteException e) {
+            return AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+        }
+    }
+
+    /**
      * Sets the current state and notifies listeners, if necessary.
      *
      * @param stateFlags The state flags.
