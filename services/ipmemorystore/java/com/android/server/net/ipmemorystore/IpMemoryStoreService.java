@@ -19,6 +19,8 @@ package com.android.server.net.ipmemorystore;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.IIpMemoryStore;
 import android.net.ipmemorystore.Blob;
 import android.net.ipmemorystore.IOnBlobRetrievedListener;
@@ -27,6 +29,7 @@ import android.net.ipmemorystore.IOnNetworkAttributesRetrieved;
 import android.net.ipmemorystore.IOnSameNetworkResponseListener;
 import android.net.ipmemorystore.IOnStatusListener;
 import android.net.ipmemorystore.NetworkAttributesParcelable;
+import android.util.Log;
 
 /**
  * Implementation for the IP memory store.
@@ -37,10 +40,41 @@ import android.net.ipmemorystore.NetworkAttributesParcelable;
  * @hide
  */
 public class IpMemoryStoreService extends IIpMemoryStore.Stub {
-    final Context mContext;
+    private static final String TAG = IpMemoryStoreService.class.getSimpleName();
 
+    @NonNull
+    final Context mContext;
+    @Nullable
+    final SQLiteDatabase mDb;
+
+    /**
+     * Construct an IpMemoryStoreService object.
+     * This constructor will block on disk access to open the database.
+     * @param context the context to access storage with.
+     */
     public IpMemoryStoreService(@NonNull final Context context) {
+        // Note that constructing the service will access the disk and block
+        // for some time, but it should make no difference to the clients. Because
+        // the interface is one-way, clients fire and forget requests, and the callback
+        // will get called eventually in any case, and the framework will wait for the
+        // service to be created to deliver subsequent requests.
+        // Avoiding this would mean the mDb member can't be final, which means the service would
+        // have to test for nullity, care for failure, and allow for a wait at every single access,
+        // which would make the code a lot more complex and require all methods to possibly block.
         mContext = context;
+        SQLiteDatabase db;
+        final IpMemoryStoreDatabase.DbHelper helper = new IpMemoryStoreDatabase.DbHelper(context);
+        try {
+            db = helper.getWritableDatabase();
+            if (null == db) Log.e(TAG, "Unexpected null return of getWriteableDatabase");
+        } catch (final SQLException e) {
+            Log.e(TAG, "Can't open the Ip Memory Store database", e);
+            db = null;
+        } catch (final Exception e) {
+            Log.wtf(TAG, "Impossible exception Ip Memory Store database", e);
+            db = null;
+        }
+        mDb = db;
     }
 
     /**
@@ -61,7 +95,7 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
     public void storeNetworkAttributes(@NonNull final String l2Key,
             @NonNull final NetworkAttributesParcelable attributes,
             @Nullable final IOnStatusListener listener) {
-        // TODO : implement this
+        // TODO : implement this.
     }
 
     /**
@@ -79,7 +113,7 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
     public void storeBlob(@NonNull final String l2Key, @NonNull final String clientId,
             @NonNull final String name, @NonNull final Blob data,
             @Nullable final IOnStatusListener listener) {
-        // TODO : implement this
+        // TODO : implement this.
     }
 
     /**
@@ -99,7 +133,7 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
     @Override
     public void findL2Key(@NonNull final NetworkAttributesParcelable attributes,
             @NonNull final IOnL2KeyResponseListener listener) {
-        // TODO : implement this
+        // TODO : implement this.
     }
 
     /**
@@ -114,7 +148,7 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
     @Override
     public void isSameNetwork(@NonNull final String l2Key1, @NonNull final String l2Key2,
             @NonNull final IOnSameNetworkResponseListener listener) {
-        // TODO : implement this
+        // TODO : implement this.
     }
 
     /**

@@ -26,6 +26,8 @@ import android.annotation.NonNull;
 public class Status {
     public static final int SUCCESS = 0;
 
+    public static final int ERROR_DATABASE_CANNOT_BE_OPENED = -1;
+
     public final int resultCode;
 
     public Status(final int resultCode) {
