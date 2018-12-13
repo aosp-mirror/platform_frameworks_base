@@ -19441,16 +19441,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public boolean isAppStorageSandboxed(int pid, int uid) {
-            if (!StorageManager.hasIsolatedStorage()) {
-                return false;
-            }
+        public int getStorageMountMode(int pid, int uid) {
             if (uid == SHELL_UID || uid == ROOT_UID) {
-                return false;
+                return Zygote.MOUNT_EXTERNAL_FULL;
             }
             synchronized (mPidsSelfLocked) {
                 final ProcessRecord pr = mPidsSelfLocked.get(pid);
-                return pr == null || pr.mountMode != Zygote.MOUNT_EXTERNAL_FULL;
+                return pr == null ? Zygote.MOUNT_EXTERNAL_NONE : pr.mountMode;
             }
         }
     }

@@ -81,6 +81,11 @@ public final class Zygote {
     public static final int MOUNT_EXTERNAL_READ = IVold.REMOUNT_MODE_READ;
     /** Read-write external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_WRITE = IVold.REMOUNT_MODE_WRITE;
+    /**
+     * Mount mode for package installers which should give them access to
+     * all obb dirs in addition to their package sandboxes
+     */
+    public static final int MOUNT_EXTERNAL_INSTALLER = IVold.REMOUNT_MODE_INSTALLER;
     /** Read-write external storage should be mounted instead of package sandbox */
     public static final int MOUNT_EXTERNAL_FULL = IVold.REMOUNT_MODE_FULL;
 

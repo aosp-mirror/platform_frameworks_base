@@ -16,6 +16,11 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.INSTALL_PACKAGES;
+import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.OP_REQUEST_INSTALL_PACKAGES;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.storage.OnObbStateChangeListener.ERROR_ALREADY_MOUNTED;
@@ -51,6 +56,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -116,6 +122,7 @@ import android.util.TimeUtils;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.AppFuseMount;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.FuseUnavailableMountException;
@@ -452,6 +459,9 @@ class StorageManagerService extends IStorageManager.Stub
     private PackageManagerInternal mPmInternal;
     private UserManagerInternal mUmInternal;
     private ActivityManagerInternal mAmInternal;
+
+    private IPackageManager mIPackageManager;
+    private IAppOpsService mIAppOpsService;
 
     private final Callbacks mCallbacks;
     private final LockPatternUtils mLockPatternUtils;
@@ -1570,6 +1580,10 @@ class StorageManagerService extends IStorageManager.Stub
                 .registerScreenObserver(this);
 
         mSystemReady = true;
+        mIPackageManager = IPackageManager.Stub.asInterface(
+                ServiceManager.getService("package"));
+        mIAppOpsService = IAppOpsService.Stub.asInterface(
+                ServiceManager.getService(Context.APP_OPS_SERVICE));
         mHandler.obtainMessage(H_SYSTEM_READY).sendToTarget();
     }
 
@@ -3117,7 +3131,8 @@ class StorageManagerService extends IStorageManager.Stub
             throw new SecurityException("Shady looking path " + path);
         }
 
-        if (!mAmInternal.isAppStorageSandboxed(pid, uid)) {
+        final int mountMode = mAmInternal.getStorageMountMode(pid, uid);
+        if (mountMode == Zygote.MOUNT_EXTERNAL_FULL) {
             return path;
         }
 
@@ -3125,6 +3140,11 @@ class StorageManagerService extends IStorageManager.Stub
         if (m.matches()) {
             final String device = m.group(1);
             final String devicePath = m.group(2);
+
+            if (mountMode == Zygote.MOUNT_EXTERNAL_INSTALLER
+                    && devicePath.startsWith("Android/obb/")) {
+                return path;
+            }
 
             // Does path belong to any packages belonging to this UID? If so,
             // they get to go straight through to legacy paths.
@@ -3477,6 +3497,27 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    private int getMountMode(int uid, String packageName) {
+        try {
+            if (Process.isIsolated(uid)) {
+                return Zygote.MOUNT_EXTERNAL_NONE;
+            }
+            if (mIPackageManager.checkUidPermission(WRITE_MEDIA_STORAGE, uid)
+                    == PERMISSION_GRANTED) {
+                return Zygote.MOUNT_EXTERNAL_FULL;
+            } else if (mIPackageManager.checkUidPermission(INSTALL_PACKAGES, uid)
+                    == PERMISSION_GRANTED || mIAppOpsService.checkOperation(
+                            OP_REQUEST_INSTALL_PACKAGES, uid, packageName) == MODE_ALLOWED) {
+                return Zygote.MOUNT_EXTERNAL_INSTALLER;
+            } else {
+                return Zygote.MOUNT_EXTERNAL_WRITE;
+            }
+        } catch (RemoteException e) {
+            // Should not happen
+        }
+        return Zygote.MOUNT_EXTERNAL_NONE;
+    }
+
     private static class Callbacks extends Handler {
         private static final int MSG_STORAGE_STATE_CHANGED = 1;
         private static final int MSG_VOLUME_STATE_CHANGED = 2;
@@ -3718,6 +3759,9 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public int getExternalStorageMountMode(int uid, String packageName) {
+            if (ENABLE_ISOLATED_STORAGE) {
+                return getMountMode(uid, packageName);
+            }
             // No locking - CopyOnWriteArrayList
             int mountMode = Integer.MAX_VALUE;
             for (ExternalStorageMountPolicy policy : mPolicies) {
@@ -3753,6 +3797,9 @@ class StorageManagerService extends IStorageManager.Stub
             // PackageManagerService and AppOpsService.
             if (uid == Process.SYSTEM_UID) {
                 return true;
+            }
+            if (ENABLE_ISOLATED_STORAGE) {
+                return getMountMode(uid, packageName) != Zygote.MOUNT_EXTERNAL_NONE;
             }
             // No locking - CopyOnWriteArrayList
             for (ExternalStorageMountPolicy policy : mPolicies) {
