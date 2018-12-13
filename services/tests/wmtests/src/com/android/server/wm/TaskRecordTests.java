@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 
@@ -31,10 +34,12 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Xml;
+import android.view.DisplayInfo;
 
 import androidx.test.filters.MediumTest;
 
@@ -66,10 +71,13 @@ public class TaskRecordTests extends ActivityTestsBase {
 
     private static final String TASK_TAG = "task";
 
+    private Rect mParentBounds;
+
     @Before
     public void setUp() throws Exception {
         TaskRecord.setTaskRecordFactory(null);
         setupActivityTaskManagerService();
+        mParentBounds = new Rect(10 /*left*/, 30 /*top*/, 80 /*right*/, 60 /*bottom*/);
     }
 
     @Test
@@ -122,6 +130,72 @@ public class TaskRecordTests extends ActivityTestsBase {
         assertFalse(task.returnsToHomeStack());
         task.intent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME);
         assertTrue(task.returnsToHomeStack());
+    }
+
+    /** Ensures that bounds are clipped to their parent. */
+    @Test
+    public void testAppBounds_BoundsClipping() {
+        final Rect shiftedBounds = new Rect(mParentBounds);
+        shiftedBounds.offset(10, 10);
+        final Rect expectedBounds = new Rect(mParentBounds);
+        expectedBounds.intersect(shiftedBounds);
+        testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, shiftedBounds,
+                expectedBounds);
+    }
+
+    /** Ensures that empty bounds are not propagated to the configuration. */
+    @Test
+    public void testAppBounds_EmptyBounds() {
+        final Rect emptyBounds = new Rect();
+        testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, emptyBounds,
+                null /*ExpectedBounds*/);
+    }
+
+    /** Ensures that bounds on freeform stacks are not clipped. */
+    @Test
+    public void testAppBounds_FreeFormBounds() {
+        final Rect freeFormBounds = new Rect(mParentBounds);
+        freeFormBounds.offset(10, 10);
+        testStackBoundsConfiguration(WINDOWING_MODE_FREEFORM, mParentBounds, freeFormBounds,
+                freeFormBounds);
+    }
+
+    /** Ensures that fully contained bounds are not clipped. */
+    @Test
+    public void testAppBounds_ContainedBounds() {
+        final Rect insetBounds = new Rect(mParentBounds);
+        insetBounds.inset(5, 5, 5, 5);
+        testStackBoundsConfiguration(
+                WINDOWING_MODE_FULLSCREEN, mParentBounds, insetBounds, insetBounds);
+    }
+
+    /** Ensures that full screen free form bounds are clipped */
+    @Test
+    public void testAppBounds_FullScreenFreeFormBounds() {
+        ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
+        DisplayInfo info = new DisplayInfo();
+        display.mDisplay.getDisplayInfo(info);
+        final Rect fullScreenBounds = new Rect(0, 0, info.logicalWidth, info.logicalHeight);
+        testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, fullScreenBounds,
+                mParentBounds);
+    }
+
+    private void testStackBoundsConfiguration(int windowingMode, Rect parentBounds, Rect bounds,
+            Rect expectedConfigBounds) {
+
+        ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
+        ActivityStack stack = display.createStack(windowingMode, ACTIVITY_TYPE_STANDARD,
+                true /* onTop */);
+        TaskRecord task = new TaskBuilder(mSupervisor).setStack(stack).build();
+
+        final Configuration parentConfig = stack.getConfiguration();
+        parentConfig.windowConfiguration.setAppBounds(parentBounds);
+        task.setBounds(bounds);
+
+        task.resolveOverrideConfiguration(parentConfig);
+        // Assert that both expected and actual are null or are equal to each other
+        assertEquals(expectedConfigBounds,
+                task.getResolvedOverrideConfiguration().windowConfiguration.getAppBounds());
     }
 
     private byte[] serializeToBytes(TaskRecord r) throws IOException, XmlPullParserException {

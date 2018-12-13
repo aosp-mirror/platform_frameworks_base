@@ -3799,7 +3799,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // changed, so we should reflect that check here as well.
         final PinnedActivityStack stack = r.getActivityStack();
         final PinnedStackWindowController windowController = stack.getWindowContainerController();
-        return !windowController.isAnimatingBoundsToFullscreen();
+        return !windowController.mContainer.isAnimatingBoundsToFullscreen();
     }
 
     @Override

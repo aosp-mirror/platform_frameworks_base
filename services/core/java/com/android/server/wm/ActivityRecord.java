@@ -717,8 +717,12 @@ final class ActivityRecord extends ConfigurationContainer {
             // to forcing the update of the picture-in-picture mode as a part of the PiP animation.
             mLastReportedPictureInPictureMode = inPictureInPictureMode;
             mLastReportedMultiWindowMode = inPictureInPictureMode;
-            final Configuration newConfig = task.computeNewOverrideConfigurationForBounds(
-                    targetStackBounds, null);
+            final Configuration newConfig = new Configuration();
+            if (targetStackBounds != null && !targetStackBounds.isEmpty()) {
+                task.computeResolvedOverrideConfiguration(newConfig,
+                        task.getParent().getConfiguration(),
+                        task.getRequestedOverrideConfiguration());
+            }
             schedulePictureInPictureModeChanged(newConfig);
             scheduleMultiWindowModeChanged(newConfig);
         }
@@ -2558,12 +2562,10 @@ final class ActivityRecord extends ConfigurationContainer {
 
         setBounds(mTmpBounds);
 
-        final Rect updatedBounds = getRequestedOverrideBounds();
-
         // Bounds changed...update configuration to match.
         if (!matchParentBounds()) {
-            task.computeOverrideConfiguration(mTmpConfig, updatedBounds,
-                    false /* overrideWidth */, false /* overrideHeight */);
+            task.computeResolvedOverrideConfiguration(mTmpConfig,
+                    task.getParent().getConfiguration(), getRequestedOverrideConfiguration());
         }
 
         onRequestedOverrideConfigurationChanged(mTmpConfig);

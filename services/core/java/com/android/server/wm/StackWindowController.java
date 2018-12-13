@@ -21,7 +21,6 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -29,8 +28,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.DisplayCutout;
-import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -49,11 +46,7 @@ public class StackWindowController
 
     private final H mHandler;
 
-    // Temp bounds only used in adjustConfigurationForBounds()
-    private final Rect mTmpRect = new Rect();
-    private final Rect mTmpStableInsets = new Rect();
-    private final Rect mTmpNonDecorInsets = new Rect();
-    private final Rect mTmpDisplayBounds = new Rect();
+    final Rect mTmpBounds = new Rect();
 
     public StackWindowController(int stackId, StackWindowListener listener, int displayId,
             boolean onTop, Rect outBounds) {
@@ -212,126 +205,6 @@ public class StackWindowController
             return;
         }
         outBounds.setEmpty();
-    }
-
-    /**
-     * Adjusts the screen size in dp's for the {@param config} for the given params. The provided
-     * params represent the desired state of a configuration change. Since this utility is used
-     * before mContainer has been updated, any relevant properties (like {@param windowingMode})
-     * need to be passed in.
-     */
-    public void adjustConfigurationForBounds(Rect bounds,
-            Rect nonDecorBounds, Rect stableBounds, boolean overrideWidth,
-            boolean overrideHeight, float density, Configuration config,
-            Configuration parentConfig, int windowingMode) {
-        final TaskStack stack = mContainer;
-        final DisplayContent displayContent = stack.getDisplayContent();
-        final DisplayInfo di = displayContent.getDisplayInfo();
-        final DisplayCutout displayCutout = di.displayCutout;
-        final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
-
-        // Get the insets and display bounds
-        displayPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                displayCutout, mTmpStableInsets);
-        displayPolicy.getNonDecorInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                displayCutout, mTmpNonDecorInsets);
-        mTmpDisplayBounds.set(0, 0, di.logicalWidth, di.logicalHeight);
-
-        int width;
-        int height;
-
-        final Rect parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
-
-        config.windowConfiguration.setBounds(bounds);
-        config.windowConfiguration.setAppBounds(!bounds.isEmpty() ? bounds : null);
-        boolean intersectParentBounds = false;
-
-        if (WindowConfiguration.isFloating(windowingMode)) {
-            // Floating tasks should not be resized to the screen's bounds.
-
-            if (windowingMode == WindowConfiguration.WINDOWING_MODE_PINNED
-                    && bounds.width() == mTmpDisplayBounds.width()
-                    && bounds.height() == mTmpDisplayBounds.height()) {
-                // If the bounds we are animating is the same as the fullscreen stack
-                // dimensions, then apply the same inset calculations that we normally do for
-                // the fullscreen stack, without intersecting it with the display bounds
-                stableBounds.inset(mTmpStableInsets);
-                nonDecorBounds.inset(mTmpNonDecorInsets);
-                // Move app bounds to zero to apply intersection with parent correctly. They are
-                // used only for evaluating width and height, so it's OK to move them around.
-                config.windowConfiguration.getAppBounds().offsetTo(0, 0);
-                intersectParentBounds = true;
-            }
-            width = (int) (stableBounds.width() / density);
-            height = (int) (stableBounds.height() / density);
-        } else {
-            // For calculating screenWidthDp, screenWidthDp, we use the stable inset screen
-            // area, i.e. the screen area without the system bars.
-            // Additionally task dimensions should not be bigger than its parents dimensions.
-            // The non decor inset are areas that could never be removed in Honeycomb. See
-            // {@link WindowManagerPolicy#getNonDecorInsetsLw}.
-            intersectDisplayBoundsExcludeInsets(nonDecorBounds, bounds, mTmpNonDecorInsets,
-                    mTmpDisplayBounds, overrideWidth, overrideHeight);
-            intersectDisplayBoundsExcludeInsets(stableBounds, bounds, mTmpStableInsets,
-                    mTmpDisplayBounds, overrideWidth, overrideHeight);
-            width = Math.min((int) (stableBounds.width() / density),
-                    parentConfig.screenWidthDp);
-            height = Math.min((int) (stableBounds.height() / density),
-                    parentConfig.screenHeightDp);
-            intersectParentBounds = true;
-        }
-
-        if (intersectParentBounds && config.windowConfiguration.getAppBounds() != null) {
-            config.windowConfiguration.getAppBounds().intersect(parentAppBounds);
-        }
-
-        config.screenWidthDp = width;
-        config.screenHeightDp = height;
-        config.smallestScreenWidthDp = getSmallestWidthForTaskBounds(
-                bounds, density, windowingMode);
-    }
-
-    /**
-     * Intersects the specified {@code inOutBounds} with the display frame that excludes the stable
-     * inset areas.
-     *
-     * @param inOutBounds The inOutBounds to subtract the stable inset areas from.
-     */
-    private void intersectDisplayBoundsExcludeInsets(Rect inOutBounds, Rect inInsetBounds,
-            Rect stableInsets, Rect displayBounds, boolean overrideWidth, boolean overrideHeight) {
-        mTmpRect.set(inInsetBounds);
-        mService.intersectDisplayInsetBounds(displayBounds, stableInsets, mTmpRect);
-        int leftInset = mTmpRect.left - inInsetBounds.left;
-        int topInset = mTmpRect.top - inInsetBounds.top;
-        int rightInset = overrideWidth ? 0 : inInsetBounds.right - mTmpRect.right;
-        int bottomInset = overrideHeight ? 0 : inInsetBounds.bottom - mTmpRect.bottom;
-        inOutBounds.inset(leftInset, topInset, rightInset, bottomInset);
-    }
-
-    /**
-     * Calculates the smallest width for a task given the target {@param bounds} and
-     * {@param windowingMode}. Avoid using values from mContainer since they can be out-of-date.
-     *
-     * @return the smallest width to be used in the Configuration, in dips
-     */
-    private int getSmallestWidthForTaskBounds(Rect bounds, float density, int windowingMode) {
-        final DisplayContent displayContent = mContainer.getDisplayContent();
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-
-        if (bounds == null || (bounds.width() == displayInfo.logicalWidth &&
-                bounds.height() == displayInfo.logicalHeight)) {
-            // If the bounds are fullscreen, return the value of the fullscreen configuration
-            return displayContent.getConfiguration().smallestScreenWidthDp;
-        } else if (WindowConfiguration.isFloating(windowingMode)) {
-            // For floating tasks, calculate the smallest width from the bounds of the task
-            return (int) (Math.min(bounds.width(), bounds.height()) / density);
-        } else {
-            // Iterating across all screen orientations, and return the minimum of the task
-            // width taking into account that the bounds might change because the snap algorithm
-            // snaps to a different value
-            return displayContent.getDockedDividerController()
-                    .getSmallestWidthDpForBounds(bounds);
-        }
     }
 
     void requestResize(Rect bounds) {
