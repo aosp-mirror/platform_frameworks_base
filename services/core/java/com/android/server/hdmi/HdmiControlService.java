@@ -646,6 +646,7 @@ public class HdmiControlService extends SystemService {
         return enabled ? ENABLED : DISABLED;
     }
 
+    @VisibleForTesting
     boolean readBooleanSetting(String key, boolean defVal) {
         ContentResolver cr = getContext().getContentResolver();
         return Global.getInt(cr, key, toInt(defVal)) == ENABLED;
@@ -654,6 +655,11 @@ public class HdmiControlService extends SystemService {
     void writeBooleanSetting(String key, boolean value) {
         ContentResolver cr = getContext().getContentResolver();
         Global.putInt(cr, key, toInt(value));
+    }
+
+    void writeStringSetting(String key, String value) {
+        ContentResolver cr = getContext().getContentResolver();
+        Global.putString(cr, key, value);
     }
 
     private void initializeCec(int initiatedBy) {
