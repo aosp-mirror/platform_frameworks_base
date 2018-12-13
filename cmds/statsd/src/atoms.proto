@@ -194,6 +194,14 @@ message Atom {
         GnssNfwNotificationReported gnss_nfw_notification_reported = 131;
         GnssConfigurationReported gnss_configuration_reported = 132;
         UsbPortOverheatEvent usb_port_overheat_event_reported = 133;
+        NfcErrorOccurred nfc_error_occurred = 134;
+        NfcStateChanged nfc_state_changed = 135;
+        NfcBeamOccurred nfc_beam_occurred = 136;
+        NfcCardemulationOccurred nfc_cardemulation_occurred = 137;
+        NfcTagOccurred nfc_tag_occurred = 138;
+        NfcHceTransactionOccurred nfc_hce_transaction_occurred = 139;
+        SeStateChanged se_state_changed = 140;
+        SeOmapiReported se_omapi_reported = 141;
     }
 
     // Pulled events will start at field 10000.
@@ -4308,4 +4316,139 @@ message GnssConfigurationReported {
     // non-framework location access permission. The package names are concatenated in one string
     // with spaces as separators.
     optional string enabled_proxy_app_package_name_list = 13;
+}
+
+/**
+ * Logs when a NFC device's error occurred.
+ * Logged from:
+ *     system/nfc/src/nfc/nfc/nfc_ncif.cc
+ *     packages/apps/Nfc/src/com/android/nfc/cardemulation/AidRoutingManager.java
+ */
+message NfcErrorOccurred {
+  enum Type {
+    UNKNOWN = 0;
+    CMD_TIMEOUT = 1;
+    ERROR_NOTIFICATION = 2;
+    AID_OVERFLOW = 3;
+  }
+  optional Type type = 1;
+  // If it's nci cmd timeout, log the timeout command.
+  optional uint32 nci_cmd = 2;
+
+  optional uint32 error_ntf_status_code = 3;
+}
+
+/**
+ * Logs when a NFC device's state changed event
+ * Logged from:
+ *     packages/apps/Nfc/src/com/android/nfc/NfcService.java
+ */
+message NfcStateChanged {
+  enum State {
+    UNKNOWN = 0;
+    OFF = 1;
+    ON = 2;
+    ON_LOCKED = 3; // Secure Nfc enabled.
+    CRASH_RESTART = 4; // NfcService watchdog timeout restart.
+  }
+  optional State state = 1;
+}
+
+/**
+ * Logs when a NFC Beam Transaction occurred.
+ * Logged from:
+ *     packages/apps/Nfc/src/com/android/nfc/P2pLinkManager.java
+ */
+message NfcBeamOccurred {
+  enum Operation {
+      UNKNOWN = 0;
+      SEND = 1;
+      RECEIVE = 2;
+  }
+  optional Operation operation = 1;
+}
+
+/**
+ * Logs when a NFC Card Emulation Transaction occurred.
+ * Logged from:
+ *     packages/apps/Nfc/src/com/android/nfc/cardemulation/HostEmulationManager.java
+ *     packages/apps/Nfc/src/com/android/nfc/cardemulation/HostNfcFEmulationManager.java
+ */
+message NfcCardemulationOccurred {
+  enum Category {
+      UNKNOWN = 0;
+      HCE_PAYMENT = 1;
+      HCE_OTHER = 2;
+      OFFHOST = 3;
+  }
+  // Transaction belongs to HCE payment or HCE other category, or offhost.
+  optional Category category = 1;
+  // SeName from transaction: SIMx, eSEx, HCE, HCEF.
+  optional string se_name = 2;
+}
+
+/**
+ * Logs when a NFC Tag event occurred.
+ * Logged from:
+ *     packages/apps/Nfc/src/com/android/nfc/NfcDispatcher.java
+ */
+message NfcTagOccurred {
+  enum Type {
+      UNKNOWN = 0;
+      URL = 1;
+      BT_PAIRING = 2;
+      PROVISION = 3;
+      WIFI_CONNECT = 4;
+      APP_LAUNCH = 5;
+      OTHERS = 6;
+  }
+  optional Type type = 1;
+}
+
+/**
+ * Logs when Hce transaction triggered
+ * Logged from:
+ *     system/nfc/src/nfc/nfc/nfc_ncif.cc
+ */
+message NfcHceTransactionOccurred {
+    // The latency period(in microseconds) it took for the first HCE data
+    // exchange.
+    optional uint32 latency_micros = 1;
+}
+
+/**
+ * Logs when SecureElement state event changed
+ * Logged from:
+ *     packages/apps/SecureElement/src/com/android/se/Terminal.java
+ */
+message SeStateChanged {
+  enum State {
+    UNKNOWN = 0;
+    INITIALIZED = 1;
+    DISCONNECTED = 2;
+    CONNECTED = 3;
+    HALCRASH = 4;
+  }
+  optional State state = 1;
+
+  optional string state_change_reason = 2;
+  // SIMx or eSEx.
+  optional string terminal = 3;
+}
+
+/**
+ * Logs when Omapi API used
+ * Logged from:
+ *     packages/apps/SecureElement/src/com/android/se/Terminal.java
+ */
+message SeOmapiReported {
+  enum Operation {
+    UNKNOWN = 0;
+    OPEN_CHANNEL = 1;
+  }
+  optional Operation operation = 1;
+  // SIMx or eSEx.
+  optional string terminal = 2;
+
+  optional string packageName = 3;
 }
