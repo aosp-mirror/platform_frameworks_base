@@ -93,8 +93,11 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
       util::make_unique<Reference>(expected_ref), context->GetDiagnostics()));
 
   // Make an overlayable resource.
+  OverlayableItem overlayable_item(std::make_shared<Overlayable>(
+      "OverlayableName", "overlay://theme", Source("res/values/overlayable.xml", 40)));
+  overlayable_item.source = Source("res/values/overlayable.xml", 42);
   ASSERT_TRUE(table->SetOverlayable(test::ParseNameOrDie("com.app.a:integer/overlayable"),
-                                    Overlayable{}, test::GetDiagnostics()));
+                                    overlayable_item, test::GetDiagnostics()));
 
   pb::ResourceTable pb_table;
   SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
@@ -160,9 +163,15 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
       new_table.FindResource(test::ParseNameOrDie("com.app.a:integer/overlayable"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  ASSERT_TRUE(search_result.value().entry->overlayable);
-  EXPECT_THAT(search_result.value().entry->overlayable.value().policies,
-              Eq(Overlayable::Policy::kNone));
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  OverlayableItem& result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("OverlayableName"));
+  EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(result_overlayable_item.overlayable->source.path, Eq("res/values/overlayable.xml"));
+  EXPECT_THAT(result_overlayable_item.overlayable->source.line, Eq(40));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kNone));
+  EXPECT_THAT(result_overlayable_item.source.path, Eq("res/values/overlayable.xml"));
+  EXPECT_THAT(result_overlayable_item.source.line, Eq(42));
 }
 
 TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
@@ -503,26 +512,31 @@ TEST(ProtoSerializeTest, SerializeDeserializeConfiguration) {
 }
 
 TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
-  Overlayable overlayable_foo{};
-  overlayable_foo.policies |= Overlayable::Policy::kSystem;
-  overlayable_foo.policies |= Overlayable::Policy::kProduct;
+  OverlayableItem overlayable_item_foo(std::make_shared<Overlayable>(
+      "CustomizableResources", "overlay://customization"));
+  overlayable_item_foo.policies |= OverlayableItem::Policy::kSystem;
+  overlayable_item_foo.policies |= OverlayableItem::Policy::kProduct;
 
-  Overlayable overlayable_bar{};
-  overlayable_bar.policies |= Overlayable::Policy::kProductServices;
-  overlayable_bar.policies |= Overlayable::Policy::kVendor;
+  OverlayableItem overlayable_item_bar(std::make_shared<Overlayable>(
+      "TaskBar", "overlay://theme"));
+  overlayable_item_bar.policies |= OverlayableItem::Policy::kProductServices;
+  overlayable_item_bar.policies |= OverlayableItem::Policy::kVendor;
 
-  Overlayable overlayable_baz{};
-  overlayable_baz.policies |= Overlayable::Policy::kPublic;
+  OverlayableItem overlayable_item_baz(std::make_shared<Overlayable>(
+      "FontPack", "overlay://theme"));
+  overlayable_item_baz.policies |= OverlayableItem::Policy::kPublic;
 
-  Overlayable overlayable_biz{};
+  OverlayableItem overlayable_item_biz(std::make_shared<Overlayable>(
+      "Other", "overlay://customization"));
+  overlayable_item_biz.comment ="comment";
 
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetOverlayable("com.app.a:bool/foo", overlayable_foo)
-          .SetOverlayable("com.app.a:bool/bar", overlayable_bar)
-          .SetOverlayable("com.app.a:bool/baz", overlayable_baz)
-          .SetOverlayable("com.app.a:bool/biz", overlayable_biz)
+          .SetOverlayable("com.app.a:bool/foo", overlayable_item_foo)
+          .SetOverlayable("com.app.a:bool/bar", overlayable_item_bar)
+          .SetOverlayable("com.app.a:bool/baz", overlayable_item_baz)
+          .SetOverlayable("com.app.a:bool/biz", overlayable_item_biz)
           .AddValue("com.app.a:bool/fiz", ResourceUtils::TryParseBool("true"))
           .Build();
 
@@ -538,33 +552,41 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   Maybe<ResourceTable::SearchResult> search_result =
       new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/foo"));
   ASSERT_TRUE(search_result);
-  ASSERT_TRUE(search_result.value().entry->overlayable);
-  Overlayable result_overlayable = search_result.value().entry->overlayable.value();
-  EXPECT_THAT(result_overlayable.policies, Eq(Overlayable::Policy::kSystem
-                                              | Overlayable::Policy::kProduct));
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  OverlayableItem& overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(overlayable_item.overlayable->name, Eq("CustomizableResources"));
+  EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://customization"));
+  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kSystem
+                                              | OverlayableItem::Policy::kProduct));
 
   search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/bar"));
   ASSERT_TRUE(search_result);
-  ASSERT_TRUE(search_result.value().entry->overlayable);
-  result_overlayable = search_result.value().entry->overlayable.value();
-  EXPECT_THAT(result_overlayable.policies, Eq(Overlayable::Policy::kProductServices
-                                              | Overlayable::Policy::kVendor));
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(overlayable_item.overlayable->name, Eq("TaskBar"));
+  EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kProductServices
+                                              | OverlayableItem::Policy::kVendor));
 
   search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/baz"));
   ASSERT_TRUE(search_result);
-  ASSERT_TRUE(search_result.value().entry->overlayable);
-  result_overlayable = search_result.value().entry->overlayable.value();
-  EXPECT_THAT(result_overlayable.policies, Overlayable::Policy::kPublic);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(overlayable_item.overlayable->name, Eq("FontPack"));
+  EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kPublic));
 
   search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/biz"));
   ASSERT_TRUE(search_result);
-  ASSERT_TRUE(search_result.value().entry->overlayable);
-  result_overlayable = search_result.value().entry->overlayable.value();
-  EXPECT_THAT(result_overlayable.policies, Overlayable::Policy::kNone);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(overlayable_item.overlayable->name, Eq("Other"));
+  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kNone));
+  EXPECT_THAT(overlayable_item.comment, Eq("comment"));
 
   search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/fiz"));
   ASSERT_TRUE(search_result);
-  ASSERT_FALSE(search_result.value().entry->overlayable);
+  ASSERT_FALSE(search_result.value().entry->overlayable_item);
 }
 
 }  // namespace aapt

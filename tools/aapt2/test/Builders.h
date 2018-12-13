@@ -74,7 +74,7 @@ class ResourceTableBuilder {
   ResourceTableBuilder& SetSymbolState(const android::StringPiece& name, const ResourceId& id,
                                        Visibility::Level level, bool allow_new = false);
   ResourceTableBuilder& SetOverlayable(const android::StringPiece& name,
-                                       const Overlayable& overlayable);
+                                       const OverlayableItem& overlayable);
 
   StringPool* string_pool();
   std::unique_ptr<ResourceTable> Build();

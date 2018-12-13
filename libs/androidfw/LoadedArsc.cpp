@@ -623,7 +623,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
               }
 
               // Add the pairing of overlayable properties to resource ids to the package
-              OverlayableInfo overlayable_info;
+              OverlayableInfo overlayable_info{};
               overlayable_info.policy_flags = policy_header->policy_flags;
               loaded_package->overlayable_infos_.push_back(std::make_pair(overlayable_info, ids));
               break;

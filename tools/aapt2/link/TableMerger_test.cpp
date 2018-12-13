@@ -437,14 +437,16 @@ TEST_F(TableMergerTest, OverlaidStyleablesAndStylesShouldBeMerged) {
 }
 
 TEST_F(TableMergerTest, SetOverlayable) {
-  Overlayable overlayable{};
-  overlayable.policies |= Overlayable::Policy::kProduct;
-  overlayable.policies |= Overlayable::Policy::kVendor;
+  auto overlayable = std::make_shared<Overlayable>("CustomizableResources",
+                                                  "overlay://customization");
+  OverlayableItem overlayable_item(overlayable);
+  overlayable_item.policies |= OverlayableItem::Policy::kProduct;
+  overlayable_item.policies |= OverlayableItem::Policy::kVendor;
 
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
-          .SetOverlayable("bool/foo", overlayable)
+          .SetOverlayable("bool/foo", overlayable_item)
           .Build();
 
   std::unique_ptr<ResourceTable> table_b =
@@ -463,26 +465,30 @@ TEST_F(TableMergerTest, SetOverlayable) {
   const ResourceName name = test::ParseNameOrDie("com.app.a:bool/foo");
   Maybe<ResourceTable::SearchResult> search_result = final_table.FindResource(name);
   ASSERT_TRUE(search_result);
-  ASSERT_TRUE(search_result.value().entry->overlayable);
-  Overlayable& result_overlayable = search_result.value().entry->overlayable.value();
-  EXPECT_THAT(result_overlayable.policies, Eq(Overlayable::Policy::kProduct
-                                              | Overlayable::Policy::kVendor));
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  OverlayableItem& result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("CustomizableResources"));
+  EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://customization"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kProduct
+                                                   | OverlayableItem::Policy::kVendor));
 }
 
 TEST_F(TableMergerTest, SetOverlayableLater) {
+  auto overlayable = std::make_shared<Overlayable>("CustomizableResources",
+                                                  "overlay://customization");
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
           .AddSimple("bool/foo")
           .Build();
 
-  Overlayable overlayable{};
-  overlayable.policies |= Overlayable::Policy::kPublic;
-  overlayable.policies |= Overlayable::Policy::kProductServices;
+  OverlayableItem overlayable_item(overlayable);
+  overlayable_item.policies |= OverlayableItem::Policy::kPublic;
+  overlayable_item.policies |= OverlayableItem::Policy::kProductServices;
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
-          .SetOverlayable("bool/foo", overlayable)
+          .SetOverlayable("bool/foo", overlayable_item)
           .Build();
 
   ResourceTable final_table;
@@ -495,27 +501,33 @@ TEST_F(TableMergerTest, SetOverlayableLater) {
   const ResourceName name = test::ParseNameOrDie("com.app.a:bool/foo");
   Maybe<ResourceTable::SearchResult> search_result = final_table.FindResource(name);
   ASSERT_TRUE(search_result);
-  ASSERT_TRUE(search_result.value().entry->overlayable);
-  Overlayable& result_overlayable = search_result.value().entry->overlayable.value();
-  EXPECT_THAT(result_overlayable.policies, Eq(Overlayable::Policy::kPublic
-                                              | Overlayable::Policy::kProductServices));
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  OverlayableItem& result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("CustomizableResources"));
+  EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://customization"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kPublic
+                                                   | OverlayableItem::Policy::kProductServices));
 }
 
-TEST_F(TableMergerTest, SetOverlayableSamePolicesFail) {
-  Overlayable overlayable_first{};
-  overlayable_first.policies |= Overlayable::Policy::kProduct;
+TEST_F(TableMergerTest, SameResourceDifferentNameFail) {
+  auto overlayable_first = std::make_shared<Overlayable>("CustomizableResources",
+                                                         "overlay://customization");
+  OverlayableItem overlayable_item_first(overlayable_first);
+  overlayable_item_first.policies |= OverlayableItem::Policy::kProduct;
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
-          .SetOverlayable("bool/foo", overlayable_first)
+          .SetOverlayable("bool/foo", overlayable_item_first)
           .Build();
 
-  Overlayable overlayable_second{};
-  overlayable_second.policies |= Overlayable::Policy::kProduct;
+  auto overlayable_second = std::make_shared<Overlayable>("ThemeResources",
+                                                          "overlay://theme");
+  OverlayableItem overlayable_item_second(overlayable_second);
+  overlayable_item_second.policies |= OverlayableItem::Policy::kProduct;
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
-          .SetOverlayable("bool/foo", overlayable_second)
+          .SetOverlayable("bool/foo", overlayable_item_second)
           .Build();
 
   ResourceTable final_table;
@@ -526,21 +538,24 @@ TEST_F(TableMergerTest, SetOverlayableSamePolicesFail) {
   ASSERT_FALSE(merger.Merge({}, table_b.get(), false /*overlay*/));
 }
 
-TEST_F(TableMergerTest, SetOverlayableDifferentPolicesFail) {
-  Overlayable overlayable_first{};
-  overlayable_first.policies |= Overlayable::Policy::kVendor;
+TEST_F(TableMergerTest, SameResourceSameNameFail) {
+  auto overlayable = std::make_shared<Overlayable>("CustomizableResources",
+                                                  "overlay://customization");
+
+  OverlayableItem overlayable_item_first(overlayable);
+  overlayable_item_first.policies |= OverlayableItem::Policy::kProduct;
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
-          .SetOverlayable("bool/foo",overlayable_first)
+          .SetOverlayable("bool/foo", overlayable_item_first)
           .Build();
 
-  Overlayable overlayable_second{};
-  overlayable_second.policies |= Overlayable::Policy::kProduct;
+  OverlayableItem overlayable_item_second(overlayable);
+  overlayable_item_second.policies |= OverlayableItem::Policy::kSystem;
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
-          .SetOverlayable("bool/foo", overlayable_second)
+          .SetOverlayable("bool/foo", overlayable_item_second)
           .Build();
 
   ResourceTable final_table;

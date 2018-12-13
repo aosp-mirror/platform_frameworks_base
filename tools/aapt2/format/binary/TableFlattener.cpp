@@ -429,29 +429,29 @@ class PackageFlattener {
       CHECK(bool(type->id)) << "type must have an ID set when flattening <overlayable>";
       for (auto& entry : type->entries) {
         CHECK(bool(type->id)) << "entry must have an ID set when flattening <overlayable>";
-        if (!entry->overlayable) {
+        if (!entry->overlayable_item) {
           continue;
         }
 
-        Overlayable overlayable = entry->overlayable.value();
-        uint32_t policy_flags = Overlayable::Policy::kNone;
-        if (overlayable.policies & Overlayable::Policy::kPublic) {
+        OverlayableItem& overlayable = entry->overlayable_item.value();
+        uint32_t policy_flags = OverlayableItem::Policy::kNone;
+        if (overlayable.policies & OverlayableItem::Policy::kPublic) {
           policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
         }
-        if (overlayable.policies & Overlayable::Policy::kSystem) {
+        if (overlayable.policies & OverlayableItem::Policy::kSystem) {
           policy_flags |= ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION;
         }
-        if (overlayable.policies & Overlayable::Policy::kVendor) {
+        if (overlayable.policies & OverlayableItem::Policy::kVendor) {
           policy_flags |= ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION;
         }
-        if (overlayable.policies & Overlayable::Policy::kProduct) {
+        if (overlayable.policies & OverlayableItem::Policy::kProduct) {
           policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION;
         }
-        if (overlayable.policies & Overlayable::Policy::kProductServices) {
+        if (overlayable.policies & OverlayableItem::Policy::kProductServices) {
           policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_SERVICES_PARTITION;
         }
 
-        if (overlayable.policies == Overlayable::Policy::kNone) {
+        if (overlayable.policies == OverlayableItem::Policy::kNone) {
           // Encode overlayable entries defined without a policy as publicly overlayable
           policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
         }

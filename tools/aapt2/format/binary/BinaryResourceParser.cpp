@@ -434,6 +434,8 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
     return false;
   }
 
+  auto overlayable = std::make_shared<Overlayable>();
+
   ResChunkPullParser parser(GetChunkData(chunk),
                             GetChunkDataLen(chunk));
   while (ResChunkPullParser::IsGoodEvent(parser.Next())) {
@@ -441,25 +443,25 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
       const ResTable_overlayable_policy_header* policy_header =
           ConvertTo<ResTable_overlayable_policy_header>(parser.chunk());
 
-      Overlayable::PolicyFlags policies = Overlayable::Policy::kNone;
+      OverlayableItem::PolicyFlags policies = OverlayableItem::Policy::kNone;
       if (policy_header->policy_flags & ResTable_overlayable_policy_header::POLICY_PUBLIC) {
-        policies |= Overlayable::Policy::kPublic;
+        policies |= OverlayableItem::Policy::kPublic;
       }
       if (policy_header->policy_flags
           & ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION) {
-        policies |= Overlayable::Policy::kSystem;
+        policies |= OverlayableItem::Policy::kSystem;
       }
       if (policy_header->policy_flags
           & ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION) {
-        policies |= Overlayable::Policy::kVendor;
+        policies |= OverlayableItem::Policy::kVendor;
       }
       if (policy_header->policy_flags
           & ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION) {
-        policies |= Overlayable::Policy::kProduct;
+        policies |= OverlayableItem::Policy::kProduct;
       }
       if (policy_header->policy_flags
           & ResTable_overlayable_policy_header::POLICY_PRODUCT_SERVICES_PARTITION) {
-        policies |= Overlayable::Policy::kProductServices;
+        policies |= OverlayableItem::Policy::kProductServices;
       }
 
       const ResTable_ref* const ref_begin = reinterpret_cast<const ResTable_ref*>(
@@ -478,10 +480,10 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
           return false;
         }
 
-        Overlayable overlayable{};
-        overlayable.source = source_.WithLine(0);
-        overlayable.policies = policies;
-        if (!table_->SetOverlayable(iter->second, overlayable, diag_)) {
+        OverlayableItem overlayable_item(overlayable);
+        overlayable_item.source = source_.WithLine(0);
+        overlayable_item.policies = policies;
+        if (!table_->SetOverlayable(iter->second, overlayable_item, diag_)) {
           return false;
         }
       }
