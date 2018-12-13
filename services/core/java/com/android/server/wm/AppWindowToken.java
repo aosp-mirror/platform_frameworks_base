@@ -746,6 +746,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     @Override
     void removeImmediately() {
         onRemovedFromDisplay();
+        if (mActivityRecord != null) {
+            mActivityRecord.unregisterConfigurationChangeListener(this);
+        }
         super.removeImmediately();
     }
 

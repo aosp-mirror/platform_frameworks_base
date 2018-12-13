@@ -201,6 +201,9 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
         if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
         EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "removeTask");
         mDeferRemoval = false;
+        if (mTaskRecord != null) {
+            mTaskRecord.unregisterConfigurationChangeListener(this);
+        }
 
         super.removeImmediately();
     }
