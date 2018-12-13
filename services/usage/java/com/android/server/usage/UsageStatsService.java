@@ -18,6 +18,7 @@ package com.android.server.usage;
 
 import static android.app.usage.UsageEvents.Event.CHOOSER_ACTION;
 import static android.app.usage.UsageEvents.Event.CONFIGURATION_CHANGE;
+import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
 import static android.app.usage.UsageEvents.Event.FLUSH_TO_DISK;
 import static android.app.usage.UsageEvents.Event.NOTIFICATION_INTERRUPTION;
 import static android.app.usage.UsageEvents.Event.SHORTCUT_INVOCATION;
@@ -416,8 +417,27 @@ public class UsageStatsService extends SystemService implements
      */
     void shutdown() {
         synchronized (mLock) {
+            mHandler.removeMessages(MSG_REPORT_EVENT);
+            Event event = new Event(DEVICE_SHUTDOWN, SystemClock.elapsedRealtime());
+            // orderly shutdown, the last event is DEVICE_SHUTDOWN.
+            reportEventToAllUserId(event);
             flushToDiskLocked();
         }
+    }
+
+    /**
+     * After power button is pressed for 3.5 seconds
+     * (as defined in {@link com.android.internal.R.integer#config_veryLongPressTimeout}),
+     * report DEVICE_SHUTDOWN event and persist the database. If the power button is pressed for 10
+     * seconds and the device is shutdown, the database is already persisted and we are not losing
+     * data.
+     * This method is called from PhoneWindowManager, do not synchronize on mLock otherwise
+     * PhoneWindowManager may be blocked.
+     */
+    void prepareForPossibleShutdown() {
+        Event event = new Event(DEVICE_SHUTDOWN, SystemClock.elapsedRealtime());
+        mHandler.obtainMessage(MSG_REPORT_EVENT_TO_ALL_USERID, event).sendToTarget();
+        mHandler.sendEmptyMessage(MSG_FLUSH_TO_DISK);
     }
 
     /**
@@ -1484,6 +1504,11 @@ public class UsageStatsService extends SystemService implements
             // we might not shutdown cleanly. This is ok to do with the 'am' lock held, because
             // we are shutting down.
             UsageStatsService.this.shutdown();
+        }
+
+        @Override
+        public void prepareForPossibleShutdown() {
+            UsageStatsService.this.prepareForPossibleShutdown();
         }
 
         @Override

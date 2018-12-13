@@ -84,8 +84,10 @@ import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
-import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
-import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
+import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs
+        .CAMERA_LENS_COVER_ABSENT;
+import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs
+        .CAMERA_LENS_UNCOVERED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 import static com.android.server.wm.WindowManagerPolicyProto.KEYGUARD_DELEGATE;
@@ -808,6 +810,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
+    private Runnable mPossibleVeryLongPressReboot = new Runnable() {
+        @Override
+        public void run() {
+            mActivityManagerInternal.prepareForPossibleShutdown();
+        }
+    };
+
     private void handleRingerChordGesture() {
         if (mRingerToggleChord == VOLUME_HUSH_OFF) {
             return;
@@ -953,6 +962,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Inform the StatusBar; but do not allow it to consume the event.
         sendSystemKeyToStatusBarAsync(event.getKeyCode());
 
+        schedulePossibleVeryLongPressReboot();
+
         // If the power key has still not yet been handled, then detect short
         // press, long press, or multi press and decide what to do.
         mPowerKeyHandled = hungUp || mScreenshotChordVolumeDownKeyTriggered
@@ -1056,6 +1067,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (hasVeryLongPressOnPowerBehavior()) {
             mHandler.removeMessages(MSG_POWER_VERY_LONG_PRESS);
         }
+        cancelPossibleVeryLongPressReboot();
     }
 
     private void cancelPendingBackKeyAction() {
@@ -4899,6 +4911,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mLockScreenTimerActive = enable;
             }
         }
+    }
+
+    private void schedulePossibleVeryLongPressReboot() {
+        mHandler.removeCallbacks(mPossibleVeryLongPressReboot);
+        mHandler.postDelayed(mPossibleVeryLongPressReboot, mVeryLongPressTimeout);
+    }
+
+    private void cancelPossibleVeryLongPressReboot() {
+        mHandler.removeCallbacks(mPossibleVeryLongPressReboot);
     }
 
     // TODO (multidisplay): Support multiple displays in WindowManagerPolicy.
