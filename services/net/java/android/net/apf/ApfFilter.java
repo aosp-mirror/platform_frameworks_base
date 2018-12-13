@@ -111,7 +111,7 @@ public class ApfFilter {
      * the last writable 32bit word.
      */
     @VisibleForTesting
-    private static enum Counter {
+    public static enum Counter {
         RESERVED_OOB,  // Points to offset 0 from the end of the buffer (out-of-bounds)
         TOTAL_PACKETS,
         PASSED_ARP,
