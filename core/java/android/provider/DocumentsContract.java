@@ -1275,7 +1275,7 @@ public final class DocumentsContract {
         }
     }
 
-    /** @removed */
+    @Deprecated
     public static Bitmap getDocumentThumbnail(ContentResolver content, Uri documentUri, Point size,
             CancellationSignal signal) throws FileNotFoundException {
         return getDocumentThumbnail((ContentInterface) content, documentUri, size, signal);
@@ -1307,7 +1307,7 @@ public final class DocumentsContract {
         }
     }
 
-    /** @removed */
+    @Deprecated
     public static Uri createDocument(ContentResolver content, Uri parentDocumentUri,
             String mimeType, String displayName) throws FileNotFoundException {
         return createDocument((ContentInterface) content, parentDocumentUri, mimeType, displayName);
@@ -1345,7 +1345,7 @@ public final class DocumentsContract {
         }
     }
 
-    /** @removed */
+    @Deprecated
     public static boolean isChildDocument(ContentResolver content, Uri parentDocumentUri,
             Uri childDocumentUri) throws FileNotFoundException {
         return isChildDocument((ContentInterface) content, parentDocumentUri, childDocumentUri);
@@ -1382,7 +1382,7 @@ public final class DocumentsContract {
         }
     }
 
-    /** @removed */
+    @Deprecated
     public static Uri renameDocument(ContentResolver content, Uri documentUri,
             String displayName) throws FileNotFoundException {
         return renameDocument((ContentInterface) content, documentUri, displayName);
@@ -1410,7 +1410,7 @@ public final class DocumentsContract {
         }
     }
 
-    /** @removed */
+    @Deprecated
     public static boolean deleteDocument(ContentResolver content, Uri documentUri)
             throws FileNotFoundException {
         return deleteDocument((ContentInterface) content, documentUri);
@@ -1441,7 +1441,7 @@ public final class DocumentsContract {
         }
     }
 
-    /** @removed */
+    @Deprecated
     public static Uri copyDocument(ContentResolver content, Uri sourceDocumentUri,
             Uri targetParentDocumentUri) throws FileNotFoundException {
         return copyDocument((ContentInterface) content, sourceDocumentUri, targetParentDocumentUri);
@@ -1474,7 +1474,7 @@ public final class DocumentsContract {
         }
     }
 
-    /** @removed */
+    @Deprecated
     public static Uri moveDocument(ContentResolver content, Uri sourceDocumentUri,
             Uri sourceParentDocumentUri, Uri targetParentDocumentUri) throws FileNotFoundException {
         return moveDocument((ContentInterface) content, sourceDocumentUri, sourceParentDocumentUri,
@@ -1508,7 +1508,7 @@ public final class DocumentsContract {
         }
     }
 
-    /** @removed */
+    @Deprecated
     public static boolean removeDocument(ContentResolver content, Uri documentUri,
             Uri parentDocumentUri) throws FileNotFoundException {
         return removeDocument((ContentInterface) content, documentUri, parentDocumentUri);
@@ -1531,7 +1531,7 @@ public final class DocumentsContract {
         }
     }
 
-    /** @removed */
+    @Deprecated
     public static void ejectRoot(ContentResolver content, Uri rootUri) {
         ejectRoot((ContentInterface) content, rootUri);
     }
@@ -1581,7 +1581,7 @@ public final class DocumentsContract {
         }
     }
 
-    /** @removed */
+    @Deprecated
     public static Bundle getDocumentMetadata(ContentResolver content, Uri documentUri)
             throws FileNotFoundException {
         return getDocumentMetadata((ContentInterface) content, documentUri);
@@ -1618,7 +1618,7 @@ public final class DocumentsContract {
         }
     }
 
-    /** @removed */
+    @Deprecated
     public static Path findDocumentPath(ContentResolver content, Uri treeUri)
             throws FileNotFoundException {
         return findDocumentPath((ContentInterface) content, treeUri);
@@ -1697,7 +1697,7 @@ public final class DocumentsContract {
         }
     }
 
-    /** @removed */
+    @Deprecated
     public static IntentSender createWebLinkIntent(ContentResolver content, Uri uri,
             Bundle options) throws FileNotFoundException {
         return createWebLinkIntent((ContentInterface) content, uri, options);
