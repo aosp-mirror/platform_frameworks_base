@@ -125,8 +125,8 @@ package android.test {
     method public static void assertEquals(double[], double[]);
     method public static void assertEquals(java.lang.String, java.lang.Object[], java.lang.Object[]);
     method public static void assertEquals(java.lang.Object[], java.lang.Object[]);
-    method public static void assertEquals(java.lang.String, java.util.Set<? extends java.lang.Object>, java.util.Set<? extends java.lang.Object>);
-    method public static void assertEquals(java.util.Set<? extends java.lang.Object>, java.util.Set<? extends java.lang.Object>);
+    method public static void assertEquals(java.lang.String, java.util.Set<?>, java.util.Set<?>);
+    method public static void assertEquals(java.util.Set<?>, java.util.Set<?>);
     method public static java.util.regex.MatchResult assertMatchesRegex(java.lang.String, java.lang.String, java.lang.String);
     method public static java.util.regex.MatchResult assertMatchesRegex(java.lang.String, java.lang.String);
     method public static void assertNotContainsRegex(java.lang.String, java.lang.String, java.lang.String);
