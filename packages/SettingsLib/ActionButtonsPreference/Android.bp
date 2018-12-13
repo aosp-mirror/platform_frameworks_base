@@ -1,5 +1,5 @@
 android_library {
-    name: "ActionButtonsPreference",
+    name: "SettingsLibActionButtonsPreference",
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
