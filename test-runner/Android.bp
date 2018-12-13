@@ -40,8 +40,6 @@ java_sdk_library {
         "junit.textui",
     ],
 
-    droiddoc_options: ["-stubsourceonly"],
-    metalava_enabled: false,
     compile_dex: true
 }
 
