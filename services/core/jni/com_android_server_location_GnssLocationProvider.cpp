@@ -25,6 +25,7 @@
 #include <android/hardware/gnss/1.0/IGnssMeasurement.h>
 #include <android/hardware/gnss/1.1/IGnssMeasurement.h>
 #include <android/hardware/gnss/2.0/IGnssMeasurement.h>
+#include <android/hardware/gnss/measurement_corrections/1.0/IMeasurementCorrections.h>
 #include <nativehelper/JNIHelp.h>
 #include "jni.h"
 #include "hardware_legacy/power.h"
@@ -68,6 +69,25 @@ static jmethodID method_reportMeasurementData;
 static jmethodID method_reportNavigationMessages;
 static jmethodID method_reportLocationBatch;
 static jmethodID method_reportGnssServiceDied;
+static jmethodID method_correctionsGetLatitudeDegrees;
+static jmethodID method_correctionsGetLongitudeDegrees;
+static jmethodID method_correctionsGetAltitudeMeters;
+static jmethodID method_correctionsGetToaGpsNanosecondsOfWeek;
+static jmethodID method_correctionsGetSingleSatCorrectionList;
+static jmethodID method_listSize;
+static jmethodID method_correctionListGet;
+static jmethodID method_correctionSatFlags;
+static jmethodID method_correctionSatConstType;
+static jmethodID method_correctionSatId;
+static jmethodID method_correctionSatCarrierFreq;
+static jmethodID method_correctionSatIsLos;
+static jmethodID method_correctionSatEpl;
+static jmethodID method_correctionSatEplUnc;
+static jmethodID method_correctionSatRefPlane;
+static jmethodID method_correctionPlaneLatDeg;
+static jmethodID method_correctionPlaneLngDeg;
+static jmethodID method_correctionPlaneAltDeg;
+static jmethodID method_correctionPlaneAzimDeg;
 
 /*
  * Save a pointer to JavaVm to attach/detach threads executing
@@ -105,7 +125,10 @@ using android::hardware::gnss::V1_0::IGnssNiCallback;
 using android::hardware::gnss::V1_0::IGnssXtra;
 using android::hardware::gnss::V1_0::IGnssXtraCallback;
 
-using android::hardware::gnss::V1_1::IGnssCallback;
+using android::hardware::gnss::V2_0::IGnssCallback;
+using android::hardware::gnss::measurement_corrections::V1_0::MeasurementCorrections;
+using android::hardware::gnss::measurement_corrections::V1_0::SingleSatCorrection;
+using android::hardware::gnss::measurement_corrections::V1_0::ReflectingPlane;
 
 using android::hidl::base::V1_0::IBase;
 
@@ -122,6 +145,9 @@ using IGnssMeasurementCallback_V1_1 = android::hardware::gnss::V1_1::IGnssMeasur
 using IGnssMeasurementCallback_V2_0 = android::hardware::gnss::V2_0::IGnssMeasurementCallback;
 using IAGnssRil_V1_0 = android::hardware::gnss::V1_0::IAGnssRil;
 using IAGnssRil_V2_0 = android::hardware::gnss::V2_0::IAGnssRil;
+
+using IMeasurementCorrections =
+    android::hardware::gnss::measurement_corrections::V1_0::IMeasurementCorrections;
 
 struct GnssDeathRecipient : virtual public hidl_death_recipient
 {
@@ -155,6 +181,11 @@ sp<IGnssMeasurement_V1_0> gnssMeasurementIface = nullptr;
 sp<IGnssMeasurement_V1_1> gnssMeasurementIface_V1_1 = nullptr;
 sp<IGnssMeasurement_V2_0> gnssMeasurementIface_V2_0 = nullptr;
 sp<IGnssNavigationMessage> gnssNavigationMessageIface = nullptr;
+sp<IMeasurementCorrections> gnssCorrectionsIface = nullptr;
+// This boolean is needed to ensure that Gnsss Measurement Corrections related method are only
+// initalized when needed which will be few devices initially
+bool firstGnssMeasurementCorrectionInjected = false;
+
 
 #define WAKE_LOCK_NAME  "GPS"
 
@@ -415,6 +446,8 @@ struct GnssCallback : public IGnssCallback {
     // New in 1.1
     Return<void> gnssNameCb(const android::hardware::hidl_string& name) override;
 
+    Return<void> gnssSetCapabilitiesCb_2_0(uint32_t capabilities) override;
+
     // TODO(b/73306084): Reconsider allocation cost vs threadsafety on these statics
     static const char* sNmeaString;
     static size_t sNmeaStringLength;
@@ -535,6 +568,10 @@ Return<void> GnssCallback::gnssSetCapabilitesCb(uint32_t capabilities) {
     env->CallVoidMethod(mCallbacksObj, method_setEngineCapabilities, capabilities);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
+}
+
+Return<void> GnssCallback::gnssSetCapabilitiesCb_2_0(uint32_t capabilities) {
+    return GnssCallback::gnssSetCapabilitesCb(capabilities);
 }
 
 Return<void> GnssCallback::gnssAcquireWakelockCb() {
@@ -1283,6 +1320,12 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
     if (gnssHal_V2_0 != nullptr) {
         // TODO(b/119638366): getExtensionGnssMeasurement_1_1 from gnssHal_V2_0
         auto gnssMeasurement = gnssHal_V2_0->getExtensionGnssMeasurement_2_0();
+        auto gnssCorrections = gnssHal_V2_0->getExtensionMeasurementCorrections();
+        if (!gnssCorrections.isOk()) {
+            ALOGD("Unable to get a handle to GnssMeasurementCorrections interface");
+        } else {
+            gnssCorrectionsIface = gnssCorrections;
+        }
         if (!gnssMeasurement.isOk()) {
             ALOGD("Unable to get a handle to GnssMeasurement_V2_0");
         } else {
@@ -1386,11 +1429,14 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
     sp<IGnssCallback> gnssCbIface = new GnssCallback();
 
     Return<bool> result = false;
-    if (gnssHal_V1_1 != nullptr) {
+    if (gnssHal_V2_0 != nullptr) {
+        result = gnssHal_V2_0->setCallback_2_0(gnssCbIface);
+    } else if (gnssHal_V1_1 != nullptr) {
         result = gnssHal_V1_1->setCallback_1_1(gnssCbIface);
     } else {
         result = gnssHal->setCallback(gnssCbIface);
     }
+
     if (!result.isOk() || !result) {
         ALOGE("SetCallback for Gnss Interface fails\n");
         return JNI_FALSE;
@@ -1933,6 +1979,150 @@ static jboolean android_location_GnssMeasurementsProvider_stop_measurement_colle
     return boolToJbool(result.isOk());
 }
 
+static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measurement_corrections(
+        JNIEnv* env,
+        jobject obj /* clazz*/,
+        jobject correctionsObj) {
+
+    if (gnssCorrectionsIface == nullptr) {
+        ALOGW("Trying to inject GNSS corrections on a chipset that does not support them.");
+        return JNI_FALSE;
+    }
+    if (firstGnssMeasurementCorrectionInjected == false) {
+        jclass measCorrClass = env->GetObjectClass(correctionsObj);
+        method_correctionsGetLatitudeDegrees = env->GetMethodID(
+            measCorrClass,"getLatitudeDegrees", "()D");
+
+        method_correctionsGetLongitudeDegrees = env->GetMethodID(
+            measCorrClass, "getLongitudeDegrees", "()D");
+
+        method_correctionsGetAltitudeMeters = env->GetMethodID(
+            measCorrClass, "getAltitudeMeters", "()D");
+
+        method_correctionsGetToaGpsNanosecondsOfWeek = env->GetMethodID(
+            measCorrClass, "getToaGpsNanosecondsOfWeek", "()J");
+
+        method_correctionsGetSingleSatCorrectionList = env->GetMethodID(
+            measCorrClass, "getSingleSatCorrectionList", "()Ljava.util.List;");
+    }
+
+    jdouble latitudeDegreesCorr = env->CallDoubleMethod(
+        correctionsObj, method_correctionsGetLatitudeDegrees);
+    jdouble longitudeDegreesCorr = env->CallDoubleMethod(
+        correctionsObj, method_correctionsGetLongitudeDegrees);
+    jdouble altitudeDegreesCorr = env->CallDoubleMethod(
+        correctionsObj, method_correctionsGetAltitudeMeters);
+    jlong toaGpsNanosOfWeek = env->CallLongMethod(
+        correctionsObj, method_correctionsGetToaGpsNanosecondsOfWeek);
+    jobject singleSatCorrectionList = env->CallObjectMethod(correctionsObj,
+        method_correctionsGetSingleSatCorrectionList);
+
+    if (firstGnssMeasurementCorrectionInjected == false) {
+        jclass corrListClass = env->GetObjectClass(singleSatCorrectionList);
+        method_listSize = env->GetMethodID(corrListClass, "size", "()I");
+        method_correctionListGet = env->GetMethodID(
+            corrListClass, "get", "(I)Landroid/location/GnssSingleSatCorrection;");
+    }
+
+    auto len = (singleSatCorrectionList == nullptr)
+        ? 0
+        : env->CallIntMethod(singleSatCorrectionList, method_listSize);
+    hidl_vec<SingleSatCorrection> list(len);
+
+    for (uint16_t i = 0; i < len; ++i) {
+        jobject singleSatCorrectionObj = env->CallObjectMethod(
+        singleSatCorrectionList, method_correctionListGet, i);
+
+        if (firstGnssMeasurementCorrectionInjected == false) {
+            jclass singleSatCorrClass = env->GetObjectClass(singleSatCorrectionObj);
+            method_correctionSatFlags = env->GetMethodID(
+                singleSatCorrClass, "getSingleSatCorrectionFlags", "()I");
+            method_correctionSatConstType = env->GetMethodID(
+                singleSatCorrClass, "getConstellationType", "()I");
+            method_correctionSatId= env->GetMethodID(
+                singleSatCorrClass, "getSatId", "()I");
+            method_correctionSatCarrierFreq = env->GetMethodID(
+                singleSatCorrClass, "getCarrierFrequencyHz", "()F");
+            method_correctionSatIsLos = env->GetMethodID(
+                singleSatCorrClass,"getSatIsLos", "()Z");
+            method_correctionSatEpl = env->GetMethodID(
+                singleSatCorrClass, "getExcessPathLengthMeters", "()F");
+            method_correctionSatEplUnc = env->GetMethodID(
+                singleSatCorrClass, "getExcessPathLengthUncertaintyMeters", "()F");
+            method_correctionSatRefPlane = env->GetMethodID(
+                singleSatCorrClass, "getReflectingPlane",
+                "()Landroid/location/GnssReflectingPlane;");
+        }
+
+        jint correctionFlags =
+            env->CallIntMethod(singleSatCorrectionObj, method_correctionSatFlags);
+        jint constType = env->CallIntMethod(singleSatCorrectionObj,
+            method_correctionSatConstType);
+        jint satId =
+            env->CallIntMethod(singleSatCorrectionObj, method_correctionSatId);
+        jfloat carrierFreqHz = env->CallFloatMethod(
+            singleSatCorrectionObj, method_correctionSatCarrierFreq);
+        jboolean satIsLos = env->CallBooleanMethod(singleSatCorrectionObj,
+            method_correctionSatIsLos);
+        jfloat eplMeters =
+            env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEpl);
+        jfloat eplUncMeters = env->CallFloatMethod(singleSatCorrectionObj,
+            method_correctionSatEplUnc);
+        jobject reflectingPlaneObj = env->CallObjectMethod(
+            singleSatCorrectionObj, method_correctionSatRefPlane);
+
+        if (firstGnssMeasurementCorrectionInjected == false) {
+            jclass refPlaneClass = env->GetObjectClass(reflectingPlaneObj);
+            method_correctionPlaneLatDeg = env->GetMethodID(
+                refPlaneClass, "getLatitudeDegrees", "()D");
+            method_correctionPlaneLngDeg = env->GetMethodID(
+                refPlaneClass, "getLongitudeDegrees", "()D");
+            method_correctionPlaneAltDeg = env->GetMethodID(
+                refPlaneClass, "getAltitudeMeters", "()D");
+            method_correctionPlaneAzimDeg = env->GetMethodID(
+                refPlaneClass, "getAzimuthDegrees", "()D");
+        }
+
+        jdouble latitudeDegreesRefPlane = env->CallDoubleMethod(
+            reflectingPlaneObj, method_correctionPlaneLatDeg);
+        jdouble longitudeDegreesRefPlane = env->CallDoubleMethod(
+            reflectingPlaneObj, method_correctionPlaneLngDeg);
+        jdouble altitudeDegreesRefPlane = env->CallDoubleMethod(
+            reflectingPlaneObj, method_correctionPlaneAltDeg);
+        jdouble azimuthDegreeRefPlane = env->CallDoubleMethod(
+            reflectingPlaneObj, method_correctionPlaneAzimDeg);
+        ReflectingPlane reflectingPlane = {
+            .latitudeDegrees = latitudeDegreesRefPlane,
+            .longitudeDegrees = longitudeDegreesRefPlane,
+            .altitudeMeters = altitudeDegreesRefPlane,
+            .azimuthDegrees = azimuthDegreeRefPlane,
+        };
+
+        SingleSatCorrection singleSatCorrection = {
+            .singleSatCorrectionFlags = static_cast<uint16_t>(correctionFlags),
+            .constellation = static_cast<GnssConstellationType>(constType),
+            .svid = static_cast<uint16_t>(satId),
+            .carrierFrequencyHz = carrierFreqHz,
+            .satIsLos = static_cast<bool>(satIsLos),
+            .excessPathLengthMeters = eplMeters,
+            .excessPathLengthUncertaintyMeters = eplUncMeters,
+            .reflectingPlane = reflectingPlane,
+        };
+        list[i] = singleSatCorrection;
+    }
+    MeasurementCorrections measurementCorrections = {
+        .latitudeDegrees = latitudeDegreesCorr,
+        .longitudeDegrees = longitudeDegreesCorr,
+        .altitudeMeters = altitudeDegreesCorr,
+        .toaGpsNanosecondsOfWeek = static_cast<uint64_t>(toaGpsNanosOfWeek),
+        .satCorrections = list,
+    };
+
+    gnssCorrectionsIface->setCorrections(measurementCorrections);
+    firstGnssMeasurementCorrectionInjected = true;
+    return JNI_TRUE;
+}
+
 static jboolean android_location_GnssNavigationMessageProvider_is_navigation_message_supported(
         JNIEnv* env,
         jclass clazz) {
@@ -2310,19 +2500,20 @@ static const JNINativeMethod sGeofenceMethods[] = {
 };
 
 static const JNINativeMethod sMeasurementMethods[] = {
-     /* name, signature, funcPtr */
-    {"native_is_measurement_supported",
-            "()Z",
-            reinterpret_cast<void *>(
-                    android_location_GnssMeasurementsProvider_is_measurement_supported)},
-    {"native_start_measurement_collection",
-             "(Z)Z",
-            reinterpret_cast<void *>(
-                    android_location_GnssMeasurementsProvider_start_measurement_collection)},
-    {"native_stop_measurement_collection",
-            "()Z",
-            reinterpret_cast<void *>(
-                    android_location_GnssMeasurementsProvider_stop_measurement_collection)},
+    /* name, signature, funcPtr */
+    {"native_is_measurement_supported", "()Z",
+     reinterpret_cast<void*>(
+         android_location_GnssMeasurementsProvider_is_measurement_supported)},
+    {"native_start_measurement_collection", "(Z)Z",
+     reinterpret_cast<void*>(
+         android_location_GnssMeasurementsProvider_start_measurement_collection)},
+    {"native_stop_measurement_collection", "()Z",
+     reinterpret_cast<void*>(
+         android_location_GnssMeasurementsProvider_stop_measurement_collection)},
+    {"native_inject_gnss_measurement_corrections",
+     "(Landroid/location/GnssMeasurementCorrections;)Z",
+     reinterpret_cast<void*>(
+         android_location_GnssMeasurementsProvider_inject_gnss_measurement_corrections)},
 };
 
 static const JNINativeMethod sNavigationMessageMethods[] = {

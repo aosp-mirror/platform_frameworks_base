@@ -21,6 +21,7 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.GnssMeasurementCorrections;
 import android.location.IBatchedLocationCallback;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
@@ -63,6 +64,9 @@ interface ILocationManager
     boolean sendNiResponse(int notifId, int userResponse);
 
     boolean addGnssMeasurementsListener(in IGnssMeasurementsListener listener, in String packageName);
+    void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections,
+            in String packageName);
+    int getGnssCapabilities(in String packageName);
     void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
 
     boolean addGnssNavigationMessageListener(

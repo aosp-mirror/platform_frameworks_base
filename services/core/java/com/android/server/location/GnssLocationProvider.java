@@ -170,7 +170,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final int GPS_CAPABILITY_SINGLE_SHOT = 0x0000008;
     private static final int GPS_CAPABILITY_ON_DEMAND_TIME = 0x0000010;
     private static final int GPS_CAPABILITY_GEOFENCING = 0x0000020;
-    private static final int GPS_CAPABILITY_MEASUREMENTS = 0x0000040;
+    public static final int GPS_CAPABILITY_MEASUREMENTS = 0x0000040;
     private static final int GPS_CAPABILITY_NAV_MESSAGES = 0x0000080;
 
     // The AGPS SUPL mode
@@ -1596,20 +1596,20 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     @NativeEntryPoint
     private void setEngineCapabilities(final int capabilities) {
         // send to handler thread for fast native return, and in-order handling
-        mHandler.post(() -> {
-            mEngineCapabilities = capabilities;
+        mHandler.post(
+                () -> {
+                    mEngineCapabilities = capabilities;
 
-            if (hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) {
-                mNtpTimeHelper.enablePeriodicTimeInjection();
-                requestUtcTime();
-            }
+                    if (hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) {
+                        mNtpTimeHelper.enablePeriodicTimeInjection();
+                        requestUtcTime();
+                    }
 
-            mGnssMeasurementsProvider.onCapabilitiesUpdated(hasCapability(
-                    GPS_CAPABILITY_MEASUREMENTS));
-            mGnssNavigationMessageProvider.onCapabilitiesUpdated(hasCapability(
-                    GPS_CAPABILITY_NAV_MESSAGES));
-            restartRequests();
-        });
+                    mGnssMeasurementsProvider.onCapabilitiesUpdated(capabilities);
+                    mGnssNavigationMessageProvider.onCapabilitiesUpdated(
+                            hasCapability(GPS_CAPABILITY_NAV_MESSAGES));
+                    restartRequests();
+                });
     }
 
     private void restartRequests() {
