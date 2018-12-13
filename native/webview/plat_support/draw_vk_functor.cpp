@@ -20,6 +20,7 @@
 
 #define LOG_TAG "webviewchromium_plat_support"
 
+#include "draw_fn.h"
 #include "draw_vk.h"
 
 #include <jni.h>
