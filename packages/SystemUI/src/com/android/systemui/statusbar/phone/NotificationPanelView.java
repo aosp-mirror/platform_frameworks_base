@@ -105,10 +105,22 @@ public class NotificationPanelView extends PanelView implements
 
     private static final boolean DEBUG = false;
 
-    private static final boolean EXPAND_ON_WAKE_UP = SystemProperties.getBoolean(
+    /**
+     * If passive interrupts expand the NSSL or not
+     */
+    private static final boolean EXPAND_ON_PASSIVE_INTERRUPT = SystemProperties.getBoolean(
             "persist.sysui.expand_shade_on_wake_up", true);
+    /**
+     * If the notification panel should remain collapsed when the phone wakes up, even if the user
+     * presses power.
+     */
+    private static final boolean NEVER_EXPAND_WHEN_WAKING_UP = SystemProperties.getBoolean(
+            "persist.sysui.defer_notifications_on_lock_screen", false);
+    /**
+     * If waking up the phone should take you to SHADE_LOCKED instead of KEYGUARD
+     */
     private static final boolean WAKE_UP_TO_SHADE = SystemProperties.getBoolean(
-            "persist.sysui.go_to_shade_on_wake_up", true);
+            "persist.sysui.go_to_shade_on_wake_up", false);
 
     /**
      * Fling expanding QS.
@@ -2774,10 +2786,12 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void setDozing(boolean dozing, boolean animate, PointF wakeUpTouchLocation,
-            boolean passiveInterrupted) {
+            boolean passivelyInterrupted) {
         if (dozing == mDozing) return;
         mDozing = dozing;
-        mSemiAwake = !EXPAND_ON_WAKE_UP && !mDozing && passiveInterrupted;
+        boolean doNotExpand = (!EXPAND_ON_PASSIVE_INTERRUPT && passivelyInterrupted)
+                || NEVER_EXPAND_WHEN_WAKING_UP;
+        mSemiAwake = doNotExpand && !mDozing;
         if (!mSemiAwake) {
             mNotificationStackScroller.setDark(mDozing, animate, wakeUpTouchLocation);
         }
