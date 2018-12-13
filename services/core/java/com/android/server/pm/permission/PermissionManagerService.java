@@ -799,10 +799,6 @@ public class PermissionManagerService {
                     continue;
                 }
 
-                if (bp.isRemoved()) {
-                    continue;
-                }
-
                 // Limit ephemeral apps to ephemeral allowed permissions.
                 if (pkg.applicationInfo.isInstantApp() && !bp.isInstant()) {
                     if (DEBUG_PERMISSIONS) {
@@ -951,7 +947,8 @@ public class PermissionManagerService {
                                     // how to disable the API to simulate revocation as legacy
                                     // apps don't expect to run with revoked permissions.
                                     if (PLATFORM_PACKAGE_NAME.equals(bp.getSourcePackageName())) {
-                                        if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
+                                        if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0
+                                                && !bp.isRemoved()) {
                                             flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
                                             // We changed the flags, hence have to write.
                                             updatedUserIds = ArrayUtils.appendInt(
