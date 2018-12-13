@@ -3960,7 +3960,12 @@ public class MediaPlayer2 implements AutoCloseable
                     textBounds = new Rect(left, top, right, bottom);
                 }
             }
+            return null;
+            /* TimedText c-tor usage is temporarily commented out.
+             * TODO(b/117527789): use SUBTITLE path for MEDIA_MIMETYPE_TEXT_3GPP track
+             *                    and remove TimedText path from MediaPlayer2.
             return new TimedText(textChars, textBounds);
+            */
         }
     }
 

@@ -1175,21 +1175,14 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
-    void reparent(TaskWindowContainerController taskController, int position) {
+    void reparent(Task task, int position) {
         if (DEBUG_ADD_REMOVE) {
             Slog.i(TAG_WM, "reparent: moving app token=" + this
-                    + " to task=" + taskController + " at " + position);
+                    + " to task=" + task.mTaskId + " at " + position);
         }
-        final Task task = taskController.mContainer;
         if (task == null) {
-            throw new IllegalArgumentException("reparent: could not find task="
-                    + taskController);
+            throw new IllegalArgumentException("reparent: could not find task");
         }
-        reparent(task, position);
-        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
-    }
-
-    void reparent(Task task, int position) {
         final Task currentTask = getTask();
         if (task == currentTask) {
             throw new IllegalArgumentException(
@@ -1220,6 +1213,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             onDisplayChanged(displayContent);
             prevDisplayContent.setLayoutNeeded();
         }
+        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
     }
 
     @Override

@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -297,7 +296,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     /**
      * Broadcast action: notify that a new batch of network logs is ready to be collected.
      * @see DeviceAdminReceiver#onNetworkLogsAvailable
-     * @hide
+     * @see DelegatedAdminReceiver#onNetworkLogsAvailable
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @BroadcastBehavior(explicitOnly = true)
@@ -426,7 +425,11 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     public static final int BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE = 1;
 
-    /** @hide */
+    /**
+     * Broadcast action: notify that some app is attempting to choose a KeyChain key.
+     * @see DeviceAdminReceiver#onChoosePrivateKeyAlias
+     * @see DelegatedAdminReceiver#onChoosePrivateKeyAlias
+     */
     public static final String ACTION_CHOOSE_PRIVATE_KEY_ALIAS =
             "android.app.action.CHOOSE_PRIVATE_KEY_ALIAS";
 
@@ -755,7 +758,6 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @deprecated Do not use
      */
     @Deprecated
-    @SystemApi
     public void onReadyForUserInitialization(Context context, Intent intent) {
     }
 

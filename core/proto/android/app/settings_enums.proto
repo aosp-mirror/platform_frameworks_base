@@ -76,5 +76,11 @@ enum PageId {
 
     // OPEN: Settings > Developer options > Disable > Info dialog
     DIALOG_DISABLE_DEVELOPMENT_OPTIONS = 1591;
+
+    // OPEN: WifiDppConfiguratorActivity (android.settings.WIFI_DPP_CONFIGURATOR_XXX action intents)
+    SETTINGS_WIFI_DPP_CONFIGURATOR = 1595;
+
+    // OPEN: WifiDppEnrolleeActivity (android.settings.WIFI_DPP_ENROLLEE_XXX action intents)
+    SETTINGS_WIFI_DPP_ENROLLEE = 1596;
 }
 

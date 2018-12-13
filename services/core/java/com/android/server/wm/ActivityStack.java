@@ -911,7 +911,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     void positionChildWindowContainerAtTop(TaskRecord child) {
-        mWindowContainerController.positionChildAtTop(child.getWindowContainerController(),
+        mWindowContainerController.positionChildAtTop(child.getTask(),
                 true /* includingParents */);
     }
 
@@ -921,7 +921,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // task to bottom, the next focusable stack on the same display should be focused.
         final ActivityStack nextFocusableStack = getDisplay().getNextFocusableStack(
                 child.getStack(), true /* ignoreCurrent */);
-        mWindowContainerController.positionChildAtBottom(child.getWindowContainerController(),
+        mWindowContainerController.positionChildAtBottom(child.getTask(),
                 nextFocusableStack == null /* includingParents */);
     }
 
@@ -1617,7 +1617,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             try {
                 EventLogTags.writeAmPauseActivity(prev.mUserId, System.identityHashCode(prev),
                         prev.shortComponentName, "userLeaving=" + userLeaving);
-                mService.updateUsageStats(prev, false);
 
                 mService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
                         prev.appToken, PauseActivityItem.obtain(prev.finishing, userLeaving,
@@ -2984,7 +2983,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         position = getAdjustedPositionForTask(task, position, null /* starting */);
         mTaskHistory.remove(task);
         mTaskHistory.add(position, task);
-        mWindowContainerController.positionChildAt(task.getWindowContainerController(), position);
+        mWindowContainerController.positionChildAt(task.getTask(), position);
         updateTaskMovement(task, true);
     }
 
@@ -4649,9 +4648,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                                     r.mUserId, System.identityHashCode(r),
                                     r.getTaskRecord().taskId, r.shortComponentName,
                                     "proc died without state saved");
-                            if (r.getState() == RESUMED) {
-                                mService.updateUsageStats(r, false);
-                            }
                         }
                     } else {
                         // We have the current state for this activity, so
@@ -5349,7 +5345,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 && !matchParentBounds() && task.isResizeable() && !isLockscreenShown) {
             task.updateOverrideConfiguration(getRequestedOverrideBounds());
         }
-        task.createWindowContainer(toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
+        task.createTask(toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
         return task;
     }
 

@@ -26,8 +26,6 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Slog;
 
-import java.lang.Float;
-
 /**
  * Determines if the device has been set upon a stationary object.
  */
@@ -138,6 +136,13 @@ public class AnyMotionDetector {
                     ((double)ORIENTATION_MEASUREMENT_DURATION_MILLIS / SAMPLING_INTERVAL_MILLIS));
             if (DEBUG) Slog.d(TAG, "mNumSufficientSamples = " + mNumSufficientSamples);
         }
+    }
+
+    /**
+     * If we do not have an accelerometer, we are not going to collect much data.
+     */
+    public boolean hasSensor() {
+        return mAccelSensor != null;
     }
 
     /*

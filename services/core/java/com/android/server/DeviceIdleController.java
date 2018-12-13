@@ -43,6 +43,7 @@ import android.net.ConnectivityManager;
 import android.net.INetworkPolicyManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
@@ -272,6 +273,7 @@ public class DeviceIdleController extends SystemService
     private PowerManager mPowerManager;
     private INetworkPolicyManager mNetworkPolicyManager;
     private SensorManager mSensorManager;
+    private final boolean mUseMotionSensor;
     private Sensor mMotionSensor;
     private LocationRequest mLocationRequest;
     private Intent mIdleIntent;
@@ -520,9 +522,10 @@ public class DeviceIdleController extends SystemService
                     updateConnectivityState(intent);
                 } break;
                 case Intent.ACTION_BATTERY_CHANGED: {
+                    boolean present = intent.getBooleanExtra(BatteryManager.EXTRA_PRESENT, true);
+                    boolean plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
                     synchronized (DeviceIdleController.this) {
-                        int plugged = intent.getIntExtra("plugged", 0);
-                        updateChargingLocked(plugged != 0);
+                        updateChargingLocked(present && plugged);
                     }
                 } break;
                 case Intent.ACTION_PACKAGE_REMOVED: {
@@ -1629,6 +1632,9 @@ public class DeviceIdleController extends SystemService
         mHandler = mInjector.getHandler(this);
         mAppStateTracker = mInjector.getAppStateTracker(context, FgThread.get().getLooper());
         LocalServices.addService(AppStateTracker.class, mAppStateTracker);
+
+        mUseMotionSensor = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_autoPowerModeUseMotionSensor);
     }
 
     public DeviceIdleController(Context context) {
@@ -1729,20 +1735,23 @@ public class DeviceIdleController extends SystemService
                         ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
                 mNetworkPolicyManagerInternal = getLocalService(NetworkPolicyManagerInternal.class);
                 mSensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
-                int sigMotionSensorId = getContext().getResources().getInteger(
-                        com.android.internal.R.integer.config_autoPowerModeAnyMotionSensor);
-                if (sigMotionSensorId > 0) {
-                    mMotionSensor = mSensorManager.getDefaultSensor(sigMotionSensorId, true);
-                }
-                if (mMotionSensor == null && getContext().getResources().getBoolean(
-                        com.android.internal.R.bool.config_autoPowerModePreferWristTilt)) {
-                    mMotionSensor = mSensorManager.getDefaultSensor(
-                            Sensor.TYPE_WRIST_TILT_GESTURE, true);
-                }
-                if (mMotionSensor == null) {
-                    // As a last ditch, fall back to SMD.
-                    mMotionSensor = mSensorManager.getDefaultSensor(
-                            Sensor.TYPE_SIGNIFICANT_MOTION, true);
+
+                if (mUseMotionSensor) {
+                    int sigMotionSensorId = getContext().getResources().getInteger(
+                            com.android.internal.R.integer.config_autoPowerModeAnyMotionSensor);
+                    if (sigMotionSensorId > 0) {
+                        mMotionSensor = mSensorManager.getDefaultSensor(sigMotionSensorId, true);
+                    }
+                    if (mMotionSensor == null && getContext().getResources().getBoolean(
+                            com.android.internal.R.bool.config_autoPowerModePreferWristTilt)) {
+                        mMotionSensor = mSensorManager.getDefaultSensor(
+                                Sensor.TYPE_WRIST_TILT_GESTURE, true);
+                    }
+                    if (mMotionSensor == null) {
+                        // As a last ditch, fall back to SMD.
+                        mMotionSensor = mSensorManager.getDefaultSensor(
+                                Sensor.TYPE_SIGNIFICANT_MOTION, true);
+                    }
                 }
 
                 if (getContext().getResources().getBoolean(
@@ -2588,14 +2597,21 @@ public class DeviceIdleController extends SystemService
                 mState = STATE_SENSING;
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_IDLE_PENDING to STATE_SENSING.");
                 EventLogTags.writeDeviceIdle(mState, reason);
-                scheduleSensingTimeoutAlarmLocked(mConstants.SENSING_TIMEOUT);
                 cancelLocatingLocked();
-                mNotMoving = false;
                 mLocated = false;
                 mLastGenericLocation = null;
                 mLastGpsLocation = null;
-                mAnyMotionDetector.checkForAnyMotion();
-                break;
+
+                // If we have an accelerometer, wait to find out whether we are moving.
+                if (mUseMotionSensor && mAnyMotionDetector.hasSensor()) {
+                    scheduleSensingTimeoutAlarmLocked(mConstants.SENSING_TIMEOUT);
+                    mNotMoving = false;
+                    mAnyMotionDetector.checkForAnyMotion();
+                    break;
+                }
+
+                mNotMoving = true;
+                // Otherwise, fall through and check this off the list of requirements.
             case STATE_SENSING:
                 cancelSensingTimeoutAlarmLocked();
                 mState = STATE_LOCATING;
@@ -2893,9 +2909,12 @@ public class DeviceIdleController extends SystemService
 
     void scheduleAlarmLocked(long delay, boolean idleUntil) {
         if (DEBUG) Slog.d(TAG, "scheduleAlarmLocked(" + delay + ", " + idleUntil + ")");
-        if (mMotionSensor == null && !(mState == STATE_QUICK_DOZE_DELAY || mState == STATE_IDLE
-                  || mState == STATE_IDLE_MAINTENANCE)) {
-            // If there is no motion sensor on this device, then we won't schedule
+
+        if (mUseMotionSensor && mMotionSensor == null
+                && mState != STATE_QUICK_DOZE_DELAY
+                && mState != STATE_IDLE
+                && mState != STATE_IDLE_MAINTENANCE) {
+            // If there is no motion sensor on this device, but we need one, then we won't schedule
             // alarms, because we can't determine if the device is not moving.  This effectively
             // turns off normal execution of device idling, although it is still possible to
             // manually poke it by pretending like the alarm is going off.
@@ -3765,13 +3784,20 @@ public class DeviceIdleController extends SystemService
             pw.print("  mLightEnabled="); pw.print(mLightEnabled);
             pw.print("  mDeepEnabled="); pw.println(mDeepEnabled);
             pw.print("  mForceIdle="); pw.println(mForceIdle);
-            pw.print("  mMotionSensor="); pw.println(mMotionSensor);
+            pw.print("  mUseMotionSensor="); pw.print(mUseMotionSensor);
+            if (mUseMotionSensor) {
+                pw.print(" mMotionSensor="); pw.println(mMotionSensor);
+            } else {
+                pw.println();
+            }
             pw.print("  mScreenOn="); pw.println(mScreenOn);
             pw.print("  mScreenLocked="); pw.println(mScreenLocked);
             pw.print("  mNetworkConnected="); pw.println(mNetworkConnected);
             pw.print("  mCharging="); pw.println(mCharging);
             pw.print("  mMotionActive="); pw.println(mMotionListener.active);
-            pw.print("  mNotMoving="); pw.println(mNotMoving);
+            if (mUseMotionSensor) {
+                pw.print("  mNotMoving="); pw.println(mNotMoving);
+            }
             pw.print("  mLocating="); pw.print(mLocating); pw.print(" mHasGps=");
                     pw.print(mHasGps); pw.print(" mHasNetwork=");
                     pw.print(mHasNetworkLocation); pw.print(" mLocated="); pw.println(mLocated);

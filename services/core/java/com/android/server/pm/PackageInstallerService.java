@@ -27,7 +27,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
-import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.Intent;
@@ -163,6 +162,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     @GuardedBy("mSessions")
     private final SparseArray<PackageInstallerSession> mSessions = new SparseArray<>();
+
+    // STOPSHIP: This is a temporary mock implementation of staged sessions. This variable
+    //           shouldn't be needed at all.
+    @GuardedBy("mStagedSessions")
+    private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
 
     /** Historical sessions kept around for debugging purposes */
     @GuardedBy("mSessions")
@@ -481,9 +485,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 if (!PackageHelper.fitsOnInternal(mContext, params)) {
                     throw new IOException("No suitable internal storage available");
                 }
-            } else {
+            } else if ((params.installFlags & PackageManager.INSTALL_FORCE_VOLUME_UUID) != 0) {
                 // For now, installs to adopted media are treated as internal from
                 // an install flag point-of-view.
+                params.installFlags |= PackageManager.INSTALL_INTERNAL;
+            } else {
                 params.installFlags |= PackageManager.INSTALL_INTERNAL;
 
                 // Resolve best location for install, based on combination of
@@ -535,6 +541,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         synchronized (mSessions) {
             mSessions.put(sessionId, session);
+        }
+        if (params.isStaged) {
+            synchronized (mStagedSessions) {
+                mStagedSessions.put(sessionId, session);
+            }
         }
 
         mCallbacks.notifySessionCreated(session.sessionId, session.userId);
@@ -666,6 +677,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     @Override
+    public ParceledListSlice<SessionInfo> getStagedSessions() {
+        final List<SessionInfo> result = new ArrayList<>();
+        synchronized (mStagedSessions) {
+            for (int i = 0; i < mStagedSessions.size(); i++) {
+                final PackageInstallerSession session = mStagedSessions.valueAt(i);
+                result.add(session.generateInfo(false));
+            }
+        }
+        return new ParceledListSlice<>(result);
+    }
+
+    @Override
     public ParceledListSlice<SessionInfo> getAllSessions(int userId) {
         mPermissionManager.enforceCrossUserPermission(
                 Binder.getCallingUid(), userId, true, false, "getAllSessions");
@@ -714,22 +737,19 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         // Check whether the caller is device owner or affiliated profile owner, in which case we do
         // it silently.
-        final int callingUserId = UserHandle.getUserId(callingUid);
         DevicePolicyManagerInternal dpmi =
                 LocalServices.getService(DevicePolicyManagerInternal.class);
-        final boolean isDeviceOwnerOrAffiliatedProfileOwner =
-                dpmi != null && dpmi.isActiveAdminWithPolicy(callingUid,
-                        DeviceAdminInfo.USES_POLICY_PROFILE_OWNER)
-                        && dpmi.isUserAffiliatedWithDevice(callingUserId);
+        final boolean canSilentlyInstallPackage =
+                dpmi != null && dpmi.canSilentlyInstallPackage(callerPackageName, callingUid);
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),
-                isDeviceOwnerOrAffiliatedProfileOwner, userId);
+                canSilentlyInstallPackage, userId);
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
                     == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
             mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);
-        } else if (isDeviceOwnerOrAffiliatedProfileOwner) {
+        } else if (canSilentlyInstallPackage) {
             // Allow the device owner and affiliated profile owner to silently delete packages
             // Need to clear the calling identity to get DELETE_PACKAGES permission
             long ident = Binder.clearCallingIdentity();
@@ -1110,6 +1130,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             mInstallHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    // TODO: remove this mock implementation.
+                    if (session.isStaged()) {
+                        // If the session is aborted, don't keep it in memory. Only store
+                        // sessions successfully staged.
+                        if (!success) {
+                            synchronized (mStagedSessions) {
+                                mStagedSessions.remove(session.sessionId);
+                            }
+                        } else {
+                            return;
+                        }
+                    }
                     synchronized (mSessions) {
                         mSessions.remove(session.sessionId);
                         addHistoricalSessionLocked(session);

@@ -210,6 +210,10 @@ interface ISub {
      */
     List<SubscriptionInfo> getOpportunisticSubscriptions(String callingPackage);
 
+    boolean removeSubscriptionsFromGroup(in int[] subIdList, String callingPackage);
+
+    List<SubscriptionInfo> getSubscriptionsInGroup(int subId, String callingPackage);
+
     int getSlotIndex(int subId);
 
     int[] getSubId(int slotIndex);

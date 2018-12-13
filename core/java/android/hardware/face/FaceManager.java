@@ -207,11 +207,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public void enroll(byte[] token, CancellationSignal cancel, int flags,
-            int userId, EnrollmentCallback callback) {
-        if (userId == UserHandle.USER_CURRENT) {
-            userId = getCurrentUserId();
-        }
+    public void enroll(byte[] token, CancellationSignal cancel,
+            EnrollmentCallback callback, int[] disabledFeatures) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an enrollment callback");
         }
@@ -228,8 +225,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         if (mService != null) {
             try {
                 mEnrollmentCallback = callback;
-                mService.enroll(mToken, token, userId, mServiceReceiver, flags,
-                        mContext.getOpPackageName());
+                mService.enroll(mToken, token, mServiceReceiver,
+                        mContext.getOpPackageName(), disabledFeatures);
             } catch (RemoteException e) {
                 Log.w(TAG, "Remote exception in enroll: ", e);
                 if (callback != null) {
@@ -284,10 +281,10 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public void setRequireAttention(boolean requireAttention, byte[] token) {
+    public void setFeature(int feature, boolean enabled, byte[] token) {
         if (mService != null) {
             try {
-                mService.setRequireAttention(requireAttention, token);
+                mService.setFeature(feature, enabled, token);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -298,11 +295,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public boolean getRequireAttention(byte[] token) {
+    public boolean getFeature(int feature) {
         boolean result = true;
         if (mService != null) {
             try {
-                mService.getRequireAttention(token);
+                result = mService.getFeature(feature);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

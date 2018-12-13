@@ -16,6 +16,9 @@
 
 package android.view.textclassifier;
 
+import static android.view.textclassifier.ConversationActions.Message.PERSON_USER_LOCAL;
+import static android.view.textclassifier.ConversationActions.Message.PERSON_USER_REMOTE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.Person;
@@ -27,16 +30,26 @@ import com.google.android.textclassifier.ActionsSuggestionsModel;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Locale;
+import java.util.function.Function;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ActionsSuggestionsHelperTest {
+    private static final String LOCALE_TAG = Locale.US.toLanguageTag();
+    private static final Function<CharSequence, String> LANGUAGE_DETECTOR =
+            charSequence -> LOCALE_TAG;
+
     @Test
     public void testToNativeMessages_emptyInput() {
         ActionsSuggestionsModel.ConversationMessage[] conversationMessages =
-                ActionsSuggestionsHelper.toNativeMessages(Collections.emptyList());
+                ActionsSuggestionsHelper.toNativeMessages(
+                        Collections.emptyList(), LANGUAGE_DETECTOR);
 
         assertThat(conversationMessages).isEmpty();
     }
@@ -44,70 +57,13 @@ public class ActionsSuggestionsHelperTest {
     @Test
     public void testToNativeMessages_noTextMessages() {
         ConversationActions.Message messageWithoutText =
-                new ConversationActions.Message.Builder().build();
+                new ConversationActions.Message.Builder(PERSON_USER_REMOTE).build();
 
         ActionsSuggestionsModel.ConversationMessage[] conversationMessages =
                 ActionsSuggestionsHelper.toNativeMessages(
-                        Collections.singletonList(messageWithoutText));
+                        Collections.singletonList(messageWithoutText), LANGUAGE_DETECTOR);
 
         assertThat(conversationMessages).isEmpty();
-    }
-
-    @Test
-    public void testToNativeMessages_missingPersonInFirstMessage() {
-        ConversationActions.Message firstMessage =
-                new ConversationActions.Message.Builder()
-                        .setText("first")
-                        .build();
-        ConversationActions.Message secondMessage =
-                new ConversationActions.Message.Builder()
-                        .setText("second")
-                        .setAuthor(new Person.Builder().build())
-                        .build();
-        ConversationActions.Message thirdMessage =
-                new ConversationActions.Message.Builder()
-                        .setText("third")
-                        .setAuthor(ConversationActions.Message.PERSON_USER_LOCAL)
-                        .build();
-
-        ActionsSuggestionsModel.ConversationMessage[] conversationMessages =
-                ActionsSuggestionsHelper.toNativeMessages(
-                        Arrays.asList(firstMessage, secondMessage, thirdMessage));
-
-        assertThat(conversationMessages).hasLength(2);
-        assertNativeMessage(conversationMessages[0], secondMessage.getText(), 1);
-        assertNativeMessage(conversationMessages[1], thirdMessage.getText(), 0);
-    }
-
-    @Test
-    public void testToNativeMessages_missingPersonInMiddleOfConversation() {
-        ConversationActions.Message firstMessage =
-                new ConversationActions.Message.Builder()
-                        .setText("first")
-                        .setAuthor(new Person.Builder().setName("first").build())
-                        .build();
-        ConversationActions.Message secondMessage =
-                new ConversationActions.Message.Builder()
-                        .setText("second")
-                        .build();
-        ConversationActions.Message thirdMessage =
-                new ConversationActions.Message.Builder()
-                        .setText("third")
-                        .setAuthor(new Person.Builder().setName("third").build())
-                        .build();
-        ConversationActions.Message fourthMessage =
-                new ConversationActions.Message.Builder()
-                        .setText("fourth")
-                        .setAuthor(new Person.Builder().setName("fourth").build())
-                        .build();
-
-        ActionsSuggestionsModel.ConversationMessage[] conversationMessages =
-                ActionsSuggestionsHelper.toNativeMessages(
-                        Arrays.asList(firstMessage, secondMessage, thirdMessage, fourthMessage));
-
-        assertThat(conversationMessages).hasLength(2);
-        assertNativeMessage(conversationMessages[0], thirdMessage.getText(), 2);
-        assertNativeMessage(conversationMessages[1], fourthMessage.getText(), 1);
     }
 
     @Test
@@ -116,42 +72,74 @@ public class ActionsSuggestionsHelperTest {
         Person userB = new Person.Builder().setName("userB").build();
 
         ConversationActions.Message firstMessage =
-                new ConversationActions.Message.Builder()
+                new ConversationActions.Message.Builder(userB)
                         .setText("first")
-                        .setAuthor(userB)
                         .build();
         ConversationActions.Message secondMessage =
-                new ConversationActions.Message.Builder()
+                new ConversationActions.Message.Builder(userA)
                         .setText("second")
-                        .setAuthor(userA)
                         .build();
         ConversationActions.Message thirdMessage =
-                new ConversationActions.Message.Builder()
+                new ConversationActions.Message.Builder(PERSON_USER_LOCAL)
                         .setText("third")
-                        .setAuthor(ConversationActions.Message.PERSON_USER_LOCAL)
                         .build();
         ConversationActions.Message fourthMessage =
-                new ConversationActions.Message.Builder()
+                new ConversationActions.Message.Builder(userA)
                         .setText("fourth")
-                        .setAuthor(userA)
                         .build();
 
         ActionsSuggestionsModel.ConversationMessage[] conversationMessages =
                 ActionsSuggestionsHelper.toNativeMessages(
-                        Arrays.asList(firstMessage, secondMessage, thirdMessage, fourthMessage));
+                        Arrays.asList(firstMessage, secondMessage, thirdMessage, fourthMessage),
+                        LANGUAGE_DETECTOR);
 
         assertThat(conversationMessages).hasLength(4);
-        assertNativeMessage(conversationMessages[0], firstMessage.getText(), 2);
-        assertNativeMessage(conversationMessages[1], secondMessage.getText(), 1);
-        assertNativeMessage(conversationMessages[2], thirdMessage.getText(), 0);
-        assertNativeMessage(conversationMessages[3], fourthMessage.getText(), 1);
+        assertNativeMessage(conversationMessages[0], firstMessage.getText(), 2, 0);
+        assertNativeMessage(conversationMessages[1], secondMessage.getText(), 1, 0);
+        assertNativeMessage(conversationMessages[2], thirdMessage.getText(), 0, 0);
+        assertNativeMessage(conversationMessages[3], fourthMessage.getText(), 1, 0);
+    }
+
+    @Test
+    public void testToNativeMessages_referenceTime() {
+        ConversationActions.Message firstMessage =
+                new ConversationActions.Message.Builder(PERSON_USER_REMOTE)
+                        .setText("first")
+                        .setReferenceTime(createZonedDateTimeFromMsUtc(1000))
+                        .build();
+        ConversationActions.Message secondMessage =
+                new ConversationActions.Message.Builder(PERSON_USER_REMOTE)
+                        .setText("second")
+                        .build();
+        ConversationActions.Message thirdMessage =
+                new ConversationActions.Message.Builder(PERSON_USER_REMOTE)
+                        .setText("third")
+                        .setReferenceTime(createZonedDateTimeFromMsUtc(2000))
+                        .build();
+
+        ActionsSuggestionsModel.ConversationMessage[] conversationMessages =
+                ActionsSuggestionsHelper.toNativeMessages(
+                        Arrays.asList(firstMessage, secondMessage, thirdMessage),
+                        LANGUAGE_DETECTOR);
+
+        assertThat(conversationMessages).hasLength(3);
+        assertNativeMessage(conversationMessages[0], firstMessage.getText(), 1, 1000);
+        assertNativeMessage(conversationMessages[1], secondMessage.getText(), 1, 0);
+        assertNativeMessage(conversationMessages[2], thirdMessage.getText(), 1, 2000);
+    }
+
+    private ZonedDateTime createZonedDateTimeFromMsUtc(long msUtc) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(msUtc), ZoneId.of("UTC"));
     }
 
     private static void assertNativeMessage(
             ActionsSuggestionsModel.ConversationMessage nativeMessage,
             CharSequence text,
-            int userId) {
+            int userId,
+            long referenceTimeInMsUtc) {
         assertThat(nativeMessage.getText()).isEqualTo(text.toString());
         assertThat(nativeMessage.getUserId()).isEqualTo(userId);
+        assertThat(nativeMessage.getLocales()).isEqualTo(LOCALE_TAG);
+        assertThat(nativeMessage.getReferenceTimeMsUtc()).isEqualTo(referenceTimeInMsUtc);
     }
 }

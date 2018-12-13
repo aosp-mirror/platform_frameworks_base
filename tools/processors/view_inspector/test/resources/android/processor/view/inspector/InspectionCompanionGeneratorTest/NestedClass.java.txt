@@ -12,11 +12,20 @@ import java.lang.Override;
  * on behalf of {@link android.processor.view.inspector.InspectionCompanionGeneratorTest}.
  */
 public final class Outer$Inner$$InspectionCompanion implements InspectionCompanion<Outer.Inner> {
+    /**
+     * Set by {@link #mapProperties(PropertyMapper)} once properties have been mapped.
+     */
+    private boolean mPropertiesMapped = false;
+
     @Override
     public void mapProperties(PropertyMapper propertyMapper) {
+        mPropertiesMapped = true;
     }
 
     @Override
     public void readProperties(Outer.Inner inspectable, PropertyReader propertyReader) {
+        if (!mPropertiesMapped) {
+            throw new InspectionCompanion.UninitializedPropertyMapException();
+        }
     }
 }

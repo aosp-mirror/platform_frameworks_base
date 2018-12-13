@@ -931,7 +931,7 @@ public final class NetworkCapabilities implements Parcelable {
      * Returns a transport-specific information container. The application may cast this
      * container to a concrete sub-class based on its knowledge of the network request. The
      * application should be able to deal with a {@code null} return value or an invalid case,
-     * e.g. use {@code instanceof} operation to verify expected type.
+     * e.g. use {@code instanceof} operator to verify expected type.
      *
      * @return A concrete implementation of the {@link TransportInfo} class or null if not
      * available for the network.

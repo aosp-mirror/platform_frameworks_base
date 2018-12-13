@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "android_media_AudioEffect.h"
 
 #include <stdio.h>
 
@@ -28,6 +27,10 @@
 #include "media/AudioEffect.h"
 
 #include <nativehelper/ScopedUtfChars.h>
+
+#include "android_media_AudioEffect.h"
+#include "android_media_AudioEffectDescriptor.h"
+#include "android_media_AudioErrors.h"
 
 using namespace android;
 
@@ -49,8 +52,6 @@ struct fields_t {
     jmethodID midPostNativeEvent;   // event post callback method
     jfieldID  fidNativeAudioEffect; // stores in Java the native AudioEffect object
     jfieldID  fidJniData;           // stores in Java additional resources used by the native AudioEffect
-    jclass    clazzDesc;            // AudioEffect.Descriptor class
-    jmethodID midDescCstor;         // AudioEffect.Descriptor class constructor
 };
 static fields_t fields;
 
@@ -226,7 +227,6 @@ android_media_AudioEffect_native_init(JNIEnv *env)
     ALOGV("android_media_AudioEffect_native_init");
 
     fields.clazzEffect = NULL;
-    fields.clazzDesc = NULL;
 
     // Get the AudioEffect class
     jclass clazz = env->FindClass(kClassPathName);
@@ -263,23 +263,6 @@ android_media_AudioEffect_native_init(JNIEnv *env)
         ALOGE("Can't find AudioEffect.%s", "mJniData");
         return;
     }
-
-    clazz = env->FindClass("android/media/audiofx/AudioEffect$Descriptor");
-    if (clazz == NULL) {
-        ALOGE("Can't find android/media/audiofx/AudioEffect$Descriptor class");
-        return;
-    }
-    fields.clazzDesc = (jclass)env->NewGlobalRef(clazz);
-
-    fields.midDescCstor
-            = env->GetMethodID(
-                    fields.clazzDesc,
-                    "<init>",
-                    "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-    if (fields.midDescCstor == NULL) {
-        ALOGE("Can't find android/media/audiofx/AudioEffect$Descriptor class constructor");
-        return;
-    }
 }
 
 
@@ -297,12 +280,6 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
     const char *uuidStr = NULL;
     effect_descriptor_t desc;
     jobject jdesc;
-    char str[EFFECT_STRING_LEN_MAX];
-    jstring jdescType;
-    jstring jdescUuid;
-    jstring jdescConnect;
-    jstring jdescName;
-    jstring jdescImplementor;
 
     ScopedUtfChars opPackageNameStr(env, opPackageName);
 
@@ -394,41 +371,12 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
     // get the effect descriptor
     desc = lpAudioEffect->descriptor();
 
-    AudioEffect::guidToString(&desc.type, str, EFFECT_STRING_LEN_MAX);
-    jdescType = env->NewStringUTF(str);
-
-    AudioEffect::guidToString(&desc.uuid, str, EFFECT_STRING_LEN_MAX);
-    jdescUuid = env->NewStringUTF(str);
-
-    if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
-        jdescConnect = env->NewStringUTF("Auxiliary");
-    } else if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_PRE_PROC) {
-        jdescConnect = env->NewStringUTF("Pre Processing");
-    } else {
-        jdescConnect = env->NewStringUTF("Insert");
-    }
-
-    jdescName = env->NewStringUTF(desc.name);
-    jdescImplementor = env->NewStringUTF(desc.implementor);
-
-    jdesc = env->NewObject(fields.clazzDesc,
-                           fields.midDescCstor,
-                           jdescType,
-                           jdescUuid,
-                           jdescConnect,
-                           jdescName,
-                           jdescImplementor);
-    env->DeleteLocalRef(jdescType);
-    env->DeleteLocalRef(jdescUuid);
-    env->DeleteLocalRef(jdescConnect);
-    env->DeleteLocalRef(jdescName);
-    env->DeleteLocalRef(jdescImplementor);
-    if (jdesc == NULL) {
-        ALOGE("env->NewObject(fields.clazzDesc, fields.midDescCstor)");
+    if (convertAudioEffectDescriptorFromNative(env, &jdesc, &desc) != AUDIO_JAVA_SUCCESS) {
         goto setup_failure;
     }
 
     env->SetObjectArrayElement(javadesc, 0, jdesc);
+    env->DeleteLocalRef(jdesc);
 
     setAudioEffect(env, thiz, lpAudioEffect);
 
@@ -729,23 +677,16 @@ static jobjectArray
 android_media_AudioEffect_native_queryEffects(JNIEnv *env, jclass clazz __unused)
 {
     effect_descriptor_t desc;
-    char str[EFFECT_STRING_LEN_MAX];
     uint32_t totalEffectsCount = 0;
     uint32_t returnedEffectsCount = 0;
     uint32_t i = 0;
-    jstring jdescType;
-    jstring jdescUuid;
-    jstring jdescConnect;
-    jstring jdescName;
-    jstring jdescImplementor;
-    jobject jdesc;
     jobjectArray ret;
 
     if (AudioEffect::queryNumberEffects(&totalEffectsCount) != NO_ERROR) {
         return NULL;
     }
 
-    jobjectArray temp = env->NewObjectArray(totalEffectsCount, fields.clazzDesc, NULL);
+    jobjectArray temp = env->NewObjectArray(totalEffectsCount, audioEffectDescriptorClass(), NULL);
     if (temp == NULL) {
         return temp;
     }
@@ -757,49 +698,18 @@ android_media_AudioEffect_native_queryEffects(JNIEnv *env, jclass clazz __unused
             goto queryEffects_failure;
         }
 
-        if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
-            jdescConnect = env->NewStringUTF("Auxiliary");
-        } else if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_INSERT) {
-            jdescConnect = env->NewStringUTF("Insert");
-        } else if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_PRE_PROC) {
-            jdescConnect = env->NewStringUTF("Pre Processing");
-        } else {
+        jobject jdesc;
+        if (convertAudioEffectDescriptorFromNative(env, &jdesc, &desc) != AUDIO_JAVA_SUCCESS) {
             continue;
         }
-
-        AudioEffect::guidToString(&desc.type, str, EFFECT_STRING_LEN_MAX);
-        jdescType = env->NewStringUTF(str);
-
-        AudioEffect::guidToString(&desc.uuid, str, EFFECT_STRING_LEN_MAX);
-        jdescUuid = env->NewStringUTF(str);
-
-        jdescName = env->NewStringUTF(desc.name);
-        jdescImplementor = env->NewStringUTF(desc.implementor);
-
-        jdesc = env->NewObject(fields.clazzDesc,
-                               fields.midDescCstor,
-                               jdescType,
-                               jdescUuid,
-                               jdescConnect,
-                               jdescName,
-                               jdescImplementor);
-        env->DeleteLocalRef(jdescType);
-        env->DeleteLocalRef(jdescUuid);
-        env->DeleteLocalRef(jdescConnect);
-        env->DeleteLocalRef(jdescName);
-        env->DeleteLocalRef(jdescImplementor);
-        if (jdesc == NULL) {
-            ALOGE("env->NewObject(fields.clazzDesc, fields.midDescCstor)");
-            goto queryEffects_failure;
-        }
-
         env->SetObjectArrayElement(temp, returnedEffectsCount++, jdesc);
-   }
+        env->DeleteLocalRef(jdesc);
+    }
 
     if (returnedEffectsCount == 0) {
         goto queryEffects_failure;
     }
-    ret = env->NewObjectArray(returnedEffectsCount, fields.clazzDesc, NULL);
+    ret = env->NewObjectArray(returnedEffectsCount, audioEffectDescriptorClass(), NULL);
     if (ret == NULL) {
         goto queryEffects_failure;
     }
@@ -835,51 +745,11 @@ android_media_AudioEffect_native_queryPreProcessings(JNIEnv *env, jclass clazz _
     }
     ALOGV("queryDefaultPreProcessing() got %d effects", numEffects);
 
-    jobjectArray ret = env->NewObjectArray(numEffects, fields.clazzDesc, NULL);
-    if (ret == NULL) {
-        return ret;
-    }
+    std::vector<effect_descriptor_t> descVector(descriptors.get(), descriptors.get() + numEffects);
 
-    char str[EFFECT_STRING_LEN_MAX];
-    jstring jdescType;
-    jstring jdescUuid;
-    jstring jdescConnect;
-    jstring jdescName;
-    jstring jdescImplementor;
-    jobject jdesc;
-
-    for (uint32_t i = 0; i < numEffects; i++) {
-
-        AudioEffect::guidToString(&descriptors[i].type, str, EFFECT_STRING_LEN_MAX);
-        jdescType = env->NewStringUTF(str);
-        AudioEffect::guidToString(&descriptors[i].uuid, str, EFFECT_STRING_LEN_MAX);
-        jdescUuid = env->NewStringUTF(str);
-        jdescConnect = env->NewStringUTF("Pre Processing");
-        jdescName = env->NewStringUTF(descriptors[i].name);
-        jdescImplementor = env->NewStringUTF(descriptors[i].implementor);
-
-        jdesc = env->NewObject(fields.clazzDesc,
-                               fields.midDescCstor,
-                               jdescType,
-                               jdescUuid,
-                               jdescConnect,
-                               jdescName,
-                               jdescImplementor);
-        env->DeleteLocalRef(jdescType);
-        env->DeleteLocalRef(jdescUuid);
-        env->DeleteLocalRef(jdescConnect);
-        env->DeleteLocalRef(jdescName);
-        env->DeleteLocalRef(jdescImplementor);
-        if (jdesc == NULL) {
-            ALOGE("env->NewObject(fields.clazzDesc, fields.midDescCstor)");
-            env->DeleteLocalRef(ret);
-            return NULL;
-        }
-
-        env->SetObjectArrayElement(ret, i, jdesc);
-   }
-
-   return ret;
+    jobjectArray ret;
+    convertAudioEffectDescriptorVectorFromNative(env, &ret, descVector);
+    return ret;
 }
 
 // ----------------------------------------------------------------------------

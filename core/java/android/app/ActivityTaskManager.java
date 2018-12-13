@@ -303,9 +303,7 @@ public class ActivityTaskManager {
      * @param stackId Id of stack to move the top activity to pinned stack.
      * @param bounds Bounds to use for pinned stack.
      * @return True if the top activity of stack was successfully moved to the pinned stack.
-     * @hide
      */
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public boolean moveTopActivityToPinnedStack(int stackId, Rect bounds) {
         try {
@@ -318,9 +316,7 @@ public class ActivityTaskManager {
     /**
      * Start to enter lock task mode for given task by system(UI).
      * @param taskId Id of task to lock.
-     * @hide
      */
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public void startSystemLockTaskMode(int taskId) {
         try {
@@ -332,9 +328,7 @@ public class ActivityTaskManager {
 
     /**
      * Stop lock task mode by system(UI).
-     * @hide
      */
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public void stopSystemLockTaskMode() {
         try {
@@ -349,9 +343,7 @@ public class ActivityTaskManager {
      * @param taskId Id of the task to move.
      * @param stackId Id of the stack for task moving.
      * @param toTop Whether the given task should shown to top of stack.
-     * @hide
      */
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
         try {
@@ -366,9 +358,7 @@ public class ActivityTaskManager {
      * @param stackId Id of the stack to resize.
      * @param bounds Bounds to resize the stack to or {@code null} for fullscreen.
      * @param animate Whether we should play an animation for resizing stack.
-     * @hide
      */
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public void resizeStack(int stackId, Rect bounds, boolean animate) {
         try {
@@ -383,9 +373,7 @@ public class ActivityTaskManager {
      * Resize task to given bounds.
      * @param taskId Id of task to resize.
      * @param bounds Bounds to resize task.
-     * @hide
      */
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public void resizeTask(int taskId, Rect bounds) {
         try {
@@ -399,9 +387,7 @@ public class ActivityTaskManager {
      * Resize docked stack & its task to given stack & task bounds.
      * @param stackBounds Bounds to resize stack.
      * @param taskBounds Bounds to resize task.
-     * @hide
      */
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public void resizeDockedStack(Rect stackBounds, Rect taskBounds) {
         try {
@@ -413,9 +399,7 @@ public class ActivityTaskManager {
 
     /**
      * List all activity stacks information.
-     * @hide
      */
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public String listAllStacks() {
         final List<ActivityManager.StackInfo> stacks;
@@ -438,7 +422,6 @@ public class ActivityTaskManager {
      * Clears launch params for the given package.
      * @param packageNames the names of the packages of which the launch params are to be cleared
      */
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public void clearLaunchParamsForPackages(List<String> packageNames) {
         try {

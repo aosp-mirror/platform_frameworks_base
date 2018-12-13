@@ -222,6 +222,11 @@
          so that applications can still use their own mechanisms. -->
     <bool name="config_enableAutoPowerModes">false</bool>
 
+    <!-- Whether (if true) this is a kind of device that can be moved around (eg. phone/laptop),
+         or (if false) something for which movement is either not measurable or should not count
+         toward power states (eg. tv/soundbar). -->
+    <bool name="config_autoPowerModeUseMotionSensor">true</bool>
+
     <!-- The threshold angle for any motion detection in auto-power save modes.
          In hundreths of a degree. -->
     <integer name="config_autoPowerModeThresholdAngle">200</integer>
@@ -3591,5 +3596,10 @@
 
     <!-- Component name for default assistant on this device -->
     <string name="config_defaultAssistantComponentName">#+UNSET</string>
+
+    <!-- Class name for the InputEvent compatibility processor override.
+         Empty string means use the default compatibility processor
+         (android.view.InputEventCompatProcessor). -->
+    <string name="config_inputEventCompatProcessorOverrideClassName" translatable="false"></string>
 
 </resources>

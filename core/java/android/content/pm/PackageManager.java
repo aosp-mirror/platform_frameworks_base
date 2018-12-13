@@ -3377,6 +3377,33 @@ public abstract class PackageManager {
             @ApplicationInfoFlags int flags, @UserIdInt int userId) throws NameNotFoundException;
 
     /**
+     * Retrieve all of the information we know about a particular
+     * package/application, for a specific user.
+     *
+     * @param packageName The full name (i.e. com.google.apps.contacts) of an
+     *            application.
+     * @param flags Additional option flags to modify the data returned.
+     * @return An {@link ApplicationInfo} containing information about the
+     *         package. If flag {@code MATCH_UNINSTALLED_PACKAGES} is set and if
+     *         the package is not found in the list of installed applications,
+     *         the application information is retrieved from the list of
+     *         uninstalled applications (which includes installed applications
+     *         as well as applications with data directory i.e. applications
+     *         which had been deleted with {@code DONT_DELETE_DATA} flag set).
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    @SystemApi
+    public ApplicationInfo getApplicationInfoAsUser(@NonNull String packageName,
+            @ApplicationInfoFlags int flags, @NonNull UserHandle user)
+            throws NameNotFoundException {
+        return getApplicationInfoAsUser(packageName, flags, user.getIdentifier());
+    }
+
+    /**
      * Retrieve all of the information we know about a particular activity
      * class.
      *
@@ -4203,6 +4230,32 @@ public abstract class PackageManager {
             @ResolveInfoFlags int flags, @UserIdInt int userId);
 
     /**
+     * Retrieve all activities that can be performed for the given intent, for a
+     * specific user.
+     *
+     * @param intent The desired intent as per resolveActivity().
+     * @param flags Additional option flags to modify the data returned. The
+     *            most important is {@link #MATCH_DEFAULT_ONLY}, to limit the
+     *            resolution to only those activities that support the
+     *            {@link android.content.Intent#CATEGORY_DEFAULT}. Or, set
+     *            {@link #MATCH_ALL} to prevent any filtering of the results.
+     * @param user The user being queried.
+     * @return Returns a List of ResolveInfo objects containing one entry for
+     *         each matching activity, ordered from best to worst. In other
+     *         words, the first item is what would be returned by
+     *         {@link #resolveActivity}. If there are no matching activities, an
+     *         empty list is returned.
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    @SystemApi
+    public List<ResolveInfo> queryIntentActivitiesAsUser(@NonNull Intent intent,
+            @ResolveInfoFlags int flags, @NonNull UserHandle user) {
+        return queryIntentActivitiesAsUser(intent, flags, user.getIdentifier());
+    }
+
+    /**
      * Retrieve a set of activities that should be presented to the user as
      * similar options. This is like {@link #queryIntentActivities}, except it
      * also allows you to supply a list of more explicit Intents that you would
@@ -4334,6 +4387,27 @@ public abstract class PackageManager {
             @ResolveInfoFlags int flags, @UserIdInt int userId);
 
     /**
+     * Retrieve all services that can match the given intent for a given user.
+     *
+     * @param intent The desired intent as per resolveService().
+     * @param flags Additional option flags to modify the data returned.
+     * @param user The user being queried.
+     * @return Returns a List of ResolveInfo objects containing one entry for
+     *         each matching service, ordered from best to worst. In other
+     *         words, the first item is what would be returned by
+     *         {@link #resolveService}. If there are no matching services, an
+     *         empty list or null is returned.
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    @SystemApi
+    public List<ResolveInfo> queryIntentServicesAsUser(@NonNull Intent intent,
+            @ResolveInfoFlags int flags, @NonNull UserHandle user) {
+        return queryIntentServicesAsUser(intent, flags, user.getIdentifier());
+    }
+
+    /**
      * Retrieve all providers that can match the given intent.
      *
      * @param intent An intent containing all of the desired specification
@@ -4348,6 +4422,26 @@ public abstract class PackageManager {
     @UnsupportedAppUsage
     public abstract List<ResolveInfo> queryIntentContentProvidersAsUser(
             Intent intent, @ResolveInfoFlags int flags, @UserIdInt int userId);
+
+    /**
+     * Retrieve all providers that can match the given intent.
+     *
+     * @param intent An intent containing all of the desired specification
+     *            (action, data, type, category, and/or component).
+     * @param flags Additional option flags to modify the data returned.
+     * @param user The user being queried.
+     * @return Returns a List of ResolveInfo objects containing one entry for
+     *         each matching provider, ordered from best to worst. If there are
+     *         no matching services, an empty list or null is returned.
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    @SystemApi
+    public List<ResolveInfo> queryIntentContentProvidersAsUser(@NonNull Intent intent,
+            @ResolveInfoFlags int flags, @NonNull UserHandle user) {
+        return queryIntentContentProvidersAsUser(intent, flags, user.getIdentifier());
+    }
 
     /**
      * Retrieve all providers that can match the given intent.
@@ -6448,7 +6542,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @SystemApi
+    @TestApi
     public String getWellbeingPackageName() {
         throw new UnsupportedOperationException(
                 "getWellbeingPackageName not implemented in subclass");

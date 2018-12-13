@@ -143,7 +143,6 @@ public final class SQLiteDebug {
     /**
      * contains statistics about a database
      */
-    @TestApi
     public static class DbStats {
         /** name of the database */
         public String dbName;
@@ -175,7 +174,6 @@ public final class SQLiteDebug {
      * return all pager and database stats for the current process.
      * @return {@link PagerStats}
      */
-    @TestApi
     public static PagerStats getDatabaseInfo() {
         PagerStats stats = new PagerStats();
         nativeGetPagerStats(stats);

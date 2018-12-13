@@ -16,7 +16,9 @@
 
 package com.android.server;
 
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.IUidObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -111,6 +113,7 @@ public class VibratorService extends IVibratorService.Stub
     private final boolean mSupportsAmplitudeControl;
     private final int mDefaultVibrationAmplitude;
     private final SparseArray<VibrationEffect> mFallbackEffects;
+    private final SparseArray<Integer> mProcStatesCache = new SparseArray();
     private final WorkSource mTmpWorkSource = new WorkSource();
     private final Handler mH = new Handler();
     private final Object mLock = new Object();
@@ -146,6 +149,25 @@ public class VibratorService extends IVibratorService.Stub
     native static boolean vibratorSupportsAmplitudeControl();
     native static void vibratorSetAmplitude(int amplitude);
     native static long vibratorPerformEffect(long effect, long strength);
+
+    private final IUidObserver mUidObserver = new IUidObserver.Stub() {
+        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+            mProcStatesCache.put(uid, procState);
+        }
+
+        @Override public void onUidGone(int uid, boolean disabled) {
+            mProcStatesCache.delete(uid);
+        }
+
+        @Override public void onUidActive(int uid) {
+        }
+
+        @Override public void onUidIdle(int uid, boolean disabled) {
+        }
+
+        @Override public void onUidCachedChanged(int uid, boolean cached) {
+        }
+    };
 
     private class Vibration implements IBinder.DeathRecipient {
         public final IBinder token;
@@ -411,6 +433,14 @@ public class VibratorService extends IVibratorService.Stub
                 }
             }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mH);
 
+            try {
+                ActivityManager.getService().registerUidObserver(mUidObserver,
+                        ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_GONE,
+                        ActivityManager.PROCESS_STATE_UNKNOWN, null);
+            } catch (RemoteException e) {
+                // ignored; both services live in system_server
+            }
+
             updateVibrators();
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
@@ -502,6 +532,12 @@ public class VibratorService extends IVibratorService.Stub
                 return;
             }
             verifyIncomingUid(uid);
+            if (mProcStatesCache.get(uid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
+                    > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                Slog.e(TAG, "Ignoring incoming vibration as process with uid = "
+                        + uid + " is background");
+                return;
+            }
             if (!verifyVibrationEffect(effect)) {
                 return;
             }

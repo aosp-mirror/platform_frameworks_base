@@ -440,6 +440,7 @@ static void android_media_visualizer_native_release(JNIEnv *env,  jobject thiz) 
         if (lpVisualizer == 0) {
             return;
         }
+        lpVisualizer->release();
     }
     // delete the JNI data
     VisualizerJniStorage* lpJniStorage =

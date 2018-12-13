@@ -6028,14 +6028,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mTextDir == null) {
                 mTextDir = getTextDirectionHeuristic();
             }
-            if (!precomputed.getParams().isSameTextMetricsInternal(
-                    getPaint(), mTextDir, mBreakStrategy, mHyphenationFrequency)) {
-                throw new IllegalArgumentException(
+            final @PrecomputedText.Params.CheckResultUsableResult int checkResult =
+                    precomputed.getParams().checkResultUsable(getPaint(), mTextDir, mBreakStrategy,
+                            mHyphenationFrequency);
+            switch (checkResult) {
+                case PrecomputedText.Params.UNUSABLE:
+                    throw new IllegalArgumentException(
                         "PrecomputedText's Parameters don't match the parameters of this TextView."
                         + "Consider using setTextMetricsParams(precomputedText.getParams()) "
                         + "to override the settings of this TextView: "
                         + "PrecomputedText: " + precomputed.getParams()
                         + "TextView: " + getTextMetricsParams());
+                case PrecomputedText.Params.NEED_RECOMPUTE:
+                    precomputed = PrecomputedText.create(precomputed, getTextMetricsParams());
+                    break;
+                case PrecomputedText.Params.USABLE:
+                    // pass through
             }
         } else if (type == BufferType.SPANNABLE || mMovement != null) {
             text = mSpannableFactory.newSpannable(text);
@@ -10209,7 +10217,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // ContentCapture
-        if (isImportantForContentCapture() && isTextEditable()) {
+        if (isLaidOut() && isImportantForContentCapture() && isTextEditable()) {
             final ContentCaptureManager cm = mContext.getSystemService(ContentCaptureManager.class);
             if (cm != null && cm.isContentCaptureEnabled()) {
                 // TODO(b/111276913): pass flags when edited by user / add CTS test

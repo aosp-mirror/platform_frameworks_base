@@ -933,6 +933,11 @@ public class AudioSystem
      */
     public static native int setA11yServicesUids(int[] uids);
 
+    /**
+     * @see AudioManager#isHapticPlaybackSupported()
+     */
+    public static native boolean isHapticPlaybackSupported();
+
     // Items shared with audio service
 
     /**

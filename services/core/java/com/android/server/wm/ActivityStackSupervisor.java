@@ -1868,7 +1868,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         stack.addTask(task, onTop, "restoreRecentTask");
         // TODO: move call for creation here and other place into Stack.addTask()
-        task.createWindowContainer(onTop, true /* showForAllUsers */);
+        task.createTask(onTop, true /* showForAllUsers */);
         if (DEBUG_RECENTS) Slog.v(TAG_RECENTS,
                 "Added restored task=" + task + " to stack=" + stack);
         final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -2040,9 +2040,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mStoppingActivities.remove(r);
 
         final ActivityStack stack = r.getActivityStack();
-        if (mRootActivityContainer.isTopDisplayFocusedStack(stack)) {
-            mService.updateUsageStats(r, true);
-        }
         if (stack.getDisplay().allResumedActivitiesComplete()) {
             mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
             // Make sure activity & window visibility should be identical

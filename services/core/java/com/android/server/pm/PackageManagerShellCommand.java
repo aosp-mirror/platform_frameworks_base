@@ -536,6 +536,7 @@ class PackageManagerShellCommand extends ShellCommand {
         boolean listInstaller = false;
         boolean showUid = false;
         boolean showVersionCode = false;
+        boolean listApexOnly = false;
         int uid = -1;
         int userId = UserHandle.USER_SYSTEM;
         try {
@@ -576,6 +577,10 @@ class PackageManagerShellCommand extends ShellCommand {
                     case "--show-versioncode":
                         showVersionCode = true;
                         break;
+                    case "--apex-only":
+                        getFlags |= PackageManager.MATCH_APEX;
+                        listApexOnly = true;
+                        break;
                     case "--user":
                         userId = UserHandle.parseUserArg(getNextArgRequired());
                         break;
@@ -606,30 +611,34 @@ class PackageManagerShellCommand extends ShellCommand {
             if (filter != null && !info.packageName.contains(filter)) {
                 continue;
             }
-            if (uid != -1 && info.applicationInfo.uid != uid) {
+            final boolean isApex = info.isApex;
+            if (uid != -1 && !isApex && info.applicationInfo.uid != uid) {
                 continue;
             }
-            final boolean isSystem =
+
+            final boolean isSystem = !isApex &&
                     (info.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0;
-            if ((!listDisabled || !info.applicationInfo.enabled) &&
-                    (!listEnabled || info.applicationInfo.enabled) &&
+            final boolean isEnabled = !isApex && info.applicationInfo.enabled;
+            if ((!listDisabled || !isEnabled) &&
+                    (!listEnabled || isEnabled) &&
                     (!listSystem || isSystem) &&
-                    (!listThirdParty || !isSystem)) {
+                    (!listThirdParty || !isSystem) &&
+                    (!listApexOnly || isApex)) {
                 pw.print("package:");
-                if (showSourceDir) {
+                if (showSourceDir && !isApex) {
                     pw.print(info.applicationInfo.sourceDir);
                     pw.print("=");
                 }
                 pw.print(info.packageName);
-                if (showVersionCode) {
+                if (showVersionCode && !isApex) {
                     pw.print(" versionCode:");
                     pw.print(info.applicationInfo.versionCode);
                 }
-                if (listInstaller) {
+                if (listInstaller && !isApex) {
                     pw.print("  installer=");
                     pw.print(mInterface.getInstallerPackageName(info.packageName));
                 }
-                if (showUid) {
+                if (showUid && !isApex) {
                     pw.print(" uid:");
                     pw.print(info.applicationInfo.uid);
                 }
@@ -2284,6 +2293,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--multi-package":
                     sessionParams.setMultiPackage();
                     break;
+                case "--staged":
+                    sessionParams.setStaged();
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -2767,11 +2779,11 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Prints all system libraries.");
         pw.println("");
         pw.println("  list packages [-f] [-d] [-e] [-s] [-3] [-i] [-l] [-u] [-U] ");
-        pw.println("      [--uid UID] [--user USER_ID] [FILTER]");
+        pw.println("      [--apex-only] [--uid UID] [--user USER_ID] [FILTER]");
         pw.println("    Prints all packages; optionally only those whose name contains");
         pw.println("    the text in FILTER.  Options are:");
         pw.println("      -f: see their associated file");
-        pw.println("      -a: all known packages");
+        pw.println("      -a: all known packages (but excluding APEXes)");
         pw.println("      -d: filter to only show disabled packages");
         pw.println("      -e: filter to only show enabled packages");
         pw.println("      -s: filter to only show system packages");
@@ -2780,6 +2792,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -l: ignored (used for compatibility with older releases)");
         pw.println("      -U: also show the package UID");
         pw.println("      -u: also include uninstalled packages");
+        pw.println("      --apex-only: only show APEX packages");
         pw.println("      --uid UID: filter to only show packages with the given UID");
         pw.println("      --user USER_ID: only list packages belonging to the given user");
         pw.println("");
@@ -2853,7 +2866,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
         pw.println("       [--preload] [--instantapp] [--full] [--dont-kill]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [--apex] [-S BYTES]");
-        pw.println("       [--multi-package]");
+        pw.println("       [--multi-package] [--staged]");
         pw.println("    Like \"install\", but starts an install session.  Use \"install-write\"");
         pw.println("    to push data into the session, and \"install-commit\" to finish.");
         pw.println("");

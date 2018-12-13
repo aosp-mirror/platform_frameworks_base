@@ -377,6 +377,9 @@ public class MeasuredParagraph {
      * @param start the inclusive start offset of the target region in the text
      * @param end the exclusive end offset of the target region in the text
      * @param textDir the text direction
+     * @param computeHyphenation true if need to compute hyphenation, otherwise false
+     * @param computeLayout true if need to compute full layout, otherwise false.
+     * @param hint pass if you already have measured paragraph.
      * @param recycle pass existing MeasuredParagraph if you want to recycle it.
      *
      * @return measured text
@@ -389,12 +392,18 @@ public class MeasuredParagraph {
             @NonNull TextDirectionHeuristic textDir,
             boolean computeHyphenation,
             boolean computeLayout,
+            @Nullable MeasuredParagraph hint,
             @Nullable MeasuredParagraph recycle) {
         final MeasuredParagraph mt = recycle == null ? obtain() : recycle;
         mt.resetAndAnalyzeBidi(text, start, end, textDir);
-        final MeasuredText.Builder builder = new MeasuredText.Builder(mt.mCopiedBuffer);
-        builder.setComputeHyphenation(computeHyphenation);
-        builder.setComputeLayout(computeLayout);
+        final MeasuredText.Builder builder;
+        if (hint == null) {
+            builder = new MeasuredText.Builder(mt.mCopiedBuffer)
+                    .setComputeHyphenation(computeHyphenation)
+                    .setComputeLayout(computeLayout);
+        } else {
+            builder = new MeasuredText.Builder(hint.mMeasuredText);
+        }
         if (mt.mTextLength == 0) {
             // Need to build empty native measured text for StaticLayout.
             // TODO: Stop creating empty measured text for empty lines.

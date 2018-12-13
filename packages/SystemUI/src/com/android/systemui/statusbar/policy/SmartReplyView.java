@@ -16,6 +16,8 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Layout;
 import android.text.TextPaint;
 import android.text.method.TransformationMethod;
@@ -34,6 +36,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -61,6 +64,8 @@ public class SmartReplyView extends ViewGroup {
 
     private final SmartReplyConstants mConstants;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
+    private final NotificationRemoteInputManager mRemoteInputManager;
+    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
 
     /**
      * The upper bound for the height of this view in pixels. Notifications are automatically
@@ -109,6 +114,7 @@ public class SmartReplyView extends ViewGroup {
         super(context, attrs);
         mConstants = Dependency.get(SmartReplyConstants.class);
         mKeyguardDismissUtil = Dependency.get(KeyguardDismissUtil.class);
+        mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
 
         mHeightUpperLimit = NotificationUtils.getFontScaledHeight(mContext,
             R.dimen.smart_reply_button_max_height);
@@ -209,13 +215,15 @@ public class SmartReplyView extends ViewGroup {
      * notification are shown.
      */
     public void addSmartActions(SmartActions smartActions,
-            SmartReplyController smartReplyController, NotificationData.Entry entry) {
+            SmartReplyController smartReplyController, NotificationData.Entry entry,
+            HeadsUpManager headsUpManager) {
         int numSmartActions = smartActions.actions.size();
         for (int n = 0; n < numSmartActions; n++) {
             Notification.Action action = smartActions.actions.get(n);
             if (action.actionIntent != null) {
                 Button actionButton = inflateActionButton(
-                        getContext(), this, n, smartActions, smartReplyController, entry);
+                        getContext(), this, n, smartActions, smartReplyController, entry,
+                        headsUpManager);
                 addView(actionButton);
             }
         }
@@ -237,12 +245,22 @@ public class SmartReplyView extends ViewGroup {
         b.setText(choice);
 
         OnDismissAction action = () -> {
+            // TODO(b/111437455): Also for EDIT_CHOICES_BEFORE_SENDING_AUTO, depending on flags.
+            if (smartReplies.remoteInput.getEditChoicesBeforeSending()
+                    == RemoteInput.EDIT_CHOICES_BEFORE_SENDING_ENABLED) {
+                entry.remoteInputText = choice;
+                mRemoteInputManager.activateRemoteInput(b,
+                        new RemoteInput[] { smartReplies.remoteInput }, smartReplies.remoteInput,
+                        smartReplies.pendingIntent);
+                return false;
+            }
+
             smartReplyController.smartReplySent(
                     entry, replyIndex, b.getText(), smartReplies.fromAssistant);
             Bundle results = new Bundle();
             results.putString(smartReplies.remoteInput.getResultKey(), choice.toString());
             Intent intent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-            RemoteInput.addResultsToIntent(new RemoteInput[]{smartReplies.remoteInput}, intent,
+            RemoteInput.addResultsToIntent(new RemoteInput[] { smartReplies.remoteInput }, intent,
                     results);
             RemoteInput.setResultsSource(intent, RemoteInput.SOURCE_CHOICE);
             entry.setHasSentReply();
@@ -274,7 +292,7 @@ public class SmartReplyView extends ViewGroup {
     @VisibleForTesting
     Button inflateActionButton(Context context, ViewGroup root, int actionIndex,
             SmartActions smartActions, SmartReplyController smartReplyController,
-            NotificationData.Entry entry) {
+            NotificationData.Entry entry, HeadsUpManager headsUpManager) {
         Notification.Action action = smartActions.actions.get(actionIndex);
         Button button = (Button) LayoutInflater.from(context).inflate(
                 R.layout.smart_action_button, root, false);
@@ -290,8 +308,12 @@ public class SmartReplyView extends ViewGroup {
         button.setOnClickListener(view ->
                 getActivityStarter().startPendingIntentDismissingKeyguard(
                         action.actionIntent,
-                        () -> smartReplyController.smartActionClicked(
-                                entry, actionIndex, action, smartActions.fromAssistant)));
+                        () -> {
+                            smartReplyController.smartActionClicked(
+                                    entry, actionIndex, action, smartActions.fromAssistant);
+                            postOnUiThread(() ->
+                                    headsUpManager.removeNotification(entry.key, true));
+                        }));
 
         // TODO(b/119010281): handle accessibility
 
@@ -299,6 +321,10 @@ public class SmartReplyView extends ViewGroup {
         final LayoutParams lp = (LayoutParams) button.getLayoutParams();
         lp.buttonType = SmartButtonType.ACTION;
         return button;
+    }
+
+    private void postOnUiThread(Runnable runnable) {
+        mMainThreadHandler.post(runnable);
     }
 
     @Override

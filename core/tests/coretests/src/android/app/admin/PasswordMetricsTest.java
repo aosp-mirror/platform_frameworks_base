@@ -16,9 +16,16 @@
 
 package android.app.admin;
 
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_LOW;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import android.app.admin.PasswordMetrics.PasswordComplexityBucket;
 import android.os.Parcel;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -163,5 +170,127 @@ public class PasswordMetricsTest {
         assertEquals(metrics0, metrics1);
 
 
+    }
+
+    @Test
+    public void testConstructQuality() {
+        PasswordMetrics expected = new PasswordMetrics();
+        expected.quality = DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
+
+        PasswordMetrics actual = new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_COMPLEX);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testDetermineComplexity_none() {
+        assertEquals(PASSWORD_COMPLEXITY_NONE,
+                PasswordMetrics.computeForPassword("").determineComplexity());
+    }
+
+    @Test
+    public void testDetermineComplexity_lowSomething() {
+        assertEquals(PASSWORD_COMPLEXITY_LOW,
+                new PasswordMetrics(PASSWORD_QUALITY_SOMETHING).determineComplexity());
+    }
+
+    @Test
+    public void testDetermineComplexity_lowNumeric() {
+        assertEquals(PASSWORD_COMPLEXITY_LOW,
+                PasswordMetrics.computeForPassword("1234").determineComplexity());
+    }
+
+    @Test
+    public void testDetermineComplexity_lowNumericComplex() {
+        assertEquals(PASSWORD_COMPLEXITY_LOW,
+                PasswordMetrics.computeForPassword("124").determineComplexity());
+    }
+
+    @Test
+    public void testDetermineComplexity_lowAlphabetic() {
+        assertEquals(PASSWORD_COMPLEXITY_LOW,
+                PasswordMetrics.computeForPassword("a!").determineComplexity());
+    }
+
+    @Test
+    public void testDetermineComplexity_lowAlphanumeric() {
+        assertEquals(PASSWORD_COMPLEXITY_LOW,
+                PasswordMetrics.computeForPassword("a!1").determineComplexity());
+    }
+
+    @Test
+    public void testDetermineComplexity_mediumNumericComplex() {
+        assertEquals(PASSWORD_COMPLEXITY_MEDIUM,
+                PasswordMetrics.computeForPassword("1238").determineComplexity());
+    }
+
+    @Test
+    public void testDetermineComplexity_mediumAlphabetic() {
+        assertEquals(PASSWORD_COMPLEXITY_MEDIUM,
+                PasswordMetrics.computeForPassword("ab!c").determineComplexity());
+    }
+
+    @Test
+    public void testDetermineComplexity_mediumAlphanumeric() {
+        assertEquals(PASSWORD_COMPLEXITY_MEDIUM,
+                PasswordMetrics.computeForPassword("ab!1").determineComplexity());
+    }
+
+    @Test
+    public void testDetermineComplexity_highNumericComplex() {
+        assertEquals(PASSWORD_COMPLEXITY_HIGH,
+                PasswordMetrics.computeForPassword("12389647!").determineComplexity());
+    }
+
+    @Test
+    public void testDetermineComplexity_highAlphabetic() {
+        assertEquals(PASSWORD_COMPLEXITY_HIGH,
+                PasswordMetrics.computeForPassword("alphabetic!").determineComplexity());
+    }
+
+    @Test
+    public void testDetermineComplexity_highAlphanumeric() {
+        assertEquals(PASSWORD_COMPLEXITY_HIGH,
+                PasswordMetrics.computeForPassword("alphanumeric123!").determineComplexity());
+    }
+
+    @Test
+    public void testComplexityLevelToBucket_none() {
+        PasswordMetrics[] bucket = PasswordComplexityBucket.complexityLevelToBucket(
+                PASSWORD_COMPLEXITY_NONE).getMetrics();
+
+        for (PasswordMetrics metrics : bucket) {
+            assertEquals(PASSWORD_COMPLEXITY_NONE, metrics.determineComplexity());
+        }
+    }
+
+    @Test
+    public void testComplexityLevelToBucket_low() {
+        PasswordMetrics[] bucket = PasswordComplexityBucket.complexityLevelToBucket(
+                PASSWORD_COMPLEXITY_LOW).getMetrics();
+
+        for (PasswordMetrics metrics : bucket) {
+            assertEquals(PASSWORD_COMPLEXITY_LOW, metrics.determineComplexity());
+        }
+    }
+
+    @Test
+    public void testComplexityLevelToBucket_medium() {
+        PasswordMetrics[] bucket = PasswordComplexityBucket.complexityLevelToBucket(
+                PASSWORD_COMPLEXITY_MEDIUM).getMetrics();
+
+        for (PasswordMetrics metrics : bucket) {
+            assertEquals(PASSWORD_COMPLEXITY_MEDIUM, metrics.determineComplexity());
+        }
+    }
+
+    @Test
+    public void testComplexityLevelToBucket_high() {
+        PasswordMetrics[] bucket = PasswordComplexityBucket.complexityLevelToBucket(
+                PASSWORD_COMPLEXITY_HIGH).getMetrics();
+
+        for (PasswordMetrics metrics : bucket) {
+            assertEquals(PASSWORD_COMPLEXITY_HIGH, metrics.determineComplexity());
+        }
     }
 }

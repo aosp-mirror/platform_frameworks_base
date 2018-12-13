@@ -128,6 +128,8 @@ struct JMediaCodec : public AHandler {
 
     void setVideoScalingMode(int mode);
 
+    void selectAudioPresentation(const int32_t presentationId, const int32_t programId);
+
 protected:
     virtual ~JMediaCodec();
 

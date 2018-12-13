@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.statsd.testdrive;
+package com.android.statsd.shelltools.testdrive;
 
 import com.android.internal.os.StatsdConfigProto.AtomMatcher;
 import com.android.internal.os.StatsdConfigProto.SimpleAtomMatcher;
@@ -21,20 +21,15 @@ import com.android.internal.os.StatsdConfigProto.StatsdConfig;
 import com.android.os.AtomsProto.Atom;
 import com.android.os.StatsLog.ConfigMetricsReport;
 import com.android.os.StatsLog.ConfigMetricsReportList;
+import com.android.statsd.shelltools.Utils;
 
 import com.google.common.io.Files;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.TextFormat.ParseException;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Formatter;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 public class TestDrive {
@@ -42,10 +37,6 @@ public class TestDrive {
     public static final int PULL_ATOM_START = 10000;
     public static final long ATOM_MATCHER_ID = 1234567;
 
-    public static final String UPDATE_CONFIG_CMD = "cmd stats config update";
-    public static final String DUMP_REPORT_CMD = "cmd stats dump-report";
-    public static final String REMOVE_CONFIG_CMD = "cmd stats config remove";
-    public static final String CONFIG_UID = "2000"; // shell uid
     public static final long CONFIG_ID = 54321;
 
     private static boolean mIsPushedAtom = false;
@@ -53,6 +44,9 @@ public class TestDrive {
     private static final Logger logger = Logger.getLogger(TestDrive.class.getName());
 
     public static void main(String[] args) {
+        TestDrive testDrive = new TestDrive();
+        Utils.setUpLogger(logger, false);
+
         if (args.length != 1) {
             logger.log(Level.SEVERE, "Usage: ./test_drive <atomId>");
             return;
@@ -70,12 +64,6 @@ public class TestDrive {
         }
         mIsPushedAtom = atomId < PULL_ATOM_START;
 
-        TestDrive testDrive = new TestDrive();
-        TestDriveFormatter formatter = new TestDriveFormatter();
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setFormatter(formatter);
-        logger.addHandler(handler);
-        logger.setUseParentHandlers(false);
 
         try {
             StatsdConfig config = testDrive.createConfig(atomId);
@@ -109,53 +97,19 @@ public class TestDrive {
         configFile.deleteOnExit();
         Files.write(config.toByteArray(), configFile);
         String remotePath = "/data/local/tmp/" + configFile.getName();
-        runCommand(null, "adb", "push", configFile.getAbsolutePath(), remotePath);
-        runCommand(
-                null, "adb", "shell", "cat", remotePath, "|", UPDATE_CONFIG_CMD,
+        Utils.runCommand(null, logger, "adb", "push", configFile.getAbsolutePath(), remotePath);
+        Utils.runCommand(null, logger,
+                "adb", "shell", "cat", remotePath, "|", Utils.CMD_UPDATE_CONFIG,
                 String.valueOf(CONFIG_ID));
     }
 
     private void removeConfig() {
         try {
-            runCommand(null, "adb", "shell", REMOVE_CONFIG_CMD, String.valueOf(CONFIG_ID));
+            Utils.runCommand(null, logger, 
+                    "adb", "shell", Utils.CMD_REMOVE_CONFIG, String.valueOf(CONFIG_ID));
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Failed to remove config: " + e.getMessage());
         }
-    }
-
-    // Runs a shell command. Output should go to outputFile. Returns error string.
-    private String runCommand(File outputFile, String... commands)
-            throws IOException, InterruptedException {
-        // Run macro on target
-        ProcessBuilder pb = new ProcessBuilder(commands);
-        // pb.redirectErrorStream(true);
-
-        if (outputFile != null && outputFile.exists() && outputFile.canWrite()) {
-            pb.redirectOutput(outputFile);
-        }
-        Process process = pb.start();
-
-        // capture any errors
-        StringBuilder out = new StringBuilder();
-        // Read output
-        BufferedReader br = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-        String line = null, previous = null;
-        while ((line = br.readLine()) != null) {
-            if (!line.equals(previous)) {
-                previous = line;
-                out.append(line).append('\n');
-                logger.fine(line);
-            }
-        }
-
-        // Check result
-        if (process.waitFor() == 0) {
-            logger.fine("Success!");
-        } else {
-            // Abnormal termination: Log command parameters and output and throw ExecutionException
-            logger.log(Level.SEVERE, out.toString());
-        }
-        return out.toString();
     }
 
     private StatsdConfig createConfig(int atomId) {
@@ -210,37 +164,8 @@ public class TestDrive {
         return builder;
     }
 
-    private ConfigMetricsReportList getReportList() throws Exception {
-        try {
-            File outputFile = File.createTempFile("statsdret", ".bin");
-            outputFile.deleteOnExit();
-            runCommand(
-                    outputFile,
-                    "adb",
-                    "shell",
-                    DUMP_REPORT_CMD,
-                    String.valueOf(CONFIG_ID),
-                    "--include_current_bucket",
-                    "--proto");
-            ConfigMetricsReportList reportList =
-                    ConfigMetricsReportList.parseFrom(new FileInputStream(outputFile));
-            return reportList;
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            logger.log(
-                    Level.SEVERE,
-                    "Failed to fetch and parse the statsd output report. "
-                            + "Perhaps there is not a valid statsd config for the requested "
-                            + "uid="
-                            + CONFIG_UID
-                            + ", id="
-                            + CONFIG_ID
-                            + ".");
-            throw (e);
-        }
-    }
-
     private void dumpMetrics() throws Exception {
-        ConfigMetricsReportList reportList = getReportList();
+        ConfigMetricsReportList reportList = Utils.getReportList(CONFIG_ID, true, logger);
         // We may get multiple reports. Take the last one.
         ConfigMetricsReport report = reportList.getReports(reportList.getReportsCount() - 1);
         // Really should be only one metric.
@@ -294,9 +219,4 @@ public class TestDrive {
                     + "\n"
                     + "hash_strings_in_metric_report: false";
 
-    public static class TestDriveFormatter extends Formatter {
-        public String format(LogRecord record) {
-            return record.getMessage() + "\n";
-        }
-    }
 }

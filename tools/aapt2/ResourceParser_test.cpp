@@ -905,16 +905,16 @@ TEST_F(ResourceParserTest, ParseOverlayable) {
   auto search_result = table_.FindResource(test::ParseNameOrDie("string/foo"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations.size(), Eq(1));
-  EXPECT_FALSE(search_result.value().entry->overlayable_declarations[0].policy);
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  EXPECT_THAT(search_result.value().entry->overlayable.value().policies,
+              Eq(Overlayable::Policy::kNone));
 
   search_result = table_.FindResource(test::ParseNameOrDie("drawable/bar"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations.size(), Eq(1));
-  EXPECT_FALSE(search_result.value().entry->overlayable_declarations[0].policy);
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  EXPECT_THAT(search_result.value().entry->overlayable.value().policies,
+              Eq(Overlayable::Policy::kNone));
 }
 
 TEST_F(ResourceParserTest, ParseOverlayablePolicy) {
@@ -945,49 +945,44 @@ TEST_F(ResourceParserTest, ParseOverlayablePolicy) {
   auto search_result = table_.FindResource(test::ParseNameOrDie("string/foo"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations.size(), Eq(1));
-  EXPECT_FALSE(search_result.value().entry->overlayable_declarations[0].policy);
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  Overlayable& overlayable = search_result.value().entry->overlayable.value();
+  EXPECT_THAT(overlayable.policies, Eq(Overlayable::Policy::kNone));
 
   search_result = table_.FindResource(test::ParseNameOrDie("string/bar"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations.size(), Eq(1));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations[0].policy,
-              Eq(Overlayable::Policy::kProduct));
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  overlayable = search_result.value().entry->overlayable.value();
+  EXPECT_THAT(overlayable.policies, Eq(Overlayable::Policy::kProduct));
 
   search_result = table_.FindResource(test::ParseNameOrDie("string/baz"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations.size(), Eq(1));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations[0].policy,
-              Eq(Overlayable::Policy::kProductServices));
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  overlayable = search_result.value().entry->overlayable.value();
+  EXPECT_THAT(overlayable.policies, Eq(Overlayable::Policy::kProductServices));
 
   search_result = table_.FindResource(test::ParseNameOrDie("string/fiz"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations.size(), Eq(1));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations[0].policy,
-              Eq(Overlayable::Policy::kSystem));
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  overlayable = search_result.value().entry->overlayable.value();
+  EXPECT_THAT(overlayable.policies, Eq(Overlayable::Policy::kSystem));
 
   search_result = table_.FindResource(test::ParseNameOrDie("string/fuz"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations.size(), Eq(1));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations[0].policy,
-              Eq(Overlayable::Policy::kVendor));
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  overlayable = search_result.value().entry->overlayable.value();
+  EXPECT_THAT(overlayable.policies, Eq(Overlayable::Policy::kVendor));
 
   search_result = table_.FindResource(test::ParseNameOrDie("string/faz"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations.size(), Eq(1));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations[0].policy,
-              Eq(Overlayable::Policy::kPublic));
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  overlayable = search_result.value().entry->overlayable.value();
+  EXPECT_THAT(overlayable.policies, Eq(Overlayable::Policy::kPublic));
 }
 
 TEST_F(ResourceParserTest, ParseOverlayableBadPolicyError) {
@@ -1031,22 +1026,18 @@ TEST_F(ResourceParserTest, ParseOverlayableMultiplePolicy) {
   auto search_result = table_.FindResource(test::ParseNameOrDie("string/foo"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations.size(), Eq(2));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations[0].policy,
-              Eq(Overlayable::Policy::kVendor));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations[1].policy,
-              Eq(Overlayable::Policy::kProductServices));
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  Overlayable& overlayable = search_result.value().entry->overlayable.value();
+  EXPECT_THAT(overlayable.policies, Eq(Overlayable::Policy::kVendor
+                                       | Overlayable::Policy::kProductServices));
 
   search_result = table_.FindResource(test::ParseNameOrDie("string/bar"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations.size(), Eq(2));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations[0].policy,
-              Eq(Overlayable::Policy::kProduct));
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations[1].policy,
-              Eq(Overlayable::Policy::kSystem));
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  overlayable = search_result.value().entry->overlayable.value();
+  EXPECT_THAT(overlayable.policies, Eq(Overlayable::Policy::kProduct
+                                       | Overlayable::Policy::kSystem));
 }
 
 TEST_F(ResourceParserTest, DuplicateOverlayableIsError) {
@@ -1067,9 +1058,29 @@ TEST_F(ResourceParserTest, DuplicateOverlayableIsError) {
   EXPECT_FALSE(TestParse(input));
 
   input = R"(
-      <overlayable">
+      <overlayable>
         <policy type="product">
           <item type="string" name="foo" />
+          <item type="string" name="foo" />
+        </policy>
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable>
+        <policy type="product">
+          <item type="string" name="foo" />
+        </policy>
+        <item type="string" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable>
+        <policy type="product">
+          <item type="string" name="foo" />
+        </policy>
+        <policy type="vendor">
           <item type="string" name="foo" />
         </policy>
       </overlayable>)";
@@ -1084,41 +1095,6 @@ TEST_F(ResourceParserTest, DuplicateOverlayableIsError) {
 
       <overlayable>
         <policy type="product">
-          <item type="string" name="foo" />
-        </policy>
-      </overlayable>)";
-  EXPECT_FALSE(TestParse(input));
-}
-
-TEST_F(ResourceParserTest, PolicyAndNonPolicyOverlayableError) {
-  std::string input = R"(
-        <overlayable policy="product">
-          <item type="string" name="foo" />
-        </overlayable>
-        <overlayable policy="">
-          <item type="string" name="foo" />
-        </overlayable>)";
-  EXPECT_FALSE(TestParse(input));
-
-  input = R"(
-        <overlayable policy="">
-          <item type="string" name="foo" />
-        </overlayable>
-        <overlayable policy="product">
-          <item type="string" name="foo" />
-        </overlayable>)";
-  EXPECT_FALSE(TestParse(input));
-}
-
-TEST_F(ResourceParserTest, DuplicateOverlayableMultiplePolicyError) {
-  std::string input = R"(
-      <overlayable>
-        <policy type="vendor|product">
-          <item type="string" name="foo" />
-        </policy>
-      </overlayable>
-      <overlayable>
-        <policy type="product_services|vendor">
           <item type="string" name="foo" />
         </policy>
       </overlayable>)";

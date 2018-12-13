@@ -93,7 +93,7 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
       util::make_unique<Reference>(expected_ref), context->GetDiagnostics()));
 
   // Make an overlayable resource.
-  ASSERT_TRUE(table->AddOverlayable(test::ParseNameOrDie("com.app.a:integer/overlayable"),
+  ASSERT_TRUE(table->SetOverlayable(test::ParseNameOrDie("com.app.a:integer/overlayable"),
                                     Overlayable{}, test::GetDiagnostics()));
 
   pb::ResourceTable pb_table;
@@ -160,8 +160,9 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
       new_table.FindResource(test::ParseNameOrDie("com.app.a:integer/overlayable"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  EXPECT_THAT(search_result.value().entry->overlayable_declarations.size(), Eq(1));
-  EXPECT_FALSE(search_result.value().entry->overlayable_declarations[0].policy);
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  EXPECT_THAT(search_result.value().entry->overlayable.value().policies,
+              Eq(Overlayable::Policy::kNone));
 }
 
 TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
@@ -502,15 +503,26 @@ TEST(ProtoSerializeTest, SerializeDeserializeConfiguration) {
 }
 
 TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
+  Overlayable overlayable_foo{};
+  overlayable_foo.policies |= Overlayable::Policy::kSystem;
+  overlayable_foo.policies |= Overlayable::Policy::kProduct;
+
+  Overlayable overlayable_bar{};
+  overlayable_bar.policies |= Overlayable::Policy::kProductServices;
+  overlayable_bar.policies |= Overlayable::Policy::kVendor;
+
+  Overlayable overlayable_baz{};
+  overlayable_baz.policies |= Overlayable::Policy::kPublic;
+
+  Overlayable overlayable_biz{};
+
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .AddOverlayable("com.app.a:bool/foo", Overlayable::Policy::kSystem)
-          .AddOverlayable("com.app.a:bool/foo", Overlayable::Policy::kProduct)
-          .AddOverlayable("com.app.a:bool/bar", Overlayable::Policy::kProductServices)
-          .AddOverlayable("com.app.a:bool/bar", Overlayable::Policy::kVendor)
-          .AddOverlayable("com.app.a:bool/baz", Overlayable::Policy::kPublic)
-          .AddOverlayable("com.app.a:bool/biz", {})
+          .SetOverlayable("com.app.a:bool/foo", overlayable_foo)
+          .SetOverlayable("com.app.a:bool/bar", overlayable_bar)
+          .SetOverlayable("com.app.a:bool/baz", overlayable_baz)
+          .SetOverlayable("com.app.a:bool/biz", overlayable_biz)
           .AddValue("com.app.a:bool/fiz", ResourceUtils::TryParseBool("true"))
           .Build();
 
@@ -523,37 +535,36 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
   EXPECT_THAT(error, IsEmpty());
 
-  Maybe<ResourceTable::SearchResult> result =
+  Maybe<ResourceTable::SearchResult> search_result =
       new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/foo"));
-  ASSERT_TRUE(result);
-  ASSERT_THAT(result.value().entry->overlayable_declarations.size(), Eq(2));
-  EXPECT_THAT(result.value().entry->overlayable_declarations[0].policy,
-              Eq(Overlayable::Policy::kSystem));
-  EXPECT_THAT(result.value().entry->overlayable_declarations[1].policy,
-              Eq(Overlayable::Policy::kProduct));
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  Overlayable result_overlayable = search_result.value().entry->overlayable.value();
+  EXPECT_THAT(result_overlayable.policies, Eq(Overlayable::Policy::kSystem
+                                              | Overlayable::Policy::kProduct));
 
-  result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/bar"));
-  ASSERT_TRUE(result);
-  ASSERT_THAT(result.value().entry->overlayable_declarations.size(), Eq(2));
-  EXPECT_THAT(result.value().entry->overlayable_declarations[0].policy,
-              Eq(Overlayable::Policy::kProductServices));
-  EXPECT_THAT(result.value().entry->overlayable_declarations[1].policy,
-              Eq(Overlayable::Policy::kVendor));
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/bar"));
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  result_overlayable = search_result.value().entry->overlayable.value();
+  EXPECT_THAT(result_overlayable.policies, Eq(Overlayable::Policy::kProductServices
+                                              | Overlayable::Policy::kVendor));
 
-  result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/baz"));
-  ASSERT_TRUE(result);
-  ASSERT_THAT(result.value().entry->overlayable_declarations.size(), Eq(1));
-  EXPECT_THAT(result.value().entry->overlayable_declarations[0].policy,
-              Eq(Overlayable::Policy::kPublic));
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/baz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  result_overlayable = search_result.value().entry->overlayable.value();
+  EXPECT_THAT(result_overlayable.policies, Overlayable::Policy::kPublic);
 
-  result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/biz"));
-  ASSERT_TRUE(result);
-  ASSERT_THAT(result.value().entry->overlayable_declarations.size(), Eq(1));
-  EXPECT_FALSE(result.value().entry->overlayable_declarations[0].policy);
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/biz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable);
+  result_overlayable = search_result.value().entry->overlayable.value();
+  EXPECT_THAT(result_overlayable.policies, Overlayable::Policy::kNone);
 
-  result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/fiz"));
-  ASSERT_TRUE(result);
-  EXPECT_THAT(result.value().entry->overlayable_declarations.size(), Eq(0));
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/fiz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_FALSE(search_result.value().entry->overlayable);
 }
 
 }  // namespace aapt

@@ -38,9 +38,12 @@ interface IPackageInstallerSession {
     void commit(in IntentSender statusReceiver, boolean forTransferred);
     void transfer(in String packageName);
     void abandon();
+
     boolean isMultiPackage();
     int[] getChildSessionIds();
     void addChildSessionId(in int sessionId);
     void removeChildSessionId(in int sessionId);
     int getParentSessionId();
+
+    boolean isStaged();
 }

@@ -377,6 +377,13 @@ final class SettingsState {
     @GuardedBy("mLock")
     public boolean insertSettingLocked(String name, String value, String tag,
             boolean makeDefault, String packageName) {
+        return insertSettingLocked(name, value, tag, makeDefault, false, packageName);
+    }
+
+    // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
+    public boolean insertSettingLocked(String name, String value, String tag,
+            boolean makeDefault, boolean forceNonSystemPackage, String packageName) {
         if (TextUtils.isEmpty(name)) {
             return false;
         }
@@ -387,7 +394,7 @@ final class SettingsState {
         Setting newState;
 
         if (oldState != null) {
-            if (!oldState.update(value, makeDefault, packageName, tag, false)) {
+            if (!oldState.update(value, makeDefault, packageName, tag, forceNonSystemPackage)) {
                 return false;
             }
             newState = oldState;

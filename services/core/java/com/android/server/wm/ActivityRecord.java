@@ -96,6 +96,7 @@ import static com.android.server.am.ActivityRecordProto.TRANSLUCENT;
 import static com.android.server.am.ActivityRecordProto.VISIBLE;
 import static com.android.server.am.EventLogTags.AM_RELAUNCH_ACTIVITY;
 import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
+import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
@@ -122,8 +123,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
-import static com.android.server.wm.ActivityTaskManagerService
-        .RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -157,6 +157,7 @@ import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.PipModeChangeItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.WindowVisibilityItem;
+import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -1035,8 +1036,6 @@ final class ActivityRecord extends ConfigurationContainer {
 
         inHistory = true;
 
-        final TaskWindowContainerController taskController = task.getWindowContainerController();
-
         // TODO(b/36505427): Maybe this call should be moved inside updateOverrideConfiguration()
         task.updateOverrideConfigurationFromLaunchBounds();
         // Make sure override configuration is up-to-date before using to create window controller.
@@ -1048,10 +1047,9 @@ final class ActivityRecord extends ConfigurationContainer {
             // TODO: Should this throw an exception instead?
             Slog.w(TAG, "Attempted to add existing app token: " + appToken);
         } else {
-            final Task container = taskController.mContainer;
+            final Task container = task.getTask();
             if (container == null) {
-                throw new IllegalArgumentException("AppWindowContainerController: invalid "
-                        + " controller=" + taskController);
+                throw new IllegalArgumentException("createAppWindowToken: invalid task =" + task);
             }
             mAppWindowToken = createAppWindow(mAtmService.mWindowManager, appToken,
                     task.voiceSession != null, container.getDisplayContent(),
@@ -1062,7 +1060,7 @@ final class ActivityRecord extends ConfigurationContainer {
                     mLaunchTaskBehind, isAlwaysFocusable());
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) {
                 Slog.v(TAG, "addAppToken: "
-                        + mAppWindowToken + " controller=" + taskController + " at "
+                        + mAppWindowToken + " task=" + container + " at "
                         + Integer.MAX_VALUE);
             }
             container.addChild(mAppWindowToken, Integer.MAX_VALUE /* add on top */);
@@ -1148,7 +1146,7 @@ final class ActivityRecord extends ConfigurationContainer {
                     + " r=" + this + " (" + prevTask.getStackId() + ")");
         }
 
-        mAppWindowToken.reparent(newTask.getWindowContainerController(), position);
+        mAppWindowToken.reparent(newTask.getTask(), position);
 
         // Reparenting prevents informing the parent stack of activity removal in the case that
         // the new stack has the same parent. we must manually signal here if this is not the case.
@@ -1800,6 +1798,18 @@ final class ActivityRecord extends ConfigurationContainer {
                 return;
             }
             mAppWindowToken.detachChildren();
+        }
+
+        if (state == RESUMED) {
+            mAtmService.updateBatteryStats(this, true);
+            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_RESUMED);
+        } else if (state == PAUSED) {
+            mAtmService.updateBatteryStats(this, false);
+            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_PAUSED);
+        } else if (state == STOPPED) {
+            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_STOPPED);
+        } else if (state == DESTROYED) {
+            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_DESTROYED);
         }
     }
 
@@ -2774,7 +2784,7 @@ final class ActivityRecord extends ConfigurationContainer {
             final boolean hasResizeChange = hasResizeChange(changes & ~info.getRealConfigChanged());
             if (hasResizeChange) {
                 final boolean isDragResizing =
-                        getTaskRecord().getWindowContainerController().isDragResizing();
+                        getTaskRecord().getTask().isDragResizing();
                 mRelaunchReason = isDragResizing ? RELAUNCH_REASON_FREE_RESIZE
                         : RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
             } else {

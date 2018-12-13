@@ -2062,7 +2062,6 @@ public class WifiManager {
     /**
      * @return true if this adapter supports Device-to-AP RTT
      */
-    @SystemApi
     public boolean isDeviceToApRttSupported() {
         return isFeatureSupported(WIFI_FEATURE_D2AP_RTT);
     }
@@ -4434,5 +4433,20 @@ public class WifiManager {
      */
     public boolean isOweSupported() {
         return isFeatureSupported(WIFI_FEATURE_OWE);
+    }
+
+    /**
+     * Gets the factory Wi-Fi MAC addresses.
+     * @return Array of String representing Wi-Fi MAC addresses sorted lexically or an empty Array
+     * if failed.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public String[] getFactoryMacAddresses() {
+        try {
+            return mService.getFactoryMacAddresses();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

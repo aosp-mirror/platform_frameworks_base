@@ -91,6 +91,7 @@ public class NotificationContentView extends FrameLayout {
 
     private SmartReplyConstants mSmartReplyConstants;
     private SmartReplyView mExpandedSmartReplyView;
+    private SmartReplyView mHeadsUpSmartReplyView;
     private SmartReplyController mSmartReplyController;
 
     private NotificationViewWrapper mContractedWrapper;
@@ -253,6 +254,9 @@ public class NotificationContentView extends FrameLayout {
         }
         if (mHeadsUpChild != null) {
             int maxHeight = mHeadsUpHeight;
+            if (mHeadsUpSmartReplyView != null) {
+                maxHeight += mHeadsUpSmartReplyView.getHeightUpperLimit();
+            }
             maxHeight += mHeadsUpWrapper.getExtraMeasureHeight();
             int size = maxHeight;
             ViewGroup.LayoutParams layoutParams = mHeadsUpChild.getLayoutParams();
@@ -955,6 +959,9 @@ public class NotificationContentView extends FrameLayout {
         if (mExpandedSmartReplyView != null) {
             mExpandedSmartReplyView.setBackgroundTintColor(color);
         }
+        if (mHeadsUpSmartReplyView != null) {
+            mHeadsUpSmartReplyView.setBackgroundTintColor(color);
+        }
     }
 
     public int getVisibleType() {
@@ -1472,6 +1479,10 @@ public class NotificationContentView extends FrameLayout {
                         entry, smartRepliesAndActions.smartReplies.choices.length);
             }
         }
+        if (mHeadsUpChild != null) {
+            mHeadsUpSmartReplyView =
+                    applySmartReplyView(mHeadsUpChild, smartRepliesAndActions, entry);
+        }
     }
 
     private SmartReplyView applySmartReplyView(View view,
@@ -1520,7 +1531,8 @@ public class NotificationContentView extends FrameLayout {
             }
             if (smartRepliesAndActions.smartActions != null) {
                 smartReplyView.addSmartActions(
-                        smartRepliesAndActions.smartActions, mSmartReplyController, entry);
+                        smartRepliesAndActions.smartActions, mSmartReplyController, entry,
+                        mContainingNotification.getHeadsUpManager());
             }
             smartReplyContainer.setVisibility(View.VISIBLE);
         }

@@ -47,6 +47,7 @@ import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.server.EventLogTags.WM_TASK_CREATED;
 import static com.android.server.am.TaskRecordProto.ACTIVITIES;
 import static com.android.server.am.TaskRecordProto.ACTIVITY_TYPE;
 import static com.android.server.am.TaskRecordProto.BOUNDS;
@@ -76,6 +77,10 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECEN
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -106,6 +111,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.DisplayMetrics;
+import android.util.EventLog;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -125,8 +131,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 
-// TODO: Make package private again once move to WM package is complete.
-public class TaskRecord extends ConfigurationContainer implements TaskWindowContainerListener {
+class TaskRecord extends ConfigurationContainer {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_ATM;
     private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
@@ -318,7 +323,8 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
     /** Helper object used for updating override configuration. */
     private Configuration mTmpConfig = new Configuration();
 
-    private TaskWindowContainerController mWindowContainerController;
+    // TODO: remove after unification
+    Task mTask;
 
     /**
      * Don't use constructor directly. Use {@link #create(ActivityTaskManagerService, int,
@@ -424,43 +430,54 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         mService.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
     }
 
-    TaskWindowContainerController getWindowContainerController() {
-        return mWindowContainerController;
+    Task getTask() {
+        return mTask;
     }
 
-    void createWindowContainer(boolean onTop, boolean showForAllUsers) {
-        if (mWindowContainerController != null) {
-            throw new IllegalArgumentException("Window container=" + mWindowContainerController
+    void createTask(boolean onTop, boolean showForAllUsers) {
+        if (mTask != null) {
+            throw new IllegalArgumentException("mTask=" + mTask
                     + " already created for task=" + this);
         }
 
         final Rect bounds = updateOverrideConfigurationFromLaunchBounds();
-        setWindowContainerController(new TaskWindowContainerController(taskId, this,
-                getStack().getWindowContainerController(), userId, bounds,
-                mResizeMode, mSupportsPictureInPicture, onTop,
-                showForAllUsers, lastTaskDescription));
+        final StackWindowController stackController = getStack().getWindowContainerController();
+
+        if (DEBUG_STACK) {
+            Slog.i(TAG_WM, "TaskRecord: taskId=" + taskId
+                    + " stack=" + stackController + " bounds=" + bounds);
+        }
+
+        final TaskStack stack = stackController.mContainer;
+        if (stack == null) {
+            throw new IllegalArgumentException("TaskRecord: invalid stack="
+                    + stackController);
+        }
+        EventLog.writeEvent(WM_TASK_CREATED, taskId, stack.mStackId);
+        mTask = new Task(taskId, stack, userId, mService.mWindowManager, mResizeMode,
+                mSupportsPictureInPicture, lastTaskDescription, this);
+        final int position = onTop ? POSITION_TOP : POSITION_BOTTOM;
+
+        if (!mDisplayedBounds.isEmpty()) {
+            mTask.setOverrideDisplayedBounds(mDisplayedBounds);
+        }
+        // We only want to move the parents to the parents if we are creating this task at the
+        // top of its stack.
+        stack.addTask(mTask, position, showForAllUsers, onTop /* moveParents */);
     }
 
-    /**
-     * Should only be invoked from {@link #createWindowContainer(boolean, boolean)}.
-     */
-    @VisibleForTesting
-    protected void setWindowContainerController(TaskWindowContainerController controller) {
-        if (mWindowContainerController != null) {
-            throw new IllegalArgumentException("Window container=" + mWindowContainerController
-                    + " already created for task=" + this);
-        }
-
-        mWindowContainerController = controller;
-        if (!mDisplayedBounds.isEmpty() && controller.mContainer != null) {
-            controller.mContainer.setOverrideDisplayedBounds(mDisplayedBounds);
-        }
+    void setTask(Task task) {
+        mTask = task;
     }
 
     void removeWindowContainer() {
         mService.getLockTaskController().clearLockedTask(this);
-        mWindowContainerController.removeContainer();
-        mWindowContainerController = null;
+        if (mTask == null) {
+            if (DEBUG_STACK) Slog.i(TAG_WM, "removeTask: could not find taskId=" + taskId);
+            return;
+        }
+        mTask.removeIfPossible();
+        mTask = null;
         if (!getWindowConfiguration().persistTaskBounds()) {
             // Reset current bounds for task whose bounds shouldn't be persisted so it uses
             // default configuration the next time it launches.
@@ -469,7 +486,6 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         mService.getTaskChangeNotificationController().notifyTaskRemoved(taskId);
     }
 
-    @Override
     public void onSnapshotChanged(TaskSnapshot snapshot) {
         mService.getTaskChangeNotificationController().notifyTaskSnapshotChanged(taskId, snapshot);
     }
@@ -479,17 +495,20 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
             return;
         }
         mResizeMode = resizeMode;
-        mWindowContainerController.setResizeable(resizeMode);
+        mTask.setResizeable(resizeMode);
         mService.mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         mService.mRootActivityContainer.resumeFocusedStacksTopActivities();
     }
 
     void setTaskDockedResizing(boolean resizing) {
-        mWindowContainerController.setTaskDockedResizing(resizing);
+        if (mTask == null) {
+            Slog.w(TAG_WM, "setTaskDockedResizing: taskId " + taskId + " not found.");
+            return;
+        }
+        mTask.setTaskDockedResizing(resizing);
     }
 
     // TODO: Consolidate this with the resize() method below.
-    @Override
     public void requestResize(Rect bounds, int resizeMode) {
         mService.resizeTask(taskId, bounds, resizeMode);
     }
@@ -511,7 +530,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
                 return true;
             }
 
-            if (mWindowContainerController == null) {
+            if (mTask == null) {
                 // Task doesn't exist in window manager yet (e.g. was restored from recents).
                 // All we can do for now is update the bounds so it can be used when the task is
                 // added to window manager.
@@ -558,7 +577,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
                     }
                 }
             }
-            mWindowContainerController.resize(kept, forced);
+            mTask.resize(kept, forced);
 
             saveLaunchingStateIfNeeded();
 
@@ -571,11 +590,15 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
 
     // TODO: Investigate combining with the resize() method above.
     void resizeWindowContainer() {
-        mWindowContainerController.resize(false /* relayout */, false /* forced */);
+        mTask.resize(false /* relayout */, false /* forced */);
     }
 
     void getWindowContainerBounds(Rect bounds) {
-        mWindowContainerController.getBounds(bounds);
+        if (mTask != null) {
+            mTask.getBounds(bounds);
+        } else {
+            bounds.setEmpty();
+        }
     }
 
     /**
@@ -679,7 +702,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
 
             // Must reparent first in window manager to avoid a situation where AM can delete the
             // we are coming from in WM before we reparent because it became empty.
-            mWindowContainerController.reparent(toStack.getWindowContainerController(), position,
+            mTask.reparent(toStack.getWindowContainerController(), position,
                     moveStackMode == REPARENT_MOVE_STACK_TO_FRONT);
 
             final boolean moveStackToFront = moveStackMode == REPARENT_MOVE_STACK_TO_FRONT
@@ -779,7 +802,11 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
     }
 
     void cancelWindowTransition() {
-        mWindowContainerController.cancelWindowTransition();
+        if (mTask == null) {
+            Slog.w(TAG_WM, "cancelWindowTransition: taskId " + taskId + " not found.");
+            return;
+        }
+        mTask.cancelTaskWindowTransition();
     }
 
     /**
@@ -1190,7 +1217,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         mActivities.add(newTop);
 
         // Make sure window manager is aware of the position change.
-        mWindowContainerController.positionChildAtTop(newTop.mAppWindowToken);
+        mTask.positionChildAtTop(newTop.mAppWindowToken);
         updateEffectiveIntent();
 
         setFrontOfTask();
@@ -1275,7 +1302,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         if (r.mAppWindowToken != null) {
             // Only attempt to move in WM if the child has a controller. It is possible we haven't
             // created controller for the activity we are starting yet.
-            mWindowContainerController.positionChildAt(r.mAppWindowToken, index);
+            mTask.positionChildAt(r.mAppWindowToken, index);
         }
 
         // Make sure the list of display UID whitelists is updated
@@ -1643,8 +1670,8 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
             }
             lastTaskDescription = new TaskDescription(label, null, iconResource, iconFilename,
                     colorPrimary, colorBackground, statusBarColor, navigationBarColor);
-            if (mWindowContainerController != null) {
-                mWindowContainerController.setTaskDescription(lastTaskDescription);
+            if (mTask != null) {
+                mTask.setTaskDescription(lastTaskDescription);
             }
             // Update the task affiliation color if we are the parent of the group
             if (taskId == mAffiliatedTaskId) {
@@ -1879,9 +1906,8 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         } else {
             mDisplayedBounds.set(bounds);
         }
-        final TaskWindowContainerController controller = getWindowContainerController();
-        if (controller != null && controller.mContainer != null) {
-            controller.mContainer.setOverrideDisplayedBounds(
+        if (mTask != null) {
+            mTask.setOverrideDisplayedBounds(
                     mDisplayedBounds.isEmpty() ? null : mDisplayedBounds);
         }
     }

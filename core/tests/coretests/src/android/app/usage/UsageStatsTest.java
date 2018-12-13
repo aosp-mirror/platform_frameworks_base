@@ -16,18 +16,22 @@
 
 package android.app.usage;
 
-import static android.app.usage.UsageEvents.Event.CONTINUE_PREVIOUS_DAY;
+import static android.app.usage.UsageEvents.Event.ACTIVITY_DESTROYED;
+import static android.app.usage.UsageEvents.Event.ACTIVITY_PAUSED;
+import static android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED;
+import static android.app.usage.UsageEvents.Event.ACTIVITY_STOPPED;
 import static android.app.usage.UsageEvents.Event.CONTINUING_FOREGROUND_SERVICE;
 import static android.app.usage.UsageEvents.Event.END_OF_DAY;
+import static android.app.usage.UsageEvents.Event.FLUSH_TO_DISK;
 import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_START;
 import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_STOP;
-import static android.app.usage.UsageEvents.Event.MOVE_TO_BACKGROUND;
-import static android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND;
 import static android.app.usage.UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import android.app.usage.UsageEvents.Event;
 import android.os.Parcel;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -120,10 +124,10 @@ public class UsageStatsTest {
         left.mBeginTimeStamp = 100000;
         left.mTotalTimeInForeground = 10;
 
-        left.mLastForegroundActivityEventMap.put("com.test.activity1", MOVE_TO_FOREGROUND);
-        left.mLastForegroundActivityEventMap.put("com.test.activity2", MOVE_TO_FOREGROUND);
-        left.mLastForegroundServiceEventMap.put("com.test.service1", FOREGROUND_SERVICE_START);
-        left.mLastForegroundServiceEventMap.put("com.test.service2", FOREGROUND_SERVICE_START);
+        left.mActivities.put(1, Event.ACTIVITY_RESUMED);
+        left.mActivities.put(2, Event.ACTIVITY_RESUMED);
+        left.mForegroundServices.put("com.test.service1", FOREGROUND_SERVICE_START);
+        left.mForegroundServices.put("com.test.service2", FOREGROUND_SERVICE_START);
 
         Parcel p = Parcel.obtain();
         left.writeToParcel(p, 0);
@@ -133,37 +137,38 @@ public class UsageStatsTest {
     }
 
     @Test
-    public void testForegroundActivity() {
+    public void testActivity() {
         left.mPackageName = "com.test";
         left.mBeginTimeStamp = 100000;
 
-        left.update("com.test.activity1", 200000, MOVE_TO_FOREGROUND);
+        left.update("com.test.activity1", 200000, Event.ACTIVITY_RESUMED, 1);
         assertEquals(left.mLastTimeUsed, 200000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"),
-                new Integer(MOVE_TO_FOREGROUND));
+        assertEquals(left.mLastTimeVisible, 200000);
+        assertEquals(left.mActivities.get(1), Event.ACTIVITY_RESUMED);
         assertEquals(left.mLaunchCount, 1);
+        assertEquals(left.mTotalTimeInForeground, 0);
+        assertEquals(left.mTotalTimeVisible, 0);
 
-        left.update("com.test.activity1", 350000, MOVE_TO_BACKGROUND);
+        left.update("com.test.activity1", 350000, ACTIVITY_PAUSED, 1);
         assertEquals(left.mLastTimeUsed, 350000);
-        assertFalse(left.mLastForegroundActivityEventMap.containsKey("com.test.activity1"));
+        assertEquals(left.mLastTimeVisible, 350000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_PAUSED);
         assertEquals(left.mTotalTimeInForeground, 350000 - 200000);
-    }
+        assertEquals(left.mTotalTimeVisible, 350000 - 200000);
 
-    @Test
-    public void testEvent_CONTINUE_PREVIOUS_DAY() {
-        left.mPackageName = "com.test";
-        left.mBeginTimeStamp = 100000;
-
-        left.update("com.test.activity1", 100000, CONTINUE_PREVIOUS_DAY);
-        assertEquals(left.mLastTimeUsed, 100000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"),
-                new Integer(CONTINUE_PREVIOUS_DAY));
-        assertEquals(left.mLaunchCount, 0);
-
-        left.update("com.test.activity1", 350000, MOVE_TO_BACKGROUND);
+        left.update("com.test.activity1", 400000, ACTIVITY_STOPPED, 1);
         assertEquals(left.mLastTimeUsed, 350000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"), null);
-        assertEquals(left.mTotalTimeInForeground, 350000 - 100000);
+        assertEquals(left.mLastTimeVisible, 400000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_STOPPED);
+        assertEquals(left.mTotalTimeInForeground, 350000 - 200000);
+        assertEquals(left.mTotalTimeVisible, 400000 - 200000);
+
+        left.update("com.test.activity1", 500000, ACTIVITY_DESTROYED, 1);
+        assertEquals(left.mLastTimeUsed, 350000);
+        assertEquals(left.mLastTimeVisible, 400000);
+        assertTrue(left.mActivities.indexOfKey(1) < 0);
+        assertEquals(left.mTotalTimeInForeground, 350000 - 200000);
+        assertEquals(left.mTotalTimeVisible, 400000 - 200000);
     }
 
     @Test
@@ -171,93 +176,143 @@ public class UsageStatsTest {
         left.mPackageName = "com.test";
         left.mBeginTimeStamp = 100000;
 
-        left.update("com.test.activity1", 100000, CONTINUE_PREVIOUS_DAY);
+        left.update("com.test.activity1", 100000, Event.ACTIVITY_RESUMED, 1);
         assertEquals(left.mLastTimeUsed, 100000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"),
-                new Integer(CONTINUE_PREVIOUS_DAY));
-        assertEquals(left.mLaunchCount, 0);
-
-        left.update(null, 350000, END_OF_DAY);
-        assertEquals(left.mLastTimeUsed, 350000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"),
-                new Integer(END_OF_DAY));
-        assertEquals(left.mTotalTimeInForeground, 350000 - 100000);
-    }
-
-    @Test
-    public void testForegroundActivityEventSequence() {
-        left.mPackageName = "com.test";
-        left.mBeginTimeStamp = 100000;
-
-        left.update("com.test.activity1", 100000, CONTINUE_PREVIOUS_DAY);
-        assertEquals(left.mLastTimeUsed, 100000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"),
-                new Integer(CONTINUE_PREVIOUS_DAY));
-        assertEquals(left.mLaunchCount, 0);
-
-        left.update("com.test.activity1", 350000, MOVE_TO_BACKGROUND);
-        assertEquals(left.mLastTimeUsed, 350000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"), null);
-        assertEquals(left.mTotalTimeInForeground, 250000 /*350000 - 100000*/);
-
-        left.update("com.test.activity1", 450000, MOVE_TO_FOREGROUND);
-        assertEquals(left.mLastTimeUsed, 450000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"),
-                new Integer(MOVE_TO_FOREGROUND));
-        assertEquals(left.mTotalTimeInForeground, 250000);
-
-        left.update("com.test.activity1", 500000, MOVE_TO_BACKGROUND);
-        assertEquals(left.mLastTimeUsed, 500000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"), null);
-        assertEquals(left.mTotalTimeInForeground, 250000 + 50000 /*500000 - 450000*/);
-    }
-
-    @Test
-    public void testForegroundActivityEventOutOfSequence() {
-        left.mPackageName = "com.test";
-        left.mBeginTimeStamp = 100000;
-
-        left.update("com.test.activity1", 100000, CONTINUE_PREVIOUS_DAY);
-        assertEquals(left.mLastTimeUsed, 100000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"),
-                new Integer(CONTINUE_PREVIOUS_DAY));
-        assertEquals(left.mLaunchCount, 0);
-
-        left.update("com.test.activity1", 150000, MOVE_TO_FOREGROUND);
-        assertEquals(left.mLastTimeUsed, 150000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"),
-                new Integer(MOVE_TO_FOREGROUND));
+        assertEquals(left.mLastTimeVisible, 100000);
+        assertEquals(left.mActivities.get(1), Event.ACTIVITY_RESUMED);
         assertEquals(left.mLaunchCount, 1);
-        assertEquals(left.mTotalTimeInForeground, 50000 /*150000 - 100000*/);
 
-        left.update("com.test.activity1", 200000, MOVE_TO_FOREGROUND);
+        left.update(null, 350000, END_OF_DAY, 0);
+        assertEquals(left.mLastTimeUsed, 350000);
+        assertEquals(left.mLastTimeVisible, 350000);
+        assertEquals(left.mActivities.get(1), Event.ACTIVITY_RESUMED);
+        assertEquals(left.mTotalTimeInForeground, 350000 - 100000);
+        assertEquals(left.mTotalTimeVisible, 350000 - 100000);
+    }
+
+    @Test
+    public void testEvent_ACTIVITY_PAUSED() {
+        left.mPackageName = "com.test";
+        left.mBeginTimeStamp = 100000;
+
+        left.update("com.test.activity1", 100000, ACTIVITY_PAUSED, 1);
+        assertEquals(left.mLastTimeUsed, 0);
+        assertEquals(left.mLastTimeVisible, 100000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_PAUSED);
+
+        left.update("com.test.activity1", 200000, Event.ACTIVITY_RESUMED, 1);
         assertEquals(left.mLastTimeUsed, 200000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"),
-                new Integer(MOVE_TO_FOREGROUND));
+        assertEquals(left.mLastTimeVisible, 200000);
+        assertEquals(left.mActivities.get(1), Event.ACTIVITY_RESUMED);
+        assertEquals(left.mTotalTimeInForeground, 0);
+        assertEquals(left.mTotalTimeVisible, 200000 - 100000);
+
+        left.update("com.test.activity1", 300000, ACTIVITY_PAUSED, 1);
+        assertEquals(left.mLastTimeUsed, 300000);
+        assertEquals(left.mLastTimeVisible, 300000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_PAUSED);
+        assertEquals(left.mTotalTimeInForeground, 300000 - 200000);
+        assertEquals(left.mTotalTimeVisible, 300000 - 100000);
+
+        left.update("com.test.activity1", 400000, ACTIVITY_STOPPED, 1);
+        assertEquals(left.mLastTimeUsed, 300000);
+        assertEquals(left.mLastTimeVisible, 400000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_STOPPED);
+        assertEquals(left.mTotalTimeInForeground, 300000 - 200000);
+        assertEquals(left.mTotalTimeVisible, 400000 - 100000);
+    }
+
+    @Test
+    public void testEvent_CHANGE_TO_INVISIBLE() {
+        left.mPackageName = "com.test";
+        left.mBeginTimeStamp = 100000;
+
+        left.update("com.test.activity1", 100000, ACTIVITY_RESUMED, 1);
+        assertEquals(left.mLastTimeUsed, 100000);
+        assertEquals(left.mLastTimeVisible, 100000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_RESUMED);
+
+        left.update("com.test.activity1", 200000, ACTIVITY_STOPPED, 1);
+        assertEquals(left.mLastTimeUsed, 200000);
+        assertEquals(left.mLastTimeVisible, 200000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_STOPPED);
+        assertEquals(left.mTotalTimeInForeground, 200000 - 100000);
+        assertEquals(left.mTotalTimeVisible, 200000 - 100000);
+
+        left.update("com.test.activity1", 300000, ACTIVITY_RESUMED, 1);
+        assertEquals(left.mLastTimeUsed, 300000);
+        assertEquals(left.mLastTimeVisible, 300000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_RESUMED);
+        assertEquals(left.mTotalTimeInForeground, 200000 - 100000);
+        assertEquals(left.mTotalTimeVisible, 200000 - 100000);
+    }
+
+    @Test
+    public void testEvent_ACTIVITY_DESTROYED() {
+        left.mPackageName = "com.test";
+        left.mBeginTimeStamp = 100000;
+
+        left.update("com.test.activity1", 100000, ACTIVITY_RESUMED, 1);
+        assertEquals(left.mLastTimeUsed, 100000);
+        assertEquals(left.mLastTimeVisible, 100000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_RESUMED);
+
+        left.update("com.test.activity1", 200000, ACTIVITY_DESTROYED, 1);
+        assertEquals(left.mLastTimeUsed, 200000);
+        assertEquals(left.mLastTimeVisible, 200000);
+        assertTrue(left.mActivities.indexOfKey(1) < 0);
+        assertEquals(left.mTotalTimeInForeground, 200000 - 100000);
+        assertEquals(left.mTotalTimeVisible, 200000 - 100000);
+    }
+
+    @Test
+    public void testActivityEventOutOfOrder() {
+        left.mPackageName = "com.test";
+        left.mBeginTimeStamp = 100000;
+
+        left.update("com.test.activity1", 100000, Event.ACTIVITY_RESUMED, 1);
+        assertEquals(left.mLastTimeUsed, 100000);
+        assertEquals(left.mLastTimeVisible, 100000);
+        assertEquals(left.mActivities.get(1), Event.ACTIVITY_RESUMED);
+        assertEquals(left.mLaunchCount, 1);
+        assertEquals(left.mTotalTimeInForeground, 0);
+        assertEquals(left.mTotalTimeVisible, 0);
+
+        left.update("com.test.activity1", 200000, Event.ACTIVITY_RESUMED, 1);
+        assertEquals(left.mLastTimeUsed, 200000);
+        assertEquals(left.mLastTimeVisible, 200000);
+        assertEquals(left.mActivities.get(1), Event.ACTIVITY_RESUMED);
         assertEquals(left.mLaunchCount, 2);
         assertEquals(left.mTotalTimeInForeground, 100000);
+        assertEquals(left.mTotalTimeVisible, 100000 /*200000 - 100000*/);
 
-        left.update("com.test.activity1", 250000, MOVE_TO_BACKGROUND);
+        left.update("com.test.activity1", 250000, ACTIVITY_PAUSED, 1);
         assertEquals(left.mLastTimeUsed, 250000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"), null);
+        assertEquals(left.mLastTimeVisible, 250000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_PAUSED);
         assertEquals(left.mTotalTimeInForeground, 150000);
+        assertEquals(left.mTotalTimeVisible, 150000 /*250000 - 100000*/);
 
-        left.update("com.test.activity1", 300000, MOVE_TO_BACKGROUND);
+        left.update("com.test.activity1", 300000, ACTIVITY_PAUSED, 1);
         assertEquals(left.mLastTimeUsed, 250000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"), null);
+        assertEquals(left.mLastTimeVisible, 300000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_PAUSED);
         assertEquals(left.mTotalTimeInForeground, 150000);
+        assertEquals(left.mTotalTimeVisible, 200000 /*300000 - 100000*/);
 
-        left.update("com.test.activity1", 350000, MOVE_TO_FOREGROUND);
+        left.update("com.test.activity1", 350000, Event.ACTIVITY_RESUMED, 1);
         assertEquals(left.mLastTimeUsed, 350000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"),
-                new Integer(MOVE_TO_FOREGROUND));
+        assertEquals(left.mLastTimeVisible, 350000);
+        assertEquals(left.mActivities.get(1), Event.ACTIVITY_RESUMED);
         assertEquals(left.mTotalTimeInForeground, 150000);
+        assertEquals(left.mTotalTimeVisible, 250000 /*350000 - 100000*/);
 
-        left.update("com.test.activity1", 400000, END_OF_DAY);
+        left.update("com.test.activity1", 400000, END_OF_DAY, 1);
         assertEquals(left.mLastTimeUsed, 400000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"),
-                new Integer(END_OF_DAY));
+        assertEquals(left.mLastTimeVisible, 400000);
+        assertEquals(left.mActivities.get(1), Event.ACTIVITY_RESUMED);
         assertEquals(left.mTotalTimeInForeground, 200000);
+        assertEquals(left.mTotalTimeVisible, 300000 /*400000 - 100000*/);
     }
 
     @Test
@@ -265,28 +320,41 @@ public class UsageStatsTest {
         left.mPackageName = "com.test";
         left.mBeginTimeStamp = 100000;
 
-        left.update("com.test.activity1", 100000, CONTINUE_PREVIOUS_DAY);
-        left.update("com.test.activity2", 100000, CONTINUE_PREVIOUS_DAY);
+        left.update("com.test.activity1", 100000, Event.ACTIVITY_RESUMED, 1);
+        left.update("com.test.activity2", 100000, Event.ACTIVITY_RESUMED, 2);
         assertEquals(left.mLastTimeUsed, 100000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"),
-                new Integer(CONTINUE_PREVIOUS_DAY));
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity2"),
-                new Integer(CONTINUE_PREVIOUS_DAY));
-        assertEquals(left.mLaunchCount, 0);
+        assertEquals(left.mLastTimeVisible, 100000);
+        assertEquals(left.mActivities.get(1), Event.ACTIVITY_RESUMED);
+        assertEquals(left.mActivities.get(2), Event.ACTIVITY_RESUMED);
+        assertEquals(left.mLaunchCount, 2);
 
-        left.update("com.test.activity1", 350000, MOVE_TO_BACKGROUND);
+        left.update("com.test.activity1", 350000, ACTIVITY_PAUSED, 1);
         assertEquals(left.mLastTimeUsed, 350000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"), null);
+        assertEquals(left.mLastTimeVisible, 350000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_PAUSED);
         assertEquals(left.mTotalTimeInForeground, 250000 /*350000 - 100000*/);
+        assertEquals(left.mTotalTimeVisible, 250000 /*350000 - 100000*/);
 
-        left.update("com.test.activity2", 450000, MOVE_TO_BACKGROUND);
+        left.update("com.test.activity2", 450000, ACTIVITY_PAUSED, 2);
         assertEquals(left.mLastTimeUsed, 450000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity2"), null);
+        assertEquals(left.mLastTimeVisible, 450000);
+        assertEquals(left.mActivities.get(2), ACTIVITY_PAUSED);
         assertEquals(left.mTotalTimeInForeground, 250000 + 100000 /*450000 - 350000*/);
+        assertEquals(left.mTotalTimeVisible, 250000 + 100000 /*450000 - 350000*/);
 
-        left.update(null, 500000, END_OF_DAY);
+        left.update("com.test.activity1", 550000, ACTIVITY_STOPPED, 1);
         assertEquals(left.mLastTimeUsed, 450000);
+        assertEquals(left.mLastTimeVisible, 550000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_STOPPED);
         assertEquals(left.mTotalTimeInForeground, 350000);
+        assertEquals(left.mTotalTimeVisible, 350000 + 100000 /*550000 - 450000*/);
+
+        left.update("com.test.activity2", 650000, ACTIVITY_STOPPED, 2);
+        assertEquals(left.mLastTimeUsed, 450000);
+        assertEquals(left.mLastTimeVisible, 650000);
+        assertEquals(left.mActivities.get(2), ACTIVITY_STOPPED);
+        assertEquals(left.mTotalTimeInForeground, 350000);
+        assertEquals(left.mTotalTimeVisible, 450000 + 100000 /*650000 - 550000*/);
     }
 
     @Test
@@ -294,15 +362,14 @@ public class UsageStatsTest {
         left.mPackageName = "com.test";
         left.mBeginTimeStamp = 100000;
 
-        left.update("com.test.service1", 200000, FOREGROUND_SERVICE_START);
+        left.update("com.test.service1", 200000, FOREGROUND_SERVICE_START, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 200000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"),
+        assertEquals(left.mForegroundServices.get("com.test.service1"),
                 new Integer(FOREGROUND_SERVICE_START));
-        assertEquals(left.mLaunchCount, 0);
 
-        left.update("com.test.service1", 350000, FOREGROUND_SERVICE_STOP);
+        left.update("com.test.service1", 350000, FOREGROUND_SERVICE_STOP, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 350000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"), null);
+        assertEquals(left.mForegroundServices.get("com.test.service1"), null);
         assertEquals(left.mTotalTimeForegroundServiceUsed, 350000 - 200000);
     }
 
@@ -311,15 +378,15 @@ public class UsageStatsTest {
         left.mPackageName = "com.test";
         left.mBeginTimeStamp = 100000;
 
-        left.update("com.test.service1", 100000, CONTINUING_FOREGROUND_SERVICE);
+        left.update("com.test.service1", 100000,
+                CONTINUING_FOREGROUND_SERVICE, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 100000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"),
+        assertEquals(left.mForegroundServices.get("com.test.service1"),
                 new Integer(CONTINUING_FOREGROUND_SERVICE));
-        assertEquals(left.mLaunchCount, 0);
 
-        left.update("com.test.service1", 350000, FOREGROUND_SERVICE_STOP);
+        left.update("com.test.service1", 350000, FOREGROUND_SERVICE_STOP, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 350000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"), null);
+        assertEquals(left.mForegroundServices.get("com.test.service1"), null);
         assertEquals(left.mTotalTimeForegroundServiceUsed, 350000 - 100000);
     }
 
@@ -329,16 +396,15 @@ public class UsageStatsTest {
         left.mBeginTimeStamp = 100000;
 
         left.update("com.test.service1", 100000,
-                CONTINUING_FOREGROUND_SERVICE);
+                CONTINUING_FOREGROUND_SERVICE, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 100000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"),
+        assertEquals(left.mForegroundServices.get("com.test.service1"),
                 new Integer(CONTINUING_FOREGROUND_SERVICE));
-        assertEquals(left.mLaunchCount, 0);
 
-        left.update(null, 350000, ROLLOVER_FOREGROUND_SERVICE);
+        left.update(null, 350000, ROLLOVER_FOREGROUND_SERVICE, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 350000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"),
-                new Integer(ROLLOVER_FOREGROUND_SERVICE));
+        assertEquals(left.mForegroundServices.get("com.test.service1"),
+                new Integer(CONTINUING_FOREGROUND_SERVICE));
         assertEquals(left.mTotalTimeForegroundServiceUsed, 350000 - 100000);
     }
 
@@ -348,27 +414,28 @@ public class UsageStatsTest {
         left.mBeginTimeStamp = 100000;
 
         left.update("com.test.service1", 100000,
-                CONTINUING_FOREGROUND_SERVICE);
+                CONTINUING_FOREGROUND_SERVICE, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 100000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"),
+        assertEquals(left.mForegroundServices.get("com.test.service1"),
                 new Integer(CONTINUING_FOREGROUND_SERVICE));
         assertEquals(left.mLaunchCount, 0);
 
-        left.update("com.test.service1", 350000, FOREGROUND_SERVICE_STOP);
+        left.update("com.test.service1", 350000, FOREGROUND_SERVICE_STOP, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 350000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"), null);
+        assertEquals(left.mForegroundServices.get("com.test.service1"), null);
         assertEquals(left.mTotalTimeForegroundServiceUsed, 250000 /*350000 - 100000*/);
 
-        left.update("com.test.service1", 450000, FOREGROUND_SERVICE_START);
+        left.update("com.test.service1", 450000, FOREGROUND_SERVICE_START, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 450000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"),
+        assertEquals(left.mForegroundServices.get("com.test.service1"),
                 new Integer(FOREGROUND_SERVICE_START));
         assertEquals(left.mTotalTimeForegroundServiceUsed, 250000);
 
-        left.update("com.test.service1", 500000, FOREGROUND_SERVICE_STOP);
+        left.update("com.test.service1", 500000, FOREGROUND_SERVICE_STOP, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 500000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"), null);
-        assertEquals(left.mTotalTimeForegroundServiceUsed, 250000 + 50000 /*500000 - 450000*/);
+        assertEquals(left.mForegroundServices.get("com.test.service1"), null);
+        assertEquals(left.mTotalTimeForegroundServiceUsed,
+                250000 + 50000 /*500000 - 450000*/);
     }
 
     @Test
@@ -377,27 +444,27 @@ public class UsageStatsTest {
         left.mBeginTimeStamp = 100000;
 
         left.update("com.test.service1", 100000,
-                CONTINUING_FOREGROUND_SERVICE);
+                CONTINUING_FOREGROUND_SERVICE, 0);
         left.update("com.test.service2", 100000,
-                CONTINUING_FOREGROUND_SERVICE);
+                CONTINUING_FOREGROUND_SERVICE, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 100000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"),
+        assertEquals(left.mForegroundServices.get("com.test.service1"),
                 new Integer(CONTINUING_FOREGROUND_SERVICE));
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service2"),
+        assertEquals(left.mForegroundServices.get("com.test.service2"),
                 new Integer(CONTINUING_FOREGROUND_SERVICE));
-        assertEquals(left.mLaunchCount, 0);
 
-        left.update("com.test.service1", 350000, FOREGROUND_SERVICE_STOP);
+        left.update("com.test.service1", 350000, FOREGROUND_SERVICE_STOP, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 350000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"), null);
+        assertEquals(left.mForegroundServices.get("com.test.service1"), null);
         assertEquals(left.mTotalTimeForegroundServiceUsed, 250000 /*350000 - 100000*/);
 
-        left.update("com.test.service2", 450000, FOREGROUND_SERVICE_STOP);
+        left.update("com.test.service2", 450000, FOREGROUND_SERVICE_STOP, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 450000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service2"), null);
-        assertEquals(left.mTotalTimeForegroundServiceUsed, 250000 + 100000 /*450000 - 350000*/);
+        assertEquals(left.mForegroundServices.get("com.test.service2"), null);
+        assertEquals(left.mTotalTimeForegroundServiceUsed,
+                250000 + 100000 /*450000 - 350000*/);
 
-        left.update(null, 500000, ROLLOVER_FOREGROUND_SERVICE);
+        left.update(null, 500000, ROLLOVER_FOREGROUND_SERVICE, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 450000);
         assertEquals(left.mTotalTimeForegroundServiceUsed, 350000);
     }
@@ -407,76 +474,117 @@ public class UsageStatsTest {
         left.mPackageName = "com.test";
         left.mBeginTimeStamp = 100000;
 
-        left.update("com.test.activity1", 100000, CONTINUE_PREVIOUS_DAY);
-        left.update("com.test.activity2", 100000, CONTINUE_PREVIOUS_DAY);
+        left.update("com.test.activity1", 100000, Event.ACTIVITY_RESUMED, 1);
+        left.update("com.test.activity2", 100000, Event.ACTIVITY_RESUMED, 2);
         left.update("com.test.service1", 100000,
-                CONTINUING_FOREGROUND_SERVICE);
+                CONTINUING_FOREGROUND_SERVICE, 0);
         left.update("com.test.service2", 100000,
-                CONTINUING_FOREGROUND_SERVICE);
+                CONTINUING_FOREGROUND_SERVICE, 0);
         assertEquals(left.mLastTimeUsed, 100000);
         assertEquals(left.mLastTimeForegroundServiceUsed, 100000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"),
-                new Integer(CONTINUE_PREVIOUS_DAY));
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity2"),
-                new Integer(CONTINUE_PREVIOUS_DAY));
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"),
+        assertEquals(left.mActivities.get(1), Event.ACTIVITY_RESUMED);
+        assertEquals(left.mActivities.get(2), Event.ACTIVITY_RESUMED);
+        assertEquals(left.mForegroundServices.get("com.test.service1"),
                 new Integer(CONTINUING_FOREGROUND_SERVICE));
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service2"),
+        assertEquals(left.mForegroundServices.get("com.test.service2"),
                 new Integer(CONTINUING_FOREGROUND_SERVICE));
-        assertEquals(left.mLaunchCount, 0);
+        assertEquals(left.mLaunchCount, 2);
 
-        left.update("com.test.activity1", 350000, MOVE_TO_BACKGROUND);
+        left.update("com.test.activity1", 350000, ACTIVITY_PAUSED, 1);
         assertEquals(left.mLastTimeUsed, 350000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity1"), null);
+        assertEquals(left.mLastTimeVisible, 350000);
+        assertEquals(left.mActivities.get(1), ACTIVITY_PAUSED);
         assertEquals(left.mTotalTimeInForeground, 250000 /*350000 - 100000*/);
+        assertEquals(left.mTotalTimeVisible, 250000 /*350000 - 100000*/);
 
-        left.update("com.test.service1", 400000, FOREGROUND_SERVICE_STOP);
+        left.update("com.test.service1", 400000, FOREGROUND_SERVICE_STOP, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 400000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service1"), null);
+        assertEquals(left.mForegroundServices.get("com.test.service1"), null);
         assertEquals(left.mTotalTimeForegroundServiceUsed, 300000 /*400000 - 100000*/);
 
-        left.update("com.test.activity2", 450000, MOVE_TO_BACKGROUND);
+        left.update("com.test.activity2", 450000, ACTIVITY_PAUSED, 2);
         assertEquals(left.mLastTimeUsed, 450000);
-        assertEquals(left.mLastForegroundActivityEventMap.get("com.test.activity2"), null);
+        assertEquals(left.mLastTimeVisible, 450000);
+        assertEquals(left.mActivities.get(2), ACTIVITY_PAUSED);
         assertEquals(left.mTotalTimeInForeground, 250000 + 100000 /*450000 - 350000*/);
+        assertEquals(left.mTotalTimeVisible, 250000 + 100000 /*450000 - 350000*/);
 
-        left.update("com.test.service2", 500000, FOREGROUND_SERVICE_STOP);
+        left.update("com.test.service2", 500000, FOREGROUND_SERVICE_STOP, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 500000);
-        assertEquals(left.mLastForegroundServiceEventMap.get("com.test.service2"), null);
-        assertEquals(left.mTotalTimeForegroundServiceUsed, 300000 + 100000 /*500000 - 400000*/);
+        assertEquals(left.mForegroundServices.get("com.test.service2"), null);
+        assertEquals(left.mTotalTimeForegroundServiceUsed,
+                300000 + 100000 /*500000 - 400000*/);
 
 
-        left.update(null, 550000, END_OF_DAY);
+        left.update(null, 550000, END_OF_DAY, 0);
         assertEquals(left.mLastTimeUsed, 450000);
+        assertEquals(left.mLastTimeVisible, 550000);
         assertEquals(left.mTotalTimeInForeground, 350000);
-        left.update(null, 550000, ROLLOVER_FOREGROUND_SERVICE);
+        assertEquals(left.mTotalTimeVisible, 450000);
+
+        left.update(null, 550000, ROLLOVER_FOREGROUND_SERVICE, 0);
         assertEquals(left.mLastTimeForegroundServiceUsed, 500000);
         assertEquals(left.mTotalTimeForegroundServiceUsed, 400000);
+    }
+
+    @Test
+    public void testEvent_FLUSH_TO_DISK() {
+        testClosingEvent(FLUSH_TO_DISK);
+    }
+
+    private void testClosingEvent(int eventType) {
+        // When these three closing events are received, all open activities/services need to be
+        // closed and usage stats are updated.
+        if (eventType != FLUSH_TO_DISK) {
+            fail("Closing eventType must be one of FLUSH_TO_DISK");
+        }
+
+        left.mPackageName = "com.test";
+        left.mBeginTimeStamp = 100000;
+
+        left.update("com.test.activity1", 100000, Event.ACTIVITY_RESUMED, 1);
+        assertEquals(left.mLastTimeUsed, 100000);
+        assertEquals(left.mLastTimeVisible, 100000);
+        assertEquals(left.mActivities.get(1), Event.ACTIVITY_RESUMED);
+
+        left.update("com.test.service1", 150000, FOREGROUND_SERVICE_START, 0);
+        assertEquals(left.mLastTimeForegroundServiceUsed, 150000);
+        assertEquals(left.mForegroundServices.get("com.test.service1"),
+                new Integer(FOREGROUND_SERVICE_START));
+
+        left.update(null, 200000, eventType, 0);
+        assertEquals(left.mLastTimeUsed, 200000);
+        assertEquals(left.mLastTimeVisible, 200000);
+        assertEquals(left.mTotalTimeInForeground, 200000 - 100000);
+        assertEquals(left.mTotalTimeVisible, 200000 - 100000);
+        assertEquals(left.mLastTimeForegroundServiceUsed, 200000);
+        assertEquals(left.mTotalTimeForegroundServiceUsed, 200000 - 150000);
     }
 
     void compareUsageStats(UsageStats us1, UsageStats us2) {
         assertEquals(us1.mPackageName, us2.mPackageName);
         assertEquals(us1.mBeginTimeStamp, us2.mBeginTimeStamp);
         assertEquals(us1.mLastTimeUsed, us2.mLastTimeUsed);
+        assertEquals(us1.mLastTimeVisible, us2.mLastTimeVisible);
         assertEquals(us1.mLastTimeForegroundServiceUsed, us2.mLastTimeForegroundServiceUsed);
         assertEquals(us1.mTotalTimeInForeground, us2.mTotalTimeInForeground);
         assertEquals(us1.mTotalTimeForegroundServiceUsed, us2.mTotalTimeForegroundServiceUsed);
         assertEquals(us1.mAppLaunchCount, us2.mAppLaunchCount);
-        assertEquals(us1.mLastForegroundActivityEventMap.size(),
-                us2.mLastForegroundActivityEventMap.size());
-        for (int i = 0; i < us1.mLastForegroundActivityEventMap.size(); i++) {
-            assertEquals(us1.mLastForegroundActivityEventMap.keyAt(i),
-                    us2.mLastForegroundActivityEventMap.keyAt(i));
-            assertEquals(us1.mLastForegroundActivityEventMap.valueAt(i),
-                    us2.mLastForegroundActivityEventMap.valueAt(i));
+        assertEquals(us1.mActivities.size(),
+                us2.mActivities.size());
+        for (int i = 0; i < us1.mActivities.size(); i++) {
+            assertEquals(us1.mActivities.keyAt(i),
+                    us2.mActivities.keyAt(i));
+            assertEquals(us1.mActivities.valueAt(i),
+                    us2.mActivities.valueAt(i));
         }
-        assertEquals(us1.mLastForegroundServiceEventMap.size(),
-                us2.mLastForegroundServiceEventMap.size());
-        for (int i = 0; i < us1.mLastForegroundServiceEventMap.size(); i++) {
-            assertEquals(us1.mLastForegroundServiceEventMap.keyAt(i),
-                    us2.mLastForegroundServiceEventMap.keyAt(i));
-            assertEquals(us1.mLastForegroundServiceEventMap.valueAt(i),
-                    us2.mLastForegroundServiceEventMap.valueAt(i));
+        assertEquals(us1.mForegroundServices.size(),
+                us2.mForegroundServices.size());
+        for (int i = 0; i < us1.mForegroundServices.size(); i++) {
+            assertEquals(us1.mForegroundServices.keyAt(i),
+                    us2.mForegroundServices.keyAt(i));
+            assertEquals(us1.mForegroundServices.valueAt(i),
+                    us2.mForegroundServices.valueAt(i));
         }
         assertEquals(us1.mChooserCounts, us2.mChooserCounts);
     }

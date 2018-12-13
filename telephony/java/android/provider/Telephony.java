@@ -3640,8 +3640,9 @@ public final class Telephony {
 
         /**
          * Generates a content {@link Uri} used to receive updates on precise carrier identity
-         * change on the given subscriptionId
-         * {@link TelephonyManager#ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED}.
+         * change on the given subscriptionId returned by
+         * {@link TelephonyManager#getSimPreciseCarrierId()}.
+         * @see TelephonyManager#ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED
          * <p>
          * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
          * precise carrier identity {@link TelephonyManager#getSimPreciseCarrierId()}
@@ -3652,7 +3653,6 @@ public final class Telephony {
          *
          * @param subscriptionId the subscriptionId to receive updates on
          * @return the Uri used to observe precise carrier identity changes
-         * @hide
          */
         public static Uri getPreciseCarrierIdUriForSubscriptionId(int subscriptionId) {
             return Uri.withAppendedPath(Uri.withAppendedPath(CONTENT_URI, "precise"),
@@ -3674,22 +3674,20 @@ public final class Telephony {
         public static final String CARRIER_ID = "carrier_id";
 
         /**
-         * A user facing carrier name for precise carrier id.
-         * @see TelephonyManager#getSimPreciseCarrierIdName()
-         * This is not a database column, only used to notify content observers for
-         * {@link #getPreciseCarrierIdUriForSubscriptionId(int)}
-         * @hide
-         */
-        public static final String PRECISE_CARRIER_ID_NAME = "precise_carrier_id_name";
-
-        /**
          * A fine-grained carrier id.
          * @see TelephonyManager#getSimPreciseCarrierId()
          * This is not a database column, only used to notify content observers for
          * {@link #getPreciseCarrierIdUriForSubscriptionId(int)}
-         * @hide
          */
         public static final String PRECISE_CARRIER_ID = "precise_carrier_id";
+
+        /**
+         * A user facing carrier name for precise carrier id {@link #PRECISE_CARRIER_ID}.
+         * @see TelephonyManager#getSimPreciseCarrierIdName()
+         * This is not a database column, only used to notify content observers for
+         * {@link #getPreciseCarrierIdUriForSubscriptionId(int)}
+         */
+        public static final String PRECISE_CARRIER_ID_NAME = "precise_carrier_id_name";
 
         /**
          * A unique parent carrier id. The parent-child
@@ -3701,18 +3699,6 @@ public final class Telephony {
          * @hide
          */
         public static final String PARENT_CARRIER_ID = "parent_carrier_id";
-
-        /**
-         * A unique mno carrier id. mno carrier shares the same {@link All#MCCMNC} as carrier id
-         * and can be solely identified by {@link All#MCCMNC} only. If there is no such mno
-         * carrier, then mno carrier id equals to {@link #CARRIER_ID carrier id}.
-         *
-         * <p>mno carrier id can be used as fallback id. When the exact carrier id configurations
-         * are not found, usually fall back to its mno carrier id.
-         * <P>Type: INTEGER </P>
-         * @hide
-         */
-        public static final String MNO_CARRIER_ID = "mno_carrier_id";
 
         /**
          * Contains mappings between matching rules with carrier id for all carriers.

@@ -373,7 +373,10 @@ public class TextClassifierTest {
     public void testSuggestConversationActions_textReplyOnly_maxThree() {
         if (isTextClassifierDisabled()) return;
         ConversationActions.Message message =
-                new ConversationActions.Message.Builder().setText("Where are you?").build();
+                new ConversationActions.Message.Builder(
+                        ConversationActions.Message.PERSON_USER_REMOTE)
+                        .setText("Hello")
+                        .build();
         ConversationActions.TypeConfig typeConfig =
                 new ConversationActions.TypeConfig.Builder().includeTypesFromTextClassifier(false)
                         .setIncludedTypes(

@@ -61,11 +61,13 @@ final class UsageStatsXmlV1 {
     private static final String FLAGS_ATTR = "flags";
     private static final String CLASS_ATTR = "class";
     private static final String TOTAL_TIME_ACTIVE_ATTR = "timeActive";
+    private static final String TOTAL_TIME_VISIBLE_ATTR = "timeVisible";
     private static final String TOTAL_TIME_SERVICE_USED_ATTR = "timeServiceUsed";
     private static final String COUNT_ATTR = "count";
     private static final String ACTIVE_ATTR = "active";
     private static final String LAST_EVENT_ATTR = "lastEvent";
     private static final String TYPE_ATTR = "type";
+    private static final String INSTANCE_ID_ATTR = "instanceId";
     private static final String SHORTCUT_ID_ATTR = "shortcutId";
     private static final String STANDBY_BUCKET_ATTR = "standbyBucket";
     private static final String APP_LAUNCH_COUNT_ATTR = "appLaunchCount";
@@ -75,6 +77,7 @@ final class UsageStatsXmlV1 {
 
     // Time attributes stored as an offset of the beginTime.
     private static final String LAST_TIME_ACTIVE_ATTR = "lastTimeActive";
+    private static final String LAST_TIME_VISIBLE_ATTR = "lastTimeVisible";
     private static final String LAST_TIME_SERVICE_USED_ATTR = "lastTimeServiceUsed";
     private static final String END_TIME_ATTR = "endTime";
     private static final String TIME_ATTR = "time";
@@ -92,6 +95,13 @@ final class UsageStatsXmlV1 {
                 parser, LAST_TIME_ACTIVE_ATTR);
 
         try {
+            stats.mLastTimeVisible = statsOut.beginTime + XmlUtils.readLongAttribute(
+                    parser, LAST_TIME_VISIBLE_ATTR);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to parse mLastTimeVisible", e);
+        }
+
+        try {
             stats.mLastTimeForegroundServiceUsed = statsOut.beginTime + XmlUtils.readLongAttribute(
                     parser, LAST_TIME_SERVICE_USED_ATTR);
         } catch (IOException e) {
@@ -101,8 +111,14 @@ final class UsageStatsXmlV1 {
         stats.mTotalTimeInForeground = XmlUtils.readLongAttribute(parser, TOTAL_TIME_ACTIVE_ATTR);
 
         try {
+            stats.mTotalTimeVisible = XmlUtils.readLongAttribute(parser, TOTAL_TIME_VISIBLE_ATTR);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to parse mTotalTimeVisible", e);
+        }
+
+        try {
             stats.mTotalTimeForegroundServiceUsed = XmlUtils.readLongAttribute(parser,
-                TOTAL_TIME_SERVICE_USED_ATTR);
+                    TOTAL_TIME_SERVICE_USED_ATTR);
         } catch (IOException e) {
             Log.e(TAG, "Failed to parse mTotalTimeForegroundServiceUsed", e);
         }
@@ -199,6 +215,13 @@ final class UsageStatsXmlV1 {
         event.mTimeStamp = statsOut.beginTime + XmlUtils.readLongAttribute(parser, TIME_ATTR);
 
         event.mEventType = XmlUtils.readIntAttribute(parser, TYPE_ATTR);
+
+        try {
+            event.mInstanceId = XmlUtils.readIntAttribute(parser, INSTANCE_ID_ATTR);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to parse mInstanceId", e);
+        }
+
         switch (event.mEventType) {
             case UsageEvents.Event.CONFIGURATION_CHANGE:
                 event.mConfiguration = new Configuration();
@@ -227,10 +250,13 @@ final class UsageStatsXmlV1 {
         // Write the time offset.
         XmlUtils.writeLongAttribute(xml, LAST_TIME_ACTIVE_ATTR,
                 usageStats.mLastTimeUsed - stats.beginTime);
+        XmlUtils.writeLongAttribute(xml, LAST_TIME_VISIBLE_ATTR,
+                usageStats.mLastTimeVisible - stats.beginTime);
         XmlUtils.writeLongAttribute(xml, LAST_TIME_SERVICE_USED_ATTR,
                 usageStats.mLastTimeForegroundServiceUsed - stats.beginTime);
         XmlUtils.writeStringAttribute(xml, PACKAGE_ATTR, usageStats.mPackageName);
         XmlUtils.writeLongAttribute(xml, TOTAL_TIME_ACTIVE_ATTR, usageStats.mTotalTimeInForeground);
+        XmlUtils.writeLongAttribute(xml, TOTAL_TIME_VISIBLE_ATTR, usageStats.mTotalTimeVisible);
         XmlUtils.writeLongAttribute(xml, TOTAL_TIME_SERVICE_USED_ATTR,
                 usageStats.mTotalTimeForegroundServiceUsed);
         XmlUtils.writeIntAttribute(xml, LAST_EVENT_ATTR, usageStats.mLastEvent);
@@ -317,6 +343,7 @@ final class UsageStatsXmlV1 {
         }
         XmlUtils.writeIntAttribute(xml, FLAGS_ATTR, event.mFlags);
         XmlUtils.writeIntAttribute(xml, TYPE_ATTR, event.mEventType);
+        XmlUtils.writeIntAttribute(xml, INSTANCE_ID_ATTR, event.mInstanceId);
 
         switch (event.mEventType) {
             case UsageEvents.Event.CONFIGURATION_CHANGE:

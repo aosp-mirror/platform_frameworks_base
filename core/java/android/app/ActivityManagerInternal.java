@@ -196,8 +196,26 @@ public abstract class ActivityManagerInternal {
 
     public abstract void updateOomAdj();
     public abstract void updateCpuStats();
-    public abstract void updateUsageStats(
+
+    /**
+     * Update battery stats on activity usage.
+     * @param activity
+     * @param uid
+     * @param userId
+     * @param started
+     */
+    public abstract void updateBatteryStats(
             ComponentName activity, int uid, int userId, boolean resumed);
+
+    /**
+     * Update UsageStats of the activity.
+     * @param activity
+     * @param userId
+     * @param event
+     * @param appToken ActivityRecord's appToken.
+     */
+    public abstract void updateActivityUsageStats(
+            ComponentName activity, int userId, int event, IBinder appToken);
     public abstract void updateForegroundTimeIfOnBattery(
             String packageName, int uid, long cpuTimeDiff);
     public abstract void sendForegroundProfileChanged(int userId);

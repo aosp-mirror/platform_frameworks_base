@@ -1215,6 +1215,15 @@
     <string name="permdesc_manageOwnCalls">Allows the app to route its calls through the system in
         order to improve the calling experience.</string>
 
+    <!-- Title of an application permission. When granted the app is allowed to be enabled as
+        a companion app. [CHAR LIMIT=NONE]-->
+    <string name="permlab_callCompanionApp">see and control calls through the system.</string>
+    <!-- Description of an application permission. When granted the app is allowed to be enabled as
+        a companion app. [CHAR LIMIT=NONE]-->
+    <string name="permdesc_callCompanionApp">Allows the app to see and control ongoing calls on the
+        device. This includes information such as call numbers for calls and the state of the
+        calls.</string>
+
     <!-- Title of an application permission.  When granted the user is giving access to a third
          party app to continue a call which originated in another app.  For example, the user
          could be in a voice call over their carrier's mobile network, and a third party video
@@ -1395,6 +1404,16 @@
       keylock and any associated password security.  For example, the phone
       disables the keylock when receiving an incoming phone call, then
       re-enables the keylock when the call is finished.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_getAndRequestScreenLockComplexity">get and request screen lock complexity</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_getAndRequestScreenLockComplexity">Allows the app to learn the screen
+        lock complexity level (high, medium, low or none), which indicates the possible range of
+        length and type of the screen lock. The app can also suggest to users that they update the
+        screen lock to a certain level but users can freely ignore and navigate away. Note that the
+        screen lock is not stored in plaintext so the app does not know the exact password.
+    </string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
     <string name="permlab_useBiometric">use biometric hardware</string>
@@ -3322,6 +3341,15 @@
     <string name="wifi_available_action_connect">Connect</string>
     <!-- Notification action name for opening the wifi picker, showing the user all the nearby networks. -->
     <string name="wifi_available_action_all_networks">All networks</string>
+
+    <!-- Notification title for a connection to a app suggested wireless network.-->
+    <string name="wifi_suggestion_title">Connected to Wi\u2011Fi network proposed by <xliff:g id="name" example="App123">%s</xliff:g></string>
+    <!-- Notification content for a connection to a app suggested wireless network.-->
+    <string name="wifi_suggestion_content">Do you want to let <xliff:g id="name" example="App123">%s</xliff:g> propose networks for you?</string>
+    <!-- Notification action for allowing app specified in the notification body.-->
+    <string name="wifi_suggestion_action_allow_app">Yes</string>
+    <!-- Notification action for disallowing app specified in the notification body.-->
+    <string name="wifi_suggestion_action_disallow_app">No</string>
 
     <!--Notification title for Wi-Fi Wake onboarding. This is displayed the first time a user disables Wi-Fi with the feature enabled. -->
     <string name="wifi_wakeup_onboarding_title">Wi\u2011Fi will turn on automatically</string>

@@ -37,9 +37,12 @@ public abstract class UsageStatsManagerInternal {
      * @param component The component for which this event occurred.
      * @param userId The user id to which the component belongs to.
      * @param eventType The event that occurred. Valid values can be found at
-     * {@link UsageEvents}
+     *                  {@link UsageEvents}
+     * @param instanceId For activity, hashCode of ActivityRecord's appToken.
+     *                   For non-activity, it is not used.
      */
-    public abstract void reportEvent(ComponentName component, @UserIdInt int userId, int eventType);
+    public abstract void reportEvent(ComponentName component, @UserIdInt int userId, int eventType,
+            int instanceId);
 
     /**
      * Reports an event to the UsageStatsManager.
