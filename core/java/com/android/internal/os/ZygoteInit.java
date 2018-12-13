@@ -536,9 +536,11 @@ public class ZygoteInit {
     static ClassLoader createPathClassLoader(String classPath, int targetSdkVersion) {
         String libraryPath = System.getProperty("java.library.path");
 
+        // We use the boot class loader, that's what the runtime expects at AOT.
+        ClassLoader parent = ClassLoader.getSystemClassLoader().getParent();
+
         return ClassLoaderFactory.createClassLoader(classPath, libraryPath, libraryPath,
-                ClassLoader.getSystemClassLoader(), targetSdkVersion, true /* isNamespaceShared */,
-                null /* classLoaderName */);
+                parent, targetSdkVersion, true /* isNamespaceShared */, null /* classLoaderName */);
     }
 
     /**
