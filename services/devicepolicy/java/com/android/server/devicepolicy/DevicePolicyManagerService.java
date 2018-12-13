@@ -5385,7 +5385,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void enforceCanManageCaCerts(ComponentName who, String callerPackage) {
         if (who == null) {
-            if (!isCallerDelegate(callerPackage, DELEGATION_CERT_INSTALL)) {
+            if (!isCallerDelegate(callerPackage, mInjector.binderGetCallingUid(),
+                    DELEGATION_CERT_INSTALL)) {
                 mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
             }
         } else {
@@ -6098,15 +6099,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * @param scope the delegation scope to be checked.
      * @return {@code true} if the calling process is a delegate of {@code scope}.
      */
-    private boolean isCallerDelegate(String callerPackage, String scope) {
+    private boolean isCallerDelegate(String callerPackage, int callerUid, String scope) {
         Preconditions.checkNotNull(callerPackage, "callerPackage is null");
         if (!Arrays.asList(DELEGATIONS).contains(scope)) {
             throw new IllegalArgumentException("Unexpected delegation scope: " + scope);
         }
 
         // Retrieve the UID and user ID of the calling process.
-        final int callingUid = mInjector.binderGetCallingUid();
-        final int userId = UserHandle.getUserId(callingUid);
+        final int userId = UserHandle.getUserId(callerUid);
         synchronized (getLockObject()) {
             // Retrieve user policy data.
             final DevicePolicyData policy = getUserData(userId);
@@ -6119,7 +6119,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     final int uid = mInjector.getPackageManager()
                             .getPackageUidAsUser(callerPackage, userId);
                     // Return true if the caller is actually callerPackage.
-                    return uid == callingUid;
+                    return uid == callerUid;
                 } catch (NameNotFoundException e) {
                     // Ignore.
                 }
@@ -6163,7 +6163,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } else {
             // If no ComponentName is given ensure calling process has scope delegation or required
             // permission
-            if (isCallerDelegate(callerPackage, scope)) {
+            if (isCallerDelegate(callerPackage, mInjector.binderGetCallingUid(), scope)) {
                 return;
             }
             if (permission == null) {
@@ -8650,7 +8650,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isCallerApplicationRestrictionsManagingPackage(String callerPackage) {
-        return isCallerDelegate(callerPackage, DELEGATION_APP_RESTRICTIONS);
+        return isCallerDelegate(callerPackage, mInjector.binderGetCallingUid(),
+                DELEGATION_APP_RESTRICTIONS);
     }
 
     @Override
@@ -10866,6 +10867,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         @Override
         public boolean isUserAffiliatedWithDevice(int userId) {
             return DevicePolicyManagerService.this.isUserAffiliatedWithDeviceLocked(userId);
+        }
+
+        @Override
+        public boolean canSilentlyInstallPackage(String callerPackage, int callerUid) {
+            if (callerPackage == null) {
+                return false;
+            }
+            if (isUserAffiliatedWithDevice(UserHandle.getUserId(callerUid))
+                    && isActiveAdminWithPolicy(callerUid,
+                            DeviceAdminInfo.USES_POLICY_PROFILE_OWNER)) {
+                // device owner or a profile owner affiliated with the device owner
+                return true;
+            }
+            if (DevicePolicyManagerService.this.isCallerDelegate(callerPackage, callerUid,
+                    DELEGATION_PACKAGE_INSTALLATION)) {
+                return true;
+            }
+            return false;
         }
 
         @Override

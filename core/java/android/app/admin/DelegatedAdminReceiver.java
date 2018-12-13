@@ -47,7 +47,7 @@ import android.util.Log;
  *
  * <p>The callback methods happen on the main thread of the process.  Thus long running
  * operations must be done on another thread.  Note that because a receiver
- * is done once returning from its receive function, such long-running operations
+ * is done once returning from its onReceive function, such long-running operations
  * should probably be done in a {@link Service}.
  *
  * @see DevicePolicyManager#setDelegatedScopes
