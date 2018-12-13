@@ -2016,10 +2016,7 @@ final class ActivityRecord extends ConfigurationContainer {
         stopped = false;
 
         if (isActivityTypeHome()) {
-            WindowProcessController app = task.mActivities.get(0).app;
-            if (hasProcess() && app != mAtmService.mHomeProcess) {
-                mAtmService.mHomeProcess = app;
-            }
+            mStackSupervisor.updateHomeProcess(task.mActivities.get(0).app);
         }
 
         if (nowVisible) {

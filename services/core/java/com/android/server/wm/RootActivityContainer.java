@@ -336,6 +336,15 @@ class RootActivityContainer extends ConfigurationContainer
         return homeStarted;
     }
 
+    void startHomeOnEmptyDisplays(String reason) {
+        for (int i = mActivityDisplays.size() - 1; i >= 0; i--) {
+            final ActivityDisplay display = mActivityDisplays.get(i);
+            if (display.topRunningActivity() == null) {
+                startHomeOnDisplay(mCurrentUser, reason, display.mDisplayId);
+            }
+        }
+    }
+
     /**
      * This starts home activity on displays that can have system decorations and only if the
      * home activity can have multiple instances.
