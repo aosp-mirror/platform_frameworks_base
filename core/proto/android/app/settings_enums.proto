@@ -82,5 +82,7 @@ enum PageId {
 
     // OPEN: WifiDppEnrolleeActivity (android.settings.WIFI_DPP_ENROLLEE_XXX action intents)
     SETTINGS_WIFI_DPP_ENROLLEE = 1596;
-}
 
+    // OPEN: Settings > Apps & Notifications -> Special app access -> Financial Apps Sms Access
+    SETTINGS_FINANCIAL_APPS_SMS_ACCESS = 1597;
+}

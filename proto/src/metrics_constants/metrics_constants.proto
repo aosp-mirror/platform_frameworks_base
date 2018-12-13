@@ -6637,6 +6637,11 @@ message MetricsEvent {
     // OS: Q
     SETTINGS_WIFI_DPP_ENROLLEE = 1596;
 
+    // OPEN: Settings > Apps & Notifications -> Special app access -> Financial Apps Sms Access
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_FINANCIAL_APPS_SMS_ACCESS = 1597;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
