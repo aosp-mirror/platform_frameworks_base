@@ -33,6 +33,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -58,7 +60,6 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;
@@ -80,8 +81,8 @@ import java.util.function.BooleanSupplier;
 @Presubmit
 public class ScreenDecorWindowTests {
 
-    private final Context mContext = InstrumentationRegistry.getTargetContext();
-    private final Instrumentation mInstrumentation = InstrumentationRegistry.getInstrumentation();
+    private final Context mContext = getInstrumentation().getTargetContext();
+    private final Instrumentation mInstrumentation = getInstrumentation();
 
     private WindowManager mWm;
     private ArrayList<View> mWindows = new ArrayList<>();
