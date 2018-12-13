@@ -190,12 +190,13 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     }
 
     @Override
-    public void performRemoveAnimation(long duration, long delay,
+    public long performRemoveAnimation(long duration, long delay,
             float translationDirection, boolean isHeadsUpAnimation, float endLocation,
             Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener) {
         // TODO: Use duration
         setContentVisible(false);
+        return 0;
     }
 
     @Override

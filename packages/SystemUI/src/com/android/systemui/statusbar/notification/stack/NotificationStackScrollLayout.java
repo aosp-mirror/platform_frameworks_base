@@ -16,10 +16,8 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator
-        .ExpandAnimationParameters;
-import static com.android.systemui.statusbar.notification.stack.StackStateAnimator
-        .ANIMATION_DURATION_SWIPE;
+import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
 import static com.android.systemui.statusbar.phone.NotificationIconAreaController.LOW_PRIORITY;
 
 import android.animation.Animator;
@@ -651,6 +649,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 < mSections[NUM_SECTIONS - 1].getCurrentBounds().bottom
                 || mAmbientState.isDark())) {
             drawBackground(canvas);
+        } else if (mInHeadsUpPinnedMode || mHeadsUpAnimatingAway) {
+            drawHeadsUpBackground(canvas);
         }
 
         if (DEBUG) {
@@ -747,6 +747,32 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 right,
                 lastSectionBottom,
                 mCornerRadius, mCornerRadius, mBackgroundPaint);
+    }
+
+    private void drawHeadsUpBackground(Canvas canvas) {
+        int left = mSidePaddings;
+        int right = getWidth() - mSidePaddings;
+
+        float top = getHeight();
+        float bottom = 0;
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() != View.GONE
+                    && child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                if ((row.isPinned() || row.isHeadsUpAnimatingAway()) && row.getTranslation() < 0) {
+                    top = Math.min(top, row.getTranslationY());
+                    bottom = Math.max(bottom, row.getTranslationY() + row.getActualHeight());
+                }
+            }
+        }
+
+        if (top < bottom) {
+            canvas.drawRoundRect(
+                    left, top, right, bottom,
+                    mCornerRadius, mCornerRadius, mBackgroundPaint);
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5574,15 +5600,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             if (translatingParentView != null && row == translatingParentView) {
                 mSwipeHelper.clearExposedMenuView();
                 mSwipeHelper.clearTranslatingParentView();
+                if (row instanceof ExpandableNotificationRow) {
+                    mHeadsUpManager.setMenuShown(
+                            ((ExpandableNotificationRow) row).getEntry(), false);
+
+                }
             }
         }
 
         @Override
         public void onMenuShown(View row) {
             if (row instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow notificationRow = (ExpandableNotificationRow) row;
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_REVEAL_GEAR,
-                        ((ExpandableNotificationRow) row).getStatusBarNotification()
-                                .getPackageName());
+                        notificationRow.getStatusBarNotification().getPackageName());
+                mHeadsUpManager.setMenuShown(notificationRow.getEntry(), true);
             }
             mSwipeHelper.onMenuShown(row);
         }

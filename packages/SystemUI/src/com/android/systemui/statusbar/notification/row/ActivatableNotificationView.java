@@ -800,7 +800,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     @Override
-    public void performRemoveAnimation(long duration, long delay,
+    public long performRemoveAnimation(long duration, long delay,
             float translationDirection, boolean isHeadsUpAnimation, float endLocation,
             Runnable onFinishedRunnable, AnimatorListenerAdapter animationListener) {
         enableAppearDrawing(true);
@@ -812,6 +812,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         } else if (onFinishedRunnable != null) {
             onFinishedRunnable.run();
         }
+        return 0;
     }
 
     @Override
