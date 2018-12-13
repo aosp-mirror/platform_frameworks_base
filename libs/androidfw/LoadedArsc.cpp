@@ -593,7 +593,12 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
           return {};
         }
 
-        // Iterate over the overlayable policy chunks
+        std::string name;
+        util::ReadUtf16StringFromDevice(header->name, arraysize(header->name), &name);
+        std::string actor;
+        util::ReadUtf16StringFromDevice(header->actor, arraysize(header->actor), &actor);
+
+        // Iterate over the overlayable policy chunks contained within the overlayable chunk data
         ChunkIterator overlayable_iter(child_chunk.data_ptr(), child_chunk.data_size());
         while (overlayable_iter.HasNext()) {
           const Chunk overlayable_child_chunk = overlayable_iter.Next();
@@ -613,7 +618,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
                 return {};
               }
 
-              // Retrieve all the ids belonging to this policy
+              // Retrieve all the resource ids belonging to this policy chunk
               std::unordered_set<uint32_t> ids;
               const auto ids_begin =
                   reinterpret_cast<const ResTable_ref*>(overlayable_child_chunk.data_ptr());
@@ -622,8 +627,10 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
                 ids.insert(dtohl(id_iter->ident));
               }
 
-              // Add the pairing of overlayable properties to resource ids to the package
+              // Add the pairing of overlayable properties and resource ids to the package
               OverlayableInfo overlayable_info{};
+              overlayable_info.name = name;
+              overlayable_info.actor = actor;
               overlayable_info.policy_flags = policy_header->policy_flags;
               loaded_package->overlayable_infos_.push_back(std::make_pair(overlayable_info, ids));
               break;
@@ -636,7 +643,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         }
 
         if (overlayable_iter.HadError()) {
-          LOG(ERROR) << StringPrintf("Error parsing RES_TABLE_OVERLAYABLE_POLICY_TYPE: %s",
+          LOG(ERROR) << StringPrintf("Error parsing RES_TABLE_OVERLAYABLE_TYPE: %s",
                                      overlayable_iter.GetLastError().c_str());
           if (overlayable_iter.HadFatalError()) {
             return {};

@@ -78,6 +78,8 @@ struct TypeSpec {
 using TypeSpecPtr = util::unique_cptr<TypeSpec>;
 
 struct OverlayableInfo {
+  std::string name;
+  std::string actor;
   uint32_t policy_flags;
 };
 
