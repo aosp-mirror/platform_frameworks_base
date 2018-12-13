@@ -29,9 +29,7 @@ import com.android.systemui.statusbar.AmbientPulseManager.OnAmbientChangedListen
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.statusbar.notification.AlertTransferListener;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.AsyncInflationTask;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.phone.NotificationGroupManager.NotificationGroup;
@@ -40,6 +38,8 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Objects;
 
 /**
@@ -47,8 +47,8 @@ import java.util.Objects;
  * {@link HeadsUpManager}, {@link AmbientPulseManager}. In particular, this class deals with keeping
  * the correct notification in a group alerting based off the group suppression.
  */
-public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedListener,
-        OnAmbientChangedListener, StateListener {
+public class NotificationGroupAlertTransferHelper implements OnGroupChangeListener,
+        OnHeadsUpChangedListener, OnAmbientChangedListener, StateListener {
 
     private static final long ALERT_TRANSFER_TIMEOUT = 300;
 
@@ -69,29 +69,20 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
     private final NotificationGroupManager mGroupManager =
             Dependency.get(NotificationGroupManager.class);
 
-    private NotificationEntryManager mEntryManager;
+    // TODO(b/119637830): It would be good if GroupManager already had all pending notifications as
+    // normal children (i.e. add notifications to GroupManager before inflation) so that we don't
+    // have to have this dependency. We'd also have to worry less about the suppression not being up
+    // to date.
+    /**
+     * Notifications that are currently inflating for the first time. Used to remove an incorrectly
+     * alerting notification faster.
+     */
+    private HashMap<String, Entry> mPendingNotifications;
 
     private boolean mIsDozing;
 
     public NotificationGroupAlertTransferHelper() {
         Dependency.get(StatusBarStateController.class).addCallback(this);
-    }
-
-    /** Causes the TransferHelper to register itself as a listener to the appropriate classes. */
-    public void bind(NotificationEntryManager entryManager,
-            NotificationGroupManager groupManager) {
-        if (mEntryManager != null) {
-            throw new IllegalStateException("Already bound.");
-        }
-
-        // TODO(b/119637830): It would be good if GroupManager already had all pending notifications
-        // as normal children (i.e. add notifications to GroupManager before inflation) so that we
-        // don't have to have this dependency. We'd also have to worry less about the suppression
-        // not being up to date.
-        mEntryManager = entryManager;
-
-        mEntryManager.setAlertTransferListener(mAlertTransferListener);
-        groupManager.addOnGroupChangeListener(mOnGroupChangeListener);
     }
 
     /**
@@ -106,8 +97,23 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         return alertInfo != null && alertInfo.isStillValid();
     }
 
+    /**
+     * Removes any alerts pending on this entry. Note that this will not stop any inflation tasks
+     * started by a transfer, so this should only be used as clean-up for when inflation is stopped
+     * and the pending alert no longer needs to happen.
+     *
+     * @param key notification key that may have info that needs to be cleaned up
+     */
+    public void cleanUpPendingAlertInfo(@NonNull String key) {
+        mPendingAlerts.remove(key);
+    }
+
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
         mHeadsUpManager = headsUpManager;
+    }
+
+    public void setPendingEntries(HashMap<String, Entry> pendingNotifications) {
+        mPendingNotifications = pendingNotifications;
     }
 
     @Override
@@ -124,45 +130,43 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         mIsDozing = isDozing;
     }
 
-    private final OnGroupChangeListener mOnGroupChangeListener = new OnGroupChangeListener() {
-        @Override
-        public void onGroupCreated(NotificationGroup group, String groupKey) {
-            mGroupAlertEntries.put(groupKey, new GroupAlertEntry(group));
-        }
+    @Override
+    public void onGroupCreated(NotificationGroup group, String groupKey) {
+        mGroupAlertEntries.put(groupKey, new GroupAlertEntry(group));
+    }
 
-        @Override
-        public void onGroupRemoved(NotificationGroup group, String groupKey) {
-            mGroupAlertEntries.remove(groupKey);
-        }
+    @Override
+    public void onGroupRemoved(NotificationGroup group, String groupKey) {
+        mGroupAlertEntries.remove(groupKey);
+    }
 
-        @Override
-        public void onGroupSuppressionChanged(NotificationGroup group, boolean suppressed) {
-            AlertingNotificationManager alertManager = getActiveAlertManager();
-            if (suppressed) {
-                if (alertManager.isAlerting(group.summary.key)) {
-                    handleSuppressedSummaryAlerted(group.summary, alertManager);
+    @Override
+    public void onGroupSuppressionChanged(NotificationGroup group, boolean suppressed) {
+        AlertingNotificationManager alertManager = getActiveAlertManager();
+        if (suppressed) {
+            if (alertManager.isAlerting(group.summary.key)) {
+                handleSuppressedSummaryAlerted(group.summary, alertManager);
+            }
+        } else {
+            // Group summary can be null if we are no longer suppressed because the summary was
+            // removed. In that case, we don't need to alert the summary.
+            if (group.summary == null) {
+                return;
+            }
+            GroupAlertEntry groupAlertEntry = mGroupAlertEntries.get(mGroupManager.getGroupKey(
+                    group.summary.notification));
+            // Group is no longer suppressed. We should check if we need to transfer the alert
+            // back to the summary now that it's no longer suppressed.
+            if (groupAlertEntry.mAlertSummaryOnNextAddition) {
+                if (!alertManager.isAlerting(group.summary.key)) {
+                    alertNotificationWhenPossible(group.summary, alertManager);
                 }
+                groupAlertEntry.mAlertSummaryOnNextAddition = false;
             } else {
-                // Group summary can be null if we are no longer suppressed because the summary was
-                // removed. In that case, we don't need to alert the summary.
-                if (group.summary == null) {
-                    return;
-                }
-                GroupAlertEntry groupAlertEntry = mGroupAlertEntries.get(mGroupManager.getGroupKey(
-                        group.summary.notification));
-                // Group is no longer suppressed. We should check if we need to transfer the alert
-                // back to the summary now that it's no longer suppressed.
-                if (groupAlertEntry.mAlertSummaryOnNextAddition) {
-                    if (!alertManager.isAlerting(group.summary.key)) {
-                        alertNotificationWhenPossible(group.summary, alertManager);
-                    }
-                    groupAlertEntry.mAlertSummaryOnNextAddition = false;
-                } else {
-                    checkShouldTransferBack(groupAlertEntry);
-                }
+                checkShouldTransferBack(groupAlertEntry);
             }
         }
-    };
+    }
 
     @Override
     public void onAmbientStateChanged(Entry entry, boolean isAmbient) {
@@ -181,42 +185,37 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         }
     }
 
-    private final AlertTransferListener mAlertTransferListener = new AlertTransferListener() {
-        // Called when a new notification has been posted but is not inflated yet. We use this to
-        // see as early as we can if we need to abort a transfer.
-        @Override
-        public void onPendingEntryAdded(Entry entry) {
-            String groupKey = mGroupManager.getGroupKey(entry.notification);
-            GroupAlertEntry groupAlertEntry = mGroupAlertEntries.get(groupKey);
-            if (groupAlertEntry != null) {
-                checkShouldTransferBack(groupAlertEntry);
+    /**
+     * Called when the entry's reinflation has finished. If there is an alert pending, we then
+     * show the alert.
+     *
+     * @param entry entry whose inflation has finished
+     */
+    public void onInflationFinished(@NonNull Entry entry) {
+        PendingAlertInfo alertInfo = mPendingAlerts.remove(entry.key);
+        if (alertInfo != null) {
+            if (alertInfo.isStillValid()) {
+                alertNotificationWhenPossible(entry, getActiveAlertManager());
+            } else {
+                // The transfer is no longer valid. Free the content.
+                entry.getRow().freeContentViewWhenSafe(alertInfo.mAlertManager.getContentFlag());
             }
         }
+    }
 
-        // Called when the entry's reinflation has finished. If there is an alert pending, we
-        // then show the alert.
-        @Override
-        public void onEntryReinflated(Entry entry) {
-            PendingAlertInfo alertInfo = mPendingAlerts.remove(entry.key);
-            if (alertInfo != null) {
-                if (alertInfo.isStillValid()) {
-                    alertNotificationWhenPossible(entry, getActiveAlertManager());
-                } else {
-                    // The transfer is no longer valid. Free the content.
-                    entry.getRow().freeContentViewWhenSafe(
-                            alertInfo.mAlertManager.getContentFlag());
-                }
-            }
+    /**
+     * Called when a new notification has been posted but is not inflated yet. We use this to see
+     * as early as we can if we need to abort a transfer.
+     *
+     * @param entry entry that has been added
+     */
+    public void onPendingEntryAdded(@NonNull Entry entry) {
+        String groupKey = mGroupManager.getGroupKey(entry.notification);
+        GroupAlertEntry groupAlertEntry = mGroupAlertEntries.get(groupKey);
+        if (groupAlertEntry != null) {
+            checkShouldTransferBack(groupAlertEntry);
         }
-
-        @Override
-        public void onEntryRemoved(Entry entry) {
-            // Removes any alerts pending on this entry. Note that this will not stop any inflation
-            // tasks started by a transfer, so this should only be used as clean-up for when
-            // inflation is stopped and the pending alert no longer needs to happen.
-            mPendingAlerts.remove(entry.key);
-        }
-    };
+    }
 
     /**
      * Gets the number of new notifications pending inflation that will be added to the group
@@ -226,11 +225,11 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
      * @return the number of new notifications that will be added to the group
      */
     private int getPendingChildrenNotAlerting(@NonNull NotificationGroup group) {
-        if (mEntryManager == null) {
+        if (mPendingNotifications == null) {
             return 0;
         }
         int number = 0;
-        Iterable<Entry> values = mEntryManager.getPendingNotificationsIterator();
+        Collection<Entry> values = mPendingNotifications.values();
         for (Entry entry : values) {
             if (isPendingNotificationInGroup(entry, group) && onlySummaryAlerts(entry)) {
                 number++;
@@ -246,10 +245,10 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
      * @return true if a pending notification will add to this group
      */
     private boolean pendingInflationsWillAddChildren(@NonNull NotificationGroup group) {
-        if (mEntryManager == null) {
+        if (mPendingNotifications == null) {
             return false;
         }
-        Iterable<Entry> values = mEntryManager.getPendingNotificationsIterator();
+        Collection<Entry> values = mPendingNotifications.values();
         for (Entry entry : values) {
             if (isPendingNotificationInGroup(entry, group)) {
                 return true;
