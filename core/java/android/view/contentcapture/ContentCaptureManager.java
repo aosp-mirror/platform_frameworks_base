@@ -31,7 +31,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
+import android.util.TimeUtils;
 import android.view.View;
 import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
@@ -98,6 +100,12 @@ public final class ContentCaptureManager {
      */
     public static final int STATE_DISABLED = 3;
 
+    /**
+     * Handler message used to flush the buffer.
+     */
+    private static final int MSG_FLUSH = 1;
+
+
     private static final String BG_THREAD_NAME = "intel_svc_streamer_thread";
 
     /**
@@ -105,6 +113,12 @@ public final class ContentCaptureManager {
      */
     // TODO(b/111276913): use settings
     private static final int MAX_BUFFER_SIZE = 100;
+
+    /**
+     * Frequency the buffer is flushed if stale.
+     */
+    // TODO(b/111276913): use settings
+    private static final int FLUSHING_FREQUENCY_MS = 5_000;
 
     @NonNull
     private final AtomicBoolean mDisabled = new AtomicBoolean();
@@ -135,6 +149,9 @@ public final class ContentCaptureManager {
     // TODO(b/111276913): use UI Thread directly (as calls are one-way) or a shared thread / handler
     // held at the Application level
     private final Handler mHandler;
+
+    // Used just for debugging purposes (on dump)
+    private long mNextFlush;
 
     /** @hide */
     public ContentCaptureManager(@NonNull Context context,
@@ -207,9 +224,17 @@ public final class ContentCaptureManager {
             mEvents = new ArrayList<>(MAX_BUFFER_SIZE);
         }
         mEvents.add(event);
+
         final int numberEvents = mEvents.size();
-        if (numberEvents < MAX_BUFFER_SIZE && !forceFlush) {
-            // Buffering events, return right away...
+
+        // TODO(b/120784831): need to optimize it so we buffer changes until a number of X are
+        // buffered (either total or per autofillid). For
+        // example, if the user typed "a", "b", "c" and the threshold is 3, we should buffer
+        // "a" and "b" then send "abc".
+        final boolean bufferEvent = numberEvents < MAX_BUFFER_SIZE;
+
+        if (bufferEvent && !forceFlush) {
+            handleScheduleFlush();
             return;
         }
 
@@ -236,10 +261,38 @@ public final class ContentCaptureManager {
             return;
         }
 
+        handleForceFlush();
+    }
+
+    private void handleScheduleFlush() {
+        if (mHandler.hasMessages(MSG_FLUSH)) {
+            // "Renew" the flush message by removing the previous one
+            mHandler.removeMessages(MSG_FLUSH);
+        }
+        mNextFlush = SystemClock.elapsedRealtime() + FLUSHING_FREQUENCY_MS;
+        if (VERBOSE) {
+            Log.v(TAG, "Scheduled to flush in " + FLUSHING_FREQUENCY_MS + "ms: " + mNextFlush);
+        }
+        mHandler.sendMessageDelayed(
+                obtainMessage(ContentCaptureManager::handleFlushIfNeeded, this).setWhat(MSG_FLUSH),
+                FLUSHING_FREQUENCY_MS);
+    }
+
+    private void handleFlushIfNeeded() {
+        if (mEvents.isEmpty()) {
+            if (VERBOSE) Log.v(TAG, "Nothing to flush");
+            return;
+        }
+        handleForceFlush();
+    }
+
+    private void handleForceFlush() {
+        final int numberEvents = mEvents.size();
         try {
             if (DEBUG) {
                 Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getActivityDebugName());
             }
+            mHandler.removeMessages(MSG_FLUSH);
             mService.sendEvents(mContext.getUserId(), mId, mEvents);
             // TODO(b/111276913): decide whether we should clear or set it to null, as each has
             // its own advantages: clearing will save extra allocations while the session is
@@ -307,6 +360,7 @@ public final class ContentCaptureManager {
         mApplicationToken = null;
         mComponentName = null;
         mEvents = null;
+        mHandler.removeMessages(MSG_FLUSH);
     }
 
     /**
@@ -443,7 +497,7 @@ public final class ContentCaptureManager {
             pw.print(prefix2); pw.print("component name: ");
             pw.println(mComponentName.flattenToShortString());
         }
-        if (mEvents != null) {
+        if (mEvents != null && !mEvents.isEmpty()) {
             final int numberEvents = mEvents.size();
             pw.print(prefix2); pw.print("buffered events: "); pw.print(numberEvents);
             pw.print('/'); pw.println(MAX_BUFFER_SIZE);
@@ -455,6 +509,9 @@ public final class ContentCaptureManager {
                     pw.println();
                 }
             }
+            pw.print(prefix2); pw.print("flush frequency: "); pw.println(FLUSHING_FREQUENCY_MS);
+            pw.print(prefix2); pw.print("next flush: ");
+            TimeUtils.formatDuration(mNextFlush - SystemClock.elapsedRealtime(), pw); pw.println();
         }
     }
 
