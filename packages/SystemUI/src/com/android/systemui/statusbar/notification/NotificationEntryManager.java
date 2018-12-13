@@ -61,6 +61,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.ForegroundServiceController;
+import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.bubbles.BubbleController;
@@ -82,6 +83,7 @@ import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -115,6 +117,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
     private final NotificationGroupManager mGroupManager =
             Dependency.get(NotificationGroupManager.class);
+    private final NotificationGroupAlertTransferHelper mGroupAlertTransferHelper =
+            Dependency.get(NotificationGroupAlertTransferHelper.class);
     private final NotificationGutsManager mGutsManager =
             Dependency.get(NotificationGutsManager.class);
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
@@ -153,7 +157,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             = new ArrayList<>();
     private ExpandableNotificationRow.OnAppOpsClickListener mOnAppOpsClickListener;
     private NotificationViewHierarchyManager.StatusBarStateListener mStatusBarStateListener;
-    @Nullable private AlertTransferListener mAlertTransferListener;
 
     private final class NotificationClicker implements View.OnClickListener {
 
@@ -255,10 +258,12 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mMessagingUtil = new NotificationMessagingUtil(context);
         mBubbleController.setDismissListener(this /* bubbleEventListener */);
         mNotificationData = new NotificationData();
+        Dependency.get(InitController.class).addPostInitTask(this::onPostInit);
     }
 
-    public void setAlertTransferListener(AlertTransferListener listener) {
-        mAlertTransferListener = listener;
+    private void onPostInit() {
+        mGroupAlertTransferHelper.setPendingEntries(mPendingNotifications);
+        mGroupManager.addOnGroupChangeListener(mGroupAlertTransferHelper);
     }
 
     /**
@@ -582,9 +587,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                     mVisualStabilityManager.onLowPriorityUpdated(entry);
                     mPresenter.updateNotificationViews();
                 }
-                if (mAlertTransferListener != null) {
-                    mAlertTransferListener.onEntryReinflated(entry);
-                }
+                mGroupAlertTransferHelper.onInflationFinished(entry);
             }
         }
         entry.setLowPriorityStateUpdated(false);
@@ -597,12 +600,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
     private void removeNotificationInternal(String key,
             @Nullable NotificationListenerService.RankingMap ranking, boolean forceRemove) {
-        final NotificationData.Entry entry = mNotificationData.get(key);
-
         abortExistingInflation(key);
-        if (mAlertTransferListener != null) {
-            mAlertTransferListener.onEntryRemoved(entry);
-        }
+        mGroupAlertTransferHelper.cleanUpPendingAlertInfo(key);
 
         // Attempt to remove notifications from their alert managers (heads up, ambient pulse).
         // Though the remove itself may fail, it lets the manager know to remove as soon as
@@ -620,6 +619,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         if (mAmbientPulseManager.isAlerting(key)) {
             mAmbientPulseManager.removeNotification(key, false /* ignoreEarliestRemovalTime */);
         }
+
+        NotificationData.Entry entry = mNotificationData.get(key);
 
         if (entry == null) {
             mCallback.onNotificationRemoved(key, null /* old */);
@@ -845,9 +846,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 mNotificationData.getImportance(key));
 
         mPendingNotifications.put(key, shadeEntry);
-        if (mAlertTransferListener != null) {
-            mAlertTransferListener.onPendingEntryAdded(shadeEntry);
-        }
+        mGroupAlertTransferHelper.onPendingEntryAdded(shadeEntry);
     }
 
     @VisibleForTesting
@@ -1229,15 +1228,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             // This notification was updated to be alerting, show it!
             alertManager.showNotification(entry);
         }
-    }
-
-    /**
-     * @return An iterator for all "pending" notifications. Pending notifications are newly-posted
-     * notifications whose views have not yet been inflated. In general, the system pretends like
-     * these don't exist, although there are a couple exceptions.
-     */
-    public Iterable<NotificationData.Entry> getPendingNotificationsIterator() {
-        return mPendingNotifications.values();
     }
 
     /**
