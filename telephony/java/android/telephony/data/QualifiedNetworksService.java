@@ -151,7 +151,7 @@ public abstract class QualifiedNetworksService extends Service {
 
         /**
          * Called when the qualified networks updater is removed. The extended class should
-         * implement this method to perform clean up works.
+         * implement this method to perform cleanup works.
          */
         @Override
         public abstract void close();
