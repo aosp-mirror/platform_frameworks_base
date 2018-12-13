@@ -2588,6 +2588,38 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
+     * Returns the original raw X coordinate of this event.  For touch
+     * events on the screen, this is the original location of the event
+     * on the screen, before it had been adjusted for the containing window
+     * and views.
+     *
+     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+     * (the first pointer that is down) to {@link #getPointerCount()}-1.
+     *
+     * @see #getX(int)
+     * @see #AXIS_X
+     */
+    public float getRawX(int pointerIndex) {
+        return nativeGetRawAxisValue(mNativePtr, AXIS_X, pointerIndex, HISTORY_CURRENT);
+    }
+
+    /**
+     * Returns the original raw Y coordinate of this event.  For touch
+     * events on the screen, this is the original location of the event
+     * on the screen, before it had been adjusted for the containing window
+     * and views.
+     *
+     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+     * (the first pointer that is down) to {@link #getPointerCount()}-1.
+     *
+     * @see #getY(int)
+     * @see #AXIS_Y
+     */
+    public float getRawY(int pointerIndex) {
+        return nativeGetRawAxisValue(mNativePtr, AXIS_Y, pointerIndex, HISTORY_CURRENT);
+    }
+
+    /**
      * Return the precision of the X coordinates being reported.  You can
      * multiply this number with {@link #getX} to find the actual hardware
      * value of the X coordinate.
