@@ -68,7 +68,6 @@ import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
 import android.graphics.Color;
 import android.net.Uri;
-import android.net.wifi.WifiInfo;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Process;
@@ -1985,17 +1984,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Test 4, Caller is DO now.
         assertTrue(dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM));
 
-        // 4-1.  But no WifiInfo.
+        // 4-1.  But WifiManager is not ready.
         assertNull(dpm.getWifiMacAddress(admin1));
 
-        // 4-2.  Returns WifiInfo, but with the default MAC.
-        when(getServices().wifiManager.getConnectionInfo()).thenReturn(new WifiInfo());
+        // 4-2.  When WifiManager returns an empty array, dpm should also output null.
+        when(getServices().wifiManager.getFactoryMacAddresses()).thenReturn(new String[0]);
         assertNull(dpm.getWifiMacAddress(admin1));
 
         // 4-3. With a real MAC address.
-        final WifiInfo wi = new WifiInfo();
-        wi.setMacAddress("11:22:33:44:55:66");
-        when(getServices().wifiManager.getConnectionInfo()).thenReturn(wi);
+        final String[] macAddresses = new String[]{"11:22:33:44:55:66"};
+        when(getServices().wifiManager.getFactoryMacAddresses()).thenReturn(macAddresses);
         assertEquals("11:22:33:44:55:66", dpm.getWifiMacAddress(admin1));
     }
 
