@@ -919,7 +919,7 @@ static jlong android_os_Binder_clearCallingWorkSource()
     return IPCThreadState::self()->clearCallingWorkSource();
 }
 
-static void android_os_Binder_restoreCallingWorkSource(long token)
+static void android_os_Binder_restoreCallingWorkSource(jlong token)
 {
     IPCThreadState::self()->restoreCallingWorkSource(token);
 }
