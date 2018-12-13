@@ -476,7 +476,7 @@ public class TelecomManager {
     /**
      * A boolean meta-data value indicating whether an {@link InCallService} implements an
      * in-call user interface to be used while the device is in car-mode (see
-     * {@link android.content.res.Configuration.UI_MODE_TYPE_CAR}).
+     * {@link android.content.res.Configuration#UI_MODE_TYPE_CAR}).
      */
     public static final String METADATA_IN_CALL_SERVICE_CAR_MODE_UI =
             "android.telecom.IN_CALL_SERVICE_CAR_MODE_UI";
