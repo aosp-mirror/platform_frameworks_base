@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package android.telephony.rcs;
+package android.telephony.ims;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-
-import com.android.internal.telephony.rcs.IRcs;
+import android.telephony.ims.aidl.IRcs;
 
 /**
  * RcsThread represents a single RCS conversation thread. It holds messages that were sent and
