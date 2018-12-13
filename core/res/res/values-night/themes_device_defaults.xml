@@ -59,4 +59,6 @@ easier.
 
     <!-- Theme for the dialog shown when an app crashes or ANRs. -->
     <style name="Theme.DeviceDefault.Dialog.AppError" parent="Theme.DeviceDefault.Dialog.Alert" />
+
+    <style name="Theme.DeviceDefault.DayNight" parent="Theme.DeviceDefault" />
 </resources>
