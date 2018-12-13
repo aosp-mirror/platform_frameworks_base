@@ -35,7 +35,6 @@
 #include "bpf/BpfUtils.h"
 #include "netdbpf/BpfNetworkStats.h"
 
-using android::bpf::hasBpfSupport;
 using android::bpf::parseBpfNetworkStatsDetail;
 using android::bpf::stats_line;
 
