@@ -13,11 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef UTIL_H_
-#define UTIL_H_
+#ifndef VIEW_COMPILER_UTIL_H_
+#define VIEW_COMPILER_UTIL_H_
 
 #include <string>
 
+namespace startop {
+namespace util {
+
 std::string FindLayoutNameFromFilename(const std::string& filename);
 
-#endif  // UTIL_H_
+}  // namespace util
+}  // namespace startop
+
+#endif  // VIEW_COMPILER_UTIL_H_
