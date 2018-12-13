@@ -1089,6 +1089,12 @@ final class ActivityRecord extends ConfigurationContainer {
             Slog.w(TAG_WM, "Attempted to set icon of non-existing app token: " + appToken);
             return false;
         }
+        if (mAppWindowToken.getTask() == null) {
+            // Can be removed after unification of Task and TaskRecord.
+            Slog.w(TAG_WM, "Attempted to start a window to an app token not having attached to any"
+                    + " task: " + appToken);
+            return false;
+        }
         return mAppWindowToken.addStartingWindow(pkg, theme, compatInfo, nonLocalizedLabel,
                 labelRes, icon, logo, windowFlags, transferFrom, newTask, taskSwitch,
                 processRunning, allowTaskSnapshot, activityCreated, fromRecents);
