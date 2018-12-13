@@ -240,6 +240,49 @@ TEST(StatsLogProcessorTest, TestReportIncludesSubConfig) {
     EXPECT_EQ(2, report.annotation(0).field_int32());
 }
 
+TEST(StatsLogProcessorTest, TestOnDumpReportEraseData) {
+    // Setup a simple config.
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
+    auto wakelockAcquireMatcher = CreateAcquireWakelockAtomMatcher();
+    *config.add_atom_matcher() = wakelockAcquireMatcher;
+
+    auto countMetric = config.add_count_metric();
+    countMetric->set_id(123456);
+    countMetric->set_what(wakelockAcquireMatcher.id());
+    countMetric->set_bucket(FIVE_MINUTES);
+
+    ConfigKey cfgKey;
+    sp<StatsLogProcessor> processor = CreateStatsLogProcessor(1, 1, config, cfgKey);
+
+    std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1")};
+    auto event = CreateAcquireWakelockEvent(attributions1, "wl1", 2);
+    processor->OnLogEvent(event.get());
+
+    vector<uint8_t> bytes;
+    ConfigMetricsReportList output;
+
+    // Dump report WITHOUT erasing data.
+    processor->onDumpReport(cfgKey, 3, true, false /* Do NOT erase data. */, ADB_DUMP, &bytes);
+    output.ParseFromArray(bytes.data(), bytes.size());
+    EXPECT_EQ(output.reports_size(), 1);
+    EXPECT_EQ(output.reports(0).metrics_size(), 1);
+    EXPECT_EQ(output.reports(0).metrics(0).count_metrics().data_size(), 1);
+
+    // Dump report WITH erasing data. There should be data since we didn't previously erase it.
+    processor->onDumpReport(cfgKey, 4, true, true /* DO erase data. */, ADB_DUMP, &bytes);
+    output.ParseFromArray(bytes.data(), bytes.size());
+    EXPECT_EQ(output.reports_size(), 1);
+    EXPECT_EQ(output.reports(0).metrics_size(), 1);
+    EXPECT_EQ(output.reports(0).metrics(0).count_metrics().data_size(), 1);
+
+    // Dump report again. There should be no data since we erased it.
+    processor->onDumpReport(cfgKey, 5, true, true /* DO erase data. */, ADB_DUMP, &bytes);
+    output.ParseFromArray(bytes.data(), bytes.size());
+    bool noData = (output.reports_size() == 0) || (output.reports(0).metrics_size() == 0);
+    EXPECT_TRUE(noData);
+}
+
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";
 #endif

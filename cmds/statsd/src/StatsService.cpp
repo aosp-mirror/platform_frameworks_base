@@ -424,13 +424,14 @@ void StatsService::print_cmd_help(int out) {
     dprintf(out, "\n                     be removed from memory and disk!\n");
     dprintf(out, "\n");
     dprintf(out,
-            "usage: adb shell cmd stats dump-report [UID] NAME [--include_current_bucket] "
-            "[--proto]\n");
+            "usage: adb shell cmd stats dump-report [UID] NAME [--keep_data] "
+            "[--include_current_bucket] [--proto]\n");
     dprintf(out, "  Dump all metric data for a configuration.\n");
     dprintf(out, "  UID           The uid of the configuration. It is only possible to pass\n");
     dprintf(out, "                the UID parameter on eng builds. If UID is omitted the\n");
     dprintf(out, "                calling uid is used.\n");
     dprintf(out, "  NAME          The name of the configuration\n");
+    dprintf(out, "  --keep_data   Do NOT erase the data upon dumping it.\n");
     dprintf(out, "  --proto       Print proto binary.\n");
     dprintf(out, "\n");
     dprintf(out, "\n");
@@ -590,6 +591,7 @@ status_t StatsService::cmd_dump_report(int out, const Vector<String8>& args) {
         bool good = false;
         bool proto = false;
         bool includeCurrentBucket = false;
+        bool eraseData = true;
         int uid;
         string name;
         if (!std::strcmp("--proto", args[argCount-1].c_str())) {
@@ -598,6 +600,10 @@ status_t StatsService::cmd_dump_report(int out, const Vector<String8>& args) {
         }
         if (!std::strcmp("--include_current_bucket", args[argCount-1].c_str())) {
             includeCurrentBucket = true;
+            argCount -= 1;
+        }
+        if (!std::strcmp("--keep_data", args[argCount-1].c_str())) {
+            eraseData = false;
             argCount -= 1;
         }
         if (argCount == 2) {
@@ -627,7 +633,7 @@ status_t StatsService::cmd_dump_report(int out, const Vector<String8>& args) {
         if (good) {
             vector<uint8_t> data;
             mProcessor->onDumpReport(ConfigKey(uid, StrToInt64(name)), getElapsedRealtimeNs(),
-                                     includeCurrentBucket, true /* erase_data */, ADB_DUMP, &data);
+                                     includeCurrentBucket, eraseData, ADB_DUMP, &data);
             if (proto) {
                 for (size_t i = 0; i < data.size(); i ++) {
                     dprintf(out, "%c", data[i]);
