@@ -241,8 +241,20 @@ public abstract class BaseCanvas {
         nDrawColor(mNativeCanvasWrapper, color, PorterDuff.Mode.SRC_OVER.nativeInt);
     }
 
+    /**
+     * @deprecated use {@link Canvas#drawColor(int, BlendMode)}
+     */
+    @Deprecated
     public void drawColor(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
         nDrawColor(mNativeCanvasWrapper, color, mode.nativeInt);
+    }
+
+    /**
+     * Make lint happy.
+     * See {@link Canvas#drawColor(int, BlendMode)}
+     */
+    public void drawColor(@ColorInt int color, @NonNull BlendMode mode) {
+        nDrawColor(mNativeCanvasWrapper, color, mode.getXfermode().porterDuffMode);
     }
 
     public void drawLine(float startX, float startY, float stopX, float stopY,
