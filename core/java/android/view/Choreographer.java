@@ -22,6 +22,7 @@ import static android.view.DisplayEventReceiver.VSYNC_SOURCE_SURFACE_FLINGER;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.FrameInfo;
+import android.graphics.Insets;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Build;
 import android.os.Handler;
@@ -199,7 +200,7 @@ public final class Choreographer {
      * @hide
      */
     private static final String[] CALLBACK_TRACE_TITLES = {
-            "input", "animation", "traversal", "commit"
+            "input", "animation", "insets_animation", "traversal", "commit"
     };
 
     /**
@@ -209,18 +210,33 @@ public final class Choreographer {
     public static final int CALLBACK_INPUT = 0;
 
     /**
-     * Callback type: Animation callback.  Runs before traversals.
+     * Callback type: Animation callback.  Runs before {@link #CALLBACK_INSETS_ANIMATION}.
      * @hide
      */
     @TestApi
     public static final int CALLBACK_ANIMATION = 1;
 
     /**
+     * Callback type: Animation callback to handle inset updates. This is separate from
+     * {@link #CALLBACK_ANIMATION} as we need to "gather" all inset animation updates via
+     * {@link WindowInsetsAnimationController#changeInsets} for multiple ongoing animations but then
+     * update the whole view system with a single callback to {@link View#dispatchWindowInsetsAnimationProgress}
+     * that contains all the combined updated insets.
+     * <p>
+     * Both input and animation may change insets, so we need to run this after these callbacks, but
+     * before traversals.
+     * <p>
+     * Runs before traversals.
+     * @hide
+     */
+    public static final int CALLBACK_INSETS_ANIMATION = 2;
+
+    /**
      * Callback type: Traversal callback.  Handles layout and draw.  Runs
      * after all other asynchronous messages have been handled.
      * @hide
      */
-    public static final int CALLBACK_TRAVERSAL = 2;
+    public static final int CALLBACK_TRAVERSAL = 3;
 
     /**
      * Callback type: Commit callback.  Handles post-draw operations for the frame.
@@ -232,7 +248,7 @@ public final class Choreographer {
      * to the view hierarchy state) actually took effect.
      * @hide
      */
-    public static final int CALLBACK_COMMIT = 3;
+    public static final int CALLBACK_COMMIT = 4;
 
     private static final int CALLBACK_LAST = CALLBACK_COMMIT;
 
@@ -704,6 +720,7 @@ public final class Choreographer {
 
             mFrameInfo.markAnimationsStart();
             doCallbacks(Choreographer.CALLBACK_ANIMATION, frameTimeNanos);
+            doCallbacks(Choreographer.CALLBACK_INSETS_ANIMATION, frameTimeNanos);
 
             mFrameInfo.markPerformTraversalsStart();
             doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameTimeNanos);

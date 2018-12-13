@@ -19,6 +19,7 @@ package android.view;
 import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.TYPE_TOP_BAR;
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.graphics.Insets;
@@ -83,7 +84,7 @@ public class InsetsAnimationControlImplTest {
         consumers.put(TYPE_NAVIGATION_BAR, navConsumer);
         mController = new InsetsAnimationControlImpl(consumers,
                 new Rect(0, 0, 500, 500), state, mMockListener, WindowInsets.Type.systemBars(),
-                () -> mMockTransactionApplier);
+                () -> mMockTransactionApplier, mock(InsetsController.class));
     }
 
     @Test

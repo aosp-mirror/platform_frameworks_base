@@ -45,7 +45,9 @@ import java.util.function.Supplier;
  * @hide
  */
 @VisibleForTesting
-public class InsetsAnimationControlImpl implements WindowInsetsAnimationController {
+public class InsetsAnimationControlImpl implements WindowInsetsAnimationController  {
+
+    private final Rect mTmpFrame = new Rect();
 
     private final WindowInsetsAnimationControlListener mListener;
     private final SparseArray<InsetsSourceConsumer> mConsumers;
@@ -61,19 +63,23 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private final InsetsState mInitialInsetsState;
     private final @InsetType int mTypes;
     private final Supplier<SyncRtSurfaceTransactionApplier> mTransactionApplierSupplier;
-
+    private final InsetsController mController;
+    private final WindowInsetsAnimationListener.InsetsAnimation mAnimation;
     private Insets mCurrentInsets;
+    private Insets mPendingInsets;
 
     @VisibleForTesting
     public InsetsAnimationControlImpl(SparseArray<InsetsSourceConsumer> consumers, Rect frame,
             InsetsState state, WindowInsetsAnimationControlListener listener,
             @InsetType int types,
-            Supplier<SyncRtSurfaceTransactionApplier> transactionApplierSupplier) {
+            Supplier<SyncRtSurfaceTransactionApplier> transactionApplierSupplier,
+            InsetsController controller) {
         mConsumers = consumers;
         mListener = listener;
         mTypes = types;
         mTransactionApplierSupplier = transactionApplierSupplier;
-        mInitialInsetsState = new InsetsState(state);
+        mController = controller;
+        mInitialInsetsState = new InsetsState(state, true /* copySources */);
         mCurrentInsets = getInsetsFromState(mInitialInsetsState, frame, null /* typeSideMap */);
         mHiddenInsets = calculateInsets(mInitialInsetsState, frame, consumers, false /* shown */,
                 null /* typeSideMap */);
@@ -83,6 +89,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
 
         // TODO: Check for controllability first and wait for IME if needed.
         listener.onReady(this, types);
+
+        mAnimation = new WindowInsetsAnimationListener.InsetsAnimation(mTypes, mHiddenInsets,
+                mShownInsets);
+        mController.dispatchAnimationStarted(mAnimation);
     }
 
     @Override
@@ -108,29 +118,35 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
 
     @Override
     public void changeInsets(Insets insets) {
-        insets = sanitize(insets);
-        final Insets offset = Insets.subtract(mShownInsets, insets);
+        mPendingInsets = sanitize(insets);
+        mController.scheduleApplyChangeInsets();
+    }
+
+    void applyChangeInsets(InsetsState state) {
+        final Insets offset = Insets.subtract(mShownInsets, mPendingInsets);
         ArrayList<SurfaceParams> params = new ArrayList<>();
         if (offset.left != 0) {
-            updateLeashesForSide(INSET_SIDE_LEFT, offset.left, params);
+            updateLeashesForSide(INSET_SIDE_LEFT, offset.left, params, state);
         }
         if (offset.top != 0) {
-            updateLeashesForSide(INSET_SIDE_TOP, offset.top, params);
+            updateLeashesForSide(INSET_SIDE_TOP, offset.top, params, state);
         }
         if (offset.right != 0) {
-            updateLeashesForSide(INSET_SIDE_RIGHT, offset.right, params);
+            updateLeashesForSide(INSET_SIDE_RIGHT, offset.right, params, state);
         }
         if (offset.bottom != 0) {
-            updateLeashesForSide(INSET_SIDE_BOTTOM, offset.bottom, params);
+            updateLeashesForSide(INSET_SIDE_BOTTOM, offset.bottom, params, state);
         }
         SyncRtSurfaceTransactionApplier applier = mTransactionApplierSupplier.get();
         applier.scheduleApply(params.toArray(new SurfaceParams[params.size()]));
-        mCurrentInsets = insets;
+        mCurrentInsets = mPendingInsets;
     }
 
     @Override
     public void finish(int shownTypes) {
         // TODO
+
+        mController.dispatchAnimationFinished(mAnimation);
     }
 
     private Insets calculateInsets(InsetsState state, Rect frame,
@@ -146,7 +162,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             @Nullable @InsetSide SparseIntArray typeSideMap) {
         return state.calculateInsets(frame, false /* isScreenRound */,
                 false /* alwaysConsumerNavBar */, null /* displayCutout */, typeSideMap)
-                .getSystemWindowInsets();
+                .getInsets(mTypes);
     }
 
     private Insets sanitize(Insets insets) {
@@ -154,7 +170,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     }
 
     private void updateLeashesForSide(@InsetSide int side, int inset,
-            ArrayList<SurfaceParams> surfaceParams) {
+            ArrayList<SurfaceParams> surfaceParams, InsetsState state) {
         ArraySet<InsetsSourceConsumer> items = mSideSourceMap.get(side);
         // TODO: Implement behavior when inset spans over multiple types
         for (int i = items.size() - 1; i >= 0; i--) {
@@ -162,24 +178,32 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             final InsetsSource source = mInitialInsetsState.getSource(consumer.getType());
             final SurfaceControl leash = consumer.getControl().getLeash();
             mTmpMatrix.setTranslate(source.getFrame().left, source.getFrame().top);
-            addTranslationToMatrix(side, inset, mTmpMatrix);
+
+            mTmpFrame.set(source.getFrame());
+            addTranslationToMatrix(side, inset, mTmpMatrix, mTmpFrame);
+
+            state.getSource(source.getType()).setFrame(mTmpFrame);
             surfaceParams.add(new SurfaceParams(leash, 1f, mTmpMatrix, null, 0, 0f));
         }
     }
 
-    private void addTranslationToMatrix(@InsetSide int side, int inset, Matrix m) {
+    private void addTranslationToMatrix(@InsetSide int side, int inset, Matrix m, Rect frame) {
         switch (side) {
             case INSET_SIDE_LEFT:
                 m.postTranslate(-inset, 0);
+                frame.offset(-inset, 0);
                 break;
             case INSET_SIDE_TOP:
                 m.postTranslate(0, -inset);
+                frame.offset(0, -inset);
                 break;
             case INSET_SIDE_RIGHT:
                 m.postTranslate(inset, 0);
+                frame.offset(inset, 0);
                 break;
             case INSET_SIDE_BOTTOM:
                 m.postTranslate(0, inset);
+                frame.offset(0, inset);
                 break;
         }
     }
