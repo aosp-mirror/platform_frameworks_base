@@ -1398,9 +1398,9 @@ public class CarrierConfigManager {
      * Example: "default"
      *
      * {@code ERROR_CODE_1} is an integer defined in
-     * {@link com.android.internal.telephony.dataconnection.DcFailCause DcFailure}
+     * {@link DataFailCause DcFailure}
      * Example:
-     * {@link com.android.internal.telephony.dataconnection.DcFailCause#MISSING_UNKNOWN_APN}
+     * {@link DataFailCause#MISSING_UNKNOWN_APN}
      *
      * {@code CARRIER_ACTION_IDX_1} is an integer defined in
      * {@link com.android.carrierdefaultapp.CarrierActionUtils CarrierActionUtils}
