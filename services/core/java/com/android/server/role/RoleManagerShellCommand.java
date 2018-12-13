@@ -23,6 +23,7 @@ import android.app.role.IRoleManagerCallback;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.util.Log;
 
 import java.io.PrintWriter;
 import java.util.concurrent.CompletableFuture;
@@ -47,7 +48,8 @@ class RoleManagerShellCommand extends ShellCommand {
                 mResult.get(5, TimeUnit.SECONDS);
                 return 0;
             } catch (Exception e) {
-                getErrPrintWriter().println("Error: " + e.toString());
+                getErrPrintWriter().println("Error: see logcat for details.\n"
+                        + Log.getStackTraceString(e));
                 return -1;
             }
         }
