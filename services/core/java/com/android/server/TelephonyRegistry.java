@@ -214,6 +214,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private PreciseCallState mPreciseCallState = new PreciseCallState();
 
+    private int mCallDisconnectCause = DisconnectCause.NOT_VALID;
+
+    private int mCallPreciseDisconnectCause = PreciseDisconnectCause.NOT_VALID;
+
     private boolean mCarrierNetworkChangeState = false;
 
     private PhoneCapability mPhoneCapability = null;
@@ -710,6 +714,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if ((events & PhoneStateListener.LISTEN_PRECISE_CALL_STATE) != 0) {
                         try {
                             r.callback.onPreciseCallStateChanged(mPreciseCallState);
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
+                    }
+                    if ((events & PhoneStateListener.LISTEN_CALL_DISCONNECT_CAUSES) != 0) {
+                        try {
+                            r.callback.onCallDisconnectCauseChanged(mCallDisconnectCause,
+                                    mCallPreciseDisconnectCause);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -1491,9 +1503,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             handleRemoveListLocked();
         }
-        broadcastPreciseCallStateChanged(ringingCallState, foregroundCallState, backgroundCallState,
-                DisconnectCause.NOT_VALID,
-                PreciseDisconnectCause.NOT_VALID);
+        broadcastPreciseCallStateChanged(ringingCallState, foregroundCallState,
+                backgroundCallState);
     }
 
     public void notifyDisconnectCause(int disconnectCause, int preciseDisconnectCause) {
@@ -1501,12 +1512,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
         synchronized (mRecords) {
-            mPreciseCallState = new PreciseCallState(mRingingCallState, mForegroundCallState,
-                    mBackgroundCallState, disconnectCause, preciseDisconnectCause);
+            mCallDisconnectCause = disconnectCause;
+            mCallPreciseDisconnectCause = preciseDisconnectCause;
             for (Record r : mRecords) {
-                if (r.matchPhoneStateListenerEvent(PhoneStateListener.LISTEN_PRECISE_CALL_STATE)) {
+                if (r.matchPhoneStateListenerEvent(PhoneStateListener
+                        .LISTEN_CALL_DISCONNECT_CAUSES)) {
                     try {
-                        r.callback.onPreciseCallStateChanged(mPreciseCallState);
+                        r.callback.onCallDisconnectCauseChanged(mCallDisconnectCause,
+                                mCallPreciseDisconnectCause);
                     } catch (RemoteException ex) {
                         mRemoveList.add(r.binder);
                     }
@@ -1514,8 +1527,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             handleRemoveListLocked();
         }
-        broadcastPreciseCallStateChanged(mRingingCallState, mForegroundCallState,
-                mBackgroundCallState, disconnectCause, preciseDisconnectCause);
     }
 
     public void notifyPreciseDataConnectionFailed(String reason, String apnType,
@@ -1735,6 +1746,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             pw.println("mPreciseDataConnectionState=" + mPreciseDataConnectionState);
             pw.println("mPreciseCallState=" + mPreciseCallState);
+            pw.println("mCallDisconnectCause=" + mCallDisconnectCause);
+            pw.println("mCallPreciseDisconnectCause=" + mCallPreciseDisconnectCause);
             pw.println("mCarrierNetworkChangeState=" + mCarrierNetworkChangeState);
             pw.println("mRingingCallState=" + mRingingCallState);
             pw.println("mForegroundCallState=" + mForegroundCallState);
@@ -1910,13 +1923,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private void broadcastPreciseCallStateChanged(int ringingCallState, int foregroundCallState,
-            int backgroundCallState, int disconnectCause, int preciseDisconnectCause) {
+            int backgroundCallState) {
         Intent intent = new Intent(TelephonyManager.ACTION_PRECISE_CALL_STATE_CHANGED);
         intent.putExtra(TelephonyManager.EXTRA_RINGING_CALL_STATE, ringingCallState);
         intent.putExtra(TelephonyManager.EXTRA_FOREGROUND_CALL_STATE, foregroundCallState);
         intent.putExtra(TelephonyManager.EXTRA_BACKGROUND_CALL_STATE, backgroundCallState);
-        intent.putExtra(TelephonyManager.EXTRA_DISCONNECT_CAUSE, disconnectCause);
-        intent.putExtra(TelephonyManager.EXTRA_PRECISE_DISCONNECT_CAUSE, preciseDisconnectCause);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                 android.Manifest.permission.READ_PRECISE_PHONE_STATE);
     }
@@ -2002,6 +2013,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     SubscriptionManager.INVALID_SUBSCRIPTION_ID, Binder.getCallingPid(),
                     Binder.getCallingUid(), callingPackage, "listen to "
                             + "LISTEN_PREFERRED_DATA_SUBID_CHANGE");
+        }
+
+        if ((events & PhoneStateListener.LISTEN_CALL_DISCONNECT_CAUSES) != 0) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_PRECISE_PHONE_STATE, null);
         }
 
         return true;
