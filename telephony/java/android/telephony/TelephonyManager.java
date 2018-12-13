@@ -5629,7 +5629,7 @@ public class TelephonyManager {
         if (value == null) {
             value = "";
         }
-
+        value.replace(',', ' ');
         if (prop != null) {
             p = prop.split(",");
         }
@@ -5655,7 +5655,13 @@ public class TelephonyManager {
             }
         }
 
-        if (propVal.length() > SystemProperties.PROP_VALUE_MAX) {
+        int propValLen = propVal.length();
+        try {
+            propValLen = propVal.getBytes("utf-8").length;
+        } catch (java.io.UnsupportedEncodingException e) {
+            Rlog.d(TAG, "setTelephonyProperty: utf-8 not supported");
+        }
+        if (propValLen > SystemProperties.PROP_VALUE_MAX) {
             Rlog.d(TAG, "setTelephonyProperty: property too long phoneId=" + phoneId +
                     " property=" + property + " value: " + value + " propVal=" + propVal);
             return;
