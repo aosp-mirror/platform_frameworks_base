@@ -1396,10 +1396,10 @@ public final class ProcessStats implements Parcelable {
         return as;
     }
 
-    // See b/118826162 -- to avoid logspaming, we rate limit the WTF.
-    private static final long INVERSE_PROC_STATE_WTF_MIN_INTERVAL_MS = 10_000L;
-    private long mNextInverseProcStateWtfUptime;
-    private int mSkippedInverseProcStateWtfCount;
+    // See b/118826162 -- to avoid logspaming, we rate limit the warnings.
+    private static final long INVERSE_PROC_STATE_WARNING_MIN_INTERVAL_MS = 10_000L;
+    private long mNextInverseProcStateWarningUptime;
+    private int mSkippedInverseProcStateWarningCount;
 
     public void updateTrackingAssociationsLocked(int curSeq, long now) {
         final int NUM = mTrackingAssociations.size();
@@ -1423,18 +1423,19 @@ public final class ProcessStats implements Parcelable {
                         act.stopActive(now);
                         if (act.mProcState < procState) {
                             final long nowUptime = SystemClock.uptimeMillis();
-                            if (mNextInverseProcStateWtfUptime > nowUptime) {
-                                mSkippedInverseProcStateWtfCount++;
+                            if (mNextInverseProcStateWarningUptime > nowUptime) {
+                                mSkippedInverseProcStateWarningCount++;
                             } else {
                                 // TODO We still see it during boot related to GMS-core.
                                 // b/118826162
-                                Slog.wtf(TAG, "Tracking association " + act + " whose proc state "
+                                Slog.w(TAG, "Tracking association " + act + " whose proc state "
                                         + act.mProcState + " is better than process " + proc
                                         + " proc state " + procState
-                                        + " (" +  mSkippedInverseProcStateWtfCount + " skipped)");
-                                mSkippedInverseProcStateWtfCount = 0;
-                                mNextInverseProcStateWtfUptime =
-                                        nowUptime + INVERSE_PROC_STATE_WTF_MIN_INTERVAL_MS;
+                                        + " (" +  mSkippedInverseProcStateWarningCount
+                                        + " skipped)");
+                                mSkippedInverseProcStateWarningCount = 0;
+                                mNextInverseProcStateWarningUptime =
+                                        nowUptime + INVERSE_PROC_STATE_WARNING_MIN_INTERVAL_MS;
                             }
                         }
                     }
