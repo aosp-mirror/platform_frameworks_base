@@ -99,7 +99,7 @@ struct ParsedResource {
   ResourceId id;
   Visibility::Level visibility_level = Visibility::Level::kUndefined;
   bool allow_new = false;
-  std::vector<Overlayable> overlayable_declarations;
+  Maybe<Overlayable> overlayable;
 
   std::string comment;
   std::unique_ptr<Value> value;
@@ -133,8 +133,8 @@ static bool AddResourcesToTable(ResourceTable* table, IDiagnostics* diag, Parsed
     }
   }
 
-  for (auto& overlayable : res->overlayable_declarations) {
-    if (!table->AddOverlayable(res->name, overlayable, diag)) {
+  if (res->overlayable) {
+    if (!table->SetOverlayable(res->name, res->overlayable.value(), diag)) {
       return false;
     }
   }
@@ -1063,20 +1063,19 @@ bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource
                     << "' for <overlayable> tag");
   }
 
-  std::string comment;
-  std::vector<Overlayable::Policy> policies;
-
   bool error = false;
+  std::string comment;
+  Overlayable::PolicyFlags current_policies = Overlayable::Policy::kNone;
   const size_t start_depth = parser->depth();
   while (xml::XmlPullParser::IsGoodEvent(parser->Next())) {
     xml::XmlPullParser::Event event = parser->event();
     if (event == xml::XmlPullParser::Event::kEndElement && parser->depth() == start_depth) {
-      // Break the loop when exiting the overyabale element
+      // Break the loop when exiting the overlayable element
       break;
     } else if (event == xml::XmlPullParser::Event::kEndElement
                && parser->depth() == start_depth + 1) {
       // Clear the current policies when exiting the policy element
-      policies.clear();
+      current_policies = Overlayable::Policy::kNone;
       continue;
     } else if (event == xml::XmlPullParser::Event::kComment) {
       // Get the comment of individual item elements
@@ -1090,104 +1089,77 @@ bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource
     const Source item_source = source_.WithLine(parser->line_number());
     const std::string& element_name = parser->element_name();
     const std::string& element_namespace = parser->element_namespace();
-
     if (element_namespace.empty() && element_name == "item") {
-      if (!ParseOverlayableItem(parser, policies, comment, out_resource)) {
+      // Items specify the name and type of resource that should be overlayable
+      Maybe<StringPiece> maybe_name = xml::FindNonEmptyAttribute(parser, "name");
+      if (!maybe_name) {
+        diag_->Error(DiagMessage(item_source)
+                     << "<item> within an <overlayable> tag must have a 'name' attribute");
         error = true;
+        continue;
       }
+
+      Maybe<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type");
+      if (!maybe_type) {
+        diag_->Error(DiagMessage(item_source)
+                     << "<item> within an <overlayable> tag must have a 'type' attribute");
+        error = true;
+        continue;
+      }
+
+      const ResourceType* type = ParseResourceType(maybe_type.value());
+      if (type == nullptr) {
+        diag_->Error(DiagMessage(item_source)
+                     << "invalid resource type '" << maybe_type.value()
+                     << "' in <item> within an <overlayable>");
+        error = true;
+        continue;
+      }
+
+      ParsedResource child_resource;
+      child_resource.name.type = *type;
+      child_resource.name.entry = maybe_name.value().to_string();
+      child_resource.overlayable = Overlayable{current_policies, item_source, comment};
+      out_resource->child_resources.push_back(std::move(child_resource));
+
     } else if (element_namespace.empty() && element_name == "policy") {
-      if (!policies.empty()) {
+      if (current_policies != Overlayable::Policy::kNone) {
         // If the policy list is not empty, then we are currently inside a policy element
         diag_->Error(DiagMessage(item_source) << "<policy> blocks cannot be recursively nested");
         error = true;
         break;
       } else if (Maybe<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type")) {
         // Parse the polices separated by vertical bar characters to allow for specifying multiple
-        // policies at once
+        // policies
         for (StringPiece part : util::Tokenize(maybe_type.value(), '|')) {
           StringPiece trimmed_part = util::TrimWhitespace(part);
           if (trimmed_part == "public") {
-            policies.push_back(Overlayable::Policy::kPublic);
+            current_policies |= Overlayable::Policy::kPublic;
           } else if (trimmed_part == "product") {
-            policies.push_back(Overlayable::Policy::kProduct);
+            current_policies |= Overlayable::Policy::kProduct;
           } else if (trimmed_part == "product_services") {
-            policies.push_back(Overlayable::Policy::kProductServices);
+            current_policies |= Overlayable::Policy::kProductServices;
           } else if (trimmed_part == "system") {
-            policies.push_back(Overlayable::Policy::kSystem);
+            current_policies |= Overlayable::Policy::kSystem;
           } else if (trimmed_part == "vendor") {
-            policies.push_back(Overlayable::Policy::kVendor);
+            current_policies |= Overlayable::Policy::kVendor;
           } else {
-            diag_->Error(DiagMessage(out_resource->source)
-                             << "<policy> has unsupported type '" << trimmed_part << "'");
+            diag_->Error(DiagMessage(item_source)
+                         << "<policy> has unsupported type '" << trimmed_part << "'");
             error = true;
             continue;
           }
         }
       }
     } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
-      diag_->Error(DiagMessage(item_source) << "invalid element <" << element_name << "> in "
-                                            << " <overlayable>");
+      diag_->Error(DiagMessage(item_source) << "invalid element <" << element_name << "> "
+                                            << " in <overlayable>");
       error = true;
       break;
     }
   }
 
   return !error;
-}
-
-bool ResourceParser::ParseOverlayableItem(xml::XmlPullParser* parser,
-                                          const std::vector<Overlayable::Policy>& policies,
-                                          const std::string& comment,
-                                          ParsedResource* out_resource) {
-  const Source item_source = source_.WithLine(parser->line_number());
-
-  Maybe<StringPiece> maybe_name = xml::FindNonEmptyAttribute(parser, "name");
-  if (!maybe_name) {
-    diag_->Error(DiagMessage(item_source)
-                     << "<item> within an <overlayable> tag must have a 'name' attribute");
-    return false;
-  }
-
-  Maybe<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type");
-  if (!maybe_type) {
-    diag_->Error(DiagMessage(item_source)
-                     << "<item> within an <overlayable> tag must have a 'type' attribute");
-    return false;
-  }
-
-  const ResourceType* type = ParseResourceType(maybe_type.value());
-  if (type == nullptr) {
-    diag_->Error(DiagMessage(out_resource->source)
-                     << "invalid resource type '" << maybe_type.value()
-                     << "' in <item> within an <overlayable>");
-    return false;
-  }
-
-  ParsedResource child_resource;
-  child_resource.name.type = *type;
-  child_resource.name.entry = maybe_name.value().to_string();
-  child_resource.source = item_source;
-
-  if (policies.empty()) {
-    Overlayable overlayable;
-    overlayable.source = item_source;
-    overlayable.comment = comment;
-    child_resource.overlayable_declarations.push_back(overlayable);
-  } else {
-    for (Overlayable::Policy policy : policies) {
-      Overlayable overlayable;
-      overlayable.policy = policy;
-      overlayable.source = item_source;
-      overlayable.comment = comment;
-      child_resource.overlayable_declarations.push_back(overlayable);
-    }
-  }
-
-  if (options_.visibility) {
-    child_resource.visibility_level = options_.visibility.value();
-  }
-  out_resource->child_resources.push_back(std::move(child_resource));
-  return true;
 }
 
 bool ResourceParser::ParseAddResource(xml::XmlPullParser* parser, ParsedResource* out_resource) {

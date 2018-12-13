@@ -310,26 +310,24 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
           pb_allow_new->set_comment(entry->allow_new.value().comment);
         }
 
-        for (const Overlayable& overlayable : entry->overlayable_declarations) {
-          pb::Overlayable* pb_overlayable = pb_entry->add_overlayable();
-          if (overlayable.policy) {
-            switch (overlayable.policy.value()) {
-              case Overlayable::Policy::kPublic:
-                pb_overlayable->set_policy(pb::Overlayable::PUBLIC);
-                break;
-              case Overlayable::Policy::kProduct:
-                pb_overlayable->set_policy(pb::Overlayable::PRODUCT);
-                break;
-              case Overlayable::Policy::kProductServices:
-                pb_overlayable->set_policy(pb::Overlayable::PRODUCT_SERVICES);
-                break;
-              case Overlayable::Policy::kSystem:
-                pb_overlayable->set_policy(pb::Overlayable::SYSTEM);
-                break;
-              case Overlayable::Policy::kVendor:
-                pb_overlayable->set_policy(pb::Overlayable::VENDOR);
-                break;
-            }
+        if (entry->overlayable) {
+          pb::Overlayable* pb_overlayable = pb_entry->mutable_overlayable();
+
+          Overlayable overlayable = entry->overlayable.value();
+          if (overlayable.policies & Overlayable::Policy::kPublic) {
+            pb_overlayable->add_policy(pb::Overlayable::PUBLIC);
+          }
+          if (overlayable.policies & Overlayable::Policy::kProduct) {
+            pb_overlayable->add_policy(pb::Overlayable::PRODUCT);
+          }
+          if (overlayable.policies & Overlayable::Policy::kProductServices) {
+            pb_overlayable->add_policy(pb::Overlayable::PRODUCT_SERVICES);
+          }
+          if (overlayable.policies & Overlayable::Policy::kSystem) {
+            pb_overlayable->add_policy(pb::Overlayable::SYSTEM);
+          }
+          if (overlayable.policies & Overlayable::Policy::kVendor) {
+            pb_overlayable->add_policy(pb::Overlayable::VENDOR);
           }
 
           SerializeSourceToPb(overlayable.source, &source_pool,

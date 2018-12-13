@@ -57,27 +57,32 @@ struct AllowNew {
   std::string comment;
 };
 
-// Represents a declaration that a resource is overayable at runtime.
+// Represents a declaration that a resource is overlayable at runtime.
 struct Overlayable {
+
   // Represents the types overlays that are allowed to overlay the resource.
-  enum class Policy {
+  enum Policy : uint32_t {
+    kNone = 0x00,
+
     // The resource can be overlaid by any overlay.
-    kPublic,
+    kPublic = 0x01,
 
     // The resource can be overlaid by any overlay on the system partition.
-    kSystem,
+    kSystem = 0x02,
 
     // The resource can be overlaid by any overlay on the vendor partition.
-    kVendor,
+    kVendor = 0x04,
 
     // The resource can be overlaid by any overlay on the product partition.
-    kProduct,
+    kProduct = 0x08,
 
     // The resource can be overlaid by any overlay on the product services partition.
-    kProductServices,
+    kProductServices = 0x10
   };
 
-  Maybe<Policy> policy;
+  typedef uint32_t PolicyFlags;
+  PolicyFlags policies = Policy::kNone;
+
   Source source;
   std::string comment;
 };
@@ -116,7 +121,7 @@ class ResourceEntry {
   Maybe<AllowNew> allow_new;
 
   // The declarations of this resource as overlayable for RROs
-  std::vector<Overlayable> overlayable_declarations;
+  Maybe<Overlayable> overlayable;
 
   // The resource's values for each configuration.
   std::vector<std::unique_ptr<ResourceConfigValue>> values;
@@ -246,9 +251,9 @@ class ResourceTable {
   bool SetVisibilityWithIdMangled(const ResourceNameRef& name, const Visibility& visibility,
                                   const ResourceId& res_id, IDiagnostics* diag);
 
-  bool AddOverlayable(const ResourceNameRef& name, const Overlayable& overlayable,
-                      IDiagnostics* diag);
-  bool AddOverlayableMangled(const ResourceNameRef& name, const Overlayable& overlayable,
+  bool SetOverlayable(const ResourceNameRef& name, const Overlayable& overlayable,
+                      IDiagnostics *diag);
+  bool SetOverlayableMangled(const ResourceNameRef& name, const Overlayable& overlayable,
                              IDiagnostics* diag);
 
   bool SetAllowNew(const ResourceNameRef& name, const AllowNew& allow_new, IDiagnostics* diag);
@@ -323,8 +328,8 @@ class ResourceTable {
   bool SetAllowNewImpl(const ResourceNameRef& name, const AllowNew& allow_new,
                        NameValidator name_validator, IDiagnostics* diag);
 
-  bool AddOverlayableImpl(const ResourceNameRef& name, const Overlayable& overlayable,
-                          NameValidator name_validator, IDiagnostics* diag);
+  bool SetOverlayableImpl(const ResourceNameRef &name, const Overlayable &overlayable,
+                          NameValidator name_validator, IDiagnostics *diag);
 
   bool SetSymbolStateImpl(const ResourceNameRef& name, const ResourceId& res_id,
                           const Visibility& symbol, NameValidator name_validator,

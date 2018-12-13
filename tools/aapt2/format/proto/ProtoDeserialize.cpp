@@ -437,37 +437,39 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
         entry->allow_new = std::move(allow_new);
       }
 
-      for (const pb::Overlayable& pb_overlayable : pb_entry.overlayable()) {
-        Overlayable overlayable;
-        switch (pb_overlayable.policy()) {
-          case pb::Overlayable::NONE:
-            overlayable.policy = {};
-            break;
-          case pb::Overlayable::PUBLIC:
-            overlayable.policy = Overlayable::Policy::kPublic;
-            break;
-          case pb::Overlayable::PRODUCT:
-            overlayable.policy = Overlayable::Policy::kProduct;
-            break;
-          case pb::Overlayable::PRODUCT_SERVICES:
-            overlayable.policy = Overlayable::Policy::kProductServices;
-            break;
-          case pb::Overlayable::SYSTEM:
-            overlayable.policy = Overlayable::Policy::kSystem;
-            break;
-          case pb::Overlayable::VENDOR:
-            overlayable.policy = Overlayable::Policy::kVendor;
-            break;
-          default:
-            *out_error = "unknown overlayable policy";
-            return false;
+      if (pb_entry.has_overlayable()) {
+        Overlayable overlayable{};
+
+        const pb::Overlayable& pb_overlayable = pb_entry.overlayable();
+        for (const int policy : pb_overlayable.policy()) {
+          switch (policy) {
+            case pb::Overlayable::PUBLIC:
+              overlayable.policies |= Overlayable::Policy::kPublic;
+              break;
+            case pb::Overlayable::SYSTEM:
+              overlayable.policies |= Overlayable::Policy::kSystem;
+              break;
+            case pb::Overlayable::VENDOR:
+              overlayable.policies |= Overlayable::Policy::kVendor;
+              break;
+            case pb::Overlayable::PRODUCT:
+              overlayable.policies |= Overlayable::Policy::kProduct;
+              break;
+            case pb::Overlayable::PRODUCT_SERVICES:
+              overlayable.policies |= Overlayable::Policy::kProductServices;
+              break;
+            default:
+              *out_error = "unknown overlayable policy";
+              return false;
+          }
         }
 
         if (pb_overlayable.has_source()) {
           DeserializeSourceFromPb(pb_overlayable.source(), src_pool, &overlayable.source);
         }
+
         overlayable.comment = pb_overlayable.comment();
-        entry->overlayable_declarations.push_back(overlayable);
+        entry->overlayable = overlayable;
       }
 
       ResourceId resid(pb_package.package_id().id(), pb_type.type_id().id(),
