@@ -22,7 +22,6 @@ import static junit.framework.TestCase.fail;
 
 import static org.testng.Assert.assertEquals;
 
-import android.app.usage.EventList;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
@@ -129,10 +128,6 @@ public class UsageStatsDatabaseTest {
         mIntervalStats.keyguardShownTracker.duration = 333333;
         mIntervalStats.keyguardHiddenTracker.count = 5;
         mIntervalStats.keyguardHiddenTracker.duration = 4444444;
-
-        if (mIntervalStats.events == null) {
-            mIntervalStats.events = new EventList();
-        }
 
         for (int i = 0; i < numberOfEvents; i++) {
             Event event = new Event();
@@ -320,20 +315,9 @@ public class UsageStatsDatabaseTest {
             }
         }
         assertEquals(stats1.activeConfiguration, stats2.activeConfiguration);
-
-        if (stats1.events == null) {
-            // If stats1 events are null, stats2 should be null or empty
-            if (stats2.events != null) {
-                assertEquals(stats2.events.size(), 0);
-            }
-        } else if (stats2.events == null) {
-            // If stats2 events are null, stats1 should be null or empty
-            assertEquals(stats1.events.size(), 0);
-        } else {
-            assertEquals(stats1.events.size(), stats2.events.size());
-            for (int i = 0; i < stats1.events.size(); i++) {
-                compareUsageEvent(stats1.events.get(i), stats2.events.get(i), i, minVersion);
-            }
+        assertEquals(stats1.events.size(), stats2.events.size());
+        for (int i = 0; i < stats1.events.size(); i++) {
+            compareUsageEvent(stats1.events.get(i), stats2.events.get(i), i, minVersion);
         }
     }
 
@@ -421,7 +405,7 @@ public class UsageStatsDatabaseTest {
         // Clear non backed up data from expected IntervalStats
         mIntervalStats.activeConfiguration = null;
         mIntervalStats.configurations.clear();
-        if (mIntervalStats.events != null) mIntervalStats.events.clear();
+        mIntervalStats.events.clear();
 
         // The written and read IntervalStats should match
         compareIntervalStats(mIntervalStats, stats.get(0), version);

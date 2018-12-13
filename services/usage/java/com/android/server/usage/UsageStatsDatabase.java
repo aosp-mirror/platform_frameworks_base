@@ -930,39 +930,37 @@ public class UsageStatsDatabase {
             }
         }
 
-        if (statsOut.events != null) {
-            final int eventSize = statsOut.events.size();
-            for (int i = 0; i < eventSize; i++) {
-                final UsageEvents.Event event = statsOut.events.get(i);
-                if (event.mPackage.isEmpty()) {
-                    if (failures++ < failureLogLimit) {
-                        sb.append("\nUnexpected empty empty package name loaded");
-                    }
+        final int eventSize = statsOut.events.size();
+        for (int i = 0; i < eventSize; i++) {
+            final UsageEvents.Event event = statsOut.events.get(i);
+            if (event.mPackage.isEmpty()) {
+                if (failures++ < failureLogLimit) {
+                    sb.append("\nUnexpected empty empty package name loaded");
                 }
-                if (event.mTimeStamp < statsOut.beginTime || event.mTimeStamp > statsOut.endTime) {
-                    if (failures++ < failureLogLimit) {
-                        sb.append("\nUnexpected event timestamp ");
-                        sb.append(event.mTimeStamp);
-                        sb.append(" loaded (beginTime : ");
-                        sb.append(statsOut.beginTime);
-                        sb.append(", endTime : ");
-                        sb.append(statsOut.endTime);
-                        sb.append(")");
-                    }
+            }
+            if (event.mTimeStamp < statsOut.beginTime || event.mTimeStamp > statsOut.endTime) {
+                if (failures++ < failureLogLimit) {
+                    sb.append("\nUnexpected event timestamp ");
+                    sb.append(event.mTimeStamp);
+                    sb.append(" loaded (beginTime : ");
+                    sb.append(statsOut.beginTime);
+                    sb.append(", endTime : ");
+                    sb.append(statsOut.endTime);
+                    sb.append(")");
                 }
-                if (event.mEventType < 0 || event.mEventType > UsageEvents.Event.MAX_EVENT_TYPE) {
-                    if (failures++ < failureLogLimit) {
-                        sb.append("\nUnexpected event type ");
-                        sb.append(event.mEventType);
-                        sb.append(" loaded");
-                    }
+            }
+            if (event.mEventType < 0 || event.mEventType > UsageEvents.Event.MAX_EVENT_TYPE) {
+                if (failures++ < failureLogLimit) {
+                    sb.append("\nUnexpected event type ");
+                    sb.append(event.mEventType);
+                    sb.append(" loaded");
                 }
-                if ((event.mFlags & ~UsageEvents.Event.VALID_FLAG_BITS) != 0) {
-                    if (failures++ < failureLogLimit) {
-                        sb.append("\nUnexpected event flag bit 0b");
-                        sb.append(Integer.toBinaryString(event.mFlags));
-                        sb.append(" loaded");
-                    }
+            }
+            if ((event.mFlags & ~UsageEvents.Event.VALID_FLAG_BITS) != 0) {
+                if (failures++ < failureLogLimit) {
+                    sb.append("\nUnexpected event flag bit 0b");
+                    sb.append(Integer.toBinaryString(event.mFlags));
+                    sb.append(" loaded");
                 }
             }
         }
@@ -1198,7 +1196,7 @@ public class UsageStatsDatabase {
         if (stats == null) return;
         stats.activeConfiguration = null;
         stats.configurations.clear();
-        if (stats.events != null) stats.events.clear();
+        stats.events.clear();
     }
 
     private byte[] serializeIntervalStats(IntervalStats stats, int version) {
