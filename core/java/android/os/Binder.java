@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -399,6 +400,9 @@ public class Binder implements IBinder {
      * reasons, we only support one UID. This UID represents the original user responsible for the
      * binder calls.
      *
+     * <p>{@link Binder#restoreCallingWorkSource(long)} must always be called after setting the
+     * worksource.
+     *
      * <p>A typical use case would be
      * <pre>
      * long token = Binder.setCallingWorkSourceUid(uid);
@@ -417,6 +421,7 @@ public class Binder implements IBinder {
      * @hide
      **/
     @CriticalNative
+    @SystemApi
     public static final native long setCallingWorkSourceUid(int workSource);
 
     /**
@@ -430,6 +435,7 @@ public class Binder implements IBinder {
      * @hide
      */
     @CriticalNative
+    @SystemApi
     public static final native int getCallingWorkSourceUid();
 
     /**
@@ -438,10 +444,24 @@ public class Binder implements IBinder {
      * <p>The work source will be propagated for future outgoing binder transactions
      * executed on this thread.
      *
+     * <p>{@link Binder#restoreCallingWorkSource(long)} must always be called after clearing the
+     * worksource.
+     *
+     * <p>A typical use case would be
+     * <pre>
+     * long token = Binder.clearCallingWorkSource();
+     * try {
+     *   // Call an API.
+     * } finally {
+     *   Binder.restoreCallingWorkSource(token);
+     * }
+     * </pre>
+     *
      * @return token to restore original work source.
      * @hide
      **/
     @CriticalNative
+    @SystemApi
     public static final native long clearCallingWorkSource();
 
     /**
@@ -461,6 +481,7 @@ public class Binder implements IBinder {
      * @hide
      **/
     @CriticalNative
+    @SystemApi
     public static final native void restoreCallingWorkSource(long token);
 
     /**
@@ -601,6 +622,7 @@ public class Binder implements IBinder {
      * See {@link setProxyTransactListener}.
      * @hide
      */
+    @SystemApi
     public interface ProxyTransactListener {
         /**
          * Called before onTransact.
@@ -663,6 +685,7 @@ public class Binder implements IBinder {
      * <li>Never execute another binder transaction inside the listener.
      * @hide
      */
+    @SystemApi
     public static void setProxyTransactListener(@Nullable ProxyTransactListener listener) {
         BinderProxy.setTransactListener(listener);
     }
