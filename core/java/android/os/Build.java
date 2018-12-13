@@ -289,6 +289,26 @@ public class Build {
                 "ro.build.version.preview_sdk", 0);
 
         /**
+         * The SDK fingerprint for a given prerelease SDK. This value will always be
+         * {@code REL} on production platform builds/devices.
+         *
+         * <p>When this value is not {@code REL}, it contains a string fingerprint of the API
+         * surface exposed by the preview SDK. Preview platforms with different API surfaces
+         * will have different {@code PREVIEW_SDK_FINGERPRINT}.
+         *
+         * <p>This attribute is intended for use by installers for finer grained targeting of
+         * packages. Applications targeting preview APIs should not use this field and should
+         * instead use {@code PREVIEW_SDK_INT} or use reflection or other runtime checks to
+         * detect the presence of an API or guard themselves against unexpected runtime
+         * behavior.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final String PREVIEW_SDK_FINGERPRINT = SystemProperties.get(
+                "ro.build.version.preview_sdk_fingerprint", "REL");
+
+        /**
          * The current development codename, or the string "REL" if this is
          * a release build.
          */
