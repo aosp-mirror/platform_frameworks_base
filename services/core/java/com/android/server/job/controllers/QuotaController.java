@@ -151,8 +151,7 @@ public final class QuotaController extends StateController {
         return "<" + userId + ">" + packageName;
     }
 
-    @VisibleForTesting
-    static final class Package {
+    private static final class Package {
         public final String packageName;
         public final int userId;
 
@@ -387,8 +386,9 @@ public final class QuotaController extends StateController {
 
     private boolean isWithinQuotaLocked(@NonNull final JobStatus jobStatus) {
         final int standbyBucket = getEffectiveStandbyBucket(jobStatus);
-        return isWithinQuotaLocked(jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(),
-                standbyBucket);
+        // Jobs for the active app should always be able to run.
+        return jobStatus.uidActive || isWithinQuotaLocked(
+                jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(), standbyBucket);
     }
 
     private boolean isWithinQuotaLocked(final int userId, @NonNull final String packageName,
@@ -579,7 +579,10 @@ public final class QuotaController extends StateController {
         boolean changed = false;
         for (int i = jobs.size() - 1; i >= 0; --i) {
             final JobStatus js = jobs.valueAt(i);
-            if (realStandbyBucket == getEffectiveStandbyBucket(js)) {
+            if (js.uidActive) {
+                // Jobs for the active app should always be able to run.
+                changed |= js.setQuotaConstraintSatisfied(true);
+            } else if (realStandbyBucket == getEffectiveStandbyBucket(js)) {
                 changed |= js.setQuotaConstraintSatisfied(realInQuota);
             } else {
                 // This job is somehow exempted. Need to determine its own quota status.
@@ -765,18 +768,18 @@ public final class QuotaController extends StateController {
         public final long startTimeElapsed;
         // End timestamp in elapsed realtime timebase.
         public final long endTimeElapsed;
-        // How many jobs ran during this session.
-        public final int jobCount;
+        // How many background jobs ran during this session.
+        public final int bgJobCount;
 
         TimingSession(long startElapsed, long endElapsed, int jobCount) {
             this.startTimeElapsed = startElapsed;
             this.endTimeElapsed = endElapsed;
-            this.jobCount = jobCount;
+            this.bgJobCount = jobCount;
         }
 
         @Override
         public String toString() {
-            return "TimingSession{" + startTimeElapsed + "->" + endTimeElapsed + ", " + jobCount
+            return "TimingSession{" + startTimeElapsed + "->" + endTimeElapsed + ", " + bgJobCount
                     + "}";
         }
 
@@ -786,7 +789,7 @@ public final class QuotaController extends StateController {
                 TimingSession other = (TimingSession) obj;
                 return startTimeElapsed == other.startTimeElapsed
                         && endTimeElapsed == other.endTimeElapsed
-                        && jobCount == other.jobCount;
+                        && bgJobCount == other.bgJobCount;
             } else {
                 return false;
             }
@@ -794,7 +797,7 @@ public final class QuotaController extends StateController {
 
         @Override
         public int hashCode() {
-            return Arrays.hashCode(new long[] {startTimeElapsed, endTimeElapsed, jobCount});
+            return Arrays.hashCode(new long[] {startTimeElapsed, endTimeElapsed, bgJobCount});
         }
 
         public void dump(IndentingPrintWriter pw) {
@@ -804,8 +807,8 @@ public final class QuotaController extends StateController {
             pw.print(" (");
             pw.print(endTimeElapsed - startTimeElapsed);
             pw.print("), ");
-            pw.print(jobCount);
-            pw.print(" jobs.");
+            pw.print(bgJobCount);
+            pw.print(" bg jobs.");
             pw.println();
         }
 
@@ -816,7 +819,8 @@ public final class QuotaController extends StateController {
                     startTimeElapsed);
             proto.write(StateControllerProto.QuotaController.TimingSession.END_TIME_ELAPSED,
                     endTimeElapsed);
-            proto.write(StateControllerProto.QuotaController.TimingSession.JOB_COUNT, jobCount);
+            proto.write(StateControllerProto.QuotaController.TimingSession.BG_JOB_COUNT,
+                    bgJobCount);
 
             proto.end(token);
         }
@@ -825,23 +829,32 @@ public final class QuotaController extends StateController {
     private final class Timer {
         private final Package mPkg;
 
-        // List of jobs currently running for this package.
-        private final ArraySet<JobStatus> mRunningJobs = new ArraySet<>();
+        // List of jobs currently running for this app that started when the app wasn't in the
+        // foreground.
+        private final ArraySet<JobStatus> mRunningBgJobs = new ArraySet<>();
         private long mStartTimeElapsed;
-        private int mJobCount;
+        private int mBgJobCount;
 
         Timer(int userId, String packageName) {
             mPkg = new Package(userId, packageName);
         }
 
         void startTrackingJob(@NonNull JobStatus jobStatus) {
+            if (jobStatus.uidActive) {
+                // We intentionally don't pay attention to fg state changes after a job has started.
+                if (DEBUG) {
+                    Slog.v(TAG,
+                            "Timer ignoring " + jobStatus.toShortString() + " because uidActive");
+                }
+                return;
+            }
             if (DEBUG) Slog.v(TAG, "Starting to track " + jobStatus.toShortString());
             synchronized (mLock) {
                 // Always track jobs, even when charging.
-                mRunningJobs.add(jobStatus);
+                mRunningBgJobs.add(jobStatus);
                 if (!mChargeTracker.isCharging()) {
-                    mJobCount++;
-                    if (mRunningJobs.size() == 1) {
+                    mBgJobCount++;
+                    if (mRunningBgJobs.size() == 1) {
                         // Started tracking the first job.
                         mStartTimeElapsed = sElapsedRealtimeClock.millis();
                         scheduleCutoff();
@@ -853,7 +866,7 @@ public final class QuotaController extends StateController {
         void stopTrackingJob(@NonNull JobStatus jobStatus) {
             if (DEBUG) Slog.v(TAG, "Stopping tracking of " + jobStatus.toShortString());
             synchronized (mLock) {
-                if (mRunningJobs.size() == 0) {
+                if (mRunningBgJobs.size() == 0) {
                     // maybeStopTrackingJobLocked can be called when an app cancels a job, so a
                     // timer may not be running when it's asked to stop tracking a job.
                     if (DEBUG) {
@@ -861,8 +874,8 @@ public final class QuotaController extends StateController {
                     }
                     return;
                 }
-                mRunningJobs.remove(jobStatus);
-                if (!mChargeTracker.isCharging() && mRunningJobs.size() == 0) {
+                if (mRunningBgJobs.remove(jobStatus)
+                        && !mChargeTracker.isCharging() && mRunningBgJobs.size() == 0) {
                     emitSessionLocked(sElapsedRealtimeClock.millis());
                     cancelCutoff();
                 }
@@ -870,13 +883,13 @@ public final class QuotaController extends StateController {
         }
 
         private void emitSessionLocked(long nowElapsed) {
-            if (mJobCount <= 0) {
+            if (mBgJobCount <= 0) {
                 // Nothing to emit.
                 return;
             }
-            TimingSession ts = new TimingSession(mStartTimeElapsed, nowElapsed, mJobCount);
+            TimingSession ts = new TimingSession(mStartTimeElapsed, nowElapsed, mBgJobCount);
             saveTimingSession(mPkg.userId, mPkg.packageName, ts);
-            mJobCount = 0;
+            mBgJobCount = 0;
             // Don't reset the tracked jobs list as we need to keep tracking the current number
             // of jobs.
             // However, cancel the currently scheduled cutoff since it's not currently useful.
@@ -889,7 +902,7 @@ public final class QuotaController extends StateController {
          */
         public boolean isActive() {
             synchronized (mLock) {
-                return mJobCount > 0;
+                return mBgJobCount > 0;
             }
         }
 
@@ -905,12 +918,12 @@ public final class QuotaController extends StateController {
                     emitSessionLocked(nowElapsed);
                 } else {
                     // Start timing from unplug.
-                    if (mRunningJobs.size() > 0) {
+                    if (mRunningBgJobs.size() > 0) {
                         mStartTimeElapsed = nowElapsed;
                         // NOTE: this does have the unfortunate consequence that if the device is
                         // repeatedly plugged in and unplugged, the job count for a package may be
                         // artificially high.
-                        mJobCount = mRunningJobs.size();
+                        mBgJobCount = mRunningBgJobs.size();
                         // Schedule cutoff since we're now actively tracking for quotas again.
                         scheduleCutoff();
                     }
@@ -958,12 +971,12 @@ public final class QuotaController extends StateController {
                 pw.print("NOT active");
             }
             pw.print(", ");
-            pw.print(mJobCount);
-            pw.print(" running jobs");
+            pw.print(mBgJobCount);
+            pw.print(" running bg jobs");
             pw.println();
             pw.increaseIndent();
-            for (int i = 0; i < mRunningJobs.size(); i++) {
-                JobStatus js = mRunningJobs.valueAt(i);
+            for (int i = 0; i < mRunningBgJobs.size(); i++) {
+                JobStatus js = mRunningBgJobs.valueAt(i);
                 if (predicate.test(js)) {
                     pw.println(js.toShortString());
                 }
@@ -979,9 +992,9 @@ public final class QuotaController extends StateController {
             proto.write(StateControllerProto.QuotaController.Timer.IS_ACTIVE, isActive());
             proto.write(StateControllerProto.QuotaController.Timer.START_TIME_ELAPSED,
                     mStartTimeElapsed);
-            proto.write(StateControllerProto.QuotaController.Timer.JOB_COUNT, mJobCount);
-            for (int i = 0; i < mRunningJobs.size(); i++) {
-                JobStatus js = mRunningJobs.valueAt(i);
+            proto.write(StateControllerProto.QuotaController.Timer.BG_JOB_COUNT, mBgJobCount);
+            for (int i = 0; i < mRunningBgJobs.size(); i++) {
+                JobStatus js = mRunningBgJobs.valueAt(i);
                 if (predicate.test(js)) {
                     js.writeToShortProto(proto,
                             StateControllerProto.QuotaController.Timer.RUNNING_JOBS);
