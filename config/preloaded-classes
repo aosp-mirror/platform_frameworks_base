@@ -6137,12 +6137,6 @@ libcore.io.BufferIterator
 libcore.io.ClassPathURLStreamHandler
 libcore.io.ClassPathURLStreamHandler$ClassPathURLConnection
 libcore.io.ClassPathURLStreamHandler$ClassPathURLConnection$1
-libcore.io.DropBox
-libcore.io.DropBox$DefaultReporter
-libcore.io.DropBox$Reporter
-libcore.io.EventLogger
-libcore.io.EventLogger$DefaultReporter
-libcore.io.EventLogger$Reporter
 libcore.io.ForwardingOs
 libcore.io.IoBridge
 libcore.io.IoTracker
