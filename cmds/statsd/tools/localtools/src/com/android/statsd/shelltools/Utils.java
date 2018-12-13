@@ -70,9 +70,16 @@ public class Utils {
     /**
      * Dumps the report from the device and converts it to a ConfigMetricsReportList.
      * Erases the data if clearData is true.
+     * @param configId id of the config
+     * @param clearData whether to erase the report data from statsd after getting the report.
+     * @param useShellUid Pulls data for the {@link SHELL_UID} instead of the caller's uid.
+     * @param logger Logger to log error messages
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
      */
     public static ConfigMetricsReportList getReportList(long configId, boolean clearData,
-            Logger logger) throws IOException, InterruptedException {
+            boolean useShellUid, Logger logger) throws IOException, InterruptedException {
         try {
             File outputFile = File.createTempFile("statsdret", ".bin");
             outputFile.deleteOnExit();
@@ -82,7 +89,7 @@ public class Utils {
                     "adb",
                     "shell",
                     CMD_DUMP_REPORT,
-                    SHELL_UID,
+                    useShellUid ? SHELL_UID : "",
                     String.valueOf(configId),
                     clearData ? "" : "--keep_data",
                     "--include_current_bucket",
@@ -93,8 +100,8 @@ public class Utils {
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
             logger.severe("Failed to fetch and parse the statsd output report. "
                             + "Perhaps there is not a valid statsd config for the requested "
-                            + "uid=" + SHELL_UID
-                            + ", configId=" + configId
+                            + (useShellUid ? ("uid=" + SHELL_UID + ", ") : "")
+                            + "configId=" + configId
                             + ".");
             throw (e);
         }

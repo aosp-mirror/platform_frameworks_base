@@ -165,7 +165,7 @@ public class LocalDrive {
             try {
                 Utils.runCommand(null, sLogger, "adb", "shell", Utils.CMD_REMOVE_CONFIG,
                         Utils.SHELL_UID, String.valueOf(configId));
-                Utils.getReportList(configId, true /* clearData */, sLogger);
+                Utils.getReportList(configId, true /* clearData */, true /* SHELL_UID */, sLogger);
             } catch (InterruptedException | IOException e) {
                 sLogger.severe("Failed to remove config: " + e.getMessage());
                 return false;
@@ -234,7 +234,7 @@ public class LocalDrive {
         // Even if the args request no modifications, we still parse it to make sure it's valid.
         ConfigMetricsReportList reportList;
         try {
-            reportList = Utils.getReportList(configId, clearData, sLogger);
+            reportList = Utils.getReportList(configId, clearData, true /* SHELL_UID */, sLogger);
         } catch (IOException | InterruptedException e) {
             sLogger.severe("Failed to get report list: " + e.getMessage());
             return false;
@@ -278,7 +278,7 @@ public class LocalDrive {
         sLogger.fine(String.format("cmdClear with %d", configId));
 
         try {
-            Utils.getReportList(configId, true /* clearData */, sLogger);
+            Utils.getReportList(configId, true /* clearData */, true /* SHELL_UID */, sLogger);
         } catch (IOException | InterruptedException e) {
             sLogger.severe("Failed to get report list: " + e.getMessage());
             return false;
