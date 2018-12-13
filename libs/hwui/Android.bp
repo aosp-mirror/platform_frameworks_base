@@ -60,6 +60,7 @@ cc_defaults {
         "libutils",
         "libEGL",
         "libGLESv2",
+        "libGLESv3",
         "libvulkan",
         "libui",
         "libgui",
