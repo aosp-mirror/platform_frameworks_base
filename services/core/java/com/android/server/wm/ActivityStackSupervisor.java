@@ -598,7 +598,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    void reportActivityLaunchedLocked(boolean timeout, ActivityRecord r, long totalTime) {
+    void reportActivityLaunchedLocked(boolean timeout, ActivityRecord r, long totalTime,
+            @WaitResult.LaunchState int launchState) {
         boolean changed = false;
         for (int i = mWaitingActivityLaunched.size() - 1; i >= 0; i--) {
             WaitResult w = mWaitingActivityLaunched.remove(i);
@@ -609,6 +610,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     w.who = new ComponentName(r.info.packageName, r.info.name);
                 }
                 w.totalTime = totalTime;
+                w.launchState = launchState;
                 // Do not modify w.result.
             }
         }
@@ -1242,7 +1244,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
             r.finishLaunchTickingLocked();
             if (fromTimeout) {
-                reportActivityLaunchedLocked(fromTimeout, r, INVALID_DELAY);
+                reportActivityLaunchedLocked(fromTimeout, r, INVALID_DELAY,
+                        -1 /* launchState */);
             }
 
             // This is a hack to semi-deal with a race condition

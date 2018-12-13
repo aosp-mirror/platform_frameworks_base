@@ -122,8 +122,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
-import static com.android.server.wm.ActivityTaskManagerService
-        .RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -145,6 +144,7 @@ import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.ResultInfo;
+import android.app.WaitResult.LaunchState;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -2158,7 +2158,7 @@ final class ActivityRecord extends ConfigurationContainer {
                 .getActivityMetricsLogger().logAppTransitionReportedDrawn(this, restoredFromBundle);
         if (info != null) {
             mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
-                    info.windowsFullyDrawnDelayMs);
+                    info.windowsFullyDrawnDelayMs, info.getLaunchState());
         }
     }
 
@@ -2182,8 +2182,9 @@ final class ActivityRecord extends ConfigurationContainer {
             final WindowingModeTransitionInfoSnapshot info = mStackSupervisor
                     .getActivityMetricsLogger().notifyWindowsDrawn(getWindowingMode(), timestamp);
             final int windowsDrawnDelayMs = info != null ? info.windowsDrawnDelayMs : INVALID_DELAY;
+            final @LaunchState int launchState = info != null ? info.getLaunchState() : -1;
             mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
-                    windowsDrawnDelayMs);
+                    windowsDrawnDelayMs, launchState);
             mStackSupervisor.sendWaitingVisibleReportLocked(this);
             finishLaunchTickingLocked();
             if (task != null) {
