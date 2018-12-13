@@ -108,6 +108,27 @@ void GenerateSimpleTestCases(const string& outdir) {
   }
   returnIfZero.Encode();
 
+  // int returnIfNotZero(int x) { if (x != 0) { return 5; } else { return 3; } }
+  MethodBuilder returnIfNotZero{cbuilder.CreateMethod(
+      "returnIfNotZero", Prototype{TypeDescriptor::Int(), TypeDescriptor::Int()})};
+  {
+    Value resultIfNotZero{returnIfNotZero.MakeRegister()};
+    Value else_target{returnIfNotZero.MakeLabel()};
+    returnIfNotZero.AddInstruction(Instruction::OpWithArgs(
+        Instruction::Op::kBranchNEqz, /*dest=*/{}, Value::Parameter(0), else_target));
+    // else branch
+    returnIfNotZero.BuildConst4(resultIfNotZero, 3);
+    returnIfNotZero.AddInstruction(
+        Instruction::OpWithArgs(Instruction::Op::kReturn, /*dest=*/{}, resultIfNotZero));
+    // then branch
+    returnIfNotZero.AddInstruction(
+        Instruction::OpWithArgs(Instruction::Op::kBindLabel, /*dest=*/{}, else_target));
+    returnIfNotZero.BuildConst4(resultIfNotZero, 5);
+    returnIfNotZero.AddInstruction(
+        Instruction::OpWithArgs(Instruction::Op::kReturn, /*dest=*/{}, resultIfNotZero));
+  }
+  returnIfNotZero.Encode();
+
   // Make sure backwards branches work too.
   //
   // Pseudo code for test:
@@ -215,6 +236,38 @@ void GenerateSimpleTestCases(const string& outdir) {
         Instruction::OpWithArgs(Instruction::Op::kReturnObject, /*dest=*/{}, resultIfZero));
     method.Encode();
   }(returnStringIfZeroBA);
+
+  // Make sure we can invoke static methods that return an object
+  // String invokeStaticReturnObject(int n, int radix) { return java.lang.Integer.toString(n,
+  // radix); }
+  MethodBuilder invokeStaticReturnObject{
+      cbuilder.CreateMethod("invokeStaticReturnObject",
+                            Prototype{string_type, TypeDescriptor::Int(), TypeDescriptor::Int()})};
+  [&](MethodBuilder& method) {
+    Value result{method.MakeRegister()};
+    MethodDeclData to_string{dex_file.GetOrDeclareMethod(
+        TypeDescriptor::FromClassname("java.lang.Integer"),
+        "toString",
+        Prototype{string_type, TypeDescriptor::Int(), TypeDescriptor::Int()})};
+    method.AddInstruction(Instruction::InvokeStaticObject(
+        to_string.id, result, Value::Parameter(0), Value::Parameter(1)));
+    method.BuildReturn(result, /*is_object=*/true);
+    method.Encode();
+  }(invokeStaticReturnObject);
+
+  // Make sure we can invoke virtual methods that return an object
+  // String invokeVirtualReturnObject(String s, int n) { return s.substring(n); }
+  MethodBuilder invokeVirtualReturnObject{cbuilder.CreateMethod(
+      "invokeVirtualReturnObject", Prototype{string_type, string_type, TypeDescriptor::Int()})};
+  [&](MethodBuilder& method) {
+    Value result{method.MakeRegister()};
+    MethodDeclData substring{dex_file.GetOrDeclareMethod(
+        string_type, "substring", Prototype{string_type, TypeDescriptor::Int()})};
+    method.AddInstruction(Instruction::InvokeVirtualObject(
+        substring.id, result, Value::Parameter(0), Value::Parameter(1)));
+    method.BuildReturn(result, /*is_object=*/true);
+    method.Encode();
+  }(invokeVirtualReturnObject);
 
   slicer::MemView image{dex_file.CreateImage()};
   std::ofstream out_file(outdir + "/simple.dex");

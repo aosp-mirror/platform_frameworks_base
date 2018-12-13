@@ -84,6 +84,15 @@ public class DexBuilderTest {
   }
 
   @Test
+  public void returnIfNotZero() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("returnIfNotZero", int.class);
+    Assert.assertEquals(3, method.invoke(null, 0));
+    Assert.assertEquals(5, method.invoke(null, 17));
+  }
+
+  @Test
   public void backwardsBranch() throws Exception {
     ClassLoader loader = loadDexFile("simple.dex");
     Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
@@ -123,5 +132,23 @@ public class DexBuilderTest {
     Method method = clazz.getMethod("returnStringIfZeroBA", int.class);
     Assert.assertEquals("b", method.invoke(null, 0));
     Assert.assertEquals("a", method.invoke(null, 1));
+  }
+
+  @Test
+  public void invokeStaticReturnObject() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("invokeStaticReturnObject", int.class, int.class);
+    Assert.assertEquals("10", method.invoke(null, 10, 10));
+    Assert.assertEquals("a", method.invoke(null, 10, 16));
+    Assert.assertEquals("5", method.invoke(null, 5, 16));
+  }
+
+  @Test
+  public void invokeVirtualReturnObject() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("invokeVirtualReturnObject", String.class, int.class);
+    Assert.assertEquals("bc", method.invoke(null, "abc", 1));
   }
 }
