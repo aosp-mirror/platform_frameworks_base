@@ -204,6 +204,10 @@ package android {
     field public static final int config_sendPackageName = 17891328; // 0x1110000
   }
 
+  public static final class R.color {
+    field public static final int system_notification_accent_color = 17170460; // 0x106001c
+  }
+
   public static final class R.dimen {
     field public static final int config_restrictedIconSize = 17104903; // 0x1050007
   }
