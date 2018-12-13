@@ -52,6 +52,7 @@ public class UninstallUninstalling extends Activity implements
     static final String EXTRA_APP_LABEL = "com.android.packageinstaller.extra.APP_LABEL";
     static final String EXTRA_CLEAR_CONTRIBUTED_FILES =
             "com.android.packageinstaller.extra.CLEAR_CONTRIBUTED_FILES";
+    static final String EXTRA_KEEP_DATA = "com.android.packageinstaller.extra.KEEP_DATA";
 
     private int mUninstallId;
     private ApplicationInfo mAppInfo;
@@ -76,6 +77,7 @@ public class UninstallUninstalling extends Activity implements
                         false);
                 boolean clearContributedFiles = getIntent().getBooleanExtra(
                         EXTRA_CLEAR_CONTRIBUTED_FILES, false);
+                boolean keepData = getIntent().getBooleanExtra(EXTRA_KEEP_DATA, false);
                 UserHandle user = getIntent().getParcelableExtra(Intent.EXTRA_USER);
 
                 // Show dialog, which is the whole UI
@@ -101,6 +103,7 @@ public class UninstallUninstalling extends Activity implements
 
                 int flags = allUsers ? PackageManager.DELETE_ALL_USERS : 0;
                 flags |= clearContributedFiles ? PackageManager.DELETE_CONTRIBUTED_MEDIA : 0;
+                flags |= keepData ? PackageManager.DELETE_KEEP_DATA : 0;
 
                 try {
                     ActivityThread.getPackageManager().getPackageInstaller().uninstall(
