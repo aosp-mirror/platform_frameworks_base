@@ -861,6 +861,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                         Slog.d(TAG, "Removing jobs for uid: " + uidRemoved);
                     }
                     cancelJobsForPackageAndUid(pkgName, uidRemoved, "app uninstalled");
+                    synchronized (mLock) {
+                        for (int c = 0; c < mControllers.size(); ++c) {
+                            mControllers.get(c).onAppRemovedLocked(pkgName, pkgUid);
+                        }
+                    }
                 }
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
@@ -868,6 +873,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.d(TAG, "Removing jobs for user: " + userId);
                 }
                 cancelJobsForUser(userId);
+                synchronized (mLock) {
+                    for (int c = 0; c < mControllers.size(); ++c) {
+                        mControllers.get(c).onUserRemovedLocked(userId);
+                    }
+                }
             } else if (Intent.ACTION_QUERY_PACKAGE_RESTART.equals(action)) {
                 // Has this package scheduled any jobs, such that we will take action
                 // if it were to be force-stopped?

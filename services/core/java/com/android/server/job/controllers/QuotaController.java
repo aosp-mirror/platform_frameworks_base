@@ -98,6 +98,19 @@ public final class QuotaController extends StateController {
             data.put(packageName, obj);
         }
 
+        /** Removes all the data for the user, if there was any. */
+        public void delete(int userId) {
+            mData.delete(userId);
+        }
+
+        /** Removes the data for the user and package, if there was any. */
+        public void delete(int userId, @NonNull String packageName) {
+            ArrayMap<String, T> data = mData.get(userId);
+            if (data != null) {
+                data.remove(packageName);
+            }
+        }
+
         @Nullable
         public T get(int userId, @NonNull String packageName) {
             ArrayMap<String, T> data = mData.get(userId);
@@ -369,6 +382,38 @@ public final class QuotaController extends StateController {
                 }
             });
         }
+    }
+
+    @Override
+    public void onAppRemovedLocked(String packageName, int uid) {
+        if (packageName == null) {
+            Slog.wtf(TAG, "Told app removed but given null package name.");
+            return;
+        }
+        final int userId = UserHandle.getUserId(uid);
+        mTrackedJobs.delete(userId, packageName);
+        Timer timer = mPkgTimers.get(userId, packageName);
+        if (timer != null) {
+            if (timer.isActive()) {
+                Slog.wtf(TAG, "onAppRemovedLocked called before Timer turned off.");
+                timer.dropEverything();
+            }
+            mPkgTimers.delete(userId, packageName);
+        }
+        mTimingSessions.delete(userId, packageName);
+        QcAlarmListener alarmListener = mInQuotaAlarmListeners.get(userId, packageName);
+        if (alarmListener != null) {
+            mAlarmManager.cancel(alarmListener);
+            mInQuotaAlarmListeners.delete(userId, packageName);
+        }
+    }
+
+    @Override
+    public void onUserRemovedLocked(int userId) {
+        mTrackedJobs.delete(userId);
+        mPkgTimers.delete(userId);
+        mTimingSessions.delete(userId);
+        mInQuotaAlarmListeners.delete(userId);
     }
 
     /**
@@ -880,6 +925,15 @@ public final class QuotaController extends StateController {
                     cancelCutoff();
                 }
             }
+        }
+
+        /**
+         * Stops tracking all jobs and cancels any pending alarms. This should only be called if
+         * the Timer is not going to be used anymore.
+         */
+        void dropEverything() {
+            mRunningBgJobs.clear();
+            cancelCutoff();
         }
 
         private void emitSessionLocked(long nowElapsed) {

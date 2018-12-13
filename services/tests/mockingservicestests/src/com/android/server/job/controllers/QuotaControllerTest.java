@@ -270,6 +270,60 @@ public class QuotaControllerTest {
     }
 
     @Test
+    public void testOnAppRemovedLocked() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.saveTimingSession(0, "com.android.test.remove",
+                createTimingSession(now - (6 * HOUR_IN_MILLIS), 10 * MINUTE_IN_MILLIS, 5));
+        mQuotaController.saveTimingSession(0, "com.android.test.remove",
+                createTimingSession(
+                        now - (2 * HOUR_IN_MILLIS + MINUTE_IN_MILLIS), 6 * MINUTE_IN_MILLIS, 5));
+        mQuotaController.saveTimingSession(0, "com.android.test.remove",
+                createTimingSession(now - (HOUR_IN_MILLIS), MINUTE_IN_MILLIS, 1));
+        // Test that another app isn't affected.
+        TimingSession one = createTimingSession(
+                now - 10 * MINUTE_IN_MILLIS, 9 * MINUTE_IN_MILLIS, 3);
+        TimingSession two = createTimingSession(
+                now - (70 * MINUTE_IN_MILLIS), 9 * MINUTE_IN_MILLIS, 1);
+        List<TimingSession> expected = new ArrayList<>();
+        // Added in correct (chronological) order.
+        expected.add(two);
+        expected.add(one);
+        mQuotaController.saveTimingSession(0, "com.android.test.stay", two);
+        mQuotaController.saveTimingSession(0, "com.android.test.stay", one);
+
+        mQuotaController.onAppRemovedLocked("com.android.test.remove", 10001);
+        assertNull(mQuotaController.getTimingSessions(0, "com.android.test.remove"));
+        assertEquals(expected, mQuotaController.getTimingSessions(0, "com.android.test.stay"));
+    }
+
+    @Test
+    public void testOnUserRemovedLocked() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(now - (6 * HOUR_IN_MILLIS), 10 * MINUTE_IN_MILLIS, 5));
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(
+                        now - (2 * HOUR_IN_MILLIS + MINUTE_IN_MILLIS), 6 * MINUTE_IN_MILLIS, 5));
+        mQuotaController.saveTimingSession(0, "com.android.test",
+                createTimingSession(now - (HOUR_IN_MILLIS), MINUTE_IN_MILLIS, 1));
+        // Test that another user isn't affected.
+        TimingSession one = createTimingSession(
+                now - 10 * MINUTE_IN_MILLIS, 9 * MINUTE_IN_MILLIS, 3);
+        TimingSession two = createTimingSession(
+                now - (70 * MINUTE_IN_MILLIS), 9 * MINUTE_IN_MILLIS, 1);
+        List<TimingSession> expected = new ArrayList<>();
+        // Added in correct (chronological) order.
+        expected.add(two);
+        expected.add(one);
+        mQuotaController.saveTimingSession(10, "com.android.test", two);
+        mQuotaController.saveTimingSession(10, "com.android.test", one);
+
+        mQuotaController.onUserRemovedLocked(0);
+        assertNull(mQuotaController.getTimingSessions(0, "com.android.test"));
+        assertEquals(expected, mQuotaController.getTimingSessions(10, "com.android.test"));
+    }
+
+    @Test
     public void testGetTrailingExecutionTimeLocked_NoTimer() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
         // Added in chronological order.

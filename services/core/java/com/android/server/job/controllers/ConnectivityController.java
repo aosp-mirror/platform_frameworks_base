@@ -296,6 +296,12 @@ public final class ConnectivityController extends StateController implements
         mRequestedWhitelistJobs.remove(uid);
     }
 
+    @GuardedBy("mLock")
+    @Override
+    public void onAppRemovedLocked(String pkgName, int uid) {
+        mTrackedJobs.delete(uid);
+    }
+
     /**
      * Test to see if running the given job on the given network is insane.
      * <p>
