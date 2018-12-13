@@ -55,10 +55,13 @@ import java.util.Set;
  * A class to centralize all the network and link properties information
  * pertaining to the current and any potential upstream network.
  *
- * Calling #start() registers two callbacks: one to track the system default
- * network and a second to observe all networks.  The latter is necessary
- * while the expression of preferred upstreams remains a list of legacy
- * connectivity types.  In future, this can be revisited.
+ * The owner of UNM gets it to register network callbacks by calling the
+ * following methods :
+ * Calling #startTrackDefaultNetwork() to track the system default network.
+ * Calling #startObserveAllNetworks() to observe all networks. Listening all
+ * networks is necessary while the expression of preferred upstreams remains
+ * a list of legacy connectivity types.  In future, this can be revisited.
+ * Calling #registerMobileNetworkRequest() to bring up mobile DUN/HIPRI network.
  *
  * The methods and data members of this class are only to be accessed and
  * modified from the tethering master state machine thread. Any other
@@ -119,32 +122,30 @@ public class UpstreamNetworkMonitor {
         mCM = cm;
     }
 
-    public void start(NetworkRequest defaultNetworkRequest) {
-        stop();
-
-        final NetworkRequest listenAllRequest = new NetworkRequest.Builder()
-                .clearCapabilities().build();
-        mListenAllCallback = new UpstreamNetworkCallback(CALLBACK_LISTEN_ALL);
-        cm().registerNetworkCallback(listenAllRequest, mListenAllCallback, mHandler);
-
-        if (defaultNetworkRequest != null) {
-            // This is not really a "request", just a way of tracking the system default network.
-            // It's guaranteed not to actually bring up any networks because it's the same request
-            // as the ConnectivityService default request, and thus shares fate with it. We can't
-            // use registerDefaultNetworkCallback because it will not track the system default
-            // network if there is a VPN that applies to our UID.
+    public void startTrackDefaultNetwork(NetworkRequest defaultNetworkRequest) {
+        // This is not really a "request", just a way of tracking the system default network.
+        // It's guaranteed not to actually bring up any networks because it's the same request
+        // as the ConnectivityService default request, and thus shares fate with it. We can't
+        // use registerDefaultNetworkCallback because it will not track the system default
+        // network if there is a VPN that applies to our UID.
+        if (mDefaultNetworkCallback == null) {
             final NetworkRequest trackDefaultRequest = new NetworkRequest(defaultNetworkRequest);
             mDefaultNetworkCallback = new UpstreamNetworkCallback(CALLBACK_DEFAULT_INTERNET);
             cm().requestNetwork(trackDefaultRequest, mDefaultNetworkCallback, mHandler);
         }
     }
 
+    public void startObserveAllNetworks() {
+        stop();
+
+        final NetworkRequest listenAllRequest = new NetworkRequest.Builder()
+                .clearCapabilities().build();
+        mListenAllCallback = new UpstreamNetworkCallback(CALLBACK_LISTEN_ALL);
+        cm().registerNetworkCallback(listenAllRequest, mListenAllCallback, mHandler);
+    }
+
     public void stop() {
         releaseMobileNetworkRequest();
-
-        releaseCallback(mDefaultNetworkCallback);
-        mDefaultNetworkCallback = null;
-        mDefaultInternetNetwork = null;
 
         releaseCallback(mListenAllCallback);
         mListenAllCallback = null;
@@ -264,9 +265,7 @@ public class UpstreamNetworkMonitor {
         mNetworkMap.put(network, new NetworkState(null, null, null, network, null, null));
     }
 
-    private void handleNetCap(int callbackType, Network network, NetworkCapabilities newNc) {
-        if (callbackType == CALLBACK_DEFAULT_INTERNET) mDefaultInternetNetwork = network;
-
+    private void handleNetCap(Network network, NetworkCapabilities newNc) {
         final NetworkState prev = mNetworkMap.get(network);
         if (prev == null || newNc.equals(prev.networkCapabilities)) {
             // Ignore notifications about networks for which we have not yet
@@ -315,31 +314,25 @@ public class UpstreamNetworkMonitor {
         notifyTarget(EVENT_ON_LINKPROPERTIES, network);
     }
 
-    private void handleSuspended(int callbackType, Network network) {
-        if (callbackType != CALLBACK_LISTEN_ALL) return;
+    private void handleSuspended(Network network) {
         if (!network.equals(mTetheringUpstreamNetwork)) return;
         mLog.log("SUSPENDED current upstream: " + network);
     }
 
-    private void handleResumed(int callbackType, Network network) {
-        if (callbackType != CALLBACK_LISTEN_ALL) return;
+    private void handleResumed(Network network) {
         if (!network.equals(mTetheringUpstreamNetwork)) return;
         mLog.log("RESUMED current upstream: " + network);
     }
 
-    private void handleLost(int callbackType, Network network) {
-        if (network.equals(mDefaultInternetNetwork)) {
-            mDefaultInternetNetwork = null;
-            // There are few TODOs within ConnectivityService's rematching code
-            // pertaining to spurious onLost() notifications.
-            //
-            // TODO: simplify this, probably if favor of code that:
-            //     - selects a new upstream if mTetheringUpstreamNetwork has
-            //       been lost (by any callback)
-            //     - deletes the entry from the map only when the LISTEN_ALL
-            //       callback gets  notified.
-            if (callbackType == CALLBACK_DEFAULT_INTERNET) return;
-        }
+    private void handleLost(Network network) {
+        // There are few TODOs within ConnectivityService's rematching code
+        // pertaining to spurious onLost() notifications.
+        //
+        // TODO: simplify this, probably if favor of code that:
+        //     - selects a new upstream if mTetheringUpstreamNetwork has
+        //       been lost (by any callback)
+        //     - deletes the entry from the map only when the LISTEN_ALL
+        //       callback gets notified.
 
         if (!mNetworkMap.containsKey(network)) {
             // Ignore loss of networks about which we had not previously
@@ -393,11 +386,17 @@ public class UpstreamNetworkMonitor {
 
         @Override
         public void onCapabilitiesChanged(Network network, NetworkCapabilities newNc) {
-            handleNetCap(mCallbackType, network, newNc);
+            if (mCallbackType == CALLBACK_DEFAULT_INTERNET) {
+                mDefaultInternetNetwork = network;
+                return;
+            }
+            handleNetCap(network, newNc);
         }
 
         @Override
         public void onLinkPropertiesChanged(Network network, LinkProperties newLp) {
+            if (mCallbackType == CALLBACK_DEFAULT_INTERNET) return;
+
             handleLinkProp(network, newLp);
             // Any non-LISTEN_ALL callback will necessarily concern a network that will
             // also match the LISTEN_ALL callback by construction of the LISTEN_ALL callback.
@@ -409,17 +408,25 @@ public class UpstreamNetworkMonitor {
 
         @Override
         public void onNetworkSuspended(Network network) {
-            handleSuspended(mCallbackType, network);
+            if (mCallbackType == CALLBACK_LISTEN_ALL) {
+                handleSuspended(network);
+            }
         }
 
         @Override
         public void onNetworkResumed(Network network) {
-            handleResumed(mCallbackType, network);
+            if (mCallbackType == CALLBACK_LISTEN_ALL) {
+                handleResumed(network);
+            }
         }
 
         @Override
         public void onLost(Network network) {
-            handleLost(mCallbackType, network);
+            if (mCallbackType == CALLBACK_DEFAULT_INTERNET) {
+                mDefaultInternetNetwork = null;
+                return;
+            }
+            handleLost(network);
             // Any non-LISTEN_ALL callback will necessarily concern a network that will
             // also match the LISTEN_ALL callback by construction of the LISTEN_ALL callback.
             // So it's not useful to do this work for non-LISTEN_ALL callbacks.

@@ -1968,6 +1968,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     void systemReady() {
         mProxyTracker.loadGlobalProxy();
         registerNetdEventCallback();
+        mTethering.systemReady();
 
         synchronized (this) {
             mSystemReady = true;
