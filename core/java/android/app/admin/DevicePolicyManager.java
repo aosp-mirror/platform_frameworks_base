@@ -1637,7 +1637,7 @@ public class DevicePolicyManager {
      * Grants access to selection of KeyChain certificates on behalf of requesting apps.
      * Once granted the app will start receiving
      * DelegatedAdminReceiver.onChoosePrivateKeyAlias. The caller (PO/DO) will
-     * no longer receive {@link DeviceAdminReceiver#onChoosePrivateKeyAlias()}.
+     * no longer receive {@link DeviceAdminReceiver#onChoosePrivateKeyAlias}.
      * There can be at most one app that has this delegation.
      * If another app already had delegated certificate selection access,
      * it will lose the delegation when a new app is delegated.
