@@ -641,15 +641,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     public void onUiModeChanged() {
         mBgColor = mContext.getColor(R.color.notification_shade_background_color);
         updateBackgroundDimming();
-
-        // Re-inflate all notification views
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child instanceof ActivatableNotificationView) {
-                ((ActivatableNotificationView) child).onUiModeChanged();
-            }
-        }
+        mShelf.onUiModeChanged();
     }
 
     @ShadeViewRefactor(RefactorComponent.DECORATOR)

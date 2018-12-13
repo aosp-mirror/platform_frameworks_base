@@ -916,6 +916,10 @@ public class NotificationShelf extends ActivatableNotificationView implements
         updateRelativeOffset();
     }
 
+    public void onUiModeChanged() {
+        updateBackgroundColors();
+    }
+
     private class ShelfState extends ExpandableViewState {
         private float openedAmount;
         private boolean hasItemsInStableShelf;
