@@ -27,12 +27,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -78,7 +72,6 @@ public class DexManagerTests {
     @Mock Installer mInstaller;
     @Mock IPackageManager mPM;
     private final Object mInstallLock = new Object();
-    @Mock DexManager.Listener mListener;
 
     private DexManager mDexManager;
 
@@ -114,9 +107,8 @@ public class DexManagerTests {
         mBarUser0DelegateLastClassLoader = new TestData(bar, isa, mUser0,
                 DELEGATE_LAST_CLASS_LOADER_NAME);
 
-        mDexManager = new DexManager(
-            /*Context*/ null, mPM, /*PackageDexOptimizer*/ null, mInstaller, mInstallLock,
-            mListener);
+        mDexManager = new DexManager(/*Context*/ null, mPM, /*PackageDexOptimizer*/ null,
+                mInstaller, mInstallLock);
 
         // Foo and Bar are available to user0.
         // Only Bar is available to user1;
@@ -415,9 +407,10 @@ public class DexManagerTests {
         String frameworkDex = "/system/framework/com.android.location.provider.jar";
         // Load a dex file from framework.
         notifyDexLoad(mFooUser0, Arrays.asList(frameworkDex), mUser0);
-        // The dex file should not be recognized as a package.
-        assertFalse(mDexManager.hasInfoOnPackage(frameworkDex));
-        assertNull(mDexManager.getPackageDynamicCodeInfo(frameworkDex));
+        // The dex file should not be recognized as owned by the package.
+        assertFalse(mDexManager.hasInfoOnPackage(mFooUser0.getPackageName()));
+
+        assertNull(getPackageDynamicCodeInfo(mFooUser0));
     }
 
     @Test
@@ -510,21 +503,6 @@ public class DexManagerTests {
         assertHasDclInfo(mBarUser0, mBarUser0, secondaries);
     }
 
-    @Test
-    public void testReconcileSecondaryDexFiles_invokesListener() throws Exception {
-        List<String> fooSecondaries = mFooUser0.getSecondaryDexPathsFromProtectedDirs();
-        notifyDexLoad(mFooUser0, fooSecondaries, mUser0);
-
-        when(mPM.getPackageInfo(mFooUser0.getPackageName(), 0, 0))
-                .thenReturn(mFooUser0.mPackageInfo);
-
-        mDexManager.reconcileSecondaryDexFiles(mFooUser0.getPackageName());
-
-        verify(mListener, times(fooSecondaries.size()))
-                .onReconcileSecondaryDexFile(any(ApplicationInfo.class),
-                        any(DexUseInfo.class), anyString(), anyInt());
-    }
-
     private void assertSecondaryUse(TestData testData, PackageUseInfo pui,
             List<String> secondaries, boolean isUsedByOtherApps, int ownerUserId,
             String[] expectedContexts) {
@@ -585,6 +563,10 @@ public class DexManagerTests {
         return pui;
     }
 
+    private PackageDynamicCode getPackageDynamicCodeInfo(TestData testData) {
+        return mDexManager.getDexLogger().getPackageDynamicCodeInfo(testData.getPackageName());
+    }
+
     private void assertNoUseInfo(TestData testData) {
         assertFalse(mDexManager.hasInfoOnPackage(testData.getPackageName()));
     }
@@ -600,11 +582,11 @@ public class DexManagerTests {
     }
 
     private void assertNoDclInfo(TestData testData) {
-        assertNull(mDexManager.getPackageDynamicCodeInfo(testData.getPackageName()));
+        assertNull(getPackageDynamicCodeInfo(testData));
     }
 
     private void assertNoDclInfo(TestData testData, int userId) {
-        PackageDynamicCode info = mDexManager.getPackageDynamicCodeInfo(testData.getPackageName());
+        PackageDynamicCode info = getPackageDynamicCodeInfo(testData);
         if (info == null) {
             return;
         }
@@ -615,7 +597,7 @@ public class DexManagerTests {
     }
 
     private void assertHasDclInfo(TestData owner, TestData loader, List<String> paths) {
-        PackageDynamicCode info = mDexManager.getPackageDynamicCodeInfo(owner.getPackageName());
+        PackageDynamicCode info = getPackageDynamicCodeInfo(owner);
         assertNotNull("No DCL data for owner " + owner.getPackageName(), info);
         for (String path : paths) {
             DynamicCodeFile fileInfo = info.mFileUsageMap.get(path);

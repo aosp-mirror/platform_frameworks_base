@@ -109,6 +109,7 @@ import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.SchedulingPolicyService;
 import com.android.server.pm.BackgroundDexOptService;
 import com.android.server.pm.CrossProfileAppsService;
+import com.android.server.pm.DynamicCodeLoggingService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.LauncherAppsService;
 import com.android.server.pm.OtaDexoptService;
@@ -1665,6 +1666,18 @@ public final class SystemServer {
                 reportWtf("starting StartBackgroundDexOptService", e);
             }
             traceEnd();
+
+            if (!isWatch) {
+                // We don't run this on watches as there are no plans to use the data logged
+                // on watch devices.
+                traceBeginAndSlog("StartDynamicCodeLoggingService");
+                try {
+                    DynamicCodeLoggingService.schedule(context);
+                } catch (Throwable e) {
+                    reportWtf("starting DynamicCodeLoggingService", e);
+                }
+                traceEnd();
+            }
 
             if (!isWatch) {
                 traceBeginAndSlog("StartPruneInstantAppsJobService");
