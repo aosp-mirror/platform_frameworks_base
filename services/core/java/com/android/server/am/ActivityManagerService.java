@@ -658,6 +658,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     ArraySet<String> mBackgroundLaunchBroadcasts;
 
     /**
+     * When an app has restrictions on the other apps that can have associations with it,
+     * it appears here with a set of the allowed apps.
+     */
+    ArrayMap<String, ArraySet<String>> mAllowedAssociations;
+
+    /**
      * All of the processes we currently have running organized by pid.
      * The keys are the pid running the application.
      *
@@ -2394,6 +2400,34 @@ public class ActivityManagerService extends IActivityManager.Stub
             mBackgroundLaunchBroadcasts = SystemConfig.getInstance().getAllowImplicitBroadcasts();
         }
         return mBackgroundLaunchBroadcasts;
+    }
+
+    boolean validateAssociationAllowedLocked(String pkg1, int uid1, String pkg2, int uid2) {
+        if (mAllowedAssociations == null) {
+            mAllowedAssociations = SystemConfig.getInstance().getAllowedAssociations();
+        }
+        // Interactions with the system uid are always allowed, since that is the core system
+        // that everyone needs to be able to interact with.
+        if (UserHandle.getAppId(uid1) == SYSTEM_UID) {
+            return true;
+        }
+        if (UserHandle.getAppId(uid2) == SYSTEM_UID) {
+            return true;
+        }
+        // We won't allow this association if either pkg1 or pkg2 has a limit on the
+        // associations that are allowed with it, and the other package is not explicitly
+        // specified as one of those associations.
+        ArraySet<String> pkgs = mAllowedAssociations.get(pkg1);
+        if (pkgs != null) {
+            if (!pkgs.contains(pkg2)) {
+                return false;
+            }
+        }
+        pkgs = mAllowedAssociations.get(pkg2);
+        if (pkgs != null) {
+            return pkgs.contains(pkg1);
+        }
+        return true;
     }
 
     @Override
@@ -6264,6 +6298,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         return state != 'Z' && state != 'X' && state != 'x' && state != 'K';
     }
 
+    private String checkContentProviderAssociation(ProcessRecord callingApp, int callingUid,
+            ProviderInfo cpi) {
+        if (callingApp == null) {
+            return validateAssociationAllowedLocked(cpi.packageName, cpi.applicationInfo.uid,
+                    null, callingUid) ? null : "<null>";
+        }
+        for (int i = callingApp.pkgList.size() - 1; i >= 0; i--) {
+            if (!validateAssociationAllowedLocked(callingApp.pkgList.keyAt(i), callingApp.uid,
+                    cpi.packageName, cpi.applicationInfo.uid)) {
+                return cpi.packageName;
+            }
+        }
+        return null;
+    }
+
     private ContentProviderHolder getContentProviderImpl(IApplicationThread caller,
             String name, IBinder token, int callingUid, String callingTag, boolean stable,
             int userId) {
@@ -6335,6 +6384,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 String msg;
 
                 if (r != null && cpr.canRunHere(r)) {
+                    if ((msg = checkContentProviderAssociation(r, callingUid, cpi)) != null) {
+                        throw new SecurityException("Content provider lookup "
+                                + cpr.name.flattenToShortString()
+                                + " failed: association not allowed with package " + msg);
+                    }
                     checkTime(startTime,
                             "getContentProviderImpl: before checkContentProviderPermission");
                     if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, checkCrossUser))
@@ -6364,6 +6418,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } catch (RemoteException e) {
                 }
 
+                if ((msg = checkContentProviderAssociation(r, callingUid, cpi)) != null) {
+                    throw new SecurityException("Content provider lookup "
+                            + cpr.name.flattenToShortString()
+                            + " failed: association not allowed with package " + msg);
+                }
                 checkTime(startTime,
                         "getContentProviderImpl: before checkContentProviderPermission");
                 if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, checkCrossUser))
@@ -6461,6 +6520,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 checkTime(startTime, "getContentProviderImpl: got app info for user");
 
                 String msg;
+                if ((msg = checkContentProviderAssociation(r, callingUid, cpi)) != null) {
+                    throw new SecurityException("Content provider lookup "
+                            + cpr.name.flattenToShortString()
+                            + " failed: association not allowed with package " + msg);
+                }
                 checkTime(startTime, "getContentProviderImpl: before checkContentProviderPermission");
                 if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, !singleton))
                         != null) {
@@ -9207,6 +9271,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
 
             }
+            dumpAllowedAssociationsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+
+            }
             mPendingIntentController.dumpPendingIntents(pw, dumpAll, dumpPackage);
             pw.println();
             if (dumpAll) {
@@ -9473,6 +9543,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     System.runFinalization();
                     System.gc();
                     pw.println(BinderInternal.nGetBinderProxyCount(Integer.parseInt(uid)));
+                }
+            } else if ("allowed-associations".equals(cmd)) {
+                if (opti < args.length) {
+                    dumpPackage = args[opti];
+                    opti++;
+                }
+                synchronized (this) {
+                    dumpAllowedAssociationsLocked(fd, pw, args, opti, true, dumpPackage);
                 }
             } else if ("broadcasts".equals(cmd) || "b".equals(cmd)) {
                 if (opti < args.length) {
@@ -10822,6 +10900,44 @@ public class ActivityManagerService extends IActivityManager.Stub
         mHandler.getLooper().writeToProto(proto,
             ActivityManagerServiceDumpBroadcastsProto.MainHandler.LOOPER);
         proto.end(handlerToken);
+    }
+
+    void dumpAllowedAssociationsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll, String dumpPackage) {
+        boolean needSep = false;
+        boolean printedAnything = false;
+
+        pw.println("ACTIVITY MANAGER ALLOWED ASSOCIATION STATE (dumpsys activity allowed-associations)");
+        boolean printed = false;
+        if (mAllowedAssociations != null) {
+            for (int i = 0; i < mAllowedAssociations.size(); i++) {
+                final String pkg = mAllowedAssociations.keyAt(i);
+                final ArraySet<String> asc = mAllowedAssociations.valueAt(i);
+                boolean printedHeader = false;
+                for (int j = 0; j < asc.size(); j++) {
+                    if (dumpPackage == null || pkg.equals(dumpPackage)
+                            || asc.valueAt(j).equals(dumpPackage)) {
+                        if (!printed) {
+                            pw.println("  Allowed associations (by restricted package):");
+                            printed = true;
+                            needSep = true;
+                            printedAnything = true;
+                        }
+                        if (!printedHeader) {
+                            pw.print("  * ");
+                            pw.print(pkg);
+                            pw.println(":");
+                            printedHeader = true;
+                        }
+                        pw.print("      Allow: ");
+                        pw.println(asc.valueAt(j));
+                    }
+                }
+            }
+        }
+        if (!printed) {
+            pw.println("  (No association restrictions)");
+        }
     }
 
     void dumpBroadcastsLocked(FileDescriptor fd, PrintWriter pw, String[] args,

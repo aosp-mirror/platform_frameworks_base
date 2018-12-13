@@ -2852,6 +2852,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    prov[iders] [COMP_SPEC ...]: content provider state");
             pw.println("    provider [COMP_SPEC]: provider client-side state");
             pw.println("    s[ervices] [COMP_SPEC ...]: service state");
+            pw.println("    allowed-associations: current package association restrictions");
             pw.println("    as[sociations]: tracked app associations");
             pw.println("    lmk: stats on low memory killer");
             pw.println("    lru: raw LRU process list");
