@@ -488,6 +488,9 @@ message WifiLog {
 
   // Counts the occurrences of each Wifi usability score provided by external app
   repeated WifiUsabilityScoreCount wifi_usability_score_count = 127;
+
+  // List of PNO scan stats, one element for each mobility state
+  repeated DeviceMobilityStatePnoScanStats mobility_state_pno_stats_list = 128;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -1816,4 +1819,33 @@ message WifiUsabilityStats {
 
   // The list of timestamped wifi usability stats
   repeated WifiUsabilityStatsEntry stats = 2;
+}
+
+message DeviceMobilityStatePnoScanStats {
+  // see WifiManager.DEVICE_MOBILITY_STATE_* constants
+  enum DeviceMobilityState {
+    // Unknown mobility
+    UNKNOWN = 0;
+
+    // High movement
+    HIGH_MVMT = 1;
+
+    // Low movement
+    LOW_MVMT = 2;
+
+    // Stationary
+    STATIONARY = 3;
+  }
+
+  // The device mobility state
+  optional DeviceMobilityState device_mobility_state = 1;
+
+  // The number of times that this state was entered
+  optional int32 num_times_entered_state = 2;
+
+  // The total duration elapsed while in this mobility state, in ms
+  optional int64 total_duration_ms = 3;
+
+  // the total duration elapsed while in this mobility state with PNO scans running, in ms
+  optional int64 pno_duration_ms = 4;
 }
