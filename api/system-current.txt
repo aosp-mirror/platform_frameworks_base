@@ -205,6 +205,7 @@ package android {
   }
 
   public static final class R.dimen {
+    field public static final int config_mediaMetadataBitmapMaxSize = 17104904; // 0x1050008
     field public static final int config_restrictedIconSize = 17104903; // 0x1050007
   }
 
