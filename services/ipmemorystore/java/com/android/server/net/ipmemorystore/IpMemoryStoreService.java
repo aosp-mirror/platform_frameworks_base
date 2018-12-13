@@ -31,6 +31,9 @@ import android.net.ipmemorystore.IOnStatusListener;
 import android.net.ipmemorystore.NetworkAttributesParcelable;
 import android.util.Log;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * Implementation for the IP memory store.
  * This component offers specialized services for network components to store and retrieve
@@ -41,11 +44,14 @@ import android.util.Log;
  */
 public class IpMemoryStoreService extends IIpMemoryStore.Stub {
     private static final String TAG = IpMemoryStoreService.class.getSimpleName();
+    private static final int MAX_CONCURRENT_THREADS = 4;
 
     @NonNull
     final Context mContext;
     @Nullable
     final SQLiteDatabase mDb;
+    @NonNull
+    final ExecutorService mExecutor;
 
     /**
      * Construct an IpMemoryStoreService object.
@@ -75,6 +81,37 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
             db = null;
         }
         mDb = db;
+        // The work-stealing thread pool executor will spawn threads as needed up to
+        // the max only when there is no free thread available. This generally behaves
+        // exactly like one would expect it intuitively :
+        // - When work arrives, it will spawn a new thread iff there are no available threads
+        // - When there is no work to do it will shutdown threads after a while (the while
+        //   being equal to 2 seconds (not configurable) when max threads are spun up and
+        //   twice as much for every one less thread)
+        // - When all threads are busy the work is enqueued and waits for any worker
+        //   to become available.
+        // Because the stealing pool is made for very heavily parallel execution of
+        // small tasks that spawn others, it creates a queue per thread that in this
+        // case is overhead. However, the three behaviors above make it a superior
+        // choice to cached or fixedThreadPoolExecutor, neither of which can actually
+        // enqueue a task waiting for a thread to be free. This can probably be solved
+        // with judicious subclassing of ThreadPoolExecutor, but that's a lot of dangerous
+        // complexity for little benefit in this case.
+        mExecutor = Executors.newWorkStealingPool(MAX_CONCURRENT_THREADS);
+    }
+
+    /**
+     * Shutdown the memory store service, cancelling running tasks and dropping queued tasks.
+     *
+     * This is provided to give a way to clean up, and is meant to be available in case of an
+     * emergency shutdown.
+     */
+    public void shutdown() {
+        // By contrast with ExecutorService#shutdown, ExecutorService#shutdownNow tries
+        // to cancel the existing tasks, and does not wait for completion. It does not
+        // guarantee the threads can be terminated in any given amount of time.
+        mExecutor.shutdownNow();
+        if (mDb != null) mDb.close();
     }
 
     /**
