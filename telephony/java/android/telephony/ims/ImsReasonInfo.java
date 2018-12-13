@@ -331,7 +331,80 @@ public final class ImsReasonInfo implements Parcelable {
      */
     public static final int CODE_SIP_USER_MARKED_UNWANTED = 365;
 
-    /*
+    /**
+     * SIP Response : 405
+     * Method not allowed for the address in the Request URI
+     */
+    public static final int CODE_SIP_METHOD_NOT_ALLOWED = 366;
+
+    /**
+     * SIP Response : 407
+     * The request requires user authentication
+     */
+    public static final int CODE_SIP_PROXY_AUTHENTICATION_REQUIRED = 367;
+
+    /**
+     * SIP Response : 413
+     * Request body too large
+     */
+    public static final int CODE_SIP_REQUEST_ENTITY_TOO_LARGE = 368;
+
+    /**
+     * SIP Response : 414
+     * Request-URI too large
+     */
+    public static final int CODE_SIP_REQUEST_URI_TOO_LARGE = 369;
+
+    /**
+     * SIP Response : 421
+     * Specific extension is required, which is not present in the HEADER
+     */
+    public static final int CODE_SIP_EXTENSION_REQUIRED = 370;
+
+    /**
+     * SIP Response : 422
+     * The session expiration field too small
+     */
+    public static final int CODE_SIP_INTERVAL_TOO_BRIEF = 371;
+
+    /**
+     * SIP Response : 481
+     * Request received by the server does not match any dialog or transaction
+     */
+    public static final int CODE_SIP_CALL_OR_TRANS_DOES_NOT_EXIST = 372;
+
+    /**
+     * SIP Response : 482
+     * Server has detected a loop
+     */
+    public static final int CODE_SIP_LOOP_DETECTED = 373;
+
+    /**
+     * SIP Response : 483
+     * Max-Forwards value reached
+     */
+    public static final int CODE_SIP_TOO_MANY_HOPS = 374;
+
+    /**
+     * SIP Response : 485
+     * Request-URI is ambiguous
+     *
+     */
+    public static final int CODE_SIP_AMBIGUOUS = 376;
+
+    /**
+     * SIP Response : 491
+     * Server has pending request for same dialog
+     */
+    public static final int CODE_SIP_REQUEST_PENDING = 377;
+
+    /**
+     * SIP Response : 493
+     * The request cannot be decrypted by recipient
+     */
+    public static final int CODE_SIP_UNDECIPHERABLE = 378;
+
+    /**
      * MEDIA (IMS -> Telephony)
      */
     /**
@@ -384,6 +457,24 @@ public final class ImsReasonInfo implements Parcelable {
      * The call has been terminated by the network or remote user.
      */
     public static final int CODE_USER_TERMINATED_BY_REMOTE = 510;
+    /**
+    * Upgrade Downgrade request rejected by
+    * Remote user if the request is MO initiated
+    * Local user if the request is MT initiated
+    */
+    public static final int CODE_USER_REJECTED_SESSION_MODIFICATION = 511;
+
+    /**
+    * Upgrade Downgrade request cacncelled by the user who initiated it
+    */
+    public static final int CODE_USER_CANCELLED_SESSION_MODIFICATION = 512;
+
+    /**
+     * UPGRADE DOWNGRADE operation failed
+     * This can happen due to failure from SIP/RTP/SDP generation or a Call end is
+     * triggered/received while Reinvite is in progress.
+     */
+    public static final int CODE_SESSION_MODIFICATION_FAILED = 1517;
 
     /*
      * UT
@@ -482,6 +573,16 @@ public final class ImsReasonInfo implements Parcelable {
      * code is received as part of the handover message.
      */
     public static final int CODE_CALL_DROP_IWLAN_TO_LTE_UNAVAILABLE = 1100;
+
+    /**
+     * For MultiEndPoint - Call was rejected elsewhere
+     */
+    public static final int CODE_REJECTED_ELSEWHERE = 1017;
+
+    /**
+     * Supplementary services (HOLD/RESUME) failure error codes.
+     * Values for Supplemetary services failure - Failed, Cancelled and Re-Invite collision.
+     */
 
     /**
      * Supplementary Services (HOLD/RESUME) - the command failed.
