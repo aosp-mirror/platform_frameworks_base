@@ -32,7 +32,7 @@ public class ShadowBluetoothAdapter extends org.robolectric.shadows.ShadowBlueto
     private BluetoothProfile.ServiceListener mServiceListener;
 
     @Implementation
-    public boolean getProfileProxy(Context context, BluetoothProfile.ServiceListener listener,
+    protected boolean getProfileProxy(Context context, BluetoothProfile.ServiceListener listener,
             int profile) {
         mServiceListener = listener;
         return true;
@@ -43,7 +43,7 @@ public class ShadowBluetoothAdapter extends org.robolectric.shadows.ShadowBlueto
     }
 
     @Implementation
-    public List<Integer> getSupportedProfiles() {
+    protected List<Integer> getSupportedProfiles() {
         return mSupportedProfiles;
     }
 

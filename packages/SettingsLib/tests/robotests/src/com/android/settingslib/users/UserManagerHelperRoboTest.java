@@ -78,8 +78,8 @@ public class UserManagerHelperRoboTest {
     @Test
     public void getForegroundUserInfo() {
         ShadowActivityManager.setCurrentUser(17);
-        when(mUserManager.getUserInfo(ShadowActivityManager.getCurrentUser()))
-                .thenReturn(createUserInfoForId(ShadowActivityManager.getCurrentUser()));
+        when(mUserManager.getUserInfo(ActivityManager.getCurrentUser()))
+                .thenReturn(createUserInfoForId(ActivityManager.getCurrentUser()));
         assertThat(mHelper.getForegroundUserInfo().id).isEqualTo(17);
     }
 
