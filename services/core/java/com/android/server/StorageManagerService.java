@@ -19,7 +19,11 @@ package com.android.server;
 import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_REQUEST_INSTALL_PACKAGES;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
@@ -32,9 +36,11 @@ import static android.os.storage.OnObbStateChangeListener.ERROR_PERMISSION_DENIE
 import static android.os.storage.OnObbStateChangeListener.MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.UNMOUNTED;
 
+import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
+import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
@@ -58,6 +64,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProviderInfo;
@@ -129,6 +136,7 @@ import com.android.internal.os.FuseUnavailableMountException;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.HexDump;
@@ -211,7 +219,9 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public void onBootPhase(int phase) {
-            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+                mStorageManagerService.servicesReady();
+            } else if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 mStorageManagerService.systemReady();
             } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
                 mStorageManagerService.bootCompleted();
@@ -268,6 +278,7 @@ class StorageManagerService extends IStorageManager.Stub
     private static final String TAG_VOLUMES = "volumes";
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_PRIMARY_STORAGE_UUID = "primaryStorageUuid";
+    private static final String ATTR_ISOLATED_STORAGE = "isolatedStorage";
     private static final String TAG_VOLUME = "volume";
     private static final String ATTR_TYPE = "type";
     private static final String ATTR_FS_UUID = "fsUuid";
@@ -317,6 +328,10 @@ class StorageManagerService extends IStorageManager.Stub
     private ArrayMap<String, VolumeRecord> mRecords = new ArrayMap<>();
     @GuardedBy("mLock")
     private String mPrimaryStorageUuid;
+
+    /** Flag indicating isolated storage state of last boot */
+    @GuardedBy("mLock")
+    private boolean mLastIsolatedStorage = false;
 
     /** Map from disk ID to latches */
     @GuardedBy("mLock")
@@ -1575,6 +1590,74 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    private void servicesReady() {
+        synchronized (mLock) {
+            final boolean thisIsolatedStorage = StorageManager.hasIsolatedStorage();
+            if (mLastIsolatedStorage == thisIsolatedStorage) {
+                // Nothing changed since last boot; keep rolling forward
+                return;
+            } else if (thisIsolatedStorage) {
+                // This boot enables isolated storage; apply legacy behavior
+                applyLegacyStorage();
+            }
+
+            // Always remember the new state we just booted with
+            writeSettingsLocked();
+        }
+    }
+
+    /**
+     * If we're enabling isolated storage, we need to remember which existing
+     * apps have already been using shared storage, and grant them legacy access
+     * to keep them running smoothly.
+     */
+    private void applyLegacyStorage() {
+        final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+        final UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
+        for (int userId : um.getUserIds()) {
+            final PackageManager pm;
+            try {
+                pm = mContext.createPackageContextAsUser(mContext.getPackageName(),
+                        0, UserHandle.of(userId)).getPackageManager();
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
+            final List<PackageInfo> pkgs = pm.getPackagesHoldingPermissions(new String[] {
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, MATCH_UNINSTALLED_PACKAGES | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE);
+            for (PackageInfo pkg : pkgs) {
+                final int uid = pkg.applicationInfo.uid;
+                final String packageName = pkg.applicationInfo.packageName;
+
+                final long lastAccess = getLastAccessTime(appOps, uid, packageName, new int[] {
+                        AppOpsManager.OP_READ_EXTERNAL_STORAGE,
+                        AppOpsManager.OP_WRITE_EXTERNAL_STORAGE,
+                });
+
+                Log.d(TAG, "Found " + uid + " " + packageName
+                        + " with granted storage access, last accessed " + lastAccess);
+                if (lastAccess > 0) {
+                    appOps.setMode(AppOpsManager.OP_LEGACY_STORAGE,
+                            uid, packageName, AppOpsManager.MODE_ALLOWED);
+                }
+            }
+        }
+    }
+
+    private static long getLastAccessTime(AppOpsManager manager,
+            int uid, String packageName, int[] ops) {
+        long maxTime = 0;
+        final List<AppOpsManager.PackageOps> pkgs = manager.getOpsForPackage(uid, packageName, ops);
+        for (AppOpsManager.PackageOps pkg : CollectionUtils.defeatNullable(pkgs)) {
+            for (AppOpsManager.OpEntry op : CollectionUtils.defeatNullable(pkg.getOps())) {
+                maxTime = Math.max(maxTime, op.getLastAccessTime());
+            }
+        }
+        return maxTime;
+    }
+
     private void systemReady() {
         LocalServices.getService(ActivityTaskManagerInternal.class)
                 .registerScreenObserver(this);
@@ -1603,6 +1686,7 @@ class StorageManagerService extends IStorageManager.Stub
     private void readSettingsLocked() {
         mRecords.clear();
         mPrimaryStorageUuid = getDefaultPrimaryStorageUuid();
+        mLastIsolatedStorage = false;
 
         FileInputStream fis = null;
         try {
@@ -1624,6 +1708,8 @@ class StorageManagerService extends IStorageManager.Stub
                             mPrimaryStorageUuid = readStringAttribute(in,
                                     ATTR_PRIMARY_STORAGE_UUID);
                         }
+                        mLastIsolatedStorage = readBooleanAttribute(in,
+                                ATTR_ISOLATED_STORAGE, false);
 
                     } else if (TAG_VOLUME.equals(tag)) {
                         final VolumeRecord rec = readVolumeRecord(in);
@@ -1654,6 +1740,7 @@ class StorageManagerService extends IStorageManager.Stub
             out.startTag(null, TAG_VOLUMES);
             writeIntAttribute(out, ATTR_VERSION, VERSION_FIX_PRIMARY);
             writeStringAttribute(out, ATTR_PRIMARY_STORAGE_UUID, mPrimaryStorageUuid);
+            writeBooleanAttribute(out, ATTR_ISOLATED_STORAGE, StorageManager.hasIsolatedStorage());
             final int size = mRecords.size();
             for (int i = 0; i < size; i++) {
                 final VolumeRecord rec = mRecords.valueAt(i);
@@ -2920,7 +3007,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         if (!foundPrimary) {
-            Log.w(TAG, "No primary storage defined yet; hacking together a stub");
+            Slog.w(TAG, "No primary storage defined yet; hacking together a stub");
 
             final boolean primaryPhysical = SystemProperties.getBoolean(
                     StorageManager.PROP_PRIMARY_PHYSICAL, false);
@@ -3504,6 +3591,10 @@ class StorageManagerService extends IStorageManager.Stub
             }
             if (mIPackageManager.checkUidPermission(WRITE_MEDIA_STORAGE, uid)
                     == PERMISSION_GRANTED) {
+                return Zygote.MOUNT_EXTERNAL_FULL;
+            } else if (mIAppOpsService.checkOperation(OP_LEGACY_STORAGE, uid,
+                    packageName) == MODE_ALLOWED) {
+                // TODO: define a specific "legacy" mount mode
                 return Zygote.MOUNT_EXTERNAL_FULL;
             } else if (mIPackageManager.checkUidPermission(INSTALL_PACKAGES, uid)
                     == PERMISSION_GRANTED || mIAppOpsService.checkOperation(
