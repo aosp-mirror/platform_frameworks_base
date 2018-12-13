@@ -21,7 +21,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.android.keyguard.AlphaOptimizedImageButton;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -34,7 +33,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
  */
 class CarNavigationBarView extends LinearLayout {
     private View mNavButtons;
-    private AlphaOptimizedImageButton mNotificationsButton;
+    private CarFacetButton mNotificationsButton;
     private CarStatusBar mCarStatusBar;
     private Context mContext;
     private View mLockScreenButtons;
@@ -71,7 +70,7 @@ class CarNavigationBarView extends LinearLayout {
     }
 
     protected void onNotificationsClick(View v) {
-        mCarStatusBar.togglePanel();
+        mCarStatusBar.toggleCarNotifications();
     }
 
     /**
