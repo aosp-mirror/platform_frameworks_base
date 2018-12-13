@@ -628,8 +628,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBubbleController = Dependency.get(BubbleController.class);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
-        mGroupAlertTransferHelper.bind(mEntryManager, mGroupManager);
-
         mColorExtractor.addOnColorsChangedListener(this);
         mStatusBarStateController.addCallback(this, StatusBarStateController.RANK_STATUS_BAR);
 
