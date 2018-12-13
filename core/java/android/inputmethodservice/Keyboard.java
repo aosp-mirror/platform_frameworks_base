@@ -16,8 +16,6 @@
 
 package android.inputmethodservice;
 
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.annotation.UnsupportedAppUsage;
 import android.annotation.XmlRes;
 import android.content.Context;
@@ -27,10 +25,12 @@ import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.util.Xml;
-import android.util.DisplayMetrics;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,7 +59,12 @@ import java.util.StringTokenizer;
  * @attr ref android.R.styleable#Keyboard_keyHeight
  * @attr ref android.R.styleable#Keyboard_horizontalGap
  * @attr ref android.R.styleable#Keyboard_verticalGap
+ * @deprecated This class is deprecated because this is just a convenient UI widget class that
+ *             application developers can re-implement on top of existing public APIs.  If you have
+ *             already depended on this class, consider copying the implementation from AOSP into
+ *             your project or re-implementing a similar widget by yourselves
  */
+@Deprecated
 public class Keyboard {
 
     static final String TAG = "Keyboard";

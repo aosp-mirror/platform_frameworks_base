@@ -7632,103 +7632,143 @@
     <declare-styleable name="VoiceInteractionSession">
     </declare-styleable>
 
+    <!-- {@deprecated Copy this definition into your own application project.} -->
     <declare-styleable name="KeyboardView">
-        <!-- Default KeyboardView style. -->
+        <!-- Default KeyboardView style.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyboardViewStyle" format="reference" />
 
         <!-- Image for the key. This image needs to be a StateListDrawable, with the following
              possible states: normal, pressed, checkable, checkable+pressed, checkable+checked,
-             checkable+checked+pressed. -->
+             checkable+checked+pressed.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyBackground" format="reference" />
 
-        <!-- Size of the text for character keys. -->
+        <!-- Size of the text for character keys.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyTextSize" format="dimension" />
 
-        <!-- Size of the text for custom keys with some text and no icon. -->
+        <!-- Size of the text for custom keys with some text and no icon.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="labelTextSize" format="dimension" />
 
-        <!-- Color to use for the label in a key. -->
+        <!-- Color to use for the label in a key.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyTextColor" format="color" />
 
-        <!-- Layout resource for key press feedback.-->
+        <!-- Layout resource for key press feedback.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyPreviewLayout" format="reference" />
 
-        <!-- Vertical offset of the key press feedback from the key. -->
+        <!-- Vertical offset of the key press feedback from the key.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyPreviewOffset" format="dimension" />
 
-        <!-- Height of the key press feedback popup. -->
+        <!-- Height of the key press feedback popup.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyPreviewHeight" format="dimension" />
 
-        <!-- Amount to offset the touch Y coordinate by, for bias correction. -->
+        <!-- Amount to offset the touch Y coordinate by, for bias correction.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="verticalCorrection" format="dimension" />
 
-        <!-- Layout resource for popup keyboards. -->
+        <!-- Layout resource for popup keyboards.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="popupLayout" format="reference" />
 
+        <!-- {@deprecated Copy this definition into your own application project.} -->
         <attr name="shadowColor" />
+        <!-- {@deprecated Copy this definition into your own application project.} -->
         <attr name="shadowRadius" />
     </declare-styleable>
 
+    <!-- {@deprecated Copy this definition into your own application project.} -->
     <declare-styleable name="KeyboardViewPreviewState">
         <!-- State for {@link android.inputmethodservice.KeyboardView KeyboardView}
-                key preview background. -->
+                key preview background.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="state_long_pressable" format="boolean" />
     </declare-styleable>
 
+    <!-- {@deprecated Copy this definition into your own application project.} -->
     <declare-styleable name="Keyboard">
-        <!-- Default width of a key, in pixels or percentage of display width. -->
+        <!-- Default width of a key, in pixels or percentage of display width.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyWidth" format="dimension|fraction" />
-        <!-- Default height of a key, in pixels or percentage of display width. -->
+        <!-- Default height of a key, in pixels or percentage of display width.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyHeight" format="dimension|fraction" />
-        <!-- Default horizontal gap between keys. -->
+        <!-- Default horizontal gap between keys.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="horizontalGap" format="dimension|fraction" />
-        <!-- Default vertical gap between rows of keys. -->
+        <!-- Default vertical gap between rows of keys.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="verticalGap" format="dimension|fraction" />
     </declare-styleable>
 
+    <!-- {@deprecated Copy this definition into your own application project.} -->
     <declare-styleable name="Keyboard_Row">
-        <!-- Row edge flags. -->
+        <!-- Row edge flags.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="rowEdgeFlags">
-            <!-- Row is anchored to the top of the keyboard. -->
+            <!-- Row is anchored to the top of the keyboard.
+             {@deprecated Copy this definition into your own application project.} -->
             <flag name="top" value="4" />
-            <!-- Row is anchored to the bottom of the keyboard. -->
+            <!-- Row is anchored to the bottom of the keyboard.
+             {@deprecated Copy this definition into your own application project.} -->
             <flag name="bottom" value="8" />
         </attr>
         <!-- Mode of the keyboard. If the mode doesn't match the
-             requested keyboard mode, the row will be skipped. -->
+             requested keyboard mode, the row will be skipped.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyboardMode" format="reference" />
     </declare-styleable>
 
+    <!-- {@deprecated Copy this definition into your own application project.} -->
     <declare-styleable name="Keyboard_Key">
-        <!-- The unicode value or comma-separated values that this key outputs. -->
+        <!-- The unicode value or comma-separated values that this key outputs.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="codes" format="integer|string" />
-        <!-- The XML keyboard layout of any popup keyboard. -->
+        <!-- The XML keyboard layout of any popup keyboard.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="popupKeyboard" format="reference" />
-        <!-- The characters to display in the popup keyboard. -->
+        <!-- The characters to display in the popup keyboard.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="popupCharacters" format="string" />
-        <!-- Key edge flags. -->
+        <!-- Key edge flags.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyEdgeFlags">
-            <!-- Key is anchored to the left of the keyboard. -->
+            <!-- Key is anchored to the left of the keyboard.
+                 {@deprecated Copy this definition into your own application project.} -->
             <flag name="left" value="1" />
-            <!-- Key is anchored to the right of the keyboard. -->
+            <!-- Key is anchored to the right of the keyboard.
+                 {@deprecated Copy this definition into your own application project.} -->
             <flag name="right" value="2" />
         </attr>
-        <!-- Whether this is a modifier key such as Alt or Shift. -->
+        <!-- Whether this is a modifier key such as Alt or Shift.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="isModifier" format="boolean" />
-        <!-- Whether this is a toggle key. -->
+        <!-- Whether this is a toggle key.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="isSticky" format="boolean" />
-        <!-- Whether long-pressing on this key will make it repeat. -->
+        <!-- Whether long-pressing on this key will make it repeat.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="isRepeatable" format="boolean" />
-        <!-- The icon to show in the popup preview. -->
+        <!-- The icon to show in the popup preview.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="iconPreview" format="reference" />
-        <!-- The string of characters to output when this key is pressed. -->
+        <!-- The string of characters to output when this key is pressed.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyOutputText" format="string" />
-        <!-- The label to display on the key. -->
+        <!-- The label to display on the key.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyLabel" format="string" />
-        <!-- The icon to display on the key instead of the label. -->
+        <!-- The icon to display on the key instead of the label.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyIcon" format="reference" />
         <!-- Mode of the keyboard. If the mode doesn't match the
-             requested keyboard mode, the key will be skipped. -->
+             requested keyboard mode, the key will be skipped.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyboardMode" />
     </declare-styleable>
 
