@@ -5,7 +5,6 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -222,7 +221,6 @@ public class VrManager {
      * @param componentName ComponentName of a VR InputMethod that should be set as selected
      * input by InputMethodManagerService.
      */
-    @TestApi
     @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
     public void setVrInputMethod(ComponentName componentName) {
         try {
