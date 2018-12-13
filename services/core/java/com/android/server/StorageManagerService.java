@@ -25,7 +25,6 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.storage.OnObbStateChangeListener.ERROR_ALREADY_MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.ERROR_COULD_NOT_MOUNT;
@@ -2876,11 +2875,7 @@ class StorageManagerService extends IStorageManager.Stub
         Slog.v(TAG, "mountProxyFileDescriptor");
 
         // We only support a narrow set of incoming mode flags
-        if ((mode & MODE_READ_WRITE) == MODE_READ_WRITE) {
-            mode = MODE_READ_WRITE;
-        } else {
-            mode = MODE_READ_ONLY;
-        }
+        mode &= MODE_READ_WRITE;
 
         try {
             synchronized (mAppFuseLock) {
