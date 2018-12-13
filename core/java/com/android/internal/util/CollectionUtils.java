@@ -326,4 +326,8 @@ public class CollectionUtils {
             throw ExceptionUtils.propagate(e);
         }
     }
+
+    public static @NonNull <T> List<T> defeatNullable(@Nullable List<T> val) {
+        return (val != null) ? val : Collections.emptyList();
+    }
 }
