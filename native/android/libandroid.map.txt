@@ -235,6 +235,10 @@ LIBANDROID {
     android_getaddrinfofornetwork; # introduced=23
     android_setprocnetwork; # introduced=23
     android_setsocknetwork; # introduced=23
+    android_res_cancel; # introduced=29
+    android_res_nquery; # introduced=29
+    android_res_nresult; # introduced=29
+    android_res_nsend; # introduced=29
   local:
     *;
 };
