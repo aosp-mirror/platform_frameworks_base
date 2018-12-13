@@ -165,7 +165,7 @@ public class TestDrive {
     }
 
     private void dumpMetrics() throws Exception {
-        ConfigMetricsReportList reportList = Utils.getReportList(CONFIG_ID, true, logger);
+        ConfigMetricsReportList reportList = Utils.getReportList(CONFIG_ID, true, false, logger);
         // We may get multiple reports. Take the last one.
         ConfigMetricsReport report = reportList.getReports(reportList.getReportsCount() - 1);
         // Really should be only one metric.
