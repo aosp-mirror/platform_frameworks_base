@@ -1121,10 +1121,10 @@
                 android:protectionLevel="normal" />
 
     <!--Allows an app which implements the
-        {@link InCallService} API to be eligible to be enabled as a calling companion app. This
-        means that the Telecom framework will bind to the app's InCallService implementation when
-        there are calls active. The app can use the InCallService API to view information about
-        calls on the system and control these calls.
+        {@link android.telecom.InCallService InCallService} API to be eligible to be enabled as a
+        calling companion app. This means that the Telecom framework will bind to the app's
+        InCallService implementation when there are calls active. The app can use the InCallService
+        API to view information about calls on the system and control these calls.
         <p>Protection level: normal
     -->
     <permission android:name="android.permission.CALL_COMPANION_APP"
