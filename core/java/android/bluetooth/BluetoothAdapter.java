@@ -643,6 +643,7 @@ public final class BluetoothAdapter {
     private final IBluetoothManager mManagerService;
     @UnsupportedAppUsage
     private IBluetooth mService;
+    private Context mContext;
     private final ReentrantReadWriteLock mServiceLock = new ReentrantReadWriteLock();
 
     private final Object mLock = new Object();
@@ -1541,6 +1542,23 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Set the context for this BluetoothAdapter (only called from BluetoothManager)
+     * @hide
+     */
+    public void setContext(Context context) {
+        mContext = context;
+    }
+
+    private String getOpPackageName() {
+        // Workaround for legacy API for getting a BluetoothAdapter not
+        // passing a context
+        if (mContext != null) {
+            return mContext.getOpPackageName();
+        }
+        return ActivityThread.currentOpPackageName();
+    }
+
+    /**
      * Start the remote device discovery process.
      * <p>The discovery process usually involves an inquiry scan of about 12
      * seconds, followed by a page scan of each new device to retrieve its
@@ -1577,7 +1595,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.startDiscovery();
+                return mService.startDiscovery(getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
