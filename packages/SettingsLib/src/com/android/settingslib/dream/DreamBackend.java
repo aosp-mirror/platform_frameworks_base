@@ -36,12 +36,12 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -97,15 +97,15 @@ public class DreamBackend {
     }
 
     public DreamBackend(Context context) {
-        mContext = context;
+        mContext = context.getApplicationContext();
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.getService(DreamService.DREAM_SERVICE));
         mComparator = new DreamInfoComparator(getDefaultDream());
-        mDreamsEnabledByDefault = context.getResources()
+        mDreamsEnabledByDefault = mContext.getResources()
                 .getBoolean(com.android.internal.R.bool.config_dreamsEnabledByDefault);
-        mDreamsActivatedOnSleepByDefault = context.getResources()
+        mDreamsActivatedOnSleepByDefault = mContext.getResources()
                 .getBoolean(com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
-        mDreamsActivatedOnDockByDefault = context.getResources()
+        mDreamsActivatedOnDockByDefault = mContext.getResources()
                 .getBoolean(com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
     }
 

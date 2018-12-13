@@ -1358,9 +1358,7 @@ public class NotificationPanelView extends PanelView implements
         mQsExpansionHeight = height;
         updateQsExpansion();
         requestScrollerTopPaddingUpdate(false /* animate */);
-        if (mKeyguardShowing) {
-            updateHeaderKeyguardAlpha();
-        }
+        updateHeaderKeyguardAlpha();
         if (mStatusBarState == StatusBarState.SHADE_LOCKED
                 || mStatusBarState == StatusBarState.KEYGUARD) {
             updateKeyguardBottomAreaAlpha();
@@ -1763,6 +1761,9 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void updateHeaderKeyguardAlpha() {
+        if (!mKeyguardShowing) {
+            return;
+        }
         float alphaQsExpansion = 1 - Math.min(1, getQsExpansionFraction() * 2);
         mKeyguardStatusBar.setAlpha(Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
                 * mKeyguardStatusBarAnimateAlpha);

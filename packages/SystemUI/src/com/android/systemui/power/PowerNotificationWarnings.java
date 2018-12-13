@@ -266,9 +266,12 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 || mEstimate.estimateMillis < mSevereWarningThreshold) {
             nb.setColor(Utils.getColorAttr(mContext, android.R.attr.colorError));
         }
-        nb.addAction(0,
-                mContext.getString(R.string.battery_saver_start_action),
-                pendingBroadcast(ACTION_START_SAVER));
+
+        if (!mPowerMan.isPowerSaveMode()) {
+            nb.addAction(0,
+                    mContext.getString(R.string.battery_saver_start_action),
+                    pendingBroadcast(ACTION_START_SAVER));
+        }
         nb.setOnlyAlertOnce(!mPlaySound);
         mPlaySound = false;
         SystemUI.overrideNotificationAppName(mContext, nb, false);

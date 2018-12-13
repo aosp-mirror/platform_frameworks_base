@@ -323,9 +323,9 @@ public class PowerUITest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldDismissLowBatteryWarning_dismissWhenPowerSaverEnabled() {
+    public void testShouldDismissLowBatteryWarning_dismissWhenPowerSaverEnabledLegacy() {
         mPowerUI.start();
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(false);
         when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
         when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
 
@@ -334,6 +334,20 @@ public class PowerUITest extends SysuiTestCase {
                 mPowerUI.shouldDismissLowBatteryWarning(UNPLUGGED, BELOW_WARNING_BUCKET,
                         BELOW_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD, !POWER_SAVER_OFF);
         assertTrue(shouldDismiss);
+    }
+
+    @Test
+    public void testShouldNotDismissLowBatteryWarning_dismissWhenPowerSaverEnabledHybrid() {
+        mPowerUI.start();
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
+
+        // device that gets power saver turned on should dismiss
+        boolean shouldDismiss =
+            mPowerUI.shouldDismissLowBatteryWarning(UNPLUGGED, BELOW_WARNING_BUCKET,
+                BELOW_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD, !POWER_SAVER_OFF);
+        assertFalse(shouldDismiss);
     }
 
     @Test

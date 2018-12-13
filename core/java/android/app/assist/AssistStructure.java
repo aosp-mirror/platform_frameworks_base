@@ -41,18 +41,23 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Assist data automatically created by the platform's implementation of assist and autofill.
+ * <p>This API automatically creates assist data from the platform's
+ * implementation of assist and autofill.
  *
  * <p>The structure is used for assist purposes when created by
  * {@link android.app.Activity#onProvideAssistData}, {@link View#onProvideStructure(ViewStructure)},
  * or {@link View#onProvideVirtualStructure(ViewStructure)}.
  *
- * <p>The structure is used for autofill purposes when created by
+ * <p>The structure is also used for autofill purposes when created by
  * {@link View#onProvideAutofillStructure(ViewStructure, int)},
  * or {@link View#onProvideAutofillVirtualStructure(ViewStructure, int)}.
  *
- * <p>For performance reasons, some properties of the assist data might be available just for assist
- * or autofill purposes; in those case, the property availability will be document in its javadoc.
+ * <p>For performance reasons, some properties of the assist data might only be available for
+ * assist or autofill purposes. In those cases, a property's availability will be documented
+ * in its javadoc.
+ *
+ * <p>To learn about using Autofill in your app, read the
+ * <a href="/guide/topics/text/autofill">Autofill Framework</a> guides.
  */
 public class AssistStructure implements Parcelable {
     static final String TAG = "AssistStructure";

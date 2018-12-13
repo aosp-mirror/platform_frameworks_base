@@ -88,17 +88,6 @@ private:
     sp<InvokeRunnableMessage> mMessage;
 };
 
-
-// ---------------- Regular JNI -----------------------------
-
-static void
-android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor) {
-    int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
-    android::uirenderer::renderthread::RenderProxy::dumpGraphicsMemory(fd);
-    minikin::Layout::dumpMinikinStats(fd);
-}
-
-
 // ---------------- @FastNative -----------------------------
 
 static void android_view_DisplayListCanvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
@@ -215,22 +204,11 @@ static JNINativeMethod gMethods[] = {
     { "nDrawRoundRect",           "(JJJJJJJJ)V",(void*) android_view_DisplayListCanvas_drawRoundRectProps },
 };
 
-static JNINativeMethod gActivityThreadMethods[] = {
-        // ------------ Regular JNI ------------------
-    { "nDumpGraphicsInfo",        "(Ljava/io/FileDescriptor;)V",
-                                               (void*) android_app_ActivityThread_dumpGraphics }
-};
-
 int register_android_view_DisplayListCanvas(JNIEnv* env) {
     jclass runnableClass = FindClassOrDie(env, "java/lang/Runnable");
     gRunnableMethodId = GetMethodIDOrDie(env, runnableClass, "run", "()V");
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
-}
-
-int register_android_app_ActivityThread(JNIEnv* env) {
-    return RegisterMethodsOrDie(env, "android/app/ActivityThread",
-            gActivityThreadMethods, NELEM(gActivityThreadMethods));
 }
 
 };

@@ -33,6 +33,10 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
+import static android.content.Context.BIND_ADJUST_BELOW_PERCEPTIBLE;
+import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
+import static android.content.Context.BIND_AUTO_CREATE;
+import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -2122,6 +2126,10 @@ public class NotificationManagerService extends SystemService {
             enforceSystemOrSystemUI("setNotificationsEnabledForPackage");
 
             mRankingHelper.setEnabled(pkg, uid, enabled);
+            mMetricsLogger.write(new LogMaker(MetricsEvent.ACTION_BAN_APP_NOTES)
+                    .setType(MetricsEvent.TYPE_ACTION)
+                    .setPackageName(pkg)
+                    .setSubtype(enabled ? 1 : 0));
             // Now, cancel any outstanding notifications that are part of a just-disabled app
             if (!enabled) {
                 cancelAllNotificationsInt(MY_UID, MY_PID, pkg, null, 0, 0, true,
@@ -6507,6 +6515,16 @@ public class NotificationManagerService extends SystemService {
         public NotificationListeners(IPackageManager pm) {
             super(getContext(), mNotificationLock, mUserProfiles, pm);
 
+        }
+
+        @Override
+        protected int getBindFlags() {
+            // Most of the same flags as the base, but also add BIND_ADJUST_BELOW_PERCEPTIBLE
+            // because too many 3P apps could be kept in memory as notification listeners and
+            // cause extreme memory pressure.
+            // TODO: Change the binding lifecycle of NotificationListeners to avoid this situation.
+            return BIND_AUTO_CREATE | BIND_FOREGROUND_SERVICE
+                    | BIND_ADJUST_BELOW_PERCEPTIBLE | BIND_ALLOW_WHITELIST_MANAGEMENT;
         }
 
         @Override

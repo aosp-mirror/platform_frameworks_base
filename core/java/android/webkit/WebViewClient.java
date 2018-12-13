@@ -31,18 +31,25 @@ import java.lang.annotation.RetentionPolicy;
 public class WebViewClient {
 
     /**
-     * Give the host application a chance to take over the control when a new
-     * url is about to be loaded in the current WebView. If WebViewClient is not
-     * provided, by default WebView will ask Activity Manager to choose the
-     * proper handler for the url. If WebViewClient is provided, return {@code true}
-     * means the host application handles the url, while return {@code false} means the
-     * current WebView handles the url.
-     * This method is not called for requests using the POST "method".
+     * Give the host application a chance to take control when a URL is about to be loaded in the
+     * current WebView. If a WebViewClient is not provided, by default WebView will ask Activity
+     * Manager to choose the proper handler for the URL. If a WebViewClient is provided, returning
+     * {@code true} causes the current WebView to abort loading the URL, while returning
+     * {@code false} causes the WebView to continue loading the URL as usual.
+     *
+     * <p class="note"><b>Note:</b> Do not call {@link WebView#loadUrl(String)} with the same
+     * URL and then return {@code true}. This unnecessarily cancels the current load and starts a
+     * new load with the same URL. The correct way to continue loading a given URL is to simply
+     * return {@code false}, without calling {@link WebView#loadUrl(String)}.
+     *
+     * <p class="note"><b>Note:</b> This method is not called for POST requests.
+     *
+     * <p class="note"><b>Note:</b> This method may be called for subframes and with non-HTTP(S)
+     * schemes; calling {@link WebView#loadUrl(String)} with such a URL will fail.
      *
      * @param view The WebView that is initiating the callback.
-     * @param url The url to be loaded.
-     * @return {@code true} if the host application wants to leave the current WebView
-     *         and handle the url itself, otherwise return {@code false}.
+     * @param url The URL to be loaded.
+     * @return {@code true} to cancel the current load, otherwise return {@code false}.
      * @deprecated Use {@link #shouldOverrideUrlLoading(WebView, WebResourceRequest)
      *             shouldOverrideUrlLoading(WebView, WebResourceRequest)} instead.
      */
@@ -52,26 +59,25 @@ public class WebViewClient {
     }
 
     /**
-     * Give the host application a chance to take over the control when a new
-     * url is about to be loaded in the current WebView. If WebViewClient is not
-     * provided, by default WebView will ask Activity Manager to choose the
-     * proper handler for the url. If WebViewClient is provided, return {@code true}
-     * means the host application handles the url, while return {@code false} means the
-     * current WebView handles the url.
+     * Give the host application a chance to take control when a URL is about to be loaded in the
+     * current WebView. If a WebViewClient is not provided, by default WebView will ask Activity
+     * Manager to choose the proper handler for the URL. If a WebViewClient is provided, returning
+     * {@code true} causes the current WebView to abort loading the URL, while returning
+     * {@code false} causes the WebView to continue loading the URL as usual.
      *
-     * <p>Notes:
-     * <ul>
-     * <li>This method is not called for requests using the POST &quot;method&quot;.</li>
-     * <li>This method is also called for subframes with non-http schemes, thus it is
-     * strongly disadvised to unconditionally call {@link WebView#loadUrl(String)}
-     * with the request's url from inside the method and then return {@code true},
-     * as this will make WebView to attempt loading a non-http url, and thus fail.</li>
-     * </ul>
+     * <p class="note"><b>Note:</b> Do not call {@link WebView#loadUrl(String)} with the request's
+     * URL and then return {@code true}. This unnecessarily cancels the current load and starts a
+     * new load with the same URL. The correct way to continue loading a given URL is to simply
+     * return {@code false}, without calling {@link WebView#loadUrl(String)}.
+     *
+     * <p class="note"><b>Note:</b> This method is not called for POST requests.
+     *
+     * <p class="note"><b>Note:</b> This method may be called for subframes and with non-HTTP(S)
+     * schemes; calling {@link WebView#loadUrl(String)} with such a URL will fail.
      *
      * @param view The WebView that is initiating the callback.
      * @param request Object containing the details of the request.
-     * @return {@code true} if the host application wants to leave the current WebView
-     *         and handle the url itself, otherwise return {@code false}.
+     * @return {@code true} to cancel the current load, otherwise return {@code false}.
      */
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
         return shouldOverrideUrlLoading(view, request.getUrl().toString());

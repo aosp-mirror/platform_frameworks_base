@@ -147,6 +147,7 @@ import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
@@ -384,6 +385,9 @@ public final class ActivityThread extends ClientTransactionHandler {
         = new ArrayMap<Activity, ArrayList<OnActivityPausedListener>>();
 
     final GcIdler mGcIdler = new GcIdler();
+    final PurgeIdler mPurgeIdler = new PurgeIdler();
+
+    boolean mPurgeIdlerScheduled = false;
     boolean mGcIdlerScheduled = false;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -1666,6 +1670,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         public static final int RUN_ISOLATED_ENTRY_POINT = 158;
         public static final int EXECUTE_TRANSACTION = 159;
         public static final int RELAUNCH_ACTIVITY = 160;
+        public static final int PURGE_RESOURCES = 161;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1709,6 +1714,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     case RUN_ISOLATED_ENTRY_POINT: return "RUN_ISOLATED_ENTRY_POINT";
                     case EXECUTE_TRANSACTION: return "EXECUTE_TRANSACTION";
                     case RELAUNCH_ACTIVITY: return "RELAUNCH_ACTIVITY";
+                    case PURGE_RESOURCES: return "PURGE_RESOURCES";
                 }
             }
             return Integer.toString(code);
@@ -1746,6 +1752,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 case UNBIND_SERVICE:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceUnbind");
                     handleUnbindService((BindServiceData)msg.obj);
+                    schedulePurgeIdler();
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case SERVICE_ARGS:
@@ -1756,6 +1763,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 case STOP_SERVICE:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceStop");
                     handleStopService((IBinder)msg.obj);
+                    schedulePurgeIdler();
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case CONFIGURATION_CHANGED:
@@ -1889,6 +1897,9 @@ public final class ActivityThread extends ClientTransactionHandler {
                 case RELAUNCH_ACTIVITY:
                     handleRelaunchActivityLocally((IBinder) msg.obj);
                     break;
+                case PURGE_RESOURCES:
+                    schedulePurgeIdler();
+                    break;
             }
             Object obj = msg.obj;
             if (obj instanceof SomeArgs) {
@@ -1941,6 +1952,17 @@ public final class ActivityThread extends ClientTransactionHandler {
         @Override
         public final boolean queueIdle() {
             doGcIfNeeded();
+            nPurgePendingResources();
+            return false;
+        }
+    }
+
+    final class PurgeIdler implements MessageQueue.IdleHandler {
+        @Override
+        public boolean queueIdle() {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "purgePendingResources");
+            nPurgePendingResources();
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             return false;
         }
     }
@@ -2268,6 +2290,22 @@ public final class ActivityThread extends ClientTransactionHandler {
             Looper.myQueue().removeIdleHandler(mGcIdler);
         }
         mH.removeMessages(H.GC_WHEN_IDLE);
+    }
+
+    void schedulePurgeIdler() {
+        if (!mPurgeIdlerScheduled) {
+            mPurgeIdlerScheduled = true;
+            Looper.myQueue().addIdleHandler(mPurgeIdler);
+        }
+        mH.removeMessages(H.PURGE_RESOURCES);
+    }
+
+    void unschedulePurgeIdler() {
+        if (mPurgeIdlerScheduled) {
+            mPurgeIdlerScheduled = false;
+            Looper.myQueue().removeIdleHandler(mPurgeIdler);
+        }
+        mH.removeMessages(H.PURGE_RESOURCES);
     }
 
     void doGcIfNeeded() {
@@ -4559,6 +4597,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
             r.setState(ON_DESTROY);
         }
+        schedulePurgeIdler();
         mActivities.remove(token);
         StrictMode.decrementExpectedActivityCount(activityClass);
         return r;
@@ -5241,6 +5280,16 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
             }
         }
+    }
+
+    /**
+     * Updates the application info.
+     *
+     * This only works in the system process. Must be called on the main thread.
+     */
+    public void handleSystemApplicationInfoChanged(@NonNull ApplicationInfo ai) {
+        Preconditions.checkState(mSystemThread, "Must only be called in the system process");
+        handleApplicationInfoChanged(ai);
     }
 
     void handleApplicationInfoChanged(@NonNull final ApplicationInfo ai) {
@@ -6771,6 +6820,6 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     // ------------------ Regular JNI ------------------------
-
+    private native void nPurgePendingResources();
     private native void nDumpGraphicsInfo(FileDescriptor fd);
 }

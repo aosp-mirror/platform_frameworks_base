@@ -659,6 +659,10 @@
     <!-- Boolean indicating whether framework needs to set the tx power limit for meeting SAR requirements -->
     <bool translatable="false" name="config_wifi_framework_enable_sar_tx_power_limit">false</bool>
 
+    <!-- Boolean indicating whether framework should use detection of softAP mode to set the tx
+         power limit for meeting SAR requirements -->
+    <bool translatable="false" name="config_wifi_framework_enable_soft_ap_sar_tx_power_limit">false</bool>
+
     <!-- Boolean indicating whether framework needs to use body proximity to set the tx power limit
          for meeting SAR requirements -->
     <bool translatable="false" name="config_wifi_framework_enable_body_proximity_sar_tx_power_limit">false</bool>
@@ -2346,6 +2350,9 @@
     <!-- Whether safe headphone volume is enabled or not (country specific). -->
     <bool name="config_safe_media_volume_enabled">true</bool>
 
+    <!-- Whether safe headphone volume warning dialog is disabled on Vol+ (operator specific). -->
+    <bool name="config_safe_media_disable_on_volume_up">true</bool>
+
     <!-- Set to true if the wifi display supports compositing content stored
          in gralloc protected buffers.  For this to be true, there must exist
          a protected hardware path for surface flinger to composite and send
@@ -2768,7 +2775,7 @@
         <item>SUPL_PORT=7275</item>
         <item>SUPL_VER=0x20000</item>
         <item>SUPL_MODE=1</item>
-        <item>SUPL_ES=0</item>
+        <item>SUPL_ES=1</item>
         <item>LPP_PROFILE=0</item>
         <item>USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL=1</item>
         <item>A_GLONASS_POS_PROTOCOL_SELECT=0</item>
@@ -2967,6 +2974,10 @@
          black in software (to avoid aliasing or emulate a cutout that is not physically existent).
          -->
     <bool name="config_fillMainBuiltInDisplayCutout">false</bool>
+
+    <!-- If true, and there is a cutout on the main built in display, the cutout will be masked
+         by shrinking the display such that it does not overlap the cutout area. -->
+    <bool name="config_maskMainBuiltInDisplayCutout">false</bool>
 
     <!-- Ultrasound support for Mic/speaker path -->
     <!-- Whether the default microphone audio source supports near-ultrasound frequencies
@@ -3492,6 +3503,13 @@
     <!-- Whether or not we should show the option to show battery percentage -->
     <bool name="config_battery_percentage_setting_available">true</bool>
 
+    <!-- Model of potentially misprovisioned devices. If none is specified in an overlay, an
+         empty string is passed in. -->
+    <string name="config_misprovisionedDeviceModel" translatable="false"></string>
+
+    <!-- Brand value for attestation of misprovisioned device. -->
+    <string name="config_misprovisionedBrandValue" translatable="false"></string>
+
     <!-- Pre-scale volume at volume step 1 for Absolute Volume -->
     <fraction name="config_prescaleAbsoluteVolume_index1">50%</fraction>
 
@@ -3500,4 +3518,8 @@
 
     <!-- Pre-scale volume at volume step 3 for Absolute Volume -->
     <fraction name="config_prescaleAbsoluteVolume_index3">85%</fraction>
+
+    <!-- Component name for default assistant on this device -->
+    <string name="config_defaultAssistantComponentName"></string>
+
 </resources>
