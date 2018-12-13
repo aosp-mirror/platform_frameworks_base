@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,11 +46,14 @@ import javax.lang.model.element.TypeElement;
  * @see android.view.inspector.InspectableProperty
  */
 @SupportedAnnotationTypes({
-        PlatformInspectableProcessor.NODE_NAME_QUALIFIED_NAME
+        PlatformInspectableProcessor.NODE_NAME_QUALIFIED_NAME,
+        PlatformInspectableProcessor.PROPERTY_QUALIFIED_NAME
 })
 public final class PlatformInspectableProcessor extends AbstractProcessor {
     static final String NODE_NAME_QUALIFIED_NAME =
             "android.view.inspector.InspectableNodeName";
+    static final String PROPERTY_QUALIFIED_NAME =
+            "android.view.inspector.InspectableProperty";
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
@@ -68,6 +71,11 @@ public final class PlatformInspectableProcessor extends AbstractProcessor {
                         new InspectableNodeNameProcessor(NODE_NAME_QUALIFIED_NAME, processingEnv),
                         modelMap);
 
+            } else if (annotation.getQualifiedName().contentEquals(PROPERTY_QUALIFIED_NAME)) {
+                runModelProcessor(
+                        roundEnv.getElementsAnnotatedWith(annotation),
+                        new InspectablePropertyProcessor(PROPERTY_QUALIFIED_NAME, processingEnv),
+                        modelMap);
 
             } else {
                 fail("Unexpected annotation type", annotation);

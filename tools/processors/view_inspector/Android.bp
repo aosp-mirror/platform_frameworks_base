@@ -5,7 +5,7 @@ java_library_host {
     java_resource_dirs: ["src/resources"],
 
     static_libs: [
-    	"javapoet",
+        "javapoet",
     ],
 
     use_tools_jar: true,
@@ -18,9 +18,9 @@ java_test_host {
     java_resource_dirs: ["test/resources"],
 
     static_libs: [
-        "guava",
         "junit",
-        "view-inspector-annotation-processor",
+        "guava",
+        "view-inspector-annotation-processor"
     ],
 
     test_suites: ["general-tests"],

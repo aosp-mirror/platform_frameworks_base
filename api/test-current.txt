@@ -2124,6 +2124,33 @@ package android.view.inputmethod {
 
 }
 
+package android.view.inspector {
+
+  public abstract class InspectableNodeName implements java.lang.annotation.Annotation {
+  }
+
+  public abstract class InspectableProperty implements java.lang.annotation.Annotation {
+  }
+
+  public static abstract class InspectableProperty.EnumMap implements java.lang.annotation.Annotation {
+  }
+
+  public static abstract class InspectableProperty.FlagMap implements java.lang.annotation.Annotation {
+  }
+
+  public static final class InspectableProperty.ValueType extends java.lang.Enum {
+    method public static android.view.inspector.InspectableProperty.ValueType valueOf(java.lang.String);
+    method public static final android.view.inspector.InspectableProperty.ValueType[] values();
+    enum_constant public static final android.view.inspector.InspectableProperty.ValueType COLOR;
+    enum_constant public static final android.view.inspector.InspectableProperty.ValueType GRAVITY;
+    enum_constant public static final android.view.inspector.InspectableProperty.ValueType INFERRED;
+    enum_constant public static final android.view.inspector.InspectableProperty.ValueType INT_ENUM;
+    enum_constant public static final android.view.inspector.InspectableProperty.ValueType INT_FLAG;
+    enum_constant public static final android.view.inspector.InspectableProperty.ValueType NONE;
+  }
+
+}
+
 package android.widget {
 
   public abstract class AbsListView extends android.widget.AdapterView implements android.widget.Filter.FilterListener android.text.TextWatcher android.view.ViewTreeObserver.OnGlobalLayoutListener android.view.ViewTreeObserver.OnTouchModeChangeListener {

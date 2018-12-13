@@ -20,6 +20,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.annotation.TestApi;
 import android.content.res.Resources;
 
 import java.lang.annotation.Retention;
@@ -40,6 +41,7 @@ import java.lang.annotation.Target;
  */
 @Target({METHOD})
 @Retention(SOURCE)
+@TestApi
 public @interface InspectableProperty {
     /**
      * The name of the property.
@@ -86,7 +88,6 @@ public @interface InspectableProperty {
      *
      * @return An array of {@link EnumMap}, empty if not applicable
      * @see android.annotation.IntDef
-     * @see IntEnumMapping
      */
     EnumMap[] enumMapping() default {};
 
@@ -109,6 +110,7 @@ public @interface InspectableProperty {
      */
     @Target({TYPE})
     @Retention(SOURCE)
+    @TestApi
     @interface EnumMap {
         /**
          * The string name of this enumeration value.
@@ -133,6 +135,7 @@ public @interface InspectableProperty {
      */
     @Target({TYPE})
     @Retention(SOURCE)
+    @TestApi
     @interface FlagMap {
         /**
          * The string name of this flag.
@@ -167,15 +170,22 @@ public @interface InspectableProperty {
      *
      * @hide
      */
+    @TestApi
     enum ValueType {
         /**
          * No special handling, property is considered to be a numeric value.
+         *
+         * @hide
          */
+        @TestApi
         NONE,
 
         /**
          * The default the annotation processor infers the value type from context.
+         *
+         * @hide
          */
+        @TestApi
         INFERRED,
 
         /**
@@ -184,7 +194,9 @@ public @interface InspectableProperty {
          * This is inferred if {@link #enumMapping()} is specified.
          *
          * @see EnumMap
+         * @hide
          */
+        @TestApi
         INT_ENUM,
 
         /**
@@ -193,7 +205,9 @@ public @interface InspectableProperty {
          * This is inferred if {@link #flagMapping()} is specified.
          *
          * @see FlagMap
+         * @hide
          */
+        @TestApi
         INT_FLAG,
 
         /**
@@ -203,7 +217,9 @@ public @interface InspectableProperty {
          * {@link android.annotation.ColorLong} on the getter method.
          *
          * @see android.graphics.Color
+         * @hide
          */
+        @TestApi
         COLOR,
 
         /**
@@ -212,7 +228,9 @@ public @interface InspectableProperty {
          * This type is not inferred, and is non-trivial to represent using {@link FlagMap}.
          *
          * @see android.view.Gravity
+         * @hide
          */
+        @TestApi
         GRAVITY
     }
 }
