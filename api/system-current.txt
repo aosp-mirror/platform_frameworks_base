@@ -5081,16 +5081,15 @@ package android.telephony {
   public abstract class NetworkService extends android.app.Service {
     ctor public NetworkService();
     method protected abstract android.telephony.NetworkService.NetworkServiceProvider createNetworkServiceProvider(int);
-    field public static final java.lang.String NETWORK_SERVICE_EXTRA_SLOT_ID = "android.telephony.extra.SLOT_ID";
     field public static final java.lang.String NETWORK_SERVICE_INTERFACE = "android.telephony.NetworkService";
   }
 
-  public class NetworkService.NetworkServiceProvider {
+  public abstract class NetworkService.NetworkServiceProvider implements java.lang.AutoCloseable {
     ctor public NetworkService.NetworkServiceProvider(int);
+    method public abstract void close();
     method public void getNetworkRegistrationState(int, android.telephony.NetworkServiceCallback);
     method public final int getSlotId();
     method public final void notifyNetworkRegistrationStateChanged();
-    method protected void onDestroy();
   }
 
   public class NetworkServiceCallback {
@@ -5403,20 +5402,19 @@ package android.telephony.data {
   public abstract class DataService extends android.app.Service {
     ctor public DataService();
     method public abstract android.telephony.data.DataService.DataServiceProvider createDataServiceProvider(int);
-    field public static final java.lang.String DATA_SERVICE_EXTRA_SLOT_ID = "android.telephony.data.extra.SLOT_ID";
     field public static final java.lang.String DATA_SERVICE_INTERFACE = "android.telephony.data.DataService";
     field public static final int REQUEST_REASON_HANDOVER = 3; // 0x3
     field public static final int REQUEST_REASON_NORMAL = 1; // 0x1
     field public static final int REQUEST_REASON_SHUTDOWN = 2; // 0x2
   }
 
-  public class DataService.DataServiceProvider {
+  public abstract class DataService.DataServiceProvider implements java.lang.AutoCloseable {
     ctor public DataService.DataServiceProvider(int);
+    method public abstract void close();
     method public void deactivateDataCall(int, int, android.telephony.data.DataServiceCallback);
     method public void getDataCallList(android.telephony.data.DataServiceCallback);
     method public final int getSlotId();
     method public final void notifyDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
-    method protected void onDestroy();
     method public void setDataProfile(java.util.List<android.telephony.data.DataProfile>, boolean, android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(android.telephony.data.DataProfile, boolean, android.telephony.data.DataServiceCallback);
     method public void setupDataCall(int, android.telephony.data.DataProfile, boolean, boolean, int, android.net.LinkProperties, android.telephony.data.DataServiceCallback);
@@ -5935,8 +5933,8 @@ package android.telephony.ims {
     field public static final int CODE_SIP_SERVER_TIMEOUT = 353; // 0x161
     field public static final int CODE_SIP_SERVICE_UNAVAILABLE = 352; // 0x160
     field public static final int CODE_SIP_TEMPRARILY_UNAVAILABLE = 336; // 0x150
-    field public static final int CODE_SIP_TRANSACTION_DOES_NOT_EXIST = 343; // 0x157
     field public static final int CODE_SIP_TOO_MANY_HOPS = 374; // 0x176
+    field public static final int CODE_SIP_TRANSACTION_DOES_NOT_EXIST = 343; // 0x157
     field public static final int CODE_SIP_UNDECIPHERABLE = 378; // 0x17a
     field public static final int CODE_SIP_USER_MARKED_UNWANTED = 365; // 0x16d
     field public static final int CODE_SIP_USER_REJECTED = 361; // 0x169
