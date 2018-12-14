@@ -5939,6 +5939,11 @@ public final class ActivityThread extends ClientTransactionHandler {
             Binder.enableTracing();
         }
 
+        // Initialize heap profiling.
+        if (isAppProfileable || Build.IS_DEBUGGABLE) {
+            nInitZygoteChildHeapProfiling();
+        }
+
         // Allow renderer debugging features if we're debuggable.
         boolean isAppDebuggable = (data.appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         HardwareRenderer.setDebuggingEnabled(isAppDebuggable || Build.IS_DEBUGGABLE);
@@ -6965,4 +6970,5 @@ public final class ActivityThread extends ClientTransactionHandler {
     // ------------------ Regular JNI ------------------------
     private native void nPurgePendingResources();
     private native void nDumpGraphicsInfo(FileDescriptor fd);
+    private native void nInitZygoteChildHeapProfiling();
 }

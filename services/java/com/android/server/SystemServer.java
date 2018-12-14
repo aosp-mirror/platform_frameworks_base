@@ -327,6 +327,11 @@ public final class SystemServer {
     private static native void startHidlServices();
 
     /**
+     * Mark this process' heap as profileable. Only for debug builds.
+     */
+    private static native void initZygoteChildHeapProfiling();
+
+    /**
      * The main entry point from zygote.
      */
     public static void main(String[] args) {
@@ -447,6 +452,11 @@ public final class SystemServer {
 
             // Initialize native services.
             System.loadLibrary("android_servers");
+
+            // Debug builds - allow heap profiling.
+            if (Build.IS_DEBUGGABLE) {
+                initZygoteChildHeapProfiling();
+            }
 
             // Check whether we failed to shut down last time we tried.
             // This call may not return.
