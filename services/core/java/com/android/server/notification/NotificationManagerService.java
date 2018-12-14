@@ -583,7 +583,6 @@ public class NotificationManagerService extends SystemService {
     private void loadPolicyFile() {
         if (DBG) Slog.d(TAG, "loadPolicyFile");
         synchronized (mPolicyFile) {
-
             InputStream infile = null;
             try {
                 infile = mPolicyFile.openRead();
@@ -3357,14 +3356,12 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, "getBackupPayload: cannot backup policy for user " + user);
                 return null;
             }
-            synchronized(mPolicyFile) {
-                final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                try {
-                    writePolicyXml(baos, true /*forBackup*/);
-                    return baos.toByteArray();
-                } catch (IOException e) {
-                    Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
-                }
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                writePolicyXml(baos, true /*forBackup*/);
+                return baos.toByteArray();
+            } catch (IOException e) {
+                Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
             }
             return null;
         }
@@ -3383,14 +3380,12 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, "applyRestore: cannot restore policy for user " + user);
                 return;
             }
-            synchronized(mPolicyFile) {
-                final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
-                try {
-                    readPolicyXml(bais, true /*forRestore*/);
-                    handleSavePolicyFile();
-                } catch (NumberFormatException | XmlPullParserException | IOException e) {
-                    Slog.w(TAG, "applyRestore: error reading payload", e);
-                }
+            final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
+            try {
+                readPolicyXml(bais, true /*forRestore*/);
+                handleSavePolicyFile();
+            } catch (NumberFormatException | XmlPullParserException | IOException e) {
+                Slog.w(TAG, "applyRestore: error reading payload", e);
             }
         }
 
