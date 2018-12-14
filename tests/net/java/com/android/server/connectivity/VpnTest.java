@@ -57,7 +57,6 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
-import android.net.IConnectivityManager;
 import android.net.IpPrefix;
 import android.net.LinkProperties;
 import android.net.Network;
@@ -97,7 +96,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -237,6 +235,30 @@ public class VpnTest {
             /* Empty range between UIDS[1] and UIDS[2], should be excluded, */
             new UidRange(user.start + PKG_UIDS[2] + 1, user.stop)
         })), disallow);
+    }
+
+    @Test
+    public void testGetAlwaysAndOnGetLockDown() throws Exception {
+        final Vpn vpn = createVpn(primaryUser.id);
+
+        // Default state.
+        assertFalse(vpn.getAlwaysOn());
+        assertFalse(vpn.getLockdown());
+
+        // Set always-on without lockdown.
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], false));
+        assertTrue(vpn.getAlwaysOn());
+        assertFalse(vpn.getLockdown());
+
+        // Set always-on with lockdown.
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], true));
+        assertTrue(vpn.getAlwaysOn());
+        assertTrue(vpn.getLockdown());
+
+        // Remove always-on configuration.
+        assertTrue(vpn.setAlwaysOnPackage(null, false));
+        assertFalse(vpn.getAlwaysOn());
+        assertFalse(vpn.getLockdown());
     }
 
     @Test
