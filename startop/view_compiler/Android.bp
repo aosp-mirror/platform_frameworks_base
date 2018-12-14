@@ -24,6 +24,9 @@ cc_defaults {
         "libdexfile",
         "slicer",
     ],
+    static_libs: [
+        "libtinyxml2",
+    ],
 }
 
 cc_library_host_static {
@@ -32,7 +35,9 @@ cc_library_host_static {
     srcs: [
         "dex_builder.cc",
         "java_lang_builder.cc",
+        "tinyxml_layout_parser.cc",
         "util.cc",
+        "layout_validation.cc",
     ],
 }
 
@@ -43,7 +48,6 @@ cc_binary_host {
         "main.cc",
     ],
     static_libs: [
-        "libtinyxml2",
         "libgflags",
         "libviewcompiler",
     ],
@@ -54,6 +58,7 @@ cc_test_host {
     defaults: ["viewcompiler_defaults"],
     srcs: [
         "dex_builder_test.cc",
+        "layout_validation_test.cc",
         "util_test.cc",
     ],
     static_libs: [
