@@ -584,6 +584,7 @@ public class SettingsBackupTest {
                  Settings.Secure.DEFAULT_INPUT_METHOD,
                  Settings.Secure.DEVICE_PAIRED,
                  Settings.Secure.DIALER_DEFAULT_APPLICATION,
+                 Settings.Secure.DISABLE_AIRPLANE_MODE_AFTER_SP_DISABLED,
                  Settings.Secure.DISABLED_PRINT_SERVICES,
                  Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS,
                  Settings.Secure.DISPLAY_DENSITY_FORCED,
@@ -605,6 +606,8 @@ public class SettingsBackupTest {
                  Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT, // Candidate?
                  Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
                  Settings.Secure.LOCK_TO_APP_EXIT_LOCKED,
+                 Settings.Secure.MAINTAIN_AIRPLANE_MODE_AFTER_SP_DISABLED,
+                 Settings.Secure.MAINTAIN_LOCATION_AFTER_SP_DISABLED,
                  Settings.Secure.MANAGED_PROFILE_CONTACT_REMOTE_SEARCH,
                  Settings.Secure.MULTI_PRESS_TIMEOUT,
                  Settings.Secure.NFC_PAYMENT_FOREGROUND,
@@ -616,6 +619,7 @@ public class SettingsBackupTest {
                  Settings.Secure.PARENTAL_CONTROL_LAST_UPDATE,
                  Settings.Secure.PAYMENT_SERVICE_SEARCH_URI,
                  Settings.Secure.PRINT_SERVICE_SEARCH_URI,
+                 Settings.Secure.REENABLE_LOCATION_AFTER_SP_DISABLED,
                  Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT, // Candidate?
                  Settings.Secure.SEARCH_GLOBAL_SEARCH_ACTIVITY,
                  Settings.Secure.SEARCH_MAX_RESULTS_PER_SOURCE,
