@@ -44,7 +44,6 @@ android_library {
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SettingsLib",
-        "androidx.car_car",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",
         "androidx.preference_preference",
@@ -67,8 +66,6 @@ android_library {
 
     libs: [
         "telephony-common",
-        "android.car",
-        "android.car.userlib",
     ],
 
     aaptflags: [
@@ -98,7 +95,6 @@ android_library {
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SettingsLib",
-        "androidx.car_car",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",
         "androidx.preference_preference",
@@ -123,8 +119,6 @@ android_library {
     libs: [
         "android.test.runner",
         "telephony-common",
-        "android.car",
-        "android.car.userlib",
         "android.test.base",
     ],
     aaptflags: [
@@ -149,8 +143,6 @@ android_app {
 
     libs: [
         "telephony-common",
-        "android.car",
-        "android.car.userlib",
     ],
 
     dxflags: ["--multi-dex"],
@@ -186,8 +178,6 @@ android_app {
     ],
     libs: [
         "telephony-common",
-        "android.car",
-        "android.car.userlib",
     ],
 
     srcs: [
