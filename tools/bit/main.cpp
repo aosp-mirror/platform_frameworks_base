@@ -662,6 +662,7 @@ run_phases(vector<Target*> targets, const Options& options)
     string dataPath = buildOut + "/target/product/" + buildDevice + "/data/";
     bool syncSystem = false;
     bool alwaysSyncSystem = false;
+    vector<string> systemFiles;
     vector<InstallApk> installApks;
     for (size_t i=0; i<targets.size(); i++) {
         Target* target = targets[i];
@@ -671,6 +672,7 @@ run_phases(vector<Target*> targets, const Options& options)
                 // System partition
                 if (starts_with(file, systemPath)) {
                     syncSystem = true;
+                    systemFiles.push_back(file);
                     if (!target->build) {
                         // If a system partition target didn't get built then
                         // it won't change we will always need to do adb sync
@@ -691,6 +693,19 @@ run_phases(vector<Target*> targets, const Options& options)
     map<string,FileInfo> systemFilesBefore;
     if (syncSystem && !alwaysSyncSystem) {
         get_directory_contents(systemPath, &systemFilesBefore);
+    }
+
+    if (systemFiles.size() > 0){
+        print_info("System files:");
+        for (size_t i=0; i<systemFiles.size(); i++) {
+            printf("  %s\n", systemFiles[i].c_str());
+        }
+    }
+    if (installApks.size() > 0){
+        print_info("APKs to install:");
+        for (size_t i=0; i<installApks.size(); i++) {
+            printf("  %s\n", installApks[i].file.filename.c_str());
+        }
     }
 
     //
@@ -799,7 +814,8 @@ run_phases(vector<Target*> targets, const Options& options)
             for (size_t j=0; j<target->module.installed.size(); j++) {
                 string filename = target->module.installed[j];
 
-                if (!ends_with(filename, ".apk")) {
+                // Apk in the data partition
+                if (!starts_with(filename, dataPath) || !ends_with(filename, ".apk")) {
                     continue;
                 }
 
