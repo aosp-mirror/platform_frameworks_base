@@ -254,6 +254,15 @@ public abstract class AugmentedAutofillService extends Service {
         @GuardedBy("mLock")
         private AutofillValue mFocusedValue;
 
+        /**
+         * Id of the last field that cause the Autofill UI to be shown.
+         *
+         * <p>Used to make sure the SmartSuggestionsParams is updated when a new fields is focused.
+         */
+        // TODO(b/111330312): might not be needed when using IME
+        @GuardedBy("mLock")
+        private AutofillId mLastShownId;
+
         // Objects used to log metrics
         private final long mRequestTime;
         private long mOnSuccessTime;
@@ -284,7 +293,7 @@ public abstract class AugmentedAutofillService extends Service {
         @NonNull
         public SystemPopupPresentationParams getSmartSuggestionParams() {
             synchronized (mLock) {
-                if (mSmartSuggestion != null) {
+                if (mSmartSuggestion != null && mFocusedId.equals(mLastShownId)) {
                     return mSmartSuggestion;
                 }
                 Rect rect;
@@ -299,6 +308,7 @@ public abstract class AugmentedAutofillService extends Service {
                     return null;
                 }
                 mSmartSuggestion = new SystemPopupPresentationParams(this, rect);
+                mLastShownId = mFocusedId;
                 return mSmartSuggestion;
             }
         }
@@ -400,6 +410,9 @@ public abstract class AugmentedAutofillService extends Service {
             pw.print(prefix); pw.print("focusedId: "); pw.println(mFocusedId);
             if (mFocusedValue != null) {
                 pw.print(prefix); pw.print("focusedValue: "); pw.println(mFocusedValue);
+            }
+            if (mLastShownId != null) {
+                pw.print(prefix); pw.print("lastShownId: "); pw.println(mLastShownId);
             }
             pw.print(prefix); pw.print("client: "); pw.println(mClient);
             final String prefix2 = prefix + "  ";
