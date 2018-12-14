@@ -19,7 +19,7 @@ package android.service.notification;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -179,13 +179,13 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param isExpanded whether the notification is expanded.
      */
     public void onNotificationExpansionChanged(
-            String key, boolean isUserAction, boolean isExpanded) {}
+            @NonNull String key, boolean isUserAction, boolean isExpanded) {}
 
     /**
      * Implement this to know when a direct reply is sent from a notification.
      * @param key the notification key
      */
-    public void onNotificationDirectReply(String key) {}
+    public void onNotificationDirectReply(@NonNull String key) {}
 
     /**
      * Implement this to know when a suggested reply is sent.
@@ -193,7 +193,9 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param reply the reply that is just sent
      * @param source the source that provided the reply, e.g. SOURCE_FROM_APP
      */
-    public void onSuggestedReplySent(String key, CharSequence reply, @Source int source) {}
+    public void onSuggestedReplySent(@NonNull String key, @NonNull CharSequence reply,
+            @Source int source) {
+    }
 
     /**
      * Implement this to know when an action is clicked.
@@ -201,7 +203,8 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param action the action that is just clicked
      * @param source the source that provided the action, e.g. SOURCE_FROM_APP
      */
-    public void onActionClicked(String key, @Nullable Notification.Action action, int source) {
+    public void onActionClicked(@NonNull String key, @NonNull Notification.Action action,
+            @Source int source) {
     }
 
     /**

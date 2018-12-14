@@ -80,6 +80,8 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private static final String LOG_TAG = DEFAULT_LOG_TAG;
 
+    private static final boolean DEBUG = false;
+
     private static final File FACTORY_MODEL_DIR = new File("/etc/textclassifier/");
     // Annotator
     private static final String ANNOTATOR_FACTORY_MODEL_FILENAME_REGEX =
@@ -108,6 +110,8 @@ public final class TextClassifierImpl implements TextClassifier {
     private AnnotatorModel mAnnotatorImpl;
     @GuardedBy("mLock") // Do not access outside this lock.
     private LangIdModel mLangIdImpl;
+    @GuardedBy("mLock") // Do not access outside this lock.
+    private ModelFileManager.ModelFile mActionModelInUse;
     @GuardedBy("mLock") // Do not access outside this lock.
     private ActionsSuggestionsModel mActionsImpl;
 
@@ -342,8 +346,10 @@ public final class TextClassifierImpl implements TextClassifier {
     }
 
     @Override
-    public void onTextClassifierEvent(@NonNull TextClassifierEvent event) {
-        // TODO: Implement.
+    public void onTextClassifierEvent(TextClassifierEvent event) {
+        if (DEBUG) {
+            Log.d(DEFAULT_LOG_TAG, "onTextClassifierEvent() called with: event = [" + event + "]");
+        }
     }
 
     /** @inheritDoc */
@@ -408,7 +414,12 @@ public final class TextClassifierImpl implements TextClassifier {
                                 .setConfidenceScore(nativeSuggestion.getScore())
                                 .build());
             }
-            return new ConversationActions(conversationActions, /*id*/ null);
+            String resultId = ActionsSuggestionsHelper.createResultId(
+                    mContext,
+                    request.getConversation(),
+                    mActionModelInUse.getVersion(),
+                    mActionModelInUse.getSupportedLocales());
+            return new ConversationActions(conversationActions, resultId);
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.
             Log.e(LOG_TAG, "Error suggesting conversation actions.", t);
@@ -517,6 +528,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 try {
                     if (pfd != null) {
                         mActionsImpl = new ActionsSuggestionsModel(pfd.getFd());
+                        mActionModelInUse = bestModel;
                     }
                 } finally {
                     maybeCloseAndLogError(pfd);
