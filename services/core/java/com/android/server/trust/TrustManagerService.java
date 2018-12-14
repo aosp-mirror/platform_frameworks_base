@@ -19,12 +19,16 @@ package com.android.server.trust;
 import android.Manifest;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.AlarmManager.OnAlarmListener;
 import android.app.admin.DevicePolicyManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.app.trust.ITrustListener;
 import android.app.trust.ITrustManager;
+import android.app.UserSwitchObserver;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -35,7 +39,9 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.DeadObjectException;
@@ -50,6 +56,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.trust.TrustAgentService;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -58,11 +65,13 @@ import android.util.SparseBooleanArray;
 import android.util.Xml;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -106,8 +115,11 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_STOP_USER = 12;
     private static final int MSG_DISPATCH_UNLOCK_LOCKOUT = 13;
     private static final int MSG_REFRESH_DEVICE_LOCKED_FOR_USER = 14;
+    private static final int MSG_SCHEDULE_TRUST_TIMEOUT = 15;
 
     private static final int TRUST_USUALLY_MANAGED_FLUSH_DELAY = 2 * 60 * 1000;
+    private static final String TRUST_TIMEOUT_ALARM_TAG = "TrustManagerService.trustTimeoutForUser";
+    private static final long TRUST_TIMEOUT_IN_MILLIS = 20 * 1000; //4 * 60 * 60 * 1000;
 
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<>();
@@ -132,6 +144,11 @@ public class TrustManagerService extends SystemService {
     @GuardedBy("mUsersUnlockedByBiometric")
     private final SparseBooleanArray mUsersUnlockedByBiometric = new SparseBooleanArray();
 
+    private final ArrayMap<Integer, TrustTimeoutAlarmListener> mTrustTimeoutAlarmListenerForUser =
+            new ArrayMap<>();
+    private AlarmManager mAlarmManager;
+    private final SettingsObserver mSettingsObserver;
+
     private final StrongAuthTracker mStrongAuthTracker;
 
     private boolean mTrustAgentsCanRun = false;
@@ -144,6 +161,8 @@ public class TrustManagerService extends SystemService {
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         mLockPatternUtils = new LockPatternUtils(context);
         mStrongAuthTracker = new StrongAuthTracker(context);
+        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        mSettingsObserver = new SettingsObserver(mHandler);
     }
 
     @Override
@@ -170,7 +189,130 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    // Agent management
+    // Extend unlock config and logic
+
+    private final class SettingsObserver extends ContentObserver {
+        private final Uri TRUST_AGENTS_EXTEND_UNLOCK =
+                Settings.Secure.getUriFor(Settings.Secure.TRUST_AGENTS_EXTEND_UNLOCK);
+
+        private final Uri LOCK_SCREEN_WHEN_TRUST_LOST =
+                Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_WHEN_TRUST_LOST);
+
+        private final ContentResolver mContentResolver;
+        private boolean mTrustAgentsExtendUnlock;
+        private boolean mLockWhenTrustLost;
+
+        /**
+         * Creates a settings observer
+         *
+         * @param handler The handler to run {@link #onChange} on, or null if none.
+         */
+        SettingsObserver(Handler handler) {
+            super(handler);
+            mContentResolver = getContext().getContentResolver();
+            updateContentObserver();
+        }
+
+        void updateContentObserver() {
+            mContentResolver.unregisterContentObserver(this);
+            mContentResolver.registerContentObserver(TRUST_AGENTS_EXTEND_UNLOCK,
+                    false /* notifyForDescendents */,
+                    this /* observer */,
+                    mCurrentUser);
+            mContentResolver.registerContentObserver(LOCK_SCREEN_WHEN_TRUST_LOST,
+                    false /* notifyForDescendents */,
+                    this /* observer */,
+                    mCurrentUser);
+
+            // Update the value immediately
+            onChange(true /* selfChange */, TRUST_AGENTS_EXTEND_UNLOCK);
+            onChange(true /* selfChange */, LOCK_SCREEN_WHEN_TRUST_LOST);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (TRUST_AGENTS_EXTEND_UNLOCK.equals(uri)) {
+                mTrustAgentsExtendUnlock =
+                        Settings.Secure.getIntForUser(
+                                mContentResolver,
+                                Settings.Secure.TRUST_AGENTS_EXTEND_UNLOCK,
+                                0 /* default */,
+                                mCurrentUser) != 0;
+            } else if (LOCK_SCREEN_WHEN_TRUST_LOST.equals(uri)) {
+                mLockWhenTrustLost =
+                        Settings.Secure.getIntForUser(
+                                mContentResolver,
+                                Settings.Secure.LOCK_SCREEN_WHEN_TRUST_LOST,
+                                0 /* default */,
+                                mCurrentUser) != 0;
+            }
+        }
+
+        boolean getTrustAgentsExtendUnlock() {
+            return mTrustAgentsExtendUnlock;
+        }
+
+        boolean getLockWhenTrustLost() {
+            return mLockWhenTrustLost;
+        }
+    }
+
+    private void maybeLockScreen(int userId) {
+        if (userId != mCurrentUser) {
+            return;
+        }
+
+        if (mSettingsObserver.getLockWhenTrustLost()) {
+            if (DEBUG) Slog.d(TAG, "Locking device because trust was lost");
+            try {
+                WindowManagerGlobal.getWindowManagerService().lockNow(null);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error locking screen when trust was lost");
+            }
+
+            // If active unlocking is not allowed, cancel any pending trust timeouts because the
+            // screen is already locked.
+            TrustTimeoutAlarmListener alarm = mTrustTimeoutAlarmListenerForUser.get(userId);
+            if (alarm != null && mSettingsObserver.getTrustAgentsExtendUnlock()) {
+                mAlarmManager.cancel(alarm);
+                alarm.setQueued(false /* isQueued */);
+            }
+        }
+    }
+
+    private void scheduleTrustTimeout(int userId, boolean override) {
+        int shouldOverride = override ? 1 : 0;
+        if (override) {
+            shouldOverride = 1;
+        }
+        mHandler.obtainMessage(MSG_SCHEDULE_TRUST_TIMEOUT, userId, shouldOverride).sendToTarget();
+    }
+
+    private void handleScheduleTrustTimeout(int userId, int shouldOverride) {
+        long when = SystemClock.elapsedRealtime() + TRUST_TIMEOUT_IN_MILLIS;
+        userId = mCurrentUser;
+        TrustTimeoutAlarmListener alarm = mTrustTimeoutAlarmListenerForUser.get(userId);
+
+        // Cancel existing trust timeouts for this user if needed.
+        if (alarm != null) {
+            if (shouldOverride == 0 && alarm.isQueued()) {
+                if (DEBUG) Slog.d(TAG, "Found existing trust timeout alarm. Skipping.");
+                return;
+            }
+            mAlarmManager.cancel(alarm);
+        } else {
+            alarm = new TrustTimeoutAlarmListener(userId);
+            mTrustTimeoutAlarmListenerForUser.put(userId, alarm);
+        }
+
+        if (DEBUG) Slog.d(TAG, "\tSetting up trust timeout alarm");
+        alarm.setQueued(true /* isQueued */);
+        mAlarmManager.setExact(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP, when, TRUST_TIMEOUT_ALARM_TAG, alarm,
+                mHandler);
+    }
+
+   // Agent management
 
     private static final class AgentInfo {
         CharSequence label;
@@ -202,14 +344,36 @@ public class TrustManagerService extends SystemService {
         }
     }
 
+
     public void updateTrust(int userId, int flags) {
+        updateTrust(userId, flags, false /* isFromUnlock */);
+    }
+
+    private void updateTrust(int userId, int flags, boolean isFromUnlock) {
         boolean managed = aggregateIsTrustManaged(userId);
         dispatchOnTrustManagedChanged(managed, userId);
         if (mStrongAuthTracker.isTrustAllowedForUser(userId)
                 && isTrustUsuallyManagedInternal(userId) != managed) {
             updateTrustUsuallyManaged(userId, managed);
         }
+
         boolean trusted = aggregateIsTrusted(userId);
+        IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+        boolean showingKeyguard = true;
+        try {
+            showingKeyguard = wm.isKeyguardLocked();
+        } catch (RemoteException e) {
+        }
+
+        if (mSettingsObserver.getTrustAgentsExtendUnlock()) {
+            trusted = trusted && (!showingKeyguard || isFromUnlock) && userId == mCurrentUser;
+            if (DEBUG) {
+                Slog.d(TAG, "Extend unlock setting trusted as " + Boolean.toString(trusted)
+                        + " && " + Boolean.toString(!showingKeyguard)
+                        + " && " + Boolean.toString(userId == mCurrentUser));
+            }
+        }
+
         boolean changed;
         synchronized (mUserIsTrusted) {
             changed = mUserIsTrusted.get(userId) != trusted;
@@ -218,6 +382,11 @@ public class TrustManagerService extends SystemService {
         dispatchOnTrustChanged(trusted, userId, flags);
         if (changed) {
             refreshDeviceLockedForUser(userId);
+            if (!trusted) {
+                maybeLockScreen(userId);
+            } else {
+                scheduleTrustTimeout(userId, false /* override */);
+            }
         }
     }
 
@@ -704,6 +873,8 @@ public class TrustManagerService extends SystemService {
     private void dispatchUnlockAttempt(boolean successful, int userId) {
         if (successful) {
             mStrongAuthTracker.allowTrustFromUnlock(userId);
+            // Allow the presence of trust on a successful unlock attempt to extend unlock.
+            updateTrust(userId, 0 /* flags */, true);
         }
 
         for (int i = 0; i < mActiveAgents.size(); i++) {
@@ -1033,8 +1204,11 @@ public class TrustManagerService extends SystemService {
             synchronized(mUsersUnlockedByBiometric) {
                 mUsersUnlockedByBiometric.put(userId, true);
             }
+            // In extend unlock mode we need to refresh trust state here, which will call
+            // refreshDeviceLockedForUser()
+            int updateTrustOnUnlock = mSettingsObserver.getTrustAgentsExtendUnlock() ? 1 : 0;
             mHandler.obtainMessage(MSG_REFRESH_DEVICE_LOCKED_FOR_USER, userId,
-                    0 /* arg2 */).sendToTarget();
+                    updateTrustOnUnlock).sendToTarget();
         }
 
         @Override
@@ -1114,6 +1288,7 @@ public class TrustManagerService extends SystemService {
                     break;
                 case MSG_SWITCH_USER:
                     mCurrentUser = msg.arg1;
+                    mSettingsObserver.updateContentObserver();
                     refreshDeviceLockedForUser(UserHandle.USER_ALL);
                     break;
                 case MSG_STOP_USER:
@@ -1134,7 +1309,13 @@ public class TrustManagerService extends SystemService {
                     }
                     break;
                 case MSG_REFRESH_DEVICE_LOCKED_FOR_USER:
+                    if (msg.arg2 == 1) {
+                        updateTrust(msg.arg1, 0 /* flags */, true);
+                    }
                     refreshDeviceLockedForUser(msg.arg1);
+                    break;
+                case MSG_SCHEDULE_TRUST_TIMEOUT:
+                    handleScheduleTrustTimeout(msg.arg1, msg.arg2);
                     break;
             }
         }
@@ -1245,6 +1426,15 @@ public class TrustManagerService extends SystemService {
                         + " agentsCanRun=" + canAgentsRunForUser(userId));
             }
 
+            // Cancel pending alarms if we require some auth anyway.
+            if (!isTrustAllowedForUser(userId)) {
+                TrustTimeoutAlarmListener alarm = mTrustTimeoutAlarmListenerForUser.get(userId);
+                if (alarm != null && alarm.isQueued()) {
+                    alarm.setQueued(false /* isQueued */);
+                    mAlarmManager.cancel(alarm);
+                }
+            }
+
             refreshAgentList(userId);
 
             // The list of active trust agents may not have changed, if there was a previous call
@@ -1281,6 +1471,37 @@ public class TrustManagerService extends SystemService {
             if (canAgentsRunForUser(userId) != previous) {
                 refreshAgentList(userId);
             }
+        }
+    }
+
+    private class TrustTimeoutAlarmListener implements OnAlarmListener {
+        private final int mUserId;
+        private boolean mIsQueued = false;
+
+        TrustTimeoutAlarmListener(int userId) {
+            mUserId = userId;
+        }
+
+        @Override
+        public void onAlarm() {
+            mIsQueued = false;
+            int strongAuthState = mStrongAuthTracker.getStrongAuthForUser(mUserId);
+
+            // Only fire if trust can unlock.
+            if (mStrongAuthTracker.isTrustAllowedForUser(mUserId)) {
+                if (DEBUG) Slog.d(TAG, "Revoking all trust because of trust timeout");
+                mLockPatternUtils.requireStrongAuth(
+                        mStrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST, mUserId);
+            }
+            maybeLockScreen(mUserId);
+        }
+
+        public void setQueued(boolean isQueued) {
+            mIsQueued = isQueued;
+        }
+
+        public boolean isQueued() {
+            return mIsQueued;
         }
     }
 }

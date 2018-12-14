@@ -7867,6 +7867,24 @@ public final class Settings {
         public static final String ASSIST_GESTURE_SETUP_COMPLETE = "assist_gesture_setup_complete";
 
         /**
+         * Control whether Trust Agents are in active unlock or extend unlock mode.
+         * @hide
+         */
+        public static final String TRUST_AGENTS_EXTEND_UNLOCK = "trust_agents_extend_unlock";
+
+        private static final Validator TRUST_AGENTS_EXTEND_UNLOCK_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Control whether the screen locks when trust is lost.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_WHEN_TRUST_LOST = "lock_screen_when_trust_lost";
+
+        private static final Validator LOCK_SCREEN_WHEN_TRUST_LOST_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * Control whether Night display is currently activated.
          * @hide
          */
@@ -8382,6 +8400,8 @@ public final class Settings {
             ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS,
             ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
             NOTIFICATION_NEW_INTERRUPTION_MODEL,
+            TRUST_AGENTS_EXTEND_UNLOCK,
+            LOCK_SCREEN_WHEN_TRUST_LOST,
         };
 
         /**
@@ -8543,6 +8563,8 @@ public final class Settings {
             VALIDATORS.put(USER_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_NEW_INTERRUPTION_MODEL, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(TRUST_AGENTS_EXTEND_UNLOCK, TRUST_AGENTS_EXTEND_UNLOCK_VALIDATOR);
+            VALIDATORS.put(LOCK_SCREEN_WHEN_TRUST_LOST, LOCK_SCREEN_WHEN_TRUST_LOST_VALIDATOR);
         }
 
         /**
