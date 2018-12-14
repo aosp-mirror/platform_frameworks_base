@@ -17,8 +17,10 @@
 package android.os;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.opengl.EGL14;
@@ -57,9 +59,9 @@ public class GraphicsEnvironment {
     private static final String TAG = "GraphicsEnvironment";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
     private static final String PROPERTY_GFX_DRIVER_WHITELIST = "ro.gfx.driver.whitelist.0";
-    private static final String ANGLE_PACKAGE_NAME = "com.google.android.angle";
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
+    private static final String ACTION_ANGLE_FOR_ANDROID = "android.app.action.ANGLE_FOR_ANDROID";
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -276,6 +278,27 @@ public class GraphicsEnvironment {
     }
 
     /**
+     * Get the ANGLE package name.
+     */
+    private String getAnglePackageName(Context context) {
+        Intent intent = new Intent(ACTION_ANGLE_FOR_ANDROID);
+
+        List<ResolveInfo> resolveInfos = context.getPackageManager()
+                .queryIntentActivities(intent, PackageManager.MATCH_SYSTEM_ONLY);
+        if (resolveInfos.size() != 1) {
+            Log.e(TAG, "Invalid number of ANGLE packages. Required: 1, Found: "
+                    + resolveInfos.size());
+            for (ResolveInfo resolveInfo : resolveInfos) {
+                Log.e(TAG, "Found ANGLE package: " + resolveInfo.activityInfo.packageName);
+            }
+            return "";
+        }
+
+        // Must be exactly 1 ANGLE PKG found to get here.
+        return resolveInfos.get(0).activityInfo.packageName;
+    }
+
+    /**
      * Pass ANGLE details down to trigger enable logic
      */
     private void setupAngle(Context context, Bundle bundle, String packageName) {
@@ -286,12 +309,18 @@ public class GraphicsEnvironment {
                     + "set to: '" + devOptIn + "'");
         }
 
+        String anglePkgName = getAnglePackageName(context);
+        if (anglePkgName.isEmpty()) {
+            Log.e(TAG, "Failed to find ANGLE package.");
+            return;
+        }
+
         ApplicationInfo angleInfo;
         try {
-            angleInfo = context.getPackageManager().getApplicationInfo(ANGLE_PACKAGE_NAME,
+            angleInfo = context.getPackageManager().getApplicationInfo(anglePkgName,
                 PackageManager.MATCH_SYSTEM_ONLY);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "ANGLE package '" + ANGLE_PACKAGE_NAME + "' not installed");
+            Log.w(TAG, "ANGLE package '" + anglePkgName + "' not installed");
             return;
         }
 
@@ -351,7 +380,7 @@ public class GraphicsEnvironment {
                 angleAssets =
                     context.getPackageManager().getResourcesForApplication(angleInfo).getAssets();
             } catch (PackageManager.NameNotFoundException e) {
-                Log.w(TAG, "Failed to get AssetManager for '" + ANGLE_PACKAGE_NAME + "'");
+                Log.w(TAG, "Failed to get AssetManager for '" + anglePkgName + "'");
                 return;
             }
 
@@ -360,7 +389,7 @@ public class GraphicsEnvironment {
                 assetsFd = angleAssets.openFd(ANGLE_RULES_FILE);
             } catch (IOException e) {
                 Log.w(TAG, "Failed to get AssetFileDescriptor for " + ANGLE_RULES_FILE + " from "
-                           + "'" + ANGLE_PACKAGE_NAME + "'");
+                           + "'" + anglePkgName + "'");
                 return;
             }
 
