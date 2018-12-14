@@ -334,6 +334,11 @@ public abstract class WindowManagerInternal {
     public abstract void registerAppTransitionListener(AppTransitionListener listener);
 
     /**
+     * Reports that the password for the given user has changed.
+     */
+    public abstract void reportPasswordChanged(int userId);
+
+    /**
      * Retrieves a height of input method window for given display.
      */
     public abstract int getInputMethodWindowVisibleHeight(int displayId);

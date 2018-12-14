@@ -22,6 +22,7 @@ import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
+import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
@@ -72,7 +73,6 @@ import static com.android.internal.util.LatencyTracker.ACTION_ROTATE_SCREEN;
 import static com.android.server.LockGuard.INDEX_WINDOW;
 import static com.android.server.LockGuard.installLock;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.KeyguardDisableHandler.KEYGUARD_POLICY_CHANGED;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
@@ -181,7 +181,6 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.MergedConfiguration;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -235,6 +234,7 @@ import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.LatencyTracker;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AnimationThread;
@@ -396,7 +396,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED:
-                    mKeyguardDisableHandler.sendEmptyMessage(KEYGUARD_POLICY_CHANGED);
+                    mKeyguardDisableHandler.updateKeyguardEnabled(getSendingUserId());
                     break;
             }
         }
@@ -961,7 +961,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
 
-        mKeyguardDisableHandler = new KeyguardDisableHandler(mContext, mPolicy);
+        mKeyguardDisableHandler = KeyguardDisableHandler.create(mContext, mPolicy, mH);
 
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
@@ -1040,7 +1040,7 @@ public class WindowManagerService extends IWindowManager.Stub
         IntentFilter filter = new IntentFilter();
         // Track changes to DevicePolicyManager state so we can enable/disable keyguard.
         filter.addAction(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        mContext.registerReceiver(mBroadcastReceiver, filter);
+        mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
 
         mLatencyTracker = LatencyTracker.getInstance(context);
 
@@ -2817,45 +2817,38 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void disableKeyguard(IBinder token, String tag) {
+    public void disableKeyguard(IBinder token, String tag, int userId) {
+        userId = mAmInternal.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false /* allowAll */, ALLOW_FULL_ONLY, "disableKeyguard", null);
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
-        // If this isn't coming from the system then don't allow disabling the lockscreen
-        // to bypass security.
-        if (Binder.getCallingUid() != SYSTEM_UID && isKeyguardSecure()) {
-            Log.d(TAG_WM, "current mode is SecurityMode, ignore disableKeyguard");
-            return;
+        final int callingUid = Binder.getCallingUid();
+        final long origIdentity = Binder.clearCallingIdentity();
+        try {
+            mKeyguardDisableHandler.disableKeyguard(token, tag, callingUid, userId);
+        } finally {
+            Binder.restoreCallingIdentity(origIdentity);
         }
-
-        // If this isn't coming from the current profiles, ignore it.
-        if (!isCurrentProfileLocked(UserHandle.getCallingUserId())) {
-            Log.d(TAG_WM, "non-current profiles, ignore disableKeyguard");
-            return;
-        }
-
-        if (token == null) {
-            throw new IllegalArgumentException("token == null");
-        }
-
-        mKeyguardDisableHandler.sendMessage(mKeyguardDisableHandler.obtainMessage(
-                KeyguardDisableHandler.KEYGUARD_DISABLE, new Pair<IBinder, String>(token, tag)));
     }
 
     @Override
-    public void reenableKeyguard(IBinder token) {
+    public void reenableKeyguard(IBinder token, int userId) {
+        userId = mAmInternal.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false /* allowAll */, ALLOW_FULL_ONLY, "reenableKeyguard", null);
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
-
-        if (token == null) {
-            throw new IllegalArgumentException("token == null");
+        Preconditions.checkNotNull(token, "token is null");
+        final int callingUid = Binder.getCallingUid();
+        final long origIdentity = Binder.clearCallingIdentity();
+        try {
+            mKeyguardDisableHandler.reenableKeyguard(token, callingUid, userId);
+        } finally {
+            Binder.restoreCallingIdentity(origIdentity);
         }
-
-        mKeyguardDisableHandler.sendMessage(mKeyguardDisableHandler.obtainMessage(
-                KeyguardDisableHandler.KEYGUARD_REENABLE, token));
     }
 
     /**
@@ -3139,11 +3132,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mCurrentUserId = newUserId;
             mCurrentProfileIds = currentProfileIds;
             mPolicy.setCurrentUserLw(newUserId);
-
-            // If keyguard was disabled, re-enable it
-            // TODO: Keep track of keyguardEnabled state per user and use here...
-            // e.g. enabled = mKeyguardDisableHandler.getEnabledStateForUser(newUserId);
-            mPolicy.enableKeyguard(true);
+            mKeyguardDisableHandler.setCurrentUser(newUserId);
 
             // Hide windows that should not be seen by the new user.
             mRoot.switchUser();
@@ -7121,6 +7110,11 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 getDefaultDisplayContentLocked().mAppTransition.registerListenerLocked(listener);
             }
+        }
+
+        @Override
+        public void reportPasswordChanged(int userId) {
+            mKeyguardDisableHandler.updateKeyguardEnabled(userId);
         }
 
         @Override
