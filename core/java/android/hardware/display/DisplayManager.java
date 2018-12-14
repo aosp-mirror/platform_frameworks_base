@@ -563,11 +563,16 @@ public final class DisplayManager {
      * 0 produces a grayscale image, 1 is normal.
      *
      * @hide
+     * @deprecated use {@link ColorDisplayManager#setSaturationLevel(int)}.
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_SATURATION)
     public void setSaturationLevel(float level) {
-        mGlobal.setSaturationLevel(level);
+        if (level < 0f || level > 1f) {
+            throw new IllegalArgumentException("Saturation level must be between 0 and 1");
+        }
+        final ColorDisplayManager cdm = mContext.getSystemService(ColorDisplayManager.class);
+        cdm.setSaturationLevel(Math.round(level * 100f));
     }
 
     /**

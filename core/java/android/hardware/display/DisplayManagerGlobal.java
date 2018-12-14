@@ -394,17 +394,6 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    /**
-     * Set the level of color saturation to apply to the display.
-     */
-    public void setSaturationLevel(float level) {
-        try {
-            mDm.setSaturationLevel(level);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
     public VirtualDisplay createVirtualDisplay(Context context, MediaProjection projection,
             String name, int width, int height, int densityDpi, Surface surface, int flags,
             VirtualDisplay.Callback callback, Handler handler, String uniqueId) {

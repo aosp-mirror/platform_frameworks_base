@@ -1541,6 +1541,10 @@ package android.hardware.display {
     field public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessCorrection> CREATOR;
   }
 
+  public final class ColorDisplayManager {
+    method public boolean setSaturationLevel(int);
+  }
+
   public final class DisplayManager {
     method public java.util.List<android.hardware.display.AmbientBrightnessDayStats> getAmbientBrightnessStats();
     method public android.hardware.display.BrightnessConfiguration getBrightnessConfiguration();
@@ -1549,7 +1553,7 @@ package android.hardware.display {
     method public android.util.Pair<float[], float[]> getMinimumBrightnessCurve();
     method public android.graphics.Point getStableDisplaySize();
     method public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
-    method public void setSaturationLevel(float);
+    method public deprecated void setSaturationLevel(float);
   }
 
 }

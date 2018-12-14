@@ -16,7 +16,9 @@
 
 package android.hardware.display;
 
+import android.Manifest;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.IBinder;
@@ -31,6 +33,7 @@ import com.android.internal.R;
  *
  * @hide
  */
+@SystemApi
 @SystemService(Context.COLOR_DISPLAY_SERVICE)
 public final class ColorDisplayManager {
 
@@ -48,13 +51,29 @@ public final class ColorDisplayManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
     public boolean isDeviceColorManaged() {
         return mManager.isDeviceColorManaged();
     }
 
     /**
+     * Set the level of color saturation to apply to the display.
+     *
+     * @param saturationLevel 0-100 (inclusive), where 100 is full saturation
+     * @return whether the saturation level change was applied successfully
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
+    public boolean setSaturationLevel(int saturationLevel) {
+        return mManager.setSaturationLevel(saturationLevel);
+    }
+
+    /**
      * Returns {@code true} if Night Display is supported by the device.
+     *
+     * @hide
      */
     public static boolean isNightDisplayAvailable(Context context) {
         return context.getResources().getBoolean(R.bool.config_nightDisplayAvailable);
@@ -62,6 +81,8 @@ public final class ColorDisplayManager {
 
     /**
      * Returns {@code true} if display white balance is supported by the device.
+     *
+     * @hide
      */
     public static boolean isDisplayWhiteBalanceAvailable(Context context) {
         return context.getResources().getBoolean(R.bool.config_displayWhiteBalanceAvailable);
@@ -95,6 +116,14 @@ public final class ColorDisplayManager {
         boolean isDeviceColorManaged() {
             try {
                 return mCdm.isDeviceColorManaged();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        boolean setSaturationLevel(int saturationLevel) {
+            try {
+                return mCdm.setSaturationLevel(saturationLevel);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
