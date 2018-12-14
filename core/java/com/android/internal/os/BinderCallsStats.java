@@ -80,7 +80,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
     private final Queue<CallSession> mCallSessionsPool = new ConcurrentLinkedQueue<>();
     private final Object mLock = new Object();
     private final Random mRandom;
-    private long mStartTime = System.currentTimeMillis();
+    private long mStartCurrentTime = System.currentTimeMillis();
+    private long mStartElapsedTime = SystemClock.elapsedRealtime();
     private long mCallStatsCount = 0;
     private boolean mAddDebugEntries = false;
 
@@ -329,8 +330,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
         // Debug entries added to help validate the data.
         if (mAddDebugEntries && mBatteryStopwatch != null) {
-            resultCallStats.add(createDebugEntry("start_time_millis", mStartTime));
-            resultCallStats.add(createDebugEntry("end_time_millis", System.currentTimeMillis()));
+            resultCallStats.add(createDebugEntry("start_time_millis", mStartElapsedTime));
+            resultCallStats.add(createDebugEntry("end_time_millis", SystemClock.elapsedRealtime()));
             resultCallStats.add(
                     createDebugEntry("battery_time_millis", mBatteryStopwatch.getMillis()));
         }
@@ -370,7 +371,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         long totalRecordedCallsCount = 0;
         long totalCpuTime = 0;
         pw.print("Start time: ");
-        pw.println(DateFormat.format("yyyy-MM-dd HH:mm:ss", mStartTime));
+        pw.println(DateFormat.format("yyyy-MM-dd HH:mm:ss", mStartCurrentTime));
         pw.print("On battery time (ms): ");
         pw.println(mBatteryStopwatch != null ? mBatteryStopwatch.getMillis() : 0);
         pw.println("Sampling interval period: " + mPeriodicSamplingInterval);
@@ -520,7 +521,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
             mCallStatsCount = 0;
             mUidEntries.clear();
             mExceptionCounts.clear();
-            mStartTime = System.currentTimeMillis();
+            mStartCurrentTime = System.currentTimeMillis();
+            mStartElapsedTime = SystemClock.elapsedRealtime();
             if (mBatteryStopwatch != null) {
                 mBatteryStopwatch.reset();
             }
