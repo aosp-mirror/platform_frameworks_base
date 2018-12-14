@@ -212,7 +212,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         removeStackReferenceIfNeeded(stack);
         releaseSelfIfNeeded();
         mService.updateSleepIfNeededLocked();
-        onStackOrderChanged();
+        onStackOrderChanged(stack);
     }
 
     void positionChildAtTop(ActivityStack stack, boolean includingParents) {
@@ -280,7 +280,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         if (!wasContained) {
             stack.setParent(this);
         }
-        onStackOrderChanged();
+        onStackOrderChanged(stack);
     }
 
     private int getTopInsertPosition(ActivityStack stack, int candidatePosition) {
@@ -1309,9 +1309,13 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         mStackOrderChangedCallbacks.remove(listener);
     }
 
-    private void onStackOrderChanged() {
+    /**
+     * Notifies of a stack order change
+     * @param stack The stack which triggered the order change
+     */
+    private void onStackOrderChanged(ActivityStack stack) {
         for (int i = mStackOrderChangedCallbacks.size() - 1; i >= 0; i--) {
-            mStackOrderChangedCallbacks.get(i).onStackOrderChanged();
+            mStackOrderChangedCallbacks.get(i).onStackOrderChanged(stack);
         }
     }
 
@@ -1390,6 +1394,6 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
      * Callback for when the order of the stacks in the display changes.
      */
     interface OnStackOrderChangedListener {
-        void onStackOrderChanged();
+        void onStackOrderChanged(ActivityStack stack);
     }
 }

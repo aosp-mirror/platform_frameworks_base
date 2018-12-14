@@ -24,7 +24,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -65,22 +64,26 @@ public class RecentsAnimationTest extends ActivityTestsBase {
     }
 
     @Test
-    public void testCancelAnimationOnStackOrderChange() {
-        ActivityStack fullscreenStack =
-                mService.mRootActivityContainer.getDefaultDisplay().createStack(
-                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        ActivityStack recentsStack = mService.mRootActivityContainer.getDefaultDisplay().createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_RECENTS, true /* onTop */);
-        ActivityRecord recentsActivity = new ActivityBuilder(mService)
+    public void testCancelAnimationOnVisibleStackOrderChange() {
+        ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
+        ActivityStack fullscreenStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        new ActivityBuilder(mService)
+                .setComponent(new ComponentName(mContext.getPackageName(), "App1"))
+                .setCreateTask(true)
+                .setStack(fullscreenStack)
+                .build();
+        ActivityStack recentsStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_RECENTS, true /* onTop */);
+        new ActivityBuilder(mService)
                 .setComponent(mRecentsComponent)
                 .setCreateTask(true)
                 .setStack(recentsStack)
                 .build();
-        ActivityStack fullscreenStack2 =
-                mService.mRootActivityContainer.getDefaultDisplay().createStack(
-                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        ActivityRecord fsActivity = new ActivityBuilder(mService)
-                .setComponent(new ComponentName(mContext.getPackageName(), "App1"))
+        ActivityStack fullscreenStack2 = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        new ActivityBuilder(mService)
+                .setComponent(new ComponentName(mContext.getPackageName(), "App2"))
                 .setCreateTask(true)
                 .setStack(fullscreenStack2)
                 .build();
@@ -95,6 +98,44 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
         // Ensure that the recents animation was canceled
         verify(mService.mWindowManager, times(1)).cancelRecentsAnimationSynchronously(
+                eq(REORDER_KEEP_IN_PLACE), any());
+    }
+
+    @Test
+    public void testKeepAnimationOnHiddenStackOrderChange() {
+        ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
+        ActivityStack fullscreenStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        new ActivityBuilder(mService)
+                .setComponent(new ComponentName(mContext.getPackageName(), "App1"))
+                .setCreateTask(true)
+                .setStack(fullscreenStack)
+                .build();
+        ActivityStack recentsStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_RECENTS, true /* onTop */);
+        new ActivityBuilder(mService)
+                .setComponent(mRecentsComponent)
+                .setCreateTask(true)
+                .setStack(recentsStack)
+                .build();
+        ActivityStack fullscreenStack2 = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        new ActivityBuilder(mService)
+                .setComponent(new ComponentName(mContext.getPackageName(), "App2"))
+                .setCreateTask(true)
+                .setStack(fullscreenStack2)
+                .build();
+        doReturn(true).when(mService.mWindowManager).canStartRecentsAnimation();
+
+        // Start the recents animation
+        Intent recentsIntent = new Intent();
+        recentsIntent.setComponent(mRecentsComponent);
+        mService.startRecentsActivity(recentsIntent, null, mock(IRecentsAnimationRunner.class));
+
+        fullscreenStack.remove();
+
+        // Ensure that the recents animation was NOT canceled
+        verify(mService.mWindowManager, times(0)).cancelRecentsAnimationSynchronously(
                 eq(REORDER_KEEP_IN_PLACE), any());
     }
 }
