@@ -149,6 +149,8 @@ public class VibratorService extends IVibratorService.Stub
     native static boolean vibratorSupportsAmplitudeControl();
     native static void vibratorSetAmplitude(int amplitude);
     native static long vibratorPerformEffect(long effect, long strength);
+    static native boolean vibratorSupportsExternalControl();
+    static native void vibratorSetExternalControl(boolean enabled);
 
     private final IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
