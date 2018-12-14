@@ -4423,7 +4423,7 @@ public class NotificationManagerService extends SystemService {
             notification.flags &= ~Notification.FLAG_CAN_COLORIZE;
         }
 
-        if (ai.targetSdkVersion >= Build.VERSION_CODES.Q) {
+        if (notification.fullScreenIntent != null && ai.targetSdkVersion >= Build.VERSION_CODES.Q) {
             int fullscreenIntentPermission = mPackageManagerClient.checkPermission(
                     android.Manifest.permission.USE_FULL_SCREEN_INTENT, pkg);
             if (fullscreenIntentPermission != PERMISSION_GRANTED) {
