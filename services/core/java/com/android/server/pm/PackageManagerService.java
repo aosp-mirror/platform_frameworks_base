@@ -1064,9 +1064,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         + verificationId + " packageName:" + packageName);
                 return;
             }
-            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
-                    "Updating IntentFilterVerificationInfo for package " + packageName
-                            +" verificationId:" + verificationId);
 
             synchronized (mPackages) {
                 if (verified) {
@@ -1084,19 +1081,47 @@ public class PackageManagerService extends IPackageManager.Stub
                     int updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
                     boolean needUpdate = false;
 
-                    // We cannot override the STATUS_ALWAYS / STATUS_NEVER states if they have
-                    // already been set by the User thru the Disambiguation dialog
+                    if (DEBUG_DOMAIN_VERIFICATION) {
+                        Slog.d(TAG,
+                                "Updating IntentFilterVerificationInfo for package " + packageName
+                                + " verificationId:" + verificationId
+                                + " verified=" + verified);
+                    }
+
+                    // In a success case, we promote from undefined or ASK to ALWAYS.  This
+                    // supports a flow where the app fails validation but then ships an updated
+                    // APK that passes, and therefore deserves to be in ALWAYS.
+                    //
+                    // If validation failed, the undefined state winds up in the basic ASK behavior,
+                    // but apps that previously passed and became ALWAYS are *demoted* out of
+                    // that state, since they would not deserve the ALWAYS behavior in case of a
+                    // clean install.
                     switch (userStatus) {
+                        case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS:
+                            if (!verified) {
+                                // updatedStatus is already UNDEFINED
+                                needUpdate = true;
+
+                                if (DEBUG_DOMAIN_VERIFICATION) {
+                                    Slog.d(TAG, "Formerly validated but now failing; demoting");
+                                }
+                            }
+                            break;
+
                         case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED:
+                            // Stay in 'undefined' on verification failure
                             if (verified) {
                                 updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
-                            } else {
-                                updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
                             }
                             needUpdate = true;
+                            if (DEBUG_DOMAIN_VERIFICATION) {
+                                Slog.d(TAG, "Applying update; old=" + userStatus
+                                        + " new=" + updatedStatus);
+                            }
                             break;
 
                         case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK:
+                            // Keep in 'ask' on failure
                             if (verified) {
                                 updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
                                 needUpdate = true;
@@ -1112,6 +1137,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                 packageName, updatedStatus, userId);
                         scheduleWritePackageRestrictionsLocked(userId);
                     }
+                } else {
+                    Slog.i(TAG, "autoVerify ignored when installing for all users");
                 }
             }
         }
@@ -16708,6 +16735,7 @@ public class PackageManagerService extends IPackageManager.Stub
         int status = ivi.getStatus();
         switch (status) {
             case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED:
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS:
             case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK:
                 return true;
 
