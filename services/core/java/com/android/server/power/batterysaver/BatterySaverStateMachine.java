@@ -15,8 +15,14 @@
  */
 package com.android.server.power.batterysaver;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -26,6 +32,7 @@ import android.provider.Settings.Global;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
@@ -46,6 +53,8 @@ import java.io.PrintWriter;
  */
 public class BatterySaverStateMachine {
     private static final String TAG = "BatterySaverStateMachine";
+    private static final String DYNAMIC_MODE_NOTIF_CHANNEL_ID = "dynamic_mode_notification";
+    private static final int DYNAMIC_MODE_NOTIFICATION_ID = 1992;
     private final Object mLock;
 
     private static final boolean DEBUG = BatterySaverPolicy.DEBUG;
@@ -484,11 +493,56 @@ public class BatterySaverStateMachine {
         }
         mBatterySaverController.enableBatterySaver(enable, intReason);
 
+        // Handle triggering the notification to show/hide when appropriate
+        if (intReason == BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON) {
+            runOnBgThread(this::triggerDynamicModeNotification);
+        } else if (!enable) {
+            runOnBgThread(this::hideDynamicModeNotification);
+        }
+
         if (DEBUG) {
             Slog.d(TAG, "Battery saver: Enabled=" + enable
                     + " manual=" + manual
                     + " reason=" + strReason + "(" + intReason + ")");
         }
+    }
+
+    private void triggerDynamicModeNotification() {
+        NotificationManager manager = mContext.getSystemService(NotificationManager.class);
+        ensureNotificationChannelExists(manager);
+
+        manager.notify(DYNAMIC_MODE_NOTIFICATION_ID, buildNotification());
+    }
+
+    private void ensureNotificationChannelExists(NotificationManager manager) {
+        NotificationChannel channel = new NotificationChannel(
+                DYNAMIC_MODE_NOTIF_CHANNEL_ID,
+                mContext.getText(
+                        R.string.dynamic_mode_notification_channel_name),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setSound(null, null);
+        manager.createNotificationChannel(channel);
+    }
+
+    private Notification buildNotification() {
+        Resources res = mContext.getResources();
+        Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent batterySaverIntent = PendingIntent.getActivity(
+                mContext, 0 /* requestCode */, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        return new Notification.Builder(mContext, DYNAMIC_MODE_NOTIF_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_battery)
+                .setContentTitle(res.getString(R.string.dynamic_mode_notification_title))
+                .setContentText(res.getString(R.string.dynamic_mode_notification_summary))
+                .setContentIntent(batterySaverIntent)
+                .setOnlyAlertOnce(true)
+                .build();
+    }
+
+    private void hideDynamicModeNotification() {
+        NotificationManager manager = mContext.getSystemService(NotificationManager.class);
+        manager.cancel(DYNAMIC_MODE_NOTIFICATION_ID);
     }
 
     @GuardedBy("mLock")
