@@ -236,6 +236,15 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public float maxAspectRatio;
 
     /**
+     * Value indicating the minimum aspect ratio the activity supports.
+     * <p>
+     * 0 means unset.
+     * @See {@link android.R.attr#minAspectRatio}.
+     * @hide
+     */
+    public float minAspectRatio;
+
+    /**
      * Name of the VrListenerService component to run for this activity.
      * @see android.R.attr#enableVrMode
      * @hide
@@ -979,6 +988,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         rotationAnimation = orig.rotationAnimation;
         colorMode = orig.colorMode;
         maxAspectRatio = orig.maxAspectRatio;
+        minAspectRatio = orig.minAspectRatio;
     }
 
     /**
@@ -1142,6 +1152,9 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (maxAspectRatio != 0) {
             pw.println(prefix + "maxAspectRatio=" + maxAspectRatio);
         }
+        if (minAspectRatio != 0) {
+            pw.println(prefix + "minAspectRatio=" + minAspectRatio);
+        }
         super.dumpBack(pw, prefix, dumpFlags);
     }
 
@@ -1190,6 +1203,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeInt(rotationAnimation);
         dest.writeInt(colorMode);
         dest.writeFloat(maxAspectRatio);
+        dest.writeFloat(minAspectRatio);
     }
 
     /**
@@ -1309,6 +1323,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         rotationAnimation = source.readInt();
         colorMode = source.readInt();
         maxAspectRatio = source.readFloat();
+        minAspectRatio = source.readFloat();
     }
 
     /**

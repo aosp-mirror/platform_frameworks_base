@@ -86,6 +86,7 @@ import static android.os.Build.VERSION_CODES.O;
 import static android.os.Process.SYSTEM_UID;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
 
 import static com.android.server.am.ActivityRecordProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.ActivityRecordProto.FRONT_OF_TASK;
@@ -582,6 +583,9 @@ final class ActivityRecord extends ConfigurationContainer {
             }
             if (info.maxAspectRatio != 0) {
                 pw.println(prefix + "maxAspectRatio=" + info.maxAspectRatio);
+            }
+            if (info.minAspectRatio != 0) {
+                pw.println(prefix + "minAspectRatio=" + info.minAspectRatio);
             }
         }
     }
@@ -2593,7 +2597,10 @@ final class ActivityRecord extends ConfigurationContainer {
         outBounds.setEmpty();
         final float maxAspectRatio = info.maxAspectRatio;
         final ActivityStack stack = getActivityStack();
-        if (task == null || stack == null || task.inMultiWindowMode() || maxAspectRatio == 0
+        final float minAspectRatio = info.minAspectRatio;
+
+        if (task == null || stack == null || task.inMultiWindowMode()
+                || (maxAspectRatio == 0 && minAspectRatio == 0)
                 || isInVrUiMode(getConfiguration())) {
             // We don't set override configuration if that activity task isn't fullscreen. I.e. the
             // activity is in multi-window mode. Or, there isn't a max aspect ratio specified for
@@ -2608,20 +2615,35 @@ final class ActivityRecord extends ConfigurationContainer {
         final Rect appBounds = getParent().getWindowConfiguration().getAppBounds();
         final int containingAppWidth = appBounds.width();
         final int containingAppHeight = appBounds.height();
-        int maxActivityWidth = containingAppWidth;
-        int maxActivityHeight = containingAppHeight;
+        final float containingRatio = Math.max(containingAppWidth, containingAppHeight)
+                / (float) Math.min(containingAppWidth, containingAppHeight);
 
-        if (containingAppWidth < containingAppHeight) {
-            // Width is the shorter side, so we use that to figure-out what the max. height
-            // should be given the aspect ratio.
-            maxActivityHeight = (int) ((maxActivityWidth * maxAspectRatio) + 0.5f);
-        } else {
-            // Height is the shorter side, so we use that to figure-out what the max. width
-            // should be given the aspect ratio.
-            maxActivityWidth = (int) ((maxActivityHeight * maxAspectRatio) + 0.5f);
+        int activityWidth = containingAppWidth;
+        int activityHeight = containingAppHeight;
+
+        if (containingRatio > maxAspectRatio && maxAspectRatio != 0) {
+            if (containingAppWidth < containingAppHeight) {
+                // Width is the shorter side, so we use that to figure-out what the max. height
+                // should be given the aspect ratio.
+                activityHeight = (int) ((activityWidth * maxAspectRatio) + 0.5f);
+            } else {
+                // Height is the shorter side, so we use that to figure-out what the max. width
+                // should be given the aspect ratio.
+                activityWidth = (int) ((activityHeight * maxAspectRatio) + 0.5f);
+            }
+        } else if (containingRatio < minAspectRatio && minAspectRatio != 0) {
+            if (containingAppWidth < containingAppHeight) {
+                // Width is the shorter side, so we use the height to figure-out what the max. width
+                // should be given the aspect ratio.
+                activityWidth = (int) ((activityHeight / minAspectRatio) + 0.5f);
+            } else {
+                // Height is the shorter side, so we use the width to figure-out what the max.
+                // height should be given the aspect ratio.
+                activityHeight = (int) ((activityWidth / minAspectRatio) + 0.5f);
+            }
         }
 
-        if (containingAppWidth <= maxActivityWidth && containingAppHeight <= maxActivityHeight) {
+        if (containingAppWidth <= activityWidth && containingAppHeight <= activityHeight) {
             // The display matches or is less than the activity aspect ratio, so nothing else to do.
             // Return the existing bounds. If this method is running for the first time,
             // {@link #getRequestedOverrideBounds()} will be empty (representing no override). If
@@ -2636,12 +2658,21 @@ final class ActivityRecord extends ConfigurationContainer {
         // Also account for the left / top insets (e.g. from display cutouts), which will be clipped
         // away later in StackWindowController.adjustConfigurationForBounds(). Otherwise, the app
         // bounds would end up too small.
-        outBounds.set(0, 0, maxActivityWidth + appBounds.left, maxActivityHeight + appBounds.top);
+        outBounds.set(0, 0, activityWidth + appBounds.left, activityHeight + appBounds.top);
 
-        if (mAtmService.mWindowManager.getNavBarPosition(getDisplayId()) == NAV_BAR_LEFT) {
+        final int navBarPosition = mAtmService.mWindowManager.getNavBarPosition(getDisplayId());
+        if (navBarPosition == NAV_BAR_LEFT) {
             // Position the activity frame on the opposite side of the nav bar.
-            outBounds.left = appBounds.right - maxActivityWidth;
+            outBounds.left = appBounds.right - activityWidth;
             outBounds.right = appBounds.right;
+        } else if (navBarPosition == NAV_BAR_RIGHT) {
+            // Position the activity frame on the opposite side of the nav bar.
+            outBounds.left = 0;
+            outBounds.right = activityWidth + appBounds.left;
+        } else {
+            // Horizontally center the frame.
+            outBounds.left = appBounds.left + (containingAppWidth - activityWidth) / 2;
+            outBounds.right = outBounds.left + activityWidth;
         }
     }
 
