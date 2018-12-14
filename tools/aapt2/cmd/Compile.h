@@ -44,13 +44,13 @@ class CompileCommand : public Command {
   explicit CompileCommand(IDiagnostics* diagnostic) : Command("compile", "c"),
                                                       diagnostic_(diagnostic) {
     SetDescription("Compiles resources to be linked into an apk.");
-    AddRequiredFlag("-o", "Output path", &options_.output_path);
-    AddOptionalFlag("--dir", "Directory to scan for resources", &options_.res_dir);
+    AddRequiredFlag("-o", "Output path", &options_.output_path, Command::kPath);
+    AddOptionalFlag("--dir", "Directory to scan for resources", &options_.res_dir, Command::kPath);
     AddOptionalFlag("--zip", "Zip file containing the res directory to scan for resources",
-        &options_.res_zip);
+        &options_.res_zip, Command::kPath);
     AddOptionalFlag("--output-text-symbols",
         "Generates a text file containing the resource symbols in the\n"
-            "specified file", &options_.generate_text_symbols_path);
+            "specified file", &options_.generate_text_symbols_path, Command::kPath);
     AddOptionalSwitch("--pseudo-localize", "Generate resources for pseudo-locales "
         "(en-XA and ar-XB)", &options_.pseudolocalize);
     AddOptionalSwitch("--no-crunch", "Disables PNG processing", &options_.no_png_crunch);
@@ -70,8 +70,9 @@ class CompileCommand : public Command {
   Maybe<std::string> visibility_;
 };
 
-int Compile(IAaptContext* context, io::IFileCollection* inputs,
-             IArchiveWriter* output_writer, CompileOptions& options);
+int Compile(IAaptContext* context, io::IFileCollection* inputs, IArchiveWriter* output_writer,
+            CompileOptions& options);
+
 }// namespace aapt
 
 #endif //AAPT2_COMPILE_H

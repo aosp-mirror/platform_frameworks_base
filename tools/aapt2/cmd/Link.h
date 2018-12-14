@@ -100,24 +100,26 @@ class LinkCommand : public Command {
   explicit LinkCommand(IDiagnostics* diag) : Command("link", "l"),
                                              diag_(diag) {
     SetDescription("Links resources into an apk.");
-    AddRequiredFlag("-o", "Output path.", &options_.output_path);
+    AddRequiredFlag("-o", "Output path.", &options_.output_path, Command::kPath);
     AddRequiredFlag("--manifest", "Path to the Android manifest to build.",
-        &options_.manifest_path);
-    AddOptionalFlagList("-I", "Adds an Android APK to link against.", &options_.include_paths);
+        &options_.manifest_path, Command::kPath);
+    AddOptionalFlagList("-I", "Adds an Android APK to link against.", &options_.include_paths,
+         Command::kPath);
     AddOptionalFlagList("-A", "An assets directory to include in the APK. These are unprocessed.",
-        &options_.assets_dirs);
+        &options_.assets_dirs, Command::kPath);
     AddOptionalFlagList("-R", "Compilation unit to link, using `overlay` semantics.\n"
-        "The last conflicting resource given takes precedence.", &overlay_arg_list_);
+        "The last conflicting resource given takes precedence.", &overlay_arg_list_,
+        Command::kPath);
     AddOptionalFlag("--package-id",
         "Specify the package ID to use for this app. Must be greater or equal to\n"
             "0x7f and can't be used with --static-lib or --shared-lib.", &package_id_);
     AddOptionalFlag("--java", "Directory in which to generate R.java.",
-        &options_.generate_java_class_path);
+        &options_.generate_java_class_path, Command::kPath);
     AddOptionalFlag("--proguard", "Output file for generated Proguard rules.",
-        &options_.generate_proguard_rules_path);
+        &options_.generate_proguard_rules_path, Command::kPath);
     AddOptionalFlag("--proguard-main-dex",
         "Output file for generated Proguard rules for the main dex.",
-        &options_.generate_main_dex_proguard_rules_path);
+        &options_.generate_main_dex_proguard_rules_path, Command::kPath);
     AddOptionalSwitch("--proguard-conditional-keep-rules",
         "Generate conditional Proguard keep rules.",
         &options_.generate_conditional_proguard_rules);

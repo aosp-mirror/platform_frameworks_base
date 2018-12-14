@@ -27,7 +27,7 @@ class ConvertCommand : public Command {
  public:
   explicit ConvertCommand() : Command("convert") {
     SetDescription("Converts an apk between binary and proto formats.");
-    AddRequiredFlag("-o", "Output path", &output_path_);
+    AddRequiredFlag("-o", "Output path", &output_path_, Command::kPath);
     AddOptionalFlag("--output-format", android::base::StringPrintf("Format of the output. "
             "Accepted values are '%s' and '%s'. When not set, defaults to '%s'.",
         kOutputFormatProto, kOutputFormatBinary, kOutputFormatBinary), &output_format_);
