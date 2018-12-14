@@ -47,17 +47,12 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
-import static android.service.notification.NotificationListenerService
-        .HINT_HOST_DISABLE_CALL_EFFECTS;
+import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_CALL_EFFECTS;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
-import static android.service.notification.NotificationListenerService
-        .HINT_HOST_DISABLE_NOTIFICATION_EFFECTS;
-import static android.service.notification.NotificationListenerService
-        .NOTIFICATION_CHANNEL_OR_GROUP_ADDED;
-import static android.service.notification.NotificationListenerService
-        .NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
-import static android.service.notification.NotificationListenerService
-        .NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
+import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_NOTIFICATION_EFFECTS;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
@@ -65,8 +60,7 @@ import static android.service.notification.NotificationListenerService.REASON_CA
 import static android.service.notification.NotificationListenerService.REASON_CHANNEL_BANNED;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 import static android.service.notification.NotificationListenerService.REASON_ERROR;
-import static android.service.notification.NotificationListenerService
-        .REASON_GROUP_SUMMARY_CANCELED;
+import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 import static android.service.notification.NotificationListenerService.REASON_LISTENER_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_LISTENER_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_PACKAGE_BANNED;
@@ -6695,7 +6689,7 @@ public class NotificationManagerService extends SystemService {
         Bundle hidden = new Bundle();
         Bundle systemGeneratedSmartActions = new Bundle();
         Bundle smartReplies = new Bundle();
-        Bundle audiblyAlerted = new Bundle();
+        Bundle lastAudiblyAlerted = new Bundle();
         Bundle noisy = new Bundle();
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
@@ -6727,7 +6721,7 @@ public class NotificationManagerService extends SystemService {
             systemGeneratedSmartActions.putParcelableArrayList(key,
                     record.getSystemGeneratedSmartActions());
             smartReplies.putCharSequenceArrayList(key, record.getSmartReplies());
-            audiblyAlerted.putBoolean(key, record.getAudiblyAlerted());
+            lastAudiblyAlerted.putLong(key, record.getLastAudiblyAlertedMs());
             noisy.putBoolean(key, record.getSound() != null || record.getVibration() != null);
         }
         final int M = keys.size();
@@ -6740,7 +6734,7 @@ public class NotificationManagerService extends SystemService {
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
                 suppressedVisualEffects, importanceAr, explanation, overrideGroupKeys,
                 channels, overridePeople, snoozeCriteria, showBadge, userSentiment, hidden,
-                systemGeneratedSmartActions, smartReplies, audiblyAlerted, noisy);
+                systemGeneratedSmartActions, smartReplies, lastAudiblyAlerted, noisy);
     }
 
     boolean hasCompanionDevice(ManagedServiceInfo info) {

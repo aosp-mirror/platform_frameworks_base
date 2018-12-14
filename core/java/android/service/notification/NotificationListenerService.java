@@ -1482,7 +1482,7 @@ public abstract class NotificationListenerService extends Service {
         private boolean mShowBadge;
         private @UserSentiment int mUserSentiment = USER_SENTIMENT_NEUTRAL;
         private boolean mHidden;
-        private boolean mAudiblyAlerted;
+        private long mLastAudiblyAlertedMs;
         private boolean mNoisy;
         private ArrayList<Notification.Action> mSmartActions;
         private ArrayList<CharSequence> mSmartReplies;
@@ -1650,12 +1650,12 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * Returns whether this notification alerted the user via sound or vibration.
+         * Returns the last time this notification alerted the user via sound or vibration.
          *
-         * @return true if the notification alerted the user, false otherwise.
+         * @return the time of the last alerting behavior, in milliseconds.
          */
-        public boolean audiblyAlerted() {
-            return mAudiblyAlerted;
+        public long getLastAudiblyAlertedMillis() {
+            return mLastAudiblyAlertedMs;
         }
 
         /** @hide */
@@ -1672,7 +1672,7 @@ public abstract class NotificationListenerService extends Service {
                 CharSequence explanation, String overrideGroupKey,
                 NotificationChannel channel, ArrayList<String> overridePeople,
                 ArrayList<SnoozeCriterion> snoozeCriteria, boolean showBadge,
-                int userSentiment, boolean hidden, boolean audiblyAlerted,
+                int userSentiment, boolean hidden, long lastAudiblyAlertedMs,
                 boolean noisy, ArrayList<Notification.Action> smartActions,
                 ArrayList<CharSequence> smartReplies) {
             mKey = key;
@@ -1690,7 +1690,7 @@ public abstract class NotificationListenerService extends Service {
             mShowBadge = showBadge;
             mUserSentiment = userSentiment;
             mHidden = hidden;
-            mAudiblyAlerted = audiblyAlerted;
+            mLastAudiblyAlertedMs = lastAudiblyAlertedMs;
             mNoisy = noisy;
             mSmartActions = smartActions;
             mSmartReplies = smartReplies;
@@ -1743,7 +1743,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayMap<String, Boolean> mShowBadge;
         private ArrayMap<String, Integer> mUserSentiment;
         private ArrayMap<String, Boolean> mHidden;
-        private ArrayMap<String, Boolean> mAudiblyAlerted;
+        private ArrayMap<String, Long> mLastAudiblyAlerted;
         private ArrayMap<String, Boolean> mNoisy;
         private ArrayMap<String, ArrayList<Notification.Action>> mSmartActions;
         private ArrayMap<String, ArrayList<CharSequence>> mSmartReplies;
@@ -1776,7 +1776,7 @@ public abstract class NotificationListenerService extends Service {
                     getImportance(key), getImportanceExplanation(key), getOverrideGroupKey(key),
                     getChannel(key), getOverridePeople(key), getSnoozeCriteria(key),
                     getShowBadge(key), getUserSentiment(key), getHidden(key),
-                    getAudiblyAlerted(key), getNoisy(key), getSmartActions(key),
+                    getLastAudiblyAlerted(key), getNoisy(key), getSmartActions(key),
                     getSmartReplies(key));
             return rank >= 0;
         }
@@ -1915,14 +1915,14 @@ public abstract class NotificationListenerService extends Service {
             return hidden == null ? false : hidden.booleanValue();
         }
 
-        private boolean getAudiblyAlerted(String key) {
+        private long getLastAudiblyAlerted(String key) {
             synchronized (this) {
-                if (mAudiblyAlerted == null) {
-                    buildAudiblyAlertedLocked();
+                if (mLastAudiblyAlerted == null) {
+                    buildLastAudiblyAlertedLocked();
                 }
             }
-            Boolean audiblyAlerted = mAudiblyAlerted.get(key);
-            return audiblyAlerted == null ? false : audiblyAlerted.booleanValue();
+            Long lastAudibleAlerted = mLastAudiblyAlerted.get(key);
+            return lastAudibleAlerted == null ? -1 : lastAudibleAlerted.longValue();
         }
 
         private boolean getNoisy(String key) {
@@ -1990,6 +1990,14 @@ public abstract class NotificationListenerService extends Service {
             ArrayMap<String, Boolean> newMap = new ArrayMap<>(bundle.size());
             for (String key : bundle.keySet()) {
                 newMap.put(key, bundle.getBoolean(key));
+            }
+            return newMap;
+        }
+
+        private ArrayMap<String, Long> buildLongMapFromBundle(Bundle bundle) {
+            ArrayMap<String, Long> newMap = new ArrayMap<>(bundle.size());
+            for (String key : bundle.keySet()) {
+                newMap.put(key, bundle.getLong(key));
             }
             return newMap;
         }
@@ -2070,8 +2078,8 @@ public abstract class NotificationListenerService extends Service {
         }
 
         // Locked by 'this'
-        private void buildAudiblyAlertedLocked() {
-            mAudiblyAlerted = buildBooleanMapFromBundle(mRankingUpdate.getAudiblyAlerted());
+        private void buildLastAudiblyAlertedLocked() {
+            mLastAudiblyAlerted = buildLongMapFromBundle(mRankingUpdate.getLastAudiblyAlerted());
         }
 
         // Locked by 'this'

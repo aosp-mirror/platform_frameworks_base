@@ -87,6 +87,7 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
@@ -1689,14 +1690,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mPublicLayout.showAppOpsIcons(activeOps);
     }
 
-    /** Sets whether the notification being displayed audibly alerted the user. */
-    public void setAudiblyAlerted(boolean audiblyAlerted) {
+    /** Sets the last time the notification being displayed audibly alerted the user. */
+    public void setLastAudiblyAlertedMs(long lastAudiblyAlertedMs) {
         if (NotificationUtils.useNewInterruptionModel(mContext)) {
+            boolean recentlyAudiblyAlerted = System.currentTimeMillis() - lastAudiblyAlertedMs
+                    < NotificationEntryManager.RECENTLY_ALERTED_THRESHOLD_MS;
             if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() != null) {
-                mChildrenContainer.getHeaderView().setAudiblyAlerted(audiblyAlerted);
+                mChildrenContainer.getHeaderView().setRecentlyAudiblyAlerted(
+                        recentlyAudiblyAlerted);
             }
-            mPrivateLayout.setAudiblyAlerted(audiblyAlerted);
-            mPublicLayout.setAudiblyAlerted(audiblyAlerted);
+            mPrivateLayout.setRecentlyAudiblyAlerted(recentlyAudiblyAlerted);
+            mPublicLayout.setRecentlyAudiblyAlerted(recentlyAudiblyAlerted);
         }
     }
 

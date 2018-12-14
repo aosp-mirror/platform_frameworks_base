@@ -103,7 +103,7 @@ public class NotificationData {
         public String key;
         public StatusBarNotification notification;
         public NotificationChannel channel;
-        public boolean audiblyAlerted;
+        public long lastAudiblyAlertedMs;
         public boolean noisy;
         public int importance;
         public StatusBarIconView icon;
@@ -172,7 +172,7 @@ public class NotificationData {
 
         public void populateFromRanking(@NonNull Ranking ranking) {
             channel = ranking.getChannel();
-            audiblyAlerted = ranking.audiblyAlerted();
+            lastAudiblyAlertedMs = ranking.getLastAudiblyAlertedMillis();
             importance = ranking.getImportance();
             snoozeCriteria = ranking.getSnoozeCriteria();
             userSentiment = ranking.getUserSentiment();

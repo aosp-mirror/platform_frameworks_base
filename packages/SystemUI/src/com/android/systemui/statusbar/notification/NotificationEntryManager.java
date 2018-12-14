@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -96,6 +97,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * NotificationEntryManager is responsible for the adding, removing, and updating of notifications.
@@ -109,6 +111,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean ENABLE_HEADS_UP = true;
     private static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
+
+    public static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
 
     private final NotificationMessagingUtil mMessagingUtil;
     protected final Context mContext;
@@ -138,6 +142,9 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     private NotificationMediaManager mMediaManager;
     private NotificationListener mNotificationListener;
     private ShadeController mShadeController;
+
+    private final Handler mDeferredNotificationViewUpdateHandler;
+    private Runnable mUpdateNotificationViewsCallback;
 
     protected IDreamManager mDreamManager;
     protected IStatusBarService mBarService;
@@ -259,6 +266,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mBubbleController.setDismissListener(this /* bubbleEventListener */);
         mNotificationData = new NotificationData();
         Dependency.get(InitController.class).addPostInitTask(this::onPostInit);
+        mDeferredNotificationViewUpdateHandler = new Handler();
     }
 
     private void onPostInit() {
@@ -301,6 +309,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             NotificationListContainer listContainer, Callback callback,
             HeadsUpManager headsUpManager) {
         mPresenter = presenter;
+        mUpdateNotificationViewsCallback = mPresenter::updateNotificationViews;
         mCallback = callback;
         mHeadsUpManager = headsUpManager;
         mNotificationData.setHeadsUpManager(mHeadsUpManager);
@@ -540,6 +549,17 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         tagForeground(shadeEntry.notification);
         updateNotifications();
         mCallback.onNotificationAdded(shadeEntry);
+
+        maybeScheduleUpdateNotificationViews(shadeEntry);
+    }
+
+    private void maybeScheduleUpdateNotificationViews(NotificationData.Entry entry) {
+        long audibleAlertTimeout = RECENTLY_ALERTED_THRESHOLD_MS
+                - (System.currentTimeMillis() - entry.lastAudiblyAlertedMs);
+        if (audibleAlertTimeout > 0) {
+            mDeferredNotificationViewUpdateHandler.postDelayed(
+                    mUpdateNotificationViewsCallback, audibleAlertTimeout);
+        }
     }
 
     /**
@@ -937,6 +957,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         }
 
         mCallback.onNotificationUpdated(notification);
+
+        maybeScheduleUpdateNotificationViews(entry);
     }
 
     @Override
