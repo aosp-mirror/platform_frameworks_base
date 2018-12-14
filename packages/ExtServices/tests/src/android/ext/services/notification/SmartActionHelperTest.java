@@ -75,7 +75,7 @@ public class SmartActionHelperTest {
         mContext.getSystemService(TextClassificationManager.class)
                 .setTextClassifier(mTextClassifier);
         when(mTextClassifier.suggestConversationActions(any(ConversationActions.Request.class)))
-                .thenReturn(new ConversationActions(Collections.emptyList()));
+                .thenReturn(new ConversationActions(Collections.emptyList(), null));
 
         when(mNotificationEntry.getSbn()).thenReturn(mStatusBarNotification);
         // The notification is eligible to have smart suggestions.

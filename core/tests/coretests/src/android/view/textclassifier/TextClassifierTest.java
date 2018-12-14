@@ -18,7 +18,6 @@ package android.view.textclassifier;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -375,7 +374,7 @@ public class TextClassifierTest {
         ConversationActions.Message message =
                 new ConversationActions.Message.Builder(
                         ConversationActions.Message.PERSON_USER_REMOTE)
-                        .setText("Hello")
+                        .setText("Where are you?")
                         .build();
         ConversationActions.TypeConfig typeConfig =
                 new ConversationActions.TypeConfig.Builder().includeTypesFromTextClassifier(false)
@@ -384,19 +383,44 @@ public class TextClassifierTest {
                         .build();
         ConversationActions.Request request =
                 new ConversationActions.Request.Builder(Collections.singletonList(message))
-                        .setMaxSuggestions(3)
+                        .setMaxSuggestions(1)
                         .setTypeConfig(typeConfig)
                         .build();
 
         ConversationActions conversationActions = mClassifier.suggestConversationActions(request);
         assertTrue(conversationActions.getConversationActions().size() > 0);
-        assertTrue(conversationActions.getConversationActions().size() <= 3);
+        assertTrue(conversationActions.getConversationActions().size() == 1);
         for (ConversationActions.ConversationAction conversationAction :
                 conversationActions.getConversationActions()) {
-            assertEquals(conversationAction.getType(), ConversationActions.TYPE_TEXT_REPLY);
-            assertNotNull(conversationAction.getTextReply());
-            assertTrue(conversationAction.getConfidenceScore() > 0);
-            assertTrue(conversationAction.getConfidenceScore() <= 1);
+            assertThat(conversationAction,
+                    isConversationAction(ConversationActions.TYPE_TEXT_REPLY));
+        }
+    }
+
+    @Test
+    public void testSuggestConversationActions_textReplyOnly_noMax() {
+        if (isTextClassifierDisabled()) return;
+        ConversationActions.Message message =
+                new ConversationActions.Message.Builder(
+                        ConversationActions.Message.PERSON_USER_REMOTE)
+                        .setText("Where are you?")
+                        .build();
+        ConversationActions.TypeConfig typeConfig =
+                new ConversationActions.TypeConfig.Builder().includeTypesFromTextClassifier(false)
+                        .setIncludedTypes(
+                                Collections.singletonList(ConversationActions.TYPE_TEXT_REPLY))
+                        .build();
+        ConversationActions.Request request =
+                new ConversationActions.Request.Builder(Collections.singletonList(message))
+                        .setTypeConfig(typeConfig)
+                        .build();
+
+        ConversationActions conversationActions = mClassifier.suggestConversationActions(request);
+        assertTrue(conversationActions.getConversationActions().size() > 1);
+        for (ConversationActions.ConversationAction conversationAction :
+                conversationActions.getConversationActions()) {
+            assertThat(conversationAction,
+                    isConversationAction(ConversationActions.TYPE_TEXT_REPLY));
         }
     }
 
@@ -495,6 +519,38 @@ public class TextClassifierTest {
             @Override
             public void describeTo(Description description) {
                 description.appendText("locale=").appendValue(languageTag);
+            }
+        };
+    }
+
+    private static Matcher<ConversationActions.ConversationAction> isConversationAction(
+            String actionType) {
+        return new BaseMatcher<ConversationActions.ConversationAction>() {
+            @Override
+            public boolean matches(Object o) {
+                if (!(o instanceof ConversationActions.ConversationAction)) {
+                    return false;
+                }
+                ConversationActions.ConversationAction conversationAction =
+                        (ConversationActions.ConversationAction) o;
+                if (!actionType.equals(conversationAction.getType())) {
+                    return false;
+                }
+                if (ConversationActions.TYPE_TEXT_REPLY.equals(actionType)) {
+                    if (conversationAction.getTextReply() == null) {
+                        return false;
+                    }
+                }
+                if (conversationAction.getConfidenceScore() < 0
+                        || conversationAction.getConfidenceScore() > 1) {
+                    return false;
+                }
+                return true;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("actionType=").appendValue(actionType);
             }
         };
     }

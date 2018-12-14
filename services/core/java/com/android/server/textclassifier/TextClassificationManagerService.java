@@ -42,6 +42,7 @@ import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassificationSessionId;
+import android.view.textclassifier.TextClassifierEvent;
 import android.view.textclassifier.TextLanguage;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
@@ -210,6 +211,27 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             } else {
                 userState.mPendingRequests.add(new PendingRequest(
                         () -> onSelectionEvent(sessionId, event),
+                        null /* onServiceFailure */, null /* binder */, this, userState));
+            }
+        }
+    }
+    @Override
+    public void onTextClassifierEvent(
+            TextClassificationSessionId sessionId,
+            TextClassifierEvent event) throws RemoteException {
+        Preconditions.checkNotNull(event);
+        final String packageName = event.getEventContext() == null
+                ? null
+                : event.getEventContext().getPackageName();
+        validateInput(mContext, packageName);
+
+        synchronized (mLock) {
+            UserState userState = getCallingUserStateLocked();
+            if (userState.isBoundLocked()) {
+                userState.mService.onTextClassifierEvent(sessionId, event);
+            } else {
+                userState.mPendingRequests.add(new PendingRequest(
+                        () -> onTextClassifierEvent(sessionId, event),
                         null /* onServiceFailure */, null /* binder */, this, userState));
             }
         }
