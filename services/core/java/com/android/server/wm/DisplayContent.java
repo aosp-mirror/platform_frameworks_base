@@ -61,9 +61,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
-
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
@@ -169,6 +169,7 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.function.TriConsumer;
+import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.DisplayRotationUtil;
 import com.android.server.wm.utils.RotationCache;
@@ -861,7 +862,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         AnimationHandler animationHandler = new AnimationHandler();
         mBoundsAnimationController = new BoundsAnimationController(service.mContext,
-                mAppTransition, SurfaceAnimationThread.getHandler(), animationHandler);
+                mAppTransition, AnimationThread.getHandler(), animationHandler);
 
         if (mWmService.mInputManager != null) {
             final InputChannel inputChannel = mWmService.mInputManager.monitorInput("Display "
