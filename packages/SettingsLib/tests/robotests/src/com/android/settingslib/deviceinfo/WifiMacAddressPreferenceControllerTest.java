@@ -27,7 +27,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.provider.Settings;
 
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
@@ -93,105 +92,23 @@ public class WifiMacAddressPreferenceControllerTest {
     }
 
     @Test
-    public void updateConnectivity_nullWifiInfoWithMacRandomizationOff_setMacUnavailable() {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
-                AbstractWifiMacAddressPreferenceController.OFF);
-        doReturn(null).when(mWifiManager).getConnectionInfo();
-
+    public void updateConnectivity_null_setMacUnavailable() {
+        doReturn(null).when(mWifiManager).getFactoryMacAddresses();
         mController.displayPreference(mScreen);
-
         assertThat(mPreference.getSummary())
                 .isEqualTo(mContext.getString(R.string.status_unavailable));
     }
 
     @Test
-    public void updateConnectivity_nullMacWithMacRandomizationOff_setMacUnavailable() {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
-                AbstractWifiMacAddressPreferenceController.OFF);
-        doReturn(null).when(mWifiInfo).getMacAddress();
-
+    public void updateConnectivity_validMac_setValidMac() {
+        final String[] macAddresses = new String[]{TEST_MAC_ADDRESS};
+        doReturn(macAddresses).when(mWifiManager).getFactoryMacAddresses();
         mController.displayPreference(mScreen);
-
-        assertThat(mPreference.getSummary())
-                .isEqualTo(mContext.getString(R.string.status_unavailable));
-    }
-
-    @Test
-    public void updateConnectivity_defaultMacWithMacRandomizationOff_setMacUnavailable() {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
-                AbstractWifiMacAddressPreferenceController.OFF);
-        doReturn(WifiInfo.DEFAULT_MAC_ADDRESS).when(mWifiInfo).getMacAddress();
-
-        mController.displayPreference(mScreen);
-
-        assertThat(mPreference.getSummary())
-                .isEqualTo(mContext.getString(R.string.status_unavailable));
-    }
-
-    @Test
-    public void updateConnectivity_validMacWithMacRandomizationOff_setValidMac() {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
-                AbstractWifiMacAddressPreferenceController.OFF);
-        doReturn(TEST_MAC_ADDRESS).when(mWifiInfo).getMacAddress();
-
-        mController.displayPreference(mScreen);
-
         assertThat(mPreference.getSummary()).isEqualTo(TEST_MAC_ADDRESS);
-    }
 
-    @Test
-    public void updateConnectivity_nullWifiInfoWithMacRandomizationOn_setMacUnavailable() {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
-                AbstractWifiMacAddressPreferenceController.ON);
-        doReturn(null).when(mWifiManager).getConnectionInfo();
 
-        mController.displayPreference(mScreen);
 
-        assertThat(mPreference.getSummary())
-                .isEqualTo(mContext.getString(R.string.status_unavailable));
-    }
 
-    @Test
-    public void updateConnectivity_nullMacWithMacRandomizationOn_setMacUnavailable() {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
-                AbstractWifiMacAddressPreferenceController.ON);
-        doReturn(null).when(mWifiInfo).getMacAddress();
-
-        mController.displayPreference(mScreen);
-
-        assertThat(mPreference.getSummary())
-                .isEqualTo(mContext.getString(R.string.status_unavailable));
-    }
-
-    @Test
-    public void updateConnectivity_defaultMacWithMacRandomizationOn_setMacRandomized() {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
-                AbstractWifiMacAddressPreferenceController.ON);
-        doReturn(WifiInfo.DEFAULT_MAC_ADDRESS).when(mWifiInfo).getMacAddress();
-
-        mController.displayPreference(mScreen);
-
-        assertThat(mPreference.getSummary())
-                .isEqualTo(mContext.getString(R.string.wifi_status_mac_randomized));
-    }
-
-    @Test
-    public void updateConnectivity_validMacWithMacRandomizationOn_setValidMac() {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
-                AbstractWifiMacAddressPreferenceController.ON);
-        doReturn(TEST_MAC_ADDRESS).when(mWifiInfo).getMacAddress();
-
-        mController.displayPreference(mScreen);
-
-        assertThat(mPreference.getSummary()).isEqualTo(TEST_MAC_ADDRESS);
     }
 
     private static class ConcreteWifiMacAddressPreferenceController
