@@ -16,8 +16,11 @@
 
 package com.android.server.pm.dex;
 
+import static com.android.server.pm.dex.PackageDynamicCodeLoading.MAX_FILES_PER_OWNER;
 import static com.android.server.pm.dex.PackageDynamicCodeLoading.escape;
 import static com.android.server.pm.dex.PackageDynamicCodeLoading.unescape;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -116,6 +119,24 @@ public class PackageDynamicCodeLoadingTests {
         PackageDynamicCodeLoading info = new PackageDynamicCodeLoading();
 
         assertThrows(() -> record(info, entry));
+    }
+
+    @Test
+    public void testRecord_tooManyFiles_ignored() {
+        PackageDynamicCodeLoading info = new PackageDynamicCodeLoading();
+        int tooManyFiles = MAX_FILES_PER_OWNER + 1;
+        for (int i = 1; i <= tooManyFiles; i++) {
+            Entry entry = new Entry("owning.package", "/path/file" + i, 'D', 10, "loading.package");
+            boolean added = record(info, entry);
+            Set<Entry> entries = entriesFrom(info);
+            if (i < tooManyFiles) {
+                assertThat(entries).contains(entry);
+                assertTrue(added);
+            } else {
+                assertThat(entries).doesNotContain(entry);
+                assertFalse(added);
+            }
+        }
     }
 
     @Test

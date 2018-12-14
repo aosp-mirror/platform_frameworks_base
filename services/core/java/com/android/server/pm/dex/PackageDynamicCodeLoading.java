@@ -62,6 +62,13 @@ class PackageDynamicCodeLoading extends AbstractStatsBase<Void> {
     private static final String PACKAGE_SEPARATOR = ",";
 
     /**
+     * Limit on how many files we store for a single owner, to avoid one app causing
+     * unbounded memory consumption.
+     */
+    @VisibleForTesting
+    static final int MAX_FILES_PER_OWNER = 100;
+
+    /**
      * Regular expression to match the expected format of an input line describing one file.
      * <p>Example: {@code D:10:package.name1,package.name2:/escaped/path}
      * <p>The capturing groups are the file type, user ID, loading packages and escaped file path
@@ -515,6 +522,9 @@ class PackageDynamicCodeLoading extends AbstractStatsBase<Void> {
         private boolean add(String path, char fileType, int userId, String loadingPackage) {
             DynamicCodeFile fileInfo = mFileUsageMap.get(path);
             if (fileInfo == null) {
+                if (mFileUsageMap.size() >= MAX_FILES_PER_OWNER) {
+                    return false;
+                }
                 fileInfo = new DynamicCodeFile(fileType, userId, loadingPackage);
                 mFileUsageMap.put(path, fileInfo);
                 return true;
