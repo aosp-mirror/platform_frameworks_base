@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.ActivityManager.START_ABORTED;
 import static android.app.ActivityManager.START_CANCELED;
@@ -50,6 +51,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -745,8 +747,9 @@ class ActivityStarter {
         // not sure if we need to create START_ABORTED_BACKGROUND so for now piggybacking
         // on START_ABORTED
         if (!abort) {
-            abort |= shouldAbortBackgroundActivityStart(callingUid, callingPackage, realCallingUid,
-                    callerApp, originatingPendingIntent, allowBackgroundActivityStart);
+            abort |= shouldAbortBackgroundActivityStart(callingUid, callingPid, callingPackage,
+                    realCallingUid, callerApp, originatingPendingIntent,
+                    allowBackgroundActivityStart);
         }
 
         // Merge the two options bundles, while realCallerOptions takes precedence.
@@ -893,8 +896,8 @@ class ActivityStarter {
                 true /* doResume */, checkedOptions, inTask, outActivity);
     }
 
-    private boolean shouldAbortBackgroundActivityStart(int callingUid, final String callingPackage,
-            int realCallingUid, WindowProcessController callerApp,
+    private boolean shouldAbortBackgroundActivityStart(int callingUid, int callingPid,
+            final String callingPackage, int realCallingUid, WindowProcessController callerApp,
             PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
         if (mService.isBackgroundActivityStartsEnabled()) {
             return false;
@@ -926,6 +929,11 @@ class ActivityStarter {
         }
         // don't abort if the caller is currently temporarily whitelisted
         if (callerApp != null && callerApp.areBackgroundActivityStartsAllowed()) {
+            return false;
+        }
+        // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
+        if (mService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
+                == PERMISSION_GRANTED) {
             return false;
         }
         // don't abort if the caller has the same uid as the recents component
