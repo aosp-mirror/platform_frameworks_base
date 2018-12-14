@@ -220,6 +220,13 @@ message ConstantsProto {
     // will use heartbeats, false will use a rolling window.
     optional bool use_heartbeats = 23;
 
+    message TimeController {
+        // Whether or not TimeController should skip setting wakeup alarms for jobs that aren't
+        // ready now.
+        optional bool skip_not_ready_jobs = 1;
+    }
+    optional TimeController time_controller = 25;
+
     message QuotaController {
         // How much time each app will have to run jobs within their standby bucket window.
         optional int64 allowed_time_per_period_ms = 1;
@@ -244,6 +251,8 @@ message ConstantsProto {
         optional int64 rare_window_size_ms = 6;
     }
     optional QuotaController quota_controller = 24;
+
+    // Next tag: 26
 }
 
 message StateControllerProto {

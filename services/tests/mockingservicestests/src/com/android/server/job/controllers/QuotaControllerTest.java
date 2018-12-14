@@ -579,8 +579,8 @@ public class QuotaControllerTest {
 
         // Start in ACTIVE bucket.
         mQuotaController.maybeScheduleStartAlarmLocked(0, "com.android.test", ACTIVE_INDEX);
-        inOrder.verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(),
-                any());
+        inOrder.verify(mAlarmManager, never())
+                .set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
         inOrder.verify(mAlarmManager, never()).cancel(any(AlarmManager.OnAlarmListener.class));
 
         // And down from there.
