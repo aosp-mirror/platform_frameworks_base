@@ -8956,6 +8956,23 @@ public class TelephonyManager {
     }
 
     /**
+     * Action set from carrier signalling broadcast receivers to reset all carrier actions
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @hide
+     */
+    public void carrierActionResetAll(int subId) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.carrierActionResetAll(subId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#carrierActionResetAll", e);
+        }
+    }
+
+    /**
      * Get aggregated video call data usage since boot.
      * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
      *

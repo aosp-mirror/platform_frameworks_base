@@ -195,19 +195,7 @@ public class CaptivePortalLoginActivity extends Activity {
         if (success) {
             // Trigger re-evaluation upon success http response code
             CarrierActionUtils.applyCarrierAction(
-                    CarrierActionUtils.CARRIER_ACTION_ENABLE_RADIO, getIntent(),
-                    getApplicationContext());
-            CarrierActionUtils.applyCarrierAction(
-                    CarrierActionUtils.CARRIER_ACTION_ENABLE_METERED_APNS, getIntent(),
-                    getApplicationContext());
-            CarrierActionUtils.applyCarrierAction(
-                    CarrierActionUtils.CARRIER_ACTION_CANCEL_ALL_NOTIFICATIONS, getIntent(),
-                    getApplicationContext());
-            CarrierActionUtils.applyCarrierAction(
-                    CarrierActionUtils.CARRIER_ACTION_DISABLE_DEFAULT_URL_HANDLER, getIntent(),
-                    getApplicationContext());
-            CarrierActionUtils.applyCarrierAction(
-                    CarrierActionUtils.CARRIER_ACTION_DEREGISTER_DEFAULT_NETWORK_AVAIL, getIntent(),
+                    CarrierActionUtils.CARRIER_ACTION_RESET_ALL, getIntent(),
                     getApplicationContext());
         }
         finishAndRemoveTask();
