@@ -50,7 +50,8 @@ public class LooperStats implements Looper.Observer {
     private int mSamplingInterval;
     private CachedDeviceState.Readonly mDeviceState;
     private CachedDeviceState.TimeInStateStopwatch mBatteryStopwatch;
-    private long mStartTime = System.currentTimeMillis();
+    private long mStartCurrentTime = System.currentTimeMillis();
+    private long mStartElapsedTime = SystemClock.elapsedRealtime();
     private boolean mAddDebugEntries = false;
 
     public LooperStats(int samplingInterval, int entriesSizeCap) {
@@ -155,8 +156,8 @@ public class LooperStats implements Looper.Observer {
         maybeAddSpecialEntry(exportedEntries, mHashCollisionEntry);
         // Debug entries added to help validate the data.
         if (mAddDebugEntries && mBatteryStopwatch != null) {
-            exportedEntries.add(createDebugEntry("start_time_millis", mStartTime));
-            exportedEntries.add(createDebugEntry("end_time_millis", System.currentTimeMillis()));
+            exportedEntries.add(createDebugEntry("start_time_millis", mStartElapsedTime));
+            exportedEntries.add(createDebugEntry("end_time_millis", SystemClock.elapsedRealtime()));
             exportedEntries.add(
                     createDebugEntry("battery_time_millis", mBatteryStopwatch.getMillis()));
         }
@@ -173,7 +174,11 @@ public class LooperStats implements Looper.Observer {
 
     /** Returns a timestamp indicating when the statistics were last reset. */
     public long getStartTimeMillis() {
-        return mStartTime;
+        return mStartCurrentTime;
+    }
+
+    public long getStartElapsedTimeMillis() {
+        return mStartElapsedTime;
     }
 
     public long getBatteryTimeMillis() {
@@ -199,7 +204,8 @@ public class LooperStats implements Looper.Observer {
         synchronized (mOverflowEntry) {
             mOverflowEntry.reset();
         }
-        mStartTime = System.currentTimeMillis();
+        mStartCurrentTime = System.currentTimeMillis();
+        mStartElapsedTime = SystemClock.elapsedRealtime();
         if (mBatteryStopwatch != null) {
             mBatteryStopwatch.reset();
         }
