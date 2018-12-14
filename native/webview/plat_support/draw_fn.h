@@ -1,0 +1,197 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+//
+//******************************************************************************
+// This is a copy of the coresponding android_webview/public/browser header.
+// Any changes to the interface should be made there as well.
+//******************************************************************************
+
+#ifndef ANDROID_WEBVIEW_PUBLIC_BROWSER_DRAW_FN_H_
+#define ANDROID_WEBVIEW_PUBLIC_BROWSER_DRAW_FN_H_
+
+#include <vulkan/vulkan.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// In order to make small changes backwards compatible, all structs passed from
+// android to chromium are versioned.
+//
+// 1 is Android Q. This matches kAwDrawGLInfoVersion version 3.
+static const int kAwDrawFnVersion = 1;
+
+struct AwDrawFn_OnSyncParams {
+  int version;
+
+  bool apply_force_dark;
+};
+
+struct AwDrawFn_DrawGLParams {
+  int version;
+
+  // Input: current clip rect in surface coordinates. Reflects the current state
+  // of the OpenGL scissor rect. Both the OpenGL scissor rect and viewport are
+  // set by the caller of the draw function and updated during View animations.
+  int clip_left;
+  int clip_top;
+  int clip_right;
+  int clip_bottom;
+
+  // Input: current width/height of destination surface.
+  int width;
+  int height;
+
+  // Input: is the View rendered into an independent layer.
+  // If false, the surface is likely to hold to the full screen contents, with
+  // the scissor box set by the caller to the actual View location and size.
+  // Also the transformation matrix will contain at least a translation to the
+  // position of the View to render, plus any other transformations required as
+  // part of any ongoing View animation. View translucency (alpha) is ignored,
+  // although the framework will set is_layer to true for non-opaque cases.
+  // Can be requested via the View.setLayerType(View.LAYER_TYPE_NONE, ...)
+  // Android API method.
+  //
+  // If true, the surface is dedicated to the View and should have its size.
+  // The viewport and scissor box are set by the caller to the whole surface.
+  // Animation transformations are handled by the caller and not reflected in
+  // the provided transformation matrix. Translucency works normally.
+  // Can be requested via the View.setLayerType(View.LAYER_TYPE_HARDWARE, ...)
+  // Android API method.
+  bool is_layer;
+
+  // Input: current transformation matrix in surface pixels.
+  // Uses the column-based OpenGL matrix format.
+  float transform[16];
+};
+
+struct AwDrawFn_InitVkParams {
+  int version;
+  VkInstance instance;
+  VkPhysicalDevice physical_device;
+  VkDevice device;
+  VkQueue queue;
+  uint32_t graphics_queue_index;
+  uint32_t instance_version;
+  const char* const* enabled_extension_names;
+  // Only one of device_features and device_features_2 should be non-null.
+  // If both are null then no features are enabled.
+  VkPhysicalDeviceFeatures* device_features;
+  VkPhysicalDeviceFeatures2* device_features_2;
+};
+
+struct AwDrawFn_DrawVkParams {
+  int version;
+
+  // Input: current width/height of destination surface.
+  int width;
+  int height;
+
+  // Input: is the render target a FBO
+  bool is_layer;
+
+  // Input: current transform matrix
+  float transform[16];
+
+  // Input WebView should do its main compositing draws into this. It cannot do
+  // anything that would require stopping the render pass.
+  VkCommandBuffer secondary_command_buffer;
+
+  // Input: The main color attachment index where secondary_command_buffer will
+  // eventually be submitted.
+  uint32_t color_attachment_index;
+
+  // Input: A render pass which will be compatible to the one which the
+  // secondary_command_buffer will be submitted into.
+  VkRenderPass compatible_render_pass;
+
+  // Input: Format of the destination surface.
+  VkFormat format;
+
+  // Input: Color space transformation from linear RGB to D50-adapted XYZ
+  float matrix[9];
+
+  // Input: current clip rect
+  int clip_left;
+  int clip_top;
+  int clip_right;
+  int clip_bottom;
+};
+
+struct AwDrawFn_PostDrawVkParams {
+  int version;
+
+  // Input: Fence for the composite command buffer to signal it has finished its
+  // work on the GPU.
+  int fd;
+};
+
+// Called on render thread while UI thread is blocked. Called for both GL and
+// VK.
+typedef void AwDrawFn_OnSync(int functor, AwDrawFn_OnSyncParams* params);
+
+// Called on render thread when either the context is destroyed _or_ when the
+// functor's last reference goes away. Will always be called with an active
+// context. Called for both GL and VK.
+typedef void AwDrawFn_OnContextDestroyed(int functor);
+
+// Called on render thread when the last reference to the handle goes away and
+// the handle is considered irrevocably destroyed. Will always be proceeded by
+// a call to OnContextDestroyed if this functor had ever been drawn. Called for
+// both GL and VK.
+typedef void AwDrawFn_OnDestroyed(int functor);
+
+// Only called for GL.
+typedef void AwDrawFn_DrawGL(int functor, AwDrawFn_DrawGLParams* params);
+
+// Initialize vulkan state. Needs to be called again after any
+// OnContextDestroyed. Only called for Vulkan.
+typedef void AwDrawFn_InitVk(int functor, AwDrawFn_InitVkParams* params);
+
+// Only called for Vulkan.
+typedef void AwDrawFn_DrawVk(int functor, AwDrawFn_DrawVkParams* params);
+
+// Only called for Vulkan.
+typedef void AwDrawFn_PostDrawVk(int functor,
+                                 AwDrawFn_PostDrawVkParams* params);
+
+struct AwDrawFnFunctorCallbacks {
+  // No version here since this is passed from chromium to android.
+  AwDrawFn_OnSync* on_sync;
+  AwDrawFn_OnContextDestroyed* on_context_destroyed;
+  AwDrawFn_OnDestroyed* on_destroyed;
+  AwDrawFn_DrawGL* draw_gl;
+  AwDrawFn_InitVk* init_vk;
+  AwDrawFn_DrawVk* draw_vk;
+  AwDrawFn_PostDrawVk* post_draw_vk;
+};
+
+enum AwDrawFnRenderMode {
+  AW_DRAW_FN_RENDER_MODE_OPENGL_ES = 0,
+  AW_DRAW_FN_RENDER_MODE_VULKAN = 1,
+};
+
+// Get the render mode. Result is static for the process.
+typedef AwDrawFnRenderMode AwDrawFn_QueryRenderMode(void);
+
+// Create a functor. |functor_callbacks| should be valid until OnDestroyed.
+typedef int AwDrawFn_CreateFunctor(AwDrawFnFunctorCallbacks* functor_callbacks);
+
+// May be called on any thread to signal that the functor should be destroyed.
+// The functor will receive an onDestroyed when the last usage of it is
+// released, and it should be considered alive & active until that point.
+typedef void AwDrawFn_ReleaseFunctor(int functor);
+
+struct AwDrawFnFunctionTable {
+  int version;
+  AwDrawFn_QueryRenderMode* query_render_mode;
+  AwDrawFn_CreateFunctor* create_functor;
+  AwDrawFn_ReleaseFunctor* release_functor;
+};
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
+#endif  // ANDROID_WEBVIEW_PUBLIC_BROWSER_DRAW_FN_H_
