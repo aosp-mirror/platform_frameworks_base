@@ -77,7 +77,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 //TODO: use java.lang.ref.Cleaner once Android supports Java 9
 import sun.misc.Cleaner;
 
@@ -2966,12 +2965,13 @@ public final class AutofillManager {
             if (afm == null) return null;
 
             final View view = afm.getClient().autofillClientFindViewByAutofillIdTraversal(id);
-            // TODO(b/111330312): optimize (for example, use temp rect from attach info) and
-            // fix (for example, take system status bar height into account) logic below
+            final Rect windowVisibleDisplayFrame = new Rect();
+            view.getWindowVisibleDisplayFrame(windowVisibleDisplayFrame);
             final int[] location = new int[2];
             view.getLocationOnScreen(location);
-            final Rect rect = new Rect(location[0], location[1], location[0] + view.getWidth(),
-                    location[1] + view.getHeight());
+            final Rect rect = new Rect(location[0], location[1] - windowVisibleDisplayFrame.top,
+                    location[0] + view.getWidth(),
+                    location[1] - windowVisibleDisplayFrame.top + view.getHeight());
             if (sVerbose) {
                 Log.v(TAG, "Coordinates for " + id + ": " + rect);
             }
