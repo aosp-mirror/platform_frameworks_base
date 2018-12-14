@@ -263,6 +263,10 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
             // The user canceled to enable a 3rd party IME.
             setCheckedInternal(false);
         });
+        builder.setOnCancelListener((dialog) -> {
+            // The user canceled to enable a 3rd party IME.
+            setCheckedInternal(false);
+        });
         mDialog = builder.create();
         mDialog.show();
     }
