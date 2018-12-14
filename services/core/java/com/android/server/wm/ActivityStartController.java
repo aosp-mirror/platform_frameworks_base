@@ -355,7 +355,6 @@ public class ActivityStartController {
                     ActivityInfo aInfo = mSupervisor.resolveActivity(intent, resolvedTypes[i], 0,
                             null, userId, ActivityStarter.computeResolveFilterUid(
                                     callingUid, realCallingUid, UserHandle.USER_NULL));
-                    // TODO: New, check if this is correct
                     aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
 
                     if (aInfo != null &&

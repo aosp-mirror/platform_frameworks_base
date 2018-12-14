@@ -1426,6 +1426,42 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
+     * Public API to check if the client is allowed to start an activity on specified display.
+     *
+     * If the target display is private or virtual, some restrictions will apply.
+     *
+     * @param displayId Target display id.
+     * @param intent Intent used to launch the activity.
+     * @param resolvedType The MIME type of the intent.
+     * @param userId The id of the user for whom the call is made.
+     * @return {@code true} if a call to start an activity on the target display should succeed and
+     *         no {@link SecurityException} will be thrown, {@code false} otherwise.
+     */
+    @Override
+    public final boolean isActivityStartAllowedOnDisplay(int displayId, Intent intent,
+            String resolvedType, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        final long origId = Binder.clearCallingIdentity();
+
+        try {
+            // Collect information about the target of the Intent.
+            ActivityInfo aInfo = mStackSupervisor.resolveActivity(intent, resolvedType,
+                    0 /* startFlags */, null /* profilerInfo */, userId,
+                    ActivityStarter.computeResolveFilterUid(callingUid, callingUid,
+                            UserHandle.USER_NULL));
+            aInfo = mAmInternal.getActivityInfoForUser(aInfo, userId);
+
+            synchronized (mGlobalLock) {
+                return mStackSupervisor.canPlaceEntityOnDisplay(displayId, callingPid, callingUid,
+                        aInfo);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
      * This is the internal entry point for handling Activity.finish().
      *
      * @param token The Binder token referencing the Activity we want to finish.
