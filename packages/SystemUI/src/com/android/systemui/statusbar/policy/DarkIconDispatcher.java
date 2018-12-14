@@ -19,9 +19,17 @@ import android.graphics.Rect;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 
-public interface DarkIconDispatcher {
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
+/**
+ * Dispatches events to {@link DarkReceiver}s about changes in darkness, tint area and dark
+ * intensity
+ */
+public interface DarkIconDispatcher extends Dumpable {
 
     void setIconsDarkArea(Rect r);
     LightBarTransitionsController getTransitionsController();
@@ -36,6 +44,11 @@ public interface DarkIconDispatcher {
     // Used to reapply darkness on an object, must have previously been added through
     // addDarkReceiver.
     void applyDark(DarkReceiver object);
+
+    /**
+     * Dumpable interface
+     */
+    default void dump(FileDescriptor fd, PrintWriter pw, String[] args) {}
 
     int DEFAULT_ICON_TINT = Color.WHITE;
     Rect sTmpRect = new Rect();
