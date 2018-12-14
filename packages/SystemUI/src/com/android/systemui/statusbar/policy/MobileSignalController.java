@@ -402,6 +402,19 @@ public class MobileSignalController extends SignalController<
         } catch (ImsException e) {
             Log.d(mTag, "unable to addCapabilitiesCallback callback.");
         }
+        queryImsState();
+    }
+
+    private void queryImsState() {
+        TelephonyManager tm = mPhone.createForSubscriptionId(mSubscriptionInfo.getSubscriptionId());
+        boolean isVoiceCapable = tm.isVolteAvailable();
+        boolean isVideoCapable = tm.isVideoTelephonyAvailable();
+        Log.d(mTag, "tm=" + tm +" phone=" + mPhone
+                + " isVoiceCapable=" + isVoiceCapable
+                + " isVideoCapable=" +isVideoCapable);
+        if ( isVoiceCapable || isVideoCapable ) {
+            mCurrentState.isVolteRegistered = true;
+        }
     }
 
     private void removeListeners() {
