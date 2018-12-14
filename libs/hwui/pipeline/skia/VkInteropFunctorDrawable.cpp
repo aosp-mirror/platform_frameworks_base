@@ -17,13 +17,13 @@
 #include "VkInteropFunctorDrawable.h"
 #include <private/hwui/DrawGlInfo.h>
 
-#include "renderthread/EglManager.h"
-#include "thread/ThreadBase.h"
-#include "utils/TimeUtils.h"
-#include <thread>
 #include <utils/Color.h>
 #include <utils/Trace.h>
 #include <utils/TraceUtils.h>
+#include <thread>
+#include "renderthread/EglManager.h"
+#include "thread/ThreadBase.h"
+#include "utils/TimeUtils.h"
 
 #include <EGL/eglext.h>
 #include <GLES2/gl2.h>
@@ -44,6 +44,7 @@ static renderthread::EglManager sEglManager;
 class ScopedDrawRequest {
 public:
     ScopedDrawRequest() { beginDraw(); }
+
 private:
     void beginDraw() {
         std::lock_guard _lock{sLock};
@@ -57,9 +58,7 @@ private:
         }
 
         if (!sEglManager.hasEglContext()) {
-            sGLDrawThread->queue().runSync([]() {
-                sEglManager.initialize();
-            });
+            sGLDrawThread->queue().runSync([]() { sEglManager.initialize(); });
         }
     }
 };
@@ -93,14 +92,14 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
     if (!mFrameBuffer.get() || mFBInfo != surfaceInfo) {
         // Buffer will be used as an OpenGL ES render target.
         mFrameBuffer = new GraphicBuffer(
-                 //TODO: try to reduce the size of the buffer: possibly by using clip bounds.
-                 static_cast<uint32_t>(surfaceInfo.width()),
-                 static_cast<uint32_t>(surfaceInfo.height()),
-                 ColorTypeToPixelFormat(surfaceInfo.colorType()),
-                 GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER |
-                         GraphicBuffer::USAGE_SW_READ_NEVER | GraphicBuffer::USAGE_HW_RENDER,
-                 std::string("VkInteropFunctorDrawable::onDraw pid [") + std::to_string(getpid()) +
-                         "]");
+                // TODO: try to reduce the size of the buffer: possibly by using clip bounds.
+                static_cast<uint32_t>(surfaceInfo.width()),
+                static_cast<uint32_t>(surfaceInfo.height()),
+                ColorTypeToPixelFormat(surfaceInfo.colorType()),
+                GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER |
+                        GraphicBuffer::USAGE_SW_READ_NEVER | GraphicBuffer::USAGE_HW_RENDER,
+                std::string("VkInteropFunctorDrawable::onDraw pid [") + std::to_string(getpid()) +
+                        "]");
         status_t error = mFrameBuffer->initCheck();
         if (error < 0) {
             ALOGW("VkInteropFunctorDrawable::onDraw() failed in GraphicBuffer.create()");
@@ -110,16 +109,15 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         mFBInfo = surfaceInfo;
     }
 
-    //TODO: Synchronization is needed on mFrameBuffer to guarantee that the previous Vulkan
-    //TODO: draw command has completed.
-    //TODO: A simple but inefficient way is to flush and issue a QueueWaitIdle call. See
-    //TODO: GrVkGpu::destroyResources() for example.
+    // TODO: Synchronization is needed on mFrameBuffer to guarantee that the previous Vulkan
+    // TODO: draw command has completed.
+    // TODO: A simple but inefficient way is to flush and issue a QueueWaitIdle call. See
+    // TODO: GrVkGpu::destroyResources() for example.
     bool success = sGLDrawThread->queue().runSync([&]() -> bool {
         ATRACE_FORMAT("WebViewDraw_%dx%d", mFBInfo.width(), mFBInfo.height());
         EGLDisplay display = sEglManager.eglDisplay();
-        LOG_ALWAYS_FATAL_IF(display == EGL_NO_DISPLAY,
-                "Failed to get EGL_DEFAULT_DISPLAY! err=%s",
-                uirenderer::renderthread::EglManager::eglErrorString());
+        LOG_ALWAYS_FATAL_IF(display == EGL_NO_DISPLAY, "Failed to get EGL_DEFAULT_DISPLAY! err=%s",
+                            uirenderer::renderthread::EglManager::eglErrorString());
         // We use an EGLImage to access the content of the GraphicBuffer
         // The EGL image is later bound to a 2D texture
         EGLClientBuffer clientBuffer = (EGLClientBuffer)mFrameBuffer->getNativeBuffer();
@@ -154,10 +152,10 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         AutoGLFramebuffer glFb;
         // Bind texture to the frame buffer.
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                             glTexture.mTexture, 0);
+                               glTexture.mTexture, 0);
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
             ALOGE("Failed framebuffer check for created target buffer: %s",
-                    GLUtils::getGLFramebufferError());
+                  GLUtils::getGLFramebufferError());
             return false;
         }
 
@@ -166,19 +164,22 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        (*mFunctor)(DrawGlInfo::kModeDraw, &info);
+        if (mAnyFunctor.index() == 0) {
+            std::get<0>(mAnyFunctor).handle->drawGl(info);
+        } else {
+            (*(std::get<1>(mAnyFunctor).functor))(DrawGlInfo::kModeDraw, &info);
+        }
 
         EGLSyncKHR glDrawFinishedFence =
                 eglCreateSyncKHR(eglGetCurrentDisplay(), EGL_SYNC_FENCE_KHR, NULL);
         LOG_ALWAYS_FATAL_IF(glDrawFinishedFence == EGL_NO_SYNC_KHR,
-                "Could not create sync fence %#x", eglGetError());
+                            "Could not create sync fence %#x", eglGetError());
         glFlush();
         // TODO: export EGLSyncKHR in file descr
         // TODO: import file desc in Vulkan Semaphore
         // TODO: instead block the GPU: probably by using external Vulkan semaphore.
         // Block the CPU until the glFlush finish.
-        EGLint waitStatus = eglClientWaitSyncKHR(display, glDrawFinishedFence, 0,
-                FENCE_TIMEOUT);
+        EGLint waitStatus = eglClientWaitSyncKHR(display, glDrawFinishedFence, 0, FENCE_TIMEOUT);
         LOG_ALWAYS_FATAL_IF(waitStatus != EGL_CONDITION_SATISFIED_KHR,
                             "Failed to wait for the fence %#x", eglGetError());
         eglDestroySyncKHR(display, glDrawFinishedFence);
@@ -197,26 +198,25 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
     canvas->resetMatrix();
 
     auto functorImage = SkImage::MakeFromAHardwareBuffer(
-        reinterpret_cast<AHardwareBuffer*>(mFrameBuffer.get()), kPremul_SkAlphaType,
-        nullptr, kBottomLeft_GrSurfaceOrigin);
+            reinterpret_cast<AHardwareBuffer*>(mFrameBuffer.get()), kPremul_SkAlphaType, nullptr,
+            kBottomLeft_GrSurfaceOrigin);
     canvas->drawImage(functorImage, 0, 0, &paint);
     canvas->restore();
 }
 
 VkInteropFunctorDrawable::~VkInteropFunctorDrawable() {
-    if (mListener.get() != nullptr) {
-        ScopedDrawRequest _drawRequest{};
-        sGLDrawThread->queue().runSync([&]() {
-             mListener->onGlFunctorReleased(mFunctor);
-        });
+    if (auto lp = std::get_if<LegacyFunctor>(&mAnyFunctor)) {
+        if (lp->listener) {
+            ScopedDrawRequest _drawRequest{};
+            sGLDrawThread->queue().runSync(
+                    [&]() { lp->listener->onGlFunctorReleased(lp->functor); });
+        }
     }
 }
 
-void VkInteropFunctorDrawable::syncFunctor() const {
+void VkInteropFunctorDrawable::syncFunctor(const WebViewSyncData& data) const {
     ScopedDrawRequest _drawRequest{};
-    sGLDrawThread->queue().runSync([&]() {
-         (*mFunctor)(DrawGlInfo::kModeSync, nullptr);
-    });
+    sGLDrawThread->queue().runSync([&]() { FunctorDrawable::syncFunctor(data); });
 }
 
 }  // namespace skiapipeline

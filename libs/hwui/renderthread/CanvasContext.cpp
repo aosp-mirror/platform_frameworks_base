@@ -576,8 +576,7 @@ void CanvasContext::trimMemory(RenderThread& thread, int level) {
     ATRACE_CALL();
     if (level >= TRIM_MEMORY_COMPLETE) {
         thread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
-        thread.destroyGlContext();
-        thread.vulkanManager().destroy();
+        thread.destroyRenderingContext();
     } else if (level >= TRIM_MEMORY_UI_HIDDEN) {
         thread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::UiHidden);
     }

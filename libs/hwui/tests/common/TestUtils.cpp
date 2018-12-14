@@ -32,6 +32,8 @@
 namespace android {
 namespace uirenderer {
 
+std::unordered_map<int, TestUtils::CallCounts> TestUtils::sMockFunctorCounts{};
+
 SkColor TestUtils::interpolateColor(float fraction, SkColor start, SkColor end) {
     int startA = (start >> 24) & 0xff;
     int startR = (start >> 16) & 0xff;
@@ -82,12 +84,10 @@ void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint
     uint32_t length = strlen(text);
     SkPaint glyphPaint(paint);
     glyphPaint.setTextEncoding(kGlyphID_SkTextEncoding);
-    canvas->drawText(
-            utf16.get(), length,  // text buffer
-            0, length,  // draw range
-            0, length,  // context range
-            x, y, minikin::Bidi::LTR,
-            glyphPaint, nullptr, nullptr /* measured text */);
+    canvas->drawText(utf16.get(), length,  // text buffer
+                     0, length,            // draw range
+                     0, length,            // context range
+                     x, y, minikin::Bidi::LTR, glyphPaint, nullptr, nullptr /* measured text */);
 }
 
 void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint,
@@ -96,7 +96,7 @@ void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint
     SkPaint glyphPaint(paint);
     glyphPaint.setTextEncoding(kGlyphID_SkTextEncoding);
     canvas->drawTextOnPath(utf16.get(), strlen(text), minikin::Bidi::LTR, path, 0, 0, glyphPaint,
-            nullptr);
+                           nullptr);
 }
 
 void TestUtils::TestTask::run() {
@@ -110,11 +110,7 @@ void TestUtils::TestTask::run() {
 
     rtCallback(renderThread);
 
-    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
-        renderThread.vulkanManager().destroy();
-    } else {
-        renderThread.destroyGlContext();
-    }
+    renderThread.destroyRenderingContext();
 }
 
 std::unique_ptr<uint16_t[]> TestUtils::asciiToUtf16(const char* str) {

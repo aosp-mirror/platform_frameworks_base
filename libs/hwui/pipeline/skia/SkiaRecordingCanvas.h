@@ -74,6 +74,7 @@ public:
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;
     virtual void callDrawGLFunction(Functor* functor,
                                     uirenderer::GlFunctorLifecycleListener* listener) override;
+    void drawWebViewFunctor(int functor) override;
 
 private:
     RecordingCanvas mRecorder;

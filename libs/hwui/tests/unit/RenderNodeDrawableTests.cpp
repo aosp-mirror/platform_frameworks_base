@@ -355,9 +355,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, emptyReceiver) {
     class ProjectionTestCanvas : public SkCanvas {
     public:
         ProjectionTestCanvas(int width, int height) : SkCanvas(width, height) {}
-        void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
-            mDrawCounter++;
-        }
+        void onDrawRect(const SkRect& rect, const SkPaint& paint) override { mDrawCounter++; }
 
         int getDrawCounter() { return mDrawCounter; }
 
@@ -370,7 +368,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, emptyReceiver) {
             [](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
                 properties.setProjectionReceiver(true);
             },
-            "B"); // a receiver with an empty display list
+            "B");  // a receiver with an empty display list
 
     auto projectingRipple = TestUtils::createSkiaNode(
             0, 0, 100, 100,
@@ -389,14 +387,14 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, emptyReceiver) {
                 canvas.drawRenderNode(projectingRipple.get());
             },
             "C");
-    auto parent = TestUtils::createSkiaNode(
-            0, 0, 100, 100,
-            [&receiverBackground, &child](RenderProperties& properties,
-                                          SkiaRecordingCanvas& canvas) {
-                canvas.drawRenderNode(receiverBackground.get());
-                canvas.drawRenderNode(child.get());
-            },
-            "A");
+    auto parent =
+            TestUtils::createSkiaNode(0, 0, 100, 100,
+                                      [&receiverBackground, &child](RenderProperties& properties,
+                                                                    SkiaRecordingCanvas& canvas) {
+                                          canvas.drawRenderNode(receiverBackground.get());
+                                          canvas.drawRenderNode(child.get());
+                                      },
+                                      "A");
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(
             CanvasContext::create(renderThread, false, parent.get(), &contextFactory));
@@ -1058,7 +1056,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, layerComposeQuality) {
     public:
         FrameTestCanvas() : TestCanvasBase(CANVAS_WIDTH, CANVAS_HEIGHT) {}
         void onDrawImageRect(const SkImage* image, const SkRect* src, const SkRect& dst,
-                const SkPaint* paint, SrcRectConstraint constraint) override {
+                             const SkPaint* paint, SrcRectConstraint constraint) override {
             mDrawCounter++;
             EXPECT_EQ(kLow_SkFilterQuality, paint->getFilterQuality());
         }
@@ -1076,7 +1074,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, layerComposeQuality) {
     FrameTestCanvas canvas;
     RenderNodeDrawable drawable(layerNode.get(), &canvas, true);
     canvas.drawDrawable(&drawable);
-    EXPECT_EQ(1, canvas.mDrawCounter);  //make sure the layer was composed
+    EXPECT_EQ(1, canvas.mDrawCounter);  // make sure the layer was composed
 
     // clean up layer pointer, so we can safely destruct RenderNode
     layerNode->setLayerSurface(nullptr);
@@ -1129,15 +1127,14 @@ TEST(ReorderBarrierDrawable, testShadowMatrix) {
                           getTotalMatrix());
             } else {
                 // Second invocation is preparing the matrix for an elevated RenderNodeDrawable.
-                EXPECT_EQ(SkMatrix::MakeTrans(TRANSLATE_X, TRANSLATE_Y),
-                          matrix);
-                EXPECT_EQ(SkMatrix::MakeTrans(TRANSLATE_X, TRANSLATE_Y),
-                          getTotalMatrix());
+                EXPECT_EQ(SkMatrix::MakeTrans(TRANSLATE_X, TRANSLATE_Y), matrix);
+                EXPECT_EQ(SkMatrix::MakeTrans(TRANSLATE_X, TRANSLATE_Y), getTotalMatrix());
             }
         }
 
     protected:
         int mDrawCounter = 0;
+
     private:
         bool mFirstDidConcat = true;
     };
@@ -1174,14 +1171,14 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaRecordingCanvas, drawVectorDrawable) {
     public:
         VectorDrawableTestCanvas() : TestCanvasBase(CANVAS_WIDTH, CANVAS_HEIGHT) {}
         void onDrawBitmapRect(const SkBitmap& bitmap, const SkRect* src, const SkRect& dst,
-                const SkPaint* paint, SrcRectConstraint constraint) override {
+                              const SkPaint* paint, SrcRectConstraint constraint) override {
             const int index = mDrawCounter++;
             switch (index) {
                 case 0:
                     EXPECT_EQ(dst, SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT));
                     break;
                 case 1:
-                    EXPECT_EQ(dst, SkRect::MakeWH(CANVAS_WIDTH/2, CANVAS_HEIGHT));
+                    EXPECT_EQ(dst, SkRect::MakeWH(CANVAS_WIDTH / 2, CANVAS_HEIGHT));
                     break;
                 default:
                     ADD_FAILURE();
@@ -1191,17 +1188,18 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaRecordingCanvas, drawVectorDrawable) {
 
     VectorDrawable::Group* group = new VectorDrawable::Group();
     sp<VectorDrawableRoot> vectorDrawable(new VectorDrawableRoot(group));
-    vectorDrawable->mutateStagingProperties()->setScaledSize(CANVAS_WIDTH/10, CANVAS_HEIGHT/10);
+    vectorDrawable->mutateStagingProperties()->setScaledSize(CANVAS_WIDTH / 10, CANVAS_HEIGHT / 10);
 
-    auto node = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
-            [&](RenderProperties& props, SkiaRecordingCanvas& canvas) {
-                vectorDrawable->mutateStagingProperties()->setBounds(SkRect::MakeWH(CANVAS_WIDTH,
-                        CANVAS_HEIGHT));
-                canvas.drawVectorDrawable(vectorDrawable.get());
-                vectorDrawable->mutateStagingProperties()->setBounds(SkRect::MakeWH(CANVAS_WIDTH/2,
-                        CANVAS_HEIGHT));
-                canvas.drawVectorDrawable(vectorDrawable.get());
-            });
+    auto node =
+            TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
+                                      [&](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+                                          vectorDrawable->mutateStagingProperties()->setBounds(
+                                                  SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT));
+                                          canvas.drawVectorDrawable(vectorDrawable.get());
+                                          vectorDrawable->mutateStagingProperties()->setBounds(
+                                                  SkRect::MakeWH(CANVAS_WIDTH / 2, CANVAS_HEIGHT));
+                                          canvas.drawVectorDrawable(vectorDrawable.get());
+                                      });
 
     VectorDrawableTestCanvas canvas;
     RenderNodeDrawable drawable(node.get(), &canvas, true);

@@ -82,6 +82,7 @@ public:
     ANDROID_API void destroy();
 
     ANDROID_API static void invokeFunctor(Functor* functor, bool waitForCompletion);
+    static void destroyFunctor(int functor);
 
     ANDROID_API DeferredLayerUpdater* createTextureLayer();
     ANDROID_API void buildLayer(RenderNode* node);

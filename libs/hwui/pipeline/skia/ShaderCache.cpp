@@ -15,11 +15,11 @@
  */
 
 #include "ShaderCache.h"
-#include <algorithm>
 #include <log/log.h>
-#include <thread>
-#include <array>
 #include <openssl/sha.h>
+#include <algorithm>
+#include <array>
+#include <thread>
 #include "FileBlobCache.h"
 #include "Properties.h"
 #include "utils/TraceUtils.h"
@@ -44,8 +44,7 @@ ShaderCache& ShaderCache::get() {
 }
 
 bool ShaderCache::validateCache(const void* identity, ssize_t size) {
-    if (nullptr == identity && size == 0)
-        return true;
+    if (nullptr == identity && size == 0) return true;
 
     if (nullptr == identity || size < 0) {
         if (CC_UNLIKELY(Properties::debugLevel & kDebugCaches)) {
@@ -66,8 +65,7 @@ bool ShaderCache::validateCache(const void* identity, ssize_t size) {
     auto key = sIDKey;
     auto loaded = mBlobCache->get(&key, sizeof(key), hash.data(), hash.size());
 
-    if (loaded && std::equal(hash.begin(), hash.end(), mIDHash.begin()))
-        return true;
+    if (loaded && std::equal(hash.begin(), hash.end(), mIDHash.begin())) return true;
 
     if (CC_UNLIKELY(Properties::debugLevel & kDebugCaches)) {
         ALOGW("ShaderCache::validateCache cache validation fails");
@@ -119,7 +117,7 @@ sk_sp<SkData> ShaderCache::load(const SkData& key) {
     int maxTries = 3;
     while (valueSize > mObservedBlobValueSize && maxTries > 0) {
         mObservedBlobValueSize = std::min(valueSize, maxValueSize);
-        void *newValueBuffer = realloc(valueBuffer, mObservedBlobValueSize);
+        void* newValueBuffer = realloc(valueBuffer, mObservedBlobValueSize);
         if (!newValueBuffer) {
             free(valueBuffer);
             return nullptr;
@@ -133,7 +131,7 @@ sk_sp<SkData> ShaderCache::load(const SkData& key) {
         return nullptr;
     }
     if (valueSize > mObservedBlobValueSize) {
-        ALOGE("ShaderCache::load value size is too big %d", (int) valueSize);
+        ALOGE("ShaderCache::load value size is too big %d", (int)valueSize);
         free(valueBuffer);
         return nullptr;
     }

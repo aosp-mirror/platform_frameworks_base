@@ -17,23 +17,21 @@
 #include "VkFunctorDrawable.h"
 #include <private/hwui/DrawVkInfo.h>
 
-#include "thread/ThreadBase.h"
-#include "utils/TimeUtils.h"
 #include <GrBackendDrawableInfo.h>
-#include <thread>
+#include <SkImage.h>
 #include <utils/Color.h>
 #include <utils/Trace.h>
 #include <utils/TraceUtils.h>
-#include <SkImage.h>
 #include <vk/GrVkTypes.h>
+#include <thread>
+#include "thread/ThreadBase.h"
+#include "utils/TimeUtils.h"
 
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-VkFunctorDrawHandler::VkFunctorDrawHandler(Functor *functor)
-    : INHERITED()
-    , mFunctor(functor) {}
+VkFunctorDrawHandler::VkFunctorDrawHandler(Functor* functor) : INHERITED(), mFunctor(functor) {}
 
 VkFunctorDrawHandler::~VkFunctorDrawHandler() {
     // TODO(cblume) Fill in the DrawVkInfo parameters.
@@ -55,14 +53,12 @@ void VkFunctorDrawHandler::draw(const GrBackendDrawableInfo& info) {
     (*mFunctor)(DrawVkInfo::kModeComposite, &draw_vk_info);
 }
 
-VkFunctorDrawable::VkFunctorDrawable(Functor* functor, GlFunctorLifecycleListener* listener,
-                                     SkCanvas* canvas)
-    : FunctorDrawable(functor, listener, canvas) {}
-
-VkFunctorDrawable::~VkFunctorDrawable() = default;
-
-void VkFunctorDrawable::syncFunctor() const {
-    (*mFunctor)(DrawVkInfo::kModeSync, nullptr);
+VkFunctorDrawable::~VkFunctorDrawable() {
+    if (auto lp = std::get_if<LegacyFunctor>(&mAnyFunctor)) {
+        if (lp->listener) {
+            lp->listener->onGlFunctorReleased(lp->functor);
+        }
+    }
 }
 
 void VkFunctorDrawable::onDraw(SkCanvas* /*canvas*/) {
@@ -71,12 +67,17 @@ void VkFunctorDrawable::onDraw(SkCanvas* /*canvas*/) {
 }
 
 std::unique_ptr<FunctorDrawable::GpuDrawHandler> VkFunctorDrawable::onSnapGpuDrawHandler(
-    GrBackendApi backendApi, const SkMatrix& matrix) {
+        GrBackendApi backendApi, const SkMatrix& matrix) {
     if (backendApi != GrBackendApi::kVulkan) {
         return nullptr;
     }
-    std::unique_ptr<VkFunctorDrawHandler> draw(new VkFunctorDrawHandler(mFunctor));
-    return std::move(draw);
+    std::unique_ptr<VkFunctorDrawHandler> draw;
+    if (mAnyFunctor.index() == 0) {
+        LOG_ALWAYS_FATAL("Not implemented");
+        return nullptr;
+    } else {
+        return std::make_unique<VkFunctorDrawHandler>(std::get<1>(mAnyFunctor).functor);
+    }
 }
 
 }  // namespace skiapipeline

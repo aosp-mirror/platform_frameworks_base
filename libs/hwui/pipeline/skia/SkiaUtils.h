@@ -22,7 +22,7 @@ namespace android {
 
 static inline SkRect SkRectMakeLargest() {
     const SkScalar v = SK_ScalarMax;
-    return { -v, -v, v, v };
+    return {-v, -v, v, v};
 };
 
 } /* namespace android */

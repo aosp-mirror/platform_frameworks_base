@@ -23,6 +23,7 @@
 #include "CacheManager.h"
 #include "TimeLord.h"
 #include "thread/ThreadBase.h"
+#include "WebViewFunctorManager.h"
 
 #include <GrContext.h>
 #include <SkBitmap.h>
@@ -104,7 +105,7 @@ public:
     void dumpGraphicsMemory(int fd);
 
     void requireGlContext();
-    void destroyGlContext();
+    void destroyRenderingContext();
 
     /**
      * isCurrent provides a way to query, if the caller is running on
@@ -151,6 +152,7 @@ private:
     TimeLord mTimeLord;
     RenderState* mRenderState;
     EglManager* mEglManager;
+    WebViewFunctorManager& mFunctorManager;
 
     ProfileDataContainer mGlobalProfileData;
     Readback* mReadback = nullptr;

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <dirent.h>
 #include <cutils/properties.h>
-#include <cstdint>
+#include <dirent.h>
 #include <errno.h>
+#include <gtest/gtest.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <utils/Log.h>
-#include "pipeline/skia/ShaderCache.h"
+#include <cstdint>
 #include "FileBlobCache.h"
+#include "pipeline/skia/ShaderCache.h"
 
 using namespace android::uirenderer::skiapipeline;
 
@@ -66,7 +66,6 @@ public:
 } /* namespace uirenderer */
 } /* namespace android */
 
-
 namespace {
 
 std::string getExternalStorageFolder() {
@@ -82,14 +81,12 @@ bool folderExist(const std::string& folderName) {
     return false;
 }
 
-inline bool
-checkShader(const sk_sp<SkData>& shader1, const sk_sp<SkData>& shader2) {
-    return nullptr != shader1 && nullptr != shader2 && shader1->size() == shader2->size()
-            && 0 == memcmp(shader1->data(), shader2->data(), shader1->size());
+inline bool checkShader(const sk_sp<SkData>& shader1, const sk_sp<SkData>& shader2) {
+    return nullptr != shader1 && nullptr != shader2 && shader1->size() == shader2->size() &&
+           0 == memcmp(shader1->data(), shader2->data(), shader1->size());
 }
 
-inline bool
-checkShader(const sk_sp<SkData>& shader, const char* program) {
+inline bool checkShader(const sk_sp<SkData>& shader, const char* program) {
     sk_sp<SkData> shader2 = SkData::MakeWithCString(program);
     return checkShader(shader, shader2);
 }
@@ -116,32 +113,31 @@ void genRandomData(std::vector<T>& buffer) {
     }
 }
 
-
 #define GrProgramDescTest(a) (*SkData::MakeWithCString(#a).get())
 
 TEST(ShaderCacheTest, testWriteAndRead) {
     if (!folderExist(getExternalStorageFolder())) {
-        //don't run the test if external storage folder is not available
+        // don't run the test if external storage folder is not available
         return;
     }
-    std::string cacheFile1 =  getExternalStorageFolder() + "/shaderCacheTest1";
-    std::string cacheFile2 =  getExternalStorageFolder() + "/shaderCacheTest2";
+    std::string cacheFile1 = getExternalStorageFolder() + "/shaderCacheTest1";
+    std::string cacheFile2 = getExternalStorageFolder() + "/shaderCacheTest2";
 
-    //remove any test files from previous test run
+    // remove any test files from previous test run
     int deleteFile = remove(cacheFile1.c_str());
     ASSERT_TRUE(0 == deleteFile || ENOENT == errno);
     std::srand(0);
 
-    //read the cache from a file that does not exist
+    // read the cache from a file that does not exist
     ShaderCache::get().setFilename(cacheFile1.c_str());
-    ShaderCacheTestUtils::setSaveDelay(ShaderCache::get(), 0); //disable deferred save
+    ShaderCacheTestUtils::setSaveDelay(ShaderCache::get(), 0);  // disable deferred save
     ShaderCache::get().initShaderDiskCache();
 
-    //read a key - should not be found since the cache is empty
+    // read a key - should not be found since the cache is empty
     sk_sp<SkData> outVS;
     ASSERT_EQ(ShaderCache::get().load(GrProgramDescTest(432)), sk_sp<SkData>());
 
-    //write to the in-memory cache without storing on disk and verify we read the same values
+    // write to the in-memory cache without storing on disk and verify we read the same values
     sk_sp<SkData> inVS;
     setShader(inVS, "sassas");
     ShaderCache::get().store(GrProgramDescTest(100), *inVS.get());
@@ -152,23 +148,23 @@ TEST(ShaderCacheTest, testWriteAndRead) {
     ASSERT_NE((outVS = ShaderCache::get().load(GrProgramDescTest(432))), sk_sp<SkData>());
     ASSERT_TRUE(checkShader(outVS, "someVS"));
 
-    //store content to disk and release in-memory cache
+    // store content to disk and release in-memory cache
     ShaderCacheTestUtils::terminate(ShaderCache::get(), true);
 
-    //change to a file that does not exist and verify load fails
+    // change to a file that does not exist and verify load fails
     ShaderCache::get().setFilename(cacheFile2.c_str());
     ShaderCache::get().initShaderDiskCache();
     ASSERT_EQ(ShaderCache::get().load(GrProgramDescTest(432)), sk_sp<SkData>());
     ShaderCacheTestUtils::terminate(ShaderCache::get(), false);
 
-    //load again content from disk from an existing file and check the data is read correctly
+    // load again content from disk from an existing file and check the data is read correctly
     ShaderCache::get().setFilename(cacheFile1.c_str());
     ShaderCache::get().initShaderDiskCache();
     sk_sp<SkData> outVS2;
     ASSERT_NE((outVS2 = ShaderCache::get().load(GrProgramDescTest(432))), sk_sp<SkData>());
     ASSERT_TRUE(checkShader(outVS2, "someVS"));
 
-    //change data, store to disk, read back again and verify data has been changed
+    // change data, store to disk, read back again and verify data has been changed
     setShader(inVS, "ewData1");
     ShaderCache::get().store(GrProgramDescTest(432), *inVS.get());
     ShaderCacheTestUtils::terminate(ShaderCache::get(), true);
@@ -176,9 +172,8 @@ TEST(ShaderCacheTest, testWriteAndRead) {
     ASSERT_NE((outVS2 = ShaderCache::get().load(GrProgramDescTest(432))), sk_sp<SkData>());
     ASSERT_TRUE(checkShader(outVS2, "ewData1"));
 
-
-    //write and read big data chunk (50K)
-    size_t dataSize = 50*1024;
+    // write and read big data chunk (50K)
+    size_t dataSize = 50 * 1024;
     std::vector<uint8_t> dataBuffer(dataSize);
     genRandomData(dataBuffer);
     setShader(inVS, dataBuffer);
@@ -194,31 +189,31 @@ TEST(ShaderCacheTest, testWriteAndRead) {
 
 TEST(ShaderCacheTest, testCacheValidation) {
     if (!folderExist(getExternalStorageFolder())) {
-        //don't run the test if external storage folder is not available
+        // don't run the test if external storage folder is not available
         return;
     }
-    std::string cacheFile1 =  getExternalStorageFolder() + "/shaderCacheTest1";
-    std::string cacheFile2 =  getExternalStorageFolder() + "/shaderCacheTest2";
+    std::string cacheFile1 = getExternalStorageFolder() + "/shaderCacheTest1";
+    std::string cacheFile2 = getExternalStorageFolder() + "/shaderCacheTest2";
 
-    //remove any test files from previous test run
+    // remove any test files from previous test run
     int deleteFile = remove(cacheFile1.c_str());
     ASSERT_TRUE(0 == deleteFile || ENOENT == errno);
     std::srand(0);
 
-    //generate identity and read the cache from a file that does not exist
+    // generate identity and read the cache from a file that does not exist
     ShaderCache::get().setFilename(cacheFile1.c_str());
-    ShaderCacheTestUtils::setSaveDelay(ShaderCache::get(), 0); //disable deferred save
+    ShaderCacheTestUtils::setSaveDelay(ShaderCache::get(), 0);  // disable deferred save
     std::vector<uint8_t> identity(1024);
     genRandomData(identity);
-    ShaderCache::get().initShaderDiskCache(identity.data(), identity.size() *
-                                           sizeof(decltype(identity)::value_type));
+    ShaderCache::get().initShaderDiskCache(
+            identity.data(), identity.size() * sizeof(decltype(identity)::value_type));
 
     // generate random content in cache and store to disk
     constexpr size_t numBlob(10);
     constexpr size_t keySize(1024);
     constexpr size_t dataSize(50 * 1024);
 
-    std::vector< std::pair<sk_sp<SkData>, sk_sp<SkData>> > blobVec(numBlob);
+    std::vector<std::pair<sk_sp<SkData>, sk_sp<SkData>>> blobVec(numBlob);
     for (auto& blob : blobVec) {
         std::vector<uint8_t> keyBuffer(keySize);
         std::vector<uint8_t> dataBuffer(dataSize);
@@ -237,47 +232,47 @@ TEST(ShaderCacheTest, testCacheValidation) {
     // change to a file that does not exist and verify validation fails
     ShaderCache::get().setFilename(cacheFile2.c_str());
     ShaderCache::get().initShaderDiskCache();
-    ASSERT_FALSE( ShaderCacheTestUtils::validateCache(ShaderCache::get(), identity) );
+    ASSERT_FALSE(ShaderCacheTestUtils::validateCache(ShaderCache::get(), identity));
     ShaderCacheTestUtils::terminate(ShaderCache::get(), false);
 
     // restore the original file and verify validation succeeds
     ShaderCache::get().setFilename(cacheFile1.c_str());
-    ShaderCache::get().initShaderDiskCache(identity.data(), identity.size() *
-                                           sizeof(decltype(identity)::value_type));
-    ASSERT_TRUE( ShaderCacheTestUtils::validateCache(ShaderCache::get(), identity) );
+    ShaderCache::get().initShaderDiskCache(
+            identity.data(), identity.size() * sizeof(decltype(identity)::value_type));
+    ASSERT_TRUE(ShaderCacheTestUtils::validateCache(ShaderCache::get(), identity));
     for (const auto& blob : blobVec) {
         auto outVS = ShaderCache::get().load(*blob.first.get());
-        ASSERT_TRUE( checkShader(outVS, blob.second) );
+        ASSERT_TRUE(checkShader(outVS, blob.second));
     }
 
     // generate error identity and verify load fails
     ShaderCache::get().initShaderDiskCache(identity.data(), -1);
     for (const auto& blob : blobVec) {
-        ASSERT_EQ( ShaderCache::get().load(*blob.first.get()), sk_sp<SkData>() );
+        ASSERT_EQ(ShaderCache::get().load(*blob.first.get()), sk_sp<SkData>());
     }
-    ShaderCache::get().initShaderDiskCache(nullptr, identity.size() *
-                                           sizeof(decltype(identity)::value_type));
+    ShaderCache::get().initShaderDiskCache(
+            nullptr, identity.size() * sizeof(decltype(identity)::value_type));
     for (const auto& blob : blobVec) {
-        ASSERT_EQ( ShaderCache::get().load(*blob.first.get()), sk_sp<SkData>() );
+        ASSERT_EQ(ShaderCache::get().load(*blob.first.get()), sk_sp<SkData>());
     }
 
     // verify the cache validation again after load fails
-    ShaderCache::get().initShaderDiskCache(identity.data(), identity.size() *
-                                           sizeof(decltype(identity)::value_type));
-    ASSERT_TRUE( ShaderCacheTestUtils::validateCache(ShaderCache::get(), identity) );
+    ShaderCache::get().initShaderDiskCache(
+            identity.data(), identity.size() * sizeof(decltype(identity)::value_type));
+    ASSERT_TRUE(ShaderCacheTestUtils::validateCache(ShaderCache::get(), identity));
     for (const auto& blob : blobVec) {
         auto outVS = ShaderCache::get().load(*blob.first.get());
-        ASSERT_TRUE( checkShader(outVS, blob.second) );
+        ASSERT_TRUE(checkShader(outVS, blob.second));
     }
 
     // generate another identity and verify load fails
     for (auto& data : identity) {
         data += std::rand();
     }
-    ShaderCache::get().initShaderDiskCache(identity.data(), identity.size() *
-                                           sizeof(decltype(identity)::value_type));
+    ShaderCache::get().initShaderDiskCache(
+            identity.data(), identity.size() * sizeof(decltype(identity)::value_type));
     for (const auto& blob : blobVec) {
-        ASSERT_EQ( ShaderCache::get().load(*blob.first.get()), sk_sp<SkData>() );
+        ASSERT_EQ(ShaderCache::get().load(*blob.first.get()), sk_sp<SkData>());
     }
 
     ShaderCacheTestUtils::terminate(ShaderCache::get(), false);

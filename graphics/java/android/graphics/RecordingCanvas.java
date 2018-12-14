@@ -189,6 +189,14 @@ public final class RecordingCanvas extends DisplayListCanvas {
         nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunctor, releasedCallback);
     }
 
+    /**
+     * Calls the provided functor that was created via WebViewFunctor_create()
+     * @hide
+     */
+    public void drawWebViewFunctor(int functor) {
+        nDrawWebViewFunctor(mNativeCanvasWrapper, functor);
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Display list
     ///////////////////////////////////////////////////////////////////////////
@@ -303,4 +311,6 @@ public final class RecordingCanvas extends DisplayListCanvas {
     @CriticalNative
     private static native void nDrawRoundRect(long renderer, long propLeft, long propTop,
             long propRight, long propBottom, long propRx, long propRy, long propPaint);
+    @CriticalNative
+    private static native void nDrawWebViewFunctor(long canvas, int functor);
 }
