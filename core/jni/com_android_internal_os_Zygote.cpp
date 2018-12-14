@@ -1534,15 +1534,12 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
           RuntimeAbort(env, __LINE__, "System server process has died. Restarting Zygote!");
       }
 
-      bool low_ram_device = GetBoolProperty("ro.config.low_ram", false);
-      bool per_app_memcg = GetBoolProperty("ro.config.per_app_memcg", low_ram_device);
-      if (per_app_memcg) {
+      if (UsePerAppMemcg()) {
           // Assign system_server to the correct memory cgroup.
-          // Not all devices mount /dev/memcg so check for the file first
+          // Not all devices mount memcg so check if it is mounted first
           // to avoid unnecessarily printing errors and denials in the logs.
-          if (!access("/dev/memcg/system/tasks", F_OK) &&
-                !WriteStringToFile(StringPrintf("%d", pid), "/dev/memcg/system/tasks")) {
-              ALOGE("couldn't write %d to /dev/memcg/system/tasks", pid);
+          if (!SetTaskProfiles(pid, std::vector<std::string>{"SystemMemoryProcess"})) {
+              ALOGE("couldn't add process %d into system memcg group", pid);
           }
       }
   }
