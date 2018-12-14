@@ -327,6 +327,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         public ContentProviderResult[] applyBatch(String callingPkg, String authority,
                 ArrayList<ContentProviderOperation> operations)
                 throws OperationApplicationException {
+            validateIncomingAuthority(authority);
             int numOperations = operations.size();
             final int[] userIds = new int[numOperations];
             for (int i = 0; i < numOperations; i++) {
@@ -447,6 +448,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         @Override
         public Bundle call(String callingPkg, String authority, String method, @Nullable String arg,
                 @Nullable Bundle extras) {
+            validateIncomingAuthority(authority);
             Bundle.setDefusable(extras, true);
             Trace.traceBegin(TRACE_TAG_DATABASE, "call");
             final String original = setCallingPackage(callingPkg);
