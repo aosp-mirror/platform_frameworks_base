@@ -15269,7 +15269,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         | (killApp ? 0 : PackageManager.DELETE_DONT_KILL_APP);
                 deletePackageAction = mayDeletePackageLocked(res.removedInfo,
                         prepareResult.originalPs, prepareResult.disabledPs,
-                        prepareResult.childPackageSettings, deleteFlags, installArgs.user);
+                        prepareResult.childPackageSettings, deleteFlags, null /* all users */);
                 if (deletePackageAction == null) {
                     throw new ReconcileFailure(
                             PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE,
@@ -17356,28 +17356,22 @@ public class PackageManagerService extends IPackageManager.Stub
      * make sure this flag is set for partially installed apps. If not its meaningless to
      * delete a partially installed application.
      */
-    private void removePackageDataLIF(PackageSetting ps, int[] allUserHandles,
+    private void removePackageDataLIF(final PackageSetting deletedPs, int[] allUserHandles,
             PackageRemovedInfo outInfo, int flags, boolean writeSettings) {
-        String packageName = ps.name;
-        if (DEBUG_REMOVE) Slog.d(TAG, "removePackageDataLI: " + ps);
+        String packageName = deletedPs.name;
+        if (DEBUG_REMOVE) Slog.d(TAG, "removePackageDataLI: " + deletedPs);
         // Retrieve object to delete permissions for shared user later on
-        final PackageParser.Package deletedPkg;
-        final PackageSetting deletedPs;
-        // reader
-        synchronized (mPackages) {
-            deletedPkg = mPackages.get(packageName);
-            deletedPs = mSettings.mPackages.get(packageName);
-            if (outInfo != null) {
-                outInfo.removedPackage = packageName;
-                outInfo.installerPackageName = ps.installerPackageName;
-                outInfo.isStaticSharedLib = deletedPkg != null
-                        && deletedPkg.staticSharedLibName != null;
-                outInfo.populateUsers(deletedPs == null ? null
-                        : deletedPs.queryInstalledUsers(sUserManager.getUserIds(), true), deletedPs);
-            }
+        final PackageParser.Package deletedPkg = deletedPs.pkg;
+        if (outInfo != null) {
+            outInfo.removedPackage = packageName;
+            outInfo.installerPackageName = deletedPs.installerPackageName;
+            outInfo.isStaticSharedLib = deletedPkg != null
+                    && deletedPkg.staticSharedLibName != null;
+            outInfo.populateUsers(deletedPs == null ? null
+                    : deletedPs.queryInstalledUsers(sUserManager.getUserIds(), true), deletedPs);
         }
 
-        removePackageLI(ps.name, (flags & PackageManager.DELETE_CHATTY) != 0);
+        removePackageLI(deletedPs.name, (flags & PackageManager.DELETE_CHATTY) != 0);
 
         if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
             final PackageParser.Package resolvedPkg;
@@ -17386,8 +17380,8 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 // We don't have a parsed package when it lives on an ejected
                 // adopted storage device, so fake something together
-                resolvedPkg = new PackageParser.Package(ps.name);
-                resolvedPkg.setVolumeUuid(ps.volumeUuid);
+                resolvedPkg = new PackageParser.Package(deletedPs.name);
+                resolvedPkg.setVolumeUuid(deletedPs.volumeUuid);
             }
             destroyAppDataLIF(resolvedPkg, UserHandle.USER_ALL,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
@@ -17447,10 +17441,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (DEBUG_REMOVE) {
                             Slog.d(TAG, "    user " + userId + " => " + installed);
                         }
-                        if (installed != ps.getInstalled(userId)) {
+                        if (installed != deletedPs.getInstalled(userId)) {
                             installedStateChanged = true;
                         }
-                        ps.setInstalled(installed, userId);
+                        deletedPs.setInstalled(installed, userId);
                     }
                 }
             }
@@ -17460,7 +17454,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.writeLPr();
             }
             if (installedStateChanged) {
-                mSettings.writeKernelMappingLPr(ps);
+                mSettings.writeKernelMappingLPr(deletedPs);
             }
         }
         if (removedAppId != -1) {
@@ -17530,12 +17524,12 @@ public class PackageManagerService extends IPackageManager.Stub
     /*
      * Tries to delete system package.
      */
-    private void deleteSystemPackageLIF(DeletePackageAction action,
-            PackageParser.Package deletedPkg, PackageSetting deletedPs, int[] allUserHandles,
-            int flags, PackageRemovedInfo outInfo, boolean writeSettings)
+    private void deleteSystemPackageLIF(DeletePackageAction action, PackageSetting deletedPs,
+            int[] allUserHandles, int flags, PackageRemovedInfo outInfo, boolean writeSettings)
             throws SystemDeleteException {
         final boolean applyUserRestrictions
                 = (allUserHandles != null) && (outInfo.origUsers != null);
+        final PackageParser.Package deletedPkg = deletedPs.pkg;
         // Confirm if the system package has been updated
         // An updated system app can be deleted. This will also have to restore
         // the system pkg from system partition
@@ -17895,16 +17889,18 @@ public class PackageManagerService extends IPackageManager.Stub
             PackageSetting[] children = mSettings.getChildSettingsLPr(ps);
             action = mayDeletePackageLocked(outInfo, ps, disabledPs, children, flags, user);
         }
+        if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageLI: " + packageName + " user " + user);
         if (null == action) {
+            if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageLI: action was null");
             return false;
         }
 
-        if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageLI: " + packageName + " user " + user);
 
         try {
             executeDeletePackageLIF(action, packageName, deleteCodeAndResources,
                     allUserHandles, writeSettings, replacingPackage);
         } catch (SystemDeleteException e) {
+            if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageLI: system deletion failure", e);
             return false;
         }
         return true;
@@ -17951,42 +17947,48 @@ public class PackageManagerService extends IPackageManager.Stub
             unsuspendForSuspendingPackage(packageName, userId);
         }
 
-
         if (!systemApp || action.mayDeleteUnupdatedSystemApp) {
             // The caller is asking that the package only be deleted for a single
             // user.  To do this, we just mark its uninstalled state and delete
             // its data. If this is a system app, we only allow this to happen if
             // they have set the special DELETE_SYSTEM_APP which requests different
             // semantics than normal for uninstalling system apps.
-            markPackageUninstalledForUserLPw(ps, user);
-
-            if (!systemApp) {
-                // Do not uninstall the APK if an app should be cached
-                boolean keepUninstalledPackage = shouldKeepUninstalledPackageLPr(packageName);
-                if (ps.isAnyInstalled(sUserManager.getUserIds()) || keepUninstalledPackage) {
-                    // Other user still have this package installed, so all
+            synchronized (mPackages) {
+                markPackageUninstalledForUserLPw(ps, user);
+                if (!systemApp) {
+                    // Do not uninstall the APK if an app should be cached
+                    boolean keepUninstalledPackage = shouldKeepUninstalledPackageLPr(packageName);
+                    if (ps.isAnyInstalled(sUserManager.getUserIds()) || keepUninstalledPackage) {
+                        // Other users still have this package installed, so all
+                        // we need to do is clear this user's data and save that
+                        // it is uninstalled.
+                        if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
+                        clearPackageStateForUserLIF(ps, userId, outInfo, flags);
+                        scheduleWritePackageRestrictionsLocked(user);
+                        return;
+                    } else {
+                        // We need to set it back to 'installed' so the uninstall
+                        // broadcasts will be sent correctly.
+                        if (DEBUG_REMOVE) Slog.d(TAG, "Not installed by other users, full delete");
+                        if (userId != UserHandle.USER_ALL) {
+                            ps.setInstalled(true, userId);
+                        } else {
+                            for (int origUserId : outInfo.origUsers) {
+                                ps.setInstalled(true, origUserId);
+                            }
+                        }
+                        mSettings.writeKernelMappingLPr(ps);
+                    }
+                } else {
+                    // This is a system app, so we assume that the
+                    // other users still have this package installed, so all
                     // we need to do is clear this user's data and save that
                     // it is uninstalled.
-                    if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
-                    clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo, flags);
+                    if (DEBUG_REMOVE) Slog.d(TAG, "Deleting system app");
+                    clearPackageStateForUserLIF(ps, userId, outInfo, flags);
                     scheduleWritePackageRestrictionsLocked(user);
                     return;
-                } else {
-                    // We need to set it back to 'installed' so the uninstall
-                    // broadcasts will be sent correctly.
-                    if (DEBUG_REMOVE) Slog.d(TAG, "Not installed by other users, full delete");
-                    ps.setInstalled(true, user.getIdentifier());
-                    mSettings.writeKernelMappingLPr(ps);
                 }
-            } else {
-                // This is a system app, so we assume that the
-                // other users still have this package installed, so all
-                // we need to do is clear this user's data and save that
-                // it is uninstalled.
-                if (DEBUG_REMOVE) Slog.d(TAG, "Deleting system app");
-                clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo, flags);
-                scheduleWritePackageRestrictionsLocked(user);
-                return;
             }
         }
 
@@ -18015,8 +18017,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing system package: " + ps.name);
             // When an updated system application is deleted we delete the existing resources
             // as well and fall back to existing code in system partition
-            deleteSystemPackageLIF(
-                    action, ps.pkg, ps, allUserHandles, flags, outInfo, writeSettings);
+            deleteSystemPackageLIF(action, ps, allUserHandles, flags, outInfo, writeSettings);
         } else {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package: " + ps.name);
             deleteInstalledPackageLIF(ps, deleteCodeAndResources, flags, allUserHandles,
