@@ -17,6 +17,7 @@
 package com.android.internal.telecom;
 
 import android.content.ComponentName;
+import android.telecom.CallIdentification;
 
 /**
  * Internal remote callback interface for call screening services.
@@ -34,4 +35,8 @@ oneway interface ICallScreeningAdapter {
             boolean shouldAddToCallLog,
             boolean shouldShowNotification,
             in ComponentName componentName);
+
+    void provideCallIdentification(
+            String callId,
+            in CallIdentification callIdentification);
 }
