@@ -136,11 +136,13 @@ public class BackupManagerServiceTestUtils {
     }
 
     public static void setUpBinderCallerAndApplicationAsSystem(Application application) {
-        ShadowBinder.setCallingUid(Process.SYSTEM_UID);
-        ShadowBinder.setCallingPid(1211);
+        final int uid = Process.SYSTEM_UID;
+        final int pid = 1211;
+        ShadowBinder.setCallingUid(uid);
+        ShadowBinder.setCallingPid(pid);
         ShadowApplication shadowApplication = shadowOf(application);
-        shadowApplication.grantPermissions("android.permission.BACKUP");
-        shadowApplication.grantPermissions("android.permission.CONFIRM_FULL_BACKUP");
+        shadowApplication.grantPermissions(pid, uid, "android.permission.BACKUP");
+        shadowApplication.grantPermissions(pid, uid, "android.permission.CONFIRM_FULL_BACKUP");
     }
 
     /**

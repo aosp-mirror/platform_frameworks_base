@@ -479,8 +479,11 @@ public class ActiveRestoreSessionTest {
 
     @Test
     public void testRestorePackage_whenCallerIsNotPackageAndPermissionGranted() throws Exception {
-        mShadowApplication.grantPermissions(android.Manifest.permission.BACKUP);
-        ShadowBinder.setCallingUid(1);
+        final int pid = 1211;
+        final int uid = 1;
+        mShadowApplication.grantPermissions(pid, uid, android.Manifest.permission.BACKUP);
+        ShadowBinder.setCallingPid(pid);
+        ShadowBinder.setCallingUid(uid);
         setUpPackage(PACKAGE_1, /* uid */ 2);
         when(mBackupManagerService.getAvailableRestoreToken(PACKAGE_1)).thenReturn(TOKEN_1);
         setUpTransport(mTransport);
@@ -494,8 +497,11 @@ public class ActiveRestoreSessionTest {
 
     @Test
     public void testRestorePackage_whenCallerIsNotPackageAndPermissionDenied() throws Exception {
-        mShadowApplication.denyPermissions(android.Manifest.permission.BACKUP);
-        ShadowBinder.setCallingUid(1);
+        final int pid = 1211;
+        final int uid = 1;
+        mShadowApplication.denyPermissions(pid, uid, android.Manifest.permission.BACKUP);
+        ShadowBinder.setCallingPid(pid);
+        ShadowBinder.setCallingUid(uid);
         setUpPackage(PACKAGE_1, /* uid */ 2);
         when(mBackupManagerService.getAvailableRestoreToken(PACKAGE_1)).thenReturn(TOKEN_1);
         setUpTransport(mTransport);
@@ -508,7 +514,11 @@ public class ActiveRestoreSessionTest {
 
     @Test
     public void testRestorePackage_whenPackageNotFound() throws Exception {
-        mShadowApplication.grantPermissions(android.Manifest.permission.BACKUP);
+        final int pid = 1211;
+        final int uid = 1;
+        mShadowApplication.grantPermissions(pid, uid, android.Manifest.permission.BACKUP);
+        ShadowBinder.setCallingPid(pid);
+        ShadowBinder.setCallingUid(uid);
         setUpPackage(PACKAGE_1, /* uid */ 1);
         setUpTransport(mTransport);
         IRestoreSession restoreSession = createActiveRestoreSession(null, mTransport);
