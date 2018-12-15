@@ -1684,7 +1684,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
 
         synchronized (mRecords) {
-            mEmergencyNumberList = TelephonyManager.getDefault().getCurrentEmergencyNumberList();
+            TelephonyManager tm = (TelephonyManager) mContext.getSystemService(
+                    Context.TELEPHONY_SERVICE);
+            mEmergencyNumberList = tm.getCurrentEmergencyNumberList();
 
             for (Record r : mRecords) {
                 if (r.matchPhoneStateListenerEvent(
