@@ -44,17 +44,11 @@ class JobConcurrencyManager {
      * We manipulate this array until we arrive at what jobs should be running on
      * what JobServiceContext.
      */
-    JobStatus[] mTmpAssignContextIdToJobMap = new JobStatus[MAX_JOB_CONTEXTS_COUNT];
+    JobStatus[] mRecycledAssignContextIdToJobMap = new JobStatus[MAX_JOB_CONTEXTS_COUNT];
 
-    /**
-     * Indicates whether we need to act on this jobContext id
-     */
-    boolean[] mTmpAssignAct = new boolean[MAX_JOB_CONTEXTS_COUNT];
+    boolean[] mRecycledSlotChanged = new boolean[MAX_JOB_CONTEXTS_COUNT];
 
-    /**
-     * The uid whose jobs we would like to assign to a context.
-     */
-    int[] mTmpAssignPreferredUidForContext = new int[MAX_JOB_CONTEXTS_COUNT];
+    int[] mRecycledPreferredUidForContext = new int[MAX_JOB_CONTEXTS_COUNT];
 
     JobConcurrencyManager(JobSchedulerService service) {
         mService = service;
@@ -99,28 +93,30 @@ class JobConcurrencyManager {
                 break;
         }
 
-        JobStatus[] contextIdToJobMap = mTmpAssignContextIdToJobMap;
-        boolean[] act = mTmpAssignAct;
-        int[] preferredUidForContext = mTmpAssignPreferredUidForContext;
-        int numActive = 0;
-        int numForeground = 0;
+        // To avoid GC churn, we recycle the arrays.
+        JobStatus[] contextIdToJobMap = mRecycledAssignContextIdToJobMap;
+        boolean[] slotChanged = mRecycledSlotChanged;
+        int[] preferredUidForContext = mRecycledPreferredUidForContext;
+
+        int numTotalRunningJobs = 0;
+        int numForegroundJobs = 0;
         for (int i=0; i<MAX_JOB_CONTEXTS_COUNT; i++) {
             final JobServiceContext js = mService.mActiveServices.get(i);
             final JobStatus status = js.getRunningJobLocked();
             if ((contextIdToJobMap[i] = status) != null) {
-                numActive++;
+                numTotalRunningJobs++;
                 if (status.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
-                    numForeground++;
+                    numForegroundJobs++;
                 }
             }
-            act[i] = false;
+            slotChanged[i] = false;
             preferredUidForContext[i] = js.getPreferredUid();
         }
         if (DEBUG) {
             Slog.d(TAG, printContextIdToJobMap(contextIdToJobMap, "running jobs initial"));
         }
         for (int i=0; i<pendingJobs.size(); i++) {
-            JobStatus nextPending = pendingJobs.get(i);
+            final JobStatus nextPending = pendingJobs.get(i);
 
             // If job is already running, go to next job.
             int jobRunningContext = findJobContextIdFromMap(nextPending, contextIdToJobMap);
@@ -131,23 +127,32 @@ class JobConcurrencyManager {
             final int priority = mService.evaluateJobPriorityLocked(nextPending);
             nextPending.lastEvaluatedPriority = priority;
 
-            // Find a context for nextPending. The context should be available OR
+            // Find an available slot for nextPending. The context should be available OR
             // it should have lowest priority among all running jobs
             // (sharing the same Uid as nextPending)
-            int minPriority = Integer.MAX_VALUE;
-            int minPriorityContextId = -1;
+            int minPriorityForPreemption = Integer.MAX_VALUE;
+            int selectedContextId = -1;
+            boolean startingJob = false;
             for (int j=0; j<MAX_JOB_CONTEXTS_COUNT; j++) {
                 JobStatus job = contextIdToJobMap[j];
                 int preferredUid = preferredUidForContext[j];
                 if (job == null) {
-                    if ((numActive < mService.mMaxActiveJobs ||
-                            (priority >= JobInfo.PRIORITY_TOP_APP &&
-                                    numForeground < mConstants.FG_JOB_COUNT)) &&
-                            (preferredUid == nextPending.getUid() ||
-                                    preferredUid == JobServiceContext.NO_PREFERRED_UID)) {
+                    final boolean totalCountOk = numTotalRunningJobs < mService.mMaxActiveJobs;
+                    final boolean fgCountOk = (priority >= JobInfo.PRIORITY_TOP_APP)
+                            && (numForegroundJobs < mConstants.FG_JOB_COUNT);
+                    final boolean preferredUidOkay = (preferredUid == nextPending.getUid())
+                            || (preferredUid == JobServiceContext.NO_PREFERRED_UID);
+
+                    // TODO: The following check is slightly wrong.
+                    // Depending on how the pending jobs are sorted, we sometimes cap the total
+                    // job count at mMaxActiveJobs (when all jobs are FG jobs), or
+                    // at [mMaxActiveJobs + FG_JOB_COUNT] (when there are mMaxActiveJobs BG jobs
+                    // and then FG_JOB_COUNT FG jobs.)
+                    if ((totalCountOk || fgCountOk) && preferredUidOkay) {
                         // This slot is free, and we haven't yet hit the limit on
                         // concurrent jobs...  we can just throw the job in to here.
-                        minPriorityContextId = j;
+                        selectedContextId = j;
+                        startingJob = true;
                         break;
                     }
                     // No job on this context, but nextPending can't run here because
@@ -158,30 +163,39 @@ class JobConcurrencyManager {
                 if (job.getUid() != nextPending.getUid()) {
                     continue;
                 }
-                if (mService.evaluateJobPriorityLocked(job) >= nextPending.lastEvaluatedPriority) {
+
+                final int jobPriority = mService.evaluateJobPriorityLocked(job);
+                if (jobPriority >= nextPending.lastEvaluatedPriority) {
                     continue;
                 }
-                if (minPriority > nextPending.lastEvaluatedPriority) {
-                    minPriority = nextPending.lastEvaluatedPriority;
-                    minPriorityContextId = j;
+
+                // TODO lastEvaluatedPriority should be evaluateJobPriorityLocked. (double check it)
+                if (minPriorityForPreemption > nextPending.lastEvaluatedPriority) {
+                    minPriorityForPreemption = nextPending.lastEvaluatedPriority;
+                    selectedContextId = j;
+                    // In this case, we're just going to preempt a low priority job, we're not
+                    // actually starting a job, so don't set startingJob.
                 }
             }
-            if (minPriorityContextId != -1) {
-                contextIdToJobMap[minPriorityContextId] = nextPending;
-                act[minPriorityContextId] = true;
-                numActive++;
+            if (selectedContextId != -1) {
+                contextIdToJobMap[selectedContextId] = nextPending;
+                slotChanged[selectedContextId] = true;
+            }
+            if (startingJob) {
+                // Increase the counters when we're going to start a job.
+                numTotalRunningJobs++;
                 if (priority >= JobInfo.PRIORITY_TOP_APP) {
-                    numForeground++;
+                    numForegroundJobs++;
                 }
             }
         }
         if (DEBUG) {
             Slog.d(TAG, printContextIdToJobMap(contextIdToJobMap, "running jobs final"));
         }
-        tracker.noteConcurrency(numActive, numForeground);
+        tracker.noteConcurrency(numTotalRunningJobs, numForegroundJobs);
         for (int i=0; i<MAX_JOB_CONTEXTS_COUNT; i++) {
             boolean preservePreferredUid = false;
-            if (act[i]) {
+            if (slotChanged[i]) {
                 JobStatus js = activeServices.get(i).getRunningJobLocked();
                 if (js != null) {
                     if (DEBUG) {
@@ -195,7 +209,7 @@ class JobConcurrencyManager {
                     final JobStatus pendingJob = contextIdToJobMap[i];
                     if (DEBUG) {
                         Slog.d(TAG, "About to run job on context "
-                                + String.valueOf(i) + ", job: " + pendingJob);
+                                + i + ", job: " + pendingJob);
                     }
                     for (int ic=0; ic<controllers.size(); ic++) {
                         controllers.get(ic).prepareForExecutionLocked(pendingJob);
