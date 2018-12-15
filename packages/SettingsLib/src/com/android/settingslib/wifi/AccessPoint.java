@@ -874,85 +874,87 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public String getSummary() {
-        return getSettingsSummary(mConfig);
+        return getSettingsSummary();
     }
 
     public String getSettingsSummary() {
-        return getSettingsSummary(mConfig);
-    }
-
-    private String getSettingsSummary(WifiConfiguration config) {
         // Update to new summary
         StringBuilder summary = new StringBuilder();
 
-        if (isActive() && config != null && config.isPasspoint()) {
-            // This is the active connection on passpoint
-            summary.append(getSummary(mContext, getDetailedState(),
-                    false, config.providerFriendlyName));
-        } else if (isActive() && config != null && getDetailedState() == DetailedState.CONNECTED
-                && mIsCarrierAp) {
-            summary.append(String.format(mContext.getString(R.string.connected_via_carrier), mCarrierName));
-        } else if (isActive()) {
-            // This is the active connection on non-passpoint network
-            summary.append(getSummary(mContext, getDetailedState(),
-                    mInfo != null && mInfo.isEphemeral()));
-        } else if (config != null && config.isPasspoint()
-                && config.getNetworkSelectionStatus().isNetworkEnabled()) {
-            String format = mContext.getString(R.string.available_via_passpoint);
-            summary.append(String.format(format, config.providerFriendlyName));
-        } else if (config != null && config.hasNoInternetAccess()) {
-            int messageID = config.getNetworkSelectionStatus().isNetworkPermanentlyDisabled()
-                    ? R.string.wifi_no_internet_no_reconnect
-                    : R.string.wifi_no_internet;
-            summary.append(mContext.getString(messageID));
-        } else if (config != null && !config.getNetworkSelectionStatus().isNetworkEnabled()) {
-            WifiConfiguration.NetworkSelectionStatus networkStatus =
-                    config.getNetworkSelectionStatus();
-            switch (networkStatus.getNetworkSelectionDisableReason()) {
-                case WifiConfiguration.NetworkSelectionStatus.DISABLED_AUTHENTICATION_FAILURE:
-                    summary.append(mContext.getString(R.string.wifi_disabled_password_failure));
-                    break;
-                case WifiConfiguration.NetworkSelectionStatus.DISABLED_BY_WRONG_PASSWORD:
-                    summary.append(mContext.getString(R.string.wifi_check_password_try_again));
-                    break;
-                case WifiConfiguration.NetworkSelectionStatus.DISABLED_DHCP_FAILURE:
-                case WifiConfiguration.NetworkSelectionStatus.DISABLED_DNS_FAILURE:
-                    summary.append(mContext.getString(R.string.wifi_disabled_network_failure));
-                    break;
-                case WifiConfiguration.NetworkSelectionStatus.DISABLED_ASSOCIATION_REJECTION:
-                    summary.append(mContext.getString(R.string.wifi_disabled_generic));
-                    break;
+        if (isActive()) {
+            if (isPasspoint()) {
+                // This is the active connection on passpoint
+                summary.append(getSummary(mContext, getDetailedState(),
+                        false, mConfig.providerFriendlyName));
+            } else if (mConfig != null && getDetailedState() == DetailedState.CONNECTED
+                    && mIsCarrierAp) {
+                // This is the active connection on a carrier AP
+                summary.append(String.format(mContext.getString(R.string.connected_via_carrier),
+                        mCarrierName));
+            } else {
+                // This is the active connection on non-passpoint network
+                summary.append(getSummary(mContext, getDetailedState(),
+                        mInfo != null && mInfo.isEphemeral()));
             }
-        } else if (config != null && config.getNetworkSelectionStatus().isNotRecommended()) {
-            summary.append(mContext.getString(R.string.wifi_disabled_by_recommendation_provider));
-        } else if (mIsCarrierAp) {
-            summary.append(String.format(mContext.getString(R.string.available_via_carrier), mCarrierName));
-        } else if (!isReachable()) { // Wifi out of range
-            summary.append(mContext.getString(R.string.wifi_not_in_range));
-        } else { // In range, not disabled.
-            if (config != null) { // Is saved network
-                // Last attempt to connect to this failed. Show reason why
-                switch (config.recentFailure.getAssociationStatus()) {
-                    case WifiConfiguration.RecentFailure.STATUS_AP_UNABLE_TO_HANDLE_NEW_STA:
-                        summary.append(mContext.getString(
-                                R.string.wifi_ap_unable_to_handle_new_sta));
+        } else { // not active
+            if (mConfig != null && mConfig.hasNoInternetAccess()) {
+                int messageID = mConfig.getNetworkSelectionStatus().isNetworkPermanentlyDisabled()
+                        ? R.string.wifi_no_internet_no_reconnect
+                        : R.string.wifi_no_internet;
+                summary.append(mContext.getString(messageID));
+            } else if (mConfig != null && !mConfig.getNetworkSelectionStatus().isNetworkEnabled()) {
+                WifiConfiguration.NetworkSelectionStatus networkStatus =
+                        mConfig.getNetworkSelectionStatus();
+                switch (networkStatus.getNetworkSelectionDisableReason()) {
+                    case WifiConfiguration.NetworkSelectionStatus.DISABLED_AUTHENTICATION_FAILURE:
+                        summary.append(mContext.getString(R.string.wifi_disabled_password_failure));
                         break;
-                    default:
-                        // "Saved"
-                        summary.append(mContext.getString(R.string.wifi_remembered));
+                    case WifiConfiguration.NetworkSelectionStatus.DISABLED_BY_WRONG_PASSWORD:
+                        summary.append(mContext.getString(R.string.wifi_check_password_try_again));
                         break;
+                    case WifiConfiguration.NetworkSelectionStatus.DISABLED_DHCP_FAILURE:
+                    case WifiConfiguration.NetworkSelectionStatus.DISABLED_DNS_FAILURE:
+                        summary.append(mContext.getString(R.string.wifi_disabled_network_failure));
+                        break;
+                    case WifiConfiguration.NetworkSelectionStatus.DISABLED_ASSOCIATION_REJECTION:
+                        summary.append(mContext.getString(R.string.wifi_disabled_generic));
+                        break;
+                }
+            } else if (mConfig != null && mConfig.getNetworkSelectionStatus().isNotRecommended()) {
+                summary.append(mContext.getString(
+                        R.string.wifi_disabled_by_recommendation_provider));
+            } else if (mIsCarrierAp) {
+                summary.append(String.format(mContext.getString(
+                        R.string.available_via_carrier), mCarrierName));
+            } else if (!isReachable()) { // Wifi out of range
+                summary.append(mContext.getString(R.string.wifi_not_in_range));
+            } else { // In range, not disabled.
+                if (mConfig != null) { // Is saved network
+                    // Last attempt to connect to this failed. Show reason why
+                    switch (mConfig.recentFailure.getAssociationStatus()) {
+                        case WifiConfiguration.RecentFailure.STATUS_AP_UNABLE_TO_HANDLE_NEW_STA:
+                            summary.append(mContext.getString(
+                                    R.string.wifi_ap_unable_to_handle_new_sta));
+                            break;
+                        default:
+                            // "Saved"
+                            summary.append(mContext.getString(R.string.wifi_remembered));
+                            break;
+                    }
                 }
             }
         }
 
+
+
         if (isVerboseLoggingEnabled()) {
-            summary.append(WifiUtils.buildLoggingSummary(this, config));
+            summary.append(WifiUtils.buildLoggingSummary(this, mConfig));
         }
 
-        if (config != null && (WifiUtils.isMeteredOverridden(config) || config.meteredHint)) {
+        if (mConfig != null && (WifiUtils.isMeteredOverridden(mConfig) || mConfig.meteredHint)) {
             return mContext.getResources().getString(
                     R.string.preference_summary_default_combination,
-                    WifiUtils.getMeteredLabel(mContext, config),
+                    WifiUtils.getMeteredLabel(mContext, mConfig),
                     summary.toString());
         }
 
