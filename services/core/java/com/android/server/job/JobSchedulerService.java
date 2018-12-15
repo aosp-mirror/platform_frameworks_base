@@ -376,6 +376,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 "qc_window_size_frequent_ms";
         private static final String KEY_QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS =
                 "qc_window_size_rare_ms";
+        private static final String KEY_QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS =
+                "qc_max_execution_time_ms";
 
         private static final int DEFAULT_MIN_IDLE_COUNT = 1;
         private static final int DEFAULT_MIN_CHARGING_COUNT = 1;
@@ -414,6 +416,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 8 * 60 * 60 * 1000L; // 8 hours
         private static final long DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS =
                 24 * 60 * 60 * 1000L; // 24 hours
+        private static final long DEFAULT_QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS =
+                4 * 60 * 60 * 1000L; // 4 hours
 
         /**
          * Minimum # of idle jobs that must be ready in order to force the JMS to schedule things
@@ -581,6 +585,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         public long QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS =
                 DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS;
 
+        /**
+         * The maximum amount of time an app can have its jobs running within a 24 hour window.
+         */
+        public long QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS =
+                DEFAULT_QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS;
+
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
         void updateConstantsLocked(String value) {
@@ -671,6 +681,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS = mParser.getDurationMillis(
                     KEY_QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS,
                     DEFAULT_QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS);
+            QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS = mParser.getDurationMillis(
+                    KEY_QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS,
+                    DEFAULT_QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS);
         }
 
         void dump(IndentingPrintWriter pw) {
@@ -717,6 +730,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS).println();
             pw.printPair(KEY_QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS,
                     QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS).println();
+            pw.printPair(KEY_QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS,
+                    QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS).println();
             pw.decreaseIndent();
         }
 
@@ -761,6 +776,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS);
             proto.write(ConstantsProto.QuotaController.RARE_WINDOW_SIZE_MS,
                     QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS);
+            proto.write(ConstantsProto.QuotaController.MAX_EXECUTION_TIME_MS,
+                    QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS);
             proto.end(qcToken);
 
             proto.end(token);
