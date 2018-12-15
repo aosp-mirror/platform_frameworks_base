@@ -186,6 +186,7 @@ import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -628,8 +629,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBubbleController = Dependency.get(BubbleController.class);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
-        mGroupAlertTransferHelper.bind(mEntryManager, mGroupManager);
-
         mColorExtractor.addOnColorsChangedListener(this);
         mStatusBarStateController.addCallback(this, StatusBarStateController.RANK_STATUS_BAR);
 
@@ -1015,7 +1014,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         return new QSFragment();
     }
 
-    protected void setUpPresenter() {
+    private void setUpPresenter() {
         // Set up the initial notification state.
         mActivityLaunchAnimator = new ActivityLaunchAnimator(
                 mStatusBarWindow, this, mNotificationPanel,
@@ -1033,7 +1032,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationActivityStarter = new StatusBarNotificationActivityStarter(
                 mContext, mNotificationPanel, mPresenter, mHeadsUpManager, mActivityLaunchAnimator);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
-        mEntryManager.setNotificationActivityStarter(mNotificationActivityStarter);
+
+        mGroupAlertTransferHelper.bind(mEntryManager, mGroupManager);
+        mEntryManager.setNotificationClicker(new NotificationClicker(
+                this, Dependency.get(BubbleController.class), mNotificationActivityStarter));
     }
 
     /**
