@@ -49,6 +49,7 @@ import android.util.Slog;
 import android.webkit.MimeTypeMap;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.SizedInputStream;
 
 import libcore.io.IoUtils;
@@ -109,8 +110,6 @@ public class FileUtils {
     private static class NoImagePreloadHolder {
         public static final Pattern SAFE_FILENAME_PATTERN = Pattern.compile("[\\w%+,./=_-]+");
     }
-
-    private static final File[] EMPTY = new File[0];
 
     // non-final so it can be toggled by Robolectric's ShadowFileUtils
     private static boolean sEnableCopyOptimizations = true;
@@ -1164,35 +1163,20 @@ public class FileUtils {
 
     /** {@hide} */
     public static @NonNull String[] listOrEmpty(@Nullable File dir) {
-        if (dir == null) return EmptyArray.STRING;
-        final String[] res = dir.list();
-        if (res != null) {
-            return res;
-        } else {
-            return EmptyArray.STRING;
-        }
+        return (dir != null) ? ArrayUtils.defeatNullable(dir.list())
+                : EmptyArray.STRING;
     }
 
     /** {@hide} */
     public static @NonNull File[] listFilesOrEmpty(@Nullable File dir) {
-        if (dir == null) return EMPTY;
-        final File[] res = dir.listFiles();
-        if (res != null) {
-            return res;
-        } else {
-            return EMPTY;
-        }
+        return (dir != null) ? ArrayUtils.defeatNullable(dir.listFiles())
+                : ArrayUtils.EMPTY_FILE;
     }
 
     /** {@hide} */
     public static @NonNull File[] listFilesOrEmpty(@Nullable File dir, FilenameFilter filter) {
-        if (dir == null) return EMPTY;
-        final File[] res = dir.listFiles(filter);
-        if (res != null) {
-            return res;
-        } else {
-            return EMPTY;
-        }
+        return (dir != null) ? ArrayUtils.defeatNullable(dir.listFiles(filter))
+                : ArrayUtils.EMPTY_FILE;
     }
 
     /** {@hide} */

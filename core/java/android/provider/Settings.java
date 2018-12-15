@@ -12932,6 +12932,11 @@ public final class Settings {
         public static final String CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED =
                 "content_capture_service_explicitly_enabled";
 
+        /** {@hide} */
+        public static final String ISOLATED_STORAGE_LOCAL = "isolated_storage_local";
+        /** {@hide} */
+        public static final String ISOLATED_STORAGE_REMOTE = "isolated_storage_remote";
+
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.

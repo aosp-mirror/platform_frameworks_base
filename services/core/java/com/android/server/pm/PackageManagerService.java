@@ -323,6 +323,7 @@ import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
+import libcore.util.HexEncoding;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -589,12 +590,6 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final int REASON_SHARED = 6;
 
     public static final int REASON_LAST = REASON_SHARED;
-
-    /**
-     * Version number for the package parser cache. Increment this whenever the format or
-     * extent of cached data changes. See {@code PackageParser#setCacheDir}.
-     */
-    private static final String PACKAGE_PARSER_CACHE_VERSION = "1";
 
     /**
      * Whether the package parser cache is enabled.
@@ -2329,7 +2324,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            mCacheDir = preparePackageParserCache(mIsUpgrade);
+            mCacheDir = preparePackageParserCache();
 
             // Set flag to monitor and not change apk file paths when
             // scanning install directories.
@@ -3196,7 +3191,7 @@ public class PackageManagerService extends IPackageManager.Stub
         setUpInstantAppInstallerActivityLP(getInstantAppInstallerLPr());
     }
 
-    private static File preparePackageParserCache(boolean isUpgrade) {
+    private static @Nullable File preparePackageParserCache() {
         if (!DEFAULT_PACKAGE_PARSER_CACHE_ENABLED) {
             return null;
         }
@@ -3217,17 +3212,25 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
 
-        // If this is a system upgrade scenario, delete the contents of the package cache dir.
-        // This also serves to "GC" unused entries when the package cache version changes (which
-        // can only happen during upgrades).
-        if (isUpgrade) {
-            FileUtils.deleteContents(cacheBaseDir);
+        // There are several items that need to be combined together to safely
+        // identify cached items. In particular, changing the value of certain
+        // feature flags should cause us to invalidate any caches.
+        final String cacheName = SystemProperties.digestOf(
+                "ro.build.fingerprint",
+                "persist.sys.isolated_storage");
+
+        // Reconcile cache directories, keeping only what we'd actually use.
+        for (File cacheDir : FileUtils.listFilesOrEmpty(cacheBaseDir)) {
+            if (Objects.equals(cacheName, cacheDir.getName())) {
+                Slog.d(TAG, "Keeping known cache " + cacheDir.getName());
+            } else {
+                Slog.d(TAG, "Destroying unknown cache " + cacheDir.getName());
+                FileUtils.deleteContentsAndDir(cacheDir);
+            }
         }
 
-
-        // Return the versioned package cache directory. This is something like
-        // "/data/system/package_cache/1"
-        File cacheDir = FileUtils.createDir(cacheBaseDir, PACKAGE_PARSER_CACHE_VERSION);
+        // Return the versioned package cache directory.
+        File cacheDir = FileUtils.createDir(cacheBaseDir, cacheName);
 
         if (cacheDir == null) {
             // Something went wrong. Attempt to delete everything and return.
@@ -3253,7 +3256,7 @@ public class PackageManagerService extends IPackageManager.Stub
             File frameworkDir = new File(Environment.getRootDirectory(), "framework");
             if (cacheDir.lastModified() < frameworkDir.lastModified()) {
                 FileUtils.deleteContents(cacheBaseDir);
-                cacheDir = FileUtils.createDir(cacheBaseDir, PACKAGE_PARSER_CACHE_VERSION);
+                cacheDir = FileUtils.createDir(cacheBaseDir, cacheName);
             }
         }
 
