@@ -16,6 +16,7 @@
 
 package com.android.systemui.notifications;
 
+import android.app.ActivityManager;
 import android.car.Car;
 import android.car.CarNotConnectedException;
 import android.car.drivingstate.CarUxRestrictionsManager;
@@ -24,6 +25,7 @@ import android.content.Context;
 import android.content.ServiceConnection;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
+import android.os.ServiceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +33,10 @@ import android.view.WindowManager;
 
 import com.android.car.notification.CarNotificationListener;
 import com.android.car.notification.CarUxRestrictionManagerWrapper;
+import com.android.car.notification.NotificationClickHandlerFactory;
 import com.android.car.notification.NotificationViewController;
 import com.android.car.notification.PreprocessingManager;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 
@@ -44,6 +48,7 @@ public class NotificationsUI extends SystemUI {
     private static final String TAG = "NotificationsUI";
     private CarNotificationListener mCarNotificationListener;
     private CarUxRestrictionsManager mCarUxRestrictionsManager;
+    private NotificationClickHandlerFactory mClickHandlerFactory;
     private Car mCar;
     private ViewGroup mCarNotificationWindow;
     private NotificationViewController mNotificationViewController;
@@ -60,7 +65,17 @@ public class NotificationsUI extends SystemUI {
         WindowManager windowManager =
                 (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mCarNotificationListener = new CarNotificationListener();
-        mCarNotificationListener.registerAsSystemService(mContext, mCarUxRestrictionManagerWrapper);
+        mClickHandlerFactory = new NotificationClickHandlerFactory(
+                IStatusBarService.Stub.asInterface(
+                        ServiceManager.getService(Context.STATUS_BAR_SERVICE)),
+                launchResult -> {
+                    if (launchResult == ActivityManager.START_TASK_TO_FRONT
+                            || launchResult == ActivityManager.START_SUCCESS) {
+                        closeCarNotifications();
+                    }
+                });
+        mCarNotificationListener.registerAsSystemService(mContext, mCarUxRestrictionManagerWrapper,
+                mClickHandlerFactory);
         mCar = Car.createCar(mContext, mCarConnectionListener);
         mCar.connect();
 
