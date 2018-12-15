@@ -107,36 +107,44 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     private CarAudioManager mCarAudioManager;
     private final CarAudioManager.CarVolumeCallback mVolumeChangeCallback =
             new CarAudioManager.CarVolumeCallback() {
-        @Override
-        public void onGroupVolumeChanged(int zoneId, int groupId, int flags) {
-            // TODO: Include zoneId into consideration.
-            // For instance
-            // - single display + single-zone, ignore zoneId
-            // - multi-display + single-zone, zoneId is fixed, may show volume bar on all displays
-            // - single-display + multi-zone, may show volume bar on primary display only
-            // - multi-display + multi-zone, may show volume bar on display specified by zoneId
-            VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
-            int value = getSeekbarValue(mCarAudioManager, groupId);
-            // Do not update the progress if it is the same as before. When car audio manager sets
-            // its group volume caused by the seekbar progress changed, it also triggers this
-            // callback. Updating the seekbar at the same time could block the continuous seeking.
-            if (value != volumeItem.progress) {
-                volumeItem.listItem.setProgress(value);
-                volumeItem.progress = value;
-            }
-            if ((flags & AudioManager.FLAG_SHOW_UI) != 0) {
-                mHandler.obtainMessage(H.SHOW, Events.SHOW_REASON_VOLUME_CHANGED).sendToTarget();
-            }
-        }
+                @Override
+                public void onGroupVolumeChanged(int zoneId, int groupId, int flags) {
+                    // TODO: Include zoneId into consideration.
+                    // For instance
+                    // - single display + single-zone, ignore zoneId
+                    // - multi-display + single-zone, zoneId is fixed, may show volume bar on all
+                    // displays
+                    // - single-display + multi-zone, may show volume bar on primary display only
+                    // - multi-display + multi-zone, may show volume bar on display specified by
+                    // zoneId
+                    VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
+                    int value = getSeekbarValue(mCarAudioManager, groupId);
+                    // Do not update the progress if it is the same as before. When car audio
+                    // manager sets
+                    // its group volume caused by the seekbar progress changed, it also triggers
+                    // this
+                    // callback. Updating the seekbar at the same time could block the continuous
+                    // seeking.
+                    if (value != volumeItem.progress) {
+                        volumeItem.listItem.setProgress(value);
+                        volumeItem.progress = value;
+                    }
+                    if ((flags & AudioManager.FLAG_SHOW_UI) != 0) {
+                        mHandler.obtainMessage(H.SHOW,
+                                Events.SHOW_REASON_VOLUME_CHANGED).sendToTarget();
+                    }
+                }
 
-        @Override
-        public void onMasterMuteChanged(int zoneId, int flags) {
-            // ignored
-        }
-    };
+                @Override
+                public void onMasterMuteChanged(int zoneId, int flags) {
+                    // ignored
+                }
+            };
     private boolean mHovering;
     private boolean mShowing;
     private boolean mExpanded;
+    private View mExpandIcon;
+    private VolumeItem mDefaultVolumeItem;
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -151,10 +159,8 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                     mAvailableVolumeItems.add(volumeItem);
                     // The first one is the default item.
                     if (groupId == 0) {
-                        volumeItem.defaultItem = true;
-                        addSeekbarListItem(volumeItem, groupId,
-                                R.drawable.car_ic_keyboard_arrow_down,
-                                new ExpandIconListener());
+                        mDefaultVolumeItem = volumeItem;
+                        setupDefaultListItem();
                     }
                 }
 
@@ -177,6 +183,13 @@ public class CarVolumeDialogImpl implements VolumeDialog {
             cleanupAudioManager();
         }
     };
+
+    private void setupDefaultListItem() {
+        mDefaultVolumeItem.defaultItem = true;
+        addSeekbarListItem(mDefaultVolumeItem, /* volumeGroupId = */0,
+                R.drawable.car_ic_keyboard_arrow_down, new ExpandIconListener()
+        );
+    }
 
     public CarVolumeDialogImpl(Context context) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
@@ -294,7 +307,9 @@ public class CarVolumeDialogImpl implements VolumeDialog {
             return;
         }
         mShowing = true;
-
+        if (mVolumeLineItems.isEmpty()) {
+            setupDefaultListItem();
+        }
         mDialog.show();
         Events.writeEvent(mContext, Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
     }
@@ -340,6 +355,13 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                     }
                     mDialog.dismiss();
                     mShowing = false;
+                    mShowing = false;
+                    // if mExpandIcon is null that means user never clicked on the expanded arrow
+                    // which implies that the dialog is still not expanded. In that case we do
+                    // not want to reset the state
+                    if (mExpandIcon != null && mExpanded) {
+                        toggleDialogExpansion(/* isClicked = */ false);
+                    }
                 }, DISMISS_DELAY_IN_MILLIS))
                 .start();
 
@@ -517,50 +539,60 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     }
 
     private final class ExpandIconListener implements View.OnClickListener {
-
         @Override
         public void onClick(final View v) {
-            mExpanded = !mExpanded;
-            Animator inAnimator;
-            if (mExpanded) {
-                for (int groupId = 0; groupId < mAvailableVolumeItems.size(); ++groupId) {
-                    // Adding the items which are not coming from the default item.
-                    VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
-                    if (volumeItem.defaultItem) {
-                        // Set progress here due to the progress of seekbar may not be updated.
-                        volumeItem.listItem.setProgress(volumeItem.progress);
-                    } else {
-                        addSeekbarListItem(volumeItem, groupId, 0, null);
-                    }
-                }
-                inAnimator = AnimatorInflater.loadAnimator(
-                        mContext, R.anim.car_arrow_fade_in_rotate_up);
-            } else {
-                // Only keeping the default stream if it is not expended.
-                Iterator itr = mVolumeLineItems.iterator();
-                while (itr.hasNext()) {
-                    SeekbarListItem seekbarListItem = (SeekbarListItem) itr.next();
-                    VolumeItem volumeItem = findVolumeItem(seekbarListItem);
-                    if (!volumeItem.defaultItem) {
-                        itr.remove();
-                    } else {
-                        // Set progress here due to the progress of seekbar may not be updated.
-                        seekbarListItem.setProgress(volumeItem.progress);
-                    }
-                }
-                inAnimator = AnimatorInflater.loadAnimator(
-                        mContext, R.anim.car_arrow_fade_in_rotate_down);
-            }
-
-            Animator outAnimator = AnimatorInflater.loadAnimator(
-                    mContext, R.anim.car_arrow_fade_out);
-            inAnimator.setStartDelay(ARROW_FADE_IN_START_DELAY_IN_MILLIS);
-            AnimatorSet animators = new AnimatorSet();
-            animators.playTogether(outAnimator, inAnimator);
-            animators.setTarget(v);
-            animators.start();
-            mPagedListAdapter.notifyDataSetChanged();
+            mExpandIcon = v;
+            toggleDialogExpansion(true);
         }
+    }
+
+    private void toggleDialogExpansion(boolean isClicked) {
+        mExpanded = !mExpanded;
+        Animator inAnimator;
+        if (mExpanded) {
+            for (int groupId = 0; groupId < mAvailableVolumeItems.size(); ++groupId) {
+                // Adding the items which are not coming from the default item.
+                VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
+                if (volumeItem.defaultItem) {
+                    // Set progress here due to the progress of seekbar may not be updated.
+                    volumeItem.listItem.setProgress(volumeItem.progress);
+                } else {
+                    addSeekbarListItem(volumeItem, groupId, 0, null);
+                }
+            }
+            inAnimator = AnimatorInflater.loadAnimator(
+                    mContext, R.anim.car_arrow_fade_in_rotate_up);
+
+        } else {
+            // Only keeping the default stream if it is not expended.
+            Iterator itr = mVolumeLineItems.iterator();
+            while (itr.hasNext()) {
+                SeekbarListItem seekbarListItem = (SeekbarListItem) itr.next();
+                VolumeItem volumeItem = findVolumeItem(seekbarListItem);
+                if (!volumeItem.defaultItem) {
+                    itr.remove();
+                } else {
+                    // Set progress here due to the progress of seekbar may not be updated.
+                    seekbarListItem.setProgress(volumeItem.progress);
+                }
+            }
+            inAnimator = AnimatorInflater.loadAnimator(
+                    mContext, R.anim.car_arrow_fade_in_rotate_down);
+        }
+
+        Animator outAnimator = AnimatorInflater.loadAnimator(
+                mContext, R.anim.car_arrow_fade_out);
+        inAnimator.setStartDelay(ARROW_FADE_IN_START_DELAY_IN_MILLIS);
+        AnimatorSet animators = new AnimatorSet();
+        animators.playTogether(outAnimator, inAnimator);
+        if (!isClicked) {
+            // Do not animate when the state is called to reset the dialogs view and not clicked
+            // by user.
+            animators.setDuration(0);
+        }
+        animators.setTarget(mExpandIcon);
+        animators.start();
+        mPagedListAdapter.notifyDataSetChanged();
     }
 
     private final class VolumeSeekBarChangeListener implements OnSeekBarChangeListener {
