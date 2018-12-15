@@ -1545,13 +1545,6 @@ public class JobInfo implements Parcelable {
          * @return The job object to hand to the JobScheduler. This object is immutable.
          */
         public JobInfo build() {
-            // Allow jobs with no constraints - What am I, a database?
-            if (!mHasEarlyConstraint && !mHasLateConstraint && mConstraintFlags == 0 &&
-                    mNetworkRequest == null &&
-                    mTriggerContentUris == null) {
-                throw new IllegalArgumentException("You're trying to build a job with no " +
-                        "constraints, this is not allowed.");
-            }
             // Check that network estimates require network type
             if ((mNetworkDownloadBytes > 0 || mNetworkUploadBytes > 0) && mNetworkRequest == null) {
                 throw new IllegalArgumentException(
