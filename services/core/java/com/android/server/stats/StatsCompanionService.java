@@ -74,6 +74,7 @@ import android.os.StatsDimensionsValue;
 import android.os.StatsLogEventWrapper;
 import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Temperature;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -1140,7 +1141,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(rssHighWaterMarkInBytes);
             pulledData.add(e);
         }
-        // TODO(b/119598534): Reset HWM counters here.
+        // Invoke rss_hwm_reset binary to reset RSS HWM counters for all processes.
+        SystemProperties.set("sys.rss_hwm_reset.on", "1");
     }
 
     private void pullBinderCallsStats(
