@@ -30,6 +30,7 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
@@ -68,7 +69,7 @@ public final class TimeController extends StateController {
 
         mNextJobExpiredElapsedMillis = Long.MAX_VALUE;
         mNextDelayExpiredElapsedMillis = Long.MAX_VALUE;
-        mChainedAttributionEnabled = WorkSource.isChainedBatteryAttributionEnabled(mContext);
+        mChainedAttributionEnabled = mService.isChainedAttributionEnabled();
     }
 
     /**
@@ -110,11 +111,24 @@ public final class TimeController extends StateController {
                 it.next();
             }
             it.add(job);
+
             job.setTrackingController(JobStatus.TRACKING_TIME);
-            maybeUpdateAlarmsLocked(
-                    job.hasTimingDelayConstraint() ? job.getEarliestRunTime() : Long.MAX_VALUE,
-                    job.hasDeadlineConstraint() ? job.getLatestRunTimeElapsed() : Long.MAX_VALUE,
-                    deriveWorkSource(job.getSourceUid(), job.getSourcePackageName()));
+            WorkSource ws = deriveWorkSource(job.getSourceUid(), job.getSourcePackageName());
+            final long deadlineExpiredElapsed =
+                    job.hasDeadlineConstraint() ? job.getLatestRunTimeElapsed() : Long.MAX_VALUE;
+            final long delayExpiredElapsed =
+                    job.hasTimingDelayConstraint() ? job.getEarliestRunTime() : Long.MAX_VALUE;
+            if (mConstants.TIME_CONTROLLER_SKIP_NOT_READY_JOBS) {
+                if (wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_TIMING_DELAY)) {
+                    maybeUpdateDelayAlarmLocked(delayExpiredElapsed, ws);
+                }
+                if (wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_DEADLINE)) {
+                    maybeUpdateDeadlineAlarmLocked(deadlineExpiredElapsed, ws);
+                }
+            } else {
+                maybeUpdateDelayAlarmLocked(delayExpiredElapsed, ws);
+                maybeUpdateDeadlineAlarmLocked(deadlineExpiredElapsed, ws);
+            }
         }
     }
 
@@ -131,6 +145,34 @@ public final class TimeController extends StateController {
                 checkExpiredDeadlinesAndResetAlarm();
             }
         }
+    }
+
+    @Override
+    public void onConstantsUpdatedLocked() {
+        checkExpiredDelaysAndResetAlarm();
+        checkExpiredDeadlinesAndResetAlarm();
+    }
+
+    @Override
+    public void evaluateStateLocked(JobStatus job) {
+        if (!mConstants.TIME_CONTROLLER_SKIP_NOT_READY_JOBS) {
+            return;
+        }
+
+        if (job.hasTimingDelayConstraint()
+                && job.getEarliestRunTime() <= mNextDelayExpiredElapsedMillis) {
+            checkExpiredDelaysAndResetAlarm();
+        }
+        if (job.hasDeadlineConstraint()
+                && job.getLatestRunTimeElapsed() <= mNextJobExpiredElapsedMillis) {
+            checkExpiredDeadlinesAndResetAlarm();
+        }
+    }
+
+    @Override
+    public void reevaluateStateLocked(int uid) {
+        checkExpiredDelaysAndResetAlarm();
+        checkExpiredDeadlinesAndResetAlarm();
     }
 
     /**
@@ -156,14 +198,15 @@ public final class TimeController extends StateController {
      * Checks list of jobs for ones that have an expired deadline, sending them to the JobScheduler
      * if so, removing them from this list, and updating the alarm for the next expiry time.
      */
-    private void checkExpiredDeadlinesAndResetAlarm() {
+    @VisibleForTesting
+    void checkExpiredDeadlinesAndResetAlarm() {
         synchronized (mLock) {
             long nextExpiryTime = Long.MAX_VALUE;
             int nextExpiryUid = 0;
             String nextExpiryPackageName = null;
             final long nowElapsedMillis = sElapsedRealtimeClock.millis();
 
-            Iterator<JobStatus> it = mTrackedJobs.iterator();
+            ListIterator<JobStatus> it = mTrackedJobs.listIterator();
             while (it.hasNext()) {
                 JobStatus job = it.next();
                 if (!job.hasDeadlineConstraint()) {
@@ -171,9 +214,22 @@ public final class TimeController extends StateController {
                 }
 
                 if (evaluateDeadlineConstraint(job, nowElapsedMillis)) {
-                    mStateChangedListener.onRunJobNow(job);
+                    if (job.isReady()) {
+                        // If the job still isn't ready, there's no point trying to rush the
+                        // Scheduler.
+                        mStateChangedListener.onRunJobNow(job);
+                    }
                     it.remove();
                 } else {  // Sorted by expiry time, so take the next one and stop.
+                    if (mConstants.TIME_CONTROLLER_SKIP_NOT_READY_JOBS
+                            && !wouldBeReadyWithConstraintLocked(
+                            job, JobStatus.CONSTRAINT_DEADLINE)) {
+                        if (DEBUG) {
+                            Slog.i(TAG,
+                                    "Skipping " + job + " because deadline won't make it ready.");
+                        }
+                        continue;
+                    }
                     nextExpiryTime = job.getLatestRunTimeElapsed();
                     nextExpiryUid = job.getSourceUid();
                     nextExpiryPackageName = job.getSourcePackageName();
@@ -202,7 +258,8 @@ public final class TimeController extends StateController {
      * Handles alarm that notifies us that a job's delay has expired. Iterates through the list of
      * tracked jobs and marks them as ready as appropriate.
      */
-    private void checkExpiredDelaysAndResetAlarm() {
+    @VisibleForTesting
+    void checkExpiredDelaysAndResetAlarm() {
         synchronized (mLock) {
             final long nowElapsedMillis = sElapsedRealtimeClock.millis();
             long nextDelayTime = Long.MAX_VALUE;
@@ -223,6 +280,15 @@ public final class TimeController extends StateController {
                         ready = true;
                     }
                 } else if (!job.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY)) {
+                    if (mConstants.TIME_CONTROLLER_SKIP_NOT_READY_JOBS
+                            && !wouldBeReadyWithConstraintLocked(
+                            job, JobStatus.CONSTRAINT_TIMING_DELAY)) {
+                        if (DEBUG) {
+                            Slog.i(TAG,
+                                    "Skipping " + job + " because delay won't make it ready.");
+                        }
+                        continue;
+                    }
                     // If this job still doesn't have its delay constraint satisfied,
                     // then see if it is the next upcoming delay time for the alarm.
                     final long jobDelayTime = job.getEarliestRunTime();
@@ -262,11 +328,13 @@ public final class TimeController extends StateController {
         return false;
     }
 
-    private void maybeUpdateAlarmsLocked(long delayExpiredElapsed, long deadlineExpiredElapsed,
-            WorkSource ws) {
+    private void maybeUpdateDelayAlarmLocked(long delayExpiredElapsed, WorkSource ws) {
         if (delayExpiredElapsed < mNextDelayExpiredElapsedMillis) {
             setDelayExpiredAlarmLocked(delayExpiredElapsed, ws);
         }
+    }
+
+    private void maybeUpdateDeadlineAlarmLocked(long deadlineExpiredElapsed, WorkSource ws) {
         if (deadlineExpiredElapsed < mNextJobExpiredElapsedMillis) {
             setDeadlineExpiredAlarmLocked(deadlineExpiredElapsed, ws);
         }
@@ -297,11 +365,7 @@ public final class TimeController extends StateController {
     }
 
     private long maybeAdjustAlarmTime(long proposedAlarmTimeElapsedMillis) {
-        final long earliestWakeupTimeElapsed = sElapsedRealtimeClock.millis();
-        if (proposedAlarmTimeElapsedMillis < earliestWakeupTimeElapsed) {
-            return earliestWakeupTimeElapsed;
-        }
-        return proposedAlarmTimeElapsedMillis;
+        return Math.max(proposedAlarmTimeElapsedMillis, sElapsedRealtimeClock.millis());
     }
 
     private void updateAlarmWithListenerLocked(String tag, OnAlarmListener listener,

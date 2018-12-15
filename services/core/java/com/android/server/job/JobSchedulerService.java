@@ -67,6 +67,7 @@ import android.os.SystemClock;
 import android.os.Temperature;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
+import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.KeyValueListParser;
@@ -364,6 +365,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_CONN_CONGESTION_DELAY_FRAC = "conn_congestion_delay_frac";
         private static final String KEY_CONN_PREFETCH_RELAX_FRAC = "conn_prefetch_relax_frac";
         private static final String KEY_USE_HEARTBEATS = "use_heartbeats";
+        private static final String KEY_TIME_CONTROLLER_SKIP_NOT_READY_JOBS =
+                "tc_skip_not_ready_jobs";
         private static final String KEY_QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS =
                 "qc_allowed_time_per_period_ms";
         private static final String KEY_QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS =
@@ -404,6 +407,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
         private static final float DEFAULT_CONN_PREFETCH_RELAX_FRAC = 0.5f;
         private static final boolean DEFAULT_USE_HEARTBEATS = true;
+        private static final boolean DEFAULT_TIME_CONTROLLER_SKIP_NOT_READY_JOBS = false;
         private static final long DEFAULT_QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS =
                 10 * 60 * 1000L; // 10 minutes
         private static final long DEFAULT_QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS =
@@ -542,6 +546,13 @@ public class JobSchedulerService extends com.android.server.SystemService
          */
         public boolean USE_HEARTBEATS = DEFAULT_USE_HEARTBEATS;
 
+        /**
+         * Whether or not TimeController should skip setting wakeup alarms for jobs that aren't
+         * ready now.
+         */
+        public boolean TIME_CONTROLLER_SKIP_NOT_READY_JOBS =
+                DEFAULT_TIME_CONTROLLER_SKIP_NOT_READY_JOBS;
+
         /** How much time each app will have to run jobs within their standby bucket window. */
         public long QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS =
                 DEFAULT_QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS;
@@ -663,6 +674,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             CONN_PREFETCH_RELAX_FRAC = mParser.getFloat(KEY_CONN_PREFETCH_RELAX_FRAC,
                     DEFAULT_CONN_PREFETCH_RELAX_FRAC);
             USE_HEARTBEATS = mParser.getBoolean(KEY_USE_HEARTBEATS, DEFAULT_USE_HEARTBEATS);
+            TIME_CONTROLLER_SKIP_NOT_READY_JOBS = mParser.getBoolean(
+                    KEY_TIME_CONTROLLER_SKIP_NOT_READY_JOBS,
+                    DEFAULT_TIME_CONTROLLER_SKIP_NOT_READY_JOBS);
             QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS = mParser.getDurationMillis(
                     KEY_QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS,
                     DEFAULT_QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS);
@@ -718,6 +732,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.printPair(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
             pw.printPair(KEY_CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC).println();
             pw.printPair(KEY_USE_HEARTBEATS, USE_HEARTBEATS).println();
+            pw.printPair(KEY_TIME_CONTROLLER_SKIP_NOT_READY_JOBS,
+                    TIME_CONTROLLER_SKIP_NOT_READY_JOBS).println();
             pw.printPair(KEY_QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS,
                     QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS).println();
             pw.printPair(KEY_QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS,
@@ -762,6 +778,11 @@ public class JobSchedulerService extends com.android.server.SystemService
             proto.write(ConstantsProto.CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC);
             proto.write(ConstantsProto.CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC);
             proto.write(ConstantsProto.USE_HEARTBEATS, USE_HEARTBEATS);
+
+            final long tcToken = proto.start(ConstantsProto.TIME_CONTROLLER);
+            proto.write(ConstantsProto.TimeController.SKIP_NOT_READY_JOBS,
+                    TIME_CONTROLLER_SKIP_NOT_READY_JOBS);
+            proto.end(tcToken);
 
             final long qcToken = proto.start(ConstantsProto.QUOTA_CONTROLLER);
             proto.write(ConstantsProto.QuotaController.ALLOWED_TIME_PER_PERIOD_MS,
@@ -967,6 +988,10 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     public Constants getConstants() {
         return mConstants;
+    }
+
+    public boolean isChainedAttributionEnabled() {
+        return WorkSource.isChainedBatteryAttributionEnabled(getContext());
     }
 
     @Override
