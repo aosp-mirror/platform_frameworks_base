@@ -27,8 +27,8 @@ using namespace android;
 using namespace android::uirenderer;
 
 TEST(WebViewFunctor, createDestroyGLES) {
-    int functor = WebViewFunctor_create(TestUtils::createMockFunctor(RenderMode::OpenGL_ES),
-                                        RenderMode::OpenGL_ES);
+    int functor = WebViewFunctor_create(
+            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
     ASSERT_NE(-1, functor);
     WebViewFunctor_release(functor);
     TestUtils::runOnRenderThreadUnmanaged([](renderthread::RenderThread&) {
@@ -41,8 +41,8 @@ TEST(WebViewFunctor, createDestroyGLES) {
 }
 
 TEST(WebViewFunctor, createSyncHandleGLES) {
-    int functor = WebViewFunctor_create(TestUtils::createMockFunctor(RenderMode::OpenGL_ES),
-                                        RenderMode::OpenGL_ES);
+    int functor = WebViewFunctor_create(
+            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
     ASSERT_NE(-1, functor);
     auto handle = WebViewFunctorManager::instance().handleFor(functor);
     ASSERT_TRUE(handle);
@@ -82,8 +82,8 @@ TEST(WebViewFunctor, createSyncHandleGLES) {
 }
 
 TEST(WebViewFunctor, createSyncDrawGLES) {
-    int functor = WebViewFunctor_create(TestUtils::createMockFunctor(RenderMode::OpenGL_ES),
-                                        RenderMode::OpenGL_ES);
+    int functor = WebViewFunctor_create(
+            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
     ASSERT_NE(-1, functor);
     auto handle = WebViewFunctorManager::instance().handleFor(functor);
     ASSERT_TRUE(handle);
@@ -109,8 +109,8 @@ TEST(WebViewFunctor, createSyncDrawGLES) {
 }
 
 TEST(WebViewFunctor, contextDestroyed) {
-    int functor = WebViewFunctor_create(TestUtils::createMockFunctor(RenderMode::OpenGL_ES),
-                                        RenderMode::OpenGL_ES);
+    int functor = WebViewFunctor_create(
+            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
     ASSERT_NE(-1, functor);
     auto handle = WebViewFunctorManager::instance().handleFor(functor);
     ASSERT_TRUE(handle);

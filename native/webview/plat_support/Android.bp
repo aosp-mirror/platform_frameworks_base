@@ -22,6 +22,7 @@ cc_library_shared {
     name: "libwebviewchromium_plat_support",
 
     srcs: [
+        "draw_functor.cpp",
         "draw_gl_functor.cpp",
         "draw_vk_functor.cpp",
         "functor_utils.cpp",

@@ -29,7 +29,7 @@ class WebViewFunctorManager;
 
 class WebViewFunctor {
 public:
-    WebViewFunctor(const WebViewFunctorCallbacks& callbacks, RenderMode functorMode);
+    WebViewFunctor(void* data, const WebViewFunctorCallbacks& callbacks, RenderMode functorMode);
     ~WebViewFunctor();
 
     class Handle : public LightRefBase<Handle> {
@@ -63,6 +63,7 @@ public:
 
 private:
     WebViewFunctorCallbacks mCallbacks;
+    void* const mData;
     int mFunctor;
     RenderMode mMode;
     bool mHasContext = false;
@@ -73,7 +74,7 @@ class WebViewFunctorManager {
 public:
     static WebViewFunctorManager& instance();
 
-    int createFunctor(const WebViewFunctorCallbacks& callbacks, RenderMode functorMode);
+    int createFunctor(void* data, const WebViewFunctorCallbacks& callbacks, RenderMode functorMode);
     void releaseFunctor(int functor);
     void onContextDestroyed();
     void destroyFunctor(int functor);
