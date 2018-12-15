@@ -107,9 +107,11 @@ public:
 
 protected:
     void dumpResourceCacheUsage() const;
+    void setSurfaceColorProperties(renderthread::ColorMode colorMode);
 
     renderthread::RenderThread& mRenderThread;
     SkColorType mSurfaceColorType;
+    SkColorSpace::Gamut mSurfaceColorGamut;
     sk_sp<SkColorSpace> mSurfaceColorSpace;
 
 private:

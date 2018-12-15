@@ -48,7 +48,8 @@ public:
 
     bool hasEglContext();
 
-    Result<EGLSurface, EGLint> createSurface(EGLNativeWindowType window, ColorMode colorMode);
+    Result<EGLSurface, EGLint> createSurface(EGLNativeWindowType window, ColorMode colorMode,
+                                             SkColorSpace::Gamut colorGamut);
     void destroySurface(EGLSurface surface);
 
     void destroy();
@@ -80,6 +81,14 @@ public:
     status_t createReleaseFence(bool useFenceSync, EGLSyncKHR* eglFence, sp<Fence>& nativeFence);
 
 private:
+    enum class SwapBehavior {
+        Discard,
+        Preserved,
+        BufferAge,
+    };
+
+    static EGLConfig load8BitsConfig(EGLDisplay display, SwapBehavior swapBehavior);
+    static EGLConfig loadFP16Config(EGLDisplay display, SwapBehavior swapBehavior);
 
     void initExtensions();
     void createPBufferSurface();
@@ -93,12 +102,7 @@ private:
     EGLContext mEglContext;
     EGLSurface mPBufferSurface;
     EGLSurface mCurrentSurface;
-
-    enum class SwapBehavior {
-        Discard,
-        Preserved,
-        BufferAge,
-    };
+    bool mHasWideColorGamutSupport;
     SwapBehavior mSwapBehavior = SwapBehavior::Discard;
 };
 
