@@ -22,6 +22,7 @@ import static android.provider.Settings.Global.LOCATION_DISABLE_STATUS_CALLBACKS
 
 import static com.android.internal.util.Preconditions.checkState;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -189,6 +190,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     private LocationBlacklist mBlacklist;
     private GnssMeasurementsProvider mGnssMeasurementsProvider;
     private GnssNavigationMessageProvider mGnssNavigationMessageProvider;
+    private String mLocationControllerExtraPackage;
+    private boolean mLocationControllerExtraPackageEnabled;
     private IGpsGeofenceHardware mGpsGeofenceProxy;
 
     // --- fields below are protected by mLock ---
@@ -2717,6 +2720,39 @@ public class LocationManagerService extends ILocationManager.Stub {
         return null;
     }
 
+    @Override
+    public void setLocationControllerExtraPackage(String packageName) {
+        mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
+                Manifest.permission.LOCATION_HARDWARE + " permission required");
+        synchronized (mLock) {
+            mLocationControllerExtraPackage = packageName;
+        }
+    }
+
+    @Override
+    public String getLocationControllerExtraPackage() {
+        synchronized (mLock) {
+            return mLocationControllerExtraPackage;
+        }
+    }
+
+    @Override
+    public void setLocationControllerExtraPackageEnabled(boolean enabled) {
+        mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
+                Manifest.permission.LOCATION_HARDWARE + " permission required");
+        synchronized (mLock) {
+            mLocationControllerExtraPackageEnabled = enabled;
+        }
+    }
+
+    @Override
+    public boolean isLocationControllerExtraPackageEnabled() {
+        synchronized (mLock) {
+            return mLocationControllerExtraPackageEnabled
+                    && (mLocationControllerExtraPackage != null);
+        }
+    }
+
     /**
      * Returns the current location enabled/disabled status for a user
      *
@@ -3490,6 +3526,11 @@ public class LocationManagerService extends ILocationManager.Stub {
                 for (Map.Entry<String, MockProvider> i : mMockProviders.entrySet()) {
                     i.getValue().dump(fd, pw, args);
                 }
+            }
+
+            if (mLocationControllerExtraPackage != null) {
+                pw.println(" Location controller extra package: " + mLocationControllerExtraPackage
+                        + " enabled: " + mLocationControllerExtraPackageEnabled);
             }
 
             if (!mBackgroundThrottlePackageWhitelist.isEmpty()) {
