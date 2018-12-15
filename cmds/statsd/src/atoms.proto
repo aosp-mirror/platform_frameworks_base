@@ -1222,7 +1222,7 @@ message UsbDeviceAttached {
         STATE_CONNECTED = 1;
     }
     optional State state = 6;
-    optional int64 last_connect_duration_ms = 7;
+    optional int64 last_connect_duration_millis = 7;
 }
 
 
