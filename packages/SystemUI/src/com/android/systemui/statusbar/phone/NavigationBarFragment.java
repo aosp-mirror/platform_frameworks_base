@@ -851,6 +851,16 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             if (Intent.ACTION_SCREEN_OFF.equals(action)
                     || Intent.ACTION_SCREEN_ON.equals(action)) {
                 notifyNavigationBarScreenOn();
+
+                if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                    // Enabled and screen is on, start it again if enabled
+                    if (NavBarTintController.isEnabled(getContext())) {
+                        mNavigationBarView.getColorAdaptionController().start();
+                    }
+                } else {
+                    // Screen off disable it
+                    mNavigationBarView.getColorAdaptionController().end();
+                }
             }
             if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 // The accessibility settings may be different for the new user

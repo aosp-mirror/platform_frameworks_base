@@ -149,6 +149,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private RecentsOnboarding mRecentsOnboarding;
     private NotificationPanelView mPanelView;
 
+    private NavBarTintController mColorAdaptionController;
     private NavigationPrototypeController mPrototypeController;
     private NavigationGestureAction[] mDefaultGestureMap;
     private QuickScrubAction mQuickScrubAction;
@@ -277,6 +278,15 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         public void onBackButtonVisibilityChanged(boolean visible) {
             getBackButton().setVisibility(visible ? VISIBLE : GONE);
         }
+
+        @Override
+        public void onColorAdaptChanged(boolean enabled) {
+            if (enabled) {
+                mColorAdaptionController.start();
+            } else {
+                mColorAdaptionController.end();
+            }
+        }
     };
 
     public NavigationBarView(Context context, AttributeSet attrs) {
@@ -334,6 +344,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mPrototypeController = new NavigationPrototypeController(mHandler, mContext);
         mPrototypeController.register();
         mPrototypeController.setOnPrototypeChangedListener(mPrototypeListener);
+        mColorAdaptionController = new NavBarTintController(this, getLightTransitionsController());
+    }
+
+    public NavBarTintController getColorAdaptionController() {
+        return mColorAdaptionController;
     }
 
     public BarTransitions getBarTransitions() {
@@ -1097,6 +1112,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         Dependency.get(PluginManager.class).addPluginListener(this,
                 NavGesture.class, false /* Only one */);
         setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
+        mColorAdaptionController.start();
     }
 
     @Override
@@ -1107,6 +1123,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mGestureHelper.destroy();
         }
         mPrototypeController.unregister();
+        mColorAdaptionController.stop();
         setUpSwipeUpOnboarding(false);
         for (int i = 0; i < mButtonDispatchers.size(); ++i) {
             mButtonDispatchers.valueAt(i).onDestroy();

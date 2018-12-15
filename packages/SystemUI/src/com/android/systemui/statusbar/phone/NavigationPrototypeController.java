@@ -37,6 +37,7 @@ public class NavigationPrototypeController extends ContentObserver {
 
     static final String NAVBAR_EXPERIMENTS_DISABLED = "navbarexperiments_disabled";
     private final String GESTURE_MATCH_SETTING = "quickstepcontroller_gesture_match_map";
+    public static final String NAV_COLOR_ADAPT_ENABLE_SETTING = "navbar_color_adapt_enable";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({ACTION_DEFAULT, ACTION_QUICKSTEP, ACTION_QUICKSCRUB, ACTION_BACK})
@@ -73,6 +74,7 @@ public class NavigationPrototypeController extends ContentObserver {
     public void register() {
         registerObserver(HIDE_BACK_BUTTON_SETTING);
         registerObserver(GESTURE_MATCH_SETTING);
+        registerObserver(NAV_COLOR_ADAPT_ENABLE_SETTING);
     }
 
     /**
@@ -96,6 +98,9 @@ public class NavigationPrototypeController extends ContentObserver {
                 } else if (path.endsWith(HIDE_BACK_BUTTON_SETTING)) {
                     mListener.onBackButtonVisibilityChanged(
                             !getGlobalBool(HIDE_BACK_BUTTON_SETTING));
+                } else if (path.endsWith(NAV_COLOR_ADAPT_ENABLE_SETTING)) {
+                    mListener.onColorAdaptChanged(
+                            NavBarTintController.isEnabled(mContext));
                 }
             } catch (SettingNotFoundException e) {
                 e.printStackTrace();
@@ -138,5 +143,6 @@ public class NavigationPrototypeController extends ContentObserver {
     public interface OnPrototypeChangedListener {
         void onGestureRemap(@GestureAction int[] actions);
         void onBackButtonVisibilityChanged(boolean visible);
+        void onColorAdaptChanged(boolean enabled);
     }
 }
