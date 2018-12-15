@@ -16,8 +16,8 @@ android_library {
         "SettingsLibAppPreference",
         "SettingsLibSearchWidget",
         "SettingsLibSettingsSpinner",
-        "SettingsLayoutPreference",
-        "ActionButtonsPreference",
+        "SettingsLibLayoutPreference",
+        "SettingsLibActionButtonsPreference",
         "SettingsLibEntityHeaderWidgets",
     ],
 
