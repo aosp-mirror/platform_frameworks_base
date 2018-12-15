@@ -3888,7 +3888,11 @@ package android.net.wifi {
 package android.net.wifi.aware {
 
   public class DiscoverySession implements java.lang.AutoCloseable {
-    method public android.net.NetworkSpecifier createNetworkSpecifierPmk(android.net.wifi.aware.PeerHandle, byte[]);
+    method public deprecated android.net.NetworkSpecifier createNetworkSpecifierPmk(android.net.wifi.aware.PeerHandle, byte[]);
+  }
+
+  public static class WifiAwareManager.NetworkSpecifierBuilder {
+    method public android.net.wifi.aware.WifiAwareManager.NetworkSpecifierBuilder setPmk(byte[]);
   }
 
   public class WifiAwareSession implements java.lang.AutoCloseable {

@@ -34,11 +34,11 @@ import java.lang.ref.WeakReference;
  * {@link PublishDiscoverySession} and {@link SubscribeDiscoverySession}. This
  * class provides functionality common to both publish and subscribe discovery sessions:
  * <ul>
- *     <li>Sending messages: {@link #sendMessage(PeerHandle, int, byte[])} method.
- *     <li>Creating a network-specifier when requesting a Aware connection:
- *     {@link #createNetworkSpecifierOpen(PeerHandle)} or
- *     {@link #createNetworkSpecifierPassphrase(PeerHandle, String)}.
+ *      <li>Sending messages: {@link #sendMessage(PeerHandle, int, byte[])} method.
+ *      <li>Creating a network-specifier when requesting a Aware connection using
+ *      {@link WifiAwareManager.NetworkSpecifierBuilder}.
  * </ul>
+ * <p>
  * The {@link #close()} method must be called to destroy discovery sessions once they are
  * no longer needed.
  */
@@ -270,6 +270,7 @@ public class DiscoverySession implements AutoCloseable {
      * <p>
      * To set up an encrypted link use the
      * {@link #createNetworkSpecifierPassphrase(PeerHandle, String)} API.
+     * @deprecated Use the replacement {@link WifiAwareManager.NetworkSpecifierBuilder}.
      *
      * @param peerHandle The peer's handle obtained through
      * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], java.util.List)}
@@ -284,6 +285,7 @@ public class DiscoverySession implements AutoCloseable {
      * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
      */
+    @Deprecated
     public NetworkSpecifier createNetworkSpecifierOpen(@NonNull PeerHandle peerHandle) {
         if (mTerminated) {
             Log.w(TAG, "createNetworkSpecifierOpen: called on terminated session");
@@ -318,6 +320,7 @@ public class DiscoverySession implements AutoCloseable {
      * <p>
      * Note: per the Wi-Fi Aware specification the roles are fixed - a Subscriber is an INITIATOR
      * and a Publisher is a RESPONDER.
+     * @deprecated Use the replacement {@link WifiAwareManager.NetworkSpecifierBuilder}.
      *
      * @param peerHandle The peer's handle obtained through
      * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
@@ -336,6 +339,7 @@ public class DiscoverySession implements AutoCloseable {
      * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
      */
+    @Deprecated
     public NetworkSpecifier createNetworkSpecifierPassphrase(
             @NonNull PeerHandle peerHandle, @NonNull String passphrase) {
         if (!WifiAwareUtils.validatePassphrase(passphrase)) {
@@ -376,6 +380,7 @@ public class DiscoverySession implements AutoCloseable {
      * <p>
      * Note: per the Wi-Fi Aware specification the roles are fixed - a Subscriber is an INITIATOR
      * and a Publisher is a RESPONDER.
+     * @deprecated Use the replacement {@link WifiAwareManager.NetworkSpecifierBuilder}.
      *
      * @param peerHandle The peer's handle obtained through
      * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
@@ -397,6 +402,7 @@ public class DiscoverySession implements AutoCloseable {
      *
      * @hide
      */
+    @Deprecated
     @SystemApi
     public NetworkSpecifier createNetworkSpecifierPmk(@NonNull PeerHandle peerHandle,
             @NonNull byte[] pmk) {

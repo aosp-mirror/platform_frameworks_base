@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -57,11 +58,7 @@ import java.util.List;
  * {@link WifiAwareSession#subscribe(SubscribeConfig, DiscoverySessionCallback, Handler)}.
  * <li>Create a Aware network specifier to be used with
  * {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
- * to set-up a Aware connection with a peer. Refer to
- * {@link DiscoverySession#createNetworkSpecifierOpen(PeerHandle)},
- * {@link DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)},
- * {@link WifiAwareSession#createNetworkSpecifierOpen(int, byte[])}, and
- * {@link WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)}.
+ * to set-up a Aware connection with a peer. Refer to {@link NetworkSpecifierBuilder}.
  * </ul>
  * <p>
  *     Aware may not be usable when Wi-Fi is disabled (and other conditions). To validate that
@@ -110,10 +107,7 @@ import java.util.List;
  *        <li>{@link NetworkRequest.Builder#addTransportType(int)} of
  *        {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
  *        <li>{@link NetworkRequest.Builder#setNetworkSpecifier(String)} using
- *        {@link WifiAwareSession#createNetworkSpecifierOpen(int, byte[])},
- *        {@link WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)},
- *        {@link DiscoverySession#createNetworkSpecifierOpen(PeerHandle)}, or
- *        {@link DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)}.
+ *        {@link NetworkSpecifierBuilder}.
  *    </ul>
  */
 @SystemService(Context.WIFI_AWARE_SERVICE)
@@ -145,8 +139,6 @@ public class WifiAwareManager {
      * Connection creation role is that of INITIATOR. Used to create a network specifier string
      * when requesting a Aware network.
      *
-     * @see DiscoverySession#createNetworkSpecifierOpen(PeerHandle)
-     * @see DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)
      * @see WifiAwareSession#createNetworkSpecifierOpen(int, byte[])
      * @see WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)
      */
@@ -156,8 +148,6 @@ public class WifiAwareManager {
      * Connection creation role is that of RESPONDER. Used to create a network specifier string
      * when requesting a Aware network.
      *
-     * @see DiscoverySession#createNetworkSpecifierOpen(PeerHandle)
-     * @see DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)
      * @see WifiAwareSession#createNetworkSpecifierOpen(int, byte[])
      * @see WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)
      */
@@ -413,6 +403,11 @@ public class WifiAwareManager {
                     + ", peerHandle=" + ((peerHandle == null) ? peerHandle : peerHandle.peerId)
                     + ", pmk=" + ((pmk == null) ? "null" : "non-null")
                     + ", passphrase=" + ((passphrase == null) ? "null" : "non-null"));
+        }
+
+        if (!WifiAwareUtils.isLegacyVersion(mContext, Build.VERSION_CODES.Q)) {
+            throw new UnsupportedOperationException(
+                    "API not deprecated - use WifiAwareManager.NetworkSpecifierBuilder");
         }
 
         if (role != WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
@@ -811,6 +806,137 @@ public class WifiAwareManager {
             }
             mAwareManager.clear();
             mOriginalCallback.onSessionTerminated();
+        }
+    }
+
+    /**
+     * A builder class for a Wi-Fi Aware network specifier to set up an Aware connection with a
+     * peer.
+     * <p>
+     * Note that all Wi-Fi Aware connection specifier objects must call the
+     * {@link NetworkSpecifierBuilder#setDiscoverySession(DiscoverySession)} to specify the context
+     * within which the connection is created, and
+     * {@link NetworkSpecifierBuilder#setPeerHandle(PeerHandle)} to specify the peer to which the
+     * connection is created.
+     */
+    public static class NetworkSpecifierBuilder {
+        private DiscoverySession mDiscoverySession;
+        private PeerHandle mPeerHandle;
+        private String mPskPassphrase;
+        private byte[] mPmk;
+
+        /**
+         * Configure the {@link PublishDiscoverySession} or {@link SubscribeDiscoverySession}
+         * discovery session in whose context the connection is created.
+         * <p>
+         * Note: this method must be called for any connection request!
+         *
+         * @param discoverySession A Wi-Fi Aware discovery session.
+         * @return the current {@link NetworkSpecifierBuilder} builder, enabling chaining of builder
+         *         methods.
+         */
+        public @NonNull NetworkSpecifierBuilder setDiscoverySession(
+                @NonNull DiscoverySession discoverySession) {
+            if (discoverySession == null) {
+                throw new IllegalArgumentException("Non-null discoverySession required");
+            }
+            mDiscoverySession = discoverySession;
+            return this;
+        }
+
+        /**
+         * Configure the {@link PeerHandle} of the peer to which the Wi-Fi Aware connection is
+         * requested. The peer is discovered through Wi-Fi Aware discovery,
+         * <p>
+         * Note: this method must be called for any connection request!
+         *
+         * @param peerHandle The peer's handle obtained through
+         * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], java.util.List)}
+         *                   or
+         *                   {@link DiscoverySessionCallback#onMessageReceived(PeerHandle, byte[])}.
+         * @return the current {@link NetworkSpecifierBuilder} builder, enabling chaining of builder
+         *         methods.
+         */
+        public @NonNull NetworkSpecifierBuilder setPeerHandle(@NonNull PeerHandle peerHandle) {
+            if (peerHandle == null) {
+                throw new IllegalArgumentException("Non-null peerHandle required");
+            }
+            mPeerHandle = peerHandle;
+            return this;
+        }
+
+        /**
+         * Configure the PSK Passphrase for the Wi-Fi Aware connection being requested. This method
+         * is optional - if not called, then an Open (unencrypted) connection will be created.
+         *
+         * @param pskPassphrase The (optional) passphrase to be used to encrypt the link.
+         * @return the current {@link NetworkSpecifierBuilder} builder, enabling chaining of builder
+         *         methods.
+         */
+        public @NonNull NetworkSpecifierBuilder setPskPassphrase(@NonNull String pskPassphrase) {
+            if (!WifiAwareUtils.validatePassphrase(pskPassphrase)) {
+                throw new IllegalArgumentException("Passphrase must meet length requirements");
+            }
+            mPskPassphrase = pskPassphrase;
+            return this;
+        }
+
+        /**
+         * Configure the PMK for the Wi-Fi Aware connection being requested. This method
+         * is optional - if not called, then an Open (unencrypted) connection will be created.
+         *
+         * @param pmk A PMK (pairwise master key, see IEEE 802.11i) specifying the key to use for
+         *            encrypting the data-path. Use the {@link #setPskPassphrase(String)} to
+         *            specify a Passphrase.
+         * @return the current {@link NetworkSpecifierBuilder} builder, enabling chaining of builder
+         *         methods.
+         * @hide
+         */
+        @SystemApi
+        public @NonNull NetworkSpecifierBuilder setPmk(@NonNull byte[] pmk) {
+            if (!WifiAwareUtils.validatePmk(pmk)) {
+                throw new IllegalArgumentException("PMK must 32 bytes");
+            }
+            mPmk = pmk;
+            return this;
+        }
+
+        /**
+         * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)}
+         * for a WiFi Aware connection (link) to the specified peer. The
+         * {@link android.net.NetworkRequest.Builder#addTransportType(int)} should be set to
+         * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
+         * <p> The default builder constructor will initialize a NetworkSpecifier which requests an
+         * open (non-encrypted) link. To request an encrypted link use the
+         * {@link #setPskPassphrase(String)} builder method.
+         *
+         * @return A {@link NetworkSpecifier} to be used to construct
+         * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} to pass
+         * to {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
+         * android.net.ConnectivityManager.NetworkCallback)}
+         * [or other varieties of that API].
+         */
+        public @NonNull NetworkSpecifier build() {
+            if (mDiscoverySession == null) {
+                throw new IllegalStateException("Null discovery session!?");
+            }
+            if (mPskPassphrase != null & mPmk != null) {
+                throw new IllegalStateException(
+                        "Can only specify a Passphrase or a PMK - not both!");
+            }
+
+            int role = mDiscoverySession instanceof SubscribeDiscoverySession
+                    ? WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
+                    : WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
+
+            if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR && mPeerHandle == null) {
+                throw new IllegalStateException("Null peerHandle!?");
+            }
+
+            return new WifiAwareNetworkSpecifier(
+                    WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_IB, role,
+                    mDiscoverySession.mClientId, mDiscoverySession.mSessionId, mPeerHandle.peerId,
+                    null, mPmk, mPskPassphrase, Process.myUid());
         }
     }
 }
