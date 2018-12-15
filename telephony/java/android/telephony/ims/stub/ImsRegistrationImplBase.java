@@ -220,7 +220,10 @@ public class ImsRegistrationImplBase {
         });
     }
 
-    private void updateToState(@ImsRegistrationTech int connType, int newState) {
+    /**
+     * @hide
+     */
+    public void updateToState(@ImsRegistrationTech int connType, int newState) {
         synchronized (mLock) {
             mConnectionType = connType;
             mRegistrationState = newState;
