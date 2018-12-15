@@ -52,7 +52,7 @@ void Canvas::drawTextDecorations(float x, float y, float length, const SkPaint& 
         const SkScalar left = x;
         const SkScalar right = x + length;
         if (flags & SkPaint::kUnderlineText_ReserveFlag) {
-            Paint::FontMetrics metrics;
+            SkFontMetrics metrics;
             paint.getFontMetrics(&metrics);
             SkScalar position;
             if (!metrics.hasUnderlinePosition(&position)) {
