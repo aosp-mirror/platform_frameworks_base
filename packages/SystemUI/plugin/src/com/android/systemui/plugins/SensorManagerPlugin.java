@@ -11,13 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.plugins;
 
-import android.hardware.Sensor;
-import android.hardware.TriggerEventListener;
+import android.hardware.SensorListener;
 
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
@@ -31,26 +30,30 @@ public interface SensorManagerPlugin extends Plugin {
     int VERSION = 1;
 
     /**
-     * Registers for trigger events from the sensor. Trigger events are one-shot and need to
-     * re-registered in order for them to be fired again.
+     * Registers for sensor events. Events will be sent until the listener is unregistered.
      * @param sensor
      * @param listener
-     * @see android.hardware.SensorManager#requestTriggerSensor(
-     *     android.hardware.TriggerEventListener, android.hardware.Sensor)
+     * @see android.hardware.SensorManager#registerListener(SensorListener, int)
      */
-    void registerTriggerEvent(Sensor sensor, TriggerEventListener listener);
+    void registerListener(Sensor sensor, SensorEventListener listener);
 
     /**
-     * Unregisters trigger events from the sensor.
+     * Unregisters events from the sensor.
      * @param sensor
      * @param listener
      */
-    void unregisterTriggerEvent(Sensor sensor, TriggerEventListener listener);
+    void unregisterListener(Sensor sensor, SensorEventListener listener);
 
-    interface TriggerEventListener {
-        void onTrigger(TriggerEvent event);
+    /**
+     * Listener triggered whenever the Sensor has new data.
+     */
+    interface SensorEventListener {
+        void onSensorChanged(SensorEvent event);
     }
 
+    /**
+     * Sensor that can be defined in a plugin.
+     */
     class Sensor {
         public static final int TYPE_WAKE_LOCK_SCREEN = 1;
         public static final int TYPE_WAKE_DISPLAY = 2;
@@ -67,29 +70,32 @@ public interface SensorManagerPlugin extends Plugin {
         }
     }
 
-    class TriggerEvent {
+    /**
+     * Event sent by a {@link Sensor}.
+     */
+    class SensorEvent {
         Sensor mSensor;
         int mVendorType;
         float[] mValues;
 
         /**
-         * Creates a trigger event
+         * Creates a sensor event.
          * @param sensor The type of sensor, e.g. TYPE_WAKE_LOCK_SCREEN
          * @param vendorType The vendor type, which should be unique for each type of sensor,
          *                   e.g. SINGLE_TAP = 1, DOUBLE_TAP = 2, etc.
          */
-        public TriggerEvent(Sensor sensor, int vendorType) {
+        public SensorEvent(Sensor sensor, int vendorType) {
             this(sensor, vendorType, null);
         }
 
         /**
-         * Creates a trigger event
+         * Creates a sensor event.
          * @param sensor The type of sensor, e.g. TYPE_WAKE_LOCK_SCREEN
          * @param vendorType The vendor type, which should be unique for each type of sensor,
          *                   e.g. SINGLE_TAP = 1, DOUBLE_TAP = 2, etc.
          * @param values Values captured by the sensor.
          */
-        public TriggerEvent(Sensor sensor, int vendorType, float[] values) {
+        public SensorEvent(Sensor sensor, int vendorType, float[] values) {
             mSensor = sensor;
             mVendorType = vendorType;
             mValues = values;
