@@ -724,6 +724,10 @@ public final class SystemServer {
         mSystemServiceManager.startService(new OverlayManagerService(mSystemContext, installer));
         traceEnd();
 
+        traceBeginAndSlog("StartSensorPrivacyService");
+        mSystemServiceManager.startService(new SensorPrivacyService(mSystemContext));
+        traceEnd();
+
         // The sensor service needs access to package manager service, app ops
         // service, and permissions service, therefore we start it after them.
         // Start sensor service in a separate thread. Completion should be checked
