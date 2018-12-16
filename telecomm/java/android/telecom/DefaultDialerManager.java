@@ -74,7 +74,7 @@ public class DefaultDialerManager {
         }
 
         // Only make the change if the new package belongs to a valid phone application
-        List<String> packageNames = getInstalledDialerApplications(context);
+        List<String> packageNames = getInstalledDialerApplications(context, user);
 
         if (packageNames.contains(packageName)) {
             // Update the secure setting.
