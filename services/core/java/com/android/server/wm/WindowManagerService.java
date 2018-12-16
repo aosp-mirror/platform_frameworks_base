@@ -611,6 +611,9 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mClientFreezingScreen = false;
     int mAppsFreezingScreen = 0;
 
+    @VisibleForTesting
+    boolean mPerDisplayFocusEnabled;
+
     // State while inside of layoutAndPlaceSurfacesLocked().
     boolean mFocusMayChange;
 
@@ -944,6 +947,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.integer.config_maxUiWidth);
         mDisableTransitionAnimation = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_disableTransitionAnimation);
+        mPerDisplayFocusEnabled = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_perDisplayFocusEnabled);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mDisplayWindowSettings = new DisplayWindowSettings(this);
@@ -4473,7 +4478,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     AccessibilityController accessibilityController = null;
 
-                    final boolean topFocusedDisplayChanged = msg.arg1 != 0;
                     synchronized (mGlobalLock) {
                         // TODO(multidisplay): Accessibility supported only of default desiplay.
                         if (mAccessibilityController != null && displayContent.isDefaultDisplay) {
@@ -4484,19 +4488,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         newFocus = displayContent.mCurrentFocus;
                     }
                     if (lastFocus == newFocus) {
-                        // Report focus to ViewRootImpl when top focused display changes.
-                        // Or, nothing to do for no window focus change.
-                        if (topFocusedDisplayChanged && newFocus != null) {
-                            if (DEBUG_FOCUS_LIGHT) {
-                                Slog.d(TAG, "Reporting focus: " + newFocus
-                                        + " due to top focused display change.");
-                            }
-                            // See {@link IWindow#windowFocusChanged} to know why set
-                            // reportToClient as false.
-                            newFocus.reportFocusChangedSerialized(true, mInTouchMode,
-                                    false /* reportToClient */);
-                            notifyFocusChanged();
-                        }
+                        // Focus is not changing, so nothing to do.
                         return;
                     }
                     synchronized (mGlobalLock) {
@@ -4518,15 +4510,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     if (newFocus != null) {
                         if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Gaining focus: " + newFocus);
-                        newFocus.reportFocusChangedSerialized(true, mInTouchMode,
-                                true /* reportToClient */);
+                        newFocus.reportFocusChangedSerialized(true, mInTouchMode);
                         notifyFocusChanged();
                     }
 
                     if (lastFocus != null) {
                         if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Losing focus: " + lastFocus);
-                        lastFocus.reportFocusChangedSerialized(false, mInTouchMode,
-                                true /* reportToClient */);
+                        lastFocus.reportFocusChangedSerialized(false, mInTouchMode);
                     }
                 } break;
 
@@ -4543,8 +4533,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     for (int i = 0; i < N; i++) {
                         if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Losing delayed focus: " +
                                 losers.get(i));
-                        losers.get(i).reportFocusChangedSerialized(false, mInTouchMode,
-                                true /* reportToClient */);
+                        losers.get(i).reportFocusChangedSerialized(false, mInTouchMode);
                     }
                 } break;
 

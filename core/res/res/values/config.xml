@@ -2019,6 +2019,10 @@
          This is intended to allow packaging drivers or tools for installation on a PC. -->
     <string translatable="false" name="config_isoImagePath"></string>
 
+    <!-- Whether the system enables per-display focus. If the system has the input method for each
+         display, this value should be true. -->
+    <bool name="config_perDisplayFocusEnabled">false</bool>
+
     <!-- Whether a software navigation bar should be shown. NOTE: in the future this may be
          autodetected from the Configuration. -->
     <bool name="config_showNavigationBar">false</bool>
