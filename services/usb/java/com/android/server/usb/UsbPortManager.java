@@ -31,8 +31,11 @@ import static com.android.internal.usb.DumpUtils.writePortStatus;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
@@ -63,6 +66,8 @@ import android.util.Slog;
 import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
@@ -87,6 +92,7 @@ public class UsbPortManager {
     private static final String TAG = "UsbPortManager";
 
     private static final int MSG_UPDATE_PORTS = 1;
+    private static final int MSG_SYSTEM_READY = 2;
 
     // All non-trivial role combinations.
     private static final int COMBO_SOURCE_HOST =
@@ -136,6 +142,14 @@ public class UsbPortManager {
     // Uploads logs only when the connection status is changes.
     private final HashMap<String, Boolean> mConnected = new HashMap<>();
 
+    private NotificationManager mNotificationManager;
+
+    /**
+     * If there currently is a notification about contaminated USB port shown the id of the
+     * notification, or 0 if there is none.
+     */
+    private int mIsPortContaminatedNotificationId;
+
     public UsbPortManager(Context context) {
         mContext = context;
         try {
@@ -166,7 +180,80 @@ public class UsbPortManager {
                         "ServiceStart: Failed to query port status", e);
             }
         }
+        mHandler.sendEmptyMessage(MSG_SYSTEM_READY);
     }
+
+    private void updateContaminantNotification() {
+        PortInfo currentPortInfo = null;
+        Resources r = mContext.getResources();
+
+        for (PortInfo portInfo : mPorts.values()) {
+            if (portInfo.mUsbPortStatus.getContaminantDetectionStatus()
+                    == UsbPortStatus.CONTAMINANT_DETECTION_DETECTED) {
+                currentPortInfo = portInfo;
+                break;
+            }
+        }
+
+        if (currentPortInfo != null && mIsPortContaminatedNotificationId
+                    != SystemMessage.NOTE_USB_CONTAMINANT_DETECTED) {
+            if (mIsPortContaminatedNotificationId
+                    == SystemMessage.NOTE_USB_CONTAMINANT_NOT_DETECTED) {
+                mNotificationManager.cancelAsUser(null, mIsPortContaminatedNotificationId,
+                        UserHandle.ALL);
+            }
+
+            mIsPortContaminatedNotificationId = SystemMessage.NOTE_USB_CONTAMINANT_DETECTED;
+            int titleRes = com.android.internal.R.string.usb_contaminant_detected_title;
+            CharSequence title = r.getText(titleRes);
+            String channel = SystemNotificationChannels.ALERTS;
+            CharSequence message = r.getText(
+                    com.android.internal.R.string.usb_contaminant_detected_message);
+
+            Notification.Builder builder = new Notification.Builder(mContext, channel)
+                    .setOngoing(true)
+                    .setTicker(title)
+                    .setColor(mContext.getColor(
+                           com.android.internal.R.color
+                           .system_notification_accent_color))
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .setSmallIcon(android.R.drawable.stat_sys_warning)
+                    .setStyle(new Notification.BigTextStyle()
+                    .bigText(message));
+            Notification notification = builder.build();
+            mNotificationManager.notifyAsUser(null, mIsPortContaminatedNotificationId, notification,
+                    UserHandle.ALL);
+        } else if (currentPortInfo == null && mIsPortContaminatedNotificationId
+                == SystemMessage.NOTE_USB_CONTAMINANT_DETECTED) {
+            mNotificationManager.cancelAsUser(null, mIsPortContaminatedNotificationId,
+                    UserHandle.ALL);
+
+            mIsPortContaminatedNotificationId = SystemMessage.NOTE_USB_CONTAMINANT_NOT_DETECTED;
+            int titleRes = com.android.internal.R.string.usb_contaminant_not_detected_title;
+            CharSequence title = r.getText(titleRes);
+            String channel = SystemNotificationChannels.ALERTS;
+            CharSequence message = r.getText(
+                    com.android.internal.R.string.usb_contaminant_not_detected_message);
+
+            Notification.Builder builder = new Notification.Builder(mContext, channel)
+                    .setSmallIcon(com.android.internal.R.drawable.ic_usb_48dp)
+                    .setTicker(title)
+                    .setColor(mContext.getColor(
+                           com.android.internal.R.color
+                           .system_notification_accent_color))
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .setStyle(new Notification.BigTextStyle()
+                    .bigText(message));
+            Notification notification = builder.build();
+            mNotificationManager.notifyAsUser(null, mIsPortContaminatedNotificationId, notification,
+                    UserHandle.ALL);
+        }
+    }
+
 
     public UsbPort[] getPorts() {
         synchronized (mLock) {
@@ -824,16 +911,19 @@ public class UsbPortManager {
     private void handlePortAddedLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         logAndPrint(Log.INFO, pw, "USB port added: " + portInfo);
         sendPortChangedBroadcastLocked(portInfo);
+        updateContaminantNotification();
     }
 
     private void handlePortChangedLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         logAndPrint(Log.INFO, pw, "USB port changed: " + portInfo);
         sendPortChangedBroadcastLocked(portInfo);
+        updateContaminantNotification();
     }
 
     private void handlePortRemovedLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         logAndPrint(Log.INFO, pw, "USB port removed: " + portInfo);
         sendPortChangedBroadcastLocked(portInfo);
+        updateContaminantNotification();
     }
 
     private void sendPortChangedBroadcastLocked(PortInfo portInfo) {
@@ -886,6 +976,11 @@ public class UsbPortManager {
                     synchronized (mLock) {
                         updatePortsLocked(null, PortInfo);
                     }
+                    break;
+                }
+                case MSG_SYSTEM_READY: {
+                    mNotificationManager = (NotificationManager)
+                            mContext.getSystemService(Context.NOTIFICATION_SERVICE);
                     break;
                 }
             }
