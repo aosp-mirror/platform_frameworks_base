@@ -41,6 +41,14 @@ LogEvent::LogEvent(log_msg& msg) {
     }
 }
 
+LogEvent::LogEvent(const LogEvent& event) {
+    mTagId = event.mTagId;
+    mLogUid = event.mLogUid;
+    mElapsedTimestampNs = event.mElapsedTimestampNs;
+    mLogdTimestampNs = event.mLogdTimestampNs;
+    mValues = event.mValues;
+}
+
 LogEvent::LogEvent(const StatsLogEventWrapper& statsLogEventWrapper, int workChainIndex) {
     mTagId = statsLogEventWrapper.getTagId();
     mLogdTimestampNs = statsLogEventWrapper.getWallClockTimeNs();

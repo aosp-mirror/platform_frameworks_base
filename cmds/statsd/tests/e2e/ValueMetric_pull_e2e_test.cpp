@@ -50,6 +50,7 @@ StatsdConfig CreateStatsdConfig() {
     valueMetric->set_bucket(FIVE_MINUTES);
     valueMetric->set_use_absolute_value_on_reset(true);
     valueMetric->set_skip_zero_diff_output(false);
+    valueMetric->set_max_pull_delay_sec(INT_MAX);
     return config;
 }
 
@@ -57,7 +58,7 @@ StatsdConfig CreateStatsdConfig() {
 
 TEST(ValueMetricE2eTest, TestPulledEvents) {
     auto config = CreateStatsdConfig();
-    int64_t baseTimeNs = 10 * NS_PER_SEC;
+    int64_t baseTimeNs = getElapsedRealtimeNs();
     int64_t configAddedTimeNs = 10 * 60 * NS_PER_SEC + baseTimeNs;
     int64_t bucketSizeNs =
         TimeUnitToBucketSizeInMillis(config.value_metric(0).bucket()) * 1000000;
@@ -163,7 +164,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents) {
 
 TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm) {
     auto config = CreateStatsdConfig();
-    int64_t baseTimeNs = 10 * NS_PER_SEC;
+    int64_t baseTimeNs = getElapsedRealtimeNs();
     int64_t configAddedTimeNs = 10 * 60 * NS_PER_SEC + baseTimeNs;
     int64_t bucketSizeNs =
         TimeUnitToBucketSizeInMillis(config.value_metric(0).bucket()) * 1000000;

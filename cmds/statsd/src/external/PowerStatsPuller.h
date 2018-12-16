@@ -28,6 +28,8 @@ namespace statsd {
 class PowerStatsPuller : public StatsPuller {
 public:
     PowerStatsPuller();
+
+private:
     bool PullInternal(vector<std::shared_ptr<LogEvent>>* data) override;
 };
 
