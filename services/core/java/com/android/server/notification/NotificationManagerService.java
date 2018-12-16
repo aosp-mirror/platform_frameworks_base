@@ -47,17 +47,12 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
-import static android.service.notification.NotificationListenerService
-        .HINT_HOST_DISABLE_CALL_EFFECTS;
+import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_CALL_EFFECTS;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
-import static android.service.notification.NotificationListenerService
-        .HINT_HOST_DISABLE_NOTIFICATION_EFFECTS;
-import static android.service.notification.NotificationListenerService
-        .NOTIFICATION_CHANNEL_OR_GROUP_ADDED;
-import static android.service.notification.NotificationListenerService
-        .NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
-import static android.service.notification.NotificationListenerService
-        .NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
+import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_NOTIFICATION_EFFECTS;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
@@ -65,8 +60,7 @@ import static android.service.notification.NotificationListenerService.REASON_CA
 import static android.service.notification.NotificationListenerService.REASON_CHANNEL_BANNED;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 import static android.service.notification.NotificationListenerService.REASON_ERROR;
-import static android.service.notification.NotificationListenerService
-        .REASON_GROUP_SUMMARY_CANCELED;
+import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 import static android.service.notification.NotificationListenerService.REASON_LISTENER_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_LISTENER_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_PACKAGE_BANNED;
@@ -583,7 +577,6 @@ public class NotificationManagerService extends SystemService {
     private void loadPolicyFile() {
         if (DBG) Slog.d(TAG, "loadPolicyFile");
         synchronized (mPolicyFile) {
-
             InputStream infile = null;
             try {
                 infile = mPolicyFile.openRead();
@@ -3357,14 +3350,12 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, "getBackupPayload: cannot backup policy for user " + user);
                 return null;
             }
-            synchronized(mPolicyFile) {
-                final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                try {
-                    writePolicyXml(baos, true /*forBackup*/);
-                    return baos.toByteArray();
-                } catch (IOException e) {
-                    Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
-                }
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                writePolicyXml(baos, true /*forBackup*/);
+                return baos.toByteArray();
+            } catch (IOException e) {
+                Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
             }
             return null;
         }
@@ -3383,14 +3374,12 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, "applyRestore: cannot restore policy for user " + user);
                 return;
             }
-            synchronized(mPolicyFile) {
-                final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
-                try {
-                    readPolicyXml(bais, true /*forRestore*/);
-                    handleSavePolicyFile();
-                } catch (NumberFormatException | XmlPullParserException | IOException e) {
-                    Slog.w(TAG, "applyRestore: error reading payload", e);
-                }
+            final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
+            try {
+                readPolicyXml(bais, true /*forRestore*/);
+                handleSavePolicyFile();
+            } catch (NumberFormatException | XmlPullParserException | IOException e) {
+                Slog.w(TAG, "applyRestore: error reading payload", e);
             }
         }
 
@@ -6700,7 +6689,7 @@ public class NotificationManagerService extends SystemService {
         Bundle hidden = new Bundle();
         Bundle systemGeneratedSmartActions = new Bundle();
         Bundle smartReplies = new Bundle();
-        Bundle audiblyAlerted = new Bundle();
+        Bundle lastAudiblyAlerted = new Bundle();
         Bundle noisy = new Bundle();
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
@@ -6732,7 +6721,7 @@ public class NotificationManagerService extends SystemService {
             systemGeneratedSmartActions.putParcelableArrayList(key,
                     record.getSystemGeneratedSmartActions());
             smartReplies.putCharSequenceArrayList(key, record.getSmartReplies());
-            audiblyAlerted.putBoolean(key, record.getAudiblyAlerted());
+            lastAudiblyAlerted.putLong(key, record.getLastAudiblyAlertedMs());
             noisy.putBoolean(key, record.getSound() != null || record.getVibration() != null);
         }
         final int M = keys.size();
@@ -6745,7 +6734,7 @@ public class NotificationManagerService extends SystemService {
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
                 suppressedVisualEffects, importanceAr, explanation, overrideGroupKeys,
                 channels, overridePeople, snoozeCriteria, showBadge, userSentiment, hidden,
-                systemGeneratedSmartActions, smartReplies, audiblyAlerted, noisy);
+                systemGeneratedSmartActions, smartReplies, lastAudiblyAlerted, noisy);
     }
 
     boolean hasCompanionDevice(ManagedServiceInfo info) {

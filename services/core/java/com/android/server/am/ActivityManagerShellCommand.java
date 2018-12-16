@@ -20,6 +20,7 @@ import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
+import static android.app.WaitResult.launchStateToString;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
@@ -491,6 +492,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             final long endTime = SystemClock.uptimeMillis();
             PrintWriter out = mWaitOption ? pw : getErrPrintWriter();
             boolean launched = false;
+            boolean hotLaunch = false;
             switch (res) {
                 case ActivityManager.START_SUCCESS:
                     launched = true;
@@ -516,6 +518,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     break;
                 case ActivityManager.START_TASK_TO_FRONT:
                     launched = true;
+                    //TODO(b/120981435) remove special case
+                    hotLaunch = true;
                     out.println(
                             "Warning: Activity not started, its current "
                                     + "task has been brought to the front");
@@ -563,6 +567,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     result.who = intent.getComponent();
                 }
                 pw.println("Status: " + (result.timeout ? "timeout" : "ok"));
+                final @WaitResult.LaunchState int launchState =
+                        hotLaunch ? WaitResult.LAUNCH_STATE_HOT : result.launchState;
+                pw.println("LaunchState: " + launchStateToString(launchState));
                 if (result.who != null) {
                     pw.println("Activity: " + result.who.flattenToShortString());
                 }
@@ -2852,6 +2859,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    prov[iders] [COMP_SPEC ...]: content provider state");
             pw.println("    provider [COMP_SPEC]: provider client-side state");
             pw.println("    s[ervices] [COMP_SPEC ...]: service state");
+            pw.println("    allowed-associations: current package association restrictions");
             pw.println("    as[sociations]: tracked app associations");
             pw.println("    lmk: stats on low memory killer");
             pw.println("    lru: raw LRU process list");

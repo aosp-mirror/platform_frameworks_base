@@ -1222,7 +1222,7 @@ message UsbDeviceAttached {
         STATE_CONNECTED = 1;
     }
     optional State state = 6;
-    optional int64 last_connect_duration_ms = 7;
+    optional int64 last_connect_duration_millis = 7;
 }
 
 
@@ -2394,16 +2394,23 @@ message KernelWakelock {
 }
 
 /**
- * Pulls low power state information. This includes platform and subsystem sleep state information,
- * PowerStatePlatformSleepState, PowerStateVoter or PowerStateSubsystemSleepState as defined in
+ * Pulls low power state information. If power.stats HAL is not available, this
+ * includes platform and subsystem sleep state information,
+ * PowerStatePlatformSleepState, PowerStateVoter or PowerStateSubsystemSleepState
+ * as defined in:
  *   hardware/interfaces/power/1.0/types.hal
  *   hardware/interfaces/power/1.1/types.hal
+ * If power.stats HAL is available, this includes PowerEntityStateResidencyResult
+ * as defined in:
+ *   hardware/interfaces/power/stats/1.0/types.hal
  */
 message SubsystemSleepState {
     // Subsystem name
     optional string subsystem_name = 1;
     // For PlatformLowPowerStats (hal 1.0), this is the voter name, which could be empty.
     // For SubsystemLowPowerStats (hal 1.1), this is the sleep state name.
+    // For PowerEntityStateResidencyResult (hal power/stats/1.0) this is the
+    //    powerEntityStateName from the corresponding PowerEntityStateInfo.
     optional string subname = 2;
     // The number of times it entered, or voted for entering the sleep state
     optional uint64 count = 3;
@@ -2540,15 +2547,19 @@ message BluetoothActivityInfo {
 
 /*
  * Logs the memory stats for a process.
+ *
+ * Pulled from StatsCompanionService for all managed processes (from ActivityManagerService).
  */
 message ProcessMemoryState {
     // The uid if available. -1 means not available.
     optional int32 uid = 1 [(is_uid) = true];
 
     // The process name.
+    // Usually package name, "system" for system server.
+    // Provided by ActivityManagerService.
     optional string process_name = 2;
 
-    // oom adj score.
+    // Current OOM score adjustment. Value read from ProcessRecord.
     optional int32 oom_adj_score = 3;
 
     // # of page-faults
@@ -2558,12 +2569,18 @@ message ProcessMemoryState {
     optional int64 page_major_fault = 5;
 
     // RSS
+    // Value is read from /proc/PID/stat, field 24. Or from memory.stat, field
+    // total_rss if per-app memory cgroups are enabled.
     optional int64 rss_in_bytes = 6;
 
     // CACHE
+    // Value is read from memory.stat, field total_cache if per-app memory
+    // cgroups are enabled. Otherwise, 0.
     optional int64 cache_in_bytes = 7;
 
     // SWAP
+    // Value is read from memory.stat, field total_swap if per-app memory
+    // cgroups are enabled. Otherwise, 0.
     optional int64 swap_in_bytes = 8;
 
     // Deprecated: use ProcessMemoryHighWaterMark atom instead. Always 0.
@@ -2576,12 +2593,15 @@ message ProcessMemoryState {
 
 /*
  * Logs the memory stats for a native process (from procfs).
+ *
+ * Pulled from StatsCompanionService for selected native processes.
  */
 message NativeProcessMemoryState {
     // The uid if available. -1 means not available.
     optional int32 uid = 1 [(is_uid) = true];
 
     // The process name.
+    // Value read from /proc/PID/cmdline.
     optional string process_name = 2;
 
     // # of page-faults
@@ -2591,6 +2611,7 @@ message NativeProcessMemoryState {
     optional int64 page_major_fault = 4;
 
     // RSS
+    // Value read from /proc/PID/stat, field 24.
     optional int64 rss_in_bytes = 5;
 
     // Deprecated: use ProcessMemoryHighWaterMark atom instead. Always 0.
@@ -2603,13 +2624,17 @@ message NativeProcessMemoryState {
 
 /*
  * Logs the memory high-water mark for a process.
- * Recorded in ActivityManagerService.
+ *
+ * Pulled from StatsCompanionService for all managed processes (from ActivityManagerServie)
+ * and for selected native processes.
  */
 message ProcessMemoryHighWaterMark {
     // The uid if available. -1 means not available.
     optional int32 uid = 1 [(is_uid) = true];
 
-    // The process name. Provided by ActivityManagerService or read from /proc/PID/cmdline.
+    // The process name.
+    // Usually package name or process cmdline.
+    // Provided by ActivityManagerService or read from /proc/PID/cmdline.
     optional string process_name = 2;
 
     // RSS high-water mark. Peak RSS usage of the process. Read from the VmHWM field in

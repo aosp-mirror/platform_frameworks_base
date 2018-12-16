@@ -111,13 +111,15 @@ public class LegacyMetadataMapper {
      *
      * @param parameters A non-{@code null} parameters set
      * @param info Camera info with camera facing direction and angle of orientation
+     * @param cameraId Current camera Id
+     * @param displaySize Device display size
      *
      * @return static camera characteristics for a camera device
      *
      * @throws NullPointerException if any of the args were {@code null}
      */
     public static CameraCharacteristics createCharacteristics(Camera.Parameters parameters,
-            CameraInfo info) {
+            CameraInfo info, int cameraId, Size displaySize) {
         checkNotNull(parameters, "parameters must not be null");
         checkNotNull(info, "info must not be null");
 
@@ -125,7 +127,7 @@ public class LegacyMetadataMapper {
         android.hardware.CameraInfo outerInfo = new android.hardware.CameraInfo();
         outerInfo.info = info;
 
-        return createCharacteristics(paramStr, outerInfo);
+        return createCharacteristics(paramStr, outerInfo, cameraId, displaySize);
     }
 
     /**
@@ -134,12 +136,14 @@ public class LegacyMetadataMapper {
      *
      * @param parameters A string parseable by {@link Camera.Parameters#unflatten}
      * @param info Camera info with camera facing direction and angle of orientation
+     * @param cameraId Current camera id
+     * @param displaySize Device display size
      * @return static camera characteristics for a camera device
      *
      * @throws NullPointerException if any of the args were {@code null}
      */
     public static CameraCharacteristics createCharacteristics(String parameters,
-            android.hardware.CameraInfo info) {
+            android.hardware.CameraInfo info, int cameraId, Size displaySize) {
         checkNotNull(parameters, "parameters must not be null");
         checkNotNull(info, "info must not be null");
         checkNotNull(info.info, "info.info must not be null");
@@ -158,6 +162,9 @@ public class LegacyMetadataMapper {
             m.dumpToLog();
             Log.v(TAG, "--------------------------------------------------- (end)");
         }
+
+        m.setCameraId(cameraId);
+        m.setDisplaySize(displaySize);
 
         return new CameraCharacteristics(m);
     }

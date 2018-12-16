@@ -26,6 +26,9 @@ import android.widget.ImageView;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 public class DarkIconDispatcherImpl implements DarkIconDispatcher {
 
     private final LightBarTransitionsController mTransitionsController;
@@ -74,7 +77,7 @@ public class DarkIconDispatcherImpl implements DarkIconDispatcher {
     }
 
     /**
-     * Sets the dark area so {@link #setIconsDark} only affects the icons in the specified area.
+     * Sets the dark area so {@link #applyDark} only affects the icons in the specified area.
      *
      * @param darkArea the area in which icons should change it's tint, in logical screen
      *                 coordinates
@@ -102,5 +105,13 @@ public class DarkIconDispatcherImpl implements DarkIconDispatcher {
         for (int i = 0; i < mReceivers.size(); i++) {
             mReceivers.valueAt(i).onDarkChanged(mTintArea, mDarkIntensity, mIconTint);
         }
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("DarkIconDispatcher: ");
+        pw.println("  mIconTint: 0x" + Integer.toHexString(mIconTint));
+        pw.println("  mDarkIntensity: " + mDarkIntensity + "f");
+        pw.println("  mTintArea: " + mTintArea);
     }
 }

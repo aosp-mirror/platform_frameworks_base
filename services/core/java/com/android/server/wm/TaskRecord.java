@@ -27,6 +27,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
@@ -85,6 +86,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static java.lang.Integer.MAX_VALUE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -114,6 +116,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
@@ -194,6 +197,13 @@ class TaskRecord extends ConfigurationContainer {
     static final int REPARENT_KEEP_STACK_AT_FRONT = 1;
     // Do not move the stack as a part of reparenting
     static final int REPARENT_LEAVE_STACK_IN_PLACE = 2;
+
+    // The height/width divide used when fitting a task within a bounds with method
+    // {@link #fitWithinBounds}.
+    // We always want the task to to be visible in the bounds without affecting its size when
+    // fitting. To make sure this is the case, we don't adjust the task left or top side pass
+    // the input bounds right or bottom side minus the width or height divided by this value.
+    private static final int FIT_WITHIN_BOUNDS_DIVIDER = 3;
 
     /**
      * The factory used to create {@link TaskRecord}. This allows OEM subclass {@link TaskRecord}.
@@ -300,7 +310,8 @@ class TaskRecord extends ConfigurationContainer {
 
     private final Rect mTmpStableBounds = new Rect();
     private final Rect mTmpNonDecorBounds = new Rect();
-    private final Rect mTmpRect = new Rect();
+    private final Rect mTmpBounds = new Rect();
+    private final Rect mTmpInsets = new Rect();
 
     // Last non-fullscreen bounds the task was launched in or resized to.
     // The information is persisted and used to determine the appropriate stack to launch the
@@ -1714,7 +1725,7 @@ class TaskRecord extends ConfigurationContainer {
         // If the task has no requested minimal size, we'd like to enforce a minimal size
         // so that the user can not render the task too small to manipulate. We don't need
         // to do this for the pinned stack as the bounds are controlled by the system.
-        if (!inPinnedWindowingMode()) {
+        if (!inPinnedWindowingMode() && mStack != null) {
             final int defaultMinSizeDp =
                     mService.mRootActivityContainer.mDefaultMinSizeOfResizeableTaskDp;
             final ActivityDisplay display =
@@ -1758,31 +1769,6 @@ class TaskRecord extends ConfigurationContainer {
     }
 
     /**
-     * @return a new Configuration for this Task, given the provided {@param bounds} and
-     *         {@param insetBounds}.
-     */
-    Configuration computeNewOverrideConfigurationForBounds(Rect bounds, Rect insetBounds) {
-        // Compute a new override configuration for the given bounds, if fullscreen bounds
-        // (bounds == null), then leave the override config unset
-        final Configuration newOverrideConfig = new Configuration();
-        if (bounds != null) {
-            newOverrideConfig.setTo(getRequestedOverrideConfiguration());
-            if (insetBounds != null && !insetBounds.isEmpty()) {
-                mTmpRect.set(insetBounds);
-                setDisplayedBounds(bounds);
-            } else {
-                mTmpRect.set(bounds);
-                setDisplayedBounds(null);
-            }
-            adjustForMinimalTaskDimensions(mTmpRect);
-            computeOverrideConfiguration(newOverrideConfig, mTmpRect,
-                    mTmpRect.right != bounds.right, mTmpRect.bottom != bounds.bottom);
-        }
-
-        return newOverrideConfig;
-    }
-
-    /**
      * Update task's override configuration based on the bounds.
      * @param bounds The bounds of the task.
      * @return True if the override configuration was updated.
@@ -1808,42 +1794,21 @@ class TaskRecord extends ConfigurationContainer {
      * @return True if the override configuration was updated.
      */
     boolean updateOverrideConfiguration(Rect bounds, @Nullable Rect insetBounds) {
-        if (equivalentRequestedOverrideBounds(bounds)) {
+        final boolean hasSetDisplayedBounds = (insetBounds != null && !insetBounds.isEmpty());
+        if (hasSetDisplayedBounds) {
+            setDisplayedBounds(bounds);
+        } else {
+            setDisplayedBounds(null);
+        }
+        // "steady" bounds do not include any temporary offsets from animation or interaction.
+        Rect steadyBounds = hasSetDisplayedBounds ? insetBounds : bounds;
+        if (equivalentRequestedOverrideBounds(steadyBounds)) {
             return false;
         }
-        final Rect currentBounds = getRequestedOverrideBounds();
 
-        mTmpConfig.setTo(getRequestedOverrideConfiguration());
-        final Configuration newConfig = getRequestedOverrideConfiguration();
-
-        final boolean matchParentBounds = bounds == null || bounds.isEmpty();
-        final boolean persistBounds = getWindowConfiguration().persistTaskBounds();
-        if (matchParentBounds) {
-            if (!currentBounds.isEmpty() && persistBounds) {
-                setLastNonFullscreenBounds(currentBounds);
-            }
-            setBounds(null);
-            setDisplayedBounds(null);
-            newConfig.unset();
-        } else {
-            if (insetBounds != null && !insetBounds.isEmpty()) {
-                mTmpRect.set(insetBounds);
-                setDisplayedBounds(bounds);
-            } else {
-                mTmpRect.set(bounds);
-                setDisplayedBounds(null);
-            }
-            adjustForMinimalTaskDimensions(mTmpRect);
-            setBounds(mTmpRect);
-
-            if (mStack == null || persistBounds) {
-                setLastNonFullscreenBounds(getRequestedOverrideBounds());
-            }
-            computeOverrideConfiguration(newConfig, mTmpRect,
-                    mTmpRect.right != bounds.right, mTmpRect.bottom != bounds.bottom);
-        }
-        onRequestedOverrideConfigurationChanged(newConfig);
-        return !mTmpConfig.equals(newConfig);
+        mTmpConfig.setTo(getResolvedOverrideConfiguration());
+        setBounds(steadyBounds);
+        return !mTmpConfig.equals(getResolvedOverrideConfiguration());
     }
 
     /**
@@ -1869,6 +1834,12 @@ class TaskRecord extends ConfigurationContainer {
         if (wasInMultiWindowMode != inMultiWindowMode()) {
             mService.mStackSupervisor.scheduleUpdateMultiWindowMode(this);
         }
+        if (getWindowConfiguration().persistTaskBounds()) {
+            final Rect currentBounds = getRequestedOverrideBounds();
+            if (!currentBounds.isEmpty()) {
+                setLastNonFullscreenBounds(currentBounds);
+            }
+        }
         // TODO: Should also take care of Pip mode changes here.
 
         saveLaunchingStateIfNeeded();
@@ -1893,6 +1864,45 @@ class TaskRecord extends ConfigurationContainer {
 
         // Saves the new state so that we can launch the activity at the same location.
         mService.mStackSupervisor.mLaunchParamsPersister.saveTask(this);
+    }
+
+    /**
+     * Adjust bounds to stay within stack bounds.
+     *
+     * Since bounds might be outside of stack bounds, this method tries to move the bounds in a way
+     * that keep them unchanged, but be contained within the stack bounds.
+     *
+     * @param bounds Bounds to be adjusted.
+     * @param stackBounds Bounds within which the other bounds should remain.
+     */
+    private static void fitWithinBounds(Rect bounds, Rect stackBounds) {
+        if (stackBounds == null || stackBounds.isEmpty() || stackBounds.contains(bounds)) {
+            return;
+        }
+
+        if (bounds.left < stackBounds.left || bounds.right > stackBounds.right) {
+            final int maxRight = stackBounds.right
+                    - (stackBounds.width() / FIT_WITHIN_BOUNDS_DIVIDER);
+            int horizontalDiff = stackBounds.left - bounds.left;
+            if ((horizontalDiff < 0 && bounds.left >= maxRight)
+                    || (bounds.left + horizontalDiff >= maxRight)) {
+                horizontalDiff = maxRight - bounds.left;
+            }
+            bounds.left += horizontalDiff;
+            bounds.right += horizontalDiff;
+        }
+
+        if (bounds.top < stackBounds.top || bounds.bottom > stackBounds.bottom) {
+            final int maxBottom = stackBounds.bottom
+                    - (stackBounds.height() / FIT_WITHIN_BOUNDS_DIVIDER);
+            int verticalDiff = stackBounds.top - bounds.top;
+            if ((verticalDiff < 0 && bounds.top >= maxBottom)
+                    || (bounds.top + verticalDiff >= maxBottom)) {
+                verticalDiff = maxBottom - bounds.top;
+            }
+            bounds.top += verticalDiff;
+            bounds.bottom += verticalDiff;
+        }
     }
 
     /**
@@ -1927,46 +1937,205 @@ class TaskRecord extends ConfigurationContainer {
         return !mDisplayedBounds.isEmpty();
     }
 
-    /** Clears passed config and fills it with new override values. */
-    // TODO(b/36505427): TaskRecord.computeOverrideConfiguration() is a utility method that doesn't
-    // depend on task or stacks, but uses those object to get the display to base the calculation
-    // on. Probably best to centralize calculations like this in ConfigurationContainer.
-    void computeOverrideConfiguration(Configuration config, Rect bounds,
-            boolean overrideWidth, boolean overrideHeight) {
-        mTmpNonDecorBounds.set(bounds);
-        mTmpStableBounds.set(bounds);
+    /**
+     * Intersects inOutBounds with intersectBounds-intersectInsets. If inOutBounds is larger than
+     * intersectBounds on a side, then the respective side will not be intersected.
+     *
+     * The assumption is that if inOutBounds is initially larger than intersectBounds, then the
+     * inset on that side is no-longer applicable. This scenario happens when a task's minimal
+     * bounds are larger than the provided parent/display bounds.
+     *
+     * @param inOutBounds the bounds to intersect.
+     * @param intersectBounds the bounds to intersect with.
+     * @param intersectInsets insets to apply to intersectBounds before intersecting.
+     */
+    private static void intersectWithInsetsIfFits(
+            Rect inOutBounds, Rect intersectBounds, Rect intersectInsets) {
+        if (inOutBounds.right <= intersectBounds.right) {
+            inOutBounds.right =
+                    Math.min(intersectBounds.right - intersectInsets.right, inOutBounds.right);
+        }
+        if (inOutBounds.bottom <= intersectBounds.bottom) {
+            inOutBounds.bottom =
+                    Math.min(intersectBounds.bottom - intersectInsets.bottom, inOutBounds.bottom);
+        }
+        if (inOutBounds.left >= intersectBounds.left) {
+            inOutBounds.left =
+                    Math.max(intersectBounds.left + intersectInsets.left, inOutBounds.left);
+        }
+        if (inOutBounds.top >= intersectBounds.top) {
+            inOutBounds.top =
+                    Math.max(intersectBounds.top + intersectInsets.top, inOutBounds.top);
+        }
+    }
 
-        config.unset();
-        final Configuration parentConfig = getParent().getConfiguration();
+    /**
+     * Gets bounds with non-decor and stable insets applied respectively.
+     *
+     * If bounds overhangs the display, those edges will not get insets. See
+     * {@link #intersectWithInsetsIfFits}
+     *
+     * @param outNonDecorBounds where to place bounds with non-decor insets applied.
+     * @param outStableBounds where to place bounds with stable insets applied.
+     * @param bounds the bounds to inset.
+     */
+    private void calculateInsetFrames(Rect outNonDecorBounds, Rect outStableBounds, Rect bounds,
+            DisplayInfo displayInfo) {
+        outNonDecorBounds.set(bounds);
+        outStableBounds.set(bounds);
+        if (getStack() == null || getStack().getDisplay() == null) {
+            return;
+        }
+        DisplayPolicy policy = getStack().getDisplay().mDisplayContent.getDisplayPolicy();
+        if (policy == null) {
+            return;
+        }
+        mTmpBounds.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
 
-        final float density = parentConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        policy.getStableInsetsLw(displayInfo.rotation,
+                displayInfo.logicalWidth, displayInfo.logicalHeight, displayInfo.displayCutout,
+                mTmpInsets);
+        intersectWithInsetsIfFits(outStableBounds, mTmpBounds, mTmpInsets);
 
-        if (mStack != null) {
-            final StackWindowController stackController = mStack.getWindowContainerController();
-            stackController.adjustConfigurationForBounds(bounds,
-                    mTmpNonDecorBounds, mTmpStableBounds, overrideWidth, overrideHeight, density,
-                    config, parentConfig, getWindowingMode());
-        } else {
-            throw new IllegalArgumentException("Expected stack when calculating override config");
+        policy.getNonDecorInsetsLw(displayInfo.rotation,
+                displayInfo.logicalWidth, displayInfo.logicalHeight, displayInfo.displayCutout,
+                mTmpInsets);
+        intersectWithInsetsIfFits(outNonDecorBounds, mTmpBounds, mTmpInsets);
+    }
+
+    /**
+     * Asks docked-divider controller for the smallestwidthdp given bounds.
+     * @param bounds bounds to calculate smallestwidthdp for.
+     */
+    private int getSmallestScreenWidthDpForDockedBounds(Rect bounds) {
+        DisplayContent dc = mStack.getDisplay().mDisplayContent;
+        if (dc != null) {
+            return dc.getDockedDividerController().getSmallestWidthDpForBounds(bounds);
+        }
+        return Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+    }
+
+    /**
+     * Calculates configuration values used by the client to get resources. This should be run
+     * using app-facing bounds (bounds unmodified by animations or transient interactions).
+     *
+     * This assumes bounds are non-empty/null. For the null-bounds case, the caller is likely
+     * configuring an "inherit-bounds" window which means that all configuration settings would
+     * just be inherited from the parent configuration.
+     **/
+    void computeConfigResourceOverrides(@NonNull Configuration inOutConfig, @NonNull Rect bounds,
+            @NonNull Configuration parentConfig) {
+        int windowingMode = inOutConfig.windowConfiguration.getWindowingMode();
+        if (windowingMode == WINDOWING_MODE_UNDEFINED) {
+            windowingMode = parentConfig.windowConfiguration.getWindowingMode();
         }
 
-        config.orientation = (config.screenWidthDp <= config.screenHeightDp)
-                ? Configuration.ORIENTATION_PORTRAIT
-                : Configuration.ORIENTATION_LANDSCAPE;
+        float density = inOutConfig.densityDpi;
+        if (density == Configuration.DENSITY_DPI_UNDEFINED) {
+            density = parentConfig.densityDpi;
+        }
+        density *= DisplayMetrics.DENSITY_DEFAULT_SCALE;
 
-        // For calculating screen layout, we need to use the non-decor inset screen area for the
-        // calculation for compatibility reasons, i.e. screen area without system bars that could
-        // never go away in Honeycomb.
-        final int compatScreenWidthDp = (int) (mTmpNonDecorBounds.width() / density);
-        final int compatScreenHeightDp = (int) (mTmpNonDecorBounds.height() / density);
-        // We're only overriding LONG, SIZE and COMPAT parts of screenLayout, so we start override
-        // calculation with partial default.
-        // Reducing the screen layout starting from its parent config.
-        final int sl = parentConfig.screenLayout &
-                (Configuration.SCREENLAYOUT_LONG_MASK | Configuration.SCREENLAYOUT_SIZE_MASK);
-        final int longSize = Math.max(compatScreenHeightDp, compatScreenWidthDp);
-        final int shortSize = Math.min(compatScreenHeightDp, compatScreenWidthDp);
-        config.screenLayout = Configuration.reduceScreenLayout(sl, longSize, shortSize);
+        Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
+        if (outAppBounds == null || outAppBounds.isEmpty()) {
+            inOutConfig.windowConfiguration.setAppBounds(bounds);
+            outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
+        }
+        if (windowingMode != WINDOWING_MODE_FREEFORM) {
+            final Rect parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
+            if (parentAppBounds != null && !parentAppBounds.isEmpty()) {
+                outAppBounds.intersect(parentAppBounds);
+            }
+        }
+
+        if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED
+                || inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
+            if (mStack != null) {
+                final DisplayInfo di = new DisplayInfo();
+                mStack.getDisplay().mDisplay.getDisplayInfo(di);
+
+                // For calculating screenWidthDp, screenWidthDp, we use the stable inset screen
+                // area, i.e. the screen area without the system bars.
+                // The non decor inset are areas that could never be removed in Honeycomb. See
+                // {@link WindowManagerPolicy#getNonDecorInsetsLw}.
+                calculateInsetFrames(mTmpNonDecorBounds, mTmpStableBounds, bounds, di);
+            } else {
+                mTmpNonDecorBounds.set(bounds);
+                mTmpStableBounds.set(bounds);
+            }
+
+            if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
+                inOutConfig.screenWidthDp = Math.min((int) (mTmpStableBounds.width() / density),
+                        parentConfig.screenWidthDp);
+            }
+            if (inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
+                inOutConfig.screenHeightDp = Math.min((int) (mTmpStableBounds.height() / density),
+                        parentConfig.screenHeightDp);
+            }
+
+            if (inOutConfig.smallestScreenWidthDp
+                    == Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
+                if (WindowConfiguration.isFloating(windowingMode)) {
+                    // For floating tasks, calculate the smallest width from the bounds of the task
+                    inOutConfig.smallestScreenWidthDp = (int) (
+                            Math.min(bounds.width(), bounds.height()) / density);
+                } else if (WindowConfiguration.isSplitScreenWindowingMode(windowingMode)) {
+                    // Iterating across all screen orientations, and return the minimum of the task
+                    // width taking into account that the bounds might change because the snap
+                    // algorithm snaps to a different value
+                    getSmallestScreenWidthDpForDockedBounds(bounds);
+                }
+                // otherwise, it will just inherit
+            }
+        }
+
+        if (inOutConfig.orientation == Configuration.ORIENTATION_UNDEFINED) {
+            inOutConfig.orientation = (inOutConfig.screenWidthDp <= inOutConfig.screenHeightDp)
+                    ? Configuration.ORIENTATION_PORTRAIT : Configuration.ORIENTATION_LANDSCAPE;
+        }
+        if (inOutConfig.screenLayout == Configuration.SCREENLAYOUT_UNDEFINED) {
+            // For calculating screen layout, we need to use the non-decor inset screen area for the
+            // calculation for compatibility reasons, i.e. screen area without system bars that
+            // could never go away in Honeycomb.
+            final int compatScreenWidthDp = (int) (mTmpNonDecorBounds.width() / density);
+            final int compatScreenHeightDp = (int) (mTmpNonDecorBounds.height() / density);
+            // We're only overriding LONG, SIZE and COMPAT parts of screenLayout, so we start
+            // override calculation with partial default.
+            // Reducing the screen layout starting from its parent config.
+            final int sl = parentConfig.screenLayout
+                    & (Configuration.SCREENLAYOUT_LONG_MASK | Configuration.SCREENLAYOUT_SIZE_MASK);
+            final int longSize = Math.max(compatScreenHeightDp, compatScreenWidthDp);
+            final int shortSize = Math.min(compatScreenHeightDp, compatScreenWidthDp);
+            inOutConfig.screenLayout = Configuration.reduceScreenLayout(sl, longSize, shortSize);
+        }
+    }
+
+    // TODO(b/113900640): remove this once ActivityRecord is changed to not need it anymore.
+    void computeResolvedOverrideConfiguration(Configuration inOutConfig, Configuration parentConfig,
+            Configuration overrideConfig) {
+        inOutConfig.setTo(overrideConfig);
+
+        Rect outOverrideBounds = inOutConfig.windowConfiguration.getBounds();
+        if (outOverrideBounds != null && !outOverrideBounds.isEmpty()) {
+            adjustForMinimalTaskDimensions(outOverrideBounds);
+
+            int windowingMode = overrideConfig.windowConfiguration.getWindowingMode();
+            if (windowingMode == WINDOWING_MODE_UNDEFINED) {
+                windowingMode = parentConfig.windowConfiguration.getWindowingMode();
+            }
+            if (windowingMode == WINDOWING_MODE_FREEFORM) {
+                // by policy, make sure the window remains within parent
+                fitWithinBounds(outOverrideBounds, parentConfig.windowConfiguration.getBounds());
+            }
+
+            computeConfigResourceOverrides(inOutConfig, outOverrideBounds, parentConfig);
+        }
+    }
+
+    @Override
+    void resolveOverrideConfiguration(Configuration newParentConfig) {
+        computeResolvedOverrideConfiguration(getResolvedOverrideConfiguration(), newParentConfig,
+                getRequestedOverrideConfiguration());
     }
 
     Rect updateOverrideConfigurationFromLaunchBounds() {

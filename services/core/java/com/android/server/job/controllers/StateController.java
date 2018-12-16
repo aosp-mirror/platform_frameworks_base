@@ -16,7 +16,10 @@
 
 package com.android.server.job.controllers;
 
+import static com.android.server.job.JobSchedulerService.DEBUG;
+
 import android.content.Context;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.IndentingPrintWriter;
@@ -32,6 +35,8 @@ import java.util.function.Predicate;
  * are ready to run, or whether they must be stopped.
  */
 public abstract class StateController {
+    private static final String TAG = "JobScheduler.SC";
+
     protected final JobSchedulerService mService;
     protected final StateChangedListener mStateChangedListener;
     protected final Context mContext;
@@ -76,6 +81,45 @@ public abstract class StateController {
      * Called when the JobScheduler.Constants are updated.
      */
     public void onConstantsUpdatedLocked() {
+    }
+
+    /** Called when a package is uninstalled from the device (not for an update). */
+    public void onAppRemovedLocked(String packageName, int uid) {
+    }
+
+    /** Called when a user is removed from the device. */
+    public void onUserRemovedLocked(int userId) {
+    }
+
+    /**
+     * Called when JobSchedulerService has determined that the job is not ready to be run. The
+     * Controller can evaluate if it can or should do something to promote this job's readiness.
+     */
+    public void evaluateStateLocked(JobStatus jobStatus) {
+    }
+
+    /**
+     * Called when something with the UID has changed. The controller should re-evaluate any
+     * internal state tracking dependent on this UID.
+     */
+    public void reevaluateStateLocked(int uid) {
+    }
+
+    protected boolean wouldBeReadyWithConstraintLocked(JobStatus jobStatus, int constraint) {
+        // This is very cheap to check (just a few conditions on data in JobStatus).
+        final boolean jobWouldBeReady = jobStatus.wouldBeReadyWithConstraint(constraint);
+        if (DEBUG) {
+            Slog.v(TAG, "wouldBeReadyWithConstraintLocked: " + jobStatus.toShortString()
+                    + " readyWithConstraint=" + jobWouldBeReady);
+        }
+        if (!jobWouldBeReady) {
+            // If the job wouldn't be ready, nothing to do here.
+            return false;
+        }
+
+        // This is potentially more expensive since JSS may have to query component
+        // presence.
+        return mService.areComponentsInPlaceLocked(jobStatus);
     }
 
     public abstract void dumpControllerStateLocked(IndentingPrintWriter pw,

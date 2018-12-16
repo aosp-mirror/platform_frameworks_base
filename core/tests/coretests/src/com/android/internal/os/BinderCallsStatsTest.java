@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Binder;
+import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -637,7 +638,7 @@ public class BinderCallsStatsTest {
 
     @Test
     public void testAddsDebugEntries() {
-        long startTime = System.currentTimeMillis();
+        long startTime = SystemClock.elapsedRealtime();
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setAddDebugEntries(true);
         ArrayList<BinderCallsStats.ExportedCallStat> callStats = bcs.getExportedCallStats();

@@ -93,6 +93,7 @@ package android {
     field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final java.lang.String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final java.lang.String MANAGE_ROLE_HOLDERS = "android.permission.MANAGE_ROLE_HOLDERS";
+    field public static final java.lang.String MANAGE_SENSOR_PRIVACY = "android.permission.MANAGE_SENSOR_PRIVACY";
     field public static final java.lang.String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
     field public static final java.lang.String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
     field public static final java.lang.String MANAGE_USB = "android.permission.MANAGE_USB";
@@ -205,6 +206,7 @@ package android {
   }
 
   public static final class R.dimen {
+    field public static final int config_mediaMetadataBitmapMaxSize = 17104904; // 0x1050008
     field public static final int config_restrictedIconSize = 17104903; // 0x1050007
   }
 
@@ -2761,7 +2763,9 @@ package android.location {
     method public deprecated boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
     method public void flushGnssBatch();
     method public int getGnssBatchSize();
+    method public java.lang.String getLocationControllerExtraPackage();
     method public java.lang.String getNetworkProviderPackage();
+    method public boolean isLocationControllerExtraPackageEnabled();
     method public boolean isLocationEnabledForUser(android.os.UserHandle);
     method public boolean isProviderEnabledForUser(java.lang.String, android.os.UserHandle);
     method public boolean registerGnssBatchedLocationCallback(long, boolean, android.location.BatchedLocationCallback, android.os.Handler);
@@ -2769,6 +2773,8 @@ package android.location {
     method public deprecated void removeGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
     method public void requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper);
     method public void requestLocationUpdates(android.location.LocationRequest, android.app.PendingIntent);
+    method public void setLocationControllerExtraPackage(java.lang.String);
+    method public void setLocationControllerExtraPackageEnabled(boolean);
     method public void setLocationEnabledForUser(boolean, android.os.UserHandle);
     method public boolean setProviderEnabledForUser(java.lang.String, boolean, android.os.UserHandle);
     method public boolean unregisterGnssBatchedLocationCallback(android.location.BatchedLocationCallback);
@@ -3883,7 +3889,11 @@ package android.net.wifi {
 package android.net.wifi.aware {
 
   public class DiscoverySession implements java.lang.AutoCloseable {
-    method public android.net.NetworkSpecifier createNetworkSpecifierPmk(android.net.wifi.aware.PeerHandle, byte[]);
+    method public deprecated android.net.NetworkSpecifier createNetworkSpecifierPmk(android.net.wifi.aware.PeerHandle, byte[]);
+  }
+
+  public static class WifiAwareManager.NetworkSpecifierBuilder {
+    method public android.net.wifi.aware.WifiAwareManager.NetworkSpecifierBuilder setPmk(byte[]);
   }
 
   public class WifiAwareSession implements java.lang.AutoCloseable {
@@ -3968,6 +3978,19 @@ package android.os {
   public class BatteryManager {
     field public static final java.lang.String EXTRA_EVENTS = "android.os.extra.EVENTS";
     field public static final java.lang.String EXTRA_EVENT_TIMESTAMP = "android.os.extra.EVENT_TIMESTAMP";
+  }
+
+  public class Binder implements android.os.IBinder {
+    method public static final long clearCallingWorkSource();
+    method public static final int getCallingWorkSourceUid();
+    method public static final void restoreCallingWorkSource(long);
+    method public static final long setCallingWorkSourceUid(int);
+    method public static void setProxyTransactListener(android.os.Binder.ProxyTransactListener);
+  }
+
+  public static abstract interface Binder.ProxyTransactListener {
+    method public abstract void onTransactEnded(java.lang.Object);
+    method public abstract java.lang.Object onTransactStarted(android.os.IBinder, int);
   }
 
   public final class ConfigUpdate {
@@ -4633,6 +4656,7 @@ package android.provider {
 
   public final class Settings {
     field public static final java.lang.String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
+    field public static final java.lang.String ACTION_LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS = "android.settings.LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS";
     field public static final java.lang.String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
   }
 
@@ -5343,9 +5367,10 @@ package android.service.textclassifier {
     method public void onDestroyTextClassificationSession(android.view.textclassifier.TextClassificationSessionId);
     method public void onDetectLanguage(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.TextLanguage.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLanguage>);
     method public abstract void onGenerateLinks(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.TextLinks.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLinks>);
-    method public void onSelectionEvent(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.SelectionEvent);
+    method public deprecated void onSelectionEvent(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.SelectionEvent);
     method public void onSuggestConversationActions(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.ConversationActions.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.ConversationActions>);
     method public abstract void onSuggestSelection(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.TextSelection.Request, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextSelection>);
+    method public void onTextClassifierEvent(android.view.textclassifier.TextClassificationSessionId, android.view.textclassifier.TextClassifierEvent);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.textclassifier.TextClassifierService";
   }
 
@@ -5643,7 +5668,7 @@ package android.telecom {
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
     method public boolean isInEmergencyCall();
     method public boolean isRinging();
-    method public boolean setDefaultDialer(java.lang.String);
+    method public deprecated boolean setDefaultDialer(java.lang.String);
     field public static final java.lang.String EXTRA_CALL_BACK_INTENT = "android.telecom.extra.CALL_BACK_INTENT";
     field public static final java.lang.String EXTRA_CLEAR_MISSED_CALLS_INTENT = "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecom.extra.CONNECTION_SERVICE";
@@ -5715,16 +5740,15 @@ package android.telephony {
   public abstract class NetworkService extends android.app.Service {
     ctor public NetworkService();
     method protected abstract android.telephony.NetworkService.NetworkServiceProvider createNetworkServiceProvider(int);
-    field public static final java.lang.String NETWORK_SERVICE_EXTRA_SLOT_ID = "android.telephony.extra.SLOT_ID";
     field public static final java.lang.String NETWORK_SERVICE_INTERFACE = "android.telephony.NetworkService";
   }
 
-  public class NetworkService.NetworkServiceProvider {
+  public abstract class NetworkService.NetworkServiceProvider implements java.lang.AutoCloseable {
     ctor public NetworkService.NetworkServiceProvider(int);
+    method public abstract void close();
     method public void getNetworkRegistrationState(int, android.telephony.NetworkServiceCallback);
     method public final int getSlotId();
     method public final void notifyNetworkRegistrationStateChanged();
-    method protected void onDestroy();
   }
 
   public class NetworkServiceCallback {
@@ -5854,6 +5878,7 @@ package android.telephony {
     method public void enableVideoCalling(boolean);
     method public java.lang.String getAidForAppType(int);
     method public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
+    method public int getCardIdForDefaultEuicc();
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntentAndPhone(android.content.Intent, int);
     method public java.lang.String getCdmaMdn();
@@ -5920,6 +5945,7 @@ package android.telephony {
     field public static final java.lang.String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final java.lang.String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
     field public static final java.lang.String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
+    field public static final int INVALID_CARD_ID = -1; // 0xffffffff
     field public static final long MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS = 60000L; // 0xea60L
     field public static final int NETWORK_MODE_CDMA_EVDO = 4; // 0x4
     field public static final int NETWORK_MODE_CDMA_NO_EVDO = 5; // 0x5
@@ -6062,20 +6088,19 @@ package android.telephony.data {
   public abstract class DataService extends android.app.Service {
     ctor public DataService();
     method public abstract android.telephony.data.DataService.DataServiceProvider createDataServiceProvider(int);
-    field public static final java.lang.String DATA_SERVICE_EXTRA_SLOT_ID = "android.telephony.data.extra.SLOT_ID";
     field public static final java.lang.String DATA_SERVICE_INTERFACE = "android.telephony.data.DataService";
     field public static final int REQUEST_REASON_HANDOVER = 3; // 0x3
     field public static final int REQUEST_REASON_NORMAL = 1; // 0x1
     field public static final int REQUEST_REASON_SHUTDOWN = 2; // 0x2
   }
 
-  public class DataService.DataServiceProvider {
+  public abstract class DataService.DataServiceProvider implements java.lang.AutoCloseable {
     ctor public DataService.DataServiceProvider(int);
+    method public abstract void close();
     method public void deactivateDataCall(int, int, android.telephony.data.DataServiceCallback);
     method public void getDataCallList(android.telephony.data.DataServiceCallback);
     method public final int getSlotId();
     method public final void notifyDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
-    method protected void onDestroy();
     method public void setDataProfile(java.util.List<android.telephony.data.DataProfile>, boolean, android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(android.telephony.data.DataProfile, boolean, android.telephony.data.DataServiceCallback);
     method public void setupDataCall(int, android.telephony.data.DataProfile, boolean, boolean, int, android.net.LinkProperties, android.telephony.data.DataServiceCallback);
@@ -6543,6 +6568,7 @@ package android.telephony.ims {
     field public static final int CODE_RADIO_SETUP_FAILURE = 1509; // 0x5e5
     field public static final int CODE_RADIO_UPLINK_FAILURE = 1508; // 0x5e4
     field public static final int CODE_REGISTRATION_ERROR = 1000; // 0x3e8
+    field public static final int CODE_REJECTED_ELSEWHERE = 1017; // 0x3f9
     field public static final int CODE_REJECT_1X_COLLISION = 1603; // 0x643
     field public static final int CODE_REJECT_CALL_ON_OTHER_SUB = 1602; // 0x642
     field public static final int CODE_REJECT_CALL_TYPE_NOT_ALLOWED = 1605; // 0x645
@@ -6566,26 +6592,39 @@ package android.telephony.ims {
     field public static final int CODE_REJECT_VT_AVPF_NOT_ALLOWED = 1619; // 0x653
     field public static final int CODE_REJECT_VT_TTY_NOT_ALLOWED = 1615; // 0x64f
     field public static final int CODE_REMOTE_CALL_DECLINE = 1404; // 0x57c
+    field public static final int CODE_SESSION_MODIFICATION_FAILED = 1517; // 0x5ed
     field public static final int CODE_SIP_ALTERNATE_EMERGENCY_CALL = 1514; // 0x5ea
+    field public static final int CODE_SIP_AMBIGUOUS = 376; // 0x178
     field public static final int CODE_SIP_BAD_ADDRESS = 337; // 0x151
     field public static final int CODE_SIP_BAD_REQUEST = 331; // 0x14b
     field public static final int CODE_SIP_BUSY = 338; // 0x152
+    field public static final int CODE_SIP_CALL_OR_TRANS_DOES_NOT_EXIST = 372; // 0x174
     field public static final int CODE_SIP_CLIENT_ERROR = 342; // 0x156
+    field public static final int CODE_SIP_EXTENSION_REQUIRED = 370; // 0x172
     field public static final int CODE_SIP_FORBIDDEN = 332; // 0x14c
     field public static final int CODE_SIP_GLOBAL_ERROR = 362; // 0x16a
+    field public static final int CODE_SIP_INTERVAL_TOO_BRIEF = 371; // 0x173
+    field public static final int CODE_SIP_LOOP_DETECTED = 373; // 0x175
+    field public static final int CODE_SIP_METHOD_NOT_ALLOWED = 366; // 0x16e
     field public static final int CODE_SIP_NOT_ACCEPTABLE = 340; // 0x154
     field public static final int CODE_SIP_NOT_FOUND = 333; // 0x14d
     field public static final int CODE_SIP_NOT_REACHABLE = 341; // 0x155
     field public static final int CODE_SIP_NOT_SUPPORTED = 334; // 0x14e
+    field public static final int CODE_SIP_PROXY_AUTHENTICATION_REQUIRED = 367; // 0x16f
     field public static final int CODE_SIP_REDIRECTED = 321; // 0x141
     field public static final int CODE_SIP_REQUEST_CANCELLED = 339; // 0x153
+    field public static final int CODE_SIP_REQUEST_ENTITY_TOO_LARGE = 368; // 0x170
+    field public static final int CODE_SIP_REQUEST_PENDING = 377; // 0x179
     field public static final int CODE_SIP_REQUEST_TIMEOUT = 335; // 0x14f
+    field public static final int CODE_SIP_REQUEST_URI_TOO_LARGE = 369; // 0x171
     field public static final int CODE_SIP_SERVER_ERROR = 354; // 0x162
     field public static final int CODE_SIP_SERVER_INTERNAL_ERROR = 351; // 0x15f
     field public static final int CODE_SIP_SERVER_TIMEOUT = 353; // 0x161
     field public static final int CODE_SIP_SERVICE_UNAVAILABLE = 352; // 0x160
     field public static final int CODE_SIP_TEMPRARILY_UNAVAILABLE = 336; // 0x150
+    field public static final int CODE_SIP_TOO_MANY_HOPS = 374; // 0x176
     field public static final int CODE_SIP_TRANSACTION_DOES_NOT_EXIST = 343; // 0x157
+    field public static final int CODE_SIP_UNDECIPHERABLE = 378; // 0x17a
     field public static final int CODE_SIP_USER_MARKED_UNWANTED = 365; // 0x16d
     field public static final int CODE_SIP_USER_REJECTED = 361; // 0x169
     field public static final int CODE_SUPP_SVC_CANCELLED = 1202; // 0x4b2
@@ -6595,9 +6634,11 @@ package android.telephony.ims {
     field public static final int CODE_TIMEOUT_NO_ANSWER = 202; // 0xca
     field public static final int CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE = 203; // 0xcb
     field public static final int CODE_UNSPECIFIED = 0; // 0x0
+    field public static final int CODE_USER_CANCELLED_SESSION_MODIFICATION = 512; // 0x200
     field public static final int CODE_USER_DECLINE = 504; // 0x1f8
     field public static final int CODE_USER_IGNORE = 503; // 0x1f7
     field public static final int CODE_USER_NOANSWER = 502; // 0x1f6
+    field public static final int CODE_USER_REJECTED_SESSION_MODIFICATION = 511; // 0x1ff
     field public static final int CODE_USER_TERMINATED = 501; // 0x1f5
     field public static final int CODE_USER_TERMINATED_BY_REMOTE = 510; // 0x1fe
     field public static final int CODE_UT_CB_PASSWORD_MISMATCH = 821; // 0x335

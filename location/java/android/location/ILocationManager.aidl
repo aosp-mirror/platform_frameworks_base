@@ -88,6 +88,10 @@ interface ILocationManager
     boolean providerMeetsCriteria(String provider, in Criteria criteria);
     ProviderProperties getProviderProperties(String provider);
     String getNetworkProviderPackage();
+    void setLocationControllerExtraPackage(String packageName);
+    String getLocationControllerExtraPackage();
+    void setLocationControllerExtraPackageEnabled(boolean enabled);
+    boolean isLocationControllerExtraPackageEnabled();
 
     boolean isProviderEnabledForUser(String provider, int userId);
     boolean setProviderEnabledForUser(String provider, boolean enabled, int userId);

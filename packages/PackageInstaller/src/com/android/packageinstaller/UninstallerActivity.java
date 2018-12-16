@@ -285,7 +285,7 @@ public class UninstallerActivity extends Activity {
         fragment.show(ft, "dialog");
     }
 
-    public void startUninstallProgress(boolean clearContributedFiles) {
+    public void startUninstallProgress(boolean clearContributedFiles, boolean keepData) {
         boolean returnResult = getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
         CharSequence label = mDialogInfo.appInfo.loadSafeLabel(getPackageManager());
 
@@ -312,6 +312,7 @@ public class UninstallerActivity extends Activity {
             newIntent.putExtra(UninstallUninstalling.EXTRA_APP_LABEL, label);
             newIntent.putExtra(UninstallUninstalling.EXTRA_CLEAR_CONTRIBUTED_FILES,
                     clearContributedFiles);
+            newIntent.putExtra(UninstallUninstalling.EXTRA_KEEP_DATA, keepData);
             newIntent.putExtra(PackageInstaller.EXTRA_CALLBACK, mDialogInfo.callback);
 
             if (returnResult) {
@@ -362,6 +363,7 @@ public class UninstallerActivity extends Activity {
 
                 int flags = mDialogInfo.allUsers ? PackageManager.DELETE_ALL_USERS : 0;
                 flags |= clearContributedFiles ? PackageManager.DELETE_CONTRIBUTED_MEDIA : 0;
+                flags |= keepData ? PackageManager.DELETE_KEEP_DATA : 0;
 
                 ActivityThread.getPackageManager().getPackageInstaller().uninstall(
                         new VersionedPackage(mDialogInfo.appInfo.packageName,

@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+
 import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGED_CALLBACKS;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_START;
@@ -176,15 +177,6 @@ public class PinnedStackWindowController extends StackWindowController {
     public boolean deferScheduleMultiWindowModeChanged() {
         synchronized (mGlobalLock) {
             return mContainer.deferScheduleMultiWindowModeChanged();
-        }
-    }
-
-    /**
-     * @return whether the bounds are currently animating to fullscreen.
-     */
-    public boolean isAnimatingBoundsToFullscreen() {
-        synchronized (mGlobalLock) {
-            return mContainer.isAnimatingBoundsToFullscreen();
         }
     }
 

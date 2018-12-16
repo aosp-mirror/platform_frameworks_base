@@ -2283,7 +2283,8 @@ public abstract class BatteryStats implements Parcelable {
     static final String[] DATA_CONNECTION_NAMES = {
         "none", "gprs", "edge", "umts", "cdma", "evdo_0", "evdo_A",
         "1xrtt", "hsdpa", "hsupa", "hspa", "iden", "evdo_b", "lte",
-        "ehrpd", "hspap", "gsm", "td_scdma", "iwlan", "lte_ca", "other"
+        "ehrpd", "hspap", "gsm", "td_scdma", "iwlan", "lte_ca", "nr",
+        "other"
     };
 
     public static final int NUM_DATA_CONNECTION_TYPES = DATA_CONNECTION_OTHER+1;
@@ -4730,7 +4731,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.append("\n       ");
             sb.append(prefix);
             didOne = true;
-            sb.append(DATA_CONNECTION_NAMES[i]);
+            sb.append(i < DATA_CONNECTION_NAMES.length ? DATA_CONNECTION_NAMES[i] : "ERROR");
             sb.append(" ");
             formatTimeMs(sb, time/1000);
             sb.append("(");

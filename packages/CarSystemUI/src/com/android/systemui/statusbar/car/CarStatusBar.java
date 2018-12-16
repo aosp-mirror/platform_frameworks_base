@@ -35,6 +35,7 @@ import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.notifications.NotificationsUI;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -587,4 +588,9 @@ public class CarStatusBar extends StatusBar implements
     private Drawable getDefaultWallpaper() {
         return mContext.getDrawable(com.android.internal.R.drawable.default_wallpaper);
     }
+
+    public void toggleCarNotifications() {
+        getComponent(NotificationsUI.class).toggleShowingCarNotifications();
+    }
+
 }

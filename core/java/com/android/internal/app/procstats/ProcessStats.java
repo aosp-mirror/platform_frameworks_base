@@ -1396,10 +1396,10 @@ public final class ProcessStats implements Parcelable {
         return as;
     }
 
-    // See b/118826162 -- to avoid logspaming, we rate limit the WTF.
-    private static final long INVERSE_PROC_STATE_WTF_MIN_INTERVAL_MS = 10_000L;
-    private long mNextInverseProcStateWtfUptime;
-    private int mSkippedInverseProcStateWtfCount;
+    // See b/118826162 -- to avoid logspaming, we rate limit the warnings.
+    private static final long INVERSE_PROC_STATE_WARNING_MIN_INTERVAL_MS = 10_000L;
+    private long mNextInverseProcStateWarningUptime;
+    private int mSkippedInverseProcStateWarningCount;
 
     public void updateTrackingAssociationsLocked(int curSeq, long now) {
         final int NUM = mTrackingAssociations.size();
@@ -1423,18 +1423,19 @@ public final class ProcessStats implements Parcelable {
                         act.stopActive(now);
                         if (act.mProcState < procState) {
                             final long nowUptime = SystemClock.uptimeMillis();
-                            if (mNextInverseProcStateWtfUptime > nowUptime) {
-                                mSkippedInverseProcStateWtfCount++;
+                            if (mNextInverseProcStateWarningUptime > nowUptime) {
+                                mSkippedInverseProcStateWarningCount++;
                             } else {
                                 // TODO We still see it during boot related to GMS-core.
                                 // b/118826162
-                                Slog.wtf(TAG, "Tracking association " + act + " whose proc state "
+                                Slog.w(TAG, "Tracking association " + act + " whose proc state "
                                         + act.mProcState + " is better than process " + proc
                                         + " proc state " + procState
-                                        + " (" +  mSkippedInverseProcStateWtfCount + " skipped)");
-                                mSkippedInverseProcStateWtfCount = 0;
-                                mNextInverseProcStateWtfUptime =
-                                        nowUptime + INVERSE_PROC_STATE_WTF_MIN_INTERVAL_MS;
+                                        + " (" +  mSkippedInverseProcStateWarningCount
+                                        + " skipped)");
+                                mSkippedInverseProcStateWarningCount = 0;
+                                mNextInverseProcStateWarningUptime =
+                                        nowUptime + INVERSE_PROC_STATE_WARNING_MIN_INTERVAL_MS;
                             }
                         }
                     }
@@ -1474,6 +1475,7 @@ public final class ProcessStats implements Parcelable {
                         final int NSRVS = pkgState.mServices.size();
                         final int NASCS = pkgState.mAssociations.size();
                         final boolean pkgMatch = reqPackage == null || reqPackage.equals(pkgName);
+                        boolean onlyAssociations = false;
                         if (!pkgMatch) {
                             boolean procMatch = false;
                             for (int iproc = 0; iproc < NPROCS; iproc++) {
@@ -1484,7 +1486,18 @@ public final class ProcessStats implements Parcelable {
                                 }
                             }
                             if (!procMatch) {
-                                continue;
+                                // Check if this app has any associations with the requested
+                                // package, so that if so we print those.
+                                for (int iasc = 0; iasc < NASCS; iasc++) {
+                                    AssociationState asc = pkgState.mAssociations.valueAt(iasc);
+                                    if (asc.hasProcess(reqPackage)) {
+                                        onlyAssociations = true;
+                                        break;
+                                    }
+                                }
+                                if (!onlyAssociations) {
+                                    continue;
+                                }
                             }
                         }
                         if (NPROCS > 0 || NSRVS > 0 || NASCS > 0) {
@@ -1502,7 +1515,7 @@ public final class ProcessStats implements Parcelable {
                             pw.print(vers);
                             pw.println(":");
                         }
-                        if ((section & REPORT_PKG_PROC_STATS) != 0) {
+                        if ((section & REPORT_PKG_PROC_STATS) != 0 && !onlyAssociations) {
                             if (!dumpSummary || dumpAll) {
                                 for (int iproc = 0; iproc < NPROCS; iproc++) {
                                     ProcessState proc = pkgState.mProcesses.valueAt(iproc);
@@ -1549,7 +1562,7 @@ public final class ProcessStats implements Parcelable {
                                         now, totalTime);
                             }
                         }
-                        if ((section & REPORT_PKG_SVC_STATS) != 0) {
+                        if ((section & REPORT_PKG_SVC_STATS) != 0 && !onlyAssociations) {
                             for (int isvc = 0; isvc < NSRVS; isvc++) {
                                 ServiceState svc = pkgState.mServices.valueAt(isvc);
                                 if (!pkgMatch && !reqPackage.equals(svc.getProcessName())) {
@@ -1578,7 +1591,9 @@ public final class ProcessStats implements Parcelable {
                             for (int iasc = 0; iasc < NASCS; iasc++) {
                                 AssociationState asc = pkgState.mAssociations.valueAt(iasc);
                                 if (!pkgMatch && !reqPackage.equals(asc.getProcessName())) {
-                                    continue;
+                                    if (!onlyAssociations || !asc.hasProcess(reqPackage)) {
+                                        continue;
+                                    }
                                 }
                                 if (activeOnly && !asc.isInUse()) {
                                     pw.print("      (Not active association: ");
@@ -1596,7 +1611,8 @@ public final class ProcessStats implements Parcelable {
                                 pw.print("        Process: ");
                                 pw.println(asc.getProcessName());
                                 asc.dumpStats(pw, "        ", "          ", "    ",
-                                        now, totalTime, dumpDetails, dumpAll);
+                                        now, totalTime, onlyAssociations ? reqPackage : null,
+                                        dumpDetails, dumpAll);
                             }
                         }
                     }

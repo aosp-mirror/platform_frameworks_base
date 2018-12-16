@@ -117,8 +117,10 @@ interface IWindowManager
     void stopFreezingScreen();
 
     // these require DISABLE_KEYGUARD permission
-    void disableKeyguard(IBinder token, String tag);
-    void reenableKeyguard(IBinder token);
+    /** @deprecated use Activity.setShowWhenLocked instead. */
+    void disableKeyguard(IBinder token, String tag, int userId);
+    /** @deprecated use Activity.setShowWhenLocked instead. */
+    void reenableKeyguard(IBinder token, int userId);
     void exitKeyguardSecurely(IOnKeyguardExitResult callback);
     boolean isKeyguardLocked();
     boolean isKeyguardSecure();

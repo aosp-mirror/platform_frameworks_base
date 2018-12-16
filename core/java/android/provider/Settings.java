@@ -150,6 +150,23 @@ public final class Settings {
             "android.settings.LOCATION_SOURCE_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of location controller extra package.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS =
+            "android.settings.LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS";
+
+    /**
      * Activity Action: Show scanning settings to allow configuration of Wi-Fi
      * and Bluetooth scanning settings.
      * <p>
@@ -7867,6 +7884,24 @@ public final class Settings {
         public static final String ASSIST_GESTURE_SETUP_COMPLETE = "assist_gesture_setup_complete";
 
         /**
+         * Control whether Trust Agents are in active unlock or extend unlock mode.
+         * @hide
+         */
+        public static final String TRUST_AGENTS_EXTEND_UNLOCK = "trust_agents_extend_unlock";
+
+        private static final Validator TRUST_AGENTS_EXTEND_UNLOCK_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Control whether the screen locks when trust is lost.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_WHEN_TRUST_LOST = "lock_screen_when_trust_lost";
+
+        private static final Validator LOCK_SCREEN_WHEN_TRUST_LOST_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * Control whether Night display is currently activated.
          * @hide
          */
@@ -8244,6 +8279,38 @@ public final class Settings {
                 "packages_to_clear_data_before_full_restore";
 
         /**
+         * Indicates the location state should be maintained after sensor privacy is disabled.
+         * @hide
+         */
+        public static final String MAINTAIN_LOCATION_AFTER_SP_DISABLED = "0";
+
+        /**
+         * Indicates location should be reenabled after sensor privacy is disabled.
+         * @hide
+         */
+        public static final String REENABLE_LOCATION_AFTER_SP_DISABLED = "1";
+
+        /**
+         * Indicates the state of airplane mode should be maintained after sensor privacy is
+         * disabled.
+         * @hide
+         */
+        public static final String MAINTAIN_AIRPLANE_MODE_AFTER_SP_DISABLED = "0";
+
+        /**
+         * Indicates airplane mode should be disabled after sensor privacy is disabled.
+         * @hide
+         */
+        public static final String DISABLE_AIRPLANE_MODE_AFTER_SP_DISABLED = "1";
+
+        /**
+         * The state of all sensors managed by SensorPrivacyService when sensor privacy is enabled.
+         * @hide
+         */
+        public static final String SENSOR_PRIVACY_SENSOR_STATE =
+                "sensor_privacy_sensor_state";
+
+        /**
          * Setting to determine whether to use the new notification priority handling features.
          * @hide
          */
@@ -8382,6 +8449,8 @@ public final class Settings {
             ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS,
             ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
             NOTIFICATION_NEW_INTERRUPTION_MODEL,
+            TRUST_AGENTS_EXTEND_UNLOCK,
+            LOCK_SCREEN_WHEN_TRUST_LOST,
         };
 
         /**
@@ -8543,6 +8612,8 @@ public final class Settings {
             VALIDATORS.put(USER_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_NEW_INTERRUPTION_MODEL, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(TRUST_AGENTS_EXTEND_UNLOCK, TRUST_AGENTS_EXTEND_UNLOCK_VALIDATOR);
+            VALIDATORS.put(LOCK_SCREEN_WHEN_TRUST_LOST, LOCK_SCREEN_WHEN_TRUST_LOST_VALIDATOR);
         }
 
         /**
@@ -13879,7 +13950,6 @@ public final class Settings {
          */
         public static final String LAST_ACTIVE_USER_ID = "last_active_persistent_user_id";
 
-
         /**
          * Whether we've enabled native flags health check on this device. Takes effect on
          * reboot. The value "1" enables native flags health check; otherwise it's disabled.
@@ -13887,7 +13957,6 @@ public final class Settings {
          */
         public static final String NATIVE_FLAGS_HEALTH_CHECK_ENABLED =
                 "native_flags_health_check_enabled";
-
     }
 
     /**

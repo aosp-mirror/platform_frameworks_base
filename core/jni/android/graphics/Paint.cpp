@@ -577,7 +577,7 @@ namespace PaintGlue {
         }
     }
 
-    static SkScalar getMetricsInternal(jlong paintHandle, Paint::FontMetrics *metrics) {
+    static SkScalar getMetricsInternal(jlong paintHandle, SkFontMetrics *metrics) {
         const int kElegantTop = 2500;
         const int kElegantBottom = -1000;
         const int kElegantAscent = 1900;
@@ -609,7 +609,7 @@ namespace PaintGlue {
     }
 
     static jfloat getFontMetrics(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         SkScalar spacing = getMetricsInternal(paintHandle, &metrics);
 
         if (metricsObj) {
@@ -624,7 +624,7 @@ namespace PaintGlue {
     }
 
     static jint getFontMetricsInt(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
 
         getMetricsInternal(paintHandle, &metrics);
         int ascent = SkScalarRoundToInt(metrics.fAscent);
@@ -845,12 +845,23 @@ namespace PaintGlue {
         static_assert(9 == static_cast<int>(SkBlendMode::kSrcATop), "xfermode_mismatch");
         static_assert(10 == static_cast<int>(SkBlendMode::kDstATop), "xfermode_mismatch");
         static_assert(11 == static_cast<int>(SkBlendMode::kXor), "xfermode_mismatch");
-        static_assert(16 == static_cast<int>(SkBlendMode::kDarken), "xfermode_mismatch");
-        static_assert(17 == static_cast<int>(SkBlendMode::kLighten), "xfermode_mismatch");
+        static_assert(12 == static_cast<int>(SkBlendMode::kPlus), "xfermode_mismatch");
         static_assert(13 == static_cast<int>(SkBlendMode::kModulate), "xfermode_mismatch");
         static_assert(14 == static_cast<int>(SkBlendMode::kScreen), "xfermode_mismatch");
-        static_assert(12 == static_cast<int>(SkBlendMode::kPlus), "xfermode_mismatch");
         static_assert(15 == static_cast<int>(SkBlendMode::kOverlay), "xfermode_mismatch");
+        static_assert(16 == static_cast<int>(SkBlendMode::kDarken), "xfermode_mismatch");
+        static_assert(17 == static_cast<int>(SkBlendMode::kLighten), "xfermode_mismatch");
+        static_assert(18 == static_cast<int>(SkBlendMode::kColorDodge), "xfermode mismatch");
+        static_assert(19 == static_cast<int>(SkBlendMode::kColorBurn), "xfermode mismatch");
+        static_assert(20 == static_cast<int>(SkBlendMode::kHardLight), "xfermode mismatch");
+        static_assert(21 == static_cast<int>(SkBlendMode::kSoftLight), "xfermode mismatch");
+        static_assert(22 == static_cast<int>(SkBlendMode::kDifference), "xfermode mismatch");
+        static_assert(23 == static_cast<int>(SkBlendMode::kExclusion), "xfermode mismatch");
+        static_assert(24 == static_cast<int>(SkBlendMode::kMultiply), "xfermode mismatch");
+        static_assert(25 == static_cast<int>(SkBlendMode::kHue), "xfermode mismatch");
+        static_assert(26 == static_cast<int>(SkBlendMode::kSaturation), "xfermode mismatch");
+        static_assert(27 == static_cast<int>(SkBlendMode::kColor), "xfermode mismatch");
+        static_assert(28 == static_cast<int>(SkBlendMode::kLuminosity), "xfermode mismatch");
 
         SkBlendMode mode = static_cast<SkBlendMode>(xfermodeHandle);
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
@@ -959,19 +970,19 @@ namespace PaintGlue {
     }
 
     static jfloat ascent(jlong paintHandle) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         return SkScalarToFloat(metrics.fAscent);
     }
 
     static jfloat descent(jlong paintHandle) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         return SkScalarToFloat(metrics.fDescent);
     }
 
     static jfloat getUnderlinePosition(jlong paintHandle) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         SkScalar position;
         if (metrics.hasUnderlinePosition(&position)) {
@@ -983,7 +994,7 @@ namespace PaintGlue {
     }
 
     static jfloat getUnderlineThickness(jlong paintHandle) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         SkScalar thickness;
         if (metrics.hasUnderlineThickness(&thickness)) {

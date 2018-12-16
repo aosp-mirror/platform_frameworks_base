@@ -69,6 +69,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_PROCESS_START_ASYNC = "process_start_async";
     static final String KEY_MEMORY_INFO_THROTTLE_TIME = "memory_info_throttle_time";
     static final String KEY_TOP_TO_FGS_GRACE_DURATION = "top_to_fgs_grace_duration";
+    static final String KEY_USE_COMPACTION = "use_compaction";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
@@ -99,6 +100,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final boolean DEFAULT_PROCESS_START_ASYNC = true;
     private static final long DEFAULT_MEMORY_INFO_THROTTLE_TIME = 5*60*1000;
     private static final long DEFAULT_TOP_TO_FGS_GRACE_DURATION = 15 * 1000;
+    private static final boolean DEFAULT_USE_COMPACTION = false;
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -217,6 +219,9 @@ final class ActivityManagerConstants extends ContentObserver {
     // Allow app just moving from TOP to FOREGROUND_SERVICE to stay in a higher adj value for
     // this long.
     public long TOP_TO_FGS_GRACE_DURATION = DEFAULT_TOP_TO_FGS_GRACE_DURATION;
+
+    // Use compaction for background apps.
+    public boolean USE_COMPACTION = DEFAULT_USE_COMPACTION;
 
     // Indicates whether the activity starts logging is enabled.
     // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
@@ -375,6 +380,7 @@ final class ActivityManagerConstants extends ContentObserver {
                     DEFAULT_MEMORY_INFO_THROTTLE_TIME);
             TOP_TO_FGS_GRACE_DURATION = mParser.getDurationMillis(KEY_TOP_TO_FGS_GRACE_DURATION,
                     DEFAULT_TOP_TO_FGS_GRACE_DURATION);
+            USE_COMPACTION = mParser.getBoolean(KEY_USE_COMPACTION, DEFAULT_USE_COMPACTION);
 
             updateMaxCachedProcesses();
         }
@@ -465,6 +471,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(MEMORY_INFO_THROTTLE_TIME);
         pw.print("  "); pw.print(KEY_TOP_TO_FGS_GRACE_DURATION); pw.print("=");
         pw.println(TOP_TO_FGS_GRACE_DURATION);
+        pw.print("  "); pw.print(KEY_USE_COMPACTION); pw.print("=");
+        pw.println(USE_COMPACTION);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {

@@ -86,6 +86,7 @@ import static android.os.Build.VERSION_CODES.O;
 import static android.os.Process.SYSTEM_UID;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
 
 import static com.android.server.am.ActivityRecordProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.ActivityRecordProto.FRONT_OF_TASK;
@@ -145,6 +146,7 @@ import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.ResultInfo;
+import android.app.WaitResult.LaunchState;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -582,6 +584,9 @@ final class ActivityRecord extends ConfigurationContainer {
             if (info.maxAspectRatio != 0) {
                 pw.println(prefix + "maxAspectRatio=" + info.maxAspectRatio);
             }
+            if (info.minAspectRatio != 0) {
+                pw.println(prefix + "minAspectRatio=" + info.minAspectRatio);
+            }
         }
     }
 
@@ -717,8 +722,12 @@ final class ActivityRecord extends ConfigurationContainer {
             // to forcing the update of the picture-in-picture mode as a part of the PiP animation.
             mLastReportedPictureInPictureMode = inPictureInPictureMode;
             mLastReportedMultiWindowMode = inPictureInPictureMode;
-            final Configuration newConfig = task.computeNewOverrideConfigurationForBounds(
-                    targetStackBounds, null);
+            final Configuration newConfig = new Configuration();
+            if (targetStackBounds != null && !targetStackBounds.isEmpty()) {
+                task.computeResolvedOverrideConfiguration(newConfig,
+                        task.getParent().getConfiguration(),
+                        task.getRequestedOverrideConfiguration());
+            }
             schedulePictureInPictureModeChanged(newConfig);
             scheduleMultiWindowModeChanged(newConfig);
         }
@@ -1087,6 +1096,12 @@ final class ActivityRecord extends ConfigurationContainer {
         }
         if (mAppWindowToken == null) {
             Slog.w(TAG_WM, "Attempted to set icon of non-existing app token: " + appToken);
+            return false;
+        }
+        if (mAppWindowToken.getTask() == null) {
+            // Can be removed after unification of Task and TaskRecord.
+            Slog.w(TAG_WM, "Attempted to start a window to an app token not having attached to any"
+                    + " task: " + appToken);
             return false;
         }
         return mAppWindowToken.addStartingWindow(pkg, theme, compatInfo, nonLocalizedLabel,
@@ -2006,10 +2021,7 @@ final class ActivityRecord extends ConfigurationContainer {
         stopped = false;
 
         if (isActivityTypeHome()) {
-            WindowProcessController app = task.mActivities.get(0).app;
-            if (hasProcess() && app != mAtmService.mHomeProcess) {
-                mAtmService.mHomeProcess = app;
-            }
+            mStackSupervisor.updateHomeProcess(task.mActivities.get(0).app);
         }
 
         if (nowVisible) {
@@ -2173,7 +2185,7 @@ final class ActivityRecord extends ConfigurationContainer {
                 .getActivityMetricsLogger().logAppTransitionReportedDrawn(this, restoredFromBundle);
         if (info != null) {
             mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
-                    info.windowsFullyDrawnDelayMs);
+                    info.windowsFullyDrawnDelayMs, info.getLaunchState());
         }
     }
 
@@ -2197,8 +2209,9 @@ final class ActivityRecord extends ConfigurationContainer {
             final WindowingModeTransitionInfoSnapshot info = mStackSupervisor
                     .getActivityMetricsLogger().notifyWindowsDrawn(getWindowingMode(), timestamp);
             final int windowsDrawnDelayMs = info != null ? info.windowsDrawnDelayMs : INVALID_DELAY;
+            final @LaunchState int launchState = info != null ? info.getLaunchState() : -1;
             mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
-                    windowsDrawnDelayMs);
+                    windowsDrawnDelayMs, launchState);
             mStackSupervisor.sendWaitingVisibleReportLocked(this);
             finishLaunchTickingLocked();
             if (task != null) {
@@ -2552,12 +2565,10 @@ final class ActivityRecord extends ConfigurationContainer {
 
         setBounds(mTmpBounds);
 
-        final Rect updatedBounds = getRequestedOverrideBounds();
-
         // Bounds changed...update configuration to match.
         if (!matchParentBounds()) {
-            task.computeOverrideConfiguration(mTmpConfig, updatedBounds,
-                    false /* overrideWidth */, false /* overrideHeight */);
+            task.computeResolvedOverrideConfiguration(mTmpConfig,
+                    task.getParent().getConfiguration(), getRequestedOverrideConfiguration());
         }
 
         onRequestedOverrideConfigurationChanged(mTmpConfig);
@@ -2586,7 +2597,10 @@ final class ActivityRecord extends ConfigurationContainer {
         outBounds.setEmpty();
         final float maxAspectRatio = info.maxAspectRatio;
         final ActivityStack stack = getActivityStack();
-        if (task == null || stack == null || task.inMultiWindowMode() || maxAspectRatio == 0
+        final float minAspectRatio = info.minAspectRatio;
+
+        if (task == null || stack == null || task.inMultiWindowMode()
+                || (maxAspectRatio == 0 && minAspectRatio == 0)
                 || isInVrUiMode(getConfiguration())) {
             // We don't set override configuration if that activity task isn't fullscreen. I.e. the
             // activity is in multi-window mode. Or, there isn't a max aspect ratio specified for
@@ -2601,20 +2615,35 @@ final class ActivityRecord extends ConfigurationContainer {
         final Rect appBounds = getParent().getWindowConfiguration().getAppBounds();
         final int containingAppWidth = appBounds.width();
         final int containingAppHeight = appBounds.height();
-        int maxActivityWidth = containingAppWidth;
-        int maxActivityHeight = containingAppHeight;
+        final float containingRatio = Math.max(containingAppWidth, containingAppHeight)
+                / (float) Math.min(containingAppWidth, containingAppHeight);
 
-        if (containingAppWidth < containingAppHeight) {
-            // Width is the shorter side, so we use that to figure-out what the max. height
-            // should be given the aspect ratio.
-            maxActivityHeight = (int) ((maxActivityWidth * maxAspectRatio) + 0.5f);
-        } else {
-            // Height is the shorter side, so we use that to figure-out what the max. width
-            // should be given the aspect ratio.
-            maxActivityWidth = (int) ((maxActivityHeight * maxAspectRatio) + 0.5f);
+        int activityWidth = containingAppWidth;
+        int activityHeight = containingAppHeight;
+
+        if (containingRatio > maxAspectRatio && maxAspectRatio != 0) {
+            if (containingAppWidth < containingAppHeight) {
+                // Width is the shorter side, so we use that to figure-out what the max. height
+                // should be given the aspect ratio.
+                activityHeight = (int) ((activityWidth * maxAspectRatio) + 0.5f);
+            } else {
+                // Height is the shorter side, so we use that to figure-out what the max. width
+                // should be given the aspect ratio.
+                activityWidth = (int) ((activityHeight * maxAspectRatio) + 0.5f);
+            }
+        } else if (containingRatio < minAspectRatio && minAspectRatio != 0) {
+            if (containingAppWidth < containingAppHeight) {
+                // Width is the shorter side, so we use the height to figure-out what the max. width
+                // should be given the aspect ratio.
+                activityWidth = (int) ((activityHeight / minAspectRatio) + 0.5f);
+            } else {
+                // Height is the shorter side, so we use the width to figure-out what the max.
+                // height should be given the aspect ratio.
+                activityHeight = (int) ((activityWidth / minAspectRatio) + 0.5f);
+            }
         }
 
-        if (containingAppWidth <= maxActivityWidth && containingAppHeight <= maxActivityHeight) {
+        if (containingAppWidth <= activityWidth && containingAppHeight <= activityHeight) {
             // The display matches or is less than the activity aspect ratio, so nothing else to do.
             // Return the existing bounds. If this method is running for the first time,
             // {@link #getRequestedOverrideBounds()} will be empty (representing no override). If
@@ -2629,12 +2658,21 @@ final class ActivityRecord extends ConfigurationContainer {
         // Also account for the left / top insets (e.g. from display cutouts), which will be clipped
         // away later in StackWindowController.adjustConfigurationForBounds(). Otherwise, the app
         // bounds would end up too small.
-        outBounds.set(0, 0, maxActivityWidth + appBounds.left, maxActivityHeight + appBounds.top);
+        outBounds.set(0, 0, activityWidth + appBounds.left, activityHeight + appBounds.top);
 
-        if (mAtmService.mWindowManager.getNavBarPosition(getDisplayId()) == NAV_BAR_LEFT) {
+        final int navBarPosition = mAtmService.mWindowManager.getNavBarPosition(getDisplayId());
+        if (navBarPosition == NAV_BAR_LEFT) {
             // Position the activity frame on the opposite side of the nav bar.
-            outBounds.left = appBounds.right - maxActivityWidth;
+            outBounds.left = appBounds.right - activityWidth;
             outBounds.right = appBounds.right;
+        } else if (navBarPosition == NAV_BAR_RIGHT) {
+            // Position the activity frame on the opposite side of the nav bar.
+            outBounds.left = 0;
+            outBounds.right = activityWidth + appBounds.left;
+        } else {
+            // Horizontally center the frame.
+            outBounds.left = appBounds.left + (containingAppWidth - activityWidth) / 2;
+            outBounds.right = outBounds.left + activityWidth;
         }
     }
 

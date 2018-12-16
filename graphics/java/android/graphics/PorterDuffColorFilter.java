@@ -23,7 +23,11 @@ import android.annotation.UnsupportedAppUsage;
 /**
  * A color filter that can be used to tint the source pixels using a single
  * color and a specific {@link PorterDuff Porter-Duff composite mode}.
+ *
+ * @deprecated Consider using {@link BlendModeColorFilter} instead as it supports a wider
+ * set of blend modes than those defined in {@link PorterDuff.Mode}
  */
+@Deprecated
 public class PorterDuffColorFilter extends ColorFilter {
     @ColorInt
     private int mColor;
@@ -71,7 +75,7 @@ public class PorterDuffColorFilter extends ColorFilter {
 
     @Override
     long createNativeInstance() {
-        return native_CreatePorterDuffFilter(mColor, mMode.nativeInt);
+        return native_CreateBlendModeFilter(mColor, mMode.nativeInt);
     }
 
     @Override
@@ -91,5 +95,5 @@ public class PorterDuffColorFilter extends ColorFilter {
         return 31 *  mMode.hashCode() + mColor;
     }
 
-    private static native long native_CreatePorterDuffFilter(int srcColor, int porterDuffMode);
+    private static native long native_CreateBlendModeFilter(int srcColor, int blendmode);
 }

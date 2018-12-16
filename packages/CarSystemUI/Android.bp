@@ -26,6 +26,7 @@ android_app {
     ],
 
     static_libs: [
+        "CarNotificationLib",
         "SystemUI-core",
         "SystemUIPluginLib",
         "SystemUISharedLib",

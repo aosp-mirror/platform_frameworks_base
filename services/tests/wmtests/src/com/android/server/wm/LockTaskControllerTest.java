@@ -560,19 +560,20 @@ public class LockTaskControllerTest {
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // THEN keyguard should be disabled
-        verify(mWindowManager).disableKeyguard(any(IBinder.class), anyString());
+        verify(mWindowManager).disableKeyguard(any(IBinder.class), anyString(), eq(TEST_USER_ID));
 
         // WHEN keyguard is enabled for lock task mode
         mLockTaskController.updateLockTaskFeatures(TEST_USER_ID, LOCK_TASK_FEATURE_KEYGUARD);
 
         // THEN keyguard should be enabled
-        verify(mWindowManager).reenableKeyguard(any(IBinder.class));
+        verify(mWindowManager).reenableKeyguard(any(IBinder.class), eq(TEST_USER_ID));
 
         // WHEN keyguard is disabled again for lock task mode
         mLockTaskController.updateLockTaskFeatures(TEST_USER_ID, LOCK_TASK_FEATURE_NONE);
 
         // THEN keyguard should be disabled
-        verify(mWindowManager, times(2)).disableKeyguard(any(IBinder.class), anyString());
+        verify(mWindowManager, times(2)).disableKeyguard(any(IBinder.class), anyString(),
+                eq(TEST_USER_ID));
     }
 
     @Test
@@ -653,7 +654,7 @@ public class LockTaskControllerTest {
 
     private void verifyLockTaskStarted(int statusBarMask, int statusBarMask2) throws Exception {
         // THEN the keyguard should have been disabled
-        verify(mWindowManager).disableKeyguard(any(IBinder.class), anyString());
+        verify(mWindowManager).disableKeyguard(any(IBinder.class), anyString(), eq(TEST_USER_ID));
         // THEN the status bar should have been disabled
         verify(mStatusBarService).disable(eq(statusBarMask), any(IBinder.class),
                 eq(mContext.getPackageName()));
@@ -668,7 +669,7 @@ public class LockTaskControllerTest {
 
     private void verifyLockTaskStopped(VerificationMode mode) throws Exception {
         // THEN the keyguard should have been disabled
-        verify(mWindowManager, mode).reenableKeyguard(any(IBinder.class));
+        verify(mWindowManager, mode).reenableKeyguard(any(IBinder.class), eq(TEST_USER_ID));
         // THEN the status bar should have been disabled
         verify(mStatusBarService, mode).disable(eq(StatusBarManager.DISABLE_NONE),
                 any(IBinder.class), eq(mContext.getPackageName()));

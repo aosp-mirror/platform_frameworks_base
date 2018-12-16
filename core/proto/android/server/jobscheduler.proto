@@ -220,6 +220,13 @@ message ConstantsProto {
     // will use heartbeats, false will use a rolling window.
     optional bool use_heartbeats = 23;
 
+    message TimeController {
+        // Whether or not TimeController should skip setting wakeup alarms for jobs that aren't
+        // ready now.
+        optional bool skip_not_ready_jobs = 1;
+    }
+    optional TimeController time_controller = 25;
+
     message QuotaController {
         // How much time each app will have to run jobs within their standby bucket window.
         optional int64 allowed_time_per_period_ms = 1;
@@ -242,8 +249,12 @@ message ConstantsProto {
         // expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
         // WINDOW_SIZE_MS.
         optional int64 rare_window_size_ms = 6;
+        // The maximum amount of time an app can have its jobs running within a 24 hour window.
+        optional int64 max_execution_time_ms = 7;
     }
     optional QuotaController quota_controller = 24;
+
+    // Next tag: 26
 }
 
 message StateControllerProto {
@@ -417,7 +428,8 @@ message StateControllerProto {
 
             optional int64 start_time_elapsed = 1;
             optional int64 end_time_elapsed = 2;
-            optional int32 job_count = 3;
+            // The number of background jobs that ran during this session.
+            optional int32 bg_job_count = 3;
         }
 
         message Timer {
@@ -428,8 +440,9 @@ message StateControllerProto {
             optional bool is_active = 2;
             // The time this timer last became active. Only valid if is_active is true.
             optional int64 start_time_elapsed = 3;
-            // How many are currently running. Valid only if the device is_active is true.
-            optional int32 job_count = 4;
+            // How many background jobs are currently running. Valid only if the device is_active
+            // is true.
+            optional int32 bg_job_count = 4;
             // All of the jobs that the Timer is currently tracking.
             repeated JobStatusShortInfoProto running_jobs = 5;
         }

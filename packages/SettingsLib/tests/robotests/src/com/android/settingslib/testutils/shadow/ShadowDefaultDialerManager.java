@@ -34,7 +34,7 @@ public class ShadowDefaultDialerManager {
     }
 
     @Implementation
-    public static String getDefaultDialerApplication(Context context) {
+    protected static String getDefaultDialerApplication(Context context) {
         return sDefaultDialer;
     }
 

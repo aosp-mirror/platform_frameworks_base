@@ -437,7 +437,7 @@ public class NotificationViewHierarchyManager {
             }
 
             row.showAppOpsIcons(entry.mActiveAppOps);
-            row.setAudiblyAlerted(entry.audiblyAlerted);
+            row.setLastAudiblyAlertedMs(entry.lastAudiblyAlertedMs);
         }
 
         Trace.beginSection("NotificationPresenter#onUpdateRowStates");

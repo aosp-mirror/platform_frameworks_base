@@ -21,11 +21,8 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.UserManager;
 
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.annotation.Resetter;
-import org.robolectric.shadow.api.Shadow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,5 +53,4 @@ public class ShadowUserManager extends org.robolectric.shadows.ShadowUserManager
     protected List<UserInfo> getProfiles(@UserIdInt int userHandle) {
         return getProfiles();
     }
-
 }

@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
+
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
@@ -27,7 +28,6 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_N
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.AppOpsManager;
 import android.app.ApplicationErrorReport;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
@@ -834,15 +834,6 @@ class AppErrors {
                         AppNotRespondingDialog.ALREADY_SHOWING);
                 return;
             }
-
-            Intent intent = new Intent("android.intent.action.ANR");
-            if (!mService.mProcessesReady) {
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                        | Intent.FLAG_RECEIVER_FOREGROUND);
-            }
-            mService.broadcastIntentLocked(null, null, intent,
-                    null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                    null, false, false, MY_PID, Process.SYSTEM_UID, 0 /* TODO: Verify */);
 
             boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;

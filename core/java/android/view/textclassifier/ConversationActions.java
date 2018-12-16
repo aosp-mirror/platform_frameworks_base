@@ -139,17 +139,21 @@ public final class ConversationActions implements Parcelable {
      */
     public static final String HINT_FOR_NOTIFICATION = "notification";
 
-    private List<ConversationAction> mConversationActions;
+    private final List<ConversationAction> mConversationActions;
+    private final String mId;
 
     /** Constructs a {@link ConversationActions} object. */
-    public ConversationActions(@NonNull List<ConversationAction> conversationActions) {
+    public ConversationActions(
+            @NonNull List<ConversationAction> conversationActions, @Nullable String id) {
         mConversationActions =
                 Collections.unmodifiableList(Preconditions.checkNotNull(conversationActions));
+        mId = id;
     }
 
     private ConversationActions(Parcel in) {
         mConversationActions =
                 Collections.unmodifiableList(in.createTypedArrayList(ConversationAction.CREATOR));
+        mId = in.readString();
     }
 
     @Override
@@ -160,12 +164,24 @@ public final class ConversationActions implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeTypedList(mConversationActions);
+        parcel.writeString(mId);
     }
 
-    /** Returns an immutable list of {@link ConversationAction} objects. */
+    /**
+     * Returns an immutable list of {@link ConversationAction} objects, which are ordered from high
+     * confidence to low confidence.
+     */
     @NonNull
     public List<ConversationAction> getConversationActions() {
         return mConversationActions;
+    }
+
+    /**
+     * Returns the id, if one exists, for this object.
+     */
+    @Nullable
+    public String getId() {
+        return mId;
     }
 
     /** Represents the action suggested by a {@link TextClassifier} on a given conversation. */
@@ -678,35 +694,37 @@ public final class ConversationActions implements Parcelable {
         private final List<String> mHints;
         @Nullable
         private String mCallingPackageName;
+        @Nullable
+        private final String mConversationId;
 
         private Request(
                 @NonNull List<Message> conversation,
                 @NonNull TypeConfig typeConfig,
                 int maxSuggestions,
+                String conversationId,
                 @Nullable @Hint List<String> hints) {
             mConversation = Preconditions.checkNotNull(conversation);
             mTypeConfig = Preconditions.checkNotNull(typeConfig);
             mMaxSuggestions = maxSuggestions;
+            mConversationId = conversationId;
             mHints = hints;
         }
 
         private static Request readFromParcel(Parcel in) {
             List<Message> conversation = new ArrayList<>();
             in.readParcelableList(conversation, null);
-
             TypeConfig typeConfig = in.readParcelable(null);
-
             int maxSuggestions = in.readInt();
-
+            String conversationId = in.readString();
             List<String> hints = new ArrayList<>();
             in.readStringList(hints);
-
             String callingPackageName = in.readString();
 
             Request request = new Request(
                     conversation,
                     typeConfig,
                     maxSuggestions,
+                    conversationId,
                     hints);
             request.setCallingPackageName(callingPackageName);
             return request;
@@ -717,6 +735,7 @@ public final class ConversationActions implements Parcelable {
             parcel.writeParcelableList(mConversation, flags);
             parcel.writeParcelable(mTypeConfig, flags);
             parcel.writeInt(mMaxSuggestions);
+            parcel.writeString(mConversationId);
             parcel.writeStringList(mHints);
             parcel.writeString(mCallingPackageName);
         }
@@ -759,6 +778,16 @@ public final class ConversationActions implements Parcelable {
             return mMaxSuggestions;
         }
 
+        /**
+         * Return an unique identifier of the conversation that is generating actions for. This
+         * identifier is unique within the calling package only, so use it with
+         * {@link #getCallingPackageName()}.
+         */
+        @Nullable
+        public String getConversationId() {
+            return mConversationId;
+        }
+
         /** Returns an immutable list of hints */
         @Nullable
         @Hint
@@ -794,6 +823,8 @@ public final class ConversationActions implements Parcelable {
             private TypeConfig mTypeConfig;
             private int mMaxSuggestions;
             @Nullable
+            private String mConversationId;
+            @Nullable
             @Hint
             private List<String> mHints;
 
@@ -823,13 +854,23 @@ public final class ConversationActions implements Parcelable {
                 return this;
             }
 
-            /** Sets the maximum number of suggestions you want.
+            /**
+             * Sets the maximum number of suggestions you want.
              * <p>
              * Value 0 means no restriction.
              */
             @NonNull
             public Builder setMaxSuggestions(@IntRange(from = 0) int maxSuggestions) {
                 mMaxSuggestions = Preconditions.checkArgumentNonnegative(maxSuggestions);
+                return this;
+            }
+
+            /**
+             * Sets an unique identifier of the conversation that is generating actions for.
+             */
+            @NonNull
+            public Builder setConversationId(@Nullable String conversationId) {
+                mConversationId = conversationId;
                 return this;
             }
 
@@ -840,6 +881,7 @@ public final class ConversationActions implements Parcelable {
                         Collections.unmodifiableList(mConversation),
                         mTypeConfig == null ? new TypeConfig.Builder().build() : mTypeConfig,
                         mMaxSuggestions,
+                        mConversationId,
                         mHints == null
                                 ? Collections.emptyList()
                                 : Collections.unmodifiableList(mHints));

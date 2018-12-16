@@ -46,6 +46,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.format.DateUtils;
+import android.util.Log;
 import com.android.frameworks.tests.net.R;
 import com.android.internal.util.HexDump;
 import java.io.File;
@@ -89,6 +90,7 @@ public class ApfTest {
         System.loadLibrary("frameworksnettestsjni");
     }
 
+    private static final String TAG = "ApfTest";
     // Expected return codes from APF interpreter.
     private static final int PASS = 1;
     private static final int DROP = 0;
@@ -869,6 +871,37 @@ public class ApfTest {
         }
     }
 
+    /**
+     * Generate APF program, run pcap file though APF filter, then check all the packets in the file
+     * should be dropped.
+     */
+    @Test
+    public void testApfFilterPcapFile() throws Exception {
+        final byte[] MOCK_PCAP_IPV4_ADDR = {(byte) 172, 16, 7, (byte) 151};
+        String pcapFilename = stageFile(R.raw.apfPcap);
+        MockIpClientCallback ipClientCallback = new MockIpClientCallback();
+        LinkAddress link = new LinkAddress(InetAddress.getByAddress(MOCK_PCAP_IPV4_ADDR), 16);
+        LinkProperties lp = new LinkProperties();
+        lp.addLinkAddress(link);
+
+        ApfConfiguration config = getDefaultConfig();
+        ApfCapabilities MOCK_APF_PCAP_CAPABILITIES = new ApfCapabilities(4, 1700, ARPHRD_ETHER);
+        config.apfCapabilities = MOCK_APF_PCAP_CAPABILITIES;
+        config.multicastFilter = DROP_MULTICAST;
+        config.ieee802_3Filter = DROP_802_3_FRAMES;
+        TestApfFilter apfFilter = new TestApfFilter(mContext, config, ipClientCallback, mLog);
+        apfFilter.setLinkProperties(lp);
+        byte[] program = ipClientCallback.getApfProgram();
+        byte[] data = new byte[ApfFilter.Counter.totalSize()];
+        final boolean result;
+
+        result = dropsAllPackets(program, data, pcapFilename);
+        Log.i(TAG, "testApfFilterPcapFile(): Data counters: " + HexDump.toHexString(data, false));
+
+        assertTrue("Failed to drop all packets by filter. \nAPF counters:" +
+            HexDump.toHexString(data, false), result);
+    }
+
     private class MockIpClientCallback extends IpClient.Callback {
         private final ConditionVariable mGotApfProgram = new ConditionVariable();
         private byte[] mLastApfProgram;
@@ -1015,12 +1048,17 @@ public class ApfTest {
             4,    // Protocol size: 4
             0, 2  // Opcode: reply (2)
     };
-    private static final int ARP_TARGET_IP_ADDRESS_OFFSET = ETH_HEADER_LEN + 24;
+    private static final int ARP_SOURCE_IP_ADDRESS_OFFSET = ARP_HEADER_OFFSET + 14;
+    private static final int ARP_TARGET_IP_ADDRESS_OFFSET = ARP_HEADER_OFFSET + 24;
 
     private static final byte[] MOCK_IPV4_ADDR           = {10, 0, 0, 1};
     private static final byte[] MOCK_BROADCAST_IPV4_ADDR = {10, 0, 31, (byte) 255}; // prefix = 19
     private static final byte[] MOCK_MULTICAST_IPV4_ADDR = {(byte) 224, 0, 0, 1};
     private static final byte[] ANOTHER_IPV4_ADDR        = {10, 0, 0, 2};
+    private static final byte[] IPV4_SOURCE_ADDR         = {10, 0, 0, 3};
+    private static final byte[] ANOTHER_IPV4_SOURCE_ADDR = {(byte) 192, 0, 2, 1};
+    private static final byte[] BUG_PROBE_SOURCE_ADDR1   = {0, 0, 1, 2};
+    private static final byte[] BUG_PROBE_SOURCE_ADDR2   = {3, 4, 0, 0};
     private static final byte[] IPV4_ANY_HOST_ADDR       = {0, 0, 0, 0};
 
     // Helper to initialize a default apfFilter.
@@ -1366,10 +1404,16 @@ public class ApfTest {
         assertVerdict(filterResult, program, arpRequestBroadcast(ANOTHER_IPV4_ADDR));
         assertDrop(program, arpRequestBroadcast(IPV4_ANY_HOST_ADDR));
 
+        // Verify ARP reply packets from different source ip
+        assertDrop(program, arpReply(IPV4_ANY_HOST_ADDR, IPV4_ANY_HOST_ADDR));
+        assertPass(program, arpReply(ANOTHER_IPV4_SOURCE_ADDR, IPV4_ANY_HOST_ADDR));
+        assertPass(program, arpReply(BUG_PROBE_SOURCE_ADDR1, IPV4_ANY_HOST_ADDR));
+        assertPass(program, arpReply(BUG_PROBE_SOURCE_ADDR2, IPV4_ANY_HOST_ADDR));
+
         // Verify unicast ARP reply packet is always accepted.
-        assertPass(program, arpReplyUnicast(MOCK_IPV4_ADDR));
-        assertPass(program, arpReplyUnicast(ANOTHER_IPV4_ADDR));
-        assertPass(program, arpReplyUnicast(IPV4_ANY_HOST_ADDR));
+        assertPass(program, arpReply(IPV4_SOURCE_ADDR, MOCK_IPV4_ADDR));
+        assertPass(program, arpReply(IPV4_SOURCE_ADDR, ANOTHER_IPV4_ADDR));
+        assertPass(program, arpReply(IPV4_SOURCE_ADDR, IPV4_ANY_HOST_ADDR));
 
         // Verify GARP reply packets are always filtered
         assertDrop(program, garpReply());
@@ -1398,19 +1442,20 @@ public class ApfTest {
         apfFilter.shutdown();
     }
 
-    private static byte[] arpRequestBroadcast(byte[] tip) {
+    private static byte[] arpReply(byte[] sip, byte[] tip) {
         ByteBuffer packet = ByteBuffer.wrap(new byte[100]);
         packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_ARP);
-        put(packet, ETH_DEST_ADDR_OFFSET, ETH_BROADCAST_MAC_ADDRESS);
         put(packet, ARP_HEADER_OFFSET, ARP_IPV4_REPLY_HEADER);
+        put(packet, ARP_SOURCE_IP_ADDRESS_OFFSET, sip);
         put(packet, ARP_TARGET_IP_ADDRESS_OFFSET, tip);
         return packet.array();
     }
 
-    private static byte[] arpReplyUnicast(byte[] tip) {
+    private static byte[] arpRequestBroadcast(byte[] tip) {
         ByteBuffer packet = ByteBuffer.wrap(new byte[100]);
         packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_ARP);
-        put(packet, ARP_HEADER_OFFSET, ARP_IPV4_REPLY_HEADER);
+        put(packet, ETH_DEST_ADDR_OFFSET, ETH_BROADCAST_MAC_ADDRESS);
+        put(packet, ARP_HEADER_OFFSET, ARP_IPV4_REQUEST_HEADER);
         put(packet, ARP_TARGET_IP_ADDRESS_OFFSET, tip);
         return packet.array();
     }
@@ -1705,6 +1750,14 @@ public class ApfTest {
      */
     private native static boolean compareBpfApf(String filter, String pcap_filename,
             byte[] apf_program);
+
+
+    /**
+     * Open packet capture file {@code pcapFilename} and run it through APF filter. Then
+     * checks whether all the packets are dropped and populates data[] {@code data} with
+     * the APF counters.
+     */
+    private native static boolean dropsAllPackets(byte[] program, byte[] data, String pcapFilename);
 
     @Test
     public void testBroadcastAddress() throws Exception {

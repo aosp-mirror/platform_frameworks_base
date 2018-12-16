@@ -67,6 +67,7 @@ public class SystemConfig {
     private static final int ALLOW_PRIVAPP_PERMISSIONS = 0x10;
     private static final int ALLOW_OEM_PERMISSIONS = 0x20;
     private static final int ALLOW_HIDDENAPI_WHITELISTING = 0x40;
+    private static final int ALLOW_ASSOCIATIONS = 0x80;
     private static final int ALLOW_ALL = ~0;
 
     // property for runtime configuration differentiation
@@ -195,6 +196,12 @@ public class SystemConfig {
 
     final ArrayMap<String, ArrayMap<String, Boolean>> mOemPermissions = new ArrayMap<>();
 
+    // Allowed associations between applications.  If there are any entries
+    // for an app, those are the only associations allowed; otherwise, all associations
+    // are allowed.  Allowing an association from app A to app B means app A can not
+    // associate with any other apps, but does not limit what apps B can associate with.
+    final ArrayMap<String, ArraySet<String>> mAllowedAssociations = new ArrayMap<>();
+
     public static SystemConfig getInstance() {
         synchronized (SystemConfig.class) {
             if (sInstance == null) {
@@ -320,6 +327,10 @@ public class SystemConfig {
         return Collections.emptyMap();
     }
 
+    public ArrayMap<String, ArraySet<String>> getAllowedAssociations() {
+        return mAllowedAssociations;
+    }
+
     SystemConfig() {
         // Read configuration from system
         readPermissions(Environment.buildPath(
@@ -329,8 +340,9 @@ public class SystemConfig {
         readPermissions(Environment.buildPath(
                 Environment.getRootDirectory(), "etc", "permissions"), ALLOW_ALL);
 
-        // Vendors are only allowed to customze libs, features and privapp permissions
-        int vendorPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS;
+        // Vendors are only allowed to customize these
+        int vendorPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS
+                | ALLOW_ASSOCIATIONS;
         if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.O_MR1) {
             // For backward compatibility
             vendorPermissionFlag |= (ALLOW_PERMISSIONS | ALLOW_APP_CONFIGS);
@@ -359,8 +371,8 @@ public class SystemConfig {
                     odmPermissionFlag);
         }
 
-        // Allow OEM to customize features and OEM permissions
-        int oemPermissionFlag = ALLOW_FEATURES | ALLOW_OEM_PERMISSIONS;
+        // Allow OEM to customize these
+        int oemPermissionFlag = ALLOW_FEATURES | ALLOW_OEM_PERMISSIONS | ALLOW_ASSOCIATIONS;
         readPermissions(Environment.buildPath(
                 Environment.getOemDirectory(), "etc", "sysconfig"), oemPermissionFlag);
         readPermissions(Environment.buildPath(
@@ -423,6 +435,11 @@ public class SystemConfig {
         }
     }
 
+    private void logNotAllowedInPartition(String name, File permFile, XmlPullParser parser) {
+        Slog.w(TAG, "<" + name + "> not allowed in partition of "
+                + permFile + " at " + parser.getPositionDescription());
+    }
+
     private void readPermissionsFromXml(File permFile, int permissionFlag) {
         FileReader permReader = null;
         try {
@@ -453,14 +470,17 @@ public class SystemConfig {
                         + ": found " + parser.getName() + ", expected 'permissions' or 'config'");
             }
 
-            boolean allowAll = permissionFlag == ALLOW_ALL;
-            boolean allowLibs = (permissionFlag & ALLOW_LIBS) != 0;
-            boolean allowFeatures = (permissionFlag & ALLOW_FEATURES) != 0;
-            boolean allowPermissions = (permissionFlag & ALLOW_PERMISSIONS) != 0;
-            boolean allowAppConfigs = (permissionFlag & ALLOW_APP_CONFIGS) != 0;
-            boolean allowPrivappPermissions = (permissionFlag & ALLOW_PRIVAPP_PERMISSIONS) != 0;
-            boolean allowOemPermissions = (permissionFlag & ALLOW_OEM_PERMISSIONS) != 0;
-            boolean allowApiWhitelisting = (permissionFlag & ALLOW_HIDDENAPI_WHITELISTING) != 0;
+            final boolean allowAll = permissionFlag == ALLOW_ALL;
+            final boolean allowLibs = (permissionFlag & ALLOW_LIBS) != 0;
+            final boolean allowFeatures = (permissionFlag & ALLOW_FEATURES) != 0;
+            final boolean allowPermissions = (permissionFlag & ALLOW_PERMISSIONS) != 0;
+            final boolean allowAppConfigs = (permissionFlag & ALLOW_APP_CONFIGS) != 0;
+            final boolean allowPrivappPermissions = (permissionFlag & ALLOW_PRIVAPP_PERMISSIONS)
+                    != 0;
+            final boolean allowOemPermissions = (permissionFlag & ALLOW_OEM_PERMISSIONS) != 0;
+            final boolean allowApiWhitelisting = (permissionFlag & ALLOW_HIDDENAPI_WHITELISTING)
+                    != 0;
+            final boolean allowAssociations = (permissionFlag & ALLOW_ASSOCIATIONS) != 0;
             while (true) {
                 XmlUtils.nextElement(parser);
                 if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
@@ -468,297 +488,425 @@ public class SystemConfig {
                 }
 
                 String name = parser.getName();
-                if ("group".equals(name) && allowAll) {
-                    String gidStr = parser.getAttributeValue(null, "gid");
-                    if (gidStr != null) {
-                        int gid = android.os.Process.getGidForName(gidStr);
-                        mGlobalGids = appendInt(mGlobalGids, gid);
-                    } else {
-                        Slog.w(TAG, "<group> without gid in " + permFile + " at "
-                                + parser.getPositionDescription());
-                    }
-
+                if (name == null) {
                     XmlUtils.skipCurrentTag(parser);
                     continue;
-                } else if ("permission".equals(name) && allowPermissions) {
-                    String perm = parser.getAttributeValue(null, "name");
-                    if (perm == null) {
-                        Slog.w(TAG, "<permission> without name in " + permFile + " at "
-                                + parser.getPositionDescription());
-                        XmlUtils.skipCurrentTag(parser);
-                        continue;
-                    }
-                    perm = perm.intern();
-                    readPermission(parser, perm);
-
-                } else if ("assign-permission".equals(name) && allowPermissions) {
-                    String perm = parser.getAttributeValue(null, "name");
-                    if (perm == null) {
-                        Slog.w(TAG, "<assign-permission> without name in " + permFile + " at "
-                                + parser.getPositionDescription());
-                        XmlUtils.skipCurrentTag(parser);
-                        continue;
-                    }
-                    String uidStr = parser.getAttributeValue(null, "uid");
-                    if (uidStr == null) {
-                        Slog.w(TAG, "<assign-permission> without uid in " + permFile + " at "
-                                + parser.getPositionDescription());
-                        XmlUtils.skipCurrentTag(parser);
-                        continue;
-                    }
-                    int uid = Process.getUidForName(uidStr);
-                    if (uid < 0) {
-                        Slog.w(TAG, "<assign-permission> with unknown uid \""
-                                + uidStr + "  in " + permFile + " at "
-                                + parser.getPositionDescription());
-                        XmlUtils.skipCurrentTag(parser);
-                        continue;
-                    }
-                    perm = perm.intern();
-                    ArraySet<String> perms = mSystemPermissions.get(uid);
-                    if (perms == null) {
-                        perms = new ArraySet<String>();
-                        mSystemPermissions.put(uid, perms);
-                    }
-                    perms.add(perm);
-                    XmlUtils.skipCurrentTag(parser);
-
-                } else if ("split-permission".equals(name) && allowPermissions) {
-                    readSplitPermission(parser, permFile);
-                } else if ("library".equals(name) && allowLibs) {
-                    String lname = parser.getAttributeValue(null, "name");
-                    String lfile = parser.getAttributeValue(null, "file");
-                    String ldependency = parser.getAttributeValue(null, "dependency");
-                    if (lname == null) {
-                        Slog.w(TAG, "<library> without name in " + permFile + " at "
-                                + parser.getPositionDescription());
-                    } else if (lfile == null) {
-                        Slog.w(TAG, "<library> without file in " + permFile + " at "
-                                + parser.getPositionDescription());
-                    } else {
-                        //Log.i(TAG, "Got library " + lname + " in " + lfile);
-                        SharedLibraryEntry entry = new SharedLibraryEntry(lname, lfile,
-                                ldependency == null ? new String[0] : ldependency.split(":"));
-                        mSharedLibraries.put(lname, entry);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-                } else if ("feature".equals(name) && allowFeatures) {
-                    String fname = parser.getAttributeValue(null, "name");
-                    int fversion = XmlUtils.readIntAttribute(parser, "version", 0);
-                    boolean allowed;
-                    if (!lowRam) {
-                        allowed = true;
-                    } else {
-                        String notLowRam = parser.getAttributeValue(null, "notLowRam");
-                        allowed = !"true".equals(notLowRam);
-                    }
-                    if (fname == null) {
-                        Slog.w(TAG, "<feature> without name in " + permFile + " at "
-                                + parser.getPositionDescription());
-                    } else if (allowed) {
-                        addFeature(fname, fversion);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-
-                } else if ("unavailable-feature".equals(name) && allowFeatures) {
-                    String fname = parser.getAttributeValue(null, "name");
-                    if (fname == null) {
-                        Slog.w(TAG, "<unavailable-feature> without name in " + permFile + " at "
-                                + parser.getPositionDescription());
-                    } else {
-                        mUnavailableFeatures.add(fname);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-
-                } else if ("allow-in-power-save-except-idle".equals(name) && allowAll) {
-                    String pkgname = parser.getAttributeValue(null, "package");
-                    if (pkgname == null) {
-                        Slog.w(TAG, "<allow-in-power-save-except-idle> without package in "
-                                + permFile + " at " + parser.getPositionDescription());
-                    } else {
-                        mAllowInPowerSaveExceptIdle.add(pkgname);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-
-                } else if ("allow-in-power-save".equals(name) && allowAll) {
-                    String pkgname = parser.getAttributeValue(null, "package");
-                    if (pkgname == null) {
-                        Slog.w(TAG, "<allow-in-power-save> without package in " + permFile + " at "
-                                + parser.getPositionDescription());
-                    } else {
-                        mAllowInPowerSave.add(pkgname);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-
-                } else if ("allow-in-data-usage-save".equals(name) && allowAll) {
-                    String pkgname = parser.getAttributeValue(null, "package");
-                    if (pkgname == null) {
-                        Slog.w(TAG, "<allow-in-data-usage-save> without package in " + permFile
-                                + " at " + parser.getPositionDescription());
-                    } else {
-                        mAllowInDataUsageSave.add(pkgname);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-
-                } else if ("allow-unthrottled-location".equals(name) && allowAll) {
-                    String pkgname = parser.getAttributeValue(null, "package");
-                    if (pkgname == null) {
-                        Slog.w(TAG, "<allow-unthrottled-location> without package in "
-                            + permFile + " at " + parser.getPositionDescription());
-                    } else {
-                        mAllowUnthrottledLocation.add(pkgname);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-
-                } else if ("allow-implicit-broadcast".equals(name) && allowAll) {
-                    String action = parser.getAttributeValue(null, "action");
-                    if (action == null) {
-                        Slog.w(TAG, "<allow-implicit-broadcast> without action in " + permFile
-                                + " at " + parser.getPositionDescription());
-                    } else {
-                        mAllowImplicitBroadcasts.add(action);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-
-                } else if ("app-link".equals(name) && allowAppConfigs) {
-                    String pkgname = parser.getAttributeValue(null, "package");
-                    if (pkgname == null) {
-                        Slog.w(TAG, "<app-link> without package in " + permFile + " at "
-                                + parser.getPositionDescription());
-                    } else {
-                        mLinkedApps.add(pkgname);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                } else if ("system-user-whitelisted-app".equals(name) && allowAppConfigs) {
-                    String pkgname = parser.getAttributeValue(null, "package");
-                    if (pkgname == null) {
-                        Slog.w(TAG, "<system-user-whitelisted-app> without package in " + permFile
-                                + " at " + parser.getPositionDescription());
-                    } else {
-                        mSystemUserWhitelistedApps.add(pkgname);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                } else if ("system-user-blacklisted-app".equals(name) && allowAppConfigs) {
-                    String pkgname = parser.getAttributeValue(null, "package");
-                    if (pkgname == null) {
-                        Slog.w(TAG, "<system-user-blacklisted-app without package in " + permFile
-                                + " at " + parser.getPositionDescription());
-                    } else {
-                        mSystemUserBlacklistedApps.add(pkgname);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                } else if ("default-enabled-vr-app".equals(name) && allowAppConfigs) {
-                    String pkgname = parser.getAttributeValue(null, "package");
-                    String clsname = parser.getAttributeValue(null, "class");
-                    if (pkgname == null) {
-                        Slog.w(TAG, "<default-enabled-vr-app without package in " + permFile
-                                + " at " + parser.getPositionDescription());
-                    } else if (clsname == null) {
-                        Slog.w(TAG, "<default-enabled-vr-app without class in " + permFile
-                                + " at " + parser.getPositionDescription());
-                    } else {
-                        mDefaultVrComponents.add(new ComponentName(pkgname, clsname));
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                } else if ("backup-transport-whitelisted-service".equals(name) && allowFeatures) {
-                    String serviceName = parser.getAttributeValue(null, "service");
-                    if (serviceName == null) {
-                        Slog.w(TAG, "<backup-transport-whitelisted-service> without service in "
-                                + permFile + " at " + parser.getPositionDescription());
-                    } else {
-                        ComponentName cn = ComponentName.unflattenFromString(serviceName);
-                        if (cn == null) {
-                            Slog.w(TAG,
-                                    "<backup-transport-whitelisted-service> with invalid service name "
-                                    + serviceName + " in "+ permFile
-                                    + " at " + parser.getPositionDescription());
-                        } else {
-                            mBackupTransportWhitelist.add(cn);
-                        }
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                } else if ("disabled-until-used-preinstalled-carrier-associated-app".equals(name)
-                        && allowAppConfigs) {
-                    String pkgname = parser.getAttributeValue(null, "package");
-                    String carrierPkgname = parser.getAttributeValue(null, "carrierAppPackage");
-                    if (pkgname == null || carrierPkgname == null) {
-                        Slog.w(TAG, "<disabled-until-used-preinstalled-carrier-associated-app"
-                                + " without package or carrierAppPackage in " + permFile + " at "
-                                + parser.getPositionDescription());
-                    } else {
-                        List<String> associatedPkgs =
-                                mDisabledUntilUsedPreinstalledCarrierAssociatedApps.get(
-                                        carrierPkgname);
-                        if (associatedPkgs == null) {
-                            associatedPkgs = new ArrayList<>();
-                            mDisabledUntilUsedPreinstalledCarrierAssociatedApps.put(
-                                    carrierPkgname, associatedPkgs);
-                        }
-                        associatedPkgs.add(pkgname);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                } else if ("disabled-until-used-preinstalled-carrier-app".equals(name)
-                        && allowAppConfigs) {
-                    String pkgname = parser.getAttributeValue(null, "package");
-                    if (pkgname == null) {
-                        Slog.w(TAG,
-                                "<disabled-until-used-preinstalled-carrier-app> without "
-                                        + "package in " + permFile + " at "
+                }
+                switch (name) {
+                    case "group": {
+                        if (allowAll) {
+                            String gidStr = parser.getAttributeValue(null, "gid");
+                            if (gidStr != null) {
+                                int gid = android.os.Process.getGidForName(gidStr);
+                                mGlobalGids = appendInt(mGlobalGids, gid);
+                            } else {
+                                Slog.w(TAG, "<" + name + "> without gid in " + permFile + " at "
                                         + parser.getPositionDescription());
-                    } else {
-                        mDisabledUntilUsedPreinstalledCarrierApps.add(pkgname);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                } else if ("privapp-permissions".equals(name) && allowPrivappPermissions) {
-                    // privapp permissions from system, vendor, product and product_services
-                    // partitions are stored separately. This is to prevent xml files in the vendor
-                    // partition from granting permissions to priv apps in the system partition and
-                    // vice versa.
-                    boolean vendor = permFile.toPath().startsWith(
-                            Environment.getVendorDirectory().toPath() + "/")
-                            || permFile.toPath().startsWith(
-                                Environment.getOdmDirectory().toPath() + "/");
-                    boolean product = permFile.toPath().startsWith(
-                            Environment.getProductDirectory().toPath() + "/");
-                    boolean productServices = permFile.toPath().startsWith(
-                            Environment.getProductServicesDirectory().toPath() + "/");
-                    if (vendor) {
-                        readPrivAppPermissions(parser, mVendorPrivAppPermissions,
-                                mVendorPrivAppDenyPermissions);
-                    } else if (product) {
-                        readPrivAppPermissions(parser, mProductPrivAppPermissions,
-                                mProductPrivAppDenyPermissions);
-                    } else if (productServices) {
-                        readPrivAppPermissions(parser, mProductServicesPrivAppPermissions,
-                                mProductServicesPrivAppDenyPermissions);
-                    } else {
-                        readPrivAppPermissions(parser, mPrivAppPermissions,
-                                mPrivAppDenyPermissions);
-                    }
-                } else if ("oem-permissions".equals(name) && allowOemPermissions) {
-                    readOemPermissions(parser);
-                } else if ("hidden-api-whitelisted-app".equals(name) && allowApiWhitelisting) {
-                    String pkgname = parser.getAttributeValue(null, "package");
-                    if (pkgname == null) {
-                        Slog.w(TAG, "<hidden-api-whitelisted-app> without package in " + permFile
-                                + " at " + parser.getPositionDescription());
-                    } else {
-                        mHiddenApiPackageWhitelist.add(pkgname);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                } else {
-                    Slog.w(TAG, "Tag " + name + " is unknown or not allowed in "
-                            + permFile.getParent());
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "permission": {
+                        if (allowPermissions) {
+                            String perm = parser.getAttributeValue(null, "name");
+                            if (perm == null) {
+                                Slog.w(TAG, "<" + name + "> without name in " + permFile + " at "
+                                        + parser.getPositionDescription());
+                                XmlUtils.skipCurrentTag(parser);
+                                break;
+                            }
+                            perm = perm.intern();
+                            readPermission(parser, perm);
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                            XmlUtils.skipCurrentTag(parser);
+                        }
+                    } break;
+                    case "assign-permission": {
+                        if (allowPermissions) {
+                            String perm = parser.getAttributeValue(null, "name");
+                            if (perm == null) {
+                                Slog.w(TAG, "<" + name + "> without name in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                                XmlUtils.skipCurrentTag(parser);
+                                break;
+                            }
+                            String uidStr = parser.getAttributeValue(null, "uid");
+                            if (uidStr == null) {
+                                Slog.w(TAG, "<" + name + "> without uid in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                                XmlUtils.skipCurrentTag(parser);
+                                break;
+                            }
+                            int uid = Process.getUidForName(uidStr);
+                            if (uid < 0) {
+                                Slog.w(TAG, "<" + name + "> with unknown uid \""
+                                        + uidStr + "  in " + permFile + " at "
+                                        + parser.getPositionDescription());
+                                XmlUtils.skipCurrentTag(parser);
+                                break;
+                            }
+                            perm = perm.intern();
+                            ArraySet<String> perms = mSystemPermissions.get(uid);
+                            if (perms == null) {
+                                perms = new ArraySet<String>();
+                                mSystemPermissions.put(uid, perms);
+                            }
+                            perms.add(perm);
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "split-permission": {
+                        if (allowPermissions) {
+                            readSplitPermission(parser, permFile);
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                            XmlUtils.skipCurrentTag(parser);
+                        }
+                    } break;
+                    case "library": {
+                        if (allowLibs) {
+                            String lname = parser.getAttributeValue(null, "name");
+                            String lfile = parser.getAttributeValue(null, "file");
+                            String ldependency = parser.getAttributeValue(null, "dependency");
+                            if (lname == null) {
+                                Slog.w(TAG, "<" + name + "> without name in " + permFile + " at "
+                                        + parser.getPositionDescription());
+                            } else if (lfile == null) {
+                                Slog.w(TAG, "<" + name + "> without file in " + permFile + " at "
+                                        + parser.getPositionDescription());
+                            } else {
+                                //Log.i(TAG, "Got library " + lname + " in " + lfile);
+                                SharedLibraryEntry entry = new SharedLibraryEntry(lname, lfile,
+                                        ldependency == null ? new String[0] : ldependency.split(":"));
+                                mSharedLibraries.put(lname, entry);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "feature": {
+                        if (allowFeatures) {
+                            String fname = parser.getAttributeValue(null, "name");
+                            int fversion = XmlUtils.readIntAttribute(parser, "version", 0);
+                            boolean allowed;
+                            if (!lowRam) {
+                                allowed = true;
+                            } else {
+                                String notLowRam = parser.getAttributeValue(null, "notLowRam");
+                                allowed = !"true".equals(notLowRam);
+                            }
+                            if (fname == null) {
+                                Slog.w(TAG, "<" + name + "> without name in " + permFile + " at "
+                                        + parser.getPositionDescription());
+                            } else if (allowed) {
+                                addFeature(fname, fversion);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "unavailable-feature": {
+                        if (allowFeatures) {
+                            String fname = parser.getAttributeValue(null, "name");
+                            if (fname == null) {
+                                Slog.w(TAG, "<" + name + "> without name in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                            } else {
+                                mUnavailableFeatures.add(fname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "allow-in-power-save-except-idle": {
+                        if (allowAll) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                mAllowInPowerSaveExceptIdle.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "allow-in-power-save": {
+                        if (allowAll) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                mAllowInPowerSave.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "allow-in-data-usage-save": {
+                        if (allowAll) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                mAllowInDataUsageSave.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "allow-unthrottled-location": {
+                        if (allowAll) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                mAllowUnthrottledLocation.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "allow-implicit-broadcast": {
+                        if (allowAll) {
+                            String action = parser.getAttributeValue(null, "action");
+                            if (action == null) {
+                                Slog.w(TAG, "<" + name + "> without action in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                mAllowImplicitBroadcasts.add(action);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "app-link": {
+                        if (allowAppConfigs) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                            } else {
+                                mLinkedApps.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "system-user-whitelisted-app": {
+                        if (allowAppConfigs) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                mSystemUserWhitelistedApps.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "system-user-blacklisted-app": {
+                        if (allowAppConfigs) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                mSystemUserBlacklistedApps.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "default-enabled-vr-app": {
+                        if (allowAppConfigs) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            String clsname = parser.getAttributeValue(null, "class");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else if (clsname == null) {
+                                Slog.w(TAG, "<" + name + "> without class in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                mDefaultVrComponents.add(new ComponentName(pkgname, clsname));
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "backup-transport-whitelisted-service": {
+                        if (allowFeatures) {
+                            String serviceName = parser.getAttributeValue(null, "service");
+                            if (serviceName == null) {
+                                Slog.w(TAG, "<" + name + "> without service in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                ComponentName cn = ComponentName.unflattenFromString(serviceName);
+                                if (cn == null) {
+                                    Slog.w(TAG, "<" + name + "> with invalid service name "
+                                            + serviceName + " in " + permFile
+                                            + " at " + parser.getPositionDescription());
+                                } else {
+                                    mBackupTransportWhitelist.add(cn);
+                                }
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "disabled-until-used-preinstalled-carrier-associated-app": {
+                        if (allowAppConfigs) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            String carrierPkgname = parser.getAttributeValue(null,
+                                    "carrierAppPackage");
+                            if (pkgname == null || carrierPkgname == null) {
+                                Slog.w(TAG, "<" + name
+                                        + "> without package or carrierAppPackage in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                            } else {
+                                List<String> associatedPkgs =
+                                        mDisabledUntilUsedPreinstalledCarrierAssociatedApps.get(
+                                                carrierPkgname);
+                                if (associatedPkgs == null) {
+                                    associatedPkgs = new ArrayList<>();
+                                    mDisabledUntilUsedPreinstalledCarrierAssociatedApps.put(
+                                            carrierPkgname, associatedPkgs);
+                                }
+                                associatedPkgs.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "disabled-until-used-preinstalled-carrier-app": {
+                        if (allowAppConfigs) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG,
+                                        "<" + name + "> without "
+                                                + "package in " + permFile + " at "
+                                                + parser.getPositionDescription());
+                            } else {
+                                mDisabledUntilUsedPreinstalledCarrierApps.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "privapp-permissions": {
+                        if (allowPrivappPermissions) {
+                            // privapp permissions from system, vendor, product and product_services
+                            // partitions are stored separately. This is to prevent xml files in
+                            // the vendor partition from granting permissions to priv apps in the
+                            // system partition and vice versa.
+                            boolean vendor = permFile.toPath().startsWith(
+                                    Environment.getVendorDirectory().toPath() + "/")
+                                    || permFile.toPath().startsWith(
+                                    Environment.getOdmDirectory().toPath() + "/");
+                            boolean product = permFile.toPath().startsWith(
+                                    Environment.getProductDirectory().toPath() + "/");
+                            boolean productServices = permFile.toPath().startsWith(
+                                    Environment.getProductServicesDirectory().toPath() + "/");
+                            if (vendor) {
+                                readPrivAppPermissions(parser, mVendorPrivAppPermissions,
+                                        mVendorPrivAppDenyPermissions);
+                            } else if (product) {
+                                readPrivAppPermissions(parser, mProductPrivAppPermissions,
+                                        mProductPrivAppDenyPermissions);
+                            } else if (productServices) {
+                                readPrivAppPermissions(parser, mProductServicesPrivAppPermissions,
+                                        mProductServicesPrivAppDenyPermissions);
+                            } else {
+                                readPrivAppPermissions(parser, mPrivAppPermissions,
+                                        mPrivAppDenyPermissions);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                            XmlUtils.skipCurrentTag(parser);
+                        }
+                    } break;
+                    case "oem-permissions": {
+                        if (allowOemPermissions) {
+                            readOemPermissions(parser);
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                            XmlUtils.skipCurrentTag(parser);
+                        }
+                    } break;
+                    case "hidden-api-whitelisted-app": {
+                        if (allowApiWhitelisting) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                mHiddenApiPackageWhitelist.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "allow-association": {
+                        if (allowAssociations) {
+                            String target = parser.getAttributeValue(null, "target");
+                            if (target == null) {
+                                Slog.w(TAG, "<" + name + "> without target in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                                XmlUtils.skipCurrentTag(parser);
+                                break;
+                            }
+                            String allowed = parser.getAttributeValue(null, "allowed");
+                            if (allowed == null) {
+                                Slog.w(TAG, "<" + name + "> without allowed in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                                XmlUtils.skipCurrentTag(parser);
+                                break;
+                            }
+                            target = target.intern();
+                            allowed = allowed.intern();
+                            ArraySet<String> associations = mAllowedAssociations.get(target);
+                            if (associations == null) {
+                                associations = new ArraySet<>();
+                                mAllowedAssociations.put(target, associations);
+                            }
+                            Slog.i(TAG, "Adding association: " + target + " <- " + allowed);
+                            associations.add(allowed);
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    default: {
+                        Slog.w(TAG, "Tag " + name + " is unknown in "
+                                + permFile + " at " + parser.getPositionDescription());
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
                 }
             }
         } catch (XmlPullParserException e) {

@@ -3,6 +3,9 @@ package com.android.server.wm;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.processStateAmToProto;
+import static android.app.WaitResult.LAUNCH_STATE_COLD;
+import static android.app.WaitResult.LAUNCH_STATE_HOT;
+import static android.app.WaitResult.LAUNCH_STATE_WARM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -80,6 +83,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_TIMEOUT;
 
+import android.app.WaitResult;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
 import android.content.Intent;
@@ -101,10 +105,10 @@ import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
 /**
@@ -258,6 +262,19 @@ class ActivityMetricsLogger {
             launchedActivityShortComponentName = launchedActivity.shortComponentName;
             activityRecordIdHashCode = System.identityHashCode(launchedActivity);
             this.windowsFullyDrawnDelayMs = windowsFullyDrawnDelayMs;
+        }
+
+        @WaitResult.LaunchState int getLaunchState() {
+            switch (type) {
+                case TYPE_TRANSITION_WARM_LAUNCH:
+                    return LAUNCH_STATE_WARM;
+                case TYPE_TRANSITION_HOT_LAUNCH:
+                    return LAUNCH_STATE_HOT;
+                case TYPE_TRANSITION_COLD_LAUNCH:
+                    return LAUNCH_STATE_COLD;
+                default:
+                    return -1;
+            }
         }
     }
 

@@ -39,7 +39,7 @@ public class NotificationRankingUpdate implements Parcelable {
     private final Bundle mHidden;
     private final Bundle mSmartActions;
     private final Bundle mSmartReplies;
-    private final Bundle mAudiblyAlerted;
+    private final Bundle mLastAudiblyAlerted;
     private final Bundle mNoisy;
 
     public NotificationRankingUpdate(String[] keys, String[] interceptedKeys,
@@ -47,7 +47,7 @@ public class NotificationRankingUpdate implements Parcelable {
             int[] importance, Bundle explanation, Bundle overrideGroupKeys,
             Bundle channels, Bundle overridePeople, Bundle snoozeCriteria,
             Bundle showBadge, Bundle userSentiment, Bundle hidden, Bundle smartActions,
-            Bundle smartReplies, Bundle audiblyAlerted, Bundle noisy) {
+            Bundle smartReplies, Bundle lastAudiblyAlerted, Bundle noisy) {
         mKeys = keys;
         mInterceptedKeys = interceptedKeys;
         mVisibilityOverrides = visibilityOverrides;
@@ -63,7 +63,7 @@ public class NotificationRankingUpdate implements Parcelable {
         mHidden = hidden;
         mSmartActions = smartActions;
         mSmartReplies = smartReplies;
-        mAudiblyAlerted = audiblyAlerted;
+        mLastAudiblyAlerted = lastAudiblyAlerted;
         mNoisy = noisy;
     }
 
@@ -84,7 +84,7 @@ public class NotificationRankingUpdate implements Parcelable {
         mHidden = in.readBundle();
         mSmartActions = in.readBundle();
         mSmartReplies = in.readBundle();
-        mAudiblyAlerted = in.readBundle();
+        mLastAudiblyAlerted = in.readBundle();
         mNoisy = in.readBundle();
     }
 
@@ -110,7 +110,7 @@ public class NotificationRankingUpdate implements Parcelable {
         out.writeBundle(mHidden);
         out.writeBundle(mSmartActions);
         out.writeBundle(mSmartReplies);
-        out.writeBundle(mAudiblyAlerted);
+        out.writeBundle(mLastAudiblyAlerted);
         out.writeBundle(mNoisy);
     }
 
@@ -185,8 +185,8 @@ public class NotificationRankingUpdate implements Parcelable {
         return mSmartReplies;
     }
 
-    public Bundle getAudiblyAlerted() {
-        return mAudiblyAlerted;
+    public Bundle getLastAudiblyAlerted() {
+        return mLastAudiblyAlerted;
     }
 
     public Bundle getNoisy() {

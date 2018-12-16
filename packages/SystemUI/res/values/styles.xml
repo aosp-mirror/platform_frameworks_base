@@ -144,7 +144,7 @@
         <item name="android:textSize">@dimen/qs_time_expanded_size</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.AboveDateTime">
@@ -171,12 +171,12 @@
     <style name="TextAppearance.QS">
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
     <style name="TextAppearance.QS.DetailHeader">
         <item name="android:textSize">@dimen/qs_detail_header_text_size</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
     </style>
 
     <style name="TextAppearance.QS.DetailItemPrimary">
@@ -202,7 +202,7 @@
         <item name="android:textSize">@dimen/qs_detail_button_text_size</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:textAllCaps">true</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="android:gravity">center</item>
     </style>
 
@@ -222,7 +222,7 @@
 
     <style name="TextAppearance.QS.SegmentedButton">
         <item name="android:textSize">16sp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
     </style>
 
     <style name="TextAppearance.QS.DataUsage">
@@ -245,7 +245,7 @@
 
     <style name="TextAppearance.QS.TileLabel.Secondary">
         <item name="android:textSize">@dimen/qs_tile_text_size</item>
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
     <style name="TextAppearance.QS.CarrierInfo">
@@ -262,7 +262,7 @@
 
     <style name="TextAppearance.AppOpsDialog.Item">
         <item name="android:textSize">@dimen/ongoing_appops_dialog_item_size</item>
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
     <style name="BaseBrightnessDialogContainer" parent="@style/Theme.SystemUI">
@@ -391,7 +391,7 @@
     <style name="TextAppearance.Volume">
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
     <style name="TextAppearance.Volume.Header">
@@ -435,7 +435,7 @@
     </style>
 
     <style name="TextAppearance.NotificationInfo">
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">@color/notification_primary_text_color</item>
     </style>
 
@@ -463,7 +463,7 @@
     </style>
 
     <style name="TextAppearance.NotificationInfo.Button">
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/colorAccent</item>
         <item name="android:background">@drawable/btn_borderless_rect</item>

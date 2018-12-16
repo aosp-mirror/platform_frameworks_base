@@ -89,7 +89,8 @@ EglManager::EglManager()
         , mEglConfigWideGamut(nullptr)
         , mEglContext(EGL_NO_CONTEXT)
         , mPBufferSurface(EGL_NO_SURFACE)
-        , mCurrentSurface(EGL_NO_SURFACE) {}
+        , mCurrentSurface(EGL_NO_SURFACE)
+        , mHasWideColorGamutSupport(false) {}
 
 EglManager::~EglManager() {
     destroy();
@@ -128,6 +129,81 @@ void EglManager::initialize() {
     createContext();
     createPBufferSurface();
     makeCurrent(mPBufferSurface, nullptr, /* force */ true);
+
+    SkColorSpace::Gamut wideColorGamut = DeviceInfo::get()->getWideColorGamut();
+    bool hasWideColorSpaceExtension = false;
+    if (wideColorGamut == SkColorSpace::Gamut::kDCIP3_D65_Gamut) {
+        hasWideColorSpaceExtension = EglExtensions.displayP3;
+    } else if (wideColorGamut == SkColorSpace::Gamut::kSRGB_Gamut) {
+        hasWideColorSpaceExtension = EglExtensions.scRGB;
+    } else {
+        LOG_ALWAYS_FATAL("Unsupported wide color space.");
+    }
+    mHasWideColorGamutSupport = EglExtensions.glColorSpace && hasWideColorSpaceExtension &&
+                                mEglConfigWideGamut != EGL_NO_CONFIG_KHR;
+}
+
+EGLConfig EglManager::load8BitsConfig(EGLDisplay display, EglManager::SwapBehavior swapBehavior) {
+    EGLint eglSwapBehavior =
+            (swapBehavior == SwapBehavior::Preserved) ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
+    EGLint attribs[] = {EGL_RENDERABLE_TYPE,
+                        EGL_OPENGL_ES2_BIT,
+                        EGL_RED_SIZE,
+                        8,
+                        EGL_GREEN_SIZE,
+                        8,
+                        EGL_BLUE_SIZE,
+                        8,
+                        EGL_ALPHA_SIZE,
+                        8,
+                        EGL_DEPTH_SIZE,
+                        0,
+                        EGL_CONFIG_CAVEAT,
+                        EGL_NONE,
+                        EGL_STENCIL_SIZE,
+                        STENCIL_BUFFER_SIZE,
+                        EGL_SURFACE_TYPE,
+                        EGL_WINDOW_BIT | eglSwapBehavior,
+                        EGL_NONE};
+    EGLConfig config = EGL_NO_CONFIG_KHR;
+    EGLint numConfigs = 1;
+    if (!eglChooseConfig(display, attribs, &config, numConfigs, &numConfigs) ||
+        numConfigs != 1) {
+        return EGL_NO_CONFIG_KHR;
+    }
+    return config;
+}
+
+EGLConfig EglManager::loadFP16Config(EGLDisplay display, SwapBehavior swapBehavior) {
+    EGLint eglSwapBehavior =
+            (swapBehavior == SwapBehavior::Preserved) ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
+    // If we reached this point, we have a valid swap behavior
+    EGLint attribs[] = {EGL_RENDERABLE_TYPE,
+                        EGL_OPENGL_ES2_BIT,
+                        EGL_COLOR_COMPONENT_TYPE_EXT,
+                        EGL_COLOR_COMPONENT_TYPE_FLOAT_EXT,
+                        EGL_RED_SIZE,
+                        16,
+                        EGL_GREEN_SIZE,
+                        16,
+                        EGL_BLUE_SIZE,
+                        16,
+                        EGL_ALPHA_SIZE,
+                        16,
+                        EGL_DEPTH_SIZE,
+                        0,
+                        EGL_STENCIL_SIZE,
+                        STENCIL_BUFFER_SIZE,
+                        EGL_SURFACE_TYPE,
+                        EGL_WINDOW_BIT | eglSwapBehavior,
+                        EGL_NONE};
+    EGLConfig config = EGL_NO_CONFIG_KHR;
+    EGLint numConfigs = 1;
+    if (!eglChooseConfig(display, attribs, &config, numConfigs, &numConfigs) ||
+        numConfigs != 1) {
+        return EGL_NO_CONFIG_KHR;
+    }
+    return config;
 }
 
 void EglManager::initExtensions() {
@@ -146,12 +222,8 @@ void EglManager::initExtensions() {
     EglExtensions.glColorSpace = extensions.has("EGL_KHR_gl_colorspace");
     EglExtensions.noConfigContext = extensions.has("EGL_KHR_no_config_context");
     EglExtensions.pixelFormatFloat = extensions.has("EGL_EXT_pixel_format_float");
-#ifdef ANDROID_ENABLE_LINEAR_BLENDING
-    EglExtensions.scRGB = extensions.has("EGL_EXT_gl_colorspace_scrgb_linear");
-#else
     EglExtensions.scRGB = extensions.has("EGL_EXT_gl_colorspace_scrgb");
-#endif
-    EglExtensions.displayP3 = extensions.has("EGL_EXT_gl_colorspace_display_p3");
+    EglExtensions.displayP3 = extensions.has("EGL_EXT_gl_colorspace_display_p3_passthrough");
     EglExtensions.contextPriority = extensions.has("EGL_IMG_context_priority");
     EglExtensions.surfacelessContext = extensions.has("EGL_KHR_surfaceless_context");
 }
@@ -162,77 +234,35 @@ bool EglManager::hasEglContext() {
 
 void EglManager::loadConfigs() {
     ALOGD("Swap behavior %d", static_cast<int>(mSwapBehavior));
-    EGLint swapBehavior =
-            (mSwapBehavior == SwapBehavior::Preserved) ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
 
     // Note: The default pixel format is RGBA_8888, when other formats are
     // available, we should check the target pixel format and configure the
     // attributes list properly.
-    EGLint attribs[] = {EGL_RENDERABLE_TYPE,
-                        EGL_OPENGL_ES2_BIT,
-                        EGL_RED_SIZE,
-                        8,
-                        EGL_GREEN_SIZE,
-                        8,
-                        EGL_BLUE_SIZE,
-                        8,
-                        EGL_ALPHA_SIZE,
-                        8,
-                        EGL_DEPTH_SIZE,
-                        0,
-                        EGL_CONFIG_CAVEAT,
-                        EGL_NONE,
-                        EGL_STENCIL_SIZE,
-                        STENCIL_BUFFER_SIZE,
-                        EGL_SURFACE_TYPE,
-                        EGL_WINDOW_BIT | swapBehavior,
-                        EGL_NONE};
-
-    EGLint numConfigs = 1;
-    if (!eglChooseConfig(mEglDisplay, attribs, &mEglConfig, numConfigs, &numConfigs) ||
-        numConfigs != 1) {
+    mEglConfig = load8BitsConfig(mEglDisplay, mSwapBehavior);
+    if (mEglConfig == EGL_NO_CONFIG_KHR) {
         if (mSwapBehavior == SwapBehavior::Preserved) {
             // Try again without dirty regions enabled
             ALOGW("Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...");
             mSwapBehavior = SwapBehavior::Discard;
-            loadConfigs();
-            return;  // the call to loadConfigs() we just made picks the wide gamut config
+            ALOGD("Swap behavior %d", static_cast<int>(mSwapBehavior));
+            mEglConfig = load8BitsConfig(mEglDisplay, mSwapBehavior);
         } else {
             // Failed to get a valid config
             LOG_ALWAYS_FATAL("Failed to choose config, error = %s", eglErrorString());
         }
     }
+    SkColorType wideColorType = DeviceInfo::get()->getWideColorType();
 
-    if (EglExtensions.pixelFormatFloat) {
-        // If we reached this point, we have a valid swap behavior
-        EGLint attribs16F[] = {EGL_RENDERABLE_TYPE,
-                               EGL_OPENGL_ES2_BIT,
-                               EGL_COLOR_COMPONENT_TYPE_EXT,
-                               EGL_COLOR_COMPONENT_TYPE_FLOAT_EXT,
-                               EGL_RED_SIZE,
-                               16,
-                               EGL_GREEN_SIZE,
-                               16,
-                               EGL_BLUE_SIZE,
-                               16,
-                               EGL_ALPHA_SIZE,
-                               16,
-                               EGL_DEPTH_SIZE,
-                               0,
-                               EGL_STENCIL_SIZE,
-                               STENCIL_BUFFER_SIZE,
-                               EGL_SURFACE_TYPE,
-                               EGL_WINDOW_BIT | swapBehavior,
-                               EGL_NONE};
-
-        numConfigs = 1;
-        if (!eglChooseConfig(mEglDisplay, attribs16F, &mEglConfigWideGamut, numConfigs,
-                             &numConfigs) ||
-            numConfigs != 1) {
+    // When we reach this point, we have a valid swap behavior
+    if (wideColorType == SkColorType::kRGBA_F16_SkColorType && EglExtensions.pixelFormatFloat) {
+        mEglConfigWideGamut = loadFP16Config(mEglDisplay, mSwapBehavior);
+        if (mEglConfigWideGamut == EGL_NO_CONFIG_KHR) {
             ALOGE("Device claims wide gamut support, cannot find matching config, error = %s",
                     eglErrorString());
             EglExtensions.pixelFormatFloat = false;
         }
+    } else if (wideColorType == SkColorType::kN32_SkColorType) {
+        mEglConfigWideGamut = load8BitsConfig(mEglDisplay, mSwapBehavior);
     }
 }
 
@@ -263,11 +293,12 @@ void EglManager::createPBufferSurface() {
     }
 }
 
-Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window, ColorMode colorMode) {
+Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
+                                                     ColorMode colorMode,
+                                                     SkColorSpace::Gamut colorGamut) {
     LOG_ALWAYS_FATAL_IF(!hasEglContext(), "Not initialized");
 
-    bool wideColorGamut = colorMode == ColorMode::WideColorGamut && EglExtensions.glColorSpace &&
-                          EglExtensions.scRGB && EglExtensions.pixelFormatFloat &&
+    bool wideColorGamut = colorMode == ColorMode::WideColorGamut && mHasWideColorGamutSupport &&
                           EglExtensions.noConfigContext;
 
     // The color space we want to use depends on whether linear blending is turned
@@ -285,8 +316,8 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
     // When wide gamut rendering is on we cannot rely on the GPU performing
     // linear blending for us. We use two different color spaces to tag the
     // surface appropriately for SurfaceFlinger:
-    // - Gamma blending (default) requires the use of the scRGB-nl color space
-    // - Linear blending requires the use of the scRGB color space
+    // - Gamma blending (default) requires the use of the non-linear color space
+    // - Linear blending requires the use of the linear color space
 
     // Not all Android targets support the EGL_GL_COLORSPACE_KHR extension
     // We insert to placeholders to set EGL_GL_COLORSPACE_KHR and its value.
@@ -296,19 +327,20 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
 
     if (EglExtensions.glColorSpace) {
         attribs[0] = EGL_GL_COLORSPACE_KHR;
-#ifdef ANDROID_ENABLE_LINEAR_BLENDING
         if (wideColorGamut) {
-            attribs[1] = EGL_GL_COLORSPACE_SCRGB_LINEAR_EXT;
-        } else {
-            attribs[1] = EGL_GL_COLORSPACE_SRGB_KHR;
-        }
-#else
-        if (wideColorGamut) {
-            attribs[1] = EGL_GL_COLORSPACE_SCRGB_EXT;
+            switch (colorGamut) {
+                case SkColorSpace::Gamut::kDCIP3_D65_Gamut:
+                    attribs[1] = EGL_GL_COLORSPACE_DISPLAY_P3_PASSTHROUGH_EXT;
+                    break;
+                case SkColorSpace::Gamut::kSRGB_Gamut:
+                    attribs[1] = EGL_GL_COLORSPACE_SCRGB_EXT;
+                    break;
+                default:
+                    LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
+            }
         } else {
             attribs[1] = EGL_GL_COLORSPACE_LINEAR_KHR;
         }
-#endif
     }
 
     EGLSurface surface = eglCreateWindowSurface(

@@ -340,7 +340,7 @@ public class NotificationHeaderView extends ViewGroup {
     }
 
     /** Updates icon visibility based on the noisiness of the notification. */
-    public void setAudiblyAlerted(boolean audiblyAlerted) {
+    public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
         mAudiblyAlertedIcon.setVisibility(audiblyAlerted ? View.VISIBLE : View.GONE);
     }
 

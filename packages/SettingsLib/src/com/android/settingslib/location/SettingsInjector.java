@@ -37,6 +37,7 @@ import android.os.Messenger;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.IconDrawableFactory;
 import android.util.Log;
@@ -44,11 +45,16 @@ import android.util.Xml;
 
 import androidx.preference.Preference;
 
+import com.android.settingslib.R;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -102,7 +108,7 @@ public class SettingsInjector {
     public SettingsInjector(Context context) {
         mContext = context;
         mSettings = new HashSet<Setting>();
-        mHandler = new StatusLoadingHandler();
+        mHandler = new StatusLoadingHandler(mSettings);
     }
 
     /**
@@ -165,7 +171,7 @@ public class SettingsInjector {
             Log.e(TAG, "Can't get ApplicationInfo for " + setting.packageName, e);
         }
         preference.setTitle(setting.title);
-        preference.setSummary(null);
+        preference.setSummary(R.string.loading_injected_setting_summary);
         preference.setIcon(appIcon);
         preference.setOnPreferenceClickListener(new ServiceSettingClickedListener(setting));
     }
@@ -180,6 +186,7 @@ public class SettingsInjector {
         final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         final List<UserHandle> profiles = um.getUserProfiles();
         ArrayList<Preference> prefs = new ArrayList<>();
+        mSettings.clear();
         for (UserHandle userHandle : profiles) {
             if (profileId == UserHandle.USER_CURRENT || profileId == userHandle.getIdentifier()) {
                 Iterable<InjectedSetting> settings = getSettings(userHandle);
@@ -363,31 +370,28 @@ public class SettingsInjector {
      * SettingInjectorService}, so to reduce memory pressure we don't want to load too many at
      * once.
      */
-    private final class StatusLoadingHandler extends Handler {
+    private static final class StatusLoadingHandler extends Handler {
+        /**
+         * References all the injected settings.
+         */
+        WeakReference<Set<Setting>> mAllSettings;
 
         /**
          * Settings whose status values need to be loaded. A set is used to prevent redundant loads.
          */
-        private Set<Setting> mSettingsToLoad = new HashSet<Setting>();
+        private Deque<Setting> mSettingsToLoad = new ArrayDeque<Setting>();
 
         /**
          * Settings that are being loaded now and haven't timed out. In practice this should have
          * zero or one elements.
          */
-        private Set<Setting> mSettingsBeingLoaded = new HashSet<Setting>();
+        private Set<Setting> mSettingsBeingLoaded = new ArraySet<Setting>();
 
-        /**
-         * Settings that are being loaded but have timed out. If only one setting has timed out, we
-         * will go ahead and start loading the next setting so that one slow load won't delay the
-         * load of the other settings.
-         */
-        private Set<Setting> mTimedOutSettings = new HashSet<Setting>();
-
-        private boolean mReloadRequested;
-
-        private StatusLoadingHandler() {
+        public StatusLoadingHandler(Set<Setting> allSettings) {
             super(Looper.getMainLooper());
+            mAllSettings = new WeakReference<>(allSettings);
         }
+
         @Override
         public void handleMessage(Message msg) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -396,20 +400,24 @@ public class SettingsInjector {
 
             // Update state in response to message
             switch (msg.what) {
-                case WHAT_RELOAD:
-                    mReloadRequested = true;
+                case WHAT_RELOAD: {
+                    final Set<Setting> allSettings = mAllSettings.get();
+                    if (allSettings != null) {
+                        // Reload requested, so must reload all settings
+                        mSettingsToLoad.clear();
+                        mSettingsToLoad.addAll(allSettings);
+                    }
                     break;
+                }
                 case WHAT_RECEIVED_STATUS:
                     final Setting receivedSetting = (Setting) msg.obj;
                     receivedSetting.maybeLogElapsedTime();
                     mSettingsBeingLoaded.remove(receivedSetting);
-                    mTimedOutSettings.remove(receivedSetting);
                     removeMessages(WHAT_TIMEOUT, receivedSetting);
                     break;
                 case WHAT_TIMEOUT:
                     final Setting timedOutSetting = (Setting) msg.obj;
                     mSettingsBeingLoaded.remove(timedOutSetting);
-                    mTimedOutSettings.add(timedOutSetting);
                     if (Log.isLoggable(TAG, Log.WARN)) {
                         Log.w(TAG, "Timed out after " + timedOutSetting.getElapsedTime()
                                 + " millis trying to get status for: " + timedOutSetting);
@@ -421,37 +429,22 @@ public class SettingsInjector {
 
             // Decide whether to load additional settings based on the new state. Start by seeing
             // if we have headroom to load another setting.
-            if (mSettingsBeingLoaded.size() > 0 || mTimedOutSettings.size() > 1) {
+            if (mSettingsBeingLoaded.size() > 0) {
                 // Don't load any more settings until one of the pending settings has completed.
-                // To reduce memory pressure, we want to be loading at most one setting (plus at
-                // most one timed-out setting) at a time. This means we'll be responsible for
-                // bringing in at most two services.
+                // To reduce memory pressure, we want to be loading at most one setting.
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "too many services already live for " + msg + ", " + this);
                 }
                 return;
             }
 
-            if (mReloadRequested && mSettingsToLoad.isEmpty() && mSettingsBeingLoaded.isEmpty()
-                    && mTimedOutSettings.isEmpty()) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "reloading because idle and reload requesteed " + msg + ", " + this);
-                }
-                // Reload requested, so must reload all settings
-                mSettingsToLoad.addAll(mSettings);
-                mReloadRequested = false;
-            }
-
-            // Remove the next setting to load from the queue, if any
-            Iterator<Setting> iter = mSettingsToLoad.iterator();
-            if (!iter.hasNext()) {
+            if (mSettingsToLoad.isEmpty()) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "nothing left to do for " + msg + ", " + this);
                 }
                 return;
             }
-            Setting setting = iter.next();
-            iter.remove();
+            Setting setting = mSettingsToLoad.removeFirst();
 
             // Request the status value
             setting.startService();
@@ -473,9 +466,36 @@ public class SettingsInjector {
             return "StatusLoadingHandler{" +
                     "mSettingsToLoad=" + mSettingsToLoad +
                     ", mSettingsBeingLoaded=" + mSettingsBeingLoaded +
-                    ", mTimedOutSettings=" + mTimedOutSettings +
-                    ", mReloadRequested=" + mReloadRequested +
                     '}';
+        }
+    }
+
+    private static class MessengerHandler extends Handler {
+        private WeakReference<Setting> mSettingRef;
+        private Handler mHandler;
+
+        public MessengerHandler(Setting setting, Handler handler) {
+            mSettingRef = new WeakReference(setting);
+            mHandler = handler;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final Setting setting = mSettingRef.get();
+            if (setting == null) {
+                return;
+            }
+            final Preference preference = setting.preference;
+            Bundle bundle = msg.getData();
+            boolean enabled = bundle.getBoolean(SettingInjectorService.ENABLED_KEY, true);
+            String summary = bundle.getString(SettingInjectorService.SUMMARY_KEY, null);
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, setting + ": received " + msg + ", bundle: " + bundle);
+            }
+            preference.setSummary(summary);
+            preference.setEnabled(enabled);
+            mHandler.sendMessage(
+                    mHandler.obtainMessage(WHAT_RECEIVED_STATUS, setting));
         }
     }
 
@@ -483,10 +503,10 @@ public class SettingsInjector {
      * Represents an injected setting and the corresponding preference.
      */
     protected final class Setting {
-
         public final InjectedSetting setting;
         public final Preference preference;
         public long startMillis;
+
 
         public Setting(InjectedSetting setting, Preference preference) {
             this.setting = setting;
@@ -499,20 +519,6 @@ public class SettingsInjector {
                     "setting=" + setting +
                     ", preference=" + preference +
                     '}';
-        }
-
-        /**
-         * Returns true if they both have the same {@link #setting} value. Ignores mutable
-         * {@link #preference} and {@link #startMillis} so that it's safe to use in sets.
-         */
-        @Override
-        public boolean equals(Object o) {
-            return this == o || o instanceof Setting && setting.equals(((Setting) o).setting);
-        }
-
-        @Override
-        public int hashCode() {
-            return setting.hashCode();
         }
 
         /**
@@ -529,20 +535,7 @@ public class SettingsInjector {
                 }
                 return;
             }
-            Handler handler = new Handler() {
-                @Override
-                public void handleMessage(Message msg) {
-                    Bundle bundle = msg.getData();
-                    boolean enabled = bundle.getBoolean(SettingInjectorService.ENABLED_KEY, true);
-                    if (Log.isLoggable(TAG, Log.DEBUG)) {
-                        Log.d(TAG, setting + ": received " + msg + ", bundle: " + bundle);
-                    }
-                    preference.setSummary(null);
-                    preference.setEnabled(enabled);
-                    mHandler.sendMessage(
-                            mHandler.obtainMessage(WHAT_RECEIVED_STATUS, Setting.this));
-                }
-            };
+            Handler handler = new MessengerHandler(this, mHandler);
             Messenger messenger = new Messenger(handler);
 
             Intent intent = setting.getServiceIntent();

@@ -54,6 +54,7 @@ import android.debug.IAdbManager;
 import android.hardware.ConsumerIrManager;
 import android.hardware.ISerialManager;
 import android.hardware.SensorManager;
+import android.hardware.SensorPrivacyManager;
 import android.hardware.SerialManager;
 import android.hardware.SystemSensorManager;
 import android.hardware.biometrics.BiometricManager;
@@ -154,7 +155,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
-import android.telephony.rcs.RcsManager;
+import android.telephony.ims.RcsManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -502,6 +503,13 @@ final class SystemServiceRegistry {
                 return new SystemSensorManager(ctx.getOuterContext(),
                   ctx.mMainThread.getHandler().getLooper());
             }});
+
+        registerService(Context.SENSOR_PRIVACY_SERVICE, SensorPrivacyManager.class,
+                new CachedServiceFetcher<SensorPrivacyManager>() {
+                    @Override
+                    public SensorPrivacyManager createService(ContextImpl ctx) {
+                        return SensorPrivacyManager.getInstance(ctx);
+                    }});
 
         registerService(Context.STATS_MANAGER, StatsManager.class,
                 new CachedServiceFetcher<StatsManager>() {

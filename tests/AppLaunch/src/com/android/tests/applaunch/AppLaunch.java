@@ -39,7 +39,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -840,6 +839,7 @@ public class AppLaunch extends InstrumentationTestCase {
                 /* SAMPLE OUTPUT : Cold launch
                 Starting: Intent { cmp=com.google.android.calculator/com.android.calculator2.Calculator }
                 Status: ok
+                LaunchState: COLD
                 Activity: com.google.android.calculator/com.android.calculator2.Calculator
                 TotalTime: 357
                 WaitTime: 377
@@ -848,6 +848,7 @@ public class AppLaunch extends InstrumentationTestCase {
                 Starting: Intent { cmp=com.google.android.calculator/com.android.calculator2.Calculator }
                 Warning: Activity not started, its current task has been brought to the front
                 Status: ok
+                LaunchState: HOT
                 Activity: com.google.android.calculator/com.android.calculator2.CalculatorGoogle
                 TotalTime: 60
                 WaitTime: 67

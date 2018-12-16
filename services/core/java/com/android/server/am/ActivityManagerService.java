@@ -658,6 +658,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     ArraySet<String> mBackgroundLaunchBroadcasts;
 
     /**
+     * When an app has restrictions on the other apps that can have associations with it,
+     * it appears here with a set of the allowed apps.
+     */
+    ArrayMap<String, ArraySet<String>> mAllowedAssociations;
+
+    /**
      * All of the processes we currently have running organized by pid.
      * The keys are the pid running the application.
      *
@@ -788,6 +794,11 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Processes we want to collect PSS data from.
      */
     final ArrayList<ProcessRecord> mPendingPssProcesses = new ArrayList<ProcessRecord>();
+
+    /**
+     * Processes to compact.
+     */
+    final ArrayList<ProcessRecord> mPendingCompactionProcesses = new ArrayList<ProcessRecord>();
 
     private boolean mBinderTransactionTrackingEnabled = false;
 
@@ -1446,6 +1457,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final Handler mUiHandler;
     final ServiceThread mProcStartHandlerThread;
     final Handler mProcStartHandler;
+    final ServiceThread mCompactionThread;
 
     final ActivityManagerConstants mConstants;
 
@@ -1782,6 +1794,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
     };
+
+    static final int COMPACT_PROCESS_SOME = 1;
+    static final int COMPACT_PROCESS_FULL = 2;
+    static final int COMPACT_PROCESS_MSG = 1;
+    final Handler mCompactionHandler;
 
     static final int COLLECT_PSS_BG_MSG = 1;
 
@@ -2218,6 +2235,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ? new PendingIntentController(handlerThread.getLooper(), mUserController) : null;
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
+        mCompactionThread = null;
+        mCompactionHandler = null;
         mHiddenApiBlacklist = null;
         mFactoryTest = FACTORY_TEST_OFF;
     }
@@ -2245,6 +2264,88 @@ public class ActivityManagerService extends IActivityManager.Stub
                 THREAD_PRIORITY_FOREGROUND, false /* allowIo */);
         mProcStartHandlerThread.start();
         mProcStartHandler = new Handler(mProcStartHandlerThread.getLooper());
+
+        mCompactionThread = new ServiceThread("CompactionThread",
+                THREAD_PRIORITY_FOREGROUND, true);
+        mCompactionThread.start();
+        mCompactionHandler = new Handler(mCompactionThread.getLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case COMPACT_PROCESS_MSG: {
+                long start = SystemClock.uptimeMillis();
+                ProcessRecord proc;
+                int pid;
+                String action;
+                final String name;
+                int pendingAction, lastCompactAction;
+                long lastCompactTime;
+                synchronized(ActivityManagerService.this) {
+                    proc = mPendingCompactionProcesses.remove(0);
+
+                    // don't compact if the process has returned to perceptible
+                    if (proc.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ) {
+                        return;
+                    }
+
+                    pid = proc.pid;
+                    name = proc.processName;
+                    pendingAction = proc.reqCompactAction;
+                    lastCompactAction = proc.lastCompactAction;
+                    lastCompactTime = proc.lastCompactTime;
+                }
+                if (pid == 0) {
+                    // not a real process, either one being launched or one being killed
+                    return;
+                }
+
+                // basic throttling
+                if (pendingAction == COMPACT_PROCESS_SOME) {
+                    // if we're compacting some, then compact if >10s after last full
+                    // or >5s after last some
+                    if ((lastCompactAction == COMPACT_PROCESS_SOME && (start - lastCompactTime < 5000)) ||
+                        (lastCompactAction == COMPACT_PROCESS_FULL && (start - lastCompactTime < 10000)))
+                        return;
+                } else {
+                    // if we're compacting full, then compact if >10s after last full
+                    // or >.5s after last some
+                    if ((lastCompactAction == COMPACT_PROCESS_SOME && (start - lastCompactTime < 500)) ||
+                        (lastCompactAction == COMPACT_PROCESS_FULL && (start - lastCompactTime < 10000)))
+                        return;
+                }
+
+                try {
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Compact " +
+                                     ((pendingAction == COMPACT_PROCESS_SOME) ? "some" : "full") +
+                                     ": " + name);
+                    long[] rssBefore = Process.getRss(pid);
+                    FileOutputStream fos = new FileOutputStream("/proc/" + pid + "/reclaim");
+                    if (pendingAction == COMPACT_PROCESS_SOME) {
+                        action = "file";
+                    } else {
+                        action = "all";
+                    }
+                    fos.write(action.getBytes());
+                    fos.close();
+                    long[] rssAfter = Process.getRss(pid);
+                    long end = SystemClock.uptimeMillis();
+                    EventLog.writeEvent(EventLogTags.AM_COMPACT, pid, name, action,
+                            rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
+                            rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], end-start);
+                    synchronized(ActivityManagerService.this) {
+                        proc.lastCompactTime = end;
+                        proc.lastCompactAction = pendingAction;
+                    }
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                } catch (Exception e) {
+                    // nothing to do, presumably the process died
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                }
+            }
+            }
+        }
+        };
+
 
         mConstants = new ActivityManagerConstants(this, mHandler);
 
@@ -2339,13 +2440,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
 
-        // bind background thread to little cores
+        // bind background threads to little cores
         // this is expected to fail inside of framework tests because apps can't touch cpusets directly
         // make sure we've already adjusted system_server's internal view of itself first
         updateOomAdjLocked();
         try {
             Process.setThreadGroupAndCpuset(BackgroundThread.get().getThreadId(),
-                    Process.THREAD_GROUP_BG_NONINTERACTIVE);
+                    Process.THREAD_GROUP_SYSTEM);
+            Process.setThreadGroupAndCpuset(mCompactionThread.getThreadId(),
+                    Process.THREAD_GROUP_SYSTEM);
         } catch (Exception e) {
             Slog.w(TAG, "Setting background thread cpuset failed");
         }
@@ -2394,6 +2497,34 @@ public class ActivityManagerService extends IActivityManager.Stub
             mBackgroundLaunchBroadcasts = SystemConfig.getInstance().getAllowImplicitBroadcasts();
         }
         return mBackgroundLaunchBroadcasts;
+    }
+
+    boolean validateAssociationAllowedLocked(String pkg1, int uid1, String pkg2, int uid2) {
+        if (mAllowedAssociations == null) {
+            mAllowedAssociations = SystemConfig.getInstance().getAllowedAssociations();
+        }
+        // Interactions with the system uid are always allowed, since that is the core system
+        // that everyone needs to be able to interact with.
+        if (UserHandle.getAppId(uid1) == SYSTEM_UID) {
+            return true;
+        }
+        if (UserHandle.getAppId(uid2) == SYSTEM_UID) {
+            return true;
+        }
+        // We won't allow this association if either pkg1 or pkg2 has a limit on the
+        // associations that are allowed with it, and the other package is not explicitly
+        // specified as one of those associations.
+        ArraySet<String> pkgs = mAllowedAssociations.get(pkg1);
+        if (pkgs != null) {
+            if (!pkgs.contains(pkg2)) {
+                return false;
+            }
+        }
+        pkgs = mAllowedAssociations.get(pkg2);
+        if (pkgs != null) {
+            return pkgs.contains(pkg1);
+        }
+        return true;
     }
 
     @Override
@@ -6264,6 +6395,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         return state != 'Z' && state != 'X' && state != 'x' && state != 'K';
     }
 
+    private String checkContentProviderAssociation(ProcessRecord callingApp, int callingUid,
+            ProviderInfo cpi) {
+        if (callingApp == null) {
+            return validateAssociationAllowedLocked(cpi.packageName, cpi.applicationInfo.uid,
+                    null, callingUid) ? null : "<null>";
+        }
+        for (int i = callingApp.pkgList.size() - 1; i >= 0; i--) {
+            if (!validateAssociationAllowedLocked(callingApp.pkgList.keyAt(i), callingApp.uid,
+                    cpi.packageName, cpi.applicationInfo.uid)) {
+                return cpi.packageName;
+            }
+        }
+        return null;
+    }
+
     private ContentProviderHolder getContentProviderImpl(IApplicationThread caller,
             String name, IBinder token, int callingUid, String callingTag, boolean stable,
             int userId) {
@@ -6335,6 +6481,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 String msg;
 
                 if (r != null && cpr.canRunHere(r)) {
+                    if ((msg = checkContentProviderAssociation(r, callingUid, cpi)) != null) {
+                        throw new SecurityException("Content provider lookup "
+                                + cpr.name.flattenToShortString()
+                                + " failed: association not allowed with package " + msg);
+                    }
                     checkTime(startTime,
                             "getContentProviderImpl: before checkContentProviderPermission");
                     if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, checkCrossUser))
@@ -6364,6 +6515,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } catch (RemoteException e) {
                 }
 
+                if ((msg = checkContentProviderAssociation(r, callingUid, cpi)) != null) {
+                    throw new SecurityException("Content provider lookup "
+                            + cpr.name.flattenToShortString()
+                            + " failed: association not allowed with package " + msg);
+                }
                 checkTime(startTime,
                         "getContentProviderImpl: before checkContentProviderPermission");
                 if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, checkCrossUser))
@@ -6461,6 +6617,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 checkTime(startTime, "getContentProviderImpl: got app info for user");
 
                 String msg;
+                if ((msg = checkContentProviderAssociation(r, callingUid, cpi)) != null) {
+                    throw new SecurityException("Content provider lookup "
+                            + cpr.name.flattenToShortString()
+                            + " failed: association not allowed with package " + msg);
+                }
                 checkTime(startTime, "getContentProviderImpl: before checkContentProviderPermission");
                 if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, !singleton))
                         != null) {
@@ -9207,6 +9368,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
 
             }
+            dumpAllowedAssociationsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+
+            }
             mPendingIntentController.dumpPendingIntents(pw, dumpAll, dumpPackage);
             pw.println();
             if (dumpAll) {
@@ -9473,6 +9640,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     System.runFinalization();
                     System.gc();
                     pw.println(BinderInternal.nGetBinderProxyCount(Integer.parseInt(uid)));
+                }
+            } else if ("allowed-associations".equals(cmd)) {
+                if (opti < args.length) {
+                    dumpPackage = args[opti];
+                    opti++;
+                }
+                synchronized (this) {
+                    dumpAllowedAssociationsLocked(fd, pw, args, opti, true, dumpPackage);
                 }
             } else if ("broadcasts".equals(cmd) || "b".equals(cmd)) {
                 if (opti < args.length) {
@@ -10822,6 +10997,44 @@ public class ActivityManagerService extends IActivityManager.Stub
         mHandler.getLooper().writeToProto(proto,
             ActivityManagerServiceDumpBroadcastsProto.MainHandler.LOOPER);
         proto.end(handlerToken);
+    }
+
+    void dumpAllowedAssociationsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll, String dumpPackage) {
+        boolean needSep = false;
+        boolean printedAnything = false;
+
+        pw.println("ACTIVITY MANAGER ALLOWED ASSOCIATION STATE (dumpsys activity allowed-associations)");
+        boolean printed = false;
+        if (mAllowedAssociations != null) {
+            for (int i = 0; i < mAllowedAssociations.size(); i++) {
+                final String pkg = mAllowedAssociations.keyAt(i);
+                final ArraySet<String> asc = mAllowedAssociations.valueAt(i);
+                boolean printedHeader = false;
+                for (int j = 0; j < asc.size(); j++) {
+                    if (dumpPackage == null || pkg.equals(dumpPackage)
+                            || asc.valueAt(j).equals(dumpPackage)) {
+                        if (!printed) {
+                            pw.println("  Allowed associations (by restricted package):");
+                            printed = true;
+                            needSep = true;
+                            printedAnything = true;
+                        }
+                        if (!printedHeader) {
+                            pw.print("  * ");
+                            pw.print(pkg);
+                            pw.println(":");
+                            printedHeader = true;
+                        }
+                        pw.print("      Allow: ");
+                        pw.println(asc.valueAt(j));
+                    }
+                }
+            }
+        }
+        if (!printed) {
+            pw.println("  (No association restrictions)");
+        }
     }
 
     void dumpBroadcastsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
@@ -16805,6 +17018,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         int changes = 0;
 
         if (app.curAdj != app.setAdj) {
+            // don't compact during bootup
+            if (mConstants.USE_COMPACTION && mBooted) {
+                // Perform a minor compaction when a perceptible app becomes the prev/home app
+                // Perform a major compaction when any app enters cached
+                // reminder: here, setAdj is previous state, curAdj is upcoming state
+                if (app.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ &&
+                    (app.curAdj == ProcessList.PREVIOUS_APP_ADJ ||
+                     app.curAdj == ProcessList.HOME_APP_ADJ)) {
+                    app.reqCompactAction = COMPACT_PROCESS_SOME;
+                    mPendingCompactionProcesses.add(app);
+                    mCompactionHandler.sendEmptyMessage(COMPACT_PROCESS_MSG);
+                } else if (app.setAdj < ProcessList.CACHED_APP_MIN_ADJ &&
+                           app.curAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
+                    app.reqCompactAction = COMPACT_PROCESS_FULL;
+                    mPendingCompactionProcesses.add(app);
+                    mCompactionHandler.sendEmptyMessage(COMPACT_PROCESS_MSG);
+                }
+            }
             ProcessList.setOomAdj(app.pid, app.uid, app.curAdj);
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mCurOomAdjUid == app.info.uid) {
                 String msg = "Set " + app.pid + " " + app.processName + " adj "
@@ -19441,16 +19672,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public boolean isAppStorageSandboxed(int pid, int uid) {
-            if (!StorageManager.hasIsolatedStorage()) {
-                return false;
-            }
+        public int getStorageMountMode(int pid, int uid) {
             if (uid == SHELL_UID || uid == ROOT_UID) {
-                return false;
+                return Zygote.MOUNT_EXTERNAL_FULL;
             }
             synchronized (mPidsSelfLocked) {
                 final ProcessRecord pr = mPidsSelfLocked.get(pid);
-                return pr == null || pr.mountMode != Zygote.MOUNT_EXTERNAL_FULL;
+                return pr == null ? Zygote.MOUNT_EXTERNAL_NONE : pr.mountMode;
             }
         }
     }

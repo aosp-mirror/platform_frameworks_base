@@ -41,10 +41,12 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
 import com.android.server.job.JobServiceContext;
 import com.android.server.job.StateControllerProto;
+import com.android.server.net.NetworkPolicyManagerInternal;
 
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -66,16 +68,29 @@ public final class ConnectivityController extends StateController implements
 
     private final ConnectivityManager mConnManager;
     private final NetworkPolicyManager mNetPolicyManager;
+    private final NetworkPolicyManagerInternal mNetPolicyManagerInternal;
 
     /** List of tracked jobs keyed by source UID. */
     @GuardedBy("mLock")
     private final SparseArray<ArraySet<JobStatus>> mTrackedJobs = new SparseArray<>();
+
+    /**
+     * Keep track of all the UID's jobs that the controller has requested that NetworkPolicyManager
+     * grant an exception to in the app standby chain.
+     */
+    @GuardedBy("mLock")
+    private final SparseArray<ArraySet<JobStatus>> mRequestedWhitelistJobs = new SparseArray<>();
+
+    /** List of currently available networks. */
+    @GuardedBy("mLock")
+    private final ArraySet<Network> mAvailableNetworks = new ArraySet<>();
 
     public ConnectivityController(JobSchedulerService service) {
         super(service);
 
         mConnManager = mContext.getSystemService(ConnectivityManager.class);
         mNetPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
+        mNetPolicyManagerInternal = LocalServices.getService(NetworkPolicyManagerInternal.class);
 
         // We're interested in all network changes; internally we match these
         // network changes against the active network for each UID with jobs.
@@ -109,7 +124,182 @@ public final class ConnectivityController extends StateController implements
             if (jobs != null) {
                 jobs.remove(jobStatus);
             }
+            maybeRevokeStandbyExceptionLocked(jobStatus);
         }
+    }
+
+    @GuardedBy("mLock")
+    @Override
+    public void onConstantsUpdatedLocked() {
+        if (mConstants.USE_HEARTBEATS) {
+            // App idle exceptions are only requested for the rolling quota system.
+            if (DEBUG) Slog.i(TAG, "Revoking all standby exceptions");
+            for (int i = 0; i < mRequestedWhitelistJobs.size(); ++i) {
+                int uid = mRequestedWhitelistJobs.keyAt(i);
+                mNetPolicyManagerInternal.setAppIdleWhitelist(uid, false);
+            }
+            mRequestedWhitelistJobs.clear();
+        }
+    }
+
+    /**
+     * Returns true if the job's requested network is available. This DOES NOT necesarilly mean
+     * that the UID has been granted access to the network.
+     */
+    public boolean isNetworkAvailable(JobStatus job) {
+        synchronized (mLock) {
+            for (int i = 0; i < mAvailableNetworks.size(); ++i) {
+                final Network network = mAvailableNetworks.valueAt(i);
+                final NetworkCapabilities capabilities = mConnManager.getNetworkCapabilities(
+                        network);
+                final boolean satisfied = isSatisfied(job, network, capabilities, mConstants);
+                if (DEBUG) {
+                    Slog.v(TAG, "isNetworkAvailable(" + job + ") with network " + network
+                            + " and capabilities " + capabilities + ". Satisfied=" + satisfied);
+                }
+                if (satisfied) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Request that NetworkPolicyManager grant an exception to the uid from its standby policy
+     * chain.
+     */
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    void requestStandbyExceptionLocked(JobStatus job) {
+        final int uid = job.getSourceUid();
+        // Need to call this before adding the job.
+        final boolean isExceptionRequested = isStandbyExceptionRequestedLocked(uid);
+        ArraySet<JobStatus> jobs = mRequestedWhitelistJobs.get(uid);
+        if (jobs == null) {
+            jobs = new ArraySet<JobStatus>();
+            mRequestedWhitelistJobs.put(uid, jobs);
+        }
+        if (!jobs.add(job) || isExceptionRequested) {
+            if (DEBUG) {
+                Slog.i(TAG, "requestStandbyExceptionLocked found exception already requested.");
+            }
+            return;
+        }
+        if (DEBUG) Slog.i(TAG, "Requesting standby exception for UID: " + uid);
+        mNetPolicyManagerInternal.setAppIdleWhitelist(uid, true);
+    }
+
+    /** Returns whether a standby exception has been requested for the UID. */
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    boolean isStandbyExceptionRequestedLocked(final int uid) {
+        ArraySet jobs = mRequestedWhitelistJobs.get(uid);
+        return jobs != null && jobs.size() > 0;
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    boolean wouldBeReadyWithConnectivityLocked(JobStatus jobStatus) {
+        final boolean networkAvailable = isNetworkAvailable(jobStatus);
+        if (DEBUG) {
+            Slog.v(TAG, "wouldBeReadyWithConnectivityLocked: " + jobStatus.toShortString()
+                    + " networkAvailable=" + networkAvailable);
+        }
+        // If the network isn't available, then requesting an exception won't help.
+
+        return networkAvailable && wouldBeReadyWithConstraintLocked(jobStatus,
+                JobStatus.CONSTRAINT_CONNECTIVITY);
+    }
+
+    /**
+     * Tell NetworkPolicyManager not to block a UID's network connection if that's the only
+     * thing stopping a job from running.
+     */
+    @GuardedBy("mLock")
+    @Override
+    public void evaluateStateLocked(JobStatus jobStatus) {
+        if (mConstants.USE_HEARTBEATS) {
+            // This should only be used for the rolling quota system.
+            return;
+        }
+
+        if (!jobStatus.hasConnectivityConstraint()) {
+            return;
+        }
+
+        // Always check the full job readiness stat in case the component has been disabled.
+        if (wouldBeReadyWithConnectivityLocked(jobStatus)) {
+            if (DEBUG) {
+                Slog.i(TAG, "evaluateStateLocked finds job " + jobStatus + " would be ready.");
+            }
+            requestStandbyExceptionLocked(jobStatus);
+        } else {
+            if (DEBUG) {
+                Slog.i(TAG, "evaluateStateLocked finds job " + jobStatus + " would not be ready.");
+            }
+            maybeRevokeStandbyExceptionLocked(jobStatus);
+        }
+    }
+
+    @GuardedBy("mLock")
+    @Override
+    public void reevaluateStateLocked(final int uid) {
+        if (mConstants.USE_HEARTBEATS) {
+            return;
+        }
+        // Check if we still need a connectivity exception in case the JobService was disabled.
+        ArraySet<JobStatus> jobs = mTrackedJobs.get(uid);
+        if (jobs == null) {
+            return;
+        }
+        for (int i = jobs.size() - 1; i >= 0; i--) {
+            evaluateStateLocked(jobs.valueAt(i));
+        }
+    }
+
+    /** Cancel the requested standby exception if none of the jobs would be ready to run anyway. */
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    void maybeRevokeStandbyExceptionLocked(final JobStatus job) {
+        final int uid = job.getSourceUid();
+        if (!isStandbyExceptionRequestedLocked(uid)) {
+            return;
+        }
+        ArraySet<JobStatus> jobs = mRequestedWhitelistJobs.get(uid);
+        if (jobs == null) {
+            Slog.wtf(TAG,
+                    "maybeRevokeStandbyExceptionLocked found null jobs array even though a "
+                            + "standby exception has been requested.");
+            return;
+        }
+        if (!jobs.remove(job) || jobs.size() > 0) {
+            if (DEBUG) {
+                Slog.i(TAG,
+                        "maybeRevokeStandbyExceptionLocked not revoking because there are still "
+                                + jobs.size() + " jobs left.");
+            }
+            return;
+        }
+        // No more jobs that need an exception.
+        revokeStandbyExceptionLocked(uid);
+    }
+
+    /**
+     * Tell NetworkPolicyManager to revoke any exception it granted from its standby policy chain
+     * for the uid.
+     */
+    @GuardedBy("mLock")
+    private void revokeStandbyExceptionLocked(final int uid) {
+        if (DEBUG) Slog.i(TAG, "Revoking standby exception for UID: " + uid);
+        mNetPolicyManagerInternal.setAppIdleWhitelist(uid, false);
+        mRequestedWhitelistJobs.remove(uid);
+    }
+
+    @GuardedBy("mLock")
+    @Override
+    public void onAppRemovedLocked(String pkgName, int uid) {
+        mTrackedJobs.delete(uid);
     }
 
     /**
@@ -326,6 +516,14 @@ public final class ConnectivityController extends StateController implements
 
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
         @Override
+        public void onAvailable(Network network) {
+            if (DEBUG) Slog.v(TAG, "onAvailable: " + network);
+            synchronized (mLock) {
+                mAvailableNetworks.add(network);
+            }
+        }
+
+        @Override
         public void onCapabilitiesChanged(Network network, NetworkCapabilities capabilities) {
             if (DEBUG) {
                 Slog.v(TAG, "onCapabilitiesChanged: " + network);
@@ -337,6 +535,9 @@ public final class ConnectivityController extends StateController implements
         public void onLost(Network network) {
             if (DEBUG) {
                 Slog.v(TAG, "onLost: " + network);
+            }
+            synchronized (mLock) {
+                mAvailableNetworks.remove(network);
             }
             updateTrackedJobs(-1, network);
         }
@@ -356,6 +557,27 @@ public final class ConnectivityController extends StateController implements
     @Override
     public void dumpControllerStateLocked(IndentingPrintWriter pw,
             Predicate<JobStatus> predicate) {
+        if (mRequestedWhitelistJobs.size() > 0) {
+            pw.print("Requested standby exceptions:");
+            for (int i = 0; i < mRequestedWhitelistJobs.size(); i++) {
+                pw.print(" ");
+                pw.print(mRequestedWhitelistJobs.keyAt(i));
+                pw.print(" (");
+                pw.print(mRequestedWhitelistJobs.valueAt(i).size());
+                pw.print(" jobs)");
+            }
+            pw.println();
+        }
+        if (mAvailableNetworks.size() > 0) {
+            pw.println("Available networks:");
+            pw.increaseIndent();
+            for (int i = 0; i < mAvailableNetworks.size(); i++) {
+                pw.println(mAvailableNetworks.valueAt(i));
+            }
+            pw.decreaseIndent();
+        } else {
+            pw.println("No available networks");
+        }
         for (int i = 0; i < mTrackedJobs.size(); i++) {
             final ArraySet<JobStatus> jobs = mTrackedJobs.valueAt(i);
             for (int j = 0; j < jobs.size(); j++) {

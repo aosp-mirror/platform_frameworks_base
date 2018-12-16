@@ -39,6 +39,7 @@ import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassificationSessionId;
 import android.view.textclassifier.TextClassifier;
+import android.view.textclassifier.TextClassifierEvent;
 import android.view.textclassifier.TextLanguage;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
@@ -189,6 +190,15 @@ public abstract class TextClassifierService extends Service {
                 SelectionEvent event) {
             Preconditions.checkNotNull(event);
             TextClassifierService.this.onSelectionEvent(sessionId, event);
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void onTextClassifierEvent(
+                TextClassificationSessionId sessionId,
+                TextClassifierEvent event) {
+            Preconditions.checkNotNull(event);
+            TextClassifierService.this.onTextClassifierEvent(sessionId, event);
         }
 
         /** {@inheritDoc} */
@@ -368,9 +378,26 @@ public abstract class TextClassifierService extends Service {
      *
      * @param sessionId the session id
      * @param event the selection event
+     * @deprecated
+     *      Use {@link #onTextClassifierEvent(TextClassificationSessionId, TextClassifierEvent)}
+     *      instead
      */
+    @Deprecated
     public void onSelectionEvent(
             @Nullable TextClassificationSessionId sessionId, @NonNull SelectionEvent event) {}
+
+    /**
+     * Writes the TextClassifier event.
+     * This is called when a TextClassifier event occurs. e.g. user changed selection,
+     * smart selection happened, or a link was clicked.
+     *
+     * <p>The default implementation ignores the event.
+     *
+     * @param sessionId the session id
+     * @param event the TextClassifier event
+     */
+    public void onTextClassifierEvent(
+            @Nullable TextClassificationSessionId sessionId, @NonNull TextClassifierEvent event) {}
 
     /**
      * Creates a new text classification session for the specified context.

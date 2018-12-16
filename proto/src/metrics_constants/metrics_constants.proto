@@ -6637,6 +6637,18 @@ message MetricsEvent {
     // OS: Q
     SETTINGS_WIFI_DPP_ENROLLEE = 1596;
 
+    // OPEN: Settings > Apps & Notifications -> Special app access -> Financial Apps Sms Access
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_FINANCIAL_APPS_SMS_ACCESS = 1597;
+
+    // OPEN: QS Sensor Privacy Mode tile shown
+    // ACTION: QS Sensor Privacy Mode tile tapped
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: Q
+    QS_SENSOR_PRIVACY = 1598;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.

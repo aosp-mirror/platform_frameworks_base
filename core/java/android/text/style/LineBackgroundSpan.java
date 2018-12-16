@@ -118,7 +118,7 @@ public interface LineBackgroundSpan extends ParagraphStyle
                 int lineNumber) {
             final int originColor = paint.getColor();
             paint.setColor(mColor);
-            canvas.drawRect(left, right, top, bottom, paint);
+            canvas.drawRect(left, top, right, bottom, paint);
             paint.setColor(originColor);
         }
     }

@@ -207,6 +207,8 @@ java_defaults {
         "core/java/android/hardware/usb/IUsbSerialReader.aidl",
         "core/java/android/net/ICaptivePortal.aidl",
         "core/java/android/net/IConnectivityManager.aidl",
+        "core/java/android/hardware/ISensorPrivacyListener.aidl",
+        "core/java/android/hardware/ISensorPrivacyManager.aidl",
         "core/java/android/net/IIpConnectivityMetrics.aidl",
         "core/java/android/net/IEthernetManager.aidl",
         "core/java/android/net/IEthernetServiceListener.aidl",
@@ -535,6 +537,7 @@ java_defaults {
         "telephony/java/android/telephony/ims/aidl/IImsServiceController.aidl",
         "telephony/java/android/telephony/ims/aidl/IImsServiceControllerListener.aidl",
         "telephony/java/android/telephony/ims/aidl/IImsSmsListener.aidl",
+        "telephony/java/android/telephony/ims/aidl/IRcs.aidl",
         "telephony/java/android/telephony/mbms/IMbmsDownloadSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IMbmsStreamingSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IMbmsGroupCallSessionCallback.aidl",
@@ -611,7 +614,6 @@ java_defaults {
         "telephony/java/com/android/internal/telephony/euicc/ISetDefaultSmdpAddressCallback.aidl",
         "telephony/java/com/android/internal/telephony/euicc/ISetNicknameCallback.aidl",
         "telephony/java/com/android/internal/telephony/euicc/ISwitchToProfileCallback.aidl",
-        "telephony/java/com/android/internal/telephony/rcs/IRcs.aidl",
         "wifi/java/android/net/wifi/INetworkRequestMatchCallback.aidl",
         "wifi/java/android/net/wifi/INetworkRequestUserSelectionCallback.aidl",
         "wifi/java/android/net/wifi/ISoftApCallback.aidl",
@@ -1190,6 +1192,7 @@ framework_docs_only_libs = [
 metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
     "--hide-package com.android.okhttp " +
     "--hide-package com.android.org.conscrypt --hide-package com.android.server " +
+    "--error UnhiddenSystemApi " +
     "--hide RequiresPermission " +
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
@@ -1606,6 +1609,7 @@ droidstubs {
     dex_mapping_filename: "dex-mapping.txt",
     args: metalava_framework_docs_args +
         " --hide ReferencesHidden " +
+        " --hide UnhiddenSystemApi " +
         " --show-unannotated " +
         " --show-annotation android.annotation.SystemApi " +
         " --show-annotation android.annotation.TestApi "

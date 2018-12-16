@@ -527,6 +527,24 @@ public final class BroadcastQueue {
     private void deliverToRegisteredReceiverLocked(BroadcastRecord r,
             BroadcastFilter filter, boolean ordered, int index) {
         boolean skip = false;
+        if (!mService.validateAssociationAllowedLocked(r.callerPackage, r.callingUid,
+                filter.packageName, filter.owningUid)) {
+            Slog.w(TAG, "Association not allowed: broadcasting "
+                    + r.intent.toString()
+                    + " from " + r.callerPackage + " (pid=" + r.callingPid
+                    + ", uid=" + r.callingUid + ") to " + filter.packageName + " through "
+                    + filter);
+            skip = true;
+        }
+        if (!skip && !mService.mIntentFirewall.checkBroadcast(r.intent, r.callingUid,
+                r.callingPid, r.resolvedType, filter.receiverList.uid)) {
+            Slog.w(TAG, "Firewall blocked: broadcasting "
+                    + r.intent.toString()
+                    + " from " + r.callerPackage + " (pid=" + r.callingPid
+                    + ", uid=" + r.callingUid + ") to " + filter.packageName + " through "
+                    + filter);
+            skip = true;
+        }
         if (filter.requiredPermission != null) {
             int perm = mService.checkComponentPermission(filter.requiredPermission,
                     r.callingPid, r.callingUid, -1, true);
@@ -616,11 +634,6 @@ public final class BroadcastQueue {
                     + " requires appop " + AppOpsManager.opToName(r.appOp)
                     + " due to sender " + r.callerPackage
                     + " (uid " + r.callingUid + ")");
-            skip = true;
-        }
-
-        if (!mService.mIntentFirewall.checkBroadcast(r.intent, r.callingUid,
-                r.callingPid, r.resolvedType, filter.receiverList.uid)) {
             skip = true;
         }
 
@@ -1082,6 +1095,24 @@ public final class BroadcastQueue {
                         > brOptions.getMaxManifestReceiverApiLevel())) {
             skip = true;
         }
+        if (!skip && !mService.validateAssociationAllowedLocked(r.callerPackage, r.callingUid,
+                component.getPackageName(), info.activityInfo.applicationInfo.uid)) {
+            Slog.w(TAG, "Association not allowed: broadcasting "
+                    + r.intent.toString()
+                    + " from " + r.callerPackage + " (pid=" + r.callingPid
+                    + ", uid=" + r.callingUid + ") to " + component.flattenToShortString());
+            skip = true;
+        }
+        if (!skip) {
+            skip = !mService.mIntentFirewall.checkBroadcast(r.intent, r.callingUid,
+                    r.callingPid, r.resolvedType, info.activityInfo.applicationInfo.uid);
+            if (skip) {
+                Slog.w(TAG, "Firewall blocked: broadcasting "
+                        + r.intent.toString()
+                        + " from " + r.callerPackage + " (pid=" + r.callingPid
+                        + ", uid=" + r.callingUid + ") to " + component.flattenToShortString());
+            }
+        }
         int perm = mService.checkComponentPermission(info.activityInfo.permission,
                 r.callingPid, r.callingUid, info.activityInfo.applicationInfo.uid,
                 info.activityInfo.exported);
@@ -1169,10 +1200,6 @@ public final class BroadcastQueue {
                     + " due to sender " + r.callerPackage
                     + " (uid " + r.callingUid + ")");
             skip = true;
-        }
-        if (!skip) {
-            skip = !mService.mIntentFirewall.checkBroadcast(r.intent, r.callingUid,
-                    r.callingPid, r.resolvedType, info.activityInfo.applicationInfo.uid);
         }
         boolean isSingleton = false;
         try {

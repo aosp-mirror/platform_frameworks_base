@@ -67,6 +67,8 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
+import java.util.ArrayList;
+
 public class StatusBarNotificationPresenter implements NotificationPresenter,
         ConfigurationController.ConfigurationListener {
 
@@ -105,6 +107,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final int mMaxAllowedKeyguardNotifications;
     private final IStatusBarService mBarService;
     private boolean mReinflateNotificationsOnUserSwitched;
+    private boolean mDispatchUiModeChangeOnUserSwitched;
     private final UnlockMethodCache mUnlockMethodCache;
     private TextView mNotificationPanelDebugText;
 
@@ -183,6 +186,27 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             mEntryManager.updateNotificationsOnDensityOrFontScaleChanged();
         } else {
             mReinflateNotificationsOnUserSwitched = true;
+        }
+    }
+
+    @Override
+    public void onUiModeChanged() {
+        if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
+            updateNotificationOnUiModeChanged();
+        } else {
+            mDispatchUiModeChangeOnUserSwitched = true;
+        }
+    }
+
+    private void updateNotificationOnUiModeChanged() {
+        ArrayList<Entry> userNotifications
+                = mEntryManager.getNotificationData().getNotificationsForCurrentUser();
+        for (int i = 0; i < userNotifications.size(); i++) {
+            Entry entry = userNotifications.get(i);
+            ExpandableNotificationRow row = entry.getRow();
+            if (row != null) {
+                row.onUiModeChanged();
+            }
         }
     }
 
@@ -300,6 +324,10 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         if (mReinflateNotificationsOnUserSwitched) {
             mEntryManager.updateNotificationsOnDensityOrFontScaleChanged();
             mReinflateNotificationsOnUserSwitched = false;
+        }
+        if (mDispatchUiModeChangeOnUserSwitched) {
+            updateNotificationOnUiModeChanged();
+            mDispatchUiModeChangeOnUserSwitched = false;
         }
         updateNotificationViews();
         mMediaManager.clearCurrentMediaNotification();

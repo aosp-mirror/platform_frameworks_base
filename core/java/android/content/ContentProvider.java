@@ -327,6 +327,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         public ContentProviderResult[] applyBatch(String callingPkg, String authority,
                 ArrayList<ContentProviderOperation> operations)
                 throws OperationApplicationException {
+            validateIncomingAuthority(authority);
             int numOperations = operations.size();
             final int[] userIds = new int[numOperations];
             for (int i = 0; i < numOperations; i++) {
@@ -447,6 +448,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         @Override
         public Bundle call(String callingPkg, String authority, String method, @Nullable String arg,
                 @Nullable Bundle extras) {
+            validateIncomingAuthority(authority);
             Bundle.setDefusable(extras, true);
             Trace.traceBegin(TRACE_TAG_DATABASE, "call");
             final String original = setCallingPackage(callingPkg);
@@ -1182,12 +1184,12 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * Implement this to handle query requests where the arguments are packed into a {@link Bundle}.
      * Arguments may include traditional SQL style query arguments. When present these
      * should be handled  according to the contract established in
-     * {@link #query(Uri, String[], String, String[], String, CancellationSignal).
+     * {@link #query(Uri, String[], String, String[], String, CancellationSignal)}.
      *
      * <p>Traditional SQL arguments can be found in the bundle using the following keys:
-     * <li>{@link ContentResolver#QUERY_ARG_SQL_SELECTION}
-     * <li>{@link ContentResolver#QUERY_ARG_SQL_SELECTION_ARGS}
-     * <li>{@link ContentResolver#QUERY_ARG_SQL_SORT_ORDER}
+     * <li>{@link android.content.ContentResolver#QUERY_ARG_SQL_SELECTION}
+     * <li>{@link android.content.ContentResolver#QUERY_ARG_SQL_SELECTION_ARGS}
+     * <li>{@link android.content.ContentResolver#QUERY_ARG_SQL_SORT_ORDER}
      *
      * <p>This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
@@ -1244,8 +1246,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
 
         return cursor;</pre>
      * <p>
-     * @see #query(Uri, String[], String, String[], String, CancellationSignal) for
-     *     implementation details.
+     * See {@link #query(Uri, String[], String, String[], String, CancellationSignal)}
+     * for implementation details.
      *
      * @param uri The URI to query. This will be the full URI sent by the client.
      * @param projection The list of columns to put into the cursor.

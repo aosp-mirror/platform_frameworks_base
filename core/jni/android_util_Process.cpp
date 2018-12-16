@@ -1137,7 +1137,7 @@ static jlongArray android_os_Process_getRss(JNIEnv* env, jobject clazz, jint pid
     UniqueFile file = MakeUniqueFile(status_path.c_str(), "re");
 
     char line[256];
-    while (fgets(line, sizeof(line), file.get())) {
+    while (file != nullptr && fgets(line, sizeof(line), file.get())) {
         jlong v;
         if ( sscanf(line, "VmRSS: %" SCNd64 " kB", &v) == 1) {
             rss[0] = v;

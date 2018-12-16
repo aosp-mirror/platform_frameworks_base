@@ -398,6 +398,8 @@ public class ZygoteProcess {
             argsForZygote.add("--mount-external-write");
         } else if (mountExternal == Zygote.MOUNT_EXTERNAL_FULL) {
             argsForZygote.add("--mount-external-full");
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_INSTALLER) {
+            argsForZygote.add("--mount-external-installer");
         }
 
         argsForZygote.add("--target-sdk-version=" + targetSdkVersion);

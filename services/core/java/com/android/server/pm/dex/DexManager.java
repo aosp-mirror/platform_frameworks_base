@@ -19,7 +19,6 @@ package com.android.server.pm.dex;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
 import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
-import static com.android.server.pm.dex.PackageDynamicCodeLoading.PackageDynamicCode;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -90,18 +89,17 @@ public class DexManager {
     // encode and save the dex usage data.
     private final PackageDexUsage mPackageDexUsage;
 
-    // PackageDynamicCodeLoading handles recording of dynamic code loading -
-    // which is similar to PackageDexUsage but records a different aspect of the data.
+    // DexLogger handles recording of dynamic code loading - which is similar to PackageDexUsage
+    // but records a different aspect of the data.
     // (It additionally includes DEX files loaded with unsupported class loaders, and doesn't
     // record class loaders or ISAs.)
-    private final PackageDynamicCodeLoading mPackageDynamicCodeLoading;
+    private final DexLogger mDexLogger;
 
     private final IPackageManager mPackageManager;
     private final PackageDexOptimizer mPackageDexOptimizer;
     private final Object mInstallLock;
     @GuardedBy("mInstallLock")
     private final Installer mInstaller;
-    private final Listener mListener;
 
     // Possible outcomes of a dex search.
     private static int DEX_SEARCH_NOT_FOUND = 0;  // dex file not found
@@ -122,26 +120,20 @@ public class DexManager {
      */
     private final static PackageUseInfo DEFAULT_USE_INFO = new PackageUseInfo();
 
-    public interface Listener {
-        /**
-         * Invoked just before the secondary dex file {@code dexPath} for the specified application
-         * is reconciled.
-         */
-        void onReconcileSecondaryDexFile(ApplicationInfo appInfo, DexUseInfo dexUseInfo,
-                String dexPath, int storageFlags);
-    }
-
     public DexManager(Context context, IPackageManager pms, PackageDexOptimizer pdo,
-            Installer installer, Object installLock, Listener listener) {
+            Installer installer, Object installLock) {
         mContext = context;
         mPackageCodeLocationsCache = new HashMap<>();
         mPackageDexUsage = new PackageDexUsage();
-        mPackageDynamicCodeLoading = new PackageDynamicCodeLoading();
         mPackageManager = pms;
         mPackageDexOptimizer = pdo;
         mInstaller = installer;
         mInstallLock = installLock;
-        mListener = listener;
+        mDexLogger = new DexLogger(pms, installer, installLock);
+    }
+
+    public DexLogger getDexLogger() {
+        return mDexLogger;
     }
 
     public void systemReady() {
@@ -243,11 +235,8 @@ public class DexManager {
                     continue;
                 }
 
-                if (mPackageDynamicCodeLoading.record(searchResult.mOwningPackageName, dexPath,
-                        PackageDynamicCodeLoading.FILE_TYPE_DEX, loaderUserId,
-                        loadingAppInfo.packageName)) {
-                    mPackageDynamicCodeLoading.maybeWriteAsync();
-                }
+                mDexLogger.record(loaderUserId, dexPath, searchResult.mOwningPackageName,
+                        loadingAppInfo.packageName);
 
                 if (classLoaderContexts != null) {
 
@@ -284,7 +273,7 @@ public class DexManager {
             loadInternal(existingPackages);
         } catch (Exception e) {
             mPackageDexUsage.clear();
-            mPackageDynamicCodeLoading.clear();
+            mDexLogger.clear();
             Slog.w(TAG, "Exception while loading. Starting with a fresh state.", e);
         }
     }
@@ -335,16 +324,12 @@ public class DexManager {
             if (mPackageDexUsage.removePackage(packageName)) {
                 mPackageDexUsage.maybeWriteAsync();
             }
-            if (mPackageDynamicCodeLoading.removePackage(packageName)) {
-                mPackageDynamicCodeLoading.maybeWriteAsync();
-            }
+            mDexLogger.removePackage(packageName);
         } else {
             if (mPackageDexUsage.removeUserPackage(packageName, userId)) {
                 mPackageDexUsage.maybeWriteAsync();
             }
-            if (mPackageDynamicCodeLoading.removeUserPackage(packageName, userId)) {
-                mPackageDynamicCodeLoading.maybeWriteAsync();
-            }
+            mDexLogger.removeUserPackage(packageName, userId);
         }
     }
 
@@ -423,10 +408,9 @@ public class DexManager {
         }
 
         try {
-            mPackageDynamicCodeLoading.read();
-            mPackageDynamicCodeLoading.syncData(packageToUsersMap);
+            mDexLogger.readAndSync(packageToUsersMap);
         } catch (Exception e) {
-            mPackageDynamicCodeLoading.clear();
+            mDexLogger.clear();
             Slog.w(TAG, "Exception while loading package dynamic code usage. "
                     + "Starting with a fresh state.", e);
         }
@@ -458,11 +442,6 @@ public class DexManager {
     @VisibleForTesting
     /*package*/ boolean hasInfoOnPackage(String packageName) {
         return mPackageDexUsage.getPackageUseInfo(packageName) != null;
-    }
-
-    @VisibleForTesting
-    /*package*/ PackageDynamicCode getPackageDynamicCodeInfo(String packageName) {
-        return mPackageDynamicCodeLoading.getPackageDynamicCodeInfo(packageName);
     }
 
     /**
@@ -572,10 +551,6 @@ public class DexManager {
                 updated = mPackageDexUsage.removeDexFile(
                         packageName, dexPath, dexUseInfo.getOwnerUserId()) || updated;
                 continue;
-            }
-
-            if (mListener != null) {
-                mListener.onReconcileSecondaryDexFile(info, dexUseInfo, dexPath, flags);
             }
 
             boolean dexStillExists = true;
@@ -721,7 +696,7 @@ public class DexManager {
      */
     public void writePackageDexUsageNow() {
         mPackageDexUsage.writeNow();
-        mPackageDynamicCodeLoading.writeNow();
+        mDexLogger.writeNow();
     }
 
     private void registerSettingObserver() {

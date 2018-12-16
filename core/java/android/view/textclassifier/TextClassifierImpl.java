@@ -139,7 +139,7 @@ public final class TextClassifierImpl implements TextClassifier {
                         FACTORY_MODEL_DIR,
                         LANG_ID_FACTORY_MODEL_FILENAME_REGEX,
                         UPDATED_LANG_ID_MODEL_FILE,
-                        fd -> -1, // TODO: Replace this with LangIdModel.getVersion(fd)
+                        LangIdModel::getVersion,
                         fd -> ModelFileManager.ModelFile.LANGUAGE_INDEPENDENT));
         mActionsModelFileManager = new ModelFileManager(
                 new ModelFileManager.ModelFileSupplierImpl(
@@ -341,6 +341,11 @@ public final class TextClassifierImpl implements TextClassifier {
         }
     }
 
+    @Override
+    public void onTextClassifierEvent(@NonNull TextClassifierEvent event) {
+        // TODO: Implement.
+    }
+
     /** @inheritDoc */
     @Override
     public TextLanguage detectLanguage(@NonNull TextLanguage.Request request) {
@@ -387,7 +392,10 @@ public final class TextClassifierImpl implements TextClassifier {
 
             Collection<String> expectedTypes = resolveActionTypesFromRequest(request);
             List<ConversationActions.ConversationAction> conversationActions = new ArrayList<>();
-            int maxSuggestions = Math.min(request.getMaxSuggestions(), nativeSuggestions.length);
+            int maxSuggestions = nativeSuggestions.length;
+            if (request.getMaxSuggestions() > 0) {
+                maxSuggestions = Math.min(request.getMaxSuggestions(), nativeSuggestions.length);
+            }
             for (int i = 0; i < maxSuggestions; i++) {
                 ActionsSuggestionsModel.ActionSuggestion nativeSuggestion = nativeSuggestions[i];
                 String actionType = nativeSuggestion.getActionType();
@@ -400,7 +408,7 @@ public final class TextClassifierImpl implements TextClassifier {
                                 .setConfidenceScore(nativeSuggestion.getScore())
                                 .build());
             }
-            return new ConversationActions(conversationActions);
+            return new ConversationActions(conversationActions, /*id*/ null);
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.
             Log.e(LOG_TAG, "Error suggesting conversation actions.", t);
@@ -798,6 +806,9 @@ public final class TextClassifierImpl implements TextClassifier {
             if (foreignText) {
                 insertTranslateAction(actions, context, text);
             }
+            actions.forEach(
+                    action -> action.getIntent()
+                            .putExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, true));
             return actions;
         }
 

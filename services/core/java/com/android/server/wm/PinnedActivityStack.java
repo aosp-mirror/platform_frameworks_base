@@ -77,7 +77,7 @@ class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
     }
 
     boolean isAnimatingBoundsToFullscreen() {
-        return getWindowContainerController().isAnimatingBoundsToFullscreen();
+        return getWindowContainerController().mContainer.isAnimatingBoundsToFullscreen();
     }
 
     /**

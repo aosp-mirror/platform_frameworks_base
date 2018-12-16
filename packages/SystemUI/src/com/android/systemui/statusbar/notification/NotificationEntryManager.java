@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -61,7 +62,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.ForegroundServiceController;
-import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.bubbles.BubbleController;
@@ -83,7 +83,6 @@ import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -96,6 +95,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * NotificationEntryManager is responsible for the adding, removing, and updating of notifications.
@@ -110,6 +110,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     private static final boolean ENABLE_HEADS_UP = true;
     private static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
+    public static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
+
     private final NotificationMessagingUtil mMessagingUtil;
     protected final Context mContext;
     protected final HashMap<String, NotificationData.Entry> mPendingNotifications = new HashMap<>();
@@ -117,8 +119,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
     private final NotificationGroupManager mGroupManager =
             Dependency.get(NotificationGroupManager.class);
-    private final NotificationGroupAlertTransferHelper mGroupAlertTransferHelper =
-            Dependency.get(NotificationGroupAlertTransferHelper.class);
     private final NotificationGutsManager mGutsManager =
             Dependency.get(NotificationGutsManager.class);
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
@@ -139,6 +139,9 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     private NotificationListener mNotificationListener;
     private ShadeController mShadeController;
 
+    private final Handler mDeferredNotificationViewUpdateHandler;
+    private Runnable mUpdateNotificationViewsCallback;
+
     protected IDreamManager mDreamManager;
     protected IStatusBarService mBarService;
     private NotificationPresenter mPresenter;
@@ -157,6 +160,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             = new ArrayList<>();
     private ExpandableNotificationRow.OnAppOpsClickListener mOnAppOpsClickListener;
     private NotificationViewHierarchyManager.StatusBarStateListener mStatusBarStateListener;
+    @Nullable private AlertTransferListener mAlertTransferListener;
 
     private final class NotificationClicker implements View.OnClickListener {
 
@@ -258,12 +262,11 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mMessagingUtil = new NotificationMessagingUtil(context);
         mBubbleController.setDismissListener(this /* bubbleEventListener */);
         mNotificationData = new NotificationData();
-        Dependency.get(InitController.class).addPostInitTask(this::onPostInit);
+        mDeferredNotificationViewUpdateHandler = new Handler();
     }
 
-    private void onPostInit() {
-        mGroupAlertTransferHelper.setPendingEntries(mPendingNotifications);
-        mGroupManager.addOnGroupChangeListener(mGroupAlertTransferHelper);
+    public void setAlertTransferListener(AlertTransferListener listener) {
+        mAlertTransferListener = listener;
     }
 
     /**
@@ -301,6 +304,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             NotificationListContainer listContainer, Callback callback,
             HeadsUpManager headsUpManager) {
         mPresenter = presenter;
+        mUpdateNotificationViewsCallback = mPresenter::updateNotificationViews;
         mCallback = callback;
         mHeadsUpManager = headsUpManager;
         mNotificationData.setHeadsUpManager(mHeadsUpManager);
@@ -540,6 +544,17 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         tagForeground(shadeEntry.notification);
         updateNotifications();
         mCallback.onNotificationAdded(shadeEntry);
+
+        maybeScheduleUpdateNotificationViews(shadeEntry);
+    }
+
+    private void maybeScheduleUpdateNotificationViews(NotificationData.Entry entry) {
+        long audibleAlertTimeout = RECENTLY_ALERTED_THRESHOLD_MS
+                - (System.currentTimeMillis() - entry.lastAudiblyAlertedMs);
+        if (audibleAlertTimeout > 0) {
+            mDeferredNotificationViewUpdateHandler.postDelayed(
+                    mUpdateNotificationViewsCallback, audibleAlertTimeout);
+        }
     }
 
     /**
@@ -587,7 +602,9 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                     mVisualStabilityManager.onLowPriorityUpdated(entry);
                     mPresenter.updateNotificationViews();
                 }
-                mGroupAlertTransferHelper.onInflationFinished(entry);
+                if (mAlertTransferListener != null) {
+                    mAlertTransferListener.onEntryReinflated(entry);
+                }
             }
         }
         entry.setLowPriorityStateUpdated(false);
@@ -600,8 +617,12 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
     private void removeNotificationInternal(String key,
             @Nullable NotificationListenerService.RankingMap ranking, boolean forceRemove) {
+        final NotificationData.Entry entry = mNotificationData.get(key);
+
         abortExistingInflation(key);
-        mGroupAlertTransferHelper.cleanUpPendingAlertInfo(key);
+        if (mAlertTransferListener != null && entry != null) {
+            mAlertTransferListener.onEntryRemoved(entry);
+        }
 
         // Attempt to remove notifications from their alert managers (heads up, ambient pulse).
         // Though the remove itself may fail, it lets the manager know to remove as soon as
@@ -619,8 +640,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         if (mAmbientPulseManager.isAlerting(key)) {
             mAmbientPulseManager.removeNotification(key, false /* ignoreEarliestRemovalTime */);
         }
-
-        NotificationData.Entry entry = mNotificationData.get(key);
 
         if (entry == null) {
             mCallback.onNotificationRemoved(key, null /* old */);
@@ -846,7 +865,9 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 mNotificationData.getImportance(key));
 
         mPendingNotifications.put(key, shadeEntry);
-        mGroupAlertTransferHelper.onPendingEntryAdded(shadeEntry);
+        if (mAlertTransferListener != null) {
+            mAlertTransferListener.onPendingEntryAdded(shadeEntry);
+        }
     }
 
     @VisibleForTesting
@@ -937,6 +958,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         }
 
         mCallback.onNotificationUpdated(notification);
+
+        maybeScheduleUpdateNotificationViews(entry);
     }
 
     @Override
@@ -1228,6 +1251,15 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             // This notification was updated to be alerting, show it!
             alertManager.showNotification(entry);
         }
+    }
+
+    /**
+     * @return An iterator for all "pending" notifications. Pending notifications are newly-posted
+     * notifications whose views have not yet been inflated. In general, the system pretends like
+     * these don't exist, although there are a couple exceptions.
+     */
+    public Iterable<NotificationData.Entry> getPendingNotificationsIterator() {
+        return mPendingNotifications.values();
     }
 
     /**

@@ -3080,6 +3080,7 @@ public abstract class Context {
             //@hide: COUNTRY_DETECTOR,
             SEARCH_SERVICE,
             SENSOR_SERVICE,
+            SENSOR_PRIVACY_SERVICE,
             STORAGE_SERVICE,
             STORAGE_STATS_SERVICE,
             WALLPAPER_SERVICE,
@@ -3541,6 +3542,18 @@ public abstract class Context {
      * @see android.hardware.SensorManager
      */
     public static final String SENSOR_SERVICE = "sensor";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.hardware.SensorPrivacyManager} for accessing sensor privacy
+     * functions.
+     *
+     * @see #getSystemService(String)
+     * @see android.hardware.SensorPrivacyManager
+     *
+     * @hide
+     */
+    public static final String SENSOR_PRIVACY_SERVICE = "sensor_privacy";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
@@ -4462,7 +4475,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.telephony.rcs.RcsManager}.
+     * {@link android.telephony.ims.RcsManager}.
      * @hide
      */
     public static final String TELEPHONY_RCS_SERVICE = "ircs";

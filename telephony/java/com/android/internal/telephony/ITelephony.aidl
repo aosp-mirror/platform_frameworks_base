@@ -1408,6 +1408,14 @@ interface ITelephony {
     void carrierActionReportDefaultNetworkStatus(int subId, boolean report);
 
     /**
+     * Action set from carrier signalling broadcast receivers to reset all carrier actions.
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @hide
+     */
+    void carrierActionResetAll(int subId);
+
+    /**
      * Get aggregated video call data usage since boot.
      * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
      *
@@ -1471,6 +1479,19 @@ interface ITelephony {
      * @hide
      */
     SignalStrength getSignalStrength(int subId);
+
+    /**
+     * Get the card ID of the default eUICC card. If there is no eUICC, returns
+     * {@link #INVALID_CARD_ID}.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param subId subscription ID used for authentication
+     * @param callingPackage package making the call
+     * @return card ID of the default eUICC card.
+     * @hide
+     */
+    int getCardIdForDefaultEuicc(int subId, String callingPackage); 
 
     /**
      * Get slot info for all the UICC slots.
