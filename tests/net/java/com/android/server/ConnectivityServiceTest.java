@@ -4024,6 +4024,14 @@ public class ConnectivityServiceTest {
         cellNetworkCallback.assertNoCallback();
         assertTrue(((LinkProperties)cbi.arg).isPrivateDnsActive());
         assertEquals("strict.example.com", ((LinkProperties)cbi.arg).getPrivateDnsServerName());
+
+        // Send the same LinkProperties and expect getting the same result including private dns.
+        // b/118518971
+        LinkProperties oldLp = (LinkProperties) cbi.arg;
+        mCellNetworkAgent.sendLinkProperties(cellLp);
+        waitForIdle();
+        LinkProperties newLp = mCm.getLinkProperties(cbi.network);
+        assertEquals(oldLp, newLp);
     }
 
     @Test

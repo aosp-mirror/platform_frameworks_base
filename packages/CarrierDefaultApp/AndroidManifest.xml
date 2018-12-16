@@ -31,7 +31,8 @@
     <application
         android:label="@string/app_name"
         android:directBootAware="true"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:icon="@mipmap/ic_launcher_android">
         <receiver android:name="com.android.carrierdefaultapp.CarrierDefaultBroadcastReceiver">
             <intent-filter>
                 <action android:name="com.android.internal.telephony.CARRIER_SIGNAL_REDIRECTED" />
@@ -45,6 +46,7 @@
         <activity
             android:name="com.android.carrierdefaultapp.CaptivePortalLoginActivity"
             android:label="@string/action_bar_label"
+            android:exported="true"
             android:theme="@style/AppTheme"
             android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>
