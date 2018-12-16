@@ -335,7 +335,8 @@ public class BackupManager {
         if (sService != null) {
             try {
                 // All packages, current transport
-                IRestoreSession binder = sService.beginRestoreSession(null, null);
+                IRestoreSession binder =
+                        sService.beginRestoreSessionForUser(mContext.getUserId(), null, null);
                 if (binder != null) {
                     session = new RestoreSession(mContext, binder);
                 }
@@ -465,7 +466,7 @@ public class BackupManager {
         checkServiceBinder();
         if (sService != null) {
             try {
-                return sService.getCurrentTransportComponent();
+                return sService.getCurrentTransportComponentForUser(mContext.getUserId());
             } catch (RemoteException e) {
                 Log.e(TAG, "getCurrentTransportComponent() couldn't connect");
             }
@@ -530,7 +531,8 @@ public class BackupManager {
         checkServiceBinder();
         if (sService != null) {
             try {
-                sService.updateTransportAttributes(
+                sService.updateTransportAttributesForUser(
+                        mContext.getUserId(),
                         transportComponent,
                         name,
                         configurationIntent,
@@ -590,7 +592,8 @@ public class BackupManager {
             try {
                 SelectTransportListenerWrapper wrapper = listener == null ?
                         null : new SelectTransportListenerWrapper(mContext, listener);
-                sService.selectBackupTransportAsync(transport, wrapper);
+                sService.selectBackupTransportAsyncForUser(
+                        mContext.getUserId(), transport, wrapper);
             } catch (RemoteException e) {
                 Log.e(TAG, "selectBackupTransportAsync() couldn't connect");
             }
@@ -637,7 +640,7 @@ public class BackupManager {
         checkServiceBinder();
         if (sService != null) {
             try {
-                return sService.getAvailableRestoreToken(packageName);
+                return sService.getAvailableRestoreTokenForUser(mContext.getUserId(), packageName);
             } catch (RemoteException e) {
                 Log.e(TAG, "getAvailableRestoreToken() couldn't connect");
             }
@@ -659,7 +662,7 @@ public class BackupManager {
         checkServiceBinder();
         if (sService != null) {
             try {
-                return sService.isAppEligibleForBackup(packageName);
+                return sService.isAppEligibleForBackupForUser(mContext.getUserId(), packageName);
             } catch (RemoteException e) {
                 Log.e(TAG, "isAppEligibleForBackup(pkg) couldn't connect");
             }
@@ -760,7 +763,7 @@ public class BackupManager {
     public Intent getConfigurationIntent(String transportName) {
         if (sService != null) {
             try {
-                return sService.getConfigurationIntent(transportName);
+                return sService.getConfigurationIntentForUser(mContext.getUserId(), transportName);
             } catch (RemoteException e) {
                 Log.e(TAG, "getConfigurationIntent() couldn't connect");
             }
@@ -781,7 +784,7 @@ public class BackupManager {
     public String getDestinationString(String transportName) {
         if (sService != null) {
             try {
-                return sService.getDestinationString(transportName);
+                return sService.getDestinationStringForUser(mContext.getUserId(), transportName);
             } catch (RemoteException e) {
                 Log.e(TAG, "getDestinationString() couldn't connect");
             }
@@ -802,7 +805,7 @@ public class BackupManager {
     public Intent getDataManagementIntent(String transportName) {
         if (sService != null) {
             try {
-                return sService.getDataManagementIntent(transportName);
+                return sService.getDataManagementIntentForUser(mContext.getUserId(), transportName);
             } catch (RemoteException e) {
                 Log.e(TAG, "getDataManagementIntent() couldn't connect");
             }
@@ -825,7 +828,7 @@ public class BackupManager {
     public String getDataManagementLabel(String transportName) {
         if (sService != null) {
             try {
-                return sService.getDataManagementLabel(transportName);
+                return sService.getDataManagementLabelForUser(mContext.getUserId(), transportName);
             } catch (RemoteException e) {
                 Log.e(TAG, "getDataManagementLabel() couldn't connect");
             }
