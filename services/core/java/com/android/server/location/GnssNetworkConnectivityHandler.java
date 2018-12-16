@@ -23,7 +23,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -65,6 +64,10 @@ class GnssNetworkConnectivityHandler {
     private static final int APN_IPV6 = 2;
     private static final int APN_IPV4V6 = 3;
 
+    // these must match the NetworkCapability enum flags in IAGnssRil.hal
+    private static final int AGNSS_NET_CAPABILITY_NOT_METERED = 1 << 0;
+    private static final int AGNSS_NET_CAPABILITY_NOT_ROAMING = 1 << 1;
+
     // Default time limit in milliseconds for the ConnectivityManager to find a suitable
     // network with SUPL connectivity or report an error.
     private static final int SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS = 10 * 1000;
@@ -95,23 +98,42 @@ class GnssNetworkConnectivityHandler {
      * Network attributes needed when updating HAL about network connectivity status changes.
      */
     private static class NetworkAttributes {
-        NetworkCapabilities mCapabilities;
-        String mApn;
-        int mType = ConnectivityManager.TYPE_NONE;
+        private NetworkCapabilities mCapabilities;
+        private String mApn;
+        private int mType = ConnectivityManager.TYPE_NONE;
 
         /**
          * Returns true if the capabilities that we pass on to HAL change between {@curCapabilities}
          * and {@code newCapabilities}.
          */
-        static boolean hasCapabilitiesChanged(NetworkCapabilities curCapabilities,
+        private static boolean hasCapabilitiesChanged(NetworkCapabilities curCapabilities,
                 NetworkCapabilities newCapabilities) {
             if (curCapabilities == null || newCapabilities == null) {
                 return true;
             }
 
-            return curCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING)
-                    != newCapabilities.hasCapability(
-                    NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING);
+            // Monitor for roaming and metered capability changes.
+            return hasCapabilityChanged(curCapabilities, newCapabilities,
+                    NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING)
+                    || hasCapabilityChanged(curCapabilities, newCapabilities,
+                    NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+        }
+
+        private static boolean hasCapabilityChanged(NetworkCapabilities curCapabilities,
+                NetworkCapabilities newCapabilities, int capability) {
+            return curCapabilities.hasCapability(capability)
+                    != newCapabilities.hasCapability(capability);
+        }
+
+        private static short getCapabilityFlags(NetworkCapabilities capabilities) {
+            short capabilityFlags = 0;
+            if (capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING)) {
+                capabilityFlags |= AGNSS_NET_CAPABILITY_NOT_ROAMING;
+            }
+            if (capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)) {
+                capabilityFlags |= AGNSS_NET_CAPABILITY_NOT_METERED;
+            }
+            return capabilityFlags;
         }
     }
 
@@ -328,36 +350,31 @@ class GnssNetworkConnectivityHandler {
         boolean networkAvailable = isConnected && TelephonyManager.getDefault().getDataEnabled();
         NetworkAttributes networkAttributes = updateTrackedNetworksState(isConnected, network,
                 capabilities);
-        String apnName = networkAttributes.mApn;
+        String apn = networkAttributes.mApn;
         int type = networkAttributes.mType;
         // When isConnected is false, capabilities argument is null. So, use last received
         // capabilities.
         capabilities = networkAttributes.mCapabilities;
-        boolean isRoaming = !capabilities.hasTransport(
-                NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING);
-
         Log.i(TAG, String.format(
                 "updateNetworkState, state=%s, connected=%s, network=%s, capabilities=%s"
-                        + ", availableNetworkCount: %d",
+                        + ", apn: %s, availableNetworkCount: %d",
                 agpsDataConnStateAsString(),
                 isConnected,
                 network,
                 capabilities,
+                apn,
                 mAvailableNetworkAttributes.size()));
 
         if (native_is_agps_ril_supported()) {
-            String defaultApn = getSelectedApn();
-            if (defaultApn == null) {
-                defaultApn = "dummy-apn";
-            }
-
             native_update_network_state(
                     isConnected,
                     type,
-                    isRoaming,
+                    !capabilities.hasTransport(
+                            NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING), /* isRoaming */
                     networkAvailable,
-                    apnName,
-                    defaultApn);
+                    apn != null ? apn : "",
+                    network.getNetworkHandle(),
+                    NetworkAttributes.getCapabilityFlags(capabilities));
         } else if (DEBUG) {
             Log.d(TAG, "Skipped network state update because GPS HAL AGPS-RIL is not  supported");
         }
@@ -398,9 +415,9 @@ class GnssNetworkConnectivityHandler {
         // TODO(b/119278134): The synchronous method ConnectivityManager.getNetworkInfo() must
         // not be called inside the asynchronous ConnectivityManager.NetworkCallback methods.
         NetworkInfo info = mConnMgr.getNetworkInfo(network);
-        String apnName = null;
+        String apn = null;
         if (info != null) {
-            apnName = info.getExtraInfo();
+            apn = info.getExtraInfo();
         }
 
         if (DEBUG) {
@@ -413,21 +430,21 @@ class GnssNetworkConnectivityHandler {
         }
 
         if (mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
-            if (apnName == null) {
+            if (apn == null) {
                 // assign a dummy value in the case of C2K as otherwise we will have a runtime
                 // exception in the following call to native_agps_data_conn_open
-                apnName = "dummy-apn";
+                apn = "dummy-apn";
             }
-            int apnIpType = getApnIpType(apnName);
+            int apnIpType = getApnIpType(apn);
             setRouting();
             if (DEBUG) {
                 String message = String.format(
                         "native_agps_data_conn_open: mAgpsApn=%s, mApnIpType=%s",
-                        apnName,
+                        apn,
                         apnIpType);
                 Log.d(TAG, message);
             }
-            native_agps_data_conn_open(apnName, apnIpType);
+            native_agps_data_conn_open(apn, apnIpType);
             mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
         }
     }
@@ -596,26 +613,6 @@ class GnssNetworkConnectivityHandler {
         return APN_INVALID;
     }
 
-    private String getSelectedApn() {
-        Uri uri = Uri.parse("content://telephony/carriers/preferapn");
-        try (Cursor cursor = mContext.getContentResolver().query(
-                uri,
-                new String[]{"apn"},
-                null /* selection */,
-                null /* selectionArgs */,
-                Carriers.DEFAULT_SORT_ORDER)) {
-            if (cursor != null && cursor.moveToFirst()) {
-                return cursor.getString(0);
-            } else {
-                Log.e(TAG, "No APN found to select.");
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error encountered on selecting the APN.", e);
-        }
-
-        return null;
-    }
-
     // AGPS support
     private native void native_agps_data_conn_open(String apn, int apnIpType);
 
@@ -626,6 +623,6 @@ class GnssNetworkConnectivityHandler {
     // AGPS ril support
     private static native boolean native_is_agps_ril_supported();
 
-    private native void native_update_network_state(boolean connected, int type,
-            boolean roaming, boolean available, String extraInfo, String defaultAPN);
+    private native void native_update_network_state(boolean connected, int type, boolean roaming,
+            boolean available, String apn, long networkHandle, short capabilities);
 }
