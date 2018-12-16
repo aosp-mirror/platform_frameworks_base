@@ -24,6 +24,7 @@ import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,8 @@ import java.util.function.IntFunction;
 public class ArrayUtils {
     private static final int CACHE_SIZE = 73;
     private static Object[] sCache = new Object[CACHE_SIZE];
+
+    public static final File[] EMPTY_FILE = new File[0];
 
     private ArrayUtils() { /* cannot be instantiated */ }
 
@@ -643,6 +646,10 @@ public class ArrayUtils {
 
     public static @NonNull String[] defeatNullable(@Nullable String[] val) {
         return (val != null) ? val : EmptyArray.STRING;
+    }
+
+    public static @NonNull File[] defeatNullable(@Nullable File[] val) {
+        return (val != null) ? val : EMPTY_FILE;
     }
 
     /**

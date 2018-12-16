@@ -282,14 +282,31 @@ public final class Sm {
                 StorageManager.DEBUG_VIRTUAL_DISK);
     }
 
-    public void runIsolatedStorage() throws RemoteException {
-        final boolean enableIsolatedStorage = Boolean.parseBoolean(nextArg());
+    public void runIsolatedStorage() {
+        final int value;
+        final int mask = StorageManager.DEBUG_ISOLATED_STORAGE_FORCE_ON
+                | StorageManager.DEBUG_ISOLATED_STORAGE_FORCE_OFF;
+        switch (nextArg()) {
+            case "on":
+            case "true":
+                value = StorageManager.DEBUG_ISOLATED_STORAGE_FORCE_ON;
+                break;
+            case "off":
+                value = StorageManager.DEBUG_ISOLATED_STORAGE_FORCE_OFF;
+                break;
+            case "default":
+            case "false":
+                value = 0;
+                break;
+            default:
+                return;
+        }
+
         // Toggling isolated-storage state will result in a device reboot. So to avoid this command
         // from erroring out (DeadSystemException), call setDebugFlags() in a separate thread.
         new Thread(() -> {
             try {
-                mSm.setDebugFlags(enableIsolatedStorage ? StorageManager.DEBUG_ISOLATED_STORAGE : 0,
-                        StorageManager.DEBUG_ISOLATED_STORAGE);
+                mSm.setDebugFlags(value, mask);
             } catch (RemoteException e) {
                 Log.e(TAG, "Encountered an error!", e);
             }
@@ -334,7 +351,7 @@ public final class Sm {
         System.err.println("");
         System.err.println("       sm set-emulate-fbe [true|false]");
         System.err.println("");
-        System.err.println("       sm set-isolated-storage [true|false]");
+        System.err.println("       sm set-isolated-storage [on|off|default]");
         System.err.println("");
         return 1;
     }

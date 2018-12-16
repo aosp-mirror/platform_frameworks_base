@@ -16,13 +16,13 @@
 
 package android.os;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import junit.framework.TestCase;
 
-import android.os.SystemProperties;
-import android.test.suitebuilder.annotation.SmallTest;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class SystemPropertiesTest extends TestCase {
     private static final String KEY = "sys.testkey";
@@ -187,5 +187,26 @@ public class SystemPropertiesTest extends TestCase {
         } catch (InterruptedException e) {
             fail("InterruptedException");
         }
+    }
+
+    @SmallTest
+    public void testDigestOf() {
+        final String empty = SystemProperties.digestOf();
+        final String finger = SystemProperties.digestOf("ro.build.fingerprint");
+        final String fingerBrand = SystemProperties.digestOf(
+                "ro.build.fingerprint", "ro.product.brand");
+        final String brandFinger = SystemProperties.digestOf(
+                "ro.product.brand", "ro.build.fingerprint");
+
+        // Shouldn't change over time
+        assertTrue(Objects.equals(finger, SystemProperties.digestOf("ro.build.fingerprint")));
+
+        // Different properties means different results
+        assertFalse(Objects.equals(empty, finger));
+        assertFalse(Objects.equals(empty, fingerBrand));
+        assertFalse(Objects.equals(finger, fingerBrand));
+
+        // Same properties means same result
+        assertTrue(Objects.equals(fingerBrand, brandFinger));
     }
 }

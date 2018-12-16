@@ -25,9 +25,14 @@ import android.util.MutableInt;
 
 import com.android.internal.annotations.GuardedBy;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import libcore.util.HexEncoding;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Gives access to the system properties store.  The system properties
@@ -230,6 +235,27 @@ public class SystemProperties {
      */
     public static void reportSyspropChanged() {
         native_report_sysprop_change();
+    }
+
+    /**
+     * Return a {@code SHA-1} digest of the given keys and their values as a
+     * hex-encoded string. The ordering of the incoming keys doesn't change the
+     * digest result.
+     *
+     * @hide
+     */
+    public static @NonNull String digestOf(@NonNull String... keys) {
+        Arrays.sort(keys);
+        try {
+            final MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            for (String key : keys) {
+                final String item = key + "=" + get(key) + "\n";
+                digest.update(item.getBytes(StandardCharsets.UTF_8));
+            }
+            return HexEncoding.encodeToString(digest.digest()).toLowerCase();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private SystemProperties() {

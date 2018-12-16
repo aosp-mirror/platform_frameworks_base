@@ -57,6 +57,7 @@ import android.app.KeyguardManager;
 import android.app.admin.SecurityLog;
 import android.app.usage.StorageStatsManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -777,6 +778,18 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             });
         refreshZramSettings();
+
+        // Toggle isolated-enable system property in response to settings
+        mContext.getContentResolver().registerContentObserver(
+            Settings.Global.getUriFor(Settings.Global.ISOLATED_STORAGE_REMOTE),
+            false /*notifyForDescendants*/,
+            new ContentObserver(null /* current thread */) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    refreshIsolatedStorageSettings();
+                }
+            });
+        refreshIsolatedStorageSettings();
     }
 
     /**
@@ -800,6 +813,32 @@ class StorageManagerService extends IStorageManager.Stub
             // sole writer.
             SystemProperties.set(ZRAM_ENABLED_PROPERTY, desiredPropertyValue);
         }
+    }
+
+    private void refreshIsolatedStorageSettings() {
+        final int local = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.ISOLATED_STORAGE_LOCAL, 0);
+        final int remote = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.ISOLATED_STORAGE_REMOTE, 0);
+
+        // Walk down precedence chain; we prefer local settings first, then
+        // remote settings, before finally falling back to hard-coded default.
+        final boolean res;
+        if (local == -1) {
+            res = false;
+        } else if (local == 1) {
+            res = true;
+        } else if (remote == -1) {
+            res = false;
+        } else if (remote == 1) {
+            res = true;
+        } else {
+            res = false;
+        }
+
+        Slog.d(TAG, "Isolated storage local flag " + local + " and remote flag "
+                + remote + " resolved to " + res);
+        SystemProperties.set(StorageManager.PROP_ISOLATED_STORAGE, Boolean.toString(res));
     }
 
     /**
@@ -2208,18 +2247,22 @@ class StorageManagerService extends IStorageManager.Stub
             }
         }
 
-        if ((mask & StorageManager.DEBUG_ISOLATED_STORAGE) != 0) {
-            final boolean enabled = (flags & StorageManager.DEBUG_ISOLATED_STORAGE) != 0;
+        if ((mask & (StorageManager.DEBUG_ISOLATED_STORAGE_FORCE_ON
+                | StorageManager.DEBUG_ISOLATED_STORAGE_FORCE_OFF)) != 0) {
+            final int value;
+            if ((flags & StorageManager.DEBUG_ISOLATED_STORAGE_FORCE_ON) != 0) {
+                value = 1;
+            } else if ((flags & StorageManager.DEBUG_ISOLATED_STORAGE_FORCE_OFF) != 0) {
+                value = -1;
+            } else {
+                value = 0;
+            }
 
             final long token = Binder.clearCallingIdentity();
             try {
-                SystemProperties.set(StorageManager.PROP_ISOLATED_STORAGE,
-                        Boolean.toString(enabled));
-
-                // Some of the storage related permissions get fiddled with during
-                // package scanning. So, delete the package cache to force PackageManagerService
-                // to do package scanning.
-                FileUtils.deleteContents(Environment.getPackageCacheDirectory());
+                Settings.Global.putInt(mContext.getContentResolver(),
+                        Settings.Global.ISOLATED_STORAGE_LOCAL, value);
+                refreshIsolatedStorageSettings();
 
                 // Perform hard reboot to kick policy into place
                 mContext.getSystemService(PowerManager.class).reboot(null);
@@ -3758,6 +3801,8 @@ class StorageManagerService extends IStorageManager.Stub
 
             pw.println();
             pw.println("Primary storage UUID: " + mPrimaryStorageUuid);
+
+            pw.println();
             final Pair<String, Long> pair = StorageManager.getPrimaryStoragePathAndSize();
             if (pair == null) {
                 pw.println("Internal storage total size: N/A");
@@ -3770,8 +3815,18 @@ class StorageManagerService extends IStorageManager.Stub
                 pw.print(DataUnit.MEBIBYTES.toBytes(pair.second));
                 pw.println(" MiB)");
             }
+
+            pw.println();
             pw.println("Local unlocked users: " + Arrays.toString(mLocalUnlockedUsers));
             pw.println("System unlocked users: " + Arrays.toString(mSystemUnlockedUsers));
+
+            final ContentResolver cr = mContext.getContentResolver();
+            pw.println();
+            pw.println("Isolated storage, local feature flag: "
+                    + Settings.Global.getInt(cr, Settings.Global.ISOLATED_STORAGE_LOCAL, 0));
+            pw.println("Isolated storage, remote feature flag: "
+                    + Settings.Global.getInt(cr, Settings.Global.ISOLATED_STORAGE_REMOTE, 0));
+            pw.println("Isolated storage, resolved: " + StorageManager.hasIsolatedStorage());
         }
 
         synchronized (mObbMounts) {
