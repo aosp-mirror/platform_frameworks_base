@@ -577,7 +577,7 @@ namespace PaintGlue {
         }
     }
 
-    static SkScalar getMetricsInternal(jlong paintHandle, Paint::FontMetrics *metrics) {
+    static SkScalar getMetricsInternal(jlong paintHandle, SkFontMetrics *metrics) {
         const int kElegantTop = 2500;
         const int kElegantBottom = -1000;
         const int kElegantAscent = 1900;
@@ -609,7 +609,7 @@ namespace PaintGlue {
     }
 
     static jfloat getFontMetrics(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         SkScalar spacing = getMetricsInternal(paintHandle, &metrics);
 
         if (metricsObj) {
@@ -624,7 +624,7 @@ namespace PaintGlue {
     }
 
     static jint getFontMetricsInt(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
 
         getMetricsInternal(paintHandle, &metrics);
         int ascent = SkScalarRoundToInt(metrics.fAscent);
@@ -970,19 +970,19 @@ namespace PaintGlue {
     }
 
     static jfloat ascent(jlong paintHandle) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         return SkScalarToFloat(metrics.fAscent);
     }
 
     static jfloat descent(jlong paintHandle) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         return SkScalarToFloat(metrics.fDescent);
     }
 
     static jfloat getUnderlinePosition(jlong paintHandle) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         SkScalar position;
         if (metrics.hasUnderlinePosition(&position)) {
@@ -994,7 +994,7 @@ namespace PaintGlue {
     }
 
     static jfloat getUnderlineThickness(jlong paintHandle) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         SkScalar thickness;
         if (metrics.hasUnderlineThickness(&thickness)) {
