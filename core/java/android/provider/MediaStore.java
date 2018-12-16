@@ -1025,6 +1025,11 @@ public final class MediaStore {
             return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("dir").build();
         }
 
+        /** @hide */
+        public static final Uri getContentUriForPath(String path) {
+            return getContentUri(getVolumeNameForPath(path));
+        }
+
         /**
          * Fields for master table for all media files.
          * Table also contains MediaColumns._ID, DATA, SIZE and DATE_MODIFIED.
@@ -1131,6 +1136,13 @@ public final class MediaStore {
          * Type: TEXT
          */
         String REFERER_URI = "referer_uri";
+
+        /**
+         * The description of the download.
+         * <p>
+         * Type: Text
+         */
+        String DESCRIPTION = "description";
     }
 
     /**
