@@ -34,8 +34,10 @@
           android:id="@+id/mobile_volte"
           android:layout_height="wrap_content"
           android:layout_width="wrap_content"
+          android:layout_gravity="center_vertical"
           android:visibility="gone"
-          android:paddingEnd="2dp"/>
+          android:paddingStart="3dp"
+          android:paddingEnd="3dp"/>
         <FrameLayout
             android:id="@+id/inout_container"
             android:layout_height="17dp"
