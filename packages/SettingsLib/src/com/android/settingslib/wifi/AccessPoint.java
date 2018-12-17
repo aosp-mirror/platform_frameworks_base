@@ -884,7 +884,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (isActive()) {
             if (isPasspoint()) {
                 // This is the active connection on passpoint
-                summary.append(getSummary(mContext, getDetailedState(),
+                summary.append(getSummary(mContext, ssid, getDetailedState(),
                         false, mConfig.providerFriendlyName));
             } else if (mConfig != null && getDetailedState() == DetailedState.CONNECTED
                     && mIsCarrierAp) {
@@ -1294,11 +1294,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     public static String getSummary(Context context, String ssid, DetailedState state,
             boolean isEphemeral, String passpointProvider) {
-        if (state == DetailedState.CONNECTED && ssid == null) {
-            if (TextUtils.isEmpty(passpointProvider) == false) {
+        if (state == DetailedState.CONNECTED) {
+            if (!TextUtils.isEmpty(passpointProvider)) {
                 // Special case for connected + passpoint networks.
-                String format = context.getString(R.string.connected_via_passpoint);
-                return String.format(format, passpointProvider);
+                String format = context.getString(R.string.ssid_by_passpoint_provider);
+                return String.format(format, ssid, passpointProvider);
             } else if (isEphemeral) {
                 // Special case for connected + ephemeral networks.
                 final NetworkScoreManager networkScoreManager = context.getSystemService(
