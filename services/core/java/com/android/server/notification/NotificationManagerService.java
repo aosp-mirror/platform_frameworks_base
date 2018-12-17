@@ -2279,6 +2279,26 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public boolean areAppOverlaysAllowed(String pkg) {
+            return areAppOverlaysAllowedForPackage(pkg, Binder.getCallingUid());
+        }
+
+        @Override
+        public boolean areAppOverlaysAllowedForPackage(String pkg, int uid) {
+            checkCallerIsSystemOrSameApp(pkg);
+
+            return mPreferencesHelper.areAppOverlaysAllowed(pkg, uid);
+        }
+
+        @Override
+        public void setAppOverlaysAllowed(String pkg, int uid, boolean allowed) {
+            checkCallerIsSystem();
+
+            mPreferencesHelper.setAppOverlaysAllowed(pkg, uid, allowed);
+            handleSavePolicyFile();
+        }
+
+        @Override
         public int getPackageImportance(String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
             return mPreferencesHelper.getImportance(pkg, Binder.getCallingUid());

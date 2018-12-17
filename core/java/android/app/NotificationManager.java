@@ -1074,6 +1074,25 @@ public class NotificationManager {
         }
     }
 
+
+    /**
+     * Sets whether notifications posted by this app can appear outside of the
+     * notification shade, floating over other apps' content.
+     *
+     * <p>This value will be ignored for notifications that are posted to channels that do not
+     * allow app overlays ({@link NotificationChannel#canOverlayApps()}.
+     *
+     * @see Notification#getAppOverlayIntent()
+     */
+    public boolean areAppOverlaysAllowed() {
+        INotificationManager service = getService();
+        try {
+            return service.areAppOverlaysAllowed(mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Checks the ability to modify notification do not disturb policy for the calling package.
      *

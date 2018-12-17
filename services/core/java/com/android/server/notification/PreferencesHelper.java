@@ -80,6 +80,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_NAME = "name";
     private static final String ATT_UID = "uid";
     private static final String ATT_ID = "id";
+    private static final String ATT_APP_OVERLAY = "overlay";
     private static final String ATT_PRIORITY = "priority";
     private static final String ATT_VISIBILITY = "visibility";
     private static final String ATT_IMPORTANCE = "importance";
@@ -92,6 +93,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final int DEFAULT_VISIBILITY = NotificationManager.VISIBILITY_NO_OVERRIDE;
     private static final int DEFAULT_IMPORTANCE = NotificationManager.IMPORTANCE_UNSPECIFIED;
     private static final boolean DEFAULT_SHOW_BADGE = true;
+    private static final boolean DEFAULT_ALLOW_APP_OVERLAY = true;
     /**
      * Default value for what fields are user locked. See {@link LockableAppFields} for all lockable
      * fields.
@@ -104,6 +106,7 @@ public class PreferencesHelper implements RankingConfig {
     @IntDef({LockableAppFields.USER_LOCKED_IMPORTANCE})
     public @interface LockableAppFields {
         int USER_LOCKED_IMPORTANCE = 0x00000001;
+        int USER_LOCKED_APP_OVERLAY = 0x00000002;
     }
 
     // pkg|uid => PackagePreferences
@@ -169,7 +172,9 @@ public class PreferencesHelper implements RankingConfig {
                                     XmlUtils.readIntAttribute(
                                             parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
                                     XmlUtils.readBooleanAttribute(
-                                            parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE));
+                                            parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE),
+                                    XmlUtils.readBooleanAttribute(
+                                            parser, ATT_APP_OVERLAY, DEFAULT_ALLOW_APP_OVERLAY));
                             r.importance = XmlUtils.readIntAttribute(
                                     parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
                             r.priority = XmlUtils.readIntAttribute(
@@ -264,11 +269,12 @@ public class PreferencesHelper implements RankingConfig {
 
     private PackagePreferences getOrCreatePackagePreferences(String pkg, int uid) {
         return getOrCreatePackagePreferences(pkg, uid,
-                DEFAULT_IMPORTANCE, DEFAULT_PRIORITY, DEFAULT_VISIBILITY, DEFAULT_SHOW_BADGE);
+                DEFAULT_IMPORTANCE, DEFAULT_PRIORITY, DEFAULT_VISIBILITY, DEFAULT_SHOW_BADGE,
+                DEFAULT_ALLOW_APP_OVERLAY);
     }
 
     private PackagePreferences getOrCreatePackagePreferences(String pkg, int uid, int importance,
-            int priority, int visibility, boolean showBadge) {
+            int priority, int visibility, boolean showBadge, boolean allowAppOverlay) {
         final String key = packagePreferencesKey(pkg, uid);
         synchronized (mPackagePreferences) {
             PackagePreferences
@@ -282,6 +288,7 @@ public class PreferencesHelper implements RankingConfig {
                 r.priority = priority;
                 r.visibility = visibility;
                 r.showBadge = showBadge;
+                r.appOverlay = allowAppOverlay;
 
                 try {
                     createDefaultChannelIfNeeded(r);
@@ -382,7 +389,8 @@ public class PreferencesHelper implements RankingConfig {
                                 || r.lockedAppFields != DEFAULT_LOCKED_APP_FIELDS
                                 || r.channels.size() > 0
                                 || r.groups.size() > 0
-                                || r.delegate != null;
+                                || r.delegate != null
+                                || r.appOverlay != DEFAULT_ALLOW_APP_OVERLAY;
                 if (hasNonDefaultSettings) {
                     out.startTag(null, TAG_PACKAGE);
                     out.attribute(null, ATT_NAME, r.pkg);
@@ -394,6 +402,9 @@ public class PreferencesHelper implements RankingConfig {
                     }
                     if (r.visibility != DEFAULT_VISIBILITY) {
                         out.attribute(null, ATT_VISIBILITY, Integer.toString(r.visibility));
+                    }
+                    if (r.appOverlay != DEFAULT_ALLOW_APP_OVERLAY) {
+                        out.attribute(null, ATT_APP_OVERLAY, Boolean.toString(r.appOverlay));
                     }
                     out.attribute(null, ATT_SHOW_BADGE, Boolean.toString(r.showBadge));
                     out.attribute(null, ATT_APP_USER_LOCKED_FIELDS,
@@ -437,6 +448,20 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
         out.endTag(null, TAG_RANKING);
+    }
+
+    public void setAppOverlaysAllowed(String pkg, int uid, boolean allowed) {
+        PackagePreferences p = getOrCreatePackagePreferences(pkg, uid);
+        p.appOverlay = allowed;
+        p.lockedAppFields = p.lockedAppFields | LockableAppFields.USER_LOCKED_APP_OVERLAY;
+    }
+
+    public boolean areAppOverlaysAllowed(String pkg, int uid) {
+        return getOrCreatePackagePreferences(pkg, uid).appOverlay;
+    }
+
+    public int getAppLockedFields(String pkg, int uid) {
+        return getOrCreatePackagePreferences(pkg, uid).lockedAppFields;
     }
 
     /**
@@ -512,7 +537,6 @@ public class PreferencesHelper implements RankingConfig {
             // apps can't update the blocked status or app overlay permission
             if (fromTargetApp) {
                 group.setBlocked(oldGroup.isBlocked());
-                group.setAllowAppOverlay(oldGroup.canOverlayApps());
                 group.unlockFields(group.getUserLockedFields());
                 group.lockFields(oldGroup.getUserLockedFields());
             } else {
@@ -520,9 +544,6 @@ public class PreferencesHelper implements RankingConfig {
                 if (group.isBlocked() != oldGroup.isBlocked()) {
                     group.lockFields(NotificationChannelGroup.USER_LOCKED_BLOCKED_STATE);
                     updateChannelsBypassingDnd(mContext.getUserId());
-                }
-                if (group.canOverlayApps() != oldGroup.canOverlayApps()) {
-                    group.lockFields(NotificationChannelGroup.USER_LOCKED_ALLOW_APP_OVERLAY);
                 }
             }
         }
@@ -1581,6 +1602,7 @@ public class PreferencesHelper implements RankingConfig {
         int priority = DEFAULT_PRIORITY;
         int visibility = DEFAULT_VISIBILITY;
         boolean showBadge = DEFAULT_SHOW_BADGE;
+        boolean appOverlay = DEFAULT_ALLOW_APP_OVERLAY;
         int lockedAppFields = DEFAULT_LOCKED_APP_FIELDS;
 
         Delegate delegate = null;
