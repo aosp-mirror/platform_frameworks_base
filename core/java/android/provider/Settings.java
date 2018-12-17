@@ -13972,21 +13972,12 @@ public final class Settings {
      * @hide
      */
     public static final class Config extends NameValueTable {
-        /**
-         * The content:// style URL for the config table.
-         *
-         * TODO(b/113100523): Move this to DeviceConfig.java when it is added, and expose it as a
-         *     System API.
-         */
-        private static final Uri CONTENT_URI =
-                Uri.parse("content://" + AUTHORITY + "/config");
-
         private static final ContentProviderHolder sProviderHolder =
-                new ContentProviderHolder(CONTENT_URI);
+                new ContentProviderHolder(DeviceConfig.CONTENT_URI);
 
         // Populated lazily, guarded by class object:
         private static final NameValueCache sNameValueCache = new NameValueCache(
-                CONTENT_URI,
+                DeviceConfig.CONTENT_URI,
                 CALL_METHOD_GET_CONFIG,
                 CALL_METHOD_PUT_CONFIG,
                 sProviderHolder);
@@ -14060,7 +14051,7 @@ public final class Settings {
                 cp.call(resolver.getPackageName(), sProviderHolder.mUri.getAuthority(),
                         CALL_METHOD_RESET_CONFIG, null, arg);
             } catch (RemoteException e) {
-                Log.w(TAG, "Can't reset to defaults for " + CONTENT_URI, e);
+                Log.w(TAG, "Can't reset to defaults for " + DeviceConfig.CONTENT_URI, e);
             }
         }
     }

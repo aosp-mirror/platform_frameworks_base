@@ -44,12 +44,6 @@ import java.util.Map;
 
 /** Unit test for SettingsProvider. */
 public class SettingsProviderTest extends AndroidTestCase {
-    /**
-     * TODO(b/113100523): Move this to DeviceConfig.java when it is added, and expose it as a System
-     *     API.
-     */
-    private static final Uri CONFIG_CONTENT_URI =
-            Uri.parse("content://" + Settings.AUTHORITY + "/config");
 
     @MediumTest
     public void testNameValueCache() {
@@ -406,27 +400,27 @@ public class SettingsProviderTest extends AndroidTestCase {
         try {
             // value is empty
             Bundle results =
-                    r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
+                    r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
             assertNull(results.get(Settings.NameValueTable.VALUE));
 
             // save value
-            results = r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, name, args);
+            results = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, name, args);
             assertNull(results);
 
             // value is no longer empty
-            results = r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
+            results = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
             assertEquals(value, results.get(Settings.NameValueTable.VALUE));
 
             // save new value
             args.putString(Settings.NameValueTable.VALUE, newValue);
-            r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, name, args);
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, name, args);
 
             // new value is returned
-            results = r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
+            results = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
             assertEquals(newValue, results.get(Settings.NameValueTable.VALUE));
         } finally {
             // clean up
-            r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, name, null);
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, name, null);
         }
     }
 
@@ -440,22 +434,23 @@ public class SettingsProviderTest extends AndroidTestCase {
 
         try {
             // save value
-            r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, name, args);
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, name, args);
 
             // get value
             Bundle results =
-                    r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
+                    r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
             assertEquals(value, results.get(Settings.NameValueTable.VALUE));
 
             // delete value
-            results = r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, name, null);
+            results = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, name,
+                    null);
 
             // value is empty now
-            results = r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
+            results = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
             assertNull(results.get(Settings.NameValueTable.VALUE));
         } finally {
             // clean up
-            r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, name, null);
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, name, null);
         }
     }
 
@@ -473,12 +468,12 @@ public class SettingsProviderTest extends AndroidTestCase {
 
         try {
             // save both values
-            r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, name, args);
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, name, args);
             args.putString(Settings.NameValueTable.VALUE, newValue);
-            r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, newName, args);
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, newName, args);
 
             // list all values
-            Bundle result = r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_LIST_CONFIG,
+            Bundle result = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_LIST_CONFIG,
                     null, null);
             Map<String, String> keyValueMap =
                     (HashMap) result.getSerializable(Settings.NameValueTable.VALUE);
@@ -488,14 +483,14 @@ public class SettingsProviderTest extends AndroidTestCase {
 
             // list values for prefix
             args.putString(Settings.CALL_METHOD_PREFIX_KEY, prefix);
-            result = r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_LIST_CONFIG, null, args);
+            result = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_LIST_CONFIG, null, args);
             keyValueMap = (HashMap) result.getSerializable(Settings.NameValueTable.VALUE);
             assertThat(keyValueMap, aMapWithSize(1));
             assertEquals(value, keyValueMap.get(name));
         } finally {
             // clean up
-            r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, name, null);
-            r.call(CONFIG_CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, newName, null);
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, name, null);
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, newName, null);
         }
     }
 }
