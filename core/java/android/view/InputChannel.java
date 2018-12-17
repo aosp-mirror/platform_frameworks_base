@@ -55,6 +55,7 @@ public final class InputChannel implements Parcelable {
     private static native InputChannel[] nativeOpenInputChannelPair(String name);
 
     private native void nativeDispose(boolean finalized);
+    private native void nativeRelease();
     private native void nativeTransferTo(InputChannel other);
     private native void nativeReadFromParcel(Parcel parcel);
     private native void nativeWriteToParcel(Parcel parcel);
@@ -117,6 +118,14 @@ public final class InputChannel implements Parcelable {
      */
     public void dispose() {
         nativeDispose(false);
+    }
+
+    /**
+     * Release the Java objects hold over the native InputChannel. If other references
+     * still exist in native-land, then the channel may continue to exist.
+     */
+    public void release() {
+        nativeRelease();
     }
 
     /**

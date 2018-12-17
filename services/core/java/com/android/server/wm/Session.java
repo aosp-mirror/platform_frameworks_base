@@ -612,4 +612,16 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     boolean hasAlertWindowSurfaces() {
         return !mAlertWindowSurfaces.isEmpty();
     }
+
+    public void blessInputSurface(int displayId, SurfaceControl surface,
+            InputChannel outInputChannel) {
+        final int callerUid = Binder.getCallingUid();
+        final int callerPid = Binder.getCallingPid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mService.blessInputSurface(callerUid, callerPid, displayId, surface, outInputChannel);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
 }
