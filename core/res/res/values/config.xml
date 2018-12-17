@@ -1404,6 +1404,13 @@
     <integer-array name="config_autoBrightnessLevels">
     </integer-array>
 
+    <!-- Timeout (in milliseconds) after which we remove the effects any user interactions might've
+         had on the brightness mapping. This timeout doesn't start until we transition to a
+         non-interactive display policy so that we don't reset while users are using their devices,
+         but also so that we don't erroneously keep the short-term model if the device is dozing
+         but the display is fully on. -->
+    <integer name="config_autoBrightnessShortTermModelTimeout">300000</integer>
+
     <!-- Array of output values for LCD backlight corresponding to the lux values
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.

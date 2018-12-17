@@ -56,13 +56,6 @@ class AutomaticBrightnessController {
     // the user is satisfied with the result before storing the sample.
     private static final int BRIGHTNESS_ADJUSTMENT_SAMPLE_DEBOUNCE_MILLIS = 10000;
 
-    // Timeout after which we remove the effects any user interactions might've had on the
-    // brightness mapping. This timeout doesn't start until we transition to a non-interactive
-    // display policy so that we don't reset while users are using their devices, but also so that
-    // we don't erroneously keep the short-term model if the device is dozing but the display is
-    // fully on.
-    private static final int SHORT_TERM_MODEL_TIMEOUT_MILLIS = 30000;
-
     private static final int MSG_UPDATE_AMBIENT_LUX = 1;
     private static final int MSG_BRIGHTNESS_ADJUSTMENT_SAMPLE = 2;
     private static final int MSG_INVALIDATE_SHORT_TERM_MODEL = 3;
@@ -125,6 +118,13 @@ class AutomaticBrightnessController {
     // Configuration object for determining thresholds to change brightness dynamically
     private final HysteresisLevels mAmbientBrightnessThresholds;
     private final HysteresisLevels mScreenBrightnessThresholds;
+
+    // Timeout after which we remove the effects any user interactions might've had on the
+    // brightness mapping. This timeout doesn't start until we transition to a non-interactive
+    // display policy so that we don't reset while users are using their devices, but also so that
+    // we don't erroneously keep the short-term model if the device is dozing but the display is
+    // fully on.
+    private long mShortTermModelTimeout;
 
     // Amount of time to delay auto-brightness after screen on while waiting for
     // the light sensor to warm-up in milliseconds.
@@ -198,7 +198,7 @@ class AutomaticBrightnessController {
             int lightSensorRate, int initialLightSensorRate, long brighteningLightDebounceConfig,
             long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
             HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds) {
+            HysteresisLevels screenBrightnessThresholds, long shortTermModelTimeout) {
         mCallbacks = callbacks;
         mSensorManager = sensorManager;
         mBrightnessMapper = mapper;
@@ -216,6 +216,7 @@ class AutomaticBrightnessController {
         mWeightingIntercept = AMBIENT_LIGHT_LONG_HORIZON_MILLIS;
         mAmbientBrightnessThresholds = ambientBrightnessThresholds;
         mScreenBrightnessThresholds = screenBrightnessThresholds;
+        mShortTermModelTimeout = shortTermModelTimeout;
         mShortTermModelValid = true;
         mShortTermModelAnchor = -1;
 
@@ -295,7 +296,7 @@ class AutomaticBrightnessController {
         }
         if (!isInteractivePolicy(policy) && isInteractivePolicy(oldPolicy)) {
             mHandler.sendEmptyMessageDelayed(MSG_INVALIDATE_SHORT_TERM_MODEL,
-                    SHORT_TERM_MODEL_TIMEOUT_MILLIS);
+                    mShortTermModelTimeout);
         } else if (isInteractivePolicy(policy) && !isInteractivePolicy(oldPolicy)) {
             mHandler.removeMessages(MSG_INVALIDATE_SHORT_TERM_MODEL);
         }
@@ -377,13 +378,13 @@ class AutomaticBrightnessController {
         pw.println("  mAmbientLightRingBuffer=" + mAmbientLightRingBuffer);
         pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
         pw.println("  mDisplayPolicy=" + DisplayPowerRequest.policyToString(mDisplayPolicy));
+        pw.println("  mShortTermModelTimeout=" + mShortTermModelTimeout);
         pw.println("  mShortTermModelAnchor=" + mShortTermModelAnchor);
         pw.println("  mShortTermModelValid=" + mShortTermModelValid);
         pw.println("  mBrightnessAdjustmentSamplePending=" + mBrightnessAdjustmentSamplePending);
         pw.println("  mBrightnessAdjustmentSampleOldLux=" + mBrightnessAdjustmentSampleOldLux);
         pw.println("  mBrightnessAdjustmentSampleOldBrightness="
                 + mBrightnessAdjustmentSampleOldBrightness);
-        pw.println("  mShortTermModelValid=" + mShortTermModelValid);
 
         pw.println();
         mBrightnessMapper.dump(pw);
