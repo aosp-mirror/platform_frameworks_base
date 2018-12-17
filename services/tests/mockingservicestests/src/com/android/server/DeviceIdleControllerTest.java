@@ -203,6 +203,8 @@ public class DeviceIdleControllerTest {
                 .strictness(Strictness.LENIENT)
                 .mockStatic(LocalServices.class)
                 .startMocking();
+        spyOn(getContext());
+        doReturn(null).when(getContext()).registerReceiver(any(), any());
         doReturn(mock(ActivityManagerInternal.class))
                 .when(() -> LocalServices.getService(ActivityManagerInternal.class));
         doReturn(mock(ActivityTaskManagerInternal.class))
