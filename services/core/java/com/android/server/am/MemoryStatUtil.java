@@ -123,9 +123,8 @@ public final class MemoryStatUtil {
      * if the file is not available.
      */
     public static String readCmdlineFromProcfs(int pid) {
-        String path = String.format(Locale.US, PROC_CMDLINE_FILE_FMT, pid);
-        String cmdline = readFileContents(path);
-        return cmdline != null ? cmdline : "";
+        final String path = String.format(Locale.US, PROC_CMDLINE_FILE_FMT, pid);
+        return parseCmdlineFromProcfs(readFileContents(path));
     }
 
     private static String readFileContents(String path) {
@@ -208,6 +207,24 @@ public final class MemoryStatUtil {
         Matcher m = RSS_HIGH_WATERMARK_IN_BYTES.matcher(procStatusContents);
         // Convert value read from /proc/pid/status from kilobytes to bytes.
         return m.find() ? Long.parseLong(m.group(1)) * BYTES_IN_KILOBYTE : 0;
+    }
+
+
+    /**
+     * Parses cmdline out of the contents of the /proc/pid/cmdline file in procfs.
+     *
+     * Parsing is required to strip anything after first null byte.
+     */
+    @VisibleForTesting
+    static String parseCmdlineFromProcfs(String cmdline) {
+        if (cmdline == null) {
+            return "";
+        }
+        int firstNullByte = cmdline.indexOf("\0");
+        if (firstNullByte == -1) {
+            return cmdline;
+        }
+        return cmdline.substring(0, firstNullByte);
     }
 
     /**
