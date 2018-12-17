@@ -33,21 +33,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-            <RelativeLayout
+            <include
+                layout="@layout/keyguard_clock_switch"
                 android:id="@+id/keyguard_clock_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|top">
-                <include layout="@layout/keyguard_clock_switch"
-                         android:id="@+id/clock_view"
-                         android:layout_width="match_parent"
-                         android:layout_height="wrap_content" />
-                <include layout="@layout/keyguard_status_area"
-                         android:id="@+id/keyguard_status_area"
-                         android:layout_width="match_parent"
-                         android:layout_height="wrap_content"
-                         android:layout_below="@id/clock_view" />
-            </RelativeLayout>
+                android:layout_height="wrap_content" />
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
