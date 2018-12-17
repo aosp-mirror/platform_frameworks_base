@@ -418,7 +418,7 @@ static int UnmountTree(const char* path) {
     }
     endmntent(fp);
 
-    for (auto path : toUnmount) {
+    for (const auto& path : toUnmount) {
         if (umount2(path.c_str(), MNT_DETACH)) {
             ALOGW("Failed to unmount %s: %s", path.c_str(), strerror(errno));
         }

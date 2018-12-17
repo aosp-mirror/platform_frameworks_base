@@ -362,7 +362,7 @@ std::unique_ptr<BinaryPrimitive> TryParseFlagSymbol(const Attribute* flag_attr,
     return util::make_unique<BinaryPrimitive>(flags);
   }
 
-  for (StringPiece part : util::Tokenize(str, '|')) {
+  for (const StringPiece& part : util::Tokenize(str, '|')) {
     StringPiece trimmed_part = util::TrimWhitespace(part);
 
     bool flag_set = false;

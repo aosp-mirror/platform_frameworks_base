@@ -152,7 +152,7 @@ void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
     // listener removes itself before we call it. It's then the listener's job to handle it (expect
     // the callback to be called after listener is removed, and the listener should properly
     // ignore it).
-    for (auto weakPtr : broadcastList) {
+    for (const auto& weakPtr : broadcastList) {
         auto strongPtr = weakPtr.promote();
         if (strongPtr != NULL) {
             strongPtr->onUidMapReceived(timestamp);
@@ -200,7 +200,7 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
         StatsdStats::getInstance().setUidMapChanges(mChanges.size());
     }
 
-    for (auto weakPtr : broadcastList) {
+    for (const auto& weakPtr : broadcastList) {
         auto strongPtr = weakPtr.promote();
         if (strongPtr != NULL) {
             strongPtr->notifyAppUpgrade(timestamp, appName, uid, versionCode);
@@ -269,7 +269,7 @@ void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const i
         getListenerListCopyLocked(&broadcastList);
     }
 
-    for (auto weakPtr : broadcastList) {
+    for (const auto& weakPtr : broadcastList) {
         auto strongPtr = weakPtr.promote();
         if (strongPtr != NULL) {
             strongPtr->notifyAppRemoved(timestamp, app, uid);
