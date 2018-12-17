@@ -66,6 +66,8 @@ interface IWifiManager
 
     List<OsuProvider> getMatchingOsuProviders(in List<ScanResult> scanResult);
 
+    Map getMatchingPasspointConfigsForOsuProviders(in List<OsuProvider> osuProviders);
+
     int addOrUpdateNetwork(in WifiConfiguration config, String packageName);
 
     boolean addOrUpdatePasspointConfiguration(in PasspointConfiguration config, String packageName);
