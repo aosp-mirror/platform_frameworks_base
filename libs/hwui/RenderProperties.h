@@ -98,14 +98,14 @@ public:
 
     LayerProperties& operator=(const LayerProperties& other);
 
+    // Strongly recommend using effectiveLayerType instead
+    LayerType type() const { return mType; }
+
 private:
     LayerProperties();
     ~LayerProperties();
     void reset();
     bool setColorFilter(SkColorFilter* filter);
-
-    // Private since external users should go through properties().effectiveLayerType()
-    LayerType type() const { return mType; }
 
     friend class RenderProperties;
 

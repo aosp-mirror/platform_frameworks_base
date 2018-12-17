@@ -338,6 +338,11 @@ static jboolean android_view_RenderNode_hasOverlappingRendering(jlong renderNode
     return renderNode->stagingProperties().hasOverlappingRendering();
 }
 
+static jboolean android_view_RenderNode_getClipToBounds(jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getClipToBounds();
+}
+
 static jboolean android_view_RenderNode_getClipToOutline(jlong renderNodePtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     return renderNode->stagingProperties().getOutline().getShouldClip();
@@ -407,6 +412,11 @@ static jboolean android_view_RenderNode_hasIdentityMatrix(jlong renderNodePtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     renderNode->mutateStagingProperties().updateMatrix();
     return !renderNode->stagingProperties().hasTransformMatrix();
+}
+
+static jint android_view_RenderNode_getLayerType(jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return static_cast<int>(renderNode->stagingProperties().layerProperties().type());
 }
 
 // ----------------------------------------------------------------------------
@@ -623,10 +633,12 @@ static const JNINativeMethod gMethods[] = {
 // ----------------------------------------------------------------------------
     { "nIsValid",              "(J)Z",   (void*) android_view_RenderNode_isValid },
     { "nSetLayerType",         "(JI)Z",  (void*) android_view_RenderNode_setLayerType },
+    { "nGetLayerType",         "(J)I",   (void*) android_view_RenderNode_getLayerType },
     { "nSetLayerPaint",        "(JJ)Z",  (void*) android_view_RenderNode_setLayerPaint },
     { "nSetStaticMatrix",      "(JJ)Z",  (void*) android_view_RenderNode_setStaticMatrix },
     { "nSetAnimationMatrix",   "(JJ)Z",  (void*) android_view_RenderNode_setAnimationMatrix },
     { "nSetClipToBounds",      "(JZ)Z",  (void*) android_view_RenderNode_setClipToBounds },
+    { "nGetClipToBounds",      "(J)Z",   (void*) android_view_RenderNode_getClipToBounds },
     { "nSetClipBounds",        "(JIIII)Z", (void*) android_view_RenderNode_setClipBounds },
     { "nSetClipBoundsEmpty",   "(J)Z",   (void*) android_view_RenderNode_setClipBoundsEmpty },
     { "nSetProjectBackwards",  "(JZ)Z",  (void*) android_view_RenderNode_setProjectBackwards },
