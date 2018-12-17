@@ -15,36 +15,20 @@
  */
 package android.view.contentcapture;
 
-import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_APPEARED;
-import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_DISAPPEARED;
-import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TEXT_CHANGED;
-
-import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.Context;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.Log;
-import android.util.TimeUtils;
 import android.view.View;
-import android.view.ViewStructure;
-import android.view.autofill.AutofillId;
-import android.view.contentcapture.ContentCaptureEvent.EventType;
 
-import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.Preconditions;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /*
@@ -62,63 +46,11 @@ public final class ContentCaptureManager {
 
     private static final String TAG = ContentCaptureManager.class.getSimpleName();
 
-    // TODO(b/111276913): define a way to dynamically set them(for example, using settings?)
-    private static final boolean VERBOSE = false;
-    private static final boolean DEBUG = true; // STOPSHIP if not set to false
-
-    /**
-     * Used to indicate that a text change was caused by user input (for example, through IME).
-     */
-    //TODO(b/111276913): link to notifyTextChanged() method once available
-    public static final int FLAG_USER_INPUT = 0x1;
-
-    /**
-     * Initial state, when there is no session.
-     *
-     * @hide
-     */
-    public static final int STATE_UNKNOWN = 0;
-
-    /**
-     * Service's startSession() was called, but server didn't confirm it was created yet.
-     *
-     * @hide
-     */
-    public static final int STATE_WAITING_FOR_SERVER = 1;
-
-    /**
-     * Session is active.
-     *
-     * @hide
-     */
-    public static final int STATE_ACTIVE = 2;
-
-    /**
-     * Session is disabled.
-     *
-     * @hide
-     */
-    public static final int STATE_DISABLED = 3;
-
-    /**
-     * Handler message used to flush the buffer.
-     */
-    private static final int MSG_FLUSH = 1;
-
-
     private static final String BG_THREAD_NAME = "intel_svc_streamer_thread";
 
-    /**
-     * Maximum number of events that are buffered before sent to the app.
-     */
-    // TODO(b/111276913): use settings
-    private static final int MAX_BUFFER_SIZE = 100;
-
-    /**
-     * Frequency the buffer is flushed if stale.
-     */
-    // TODO(b/111276913): use settings
-    private static final int FLUSHING_FREQUENCY_MS = 5_000;
+    // TODO(b/121044306): define a way to dynamically set them(for example, using settings?)
+    static final boolean VERBOSE = false;
+    static final boolean DEBUG = true; // STOPSHIP if not set to false
 
     @NonNull
     private final AtomicBoolean mDisabled = new AtomicBoolean();
@@ -129,29 +61,12 @@ public final class ContentCaptureManager {
     @Nullable
     private final IContentCaptureManager mService;
 
-    @Nullable
-    private String mId;
-
-    private int mState = STATE_UNKNOWN;
-
-    @Nullable
-    private IBinder mApplicationToken;
-
-    @Nullable
-    private ComponentName mComponentName;
-
-    /**
-     * List of events held to be sent as a batch.
-     */
-    @Nullable
-    private ArrayList<ContentCaptureEvent> mEvents;
-
-    // TODO(b/111276913): use UI Thread directly (as calls are one-way) or a shared thread / handler
+    // TODO(b/119220549): use UI Thread directly (as calls are one-way) or a shared thread / handler
     // held at the Application level
+    @NonNull
     private final Handler mHandler;
 
-    // Used just for debugging purposes (on dump)
-    private long mNextFlush;
+    private ContentCaptureSession mMainSession;
 
     /** @hide */
     public ContentCaptureManager(@NonNull Context context,
@@ -161,290 +76,93 @@ public final class ContentCaptureManager {
             Log.v(TAG, "Constructor for " + context.getPackageName());
         }
         mService = service;
-        // TODO(b/111276913): use an existing bg thread instead...
+        // TODO(b/119220549): use an existing bg thread instead...
         final HandlerThread bgThread = new HandlerThread(BG_THREAD_NAME);
         bgThread.start();
         mHandler = Handler.createAsync(bgThread.getLooper());
     }
 
-    /** @hide */
-    public void onActivityCreated(@NonNull IBinder token, @NonNull ComponentName componentName) {
-        if (!isContentCaptureEnabled()) return;
-
-        mHandler.sendMessage(obtainMessage(ContentCaptureManager::handleStartSession, this,
-                token, componentName));
-    }
-
-    private void handleStartSession(@NonNull IBinder token, @NonNull ComponentName componentName) {
-        if (mState != STATE_UNKNOWN) {
-            // TODO(b/111276913): revisit this scenario
-            Log.w(TAG, "ignoring handleStartSession(" + token + ") while on state "
-                    + getStateAsString(mState));
-            return;
-        }
-        mState = STATE_WAITING_FOR_SERVER;
-        mId = UUID.randomUUID().toString();
-        mApplicationToken = token;
-        mComponentName = componentName;
-
-        if (VERBOSE) {
-            Log.v(TAG, "handleStartSession(): token=" + token + ", act="
-                    + getActivityDebugName() + ", id=" + mId);
-        }
-        final int flags = 0; // TODO(b/111276913): get proper flags
-
-        try {
-            mService.startSession(mContext.getUserId(), mApplicationToken, componentName,
-                    mId, flags, new IResultReceiver.Stub() {
-                        @Override
-                        public void send(int resultCode, Bundle resultData) {
-                            handleSessionStarted(resultCode);
-                        }
-                    });
-        } catch (RemoteException e) {
-            Log.w(TAG, "Error starting session for " + componentName.flattenToShortString() + ": "
-                    + e);
-        }
-    }
-
-    private void handleSessionStarted(int resultCode) {
-        mState = resultCode;
-        mDisabled.set(mState == STATE_DISABLED);
-        if (VERBOSE) {
-            Log.v(TAG, "onActivityStarted() result: code=" + resultCode + ", id=" + mId
-                    + ", state=" + getStateAsString(mState) + ", disabled=" + mDisabled.get());
-        }
-    }
-
-    private void handleSendEvent(@NonNull ContentCaptureEvent event, boolean forceFlush) {
-        if (mEvents == null) {
-            if (VERBOSE) {
-                Log.v(TAG, "Creating buffer for " + MAX_BUFFER_SIZE + " events");
-            }
-            mEvents = new ArrayList<>(MAX_BUFFER_SIZE);
-        }
-        mEvents.add(event);
-
-        final int numberEvents = mEvents.size();
-
-        // TODO(b/120784831): need to optimize it so we buffer changes until a number of X are
-        // buffered (either total or per autofillid). For
-        // example, if the user typed "a", "b", "c" and the threshold is 3, we should buffer
-        // "a" and "b" then send "abc".
-        final boolean bufferEvent = numberEvents < MAX_BUFFER_SIZE;
-
-        if (bufferEvent && !forceFlush) {
-            handleScheduleFlush();
-            return;
-        }
-
-        if (mState != STATE_ACTIVE) {
-            // Callback from startSession hasn't been called yet - typically happens on system
-            // apps that are started before the system service
-            // TODO(b/111276913): try to ignore session while system is not ready / boot
-            // not complete instead. Similarly, the manager service should return right away
-            // when the user does not have a service set
-            if (VERBOSE) {
-                Log.v(TAG, "Closing session for " + getActivityDebugName()
-                        + " after " + numberEvents + " delayed events and state "
-                        + getStateAsString(mState));
-            }
-            handleResetState();
-            // TODO(b/111276913): blacklist activity / use special flag to indicate that
-            // when it's launched again
-            return;
-        }
-
-        if (mId == null) {
-            // Sanity check - should not happen
-            Log.wtf(TAG, "null session id for " + getActivityDebugName());
-            return;
-        }
-
-        handleForceFlush();
-    }
-
-    private void handleScheduleFlush() {
-        if (mHandler.hasMessages(MSG_FLUSH)) {
-            // "Renew" the flush message by removing the previous one
-            mHandler.removeMessages(MSG_FLUSH);
-        }
-        mNextFlush = SystemClock.elapsedRealtime() + FLUSHING_FREQUENCY_MS;
-        if (VERBOSE) {
-            Log.v(TAG, "Scheduled to flush in " + FLUSHING_FREQUENCY_MS + "ms: " + mNextFlush);
-        }
-        mHandler.sendMessageDelayed(
-                obtainMessage(ContentCaptureManager::handleFlushIfNeeded, this).setWhat(MSG_FLUSH),
-                FLUSHING_FREQUENCY_MS);
-    }
-
-    private void handleFlushIfNeeded() {
-        if (mEvents.isEmpty()) {
-            if (VERBOSE) Log.v(TAG, "Nothing to flush");
-            return;
-        }
-        handleForceFlush();
-    }
-
-    private void handleForceFlush() {
-        final int numberEvents = mEvents.size();
-        try {
-            if (DEBUG) {
-                Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getActivityDebugName());
-            }
-            mHandler.removeMessages(MSG_FLUSH);
-            mService.sendEvents(mContext.getUserId(), mId, mEvents);
-            // TODO(b/111276913): decide whether we should clear or set it to null, as each has
-            // its own advantages: clearing will save extra allocations while the session is
-            // active, while setting to null would save memory if there's no more event coming.
-            mEvents.clear();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Error sending " + numberEvents + " for " + getActivityDebugName()
-                    + ": " + e);
-        }
+    @NonNull
+    private static Handler newHandler() {
+        // TODO(b/119220549): use an existing bg thread instead...
+        // TODO(b/119220549): use UI Thread directly (as calls are one-way) or an existing bgThread
+        // or a shared thread / handler held at the Application level
+        final HandlerThread bgThread = new HandlerThread(BG_THREAD_NAME);
+        bgThread.start();
+        return Handler.createAsync(bgThread.getLooper());
     }
 
     /**
-     * Used for intermediate events (i.e, other than created and destroyed).
+     * Creates a new {@link ContentCaptureSession}.
      *
-     * @hide
+     * <p>See {@link View#setContentCaptureSession(ContentCaptureSession)} for more info.
      */
-    public void onActivityLifecycleEvent(@EventType int type) {
-        if (!isContentCaptureEnabled()) return;
-        if (VERBOSE) {
-            Log.v(TAG, "onActivityLifecycleEvent() for " + getActivityDebugName()
-                    + ": " + ContentCaptureEvent.getTypeAsString(type));
+    @NonNull
+    public ContentCaptureSession createContentCaptureSession(
+            @NonNull ContentCaptureContext context) {
+        if (DEBUG) Log.d(TAG, "createContentCaptureSession(): " + context);
+        // TODO(b/121033016): for now we're updating the main session, but we need instead:
+        // 1.Keep a list of sessions
+        // 2.Making sure the applicationToken and componentName passed by
+        // the activity is used on all of these sessions
+        // 3.We might also need to delay the start of all of these sessions until
+        // onActivityStarted() is called (and the main session is created).
+        // 4.Close (and delete) these sessions when onActivityStopped() is called.
+        // 5.Figure out whether each session will have its own mDisabled AtomicBoolean.
+        if (mMainSession == null) {
+            mMainSession = new ContentCaptureSession(mContext, mHandler, mService,
+                    mDisabled, Preconditions.checkNotNull(context));
+        } else {
+            throw new IllegalStateException("Manager already has a session: " + mMainSession);
         }
-        mHandler.sendMessage(obtainMessage(ContentCaptureManager::handleSendEvent, this,
-                new ContentCaptureEvent(type), /* forceFlush= */ true));
-    }
-
-    /** @hide */
-    public void onActivityDestroyed() {
-        if (!isContentCaptureEnabled()) return;
-
-        //TODO(b/111276913): check state (for example, how to handle if it's waiting for remote
-        // id) and send it to the cache of batched commands
-        if (VERBOSE) {
-            Log.v(TAG, "onActivityDestroyed(): state=" + getStateAsString(mState)
-                    + ", mId=" + mId);
-        }
-
-        mHandler.sendMessage(obtainMessage(ContentCaptureManager::handleFinishSession, this));
-    }
-
-    private void handleFinishSession() {
-        //TODO(b/111276913): right now both the ContentEvents and lifecycle sessions are sent
-        // to system_server, so it's ok to call both in sequence here. But once we split
-        // them so the events are sent directly to the service, we need to make sure they're
-        // sent in order.
-        try {
-            if (DEBUG) {
-                Log.d(TAG, "Finishing session " + mId + " with "
-                        + (mEvents == null ? 0 : mEvents.size()) + " event(s) for "
-                        + getActivityDebugName());
-            }
-
-            mService.finishSession(mContext.getUserId(), mId, mEvents);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error finishing session " + mId + " for " + getActivityDebugName()
-                    + ": " + e);
-        } finally {
-            handleResetState();
-        }
-    }
-
-    private void handleResetState() {
-        mState = STATE_UNKNOWN;
-        mId = null;
-        mApplicationToken = null;
-        mComponentName = null;
-        mEvents = null;
-        mHandler.removeMessages(MSG_FLUSH);
+        return mMainSession;
     }
 
     /**
-     * Notifies the Intelligence Service that a node has been added to the view structure.
+     * Gets the main session associated with the context.
      *
-     * <p>Typically called "manually" by views that handle their own virtual view hierarchy, or
-     * automatically by the Android System for views that return {@code true} on
-     * {@link View#onProvideContentCaptureStructure(ViewStructure, int)}.
-     *
-     * @param node node that has been added.
-     */
-    public void notifyViewAppeared(@NonNull ViewStructure node) {
-        Preconditions.checkNotNull(node);
-        if (!isContentCaptureEnabled()) return;
-
-        if (!(node instanceof ViewNode.ViewStructureImpl)) {
-            throw new IllegalArgumentException("Invalid node class: " + node.getClass());
-        }
-
-        mHandler.sendMessage(obtainMessage(ContentCaptureManager::handleSendEvent, this,
-                new ContentCaptureEvent(TYPE_VIEW_APPEARED)
-                        .setViewNode(((ViewNode.ViewStructureImpl) node).mNode),
-                        /* forceFlush= */ false));
-    }
-
-    /**
-     * Notifies the Intelligence Service that a node has been removed from the view structure.
-     *
-     * <p>Typically called "manually" by views that handle their own virtual view hierarchy, or
-     * automatically by the Android System for standard views.
-     *
-     * @param id id of the node that has been removed.
-     */
-    public void notifyViewDisappeared(@NonNull AutofillId id) {
-        Preconditions.checkNotNull(id);
-        if (!isContentCaptureEnabled()) return;
-
-        mHandler.sendMessage(obtainMessage(ContentCaptureManager::handleSendEvent, this,
-                new ContentCaptureEvent(TYPE_VIEW_DISAPPEARED).setAutofillId(id),
-                        /* forceFlush= */ false));
-    }
-
-    /**
-     * Notifies the Intelligence Service that the value of a text node has been changed.
-     *
-     * @param id of the node.
-     * @param text new text.
-     * @param flags either {@code 0} or {@link #FLAG_USER_INPUT} when the value was explicitly
-     * changed by the user (for example, through the keyboard).
-     */
-    public void notifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text,
-            int flags) {
-        Preconditions.checkNotNull(id);
-
-        if (!isContentCaptureEnabled()) return;
-
-        mHandler.sendMessage(obtainMessage(ContentCaptureManager::handleSendEvent, this,
-                new ContentCaptureEvent(TYPE_VIEW_TEXT_CHANGED, flags).setAutofillId(id)
-                        .setText(text), /* forceFlush= */ false));
-    }
-
-    /**
-     * Creates a {@link ViewStructure} for a "standard" view.
+     * <p>By default there's just one (associated with the activity lifecycle), but apps could
+     * explicitly add more using {@link #createContentCaptureSession(ContentCaptureContext)}.
      *
      * @hide
      */
     @NonNull
-    public ViewStructure newViewStructure(@NonNull View view) {
-        return new ViewNode.ViewStructureImpl(view);
+    public ContentCaptureSession getMainContentCaptureSession() {
+        // TODO(b/121033016): figure out how to manage the "default" session when it support
+        // multiple sessions (can't just be the first one, as it could be closed).
+        if (mMainSession == null) {
+            mMainSession = new ContentCaptureSession(mContext, mHandler, mService, mDisabled,
+                    /* contentCaptureContext=  */ null);
+            if (VERBOSE) {
+                Log.v(TAG, "getDefaultContentCaptureSession(): created " + mMainSession);
+            }
+        }
+        return mMainSession;
+    }
+
+    /** @hide */
+    public void onActivityStarted(@NonNull IBinder applicationToken,
+            @NonNull ComponentName activityComponent) {
+        // TODO(b/121033016): must start all sessions
+        getMainContentCaptureSession().start(applicationToken, activityComponent);
+    }
+
+    /** @hide */
+    public void onActivityStopped() {
+        // TODO(b/121033016): must finish all sessions
+        getMainContentCaptureSession().destroy();
     }
 
     /**
-     * Creates a {@link ViewStructure} for a "virtual" view, so it can be passed to
-     * {@link #notifyViewAppeared(ViewStructure)} by the view managing the virtual view hierarchy.
+     * Flushes the content of all sessions.
      *
-     * @param parentId id of the virtual view parent (it can be obtained by calling
-     * {@link ViewStructure#getAutofillId()} on the parent).
-     * @param virtualId id of the virtual child, relative to the parent.
+     * <p>Typically called by {@code Activity} when it's paused / resumed.
      *
-     * @return a new {@link ViewStructure} that can be used for Content Capture purposes.
+     * @hide
      */
-    @NonNull
-    public ViewStructure newVirtualViewStructure(@NonNull AutofillId parentId, int virtualId) {
-        return new ViewNode.ViewStructureImpl(parentId, virtualId);
+    public void flush() {
+        // TODO(b/121033016): must flush all sessions
+        getMainContentCaptureSession().flush();
     }
 
     /**
@@ -453,7 +171,7 @@ public final class ContentCaptureManager {
      */
     @Nullable
     public ComponentName getServiceComponentName() {
-        //TODO(b/111276913): implement
+        //TODO(b/121047489): implement
         return null;
     }
 
@@ -471,71 +189,35 @@ public final class ContentCaptureManager {
      * it on {@link android.app.Activity#onCreate(android.os.Bundle, android.os.PersistableBundle)}.
      */
     public void setContentCaptureEnabled(boolean enabled) {
+        //TODO(b/111276913): implement (need to finish / disable all sessions)
+    }
+
+    /**
+     * Called by the ap to request the Content Capture service to remove user-data associated with
+     * some context.
+     *
+     * @param request object specifying what user data should be removed.
+     */
+    public void removeUserData(@NonNull UserDataRemovalRequest request) {
         //TODO(b/111276913): implement
     }
 
     /** @hide */
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.println("ContentCaptureManager");
-        final String prefix2 = prefix + "  ";
-        pw.print(prefix2); pw.print("mContext: "); pw.println(mContext);
-        pw.print(prefix2); pw.print("user: "); pw.println(mContext.getUserId());
+
+        pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled.get());
+        pw.print(prefix); pw.print("Context: "); pw.println(mContext);
+        pw.print(prefix); pw.print("User: "); pw.println(mContext.getUserId());
         if (mService != null) {
-            pw.print(prefix2); pw.print("mService: "); pw.println(mService);
+            pw.print(prefix); pw.print("Service: "); pw.println(mService);
         }
-        pw.print(prefix2); pw.print("mDisabled: "); pw.println(mDisabled.get());
-        pw.print(prefix2); pw.print("isEnabled(): "); pw.println(isContentCaptureEnabled());
-        if (mId != null) {
-            pw.print(prefix2); pw.print("id: "); pw.println(mId);
-        }
-        pw.print(prefix2); pw.print("state: "); pw.print(mState); pw.print(" (");
-        pw.print(getStateAsString(mState)); pw.println(")");
-        if (mApplicationToken != null) {
-            pw.print(prefix2); pw.print("app token: "); pw.println(mApplicationToken);
-        }
-        if (mComponentName != null) {
-            pw.print(prefix2); pw.print("component name: ");
-            pw.println(mComponentName.flattenToShortString());
-        }
-        if (mEvents != null && !mEvents.isEmpty()) {
-            final int numberEvents = mEvents.size();
-            pw.print(prefix2); pw.print("buffered events: "); pw.print(numberEvents);
-            pw.print('/'); pw.println(MAX_BUFFER_SIZE);
-            if (VERBOSE && numberEvents > 0) {
-                final String prefix3 = prefix2 + "  ";
-                for (int i = 0; i < numberEvents; i++) {
-                    final ContentCaptureEvent event = mEvents.get(i);
-                    pw.print(prefix3); pw.print(i); pw.print(": "); event.dump(pw);
-                    pw.println();
-                }
-            }
-            pw.print(prefix2); pw.print("flush frequency: "); pw.println(FLUSHING_FREQUENCY_MS);
-            pw.print(prefix2); pw.print("next flush: ");
-            TimeUtils.formatDuration(mNextFlush - SystemClock.elapsedRealtime(), pw); pw.println();
-        }
-    }
-
-    /**
-     * Gets a string that can be used to identify the activity on logging statements.
-     */
-    private String getActivityDebugName() {
-        return mComponentName == null ? mContext.getPackageName()
-                : mComponentName.flattenToShortString();
-    }
-
-    @NonNull
-    private static String getStateAsString(int state) {
-        switch (state) {
-            case STATE_UNKNOWN:
-                return "UNKNOWN";
-            case STATE_WAITING_FOR_SERVER:
-                return "WAITING_FOR_SERVER";
-            case STATE_ACTIVE:
-                return "ACTIVE";
-            case STATE_DISABLED:
-                return "DISABLED";
-            default:
-                return "INVALID:" + state;
+        if (mMainSession != null) {
+            final String prefix2 = prefix + "  ";
+            pw.print(prefix); pw.println("Main session:");
+            mMainSession.dump(prefix2, pw);
+        } else {
+            pw.print(prefix); pw.println("No sessions");
         }
     }
 }
