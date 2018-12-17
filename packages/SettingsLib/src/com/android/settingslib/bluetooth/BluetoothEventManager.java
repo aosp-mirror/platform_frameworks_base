@@ -321,6 +321,11 @@ public class BluetoothEventManager {
                 // Dispatch device add callback to show bonded but
                 // not connected devices in discovery mode
                 dispatchDeviceAdded(cachedDevice);
+                Log.d(TAG, "DeviceFoundHandler found bonded and not connected device:"
+                        + cachedDevice);
+            } else {
+                Log.d(TAG, "DeviceFoundHandler found existing CachedBluetoothDevice:"
+                        + cachedDevice);
             }
             cachedDevice.setRssi(rssi);
             cachedDevice.setJustDiscovered(true);
