@@ -32,19 +32,24 @@ public class WifiIcons {
               R.drawable.stat_sys_wifi_signal_4_fully }
         };
 
+    static final int[] WIFI_FULL_ICONS = {
+            com.android.internal.R.drawable.ic_wifi_signal_0,
+            com.android.internal.R.drawable.ic_wifi_signal_1,
+            com.android.internal.R.drawable.ic_wifi_signal_2,
+            com.android.internal.R.drawable.ic_wifi_signal_3,
+            com.android.internal.R.drawable.ic_wifi_signal_4
+    };
+
     public static final int[][] QS_WIFI_SIGNAL_STRENGTH = {
             { R.drawable.ic_qs_wifi_0,
               R.drawable.ic_qs_wifi_1,
               R.drawable.ic_qs_wifi_2,
               R.drawable.ic_qs_wifi_3,
               R.drawable.ic_qs_wifi_4 },
-            { R.drawable.ic_qs_wifi_full_0,
-              R.drawable.ic_qs_wifi_full_1,
-              R.drawable.ic_qs_wifi_full_2,
-              R.drawable.ic_qs_wifi_full_3,
-              R.drawable.ic_qs_wifi_full_4 }
+            WIFI_FULL_ICONS
         };
 
+    public static final int QS_WIFI_DISABLED = com.android.internal.R.drawable.ic_wifi_signal_0;
     static final int QS_WIFI_NO_NETWORK = R.drawable.ic_qs_wifi_no_network;
     static final int WIFI_NO_NETWORK = R.drawable.stat_sys_wifi_signal_null;
 
