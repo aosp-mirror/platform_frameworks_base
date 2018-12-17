@@ -71,12 +71,12 @@ bool detectAnomaliesPass(AnomalyTracker& tracker,
                          const std::shared_ptr<DimToValMap>& currentBucket,
                          const std::set<const MetricDimensionKey>& trueList,
                          const std::set<const MetricDimensionKey>& falseList) {
-    for (MetricDimensionKey key : trueList) {
+    for (const MetricDimensionKey& key : trueList) {
         if (!tracker.detectAnomaly(bucketNum, key, getBucketValue(currentBucket, key))) {
             return false;
         }
     }
-    for (MetricDimensionKey key : falseList) {
+    for (const MetricDimensionKey& key : falseList) {
         if (tracker.detectAnomaly(bucketNum, key, getBucketValue(currentBucket, key))) {
             return false;
         }
