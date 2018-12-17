@@ -2632,6 +2632,10 @@ public class NotificationManagerService extends SystemService {
          * Note that since notification posting is done asynchronously, this will not return
          * notifications that are in the process of being posted.
          *
+         * From {@link Build.VERSION_CODES#Q}, will also return notifications you've posted as
+         * an app's notification delegate via
+         * {@link NotificationManager#notifyAsPackage(String, String, int, Notification)}.
+         *
          * @returns A list of all the package's notifications, in natural order.
          */
         @Override
@@ -2674,16 +2678,18 @@ public class NotificationManagerService extends SystemService {
 
         private StatusBarNotification sanitizeSbn(String pkg, int userId,
                 StatusBarNotification sbn) {
-            if (sbn.getPackageName().equals(pkg) && sbn.getUserId() == userId) {
-                // We could pass back a cloneLight() but clients might get confused and
-                // try to send this thing back to notify() again, which would not work
-                // very well.
-                return new StatusBarNotification(
-                        sbn.getPackageName(),
-                        sbn.getOpPkg(),
-                        sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
-                        sbn.getNotification().clone(),
-                        sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
+            if (sbn.getUserId() == userId) {
+                if (sbn.getPackageName().equals(pkg) || sbn.getOpPkg().equals(pkg)) {
+                    // We could pass back a cloneLight() but clients might get confused and
+                    // try to send this thing back to notify() again, which would not work
+                    // very well.
+                    return new StatusBarNotification(
+                            sbn.getPackageName(),
+                            sbn.getOpPkg(),
+                            sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
+                            sbn.getNotification().clone(),
+                            sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
+                }
             }
             return null;
         }
