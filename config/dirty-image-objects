@@ -44,7 +44,6 @@ java.util.function.ToIntFunction
 sun.misc.FormattedFloatingDecimal
 java.util.stream.IntStream
 android.icu.util.TimeZone
-libcore.io.DropBox
 org.apache.harmony.luni.internal.util.TimezoneGetter
 dalvik.system.SocketTagger
 dalvik.system.CloseGuard
@@ -137,7 +136,6 @@ java.lang.CharSequence
 android.icu.util.ULocale
 dalvik.system.BaseDexClassLoader
 android.icu.text.BreakIterator
-libcore.io.EventLogger
 libcore.net.NetworkSecurityPolicy
 android.icu.text.UnicodeSet
 com.android.org.conscrypt.TrustedCertificateStore$PreloadHolder
