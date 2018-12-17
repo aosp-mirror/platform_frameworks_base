@@ -16,6 +16,8 @@
 
 package com.android.server.contentcapture;
 
+import static android.service.contentcapture.ContentCaptureService.setClientState;
+
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
@@ -38,7 +40,6 @@ import android.service.contentcapture.SnapshotData;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
-import android.view.contentcapture.ContentCaptureEvent;
 import android.view.contentcapture.ContentCaptureSession;
 
 import com.android.internal.annotations.GuardedBy;
@@ -48,7 +49,6 @@ import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Per-user instance of {@link ContentCaptureManagerService}.
@@ -114,10 +114,10 @@ final class ContentCapturePerUserService
     @GuardedBy("mLock")
     public void startSessionLocked(@NonNull IBinder activityToken,
             @NonNull ComponentName componentName, int taskId, int displayId,
-            @NonNull String sessionId, @Nullable ContentCaptureContext clientContext,
-            int flags, boolean bindInstantServiceAllowed, @NonNull IResultReceiver resultReceiver) {
+            @NonNull String sessionId, int uid, @Nullable ContentCaptureContext clientContext,
+            int flags, boolean bindInstantServiceAllowed, @NonNull IResultReceiver clientReceiver) {
         if (!isEnabledLocked()) {
-            sendToClient(resultReceiver, ContentCaptureSession.STATE_DISABLED);
+            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED, /* binder=*/ null);
             return;
         }
         final ComponentName serviceComponentName = getServiceComponentName();
@@ -131,35 +131,30 @@ final class ContentCapturePerUserService
             return;
         }
 
-        ContentCaptureServerSession session = mSessions.get(sessionId);
-        if (session != null) {
-            if (mMaster.debug) {
-                Slog.d(TAG, "startSession(): reusing session " + sessionId + " for "
-                        + componentName);
-            }
-            // TODO(b/111276913): check if local ids match and decide what to do if they don't
-            // TODO(b/111276913): should we call session.notifySessionStartedLocked() again??
-            // if not, move notifySessionStartedLocked() into session constructor
-            sendToClient(resultReceiver, ContentCaptureSession.STATE_ACTIVE);
+        final ContentCaptureServerSession existingSession = mSessions.get(sessionId);
+        if (existingSession != null) {
+            Slog.w(TAG, "startSession(id=" + existingSession + ", token=" + activityToken
+                    + ": ignoring because it already exists for " + existingSession.mActivityToken);
+            setClientState(clientReceiver, ContentCaptureSession.STATE_DISABLED_DUPLICATED_ID,
+                    /* binder=*/ null);
             return;
         }
 
-        session = new ContentCaptureServerSession(getContext(), mUserId, mLock, activityToken,
-                this, serviceComponentName, componentName, taskId, displayId, sessionId,
-                clientContext, flags, bindInstantServiceAllowed, mMaster.verbose);
+        final ContentCaptureServerSession newSession = new ContentCaptureServerSession(getContext(),
+                mUserId, mLock, activityToken, this, serviceComponentName, componentName, taskId,
+                displayId, sessionId, uid, clientContext, flags, bindInstantServiceAllowed,
+                mMaster.verbose);
         if (mMaster.verbose) {
-            Slog.v(TAG, "startSession(): new session for " + componentName + " and id "
-                    + sessionId);
+            Slog.v(TAG, "startSession(): new session for "
+                    + ComponentName.flattenToShortString(componentName) + " and id " + sessionId);
         }
-        mSessions.put(sessionId, session);
-        session.notifySessionStartedLocked();
-        sendToClient(resultReceiver, ContentCaptureSession.STATE_ACTIVE);
+        mSessions.put(sessionId, newSession);
+        newSession.notifySessionStartedLocked(clientReceiver);
     }
 
     // TODO(b/111276913): log metrics
     @GuardedBy("mLock")
-    public void finishSessionLocked(@NonNull String sessionId,
-            @Nullable List<ContentCaptureEvent> events) {
+    public void finishSessionLocked(@NonNull String sessionId) {
         if (!isEnabledLocked()) {
             return;
         }
@@ -171,41 +166,8 @@ final class ContentCapturePerUserService
             }
             return;
         }
-        if (events != null && !events.isEmpty()) {
-            // TODO(b/111276913): for now we're sending the events and the onDestroy() in 2 separate
-            // calls because it's not clear yet whether we'll change the manager to send events
-            // to the service directly (i.e., without passing through system server). Once we
-            // decide, we might need to split IContentCaptureManager.onSessionLifecycle() in 2
-            // methods, one for start and another for finish (and passing the events to finish),
-            // otherwise the service might receive the 2 calls out of order.
-            session.sendEventsLocked(events);
-        }
-        if (mMaster.verbose) {
-            Slog.v(TAG, "finishSession(" + (events == null ? 0 : events.size()) + " events): "
-                    + session);
-        }
-        session.removeSelfLocked(true);
-    }
-
-    // TODO(b/111276913): need to figure out why some events are sent before session is started;
-    // probably because ContentCaptureManager is not buffering them until it gets the session back
-    @GuardedBy("mLock")
-    public void sendEventsLocked(@NonNull String sessionId,
-            @NonNull List<ContentCaptureEvent> events) {
-        if (!isEnabledLocked()) {
-            return;
-        }
-        final ContentCaptureServerSession session = mSessions.get(sessionId);
-        if (session == null) {
-            if (mMaster.verbose) {
-                Slog.v(TAG, "sendEvents(): no session for " + sessionId);
-            }
-            return;
-        }
-        if (mMaster.verbose) {
-            Slog.v(TAG, "sendEvents(): id=" + sessionId + ", events=" + events.size());
-        }
-        session.sendEventsLocked(events);
+        if (mMaster.verbose) Slog.v(TAG, "finishSession(): id=" + sessionId);
+        session.removeSelfLocked(/* notifyRemoteService= */ true);
     }
 
     @GuardedBy("mLock")
@@ -307,13 +269,5 @@ final class ContentCapturePerUserService
             }
         }
         return null;
-    }
-
-    private static void sendToClient(@NonNull IResultReceiver resultReceiver, int value) {
-        try {
-            resultReceiver.send(value, null);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Error async reporting result to client: " + e);
-        }
     }
 }

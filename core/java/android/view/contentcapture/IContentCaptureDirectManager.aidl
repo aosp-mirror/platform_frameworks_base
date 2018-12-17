@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package android.service.contentcapture;
+package android.view.contentcapture;
 
-import android.service.contentcapture.SnapshotData;
-import android.view.contentcapture.ContentCaptureContext;
-
-import com.android.internal.os.IResultReceiver;
-
-import java.util.List;
+import android.content.pm.ParceledListSlice;
+import android.view.contentcapture.ContentCaptureEvent;
 
 /**
- * Interface from the system to a Content Capture service.
- *
- * @hide
- */
-oneway interface IContentCaptureService {
-    void onSessionStarted(in ContentCaptureContext context, String sessionId, int uid,
-                          in IResultReceiver clientReceiver);
-    void onSessionFinished(String sessionId);
-    void onActivitySnapshot(String sessionId, in SnapshotData snapshotData);
+  * Interface between an app (ContentCaptureManager / ContentCaptureSession) and the app providing
+  * the ContentCaptureService implementation.
+  *
+  * @hide
+  */
+oneway interface IContentCaptureDirectManager {
+    void sendEvents(in String sessionId, in ParceledListSlice events);
 }

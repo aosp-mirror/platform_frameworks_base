@@ -357,6 +357,7 @@ java_defaults {
         "core/java/android/view/autofill/IAutoFillManagerClient.aidl",
         "core/java/android/view/autofill/IAugmentedAutofillManagerClient.aidl",
         "core/java/android/view/autofill/IAutofillWindowPresenter.aidl",
+        "core/java/android/view/contentcapture/IContentCaptureDirectManager.aidl",
         "core/java/android/view/contentcapture/IContentCaptureManager.aidl",
         "core/java/android/view/IApplicationToken.aidl",
         "core/java/android/view/IAppTransitionAnimationSpecsFuture.aidl",

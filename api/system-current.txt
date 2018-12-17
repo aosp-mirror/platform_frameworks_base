@@ -5017,7 +5017,7 @@ package android.service.contentcapture {
     method public final java.util.Set<android.content.ComponentName> getContentCaptureDisabledActivities();
     method public final java.util.Set<java.lang.String> getContentCaptureDisabledPackages();
     method public void onActivitySnapshot(android.view.contentcapture.ContentCaptureSessionId, android.service.contentcapture.SnapshotData);
-    method public abstract void onContentCaptureEventsRequest(android.view.contentcapture.ContentCaptureSessionId, android.service.contentcapture.ContentCaptureEventsRequest);
+    method public void onContentCaptureEventsRequest(android.view.contentcapture.ContentCaptureSessionId, android.service.contentcapture.ContentCaptureEventsRequest);
     method public void onCreateContentCaptureSession(android.view.contentcapture.ContentCaptureContext, android.view.contentcapture.ContentCaptureSessionId);
     method public void onDestroyContentCaptureSession(android.view.contentcapture.ContentCaptureSessionId);
     method public final void setActivityContentCaptureEnabled(android.content.ComponentName, boolean);
