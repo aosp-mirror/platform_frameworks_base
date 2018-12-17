@@ -3640,4 +3640,6 @@
          (android.view.InputEventCompatProcessor). -->
     <string name="config_inputEventCompatProcessorOverrideClassName" translatable="false"></string>
 
+    <!-- Component name for the default module metadata provider on this device -->
+    <string name="config_defaultModuleMetadataProvider">com.android.modulemetadata</string>
 </resources>

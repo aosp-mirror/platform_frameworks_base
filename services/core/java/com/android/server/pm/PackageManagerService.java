@@ -162,12 +162,14 @@ import android.content.pm.InstantAppRequest;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
+import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageList;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
+import android.content.pm.PackageManager.ModuleInfoFlags;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.CheckPermissionDelegate;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
@@ -717,6 +719,8 @@ public class PackageManagerService extends IPackageManager.Stub
     final private ArraySet<PackageListObserver> mPackageListObservers = new ArraySet<>();
 
     private PackageManager mPackageManager;
+
+    private final ModuleInfoProvider mModuleInfoProvider;
 
     class PackageParserCallback implements PackageParser.Callback {
         @Override public final boolean hasFeature(String feature) {
@@ -3030,6 +3034,8 @@ public class PackageManagerService extends IPackageManager.Stub
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
 
+        mModuleInfoProvider = new ModuleInfoProvider(mContext, this);
+
         // Now after opening every single application zip, make sure they
         // are all flushed.  Not really needed, but keeps things nice and
         // tidy.
@@ -4966,6 +4972,16 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         return null;
+    }
+
+    @Override
+    public ModuleInfo getModuleInfo(String packageName, @ModuleInfoFlags int flags) {
+        return mModuleInfoProvider.getModuleInfo(packageName, flags);
+    }
+
+    @Override
+    public List<ModuleInfo> getInstalledModules(int flags) {
+        return mModuleInfoProvider.getInstalledModules(flags);
     }
 
     @Override
@@ -20242,6 +20258,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
         }
+
+        mModuleInfoProvider.systemReady();
     }
 
     public void waitForAppDataPrepared() {
