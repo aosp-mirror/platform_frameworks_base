@@ -2691,10 +2691,12 @@ public class UserManagerService extends IUserManager.Stub {
                 if (!isGuest && !isManagedProfile && !isDemo && isUserLimitReached()) {
                     // If we're not adding a guest/demo user or a managed profile and the limit has
                     // been reached, cannot add a user.
+                    Log.e(LOG_TAG, "Cannot add user. Maximum user limit is reached.");
                     return null;
                 }
                 // If we're adding a guest and there already exists one, bail.
                 if (isGuest && findCurrentGuestUser() != null) {
+                    Log.e(LOG_TAG, "Cannot add guest user. Guest user already exists.");
                     return null;
                 }
                 // In legacy mode, restricted profile's parent can only be the owner user
@@ -2937,13 +2939,26 @@ public class UserManagerService extends IUserManager.Stub {
             final UserData userData;
             int currentUser = ActivityManager.getCurrentUser();
             if (currentUser == userHandle) {
-                Log.w(LOG_TAG, "Current user cannot be removed");
+                Log.w(LOG_TAG, "Current user cannot be removed.");
                 return false;
             }
             synchronized (mPackagesLock) {
                 synchronized (mUsersLock) {
                     userData = mUsers.get(userHandle);
-                    if (userHandle == 0 || userData == null || mRemovingUserIds.get(userHandle)) {
+                    if (userHandle == UserHandle.USER_SYSTEM) {
+                        Log.e(LOG_TAG, "System user cannot be removed.");
+                        return false;
+                    }
+
+                    if (userData == null) {
+                        Log.e(LOG_TAG, String.format(
+                                "Cannot remove user %d, invalid user id provided.", userHandle));
+                        return false;
+                    }
+
+                    if (mRemovingUserIds.get(userHandle)) {
+                        Log.e(LOG_TAG, String.format(
+                                "User %d is already scheduled for removal.", userHandle));
                         return false;
                     }
 
@@ -2962,7 +2977,7 @@ public class UserManagerService extends IUserManager.Stub {
             try {
                 mAppOpsService.removeUser(userHandle);
             } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Unable to notify AppOpsService of removing user", e);
+                Log.w(LOG_TAG, "Unable to notify AppOpsService of removing user.", e);
             }
 
             if (userData.info.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
@@ -2986,6 +3001,7 @@ public class UserManagerService extends IUserManager.Stub {
                             }
                         });
             } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Failed to stop user during removal.", e);
                 return false;
             }
             return res == ActivityManager.USER_OP_SUCCESS;

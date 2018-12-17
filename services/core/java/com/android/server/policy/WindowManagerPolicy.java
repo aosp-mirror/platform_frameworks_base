@@ -1034,6 +1034,13 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     public KeyEvent dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags);
 
     /**
+     * Called when the top focused display is changed.
+     *
+     * @param displayId The ID of the top focused display.
+     */
+    void setTopFocusedDisplay(int displayId);
+
+    /**
      * Apply the keyguard policy to a specific window.
      *
      * @param win The window to apply the keyguard policy.

@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.os.Build.VERSION_CODES.P;
+import static android.os.Build.VERSION_CODES.Q;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
@@ -309,9 +311,27 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testFocusedWindowMultipleDisplays() {
+        doTestFocusedWindowMultipleDisplays(false /* perDisplayFocusEnabled */, Q);
+    }
+
+    @Test
+    public void testFocusedWindowMultipleDisplaysPerDisplayFocusEnabled() {
+        doTestFocusedWindowMultipleDisplays(true /* perDisplayFocusEnabled */, Q);
+    }
+
+    @Test
+    public void testFocusedWindowMultipleDisplaysPerDisplayFocusEnabledLegacyApp() {
+        doTestFocusedWindowMultipleDisplays(true /* perDisplayFocusEnabled */, P);
+    }
+
+    private void doTestFocusedWindowMultipleDisplays(boolean perDisplayFocusEnabled,
+            int targetSdk) {
+        mWm.mPerDisplayFocusEnabled = perDisplayFocusEnabled;
+
         // Create a focusable window and check that focus is calculated correctly
         final WindowState window1 =
                 createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "window1");
+        window1.mAppToken.mTargetSdk = targetSdk;
         updateFocusedWindow();
         assertTrue(window1.isFocused());
         assertEquals(window1, mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
@@ -324,16 +344,17 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // Add a window to the second display, and it should be focused
         final WindowState window2 = createWindow(null, TYPE_BASE_APPLICATION, dc, "window2");
+        window2.mAppToken.mTargetSdk = targetSdk;
         updateFocusedWindow();
-        assertTrue(window1.isFocused());
         assertTrue(window2.isFocused());
+        assertEquals(perDisplayFocusEnabled && targetSdk >= Q, window1.isFocused());
         assertEquals(window2, mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
 
-        // Move the first window to the to including parents, and make sure focus is updated
+        // Move the first window to top including parents, and make sure focus is updated
         window1.getParent().positionChildAt(POSITION_TOP, window1, true);
         updateFocusedWindow();
         assertTrue(window1.isFocused());
-        assertTrue(window2.isFocused());
+        assertEquals(perDisplayFocusEnabled && targetSdk >= Q, window2.isFocused());
         assertEquals(window1, mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
     }
 

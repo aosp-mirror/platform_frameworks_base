@@ -61,9 +61,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
-
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
@@ -103,6 +103,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.CUSTOM_SCREEN_ROTATION;
+import static com.android.server.wm.WindowManagerService.H.REPORT_FOCUS_CHANGE;
 import static com.android.server.wm.WindowManagerService.H.REPORT_HARD_KEYBOARD_STATUS_CHANGE;
 import static com.android.server.wm.WindowManagerService.H.REPORT_LOSING_FOCUS;
 import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
@@ -2832,6 +2833,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         forAllWindows(mScheduleToastTimeout, false /* traverseTopToBottom */);
     }
 
+    WindowState findFocusedWindowIfNeeded() {
+        return (mWmService.mPerDisplayFocusEnabled
+                || mWmService.mRoot.mTopFocusedAppByProcess.isEmpty()) ? findFocusedWindow() : null;
+    }
+
     WindowState findFocusedWindow() {
         mTmpWindow = null;
 
@@ -2844,7 +2850,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mTmpWindow;
     }
 
-
     /**
      * Update the focused window and make some adjustments if the focus has changed.
      *
@@ -2856,31 +2861,31 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @param updateInputWindows Whether to sync the window information to the input module.
      * @return {@code true} if the focused window has changed.
      */
-    boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows, boolean focusFound) {
-        final WindowState newFocus = findFocusedWindow();
+    boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
+        WindowState newFocus = findFocusedWindowIfNeeded();
         if (mCurrentFocus == newFocus) {
             return false;
         }
         boolean imWindowChanged = false;
-        // TODO (b/111080190): Multi-Session IME
-        if (!focusFound) {
-            final WindowState imWindow = mInputMethodWindow;
-            if (imWindow != null) {
-                final WindowState prevTarget = mInputMethodTarget;
+        final WindowState imWindow = mInputMethodWindow;
+        if (imWindow != null) {
+            final WindowState prevTarget = mInputMethodTarget;
+            final WindowState newTarget = computeImeTarget(true /* updateImeTarget*/);
+            imWindowChanged = prevTarget != newTarget;
 
-                final WindowState newTarget = computeImeTarget(true /* updateImeTarget*/);
-                imWindowChanged = prevTarget != newTarget;
-
-                if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS
-                        && mode != UPDATE_FOCUS_WILL_PLACE_SURFACES) {
-                    assignWindowLayers(false /* setLayoutNeeded */);
-                }
+            if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS
+                    && mode != UPDATE_FOCUS_WILL_PLACE_SURFACES) {
+                assignWindowLayers(false /* setLayoutNeeded */);
             }
         }
 
         if (imWindowChanged) {
             mWmService.mWindowsChanged = true;
             setLayoutNeeded();
+            newFocus = findFocusedWindowIfNeeded();
+        }
+        if (mCurrentFocus != newFocus) {
+            mWmService.mH.obtainMessage(REPORT_FOCUS_CHANGE, this).sendToTarget();
         }
 
         if (DEBUG_FOCUS_LIGHT || mWmService.localLOGV) Slog.v(TAG_WM, "Changing focus from "

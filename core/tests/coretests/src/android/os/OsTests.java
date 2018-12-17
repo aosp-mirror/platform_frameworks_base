@@ -33,7 +33,6 @@ public class OsTests {
         suite.addTestSuite(MessageQueueTest.class);
         suite.addTestSuite(MessengerTest.class);
         suite.addTestSuite(PatternMatcherTest.class);
-        suite.addTestSuite(SystemPropertiesTest.class);
 
         return suite;
     }
