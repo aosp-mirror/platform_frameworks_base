@@ -26,6 +26,7 @@ import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
+import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
@@ -59,7 +60,8 @@ message Atom {
         LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 11;
         MobileRadioPowerStateChanged mobile_radio_power_state_changed = 12;
         WifiRadioPowerStateChanged wifi_radio_power_state_changed = 13;
-        // 14 - 19 are available
+        // 14 - 18 are available
+        LauncherUIChanged launcher_event = 19;
         BatterySaverModeStateChanged battery_saver_mode_state_changed = 20;
         DeviceIdleModeStateChanged device_idle_mode_state_changed = 21;
         DeviceIdlingModeStateChanged device_idling_mode_state_changed = 22;
@@ -1183,6 +1185,14 @@ message PhoneStateChanged {
         ON = 1;
     }
     optional State state = 1;
+}
+
+message LauncherUIChanged {
+    optional android.stats.launcher.LauncherAction action = 1;
+    optional android.stats.launcher.LauncherState src_state = 2;
+    optional android.stats.launcher.LauncherState dst_state = 3;
+    optional android.stats.launcher.LauncherExtension extension = 4 [(log_mode) = MODE_BYTES];
+    optional bool is_swipe_up_enabled = 5;
 }
 
 /**

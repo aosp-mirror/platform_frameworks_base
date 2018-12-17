@@ -1,0 +1,86 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.stats.launcher;
+option java_multiple_files = true;
+
+enum LauncherAction {
+    DEFAULT_ACTION = 0;
+    LAUNCH_APP = 1;
+    LAUNCH_TASK = 2;
+    DISMISS_TASK = 3;
+    LONGPRESS = 4;
+    DRAGDROP = 5;
+    SWIPE_UP = 6;
+    SWIPE_DOWN = 7;
+    SWIPE_LEFT = 8;
+    SWIPE_RIGHT = 9;
+}
+
+enum LauncherState {
+    BACKGROUND = 0;
+    HOME = 1;
+    OVERVIEW = 2;
+    ALLAPPS = 3;
+}
+
+message LauncherTarget {
+    enum Type {
+        NONE = 0;
+        ITEM_TYPE = 1;
+        CONTROL_TYPE = 2;
+        CONTAINER_TYPE = 3;
+    }
+    enum Item {
+        DEFAULT_ITEM = 0;
+        APP_ICON = 1;
+        SHORTCUT = 2;
+        WIDGET = 3;
+        FOLDER_ICON = 4;
+        DEEPSHORTCUT = 5;
+        SEARCHBOX = 6;
+        EDITTEXT = 7;
+        NOTIFICATION = 8;
+        TASK = 9;
+    }
+    enum Container {
+        DEFAULT_CONTAINER = 0;
+        HOTSEAT = 1;
+        FOLDER = 2;
+        PREDICTION = 3;
+        SEARCHRESULT = 4;
+    }
+    enum Control {
+        DEFAULT_CONTROL = 0;
+        MENU = 1;
+        UNINSTALL = 2;
+        REMOVE = 3;
+    }
+    optional Type type = 1;
+    optional Item item = 2;
+    optional Container container = 3;
+    optional Control control = 4;
+    optional string launch_component = 5;
+    optional int32 page_id = 6;
+    optional int32 grid_x = 7;
+    optional int32 grid_y = 8;
+}
+
+message LauncherExtension {
+    repeated LauncherTarget src_target = 1;
+    repeated LauncherTarget dst_target = 2;
+}
