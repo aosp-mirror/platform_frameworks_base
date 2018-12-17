@@ -568,11 +568,34 @@ static jboolean Bitmap_compress(JNIEnv* env, jobject clazz, jlong bitmapHandle,
     return SkEncodeImage(strm.get(), skbitmap, fm, quality) ? JNI_TRUE : JNI_FALSE;
 }
 
+static inline void bitmapErase(SkBitmap bitmap, const SkColor4f& color,
+        const sk_sp<SkColorSpace>& colorSpace) {
+    SkPaint p;
+    p.setColor4f(color, colorSpace.get());
+    p.setBlendMode(SkBlendMode::kSrc);
+    SkCanvas canvas(bitmap);
+    canvas.drawPaint(p);
+}
+
 static void Bitmap_erase(JNIEnv* env, jobject, jlong bitmapHandle, jint color) {
     LocalScopedBitmap bitmap(bitmapHandle);
     SkBitmap skBitmap;
     bitmap->getSkBitmap(&skBitmap);
-    skBitmap.eraseColor(color);
+    bitmapErase(skBitmap, SkColor4f::FromColor(color), SkColorSpace::MakeSRGB());
+}
+
+static void Bitmap_eraseLong(JNIEnv* env, jobject, jlong bitmapHandle, jobject jColorSpace,
+        jfloat r, jfloat g, jfloat b, jfloat a) {
+    sk_sp<SkColorSpace> cs = GraphicsJNI::getNativeColorSpace(env, jColorSpace);
+    if (GraphicsJNI::hasException(env)) {
+        return;
+    }
+
+    LocalScopedBitmap bitmap(bitmapHandle);
+    SkBitmap skBitmap;
+    bitmap->getSkBitmap(&skBitmap);
+    SkColor4f color = SkColor4f{r, g, b, a};
+    bitmapErase(skBitmap, color, cs);
 }
 
 static jint Bitmap_rowBytes(JNIEnv* env, jobject, jlong bitmapHandle) {
@@ -1183,6 +1206,7 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeCompress",           "(JIILjava/io/OutputStream;[B)Z",
         (void*)Bitmap_compress },
     {   "nativeErase",              "(JI)V", (void*)Bitmap_erase },
+    {   "nativeErase",              "(JLandroid/graphics/ColorSpace;FFFF)V", (void*)Bitmap_eraseLong },
     {   "nativeRowBytes",           "(J)I", (void*)Bitmap_rowBytes },
     {   "nativeConfig",             "(J)I", (void*)Bitmap_config },
     {   "nativeHasAlpha",           "(J)Z", (void*)Bitmap_hasAlpha },

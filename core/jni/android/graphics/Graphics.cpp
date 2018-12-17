@@ -456,12 +456,14 @@ sk_sp<SkColorSpace> GraphicsJNI::getNativeColorSpace(JNIEnv* env, jobject colorS
     if (colorSpace == nullptr) return nullptr;
     if (!env->IsInstanceOf(colorSpace, gColorSpaceRGB_class)) {
         doThrowIAE(env, "The color space must be an RGB color space");
+        return nullptr;
     }
 
     jobject transferParams = env->CallObjectMethod(colorSpace,
             gColorSpaceRGB_getTransferParametersMethodID);
     if (transferParams == nullptr) {
         doThrowIAE(env, "The color space must use an ICC parametric transfer function");
+        return nullptr;
     }
 
     jfloatArray illuminantD50 = (jfloatArray) env->GetStaticObjectField(gColorSpace_class,
