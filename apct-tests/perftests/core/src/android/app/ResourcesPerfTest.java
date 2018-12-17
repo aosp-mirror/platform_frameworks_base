@@ -23,7 +23,8 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.support.test.filters.LargeTest;
+
+import androidx.test.filters.LargeTest;
 
 import org.junit.After;
 import org.junit.Before;

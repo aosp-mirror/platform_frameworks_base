@@ -9,7 +9,7 @@ LOCAL_SRC_FILES := \
   src/android/os/ISomeService.aidl
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    android-support-test \
+    androidx.test.rules \
     androidx.annotation_annotation \
     apct-perftests-utils \
     guava

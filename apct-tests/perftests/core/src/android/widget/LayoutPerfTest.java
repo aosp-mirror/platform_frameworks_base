@@ -16,16 +16,25 @@
 
 package android.widget;
 
+import static android.perftests.utils.LayoutUtils.gatherViewTree;
+import static android.perftests.utils.LayoutUtils.requestLayoutForAllNodes;
+import static android.view.View.MeasureSpec.AT_MOST;
+import static android.view.View.MeasureSpec.EXACTLY;
+import static android.view.View.MeasureSpec.UNSPECIFIED;
+
+import static org.junit.Assert.assertTrue;
+
 import android.app.Activity;
 import android.os.Looper;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.StubActivity;
-import android.support.test.annotation.UiThreadTest;
-import android.support.test.filters.LargeTest;
-import android.support.test.rule.ActivityTestRule;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.LargeTest;
+import androidx.test.rule.ActivityTestRule;
 
 import com.android.perftests.core.R;
 
@@ -37,13 +46,6 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
-import static android.perftests.utils.LayoutUtils.gatherViewTree;
-import static android.perftests.utils.LayoutUtils.requestLayoutForAllNodes;
-import static android.view.View.MeasureSpec.AT_MOST;
-import static android.view.View.MeasureSpec.EXACTLY;
-import static android.view.View.MeasureSpec.UNSPECIFIED;
-import static org.junit.Assert.assertTrue;
 
 @LargeTest
 @RunWith(Parameterized.class)
