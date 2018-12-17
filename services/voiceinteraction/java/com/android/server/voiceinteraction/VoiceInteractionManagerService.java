@@ -356,7 +356,12 @@ public class VoiceInteractionManagerService extends SystemService {
             }
 
             // No voice interactor, we'll just set up a simple recognizer.
-            curRecognizer = findAvailRecognizer(null, userHandle);
+            initSimpleRecognizer(curInteractorInfo, userHandle);
+        }
+
+        public void initSimpleRecognizer(VoiceInteractionServiceInfo curInteractorInfo,
+                int userHandle) {
+            ComponentName curRecognizer = findAvailRecognizer(null, userHandle);
             if (curRecognizer != null) {
                 if (curInteractorInfo == null) {
                     setCurInteractor(null, userHandle);
@@ -1236,34 +1241,46 @@ public class VoiceInteractionManagerService extends SystemService {
                 int userHandle = UserHandle.getUserId(uid);
                 ComponentName curInteractor = getCurInteractor(userHandle);
                 ComponentName curRecognizer = getCurRecognizer(userHandle);
-                boolean hit = false;
+                boolean hitInt = false;
+                boolean hitRec = false;
                 for (String pkg : packages) {
                     if (curInteractor != null && pkg.equals(curInteractor.getPackageName())) {
-                        hit = true;
+                        hitInt = true;
                         break;
                     } else if (curRecognizer != null
                             && pkg.equals(curRecognizer.getPackageName())) {
-                        hit = true;
+                        hitRec = true;
                         break;
                     }
                 }
-                if (hit && doit) {
-                    // The user is force stopping our current interactor/recognizer.
+                if (hitInt && doit) {
+                    // The user is force stopping our current interactor.
                     // Clear the current settings and restore default state.
                     synchronized (VoiceInteractionManagerServiceStub.this) {
+                        Slog.i(TAG, "Force stopping current voice interactor: "
+                                + getCurInteractor(userHandle));
                         unloadAllKeyphraseModels();
                         if (mImpl != null) {
                             mImpl.shutdownLocked();
                             setImplLocked(null);
                         }
+
                         setCurInteractor(null, userHandle);
                         setCurRecognizer(null, userHandle);
                         resetCurAssistant(userHandle);
                         initForUser(userHandle);
                         switchImplementationIfNeededLocked(true);
                     }
+                } else if (hitRec && doit) {
+                    // We are just force-stopping the current recognizer, which is not
+                    // also the current interactor.
+                    synchronized (VoiceInteractionManagerServiceStub.this) {
+                        Slog.i(TAG, "Force stopping current voice recognizer: "
+                                + getCurRecognizer(userHandle));
+                        initSimpleRecognizer(null, userHandle);
+                    }
                 }
-                return hit;
+                return hitInt || hitRec;
             }
 
             @Override
