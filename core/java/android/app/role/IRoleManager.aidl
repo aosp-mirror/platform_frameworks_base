@@ -48,4 +48,6 @@ interface IRoleManager {
     boolean addRoleHolderFromController(in String roleName, in String packageName);
 
     boolean removeRoleHolderFromController(in String roleName, in String packageName);
+
+    List<String> getHeldRolesFromController(in String packageName);
 }

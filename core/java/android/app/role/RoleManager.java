@@ -542,6 +542,27 @@ public final class RoleManager {
         }
     }
 
+
+    /**
+     * Returns the list of all roles that the given package is currently holding
+     *
+     * @param packageName the package name
+     * @return the list of role names
+     *
+     * @hide
+     */
+    @RequiresPermission(PERMISSION_MANAGE_ROLES_FROM_CONTROLLER)
+    @SystemApi
+    @NonNull
+    public List<String> getHeldRolesFromController(@NonNull String packageName) {
+        Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
+        try {
+            return mService.getHeldRolesFromController(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private static class RoleManagerCallbackDelegate extends IRoleManagerCallback.Stub {
 
         @NonNull

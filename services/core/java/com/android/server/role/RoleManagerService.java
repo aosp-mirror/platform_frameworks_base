@@ -503,6 +503,18 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             return userState.removeRoleHolder(roleName, packageName);
         }
 
+        @Override
+        public List<String> getHeldRolesFromController(@NonNull String packageName) {
+            Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
+            getContext().enforceCallingOrSelfPermission(
+                    RoleManager.PERMISSION_MANAGE_ROLES_FROM_CONTROLLER,
+                    "getRolesHeldFromController");
+
+            int userId = UserHandle.getCallingUserId();
+            RoleUserState userState = getOrCreateUserState(userId);
+            return userState.getHeldRoles(packageName);
+        }
+
         @CheckResult
         private int handleIncomingUser(@UserIdInt int userId, @NonNull String name) {
             return ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,

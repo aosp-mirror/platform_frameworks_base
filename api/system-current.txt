@@ -853,6 +853,7 @@ package android.app.role {
     method public void addRoleHolderAsUser(java.lang.String, java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
     method public boolean addRoleHolderFromController(java.lang.String, java.lang.String);
     method public void clearRoleHoldersAsUser(java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
+    method public java.util.List<java.lang.String> getHeldRolesFromController(java.lang.String);
     method public java.util.List<java.lang.String> getRoleHolders(java.lang.String);
     method public java.util.List<java.lang.String> getRoleHoldersAsUser(java.lang.String, android.os.UserHandle);
     method public void removeOnRoleHoldersChangedListenerAsUser(android.app.role.OnRoleHoldersChangedListener, android.os.UserHandle);
