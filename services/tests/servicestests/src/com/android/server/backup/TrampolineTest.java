@@ -487,8 +487,8 @@ public class TrampolineTest {
 
     @Test
     public void adbBackup_calledBeforeInitialize_ignored() throws RemoteException {
-        mTrampoline.adbBackup(mParcelFileDescriptorMock, true, true, true, true, true, true, true,
-                true,
+        mTrampoline.adbBackup(mUserId, mParcelFileDescriptorMock, true, true,
+                true, true, true, true, true, true,
                 PACKAGE_NAMES);
         verifyNoMoreInteractions(mBackupManagerServiceMock);
     }
@@ -496,12 +496,11 @@ public class TrampolineTest {
     @Test
     public void adbBackup_forwarded() throws RemoteException {
         mTrampoline.initializeService(UserHandle.USER_SYSTEM);
-        mTrampoline.adbBackup(mParcelFileDescriptorMock, true, true, true, true, true, true, true,
-                true,
+        mTrampoline.adbBackup(mUserId, mParcelFileDescriptorMock, true, true,
+                true, true, true, true, true, true,
                 PACKAGE_NAMES);
-        verify(mBackupManagerServiceMock).adbBackup(mParcelFileDescriptorMock, true, true, true,
-                true,
-                true, true, true, true, PACKAGE_NAMES);
+        verify(mBackupManagerServiceMock).adbBackup(mUserId, mParcelFileDescriptorMock, true,
+                true, true, true, true, true, true, true, PACKAGE_NAMES);
     }
 
     @Test
@@ -519,15 +518,15 @@ public class TrampolineTest {
 
     @Test
     public void adbRestore_calledBeforeInitialize_ignored() throws RemoteException {
-        mTrampoline.adbRestore(mParcelFileDescriptorMock);
+        mTrampoline.adbRestore(mUserId, mParcelFileDescriptorMock);
         verifyNoMoreInteractions(mBackupManagerServiceMock);
     }
 
     @Test
     public void adbRestore_forwarded() throws RemoteException {
         mTrampoline.initializeService(UserHandle.USER_SYSTEM);
-        mTrampoline.adbRestore(mParcelFileDescriptorMock);
-        verify(mBackupManagerServiceMock).adbRestore(mParcelFileDescriptorMock);
+        mTrampoline.adbRestore(mUserId, mParcelFileDescriptorMock);
+        verify(mBackupManagerServiceMock).adbRestore(mUserId, mParcelFileDescriptorMock);
     }
 
     @Test

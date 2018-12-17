@@ -27,6 +27,7 @@ LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     bmgrlib \
+    bu \
     services.backup \
     services.core \
     services.net

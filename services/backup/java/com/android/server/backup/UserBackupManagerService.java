@@ -37,6 +37,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 import static com.android.server.backup.internal.BackupHandler.MSG_SCHEDULE_BACKUP_PACKAGE;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
@@ -2423,9 +2424,9 @@ public class UserBackupManagerService {
      * return to the caller until the backup has been completed. It requires on-screen confirmation
      * by the user.
      */
-    public void adbBackup(ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
-            boolean includeShared, boolean doWidgets, boolean doAllApps, boolean includeSystem,
-            boolean compress, boolean doKeyValue, String[] pkgList) {
+    public void adbBackup(ParcelFileDescriptor fd, boolean includeApks,
+            boolean includeObbs, boolean includeShared, boolean doWidgets, boolean doAllApps,
+            boolean includeSystem, boolean compress, boolean doKeyValue, String[] pkgList) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "adbBackup");
 
         final int callingUserHandle = UserHandle.getCallingUserId();

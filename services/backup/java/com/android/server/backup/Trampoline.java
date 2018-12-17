@@ -389,14 +389,13 @@ public class Trampoline extends IBackupManager.Stub {
         backupNowForUser(binderGetCallingUserId());
     }
 
-    @Override
-    public void adbBackup(ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
-            boolean includeShared, boolean doWidgets, boolean allApps,
-            boolean allIncludesSystem, boolean doCompress, boolean doKeyValue, String[] packageNames)
-                    throws RemoteException {
+    public void adbBackup(@UserIdInt int userId, ParcelFileDescriptor fd,
+            boolean includeApks, boolean includeObbs, boolean includeShared, boolean doWidgets,
+            boolean allApps, boolean allIncludesSystem, boolean doCompress, boolean doKeyValue,
+            String[] packageNames) throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.adbBackup(fd, includeApks, includeObbs, includeShared, doWidgets,
+            svc.adbBackup(userId, fd, includeApks, includeObbs, includeShared, doWidgets,
                     allApps, allIncludesSystem, doCompress, doKeyValue, packageNames);
         }
     }
@@ -410,10 +409,10 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public void adbRestore(ParcelFileDescriptor fd) throws RemoteException {
+    public void adbRestore(@UserIdInt int userId, ParcelFileDescriptor fd) throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.adbRestore(fd);
+            svc.adbRestore(userId, fd);
         }
     }
 

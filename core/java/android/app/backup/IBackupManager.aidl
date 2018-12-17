@@ -189,8 +189,11 @@ interface IBackupManager {
      * completed.
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     * If the {@code userId} is different from the calling user id, then the caller must hold the
+     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
      *
-     * @param fd The file descriptor to which a 'tar' file stream is to be written
+     * @param userId User id for which backup should be performed.
+     * @param fd The file descriptor to which a 'tar' file stream is to be written.
      * @param includeApks If <code>true</code>, the resulting tar stream will include the
      *     application .apk files themselves as well as their data.
      * @param includeObbs If <code>true</code>, the resulting tar stream will include any
@@ -209,7 +212,7 @@ interface IBackupManager {
      * @param packageNames The package names of the apps whose data (and optionally .apk files)
      *     are to be backed up.  The <code>allApps</code> parameter supersedes this.
      */
-    void adbBackup(in ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
+    void adbBackup(int userId, in ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
             boolean includeShared, boolean doWidgets, boolean allApps, boolean allIncludesSystem,
             boolean doCompress, boolean doKeyValue, in String[] packageNames);
 
@@ -227,8 +230,12 @@ interface IBackupManager {
      * Currently only used by the 'adb restore' command.
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     * If the {@code userId} is different from the calling user id, then the caller must hold the
+     * android.permission.INTERACT_ACROSS_USERS_FULL.
+     *
+     * @param userId User id for which restore should be performed.
      */
-    void adbRestore(in ParcelFileDescriptor fd);
+    void adbRestore(int userId, in ParcelFileDescriptor fd);
 
     /**
      * Confirm that the requested full backup/restore operation can proceed.  The system will
