@@ -387,7 +387,13 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     }
 
     @Override
-    public void onStackOrderChanged() {
+    public void onStackOrderChanged(ActivityStack stack) {
+        if (DEBUG) Slog.d(TAG, "onStackOrderChanged(): stack=" + stack);
+        if (mDefaultDisplay.getIndexOf(stack) == -1 || !stack.shouldBeVisible(null)) {
+            // The stack is not visible, so ignore this change
+            return;
+        }
+
         // If the activity display stack order changes, cancel any running recents animation in
         // place
         mWindowManager.cancelRecentsAnimationSynchronously(REORDER_KEEP_IN_PLACE,
@@ -429,7 +435,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
 
         for (int i = targetStack.getChildCount() - 1; i >= 0; i--) {
-            final TaskRecord task = (TaskRecord) targetStack.getChildAt(i);
+            final TaskRecord task = targetStack.getChildAt(i);
             if (task.getBaseIntent().getComponent().equals(component)) {
                 return task.getTopActivity();
             }
