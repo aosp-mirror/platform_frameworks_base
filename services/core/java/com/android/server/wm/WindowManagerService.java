@@ -433,6 +433,12 @@ public class WindowManagerService extends IWindowManager.Stub
     final long mDrawLockTimeoutMillis;
     final boolean mAllowAnimationsInLowPowerMode;
 
+    /**
+     * Use very low resolution task snapshots. Replaces task snapshot starting windows with
+     * splashscreen starting windows. Used on low RAM devices to save memory.
+     */
+    final boolean mLowRamTaskSnapshots;
+
     final boolean mAllowBootMessages;
 
     final boolean mLimitedAlphaCompositing;
@@ -949,6 +955,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_disableTransitionAnimation);
         mPerDisplayFocusEnabled = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_perDisplayFocusEnabled);
+        mLowRamTaskSnapshots = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_lowRamTaskSnapshotsAndRecents);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mDisplayWindowSettings = new DisplayWindowSettings(this);
