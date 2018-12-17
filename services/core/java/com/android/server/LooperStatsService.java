@@ -122,6 +122,10 @@ public class LooperStatsService extends Binder {
                 "exception_count"));
         pw.println(header);
         for (LooperStats.ExportedEntry entry : entries) {
+            if (entry.messageName.startsWith(LooperStats.DEBUG_ENTRY_PREFIX)) {
+                // Do not dump debug entries.
+                continue;
+            }
             pw.printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
                     packageMap.mapUid(entry.workSourceUid),
                     entry.threadName,
