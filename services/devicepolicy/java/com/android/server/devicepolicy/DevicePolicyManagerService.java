@@ -2105,6 +2105,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return Settings.Global.getInt(mContext.getContentResolver(), name, def);
         }
 
+        @Nullable
         String settingsGlobalGetString(String name) {
             return Settings.Global.getString(mContext.getContentResolver(), name);
         }
@@ -13901,7 +13902,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         Preconditions.checkNotNull(who, "ComponentName is null");
         enforceDeviceOwner(who);
-        switch (mInjector.settingsGlobalGetString(PRIVATE_DNS_MODE)) {
+        String currentMode = mInjector.settingsGlobalGetString(PRIVATE_DNS_MODE);
+        if (currentMode == null) {
+            currentMode = ConnectivityManager.PRIVATE_DNS_DEFAULT_MODE_FALLBACK;
+        }
+        switch (currentMode) {
             case ConnectivityManager.PRIVATE_DNS_MODE_OFF:
                 return PRIVATE_DNS_MODE_OFF;
             case ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC:
