@@ -70,7 +70,8 @@ sk_sp<SkImage> ImageConsumer::dequeueImage(bool* queueEmpty, SurfaceTexture& st,
             int slot = st.mCurrentTexture;
             if (slot != BufferItem::INVALID_BUFFER_SLOT) {
                 *queueEmpty = true;
-                mImageSlots[slot].createIfNeeded(st.mSlots[slot].mGraphicBuffer, item.mDataSpace);
+                mImageSlots[slot].createIfNeeded(st.mSlots[slot].mGraphicBuffer,
+                        st.mCurrentDataSpace);
                 return mImageSlots[slot].mImage;
             }
         }
