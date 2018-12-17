@@ -44,7 +44,7 @@ namespace statsd {
 // for StatsLogReport
 const int FIELD_ID_ID = 1;
 const int FIELD_ID_EVENT_METRICS = 4;
-const int FIELD_ID_IS_ACTIVE = 13;
+const int FIELD_ID_IS_ACTIVE = 14;
 // for EventMetricDataWrapper
 const int FIELD_ID_DATA = 1;
 // for EventMetricData
