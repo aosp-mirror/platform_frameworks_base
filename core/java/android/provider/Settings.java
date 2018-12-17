@@ -12949,20 +12949,32 @@ public final class Settings {
 
         /**
          * Property used by {@code com.android.server.SystemServer} on start to decide whether
-         * the Content Capture service should be created or not
+         * the Content Capture service should be created or not.
          *
-         * <p>By default it should *NOT* be set (in which case the decision is based on whether
-         * the OEM provides an implementation for the service), but it can be overridden to:
+         * <p>Possible values are:
          *
          * <ul>
-         *   <li>Provide a "kill switch" so OEMs can disable it remotely in case of emergency.
-         *   <li>Enable the CTS tests to be run on AOSP builds
+         *   <li>If set to {@link #CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED_DEFAULT}, it will only
+         *   be set if the OEM provides and defines the service name by overlaying
+         *   {@code config_defaultContentCaptureService} (this is the "default" mode)
+         *   <li>If set to {@link #CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED_ALWAYS}, it will
+         *   always be enabled, even when the resource is not overlaid (this is useful during
+         *   development and/or to run the CTS tests on AOSP builds).
+         *   <li>Otherwise, it's explicitly disabled (this could work as a "kill switch" so OEMs
+         *   can disable it remotely in case of emergency by setting to something else (like
+         *   {@code "false"}); notice that it's also disabled if the OEM doesn't explicitly set one
+         *   of the values above).
          * </ul>
          *
          * @hide
          */
         public static final String CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED =
                 "content_capture_service_explicitly_enabled";
+
+        /** @hide */
+        public static final String CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED_DEFAULT = "default";
+        /** @hide */
+        public static final String CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED_ALWAYS = "always";
 
         /** {@hide} */
         public static final String ISOLATED_STORAGE_LOCAL = "isolated_storage_local";

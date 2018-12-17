@@ -2116,30 +2116,33 @@ public final class SystemServer {
 
     private void startContentCaptureService(@NonNull Context context) {
 
-        // First check if it was explicitly enabled by Settings
-        boolean explicitlySupported = false;
+        // Check if it was explicitly enabled by Settings
         final String settings = Settings.Global.getString(context.getContentResolver(),
                 Settings.Global.CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED);
-        if (settings != null) {
-            explicitlySupported = Boolean.parseBoolean(settings);
-            if (explicitlySupported) {
+        if (settings == null) {
+            // Better be safe than sorry...
+            Slog.d(TAG, "ContentCaptureService disabled because its not set by OEM");
+            return;
+        }
+        switch (settings) {
+            case Settings.Global.CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED_ALWAYS:
+                // Should be used only during development
                 Slog.d(TAG, "ContentCaptureService explicitly enabled by Settings");
-            } else {
-                Slog.d(TAG, "ContentCaptureService explicitly disabled by Settings");
+                break;
+            case Settings.Global.CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED_DEFAULT:
+                // Default case: check if OEM overlaid the resource that defines the service.
+                final String serviceName = context.getString(
+                        com.android.internal.R.string.config_defaultContentCaptureService);
+                if (TextUtils.isEmpty(serviceName)) {
+                    Slog.d(TAG, "ContentCaptureService disabled because resource is not overlaid");
+                    return;
+                }
+                break;
+            default:
+                // Kill switch for OEMs
+                Slog.d(TAG, "ContentCaptureService disabled because its set to: " + settings);
                 return;
-            }
         }
-
-        // Then check if OEM overlaid the resource that defines the service.
-        if (!explicitlySupported) {
-            final String serviceName = context
-                    .getString(com.android.internal.R.string.config_defaultContentCaptureService);
-            if (TextUtils.isEmpty(serviceName)) {
-                Slog.d(TAG, "ContentCaptureService disabled because resource is not overlaid");
-                return;
-            }
-        }
-
         traceBeginAndSlog("StartContentCaptureService");
         mSystemServiceManager.startService(CONTENT_CAPTURE_MANAGER_SERVICE_CLASS);
         traceEnd();
