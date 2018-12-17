@@ -874,6 +874,7 @@ message KernelWakeupReported {
 
 /**
  * Logs when Wifi is toggled on/off.
+ * Note that Wifi may still perform certain functions (e.g. location scanning) even when disabled.
  *
  * Logged from:
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
@@ -888,7 +889,8 @@ message WifiEnabledStateChanged {
 
 /**
  * Logs when an app causes Wifi to run. In this context, 'to run' means to use Wifi Client Mode.
- * TODO: Include support for Hotspot.
+ * TODO: Include support for Hotspot, perhaps by using an extra field to denote 'mode'.
+ * Note that Wifi Scanning is monitored separately in WifiScanStateChanged.
  *
  * Logged from:
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
