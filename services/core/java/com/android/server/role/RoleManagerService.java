@@ -35,6 +35,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -92,6 +93,15 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     @NonNull
     private final Object mLock = new Object();
 
+    @NonNull
+    private final RoleHoldersResolver mLegacyRoleResolver;
+
+    /** @see #getRoleHolders(String, int) */
+    public interface RoleHoldersResolver {
+        /** @return a list of packages that hold a given role for a given user */
+        List<String> getRoleHolders(String roleName, int userId);
+    }
+
     /**
      * Maps user id to its state.
      */
@@ -118,8 +128,11 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     @NonNull
     private final Handler mListenerHandler = FgThread.getHandler();
 
-    public RoleManagerService(@NonNull Context context) {
+    public RoleManagerService(@NonNull Context context,
+            @NonNull RoleHoldersResolver legacyRoleResolver) {
         super(context);
+
+        mLegacyRoleResolver = legacyRoleResolver;
 
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
@@ -175,10 +188,17 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     private void performInitialGrantsIfNecessary(@UserIdInt int userId) {
         RoleUserState userState;
         userState = getOrCreateUserState(userId);
+
         String packagesHash = computeComponentStateHash(userId);
         String oldPackagesHash = userState.getPackagesHash();
         boolean needGrant = !Objects.equals(packagesHash, oldPackagesHash);
         if (needGrant) {
+
+            //TODO gradually add more role migrations statements here for remaining roles
+            // Make sure to implement LegacyRoleResolutionPolicy#getRoleHolders
+            // for a given role before adding a migration statement for it here
+            migrateRoleIfNecessary(RoleManager.ROLE_SMS, userId);
+
             // Some vital packages state has changed since last role grant
             // Run grants again
             Slog.i(LOG_TAG, "Granting default permissions...");
@@ -202,6 +222,20 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             }
         } else if (RemoteRoleControllerService.DEBUG) {
             Slog.i(LOG_TAG, "Already ran grants for package state " + packagesHash);
+        }
+    }
+
+    private void migrateRoleIfNecessary(String role, @UserIdInt int userId) {
+        // Any role for which we have a record are already migrated
+        RoleUserState userState = getOrCreateUserState(userId);
+        if (!userState.isRoleAvailable(role)) {
+            userState.addRoleName(role);
+            List<String> roleHolders = mLegacyRoleResolver.getRoleHolders(role, userId);
+            Slog.i(LOG_TAG, "Migrating " + role + ", legacy holders: " + roleHolders);
+            int size = roleHolders.size();
+            for (int i = 0; i < size; i++) {
+                userState.addRoleHolder(role, roleHolders.get(i));
+            }
         }
     }
 
@@ -372,6 +406,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         @Nullable
         private ArraySet<String> getRoleHoldersInternal(@NonNull String roleName,
                 @UserIdInt int userId) {
+            migrateRoleIfNecessary(roleName, userId);
             RoleUserState userState = getOrCreateUserState(userId);
             return userState.getRoleHolders(roleName);
         }
@@ -527,6 +562,17 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 @Nullable ShellCallback callback, @NonNull ResultReceiver resultReceiver) {
             new RoleManagerShellCommand(this).exec(this, in, out, err, args, callback,
                     resultReceiver);
+        }
+
+        @Override
+        public String getDefaultSmsPackage(int userId) {
+            long identity = Binder.clearCallingIdentity();
+            try {
+                return CollectionUtils.firstOrNull(
+                        getRoleHoldersAsUser(RoleManager.ROLE_SMS, userId));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override

@@ -205,6 +205,28 @@ public class RoleUserState {
     }
 
     /**
+     * Adds the given role, effectively marking it as {@link #isRoleAvailable available}
+     *
+     * @param roleName the name of the role
+     *
+     * @return whether any changes were made
+     */
+    public boolean addRoleName(@NonNull String roleName) {
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+
+            if (!mRoles.containsKey(roleName)) {
+                mRoles.put(roleName, new ArraySet<>());
+                Slog.i(LOG_TAG, "Added new role: " + roleName);
+                scheduleWriteFileLocked();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    /**
      * Set the names of all available roles.
      *
      * @param roleNames the names of all the available roles
@@ -231,13 +253,7 @@ public class RoleUserState {
 
             int roleNamesSize = roleNames.size();
             for (int i = 0; i < roleNamesSize; i++) {
-                String roleName = roleNames.get(i);
-
-                if (!mRoles.containsKey(roleName)) {
-                    mRoles.put(roleName, new ArraySet<>());
-                    Slog.i(LOG_TAG, "Added new role: " + roleName);
-                    changed = true;
-                }
+                changed |= addRoleName(roleNames.get(i));
             }
 
             if (changed) {

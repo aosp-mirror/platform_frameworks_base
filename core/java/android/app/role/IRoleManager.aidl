@@ -50,4 +50,6 @@ interface IRoleManager {
     boolean removeRoleHolderFromController(in String roleName, in String packageName);
 
     List<String> getHeldRolesFromController(in String packageName);
+
+    String getDefaultSmsPackage(int userId);
 }
