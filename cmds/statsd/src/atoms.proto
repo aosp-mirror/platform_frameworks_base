@@ -2627,6 +2627,8 @@ message NativeProcessMemoryState {
  *
  * Pulled from StatsCompanionService for all managed processes (from ActivityManagerServie)
  * and for selected native processes.
+ *
+ * Pulling this atom resets high-water mark counters for all processes.
  */
 message ProcessMemoryHighWaterMark {
     // The uid if available. -1 means not available.
