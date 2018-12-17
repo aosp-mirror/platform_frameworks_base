@@ -40,11 +40,30 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This service is implemented by any app that wishes to provide the user-interface for managing
- * phone calls. Telecom binds to this service while there exists a live (active or incoming) call,
- * and uses it to notify the in-call app of any live and recently disconnected calls. An app must
- * first be set as the default phone app (See {@link TelecomManager#getDefaultDialerPackage()})
- * before the telecom service will bind to its {@code InCallService} implementation.
+ * This service is implemented by an app that wishes to provide functionality for managing
+ * phone calls.
+ * <p>
+ * There are three types of apps which Telecom can bind to when there exists a live (active or
+ * incoming) call:
+ * <ol>
+ *     <li>Default Dialer/Phone app - the default dialer/phone app is one which provides the
+ *     in-call user interface while the device is in a call.  A device is bundled with a system
+ *     provided default dialer/phone app.  The user may choose a single app to take over this role
+ *     from the system app.</li>
+ *     <li>Default Car-mode Dialer/Phone app - the default car-mode dialer/phone app is one which
+ *     provides the in-call user interface while the device is in a call and the device is in car
+ *     mode.  The user may choose a single app to fill this role.</li>
+ *     <li>Call Companion app - a call companion app is one which provides no user interface itself,
+ *     but exposes call information to another display surface, such as a wearable device.  The
+ *     user may choose multiple apps to fill this role.</li>
+ * </ol>
+ * <p>
+ * Apps which wish to fulfill one of the above roles use the {@link android.app.role.RoleManager}
+ * to request that they fill the desired role.
+ *
+ * <h2>Becoming the Default Phone App</h2>
+ * An app filling the role of the default phone app provides a user interface while the device is in
+ * a call, and the device is not in car mode.
  * <p>
  * Below is an example manifest registration for an {@code InCallService}. The meta-data
  * {@link TelecomManager#METADATA_IN_CALL_SERVICE_UI} indicates that this particular
@@ -82,12 +101,34 @@ import java.util.List;
  * }
  * </pre>
  * <p>
- * When a user installs your application and runs it for the first time, you should prompt the user
- * to see if they would like your application to be the new default phone app.  See the
- * {@link TelecomManager#ACTION_CHANGE_DEFAULT_DIALER} intent documentation for more information on
- * how to do this.
+ * When a user installs your application and runs it for the first time, you should use the
+ * {@link android.app.role.RoleManager} to prompt the user to see if they would like your app to
+ * be the new default phone app.
+ * <p id="requestRole">
+ * The code below shows how your app can request to become the default phone/dialer app:
+ * <pre>
+ * {@code
+ * private static final int REQUEST_ID = 1;
+ *
+ * public void requestRole() {
+ *     RoleManager roleManager = (RoleManager) getSystemService(ROLE_SERVICE);
+ *     Intent intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_DIALER);
+ *     startActivityForResult(intent, REQUEST_ID);
+ * }
+ *
+ * &#64;Override
+ * public void onActivityResult(int requestCode, int resultCode, Intent data) {
+ *     if (requestCode == REQUEST_ID) {
+ *         if (resultCode == android.app.Activity.RESULT_OK) {
+ *             // Your app is now the default dialer app
+ *         } else {
+ *             // Your app is not the default dialer app
+ *         }
+ *     }
+ * }
+ * </pre>
  * <p id="incomingCallNotification">
- * <h2>Showing the Incoming Call Notification</h2>
+ * <h3>Showing the Incoming Call Notification</h3>
  * When your app receives a new incoming call via {@link InCallService#onCallAdded(Call)}, it is
  * responsible for displaying an incoming call UI for the incoming call.  It should do this using
  * {@link android.app.NotificationManager} APIs to post a new incoming call notification.
@@ -121,7 +162,7 @@ import java.util.List;
  * heads-up notification if the user is actively using the phone.  When the user is not using the
  * phone, your full-screen incoming call UI is used instead.
  * For example:
- * <pre><code>
+ * <pre><code>{@code
  * // Create an intent which triggers your fullscreen incoming call user interface.
  * Intent intent = new Intent(Intent.ACTION_MAIN, null);
  * intent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -151,7 +192,49 @@ import java.util.List;
  * NotificationManager notificationManager = mContext.getSystemService(
  *     NotificationManager.class);
  * notificationManager.notify(YOUR_CHANNEL_ID, YOUR_TAG, YOUR_ID, builder.build());
- * </code></pre>
+ * }</pre>
+ * <p>
+ * <h2>Becoming the Default Car-mode Phone App</h2>
+ * An app filling the role of the default car-mode dialer/phone app provides a user interface while
+ * the device is in a call, and in car mode.  See
+ * {@link android.app.UiModeManager#ACTION_ENTER_CAR_MODE} for more information about car mode.
+ * When the device is in car mode, Telecom binds to the default car-mode dialer/phone app instead
+ * of the usual dialer/phone app.
+ * <p>
+ * Similar to the requirements for becoming the default dialer/phone app, your app must declare a
+ * manifest entry for its {@link InCallService} implementation.  Your manifest entry should ensure
+ * the following conditions are met:
+ * <ul>
+ *     <li>Do NOT declare the {@link TelecomManager#METADATA_IN_CALL_SERVICE_UI} metadata.</li>
+ *     <li>Set the {@link TelecomManager#METADATA_IN_CALL_SERVICE_CAR_MODE_UI} metadata to
+ *     {@code true}<li>
+ *     <li>Your app must request the permission
+ *     {@link android.Manifest.permission.CALL_COMPANION_APP}.</li>
+ * </ul>
+ * <p>
+ * Your app should request to fill the role {@code android.app.role.CAR_MODE_DIALER_APP} in order to
+ * become the default (see <a href="#requestRole">above</a> for how to request your app fills this
+ * role).
+ *
+ * <h2>Becoming a Call Companion App</h2>
+ * An app which fills the companion app role does not directly provide a user interface while the
+ * device is in a call.  Instead, it is typically used to relay information about calls to another
+ * display surface, such as a wearable device.
+ * <p>
+ * Similar to the requirements for becoming the default dialer/phone app, your app must declare a
+ * manifest entry for its {@link InCallService} implementation.  Your manifest entry should
+ * ensure the following conditions are met:
+ * <ul>
+ *     <li>Do NOT declare the {@link TelecomManager#METADATA_IN_CALL_SERVICE_UI} metadata.</li>
+ *     <li>Do NOT declare the {@link TelecomManager#METADATA_IN_CALL_SERVICE_CAR_MODE_UI}
+ *     metadata.</li>
+ *     <li>Your app must request the permission
+ *     {@link android.Manifest.permission.CALL_COMPANION_APP}.</li>
+ * </ul>
+ * <p>
+ * Your app should request to fill the role {@code android.app.role.CALL_COMPANION_APP} in order to
+ * become a call companion app (see <a href="#requestRole">above</a> for how to request your app
+ * fills this role).
  */
 public abstract class InCallService extends Service {
 
