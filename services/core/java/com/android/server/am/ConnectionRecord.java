@@ -43,6 +43,7 @@ final class ConnectionRecord {
     final PendingIntent clientIntent; // How to launch the client.
     final int clientUid;            // The identity of this connection's client
     final String clientProcessName; // The source process of this connection's client
+    final String clientPackageName; // The source package of this connection's client
     public AssociationState.SourceState association; // Association tracking
     String stringName;              // Caching of toString.
     boolean serviceDead;            // Well is it?
@@ -96,7 +97,7 @@ final class ConnectionRecord {
             ActivityServiceConnectionsHolder<ConnectionRecord> _activity,
             IServiceConnection _conn, int _flags,
             int _clientLabel, PendingIntent _clientIntent,
-            int _clientUid, String _clientProcessName) {
+            int _clientUid, String _clientProcessName, String _clientPackageName) {
         binding = _binding;
         activity = _activity;
         conn = _conn;
@@ -105,6 +106,7 @@ final class ConnectionRecord {
         clientIntent = _clientIntent;
         clientUid = _clientUid;
         clientProcessName = _clientProcessName;
+        clientPackageName = _clientPackageName;
     }
 
     public void startAssociationIfNeeded() {
@@ -125,7 +127,7 @@ final class ConnectionRecord {
             } else {
                 association = holder.pkg.getAssociationStateLocked(holder.state,
                         binding.service.instanceName.getClassName()).startSource(clientUid,
-                        clientProcessName);
+                        clientProcessName, clientPackageName);
 
             }
         }

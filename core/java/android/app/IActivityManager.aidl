@@ -124,7 +124,7 @@ interface IActivityManager {
             int ignoreWindowingMode);
     void moveTaskToFront(int task, int flags, in Bundle options);
     int getTaskForActivity(in IBinder token, in boolean onlyRoot);
-    ContentProviderHolder getContentProvider(in IApplicationThread caller,
+    ContentProviderHolder getContentProvider(in IApplicationThread caller, in String callingPackage,
             in String name, int userId, boolean stable);
     void publishContentProviders(in IApplicationThread caller,
             in List<ContentProviderHolder> providers);

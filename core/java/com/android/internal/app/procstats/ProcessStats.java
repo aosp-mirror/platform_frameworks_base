@@ -178,7 +178,7 @@ public final class ProcessStats implements Parcelable {
             {"proc", "pkg-proc", "pkg-svc", "pkg-asc", "pkg-all", "all"};
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 34;
+    private static final int PARCEL_VERSION = 35;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 
@@ -1490,7 +1490,7 @@ public final class ProcessStats implements Parcelable {
                                 // package, so that if so we print those.
                                 for (int iasc = 0; iasc < NASCS; iasc++) {
                                     AssociationState asc = pkgState.mAssociations.valueAt(iasc);
-                                    if (asc.hasProcess(reqPackage)) {
+                                    if (asc.hasProcessOrPackage(reqPackage)) {
                                         onlyAssociations = true;
                                         break;
                                     }
@@ -1591,7 +1591,7 @@ public final class ProcessStats implements Parcelable {
                             for (int iasc = 0; iasc < NASCS; iasc++) {
                                 AssociationState asc = pkgState.mAssociations.valueAt(iasc);
                                 if (!pkgMatch && !reqPackage.equals(asc.getProcessName())) {
-                                    if (!onlyAssociations || !asc.hasProcess(reqPackage)) {
+                                    if (!onlyAssociations || !asc.hasProcessOrPackage(reqPackage)) {
                                         continue;
                                     }
                                 }

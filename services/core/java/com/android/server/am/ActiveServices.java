@@ -1665,7 +1665,7 @@ public final class ActiveServices {
             AppBindRecord b = s.retrieveAppBindingLocked(service, callerApp);
             ConnectionRecord c = new ConnectionRecord(b, activity,
                     connection, flags, clientLabel, clientIntent,
-                    callerApp.uid, callerApp.processName);
+                    callerApp.uid, callerApp.processName, callingPackage);
 
             IBinder binder = connection.asBinder();
             ArrayList<ConnectionRecord> clist = s.connections.get(binder);

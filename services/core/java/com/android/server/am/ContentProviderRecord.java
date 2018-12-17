@@ -305,7 +305,7 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
                 } else {
                     mAssociation = holder.pkg.getAssociationStateLocked(holder.state,
                             provider.name.getClassName()).startSource(mOwningUid,
-                            mOwningProcessName);
+                            mOwningProcessName, null);
 
                 }
             }
