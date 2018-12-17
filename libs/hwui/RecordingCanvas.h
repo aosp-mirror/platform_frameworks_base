@@ -65,6 +65,7 @@ public:
     void applyColorTransform(ColorTransform transform);
 
     bool hasText() const { return mHasText; }
+    size_t usedSize() const { return fUsed; }
 
 private:
     friend class RecordingCanvas;

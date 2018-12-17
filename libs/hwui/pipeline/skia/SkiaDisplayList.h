@@ -49,7 +49,7 @@ namespace skiapipeline {
  */
 class SkiaDisplayList {
 public:
-    size_t getUsedSize() { return allocator.usedSize(); }
+    size_t getUsedSize() { return allocator.usedSize() + mDisplayList.usedSize(); }
 
     ~SkiaDisplayList() {
         /* Given that we are using a LinearStdAllocator to store some of the
