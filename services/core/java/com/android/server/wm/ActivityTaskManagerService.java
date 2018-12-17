@@ -4569,6 +4569,26 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    /**
+     * Makes the display with the given id a single task instance display. I.e the display can only
+     * contain one task.
+     */
+    @Override
+    public void setDisplayToSingleTaskInstance(int displayId) {
+        mAmInternal.enforceCallingPermission(Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "setDisplayToSingleTaskInstance");
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            final ActivityDisplay display =
+                    mRootActivityContainer.getActivityDisplayOrCreate(displayId);
+            if (display != null) {
+                display.setDisplayToSingleTaskInstance();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     void dumpLastANRLocked(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER LAST ANR (dumpsys activity lastanr)");
         if (mLastANRState == null) {

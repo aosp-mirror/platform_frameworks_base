@@ -1142,6 +1142,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
+    /** @return true if the stack can only contain one task */
+    boolean isSingleTaskInstance() {
+        final ActivityDisplay display = getDisplay();
+        return display != null && display.isSingleTaskInstance();
+    }
+
     final void removeActivitiesFromLRUListLocked(TaskRecord task) {
         for (ActivityRecord r : task.mActivities) {
             mLRUActivities.remove(r);
@@ -5348,6 +5354,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             String reason) {
         // TODO: Is this remove really needed? Need to look into the call path for the other addTask
         mTaskHistory.remove(task);
+        if (isSingleTaskInstance() && !mTaskHistory.isEmpty()) {
+            throw new IllegalStateException("Can only have one child on stack=" + this);
+        }
+
         position = getAdjustedPositionForTask(task, position, null /* starting */);
         final boolean toTop = position >= mTaskHistory.size();
         final ActivityStack prevStack = preAddTask(task, reason, toTop);
