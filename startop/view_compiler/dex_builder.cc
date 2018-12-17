@@ -61,16 +61,44 @@ std::ostream& operator<<(std::ostream& out, const Instruction::Op& opcode) {
     case Instruction::Op::kInvokeDirect:
       out << "kInvokeDirect";
       return out;
+    case Instruction::Op::kInvokeStatic:
+      out << "kInvokeStatic";
+      return out;
+    case Instruction::Op::kInvokeInterface:
+      out << "kInvokeInterface";
+      return out;
     case Instruction::Op::kBindLabel:
       out << "kBindLabel";
       return out;
     case Instruction::Op::kBranchEqz:
       out << "kBranchEqz";
       return out;
+    case Instruction::Op::kBranchNEqz:
+      out << "kBranchNEqz";
+      return out;
     case Instruction::Op::kNew:
       out << "kNew";
       return out;
   }
+}
+
+std::ostream& operator<<(std::ostream& out, const Value& value) {
+  if (value.is_register()) {
+    out << "Register(" << value.value() << ")";
+  } else if (value.is_parameter()) {
+    out << "Parameter(" << value.value() << ")";
+  } else if (value.is_immediate()) {
+    out << "Immediate(" << value.value() << ")";
+  } else if (value.is_string()) {
+    out << "String(" << value.value() << ")";
+  } else if (value.is_label()) {
+    out << "Label(" << value.value() << ")";
+  } else if (value.is_type()) {
+    out << "Type(" << value.value() << ")";
+  } else {
+    out << "UnknownValue";
+  }
+  return out;
 }
 
 void* TrackingAllocator::Allocate(size_t size) {
@@ -289,10 +317,16 @@ void MethodBuilder::EncodeInstruction(const Instruction& instruction) {
       return EncodeInvoke(instruction, art::Instruction::INVOKE_VIRTUAL);
     case Instruction::Op::kInvokeDirect:
       return EncodeInvoke(instruction, art::Instruction::INVOKE_DIRECT);
+    case Instruction::Op::kInvokeStatic:
+      return EncodeInvoke(instruction, art::Instruction::INVOKE_STATIC);
+    case Instruction::Op::kInvokeInterface:
+      return EncodeInvoke(instruction, art::Instruction::INVOKE_INTERFACE);
     case Instruction::Op::kBindLabel:
       return BindLabel(instruction.args()[0]);
     case Instruction::Op::kBranchEqz:
       return EncodeBranch(art::Instruction::IF_EQZ, instruction);
+    case Instruction::Op::kBranchNEqz:
+      return EncodeBranch(art::Instruction::IF_NEZ, instruction);
     case Instruction::Op::kNew:
       return EncodeNew(instruction);
   }
@@ -353,7 +387,9 @@ void MethodBuilder::EncodeInvoke(const Instruction& instruction, ::art::Instruct
 
   // If there is a return value, add a move-result instruction
   if (instruction.dest().has_value()) {
-    Encode11x(art::Instruction::MOVE_RESULT, RegisterValue(*instruction.dest()));
+    Encode11x(instruction.result_is_object() ? art::Instruction::MOVE_RESULT_OBJECT
+                                             : art::Instruction::MOVE_RESULT,
+              RegisterValue(*instruction.dest()));
   }
 
   max_args_ = std::max(max_args_, instruction.args().size());
@@ -447,7 +483,7 @@ const MethodDeclData& DexBuilder::GetOrDeclareMethod(TypeDescriptor type, const 
     auto& ir_node = dex_file_->methods_map[new_index];
     SLICER_CHECK(ir_node == nullptr);
     ir_node = decl;
-    decl->orig_index = new_index;
+    decl->orig_index = decl->index = new_index;
 
     entry = {id, decl};
   }
