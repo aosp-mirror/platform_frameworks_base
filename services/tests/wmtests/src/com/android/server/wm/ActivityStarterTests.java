@@ -414,10 +414,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .setActivityOptions(new SafeActivityOptions(options))
                 .execute();
 
-        // verify that values are passed to the modifier. Values are passed twice -- once for
+        // verify that values are passed to the modifier. Values are passed thrice -- two for
         // setting initial state, another when task is created.
-        verify(modifier, times(2)).onCalculate(any(), eq(windowLayout), any(), any(), eq(options),
-                any(), any());
+        verify(modifier, times(3)).onCalculate(any(), eq(windowLayout), any(), any(), eq(options),
+                anyInt(), any(), any());
     }
 
     /**

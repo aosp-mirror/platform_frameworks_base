@@ -51,6 +51,7 @@ import android.util.Slog;
 import android.view.Gravity;
 import android.view.View;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
 
@@ -102,19 +103,27 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         mSupervisor = supervisor;
     }
 
+    @VisibleForTesting
+    int onCalculate(TaskRecord task, ActivityInfo.WindowLayout layout, ActivityRecord activity,
+            ActivityRecord source, ActivityOptions options, LaunchParams currentParams,
+            LaunchParams outParams) {
+        return onCalculate(task, layout, activity, source, options, PHASE_BOUNDS, currentParams,
+                outParams);
+    }
+
     @Override
     public int onCalculate(TaskRecord task, ActivityInfo.WindowLayout layout,
                            ActivityRecord activity, ActivityRecord source, ActivityOptions options,
-                           LaunchParams currentParams, LaunchParams outParams) {
+                           int phase, LaunchParams currentParams, LaunchParams outParams) {
         initLogBuilder(task, activity);
-        final int result = calculate(task, layout, activity, source, options, currentParams,
+        final int result = calculate(task, layout, activity, source, options, phase, currentParams,
                 outParams);
         outputLog();
         return result;
     }
 
     private int calculate(TaskRecord task, ActivityInfo.WindowLayout layout,
-            ActivityRecord activity, ActivityRecord source, ActivityOptions options,
+            ActivityRecord activity, ActivityRecord source, ActivityOptions options, int phase,
             LaunchParams currentParams, LaunchParams outParams) {
         final ActivityRecord root;
         if (task != null) {
@@ -143,6 +152,10 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         if (DEBUG) {
             appendLog("display-id=" + outParams.mPreferredDisplayId + " display-windowing-mode="
                     + display.getWindowingMode());
+        }
+
+        if (phase == PHASE_DISPLAY) {
+            return RESULT_CONTINUE;
         }
 
         // STEP 2: Resolve launch windowing mode.
@@ -247,6 +260,10 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         outParams.mWindowingMode = launchMode == display.getWindowingMode()
                 ? WINDOWING_MODE_UNDEFINED : launchMode;
 
+        if (phase == PHASE_WINDOWING_MODE) {
+            return RESULT_CONTINUE;
+        }
+
         // STEP 3: Determine final launch bounds based on resolved windowing mode and activity
         // requested orientation. We set bounds to empty for fullscreen mode and keep bounds as is
         // for all other windowing modes that's not freeform mode. One can read comments in
@@ -288,17 +305,17 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             displayId = optionLaunchId;
         }
 
-        if (displayId == INVALID_DISPLAY && source != null) {
-            final int sourceDisplayId = source.getDisplayId();
-            if (DEBUG) appendLog("display-from-source=" + sourceDisplayId);
-            displayId = sourceDisplayId;
-        }
-
         ActivityStack stack =
                 (displayId == INVALID_DISPLAY && task != null) ? task.getStack() : null;
         if (stack != null) {
             if (DEBUG) appendLog("display-from-task=" + stack.mDisplayId);
             displayId = stack.mDisplayId;
+        }
+
+        if (displayId == INVALID_DISPLAY && source != null) {
+            final int sourceDisplayId = source.getDisplayId();
+            if (DEBUG) appendLog("display-from-source=" + sourceDisplayId);
+            displayId = sourceDisplayId;
         }
 
         if (displayId != INVALID_DISPLAY
