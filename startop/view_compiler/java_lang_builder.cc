@@ -67,7 +67,7 @@ void JavaLangViewBuilder::Finish() const {
           "}\n";     // end CompiledView
 }
 
-void JavaLangViewBuilder::StartView(const string& class_name) {
+void JavaLangViewBuilder::StartView(const string& class_name, bool /*is_viewgroup*/) {
   const string view_var = MakeVar("view");
   const string layout_var = MakeVar("layout");
   std::string parent = "null";
