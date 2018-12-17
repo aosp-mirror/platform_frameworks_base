@@ -165,6 +165,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     // STOPSHIP: This is a temporary mock implementation of staged sessions. This variable
     //           shouldn't be needed at all.
+    // TODO(b/118865310): Implement staged sessions logic.
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
 
@@ -1130,7 +1131,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             mInstallHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    // TODO: remove this mock implementation.
+                    // TODO(b/118865310): remove this mock implementation.
                     if (session.isStaged()) {
                         // If the session is aborted, don't keep it in memory. Only store
                         // sessions successfully staged.
