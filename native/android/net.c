@@ -84,8 +84,7 @@ int android_getaddrinfofornetwork(net_handle_t network,
     return android_getaddrinfofornet(node, service, hints, netid, 0, res);
 }
 
-int android_res_nquery(net_handle_t network,
-        const char *dname, int ns_class, int ns_type) {
+int android_res_nquery(net_handle_t network, const char *dname, int ns_class, int ns_type) {
     unsigned netid;
     if (!getnetidfromhandle(network, &netid)) {
         return -ENONET;
@@ -94,12 +93,11 @@ int android_res_nquery(net_handle_t network,
     return resNetworkQuery(netid, dname, ns_class, ns_type);
 }
 
-int android_res_nresult(int fd, int *rcode, unsigned char *answer, int anslen) {
+int android_res_nresult(int fd, int *rcode, uint8_t *answer, size_t anslen) {
     return resNetworkResult(fd, rcode, answer, anslen);
 }
 
-int android_res_nsend(net_handle_t network,
-        const unsigned char *msg, int msglen) {
+int android_res_nsend(net_handle_t network, const uint8_t *msg, size_t msglen) {
     unsigned netid;
     if (!getnetidfromhandle(network, &netid)) {
         return -ENONET;
