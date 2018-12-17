@@ -106,14 +106,14 @@ void ConfigManager::UpdateConfig(const ConfigKey& key, const StatsdConfig& confi
         // Add to set.
         mConfigs[key.GetUid()].insert(key);
 
-        for (sp<ConfigListener> listener : mListeners) {
+        for (const sp<ConfigListener>& listener : mListeners) {
             broadcastList.push_back(listener);
         }
     }
 
     const int64_t timestampNs = getElapsedRealtimeNs();
     // Tell everyone
-    for (sp<ConfigListener> listener : broadcastList) {
+    for (const sp<ConfigListener>& listener : broadcastList) {
         listener->OnConfigUpdated(timestampNs, key, config);
     }
 }
@@ -137,7 +137,7 @@ void ConfigManager::RemoveConfig(const ConfigKey& key) {
         if (uidIt != mConfigs.end() && uidIt->second.find(key) != uidIt->second.end()) {
             // Remove from map
             uidIt->second.erase(key);
-            for (sp<ConfigListener> listener : mListeners) {
+            for (const sp<ConfigListener>& listener : mListeners) {
                 broadcastList.push_back(listener);
             }
         }
@@ -153,7 +153,7 @@ void ConfigManager::RemoveConfig(const ConfigKey& key) {
         remove_saved_configs(key);
     }
 
-    for (sp<ConfigListener> listener:broadcastList) {
+    for (const sp<ConfigListener>& listener:broadcastList) {
         listener->OnConfigRemoved(key);
     }
 }
@@ -183,7 +183,7 @@ void ConfigManager::RemoveConfigs(int uid) {
 
         mConfigs.erase(uidIt);
 
-        for (sp<ConfigListener> listener : mListeners) {
+        for (const sp<ConfigListener>& listener : mListeners) {
             broadcastList.push_back(listener);
         }
     }
@@ -191,7 +191,7 @@ void ConfigManager::RemoveConfigs(int uid) {
     // Remove separately so if they do anything in the callback they can't mess up our iteration.
     for (auto& key : removed) {
         // Tell everyone
-        for (sp<ConfigListener> listener:broadcastList) {
+        for (const sp<ConfigListener>& listener:broadcastList) {
             listener->OnConfigRemoved(key);
         }
     }
@@ -213,7 +213,7 @@ void ConfigManager::RemoveAllConfigs() {
         }
 
         mConfigReceivers.clear();
-        for (sp<ConfigListener> listener : mListeners) {
+        for (const sp<ConfigListener>& listener : mListeners) {
             broadcastList.push_back(listener);
         }
     }
@@ -221,7 +221,7 @@ void ConfigManager::RemoveAllConfigs() {
     // Remove separately so if they do anything in the callback they can't mess up our iteration.
     for (auto& key : removed) {
         // Tell everyone
-        for (sp<ConfigListener> listener:broadcastList) {
+        for (const sp<ConfigListener>& listener:broadcastList) {
             listener->OnConfigRemoved(key);
         }
     }

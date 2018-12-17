@@ -412,7 +412,7 @@ void MetricsManager::onPeriodicAlarmFired(
 // Returns the total byte size of all metrics managed by a single config source.
 size_t MetricsManager::byteSize() {
     size_t totalSize = 0;
-    for (auto metricProducer : mAllMetricProducers) {
+    for (const auto& metricProducer : mAllMetricProducers) {
         totalSize += metricProducer->byteSize();
     }
     return totalSize;

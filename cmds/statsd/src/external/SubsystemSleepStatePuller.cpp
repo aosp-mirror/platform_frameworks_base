@@ -281,7 +281,7 @@ bool getIPowerDataLocked(vector<shared_ptr<LogEvent>>* data) {
                              (long long)state.residencyInMsecSinceBoot,
                              (long long)state.totalTransitions,
                              state.supportedOnlyInSuspend ? 1 : 0);
-                        for (auto voter : state.voters) {
+                        for (const auto& voter : state.voters) {
                             auto voterPtr = make_shared<LogEvent>(
                                 android::util::SUBSYSTEM_SLEEP_STATE,
                                 wallClockTimestampNs, elapsedTimestampNs);
