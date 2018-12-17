@@ -32,10 +32,11 @@ public interface ActivityStarter {
     void startPendingIntentDismissingKeyguard(PendingIntent intent);
 
     /**
-     * Similar to {@link #startPendingIntentDismissingKeyguard(PendingIntent, Runnable)}, but
-     * allow you to specify the callback that is executed after the intent is sent.
+     * Similar to {@link #startPendingIntentDismissingKeyguard(PendingIntent, Runnable)}, but allows
+     * you to specify the callback that is executed on the UI thread after the intent is sent.
      */
-    void startPendingIntentDismissingKeyguard(PendingIntent intent, Runnable intentSentCallback);
+    void startPendingIntentDismissingKeyguard(PendingIntent intent,
+            Runnable intentSentUiThreadCallback);
     void startActivity(Intent intent, boolean dismissShade);
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade);
     void startActivity(Intent intent, boolean dismissShade, Callback callback);

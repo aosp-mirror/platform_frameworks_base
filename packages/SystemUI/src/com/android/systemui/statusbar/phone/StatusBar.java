@@ -79,6 +79,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -568,6 +569,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mEntryManager.updateNotifications();
                 }
             };
+    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
 
     protected DisplayManager mDisplayManager;
 
@@ -4353,7 +4355,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void startPendingIntentDismissingKeyguard(
-            final PendingIntent intent, @Nullable final Runnable intentSentCallback) {
+            final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback) {
         final boolean afterKeyguardGone = intent.isActivity()
                 && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
@@ -4372,10 +4374,14 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (intent.isActivity()) {
                 mAssistManager.hideAssist();
             }
-            if (intentSentCallback != null) {
-                intentSentCallback.run();
+            if (intentSentUiThreadCallback != null) {
+                postOnUiThread(intentSentUiThreadCallback);
             }
         }, afterKeyguardGone);
+    }
+
+    private void postOnUiThread(Runnable runnable) {
+        mMainThreadHandler.post(runnable);
     }
 
     public static Bundle getActivityOptions(@Nullable RemoteAnimationAdapter animationAdapter) {

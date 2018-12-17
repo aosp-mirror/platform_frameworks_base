@@ -16,8 +16,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.Layout;
 import android.text.TextPaint;
 import android.text.method.TransformationMethod;
@@ -65,7 +63,6 @@ public class SmartReplyView extends ViewGroup {
     private final SmartReplyConstants mConstants;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
     private final NotificationRemoteInputManager mRemoteInputManager;
-    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
 
     /**
      * The upper bound for the height of this view in pixels. Notifications are automatically
@@ -311,8 +308,7 @@ public class SmartReplyView extends ViewGroup {
                         () -> {
                             smartReplyController.smartActionClicked(
                                     entry, actionIndex, action, smartActions.fromAssistant);
-                            postOnUiThread(() ->
-                                    headsUpManager.removeNotification(entry.key, true));
+                            headsUpManager.removeNotification(entry.key, true);
                         }));
 
         // TODO(b/119010281): handle accessibility
@@ -321,10 +317,6 @@ public class SmartReplyView extends ViewGroup {
         final LayoutParams lp = (LayoutParams) button.getLayoutParams();
         lp.buttonType = SmartButtonType.ACTION;
         return button;
-    }
-
-    private void postOnUiThread(Runnable runnable) {
-        mMainThreadHandler.post(runnable);
     }
 
     @Override
