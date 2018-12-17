@@ -10823,6 +10823,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         return onTextContextMenuItem(ID_PASTE);
                     }
                     break;
+                case KeyEvent.KEYCODE_INSERT:
+                    if (canCopy()) {
+                        return onTextContextMenuItem(ID_COPY);
+                    }
+                    break;
+            }
+        } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+            // Handle Shift-only shortcuts.
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_FORWARD_DEL:
+                    if (canCut()) {
+                        return onTextContextMenuItem(ID_CUT);
+                    }
+                    break;
+                case KeyEvent.KEYCODE_INSERT:
+                    if (canPaste()) {
+                        return onTextContextMenuItem(ID_PASTE);
+                    }
+                    break;
             }
         } else if (event.hasModifiers(KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)) {
             // Handle Ctrl-Shift shortcuts.
