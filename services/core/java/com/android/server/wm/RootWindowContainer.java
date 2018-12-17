@@ -184,6 +184,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if (mTopFocusedDisplayId != topFocusedDisplayId) {
             mTopFocusedDisplayId = topFocusedDisplayId;
             mWmService.mInputManager.setFocusedDisplay(topFocusedDisplayId);
+            mWmService.mPolicy.setTopFocusedDisplay(topFocusedDisplayId);
             if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "New topFocusedDisplayId="
                     + topFocusedDisplayId);
         }
