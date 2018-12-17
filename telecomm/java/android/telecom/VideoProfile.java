@@ -369,16 +369,13 @@ public class VideoProfile implements Parcelable {
         }
 
         /**
-         * Create a call camera capabilities instance that optionally
-         * supports zoom.
+         * Create a call camera capabilities instance that optionally supports zoom.
          *
          * @param width The width of the camera video (in pixels).
          * @param height The height of the camera video (in pixels).
          * @param zoomSupported True when camera supports zoom.
          * @param maxZoom Maximum zoom supported by camera.
-         * @hide
          */
-        @UnsupportedAppUsage
         public CameraCapabilities(int width, int height, boolean zoomSupported, float maxZoom) {
             mWidth = width;
             mHeight = height;
@@ -455,16 +452,14 @@ public class VideoProfile implements Parcelable {
         }
 
         /**
-         * Whether the camera supports zoom.
-         * @hide
+         * Returns {@code true} is zoom is supported, {@code false} otherwise.
          */
         public boolean isZoomSupported() {
             return mZoomSupported;
         }
 
         /**
-         * The maximum zoom supported by the camera.
-         * @hide
+         * Returns the maximum zoom supported by the camera.
          */
         public float getMaxZoom() {
             return mMaxZoom;
