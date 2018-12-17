@@ -18,6 +18,7 @@
 #include "Debug.h"
 #include "DeviceInfo.h"
 #include "SkTraceEventCommon.h"
+#include "HWUIProperties.sysprop.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -174,8 +175,13 @@ RenderPipelineType Properties::getRenderPipelineType() {
     if (sRenderPipelineType != RenderPipelineType::NotInitialized) {
         return sRenderPipelineType;
     }
+    bool useVulkan = use_vulkan().value_or(false);
     char prop[PROPERTY_VALUE_MAX];
-    property_get(PROPERTY_RENDERER, prop, "skiagl");
+    if (useVulkan) {
+        property_get(PROPERTY_RENDERER, prop, "skiavk");
+    } else {
+        property_get(PROPERTY_RENDERER, prop, "skiagl");
+    }
     if (!strcmp(prop, "skiavk")) {
         ALOGD("Skia Vulkan Pipeline");
         sRenderPipelineType = RenderPipelineType::SkiaVulkan;
