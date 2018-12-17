@@ -1223,81 +1223,79 @@ public class TelephonyManager {
             "android.telephony.action.SUBSCRIPTION_CARRIER_IDENTITY_CHANGED";
 
     /**
-     * Broadcast Action: The subscription precise carrier identity has changed.
-     * Similar like {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED}, this intent will be sent
-     * on the event of {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED}. However, its possible
-     * that precise carrier identity changes while
-     * {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} remains the same e.g, the same
-     * subscription switches to different IMSI could potentially change its precise carrier id.
-     *
-     * The intent will have the following extra values:
-     * <ul>
-     *   <li>{@link #EXTRA_PRECISE_CARRIER_ID} The up-to-date precise carrier id of the
-     *   current subscription.
-     *   </li>
-     *   <li>{@link #EXTRA_PRECISE_CARRIER_NAME} The up-to-date carrier name of the current
-     *   subscription.
-     *   </li>
-     *   <li>{@link #EXTRA_SUBSCRIPTION_ID} The subscription id associated with the changed carrier
-     *   identity.
-     *   </li>
-     * </ul>
-     * <p class="note">This is a protected intent that can only be sent by the system.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED =
-            "android.telephony.action.SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED";
-
-    /**
      * An int extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} which indicates
-     * the updated carrier id {@link TelephonyManager#getSimCarrierId()} of
-     * the current subscription.
+     * the updated carrier id returned by {@link TelephonyManager#getSimCarrierId()}.
      * <p>Will be {@link TelephonyManager#UNKNOWN_CARRIER_ID} if the subscription is unavailable or
      * the carrier cannot be identified.
      */
     public static final String EXTRA_CARRIER_ID = "android.telephony.extra.CARRIER_ID";
 
     /**
-     * An int extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} which indicates
-     * the updated mno carrier id of the current subscription.
-     * <p>Will be {@link TelephonyManager#UNKNOWN_CARRIER_ID} if the subscription is unavailable or
-     * the carrier cannot be identified.
-     *
-     *@hide
-     */
-    public static final String EXTRA_MNO_CARRIER_ID = "android.telephony.extra.MNO_CARRIER_ID";
-
-    /**
      * An string extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} which
      * indicates the updated carrier name of the current subscription.
-     * {@see TelephonyManager#getSimCarrierIdName()}
+     * @see TelephonyManager#getSimCarrierIdName()
      * <p>Carrier name is a user-facing name of the carrier id {@link #EXTRA_CARRIER_ID},
      * usually the brand name of the subsidiary (e.g. T-Mobile).
      */
     public static final String EXTRA_CARRIER_NAME = "android.telephony.extra.CARRIER_NAME";
 
     /**
+     * Broadcast Action: The subscription precise carrier identity has changed.
+     * The precise carrier id can be used to further differentiate a carrier by different
+     * networks, by prepaid v.s.postpaid or even by 4G v.s.3G plan. Each carrier has a unique
+     * carrier id returned by {@link #getSimCarrierId()} but could have multiple precise carrier id.
+     * e.g, {@link #getSimCarrierId()} will always return Tracfone (id 2022) for a Tracfone SIM,
+     * while {@link #getSimPreciseCarrierId()} can return Tracfone AT&T or Tracfone T-Mobile based
+     * on the current subscription IMSI. For carriers without any fine-grained ids, precise carrier
+     * id is same as carrier id.
+     *
+     * <p>Similar like {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED}, this intent will be
+     * sent on the event of {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} while its also
+     * possible to be sent without {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} when
+     * precise carrier id changes with the same carrier id.
+     * e.g, the same subscription switches to different IMSI could potentially change its
+     * precise carrier id while carrier id remains the same.
+     * @see #getSimPreciseCarrierId()
+     * @see #getSimCarrierId()
+     *
+     * The intent will have the following extra values:
+     * <ul>
+     *   <li>{@link #EXTRA_PRECISE_CARRIER_ID} The up-to-date precise carrier id of the
+     *   current subscription.
+     *   </li>
+     *   <li>{@link #EXTRA_PRECISE_CARRIER_NAME} The up-to-date name of the precise carrier id.
+     *   </li>
+     *   <li>{@link #EXTRA_SUBSCRIPTION_ID} The subscription id associated with the changed carrier
+     *   identity.
+     *   </li>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED =
+            "android.telephony.action.SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED";
+
+    /**
      * An int extra used with {@link #ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED} which
-     * indicates the updated precise carrier id {@link TelephonyManager#getSimPreciseCarrierId()} of
-     * the current subscription. Note, its possible precise carrier id changes while
-     * {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} remains the same e.g, when
-     * subscription switch to different IMSI.
+     * indicates the updated precise carrier id returned by
+     * {@link TelephonyManager#getSimPreciseCarrierId()}. Note, its possible precise carrier id
+     * changes while {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} remains the same
+     * e.g, when subscription switch to different IMSIs.
      * <p>Will be {@link TelephonyManager#UNKNOWN_CARRIER_ID} if the subscription is unavailable or
      * the carrier cannot be identified.
-     * @hide
      */
     public static final String EXTRA_PRECISE_CARRIER_ID =
             "android.telephony.extra.PRECISE_CARRIER_ID";
 
     /**
      * An string extra used with {@link #ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED} which
-     * indicates the updated precise carrier name of the current subscription.
-     * {@see TelephonyManager#getSimPreciseCarrierIdName()}
-     * <p>it's a user-facing name of the precise carrier id {@link #EXTRA_PRECISE_CARRIER_ID},
-     * @hide
+     * indicates the updated precise carrier name returned by
+     * {@link TelephonyManager#getSimPreciseCarrierIdName()}.
+     * <p>it's a user-facing name of the precise carrier id {@link #EXTRA_PRECISE_CARRIER_ID}, e.g,
+     * Tracfone-AT&T.
      */
-    public static final String EXTRA_PRECISE_CARRIER_NAME = "android.telephony.extra.CARRIER_NAME";
+    public static final String EXTRA_PRECISE_CARRIER_NAME =
+            "android.telephony.extra.PRECISE_CARRIER_NAME";
 
     /**
      * An int extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} to indicate the
@@ -8335,7 +8333,7 @@ public class TelephonyManager {
 
     /**
      * Returns carrier id name of the current subscription.
-     * <p>Carrier id name is a user-facing name of carrier id
+     * <p>Carrier id name is a user-facing name of carrier id returned by
      * {@link #getSimCarrierId()}, usually the brand name of the subsidiary
      * (e.g. T-Mobile). Each carrier could configure multiple {@link #getSimOperatorName() SPN} but
      * should have a single carrier name. Carrier name is not a canonical identity,
@@ -8345,7 +8343,7 @@ public class TelephonyManager {
      * @return Carrier name of the current subscription. Return {@code null} if the subscription is
      * unavailable or the carrier cannot be identified.
      */
-    public CharSequence getSimCarrierIdName() {
+    public @Nullable CharSequence getSimCarrierIdName() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
@@ -8362,10 +8360,10 @@ public class TelephonyManager {
      *
      * <p>The precise carrier id can be used to further differentiate a carrier by different
      * networks, by prepaid v.s.postpaid or even by 4G v.s.3G plan. Each carrier has a unique
-     * carrier id {@link #getSimCarrierId()} but can have multiple precise carrier id. e.g,
-     * {@link #getSimCarrierId()} will always return Tracfone (id 2022) for a Tracfone SIM, while
-     * {@link #getSimPreciseCarrierId()} can return Tracfone AT&T or Tracfone T-Mobile based on the
-     * current subscription IMSI.
+     * carrier id returned by {@link #getSimCarrierId()} but could have multiple precise carrier id.
+     * e.g, {@link #getSimCarrierId()} will always return Tracfone (id 2022) for a Tracfone SIM,
+     * while {@link #getSimPreciseCarrierId()} can return Tracfone AT&T or Tracfone T-Mobile based
+     * on the current subscription IMSI.
      *
      * <p>For carriers without any fine-grained carrier ids, return {@link #getSimCarrierId()}
      * <p>Precise carrier ids are defined in the same way as carrier id
@@ -8375,8 +8373,6 @@ public class TelephonyManager {
      * @return Returns fine-grained carrier id of the current subscription.
      * Return {@link #UNKNOWN_CARRIER_ID} if the subscription is unavailable or the carrier cannot
      * be identified.
-     *
-     * @hide
      */
     public int getSimPreciseCarrierId() {
         try {
@@ -8392,16 +8388,14 @@ public class TelephonyManager {
 
     /**
      * Similar like {@link #getSimCarrierIdName()}, returns user-facing name of the
-     * precise carrier id {@link #getSimPreciseCarrierId()}
+     * precise carrier id returned by {@link #getSimPreciseCarrierId()}.
      *
      * <p>The returned name is unlocalized.
      *
      * @return user-facing name of the subscription precise carrier id. Return {@code null} if the
      * subscription is unavailable or the carrier cannot be identified.
-     *
-     * @hide
      */
-    public CharSequence getSimPreciseCarrierIdName() {
+    public @Nullable CharSequence getSimPreciseCarrierIdName() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
@@ -8411,6 +8405,62 @@ public class TelephonyManager {
             // This could happen if binder process crashes.
         }
         return null;
+    }
+
+    /**
+     * Returns carrier id based on sim MCCMNC (returned by {@link #getSimOperator()}) only.
+     * This is used for fallback when configurations/logic for exact carrier id
+     * {@link #getSimCarrierId()} are not found.
+     *
+     * Android carrier id table <a href="https://android.googlesource.com/platform/packages/providers/TelephonyProvider/+/master/assets/carrier_list.textpb">here</a>
+     * can be updated out-of-band, its possible a MVNO (Mobile Virtual Network Operator) carrier
+     * was not fully recognized and assigned to its MNO (Mobile Network Operator) carrier id
+     * by default. After carrier id table update, a new carrier id was assigned. If apps don't
+     * take the update with the new id, it might be helpful to always fallback by using carrier
+     * id based on MCCMNC if there is no match.
+     *
+     * @return matching carrier id from sim MCCMNC. Return {@link #UNKNOWN_CARRIER_ID} if the
+     * subscription is unavailable or the carrier cannot be identified.
+     */
+    public int getCarrierIdFromSimMccMnc() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getCarrierIdFromMccMnc(getSlotIndex(), getSimOperator(), true);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return UNKNOWN_CARRIER_ID;
+    }
+
+     /**
+      * Returns carrier id based on MCCMNC (returned by {@link #getSimOperator()}) only. This is
+      * used for fallback when configurations/logic for exact carrier id {@link #getSimCarrierId()}
+      * are not found.
+      *
+      * Android carrier id table <a href="https://android.googlesource.com/platform/packages/providers/TelephonyProvider/+/master/assets/carrier_list.textpb">here</a>
+      * can be updated out-of-band, its possible a MVNO (Mobile Virtual Network Operator) carrier
+      * was not fully recognized and assigned to its MNO (Mobile Network Operator) carrier id
+      * by default. After carrier id table update, a new carrier id was assigned. If apps don't
+      * take the update with the new id, it might be helpful to always fallback by using carrier
+      * id based on MCCMNC if there is no match.
+      *
+      * @return matching carrier id from passing MCCMNC. Return {@link #UNKNOWN_CARRIER_ID} if the
+      * subscription is unavailable or the carrier cannot be identified.
+      * @hide
+      */
+     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+     public int getCarrierIdFromMccMnc(String mccmnc) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getCarrierIdFromMccMnc(getSlotIndex(), mccmnc, false);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return UNKNOWN_CARRIER_ID;
     }
 
     /**
@@ -8434,48 +8484,6 @@ public class TelephonyManager {
             // This could happen if binder process crashes.
         }
         return null;
-    }
-
-    /**
-     * Returns MNO carrier id of the current subscription’s MCCMNC.
-     * <p>MNO carrier id can be solely identified by subscription mccmnc. This is mainly used
-     * for MNO fallback when exact carrier id {@link #getSimCarrierId()}
-     * configurations are not found.
-     *
-     * @return MNO carrier id of the current subscription. Return the value same as carrier id
-     * {@link #getSimCarrierId()}, if MNO carrier id cannot be identified.
-     * @hide
-     */
-    public int getSimMNOCarrierId() {
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                return service.getSubscriptionMNOCarrierId(getSubId());
-            }
-        } catch (RemoteException ex) {
-            // This could happen if binder process crashes.
-        }
-        return UNKNOWN_CARRIER_ID;
-    }
-
-     /**
-      * Returns carrier id based on MCCMNC only. This is for fallback when exact carrier id
-      * {@link #getSimCarrierId()} configurations are not found
-      *
-      * @return matching carrier id from passing mccmnc.
-      * @hide
-      */
-     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-     public int getCarrierIdFromMccMnc(String mccmnc) {
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                return service.getCarrierIdFromMccMnc(getSlotIndex(), mccmnc);
-            }
-        } catch (RemoteException ex) {
-            // This could happen if binder process crashes.
-        }
-        return UNKNOWN_CARRIER_ID;
     }
 
     /**
