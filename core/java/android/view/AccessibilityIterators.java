@@ -145,6 +145,9 @@ public final class AccessibilityIterators {
         @Override
         public void onConfigurationChanged(Configuration globalConfig) {
             final Locale locale = globalConfig.getLocales().get(0);
+            if (locale == null) {
+                return;
+            }
             if (!mLocale.equals(locale)) {
                 mLocale = locale;
                 onLocaleChanged(locale);
