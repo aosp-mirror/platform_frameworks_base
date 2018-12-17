@@ -1471,8 +1471,8 @@ public final class AutofillManager {
     // Note: don't need to use locked suffix because mContext is final.
     private AutofillClient getClient() {
         final AutofillClient client = mContext.getAutofillClient();
-        if (client == null && sDebug) {
-            Log.d(TAG, "No AutofillClient for " + mContext.getPackageName() + " on context "
+        if (client == null && sVerbose) {
+            Log.v(TAG, "No AutofillClient for " + mContext.getPackageName() + " on context "
                     + mContext);
         }
         return client;
