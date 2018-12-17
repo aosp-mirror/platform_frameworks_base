@@ -148,6 +148,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.doze.DozeReceiver;
+import com.android.systemui.doze.LockScreenWakeUpController;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -581,6 +582,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
     private boolean mPulsing;
+    private LockScreenWakeUpController mLockScreenWakeUpController;
 
     @Override
     public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
@@ -984,6 +986,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         for (int i = 0; i < pattern.length; i++) {
             mCameraLaunchGestureVibePattern[i] = pattern[i];
         }
+        mLockScreenWakeUpController = new LockScreenWakeUpController(mContext, mDozeServiceHost);
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
