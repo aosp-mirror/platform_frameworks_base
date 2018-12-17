@@ -23,6 +23,7 @@ import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
 import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
 import static android.system.OsConstants.F_OK;
+import static android.system.OsConstants.O_ACCMODE;
 import static android.system.OsConstants.O_APPEND;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
@@ -1259,11 +1260,11 @@ public class FileUtils {
 
         int res = 0;
         if (mode.startsWith("rw")) {
-            res |= O_RDWR | O_CREAT;
+            res = O_RDWR | O_CREAT;
         } else if (mode.startsWith("w")) {
-            res |= O_WRONLY | O_CREAT;
+            res = O_WRONLY | O_CREAT;
         } else if (mode.startsWith("r")) {
-            res |= O_RDONLY;
+            res = O_RDONLY;
         } else {
             throw new IllegalArgumentException("Bad mode: " + mode);
         }
@@ -1279,12 +1280,12 @@ public class FileUtils {
     /** {@hide} */
     public static String translateModePosixToString(int mode) {
         String res = "";
-        if ((mode & O_RDWR) == O_RDWR) {
-            res += "rw";
-        } else if ((mode & O_WRONLY) == O_WRONLY) {
-            res += "w";
-        } else if ((mode & O_RDONLY) == O_RDONLY) {
-            res += "r";
+        if ((mode & O_ACCMODE) == O_RDWR) {
+            res = "rw";
+        } else if ((mode & O_ACCMODE) == O_WRONLY) {
+            res = "w";
+        } else if ((mode & O_ACCMODE) == O_RDONLY) {
+            res = "r";
         } else {
             throw new IllegalArgumentException("Bad mode: " + mode);
         }
@@ -1300,12 +1301,12 @@ public class FileUtils {
     /** {@hide} */
     public static int translateModePosixToPfd(int mode) {
         int res = 0;
-        if ((mode & O_RDWR) == O_RDWR) {
-            res |= MODE_READ_WRITE;
-        } else if ((mode & O_WRONLY) == O_WRONLY) {
-            res |= MODE_WRITE_ONLY;
-        } else if ((mode & O_RDONLY) == O_RDONLY) {
-            res |= MODE_READ_ONLY;
+        if ((mode & O_ACCMODE) == O_RDWR) {
+            res = MODE_READ_WRITE;
+        } else if ((mode & O_ACCMODE) == O_WRONLY) {
+            res = MODE_WRITE_ONLY;
+        } else if ((mode & O_ACCMODE) == O_RDONLY) {
+            res = MODE_READ_ONLY;
         } else {
             throw new IllegalArgumentException("Bad mode: " + mode);
         }
@@ -1325,11 +1326,11 @@ public class FileUtils {
     public static int translateModePfdToPosix(int mode) {
         int res = 0;
         if ((mode & MODE_READ_WRITE) == MODE_READ_WRITE) {
-            res |= O_RDWR;
+            res = O_RDWR;
         } else if ((mode & MODE_WRITE_ONLY) == MODE_WRITE_ONLY) {
-            res |= O_WRONLY;
+            res = O_WRONLY;
         } else if ((mode & MODE_READ_ONLY) == MODE_READ_ONLY) {
-            res |= O_RDONLY;
+            res = O_RDONLY;
         } else {
             throw new IllegalArgumentException("Bad mode: " + mode);
         }
@@ -1428,4 +1429,3 @@ public class FileUtils {
         }
     }
 }
-
