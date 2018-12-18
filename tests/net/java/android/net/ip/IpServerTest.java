@@ -404,7 +404,7 @@ public class IpServerTest {
 
     private void assertDhcpStarted(IpPrefix expectedPrefix) {
         verify(mDependencies, times(1)).makeDhcpServer(
-                eq(mLooper.getLooper()), eq(TEST_IFACE_PARAMS), any(), eq(mSharedLog));
+                eq(mLooper.getLooper()), eq(IFACE_NAME), any(), eq(mSharedLog));
         verify(mDhcpServer, times(1)).start();
         final DhcpServingParams params = mDhcpParamsCaptor.getValue();
         // Last address byte is random
