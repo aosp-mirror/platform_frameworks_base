@@ -299,12 +299,14 @@ public class LocationManagerService extends ILocationManager.Stub {
             AppOpsManager.OnOpChangedListener callback
                     = new AppOpsManager.OnOpChangedInternalListener() {
                 public void onOpChanged(int op, String packageName) {
-                    synchronized (mLock) {
-                        for (Receiver receiver : mReceivers.values()) {
-                            receiver.updateMonitoring(true);
-                        }
-                        applyAllProviderRequirementsLocked();
-                    }
+                            mLocationHandler.post(() -> {
+                                synchronized (mLock) {
+                                    for (Receiver receiver : mReceivers.values()) {
+                                        receiver.updateMonitoring(true);
+                                    }
+                                    applyAllProviderRequirementsLocked();
+                                }
+                            });
                 }
             };
             mAppOps.startWatchingMode(AppOpsManager.OP_COARSE_LOCATION, null,
