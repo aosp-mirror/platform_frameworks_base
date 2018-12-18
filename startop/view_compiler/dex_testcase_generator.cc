@@ -269,6 +269,19 @@ void GenerateSimpleTestCases(const string& outdir) {
     method.Encode();
   }(invokeVirtualReturnObject);
 
+  // Make sure we can cast objects
+  // String castObjectToString(Object o) { return (String)o; }
+  MethodBuilder castObjectToString{cbuilder.CreateMethod(
+      "castObjectToString",
+      Prototype{string_type, TypeDescriptor::FromClassname("java.lang.Object")})};
+  [&](MethodBuilder& method) {
+    const ir::Type* type_def = dex_file.GetOrAddType(string_type.descriptor());
+    method.AddInstruction(
+        Instruction::Cast(Value::Parameter(0), Value::Type(type_def->orig_index)));
+    method.BuildReturn(Value::Parameter(0), /*is_object=*/true);
+    method.Encode();
+  }(castObjectToString);
+
   slicer::MemView image{dex_file.CreateImage()};
   std::ofstream out_file(outdir + "/simple.dex");
   out_file.write(image.ptr<const char>(), image.size());

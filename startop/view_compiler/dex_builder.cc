@@ -79,6 +79,9 @@ std::ostream& operator<<(std::ostream& out, const Instruction::Op& opcode) {
     case Instruction::Op::kNew:
       out << "kNew";
       return out;
+    case Instruction::Op::kCheckCast:
+      out << "kCheckCast";
+      return out;
   }
 }
 
@@ -329,6 +332,8 @@ void MethodBuilder::EncodeInstruction(const Instruction& instruction) {
       return EncodeBranch(art::Instruction::IF_NEZ, instruction);
     case Instruction::Op::kNew:
       return EncodeNew(instruction);
+    case Instruction::Op::kCheckCast:
+      return EncodeCast(instruction);
   }
 }
 
@@ -420,6 +425,18 @@ void MethodBuilder::EncodeNew(const Instruction& instruction) {
   DCHECK_LT(RegisterValue(*instruction.dest()), 256);
   DCHECK(type.is_type());
   Encode21c(::art::Instruction::NEW_INSTANCE, RegisterValue(*instruction.dest()), type.value());
+}
+
+void MethodBuilder::EncodeCast(const Instruction& instruction) {
+  DCHECK_EQ(Instruction::Op::kCheckCast, instruction.opcode());
+  DCHECK(instruction.dest().has_value());
+  DCHECK(instruction.dest()->is_variable());
+  DCHECK_EQ(1, instruction.args().size());
+
+  const Value& type = instruction.args()[0];
+  DCHECK_LT(RegisterValue(*instruction.dest()), 256);
+  DCHECK(type.is_type());
+  Encode21c(::art::Instruction::CHECK_CAST, RegisterValue(*instruction.dest()), type.value());
 }
 
 size_t MethodBuilder::RegisterValue(const Value& value) const {
