@@ -22,16 +22,21 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.metrics.LogMaker;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 /**
  * Class encapsulating a Notification. Sent by the NotificationManagerService to clients including
  * the status bar and any {@link android.service.notification.NotificationListenerService}s.
  */
 public class StatusBarNotification implements Parcelable {
+    static final int MAX_LOG_TAG_LENGTH = 36;
+
     @UnsupportedAppUsage
     private final String pkg;
     @UnsupportedAppUsage
@@ -55,6 +60,9 @@ public class StatusBarNotification implements Parcelable {
     private final long postTime;
 
     private Context mContext; // used for inflation & icon expansion
+
+    // Contains the basic logging data of the notification.
+    private LogMaker mLogMaker;
 
     /** @hide */
     public StatusBarNotification(String pkg, String opPkg, int id,
@@ -380,5 +388,52 @@ public class StatusBarNotification implements Parcelable {
             mContext = context;
         }
         return mContext;
+    }
+
+    /**
+     * Returns a LogMaker that contains all basic information of the notification.
+     * @hide
+     */
+    public LogMaker getLogMaker() {
+        if (mLogMaker == null) {
+            // Initialize fields that only change on update (so a new record).
+            mLogMaker = new LogMaker(MetricsEvent.VIEW_UNKNOWN)
+                .setPackageName(getPackageName())
+                .addTaggedData(MetricsEvent.NOTIFICATION_ID, getId())
+                .addTaggedData(MetricsEvent.NOTIFICATION_TAG, getTag())
+                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_ID, getChannelIdLogTag());
+        }
+        // Reset fields that can change between updates, or are used by multiple logs.
+        return mLogMaker
+            .clearCategory()
+            .clearType()
+            .clearSubtype()
+            .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID, getGroupLogTag())
+            .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_SUMMARY,
+                getNotification().isGroupSummary() ? 1 : 0);
+    }
+
+    private String getGroupLogTag() {
+        return shortenTag(getGroup());
+    }
+
+    private String getChannelIdLogTag() {
+        if (notification.getChannelId() == null) {
+            return null;
+        }
+        return shortenTag(notification.getChannelId());
+    }
+
+    // Make logTag with max size MAX_LOG_TAG_LENGTH.
+    // For shorter or equal tags, returns the tag.
+    // For longer tags, truncate the tag and append a hash of the full tag to
+    // fill the maximum size.
+    private String shortenTag(String logTag) {
+        if (logTag == null || logTag.length() <= MAX_LOG_TAG_LENGTH) {
+            return logTag;
+        }
+        String hash = Integer.toHexString(logTag.hashCode());
+        return logTag.substring(0, MAX_LOG_TAG_LENGTH - hash.length() - 1) + "-"
+            + hash;
     }
 }

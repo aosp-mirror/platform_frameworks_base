@@ -45,7 +45,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.INotificationManager;
@@ -73,6 +72,7 @@ import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -498,12 +498,15 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testLogBlockingHelperCounter_doesntLogForNormalGutsView() throws Exception {
+    public void testLogBlockingHelperCounter_logGutsViewDisplayed() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, true, false,
                 IMPORTANCE_DEFAULT);
         mNotificationInfo.logBlockingHelperCounter("HowCanNotifsBeRealIfAppsArent");
-        verifyZeroInteractions(mMetricsLogger);
+        verify(mMetricsLogger).write(argThat(logMaker ->
+                logMaker.getType() == MetricsEvent.NOTIFICATION_BLOCKING_HELPER
+                        && logMaker.getSubtype() == MetricsEvent.BLOCKING_HELPER_DISPLAY
+        ));
     }
 
     @Test
