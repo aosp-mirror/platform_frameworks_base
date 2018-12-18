@@ -62,4 +62,12 @@ public interface ClockPlugin extends Plugin {
      * Notifies that the time zone has changed.
      */
     default void onTimeZoneChanged(TimeZone timeZone) {}
+
+    /**
+     * Indicates whether the keyguard status area (date) should be shown below
+     * the clock.
+     */
+    default boolean shouldShowStatusArea() {
+        return true;
+    }
 }
