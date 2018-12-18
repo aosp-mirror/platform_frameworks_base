@@ -24,10 +24,10 @@
 #include "DamageAccumulator.h"
 #include "IContextFactory.h"
 #include "SkiaCanvas.h"
-#include "pipeline/skia/SkiaUtils.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaRecordingCanvas.h"
+#include "pipeline/skia/SkiaUtils.h"
 #include "renderthread/CanvasContext.h"
 #include "tests/common/TestUtils.h"
 
@@ -51,8 +51,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrame) {
     auto surface = SkSurface::MakeRasterN32Premul(1, 1);
     surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
 }
 
@@ -84,8 +83,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, testOnPrepareTree) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
 
     // drawFrame will crash if "SkiaPipeline::onPrepareTree" did not clean invalid VD pointer
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
 }
 
@@ -106,12 +104,10 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckOpaque) {
     auto surface = SkSurface::MakeRasterN32Premul(2, 2);
     surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, contentDrawBounds, surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 1), SK_ColorGREEN);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, false, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, false, contentDrawBounds, surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned int)SK_ColorTRANSPARENT);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 1), SK_ColorGREEN);
 }
@@ -130,8 +126,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckDirtyRect) {
     auto surface = SkSurface::MakeRasterN32Premul(2, 2);
     surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, contentDrawBounds, surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
     ASSERT_EQ(TestUtils::getColor(surface, 1, 0), SK_ColorBLUE);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 1), SK_ColorRED);
@@ -203,38 +198,32 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderOverdraw) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
 
     // Single draw, should be white.
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
 
     // 1 Overdraw, should be blue blended onto white.
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffd0d0ff);
 
     // 2 Overdraw, should be green blended onto white
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffd0ffd0);
 
     // 3 Overdraw, should be pink blended onto white.
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffffc0c0);
 
     // 4 Overdraw, should be red blended onto white.
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffff8080);
 
     // 5 Overdraw, should be red blended onto white.
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffff8080);
 }
 
@@ -389,7 +378,6 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, context_lost) {
     EXPECT_FALSE(pipeline->isSurfaceReady());
     EXPECT_TRUE(pipeline->setSurface((Surface*)0x01, SwapBehavior::kSwap_default, ColorMode::SRGB));
     EXPECT_TRUE(pipeline->isSurfaceReady());
-    renderThread.destroyGlContext();
+    renderThread.destroyRenderingContext();
     EXPECT_FALSE(pipeline->isSurfaceReady());
 }
-

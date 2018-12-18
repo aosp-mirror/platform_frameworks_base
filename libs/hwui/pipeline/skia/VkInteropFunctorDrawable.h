@@ -18,8 +18,8 @@
 
 #include "FunctorDrawable.h"
 
-#include <utils/RefBase.h>
 #include <ui/GraphicBuffer.h>
+#include <utils/RefBase.h>
 
 namespace android {
 namespace uirenderer {
@@ -32,20 +32,18 @@ namespace skiapipeline {
  */
 class VkInteropFunctorDrawable : public FunctorDrawable {
 public:
-    VkInteropFunctorDrawable(Functor* functor, GlFunctorLifecycleListener* listener,
-            SkCanvas* canvas)
-            : FunctorDrawable(functor, listener, canvas) {}
+    using FunctorDrawable::FunctorDrawable;
+
     virtual ~VkInteropFunctorDrawable();
 
-    void syncFunctor() const override;
-
     static void vkInvokeFunctor(Functor* functor);
+
+    void syncFunctor(const WebViewSyncData& data) const override;
 
 protected:
     virtual void onDraw(SkCanvas* canvas) override;
 
 private:
-
     // Variables below describe/store temporary offscreen buffer used for Vulkan pipeline.
     sp<GraphicBuffer> mFrameBuffer;
     SkImageInfo mFBInfo;

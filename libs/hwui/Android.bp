@@ -9,6 +9,8 @@ cc_defaults {
         "hwui_lto",
     ],
 
+    cpp_std: "experimental",
+
     cflags: [
         "-DEGL_EGLEXT_PROTOTYPES",
         "-DGL_GLEXT_PROTOTYPES",
@@ -226,6 +228,7 @@ cc_defaults {
         "RenderProperties.cpp",
         "SkiaCanvas.cpp",
         "TreeInfo.cpp",
+        "WebViewFunctorManager.cpp",
         "VectorDrawable.cpp",
         "protos/graphicsstats.proto",
     ],
@@ -330,6 +333,7 @@ cc_test {
         "tests/unit/TypefaceTests.cpp",
         "tests/unit/VectorDrawableTests.cpp",
         "tests/unit/VectorDrawableAtlasTests.cpp",
+        "tests/unit/WebViewFunctorManagerTests.cpp",
     ],
 }
 

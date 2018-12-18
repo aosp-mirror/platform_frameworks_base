@@ -288,7 +288,10 @@ void RenderNode::syncDisplayList(TreeObserver& observer, TreeInfo* info) {
     mDisplayList = mStagingDisplayList;
     mStagingDisplayList = nullptr;
     if (mDisplayList) {
-        mDisplayList->syncContents();
+        WebViewSyncData syncData {
+            .applyForceDark = info && !info->disableForceDark
+        };
+        mDisplayList->syncContents(syncData);
         handleForceDark(info);
     }
 }

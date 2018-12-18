@@ -132,6 +132,7 @@ RenderThread::RenderThread()
         , mFrameCallbackTaskPending(false)
         , mRenderState(nullptr)
         , mEglManager(nullptr)
+        , mFunctorManager(WebViewFunctorManager::instance())
         , mVkManager(nullptr) {
     Properties::load();
     start("RenderThread");
@@ -197,11 +198,13 @@ void RenderThread::requireGlContext() {
     setGrContext(grContext);
 }
 
-void RenderThread::destroyGlContext() {
+void RenderThread::destroyRenderingContext() {
+    mFunctorManager.onContextDestroyed();
     if (mEglManager->hasEglContext()) {
         setGrContext(nullptr);
         mEglManager->destroy();
     }
+    vulkanManager().destroy();
 }
 
 void RenderThread::dumpGraphicsMemory(int fd) {
