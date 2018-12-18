@@ -18,14 +18,17 @@ package android.hardware.hdmi;
 
 import android.os.Handler;
 import android.os.test.TestLooper;
-import android.support.test.filters.SmallTest;
 import android.util.Log;
-import java.util.List;
+
+import androidx.test.filters.SmallTest;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.List;
 
 /**
  * Tests for {@link HdmiAudioSystemClient}
