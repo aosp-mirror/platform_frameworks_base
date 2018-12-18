@@ -1716,7 +1716,7 @@ class TaskRecord extends ConfigurationContainer {
         updateTaskDescription();
     }
 
-    private void adjustForMinimalTaskDimensions(Rect bounds) {
+    private void adjustForMinimalTaskDimensions(Rect bounds, Rect previousBounds) {
         if (bounds == null) {
             return;
         }
@@ -1747,9 +1747,8 @@ class TaskRecord extends ConfigurationContainer {
             return;
         }
 
-        final Rect configBounds = getRequestedOverrideBounds();
         if (adjustWidth) {
-            if (!configBounds.isEmpty() && bounds.right == configBounds.right) {
+            if (!previousBounds.isEmpty() && bounds.right == previousBounds.right) {
                 bounds.left = bounds.right - minWidth;
             } else {
                 // Either left bounds match, or neither match, or the previous bounds were
@@ -1758,7 +1757,7 @@ class TaskRecord extends ConfigurationContainer {
             }
         }
         if (adjustHeight) {
-            if (!configBounds.isEmpty() && bounds.bottom == configBounds.bottom) {
+            if (!previousBounds.isEmpty() && bounds.bottom == previousBounds.bottom) {
                 bounds.top = bounds.bottom - minHeight;
             } else {
                 // Either top bounds match, or neither match, or the previous bounds were
@@ -2113,11 +2112,15 @@ class TaskRecord extends ConfigurationContainer {
     // TODO(b/113900640): remove this once ActivityRecord is changed to not need it anymore.
     void computeResolvedOverrideConfiguration(Configuration inOutConfig, Configuration parentConfig,
             Configuration overrideConfig) {
+        // Save previous bounds because adjustForMinimalTaskDimensions uses that to determine if it
+        // changes left bound vs. right bound, or top bound vs. bottom bound.
+        mTmpBounds.set(inOutConfig.windowConfiguration.getBounds());
+
         inOutConfig.setTo(overrideConfig);
 
         Rect outOverrideBounds = inOutConfig.windowConfiguration.getBounds();
         if (outOverrideBounds != null && !outOverrideBounds.isEmpty()) {
-            adjustForMinimalTaskDimensions(outOverrideBounds);
+            adjustForMinimalTaskDimensions(outOverrideBounds, mTmpBounds);
 
             int windowingMode = overrideConfig.windowConfiguration.getWindowingMode();
             if (windowingMode == WINDOWING_MODE_UNDEFINED) {
