@@ -2329,9 +2329,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     fos.close();
                     long[] rssAfter = Process.getRss(pid);
                     long end = SystemClock.uptimeMillis();
+                    long time = end - start;
                     EventLog.writeEvent(EventLogTags.AM_COMPACT, pid, name, action,
                             rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
-                            rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], end-start);
+                            rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], time,
+                            lastCompactAction, lastCompactTime, msg.arg1, msg.arg2);
+                    StatsLog.write(StatsLog.APP_COMPACTED, pid, name, pendingAction,
+                            rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
+                            rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], time,
+                            lastCompactAction, lastCompactTime, msg.arg1,
+                            ActivityManager.processStateAmToProto(msg.arg2));
                     synchronized(ActivityManagerService.this) {
                         proc.lastCompactTime = end;
                         proc.lastCompactAction = pendingAction;
@@ -17028,12 +17035,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                      app.curAdj == ProcessList.HOME_APP_ADJ)) {
                     app.reqCompactAction = COMPACT_PROCESS_SOME;
                     mPendingCompactionProcesses.add(app);
-                    mCompactionHandler.sendEmptyMessage(COMPACT_PROCESS_MSG);
+                    mCompactionHandler.sendMessage(
+                            mCompactionHandler.obtainMessage(
+                                COMPACT_PROCESS_MSG, app.curAdj, app.setProcState));
                 } else if (app.setAdj < ProcessList.CACHED_APP_MIN_ADJ &&
                            app.curAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
                     app.reqCompactAction = COMPACT_PROCESS_FULL;
                     mPendingCompactionProcesses.add(app);
-                    mCompactionHandler.sendEmptyMessage(COMPACT_PROCESS_MSG);
+                    mCompactionHandler.sendMessage(
+                            mCompactionHandler.obtainMessage(
+                                COMPACT_PROCESS_MSG, app.curAdj, app.setProcState));
                 }
             }
             ProcessList.setOomAdj(app.pid, app.uid, app.curAdj);

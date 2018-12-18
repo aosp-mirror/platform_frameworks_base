@@ -171,6 +171,7 @@ message Atom {
         DocsUIUserActionReported docs_ui_user_action_reported = 112;
         WifiEnabledStateChanged wifi_enabled_state_changed = 113;
         WifiRunningStateChanged wifi_running_state_changed = 114;
+        AppCompacted app_compacted = 115;
     }
 
     // Pulled events will start at field 10000.
@@ -3648,4 +3649,66 @@ message DocsUIUserActionReported {
  */
 message DocsUIInvalidScopedAccessRequestReported {
     optional android.stats.docsui.InvalidScopedAccess type = 1;
+}
+
+/**
+ * Logs when an app's memory is compacted.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message AppCompacted {
+  // The pid of the process being compacted.
+  optional int32 pid = 1;
+
+  // The name of the process being compacted.
+  optional string process_name = 2;
+
+  // The type of compaction.
+  enum Action {
+    UNKNOWN = 0;
+    SOME = 1;
+    FULL = 2;
+  }
+  optional Action action = 3 [default = UNKNOWN];
+
+  // Total RSS in kilobytes consumed by the process prior to compaction.
+  optional int64 before_rss_total_kilobytes = 4;
+
+  // File RSS in kilobytes consumed by the process prior to compaction.
+  optional int64 before_rss_file_kilobytes = 5;
+
+  // Anonymous RSS in kilobytes consumed by the process prior to compaction.
+  optional int64 before_rss_anon_kilobytes = 6;
+
+  // Swap in kilobytes consumed by the process prior to compaction.
+  optional int64 before_swap_kilobytes = 7;
+
+  // Total RSS in kilobytes consumed by the process after compaction.
+  optional int64 after_rss_total_kilobytes = 8;
+
+  // File RSS in kilobytes consumed by the process after compaction.
+  optional int64 after_rss_file_kilobytes = 9;
+
+  // Anonymous RSS in kilobytes consumed by the process after compaction.
+  optional int64 after_rss_anon_kilobytes = 10;
+
+  // Swap in kilobytes consumed by the process after compaction.
+  optional int64 after_swap_kilobytes = 11;
+
+  // The time taken to perform compaction in milliseconds.
+  optional int64 time_to_compact_millis = 12;
+
+  // The last compaction action performed for this app.
+  optional Action last_action = 13;
+
+  // The last time that compaction was attempted on this process in seconds
+  // since boot.
+  optional int64 last_compact_timestamp = 14;
+
+  // The oom_adj at the time of compaction.
+  optional int32 oom_adj = 15;
+
+  // The process state at the time of compaction.
+  optional android.app.ProcessStateEnum process_state = 16 [default = PROCESS_STATE_UNKNOWN];
 }
