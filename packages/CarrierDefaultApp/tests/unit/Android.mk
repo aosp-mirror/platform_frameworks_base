@@ -21,7 +21,7 @@ LOCAL_CERTIFICATE := platform
 
 LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common android.test.base
 
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-test mockito-target-minus-junit4
+LOCAL_STATIC_JAVA_LIBRARIES := androidx.test.rules mockito-target-minus-junit4
 
 # Include all test java files.
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
