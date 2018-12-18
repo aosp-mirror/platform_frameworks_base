@@ -1,8 +1,9 @@
 package com.android.multidexlegacytestapp.test2;
 
 import android.os.Bundle;
+
 import androidx.multidex.MultiDex;
-import android.support.test.runner.AndroidJUnitRunner;
+import androidx.test.runner.AndroidJUnitRunner;
 
 public class MultiDexAndroidJUnitRunner extends AndroidJUnitRunner {
 
