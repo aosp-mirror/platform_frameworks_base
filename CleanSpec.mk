@@ -251,6 +251,7 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/framework/com.android.media.
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/overlay/ExperimentNavigationBarSlim)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/vendor/overlay/ExperimentNavigationBarSlim)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/vendor/overlay/ExperimentNavigationBarSlim)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/priv-app/SystemUI)
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
 # ******************************************************************
