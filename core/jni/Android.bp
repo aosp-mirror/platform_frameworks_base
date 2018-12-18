@@ -274,6 +274,7 @@ cc_library_shared {
         "libicuuc",
         "libmedia",
         "libmediametrics",
+        "libmeminfo",
         "libaudioclient",
         "libjpeg",
         "libusbhost",
