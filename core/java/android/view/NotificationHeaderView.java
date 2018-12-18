@@ -201,22 +201,16 @@ public class NotificationHeaderView extends ViewGroup {
             int bottom = top + childHeight;
             int layoutLeft = left;
             int layoutRight = right;
-            if (child == mExpandButton && mShowExpandButtonAtEnd) {
-                layoutRight = end - mContentEndMargin;
-                end = layoutLeft = layoutRight - child.getMeasuredWidth();
-            }
-            if (child == mProfileBadge) {
-                int paddingEnd = getPaddingEnd();
-                if (mShowWorkBadgeAtEnd) {
-                    paddingEnd = mContentEndMargin;
+            if ((child == mExpandButton && mShowExpandButtonAtEnd)
+                    || child == mProfileBadge
+                    || child == mAppOps) {
+                if (end == getMeasuredWidth()) {
+                    layoutRight = end - mContentEndMargin;
+                } else {
+                    layoutRight = end - params.getMarginEnd();
                 }
-                layoutRight = end - paddingEnd;
-                end = layoutLeft = layoutRight - child.getMeasuredWidth();
-            }
-            if (child == mAppOps) {
-                int paddingEnd = mContentEndMargin;
-                layoutRight = end - paddingEnd;
-                end = layoutLeft = layoutRight - child.getMeasuredWidth();
+                layoutLeft = layoutRight - child.getMeasuredWidth();
+                end = layoutLeft - params.getMarginStart();
             }
             if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
                 int ltrLeft = layoutLeft;
