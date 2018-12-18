@@ -290,10 +290,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected static final boolean CLOSE_PANEL_WHEN_EMPTIED = true;
 
-    private static final int STATUS_OR_NAV_TRANSIENT =
-            View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
-    private static final long AUTOHIDE_TIMEOUT_MS = 2250;
-
     /**
      * The delay to reset the hint text when the hint animation is finished running.
      */
@@ -342,6 +338,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected BiometricUnlockController mBiometricUnlockController;
     private LightBarController mLightBarController;
     protected LockscreenWallpaper mLockscreenWallpaper;
+    @VisibleForTesting
+    protected AutoHideController mAutoHideController;
 
     private int mNaturalBarHeight = -1;
 
@@ -406,9 +404,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Rect mLastFullscreenStackBounds = new Rect();
     private final Rect mLastDockedStackBounds = new Rect();
 
-    // last value sent to window manager
-    private int mLastDispatchedSystemUiVisibility = ~View.SYSTEM_UI_FLAG_VISIBLE;
-
     private final DisplayMetrics mDisplayMetrics = Dependency.get(DisplayMetrics.class);
 
     // XXX: gesture research
@@ -448,20 +443,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected final H mHandler = createHandler();
 
     private int mInteractingWindows;
-    private boolean mAutoHideSuspended;
     private @TransitionMode int mStatusBarMode;
 
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
     protected ScrimController mScrimController;
     protected DozeScrimController mDozeScrimController;
     private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
-
-    private final Runnable mAutoHide = () -> {
-        int requested = mSystemUiVisibility & ~STATUS_OR_NAV_TRANSIENT;
-        if (mSystemUiVisibility != requested) {
-            notifySystemUiVisibilityChanged(requested);
-        }
-    };
 
     protected boolean mDozing;
     private boolean mDozingRequested;
@@ -904,6 +891,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         });
 
+        mAutoHideController = Dependency.get(AutoHideController.class);
+        mAutoHideController.setStatusBar(this);
+
         mLightBarController = Dependency.get(LightBarController.class);
 
         ScrimView scrimBehind = mStatusBarWindow.findViewById(R.id.scrim_behind);
@@ -1102,7 +1092,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     protected View.OnTouchListener getStatusBarWindowTouchListener() {
         return (v, event) -> {
-            checkUserAutoHide(event);
+            mAutoHideController.checkUserAutoHide(event);
             mRemoteInputManager.checkRemoteInputOutside(event);
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (mExpandedVisible) {
@@ -2073,7 +2063,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             // ready to unhide
             if ((vis & View.STATUS_BAR_UNHIDE) != 0) {
-                mSystemUiVisibility &= ~View.STATUS_BAR_UNHIDE;
                 mNoAnimationOnNextBarModeChange = true;
             }
 
@@ -2084,17 +2073,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (sbModeChanged && sbMode != mStatusBarMode) {
                 mStatusBarMode = sbMode;
                 checkBarModes();
-                touchAutoHide();
+                mAutoHideController.touchAutoHide();
             }
-
-            if ((vis & View.NAVIGATION_BAR_UNHIDE) != 0) {
-                mSystemUiVisibility &= ~View.NAVIGATION_BAR_UNHIDE;
-            }
-
-            // send updated sysui visibility to window manager
-            notifySystemUiVisibilityChanged(mSystemUiVisibility);
         }
-
         mLightBarController.onSystemUiVisibilityChanged(fullscreenStackVis, dockedStackVis,
                 mask, fullscreenStackBounds, dockedStackBounds, sbModeChanged, mStatusBarMode);
     }
@@ -2119,16 +2100,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             // workspace
             WirelessChargingAnimation.makeWirelessChargingAnimation(mContext, null,
                     batteryLevel, null, false).show();
-        }
-    }
-
-    void touchAutoHide() {
-        // update transient bar auto hide
-        if (mStatusBarMode == MODE_SEMI_TRANSPARENT
-                || mNavigationBarController.isSemiTransparent(mDisplayId)) {
-            scheduleAutoHide();
-        } else {
-            cancelAutoHide();
         }
     }
 
@@ -2201,9 +2172,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 ? (mInteractingWindows | barWindow)
                 : (mInteractingWindows & ~barWindow);
         if (mInteractingWindows != 0) {
-            suspendAutoHide();
+            mAutoHideController.suspendAutoHide();
         } else {
-            resumeSuspendedAutoHide();
+            mAutoHideController.resumeSuspendedAutoHide();
         }
         // manually dismiss the volume panel when interacting with the nav bar
         if (changing && interacting && barWindow == StatusBarManager.WINDOW_NAVIGATION_BAR) {
@@ -2219,44 +2190,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    private void resumeSuspendedAutoHide() {
-        if (mAutoHideSuspended) {
-            scheduleAutoHide();
-            mHandler.postDelayed(mCheckBarModes, 500); // longer than home -> launcher
-        }
-    }
-
-    private void suspendAutoHide() {
-        mHandler.removeCallbacks(mAutoHide);
-        mHandler.removeCallbacks(mCheckBarModes);
-        mAutoHideSuspended = (mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT) != 0;
-    }
-
-    private void cancelAutoHide() {
-        mAutoHideSuspended = false;
-        mHandler.removeCallbacks(mAutoHide);
-    }
-
-    private void scheduleAutoHide() {
-        cancelAutoHide();
-        mHandler.postDelayed(mAutoHide, AUTOHIDE_TIMEOUT_MS);
-    }
-
-    void checkUserAutoHide(MotionEvent event) {
-        if ((mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT) != 0  // a transient bar is revealed
-                && event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar
-                && event.getX() == 0 && event.getY() == 0  // a touch outside both bars
-                && !mRemoteInputManager.getController()
-                        .isRemoteInputActive()) { // not due to typing in IME
-            userAutoHide();
-        }
-    }
-
-    private void userAutoHide() {
-        cancelAutoHide();
-        mHandler.postDelayed(mAutoHide, 350); // longer than app gesture -> flag clear
-    }
-
     private boolean areLightsOn() {
         return 0 == (mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
     }
@@ -2270,16 +2203,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             setSystemUiVisibility(mDisplayId, View.SYSTEM_UI_FLAG_LOW_PROFILE, 0, 0,
                     View.SYSTEM_UI_FLAG_LOW_PROFILE, mLastFullscreenStackBounds,
                     mLastDockedStackBounds);
-        }
-    }
-
-    private void notifySystemUiVisibilityChanged(int vis) {
-        try {
-            if (mLastDispatchedSystemUiVisibility != vis) {
-                mWindowManagerService.statusBarVisibilityChanged(mDisplayId, vis);
-                mLastDispatchedSystemUiVisibility = vis;
-            }
-        } catch (RemoteException ex) {
         }
     }
 
@@ -4478,5 +4401,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Subcomponent
     public interface StatusBarInjector {
         void createStatusBar(StatusBar statusbar);
+    }
+
+    public @TransitionMode int getStatusBarMode() {
+        return mStatusBarMode;
     }
 }

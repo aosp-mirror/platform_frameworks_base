@@ -248,7 +248,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mock(StatusBarWindowController.class), mock(NotificationIconAreaController.class),
                 mDozeScrimController, mock(NotificationShelf.class),
                 mLockscreenUserManager, mCommandQueue, mNotificationPresenter,
-                mock(BubbleController.class), mock(NavigationBarController.class));
+                mock(BubbleController.class), mock(NavigationBarController.class),
+                mock(AutoHideController.class));
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         SystemUIFactory.getInstance().getRootComponent()
@@ -700,7 +701,8 @@ public class StatusBarTest extends SysuiTestCase {
                 CommandQueue commandQueue,
                 NotificationPresenter notificationPresenter,
                 BubbleController bubbleController,
-                NavigationBarController navBarController) {
+                NavigationBarController navBarController,
+                AutoHideController autoHideController) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -732,6 +734,7 @@ public class StatusBarTest extends SysuiTestCase {
             mGestureWakeLock = mock(PowerManager.WakeLock.class);
             mBubbleController = bubbleController;
             mNavigationBarController = navBarController;
+            mAutoHideController = autoHideController;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {

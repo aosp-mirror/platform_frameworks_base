@@ -34,6 +34,7 @@ import android.view.WindowManagerGlobal;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.NavigationBarFragment;
@@ -132,12 +133,21 @@ public class NavigationBarController implements DisplayListener {
             // Unfortunately, we still need it because status bar needs LightBarController
             // before notifications creation. We cannot directly use getLightBarController()
             // from NavigationBarFragment directly.
-            LightBarController controller = isOnDefaultDisplay
+            LightBarController lightBarController = isOnDefaultDisplay
                     ? Dependency.get(LightBarController.class)
                     : new LightBarController(context,
                             Dependency.get(DarkIconDispatcher.class),
                             Dependency.get(BatteryController.class));
-            navBar.setLightBarController(controller);
+            navBar.setLightBarController(lightBarController);
+
+            // TODO(b/118592525): to support multi-display, we start to add something which is
+            //                    per-display, while others may be global. I think it's time to add
+            //                    a new class maybe named DisplayDependency to solve per-display
+            //                    Dependency problem.
+            AutoHideController autoHideController = isOnDefaultDisplay
+                    ? Dependency.get(AutoHideController.class)
+                    : new AutoHideController(context, mHandler);
+            navBar.setAutoHideController(autoHideController);
             navBar.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             mNavigationBars.append(displayId, navBar);
         });
@@ -195,15 +205,6 @@ public class NavigationBarController implements DisplayListener {
         if (navBar != null) {
             navBar.transitionTo(barMode, animate);
         }
-    }
-
-    /** @see NavigationBarFragment#isSemiTransparent() */
-    public boolean isSemiTransparent(int displayId) {
-        NavigationBarFragment navBar = mNavigationBars.get(displayId);
-        if (navBar != null) {
-            return navBar.isSemiTransparent();
-        }
-        return false;
     }
 
     /** @see NavigationBarFragment#disableAnimationsDuringHide(long) */
