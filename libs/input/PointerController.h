@@ -23,6 +23,7 @@
 #include <vector>
 
 #include <ui/DisplayInfo.h>
+#include <input/DisplayViewport.h>
 #include <input/Input.h>
 #include <PointerControllerInterface.h>
 #include <utils/BitSet.h>
@@ -96,6 +97,7 @@ public:
     virtual int32_t getButtonState() const;
     virtual void setPosition(float x, float y);
     virtual void getPosition(float* outX, float* outY) const;
+    virtual int32_t getDisplayId() const;
     virtual void fade(Transition transition);
     virtual void unfade(Transition transition);
 
@@ -106,7 +108,7 @@ public:
 
     void updatePointerIcon(int32_t iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
-    void setDisplayViewport(int32_t width, int32_t height, int32_t orientation);
+    void setDisplayViewport(const DisplayViewport& viewport);
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void reloadPointerResources();
 
@@ -156,9 +158,7 @@ private:
         size_t animationFrameIndex;
         nsecs_t lastFrameUpdatedTime;
 
-        int32_t displayWidth;
-        int32_t displayHeight;
-        int32_t displayOrientation;
+        DisplayViewport viewport;
 
         InactivityTimeout inactivityTimeout;
 
@@ -182,7 +182,7 @@ private:
 
         Vector<Spot*> spots;
         Vector<sp<Sprite> > recycledSprites;
-    } mLocked;
+    } mLocked GUARDED_BY(mLock);
 
     bool getBoundsLocked(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
     void setPositionLocked(float x, float y);
@@ -207,7 +207,7 @@ private:
     void fadeOutAndReleaseSpotLocked(Spot* spot);
     void fadeOutAndReleaseAllSpotsLocked();
 
-    void loadResources();
+    void loadResourcesLocked();
 };
 
 } // namespace android
