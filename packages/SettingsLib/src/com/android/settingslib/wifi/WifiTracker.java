@@ -623,16 +623,20 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             // TODO(b/118705403): filter out OSU Providers which we already have credentials from.
             Map<OsuProvider, List<ScanResult>> providersAndScans =
                     mWifiManager.getMatchingOsuProviders(cachedScanResults);
+            Set<OsuProvider> alreadyProvisioned = mWifiManager
+                    .getMatchingPasspointConfigsForOsuProviders(
+                            providersAndScans.keySet()).keySet();
             for (OsuProvider provider : providersAndScans.keySet()) {
-                AccessPoint accessPointOsu = new AccessPoint(mContext, provider);
-                // TODO(b/118705403): accessPointOsu.setScanResults(Matching ScanResult with best
-                // RSSI)
-                // TODO(b/118705403): Figure out if we would need to update an OSU AP (this will be
-                // used if we need to display it at the top of the picker as the "active" AP).
-                // Otherwise, OSU APs should ignore attempts to update the active connection
-                // info.
-                // accessPointOsu.update(connectionConfig, mLastInfo, mLastNetworkInfo);
-                accessPoints.add(accessPointOsu);
+                if (!alreadyProvisioned.contains(provider)) {
+                    AccessPoint accessPointOsu = new AccessPoint(mContext, provider);
+                    // TODO(b/118705403): accessPointOsu.setScanResults(Matching ScanResult with
+                    // best RSSI)
+                    // TODO(b/118705403): Figure out if we would need to update an OSU AP (this will
+                    // be used if we need to display it at the top of the picker as the "active" AP)
+                    // Otherwise OSU APs should ignore attempts to update the active connection info
+                    // accessPointOsu.update(connectionConfig, mLastInfo, mLastNetworkInfo);
+                    accessPoints.add(accessPointOsu);
+                }
             }
 
 
