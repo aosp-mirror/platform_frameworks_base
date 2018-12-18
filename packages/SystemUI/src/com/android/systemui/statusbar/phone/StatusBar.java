@@ -191,6 +191,7 @@ import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -376,6 +377,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NotificationGutsManager mGutsManager;
     protected NotificationLogger mNotificationLogger;
     protected NotificationEntryManager mEntryManager;
+    private NotificationRowBinder mNotificationRowBinder;
     protected NotificationViewHierarchyManager mViewHierarchyManager;
     protected ForegroundServiceController mForegroundServiceController;
     protected AppOpsController mAppOpsController;
@@ -620,6 +622,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGutsManager = Dependency.get(NotificationGutsManager.class);
         mMediaManager = Dependency.get(NotificationMediaManager.class);
         mEntryManager = Dependency.get(NotificationEntryManager.class);
+        mNotificationRowBinder = Dependency.get(NotificationRowBinder.class);
         mViewHierarchyManager = Dependency.get(NotificationViewHierarchyManager.class);
         mForegroundServiceController = Dependency.get(ForegroundServiceController.class);
         mAppOpsController = Dependency.get(AppOpsController.class);
@@ -1035,10 +1038,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationActivityStarter = new StatusBarNotificationActivityStarter(
                 mContext, mNotificationPanel, mPresenter, mHeadsUpManager, mActivityLaunchAnimator);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
+        mNotificationRowBinder.setNotificationClicker(new NotificationClicker(
+                this, Dependency.get(BubbleController.class), mNotificationActivityStarter));
 
         mGroupAlertTransferHelper.bind(mEntryManager, mGroupManager);
-        mEntryManager.setNotificationClicker(new NotificationClicker(
-                this, Dependency.get(BubbleController.class), mNotificationActivityStarter));
     }
 
     /**

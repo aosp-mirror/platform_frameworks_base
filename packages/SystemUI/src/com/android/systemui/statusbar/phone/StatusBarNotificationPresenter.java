@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -88,6 +89,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             Dependency.get(StatusBarStateController.class);
     private final NotificationEntryManager mEntryManager =
             Dependency.get(NotificationEntryManager.class);
+    private final NotificationRowBinder mNotificationRowBinder =
+            Dependency.get(NotificationRowBinder.class);
     private final NotificationMediaManager mMediaManager =
             Dependency.get(NotificationMediaManager.class);
     protected AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
@@ -168,6 +171,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         Dependency.get(InitController.class).addPostInitTask(() -> {
             mViewHierarchyManager.setUpWithPresenter(this, notifListContainer);
             mEntryManager.setUpWithPresenter(this, notifListContainer, this, mHeadsUpManager);
+            mNotificationRowBinder.setUpWithPresenter(this, notifListContainer, mHeadsUpManager,
+                    mEntryManager, this);
             mLockscreenUserManager.setUpWithPresenter(this);
             mMediaManager.setUpWithPresenter(this);
             Dependency.get(NotificationGutsManager.class).setUpWithPresenter(this,
