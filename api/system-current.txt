@@ -7799,7 +7799,7 @@ package android.telephony {
 package android.telephony.data {
 
   public final class DataCallResponse implements android.os.Parcelable {
-    ctor public DataCallResponse(int, int, int, int, @Nullable String, @Nullable String, @Nullable java.util.List<android.net.LinkAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.lang.String>, int);
+    ctor public DataCallResponse(int, int, int, int, int, @Nullable String, @Nullable java.util.List<android.net.LinkAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.lang.String>, int);
     ctor public DataCallResponse(android.os.Parcel);
     method public int describeContents();
     method public int getActive();
@@ -7810,9 +7810,9 @@ package android.telephony.data {
     method @NonNull public String getIfname();
     method public int getMtu();
     method @NonNull public java.util.List<java.lang.String> getPcscfs();
+    method public int getProtocolType();
     method public int getStatus();
     method public int getSuggestedRetryTime();
-    method @NonNull public String getType();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.data.DataCallResponse> CREATOR;
   }
@@ -7826,8 +7826,8 @@ package android.telephony.data {
     method public int getMtu();
     method public String getPassword();
     method public int getProfileId();
-    method public String getProtocol();
-    method public String getRoamingProtocol();
+    method public int getProtocol();
+    method public int getRoamingProtocol();
     method public int getSupportedApnTypesBitmap();
     method public int getType();
     method public String getUserName();
