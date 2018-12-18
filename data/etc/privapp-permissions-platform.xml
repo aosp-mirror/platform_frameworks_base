@@ -141,6 +141,7 @@ applications that come with the platform
         <permission name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"/>
         <permission name="android.permission.GET_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
+        <permission name="android.permission.APPROVE_INCIDENT_REPORTS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">

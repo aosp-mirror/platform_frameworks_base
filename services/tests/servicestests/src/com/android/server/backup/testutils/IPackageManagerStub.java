@@ -1151,6 +1151,10 @@ public class IPackageManagerStub implements IPackageManager {
         return null;
     }
 
+    public String getIncidentReportApproverPackageName() throws RemoteException {
+        return null;
+    }
+
     @Override
     public boolean isPackageStateProtected(String packageName, int userId) throws RemoteException {
         return false;

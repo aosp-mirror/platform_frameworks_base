@@ -18,6 +18,7 @@ package android {
     field public static final String ALLOCATE_AGGRESSIVE = "android.permission.ALLOCATE_AGGRESSIVE";
     field public static final String ALLOW_ANY_CODEC_FOR_PLAYBACK = "android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK";
     field public static final String AMBIENT_WALLPAPER = "android.permission.AMBIENT_WALLPAPER";
+    field public static final String APPROVE_INCIDENT_REPORTS = "android.permission.APPROVE_INCIDENT_REPORTS";
     field public static final String BACKUP = "android.permission.BACKUP";
     field public static final String BIND_ATTENTION_SERVICE = "android.permission.BIND_ATTENTION_SERVICE";
     field public static final String BIND_AUGMENTED_AUTOFILL_SERVICE = "android.permission.BIND_AUGMENTED_AUTOFILL_SERVICE";
@@ -1489,6 +1490,7 @@ package android.content.pm {
     method @NonNull public android.content.pm.dex.ArtManager getArtManager();
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract String getDefaultBrowserPackageNameAsUser(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.SET_HARMFUL_APP_WARNINGS) public CharSequence getHarmfulAppWarning(@NonNull String);
+    method public String getIncidentReportApproverPackageName();
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_INSTANT_APPS) public abstract android.graphics.drawable.Drawable getInstantAppIcon(String);
     method public abstract android.content.ComponentName getInstantAppInstallerComponent();
@@ -1610,6 +1612,7 @@ package android.content.pm {
     field public static final int FLAG_REMOVED = 2; // 0x2
     field public static final int PROTECTION_FLAG_CONFIGURATOR = 524288; // 0x80000
     field public static final int PROTECTION_FLAG_DOCUMENTER = 262144; // 0x40000
+    field public static final int PROTECTION_FLAG_INCIDENT_REPORT_APPROVER = 1048576; // 0x100000
     field public static final int PROTECTION_FLAG_OEM = 16384; // 0x4000
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000

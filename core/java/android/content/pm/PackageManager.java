@@ -6744,6 +6744,19 @@ public abstract class PackageManager {
     }
 
     /**
+     * @return the incident report approver app package name, or null if it's not defined
+     * by the OEM.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public String getIncidentReportApproverPackageName() {
+        throw new UnsupportedOperationException(
+                "getIncidentReportApproverPackageName not implemented in subclass");
+    }
+
+    /**
      * @return whether a given package's state is protected, e.g. package cannot be disabled,
      *         suspended, hidden or force stopped.
      *

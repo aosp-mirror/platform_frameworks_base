@@ -1350,6 +1350,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mDocumenterPackage;
     final @Nullable String mConfiguratorPackage;
     final @Nullable String mAppPredictionServicePackage;
+    final @Nullable String mIncidentReportApproverPackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
@@ -2879,6 +2880,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mConfiguratorPackage =
                     mContext.getString(R.string.config_deviceConfiguratorPackageName);
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
+            mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -20112,6 +20114,10 @@ public class PackageManagerService extends IPackageManager.Stub
         return contentCaptureServiceName.substring(0, separatorIndex);
     }
 
+    public String getIncidentReportApproverPackageName() {
+        return mContext.getString(R.string.config_incidentReportApproverPackage);
+    }
+
     @Override
     public void setApplicationEnabledSetting(String appPackageName,
             int newState, int flags, int userId, String callingPackage) {
@@ -23275,6 +23281,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return mDocumenterPackage;
                 case PackageManagerInternal.PACKAGE_CONFIGURATOR:
                     return mConfiguratorPackage;
+                case PackageManagerInternal.PACKAGE_INCIDENT_REPORT_APPROVER:
+                    return mIncidentReportApproverPackage;
             }
             return null;
         }
