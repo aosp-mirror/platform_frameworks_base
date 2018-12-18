@@ -103,6 +103,8 @@
     <string name="ssid_by_passpoint_provider"><xliff:g id="ssid" example="Cafe Wifi">%1$s</xliff:g> by <xliff:g id="passpointProvider" example="Passpoint Provider">%2$s</xliff:g></string>
     <!-- Status message of Wi-Fi when network has matching passpoint credentials. [CHAR LIMIT=NONE] -->
     <string name="available_via_passpoint">Available via %1$s</string>
+    <!-- Status message of OSU Provider network when not connected. [CHAR LIMIT=NONE] -->
+    <string name="tap_to_set_up">Tap to set up</string>
     <!-- Package name for Settings app-->
     <string name="settings_package" translatable="false">com.android.settings</string>
     <!-- Package name for Certinstaller app-->

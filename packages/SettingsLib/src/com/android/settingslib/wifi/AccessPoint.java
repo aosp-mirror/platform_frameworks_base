@@ -926,6 +926,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
             } else if (mIsCarrierAp) {
                 summary.append(String.format(mContext.getString(
                         R.string.available_via_carrier), mCarrierName));
+            } else if (isOsuProvider()) {
+                summary.append(mContext.getString(R.string.tap_to_set_up));
             } else if (!isReachable()) { // Wifi out of range
                 summary.append(mContext.getString(R.string.wifi_not_in_range));
             } else { // In range, not disabled.
