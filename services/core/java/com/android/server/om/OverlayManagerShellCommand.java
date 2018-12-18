@@ -121,8 +121,8 @@ final class OverlayManagerShellCommand extends ShellCommand {
         for (final String targetPackageName : allOverlays.keySet()) {
             out.println(targetPackageName);
             List<OverlayInfo> overlaysForTarget = allOverlays.get(targetPackageName);
-            final int N = overlaysForTarget.size();
-            for (int i = 0; i < N; i++) {
+            final int n = overlaysForTarget.size();
+            for (int i = 0; i < n; i++) {
                 final OverlayInfo oi = overlaysForTarget.get(i);
                 String status;
                 switch (oi.state) {

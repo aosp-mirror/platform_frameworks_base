@@ -223,8 +223,8 @@ public final class OverlayManagerService extends SystemService {
     public OverlayManagerService(@NonNull final Context context,
             @NonNull final Installer installer) {
         super(context);
-        mSettingsFile =
-            new AtomicFile(new File(Environment.getDataSystemDirectory(), "overlays.xml"), "overlays");
+        mSettingsFile = new AtomicFile(
+                new File(Environment.getDataSystemDirectory(), "overlays.xml"), "overlays");
         mPackageManager = new PackageManagerHelper();
         mUserManager = UserManagerService.getInstance();
         IdmapManager im = new IdmapManager(installer);
@@ -717,9 +717,9 @@ public final class OverlayManagerService extends SystemService {
         final Map<String, List<String>> pendingChanges = new ArrayMap<>(targetPackageNames.size());
         synchronized (mLock) {
             final List<String> frameworkOverlays =
-                mImpl.getEnabledOverlayPackageNames("android", userId);
-            final int N = targetPackageNames.size();
-            for (int i = 0; i < N; i++) {
+                    mImpl.getEnabledOverlayPackageNames("android", userId);
+            final int n = targetPackageNames.size();
+            for (int i = 0; i < n; i++) {
                 final String targetPackageName = targetPackageNames.get(i);
                 List<String> list = new ArrayList<>();
                 if (!"android".equals(targetPackageName)) {
@@ -730,8 +730,8 @@ public final class OverlayManagerService extends SystemService {
             }
         }
 
-        final int N = targetPackageNames.size();
-        for (int i = 0; i < N; i++) {
+        final int n = targetPackageNames.size();
+        for (int i = 0; i < n; i++) {
             final String targetPackageName = targetPackageNames.get(i);
             if (DEBUG) {
                 Slog.d(TAG, "-> Updating overlay: target=" + targetPackageName + " overlays=["
@@ -789,7 +789,7 @@ public final class OverlayManagerService extends SystemService {
             if (!mSettingsFile.getBaseFile().exists()) {
                 return;
             }
-            try (final FileInputStream stream = mSettingsFile.openRead()) {
+            try (FileInputStream stream = mSettingsFile.openRead()) {
                 mSettings.restore(stream);
 
                 // We might have data for dying users if the device was
@@ -915,8 +915,8 @@ public final class OverlayManagerService extends SystemService {
 
             if (!verbose) {
                 int count = 0;
-                final int N = mCache.size();
-                for (int i = 0; i < N; i++) {
+                final int n = mCache.size();
+                for (int i = 0; i < n; i++) {
                     final int userId = mCache.keyAt(i);
                     count += mCache.get(userId).size();
                 }
@@ -929,8 +929,8 @@ public final class OverlayManagerService extends SystemService {
                 return;
             }
 
-            final int N = mCache.size();
-            for (int i = 0; i < N; i++) {
+            final int n = mCache.size();
+            for (int i = 0; i < n; i++) {
                 final int userId = mCache.keyAt(i);
                 pw.println(TAB1 + "User " + userId);
                 final HashMap<String, PackageInfo> map = mCache.get(userId);
