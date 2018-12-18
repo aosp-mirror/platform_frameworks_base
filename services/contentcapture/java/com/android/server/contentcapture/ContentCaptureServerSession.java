@@ -16,15 +16,16 @@
 package com.android.server.contentcapture;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
 import android.service.contentcapture.ContentCaptureService;
-import android.service.contentcapture.InteractionContext;
-import android.service.contentcapture.InteractionSessionId;
 import android.service.contentcapture.SnapshotData;
 import android.util.Slog;
+import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
+import android.view.contentcapture.ContentCaptureSessionId;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -33,21 +34,22 @@ import com.android.server.contentcapture.RemoteContentCaptureService.ContentCapt
 import java.io.PrintWriter;
 import java.util.List;
 
-final class ContentCaptureSession implements ContentCaptureServiceCallbacks {
+final class ContentCaptureServerSession implements ContentCaptureServiceCallbacks {
 
-    private static final String TAG = "ContentCaptureSession";
+    private static final String TAG = ContentCaptureServerSession.class.getSimpleName();
 
     private final Object mLock;
     final IBinder mActivityToken;
     private final ContentCapturePerUserService mService;
     private final RemoteContentCaptureService mRemoteService;
-    private final InteractionContext mInterationContext;
+    private final ContentCaptureContext mContentCaptureContext;
     private final String mId;
 
-    ContentCaptureSession(@NonNull Context context, int userId, @NonNull Object lock,
+    ContentCaptureServerSession(@NonNull Context context, int userId, @NonNull Object lock,
             @NonNull IBinder activityToken, @NonNull ContentCapturePerUserService service,
             @NonNull ComponentName serviceComponentName, @NonNull ComponentName appComponentName,
-            int taskId, int displayId, @NonNull String sessionId, int flags,
+            int taskId, int displayId, @NonNull String sessionId,
+            @Nullable ContentCaptureContext clientContext, int flags,
             boolean bindInstantServiceAllowed, boolean verbose) {
         mLock = lock;
         mActivityToken = activityToken;
@@ -56,7 +58,8 @@ final class ContentCaptureSession implements ContentCaptureServiceCallbacks {
         mRemoteService = new RemoteContentCaptureService(context,
                 ContentCaptureService.SERVICE_INTERFACE, serviceComponentName, userId, this,
                 bindInstantServiceAllowed, verbose);
-        mInterationContext = new InteractionContext(appComponentName, taskId, displayId, flags);
+        mContentCaptureContext = new ContentCaptureContext(clientContext, appComponentName, taskId,
+                displayId, flags);
     }
 
     /**
@@ -71,7 +74,7 @@ final class ContentCaptureSession implements ContentCaptureServiceCallbacks {
      */
     @GuardedBy("mLock")
     public void notifySessionStartedLocked() {
-        mRemoteService.onSessionLifecycleRequest(mInterationContext, mId);
+        mRemoteService.onSessionLifecycleRequest(mContentCaptureContext, mId);
     }
 
     /**
@@ -93,7 +96,7 @@ final class ContentCaptureSession implements ContentCaptureServiceCallbacks {
      * Cleans up the session and removes it from the service.
      *
      * @param notifyRemoteService whether it should trigger a {@link
-     * ContentCaptureService#onDestroyInteractionSession(InteractionSessionId)}
+     * ContentCaptureService#onDestroyContentCaptureSession(ContentCaptureSessionId)}
      * request.
      */
     @GuardedBy("mLock")
@@ -109,7 +112,7 @@ final class ContentCaptureSession implements ContentCaptureServiceCallbacks {
      * Cleans up the session, but not removes it from the service.
      *
      * @param notifyRemoteService whether it should trigger a {@link
-     * ContentCaptureService#onDestroyInteractionSession(InteractionSessionId)}
+     * ContentCaptureService#onDestroyContentCaptureSession(ContentCaptureSessionId)}
      * request.
      */
     @GuardedBy("mLock")
@@ -137,7 +140,7 @@ final class ContentCaptureSession implements ContentCaptureServiceCallbacks {
     @GuardedBy("mLock")
     public void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
         pw.print(prefix); pw.print("id: ");  pw.print(mId); pw.println();
-        pw.print(prefix); pw.print("context: ");  mInterationContext.dump(pw); pw.println();
+        pw.print(prefix); pw.print("context: ");  mContentCaptureContext.dump(pw); pw.println();
         pw.print(prefix); pw.print("activity token: "); pw.println(mActivityToken);
         pw.print(prefix); pw.print("has autofill callback: ");
     }

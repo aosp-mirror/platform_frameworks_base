@@ -853,6 +853,7 @@ package android.app.role {
     method public void addRoleHolderAsUser(java.lang.String, java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
     method public boolean addRoleHolderFromController(java.lang.String, java.lang.String);
     method public void clearRoleHoldersAsUser(java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
+    method public java.util.List<java.lang.String> getHeldRolesFromController(java.lang.String);
     method public java.util.List<java.lang.String> getRoleHolders(java.lang.String);
     method public java.util.List<java.lang.String> getRoleHoldersAsUser(java.lang.String, android.os.UserHandle);
     method public void removeOnRoleHoldersChangedListenerAsUser(android.app.role.OnRoleHoldersChangedListener, android.os.UserHandle);
@@ -3712,6 +3713,7 @@ package android.net.wifi {
     method public boolean isWifiScannerSupported();
     method public void registerNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback, android.os.Handler);
     method public void save(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
+    method public void setDeviceMobilityState(int);
     method public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
     method public boolean startScan(android.os.WorkSource);
     method public void unregisterNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback);
@@ -3719,6 +3721,10 @@ package android.net.wifi {
     field public static final int CHANGE_REASON_CONFIG_CHANGE = 2; // 0x2
     field public static final int CHANGE_REASON_REMOVED = 1; // 0x1
     field public static final java.lang.String CONFIGURED_NETWORKS_CHANGED_ACTION = "android.net.wifi.CONFIGURED_NETWORKS_CHANGE";
+    field public static final int DEVICE_MOBILITY_STATE_HIGH_MVMT = 1; // 0x1
+    field public static final int DEVICE_MOBILITY_STATE_LOW_MVMT = 2; // 0x2
+    field public static final int DEVICE_MOBILITY_STATE_STATIONARY = 3; // 0x3
+    field public static final int DEVICE_MOBILITY_STATE_UNKNOWN = 0; // 0x0
     field public static final java.lang.String EXTRA_CHANGE_REASON = "changeReason";
     field public static final java.lang.String EXTRA_MULTIPLE_NETWORKS_CHANGED = "multipleChanges";
     field public static final java.lang.String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
@@ -4537,6 +4543,18 @@ package android.provider {
     field public static final java.lang.String STATE = "state";
   }
 
+  public final class DeviceConfig {
+    method public static void addOnPropertyChangedListener(java.lang.String, java.util.concurrent.Executor, android.provider.DeviceConfig.OnPropertyChangedListener);
+    method public static java.lang.String getProperty(java.lang.String, java.lang.String);
+    method public static void removeOnPropertyChangedListener(android.provider.DeviceConfig.OnPropertyChangedListener);
+    method public static void resetToDefaults(int, java.lang.String);
+    method public static boolean setProperty(java.lang.String, java.lang.String, java.lang.String, boolean);
+  }
+
+  public static abstract interface DeviceConfig.OnPropertyChangedListener {
+    method public abstract void onPropertyChanged(java.lang.String, java.lang.String, java.lang.String);
+  }
+
   public final class DocumentsContract {
     method public static boolean isManageMode(android.net.Uri);
     method public static android.net.Uri setManageMode(android.net.Uri);
@@ -4994,32 +5012,14 @@ package android.service.contentcapture {
     ctor public ContentCaptureService();
     method public final java.util.Set<android.content.ComponentName> getContentCaptureDisabledActivities();
     method public final java.util.Set<java.lang.String> getContentCaptureDisabledPackages();
-    method public void onActivitySnapshot(android.service.contentcapture.InteractionSessionId, android.service.contentcapture.SnapshotData);
-    method public abstract void onContentCaptureEventsRequest(android.service.contentcapture.InteractionSessionId, android.service.contentcapture.ContentCaptureEventsRequest);
-    method public void onCreateInteractionSession(android.service.contentcapture.InteractionContext, android.service.contentcapture.InteractionSessionId);
-    method public void onDestroyInteractionSession(android.service.contentcapture.InteractionSessionId);
+    method public void onActivitySnapshot(android.view.contentcapture.ContentCaptureSessionId, android.service.contentcapture.SnapshotData);
+    method public abstract void onContentCaptureEventsRequest(android.view.contentcapture.ContentCaptureSessionId, android.service.contentcapture.ContentCaptureEventsRequest);
+    method public void onCreateContentCaptureSession(android.view.contentcapture.ContentCaptureContext, android.view.contentcapture.ContentCaptureSessionId);
+    method public void onDestroyContentCaptureSession(android.view.contentcapture.ContentCaptureSessionId);
     method public final void setActivityContentCaptureEnabled(android.content.ComponentName, boolean);
     method public final void setContentCaptureWhitelist(java.util.List<java.lang.String>, java.util.List<android.content.ComponentName>);
     method public final void setPackageContentCaptureEnabled(java.lang.String, boolean);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
-  }
-
-  public final class InteractionContext implements android.os.Parcelable {
-    method public int describeContents();
-    method public android.content.ComponentName getActivityComponent();
-    method public int getDisplayId();
-    method public int getFlags();
-    method public int getTaskId();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.contentcapture.InteractionContext> CREATOR;
-    field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
-    field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
-  }
-
-  public final class InteractionSessionId implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.contentcapture.InteractionSessionId> CREATOR;
   }
 
   public final class SnapshotData implements android.os.Parcelable {
@@ -5832,6 +5832,7 @@ package android.telephony {
   public class SubscriptionManager {
     method public java.util.List<android.telephony.SubscriptionInfo> getAvailableSubscriptionInfoList();
     method public void requestEmbeddedSubscriptionInfoListRefresh();
+    method public void requestEmbeddedSubscriptionInfoListRefresh(int);
     method public void setDefaultDataSubId(int);
     method public void setDefaultSmsSubId(int);
     field public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
@@ -7289,6 +7290,17 @@ package android.view.accessibility {
 
 package android.view.contentcapture {
 
+  public final class ContentCaptureContext implements android.os.Parcelable {
+    method public android.content.ComponentName getActivityComponent();
+    method public int getDisplayId();
+    method public android.os.Bundle getExtras();
+    method public int getFlags();
+    method public int getTaskId();
+    method public android.net.Uri getUri();
+    field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
+    field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
+  }
+
   public final class ContentCaptureEvent implements android.os.Parcelable {
     method public int describeContents();
     method public long getEventTime();
@@ -7299,13 +7311,20 @@ package android.view.contentcapture {
     method public android.view.contentcapture.ViewNode getViewNode();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.view.contentcapture.ContentCaptureEvent> CREATOR;
-    field public static final deprecated int TYPE_ACTIVITY_PAUSED = 3; // 0x3
-    field public static final deprecated int TYPE_ACTIVITY_RESUMED = 2; // 0x2
-    field public static final deprecated int TYPE_ACTIVITY_STARTED = 1; // 0x1
-    field public static final deprecated int TYPE_ACTIVITY_STOPPED = 4; // 0x4
-    field public static final int TYPE_VIEW_APPEARED = 5; // 0x5
-    field public static final int TYPE_VIEW_DISAPPEARED = 6; // 0x6
-    field public static final int TYPE_VIEW_TEXT_CHANGED = 7; // 0x7
+    field public static final int TYPE_VIEW_APPEARED = 1; // 0x1
+    field public static final int TYPE_VIEW_DISAPPEARED = 2; // 0x2
+    field public static final int TYPE_VIEW_TEXT_CHANGED = 3; // 0x3
+  }
+
+  public final class UserDataRemovalRequest implements android.os.Parcelable {
+    method public java.lang.String getPackageName();
+    method public java.util.List<android.view.contentcapture.UserDataRemovalRequest.UriRequest> getUriRequests();
+    method public boolean isForEverything();
+  }
+
+  public final class UserDataRemovalRequest.UriRequest {
+    method public android.net.Uri getUri();
+    method public boolean isRecursive();
   }
 
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {

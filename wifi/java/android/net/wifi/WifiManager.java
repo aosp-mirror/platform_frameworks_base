@@ -57,8 +57,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -1224,6 +1227,30 @@ public class WifiManager {
     public List<OsuProvider> getMatchingOsuProviders(List<ScanResult> scanResults) {
         try {
             return mService.getMatchingOsuProviders(scanResults);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the matching Passpoint R2 configurations for given OSU (Online Sign-Up) providers.
+     *
+     * Given a list of OSU providers, this only returns OSU providers that already have Passpoint R2
+     * configurations in the device.
+     * An empty map will be returned when there is no matching Passpoint R2 configuration for the
+     * given OsuProviders.
+     *
+     * @param osuProviders a set of {@link OsuProvider}
+     * @return Map that consists of {@link OsuProvider} and matching {@link PasspointConfiguration}.
+     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public Map<OsuProvider, PasspointConfiguration> getMatchingPasspointConfigsForOsuProviders(
+            @NonNull Set<OsuProvider> osuProviders) {
+        try {
+            return mService.getMatchingPasspointConfigsForOsuProviders(
+                    new ArrayList<>(osuProviders));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4445,6 +4472,71 @@ public class WifiManager {
     public String[] getFactoryMacAddresses() {
         try {
             return mService.getFactoryMacAddresses();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"DEVICE_MOBILITY_STATE_"}, value = {
+            DEVICE_MOBILITY_STATE_UNKNOWN,
+            DEVICE_MOBILITY_STATE_HIGH_MVMT,
+            DEVICE_MOBILITY_STATE_LOW_MVMT,
+            DEVICE_MOBILITY_STATE_STATIONARY})
+    public @interface DeviceMobilityState {}
+
+    /**
+     * Unknown device mobility state
+     *
+     * @see #setDeviceMobilityState(int)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DEVICE_MOBILITY_STATE_UNKNOWN = 0;
+
+    /**
+     * High movement device mobility state
+     *
+     * @see #setDeviceMobilityState(int)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DEVICE_MOBILITY_STATE_HIGH_MVMT = 1;
+
+    /**
+     * Low movement device mobility state
+     *
+     * @see #setDeviceMobilityState(int)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DEVICE_MOBILITY_STATE_LOW_MVMT = 2;
+
+    /**
+     * Stationary device mobility state
+     *
+     * @see #setDeviceMobilityState(int)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DEVICE_MOBILITY_STATE_STATIONARY = 3;
+
+    /**
+     * Updates the device mobility state. Wifi uses this information to adjust the interval between
+     * Wifi scans in order to balance power consumption with scan accuracy.
+     * @param state the updated device mobility state
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_SET_DEVICE_MOBILITY_STATE)
+    public void setDeviceMobilityState(@DeviceMobilityState int state) {
+        try {
+            mService.setDeviceMobilityState(state);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

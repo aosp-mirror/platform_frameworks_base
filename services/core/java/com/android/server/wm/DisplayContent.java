@@ -170,6 +170,7 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.function.TriConsumer;
+import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.DisplayRotationUtil;
 import com.android.server.wm.utils.RotationCache;
@@ -862,7 +863,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         AnimationHandler animationHandler = new AnimationHandler();
         mBoundsAnimationController = new BoundsAnimationController(service.mContext,
-                mAppTransition, SurfaceAnimationThread.getHandler(), animationHandler);
+                mAppTransition, AnimationThread.getHandler(), animationHandler);
 
         if (mWmService.mInputManager != null) {
             final InputChannel inputChannel = mWmService.mInputManager.monitorInput("Display "

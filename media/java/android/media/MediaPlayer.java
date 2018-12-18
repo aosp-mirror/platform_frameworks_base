@@ -19,7 +19,6 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.content.ContentProvider;
@@ -1678,37 +1677,6 @@ public class MediaPlayer extends PlayerBase
      * initialized or has been released.
      */
     public native boolean isPlaying();
-
-    /**
-     * Gets the current buffering management params used by the source component.
-     * Calling it only after {@code setDataSource} has been called.
-     * Each type of data source might have different set of default params.
-     *
-     * @return the current buffering management params used by the source component.
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized, or {@code setDataSource} has not been called.
-     * @hide
-     */
-    @NonNull
-    @TestApi
-    public native BufferingParams getBufferingParams();
-
-    /**
-     * Sets buffering management params.
-     * The object sets its internal BufferingParams to the input, except that the input is
-     * invalid or not supported.
-     * Call it only after {@code setDataSource} has been called.
-     * The input is a hint to MediaPlayer.
-     *
-     * @param params the buffering management params.
-     *
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released, or {@code setDataSource} has not been called.
-     * @throws IllegalArgumentException if params is invalid or not supported.
-     * @hide
-     */
-    @TestApi
-    public native void setBufferingParams(@NonNull BufferingParams params);
 
     /**
      * Change playback speed of audio by resampling the audio.

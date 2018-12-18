@@ -73,6 +73,8 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_USER_
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
+import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
+import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
 import static com.android.server.wm.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.wm.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
 
@@ -1339,6 +1341,21 @@ class ActivityStarter {
                 voiceInteractor);
         final int preferredWindowingMode = mLaunchParams.mWindowingMode;
 
+        computeLaunchingTaskFlags();
+
+        computeSourceStack();
+
+        mIntent.setFlags(mLaunchFlags);
+
+        ActivityRecord reusedActivity = getReusableIntentActivity();
+
+        mSupervisor.getLaunchParamsController().calculate(
+                reusedActivity != null ? reusedActivity.getTaskRecord() : mInTask,
+                r.info.windowLayout, r, sourceRecord, options, PHASE_BOUNDS, mLaunchParams);
+        mPreferredDisplayId =
+                mLaunchParams.hasPreferredDisplay() ? mLaunchParams.mPreferredDisplayId
+                        : DEFAULT_DISPLAY;
+
         // Do not start home activity if it cannot be launched on preferred display. We are not
         // doing this in ActivityStackSupervisor#canPlaceEntityOnDisplay because it might
         // fallback to launch on other displays.
@@ -1347,14 +1364,6 @@ class ActivityStarter {
             Slog.w(TAG, "Cannot launch home on display " + mPreferredDisplayId);
             return START_CANCELED;
         }
-
-        computeLaunchingTaskFlags();
-
-        computeSourceStack();
-
-        mIntent.setFlags(mLaunchFlags);
-
-        ActivityRecord reusedActivity = getReusableIntentActivity();
 
         if (reusedActivity != null) {
             // When the flags NEW_TASK and CLEAR_TASK are set, then the task gets reused but
@@ -1651,14 +1660,13 @@ class ActivityStarter {
 
         mLaunchParams.reset();
 
+        // Preferred display id is the only state we need for now and it could be updated again
+        // after we located a reusable task (which might be resided in another display).
         mSupervisor.getLaunchParamsController().calculate(inTask, r.info.windowLayout, r,
-                sourceRecord, options, mLaunchParams);
-
-        if (mLaunchParams.hasPreferredDisplay()) {
-            mPreferredDisplayId = mLaunchParams.mPreferredDisplayId;
-        } else {
-            mPreferredDisplayId = DEFAULT_DISPLAY;
-        }
+                sourceRecord, options, PHASE_DISPLAY, mLaunchParams);
+        mPreferredDisplayId =
+                mLaunchParams.hasPreferredDisplay() ? mLaunchParams.mPreferredDisplayId
+                        : DEFAULT_DISPLAY;
 
         mLaunchMode = r.launchMode;
 
@@ -2502,14 +2510,9 @@ class ActivityStarter {
 
         if (((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0)
                  || mPreferredDisplayId != DEFAULT_DISPLAY) {
-            // We don't pass in the default display id into the get launch stack call so it can do a
-            // full resolution.
-            mLaunchParams.mPreferredDisplayId =
-                    mPreferredDisplayId != DEFAULT_DISPLAY ? mPreferredDisplayId : INVALID_DISPLAY;
             final boolean onTop = aOptions == null || !aOptions.getAvoidMoveToFront();
             final ActivityStack stack =
                     mRootActivityContainer.getLaunchStack(r, aOptions, task, onTop, mLaunchParams);
-            mLaunchParams.mPreferredDisplayId = mPreferredDisplayId;
             return stack;
         }
         // Otherwise handle adjacent launch.

@@ -37,8 +37,9 @@ import android.os.RemoteException;
 import android.service.contentcapture.SnapshotData;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
-import android.view.contentcapture.ContentCaptureManager;
+import android.view.contentcapture.ContentCaptureSession;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -59,7 +60,7 @@ final class ContentCapturePerUserService
     private static final String TAG = ContentCaptureManagerService.class.getSimpleName();
 
     @GuardedBy("mLock")
-    private final ArrayMap<String, ContentCaptureSession> mSessions =
+    private final ArrayMap<String, ContentCaptureServerSession> mSessions =
             new ArrayMap<>();
 
     // TODO(b/111276913): add mechanism to prune stale sessions, similar to Autofill's
@@ -113,10 +114,10 @@ final class ContentCapturePerUserService
     @GuardedBy("mLock")
     public void startSessionLocked(@NonNull IBinder activityToken,
             @NonNull ComponentName componentName, int taskId, int displayId,
-            @NonNull String sessionId, int flags, boolean bindInstantServiceAllowed,
-            @NonNull IResultReceiver resultReceiver) {
+            @NonNull String sessionId, @Nullable ContentCaptureContext clientContext,
+            int flags, boolean bindInstantServiceAllowed, @NonNull IResultReceiver resultReceiver) {
         if (!isEnabledLocked()) {
-            sendToClient(resultReceiver, ContentCaptureManager.STATE_DISABLED);
+            sendToClient(resultReceiver, ContentCaptureSession.STATE_DISABLED);
             return;
         }
         final ComponentName serviceComponentName = getServiceComponentName();
@@ -130,7 +131,7 @@ final class ContentCapturePerUserService
             return;
         }
 
-        ContentCaptureSession session = mSessions.get(sessionId);
+        ContentCaptureServerSession session = mSessions.get(sessionId);
         if (session != null) {
             if (mMaster.debug) {
                 Slog.d(TAG, "startSession(): reusing session " + sessionId + " for "
@@ -139,20 +140,20 @@ final class ContentCapturePerUserService
             // TODO(b/111276913): check if local ids match and decide what to do if they don't
             // TODO(b/111276913): should we call session.notifySessionStartedLocked() again??
             // if not, move notifySessionStartedLocked() into session constructor
-            sendToClient(resultReceiver, ContentCaptureManager.STATE_ACTIVE);
+            sendToClient(resultReceiver, ContentCaptureSession.STATE_ACTIVE);
             return;
         }
 
-        session = new ContentCaptureSession(getContext(), mUserId, mLock, activityToken,
-                this, serviceComponentName, componentName, taskId, displayId, sessionId, flags,
-                bindInstantServiceAllowed, mMaster.verbose);
+        session = new ContentCaptureServerSession(getContext(), mUserId, mLock, activityToken,
+                this, serviceComponentName, componentName, taskId, displayId, sessionId,
+                clientContext, flags, bindInstantServiceAllowed, mMaster.verbose);
         if (mMaster.verbose) {
             Slog.v(TAG, "startSession(): new session for " + componentName + " and id "
                     + sessionId);
         }
         mSessions.put(sessionId, session);
         session.notifySessionStartedLocked();
-        sendToClient(resultReceiver, ContentCaptureManager.STATE_ACTIVE);
+        sendToClient(resultReceiver, ContentCaptureSession.STATE_ACTIVE);
     }
 
     // TODO(b/111276913): log metrics
@@ -163,7 +164,7 @@ final class ContentCapturePerUserService
             return;
         }
 
-        final ContentCaptureSession session = mSessions.get(sessionId);
+        final ContentCaptureServerSession session = mSessions.get(sessionId);
         if (session == null) {
             if (mMaster.debug) {
                 Slog.d(TAG, "finishSession(): no session with id" + sessionId);
@@ -194,7 +195,7 @@ final class ContentCapturePerUserService
         if (!isEnabledLocked()) {
             return;
         }
-        final ContentCaptureSession session = mSessions.get(sessionId);
+        final ContentCaptureServerSession session = mSessions.get(sessionId);
         if (session == null) {
             if (mMaster.verbose) {
                 Slog.v(TAG, "sendEvents(): no session for " + sessionId);
@@ -212,7 +213,7 @@ final class ContentCapturePerUserService
             @NonNull Bundle data) {
         final String id = getSessionId(activityToken);
         if (id != null) {
-            final ContentCaptureSession session = mSessions.get(id);
+            final ContentCaptureServerSession session = mSessions.get(id);
             final Bundle assistData = data.getBundle(ASSIST_KEY_DATA);
             final AssistStructure assistStructure = data.getParcelable(ASSIST_KEY_STRUCTURE);
             final AssistContent assistContent = data.getParcelable(ASSIST_KEY_CONTENT);
@@ -237,9 +238,9 @@ final class ContentCapturePerUserService
     }
 
     @GuardedBy("mLock")
-    private ContentCaptureSession getSession(@NonNull IBinder activityToken) {
+    private ContentCaptureServerSession getSession(@NonNull IBinder activityToken) {
         for (int i = 0; i < mSessions.size(); i++) {
-            final ContentCaptureSession session = mSessions.valueAt(i);
+            final ContentCaptureServerSession session = mSessions.valueAt(i);
             if (session.mActivityToken.equals(activityToken)) {
                 return session;
             }
@@ -262,7 +263,7 @@ final class ContentCapturePerUserService
     void destroySessionsLocked() {
         final int numSessions = mSessions.size();
         for (int i = 0; i < numSessions; i++) {
-            final ContentCaptureSession session = mSessions.valueAt(i);
+            final ContentCaptureServerSession session = mSessions.valueAt(i);
             session.destroyLocked(true);
         }
         mSessions.clear();
@@ -272,7 +273,7 @@ final class ContentCapturePerUserService
     void listSessionsLocked(ArrayList<String> output) {
         final int numSessions = mSessions.size();
         for (int i = 0; i < numSessions; i++) {
-            final ContentCaptureSession session = mSessions.valueAt(i);
+            final ContentCaptureServerSession session = mSessions.valueAt(i);
             output.add(session.toShortString());
         }
     }
@@ -288,7 +289,7 @@ final class ContentCapturePerUserService
             final String prefix2 = prefix + "  ";
             for (int i = 0; i < size; i++) {
                 pw.print(prefix); pw.print("session@"); pw.println(i);
-                final ContentCaptureSession session = mSessions.valueAt(i);
+                final ContentCaptureServerSession session = mSessions.valueAt(i);
                 session.dumpLocked(prefix2, pw);
             }
         }
@@ -300,7 +301,7 @@ final class ContentCapturePerUserService
     @GuardedBy("mLock")
     private String getSessionId(@NonNull IBinder activityToken) {
         for (int i = 0; i < mSessions.size(); i++) {
-            ContentCaptureSession session = mSessions.valueAt(i);
+            ContentCaptureServerSession session = mSessions.valueAt(i);
             if (session.isActivitySession(activityToken)) {
                 return mSessions.keyAt(i);
             }

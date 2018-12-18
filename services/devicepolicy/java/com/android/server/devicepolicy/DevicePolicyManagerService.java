@@ -5968,9 +5968,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             // If set, remove exclusive scopes from all other delegates
             if (exclusiveScopes != null && !exclusiveScopes.isEmpty()) {
-                for (Map.Entry<String, List<String>> entry : policy.mDelegationMap.entrySet()) {
-                    final String currentPackage = entry.getKey();
-                    final List<String> currentScopes = entry.getValue();
+                for (int i = policy.mDelegationMap.size() - 1; i >= 0; --i) {
+                    final String currentPackage = policy.mDelegationMap.keyAt(i);
+                    final List<String> currentScopes = policy.mDelegationMap.valueAt(i);
 
                     if (!currentPackage.equals(delegatePackage)) {
                         // Iterate through all other delegates
@@ -5978,7 +5978,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             // And if this delegate had some exclusive scopes which are now moved
                             // to the new delegate, notify about its delegation changes.
                             if (currentScopes.isEmpty()) {
-                                policy.mDelegationMap.remove(currentPackage);
+                                policy.mDelegationMap.removeAt(i);
                             }
                             sendDelegationChangedBroadcast(currentPackage,
                                     new ArrayList<>(currentScopes), userId);

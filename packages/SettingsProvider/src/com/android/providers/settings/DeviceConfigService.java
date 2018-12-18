@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.content.IContentProvider;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Process;
@@ -28,6 +27,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 
 import java.io.FileDescriptor;
@@ -46,13 +46,6 @@ import java.util.Map;
  */
 @SystemApi
 public final class DeviceConfigService extends Binder {
-    /**
-     * TODO(b/113100523): Move this to DeviceConfig.java when it is added, and expose it as a System
-     *     API.
-     */
-    private static final Uri CONFIG_CONTENT_URI =
-            Uri.parse("content://" + Settings.AUTHORITY + "/config");
-
     final SettingsProvider mProvider;
 
     public DeviceConfigService(SettingsProvider provider) {
@@ -191,10 +184,10 @@ public final class DeviceConfigService extends Binder {
             final PrintWriter pout = getOutPrintWriter();
             switch (verb) {
                 case GET:
-                    pout.println(get(iprovider, namespace, key));
+                    pout.println(DeviceConfig.getProperty(namespace, key));
                     break;
                 case PUT:
-                    put(iprovider, namespace, key, value, makeDefault);
+                    DeviceConfig.setProperty(namespace, key, value, makeDefault);
                     break;
                 case DELETE:
                     pout.println(delete(iprovider, namespace, key)
@@ -207,7 +200,7 @@ public final class DeviceConfigService extends Binder {
                     }
                     break;
                 case RESET:
-                    reset(iprovider, resetMode, namespace);
+                    DeviceConfig.resetToDefaults(resetMode, namespace);
                     break;
                 default:
                     perr.println("Unspecified command");
@@ -239,43 +232,6 @@ public final class DeviceConfigService extends Binder {
                     + "trusted_defaults}");
             pw.println("      NAMESPACE limits which flags are reset if provided, otherwise all "
                     + "flags are reset");
-        }
-
-        private String get(IContentProvider provider, String namespace, String key) {
-            String compositeKey = namespace + "/" + key;
-            String result = null;
-            try {
-                Bundle args = new Bundle();
-                args.putInt(Settings.CALL_METHOD_USER_KEY,
-                        ActivityManager.getService().getCurrentUser().id);
-                Bundle b = provider.call(resolveCallingPackage(), Settings.CALL_METHOD_GET_CONFIG,
-                        compositeKey, args);
-                if (b != null) {
-                    result = b.getPairValue();
-                }
-            } catch (RemoteException e) {
-                throw new RuntimeException("Failed in IPC", e);
-            }
-            return result;
-        }
-
-        private void put(IContentProvider provider, String namespace, String key, String value,
-                boolean makeDefault) {
-            String compositeKey = namespace + "/" + key;
-
-            try {
-                Bundle args = new Bundle();
-                args.putString(Settings.NameValueTable.VALUE, value);
-                args.putInt(Settings.CALL_METHOD_USER_KEY,
-                        ActivityManager.getService().getCurrentUser().id);
-                if (makeDefault) {
-                    args.putBoolean(Settings.CALL_METHOD_MAKE_DEFAULT_KEY, true);
-                }
-                provider.call(resolveCallingPackage(), Settings.CALL_METHOD_PUT_CONFIG,
-                        compositeKey, args);
-            } catch (RemoteException e) {
-                throw new RuntimeException("Failed in IPC", e);
-            }
         }
 
         private boolean delete(IContentProvider provider, String namespace, String key) {
@@ -320,20 +276,6 @@ public final class DeviceConfigService extends Binder {
                 throw new RuntimeException("Failed in IPC", e);
             }
             return lines;
-        }
-
-        private void reset(IContentProvider provider, int resetMode, @Nullable String namespace) {
-            try {
-                Bundle args = new Bundle();
-                args.putInt(Settings.CALL_METHOD_USER_KEY,
-                        ActivityManager.getService().getCurrentUser().id);
-                args.putInt(Settings.CALL_METHOD_RESET_MODE_KEY, resetMode);
-                args.putString(Settings.CALL_METHOD_PREFIX_KEY, namespace);
-                provider.call(
-                        resolveCallingPackage(), Settings.CALL_METHOD_RESET_CONFIG, null, args);
-            } catch (RemoteException e) {
-                throw new RuntimeException("Failed in IPC", e);
-            }
         }
 
         private static String resolveCallingPackage() {

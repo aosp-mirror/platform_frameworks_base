@@ -50,7 +50,7 @@
     </style>
     <style name="Widget.TextView.NumPadKey.Klondike" parent="Widget.TextView.NumPadKey">
         <item name="android:textSize">12sp</item>
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?attr/wallpaperTextColorSecondary</item>
         <item name="android:paddingBottom">0dp</item>
     </style>
@@ -59,10 +59,10 @@
     <style name="widget_label">
         <item name="android:textSize">@dimen/widget_label_font_size</item>
     </style>
-    <style name="widget_big_thin">
+    <style name="widget_big">
         <item name="android:textSize">@dimen/widget_big_font_size</item>
         <item name="android:paddingBottom">@dimen/bottom_text_spacing_digital</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyLight</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:fontFeatureSettings">@*android:string/config_headlineFontFeatureSettings</item>
         <item name="android:ellipsize">none</item>
     </style>
@@ -93,7 +93,7 @@
         <item name="android:gravity">center</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyLight</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
     </style>
 
     <style name="TextAppearance.Keyguard.Secondary">

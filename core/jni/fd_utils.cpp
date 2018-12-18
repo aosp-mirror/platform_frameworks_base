@@ -331,11 +331,13 @@ bool FileDescriptorInfo::ReopenOrDetach(std::string* error_msg) const {
     return false;
   }
 
-  if (TEMP_FAILURE_RETRY(dup2(new_fd, fd)) == -1) {
+  int dupFlags = (fd_flags & FD_CLOEXEC) ? O_CLOEXEC : 0;
+  if (TEMP_FAILURE_RETRY(dup3(new_fd, fd, dupFlags)) == -1) {
     close(new_fd);
-    *error_msg = android::base::StringPrintf("Failed dup2(%d, %d) (%s): %s",
+    *error_msg = android::base::StringPrintf("Failed dup3(%d, %d, %d) (%s): %s",
                                              fd,
                                              new_fd,
+                                             dupFlags,
                                              file_path.c_str(),
                                              strerror(errno));
     return false;

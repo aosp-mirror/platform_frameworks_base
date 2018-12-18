@@ -1829,9 +1829,12 @@
   <java-symbol type="array" name="config_autoBrightnessKeyboardBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessLcdBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessLevels" />
-  <java-symbol type="array" name="config_dynamicHysteresisBrightLevels" />
-  <java-symbol type="array" name="config_dynamicHysteresisDarkLevels" />
-  <java-symbol type="array" name="config_dynamicHysteresisLuxLevels" />
+  <java-symbol type="array" name="config_ambientThresholdLevels" />
+  <java-symbol type="array" name="config_ambientBrighteningThresholds" />
+  <java-symbol type="array" name="config_ambientDarkeningThresholds" />
+  <java-symbol type="array" name="config_screenThresholdLevels" />
+  <java-symbol type="array" name="config_screenBrighteningThresholds" />
+  <java-symbol type="array" name="config_screenDarkeningThresholds" />
   <java-symbol type="array" name="config_minimumBrightnessCurveLux" />
   <java-symbol type="array" name="config_minimumBrightnessCurveNits" />
   <java-symbol type="array" name="config_protectedNetworks" />
@@ -3460,6 +3463,7 @@
   <java-symbol type="integer" name="config_lowBatteryAutoTriggerDefaultLevel" />
   <java-symbol type="bool" name="config_batterySaverStickyBehaviourDisabled" />
   <java-symbol type="integer" name="config_dynamicPowerSavingsDefaultDisableThreshold" />
+  <java-symbol type="string" name="config_batterySaverScheduleProvider" />
 
   <!-- For car devices -->
   <java-symbol type="string" name="car_loading_profile" />
@@ -3516,4 +3520,6 @@
   <java-symbol type="dimen" name="rounded_corner_radius" />
   <java-symbol type="dimen" name="rounded_corner_radius_top" />
   <java-symbol type="dimen" name="rounded_corner_radius_bottom" />
+
+  <java-symbol type="string" name="config_defaultModuleMetadataProvider" />
 </resources>

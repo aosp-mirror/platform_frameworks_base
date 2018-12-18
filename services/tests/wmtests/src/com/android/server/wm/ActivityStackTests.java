@@ -797,7 +797,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         public boolean mChanged = false;
 
         @Override
-        public void onStackOrderChanged() {
+        public void onStackOrderChanged(ActivityStack stack) {
             mChanged = true;
         }
     }

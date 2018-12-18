@@ -18,6 +18,7 @@
 
 #include "dex_builder.h"
 #include "java_lang_builder.h"
+#include "tinyxml_layout_parser.h"
 #include "util.h"
 
 #include "tinyxml2.h"
@@ -99,6 +100,12 @@ int main(int argc, char** argv) {
 
   XMLDocument xml;
   xml.LoadFile(filename);
+
+  string message{};
+  if (!startop::CanCompileLayout(xml, &message)) {
+    LOG(ERROR) << "Layout not supported: " << message;
+    return 1;
+  }
 
   std::ofstream outfile;
   if (FLAGS_out != kStdoutFilename) {

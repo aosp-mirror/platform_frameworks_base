@@ -655,11 +655,6 @@ package android.media {
     method public android.media.BufferingParams.Builder setResumePlaybackMarkMs(int);
   }
 
-  public class MediaPlayer implements android.media.AudioRouting android.media.VolumeAutomation {
-    method public android.media.BufferingParams getBufferingParams();
-    method public void setBufferingParams(android.media.BufferingParams);
-  }
-
   public final class PlaybackParams implements android.os.Parcelable {
     method public int getAudioStretchMode();
     method public android.media.PlaybackParams setAudioStretchMode(int);
@@ -1197,7 +1192,7 @@ package android.service.notification {
     field public static final java.lang.String KEY_USER_SENTIMENT = "key_user_sentiment";
   }
 
-  public abstract class ConditionProviderService extends android.app.Service {
+  public abstract deprecated class ConditionProviderService extends android.app.Service {
     method public boolean isBound();
   }
 

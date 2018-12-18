@@ -25,7 +25,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
@@ -42,7 +41,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -66,7 +64,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -95,6 +92,8 @@ public class AlarmManagerServiceTest {
     private AlarmManagerService mService;
     @Mock
     private ContentResolver mMockResolver;
+    @Mock
+    private Context mMockContext;
     @Mock
     private IActivityManager mIActivityManager;
     @Mock
@@ -221,17 +220,16 @@ public class AlarmManagerServiceTest {
                 .thenReturn(STANDBY_BUCKET_ACTIVE);
         doReturn(Looper.getMainLooper()).when(Looper::myLooper);
 
-        final Context context = spy(InstrumentationRegistry.getTargetContext());
-        when(context.getContentResolver()).thenReturn(mMockResolver);
-        doNothing().when(mMockResolver).registerContentObserver(any(), anyBoolean(), any());
+        when(mMockContext.getContentResolver()).thenReturn(mMockResolver);
         doReturn("min_futurity=0").when(() ->
                 Settings.Global.getString(mMockResolver, Settings.Global.ALARM_MANAGER_CONSTANTS));
-        mInjector = new Injector(context);
-        mService = new AlarmManagerService(context, mInjector);
+        mInjector = new Injector(mMockContext);
+        mService = new AlarmManagerService(mMockContext, mInjector);
         spyOn(mService);
         doNothing().when(mService).publishBinderService(any(), any());
         mService.onStart();
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+        spyOn(mService.mHandler);
 
         assertEquals(0, mService.mConstants.MIN_FUTURITY);
         assertEquals(mService.mSystemUiUid, SYSTEM_UI_UID);
@@ -273,7 +271,7 @@ public class AlarmManagerServiceTest {
 
         final ArgumentCaptor<PendingIntent.OnFinished> onFinishedCaptor =
                 ArgumentCaptor.forClass(PendingIntent.OnFinished.class);
-        verify(alarmPi).send(any(Context.class), eq(0), any(Intent.class),
+        verify(alarmPi).send(eq(mMockContext), eq(0), any(Intent.class),
                 onFinishedCaptor.capture(), any(Handler.class), isNull(), any());
         verify(mWakeLock).acquire();
         onFinishedCaptor.getValue().onSendFinished(alarmPi, null, 0, null, null);
@@ -423,9 +421,21 @@ public class AlarmManagerServiceTest {
         assertNotNull(restrictedAlarms.get(TEST_CALLING_UID));
 
         listenerArgumentCaptor.getValue().unblockAlarmsForUid(TEST_CALLING_UID);
-        verify(alarmPi).send(any(Context.class), eq(0), any(Intent.class), any(),
+        verify(alarmPi).send(eq(mMockContext), eq(0), any(Intent.class), any(),
                 any(Handler.class), isNull(), any());
         assertNull(restrictedAlarms.get(TEST_CALLING_UID));
+    }
+
+    @Test
+    public void sendsTimeTickOnInteractive() {
+        final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        // Stubbing so the handler doesn't actually run the runnable.
+        doReturn(true).when(mService.mHandler).post(runnableCaptor.capture());
+        // change interactive state: false -> true
+        mService.interactiveStateChangedLocked(false);
+        mService.interactiveStateChangedLocked(true);
+        runnableCaptor.getValue().run();
+        verify(mMockContext).sendBroadcastAsUser(mService.mTimeTickIntent, UserHandle.ALL);
     }
 
     @After

@@ -17,7 +17,6 @@
 package com.android.systemui.doze;
 
 import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_DISPLAY;
-import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_LOCK_SCREEN;
 
 import android.annotation.AnyThread;
 import android.app.ActivityManager;
@@ -26,7 +25,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
@@ -114,14 +112,7 @@ public class DozeSensors {
                         DozeLog.PULSE_REASON_SENSOR_LONG_PRESS,
                         true /* reports touch coordinates */,
                         true /* touchscreen */),
-                new PluginTriggerSensor(
-                        new SensorManagerPlugin.Sensor(TYPE_WAKE_LOCK_SCREEN),
-                        Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
-                        true /* configured */,
-                        DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN,
-                        false /* reports touch coordinates */,
-                        false /* touchscreen */),
-                new PluginTriggerSensor(
+                new PluginSensor(
                         new SensorManagerPlugin.Sensor(TYPE_WAKE_DISPLAY),
                         Settings.Secure.DOZE_WAKE_SCREEN_GESTURE,
                         true /* configured */,
@@ -272,7 +263,7 @@ public class DozeSensors {
         }
 
         @Override
-        public void onSensorChanged(SensorEvent event) {
+        public void onSensorChanged(android.hardware.SensorEvent event) {
             if (DEBUG) Log.d(TAG, "onSensorChanged " + event);
 
             mCurrentlyFar = event.values[0] >= event.sensor.getMaximumRange();
@@ -417,7 +408,7 @@ public class DozeSensors {
 
         protected String triggerEventToString(TriggerEvent event) {
             if (event == null) return null;
-            final StringBuilder sb = new StringBuilder("TriggerEvent[")
+            final StringBuilder sb = new StringBuilder("SensorEvent[")
                     .append(event.timestamp).append(',')
                     .append(event.sensor.getName());
             if (event.values != null) {
@@ -432,23 +423,19 @@ public class DozeSensors {
     /**
      * A Sensor that is injected via plugin.
      */
-    private class PluginTriggerSensor extends TriggerSensor {
+    private class PluginSensor extends TriggerSensor {
 
         private final SensorManagerPlugin.Sensor mPluginSensor;
-        private final SensorManagerPlugin.TriggerEventListener mTriggerEventListener = (event) -> {
+        private final SensorManagerPlugin.SensorEventListener mTriggerEventListener = (event) -> {
             DozeLog.traceSensor(mContext, mPulseReason);
             mHandler.post(mWakeLock.wrap(() -> {
-                if (DEBUG) Log.d(TAG, "onTrigger: " + triggerEventToString(event));
-                mRegistered = false;
+                if (DEBUG) Log.d(TAG, "onSensorEvent: " + triggerEventToString(event));
                 mCallback.onSensorPulse(mPulseReason, true /* sensorPerformsProxCheck */, -1, -1,
                         event.getValues());
-                if (!mRegistered) {
-                    updateListener();  // reregister, this sensor only fires once
-                }
             }));
         };
 
-        PluginTriggerSensor(SensorManagerPlugin.Sensor sensor, String setting, boolean configured,
+        PluginSensor(SensorManagerPlugin.Sensor sensor, String setting, boolean configured,
                 int pulseReason, boolean reportsTouchCoordinates, boolean requiresTouchscreen) {
             super(null, setting, configured, pulseReason, reportsTouchCoordinates,
                     requiresTouchscreen);
@@ -460,13 +447,13 @@ public class DozeSensors {
             if (!mConfigured) return;
             AsyncSensorManager asyncSensorManager = (AsyncSensorManager) mSensorManager;
             if (mRequested && !mDisabled && enabledBySetting() && !mRegistered) {
-                asyncSensorManager.requestPluginTriggerSensor(mPluginSensor, mTriggerEventListener);
+                asyncSensorManager.registerPluginListener(mPluginSensor, mTriggerEventListener);
                 mRegistered = true;
-                if (DEBUG) Log.d(TAG, "requestPluginTriggerSensor");
+                if (DEBUG) Log.d(TAG, "registerPluginListener");
             } else if (mRegistered) {
-                asyncSensorManager.cancelPluginTriggerSensor(mPluginSensor, mTriggerEventListener);
+                asyncSensorManager.unregisterPluginListener(mPluginSensor, mTriggerEventListener);
                 mRegistered = false;
-                if (DEBUG) Log.d(TAG, "cancelPluginTriggerSensor");
+                if (DEBUG) Log.d(TAG, "unregisterPluginListener");
             }
         }
 
@@ -479,7 +466,7 @@ public class DozeSensors {
                     .append(", mSensor=").append(mPluginSensor).append("}").toString();
         }
 
-        private String triggerEventToString(SensorManagerPlugin.TriggerEvent event) {
+        private String triggerEventToString(SensorManagerPlugin.SensorEvent event) {
             if (event == null) return null;
             final StringBuilder sb = new StringBuilder("PluginTriggerEvent[")
                     .append(event.getSensor()).append(',')

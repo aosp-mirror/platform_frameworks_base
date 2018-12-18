@@ -150,6 +150,7 @@ android_app {
         "--extra-packages",
         "com.android.keyguard",
     ],
+    required: ["privapp_whitelist_com.android.systemui"],
 
 }
 

@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.policy.WifiIcons;
 
 import java.util.List;
 
@@ -190,7 +191,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
         } else if (!state.value) {
             state.slash.isSlashed = true;
             state.state = Tile.STATE_INACTIVE;
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_wifi_disabled);
+            state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_DISABLED);
             state.label = r.getString(R.string.quick_settings_wifi_label);
         } else if (wifiConnected) {
             state.icon = ResourceIcon.get(cb.wifiSignalIconId);

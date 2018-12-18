@@ -76,11 +76,14 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private final Rect mLastDockedBounds = new Rect();
     private boolean mQsCustomizing;
 
+    private final Context mContext;
+
     public LightBarController(Context ctx) {
         mDarkModeColor = Color.valueOf(ctx.getColor(R.color.dark_mode_icon_color_single_tone));
         mStatusBarIconController = Dependency.get(DarkIconDispatcher.class);
         mBatteryController = Dependency.get(BatteryController.class);
         mBatteryController.addCallback(this);
+        mContext = ctx;
     }
 
     public void setNavigationBar(LightBarTransitionsController navigationBar) {
@@ -217,8 +220,9 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     private void updateNavigation() {
         if (mNavigationBarController != null) {
-            mNavigationBarController.setIconsDark(
-                    mNavigationLight, animateChange());
+            if (!NavBarTintController.isEnabled(mContext)) {
+                mNavigationBarController.setIconsDark(mNavigationLight, animateChange());
+            }
         }
     }
 

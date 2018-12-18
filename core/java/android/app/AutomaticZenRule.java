@@ -20,10 +20,14 @@ import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 
 import android.app.NotificationManager.InterruptionFilter;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.notification.ZenPolicy;
+import android.service.notification.Condition;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.Objects;
 
@@ -40,6 +44,7 @@ public final class AutomaticZenRule implements Parcelable {
     private @InterruptionFilter int interruptionFilter;
     private Uri conditionId;
     private ComponentName owner;
+    private ComponentName configurationActivity;
     private long creationTime;
     private ZenPolicy mZenPolicy;
     private boolean mModified = false;
@@ -49,39 +54,51 @@ public final class AutomaticZenRule implements Parcelable {
      *
      * @param name The name of the rule.
      * @param owner The Condition Provider service that owns this rule.
-     * @param conditionId A representation of the state that should cause the Condition Provider
-     *                    service to apply the given interruption filter.
      * @param interruptionFilter The interruption filter defines which notifications are allowed to
      *                           interrupt the user (e.g. via sound &amp; vibration) while this rule
      *                           is active.
      * @param enabled Whether the rule is enabled.
+     * @deprecated use {@link #AutomaticZenRule(String, ComponentName, ComponentName, Uri,
+     * ZenPolicy, int, boolean)}.
      */
+    @Deprecated
     public AutomaticZenRule(String name, ComponentName owner, Uri conditionId,
             int interruptionFilter, boolean enabled) {
-        this.name = name;
-        this.owner = owner;
-        this.conditionId = conditionId;
-        this.interruptionFilter = interruptionFilter;
-        this.enabled = enabled;
+        this(name, owner, null, conditionId, null, interruptionFilter, enabled);
     }
 
     /**
      * Creates an automatic zen rule.
      *
      * @param name The name of the rule.
-     * @param owner The Condition Provider service that owns this rule.
-     * @param conditionId A representation of the state that should cause the Condition Provider
-     *                    service to apply the given interruption filter.
+     * @param owner The Condition Provider service that owns this rule. This can be null if you're
+     *              using {@link NotificationManager#setAutomaticZenRuleState(String, Condition)}
+     *              instead of {@link android.service.notification.ConditionProviderService}.
+     * @param configurationActivity An activity that handles
+     *                              {@link NotificationManager#ACTION_AUTOMATIC_ZEN_RULE} that shows
+     *                              the user
+     *                              more information about this rule and/or allows them to
+     *                              configure it. This is required if you are not using a
+     *                              {@link android.service.notification.ConditionProviderService}.
+     *                              If you are, it overrides the information specified in your
+     *                              manifest.
+     * @param conditionId A representation of the state that should cause your app to apply the
+     *                    given interruption filter.
+     * @param interruptionFilter The interruption filter defines which notifications are allowed to
+     *                           interrupt the user (e.g. via sound &amp; vibration) while this rule
+     *                           is active.
      * @param policy The policy defines which notifications are allowed to interrupt the user
-     *               while this rule is active
+     *               while this rule is active. This overrides the global policy while this rule is
+     *               action ({@link Condition#STATE_TRUE}).
      * @param enabled Whether the rule is enabled.
      */
-    public AutomaticZenRule(String name, ComponentName owner, Uri conditionId, ZenPolicy policy,
-            boolean enabled) {
+    public AutomaticZenRule(String name, ComponentName owner, ComponentName configurationActivity,
+            Uri conditionId, ZenPolicy policy, int interruptionFilter, boolean enabled) {
         this.name = name;
         this.owner = owner;
+        this.configurationActivity = configurationActivity;
         this.conditionId = conditionId;
-        this.interruptionFilter = INTERRUPTION_FILTER_PRIORITY;
+        this.interruptionFilter = interruptionFilter;
         this.enabled = enabled;
         this.mZenPolicy = policy;
     }
@@ -89,18 +106,10 @@ public final class AutomaticZenRule implements Parcelable {
     /**
      * @hide
      */
-    public AutomaticZenRule(String name, ComponentName owner, Uri conditionId,
-            int interruptionFilter, boolean enabled, long creationTime) {
-        this(name, owner, conditionId, interruptionFilter, enabled);
-        this.creationTime = creationTime;
-    }
-
-    /**
-     * @hide
-     */
-    public AutomaticZenRule(String name, ComponentName owner, Uri conditionId, ZenPolicy policy,
-            boolean enabled, long creationTime) {
-        this(name, owner, conditionId, policy, enabled);
+    public AutomaticZenRule(String name, ComponentName owner, ComponentName configurationActivity,
+            Uri conditionId, ZenPolicy policy, int interruptionFilter, boolean enabled,
+            long creationTime) {
+        this(name, owner, configurationActivity, conditionId, policy, interruptionFilter, enabled);
         this.creationTime = creationTime;
     }
 
@@ -112,6 +121,7 @@ public final class AutomaticZenRule implements Parcelable {
         interruptionFilter = source.readInt();
         conditionId = source.readParcelable(null);
         owner = source.readParcelable(null);
+        configurationActivity = source.readParcelable(null);
         creationTime = source.readLong();
         mZenPolicy = source.readParcelable(null);
         mModified = source.readInt() == ENABLED;
@@ -122,6 +132,14 @@ public final class AutomaticZenRule implements Parcelable {
      */
     public ComponentName getOwner() {
         return owner;
+    }
+
+    /**
+     * Returns the {@link ComponentName} of the activity that shows configuration options
+     * for this rule.
+     */
+    public ComponentName getConfigurationActivity() {
+        return configurationActivity;
     }
 
     /**
@@ -218,6 +236,15 @@ public final class AutomaticZenRule implements Parcelable {
         this.mZenPolicy = zenPolicy;
     }
 
+    /**
+     * Sets the configuration activity - an activity that handles
+     * {@link NotificationManager#ACTION_AUTOMATIC_ZEN_RULE} that shows the user more information
+     * about this rule and/or allows them to configure it.
+     */
+    public void setConfigurationActivity(ComponentName componentName) {
+        this.configurationActivity = componentName;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -235,6 +262,7 @@ public final class AutomaticZenRule implements Parcelable {
         dest.writeInt(interruptionFilter);
         dest.writeParcelable(conditionId, 0);
         dest.writeParcelable(owner, 0);
+        dest.writeParcelable(configurationActivity, 0);
         dest.writeLong(creationTime);
         dest.writeParcelable(mZenPolicy, 0);
         dest.writeInt(mModified ? ENABLED : DISABLED);
@@ -248,6 +276,7 @@ public final class AutomaticZenRule implements Parcelable {
                 .append(",interruptionFilter=").append(interruptionFilter)
                 .append(",conditionId=").append(conditionId)
                 .append(",owner=").append(owner)
+                .append(",configActivity=").append(configurationActivity)
                 .append(",creationTime=").append(creationTime)
                 .append(",mZenPolicy=").append(mZenPolicy)
                 .append(']').toString();
@@ -264,14 +293,15 @@ public final class AutomaticZenRule implements Parcelable {
                 && other.interruptionFilter == interruptionFilter
                 && Objects.equals(other.conditionId, conditionId)
                 && Objects.equals(other.owner, owner)
-                && other.creationTime == creationTime
-                && Objects.equals(other.mZenPolicy, mZenPolicy);
+                && Objects.equals(other.mZenPolicy, mZenPolicy)
+                && Objects.equals(other.configurationActivity, configurationActivity)
+                && other.creationTime == creationTime;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(enabled, name, interruptionFilter, conditionId, owner, creationTime,
-                mZenPolicy, mModified);
+        return Objects.hash(enabled, name, interruptionFilter, conditionId, owner,
+                configurationActivity, mZenPolicy, mModified, creationTime);
     }
 
     public static final Parcelable.Creator<AutomaticZenRule> CREATOR

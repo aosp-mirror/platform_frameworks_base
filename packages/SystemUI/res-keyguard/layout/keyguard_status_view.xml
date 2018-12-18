@@ -44,7 +44,7 @@
             android:paddingLeft="@dimen/logout_button_padding_horizontal"
             android:paddingRight="@dimen/logout_button_padding_horizontal"
             android:background="@drawable/logout_button_background"
-            android:fontFamily="roboto-medium"
+            android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
             android:textAllCaps="true"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="13sp"

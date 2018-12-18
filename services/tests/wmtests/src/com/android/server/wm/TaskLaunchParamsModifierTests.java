@@ -173,6 +173,23 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testUsesTasksDisplayIdPriorToSourceIfSet() {
+        final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FREEFORM);
+        final TestActivityDisplay fullscreenDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FULLSCREEN);
+
+        mCurrent.mPreferredDisplayId = freeformDisplay.mDisplayId;
+        ActivityRecord reusableActivity = createSourceActivity(fullscreenDisplay);
+        ActivityRecord source = createSourceActivity(freeformDisplay);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(reusableActivity.getTaskRecord(),
+                /* layout */ null, mActivity, source, /* options */ null, mCurrent, mResult));
+
+        assertEquals(fullscreenDisplay.mDisplayId, mResult.mPreferredDisplayId);
+    }
+
+    @Test
     public void testUsesTaskDisplayIdIfSet() {
         final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
                 WINDOWING_MODE_FREEFORM);

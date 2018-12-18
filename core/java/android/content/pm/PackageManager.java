@@ -2288,21 +2288,28 @@ public abstract class PackageManager {
      * {@link #hasSystemFeature}: The device has biometric hardware to detect a fingerprint.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_FINGERPRINT = "android.hardware.fingerprint";
+    public static final String FEATURE_FINGERPRINT_PRE_29 = "android.hardware.fingerprint";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device has biometric hardware to detect a fingerprint.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_FINGERPRINT = "android.hardware.biometrics.fingerprint";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has biometric hardware to perform face authentication.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_FACE = "android.hardware.face";
+    public static final String FEATURE_FACE = "android.hardware.biometrics.face";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has biometric hardware to perform iris authentication.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_IRIS = "android.hardware.iris";
+    public static final String FEATURE_IRIS = "android.hardware.biometrics.iris";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and

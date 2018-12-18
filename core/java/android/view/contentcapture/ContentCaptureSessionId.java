@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package android.service.contentcapture;
+package android.view.contentcapture;
 
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -25,11 +24,8 @@ import java.io.PrintWriter;
 
 /**
  * Identifier for a Content Capture session.
- *
- * @hide
  */
-@SystemApi
-public final class InteractionSessionId implements Parcelable {
+public final class ContentCaptureSessionId implements Parcelable {
 
     private final @NonNull String mValue;
 
@@ -40,7 +36,7 @@ public final class InteractionSessionId implements Parcelable {
      *
      * @hide
      */
-    public InteractionSessionId(@NonNull String value) {
+    public ContentCaptureSessionId(@NonNull String value) {
         mValue = value;
     }
 
@@ -64,7 +60,7 @@ public final class InteractionSessionId implements Parcelable {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
-        final InteractionSessionId other = (InteractionSessionId) obj;
+        final ContentCaptureSessionId other = (ContentCaptureSessionId) obj;
         if (mValue == null) {
             if (other.mValue != null) return false;
         } else if (!mValue.equals(other.mValue)) {
@@ -100,17 +96,17 @@ public final class InteractionSessionId implements Parcelable {
         parcel.writeString(mValue);
     }
 
-    public static final Parcelable.Creator<InteractionSessionId> CREATOR =
-            new Parcelable.Creator<InteractionSessionId>() {
+    public static final Parcelable.Creator<ContentCaptureSessionId> CREATOR =
+            new Parcelable.Creator<ContentCaptureSessionId>() {
 
         @Override
-        public InteractionSessionId createFromParcel(Parcel parcel) {
-            return new InteractionSessionId(parcel.readString());
+        public ContentCaptureSessionId createFromParcel(Parcel parcel) {
+            return new ContentCaptureSessionId(parcel.readString());
         }
 
         @Override
-        public InteractionSessionId[] newArray(int size) {
-            return new InteractionSessionId[size];
+        public ContentCaptureSessionId[] newArray(int size) {
+            return new ContentCaptureSessionId[size];
         }
     };
 }

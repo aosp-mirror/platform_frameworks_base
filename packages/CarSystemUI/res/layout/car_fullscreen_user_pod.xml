@@ -25,13 +25,15 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <ImageView android:id="@+id/user_avatar"
+    <ImageView
+        android:id="@+id/user_avatar"
         android:layout_width="@dimen/car_user_switcher_image_avatar_size"
         android:layout_height="@dimen/car_user_switcher_image_avatar_size"
-        android:background="@drawable/car_button_ripple_background_light"
+        android:background="?android:attr/selectableItemBackground"
         android:gravity="center"/>
 
-    <TextView android:id="@+id/user_name"
+    <TextView
+        android:id="@+id/user_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/car_user_switcher_vertical_spacing_between_name_and_avatar"

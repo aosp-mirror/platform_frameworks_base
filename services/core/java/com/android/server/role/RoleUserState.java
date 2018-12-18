@@ -47,6 +47,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -312,6 +313,21 @@ public class RoleUserState {
             mCallback.onRoleHoldersChanged(roleName, mUserId);
         }
         return true;
+    }
+
+    /**
+     * @see android.app.role.RoleManager#getHeldRolesFromController
+     */
+    @NonNull
+    public List<String> getHeldRoles(@NonNull String packageName) {
+        ArrayList<String> result = new ArrayList<>();
+        int size = mRoles.size();
+        for (int i = 0; i < size; i++) {
+            if (mRoles.valueAt(i).contains(packageName)) {
+                result.add(mRoles.keyAt(i));
+            }
+        }
+        return result;
     }
 
     /**

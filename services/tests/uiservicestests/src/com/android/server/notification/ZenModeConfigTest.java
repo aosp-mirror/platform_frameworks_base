@@ -17,20 +17,33 @@
 package com.android.server.notification;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertNull;
 
 import android.app.NotificationManager.Policy;
+import android.content.ComponentName;
 import android.net.Uri;
+import android.provider.Settings;
+import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.EventInfo;
 import android.service.notification.ZenPolicy;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Xml;
 
+import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -136,6 +149,54 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         Uri conditionId = ZenModeConfig.toEventConditionId(event);
         EventInfo eventParsed = ZenModeConfig.tryParseEventConditionId(conditionId);
         assertEquals(event, eventParsed);
+    }
+
+    @Test
+    public void testRuleXml() throws Exception {
+        String tag = "tag";
+
+        ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
+        rule.configurationActivity = new ComponentName("a", "a");
+        rule.component = new ComponentName("a", "b");
+        rule.conditionId = new Uri.Builder().scheme("hello").build();
+        rule.condition = new Condition(rule.conditionId, "", Condition.STATE_TRUE);
+        rule.enabled = true;
+        rule.creationTime = 123;
+        rule.id = "id";
+        rule.zenMode = Settings.Global.ZEN_MODE_ALARMS;
+        rule.modified = true;
+        rule.name = "name";
+        rule.snoozing = true;
+
+        XmlSerializer out = new FastXmlSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        out.setOutput(new BufferedOutputStream(baos), "utf-8");
+        out.startDocument(null, true);
+        out.startTag(null, tag);
+        ZenModeConfig.writeRuleXml(rule, out);
+        out.endTag(null, tag);
+        out.endDocument();
+
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        parser.nextTag();
+        ZenModeConfig.ZenRule fromXml = ZenModeConfig.readRuleXml(parser);
+        // read from backing component
+        assertEquals("a", fromXml.pkg);
+        // always resets on reboot
+        assertFalse(fromXml.snoozing);
+        //should all match original
+        assertEquals(rule.component, fromXml.component);
+        assertEquals(rule.configurationActivity, fromXml.configurationActivity);
+        assertNull(fromXml.enabler);
+        assertEquals(rule.condition, fromXml.condition);
+        assertEquals(rule.enabled, fromXml.enabled);
+        assertEquals(rule.creationTime, fromXml.creationTime);
+        assertEquals(rule.modified, fromXml.modified);
+        assertEquals(rule.conditionId, fromXml.conditionId);
+        assertEquals(rule.name, fromXml.name);
+        assertEquals(rule.zenMode, fromXml.zenMode);
     }
 
     private ZenModeConfig getMutedNotificationsConfig() {

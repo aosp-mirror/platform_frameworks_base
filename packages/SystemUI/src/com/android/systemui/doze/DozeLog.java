@@ -44,8 +44,7 @@ public class DozeLog {
     public static final int PULSE_REASON_SENSOR_PICKUP = 3;
     public static final int PULSE_REASON_SENSOR_DOUBLE_TAP = 4;
     public static final int PULSE_REASON_SENSOR_LONG_PRESS = 5;
-    public static final int PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN = 6;
-    public static final int REASON_SENSOR_WAKE_UP = 7;
+    public static final int REASON_SENSOR_WAKE_UP = 6;
 
     private static boolean sRegisterKeyguardCallback = true;
 
@@ -212,7 +211,6 @@ public class DozeLog {
             case PULSE_REASON_SENSOR_PICKUP: return "pickup";
             case PULSE_REASON_SENSOR_DOUBLE_TAP: return "doubletap";
             case PULSE_REASON_SENSOR_LONG_PRESS: return "longpress";
-            case PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN: return "wakeLockScreen";
             case REASON_SENSOR_WAKE_UP: return "wakeup";
             default: throw new IllegalArgumentException("bad reason: " + pulseReason);
         }

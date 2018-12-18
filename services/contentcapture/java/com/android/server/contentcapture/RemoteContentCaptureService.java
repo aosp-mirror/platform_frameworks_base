@@ -22,9 +22,9 @@ import android.content.Context;
 import android.os.IBinder;
 import android.service.contentcapture.ContentCaptureEventsRequest;
 import android.service.contentcapture.IContentCaptureService;
-import android.service.contentcapture.InteractionContext;
 import android.service.contentcapture.SnapshotData;
 import android.text.format.DateUtils;
+import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
 
 import com.android.server.infra.AbstractMultiplePendingRequestsRemoteService;
@@ -66,17 +66,17 @@ final class RemoteContentCaptureService
     }
 
     /**
-     * Called by {@link ContentCaptureSession} to generate a call to the
+     * Called by {@link ContentCaptureServerSession} to generate a call to the
      * {@link RemoteContentCaptureService} to indicate the session was created (when {@code context}
      * is not {@code null} or destroyed (when {@code context} is {@code null}).
      */
-    public void onSessionLifecycleRequest(@Nullable InteractionContext context,
+    public void onSessionLifecycleRequest(@Nullable ContentCaptureContext context,
             @NonNull String sessionId) {
         scheduleAsyncRequest((s) -> s.onSessionLifecycle(context, sessionId));
     }
 
     /**
-     * Called by {@link ContentCaptureSession} to send a batch of events to the service.
+     * Called by {@link ContentCaptureServerSession} to send a batch of events to the service.
      */
     public void onContentCaptureEventsRequest(@NonNull String sessionId,
             @NonNull List<ContentCaptureEvent> events) {
@@ -85,7 +85,7 @@ final class RemoteContentCaptureService
     }
 
     /**
-     * Called by {@link ContentCaptureSession} to send snapshot data to the service.
+     * Called by {@link ContentCaptureServerSession} to send snapshot data to the service.
      */
     public void onActivitySnapshotRequest(@NonNull String sessionId,
             @NonNull SnapshotData snapshotData) {
@@ -94,8 +94,8 @@ final class RemoteContentCaptureService
 
     public interface ContentCaptureServiceCallbacks
             extends VultureCallback<RemoteContentCaptureService> {
-        // NOTE: so far we don't need to notify the callback implementation (an inner class on
-        // AutofillManagerServiceImpl) of the request results (success, timeouts, etc..), so this
+        // NOTE: so far we don't need to notify the callback implementation
+        // (ContentCaptureServerSession) of the request results (success, timeouts, etc..), so this
         // callback interface is empty.
     }
 }

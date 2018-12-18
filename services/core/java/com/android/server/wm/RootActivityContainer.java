@@ -1615,33 +1615,35 @@ class RootActivityContainer extends ConfigurationContainer
             return candidateTask.getStack();
         }
 
+        int windowingMode;
+        if (launchParams != null) {
+            // When launch params is not null, we always defer to its windowing mode. Sometimes
+            // it could be unspecified, which indicates it should inherit windowing mode from
+            // display.
+            windowingMode = launchParams.mWindowingMode;
+        } else {
+            windowingMode = options != null ? options.getLaunchWindowingMode()
+                    : r.getWindowingMode();
+        }
+        windowingMode = activityDisplay.validateWindowingMode(windowingMode, r, candidateTask,
+                r.getActivityType());
+
         // Return the topmost valid stack on the display.
         for (int i = activityDisplay.getChildCount() - 1; i >= 0; --i) {
             final ActivityStack stack = activityDisplay.getChildAt(i);
-            if (isValidLaunchStack(stack, r)) {
+            if (isValidLaunchStack(stack, r, windowingMode)) {
                 return stack;
             }
         }
 
         // If there is no valid stack on the external display - check if new dynamic stack will do.
         if (displayId != DEFAULT_DISPLAY) {
-            final int windowingMode;
-            if (launchParams != null) {
-                // When launch params is not null, we always defer to its windowing mode. Sometimes
-                // it could be unspecified, which indicates it should inherit windowing mode from
-                // display.
-                windowingMode = launchParams.mWindowingMode;
-            } else {
-                windowingMode = options != null ? options.getLaunchWindowingMode()
-                        : r.getWindowingMode();
-            }
             final int activityType =
                     options != null && options.getLaunchActivityType() != ACTIVITY_TYPE_UNDEFINED
                             ? options.getLaunchActivityType() : r.getActivityType();
             return activityDisplay.createStack(windowingMode, activityType, true /*onTop*/);
         }
 
-        Slog.w(TAG, "getValidLaunchStackOnDisplay: can't launch on displayId " + displayId);
         return null;
     }
 
@@ -1653,7 +1655,7 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     // TODO: Can probably be consolidated into getLaunchStack()...
-    private boolean isValidLaunchStack(ActivityStack stack, ActivityRecord r) {
+    private boolean isValidLaunchStack(ActivityStack stack, ActivityRecord r, int windowingMode) {
         switch (stack.getActivityType()) {
             case ACTIVITY_TYPE_HOME: return r.isActivityTypeHome();
             case ACTIVITY_TYPE_RECENTS: return r.isActivityTypeRecents();
@@ -1661,11 +1663,13 @@ class RootActivityContainer extends ConfigurationContainer
         }
         // There is a 1-to-1 relationship between stack and task when not in
         // primary split-windowing mode.
-        if (stack.getWindowingMode() != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            return false;
-        } else {
-            return r.supportsSplitScreenWindowingMode();
+        if (stack.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                && r.supportsSplitScreenWindowingMode()
+                && (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                || windowingMode == WINDOWING_MODE_UNDEFINED)) {
+            return true;
         }
+        return false;
     }
 
     int resolveActivityType(@Nullable ActivityRecord r, @Nullable ActivityOptions options,

@@ -724,6 +724,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mStats) {
             mStats.noteWifiOnLocked();
         }
+        StatsLog.write(StatsLog.WIFI_ENABLED_STATE_CHANGED,
+                StatsLog.WIFI_ENABLED_STATE_CHANGED__STATE__ON);
     }
 
     public void noteWifiOff() {
@@ -731,6 +733,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mStats) {
             mStats.noteWifiOffLocked();
         }
+        StatsLog.write(StatsLog.WIFI_ENABLED_STATE_CHANGED,
+                StatsLog.WIFI_ENABLED_STATE_CHANGED__STATE__OFF);
     }
 
     public void noteStartAudio(int uid) {
@@ -865,6 +869,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mStats) {
             mStats.noteWifiRunningLocked(ws);
         }
+        // TODO: Log WIFI_RUNNING_STATE_CHANGED in a better spot to include Hotspot too.
+        StatsLog.write(StatsLog.WIFI_RUNNING_STATE_CHANGED,
+                ws, StatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__ON);
     }
 
     public void noteWifiRunningChanged(WorkSource oldWs, WorkSource newWs) {
@@ -872,6 +879,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mStats) {
             mStats.noteWifiRunningChangedLocked(oldWs, newWs);
         }
+        StatsLog.write(StatsLog.WIFI_RUNNING_STATE_CHANGED,
+                newWs, StatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__ON);
+        StatsLog.write(StatsLog.WIFI_RUNNING_STATE_CHANGED,
+                oldWs, StatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__OFF);
     }
 
     public void noteWifiStopped(WorkSource ws) {
@@ -879,6 +890,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mStats) {
             mStats.noteWifiStoppedLocked(ws);
         }
+        StatsLog.write(StatsLog.WIFI_RUNNING_STATE_CHANGED,
+                ws, StatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__OFF);
     }
 
     public void noteWifiState(int wifiState, String accessPoint) {

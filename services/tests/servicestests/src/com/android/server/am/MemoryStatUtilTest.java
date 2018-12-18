@@ -20,6 +20,7 @@ import static com.android.server.am.MemoryStatUtil.BYTES_IN_KILOBYTE;
 import static com.android.server.am.MemoryStatUtil.JIFFY_NANOS;
 import static com.android.server.am.MemoryStatUtil.MemoryStat;
 import static com.android.server.am.MemoryStatUtil.PAGE_SIZE;
+import static com.android.server.am.MemoryStatUtil.parseCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.parseMemoryStatFromMemcg;
 import static com.android.server.am.MemoryStatUtil.parseMemoryStatFromProcfs;
 import static com.android.server.am.MemoryStatUtil.parseVmHWMFromProcfs;
@@ -31,6 +32,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Collections;
 
 /**
@@ -231,5 +233,42 @@ public class MemoryStatUtilTest {
         assertEquals(0, parseVmHWMFromProcfs(""));
 
         assertEquals(0, parseVmHWMFromProcfs(null));
+    }
+
+    @Test
+    public void testParseCmdlineFromProcfs_invalidValue() {
+        byte[] nothing = new byte[] {0x00, 0x74, 0x65, 0x73, 0x74}; // \0test
+
+        assertEquals("", parseCmdlineFromProcfs(bytesToString(nothing)));
+    }
+
+    @Test
+    public void testParseCmdlineFromProcfs_correctValue_noNullBytes() {
+        assertEquals("com.google.app", parseCmdlineFromProcfs("com.google.app"));
+    }
+
+    @Test
+    public void testParseCmdlineFromProcfs_correctValue_withNullBytes() {
+        byte[] trailing = new byte[] {0x74, 0x65, 0x73, 0x74, 0x00, 0x00, 0x00}; // test\0\0\0
+
+        assertEquals("test", parseCmdlineFromProcfs(bytesToString(trailing)));
+
+        // test\0\0test
+        byte[] inside = new byte[] {0x74, 0x65, 0x73, 0x74, 0x00, 0x00, 0x74, 0x65, 0x73, 0x74};
+
+        assertEquals("test", parseCmdlineFromProcfs(bytesToString(trailing)));
+    }
+
+    @Test
+    public void testParseCmdlineFromProcfs_emptyContents() {
+        assertEquals("", parseCmdlineFromProcfs(""));
+
+        assertEquals("", parseCmdlineFromProcfs(null));
+    }
+
+    private static String bytesToString(byte[] bytes) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        output.write(bytes, 0, bytes.length);
+        return output.toString();
     }
 }

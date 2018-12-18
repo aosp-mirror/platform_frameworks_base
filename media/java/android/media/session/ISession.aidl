@@ -39,7 +39,7 @@ interface ISession {
     void destroy();
 
     // These commands are for the TransportPerformer
-    void setMetadata(in MediaMetadata metadata);
+    void setMetadata(in MediaMetadata metadata, long duration, String metadataDescription);
     void setPlaybackState(in PlaybackState state);
     void setQueue(in ParceledListSlice queue);
     void setQueueTitle(CharSequence title);

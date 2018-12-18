@@ -16,12 +16,16 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.phone.NavBarTintController.MIN_COLOR_ADAPT_TRANSITION_TIME;
+import static com.android.systemui.statusbar.phone.NavBarTintController.NAV_COLOR_TRANSITION_TIME_SETTING;
+
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.MathUtils;
+import android.provider.Settings;
 import android.util.TimeUtils;
 
 import com.android.systemui.Dependency;
@@ -42,13 +46,14 @@ import java.io.PrintWriter;
 public class LightBarTransitionsController implements Dumpable, Callbacks,
         StatusBarStateController.StateListener {
 
-    public static final long DEFAULT_TINT_ANIMATION_DURATION = 120;
+    public static final int DEFAULT_TINT_ANIMATION_DURATION = 120;
     private static final String EXTRA_DARK_INTENSITY = "dark_intensity";
 
     private final Handler mHandler;
     private final DarkIntensityApplier mApplier;
     private final KeyguardMonitor mKeyguardMonitor;
     private final StatusBarStateController mStatusBarStateController;
+    private NavBarTintController mColorAdaptionController;
 
     private boolean mTransitionDeferring;
     private long mTransitionDeferringStartTime;
@@ -67,6 +72,8 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
         }
     };
 
+    private final Context mContext;
+
     public LightBarTransitionsController(Context context, DarkIntensityApplier applier) {
         mApplier = applier;
         mHandler = new Handler();
@@ -76,6 +83,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
                 .addCallback(this);
         mStatusBarStateController.addCallback(this);
         mDozeAmount = mStatusBarStateController.getDozeAmount();
+        mContext = context;
     }
 
     public void destroy(Context context) {
@@ -106,7 +114,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
     public void appTransitionCancelled() {
         if (mTransitionPending && mTintChangePending) {
             mTintChangePending = false;
-            animateIconTint(mPendingDarkIntensity, 0 /* delay */, DEFAULT_TINT_ANIMATION_DURATION);
+            animateIconTint(mPendingDarkIntensity, 0 /* delay */, getTintAnimationDuration());
         }
         mTransitionPending = false;
     }
@@ -146,8 +154,17 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
                     Math.max(0, mTransitionDeferringStartTime - SystemClock.uptimeMillis()),
                     mTransitionDeferringDuration);
         } else {
-            animateIconTint(dark ? 1.0f : 0.0f, 0 /* delay */, DEFAULT_TINT_ANIMATION_DURATION);
+            animateIconTint(dark ? 1.0f : 0.0f, 0 /* delay */, getTintAnimationDuration());
         }
+    }
+
+    public long getTintAnimationDuration() {
+        if (NavBarTintController.isEnabled(mContext)) {
+            return Math.max(Settings.Global.getInt(mContext.getContentResolver(),
+                    NAV_COLOR_TRANSITION_TIME_SETTING, DEFAULT_TINT_ANIMATION_DURATION),
+                    MIN_COLOR_ADAPT_TRANSITION_TIME);
+        }
+        return DEFAULT_TINT_ANIMATION_DURATION;
     }
 
     public float getCurrentDarkIntensity() {

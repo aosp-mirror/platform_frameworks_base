@@ -361,7 +361,8 @@ public class ActivityView extends ViewGroup {
                 DISPLAY_NAME + "@" + System.identityHashCode(this),
                 width, height, getBaseDisplayDensity(), mTmpSurface,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
-                        | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
+                        | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+                        | DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL);
         if (mVirtualDisplay == null) {
             Log.e(TAG, "Failed to initialize ActivityView");
             return;

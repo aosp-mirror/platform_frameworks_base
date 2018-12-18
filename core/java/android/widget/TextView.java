@@ -158,6 +158,7 @@ import android.view.animation.AnimationUtils;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.contentcapture.ContentCaptureManager;
+import android.view.contentcapture.ContentCaptureSession;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -10227,12 +10228,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
+        // TODO(b/121045053): should use a flag / boolean to keep status of SHOWN / HIDDEN instead
+        // of using isLaidout(), so it's not called in cases where it's laid out but a
+        // notifyAppeared was not sent.
+
         // ContentCapture
         if (isLaidOut() && isImportantForContentCapture() && isTextEditable()) {
             final ContentCaptureManager cm = mContext.getSystemService(ContentCaptureManager.class);
             if (cm != null && cm.isContentCaptureEnabled()) {
-                // TODO(b/111276913): pass flags when edited by user / add CTS test
-                cm.notifyViewTextChanged(getAutofillId(), getText(), /* flags= */ 0);
+                final ContentCaptureSession session = getContentCaptureSession();
+                if (session != null) {
+                    // TODO(b/111276913): pass flags when edited by user / add CTS test
+                    session.notifyViewTextChanged(getAutofillId(), getText(), /* flags= */ 0);
+                }
             }
         }
     }
@@ -10819,6 +10827,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                     break;
                 case KeyEvent.KEYCODE_V:
+                    if (canPaste()) {
+                        return onTextContextMenuItem(ID_PASTE);
+                    }
+                    break;
+                case KeyEvent.KEYCODE_INSERT:
+                    if (canCopy()) {
+                        return onTextContextMenuItem(ID_COPY);
+                    }
+                    break;
+            }
+        } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+            // Handle Shift-only shortcuts.
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_FORWARD_DEL:
+                    if (canCut()) {
+                        return onTextContextMenuItem(ID_CUT);
+                    }
+                    break;
+                case KeyEvent.KEYCODE_INSERT:
                     if (canPaste()) {
                         return onTextContextMenuItem(ID_PASTE);
                     }

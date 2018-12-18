@@ -109,7 +109,9 @@ import android.view.animation.Transformation;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
+import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureManager;
+import android.view.contentcapture.ContentCaptureSession;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -121,6 +123,7 @@ import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 
 import com.android.internal.R;
+import com.android.internal.util.Preconditions;
 import com.android.internal.view.TooltipPopup;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.ScrollBarUtils;
@@ -5018,6 +5021,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private Handler mVisibilityChangeForAutofillHandler;
 
     /**
+     * Used when app developers explicitly set the {@link ContentCaptureSession} associated with the
+     * view (through {@link #setContentCaptureSession(ContentCaptureSession)}.
+     */
+    @Nullable
+    private WeakReference<ContentCaptureSession> mContentCaptureSession;
+
+    /**
      * Simple constructor to use when creating a view from code.
      *
      * @param context The Context the view is running in, through which it can
@@ -8161,7 +8171,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * is visible.
      *
      * <p>The populated structure is then passed to the service through
-     * {@link ContentCaptureManager#notifyViewAppeared(ViewStructure)}.
+     * {@link ContentCaptureSession#notifyViewAppeared(ViewStructure)}.
      *
      * <p><b>Note: </b>the following methods of the {@code structure} will be ignored:
      * <ul>
@@ -8977,12 +8987,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (!mContext.isContentCaptureSupported()) return;
 
         // Then check if it's enabled in the context...
-        final ContentCaptureManager cm = mContext.getSystemService(ContentCaptureManager.class);
-        if (cm == null || !cm.isContentCaptureEnabled()) return;
+        final ContentCaptureManager ccm = mContext.getSystemService(ContentCaptureManager.class);
+        if (ccm == null || !ccm.isContentCaptureEnabled()) return;
 
         // ... and finally at the view level
         // NOTE: isImportantForContentCapture() is more expensive than cm.isContentCaptureEnabled()
         if (!isImportantForContentCapture()) return;
+
+        final ContentCaptureSession session = getContentCaptureSession(ccm);
+        if (session == null) return;
 
         if (appeared) {
             if (!isLaidOut() || !isVisibleToUser()
@@ -8995,10 +9008,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
                 return;
             }
-            // All good: notify the manager...
-            final ViewStructure structure = cm.newViewStructure(this);
+            // All good: notify it...
+            final ViewStructure structure = session.newViewStructure(this);
             onProvideContentCaptureStructure(structure, /* flags= */ 0);
-            cm.notifyViewAppeared(structure);
+            session.notifyViewAppeared(structure);
             // ...and set the flags
             mPrivateFlags4 |= PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED;
             mPrivateFlags4 &= ~PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED;
@@ -9014,12 +9027,83 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
                 return;
             }
-            // All good: notify the manager...
-            cm.notifyViewDisappeared(getAutofillId());
+            // All good: notify it...
+            session.notifyViewDisappeared(getAutofillId());
             // ...and set the flags
             mPrivateFlags4 |= PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED;
             mPrivateFlags4 &= ~PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED;
         }
+    }
+
+    /**
+     * Sets the (optional) {@link ContentCaptureSession} associated with this view.
+     *
+     * <p>This method should be called when you need to associate a {@link ContentCaptureContext} to
+     * the Content Capture events associated with this view or its view hierarchy (if it's a
+     * {@link ViewGroup}).
+     *
+     * <p>For example, if your activity is associated with a web domain, you could create a session
+     * {@code onCreate()} and associate it with the root view of the activity:
+     *
+     * <pre>
+     *  ContentCaptureManager mgr = getSystemService(ContentCaptureManager.class);
+     *  if (mgr != null && mgr.isContentCaptureEnabled()) {
+     *    View rootView = findViewById(R.my_root_view);
+     *    ContentCaptureSession session = mgr.createContentCaptureSession(new
+     *        ContentCaptureContext.Builder().setUri(myUrl).build());
+     *    rootView.setContentCaptureSession(session);
+     *  }
+     * </pre>
+     *
+     * @param contentCaptureSession a session created by
+     * {@link ContentCaptureManager#createContentCaptureSession(
+     *        android.view.contentcapture.ContentCaptureContext)}.
+     */
+    public void setContentCaptureSession(@NonNull ContentCaptureSession contentCaptureSession) {
+        mContentCaptureSession = new WeakReference<>(
+                Preconditions.checkNotNull(contentCaptureSession));
+    }
+
+    /**
+     * Gets the session used to notify Content Capture events.
+     *
+     * @return session explicitly set by {@link #setContentCaptureSession(ContentCaptureSession)},
+     * inherited by ancestore, default session or {@code null} if content capture is disabled for
+     * this view.
+     */
+    @Nullable
+    public final ContentCaptureSession getContentCaptureSession() {
+        // First try the session explicitly set by setContentCaptureSession()
+        if (mContentCaptureSession != null) return mContentCaptureSession.get();
+
+        // Then the session explicitly set in an ancestor
+        ContentCaptureSession session = null;
+        if (mParent instanceof View) {
+            session = ((View) mParent).getContentCaptureSession();
+        }
+
+        // Finally, if no session was explicitly set, use the context's default session.
+        if (session == null) {
+            final ContentCaptureManager ccm = mContext
+                    .getSystemService(ContentCaptureManager.class);
+            return ccm == null ? null : ccm.getMainContentCaptureSession();
+        }
+        return session;
+    }
+
+    /**
+     * Optimized version of {@link #getContentCaptureSession()} that avoids a service lookup.
+     */
+    @Nullable
+    private ContentCaptureSession getContentCaptureSession(@NonNull ContentCaptureManager ccm) {
+        if (mContentCaptureSession != null) return mContentCaptureSession.get();
+
+        ContentCaptureSession session = null;
+        if (mParent instanceof View) {
+            session = ((View) mParent).getContentCaptureSession();
+        }
+
+        return session != null ? session : ccm.getMainContentCaptureSession();
     }
 
     @Nullable

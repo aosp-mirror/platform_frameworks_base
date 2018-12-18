@@ -128,9 +128,10 @@ public class BoundsAnimationController {
         mAnimationHandler = animationHandler;
         if (animationHandler != null) {
             // If an animation handler is provided, then ensure that it runs on the sf vsync tick
-            handler.runWithScissors(() -> mChoreographer = Choreographer.getSfInstance(),
-                    0 /* timeout */);
-            animationHandler.setProvider(new SfVsyncFrameCallbackProvider(mChoreographer));
+            handler.post(() -> {
+                mChoreographer = Choreographer.getSfInstance();
+                animationHandler.setProvider(new SfVsyncFrameCallbackProvider(mChoreographer));
+            });
         }
     }
 

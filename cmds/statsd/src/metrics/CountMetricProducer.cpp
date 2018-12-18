@@ -49,7 +49,7 @@ const int FIELD_ID_TIME_BASE = 9;
 const int FIELD_ID_BUCKET_SIZE = 10;
 const int FIELD_ID_DIMENSION_PATH_IN_WHAT = 11;
 const int FIELD_ID_DIMENSION_PATH_IN_CONDITION = 12;
-const int FIELD_ID_IS_ACTIVE = 13;
+const int FIELD_ID_IS_ACTIVE = 14;
 
 // for CountMetricDataWrapper
 const int FIELD_ID_DATA = 1;

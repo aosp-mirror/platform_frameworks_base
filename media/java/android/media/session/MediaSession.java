@@ -30,6 +30,7 @@ import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
+import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,7 +41,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
-import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.service.media.MediaBrowserService;
 import android.text.TextUtils;
 import android.util.Log;
@@ -434,11 +434,21 @@ public final class MediaSession {
      * @see android.media.MediaMetadata.Builder#putBitmap
      */
     public void setMetadata(@Nullable MediaMetadata metadata) {
+        long duration = -1;
+        int fields = 0;
+        MediaDescription description = null;
         if (metadata != null) {
             metadata = (new MediaMetadata.Builder(metadata, mMaxBitmapSize)).build();
+            if (metadata.containsKey(MediaMetadata.METADATA_KEY_DURATION)) {
+                duration = metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+            }
+            fields = metadata.size();
+            description = metadata.getDescription();
         }
+        String metadataDescription = "size=" + fields + ", description=" + description;
+
         try {
-            mBinder.setMetadata(metadata);
+            mBinder.setMetadata(metadata, duration, metadataDescription);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Dead object in setPlaybackState.", e);
         }
