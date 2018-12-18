@@ -87,6 +87,7 @@ public class UserBackupManagerServiceTest {
     private static final String TAG = "BMSTest";
     private static final String PACKAGE_1 = "some.package.1";
     private static final String PACKAGE_2 = "some.package.2";
+    private static final int USER_ID = 10;
 
     @Mock private TransportManager mTransportManager;
     private HandlerThread mBackupThread;
@@ -979,6 +980,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
 
         UserBackupManagerService.createAndInitializeService(
+                USER_ID,
                 mContext,
                 new Trampoline(mContext),
                 mBackupThread,
@@ -1000,6 +1002,7 @@ public class UserBackupManagerServiceTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
 
         UserBackupManagerService.createAndInitializeService(
+                USER_ID,
                 mContext,
                 new Trampoline(mContext),
                 mBackupThread,
@@ -1022,6 +1025,7 @@ public class UserBackupManagerServiceTest {
                 NullPointerException.class,
                 () ->
                         UserBackupManagerService.createAndInitializeService(
+                                USER_ID,
                                 /* context */ null,
                                 new Trampoline(mContext),
                                 mBackupThread,
@@ -1041,6 +1045,7 @@ public class UserBackupManagerServiceTest {
                 NullPointerException.class,
                 () ->
                         UserBackupManagerService.createAndInitializeService(
+                                USER_ID,
                                 mContext,
                                 /* trampoline */ null,
                                 mBackupThread,
@@ -1060,6 +1065,7 @@ public class UserBackupManagerServiceTest {
                 NullPointerException.class,
                 () ->
                         UserBackupManagerService.createAndInitializeService(
+                                USER_ID,
                                 mContext,
                                 new Trampoline(mContext),
                                 /* backupThread */ null,
@@ -1079,6 +1085,7 @@ public class UserBackupManagerServiceTest {
                 NullPointerException.class,
                 () ->
                         UserBackupManagerService.createAndInitializeService(
+                                USER_ID,
                                 mContext,
                                 new Trampoline(mContext),
                                 mBackupThread,
@@ -1089,8 +1096,8 @@ public class UserBackupManagerServiceTest {
 
     /**
      * Test checking non-null argument on {@link
-     * UserBackupManagerService#createAndInitializeService(Context, Trampoline, HandlerThread, File,
-     * File, TransportManager)}.
+     * UserBackupManagerService#createAndInitializeService(int, Context, Trampoline, HandlerThread,
+     * File, File, TransportManager)}.
      */
     @Test
     public void testCreateAndInitializeService_withNullDataDir_throws() {
@@ -1098,6 +1105,7 @@ public class UserBackupManagerServiceTest {
                 NullPointerException.class,
                 () ->
                         UserBackupManagerService.createAndInitializeService(
+                                USER_ID,
                                 mContext,
                                 new Trampoline(mContext),
                                 mBackupThread,
@@ -1108,8 +1116,8 @@ public class UserBackupManagerServiceTest {
 
     /**
      * Test checking non-null argument on {@link
-     * UserBackupManagerService#createAndInitializeService(Context, Trampoline, HandlerThread, File,
-     * File, TransportManager)}.
+     * UserBackupManagerService#createAndInitializeService(int, Context, Trampoline, HandlerThread,
+     * File, File, TransportManager)}.
      */
     @Test
     public void testCreateAndInitializeService_withNullTransportManager_throws() {
@@ -1117,6 +1125,7 @@ public class UserBackupManagerServiceTest {
                 NullPointerException.class,
                 () ->
                         UserBackupManagerService.createAndInitializeService(
+                                USER_ID,
                                 mContext,
                                 new Trampoline(mContext),
                                 mBackupThread,
@@ -1127,7 +1136,7 @@ public class UserBackupManagerServiceTest {
 
     private UserBackupManagerService createUserBackupManagerServiceAndRunTasks() {
         return BackupManagerServiceTestUtils.createUserBackupManagerServiceAndRunTasks(
-                mContext, mBackupThread, mBaseStateDir, mDataDir, mTransportManager);
+                USER_ID, mContext, mBackupThread, mBaseStateDir, mDataDir, mTransportManager);
     }
 
     private void setUpPowerManager(UserBackupManagerService backupManagerService) {

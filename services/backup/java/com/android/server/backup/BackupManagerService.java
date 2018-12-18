@@ -146,7 +146,7 @@ public class BackupManagerService {
     protected void startServiceForUser(int userId) {
         UserBackupManagerService userBackupManagerService =
                 UserBackupManagerService.createAndInitializeService(
-                        mContext, mTrampoline, mBackupThread, mTransportWhitelist);
+                        userId, mContext, mTrampoline, mBackupThread, mTransportWhitelist);
         startServiceForUser(userId, userBackupManagerService);
     }
 

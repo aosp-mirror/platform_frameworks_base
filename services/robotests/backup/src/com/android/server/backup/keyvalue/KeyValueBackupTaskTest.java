@@ -169,6 +169,7 @@ public class KeyValueBackupTaskTest {
     private static final PackageData PACKAGE_2 = keyValuePackage(2);
     private static final String BACKUP_AGENT_SHARED_PREFS_SYNCHRONIZER_CLASS =
             "android.app.backup.BackupAgent$SharedPrefsSynchronizer";
+    private static final int USER_ID = 10;
 
     @Mock private TransportManager mTransportManager;
     @Mock private DataChangedJournal mOldJournal;
@@ -224,7 +225,7 @@ public class KeyValueBackupTaskTest {
         setUpBinderCallerAndApplicationAsSystem(mApplication);
         mBackupManagerService =
                 spy(createUserBackupManagerServiceAndRunTasks(
-                        mContext, mBaseStateDir, mDataDir, mTransportManager));
+                        USER_ID, mContext, mBaseStateDir, mDataDir, mTransportManager));
         setUpBackupManagerServiceBasics(
                 mBackupManagerService,
                 mApplication,

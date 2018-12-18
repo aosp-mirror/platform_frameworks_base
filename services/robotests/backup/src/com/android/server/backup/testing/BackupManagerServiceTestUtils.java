@@ -58,13 +58,17 @@ public class BackupManagerServiceTestUtils {
      * <p>If the class-under-test is going to execute methods as the system, it's a good idea to
      * also call {@link #setUpBinderCallerAndApplicationAsSystem(Application)} before this method.
      *
-     * @see #createUserBackupManagerServiceAndRunTasks(Context, HandlerThread, File, File,
+     * @see #createUserBackupManagerServiceAndRunTasks(int, Context, HandlerThread, File, File,
      *     TransportManager)
      */
     public static UserBackupManagerService createUserBackupManagerServiceAndRunTasks(
-            Context context, File baseStateDir, File dataDir, TransportManager transportManager) {
+            int userId,
+            Context context,
+            File baseStateDir,
+            File dataDir,
+            TransportManager transportManager) {
         return createUserBackupManagerServiceAndRunTasks(
-                context, startBackupThread(null), baseStateDir, dataDir, transportManager);
+                userId, context, startBackupThread(null), baseStateDir, dataDir, transportManager);
     }
 
     /**
@@ -75,6 +79,7 @@ public class BackupManagerServiceTestUtils {
      * also call {@link #setUpBinderCallerAndApplicationAsSystem(Application)} before this method.
      */
     public static UserBackupManagerService createUserBackupManagerServiceAndRunTasks(
+            int userId,
             Context context,
             HandlerThread backupThread,
             File baseStateDir,
@@ -82,6 +87,7 @@ public class BackupManagerServiceTestUtils {
             TransportManager transportManager) {
         UserBackupManagerService backupManagerService =
                 UserBackupManagerService.createAndInitializeService(
+                        userId,
                         context,
                         new Trampoline(context),
                         backupThread,
