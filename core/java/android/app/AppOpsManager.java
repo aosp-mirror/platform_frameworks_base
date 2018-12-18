@@ -41,8 +41,10 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsActiveCallback;
 import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.app.IAppOpsNotedCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.Preconditions;
 
@@ -86,10 +88,20 @@ public class AppOpsManager {
      */
 
     final Context mContext;
+
     @UnsupportedAppUsage
     final IAppOpsService mService;
-    final ArrayMap<OnOpChangedListener, IAppOpsCallback> mModeWatchers = new ArrayMap<>();
-    final ArrayMap<OnOpActiveChangedListener, IAppOpsActiveCallback> mActiveWatchers =
+
+    @GuardedBy("mModeWatchers")
+    private final ArrayMap<OnOpChangedListener, IAppOpsCallback> mModeWatchers =
+            new ArrayMap<>();
+
+    @GuardedBy("mActiveWatchers")
+    private final ArrayMap<OnOpActiveChangedListener, IAppOpsActiveCallback> mActiveWatchers =
+            new ArrayMap<>();
+
+    @GuardedBy("mNotedWatchers")
+    private final ArrayMap<OnOpNotedListener, IAppOpsNotedCallback> mNotedWatchers =
             new ArrayMap<>();
 
     static IBinder sToken;
@@ -2471,6 +2483,23 @@ public class AppOpsManager {
     }
 
     /**
+     * Callback for notification of an op being noted.
+     *
+     * @hide
+     */
+    public interface OnOpNotedListener {
+        /**
+         * Called when an op was noted.
+         *
+         * @param code The op code.
+         * @param uid The UID performing the operation.
+         * @param packageName The package performing the operation.
+         * @param result The result of the note.
+         */
+        void onOpNoted(String code, int uid, String packageName, int result);
+    }
+
+    /**
      * Callback for notification of changes to operation state.
      * This allows you to see the raw op codes instead of strings.
      * @hide
@@ -2819,7 +2848,7 @@ public class AppOpsManager {
      */
     public void stopWatchingMode(OnOpChangedListener callback) {
         synchronized (mModeWatchers) {
-            IAppOpsCallback cb = mModeWatchers.get(callback);
+            IAppOpsCallback cb = mModeWatchers.remove(callback);
             if (cb != null) {
                 try {
                     mService.stopWatchingMode(cb);
@@ -2893,10 +2922,78 @@ public class AppOpsManager {
     @TestApi
     public void stopWatchingActive(@NonNull OnOpActiveChangedListener callback) {
         synchronized (mActiveWatchers) {
-            final IAppOpsActiveCallback cb = mActiveWatchers.get(callback);
+            final IAppOpsActiveCallback cb = mActiveWatchers.remove(callback);
             if (cb != null) {
                 try {
                     mService.stopWatchingActive(cb);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+    }
+
+    /**
+     * Start watching for noted app ops. An app op may be immediate or long running.
+     * Immediate ops are noted while long running ones are started and stopped. This
+     * method allows registering a listener to be notified when an app op is noted. If
+     * an op is being noted by any package you will get a callback. To change the
+     * watched ops for a registered callback you need to unregister and register it again.
+     *
+     * <p> If you don't hold the {@link android.Manifest.permission#WATCH_APPOPS} permission
+     * you can watch changes only for your UID.
+     *
+     * @param ops The ops to watch.
+     * @param callback Where to report changes.
+     *
+     * @see #startWatchingActive(int[], OnOpActiveChangedListener)
+     * @see #stopWatchingNoted(OnOpNotedListener)
+     * @see #noteOp(String, int, String)
+     *
+     * @hide
+     */
+    @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
+    public void startWatchingNoted(@NonNull String[] ops, @NonNull OnOpNotedListener callback) {
+        IAppOpsNotedCallback cb;
+        synchronized (mNotedWatchers) {
+            cb = mNotedWatchers.get(callback);
+            if (cb != null) {
+                return;
+            }
+            cb = new IAppOpsNotedCallback.Stub() {
+                @Override
+                public void opNoted(int op, int uid, String packageName, int mode) {
+                    callback.onOpNoted(sOpToString[op], uid, packageName, mode);
+                }
+            };
+            mNotedWatchers.put(callback, cb);
+        }
+        try {
+            final int[] opCodes = new int[ops.length];
+            for (int i = 0; i < opCodes.length; i++) {
+                opCodes[i] = strOpToOp(ops[i]);
+            }
+            mService.startWatchingNoted(opCodes, cb);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Stop watching for noted app ops. An app op may be immediate or long running.
+     * Unregistering a non-registered callback has no effect.
+     *
+     * @see #startWatchingNoted(String[], OnOpNotedListener)
+     * @see #noteOp(String, int, String)
+     *
+     * @hide
+     */
+    public void stopWatchingNoted(@NonNull OnOpNotedListener callback) {
+        synchronized (mNotedWatchers) {
+            final IAppOpsNotedCallback cb = mNotedWatchers.get(callback);
+            if (cb != null) {
+                try {
+                    mService.stopWatchingNoted(cb);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
