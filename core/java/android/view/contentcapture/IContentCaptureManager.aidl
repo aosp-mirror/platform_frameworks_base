@@ -26,12 +26,14 @@ import com.android.internal.os.IResultReceiver;
 import java.util.List;
 
 /**
- * {@hide}
- */
+  * Interface between an app (ContentCaptureManager / ContentCaptureSession) and the system-server
+  * implementation service (ContentCaptureManagerService).
+  *
+  * @hide
+  */
 oneway interface IContentCaptureManager {
     void startSession(int userId, IBinder activityToken, in ComponentName componentName,
                       String sessionId, in ContentCaptureContext clientContext, int flags,
                       in IResultReceiver result);
-    void finishSession(int userId, String sessionId, in List<ContentCaptureEvent> events);
-    void sendEvents(int userId, in String sessionId, in List<ContentCaptureEvent> events);
+    void finishSession(int userId, String sessionId);
 }

@@ -17,6 +17,7 @@ package android.service.contentcapture;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.content.pm.ParceledListSlice;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.contentcapture.ContentCaptureEvent;
@@ -31,10 +32,10 @@ import java.util.List;
 @SystemApi
 public final class ContentCaptureEventsRequest implements Parcelable {
 
-    private final List<ContentCaptureEvent> mEvents;
+    private final ParceledListSlice<ContentCaptureEvent> mEvents;
 
     /** @hide */
-    public ContentCaptureEventsRequest(@NonNull List<ContentCaptureEvent> events) {
+    public ContentCaptureEventsRequest(@NonNull ParceledListSlice<ContentCaptureEvent> events) {
         mEvents = events;
     }
 
@@ -43,7 +44,7 @@ public final class ContentCaptureEventsRequest implements Parcelable {
      */
     @NonNull
     public List<ContentCaptureEvent> getEvents() {
-        return mEvents;
+        return mEvents.getList();
     }
 
     @Override
@@ -53,7 +54,7 @@ public final class ContentCaptureEventsRequest implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeTypedList(mEvents, flags);
+        parcel.writeParcelable(mEvents, flags);
     }
 
     public static final Parcelable.Creator<ContentCaptureEventsRequest> CREATOR =
@@ -61,8 +62,7 @@ public final class ContentCaptureEventsRequest implements Parcelable {
 
         @Override
         public ContentCaptureEventsRequest createFromParcel(Parcel parcel) {
-            return new ContentCaptureEventsRequest(parcel
-                    .createTypedArrayList(ContentCaptureEvent.CREATOR));
+            return new ContentCaptureEventsRequest(parcel.readParcelable(null));
         }
 
         @Override

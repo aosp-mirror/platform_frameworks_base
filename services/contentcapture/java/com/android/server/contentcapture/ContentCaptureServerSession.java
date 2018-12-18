@@ -24,15 +24,14 @@ import android.service.contentcapture.ContentCaptureService;
 import android.service.contentcapture.SnapshotData;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
-import android.view.contentcapture.ContentCaptureEvent;
 import android.view.contentcapture.ContentCaptureSessionId;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.Preconditions;
 import com.android.server.contentcapture.RemoteContentCaptureService.ContentCaptureServiceCallbacks;
 
 import java.io.PrintWriter;
-import java.util.List;
 
 final class ContentCaptureServerSession implements ContentCaptureServiceCallbacks {
 
@@ -43,18 +42,28 @@ final class ContentCaptureServerSession implements ContentCaptureServiceCallback
     private final ContentCapturePerUserService mService;
     private final RemoteContentCaptureService mRemoteService;
     private final ContentCaptureContext mContentCaptureContext;
+
+    /**
+     * Canonical session id.
+     */
     private final String mId;
+
+    /**
+     * UID of the app whose contents is being captured.
+     */
+    private final int mUid;
 
     ContentCaptureServerSession(@NonNull Context context, int userId, @NonNull Object lock,
             @NonNull IBinder activityToken, @NonNull ContentCapturePerUserService service,
             @NonNull ComponentName serviceComponentName, @NonNull ComponentName appComponentName,
-            int taskId, int displayId, @NonNull String sessionId,
+            int taskId, int displayId, @NonNull String sessionId, int uid,
             @Nullable ContentCaptureContext clientContext, int flags,
             boolean bindInstantServiceAllowed, boolean verbose) {
         mLock = lock;
         mActivityToken = activityToken;
         mService = service;
         mId = Preconditions.checkNotNull(sessionId);
+        mUid = uid;
         mRemoteService = new RemoteContentCaptureService(context,
                 ContentCaptureService.SERVICE_INTERFACE, serviceComponentName, userId, this,
                 bindInstantServiceAllowed, verbose);
@@ -73,15 +82,8 @@ final class ContentCaptureServerSession implements ContentCaptureServiceCallback
      * Notifies the {@link ContentCaptureService} that the service started.
      */
     @GuardedBy("mLock")
-    public void notifySessionStartedLocked() {
-        mRemoteService.onSessionLifecycleRequest(mContentCaptureContext, mId);
-    }
-
-    /**
-     * Notifies the {@link ContentCaptureService} of a batch of events.
-     */
-    public void sendEventsLocked(@NonNull List<ContentCaptureEvent> events) {
-        mRemoteService.onContentCaptureEventsRequest(mId, events);
+    public void notifySessionStartedLocked(@NonNull IResultReceiver clientReceiver) {
+        mRemoteService.onSessionStarted(mContentCaptureContext, mId, mUid, clientReceiver);
     }
 
     /**
@@ -118,11 +120,11 @@ final class ContentCaptureServerSession implements ContentCaptureServiceCallback
     @GuardedBy("mLock")
     public void destroyLocked(boolean notifyRemoteService) {
         if (mService.isVerbose()) {
-            Slog.v(TAG, "destroyLocked(notifyRemoteService=" + notifyRemoteService + ")");
+            Slog.v(TAG, "destroy(notifyRemoteService=" + notifyRemoteService + ")");
         }
         // TODO(b/111276913): must call client to set session as FINISHED_BY_SERVER
         if (notifyRemoteService) {
-            mRemoteService.onSessionLifecycleRequest(/* context= */ null, mId);
+            mRemoteService.onSessionFinished(mId);
         }
     }
 
@@ -133,13 +135,14 @@ final class ContentCaptureServerSession implements ContentCaptureServiceCallback
             Slog.d(TAG, "onServiceDied() for " + mId);
         }
         synchronized (mLock) {
-            removeSelfLocked(/* notifyRemoteService= */ false);
+            removeSelfLocked(/* notifyRemoteService= */ true);
         }
     }
 
     @GuardedBy("mLock")
     public void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
         pw.print(prefix); pw.print("id: ");  pw.print(mId); pw.println();
+        pw.print(prefix); pw.print("uid: ");  pw.print(mUid); pw.println();
         pw.print(prefix); pw.print("context: ");  mContentCaptureContext.dump(pw); pw.println();
         pw.print(prefix); pw.print("activity token: "); pw.println(mActivityToken);
         pw.print(prefix); pw.print("has autofill callback: ");
