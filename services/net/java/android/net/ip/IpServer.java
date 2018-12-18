@@ -138,9 +138,9 @@ public class IpServer extends StateMachine {
             return NetdService.getInstance();
         }
 
-        public DhcpServer makeDhcpServer(Looper looper, InterfaceParams iface,
+        public DhcpServer makeDhcpServer(Looper looper, String ifName,
                 DhcpServingParams params, SharedLog log) {
-            return new DhcpServer(looper, iface, params, log);
+            return new DhcpServer(looper, ifName, params, log);
         }
     }
 
@@ -256,12 +256,6 @@ public class IpServer extends StateMachine {
         if (mUsingLegacyDhcp) {
             return true;
         }
-
-        final InterfaceParams ifaceParams = mDeps.getInterfaceParams(mIfaceName);
-        if (ifaceParams == null) {
-            Log.e(TAG, "Failed to find interface params for DHCPv4");
-            return false;
-        }
         final DhcpServingParams params;
         try {
             params = new DhcpServingParams.Builder()
@@ -277,7 +271,7 @@ public class IpServer extends StateMachine {
             return false;
         }
 
-        mDhcpServer = mDeps.makeDhcpServer(getHandler().getLooper(), ifaceParams, params,
+        mDhcpServer = mDeps.makeDhcpServer(getHandler().getLooper(), mIfaceName, params,
                 mLog.forSubComponent("DHCP"));
         mDhcpServer.start();
         return true;
