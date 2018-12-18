@@ -22,33 +22,25 @@ import static com.android.systemui.statusbar.notification.row.NotificationInflat
 
 import android.annotation.Nullable;
 import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.service.dreams.DreamService;
-import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.EventLog;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
-import com.android.systemui.EventLogTags;
 import com.android.systemui.ForegroundServiceController;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
@@ -101,7 +93,6 @@ public class NotificationEntryManager implements
             Dependency.get(NotificationGroupManager.class);
     private final NotificationGutsManager mGutsManager =
             Dependency.get(NotificationGutsManager.class);
-    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private final DeviceProvisionedController mDeviceProvisionedController =
             Dependency.get(DeviceProvisionedController.class);
     private final VisualStabilityManager mVisualStabilityManager =
@@ -124,7 +115,6 @@ public class NotificationEntryManager implements
     private final Handler mDeferredNotificationViewUpdateHandler;
     private Runnable mUpdateNotificationViewsCallback;
 
-    protected IDreamManager mDreamManager;
     protected IStatusBarService mBarService;
     private NotificationPresenter mPresenter;
     private Callback mCallback;
@@ -136,7 +126,7 @@ public class NotificationEntryManager implements
     @VisibleForTesting
     final ArrayList<NotificationLifetimeExtender> mNotificationLifetimeExtenders
             = new ArrayList<>();
-    @Nullable private AlertTransferListener mAlertTransferListener;
+    private final List<NotificationEntryListener> mNotificationEntryListeners = new ArrayList<>();
 
     private final DeviceProvisionedController.DeviceProvisionedListener
             mDeviceProvisionedListener =
@@ -169,15 +159,14 @@ public class NotificationEntryManager implements
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        mDreamManager = IDreamManager.Stub.asInterface(
-                ServiceManager.checkService(DreamService.DREAM_SERVICE));
         mBubbleController.setDismissListener(this /* bubbleEventListener */);
         mNotificationData = new NotificationData();
         mDeferredNotificationViewUpdateHandler = new Handler();
     }
 
-    public void setAlertTransferListener(AlertTransferListener listener) {
-        mAlertTransferListener = listener;
+    /** Adds a {@link NotificationEntryListener}. */
+    public void addNotificationEntryListener(NotificationEntryListener listener) {
+        mNotificationEntryListeners.add(listener);
     }
 
     /**
@@ -259,14 +248,6 @@ public class NotificationEntryManager implements
     @Override
     public void onReorderingAllowed() {
         updateNotifications();
-    }
-
-    private boolean shouldSuppressFullScreenIntent(NotificationData.Entry entry) {
-        if (mPresenter.isDeviceInVrMode()) {
-            return true;
-        }
-
-        return entry.shouldSuppressFullScreenIntent();
     }
 
     public void performRemoveNotification(StatusBarNotification n) {
@@ -413,8 +394,8 @@ public class NotificationEntryManager implements
                     mVisualStabilityManager.onLowPriorityUpdated(entry);
                     mPresenter.updateNotificationViews();
                 }
-                if (mAlertTransferListener != null) {
-                    mAlertTransferListener.onEntryReinflated(entry);
+                for (NotificationEntryListener listener : mNotificationEntryListeners) {
+                    listener.onEntryReinflated(entry);
                 }
             }
         }
@@ -431,8 +412,10 @@ public class NotificationEntryManager implements
         final NotificationData.Entry entry = mNotificationData.get(key);
 
         abortExistingInflation(key);
-        if (mAlertTransferListener != null && entry != null) {
-            mAlertTransferListener.onEntryRemoved(entry);
+        if (entry != null) {
+            for (NotificationEntryListener listener : mNotificationEntryListeners) {
+                listener.onEntryRemoved(entry);
+            }
         }
 
         // Attempt to remove notifications from their alert managers (heads up, ambient pulse).
@@ -589,51 +572,15 @@ public class NotificationEntryManager implements
         mNotificationData.updateRanking(rankingMap);
         NotificationListenerService.Ranking ranking = new NotificationListenerService.Ranking();
         rankingMap.getRanking(key, ranking);
-        NotificationData.Entry shadeEntry = createNotificationEntry(notification, ranking);
-        boolean isHeadsUped = mNotificationInterruptionStateProvider.shouldHeadsUp(shadeEntry);
-        if (!isHeadsUped && notification.getNotification().fullScreenIntent != null) {
-            if (shouldSuppressFullScreenIntent(shadeEntry)) {
-                if (DEBUG) {
-                    Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + key);
-                }
-            } else if (mNotificationData.getImportance(key)
-                    < NotificationManager.IMPORTANCE_HIGH) {
-                if (DEBUG) {
-                    Log.d(TAG, "No Fullscreen intent: not important enough: "
-                            + key);
-                }
-            } else {
-                // Stop screensaver if the notification has a fullscreen intent.
-                // (like an incoming phone call)
-                Dependency.get(UiOffloadThread.class).submit(() -> {
-                    try {
-                        mDreamManager.awaken();
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-                // not immersive & a fullscreen alert should be shown
-                if (DEBUG)
-                    Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
-                try {
-                    EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
-                            key);
-                    notification.getNotification().fullScreenIntent.send();
-                    shadeEntry.notifyFullScreenIntentLaunched();
-                    mMetricsLogger.count("note_fullscreen", 1);
-                } catch (PendingIntent.CanceledException e) {
-                }
-            }
-        }
+        NotificationData.Entry entry = createNotificationEntry(notification, ranking);
         abortExistingInflation(key);
 
         mForegroundServiceController.addNotification(notification,
                 mNotificationData.getImportance(key));
 
-        mPendingNotifications.put(key, shadeEntry);
-        if (mAlertTransferListener != null) {
-            mAlertTransferListener.onPendingEntryAdded(shadeEntry);
+        mPendingNotifications.put(key, entry);
+        for (NotificationEntryListener listener : mNotificationEntryListeners) {
+            listener.onPendingEntryAdded(entry);
         }
     }
 

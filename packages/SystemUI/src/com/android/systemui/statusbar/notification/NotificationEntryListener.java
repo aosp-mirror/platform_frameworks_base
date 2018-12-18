@@ -16,26 +16,27 @@
 package com.android.systemui.statusbar.notification;
 
 /**
- * Listener interface for when NotificationEntryManager needs to tell
- * NotificationGroupAlertTransferHelper things. Will eventually grow to be a general-purpose
- * listening interface for the NotificationEntryManager.
+ * Listener interface for changes sent by NotificationEntryManager.
  */
-public interface AlertTransferListener {
+public interface NotificationEntryListener {
     /**
      * Called when a new notification is posted. At this point, the notification is "pending": its
      * views haven't been inflated yet and most of the system pretends like it doesn't exist yet.
      */
-    void onPendingEntryAdded(NotificationData.Entry entry);
+    default void onPendingEntryAdded(NotificationData.Entry entry) {
+    }
 
     /**
      * Called when an existing notification's views are reinflated (usually due to an update being
      * posted to that notification).
      */
-    void onEntryReinflated(NotificationData.Entry entry);
+    default void onEntryReinflated(NotificationData.Entry entry) {
+    }
 
     /**
      * Called when a notification has been removed (either because the user swiped it away or
      * because the developer retracted it).
      */
-    void onEntryRemoved(NotificationData.Entry entry);
+    default void onEntryRemoved(NotificationData.Entry entry) {
+    }
 }

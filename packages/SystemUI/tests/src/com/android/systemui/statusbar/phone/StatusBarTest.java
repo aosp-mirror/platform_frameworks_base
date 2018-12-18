@@ -223,7 +223,7 @@ public class StatusBarTest extends SysuiTestCase {
         mNotificationInterruptionStateProvider.setUpWithPresenter(mNotificationPresenter,
                 mHeadsUpManager, mHeadsUpSuppressor);
 
-        mEntryManager = new TestableNotificationEntryManager(mDreamManager, mPowerManager, mContext);
+        mEntryManager = new TestableNotificationEntryManager(mPowerManager, mContext);
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
@@ -738,10 +738,8 @@ public class StatusBarTest extends SysuiTestCase {
 
     public static class TestableNotificationEntryManager extends NotificationEntryManager {
 
-        public TestableNotificationEntryManager(IDreamManager dreamManager,
-                PowerManager powerManager, Context context) {
+        public TestableNotificationEntryManager(PowerManager powerManager, Context context) {
             super(context);
-            mDreamManager = dreamManager;
             mPowerManager = powerManager;
         }
 
