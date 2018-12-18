@@ -88,10 +88,14 @@ public class SmartReplyController {
         return mSendingKeys.contains(key);
     }
 
-    public void smartRepliesAdded(final NotificationData.Entry entry, int replyCount) {
+    /**
+     * Smart Replies and Actions have been added to the UI.
+     */
+    public void smartSuggestionsAdded(final NotificationData.Entry entry, int replyCount,
+            int actionCount, boolean generatedByAssistant) {
         try {
-            mBarService.onNotificationSmartRepliesAdded(entry.notification.getKey(),
-                    replyCount);
+            mBarService.onNotificationSmartSuggestionsAdded(
+                    entry.notification.getKey(), replyCount, actionCount, generatedByAssistant);
         } catch (RemoteException e) {
             // Nothing to do, system going down
         }

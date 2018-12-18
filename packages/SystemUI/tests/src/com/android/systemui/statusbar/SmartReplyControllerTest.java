@@ -51,6 +51,7 @@ public class SmartReplyControllerTest extends SysuiTestCase {
     private static final String TEST_CHOICE_TEXT = "A Reply";
     private static final int TEST_CHOICE_INDEX = 2;
     private static final int TEST_CHOICE_COUNT = 4;
+    private static final int TEST_ACTION_COUNT = 3;
 
     private Notification mNotification;
     private NotificationData.Entry mEntry;
@@ -117,12 +118,14 @@ public class SmartReplyControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowSmartReply_logsToStatusBar() throws RemoteException {
-        mSmartReplyController.smartRepliesAdded(mEntry, TEST_CHOICE_COUNT);
+    public void testShowSmartSuggestions_logsToStatusBar() throws RemoteException {
+        final boolean generatedByAsssistant = true;
+        mSmartReplyController.smartSuggestionsAdded(mEntry, TEST_CHOICE_COUNT, TEST_ACTION_COUNT,
+                generatedByAsssistant);
 
         // Check we log the result to the status bar service.
-        verify(mIStatusBarService).onNotificationSmartRepliesAdded(mSbn.getKey(),
-                TEST_CHOICE_COUNT);
+        verify(mIStatusBarService).onNotificationSmartSuggestionsAdded(mSbn.getKey(),
+                TEST_CHOICE_COUNT, TEST_ACTION_COUNT, generatedByAsssistant);
     }
 
     @Test
