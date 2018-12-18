@@ -28,9 +28,6 @@
     <style name="Theme.DeviceDefault.PermissionGrant"
            parent="@style/Theme.DeviceDefault.Light.Dialog">
         <item name="titleTextStyle">@style/PermissionGrantTitleMessage</item>
-        <item name="radioButtonStyle">@style/PermissionGrantRadioButton</item>
-        <item name="checkboxStyle">@style/PermissionGrantCheckbox</item>
-        <item name="buttonBarStyle">@style/PermissionGrantButtonBar</item>
     </style>
 
     <!-- themes for the permission review dialog. -->
@@ -39,6 +36,5 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="titleTextStyle">@style/PermissionReviewTitleMessage</item>
-        <item name="buttonBarStyle">@style/PermissionReviewButtonBar</item>
     </style>
 </resources>
