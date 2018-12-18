@@ -10,7 +10,7 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files) \
     ../src/com/android/providers/settings/SettingsState.java \
     ../src/com/android/providers/settings/SettingsHelper.java
 
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
+LOCAL_STATIC_JAVA_LIBRARIES := androidx.test.rules
 
 LOCAL_JAVA_LIBRARIES := android.test.base
 
