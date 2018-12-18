@@ -1002,6 +1002,7 @@ public final class MediaStore {
         public static final int MICRO_KIND = 3;
 
         public static final Point MINI_SIZE = new Point(512, 384);
+        public static final Point FULL_SCREEN_SIZE = new Point(1024, 786);
         public static final Point MICRO_SIZE = new Point(96, 96);
     }
 
@@ -1127,6 +1128,8 @@ public final class MediaStore {
             final Point size;
             if (kind == ThumbnailConstants.MICRO_KIND) {
                 size = ThumbnailConstants.MICRO_SIZE;
+            } else if (kind == ThumbnailConstants.FULL_SCREEN_KIND) {
+                size = ThumbnailConstants.FULL_SCREEN_SIZE;
             } else if (kind == ThumbnailConstants.MINI_KIND) {
                 size = ThumbnailConstants.MINI_SIZE;
             } else {

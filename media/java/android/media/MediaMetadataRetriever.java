@@ -40,8 +40,7 @@ import java.util.Map;
  * MediaMetadataRetriever class provides a unified interface for retrieving
  * frame and meta data from an input media file.
  */
-public class MediaMetadataRetriever
-{
+public class MediaMetadataRetriever implements AutoCloseable {
     static {
         System.loadLibrary("media_jni");
         native_init();
@@ -671,6 +670,11 @@ public class MediaMetadataRetriever
 
     @UnsupportedAppUsage
     private native byte[] getEmbeddedPicture(int pictureType);
+
+    @Override
+    public void close() {
+        release();
+    }
 
     /**
      * Call it when one is done with the object. This method releases the memory
