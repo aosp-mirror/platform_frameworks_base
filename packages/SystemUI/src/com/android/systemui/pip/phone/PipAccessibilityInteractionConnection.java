@@ -165,6 +165,11 @@ public class PipAccessibilityInteractionConnection
         }
     }
 
+    @Override
+    public void clearAccessibilityFocus() {
+        // We should not be here.
+    }
+
     public static AccessibilityNodeInfo obtainRootAccessibilityNodeInfo() {
         AccessibilityNodeInfo info = AccessibilityNodeInfo.obtain();
         info.setSourceNodeId(AccessibilityNodeInfo.ROOT_NODE_ID,
