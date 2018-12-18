@@ -23,7 +23,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_PACKAGE_NAME := MultiDexLegacyTestServicesTests2
 
 LOCAL_JAVA_LIBRARIES := android-support-multidex
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
+LOCAL_STATIC_JAVA_LIBRARIES := androidx.test.rules
 
 LOCAL_SDK_VERSION := 9
 
