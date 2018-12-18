@@ -109,10 +109,9 @@ public abstract class ContentCaptureService extends Service {
             new IContentCaptureDirectManager.Stub() {
 
         @Override
-        public void sendEvents(String sessionId,
-                @SuppressWarnings("rawtypes") ParceledListSlice events) {
+        public void sendEvents(@SuppressWarnings("rawtypes") ParceledListSlice events) {
             mHandler.sendMessage(obtainMessage(ContentCaptureService::handleSendEvents,
-                            ContentCaptureService.this, sessionId, Binder.getCallingUid(), events));
+                            ContentCaptureService.this, Binder.getCallingUid(), events));
         }
     };
 
@@ -218,17 +217,28 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
-     * Notifies the service of {@link ContentCaptureEvent events} associated with a content capture
-     * session.
      *
-     * @param sessionId the session's Id
-     * @param request the events
+     * @deprecated use {@link #onContentCaptureEvent(ContentCaptureSessionId, ContentCaptureEvent)}
+     * instead.
      */
+    @Deprecated
     public void onContentCaptureEventsRequest(@NonNull ContentCaptureSessionId sessionId,
             @NonNull ContentCaptureEventsRequest request) {
         if (VERBOSE) Log.v(TAG, "onContentCaptureEventsRequest(id=" + sessionId + ")");
     }
 
+    /**
+     * Notifies the service of {@link ContentCaptureEvent events} associated with a content capture
+     * session.
+     *
+     * @param sessionId the session's Id
+     * @param event the event
+     */
+    public void onContentCaptureEvent(@NonNull ContentCaptureSessionId sessionId,
+            @NonNull ContentCaptureEvent event) {
+        if (VERBOSE) Log.v(TAG, "onContentCaptureEventsRequest(id=" + sessionId + ")");
+        onContentCaptureEventsRequest(sessionId, new ContentCaptureEventsRequest(event));
+    }
     /**
      * Notifies the service of {@link SnapshotData snapshot data} associated with a session.
      *
@@ -272,11 +282,24 @@ public abstract class ContentCaptureService extends Service {
                 mClientInterface.asBinder());
     }
 
-    private void handleSendEvents(@NonNull String sessionId, int uid,
-            @NonNull ParceledListSlice<ContentCaptureEvent> events) {
-        if (handleIsRightCallerFor(sessionId, uid)) {
-            onContentCaptureEventsRequest(new ContentCaptureSessionId(sessionId),
-                    new ContentCaptureEventsRequest(events));
+    private void handleSendEvents(int uid,
+            @NonNull ParceledListSlice<ContentCaptureEvent> parceledEvents) {
+
+        // Most events belong to the same session, so we can keep a reference to the last one
+        // to avoid creating too many ContentCaptureSessionId objects
+        String lastSessionId = null;
+        ContentCaptureSessionId sessionId = null;
+
+        final List<ContentCaptureEvent> events = parceledEvents.getList();
+        for (int i = 0; i < events.size(); i++) {
+            final ContentCaptureEvent event = events.get(i);
+            String sessionIdString = event.getSessionId();
+            if (!sessionIdString.equals(lastSessionId)) {
+                if (!handleIsRightCallerFor(sessionIdString, uid)) continue;
+                sessionId = new ContentCaptureSessionId(sessionIdString);
+                lastSessionId = sessionIdString;
+            }
+            onContentCaptureEvent(sessionId, event);
         }
     }
 

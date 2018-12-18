@@ -327,7 +327,7 @@ public final class ActivityContentCaptureSession extends ContentCaptureSession {
             mHandler.removeMessages(MSG_FLUSH);
 
             final ParceledListSlice<ContentCaptureEvent> events = handleClearEvents();
-            mDirectServiceInterface.sendEvents(mId, events);
+            mDirectServiceInterface.sendEvents(events);
         } catch (RemoteException e) {
             Log.w(mTag, "Error sending " + numberEvents + " for " + getActivityDebugName()
                     + ": " + e);
@@ -387,14 +387,14 @@ public final class ActivityContentCaptureSession extends ContentCaptureSession {
     @Override
     void internalNotifyViewAppeared(@NonNull ViewStructureImpl node) {
         mHandler.sendMessage(obtainMessage(ActivityContentCaptureSession::handleSendEvent, this,
-                new ContentCaptureEvent(TYPE_VIEW_APPEARED)
+                new ContentCaptureEvent(mId, TYPE_VIEW_APPEARED)
                         .setViewNode(node.mNode), /* forceFlush= */ false));
     }
 
     @Override
     void internalNotifyViewDisappeared(@NonNull AutofillId id) {
         mHandler.sendMessage(obtainMessage(ActivityContentCaptureSession::handleSendEvent, this,
-                new ContentCaptureEvent(TYPE_VIEW_DISAPPEARED).setAutofillId(id),
+                new ContentCaptureEvent(mId, TYPE_VIEW_DISAPPEARED).setAutofillId(id),
                         /* forceFlush= */ false));
     }
 
@@ -402,7 +402,7 @@ public final class ActivityContentCaptureSession extends ContentCaptureSession {
     void internalNotifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text,
             int flags) {
         mHandler.sendMessage(obtainMessage(ActivityContentCaptureSession::handleSendEvent, this,
-                new ContentCaptureEvent(TYPE_VIEW_TEXT_CHANGED, flags).setAutofillId(id)
+                new ContentCaptureEvent(mId, TYPE_VIEW_TEXT_CHANGED, flags).setAutofillId(id)
                         .setText(text), /* forceFlush= */ false));
     }
 

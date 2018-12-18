@@ -26,5 +26,5 @@ import android.view.contentcapture.ContentCaptureEvent;
   * @hide
   */
 oneway interface IContentCaptureDirectManager {
-    void sendEvents(in String sessionId, in ParceledListSlice events);
+    void sendEvents(in ParceledListSlice events);
 }

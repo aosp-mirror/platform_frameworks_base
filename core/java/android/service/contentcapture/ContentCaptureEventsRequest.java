@@ -17,26 +17,30 @@ package android.service.contentcapture;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.content.pm.ParceledListSlice;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.contentcapture.ContentCaptureEvent;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * Batch of content capture events.
+ * Not needed anymore...
+ *
+ * @deprecated
  *
  * @hide
  */
 @SystemApi
+@Deprecated
 public final class ContentCaptureEventsRequest implements Parcelable {
+// TODO(b/121033016): remove .java and .aidl once service implementation doesn't use it anymore
 
-    private final ParceledListSlice<ContentCaptureEvent> mEvents;
+    private final ContentCaptureEvent mEvent;
 
     /** @hide */
-    public ContentCaptureEventsRequest(@NonNull ParceledListSlice<ContentCaptureEvent> events) {
-        mEvents = events;
+    public ContentCaptureEventsRequest(@NonNull ContentCaptureEvent event) {
+        mEvent = event;
     }
 
     /**
@@ -44,7 +48,7 @@ public final class ContentCaptureEventsRequest implements Parcelable {
      */
     @NonNull
     public List<ContentCaptureEvent> getEvents() {
-        return mEvents.getList();
+        return Arrays.asList(mEvent);
     }
 
     @Override
@@ -54,7 +58,7 @@ public final class ContentCaptureEventsRequest implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeParcelable(mEvents, flags);
+        parcel.writeParcelable(mEvent, flags);
     }
 
     public static final Parcelable.Creator<ContentCaptureEventsRequest> CREATOR =
