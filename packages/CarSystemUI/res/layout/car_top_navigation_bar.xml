@@ -21,7 +21,7 @@
     android:id="@+id/car_top_bar"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black"
+    android:background="@drawable/system_bar_background"
     android:orientation="vertical">
 
     <RelativeLayout

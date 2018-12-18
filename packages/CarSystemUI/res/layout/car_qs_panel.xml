@@ -21,8 +21,7 @@
     android:layout_height="wrap_content"
     android:background="@color/car_qs_background_primary"
     android:orientation="vertical"
-    android:elevation="4dp"
-    android:theme="@android:style/Theme">
+    android:elevation="4dp">
 
     <include layout="@layout/car_status_bar_header"/>
     <include layout="@layout/car_qs_footer"/>
@@ -39,7 +38,7 @@
             android:id="@+id/user_grid"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:theme="@style/Theme.Car.Light.List"
+            android:theme="@style/PagedListTheme"
             app:showPagedListViewDivider="false"
             app:gutter="both"
             app:itemSpacing="@dimen/car_user_switcher_vertical_spacing_between_users"/>
