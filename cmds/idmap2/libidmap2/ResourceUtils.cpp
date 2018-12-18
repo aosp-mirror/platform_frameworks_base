@@ -15,12 +15,12 @@
  */
 
 #include <string>
-#include <utility>
 
 #include "androidfw/StringPiece.h"
 #include "androidfw/Util.h"
 
 #include "idmap2/ResourceUtils.h"
+#include "idmap2/Result.h"
 
 using android::StringPiece16;
 using android::util::Utf16ToUtf8;
@@ -29,11 +29,10 @@ namespace android {
 namespace idmap2 {
 namespace utils {
 
-std::pair<bool, std::string> WARN_UNUSED ResToTypeEntryName(const AssetManager2& am,
-                                                            ResourceId resid) {
+Result<std::string> WARN_UNUSED ResToTypeEntryName(const AssetManager2& am, ResourceId resid) {
   AssetManager2::ResourceName name;
   if (!am.GetResourceName(resid, &name)) {
-    return std::make_pair(false, "");
+    return {};
   }
   std::string out;
   if (name.type != nullptr) {
@@ -47,7 +46,7 @@ std::pair<bool, std::string> WARN_UNUSED ResToTypeEntryName(const AssetManager2&
   } else {
     out += Utf16ToUtf8(StringPiece16(name.entry16, name.entry_len));
   }
-  return std::make_pair(true, out);
+  return {out};
 }
 
 }  // namespace utils

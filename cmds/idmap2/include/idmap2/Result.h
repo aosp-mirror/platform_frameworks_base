@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-#ifndef IDMAP2_INCLUDE_IDMAP2_RESOURCEUTILS_H_
-#define IDMAP2_INCLUDE_IDMAP2_RESOURCEUTILS_H_
+#ifndef IDMAP2_INCLUDE_IDMAP2_RESULT_H_
+#define IDMAP2_INCLUDE_IDMAP2_RESULT_H_
 
-#include <string>
+#include <optional>
 
-#include "android-base/macros.h"
-#include "androidfw/AssetManager2.h"
+namespace android::idmap2 {
 
-#include "idmap2/Idmap.h"
-#include "idmap2/Result.h"
+template <typename T>
+using Result = std::optional<T>;
 
-namespace android {
-namespace idmap2 {
-namespace utils {
+static constexpr std::nullopt_t kResultError = std::nullopt;
 
-Result<std::string> WARN_UNUSED ResToTypeEntryName(const AssetManager2& am, ResourceId resid);
+}  // namespace android::idmap2
 
-}  // namespace utils
-}  // namespace idmap2
-}  // namespace android
-
-#endif  // IDMAP2_INCLUDE_IDMAP2_RESOURCEUTILS_H_
+#endif  // IDMAP2_INCLUDE_IDMAP2_RESULT_H_

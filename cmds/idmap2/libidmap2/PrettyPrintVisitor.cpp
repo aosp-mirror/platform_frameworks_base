@@ -15,7 +15,6 @@
  */
 
 #include <string>
-#include <utility>
 
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
@@ -23,6 +22,7 @@
 
 #include "idmap2/PrettyPrintVisitor.h"
 #include "idmap2/ResourceUtils.h"
+#include "idmap2/Result.h"
 
 namespace android {
 namespace idmap2 {
@@ -63,11 +63,9 @@ void PrettyPrintVisitor::visit(const IdmapData::TypeEntry& te) {
 
     stream_ << base::StringPrintf("0x%08x -> 0x%08x", target_resid, overlay_resid);
     if (target_package_loaded) {
-      bool lookup_ok;
-      std::string name;
-      std::tie(lookup_ok, name) = utils::ResToTypeEntryName(target_am_, target_resid);
-      if (lookup_ok) {
-        stream_ << " " << name;
+      Result<std::string> name = utils::ResToTypeEntryName(target_am_, target_resid);
+      if (name) {
+        stream_ << " " << *name;
       }
     }
     stream_ << std::endl;
