@@ -55,5 +55,6 @@ oneway interface IPhoneStateListener {
     void onPreferredDataSubIdChanged(in int subId);
     void onRadioPowerStateChanged(in int state);
     void onEmergencyNumberListChanged(in Map emergencyNumberList);
+    void onCallDisconnectCauseChanged(in int disconnectCause, in int preciseDisconnectCause);
 }
 
