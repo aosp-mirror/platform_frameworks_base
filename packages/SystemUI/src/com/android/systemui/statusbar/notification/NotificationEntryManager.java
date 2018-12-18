@@ -15,6 +15,7 @@
  */
 package com.android.systemui.statusbar.notification;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.bubbles.BubbleController.DEBUG_DEMOTE_TO_NOTIF;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY;
@@ -36,7 +37,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
@@ -49,7 +49,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -57,7 +56,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.NotificationMessagingUtil;
-import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.EventLogTags;
@@ -115,7 +113,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     private final NotificationMessagingUtil mMessagingUtil;
     protected final Context mContext;
     protected final HashMap<String, NotificationData.Entry> mPendingNotifications = new HashMap<>();
-    private final NotificationClicker mNotificationClicker = new NotificationClicker();
 
     private final NotificationGroupManager mGroupManager =
             Dependency.get(NotificationGroupManager.class);
@@ -146,7 +143,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     protected IStatusBarService mBarService;
     private NotificationPresenter mPresenter;
     private Callback mCallback;
-    private NotificationActivityStarter mNotificationActivityStarter;
     protected PowerManager mPowerManager;
     private NotificationListenerService.RankingMap mLatestRankingMap;
     protected HeadsUpManager mHeadsUpManager;
@@ -161,63 +157,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     private ExpandableNotificationRow.OnAppOpsClickListener mOnAppOpsClickListener;
     private NotificationViewHierarchyManager.StatusBarStateListener mStatusBarStateListener;
     @Nullable private AlertTransferListener mAlertTransferListener;
-
-    private final class NotificationClicker implements View.OnClickListener {
-
-        @Override
-        public void onClick(final View v) {
-            if (!(v instanceof ExpandableNotificationRow)) {
-                Log.e(TAG, "NotificationClicker called on a view that is not a notification row.");
-                return;
-            }
-
-            getShadeController().wakeUpIfDozing(SystemClock.uptimeMillis(), v);
-
-            final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-            final StatusBarNotification sbn = row.getStatusBarNotification();
-            if (sbn == null) {
-                Log.e(TAG, "NotificationClicker called on an unclickable notification,");
-                return;
-            }
-
-            // Check if the notification is displaying the menu, if so slide notification back
-            if (isMenuVisible(row)) {
-                row.animateTranslateNotification(0);
-                return;
-            } else if (row.isChildInGroup() && isMenuVisible(row.getNotificationParent())) {
-                row.getNotificationParent().animateTranslateNotification(0);
-                return;
-            } else if (row.isSummaryWithChildren() && row.areChildrenExpanded()) {
-                // We never want to open the app directly if the user clicks in between
-                // the notifications.
-                return;
-            }
-
-            // Mark notification for one frame.
-            row.setJustClicked(true);
-            DejankUtils.postAfterTraversal(() -> row.setJustClicked(false));
-
-            // If it was a bubble we should close it
-            if (row.getEntry().isBubble()) {
-                mBubbleController.collapseStack();
-            }
-
-            mNotificationActivityStarter.onNotificationClicked(sbn, row);
-        }
-
-        private boolean isMenuVisible(ExpandableNotificationRow row) {
-            return row.getProvider() != null && row.getProvider().isMenuVisible();
-        }
-
-        public void register(ExpandableNotificationRow row, StatusBarNotification sbn) {
-            Notification notification = sbn.getNotification();
-            if (notification.contentIntent != null || notification.fullScreenIntent != null) {
-                row.setOnClickListener(this);
-            } else {
-                row.setOnClickListener(null);
-            }
-        }
-    }
+    @Nullable private NotificationClicker mNotificationClicker;
 
     private final DeviceProvisionedController.DeviceProvisionedListener
             mDeviceProvisionedListener =
@@ -267,6 +207,10 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
     public void setAlertTransferListener(AlertTransferListener listener) {
         mAlertTransferListener = listener;
+    }
+
+    public void setNotificationClicker(NotificationClicker clicker) {
+        mNotificationClicker = clicker;
     }
 
     /**
@@ -353,11 +297,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
         mHeadsUpObserver.onChange(true); // set up
         mOnAppOpsClickListener = mGutsManager::openGuts;
-    }
-
-    public void setNotificationActivityStarter(
-            NotificationActivityStarter notificationActivityStarter) {
-        mNotificationActivityStarter = notificationActivityStarter;
     }
 
     public NotificationData getNotificationData() {
@@ -757,7 +696,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         row.setIsLowPriority(isLowPriority);
         row.setLowPriorityStateUpdated(isUpdate && (wasLowPriority != isLowPriority));
         // bind the click event to the content area
-        mNotificationClicker.register(row, sbn);
+        checkNotNull(mNotificationClicker).register(row, sbn);
 
         // Extract target SDK version.
         try {
