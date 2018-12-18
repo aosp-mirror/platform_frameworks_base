@@ -169,6 +169,7 @@
     <assign-permission name="android.permission.DUMP" uid="incidentd" />
     <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="incidentd" />
     <assign-permission name="android.permission.INTERACT_ACROSS_USERS" uid="incidentd" />
+    <assign-permission name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL" uid="incidentd" />
 
     <assign-permission name="android.permission.ACCESS_LOWPAN_STATE" uid="lowpan" />
     <assign-permission name="android.permission.MANAGE_LOWPAN_INTERFACES" uid="lowpan" />

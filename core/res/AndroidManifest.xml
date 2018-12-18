@@ -2808,6 +2808,11 @@
     <permission android:name="android.permission.APPROVE_INCIDENT_REPORTS"
         android:protectionLevel="signature|incidentReportApprover" />
 
+    <!-- @hide Allow an application to approve an incident or bug report approval from
+        the system. -->
+    <permission android:name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"
+        android:protectionLevel="signature|privileged" />
+
     <!-- ==================================== -->
     <!-- Private permissions                  -->
     <!-- ==================================== -->

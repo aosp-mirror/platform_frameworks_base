@@ -141,6 +141,7 @@ applications that come with the platform
         <permission name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"/>
         <permission name="android.permission.GET_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
+        <permission name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"/>
         <permission name="android.permission.APPROVE_INCIDENT_REPORTS"/>
     </privapp-permissions>
 
@@ -328,6 +329,7 @@ applications that come with the platform
         <permission name="android.permission.USE_RESERVED_DISK"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+        <permission name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

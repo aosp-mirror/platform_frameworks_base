@@ -91,6 +91,7 @@ import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.emergency.EmergencyAffordanceService;
 import com.android.server.hdmi.HdmiControlService;
+import com.android.server.incident.IncidentCompanionService;
 import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
 import com.android.server.inputmethod.MultiClientInputMethodManagerService;
@@ -1854,6 +1855,11 @@ public final class SystemServer {
         // Statsd helper
         traceBeginAndSlog("StartStatsCompanionService");
         mSystemServiceManager.startService(StatsCompanionService.Lifecycle.class);
+        traceEnd();
+
+        // Incidentd and dumpstated helper
+        traceBeginAndSlog("StartIncidentCompanionService");
+        mSystemServiceManager.startService(IncidentCompanionService.class);
         traceEnd();
 
         if (safeMode) {

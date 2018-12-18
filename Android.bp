@@ -656,6 +656,7 @@ java_defaults {
         ":vold_aidl",
         ":installd_aidl",
         ":dumpstate_aidl",
+        ":incidentcompanion_aidl",
 
         "lowpan/java/android/net/lowpan/ILowpanEnergyScanCallback.aidl",
         "lowpan/java/android/net/lowpan/ILowpanNetScanCallback.aidl",
@@ -706,6 +707,7 @@ java_defaults {
             "system/update_engine/binder_bindings",
             "frameworks/native/aidl/binder",
             "frameworks/native/cmds/dumpstate/binder",
+            "frameworks/native/libs/incidentcompanion/binder",
             "frameworks/av/camera/aidl",
             "frameworks/av/media/libaudioclient/aidl",
             "frameworks/native/aidl/gui",

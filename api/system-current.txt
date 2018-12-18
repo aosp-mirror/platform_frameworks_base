@@ -1307,6 +1307,7 @@ package android.content {
     field public static final String ACTION_MANAGE_PERMISSION_APPS = "android.intent.action.MANAGE_PERMISSION_APPS";
     field @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public static final String ACTION_MANAGE_SPECIAL_APP_ACCESSES = "android.intent.action.MANAGE_SPECIAL_APP_ACCESSES";
     field public static final String ACTION_MASTER_CLEAR_NOTIFICATION = "android.intent.action.MASTER_CLEAR_NOTIFICATION";
+    field public static final String ACTION_PENDING_INCIDENT_REPORTS_CHANGED = "android.intent.action.PENDING_INCIDENT_REPORTS_CHANGED";
     field public static final String ACTION_PRE_BOOT_COMPLETED = "android.intent.action.PRE_BOOT_COMPLETED";
     field public static final String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
     field public static final String ACTION_RESOLVE_INSTANT_APP_PACKAGE = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
@@ -5333,7 +5334,27 @@ package android.os {
   }
 
   public class IncidentManager {
+    method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public void approveReport(android.net.Uri);
+    method @RequiresPermission("android.permission.REQUEST_INCIDENT_REPORT_APPROVAL") public void cancelAuthorization(android.os.IncidentManager.AuthListener);
+    method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public void denyReport(android.net.Uri);
+    method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public java.util.List<android.os.IncidentManager.PendingReport> getPendingReports();
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void reportIncident(android.os.IncidentReportArgs);
+    method @RequiresPermission("android.permission.REQUEST_INCIDENT_REPORT_APPROVAL") public void requestAuthorization(int, String, int, android.os.IncidentManager.AuthListener);
+    field public static final int FLAG_CONFIRMATION_DIALOG = 1; // 0x1
+  }
+
+  public static class IncidentManager.AuthListener {
+    ctor public IncidentManager.AuthListener();
+    method public void onReportApproved();
+    method public void onReportDenied();
+  }
+
+  public static class IncidentManager.PendingReport {
+    ctor public IncidentManager.PendingReport(@NonNull android.net.Uri);
+    method public int getFlags();
+    method @NonNull public String getRequestingPackage();
+    method public long getTimestamp();
+    method @NonNull public android.net.Uri getUri();
   }
 
   public final class IncidentReportArgs implements android.os.Parcelable {
