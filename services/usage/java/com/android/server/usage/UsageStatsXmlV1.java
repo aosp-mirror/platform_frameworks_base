@@ -98,14 +98,14 @@ final class UsageStatsXmlV1 {
             stats.mLastTimeVisible = statsOut.beginTime + XmlUtils.readLongAttribute(
                     parser, LAST_TIME_VISIBLE_ATTR);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to parse mLastTimeVisible", e);
+            Log.i(TAG, "Failed to parse mLastTimeVisible");
         }
 
         try {
             stats.mLastTimeForegroundServiceUsed = statsOut.beginTime + XmlUtils.readLongAttribute(
                     parser, LAST_TIME_SERVICE_USED_ATTR);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to parse mLastTimeForegroundServiceUsed", e);
+            Log.i(TAG, "Failed to parse mLastTimeForegroundServiceUsed");
         }
 
         stats.mTotalTimeInForeground = XmlUtils.readLongAttribute(parser, TOTAL_TIME_ACTIVE_ATTR);
@@ -113,14 +113,14 @@ final class UsageStatsXmlV1 {
         try {
             stats.mTotalTimeVisible = XmlUtils.readLongAttribute(parser, TOTAL_TIME_VISIBLE_ATTR);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to parse mTotalTimeVisible", e);
+            Log.i(TAG, "Failed to parse mTotalTimeVisible");
         }
 
         try {
             stats.mTotalTimeForegroundServiceUsed = XmlUtils.readLongAttribute(parser,
                     TOTAL_TIME_SERVICE_USED_ATTR);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to parse mTotalTimeForegroundServiceUsed", e);
+            Log.i(TAG, "Failed to parse mTotalTimeForegroundServiceUsed");
         }
 
         stats.mLastEvent = XmlUtils.readIntAttribute(parser, LAST_EVENT_ATTR);
