@@ -17,9 +17,21 @@
 package com.android.server.net.ipmemorystore;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.NetworkUtils;
+import android.net.ipmemorystore.NetworkAttributes;
+import android.net.ipmemorystore.Status;
+import android.util.Log;
+
+import java.io.ByteArrayOutputStream;
+import java.net.InetAddress;
+import java.util.List;
 
 /**
  * Encapsulating class for using the SQLite database backing the memory store.
@@ -30,6 +42,8 @@ import android.database.sqlite.SQLiteOpenHelper;
  * @hide
  */
 public class IpMemoryStoreDatabase {
+    private static final String TAG = IpMemoryStoreDatabase.class.getSimpleName();
+
     /**
      * Contract class for the Network Attributes table.
      */
@@ -139,5 +153,126 @@ public class IpMemoryStoreDatabase {
             db.execSQL(PrivateDataContract.DROP_TABLE);
             onCreate(db);
         }
+    }
+
+    @NonNull
+    private static byte[] encodeAddressList(@NonNull final List<InetAddress> addresses) {
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        for (final InetAddress address : addresses) {
+            final byte[] b = address.getAddress();
+            os.write(b.length);
+            os.write(b, 0, b.length);
+        }
+        return os.toByteArray();
+    }
+
+    // Convert a NetworkAttributes object to content values to store them in a table compliant
+    // with the contract defined in NetworkAttributesContract.
+    @NonNull
+    private static ContentValues toContentValues(@NonNull final String key,
+            @Nullable final NetworkAttributes attributes, final long expiry) {
+        final ContentValues values = new ContentValues();
+        values.put(NetworkAttributesContract.COLNAME_L2KEY, key);
+        values.put(NetworkAttributesContract.COLNAME_EXPIRYDATE, expiry);
+        if (null != attributes) {
+            if (null != attributes.assignedV4Address) {
+                values.put(NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESS,
+                        NetworkUtils.inet4AddressToIntHTH(attributes.assignedV4Address));
+            }
+            if (null != attributes.groupHint) {
+                values.put(NetworkAttributesContract.COLNAME_GROUPHINT, attributes.groupHint);
+            }
+            if (null != attributes.dnsAddresses) {
+                values.put(NetworkAttributesContract.COLNAME_DNSADDRESSES,
+                        encodeAddressList(attributes.dnsAddresses));
+            }
+            if (null != attributes.mtu) {
+                values.put(NetworkAttributesContract.COLNAME_MTU, attributes.mtu);
+            }
+        }
+        return values;
+    }
+
+    // Convert a byte array into content values to store it in a table compliant with the
+    // contract defined in PrivateDataContract.
+    @NonNull
+    private static ContentValues toContentValues(@NonNull final String key,
+            @NonNull final String clientId, @NonNull final String name,
+            @NonNull final byte[] data) {
+        final ContentValues values = new ContentValues();
+        values.put(PrivateDataContract.COLNAME_L2KEY, key);
+        values.put(PrivateDataContract.COLNAME_CLIENT, clientId);
+        values.put(PrivateDataContract.COLNAME_DATANAME, name);
+        values.put(PrivateDataContract.COLNAME_DATA, data);
+        return values;
+    }
+
+    private static final String[] EXPIRY_COLUMN = new String[] {
+        NetworkAttributesContract.COLNAME_EXPIRYDATE
+    };
+    static final int EXPIRY_ERROR = -1; // Legal values for expiry are positive
+
+    static final String SELECT_L2KEY = NetworkAttributesContract.COLNAME_L2KEY + " = ?";
+
+    // Returns the expiry date of the specified row, or one of the error codes above if the
+    // row is not found or some other error
+    static long getExpiry(@NonNull final SQLiteDatabase db, @NonNull final String key) {
+        final Cursor cursor = db.query(NetworkAttributesContract.TABLENAME,
+                EXPIRY_COLUMN, // columns
+                SELECT_L2KEY, // selection
+                new String[] { key }, // selectionArgs
+                null, // groupBy
+                null, // having
+                null // orderBy
+        );
+        // L2KEY is the primary key ; it should not be possible to get more than one
+        // result here. 0 results means the key was not found.
+        if (cursor.getCount() != 1) return EXPIRY_ERROR;
+        cursor.moveToFirst();
+        return cursor.getLong(0); // index in the EXPIRY_COLUMN array
+    }
+
+    static final int RELEVANCE_ERROR = -1; // Legal values for relevance are positive
+
+    // Returns the relevance of the specified row, or one of the error codes above if the
+    // row is not found or some other error
+    static int getRelevance(@NonNull final SQLiteDatabase db, @NonNull final String key) {
+        final long expiry = getExpiry(db, key);
+        return expiry < 0 ? (int) expiry : RelevanceUtils.computeRelevanceForNow(expiry);
+    }
+
+    // If the attributes are null, this will only write the expiry.
+    // Returns an int out of Status.{SUCCESS,ERROR_*}
+    static int storeNetworkAttributes(@NonNull final SQLiteDatabase db, @NonNull final String key,
+            final long expiry, @Nullable final NetworkAttributes attributes) {
+        final ContentValues cv = toContentValues(key, attributes, expiry);
+        db.beginTransaction();
+        try {
+            // Unfortunately SQLite does not have any way to do INSERT OR UPDATE. Options are
+            // to either insert with on conflict ignore then update (like done here), or to
+            // construct a custom SQL INSERT statement with nested select.
+            final long resultId = db.insertWithOnConflict(NetworkAttributesContract.TABLENAME,
+                    null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+            if (resultId < 0) {
+                db.update(NetworkAttributesContract.TABLENAME, cv, SELECT_L2KEY, new String[]{key});
+            }
+            db.setTransactionSuccessful();
+            return Status.SUCCESS;
+        } catch (SQLiteException e) {
+            // No space left on disk or something
+            Log.e(TAG, "Could not write to the memory store", e);
+        } finally {
+            db.endTransaction();
+        }
+        return Status.ERROR_STORAGE;
+    }
+
+    // Returns an int out of Status.{SUCCESS,ERROR_*}
+    static int storeBlob(@NonNull final SQLiteDatabase db, @NonNull final String key,
+            @NonNull final String clientId, @NonNull final String name,
+            @NonNull final byte[] data) {
+        final long res = db.insertWithOnConflict(PrivateDataContract.TABLENAME, null,
+                toContentValues(key, clientId, name, data), SQLiteDatabase.CONFLICT_REPLACE);
+        return (res == -1) ? Status.ERROR_STORAGE : Status.SUCCESS;
     }
 }
