@@ -6152,7 +6152,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         try {
             synchronized (getGetProviderLock(auth, userId)) {
                 holder = ActivityManager.getService().getContentProvider(
-                        getApplicationThread(), auth, userId, stable);
+                        getApplicationThread(), c.getOpPackageName(), auth, userId, stable);
             }
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();

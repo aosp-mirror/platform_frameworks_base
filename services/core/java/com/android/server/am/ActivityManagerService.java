@@ -6291,7 +6291,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     ContentProviderConnection incProviderCountLocked(ProcessRecord r,
             final ContentProviderRecord cpr, IBinder externalProcessToken, int callingUid,
-            String callingTag, boolean stable) {
+            String callingPackage, String callingTag, boolean stable) {
         if (r != null) {
             for (int i=0; i<r.conProviders.size(); i++) {
                 ContentProviderConnection conn = r.conProviders.get(i);
@@ -6311,7 +6311,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return conn;
                 }
             }
-            ContentProviderConnection conn = new ContentProviderConnection(cpr, r);
+            ContentProviderConnection conn = new ContentProviderConnection(cpr, r, callingPackage);
             conn.startAssociationIfNeeded();
             if (stable) {
                 conn.stableCount = 1;
@@ -6418,8 +6418,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private ContentProviderHolder getContentProviderImpl(IApplicationThread caller,
-            String name, IBinder token, int callingUid, String callingTag, boolean stable,
-            int userId) {
+            String name, IBinder token, int callingUid, String callingPackage, String callingTag,
+            boolean stable, int userId) {
         ContentProviderRecord cpr;
         ContentProviderConnection conn = null;
         ProviderInfo cpi = null;
@@ -6542,7 +6542,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // In this case the provider instance already exists, so we can
                 // return it right away.
-                conn = incProviderCountLocked(r, cpr, token, callingUid, callingTag, stable);
+                conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage, callingTag,
+                        stable);
                 if (conn != null && (conn.stableCount+conn.unstableCount) == 1) {
                     if (cpr.proc != null && r.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ) {
                         // If this is a perceptible app accessing the provider,
@@ -6789,7 +6790,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
 
                 mProviderMap.putProviderByName(name, cpr);
-                conn = incProviderCountLocked(r, cpr, token, callingUid, callingTag, stable);
+                conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage, callingTag,
+                        stable);
                 if (conn != null) {
                     conn.waiting = true;
                 }
@@ -6931,7 +6933,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public final ContentProviderHolder getContentProvider(
-            IApplicationThread caller, String name, int userId, boolean stable) {
+            IApplicationThread caller, String callingPackage, String name, int userId,
+            boolean stable) {
         enforceNotIsolatedCaller("getContentProvider");
         if (caller == null) {
             String msg = "null IApplicationThread when getting content provider "
@@ -6941,8 +6944,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         // The incoming user check is now handled in checkContentProviderPermissionLocked() to deal
         // with cross-user grant.
-        return getContentProviderImpl(caller, name, null, Binder.getCallingUid(), null, stable,
-                userId);
+        final int callingUid = Binder.getCallingUid();
+        if (callingPackage != null && mAppOpsService.checkPackage(callingUid, callingPackage)
+                != AppOpsManager.MODE_ALLOWED) {
+            throw new SecurityException("Given calling package " + callingPackage
+                    + " does not match caller's uid " + callingUid);
+        }
+        return getContentProviderImpl(caller, name, null, callingUid, callingPackage,
+                null, stable, userId);
     }
 
     public ContentProviderHolder getContentProviderExternal(
@@ -6957,7 +6966,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private ContentProviderHolder getContentProviderExternalUnchecked(String name,
             IBinder token, int callingUid, String callingTag, int userId) {
-        return getContentProviderImpl(null, name, token, callingUid, callingTag, true, userId);
+        return getContentProviderImpl(null, name, token, callingUid, null, callingTag,
+                true, userId);
     }
 
     /**

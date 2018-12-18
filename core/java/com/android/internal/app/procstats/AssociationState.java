@@ -17,6 +17,7 @@
 package com.android.internal.app.procstats;
 
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -192,9 +193,16 @@ public final class AssociationState {
          */
         String mProcess;
 
-        SourceKey(int uid, String process) {
+        /**
+         * Optional package name, or null; consider this final.  Not final just to avoid a
+         * temporary object during lookup.
+         */
+        @Nullable String mPackage;
+
+        SourceKey(int uid, String process, String pkg) {
             mUid = uid;
             mProcess = process;
+            mPackage = pkg;
         }
 
         public boolean equals(Object o) {
@@ -202,12 +210,14 @@ public final class AssociationState {
                 return false;
             }
             SourceKey s = (SourceKey) o;
-            return s.mUid == mUid && Objects.equals(s.mProcess, mProcess);
+            return s.mUid == mUid && Objects.equals(s.mProcess, mProcess)
+                    && Objects.equals(s.mPackage, mPackage);
         }
 
         @Override
         public int hashCode() {
-            return Integer.hashCode(mUid) ^ (mProcess == null ? 0 : mProcess.hashCode());
+            return Integer.hashCode(mUid) ^ (mProcess == null ? 0 : mProcess.hashCode())
+                    ^ (mPackage == null ? 0 : (mPackage.hashCode() * 33));
         }
 
         @Override
@@ -217,6 +227,8 @@ public final class AssociationState {
             UserHandle.formatUid(sb, mUid);
             sb.append(' ');
             sb.append(mProcess);
+            sb.append(' ');
+            sb.append(mPackage);
             sb.append('}');
             return sb.toString();
         }
@@ -227,7 +239,7 @@ public final class AssociationState {
      */
     private final ArrayMap<SourceKey, SourceState> mSources = new ArrayMap<>();
 
-    private final SourceKey mTmpSourceKey = new SourceKey(0, null);
+    private final SourceKey mTmpSourceKey = new SourceKey(0, null, null);
 
     private ProcessState mProc;
 
@@ -266,12 +278,13 @@ public final class AssociationState {
         mProc = proc;
     }
 
-    public SourceState startSource(int uid, String processName) {
+    public SourceState startSource(int uid, String processName, String packageName) {
         mTmpSourceKey.mUid = uid;
         mTmpSourceKey.mProcess = processName;
+        mTmpSourceKey.mPackage = packageName;
         SourceState src = mSources.get(mTmpSourceKey);
         if (src == null) {
-            SourceKey key = new SourceKey(uid, processName);
+            SourceKey key = new SourceKey(uid, processName, packageName);
             src = new SourceState(key);
             mSources.put(key, src);
         }
@@ -379,6 +392,7 @@ public final class AssociationState {
             final SourceState src = mSources.valueAt(isrc);
             out.writeInt(key.mUid);
             stats.writeCommonString(out, key.mProcess);
+            stats.writeCommonString(out, key.mPackage);
             out.writeInt(src.mCount);
             out.writeLong(src.mDuration);
             out.writeInt(src.mActiveCount);
@@ -405,7 +419,8 @@ public final class AssociationState {
         for (int isrc = 0; isrc < NSRC; isrc++) {
             final int uid = in.readInt();
             final String procName = stats.readCommonString(in, parcelVersion);
-            final SourceKey key = new SourceKey(uid, procName);
+            final String pkgName = stats.readCommonString(in, parcelVersion);
+            final SourceKey key = new SourceKey(uid, procName, pkgName);
             final SourceState src = new SourceState(key);
             src.mCount = in.readInt();
             src.mDuration = in.readLong();
@@ -445,10 +460,11 @@ public final class AssociationState {
         }
     }
 
-    public boolean hasProcess(String procName) {
+    public boolean hasProcessOrPackage(String procName) {
         final int NSRC = mSources.size();
         for (int isrc = 0; isrc < NSRC; isrc++) {
-            if (mSources.keyAt(isrc).mProcess.equals(procName)) {
+            final SourceKey key = mSources.keyAt(isrc);
+            if (procName.equals(key.mProcess) || procName.equals(key.mPackage)) {
                 return true;
             }
         }
@@ -466,14 +482,20 @@ public final class AssociationState {
         for (int isrc = 0; isrc < NSRC; isrc++) {
             final SourceKey key = mSources.keyAt(isrc);
             final SourceState src = mSources.valueAt(isrc);
-            if (reqPackage != null && !reqPackage.equals(key.mProcess)) {
+            if (reqPackage != null && !reqPackage.equals(key.mProcess)
+                    && !reqPackage.equals(key.mPackage)) {
                 continue;
             }
             pw.print(prefixInner);
             pw.print("<- ");
             pw.print(key.mProcess);
-            pw.print(" / ");
+            pw.print("/");
             UserHandle.formatUid(pw, key.mUid);
+            if (key.mPackage != null) {
+                pw.print(" (");
+                pw.print(key.mPackage);
+                pw.print(")");
+            }
             pw.println(":");
             pw.print(prefixInner);
             pw.print("   Total count ");
@@ -683,6 +705,7 @@ public final class AssociationState {
             final SourceState src = mSources.valueAt(isrc);
             final long sourceToken = proto.start(PackageAssociationProcessStatsProto.SOURCES);
             proto.write(PackageAssociationSourceProcessStatsProto.PROCESS_NAME, key.mProcess);
+            proto.write(PackageAssociationSourceProcessStatsProto.PACKAGE_NAME, key.mPackage);
             proto.write(PackageAssociationSourceProcessStatsProto.PROCESS_UID, key.mUid);
             proto.write(PackageAssociationSourceProcessStatsProto.TOTAL_COUNT, src.mCount);
             long duration = src.mDuration;

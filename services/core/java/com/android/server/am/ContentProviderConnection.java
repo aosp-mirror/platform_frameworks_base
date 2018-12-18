@@ -32,6 +32,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 public final class ContentProviderConnection extends Binder {
     public final ContentProviderRecord provider;
     public final ProcessRecord client;
+    public final String clientPackage;
     public AssociationState.SourceState association;
     public final long createTime;
     public int stableCount;
@@ -46,9 +47,11 @@ public final class ContentProviderConnection extends Binder {
     public int numStableIncs;
     public int numUnstableIncs;
 
-    public ContentProviderConnection(ContentProviderRecord _provider, ProcessRecord _client) {
+    public ContentProviderConnection(ContentProviderRecord _provider, ProcessRecord _client,
+            String _clientPackage) {
         provider = _provider;
         client = _client;
+        clientPackage = _clientPackage;
         createTime = SystemClock.elapsedRealtime();
     }
 
@@ -69,7 +72,8 @@ public final class ContentProviderConnection extends Binder {
                         + provider.name.toShortString() + ": proc=" + provider.proc);
             } else {
                 association = holder.pkg.getAssociationStateLocked(holder.state,
-                        provider.name.getClassName()).startSource(client.uid, client.processName);
+                        provider.name.getClassName()).startSource(client.uid, client.processName,
+                        clientPackage);
 
             }
         }
