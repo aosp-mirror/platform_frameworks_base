@@ -64,6 +64,8 @@ public class NotificationRowBinder {
     private final NotificationGutsManager mGutsManager =
             Dependency.get(NotificationGutsManager.class);
     private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider =
+            Dependency.get(NotificationInterruptionStateProvider.class);
 
     private final Context mContext;
     private final IStatusBarService mBarService;
@@ -79,7 +81,6 @@ public class NotificationRowBinder {
     private ExpandableNotificationRow.OnAppOpsClickListener mOnAppOpsClickListener;
     private BindRowCallback mBindRowCallback;
     private NotificationClicker mNotificationClicker;
-    private NotificationEntryManager.InterruptionStateProvider mInterruptionStateProvider;
 
     @Inject
     public NotificationRowBinder(Context context) {
@@ -114,11 +115,6 @@ public class NotificationRowBinder {
 
     public void setNotificationClicker(NotificationClicker clicker) {
         mNotificationClicker = clicker;
-    }
-
-    public void setInterruptionStateProvider(
-            NotificationEntryManager.InterruptionStateProvider interruptionStateProvider) {
-        mInterruptionStateProvider = interruptionStateProvider;
     }
 
     /**
@@ -253,10 +249,10 @@ public class NotificationRowBinder {
         row.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
         row.setEntry(entry);
 
-        if (mInterruptionStateProvider.shouldHeadsUp(entry)) {
+        if (mNotificationInterruptionStateProvider.shouldHeadsUp(entry)) {
             row.updateInflationFlag(FLAG_CONTENT_VIEW_HEADS_UP, true /* shouldInflate */);
         }
-        if (mInterruptionStateProvider.shouldPulse(entry)) {
+        if (mNotificationInterruptionStateProvider.shouldPulse(entry)) {
             row.updateInflationFlag(FLAG_CONTENT_VIEW_AMBIENT, true /* shouldInflate */);
         }
         row.setNeedsRedaction(

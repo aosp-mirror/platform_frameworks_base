@@ -29,8 +29,6 @@ import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,7 +48,6 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
-import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -105,6 +102,7 @@ public class NotificationDataTest extends SysuiTestCase {
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
         MockitoAnnotations.initMocks(this);
         when(mMockStatusBarNotification.getUid()).thenReturn(UID_NORMAL);
+        when(mMockStatusBarNotification.cloneLight()).thenReturn(mMockStatusBarNotification);
 
         when(mMockPackageManager.checkUidPermission(
                 eq(Manifest.permission.NOTIFICATION_DURING_SETUP),
@@ -126,41 +124,6 @@ public class NotificationDataTest extends SysuiTestCase {
         mNotificationData.updateRanking(mock(NotificationListenerService.RankingMap.class));
         mRow = new NotificationTestHelper(getContext()).createRow();
         Dependency.get(InitController.class).executePostInitTasks();
-    }
-
-    @Test
-    @UiThreadTest
-    public void testShowNotificationEvenIfUnprovisioned_FalseIfNoExtra() {
-        initStatusBarNotification(false);
-        when(mMockStatusBarNotification.getUid()).thenReturn(UID_ALLOW_DURING_SETUP);
-
-        assertFalse(
-                NotificationData.showNotificationEvenIfUnprovisioned(
-                        mMockPackageManager,
-                        mMockStatusBarNotification));
-    }
-
-    @Test
-    @UiThreadTest
-    public void testShowNotificationEvenIfUnprovisioned_FalseIfNoPermission() {
-        initStatusBarNotification(true);
-
-        assertFalse(
-                NotificationData.showNotificationEvenIfUnprovisioned(
-                        mMockPackageManager,
-                        mMockStatusBarNotification));
-    }
-
-    @Test
-    @UiThreadTest
-    public void testShowNotificationEvenIfUnprovisioned_TrueIfHasPermissionAndExtra() {
-        initStatusBarNotification(true);
-        when(mMockStatusBarNotification.getUid()).thenReturn(UID_ALLOW_DURING_SETUP);
-
-        assertTrue(
-                NotificationData.showNotificationEvenIfUnprovisioned(
-                        mMockPackageManager,
-                        mMockStatusBarNotification));
     }
 
     @Test
@@ -230,76 +193,6 @@ public class NotificationDataTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSuppressSystemAlertNotification() {
-        when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(false);
-        when(mFsc.isSystemAlertNotification(any())).thenReturn(true);
-        StatusBarNotification sbn = mRow.getEntry().notification;
-        Bundle bundle = new Bundle();
-        bundle.putStringArray(Notification.EXTRA_FOREGROUND_APPS, new String[] {"something"});
-        sbn.getNotification().extras = bundle;
-
-        assertTrue(mNotificationData.shouldFilterOut(mRow.getEntry()));
-    }
-
-    @Test
-    public void testDoNotSuppressSystemAlertNotification() {
-        StatusBarNotification sbn = mRow.getEntry().notification;
-        Bundle bundle = new Bundle();
-        bundle.putStringArray(Notification.EXTRA_FOREGROUND_APPS, new String[] {"something"});
-        sbn.getNotification().extras = bundle;
-
-        when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(true);
-        when(mFsc.isSystemAlertNotification(any())).thenReturn(true);
-
-        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry()));
-
-        when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(true);
-        when(mFsc.isSystemAlertNotification(any())).thenReturn(false);
-
-        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry()));
-
-        when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(false);
-        when(mFsc.isSystemAlertNotification(any())).thenReturn(false);
-
-        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry()));
-    }
-
-    @Test
-    public void testDoNotSuppressMalformedSystemAlertNotification() {
-        when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(true);
-
-        // missing extra
-        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry()));
-
-        StatusBarNotification sbn = mRow.getEntry().notification;
-        Bundle bundle = new Bundle();
-        bundle.putStringArray(Notification.EXTRA_FOREGROUND_APPS, new String[] {});
-        sbn.getNotification().extras = bundle;
-
-        // extra missing values
-        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry()));
-    }
-
-    @Test
-    public void testShouldFilterHiddenNotifications() {
-        initStatusBarNotification(false);
-        // setup
-        when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(false);
-        when(mFsc.isSystemAlertNotification(any())).thenReturn(false);
-
-        // test should filter out hidden notifications:
-        // hidden
-        when(mMockStatusBarNotification.getKey()).thenReturn(TEST_HIDDEN_NOTIFICATION_KEY);
-        NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
-        assertTrue(mNotificationData.shouldFilterOut(entry));
-
-        // not hidden
-        when(mMockStatusBarNotification.getKey()).thenReturn("not hidden");
-        entry = new NotificationData.Entry(mMockStatusBarNotification);
-        assertFalse(mNotificationData.shouldFilterOut(entry));
-    }
-
-    @Test
     public void testGetNotificationsForCurrentUser_shouldFilterNonCurrentUserNotifications()
             throws Exception {
         mNotificationData.add(mRow.getEntry());
@@ -325,9 +218,10 @@ public class NotificationDataTest extends SysuiTestCase {
         Notification n = mMockStatusBarNotification.getNotification();
         n.flags = Notification.FLAG_FOREGROUND_SERVICE;
         NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
+        mNotificationData.add(entry);
 
-        assertTrue(mNotificationData.isExemptFromDndVisualSuppression(entry));
-        assertFalse(mNotificationData.shouldSuppressAmbient(entry));
+        assertTrue(entry.isExemptFromDndVisualSuppression());
+        assertFalse(entry.shouldSuppressAmbient());
     }
 
     @Test
@@ -341,9 +235,10 @@ public class NotificationDataTest extends SysuiTestCase {
         n = nb.build();
         when(mMockStatusBarNotification.getNotification()).thenReturn(n);
         NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
+        mNotificationData.add(entry);
 
-        assertTrue(mNotificationData.isExemptFromDndVisualSuppression(entry));
-        assertFalse(mNotificationData.shouldSuppressAmbient(entry));
+        assertTrue(entry.isExemptFromDndVisualSuppression());
+        assertFalse(entry.shouldSuppressAmbient());
     }
 
     @Test
@@ -353,9 +248,10 @@ public class NotificationDataTest extends SysuiTestCase {
                 TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY);
         NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
         entry.mIsSystemNotification = true;
+        mNotificationData.add(entry);
 
-        assertTrue(mNotificationData.isExemptFromDndVisualSuppression(entry));
-        assertFalse(mNotificationData.shouldSuppressAmbient(entry));
+        assertTrue(entry.isExemptFromDndVisualSuppression());
+        assertFalse(entry.shouldSuppressAmbient());
     }
 
     @Test
@@ -365,31 +261,33 @@ public class NotificationDataTest extends SysuiTestCase {
                 TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY);
         NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
         entry.mIsSystemNotification = true;
+        mNotificationData.add(entry);
+
         when(mMockStatusBarNotification.getNotification()).thenReturn(
                 new Notification.Builder(mContext, "").setCategory(CATEGORY_CALL).build());
 
-        assertFalse(mNotificationData.isExemptFromDndVisualSuppression(entry));
-        assertTrue(mNotificationData.shouldSuppressAmbient(entry));
+        assertFalse(entry.isExemptFromDndVisualSuppression());
+        assertTrue(entry.shouldSuppressAmbient());
 
         when(mMockStatusBarNotification.getNotification()).thenReturn(
                 new Notification.Builder(mContext, "").setCategory(CATEGORY_REMINDER).build());
 
-        assertFalse(mNotificationData.isExemptFromDndVisualSuppression(entry));
+        assertFalse(entry.isExemptFromDndVisualSuppression());
 
         when(mMockStatusBarNotification.getNotification()).thenReturn(
                 new Notification.Builder(mContext, "").setCategory(CATEGORY_ALARM).build());
 
-        assertFalse(mNotificationData.isExemptFromDndVisualSuppression(entry));
+        assertFalse(entry.isExemptFromDndVisualSuppression());
 
         when(mMockStatusBarNotification.getNotification()).thenReturn(
                 new Notification.Builder(mContext, "").setCategory(CATEGORY_EVENT).build());
 
-        assertFalse(mNotificationData.isExemptFromDndVisualSuppression(entry));
+        assertFalse(entry.isExemptFromDndVisualSuppression());
 
         when(mMockStatusBarNotification.getNotification()).thenReturn(
                 new Notification.Builder(mContext, "").setCategory(CATEGORY_MESSAGE).build());
 
-        assertFalse(mNotificationData.isExemptFromDndVisualSuppression(entry));
+        assertFalse(entry.isExemptFromDndVisualSuppression());
     }
 
     @Test

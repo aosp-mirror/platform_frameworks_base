@@ -133,7 +133,6 @@ public class NotificationViewHierarchyManager {
         mAlwaysExpandNonGroupedNotification =
                 res.getBoolean(R.bool.config_alwaysExpandNonGroupedNotifications);
         mStatusBarStateListener = new StatusBarStateListener(mBubbleController);
-        mEntryManager.setStatusBarStateListener(mStatusBarStateListener);
         Dependency.get(StatusBarStateController.class).addCallback(mStatusBarStateListener);
     }
 

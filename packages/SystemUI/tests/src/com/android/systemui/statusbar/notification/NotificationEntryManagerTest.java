@@ -137,7 +137,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
             super(context);
             mBarService = barService;
             mCountDownLatch = new CountDownLatch(1);
-            mUseHeadsUp = true;
         }
 
         @Override
