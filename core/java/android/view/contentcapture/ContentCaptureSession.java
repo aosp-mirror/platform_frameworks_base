@@ -15,8 +15,10 @@
  */
 package android.view.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureManager.DEBUG;
 import static android.view.contentcapture.ContentCaptureManager.VERBOSE;
 
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Log;
@@ -30,6 +32,7 @@ import com.android.internal.util.Preconditions;
 import dalvik.system.CloseGuard;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -80,6 +83,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      */
     public static final int STATE_DISABLED_DUPLICATED_ID = 4;
 
+    private static final int INITIAL_CHILDREN_CAPACITY = 5;
+
     /** @hide */
     protected final String mTag = getClass().getSimpleName();
 
@@ -95,19 +100,17 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     private ContentCaptureSessionId mContentCaptureSessionId;
 
     /**
-     * {@link ContentCaptureContext} set by client, or {@code null} when it's the
-     * {@link ContentCaptureManager#getMainContentCaptureSession() default session} for the
-     * context.
-     *
-     * @hide
+     * List of children session.
      */
+    // TODO(b/121033016): need to synchonize access, either by changing on handler or UI thread
+    // (for now there's no handler on this class, so we need to wait for the next refactoring),
+    // most likely the former (as we have no guarantee that createContentCaptureSession()
+    // it will be called in the UiThread; for example, WebView most likely won't call on it)
     @Nullable
-    // TODO(b/121042846): move to ChildContentCaptureSession.java
-    protected final ContentCaptureContext mClientContext;
+    private ArrayList<ContentCaptureSession> mChildren;
 
     /** @hide */
-    protected ContentCaptureSession(@Nullable ContentCaptureContext clientContext) {
-        mClientContext = clientContext;
+    protected ContentCaptureSession() {
         mCloseGuard.open("destroy");
     }
 
@@ -122,6 +125,28 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     }
 
     /**
+     * Creates a new {@link ContentCaptureSession}.
+     *
+     * <p>See {@link View#setContentCaptureSession(ContentCaptureSession)} for more info.
+     */
+    @NonNull
+    public final ContentCaptureSession createContentCaptureSession(
+            @NonNull ContentCaptureContext context) {
+        final ContentCaptureSession child = newChild(context);
+        if (DEBUG) {
+            Log.d(mTag, "createContentCaptureSession(" + context + ": parent=" + mId + ", child= "
+                    + child.mId);
+        }
+        if (mChildren == null) {
+            mChildren = new ArrayList<>(INITIAL_CHILDREN_CAPACITY);
+        }
+        mChildren.add(child);
+        return child;
+    }
+
+    abstract ContentCaptureSession newChild(@NonNull ContentCaptureContext context);
+
+    /**
      * Flushes the buffered events to the service.
      */
     abstract void flush();
@@ -134,7 +159,10 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public final void destroy() {
         //TODO(b/111276913): mark it as destroyed so other methods are ignored (and test on CTS)
 
+        //TODO(b/111276913): probably shouldn't check for it
         if (!isContentCaptureEnabled()) return;
+
+        mCloseGuard.close();
 
         //TODO(b/111276913): check state (for example, how to handle if it's waiting for remote
         // id) and send it to the cache of batched commands
@@ -142,15 +170,28 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             Log.v(mTag, "destroy(): state=" + getStateAsString(mState) + ", mId=" + mId);
         }
 
-        flush();
+        // Finish children first
+        if (mChildren != null) {
+            final int numberChildren = mChildren.size();
+            if (VERBOSE) Log.v(mTag, "Destroying " + numberChildren + " children first");
+            for (int i = 0; i < numberChildren; i++) {
+                final ContentCaptureSession child = mChildren.get(i);
+                try {
+                    child.destroy();
+                } catch (Exception e) {
+                    Log.w(mTag, "exception destroying child session #" + i + ": " + e);
+                }
+            }
+        }
 
-        onDestroy();
-
-        mCloseGuard.close();
+        try {
+            flush();
+        } finally {
+            onDestroy();
+        }
     }
 
     abstract void onDestroy();
-
 
     /** @hide */
     @Override
@@ -259,7 +300,19 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     abstract boolean isContentCaptureEnabled();
 
-    abstract void dump(@NonNull String prefix, @NonNull PrintWriter pw);
+    @CallSuper
+    void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
+        if (mChildren != null && !mChildren.isEmpty()) {
+            final String prefix2 = prefix + "  ";
+            final int numberChildren = mChildren.size();
+            pw.print(prefix); pw.print("number children: "); pw.print(numberChildren);
+            for (int i = 0; i < numberChildren; i++) {
+                final ContentCaptureSession child = mChildren.get(i);
+                pw.print(prefix); pw.print(i); pw.println(": "); child.dump(prefix2, pw);
+            }
+        }
+
+    }
 
     @Override
     public String toString() {

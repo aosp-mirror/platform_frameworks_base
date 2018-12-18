@@ -18,13 +18,13 @@ package android.view.contentcapture;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.annotation.UiThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.View;
 
 import com.android.internal.util.Preconditions;
 
@@ -66,7 +66,7 @@ public final class ContentCaptureManager {
     @NonNull
     private final Handler mHandler;
 
-    private ActivityContentCaptureSession mMainSession;
+    private MainContentCaptureSession mMainSession;
 
     /** @hide */
     public ContentCaptureManager(@NonNull Context context,
@@ -93,46 +93,20 @@ public final class ContentCaptureManager {
     }
 
     /**
-     * Creates a new {@link ContentCaptureSession}.
-     *
-     * <p>See {@link View#setContentCaptureSession(ContentCaptureSession)} for more info.
-     */
-    @NonNull
-    public ContentCaptureSession createContentCaptureSession(
-            @NonNull ContentCaptureContext context) {
-        if (DEBUG) Log.d(TAG, "createContentCaptureSession(): " + context);
-        // TODO(b/121033016): for now we're updating the main session, but we need instead:
-        // 1.Keep a list of sessions
-        // 2.Making sure the applicationToken and componentName passed by
-        // the activity is used on all of these sessions
-        // 3.We might also need to delay the start of all of these sessions until
-        // onActivityStarted() is called (and the main session is created).
-        // 4.Close (and delete) these sessions when onActivityStopped() is called.
-        // 5.Figure out whether each session will have its own mDisabled AtomicBoolean.
-        if (mMainSession == null) {
-            mMainSession = new ActivityContentCaptureSession(mContext, mHandler, mService,
-                    mDisabled, Preconditions.checkNotNull(context));
-        } else {
-            throw new IllegalStateException("Manager already has a session: " + mMainSession);
-        }
-        return mMainSession;
-    }
-
-    /**
      * Gets the main session associated with the context.
      *
      * <p>By default there's just one (associated with the activity lifecycle), but apps could
-     * explicitly add more using {@link #createContentCaptureSession(ContentCaptureContext)}.
+     * explicitly add more using
+     * {@link ContentCaptureSession#createContentCaptureSession(ContentCaptureContext)}.
      *
      * @hide
      */
     @NonNull
-    public ActivityContentCaptureSession getMainContentCaptureSession() {
-        // TODO(b/121033016): figure out how to manage the "default" session when it support
-        // multiple sessions (can't just be the first one, as it could be closed).
+    @UiThread
+    public MainContentCaptureSession getMainContentCaptureSession() {
         if (mMainSession == null) {
-            mMainSession = new ActivityContentCaptureSession(mContext, mHandler, mService,
-                    mDisabled, /* clientContext= */ null);
+            mMainSession = new MainContentCaptureSession(mContext, mHandler, mService,
+                    mDisabled);
             if (VERBOSE) {
                 Log.v(TAG, "getDefaultContentCaptureSession(): created " + mMainSession);
             }

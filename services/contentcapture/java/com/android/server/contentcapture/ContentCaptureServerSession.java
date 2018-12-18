@@ -16,7 +16,6 @@
 package com.android.server.contentcapture;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
@@ -56,8 +55,7 @@ final class ContentCaptureServerSession implements ContentCaptureServiceCallback
     ContentCaptureServerSession(@NonNull Context context, int userId, @NonNull Object lock,
             @NonNull IBinder activityToken, @NonNull ContentCapturePerUserService service,
             @NonNull ComponentName serviceComponentName, @NonNull ComponentName appComponentName,
-            int taskId, int displayId, @NonNull String sessionId, int uid,
-            @Nullable ContentCaptureContext clientContext, int flags,
+            int taskId, int displayId, @NonNull String sessionId, int uid, int flags,
             boolean bindInstantServiceAllowed, boolean verbose) {
         mLock = lock;
         mActivityToken = activityToken;
@@ -67,8 +65,8 @@ final class ContentCaptureServerSession implements ContentCaptureServiceCallback
         mRemoteService = new RemoteContentCaptureService(context,
                 ContentCaptureService.SERVICE_INTERFACE, serviceComponentName, userId, this,
                 bindInstantServiceAllowed, verbose);
-        mContentCaptureContext = new ContentCaptureContext(clientContext, appComponentName, taskId,
-                displayId, flags);
+        mContentCaptureContext = new ContentCaptureContext(/* clientContext= */ null,
+                appComponentName, taskId, displayId, flags);
     }
 
     /**

@@ -20,7 +20,6 @@ import static android.Manifest.permission.MANAGE_CONTENT_CAPTURE;
 import static android.content.Context.CONTENT_CAPTURE_MANAGER_SERVICE;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
@@ -34,7 +33,6 @@ import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
-import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.IContentCaptureManager;
 
 import com.android.internal.annotations.GuardedBy;
@@ -164,8 +162,7 @@ public final class ContentCaptureManagerService extends
 
         @Override
         public void startSession(@UserIdInt int userId, @NonNull IBinder activityToken,
-                @NonNull ComponentName componentName, @NonNull String sessionId,
-                @Nullable ContentCaptureContext clientContext, int flags,
+                @NonNull ComponentName componentName, @NonNull String sessionId, int flags,
                 @NonNull IResultReceiver result) {
             Preconditions.checkNotNull(activityToken);
             Preconditions.checkNotNull(componentName);
@@ -175,14 +172,13 @@ public final class ContentCaptureManagerService extends
             // so we don't pass it on startSession (same for Autofill)
             final int taskId = getAmInternal().getTaskIdForActivity(activityToken, false);
 
-            // TODO(b/111276913): get from AM as well
+            // TODO(b/121260224): get from AM as well
             final int displayId = 0;
 
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, componentName, taskId, displayId,
-                        sessionId, Binder.getCallingUid(), clientContext, flags,
-                        mAllowInstantService, result);
+                        sessionId, Binder.getCallingUid(), flags, mAllowInstantService, result);
             }
         }
 

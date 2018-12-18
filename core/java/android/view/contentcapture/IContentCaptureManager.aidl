@@ -33,7 +33,6 @@ import java.util.List;
   */
 oneway interface IContentCaptureManager {
     void startSession(int userId, IBinder activityToken, in ComponentName componentName,
-                      String sessionId, in ContentCaptureContext clientContext, int flags,
-                      in IResultReceiver result);
+                      String sessionId, int flags, in IResultReceiver result);
     void finishSession(int userId, String sessionId);
 }

@@ -34,13 +34,13 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
-import android.view.contentcapture.ActivityContentCaptureSession;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
 import android.view.contentcapture.ContentCaptureSessionId;
 import android.view.contentcapture.IContentCaptureDirectManager;
+import android.view.contentcapture.MainContentCaptureSession;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -293,13 +293,26 @@ public abstract class ContentCaptureService extends Service {
         final List<ContentCaptureEvent> events = parceledEvents.getList();
         for (int i = 0; i < events.size(); i++) {
             final ContentCaptureEvent event = events.get(i);
+            if (!handleIsRightCallerFor(event, uid)) continue;
             String sessionIdString = event.getSessionId();
             if (!sessionIdString.equals(lastSessionId)) {
-                if (!handleIsRightCallerFor(sessionIdString, uid)) continue;
                 sessionId = new ContentCaptureSessionId(sessionIdString);
                 lastSessionId = sessionIdString;
             }
-            onContentCaptureEvent(sessionId, event);
+            switch (event.getType()) {
+                case ContentCaptureEvent.TYPE_SESSION_STARTED:
+                    final ContentCaptureContext clientContext = event.getClientContext();
+                    clientContext.setParentSessionId(event.getParentSessionId());
+                    mSessionsByUid.put(sessionIdString, uid);
+                    onCreateContentCaptureSession(clientContext, sessionId);
+                    break;
+                case ContentCaptureEvent.TYPE_SESSION_FINISHED:
+                    mSessionsByUid.remove(sessionIdString);
+                    onDestroyContentCaptureSession(sessionId);
+                    break;
+                default:
+                    onContentCaptureEvent(sessionId, event);
+            }
         }
     }
 
@@ -314,9 +327,18 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
-     * Checks if the given {@code uid} owns the session.
+     * Checks if the given {@code uid} owns the session associated with the event.
      */
-    private boolean handleIsRightCallerFor(@NonNull String sessionId, int uid) {
+    private boolean handleIsRightCallerFor(@NonNull ContentCaptureEvent event, int uid) {
+        final String sessionId;
+        switch (event.getType()) {
+            case ContentCaptureEvent.TYPE_SESSION_STARTED:
+            case ContentCaptureEvent.TYPE_SESSION_FINISHED:
+                sessionId = event.getParentSessionId();
+                break;
+            default:
+                sessionId = event.getSessionId();
+        }
         final Integer rightUid = mSessionsByUid.get(sessionId);
         if (rightUid == null) {
             if (VERBOSE) Log.v(TAG, "No session for " + sessionId);
@@ -347,7 +369,7 @@ public abstract class ContentCaptureService extends Service {
             final Bundle extras;
             if (binder != null) {
                 extras = new Bundle();
-                extras.putBinder(ActivityContentCaptureSession.EXTRA_BINDER, binder);
+                extras.putBinder(MainContentCaptureSession.EXTRA_BINDER, binder);
             } else {
                 extras = null;
             }
