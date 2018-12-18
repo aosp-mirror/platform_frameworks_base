@@ -29,7 +29,6 @@
         <permission name="android.permission.DUMP"/>
         <permission name="android.permission.GET_APP_OPS_STATS"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-        <permission name="android.permission.MANAGE_ACTIVITY_STACKS"/>
         <permission name="android.permission.MANAGE_DEBUGGING"/>
         <permission name="android.permission.MANAGE_SENSOR_PRIVACY"/>
         <permission name="android.permission.MANAGE_USB"/>
