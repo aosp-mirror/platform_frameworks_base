@@ -15,21 +15,23 @@
  */
 package com.android.settingslib.utils;
 
+import static junit.framework.Assert.assertTrue;
+
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.test.filters.SmallTest;
 import android.text.Spanned;
 import android.text.style.TtsSpan;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.settingslib.datetime.ZoneGetter;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.*;
-import com.android.settingslib.datetime.ZoneGetter;
-
-import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
