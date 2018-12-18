@@ -25,6 +25,7 @@ import android.app.Service;
 import android.app.WallpaperColors;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -52,12 +53,12 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
+import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
-import android.view.InsetsState;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -211,7 +212,8 @@ public abstract class WallpaperService extends Service {
         private final Supplier<Long> mClockFunction;
         private final Handler mHandler;
 
-        Display mDisplay;
+        private Display mDisplay;
+        private Context mDisplayContext;
         private int mDisplayState;
 
         final BaseSurfaceHolder mSurfaceHolder = new BaseSurfaceHolder() {
@@ -1038,6 +1040,7 @@ public abstract class WallpaperService extends Service {
             mIWallpaperEngine.mDisplayManager.registerDisplayListener(mDisplayListener,
                     mCaller.getHandler());
             mDisplay = mIWallpaperEngine.mDisplay;
+            mDisplayContext = createDisplayContext(mDisplay);
             mDisplayState = mDisplay.getState();
 
             if (DEBUG) Log.v(TAG, "onCreate(): " + this);
@@ -1047,6 +1050,18 @@ public abstract class WallpaperService extends Service {
 
             mReportedVisible = false;
             updateSurface(false, false, false);
+        }
+
+        /**
+         * The {@link Context} with resources that match the current display the wallpaper is on.
+         * For multiple display environment, multiple engines can be created to render on each
+         * display, but these displays may have different densities. Use this context to get the
+         * corresponding resources for currently display, avoiding the context of the service.
+         *
+         * @return A {@link Context} for current display.
+         */
+        public Context getDisplayContext() {
+            return mDisplayContext;
         }
 
         /**
