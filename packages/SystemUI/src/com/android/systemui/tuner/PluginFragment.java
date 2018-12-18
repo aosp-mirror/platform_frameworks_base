@@ -184,7 +184,11 @@ public class PluginFragment extends PreferenceFragment {
                         mInfo.services[i].name);
 
                 if (mPluginEnabler.isEnabled(componentName) != isEnabled) {
-                    mPluginEnabler.setEnabled(componentName, isEnabled);
+                    if (isEnabled) {
+                        mPluginEnabler.setEnabled(componentName);
+                    } else {
+                        mPluginEnabler.setDisabled(componentName, PluginEnabler.DISABLED_MANUALLY);
+                    }
                     shouldSendBroadcast = true;
                 }
             }

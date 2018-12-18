@@ -184,6 +184,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         mListening = true;
         IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addAction(PLUGIN_CHANGED);
         filter.addAction(DISABLE_PLUGIN);
@@ -214,12 +215,13 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                 // Don't disable whitelisted plugins as they are a part of the OS.
                 return;
             }
-            getPluginEnabler().setEnabled(component, false);
+            getPluginEnabler().setDisabled(component, PluginEnabler.DISABLED_INVALID_VERSION);
             mContext.getSystemService(NotificationManager.class).cancel(component.getClassName(),
                     SystemMessage.NOTE_PLUGIN);
         } else {
             Uri data = intent.getData();
             String pkg = data.getEncodedSchemeSpecificPart();
+            ComponentName componentName = ComponentName.unflattenFromString(pkg);
             if (mOneShotPackages.contains(pkg)) {
                 int icon = mContext.getResources().getIdentifier("tuner", "drawable",
                         mContext.getPackageName());
@@ -254,6 +256,17 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                     Toast.makeText(mContext, "Reloading " + pkg, Toast.LENGTH_LONG).show();
                 } else {
                     Log.v(TAG, "Reloading " + pkg);
+                }
+            }
+            if (Intent.ACTION_PACKAGE_REPLACED.equals(intent.getAction())) {
+                @PluginEnabler.DisableReason int disableReason =
+                        getPluginEnabler().getDisableReason(componentName);
+                if (disableReason == PluginEnabler.DISABLED_FROM_EXPLICIT_CRASH
+                        || disableReason == PluginEnabler.DISABLED_FROM_SYSTEM_CRASH
+                        || disableReason == PluginEnabler.DISABLED_INVALID_VERSION) {
+                    Log.i(TAG, "Re-enabling previously disabled plugin that has been "
+                            + "updated: " + componentName.flattenToShortString());
+                    getPluginEnabler().setEnabled(componentName);
                 }
             }
             if (!Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
