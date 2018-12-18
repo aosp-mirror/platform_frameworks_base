@@ -19,6 +19,7 @@ package com.android.internal.infra;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -163,6 +164,15 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
      * Defines how long after we make a remote request to a fill service we timeout.
      */
     protected abstract long getRemoteRequestMillis();
+
+    /**
+     * Gets the currently registered service interface or {@code null} if the service is not
+     * connected.
+     */
+    @Nullable
+    public final I getServiceInterface() {
+        return mService;
+    }
 
     private void handleDestroy() {
         if (checkIfDestroyed()) return;
