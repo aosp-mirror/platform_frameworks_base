@@ -4914,7 +4914,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         // Update override configurations of all tasks in the stack.
         final Rect taskBounds = tempTaskBounds != null ? tempTaskBounds : bounds;
-        final Rect insetBounds = tempTaskInsetBounds != null ? tempTaskInsetBounds : taskBounds;
 
         mTmpBounds.clear();
         mTmpInsetBounds.clear();
@@ -4922,7 +4921,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
             final TaskRecord task = mTaskHistory.get(i);
             if (task.isResizeable()) {
-                task.updateOverrideConfiguration(taskBounds, insetBounds);
+                task.updateOverrideConfiguration(taskBounds, tempTaskInsetBounds);
             }
 
             if (task.hasDisplayedBounds()) {
