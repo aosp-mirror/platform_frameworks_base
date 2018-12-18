@@ -34,6 +34,7 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
+import android.view.contentcapture.ActivityContentCaptureSession;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
 import android.view.contentcapture.ContentCaptureManager;
@@ -323,7 +324,7 @@ public abstract class ContentCaptureService extends Service {
             final Bundle extras;
             if (binder != null) {
                 extras = new Bundle();
-                extras.putBinder(ContentCaptureSession.EXTRA_BINDER, binder);
+                extras.putBinder(ActivityContentCaptureSession.EXTRA_BINDER, binder);
             } else {
                 extras = null;
             }
