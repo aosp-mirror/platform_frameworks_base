@@ -69,6 +69,7 @@ android_app {
         ],
     },
     resource_dirs: [
+        "res-keyguard",
         "res",
     ],
 
