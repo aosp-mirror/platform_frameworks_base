@@ -279,7 +279,10 @@ TEST(StatsLogProcessorTest, TestOnDumpReportEraseData) {
     // Dump report again. There should be no data since we erased it.
     processor->onDumpReport(cfgKey, 5, true, true /* DO erase data. */, ADB_DUMP, &bytes);
     output.ParseFromArray(bytes.data(), bytes.size());
-    bool noData = (output.reports_size() == 0) || (output.reports(0).metrics_size() == 0);
+    // We don't care whether statsd has a report, as long as it has no count metrics in it.
+    bool noData = output.reports_size() == 0
+            || output.reports(0).metrics_size() == 0
+            || output.reports(0).metrics(0).count_metrics().data_size() == 0;
     EXPECT_TRUE(noData);
 }
 
