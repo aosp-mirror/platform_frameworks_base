@@ -60,6 +60,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
@@ -85,6 +86,7 @@ import android.system.Os;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.Xml;
 import android.view.Display;
 import android.view.IWindowManager;
@@ -120,12 +122,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class WallpaperManagerService extends IWallpaperManager.Stub
         implements IWallpaperManagerService {
-    static final String TAG = "WallpaperManagerService";
-    static final boolean DEBUG = false;
-    static final boolean DEBUG_LIVE = DEBUG || true;
+    private static final String TAG = "WallpaperManagerService";
+    private static final boolean DEBUG = false;
+    private static final boolean DEBUG_LIVE = true;
 
     public static class Lifecycle extends SystemService {
         private IWallpaperManagerService mService;
@@ -163,14 +166,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    final Object mLock = new Object();
+    private final Object mLock = new Object();
 
     /**
      * Minimum time between crashes of a wallpaper service for us to consider
      * restarting it vs. just reverting to the static wallpaper.
      */
-    static final long MIN_WALLPAPER_CRASH_TIME = 10000;
-    static final int MAX_WALLPAPER_COMPONENT_LOG_LENGTH = 128;
+    private static final long MIN_WALLPAPER_CRASH_TIME = 10000;
+    private static final int MAX_WALLPAPER_COMPONENT_LOG_LENGTH = 128;
     static final String WALLPAPER = "wallpaper_orig";
     static final String WALLPAPER_CROP = "wallpaper";
     static final String WALLPAPER_LOCK_ORIG = "wallpaper_lock_orig";
@@ -178,7 +181,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     static final String WALLPAPER_INFO = "wallpaper_info.xml";
 
     // All the various per-user state files we need to be aware of
-    static final String[] sPerUserFiles = new String[] {
+    private static final String[] sPerUserFiles = new String[] {
         WALLPAPER, WALLPAPER_CROP,
         WALLPAPER_LOCK_ORIG, WALLPAPER_LOCK_CROP,
         WALLPAPER_INFO
@@ -335,7 +338,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    void notifyLockWallpaperChanged() {
+    private void notifyLockWallpaperChanged() {
         final IWallpaperManagerCallback cb = mKeyguardListener;
         if (cb != null) {
             try {
@@ -487,7 +490,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         boolean success = false;
 
         // Only generate crop for default display.
-        final WallpaperData.DisplayData wpData = getDisplayDataOrCreate(wallpaper, DEFAULT_DISPLAY);
+        final DisplayData wpData = getDisplayDataOrCreate(DEFAULT_DISPLAY);
         Rect cropHint = new Rect(wallpaper.cropHint);
 
         if (DEBUG) {
@@ -640,11 +643,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    final Context mContext;
-    final IWindowManager mIWindowManager;
-    final IPackageManager mIPackageManager;
-    final MyPackageMonitor mMonitor;
-    final AppOpsManager mAppOpsManager;
+    private final Context mContext;
+    private final IWindowManager mIWindowManager;
+    private final IPackageManager mIPackageManager;
+    private final MyPackageMonitor mMonitor;
+    private final AppOpsManager mAppOpsManager;
 
     private final DisplayManager mDisplayManager;
     private final DisplayManager.DisplayListener mDisplayListener =
@@ -654,11 +657,23 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         public void onDisplayAdded(int displayId) {
             synchronized (mLock) {
                 if (mLastWallpaper != null) {
-                    final WallpaperConnection.DisplayConnector connector =
-                            mLastWallpaper.connection.getDisplayConnectorOrCreate(displayId);
-                    if (connector == null) return;
-
-                    connector.connectLocked(mLastWallpaper.connection, mLastWallpaper);
+                    if (supportsMultiDisplay(mLastWallpaper.connection)) {
+                        final WallpaperConnection.DisplayConnector connector =
+                                mLastWallpaper.connection.getDisplayConnectorOrCreate(displayId);
+                        if (connector == null) return;
+                        connector.connectLocked(mLastWallpaper.connection, mLastWallpaper);
+                        return;
+                    }
+                    // System wallpaper does not support multiple displays, attach this display to
+                    // the fallback wallpaper.
+                    if (mFallbackWallpaper != null) {
+                        final WallpaperConnection.DisplayConnector connector = mFallbackWallpaper
+                                .connection.getDisplayConnectorOrCreate(displayId);
+                        if (connector == null) return;
+                        connector.connectLocked(mFallbackWallpaper.connection, mFallbackWallpaper);
+                    } else {
+                        Slog.w(TAG, "No wallpaper can be added to the new display");
+                    }
                 }
             }
         }
@@ -667,12 +682,19 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         public void onDisplayRemoved(int displayId) {
             synchronized (mLock) {
                 if (mLastWallpaper != null) {
-                    final WallpaperConnection.DisplayConnector connector =
-                            mLastWallpaper.connection.getDisplayConnectorOrCreate(displayId);
+                    WallpaperData targetWallpaper = null;
+                    if (mLastWallpaper.connection.containsDisplay(displayId)) {
+                        targetWallpaper = mLastWallpaper;
+                    } else if (mFallbackWallpaper.connection.containsDisplay(displayId)) {
+                        targetWallpaper = mFallbackWallpaper;
+                    }
+                    if (targetWallpaper == null) return;
+                    WallpaperConnection.DisplayConnector connector =
+                            targetWallpaper.connection.getDisplayConnectorOrCreate(displayId);
                     if (connector == null) return;
                     connector.disconnectLocked();
-                    mLastWallpaper.connection.removeDisplayConnector(displayId);
-                    mLastWallpaper.removeDisplayData(displayId);
+                    targetWallpaper.connection.removeDisplayConnector(displayId);
+                    removeDisplayData(displayId);
                 }
             }
         }
@@ -686,35 +708,40 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
      * Map of color listeners per user id.
      * The key will be the id of a user or UserHandle.USER_ALL - for wildcard listeners.
      */
-    final SparseArray<RemoteCallbackList<IWallpaperManagerCallback>> mColorsChangedListeners;
-    WallpaperData mLastWallpaper;
-    IWallpaperManagerCallback mKeyguardListener;
-    boolean mWaitingForUnlock;
-    boolean mShuttingDown;
+    private final SparseArray<RemoteCallbackList<IWallpaperManagerCallback>>
+            mColorsChangedListeners;
+    private WallpaperData mLastWallpaper;
+    private IWallpaperManagerCallback mKeyguardListener;
+    private boolean mWaitingForUnlock;
+    private boolean mShuttingDown;
 
     /**
      * ID of the current wallpaper, changed every time anything sets a wallpaper.
      * This is used for external detection of wallpaper update activity.
      */
-    int mWallpaperId;
+    private int mWallpaperId;
 
     /**
      * Name of the component used to display bitmap wallpapers from either the gallery or
      * built-in wallpapers.
      */
-    final ComponentName mImageWallpaper;
+    private final ComponentName mImageWallpaper;
 
     /**
      * Name of the default wallpaper component; might be different from mImageWallpaper
      */
-    final ComponentName mDefaultWallpaperComponent;
+    private final ComponentName mDefaultWallpaperComponent;
 
-    final SparseArray<WallpaperData> mWallpaperMap = new SparseArray<WallpaperData>();
-    final SparseArray<WallpaperData> mLockWallpaperMap = new SparseArray<WallpaperData>();
+    private final SparseArray<WallpaperData> mWallpaperMap = new SparseArray<WallpaperData>();
+    private final SparseArray<WallpaperData> mLockWallpaperMap = new SparseArray<WallpaperData>();
 
-    final SparseArray<Boolean> mUserRestorecon = new SparseArray<Boolean>();
-    int mCurrentUserId = UserHandle.USER_NULL;
-    boolean mInAmbientMode;
+    private SparseArray<DisplayData> mDisplayDatas = new SparseArray<>();
+
+    private WallpaperData mFallbackWallpaper;
+
+    private final SparseBooleanArray mUserRestorecon = new SparseBooleanArray();
+    private int mCurrentUserId = UserHandle.USER_NULL;
+    private boolean mInAmbientMode;
 
     static class WallpaperData {
 
@@ -780,18 +807,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         private RemoteCallbackList<IWallpaperManagerCallback> callbacks
                 = new RemoteCallbackList<IWallpaperManagerCallback>();
 
-        private static final class DisplayData {
-            int mWidth = -1;
-            int mHeight = -1;
-            final Rect mPadding = new Rect(0, 0, 0, 0);
-            final int mDisplayId;
-
-            DisplayData(int displayId) {
-                mDisplayId = displayId;
-            }
-        }
-        private SparseArray<DisplayData> mDisplayDatas = new SparseArray<>();
-
         /**
          * The crop hint supplied for displaying a subset of the source image
          */
@@ -812,24 +827,34 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         boolean sourceExists() {
             return wallpaperFile.exists();
         }
+    }
 
-        void removeDisplayData(int displayId) {
-            mDisplayDatas.remove(displayId);
+    private static final class DisplayData {
+        int mWidth = -1;
+        int mHeight = -1;
+        final Rect mPadding = new Rect(0, 0, 0, 0);
+        final int mDisplayId;
+
+        DisplayData(int displayId) {
+            mDisplayId = displayId;
         }
     }
 
-    private WallpaperData.DisplayData getDisplayDataOrCreate(WallpaperData data, int displayId) {
-        WallpaperData.DisplayData wpdData = data.mDisplayDatas.get(displayId);
+    private void removeDisplayData(int displayId) {
+        mDisplayDatas.remove(displayId);
+    }
+
+    private DisplayData getDisplayDataOrCreate(int displayId) {
+        DisplayData wpdData = mDisplayDatas.get(displayId);
         if (wpdData == null) {
-            wpdData = new WallpaperData.DisplayData(displayId);
+            wpdData = new DisplayData(displayId);
             ensureSaneWallpaperDisplaySize(wpdData, displayId);
-            data.mDisplayDatas.append(displayId, wpdData);
+            mDisplayDatas.append(displayId, wpdData);
         }
         return wpdData;
     }
 
-    private void ensureSaneWallpaperDisplaySize(WallpaperData.DisplayData wpdData,
-            int displayId) {
+    private void ensureSaneWallpaperDisplaySize(DisplayData wpdData, int displayId) {
         // We always want to have some reasonable width hint.
         final int baseSize = getMaximumSizeDimension(displayId);
         if (wpdData.mWidth < baseSize) {
@@ -842,12 +867,16 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     private int getMaximumSizeDimension(int displayId) {
         Display display = mDisplayManager.getDisplay(displayId);
+        if (display == null) {
+            Slog.w(TAG, "Invalid displayId=" + displayId + " " + Debug.getCallers(4));
+            display = mDisplayManager.getDisplay(DEFAULT_DISPLAY);
+        }
         return display.getMaximumSizeDimension();
     }
 
-    void forEachDisplayData(WallpaperData data, Consumer<WallpaperData.DisplayData> action) {
-        for (int i = data.mDisplayDatas.size() - 1; i >= 0; i--) {
-            final WallpaperData.DisplayData wpdData = data.mDisplayDatas.valueAt(i);
+    void forEachDisplayData(Consumer<DisplayData> action) {
+        for (int i = mDisplayDatas.size() - 1; i >= 0; i--) {
+            final DisplayData wpdData = mDisplayDatas.valueAt(i);
             action.accept(wpdData);
         }
     }
@@ -857,6 +886,36 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             ++mWallpaperId;
         } while (mWallpaperId == 0);
         return mWallpaperId;
+    }
+
+    private boolean supportsMultiDisplay(WallpaperConnection connection) {
+        if (connection != null) {
+            return connection.mInfo == null // This is image wallpaper
+                    || connection.mInfo.supportsMultipleDisplays();
+        }
+        return false;
+    }
+
+    private void updateFallbackConnection() {
+        if (mLastWallpaper == null || mFallbackWallpaper == null) return;
+        final WallpaperConnection systemConnection = mLastWallpaper.connection;
+        final WallpaperConnection fallbackConnection = mFallbackWallpaper.connection;
+        if (supportsMultiDisplay(systemConnection)
+                && fallbackConnection.getConnectedEngineSize() != 0) {
+            fallbackConnection.forEachDisplayConnector(
+                    WallpaperConnection.DisplayConnector::disconnectLocked);
+            fallbackConnection.mDisplayConnector.clear();
+        } else {
+            fallbackConnection.appendConnectorWithCondition(display ->
+                    fallbackConnection.isUsableDisplay(display)
+                            && display.getDisplayId() != DEFAULT_DISPLAY
+                            && !fallbackConnection.containsDisplay(display.getDisplayId()));
+            fallbackConnection.forEachDisplayConnector(connector -> {
+                if (connector.mEngine == null) {
+                    connector.connectLocked(fallbackConnection, mFallbackWallpaper);
+                }
+            });
+        }
     }
 
     class WallpaperConnection extends IWallpaperConnection.Stub
@@ -877,8 +936,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
 
             void ensureStatusHandled() {
-                final WallpaperData.DisplayData wpdData = getDisplayDataOrCreate(mWallpaper,
-                        mDisplayId);
+                final DisplayData wpdData = getDisplayDataOrCreate(mDisplayId);
                 if (mDimensionsChanged) {
                     try {
                         mEngine.setDesiredSize(wpdData.mWidth, wpdData.mHeight);
@@ -906,8 +964,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     return;
                 }
 
-                final WallpaperData.DisplayData wpdData = getDisplayDataOrCreate(wallpaper,
-                        mDisplayId);
+                final DisplayData wpdData = getDisplayDataOrCreate(mDisplayId);
                 try {
                     connection.mService.attach(connection, mToken, TYPE_WALLPAPER, false,
                             wpdData.mWidth, wpdData.mHeight,
@@ -982,19 +1039,33 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
 
         private void initDisplayState() {
-            final Display[] displays = mDisplayManager.getDisplays();
-            for (Display display : displays) {
-                if (isUsableDisplay(display)) {
-                    final int displayId = display.getDisplayId();
-                    mDisplayConnector.append(displayId, new DisplayConnector(displayId));
+            // Do not initialize fallback wallpaper
+            if (!mWallpaper.equals(mFallbackWallpaper)) {
+                if (supportsMultiDisplay(this)) {
+                    // The system wallpaper is image wallpaper or it can supports multiple displays.
+                    appendConnectorWithCondition(this::isUsableDisplay);
+                } else {
+                    // The system wallpaper does not support multiple displays, so just attach it on
+                    // default display.
+                    mDisplayConnector.append(DEFAULT_DISPLAY,
+                            new DisplayConnector(DEFAULT_DISPLAY));
                 }
             }
         }
 
-        // TODO(b/115486823) Support the system decorations change at runtime.
+        private void appendConnectorWithCondition(Predicate<Display> tester) {
+            final Display[] displays = mDisplayManager.getDisplays();
+            for (Display display : displays) {
+                if (tester.test(display)) {
+                    final int displayId = display.getDisplayId();
+                    mDisplayConnector.append(displayId,
+                            new DisplayConnector(displayId));
+                }
+            }
+        }
+
         private boolean isUsableDisplay(Display display) {
             return display != null &&  display.hasAccess(mClientUid)
-                    // TODO(b/114338689) Use WindowManager.supportsSystemDecorations when ready
                     && (display.supportsSystemDecorations()
                             || display.getDisplayId() == DEFAULT_DISPLAY);
         }
@@ -1027,6 +1098,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             return connector;
         }
 
+        boolean containsDisplay(int displayId) {
+            return mDisplayConnector.get(displayId) != null;
+        }
+
         void removeDisplayConnector(int displayId) {
             final DisplayConnector connector = mDisplayConnector.get(displayId);
             if (connector != null) {
@@ -1044,7 +1119,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     // when we have an engine, but I'm not sure about
                     // locking there and anyway we always need to be able to
                     // recover if there is something wrong.
-                    saveSettingsLocked(mWallpaper.userId);
+                    if (!mWallpaper.equals(mFallbackWallpaper)) {
+                        saveSettingsLocked(mWallpaper.userId);
+                    }
                     FgThread.getHandler().removeCallbacks(mResetRunnable);
                 }
             }
@@ -1533,8 +1610,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 // This corrects for mislabeling bugs that might have arisen from move-to
                 // operations involving the wallpaper files.  This isn't timing-critical,
                 // so we do it in the background to avoid holding up the user unlock operation.
-                if (mUserRestorecon.get(userId) != Boolean.TRUE) {
-                    mUserRestorecon.put(userId, Boolean.TRUE);
+                if (!mUserRestorecon.get(userId)) {
+                    mUserRestorecon.put(userId, true);
                     Runnable relabeler = new Runnable() {
                         @Override
                         public void run() {
@@ -1562,7 +1639,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             for (String filename : sPerUserFiles) {
                 new File(wallpaperDir, filename).delete();
             }
-            mUserRestorecon.remove(userId);
+            mUserRestorecon.delete(userId);
         }
     }
 
@@ -1789,7 +1866,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 throw new IllegalArgumentException("Cannot find display with id=" + displayId);
             }
 
-            final WallpaperData.DisplayData wpdData = getDisplayDataOrCreate(wallpaper, displayId);
+            final DisplayData wpdData = getDisplayDataOrCreate(displayId);
             if (width != wpdData.mWidth || height != wpdData.mHeight) {
                 wpdData.mWidth = width;
                 wpdData.mHeight = height;
@@ -1826,8 +1903,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
             WallpaperData wallpaper = mWallpaperMap.get(UserHandle.getCallingUserId());
             if (wallpaper != null) {
-                final WallpaperData.DisplayData wpdData = getDisplayDataOrCreate(wallpaper,
-                        displayId);
+                final DisplayData wpdData = getDisplayDataOrCreate(displayId);
                 return wpdData.mWidth;
             } else {
                 return 0;
@@ -1845,8 +1921,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
             WallpaperData wallpaper = mWallpaperMap.get(UserHandle.getCallingUserId());
             if (wallpaper != null) {
-                final WallpaperData.DisplayData wpdData = getDisplayDataOrCreate(wallpaper,
-                        displayId);
+                final DisplayData wpdData = getDisplayDataOrCreate(displayId);
                 return wpdData.mHeight;
             } else {
                 return 0;
@@ -1872,7 +1947,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 throw new IllegalArgumentException("padding must be positive: " + padding);
             }
 
-            final WallpaperData.DisplayData wpdData = getDisplayDataOrCreate(wallpaper, displayId);
+            final DisplayData wpdData = getDisplayDataOrCreate(displayId);
             if (!padding.equals(wpdData.mPadding)) {
                 wpdData.mPadding.set(padding);
                 if (displayId == DEFAULT_DISPLAY) saveSettingsLocked(userId);
@@ -1940,8 +2015,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 return null;
             }
             // Only for default display.
-            final WallpaperData.DisplayData wpdData = getDisplayDataOrCreate(wallpaper,
-                    DEFAULT_DISPLAY);
+            final DisplayData wpdData = getDisplayDataOrCreate(DEFAULT_DISPLAY);
             try {
                 if (outParams != null) {
                     outParams.putInt("width", wpdData.mWidth);
@@ -2173,14 +2247,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         // We know a-priori that there is no lock-only wallpaper currently
         WallpaperData lockWP = new WallpaperData(userId,
                 WALLPAPER_LOCK_ORIG, WALLPAPER_LOCK_CROP);
-        final WallpaperData.DisplayData lockWPDData = getDisplayDataOrCreate(lockWP,
-                DEFAULT_DISPLAY);
-        final WallpaperData.DisplayData sysWPDData = getDisplayDataOrCreate(sysWP,
-                DEFAULT_DISPLAY);
         lockWP.wallpaperId = sysWP.wallpaperId;
         lockWP.cropHint.set(sysWP.cropHint);
-        lockWPDData.mWidth = sysWPDData.mWidth;
-        lockWPDData.mHeight = sysWPDData.mHeight;
         lockWP.allowBackup = sysWP.allowBackup;
         lockWP.primaryColors = sysWP.primaryColors;
 
@@ -2320,7 +2388,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         return false;
     }
 
-    boolean bindWallpaperComponentLocked(ComponentName componentName, boolean force,
+    private boolean bindWallpaperComponentLocked(ComponentName componentName, boolean force,
             boolean fromUser, WallpaperData wallpaper, IRemoteCallback reply) {
         if (DEBUG_LIVE) {
             Slog.v(TAG, "bindWallpaperComponentLocked: componentName=" + componentName);
@@ -2443,15 +2511,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 Slog.w(TAG, msg);
                 return false;
             }
-            if (wallpaper.userId == mCurrentUserId && mLastWallpaper != null) {
+            if (wallpaper.userId == mCurrentUserId && mLastWallpaper != null
+                    && !wallpaper.equals(mFallbackWallpaper)) {
                 detachWallpaperLocked(mLastWallpaper);
             }
             wallpaper.wallpaperComponent = componentName;
             wallpaper.connection = newConn;
             newConn.mReply = reply;
-            if (wallpaper.userId == mCurrentUserId) {
+            if (wallpaper.userId == mCurrentUserId && !wallpaper.equals(mFallbackWallpaper)) {
                 mLastWallpaper = wallpaper;
             }
+            updateFallbackConnection();
         } catch (RemoteException e) {
             String msg = "Remote exception for " + componentName + "\n" + e;
             if (fromUser) {
@@ -2463,7 +2533,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         return true;
     }
 
-    void detachWallpaperLocked(WallpaperData wallpaper) {
+    private void detachWallpaperLocked(WallpaperData wallpaper) {
         if (wallpaper.connection != null) {
             if (wallpaper.connection.mReply != null) {
                 try {
@@ -2473,7 +2543,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 wallpaper.connection.mReply = null;
             }
             mContext.unbindService(wallpaper.connection);
-            wallpaper.connection.forEachDisplayConnector(connector -> connector.disconnectLocked());
+            wallpaper.connection.forEachDisplayConnector(
+                    WallpaperConnection.DisplayConnector::disconnectLocked);
             wallpaper.connection.mService = null;
             wallpaper.connection.mDisplayConnector.clear();
             wallpaper.connection = null;
@@ -2481,12 +2552,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    void clearWallpaperComponentLocked(WallpaperData wallpaper) {
+    private void clearWallpaperComponentLocked(WallpaperData wallpaper) {
         wallpaper.wallpaperComponent = null;
         detachWallpaperLocked(wallpaper);
     }
 
-    void attachServiceLocked(WallpaperConnection conn, WallpaperData wallpaper) {
+    private void attachServiceLocked(WallpaperConnection conn, WallpaperData wallpaper) {
         conn.forEachDisplayConnector(connector-> connector.connectLocked(conn, wallpaper));
     }
 
@@ -2596,8 +2667,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (DEBUG) {
             Slog.v(TAG, "writeWallpaperAttributes id=" + wallpaper.wallpaperId);
         }
-        final WallpaperData.DisplayData wpdData = getDisplayDataOrCreate(wallpaper,
-                DEFAULT_DISPLAY);
+        final DisplayData wpdData = getDisplayDataOrCreate(DEFAULT_DISPLAY);
         out.startTag(null, tag);
         out.attribute(null, "id", Integer.toString(wallpaper.wallpaperId));
         out.attribute(null, "width", Integer.toString(wpdData.mWidth));
@@ -2755,10 +2825,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     Slog.i(TAG, "No static wallpaper imagery; defaults will be shown");
                 }
             }
+            initializeFallbackWallpaper();
         }
         boolean success = false;
-        final WallpaperData.DisplayData wpdData = getDisplayDataOrCreate(wallpaper,
-                DEFAULT_DISPLAY);
+        final DisplayData wpdData = getDisplayDataOrCreate(DEFAULT_DISPLAY);
         try {
             stream = new FileInputStream(file);
             XmlPullParser parser = Xml.newPullParser();
@@ -2845,8 +2915,19 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
+    private void initializeFallbackWallpaper() {
+        if (mFallbackWallpaper == null) {
+            if (DEBUG) Slog.d(TAG, "Initialize fallback wallpaper");
+            mFallbackWallpaper = new WallpaperData(
+                    UserHandle.USER_SYSTEM, WALLPAPER, WALLPAPER_CROP);
+            mFallbackWallpaper.allowBackup = false;
+            mFallbackWallpaper.wallpaperId = makeWallpaperIdLocked();
+            bindWallpaperComponentLocked(mImageWallpaper, true, false, mFallbackWallpaper, null);
+        }
+    }
+
     private void ensureSaneWallpaperData(WallpaperData wallpaper, int displayId) {
-        final WallpaperData.DisplayData size = getDisplayDataOrCreate(wallpaper, displayId);
+        final DisplayData size = getDisplayDataOrCreate(displayId);
 
         if (displayId == DEFAULT_DISPLAY) {
             // crop, if not previously specified
@@ -2869,7 +2950,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             wallpaper.wallpaperId = makeWallpaperIdLocked();
         }
 
-        final WallpaperData.DisplayData wpData = getDisplayDataOrCreate(wallpaper, DEFAULT_DISPLAY);
+        final DisplayData wpData = getDisplayDataOrCreate(DEFAULT_DISPLAY);
 
         if (!keepDimensionHints) {
             wpData.mWidth = Integer.parseInt(parser.getAttributeValue(null, "width"));
@@ -2963,7 +3044,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     // Restore the named resource bitmap to both source + crop files
-    boolean restoreNamedResourceLocked(WallpaperData wallpaper) {
+    private boolean restoreNamedResourceLocked(WallpaperData wallpaper) {
         if (wallpaper.name.length() > 4 && "res:".equals(wallpaper.name.substring(0, 4))) {
             String resName = wallpaper.name.substring(4);
 
@@ -3048,8 +3129,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             for (int i = 0; i < mWallpaperMap.size(); i++) {
                 WallpaperData wallpaper = mWallpaperMap.valueAt(i);
                 pw.print(" User "); pw.print(wallpaper.userId);
-                    pw.print(": id="); pw.println(wallpaper.wallpaperId);
-                forEachDisplayData(wallpaper, wpSize -> {
+                pw.print(": id="); pw.println(wallpaper.wallpaperId);
+                pw.println(" Display state:");
+                forEachDisplayData(wpSize -> {
                     pw.print("  displayId=");
                     pw.println(wpSize.mDisplayId);
                     pw.print("  mWidth=");
@@ -3072,11 +3154,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         pw.println(conn.mInfo.getComponent());
                     }
                     conn.forEachDisplayConnector(connector -> {
-                        pw.print("    mDisplayId=");
+                        pw.print("     mDisplayId=");
                         pw.println(connector.mDisplayId);
-                        pw.print("    mToken=");
+                        pw.print("     mToken=");
                         pw.println(connector.mToken);
-                        pw.print("    mEngine=");
+                        pw.print("     mEngine=");
                         pw.println(connector.mEngine);
                     });
                     pw.print("    mService=");
@@ -3090,18 +3172,38 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 WallpaperData wallpaper = mLockWallpaperMap.valueAt(i);
                 pw.print(" User "); pw.print(wallpaper.userId);
                 pw.print(": id="); pw.println(wallpaper.wallpaperId);
-                forEachDisplayData(wallpaper, wpSize -> {
-                    pw.print("  displayId=");
-                    pw.println(wpSize.mDisplayId);
-                    pw.print("  mWidth="); pw.print(wpSize.mWidth);
-                    pw.print("  mHeight="); pw.println(wpSize.mHeight);
-                    pw.print("  mPadding="); pw.println(wpSize.mPadding);
-                });
                 pw.print("  mCropHint="); pw.println(wallpaper.cropHint);
                 pw.print("  mName=");  pw.println(wallpaper.name);
                 pw.print("  mAllowBackup="); pw.println(wallpaper.allowBackup);
             }
-
+            pw.println("Fallback wallpaper state:");
+            pw.print(" User "); pw.print(mFallbackWallpaper.userId);
+            pw.print(": id="); pw.println(mFallbackWallpaper.wallpaperId);
+            pw.print("  mCropHint="); pw.println(mFallbackWallpaper.cropHint);
+            pw.print("  mName=");  pw.println(mFallbackWallpaper.name);
+            pw.print("  mAllowBackup="); pw.println(mFallbackWallpaper.allowBackup);
+            if (mFallbackWallpaper.connection != null) {
+                WallpaperConnection conn = mFallbackWallpaper.connection;
+                pw.print("  Fallback Wallpaper connection ");
+                pw.print(conn);
+                pw.println(":");
+                if (conn.mInfo != null) {
+                    pw.print("    mInfo.component=");
+                    pw.println(conn.mInfo.getComponent());
+                }
+                conn.forEachDisplayConnector(connector -> {
+                    pw.print("     mDisplayId=");
+                    pw.println(connector.mDisplayId);
+                    pw.print("     mToken=");
+                    pw.println(connector.mToken);
+                    pw.print("     mEngine=");
+                    pw.println(connector.mEngine);
+                });
+                pw.print("    mService=");
+                pw.println(conn.mService);
+                pw.print("    mLastDiedTime=");
+                pw.println(mFallbackWallpaper.lastDiedTime - SystemClock.uptimeMillis());
+            }
         }
     }
 }
