@@ -132,6 +132,8 @@ public class StorageManager {
     public static final String PROP_VIRTUAL_DISK = "persist.sys.virtual_disk";
     /** {@hide} */
     public static final String PROP_ISOLATED_STORAGE = "persist.sys.isolated_storage";
+    /** {@hide} */
+    public static final String PROP_ISOLATED_STORAGE_SNAPSHOT = "sys.isolated_storage_snapshot";
 
     /** {@hide} */
     public static final String PROP_FORCE_AUDIO = "persist.fw.force_audio";
@@ -1540,7 +1542,9 @@ public class StorageManager {
     /** {@hide} */
     @TestApi
     public static boolean hasIsolatedStorage() {
-        return SystemProperties.getBoolean(PROP_ISOLATED_STORAGE, false);
+        // Prefer to use snapshot for current boot when available
+        return SystemProperties.getBoolean(PROP_ISOLATED_STORAGE_SNAPSHOT,
+                SystemProperties.getBoolean(PROP_ISOLATED_STORAGE, false));
     }
 
     /**
