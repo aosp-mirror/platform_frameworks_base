@@ -6649,6 +6649,21 @@ message MetricsEvent {
     // OS: Q
     QS_SENSOR_PRIVACY = 1598;
 
+    // Tagged data for SMART_REPLY_VISIBLE. Count of number of smart actions.
+    // OS: Q
+    NOTIFICATION_SMART_ACTION_COUNT = 1599;
+
+    // Tagged data for SMART_REPLY_VISIBLE and NOTIFICATION_ITEM_ACTION.
+    // Whether the notification has notification-assistant generated
+    // actions/replies.
+    // OS: Q
+    NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED = 1600;
+
+    // Tagged data for NOTIFICATION_ITEM_ACTION. Whether the action is a smart
+    // action.
+    // OS: Q
+    NOTIFICATION_ACTION_IS_SMART = 1601;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
