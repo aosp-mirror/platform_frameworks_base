@@ -517,6 +517,28 @@ public class FileUtilsTest {
     }
 
     @Test
+    public void testMalformedTransate_int() throws Exception {
+        try {
+            // The non-standard Linux access mode 3 should throw
+            // an IllegalArgumentException.
+            translateModePosixToPfd(O_RDWR | O_WRONLY);
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testMalformedTransate_string() throws Exception {
+        try {
+            // The non-standard Linux access mode 3 should throw
+            // an IllegalArgumentException.
+            translateModePosixToString(O_RDWR | O_WRONLY);
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
     public void testTranslateMode_Invalid() throws Exception {
         try {
             translateModeStringToPosix("rwx");
