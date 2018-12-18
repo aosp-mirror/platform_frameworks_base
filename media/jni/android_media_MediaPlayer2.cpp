@@ -820,7 +820,7 @@ android_media_MediaPlayer2_getCurrentPosition(JNIEnv *env, jobject thiz)
 }
 
 static jlong
-android_media_MediaPlayer2_getDuration(JNIEnv *env, jobject thiz)
+android_media_MediaPlayer2_getDuration(JNIEnv *env, jobject thiz, jlong srcId)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
@@ -828,7 +828,7 @@ android_media_MediaPlayer2_getDuration(JNIEnv *env, jobject thiz)
         return 0;
     }
     int64_t msec;
-    process_media_player_call( env, thiz, mp->getDuration(&msec), NULL, NULL );
+    process_media_player_call( env, thiz, mp->getDuration(srcId, &msec), NULL, NULL );
     ALOGV("getDuration: %lld (msec)", (long long)msec);
     return (jlong) msec;
 }
@@ -1408,7 +1408,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_seekTo",       "(JI)V",                            (void *)android_media_MediaPlayer2_seekTo},
     {"native_pause",        "()V",                              (void *)android_media_MediaPlayer2_pause},
     {"getCurrentPosition",  "()J",                              (void *)android_media_MediaPlayer2_getCurrentPosition},
-    {"getDuration",         "()J",                              (void *)android_media_MediaPlayer2_getDuration},
+    {"native_getDuration",  "(J)J",                             (void *)android_media_MediaPlayer2_getDuration},
     {"native_release",      "()V",                              (void *)android_media_MediaPlayer2_release},
     {"native_reset",        "()V",                              (void *)android_media_MediaPlayer2_reset},
     {"native_setAudioAttributes", "(Landroid/media/AudioAttributes;)Z", (void *)android_media_MediaPlayer2_setAudioAttributes},

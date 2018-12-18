@@ -544,32 +544,55 @@ public class MediaPlayer2 implements AutoCloseable
     public native long getCurrentPosition();
 
     /**
-     * Gets the duration of the file.
+     * Gets the duration of the dsd.
      *
+     * @param dsd the descriptor of data source of which you want to get duration
      * @return the duration in milliseconds, if no duration is available
      *         (for example, if streaming live content), -1 is returned.
+     * @throws NullPointerException if dsd is null
      */
-    public native long getDuration();
+    public long getDuration(@NonNull DataSourceDesc dsd) {
+        if (dsd == null) {
+            throw new NullPointerException("non-null dsd is expected");
+        }
+        SourceInfo sourceInfo = getSourceInfo(dsd);
+        if (sourceInfo == null) {
+            return -1;
+        }
+
+        return native_getDuration(sourceInfo.mId);
+    }
+
+    private native long native_getDuration(long srcId);
 
     /**
-     * Gets the current buffered media source position received through progressive downloading.
+     * Gets the buffered media source position of given dsd.
      * For example a buffering update of 8000 milliseconds when 5000 milliseconds of the content
      * has already been played indicates that the next 3000 milliseconds of the
      * content to play has been buffered.
      *
+     * @param dsd the descriptor of data source of which you want to get buffered position
      * @return the current buffered media source position in milliseconds
+     * @throws NullPointerException if dsd is null
      */
-    public long getBufferedPosition() {
-        // Use cached buffered percent for now.
-        int bufferedPercentage;
-        synchronized (mSrcLock) {
-            if (mCurrentSourceInfo == null) {
-                bufferedPercentage = 0;
-            } else {
-                bufferedPercentage = mCurrentSourceInfo.mBufferedPercentage.get();
-            }
+    public long getBufferedPosition(@NonNull DataSourceDesc dsd) {
+        if (dsd == null) {
+            throw new NullPointerException("non-null dsd is expected");
         }
-        return getDuration() * bufferedPercentage / 100;
+        SourceInfo sourceInfo = getSourceInfo(dsd);
+        if (sourceInfo == null) {
+            return 0;
+        }
+
+        // Use cached buffered percent for now.
+        int bufferedPercentage = sourceInfo.mBufferedPercentage.get();
+
+        long duration = getDuration(dsd);
+        if (duration < 0) {
+            duration = 0;
+        }
+
+        return duration * bufferedPercentage / 100;
     }
 
     /**
@@ -1467,7 +1490,6 @@ public class MediaPlayer2 implements AutoCloseable
 
     private native PersistableBundle native_getMetrics();
 
-
     /**
      * Gets the current buffering management params used by the source component.
      * Calling it only after {@code setDataSource} has been called.
@@ -1504,7 +1526,6 @@ public class MediaPlayer2 implements AutoCloseable
     }
 
     private native void native_setBufferingParams(@NonNull BufferingParams params);
-
 
     /**
      * Sets playback rate using {@link PlaybackParams}. The object sets its internal
@@ -1969,19 +1990,31 @@ public class MediaPlayer2 implements AutoCloseable
     /**
      * Returns a List of track information.
      *
+     * @param dsd the descriptor of data source of which you want to get track info
      * @return List of track info. The total number of tracks is the array length.
      * Must be called again if an external timed text source has been added after
      * addTimedTextSource method is called.
      * @throws IllegalStateException if it is called in an invalid state.
+     * @throws NullPointerException if dsd is null
      */
-    public @NonNull List<TrackInfo> getTrackInfo() {
-        TrackInfo[] trackInfo = getInbandTrackInfo();
+
+    public @NonNull List<TrackInfo> getTrackInfo(@NonNull DataSourceDesc dsd) {
+        if (dsd == null) {
+            throw new NullPointerException("non-null dsd is expected");
+        }
+        SourceInfo sourceInfo = getSourceInfo(dsd);
+        if (sourceInfo == null) {
+            return new ArrayList<TrackInfo>(0);
+        }
+
+        TrackInfo[] trackInfo = getInbandTrackInfo(sourceInfo);
         return (trackInfo != null ? Arrays.asList(trackInfo) : new ArrayList<TrackInfo>(0));
     }
 
-    private TrackInfo[] getInbandTrackInfo() throws IllegalStateException {
+    private TrackInfo[] getInbandTrackInfo(SourceInfo sourceInfo) throws IllegalStateException {
         PlayerMessage request = PlayerMessage.newBuilder()
                 .addValues(Value.newBuilder().setInt32Value(INVOKE_ID_GET_TRACK_INFO))
+                .addValues(Value.newBuilder().setInt64Value(sourceInfo.mId))
                 .build();
         PlayerMessage response = invoke(request);
         if (response == null) {
@@ -2001,9 +2034,10 @@ public class MediaPlayer2 implements AutoCloseable
 
     /**
      * Returns the index of the audio, video, or subtitle track currently selected for playback,
-     * The return value is an index into the array returned by {@link #getTrackInfo()}, and can
-     * be used in calls to {@link #selectTrack(int)} or {@link #deselectTrack(int)}.
+     * The return value is an index into the array returned by {@link #getTrackInfo}, and can
+     * be used in calls to {@link #selectTrack} or {@link #deselectTrack}.
      *
+     * @param dsd the descriptor of data source of which you want to get selected track
      * @param trackType should be one of {@link TrackInfo#MEDIA_TRACK_TYPE_VIDEO},
      * {@link TrackInfo#MEDIA_TRACK_TYPE_AUDIO}, or
      * {@link TrackInfo#MEDIA_TRACK_TYPE_SUBTITLE}
@@ -2011,14 +2045,24 @@ public class MediaPlayer2 implements AutoCloseable
      * a negative integer is returned when there is no selected track for {@code trackType} or
      * when {@code trackType} is not one of audio, video, or subtitle.
      * @throws IllegalStateException if called after {@link #close()}
+     * @throws NullPointerException if dsd is null
      *
-     * @see #getTrackInfo()
-     * @see #selectTrack(int)
-     * @see #deselectTrack(int)
+     * @see #getTrackInfo
+     * @see #selectTrack
+     * @see #deselectTrack
      */
-    public int getSelectedTrack(int trackType) {
+    public int getSelectedTrack(@NonNull DataSourceDesc dsd, int trackType) {
+        if (dsd == null) {
+            throw new NullPointerException("non-null dsd is expected");
+        }
+        SourceInfo sourceInfo = getSourceInfo(dsd);
+        if (sourceInfo == null) {
+            return -1;
+        }
+
         PlayerMessage request = PlayerMessage.newBuilder()
                 .addValues(Value.newBuilder().setInt32Value(INVOKE_ID_GET_SELECTED_TRACK))
+                .addValues(Value.newBuilder().setInt64Value(sourceInfo.mId))
                 .addValues(Value.newBuilder().setInt32Value(trackType))
                 .build();
         PlayerMessage response = invoke(request);
@@ -2049,19 +2093,20 @@ public class MediaPlayer2 implements AutoCloseable
      * In addition, the support for selecting an audio track at runtime is pretty limited
      * in that an audio track can only be selected in the <em>Prepared</em> state.
      * </p>
+     * @param dsd the descriptor of data source of which you want to select track
      * @param index the index of the track to be selected. The valid range of the index
      * is 0..total number of track - 1. The total number of tracks as well as the type of
-     * each individual track can be found by calling {@link #getTrackInfo()} method.
+     * each individual track can be found by calling {@link #getTrackInfo} method.
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      *
      * @see MediaPlayer2#getTrackInfo
      */
     // This is an asynchronous call.
-    public Object selectTrack(int index) {
+    public Object selectTrack(@NonNull DataSourceDesc dsd, int index) {
         return addTask(new Task(CALL_COMPLETED_SELECT_TRACK, false) {
             @Override
             void process() {
-                selectOrDeselectTrack(index, true /* select */);
+                selectOrDeselectTrack(dsd, index, true /* select */);
             }
         });
     }
@@ -2073,28 +2118,37 @@ public class MediaPlayer2 implements AutoCloseable
      * deselected. If the timed text track identified by index has not been
      * selected before, it throws an exception.
      * </p>
+     * @param dsd the descriptor of data source of which you want to deselect track
      * @param index the index of the track to be deselected. The valid range of the index
      * is 0..total number of tracks - 1. The total number of tracks as well as the type of
-     * each individual track can be found by calling {@link #getTrackInfo()} method.
+     * each individual track can be found by calling {@link #getTrackInfo} method.
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      *
      * @see MediaPlayer2#getTrackInfo
      */
     // This is an asynchronous call.
-    public Object deselectTrack(int index) {
+    public Object deselectTrack(@NonNull DataSourceDesc dsd, int index) {
         return addTask(new Task(CALL_COMPLETED_DESELECT_TRACK, false) {
             @Override
             void process() {
-                selectOrDeselectTrack(index, false /* select */);
+                selectOrDeselectTrack(dsd, index, false /* select */);
             }
         });
     }
 
-    private void selectOrDeselectTrack(int index, boolean select)
-            throws IllegalStateException {
+    private void selectOrDeselectTrack(@NonNull DataSourceDesc dsd, int index, boolean select) {
+        if (dsd == null) {
+            throw new IllegalArgumentException("non-null dsd is expected");
+        }
+        SourceInfo sourceInfo = getSourceInfo(dsd);
+        if (sourceInfo == null) {
+            return;
+        }
+
         PlayerMessage request = PlayerMessage.newBuilder()
                 .addValues(Value.newBuilder().setInt32Value(
                             select ? INVOKE_ID_SELECT_TRACK : INVOKE_ID_DESELECT_TRACK))
+                .addValues(Value.newBuilder().setInt64Value(sourceInfo.mId))
                 .addValues(Value.newBuilder().setInt32Value(index))
                 .build();
         invoke(request);
@@ -2568,7 +2622,7 @@ public class MediaPlayer2 implements AutoCloseable
          * Currently only HTTP live streaming data URI's embedded with timed ID3 tags generates
          * {@link TimedMetaData}.
          *
-         * @see MediaPlayer2#selectTrack(int)
+         * @see MediaPlayer2#selectTrack
          * @see MediaPlayer2.OnTimedMetaDataAvailableListener
          * @see TimedMetaData
          *
