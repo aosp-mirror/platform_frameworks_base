@@ -5714,7 +5714,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // This should never fail.  Specifying an already in use NetID will cause failure.
                 if (networkAgent.isVPN()) {
                     mNMS.createVirtualNetwork(networkAgent.network.netId,
-                            !networkAgent.linkProperties.getDnsServers().isEmpty(),
                             (networkAgent.networkMisc == null ||
                                 !networkAgent.networkMisc.allowBypass));
                 } else {

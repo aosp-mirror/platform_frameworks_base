@@ -2308,11 +2308,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void createVirtualNetwork(int netId, boolean hasDNS, boolean secure) {
+    public void createVirtualNetwork(int netId, boolean secure) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         try {
-            mNetdService.networkCreateVpn(netId, hasDNS, secure);
+            mNetdService.networkCreateVpn(netId, secure);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
