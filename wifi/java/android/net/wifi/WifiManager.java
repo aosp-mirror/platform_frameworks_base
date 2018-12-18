@@ -4476,4 +4476,69 @@ public class WifiManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"DEVICE_MOBILITY_STATE_"}, value = {
+            DEVICE_MOBILITY_STATE_UNKNOWN,
+            DEVICE_MOBILITY_STATE_HIGH_MVMT,
+            DEVICE_MOBILITY_STATE_LOW_MVMT,
+            DEVICE_MOBILITY_STATE_STATIONARY})
+    public @interface DeviceMobilityState {}
+
+    /**
+     * Unknown device mobility state
+     *
+     * @see #setDeviceMobilityState(int)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DEVICE_MOBILITY_STATE_UNKNOWN = 0;
+
+    /**
+     * High movement device mobility state
+     *
+     * @see #setDeviceMobilityState(int)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DEVICE_MOBILITY_STATE_HIGH_MVMT = 1;
+
+    /**
+     * Low movement device mobility state
+     *
+     * @see #setDeviceMobilityState(int)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DEVICE_MOBILITY_STATE_LOW_MVMT = 2;
+
+    /**
+     * Stationary device mobility state
+     *
+     * @see #setDeviceMobilityState(int)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DEVICE_MOBILITY_STATE_STATIONARY = 3;
+
+    /**
+     * Updates the device mobility state. Wifi uses this information to adjust the interval between
+     * Wifi scans in order to balance power consumption with scan accuracy.
+     * @param state the updated device mobility state
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_SET_DEVICE_MOBILITY_STATE)
+    public void setDeviceMobilityState(@DeviceMobilityState int state) {
+        try {
+            mService.setDeviceMobilityState(state);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
