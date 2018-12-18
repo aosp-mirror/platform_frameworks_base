@@ -62,7 +62,7 @@ public class Utils {
         if (process.waitFor() == 0) {
             logger.fine("Adb command successful.");
         } else {
-            logger.severe("Abnormal adb shell cmd termination for: " + String.join(",", commands));
+            logger.severe("Abnormal adb shell termination for: " + String.join(",", commands));
             throw new RuntimeException("Error running adb command: " + err.toString());
         }
     }
@@ -116,6 +116,52 @@ public class Utils {
             logger.setLevel(Level.ALL);
         }
         logger.addHandler(handler);
+    }
+
+    /**
+     * Attempt to determine whether tool will work with this statsd, i.e. whether statsd is
+     * minCodename or higher.
+     * Algorithm: true if (sdk >= minSdk) || (sdk == minSdk-1 && codeName.startsWith(minCodeName))
+     * If all else fails, assume it will work (letting future commands deal with any errors).
+     */
+    public static boolean isAcceptableStatsd(Logger logger, int minSdk, String minCodename) {
+        BufferedReader in = null;
+        try {
+            File outFileSdk = File.createTempFile("shelltools_sdk", "tmp");
+            outFileSdk.deleteOnExit();
+            runCommand(outFileSdk, logger,
+                    "adb", "shell", "getprop", "ro.build.version.sdk");
+            in = new BufferedReader(new InputStreamReader(new FileInputStream(outFileSdk)));
+            // If NullPointerException/NumberFormatException/etc., just catch and return true.
+            int sdk = Integer.parseInt(in.readLine().trim());
+            if (sdk >= minSdk) {
+                return true;
+            } else if (sdk == minSdk - 1) { // Could be minSdk-1, or could be minSdk development.
+                in.close();
+                File outFileCode = File.createTempFile("shelltools_codename", "tmp");
+                outFileCode.deleteOnExit();
+                runCommand(outFileCode, logger,
+                        "adb", "shell", "getprop", "ro.build.version.codename");
+                in = new BufferedReader(new InputStreamReader(new FileInputStream(outFileCode)));
+                return in.readLine().startsWith(minCodename);
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            logger.fine("Could not determine whether statsd version is compatibile "
+                    + "with tool: " + e.toString());
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException e) {
+                logger.fine("Could not close temporary file: " + e.toString());
+            }
+        }
+        // Could not determine whether statsd is acceptable version.
+        // Just assume it is; if it isn't, we'll just get future errors via adb and deal with them.
+        return true;
     }
 
     public static class LocalToolsFormatter extends Formatter {

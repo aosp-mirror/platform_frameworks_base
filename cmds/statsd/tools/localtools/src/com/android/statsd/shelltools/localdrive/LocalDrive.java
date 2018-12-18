@@ -37,6 +37,9 @@ import java.util.logging.Logger;
 public class LocalDrive {
     private static final boolean DEBUG = false;
 
+    public static final int MIN_SDK = 29;
+    public static final String MIN_CODENAME = "Q";
+
     public static final long DEFAULT_CONFIG_ID = 56789;
 
     public static final String BINARY_FLAG = "--binary";
@@ -46,7 +49,7 @@ public class LocalDrive {
     public static final String HELP_STRING =
         "Usage:\n\n" +
 
-        "statsd_local upload CONFIG_FILE [CONFIG_ID] [--binary]\n" +
+        "statsd_localdrive upload CONFIG_FILE [CONFIG_ID] [--binary]\n" +
         "  Uploads the given statsd config file (in binary or human-readable-text format).\n" +
         "  If a config with this id already exists, removes it first.\n" +
         "    CONFIG_FILE    Location of config file on host.\n" +
@@ -56,12 +59,12 @@ public class LocalDrive {
         // Similar to: adb shell cmd stats config update SHELL_UID CONFIG_ID
         "\n" +
 
-        "statsd_local update CONFIG_FILE [CONFIG_ID] [--binary]\n" +
+        "statsd_localdrive update CONFIG_FILE [CONFIG_ID] [--binary]\n" +
         "  Same as upload, but does not remove the old config first (if it already exists).\n" +
         // Similar to: adb shell cmd stats config update SHELL_UID CONFIG_ID
         "\n" +
 
-        "statsd_local get-data [CONFIG_ID] [--clear] [--binary] [--no-uid-map]\n" +
+        "statsd_localdrive get-data [CONFIG_ID] [--clear] [--binary] [--no-uid-map]\n" +
         "  Prints the output statslog data (in binary or human-readable-text format).\n" +
         "    CONFIG_ID      Long ID of the config. If absent, uses " + DEFAULT_CONFIG_ID + ".\n" +
         "    --binary       Output should be in binary, instead of default human-readable text.\n" +
@@ -72,13 +75,13 @@ public class LocalDrive {
         //                                                      --include_current_bucket --proto
         "\n" +
 
-        "statsd_local remove [CONFIG_ID]\n" +
+        "statsd_localdrive remove [CONFIG_ID]\n" +
         "  Removes the config.\n" +
         "    CONFIG_ID      Long ID of the config. If absent, uses " + DEFAULT_CONFIG_ID + ".\n" +
         // Equivalent to: adb shell cmd stats config remove SHELL_UID CONFIG_ID
         "\n" +
 
-        "statsd_local clear [CONFIG_ID]\n" +
+        "statsd_localdrive clear [CONFIG_ID]\n" +
         "  Clears the data associated with the config.\n" +
         "    CONFIG_ID      Long ID of the config. If absent, uses " + DEFAULT_CONFIG_ID + ".\n" +
         // Similar to: adb shell cmd stats dump-report SHELL_UID CONFIG_ID
@@ -91,6 +94,12 @@ public class LocalDrive {
     /** Usage: make statsd_localdrive && statsd_localdrive */
     public static void main(String[] args) {
         Utils.setUpLogger(sLogger, DEBUG);
+
+        if (!Utils.isAcceptableStatsd(sLogger, MIN_SDK, MIN_CODENAME)) {
+            sLogger.severe("LocalDrive only works with statsd versions for Android "
+                    + MIN_CODENAME + " or higher.");
+            return;
+        }
 
         if (args.length > 0) {
             switch (args[0]) {
