@@ -2230,6 +2230,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             mNavigationBar.getBarTransitions().setAutoDim(false);
         }
         mHandler.removeCallbacks(mAutoDim);
+
+        // Do not dim the navigation buttons if the its tint is controlled by the bar's background
+        if (NavBarTintController.isEnabled(mContext)) {
+            return;
+        }
         if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED) {
             mHandler.postDelayed(mAutoDim, AUTOHIDE_TIMEOUT_MS);
         }
