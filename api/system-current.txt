@@ -4609,6 +4609,17 @@ package android.os.storage {
 
 package android.permission {
 
+  public final class PermissionControllerManager {
+    method public void revokeRuntimePermissions(java.util.Map<java.lang.String, java.util.List<java.lang.String>>, boolean, int, java.util.concurrent.Executor, android.permission.PermissionControllerManager.OnRevokeRuntimePermissionsCallback);
+    field public static final int REASON_INSTALLER_POLICY_VIOLATION = 2; // 0x2
+    field public static final int REASON_MALWARE = 1; // 0x1
+  }
+
+  public static abstract class PermissionControllerManager.OnRevokeRuntimePermissionsCallback {
+    ctor public PermissionControllerManager.OnRevokeRuntimePermissionsCallback();
+    method public abstract void onRevokeRuntimePermissions(java.util.Map<java.lang.String, java.util.List<java.lang.String>>);
+  }
+
   public abstract class PermissionControllerService extends android.app.Service {
     ctor public PermissionControllerService();
     method public final void attachBaseContext(android.content.Context);
@@ -4616,6 +4627,7 @@ package android.permission {
     method public abstract int onCountPermissionApps(java.util.List<java.lang.String>, boolean, boolean);
     method public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(java.lang.String);
     method public abstract void onRevokeRuntimePermission(java.lang.String, java.lang.String);
+    method public abstract java.util.Map<java.lang.String, java.util.List<java.lang.String>> onRevokeRuntimePermissions(java.util.Map<java.lang.String, java.util.List<java.lang.String>>, boolean, int, java.lang.String);
     field public static final java.lang.String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
   }
 
