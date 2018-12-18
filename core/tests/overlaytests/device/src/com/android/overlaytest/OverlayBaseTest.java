@@ -25,9 +25,10 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
-import android.support.test.InstrumentationRegistry;
 import android.util.AttributeSet;
 import android.util.Xml;
+
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Ignore;

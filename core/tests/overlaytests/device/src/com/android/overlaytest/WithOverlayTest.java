@@ -16,7 +16,7 @@
 
 package com.android.overlaytest;
 
-import android.support.test.filters.MediumTest;
+import androidx.test.filters.MediumTest;
 
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
