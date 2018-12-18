@@ -4825,7 +4825,7 @@ public class TelephonyManager {
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
     public void requestCellInfoUpdate(
-            @NonNull Executor executor, @NonNull CellInfoCallback callback) {
+            @NonNull @CallbackExecutor Executor executor, @NonNull CellInfoCallback callback) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null) return;
