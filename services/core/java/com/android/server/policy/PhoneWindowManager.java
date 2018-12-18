@@ -2549,12 +2549,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public long interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags) {
         final long result = interceptKeyBeforeDispatchingInner(win, event, policyFlags);
+        final int eventDisplayId = event.getDisplayId();
         if (result == 0 && !mPerDisplayFocusEnabled
-                && event.getDisplayId() != mTopFocusedDisplayId) {
+                && eventDisplayId != INVALID_DISPLAY && eventDisplayId != mTopFocusedDisplayId) {
             // Someone tries to send a key event to a display which doesn't have a focused window.
             // We drop the event here, or it will cause ANR.
             // TODO (b/121057974): The user may be confused about why the key doesn't work, so we
             // may need to deal with this problem.
+            Slog.i(TAG, "Dropping this event targeting display #" + eventDisplayId
+                    + " because the focus is on display #" + mTopFocusedDisplayId);
             return -1;
         }
         return result;
