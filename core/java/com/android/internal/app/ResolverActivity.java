@@ -101,6 +101,7 @@ public class ResolverActivity extends Activity {
     private AbsListView mAdapterView;
     private Button mAlwaysButton;
     private Button mOnceButton;
+    private Button mSettingsButton;
     private View mProfileView;
     private int mIconDpi;
     private int mLastSelected = AbsListView.INVALID_POSITION;
@@ -112,6 +113,7 @@ public class ResolverActivity extends Activity {
     private String mReferrerPackage;
     private CharSequence mTitle;
     private int mDefaultTitleResId;
+    private boolean mUseLayoutForBrowsables;
 
     // Whether or not this activity supports choosing a default handler for the intent.
     private boolean mSupportsAlwaysUseOption;
@@ -191,6 +193,12 @@ public class ResolverActivity extends Activity {
                 com.android.internal.R.string.whichHomeApplication,
                 com.android.internal.R.string.whichHomeApplicationNamed,
                 com.android.internal.R.string.whichHomeApplicationLabel);
+
+        // SpR.id.buttonecial titles for BROWSABLE components
+        public static final int BROWSABLE_TITLE_RES =
+                com.android.internal.R.string.whichGiveAccessToApplication;
+        public static final int BROWSABLE_NAMED_TITLE_RES =
+                com.android.internal.R.string.whichGiveAccessToApplicationNamed;
 
         public final String action;
         public final int titleRes;
@@ -283,7 +291,6 @@ public class ResolverActivity extends Activity {
         mPackageMonitor.register(this, getMainLooper(), false);
         mRegistered = true;
         mReferrerPackage = getReferrerPackageName();
-        mSupportsAlwaysUseOption = supportsAlwaysUseOption;
 
         final ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         mIconDpi = am.getLauncherLargeIconDensity();
@@ -292,6 +299,14 @@ public class ResolverActivity extends Activity {
         mIntents.add(0, new Intent(intent));
         mTitle = title;
         mDefaultTitleResId = defaultTitleRes;
+
+        mUseLayoutForBrowsables = getTargetIntent() == null
+                ? false
+                : getTargetIntent().hasCategory(Intent.CATEGORY_BROWSABLE);
+
+        // We don't want to support Always Use if browsable layout is being used,
+        // as to mitigate Intent Capturing vulnerability
+        mSupportsAlwaysUseOption = supportsAlwaysUseOption && !mUseLayoutForBrowsables;
 
         mIconFactory = IconDrawableFactory.newInstance(this, true);
         if (configureContentView(mIntents, initialIntents, rList)) {
@@ -448,13 +463,23 @@ public class ResolverActivity extends Activity {
         mSafeForwardingMode = safeForwarding;
     }
 
-    protected CharSequence getTitleForAction(String action, int defaultTitleRes) {
-        final ActionTitle title = mResolvingHome ? ActionTitle.HOME : ActionTitle.forAction(action);
+    protected CharSequence getTitleForAction(Intent intent, int defaultTitleRes) {
+        final ActionTitle title = mResolvingHome
+                ? ActionTitle.HOME
+                : ActionTitle.forAction(intent.getAction());
+
         // While there may already be a filtered item, we can only use it in the title if the list
         // is already sorted and all information relevant to it is already in the list.
         final boolean named = mAdapter.getFilteredPosition() >= 0;
         if (title == ActionTitle.DEFAULT && defaultTitleRes != 0) {
             return getString(defaultTitleRes);
+        } else if (intent.hasCategory(Intent.CATEGORY_BROWSABLE)) {
+            // If the Intent is BROWSABLE then we need to warn the user that
+            // they're giving access for the activity to open URLs from this specific host
+            return named
+                    ? getString(ActionTitle.BROWSABLE_NAMED_TITLE_RES, intent.getData().getHost(),
+                    mAdapter.getFilteredItem().getDisplayLabel())
+                    : getString(ActionTitle.BROWSABLE_TITLE_RES, intent.getData().getHost());
         } else {
             return named
                     ? getString(title.namedTitleRes, mAdapter.getFilteredItem().getDisplayLabel())
@@ -555,7 +580,7 @@ public class ResolverActivity extends Activity {
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        resetAlwaysOrOnceButtonBar();
+        resetButtonBar();
     }
 
     private boolean hasManagedProfile() {
@@ -607,11 +632,23 @@ public class ResolverActivity extends Activity {
 
     public void onButtonClick(View v) {
         final int id = v.getId();
-        startSelected(mAdapter.hasFilteredItem() ?
-                        mAdapter.getFilteredPosition():
-                        mAdapterView.getCheckedItemPosition(),
-                id == R.id.button_always,
-                !mAdapter.hasFilteredItem());
+        int which = mAdapter.hasFilteredItem()
+                ? mAdapter.getFilteredPosition()
+                : mAdapterView.getCheckedItemPosition();
+        boolean hasIndexBeenFiltered = !mAdapter.hasFilteredItem();
+        if (id == R.id.button_app_settings) {
+            showSettingsForSelected(which, hasIndexBeenFiltered);
+        } else {
+            startSelected(which, id == R.id.button_always, hasIndexBeenFiltered);
+        }
+    }
+
+    private void showSettingsForSelected(int which, boolean hasIndexBeenFiltered) {
+        ResolveInfo ri = mAdapter.resolveInfoForPosition(which, hasIndexBeenFiltered);
+        Intent in = new Intent().setAction(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS)
+                .setData(Uri.fromParts("package", ri.activityInfo.packageName, null))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        startActivity(in);
     }
 
     public void startSelected(int which, boolean always, boolean hasIndexBeenFiltered) {
@@ -995,7 +1032,7 @@ public class ResolverActivity extends Activity {
         adapterView.setOnItemClickListener(listener);
         adapterView.setOnItemLongClickListener(listener);
 
-        if (mSupportsAlwaysUseOption) {
+        if (mSupportsAlwaysUseOption || mUseLayoutForBrowsables) {
             listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         }
 
@@ -1017,7 +1054,7 @@ public class ResolverActivity extends Activity {
 
         CharSequence title = mTitle != null
                 ? mTitle
-                : getTitleForAction(getTargetIntent().getAction(), mDefaultTitleResId);
+                : getTitleForAction(getTargetIntent(), mDefaultTitleResId);
 
         if (!TextUtils.isEmpty(title)) {
             final TextView titleView = findViewById(R.id.title);
@@ -1051,16 +1088,47 @@ public class ResolverActivity extends Activity {
         }
     }
 
-    public void resetAlwaysOrOnceButtonBar() {
-        if (mSupportsAlwaysUseOption) {
-            final ViewGroup buttonLayout = findViewById(R.id.button_bar);
-            if (buttonLayout != null) {
-                buttonLayout.setVisibility(View.VISIBLE);
-                mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
-                mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
+    private void resetButtonBar() {
+        if (!mSupportsAlwaysUseOption && !mUseLayoutForBrowsables) {
+            return;
+        }
+        final ViewGroup buttonLayout = findViewById(R.id.button_bar);
+        if (buttonLayout != null) {
+            buttonLayout.setVisibility(View.VISIBLE);
+            mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
+            mSettingsButton = (Button) buttonLayout.findViewById(R.id.button_app_settings);
+            mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
+
+            if (mUseLayoutForBrowsables) {
+                resetSettingsOrOnceButtonBar();
             } else {
-                Log.e(TAG, "Layout unexpectedly does not have a button bar");
+                resetAlwaysOrOnceButtonBar();
             }
+        } else {
+            Log.e(TAG, "Layout unexpectedly does not have a button bar");
+        }
+    }
+
+    private void resetSettingsOrOnceButtonBar() {
+        //unsetting always button
+        mAlwaysButton.setVisibility(View.GONE);
+
+        // When the items load in, if an item was already selected,
+        // enable the buttons
+        if (mAdapterView != null
+                && mAdapterView.getCheckedItemPosition() != ListView.INVALID_POSITION) {
+            mSettingsButton.setEnabled(true);
+            mOnceButton.setEnabled(true);
+        }
+    }
+
+    private void resetAlwaysOrOnceButtonBar() {
+        // This check needs to be made because layout with default
+        // doesn't have a settings button
+        if (mSettingsButton != null) {
+            //unsetting always button
+            mSettingsButton.setVisibility(View.GONE);
+            mSettingsButton = null;
         }
 
         if (useLayoutWithDefault()
@@ -1625,7 +1693,7 @@ public class ResolverActivity extends Activity {
                     @Override
                     public void run() {
                         setTitleAndIcon();
-                        resetAlwaysOrOnceButtonBar();
+                        resetButtonBar();
                         onListRebuilt();
                         mPostListReadyRunnable = null;
                     }
@@ -1986,8 +2054,14 @@ public class ResolverActivity extends Activity {
             final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
             if (!useLayoutWithDefault()
                     && (!hasValidSelection || mLastSelected != checkedPos)
-                    && mAlwaysButton != null) {
-                setAlwaysButtonEnabled(hasValidSelection, checkedPos, true);
+                    && (mAlwaysButton != null || mSettingsButton != null)) {
+                if (mSettingsButton != null) {
+                    // this implies that the layout for browsables is being used
+                    mSettingsButton.setEnabled(true);
+                } else {
+                    // this implies that mAlwaysButton != null
+                    setAlwaysButtonEnabled(hasValidSelection, checkedPos, true);
+                }
                 mOnceButton.setEnabled(hasValidSelection);
                 if (hasValidSelection) {
                     mAdapterView.smoothScrollToPosition(checkedPos);
