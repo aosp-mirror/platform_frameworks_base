@@ -1504,6 +1504,10 @@ class StorageManagerService extends IStorageManager.Stub
     public StorageManagerService(Context context) {
         sSelf = this;
 
+        // Snapshot feature flag used for this boot
+        SystemProperties.set(StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT, Boolean.toString(
+                SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)));
+
         mContext = context;
         mCallbacks = new Callbacks(FgThread.get().getLooper());
         mLockPatternUtils = new LockPatternUtils(mContext);
