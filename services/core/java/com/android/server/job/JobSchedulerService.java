@@ -1261,6 +1261,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     @Override
     public void onDeviceIdleStateChanged(boolean deviceIdle) {
         synchronized (mLock) {
+            if (DEBUG) {
+                Slog.d(TAG, "Doze state changed: " + deviceIdle);
+            }
             if (deviceIdle) {
                 // When becoming idle, make sure no jobs are actively running,
                 // except those using the idle exemption flag.
@@ -1829,6 +1832,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                         }
                     } break;
                     case MSG_CHECK_JOB:
+                        if (DEBUG) {
+                            Slog.d(TAG, "MSG_CHECK_JOB");
+                        }
                         if (mReportedActive) {
                             // if jobs are currently being run, queue all ready jobs for execution.
                             queueReadyJobsForExecutionLocked();
@@ -1838,6 +1844,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                         }
                         break;
                     case MSG_CHECK_JOB_GREEDY:
+                        if (DEBUG) {
+                            Slog.d(TAG, "MSG_CHECK_JOB_GREEDY");
+                        }
                         queueReadyJobsForExecutionLocked();
                         break;
                     case MSG_STOP_JOB:
