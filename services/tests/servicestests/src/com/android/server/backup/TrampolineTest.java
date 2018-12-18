@@ -132,19 +132,21 @@ public class TrampolineTest {
     }
 
     @Test
-    public void startServiceForUser_whenMultiUserSettingDisabled_isIgnored() {
+    public void unlockUser_whenMultiUserSettingDisabled_isIgnoredForNonSystemUser() {
         Settings.Global.putInt(mContentResolver, Settings.Global.BACKUP_MULTI_USER_ENABLED, 0);
+        mTrampoline.initializeService(UserHandle.USER_SYSTEM);
 
-        mTrampoline.startServiceForUser(10);
+        mTrampoline.unlockUser(10);
 
         verify(mBackupManagerServiceMock, never()).startServiceForUser(10);
     }
 
     @Test
-    public void startServiceForUser_whenMultiUserSettingEnabled_callsBackupManagerService() {
+    public void unlockUser_whenMultiUserSettingEnabled_callsBackupManagerServiceForNonSystemUser() {
         Settings.Global.putInt(mContentResolver, Settings.Global.BACKUP_MULTI_USER_ENABLED, 1);
+        mTrampoline.initializeService(UserHandle.USER_SYSTEM);
 
-        mTrampoline.startServiceForUser(10);
+        mTrampoline.unlockUser(10);
 
         verify(mBackupManagerServiceMock).startServiceForUser(10);
     }
@@ -987,6 +989,11 @@ public class TrampolineTest {
         protected BackupManagerService createBackupManagerService() {
             mCreateServiceCallsCount++;
             return sBackupManagerServiceMock;
+        }
+
+        @Override
+        protected void postToHandler(Runnable runnable) {
+            runnable.run();
         }
 
         int getCreateServiceCallsCount() {
