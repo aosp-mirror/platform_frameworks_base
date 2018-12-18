@@ -900,12 +900,21 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (mLastWallpaper == null || mFallbackWallpaper == null) return;
         final WallpaperConnection systemConnection = mLastWallpaper.connection;
         final WallpaperConnection fallbackConnection = mFallbackWallpaper.connection;
+        if (fallbackConnection == null) {
+            Slog.w(TAG, "Fallback wallpaper connection has not been created yet!!");
+            return;
+        }
         if (supportsMultiDisplay(systemConnection)
                 && fallbackConnection.getConnectedEngineSize() != 0) {
             fallbackConnection.forEachDisplayConnector(
                     WallpaperConnection.DisplayConnector::disconnectLocked);
             fallbackConnection.mDisplayConnector.clear();
         } else {
+            // TODO(b/121181553) Handle wallpaper service disconnect case.
+            if (fallbackConnection.mService == null) {
+                Slog.w(TAG, "There is no fallback wallpaper service");
+                return;
+            }
             fallbackConnection.appendConnectorWithCondition(display ->
                     fallbackConnection.isUsableDisplay(display)
                             && display.getDisplayId() != DEFAULT_DISPLAY
