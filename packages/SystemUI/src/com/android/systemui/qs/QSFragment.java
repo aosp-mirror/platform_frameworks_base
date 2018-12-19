@@ -35,7 +35,6 @@ import android.widget.FrameLayout.LayoutParams;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
@@ -46,6 +45,8 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
+
+import javax.inject.Inject;
 
 public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     private static final String TAG = "QS";
@@ -74,8 +75,12 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     private float mLastQSExpansion = -1;
     private boolean mQsDisabled;
 
-    private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler =
-            Dependency.get(RemoteInputQuickSettingsDisabler.class);
+    private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
+
+    @Inject
+    public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler) {
+        mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,

@@ -44,7 +44,6 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.appops.AppOpsControllerImpl;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
@@ -401,12 +400,6 @@ public class DependencyProvider {
     @Provides
     public WakefulnessLifecycle provideWakefulnessLifecycle() {
         return new WakefulnessLifecycle();
-    }
-
-    @Singleton
-    @Provides
-    public FragmentService provideFragmentService() {
-        return new FragmentService();
     }
 
     @Singleton
