@@ -115,7 +115,7 @@ class PrivacyItemController(val context: Context, val callback: Callback) {
 
     private fun updatePrivacyList() {
         privacyList = currentUserIds.flatMap { appOpsController.getActiveAppOpsForUser(it) }
-                .mapNotNull { toPrivacyItem(it) }
+                .mapNotNull { toPrivacyItem(it) }.distinct()
     }
 
     private fun toPrivacyItem(appOpItem: AppOpItem): PrivacyItem? {

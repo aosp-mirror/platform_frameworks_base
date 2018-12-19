@@ -39,25 +39,39 @@ import java.util.Set;
  * NotificationPresenter to be displayed to the user.
  */
 public class AppOpsControllerImpl implements AppOpsController,
-        AppOpsManager.OnOpActiveChangedListener {
+        AppOpsManager.OnOpActiveChangedListener,
+        AppOpsManager.OnOpNotedListener {
 
-    private static final long LOCATION_TIME_DELAY_MS = 5000;
+    private static final long NOTED_OP_TIME_DELAY_MS = 5000;
     private static final String TAG = "AppOpsControllerImpl";
     private static final boolean DEBUG = false;
     private final Context mContext;
 
-    protected final AppOpsManager mAppOps;
-    private final H mBGHandler;
+    private final AppOpsManager mAppOps;
+    private H mBGHandler;
     private final List<AppOpsController.Callback> mCallbacks = new ArrayList<>();
     private final ArrayMap<Integer, Set<Callback>> mCallbacksByCode = new ArrayMap<>();
+
     @GuardedBy("mActiveItems")
     private final List<AppOpItem> mActiveItems = new ArrayList<>();
+    @GuardedBy("mNotedItems")
+    private final List<AppOpItem> mNotedItems = new ArrayList<>();
 
-    protected static final int[] OPS = new int[] {AppOpsManager.OP_CAMERA,
-            AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-            AppOpsManager.OP_RECORD_AUDIO,
-            AppOpsManager.OP_COARSE_LOCATION,
-            AppOpsManager.OP_FINE_LOCATION};
+    protected static final int[] OPS;
+    protected static final String[] OPS_STRING = new String[] {
+            AppOpsManager.OPSTR_CAMERA,
+            AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW,
+            AppOpsManager.OPSTR_RECORD_AUDIO,
+            AppOpsManager.OPSTR_COARSE_LOCATION,
+            AppOpsManager.OPSTR_FINE_LOCATION};
+
+    static {
+        int numOps = OPS_STRING.length;
+        OPS = new int[numOps];
+        for (int i = 0; i < numOps; i++) {
+            OPS[i] = AppOpsManager.strOpToOp(OPS_STRING[i]);
+        }
+    }
 
     public AppOpsControllerImpl(Context context, Looper bgLooper) {
         mContext = context;
@@ -70,11 +84,18 @@ public class AppOpsControllerImpl implements AppOpsController,
     }
 
     @VisibleForTesting
+    protected void setBGHandler(H handler) {
+        mBGHandler = handler;
+    }
+
+    @VisibleForTesting
     protected void setListening(boolean listening) {
         if (listening) {
             mAppOps.startWatchingActive(OPS, this);
+            mAppOps.startWatchingNoted(OPS_STRING, this);
         } else {
             mAppOps.stopWatchingActive(this);
+            mAppOps.stopWatchingNoted(this);
         }
     }
 
@@ -124,10 +145,11 @@ public class AppOpsControllerImpl implements AppOpsController,
         if (mCallbacks.isEmpty()) setListening(false);
     }
 
-    private AppOpItem getAppOpItem(int code, int uid, String packageName) {
-        final int itemsQ = mActiveItems.size();
+    private AppOpItem getAppOpItem(List<AppOpItem> appOpList, int code, int uid,
+            String packageName) {
+        final int itemsQ = appOpList.size();
         for (int i = 0; i < itemsQ; i++) {
-            AppOpItem item = mActiveItems.get(i);
+            AppOpItem item = appOpList.get(i);
             if (item.getCode() == code && item.getUid() == uid
                     && item.getPackageName().equals(packageName)) {
                 return item;
@@ -138,28 +160,43 @@ public class AppOpsControllerImpl implements AppOpsController,
 
     private boolean updateActives(int code, int uid, String packageName, boolean active) {
         synchronized (mActiveItems) {
-            AppOpItem item = getAppOpItem(code, uid, packageName);
+            AppOpItem item = getAppOpItem(mActiveItems, code, uid, packageName);
             if (item == null && active) {
                 item = new AppOpItem(code, uid, packageName, System.currentTimeMillis());
                 mActiveItems.add(item);
-                if (code == AppOpsManager.OP_COARSE_LOCATION
-                        || code == AppOpsManager.OP_FINE_LOCATION) {
-                    mBGHandler.scheduleRemoval(item, LOCATION_TIME_DELAY_MS);
-                }
                 if (DEBUG) Log.w(TAG, "Added item: " + item.toString());
                 return true;
             } else if (item != null && !active) {
                 mActiveItems.remove(item);
                 if (DEBUG) Log.w(TAG, "Removed item: " + item.toString());
                 return true;
-            } else if (item != null && active
-                    && (code == AppOpsManager.OP_COARSE_LOCATION
-                            || code == AppOpsManager.OP_FINE_LOCATION)) {
-                mBGHandler.scheduleRemoval(item, LOCATION_TIME_DELAY_MS);
-                return true;
             }
             return false;
         }
+    }
+
+    private void removeNoted(int code, int uid, String packageName) {
+        AppOpItem item;
+        synchronized (mNotedItems) {
+            item = getAppOpItem(mNotedItems, code, uid, packageName);
+            if (item == null) return;
+            mNotedItems.remove(item);
+            if (DEBUG) Log.w(TAG, "Removed item: " + item.toString());
+        }
+        notifySuscribers(code, uid, packageName, false);
+    }
+
+    private void addNoted(int code, int uid, String packageName) {
+        AppOpItem item;
+        synchronized (mNotedItems) {
+            item = getAppOpItem(mNotedItems, code, uid, packageName);
+            if (item == null) {
+                item = new AppOpItem(code, uid, packageName, System.currentTimeMillis());
+                mNotedItems.add(item);
+                if (DEBUG) Log.w(TAG, "Added item: " + item.toString());
+            }
+        }
+        mBGHandler.scheduleRemoval(item, NOTED_OP_TIME_DELAY_MS);
     }
 
     /**
@@ -168,9 +205,14 @@ public class AppOpsControllerImpl implements AppOpsController,
      * @return List of active AppOps information
      */
     public List<AppOpItem> getActiveAppOps() {
+        ArrayList<AppOpItem> active;
         synchronized (mActiveItems) {
-            return new ArrayList<>(mActiveItems);
+            active = new ArrayList<>(mActiveItems);
         }
+        synchronized (mNotedItems) {
+            active.addAll(mNotedItems);
+        }
+        return active;
     }
 
     /**
@@ -192,19 +234,45 @@ public class AppOpsControllerImpl implements AppOpsController,
                 }
             }
         }
+        synchronized (mNotedItems) {
+            final int numNotedItems = mNotedItems.size();
+            for (int i = 0; i < numNotedItems; i++) {
+                AppOpItem item = mNotedItems.get(i);
+                if (UserHandle.getUserId(item.getUid()) == userId) {
+                    list.add(item);
+                }
+            }
+        }
         return list;
     }
 
     @Override
     public void onOpActiveChanged(int code, int uid, String packageName, boolean active) {
         if (updateActives(code, uid, packageName, active)) {
+            notifySuscribers(code, uid, packageName, active);
+        }
+    }
+
+    @Override
+    public void onOpNoted(String code, int uid, String packageName, int result) {
+        if (DEBUG) {
+            Log.w(TAG, "Op: " + code + " with result " + AppOpsManager.MODE_NAMES[result]);
+        }
+        if (result != AppOpsManager.MODE_ALLOWED) return;
+        int op_code = AppOpsManager.strOpToOp(code);
+        addNoted(op_code, uid, packageName);
+        notifySuscribers(op_code, uid, packageName, true);
+    }
+
+    private void notifySuscribers(int code, int uid, String packageName, boolean active) {
+        if (mCallbacksByCode.containsKey(code)) {
             for (Callback cb: mCallbacksByCode.get(code)) {
                 cb.onActiveStateChanged(code, uid, packageName, active);
             }
         }
     }
 
-    private final class H extends Handler {
+    protected final class H extends Handler {
         H(Looper looper) {
             super(looper);
         }
@@ -214,8 +282,7 @@ public class AppOpsControllerImpl implements AppOpsController,
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    onOpActiveChanged(item.getCode(), item.getUid(),
-                            item.getPackageName(), false);
+                    removeNoted(item.getCode(), item.getUid(), item.getPackageName());
                 }
             }, item, timeToRemoval);
         }
