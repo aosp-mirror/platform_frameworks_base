@@ -1837,23 +1837,23 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     return false;
                 }
             }
-
-            if (transferStartingWindow(transferFrom)) {
-                return true;
-            }
-
-            // There is no existing starting window, and we don't want to create a splash screen, so
-            // that's it!
-            if (type != STARTING_WINDOW_TYPE_SPLASH_SCREEN) {
-                return false;
-            }
-
-            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating SplashScreenStartingData");
-            startingData = new SplashScreenStartingData(mWmService, pkg,
-                    theme, compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
-                    getMergedOverrideConfiguration());
-            scheduleAddStartingWindow();
         }
+
+        if (transferStartingWindow(transferFrom)) {
+            return true;
+        }
+
+        // There is no existing starting window, and we don't want to create a splash screen, so
+        // that's it!
+        if (type != STARTING_WINDOW_TYPE_SPLASH_SCREEN) {
+            return false;
+        }
+
+        if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating SplashScreenStartingData");
+        startingData = new SplashScreenStartingData(mWmService, pkg,
+                theme, compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
+                getMergedOverrideConfiguration());
+        scheduleAddStartingWindow();
         return true;
     }
 
