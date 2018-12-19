@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
 /* Copyright 2012, The Android Open Source Project
 **
@@ -3328,7 +3327,6 @@
   <java-symbol type="bool" name="config_displayBrightnessBucketsInDoze" />
   <java-symbol type="integer" name="config_storageManagerDaystoRetainDefault" />
   <java-symbol type="string" name="config_headlineFontFamily" />
-  <java-symbol type="string" name="config_headlineFontFamilyLight" />
   <java-symbol type="string" name="config_headlineFontFamilyMedium" />
 
   <java-symbol type="drawable" name="stat_sys_vitals" />
