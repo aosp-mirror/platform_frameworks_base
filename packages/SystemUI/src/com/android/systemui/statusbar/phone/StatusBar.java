@@ -1014,7 +1014,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     protected QS createDefaultQSFragment() {
-        return new QSFragment();
+        return FragmentHostManager.get(mStatusBarWindow).create(QSFragment.class);
     }
 
     private void setUpPresenter() {

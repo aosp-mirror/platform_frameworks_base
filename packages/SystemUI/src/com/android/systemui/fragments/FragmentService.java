@@ -23,6 +23,7 @@ import android.view.View;
 import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.Dumpable;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.phone.NavigationBarFragment;
 
 import java.io.FileDescriptor;
@@ -119,6 +120,10 @@ public class FragmentService implements ConfigurationChangedReceiver, Dumpable {
          * Inject a NavigationBarFragment.
          */
         NavigationBarFragment createNavigationBarFragment();
+        /**
+         * Inject a QSFragment.
+         */
+        QSFragment createQSFragment();
     }
 
     private class FragmentHostState {
