@@ -59,15 +59,89 @@ class UtilTests(unittest.TestCase):
 
     def test_skip_to_matching_class_found(self):
         it = _ri([c1, c2, c3, c4])
-        self.assertEquals(apilint._parse_to_matching_class(it, c3),
+        self.assertEquals(apilint._skip_to_matching_class(it, c3),
                           c3)
         self.assertEqual(it.next(), c4)
 
     def test_skip_to_matching_class_not_found(self):
         it = _ri([c1, c2, c3, c4])
-        self.assertEquals(apilint._parse_to_matching_class(it, cls("android.content", "ContentProvider")),
+        self.assertEquals(apilint._skip_to_matching_class(it, cls("android.content", "ContentProvider")),
                           None)
         self.assertEqual(it.next(), c4)
+
+    def test_yield_until_matching_class_found(self):
+        it = _ri([c1, c2, c3, c4])
+        self.assertEquals(list(apilint._yield_until_matching_class(it, c3)),
+                          [c1, c2])
+        self.assertEqual(it.next(), c4)
+
+    def test_yield_until_matching_class_not_found(self):
+        it = _ri([c1, c2, c3, c4])
+        self.assertEquals(list(apilint._yield_until_matching_class(it, cls("android.content", "ContentProvider"))),
+                          [c1, c2, c3])
+        self.assertEqual(it.next(), c4)
+
+    def test_yield_until_matching_class_None(self):
+        it = _ri([c1, c2, c3, c4])
+        self.assertEquals(list(apilint._yield_until_matching_class(it, None)),
+                          [c1, c2, c3, c4])
+
+
+faulty_current_txt = """
+package android.app {
+  public final class Activity {
+  }
+
+  public final class WallpaperColors implements android.os.Parcelable {
+    ctor public WallpaperColors(android.os.Parcel);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.WallpaperColors> CREATOR;
+  }
+}
+""".split('\n')
+
+ok_current_txt = """
+package android.app {
+  public final class Activity {
+  }
+
+  public final class WallpaperColors implements android.os.Parcelable {
+    ctor public WallpaperColors();
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.WallpaperColors> CREATOR;
+  }
+}
+""".split('\n')
+
+system_current_txt = """
+package android.app {
+  public final class WallpaperColors implements android.os.Parcelable {
+    method public int getSomething();
+  }
+}
+""".split('\n')
+
+
+
+class BaseFileTests(unittest.TestCase):
+    def test_base_file_avoids_errors(self):
+        failures, _ = apilint.examine_stream(system_current_txt, ok_current_txt)
+        self.assertEquals(failures, {})
+
+    def test_class_with_base_finds_same_errors(self):
+        failures_with_classes_with_base, _ = apilint.examine_stream("", faulty_current_txt,
+                                                                    in_classes_with_base=[cls("android.app", "WallpaperColors")])
+        failures_with_system_txt, _ = apilint.examine_stream(system_current_txt, faulty_current_txt)
+
+        self.assertEquals(failures_with_classes_with_base.keys(), failures_with_system_txt.keys())
+
+    def test_classes_with_base_is_emited(self):
+        classes_with_base = []
+        _, _ = apilint.examine_stream(system_current_txt, faulty_current_txt,
+                                      out_classes_with_base=classes_with_base)
+        self.assertEquals(map(lambda x: x.fullname, classes_with_base), ["android.app.WallpaperColors"])
 
 if __name__ == "__main__":
     unittest.main()
