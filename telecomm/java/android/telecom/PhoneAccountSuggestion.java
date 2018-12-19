@@ -24,6 +24,7 @@ import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 public final class PhoneAccountSuggestion implements Parcelable {
 
@@ -131,5 +132,20 @@ public final class PhoneAccountSuggestion implements Parcelable {
         dest.writeParcelable(mHandle, flags);
         dest.writeInt(mReason);
         dest.writeByte((byte) (mShouldAutoSelect ? 1 : 0));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PhoneAccountSuggestion that = (PhoneAccountSuggestion) o;
+        return mReason == that.mReason
+                && mShouldAutoSelect == that.mShouldAutoSelect
+                && Objects.equals(mHandle, that.mHandle);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mHandle, mReason, mShouldAutoSelect);
     }
 }
