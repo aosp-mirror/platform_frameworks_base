@@ -29,6 +29,35 @@ include $(BUILD_JAVA_LIBRARY)
 dexloggertest_jar := $(LOCAL_BUILT_MODULE)
 
 
+# Also build a native library that the test app can dynamically load
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+LOCAL_MODULE := DexLoggerNativeTestLibrary
+LOCAL_MULTILIB := first
+LOCAL_SRC_FILES := src/cpp/com_android_dcl_Jni.cpp
+LOCAL_C_INCLUDES += \
+    $(JNI_H_INCLUDE)
+LOCAL_SDK_VERSION := 28
+LOCAL_NDK_STL_VARIANT := c++_static
+
+include $(BUILD_SHARED_LIBRARY)
+
+dexloggertest_so := $(LOCAL_BUILT_MODULE)
+
+# And a standalone native executable that we can exec.
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+LOCAL_MODULE := DexLoggerNativeExecutable
+LOCAL_SRC_FILES := src/cpp/test_executable.cpp
+
+include $(BUILD_EXECUTABLE)
+
+dexloggertest_executable := $(LOCAL_BUILT_MODULE)
+
 # Build the test app itself
 
 include $(CLEAR_VARS)
@@ -37,14 +66,18 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := DexLoggerIntegrationTests
 LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := device-tests
-LOCAL_CERTIFICATE := platform
+LOCAL_CERTIFICATE := shared
 LOCAL_SRC_FILES := $(call all-java-files-under, src/com/android/server/pm)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
     truth-prebuilt \
 
-# This gets us the javalib.jar built by DexLoggerTestLibrary above.
-LOCAL_JAVA_RESOURCE_FILES := $(dexloggertest_jar)
+# This gets us the javalib.jar built by DexLoggerTestLibrary above as well as the various
+# native binaries.
+LOCAL_JAVA_RESOURCE_FILES := \
+    $(dexloggertest_jar) \
+    $(dexloggertest_so) \
+    $(dexloggertest_executable)
 
 include $(BUILD_PACKAGE)
