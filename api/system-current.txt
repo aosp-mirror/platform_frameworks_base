@@ -23,6 +23,7 @@ package android {
     field public static final java.lang.String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
     field public static final java.lang.String BIND_NETWORK_RECOMMENDATION_SERVICE = "android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE";
     field public static final java.lang.String BIND_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE";
+    field public static final java.lang.String BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE = "android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE";
     field public static final java.lang.String BIND_PRINT_RECOMMENDATION_SERVICE = "android.permission.BIND_PRINT_RECOMMENDATION_SERVICE";
     field public static final java.lang.String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final java.lang.String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
@@ -4940,6 +4941,14 @@ package android.telecom {
 
   public final class PhoneAccountSuggestion implements android.os.Parcelable {
     ctor public PhoneAccountSuggestion(android.telecom.PhoneAccountHandle, int, boolean);
+  }
+
+  public class PhoneAccountSuggestionService extends android.app.Service {
+    ctor public PhoneAccountSuggestionService();
+    method public void onAccountSuggestionRequest(java.lang.String);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public final void suggestPhoneAccounts(java.lang.String, java.util.List<android.telecom.PhoneAccountSuggestion>);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.telecom.PhoneAccountSuggestionService";
   }
 
   public final class RemoteConference {
