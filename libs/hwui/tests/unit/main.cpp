@@ -17,14 +17,14 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "Properties.h"
 #include "debug/GlesDriver.h"
 #include "debug/NullGlesDriver.h"
 #include "hwui/Typeface.h"
-#include "Properties.h"
 #include "tests/common/LeakChecker.h"
-#include "thread/TaskProcessor.h"
 #include "thread/Task.h"
 #include "thread/TaskManager.h"
+#include "thread/TaskProcessor.h"
 
 #include <signal.h>
 

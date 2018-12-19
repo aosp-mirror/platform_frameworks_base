@@ -25,6 +25,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -34,7 +35,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
-import android.view.contentcapture.ContentCaptureEvent;
 import android.view.contentcapture.IContentCaptureManager;
 
 import com.android.internal.annotations.GuardedBy;
@@ -47,7 +47,6 @@ import com.android.server.infra.AbstractMasterSystemService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A service used to observe the contents of the screen.
@@ -182,30 +181,18 @@ public final class ContentCaptureManagerService extends
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, componentName, taskId, displayId,
-                        sessionId, clientContext, flags, mAllowInstantService, result);
+                        sessionId, Binder.getCallingUid(), clientContext, flags,
+                        mAllowInstantService, result);
             }
         }
 
         @Override
-        public void sendEvents(@UserIdInt int userId, @NonNull String sessionId,
-                @NonNull List<ContentCaptureEvent> events) {
-            Preconditions.checkNotNull(sessionId);
-            Preconditions.checkNotNull(events);
-
-            synchronized (mLock) {
-                final ContentCapturePerUserService service = getServiceForUserLocked(userId);
-                service.sendEventsLocked(sessionId, events);
-            }
-        }
-
-        @Override
-        public void finishSession(@UserIdInt int userId, @NonNull String sessionId,
-                @Nullable List<ContentCaptureEvent> events) {
+        public void finishSession(@UserIdInt int userId, @NonNull String sessionId) {
             Preconditions.checkNotNull(sessionId);
 
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
-                service.finishSessionLocked(sessionId, events);
+                service.finishSessionLocked(sessionId);
             }
         }
 

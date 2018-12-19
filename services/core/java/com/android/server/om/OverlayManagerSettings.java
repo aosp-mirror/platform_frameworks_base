@@ -290,21 +290,22 @@ final class OverlayManagerSettings {
             return;
         }
 
-        final int N = mItems.size();
-        for (int i = 0; i < N; i++) {
+        final int n = mItems.size();
+        for (int i = 0; i < n; i++) {
             final SettingsItem item = mItems.get(i);
             pw.println(item.mPackageName + ":" + item.getUserId() + " {");
             pw.increaseIndent();
 
-            pw.print("mPackageName.......: "); pw.println(item.mPackageName);
-            pw.print("mUserId............: "); pw.println(item.getUserId());
-            pw.print("mTargetPackageName.: "); pw.println(item.getTargetPackageName());
-            pw.print("mBaseCodePath......: "); pw.println(item.getBaseCodePath());
-            pw.print("mState.............: "); pw.println(OverlayInfo.stateToString(item.getState()));
-            pw.print("mIsEnabled.........: "); pw.println(item.isEnabled());
-            pw.print("mIsStatic..........: "); pw.println(item.isStatic());
-            pw.print("mPriority..........: "); pw.println(item.mPriority);
-            pw.print("mCategory..........: "); pw.println(item.mCategory);
+            pw.println("mPackageName.......: " + item.mPackageName);
+            pw.println("mUserId............: " + item.getUserId());
+            pw.println("mTargetPackageName.: " + item.getTargetPackageName());
+            pw.println("mBaseCodePath......: " + item.getBaseCodePath());
+            pw.println("mState.............: " + OverlayInfo.stateToString(item.getState()));
+            pw.println("mState.............: " + OverlayInfo.stateToString(item.getState()));
+            pw.println("mIsEnabled.........: " + item.isEnabled());
+            pw.println("mIsStatic..........: " + item.isStatic());
+            pw.println("mPriority..........: " + item.mPriority);
+            pw.println("mCategory..........: " + item.mCategory);
 
             pw.decreaseIndent();
             pw.println("}");
@@ -400,8 +401,8 @@ final class OverlayManagerSettings {
             xml.startTag(null, TAG_OVERLAYS);
             XmlUtils.writeIntAttribute(xml, ATTR_VERSION, CURRENT_VERSION);
 
-            final int N = table.size();
-            for (int i = 0; i < N; i++) {
+            final int n = table.size();
+            for (int i = 0; i < n; i++) {
                 final SettingsItem item = table.get(i);
                 persistRow(xml, item);
             }
@@ -542,8 +543,8 @@ final class OverlayManagerSettings {
     }
 
     private int select(@NonNull final String packageName, final int userId) {
-        final int N = mItems.size();
-        for (int i = 0; i < N; i++) {
+        final int n = mItems.size();
+        for (int i = 0; i < n; i++) {
             final SettingsItem item = mItems.get(i);
             if (item.mUserId == userId && item.mPackageName.equals(packageName)) {
                 return i;

@@ -192,7 +192,7 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
         flushIfNeededLocked(dumpTimeNs);
     }
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_IS_ACTIVE, isActiveLocked());
+    protoOutput->write(FIELD_TYPE_BOOL | FIELD_ID_IS_ACTIVE, isActiveLocked());
 
     if (mPastBuckets.empty() && mSkippedBuckets.empty()) {
         return;

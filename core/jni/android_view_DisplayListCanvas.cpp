@@ -168,6 +168,11 @@ static void android_view_DisplayListCanvas_drawCircleProps(jlong canvasPtr,
     canvas->drawCircle(xProp, yProp, radiusProp, paintProp);
 }
 
+static void android_view_DisplayListCanvas_drawWebViewFunctor(jlong canvasPtr, jint functor) {
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
+    canvas->drawWebViewFunctor(functor);
+}
+
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -192,6 +197,7 @@ static JNINativeMethod gMethods[] = {
     { "nDrawTextureLayer",        "(JJ)V",      (void*) android_view_DisplayListCanvas_drawTextureLayer },
     { "nDrawCircle",              "(JJJJJ)V",   (void*) android_view_DisplayListCanvas_drawCircleProps },
     { "nDrawRoundRect",           "(JJJJJJJJ)V",(void*) android_view_DisplayListCanvas_drawRoundRectProps },
+    { "nDrawWebViewFunctor",      "(JI)V",      (void*) android_view_DisplayListCanvas_drawWebViewFunctor },
 };
 
 int register_android_view_DisplayListCanvas(JNIEnv* env) {

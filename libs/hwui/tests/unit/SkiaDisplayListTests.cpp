@@ -100,16 +100,35 @@ TEST(SkiaDisplayList, syncContexts) {
     GLFunctorDrawable functorDrawable(&functor, nullptr, &dummyCanvas);
     skiaDL.mChildFunctors.push_back(&functorDrawable);
 
+    int functor2 = WebViewFunctor_create(TestUtils::createMockFunctor(RenderMode::OpenGL_ES),
+                                         RenderMode::OpenGL_ES);
+    auto& counts = TestUtils::countsForFunctor(functor2);
+    skiaDL.mChildFunctors.push_back(
+            skiaDL.allocateDrawable<GLFunctorDrawable>(functor2, &dummyCanvas));
+    WebViewFunctor_release(functor2);
+
     SkRect bounds = SkRect::MakeWH(200, 200);
     VectorDrawableRoot vectorDrawable(new VectorDrawable::Group());
     vectorDrawable.mutateStagingProperties()->setBounds(bounds);
     skiaDL.mVectorDrawables.push_back(&vectorDrawable);
 
     // ensure that the functor and vectorDrawable are properly synced
-    skiaDL.syncContents();
+    TestUtils::runOnRenderThread([&](auto&) {
+        skiaDL.syncContents(WebViewSyncData{
+                .applyForceDark = false,
+        });
+    });
 
-    ASSERT_EQ(functor.getLastMode(), DrawGlInfo::kModeSync);
-    ASSERT_EQ(vectorDrawable.mutateProperties()->getBounds(), bounds);
+    EXPECT_EQ(functor.getLastMode(), DrawGlInfo::kModeSync);
+    EXPECT_EQ(counts.sync, 1);
+    EXPECT_EQ(counts.destroyed, 0);
+    EXPECT_EQ(vectorDrawable.mutateProperties()->getBounds(), bounds);
+
+    skiaDL.reset();
+    TestUtils::runOnRenderThread([](auto&) {
+        // Fence
+    });
+    EXPECT_EQ(counts.destroyed, 1);
 }
 
 class ContextFactory : public IContextFactory {

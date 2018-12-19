@@ -19,10 +19,10 @@
 
 #include <memory>
 #include <string>
-#include <utility>
 
 #include "android-base/macros.h"
 #include "ziparchive/zip_archive.h"
+#include "idmap2/Result.h"
 
 namespace android {
 namespace idmap2 {
@@ -43,7 +43,7 @@ class ZipFile {
   static std::unique_ptr<const ZipFile> Open(const std::string& path);
 
   std::unique_ptr<const MemoryChunk> Uncompress(const std::string& entryPath) const;
-  std::pair<bool, uint32_t> Crc(const std::string& entryPath) const;
+  Result<uint32_t> Crc(const std::string& entryPath) const;
 
   ~ZipFile();
 

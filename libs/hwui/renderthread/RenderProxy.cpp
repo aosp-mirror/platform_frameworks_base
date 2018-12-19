@@ -30,6 +30,7 @@
 #include "renderthread/RenderThread.h"
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
+#include "WebViewFunctorManager.h"
 
 #include <ui/GraphicBuffer.h>
 
@@ -141,6 +142,14 @@ void RenderProxy::invokeFunctor(Functor* functor, bool waitForCompletion) {
     } else {
         thread.queue().post(std::move(invoke));
     }
+}
+
+void RenderProxy::destroyFunctor(int functor) {
+    ATRACE_CALL();
+    RenderThread& thread = RenderThread::getInstance();
+    thread.queue().post([=]() {
+        WebViewFunctorManager::instance().destroyFunctor(functor);
+    });
 }
 
 DeferredLayerUpdater* RenderProxy::createTextureLayer() {

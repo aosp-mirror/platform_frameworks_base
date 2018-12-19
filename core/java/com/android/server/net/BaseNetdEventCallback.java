@@ -32,6 +32,12 @@ public class BaseNetdEventCallback extends INetdEventCallback.Stub {
     }
 
     @Override
+    public void onNat64PrefixEvent(int netId, boolean added, String prefixString,
+            int prefixLength) {
+        // default no-op
+    }
+
+    @Override
     public void onPrivateDnsValidationEvent(int netId, String ipAddress,
             String hostname, boolean validated) {
         // default no-op

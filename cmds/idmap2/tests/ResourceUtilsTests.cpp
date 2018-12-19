@@ -16,13 +16,13 @@
 
 #include <memory>
 #include <string>
-#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "androidfw/ApkAssets.h"
 #include "idmap2/ResourceUtils.h"
+#include "idmap2/Result.h"
 
 #include "TestHelpers.h"
 
@@ -52,17 +52,14 @@ class ResourceUtilsTests : public Idmap2Tests {
 };
 
 TEST_F(ResourceUtilsTests, ResToTypeEntryName) {
-  bool lookup_ok;
-  std::string name;
-  std::tie(lookup_ok, name) = utils::ResToTypeEntryName(GetAssetManager(), 0x7f010000u);
-  ASSERT_TRUE(lookup_ok);
-  ASSERT_EQ(name, "integer/int1");
+  Result<std::string> name = utils::ResToTypeEntryName(GetAssetManager(), 0x7f010000u);
+  ASSERT_TRUE(name);
+  ASSERT_EQ(*name, "integer/int1");
 }
 
 TEST_F(ResourceUtilsTests, ResToTypeEntryNameNoSuchResourceId) {
-  bool lookup_ok;
-  std::tie(lookup_ok, std::ignore) = utils::ResToTypeEntryName(GetAssetManager(), 0x7f123456u);
-  ASSERT_FALSE(lookup_ok);
+  Result<std::string> name = utils::ResToTypeEntryName(GetAssetManager(), 0x7f123456u);
+  ASSERT_FALSE(name);
 }
 
 }  // namespace idmap2

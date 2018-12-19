@@ -111,6 +111,7 @@
         android:background="@null"
         android:layout_width="@dimen/notification_header_expand_icon_size"
         android:layout_height="@dimen/notification_header_expand_icon_size"
+        android:layout_marginStart="4dp"
         android:paddingTop="@dimen/notification_expand_button_padding_top"
         android:visibility="gone"
         android:contentDescription="@string/expand_button_content_description_collapsed"

@@ -231,6 +231,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntryManager = new TestableNotificationEntryManager(mContext, mBarService);
         Dependency.get(InitController.class).executePostInitTasks();
         mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mCallback, mHeadsUpManager);
+        mEntryManager.setNotificationClicker(mock(NotificationClicker.class));
 
         setUserSentiment(mEntry.key, NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL);
     }

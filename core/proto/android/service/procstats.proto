@@ -186,7 +186,7 @@ message PackageServiceStatsProto {
     repeated PackageServiceOperationStatsProto operation_stats = 2;
 }
 
-// Next Tag: 7
+// Next Tag: 8
 message PackageAssociationSourceProcessStatsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -194,6 +194,8 @@ message PackageAssociationSourceProcessStatsProto {
     optional int32 process_uid = 1;
     // Process name.
     optional string process_name = 2;
+    // Package name.
+    optional string package_name = 7;
 
     // Total count of the times this association appeared.
     optional int32 total_count = 3;

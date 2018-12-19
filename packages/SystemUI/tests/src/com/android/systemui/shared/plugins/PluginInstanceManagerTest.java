@@ -17,6 +17,7 @@ package com.android.systemui.shared.plugins;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -25,22 +26,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.Plugin;
-import com.android.systemui.plugins.PluginEnablerImpl;
-import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginInstanceManager.PluginInfo;
-import com.android.systemui.shared.plugins.VersionInfo.InvalidVersionException;
-import com.android.systemui.plugins.annotations.Requires;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -59,6 +44,21 @@ import android.os.UserHandle;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.Plugin;
+import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.annotations.Requires;
+import com.android.systemui.shared.plugins.PluginInstanceManager.PluginInfo;
+import com.android.systemui.shared.plugins.VersionInfo.InvalidVersionException;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,6 +79,9 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     private PluginInstanceManager mPluginInstanceManager;
     private PluginManagerImpl mMockManager;
     private VersionInfo mMockVersionInfo;
+    private PluginEnabler mMockEnabler;
+    ComponentName mTestPluginComponentName =
+            new ComponentName(WHITELISTED_PACKAGE, TestPlugin.class.getName());
 
     @Before
     public void setup() throws Exception {
@@ -88,9 +91,9 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mMockPm = mock(PackageManager.class);
         mMockListener = mock(PluginListener.class);
         mMockManager = mock(PluginManagerImpl.class);
-        when(mMockManager.getClassLoader(any(), any()))
-                .thenReturn(getClass().getClassLoader());
-        when(mMockManager.getPluginEnabler()).thenReturn(new PluginEnablerImpl(mMockPm));
+        when(mMockManager.getClassLoader(any(), any())).thenReturn(getClass().getClassLoader());
+        mMockEnabler = mock(PluginEnabler.class);
+        when(mMockManager.getPluginEnabler()).thenReturn(mMockEnabler);
         mMockVersionInfo = mock(VersionInfo.class);
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
                 mMockListener, true, mHandlerThread.getLooper(), mMockVersionInfo,
@@ -230,18 +233,13 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         // Start with an unrelated class.
         boolean result = mPluginInstanceManager.checkAndDisable(Activity.class.getName());
         assertFalse(result);
-        verify(mMockPm, never()).setComponentEnabledSetting(
-                ArgumentCaptor.forClass(ComponentName.class).capture(),
-                ArgumentCaptor.forClass(int.class).capture(),
-                ArgumentCaptor.forClass(int.class).capture());
+        verify(mMockEnabler, never()).setDisabled(any(ComponentName.class), anyInt());
 
         // Now hand it a real class and make sure it disables the plugin.
         result = mPluginInstanceManager.checkAndDisable(TestPlugin.class.getName());
         assertTrue(result);
-        verify(mMockPm).setComponentEnabledSetting(
-                ArgumentCaptor.forClass(ComponentName.class).capture(),
-                ArgumentCaptor.forClass(int.class).capture(),
-                ArgumentCaptor.forClass(int.class).capture());
+        verify(mMockEnabler).setDisabled(
+                mTestPluginComponentName, PluginEnabler.DISABLED_FROM_EXPLICIT_CRASH);
     }
 
     @Test
@@ -250,10 +248,8 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
 
         mPluginInstanceManager.disableAll();
 
-        verify(mMockPm).setComponentEnabledSetting(
-                ArgumentCaptor.forClass(ComponentName.class).capture(),
-                ArgumentCaptor.forClass(int.class).capture(),
-                ArgumentCaptor.forClass(int.class).capture());
+        verify(mMockEnabler).setDisabled(
+                mTestPluginComponentName, PluginEnabler.DISABLED_FROM_SYSTEM_CRASH);
     }
 
     @Test
@@ -275,8 +271,8 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         List<ResolveInfo> list = new ArrayList<>();
         ResolveInfo info = new ResolveInfo();
         info.serviceInfo = mock(ServiceInfo.class);
-        info.serviceInfo.packageName = "com.android.systemui";
-        info.serviceInfo.name = TestPlugin.class.getName();
+        info.serviceInfo.packageName = mTestPluginComponentName.getPackageName();
+        info.serviceInfo.name = mTestPluginComponentName.getClassName();
         when(info.serviceInfo.loadLabel(any())).thenReturn("Test Plugin");
         list.add(info);
         when(mMockPm.queryIntentServices(any(), Mockito.anyInt())).thenReturn(list);
@@ -288,6 +284,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         ApplicationInfo appInfo = getContext().getApplicationInfo();
         when(mMockPm.getApplicationInfo(Mockito.anyString(), Mockito.anyInt())).thenReturn(
                 appInfo);
+        when(mMockEnabler.isEnabled(mTestPluginComponentName)).thenReturn(true);
     }
 
     private void createPlugin() throws Exception {

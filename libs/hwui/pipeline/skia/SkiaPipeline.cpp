@@ -184,15 +184,15 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
         } else {
             String8 cachesOutput;
             mRenderThread.cacheManager().dumpMemoryUsage(cachesOutput,
-                    &mRenderThread.renderState());
+                                                         &mRenderThread.renderState());
             ALOGE("%s", cachesOutput.string());
             if (errorHandler) {
                 std::ostringstream err;
                 err << "Unable to create layer for " << node->getName();
                 const int maxTextureSize = DeviceInfo::get()->maxTextureSize();
                 err << ", size " << info.width() << "x" << info.height() << " max size "
-                    << maxTextureSize << " color type " << (int)info.colorType()
-                    << " has context " << (int)(mRenderThread.getGrContext() != nullptr);
+                    << maxTextureSize << " color type " << (int)info.colorType() << " has context "
+                    << (int)(mRenderThread.getGrContext() != nullptr);
                 errorHandler->onError(err.str());
             }
         }
@@ -301,8 +301,7 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
                 mSavePictureProcessor->savePicture(data, mCapturedFile);
             } else {
                 mSavePictureProcessor->savePicture(
-                        data,
-                        mCapturedFile + "_" + std::to_string(mCaptureSequence));
+                        data, mCapturedFile + "_" + std::to_string(mCaptureSequence));
             }
             mCaptureSequence--;
         }

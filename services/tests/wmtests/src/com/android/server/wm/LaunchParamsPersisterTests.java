@@ -40,7 +40,6 @@ import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import com.android.server.LocalServices;
@@ -65,7 +64,6 @@ import java.util.function.Predicate;
  */
 @MediumTest
 @Presubmit
-@FlakyTest(detail = "Confirm stable in post-submit before removing")
 public class LaunchParamsPersisterTests extends ActivityTestsBase {
     private static final int TEST_USER_ID = 3;
     private static final int ALTERNATIVE_USER_ID = 0;

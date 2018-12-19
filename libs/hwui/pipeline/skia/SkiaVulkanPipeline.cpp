@@ -20,9 +20,9 @@
 #include "Readback.h"
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
+#include "VkInteropFunctorDrawable.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/Frame.h"
-#include "VkInteropFunctorDrawable.h"
 
 #include <SkSurface.h>
 #include <SkTypes.h>
@@ -158,7 +158,7 @@ sk_sp<Bitmap> SkiaVulkanPipeline::allocateHardwareBitmap(renderthread::RenderThr
         ALOGW("SkiaVulkanPipeline::allocateHardwareBitmap() failed in GraphicBuffer.create()");
         return nullptr;
     }
-    return sk_sp<Bitmap>(new Bitmap(buffer.get(), skBitmap.info()));
+    return Bitmap::createFrom(buffer, skBitmap.refColorSpace());
 }
 
 } /* namespace skiapipeline */

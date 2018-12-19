@@ -173,14 +173,14 @@ public class PhoneStateListener {
     public static final int LISTEN_CELL_INFO = 0x00000400;
 
     /**
-     * Listen for precise changes and fails to the device calls (cellular).
+     * Listen for {@link PreciseCallState.State} of ringing, background and foreground calls.
      * {@more}
      * Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
      * READ_PRECISE_PHONE_STATE}
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public static final int LISTEN_PRECISE_CALL_STATE                       = 0x00000800;
 
     /**
@@ -319,6 +319,18 @@ public class PhoneStateListener {
      * @see #onEmergencyNumberListChanged
      */
     public static final int LISTEN_EMERGENCY_NUMBER_LIST                   = 0x01000000;
+
+    /**
+     * Listen for call disconnect causes which contains {@link DisconnectCause} and
+     * {@link PreciseDisconnectCause}.
+     * {@more}
+     * Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
+     * READ_PRECISE_PHONE_STATE}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int LISTEN_CALL_DISCONNECT_CAUSES                  = 0x02000000;
 
     /*
      * Subscription used to listen to the phone state changes
@@ -530,11 +542,23 @@ public class PhoneStateListener {
 
     /**
      * Callback invoked when precise device call state changes.
+     * @param callState {@link PreciseCallState}
+     * @hide
+     */
+    @SystemApi
+    public void onPreciseCallStateChanged(PreciseCallState callState) {
+        // default implementation empty
+    }
+
+    /**
+     * Callback invoked when call disconnect cause changes.
+     * @param disconnectCause {@link DisconnectCause}.
+     * @param preciseDisconnectCause {@link PreciseDisconnectCause}.
      *
      * @hide
      */
-    @UnsupportedAppUsage
-    public void onPreciseCallStateChanged(PreciseCallState callState) {
+    @SystemApi
+    public void onCallDisconnectCauseChanged(int disconnectCause, int preciseDisconnectCause) {
         // default implementation empty
     }
 
@@ -797,6 +821,15 @@ public class PhoneStateListener {
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> psl.onPreciseCallStateChanged(callState)));
+        }
+
+        public void onCallDisconnectCauseChanged(int disconnectCause, int preciseDisconnectCause) {
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> psl.onCallDisconnectCauseChanged(
+                            disconnectCause, preciseDisconnectCause)));
         }
 
         public void onPreciseDataConnectionStateChanged(

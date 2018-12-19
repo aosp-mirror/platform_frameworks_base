@@ -27,6 +27,7 @@
 #include <renderstate/RenderState.h>
 #include <renderthread/RenderThread.h>
 
+#include <gtest/gtest.h>
 #include <memory>
 
 namespace android {
@@ -201,8 +202,7 @@ public:
 
     static void recordNode(RenderNode& node, std::function<void(Canvas&)> contentCallback) {
         std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
-                node.stagingProperties().getWidth(), node.stagingProperties().getHeight(),
-                &node));
+                node.stagingProperties().getWidth(), node.stagingProperties().getHeight(), &node));
         contentCallback(*canvas.get());
         node.setStagingDisplayList(canvas->finishRecording());
     }
@@ -267,7 +267,14 @@ public:
         renderthread::RenderThread::getInstance().queue().runSync([&]() { task.run(); });
     }
 
+    static void runOnRenderThreadUnmanaged(RtCallback rtCallback) {
+        auto& rt = renderthread::RenderThread::getInstance();
+        rt.queue().runSync([&]() { rtCallback(rt); });
+    }
+
+
     static bool isRenderThreadRunning() { return renderthread::RenderThread::hasInstance(); }
+    static pid_t getRenderThreadTid() { return renderthread::RenderThread::getInstance().getTid(); }
 
     static SkColor interpolateColor(float fraction, SkColor start, SkColor end);
 
@@ -296,7 +303,52 @@ public:
     static SkRect getClipBounds(const SkCanvas* canvas);
     static SkRect getLocalClipBounds(const SkCanvas* canvas);
 
+    struct CallCounts {
+        int sync = 0;
+        int contextDestroyed = 0;
+        int destroyed = 0;
+        int glesDraw = 0;
+    };
+
+    static void expectOnRenderThread() { EXPECT_EQ(gettid(), TestUtils::getRenderThreadTid()); }
+
+    static WebViewFunctorCallbacks createMockFunctor(RenderMode mode) {
+        auto callbacks = WebViewFunctorCallbacks{
+                .onSync =
+                        [](int functor, const WebViewSyncData& data) {
+                            expectOnRenderThread();
+                            sMockFunctorCounts[functor].sync++;
+                        },
+                .onContextDestroyed =
+                        [](int functor) {
+                            expectOnRenderThread();
+                            sMockFunctorCounts[functor].contextDestroyed++;
+                        },
+                .onDestroyed =
+                        [](int functor) {
+                            expectOnRenderThread();
+                            sMockFunctorCounts[functor].destroyed++;
+                        },
+        };
+        switch (mode) {
+            case RenderMode::OpenGL_ES:
+                callbacks.gles.draw = [](int functor, const DrawGlInfo& params) {
+                    expectOnRenderThread();
+                    sMockFunctorCounts[functor].glesDraw++;
+                };
+                break;
+            default:
+                ADD_FAILURE();
+                return WebViewFunctorCallbacks{};
+        }
+        return callbacks;
+    }
+
+    static CallCounts& countsForFunctor(int functor) { return sMockFunctorCounts[functor]; }
+
 private:
+    static std::unordered_map<int, CallCounts> sMockFunctorCounts;
+
     static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {
         MarkAndSweepRemoved observer(nullptr);
         node->syncProperties();
@@ -306,9 +358,9 @@ private:
         }
         auto displayList = node->getDisplayList();
         if (displayList) {
-            for (auto&& childDr : static_cast<skiapipeline::SkiaDisplayList*>(
-                                          const_cast<DisplayList*>(displayList))
-                                          ->mChildNodes) {
+            for (auto&& childDr :
+                 static_cast<skiapipeline::SkiaDisplayList*>(const_cast<DisplayList*>(displayList))
+                         ->mChildNodes) {
                 syncHierarchyPropertiesAndDisplayListImpl(childDr.getRenderNode());
             }
         }

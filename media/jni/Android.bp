@@ -97,9 +97,10 @@ cc_library_shared {
     shared_libs: [
         "android.hardware.cas@1.0",  // for CasManager. VNDK???
         "android.hardware.cas.native@1.0",  // CasManager. VNDK???
+        "android.hidl.allocator@1.0",
+        "libhidlmemory",
         "libbinder",
         "libgui",  // for VideoFrameScheduler
-        "libhidlallocatorutils",
         "libhidlbase",  // VNDK???
         "libpowermanager",  // for JWakeLock. to be removed
 

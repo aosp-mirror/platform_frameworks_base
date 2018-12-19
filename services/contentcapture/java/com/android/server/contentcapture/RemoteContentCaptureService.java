@@ -20,16 +20,13 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
-import android.service.contentcapture.ContentCaptureEventsRequest;
 import android.service.contentcapture.IContentCaptureService;
 import android.service.contentcapture.SnapshotData;
 import android.text.format.DateUtils;
 import android.view.contentcapture.ContentCaptureContext;
-import android.view.contentcapture.ContentCaptureEvent;
 
+import com.android.internal.os.IResultReceiver;
 import com.android.server.infra.AbstractMultiplePendingRequestsRemoteService;
-
-import java.util.List;
 
 final class RemoteContentCaptureService
         extends AbstractMultiplePendingRequestsRemoteService<RemoteContentCaptureService,
@@ -67,21 +64,19 @@ final class RemoteContentCaptureService
 
     /**
      * Called by {@link ContentCaptureServerSession} to generate a call to the
-     * {@link RemoteContentCaptureService} to indicate the session was created (when {@code context}
-     * is not {@code null} or destroyed (when {@code context} is {@code null}).
+     * {@link RemoteContentCaptureService} to indicate the session was created.
      */
-    public void onSessionLifecycleRequest(@Nullable ContentCaptureContext context,
-            @NonNull String sessionId) {
-        scheduleAsyncRequest((s) -> s.onSessionLifecycle(context, sessionId));
+    public void onSessionStarted(@Nullable ContentCaptureContext context,
+            @NonNull String sessionId, int uid, @NonNull IResultReceiver clientReceiver) {
+        scheduleAsyncRequest((s) -> s.onSessionStarted(context, sessionId, uid, clientReceiver));
     }
 
     /**
-     * Called by {@link ContentCaptureServerSession} to send a batch of events to the service.
+     * Called by {@link ContentCaptureServerSession} to generate a call to the
+     * {@link RemoteContentCaptureService} to indicate the session was finished.
      */
-    public void onContentCaptureEventsRequest(@NonNull String sessionId,
-            @NonNull List<ContentCaptureEvent> events) {
-        scheduleAsyncRequest((s) -> s.onContentCaptureEventsRequest(sessionId,
-                new ContentCaptureEventsRequest(events)));
+    public void onSessionFinished(@NonNull String sessionId) {
+        scheduleAsyncRequest((s) -> s.onSessionFinished(sessionId));
     }
 
     /**

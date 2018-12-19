@@ -45,6 +45,20 @@ oneway interface INetdEventCallback {
             in String[] ipAddresses, int ipAddressesCount, long timestamp, int uid);
 
     /**
+     * Represents adding or removing a NAT64 prefix.
+     * This method must not block or perform long-running operations.
+     *
+     * @param netId the ID of the network the prefix was performed on.
+     * @param added true if the NAT64 prefix was added, or false if the NAT64 prefix was removed.
+     *        There is only one prefix at a time for each netId. If a prefix is added, it replaces
+     *        the previous-added prefix.
+     * @param prefixString the detected NAT64 prefix as a string literal.
+     * @param prefixLength the prefix length associated with this NAT64 prefix.
+     */
+    void onNat64PrefixEvent(int netId, boolean added, @utf8InCpp String prefixString,
+            int prefixLength);
+
+    /**
      * Represents a private DNS validation success or failure.
      * This method must not block or perform long-running operations.
      *

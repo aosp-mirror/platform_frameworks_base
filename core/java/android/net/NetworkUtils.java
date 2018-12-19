@@ -21,6 +21,7 @@ import static android.system.OsConstants.AF_INET6;
 
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.system.Os;
 import android.util.Log;
@@ -299,8 +300,10 @@ public class NetworkUtils {
      * @param addrString
      * @return the InetAddress
      * @hide
+     * @deprecated Use {@link InetAddresses#parseNumericAddress(String)}, if possible.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @Deprecated
     public static InetAddress numericToInetAddress(String addrString)
             throws IllegalArgumentException {
         return InetAddress.parseNumericAddress(addrString);

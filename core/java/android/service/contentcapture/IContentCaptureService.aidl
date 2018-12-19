@@ -16,9 +16,10 @@
 
 package android.service.contentcapture;
 
-import android.service.contentcapture.ContentCaptureEventsRequest;
 import android.service.contentcapture.SnapshotData;
 import android.view.contentcapture.ContentCaptureContext;
+
+import com.android.internal.os.IResultReceiver;
 
 import java.util.List;
 
@@ -28,11 +29,8 @@ import java.util.List;
  * @hide
  */
 oneway interface IContentCaptureService {
-
-    // Called when session is created (context not null) or destroyed (context null)
-    void onSessionLifecycle(in ContentCaptureContext context, String sessionId);
-
-    void onContentCaptureEventsRequest(String sessionId, in ContentCaptureEventsRequest request);
-
+    void onSessionStarted(in ContentCaptureContext context, String sessionId, int uid,
+                          in IResultReceiver clientReceiver);
+    void onSessionFinished(String sessionId);
     void onActivitySnapshot(String sessionId, in SnapshotData snapshotData);
 }

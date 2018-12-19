@@ -19,9 +19,9 @@
 
 #include "tests/common/TestUtils.h"
 
-#include <gtest/gtest.h>
 #include <SkBitmap.h>
 #include <SkImage.h>
+#include <gtest/gtest.h>
 
 using namespace android;
 using namespace android::uirenderer;

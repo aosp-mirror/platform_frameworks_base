@@ -675,13 +675,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final int mHardKeyboardBehavior;
 
     /**
-     * Whether we temporarily allow IMEs implemented in instant apps to run for testing.
-     *
-     * <p>Note: This is quite dangerous.  Don't forget to reset after you finish testing.</p>
-     */
-    private boolean mBindInstantServiceAllowed = false;
-
-    /**
      * Internal state snapshot when {@link #MSG_START_INPUT} message is about to be posted to the
      * internal message queue. Any subsequent state change inside {@link InputMethodManagerService}
      * will not affect those tasks that are already posted.
@@ -1135,8 +1128,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final PackageManager pm = mContext.getPackageManager();
                 final List<ResolveInfo> services = pm.queryIntentServicesAsUser(
                         new Intent(InputMethod.SERVICE_INTERFACE).setPackage(packageName),
-                        getComponentMatchingFlags(PackageManager.MATCH_DISABLED_COMPONENTS),
-                        getChangingUserId());
+                        PackageManager.MATCH_DISABLED_COMPONENTS, getChangingUserId());
                 // No need to lock this because we access it only on getRegisteredHandler().
                 if (!services.isEmpty()) {
                     mImePackageAppeared = true;
@@ -1683,9 +1675,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (service == null || conn == null) {
             Slog.e(TAG, "--- bind failed: service = " + service + ", conn = " + conn);
             return false;
-        }
-        if (mBindInstantServiceAllowed) {
-            flags |= Context.BIND_ALLOW_INSTANT;
         }
         return mContext.bindServiceAsUser(service, conn, flags,
                 new UserHandle(mSettings.getCurrentUserId()));
@@ -3631,16 +3620,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return false;
     }
 
-    @PackageManager.ResolveInfoFlags
-    private int getComponentMatchingFlags(@PackageManager.ResolveInfoFlags int baseFlags) {
-        synchronized (mMethodMap) {
-            if (mBindInstantServiceAllowed) {
-                baseFlags |= PackageManager.MATCH_INSTANT;
-            }
-            return baseFlags;
-        }
-    }
-
     @GuardedBy("mMethodMap")
     void buildInputMethodListLocked(boolean resetDefaultEnabledIme) {
         if (DEBUG) {
@@ -3664,8 +3643,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // services depending on the unlock state for the specified user.
         final List<ResolveInfo> services = pm.queryIntentServicesAsUser(
                 new Intent(InputMethod.SERVICE_INTERFACE),
-                getComponentMatchingFlags(PackageManager.GET_META_DATA
-                        | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS),
+                PackageManager.GET_META_DATA | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS,
                 mSettings.getCurrentUserId());
 
         final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
@@ -3707,8 +3685,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // conservative, but it seems we cannot use it for now (Issue 35176630).
             final List<ResolveInfo> allInputMethodServices = pm.queryIntentServicesAsUser(
                     new Intent(InputMethod.SERVICE_INTERFACE),
-                    getComponentMatchingFlags(PackageManager.MATCH_DISABLED_COMPONENTS),
-                    mSettings.getCurrentUserId());
+                    PackageManager.MATCH_DISABLED_COMPONENTS, mSettings.getCurrentUserId());
             final int N = allInputMethodServices.size();
             for (int i = 0; i < N; ++i) {
                 final ServiceInfo si = allInputMethodServices.get(i).serviceInfo;
@@ -4606,8 +4583,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             p.println("Current Input Method Manager state:");
             int N = mMethodList.size();
-            p.println("  Input Methods: mMethodMapUpdateCount=" + mMethodMapUpdateCount
-                    + " mBindInstantServiceAllowed=" + mBindInstantServiceAllowed);
+            p.println("  Input Methods: mMethodMapUpdateCount=" + mMethodMapUpdateCount);
             for (int i=0; i<N; i++) {
                 InputMethodInfo info = mMethodList.get(i);
                 p.println("  InputMethod #" + i + ":");
@@ -4719,9 +4695,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if ("refresh_debug_properties".equals(cmd)) {
                 return refreshDebugProperties();
             }
-            if ("set-bind-instant-service-allowed".equals(cmd)) {
-                return setBindInstantServiceAllowed();
-            }
 
             // For existing "adb shell ime <command>".
             if ("ime".equals(cmd)) {
@@ -4752,12 +4725,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @ShellCommandResult
-        private int setBindInstantServiceAllowed() {
-            return mService.handleSetBindInstantServiceAllowed(this);
-        }
-
-        @BinderThread
-        @ShellCommandResult
         private int refreshDebugProperties() {
             DebugFlags.FLAG_OPTIMIZE_START_INPUT.refresh();
             return ShellCommandResult.SUCCESS;
@@ -4774,9 +4741,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 pw.println("    Synonym of dumpsys.");
                 pw.println("  ime <command> [options]");
                 pw.println("    Manipulate IMEs.  Run \"ime help\" for details.");
-                pw.println("  set-bind-instant-service-allowed true|false ");
-                pw.println("    Set whether binding to services provided by instant apps is "
-                        + "allowed.");
             }
         }
 
@@ -4823,53 +4787,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // ----------------------------------------------------------------------
     // Shell command handlers:
-
-    /**
-     * Handles {@code adb shell cmd input_method set-bind-instant-service-allowed}.
-     *
-     * @param shellCommand {@link ShellCommand} object that is handling this command.
-     * @return Exit code of the command.
-     */
-    @BinderThread
-    @RequiresPermission(android.Manifest.permission.MANAGE_BIND_INSTANT_SERVICE)
-    @ShellCommandResult
-    private int handleSetBindInstantServiceAllowed(@NonNull ShellCommand shellCommand) {
-        final String allowedString = shellCommand.getNextArgRequired();
-        if (allowedString == null) {
-            shellCommand.getErrPrintWriter().println("Error: no true/false specified");
-            return ShellCommandResult.FAILURE;
-        }
-        final boolean allowed = Boolean.parseBoolean(allowedString);
-        synchronized (mMethodMap) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.MANAGE_BIND_INSTANT_SERVICE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                shellCommand.getErrPrintWriter().print(
-                        "Caller must have MANAGE_BIND_INSTANT_SERVICE permission");
-                return ShellCommandResult.FAILURE;
-            }
-
-            if (mBindInstantServiceAllowed == allowed) {
-                // Nothing to do.
-                return ShellCommandResult.SUCCESS;
-            }
-            mBindInstantServiceAllowed = allowed;
-
-            // Rebuild everything.
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                // Reset the current IME
-                resetSelectedInputMethodAndSubtypeLocked(null);
-                // Also reset the settings of the current IME
-                mSettings.putSelectedInputMethod(null);
-                buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
-                updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-        return ShellCommandResult.SUCCESS;
-    }
 
     /**
      * Handles {@code adb shell ime list}.

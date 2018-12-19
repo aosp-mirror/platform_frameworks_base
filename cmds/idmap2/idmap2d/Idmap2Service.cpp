@@ -78,6 +78,18 @@ Status Idmap2Service::removeIdmap(const std::string& overlay_apk_path,
   }
 }
 
+Status Idmap2Service::verifyIdmap(const std::string& overlay_apk_path,
+                                  int32_t user_id ATTRIBUTE_UNUSED, bool* _aidl_return) {
+  assert(_aidl_return);
+  const std::string idmap_path = Idmap::CanonicalIdmapPathFor(kIdmapCacheDir, overlay_apk_path);
+  std::ifstream fin(idmap_path);
+  const std::unique_ptr<const IdmapHeader> header = IdmapHeader::FromBinaryStream(fin);
+  fin.close();
+  std::stringstream dev_null;
+  *_aidl_return = header && header->IsUpToDate(dev_null);
+  return ok();
+}
+
 Status Idmap2Service::createIdmap(const std::string& target_apk_path,
                                   const std::string& overlay_apk_path, int32_t user_id,
                                   std::unique_ptr<std::string>* _aidl_return) {
@@ -89,17 +101,6 @@ Status Idmap2Service::createIdmap(const std::string& target_apk_path,
   std::cout << trace.str() << std::endl;
 
   _aidl_return->reset(nullptr);
-
-  const std::string idmap_path = Idmap::CanonicalIdmapPathFor(kIdmapCacheDir, overlay_apk_path);
-  std::ifstream fin(idmap_path);
-  const std::unique_ptr<const IdmapHeader> header = IdmapHeader::FromBinaryStream(fin);
-  fin.close();
-  // do not reuse error stream from IsUpToDate below, or error messages will be
-  // polluted with irrelevant data
-  std::stringstream dev_null;
-  if (header && header->IsUpToDate(dev_null)) {
-    return ok();
-  }
 
   const std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
   if (!target_apk) {
@@ -119,6 +120,7 @@ Status Idmap2Service::createIdmap(const std::string& target_apk_path,
   }
 
   umask(0133);  // u=rw,g=r,o=r
+  const std::string idmap_path = Idmap::CanonicalIdmapPathFor(kIdmapCacheDir, overlay_apk_path);
   std::ofstream fout(idmap_path);
   if (fout.fail()) {
     return error("failed to open idmap path " + idmap_path);

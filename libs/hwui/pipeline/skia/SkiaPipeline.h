@@ -97,8 +97,7 @@ public:
         return mLightCenter;
     }
 
-    static void updateLighting(const LightGeometry& lightGeometry,
-                               const LightInfo& lightInfo) {
+    static void updateLighting(const LightGeometry& lightGeometry, const LightInfo& lightInfo) {
         mLightRadius = lightGeometry.radius;
         mAmbientShadowAlpha = lightInfo.ambientShadowAlpha;
         mSpotShadowAlpha = lightInfo.spotShadowAlpha;

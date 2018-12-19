@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include "hwui/AnimatedImageDrawable.h"
 #include "FunctorDrawable.h"
 #include "RecordingCanvas.h"
 #include "RenderNodeDrawable.h"
 #include "TreeInfo.h"
+#include "hwui/AnimatedImageDrawable.h"
 #include "utils/LinearAllocator.h"
 
 #include <deque>
@@ -109,7 +109,7 @@ public:
      * NOTE: This function can be folded into RenderNode when we no longer need
      *       to subclass from DisplayList
      */
-    void syncContents();
+    void syncContents(const WebViewSyncData& data);
 
     /**
      * ONLY to be called by RenderNode::prepareTree in order to prepare this

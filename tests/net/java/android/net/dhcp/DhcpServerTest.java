@@ -25,7 +25,6 @@ import static android.net.dhcp.DhcpPacket.INADDR_BROADCAST;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -48,7 +47,6 @@ import android.net.dhcp.DhcpLeaseRepository.InvalidAddressException;
 import android.net.dhcp.DhcpLeaseRepository.OutOfAddressesException;
 import android.net.dhcp.DhcpServer.Clock;
 import android.net.dhcp.DhcpServer.Dependencies;
-import android.net.util.InterfaceParams;
 import android.net.util.SharedLog;
 import android.os.test.TestLooper;
 import android.support.test.filters.SmallTest;
@@ -74,9 +72,6 @@ import java.util.Set;
 public class DhcpServerTest {
     private static final String PROP_DEXMAKER_SHARE_CLASSLOADER = "dexmaker.share_classloader";
     private static final String TEST_IFACE = "testiface";
-    private static final MacAddress TEST_IFACE_MAC = MacAddress.fromString("11:22:33:44:55:66");
-    private static final InterfaceParams TEST_IFACEPARAMS =
-            new InterfaceParams(TEST_IFACE, 1, TEST_IFACE_MAC);
 
     private static final Inet4Address TEST_SERVER_ADDR = parseAddr("192.168.0.2");
     private static final LinkAddress TEST_SERVER_LINKADDR = new LinkAddress(TEST_SERVER_ADDR, 20);
@@ -149,7 +144,7 @@ public class DhcpServerTest {
                 .build();
 
         mLooper = new TestLooper();
-        mServer = new DhcpServer(mLooper.getLooper(), TEST_IFACEPARAMS, servingParams,
+        mServer = new DhcpServer(mLooper.getLooper(), TEST_IFACE, servingParams,
                 new SharedLog(DhcpServerTest.class.getSimpleName()), mDeps);
 
         mServer.start();

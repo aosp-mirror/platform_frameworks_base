@@ -25,7 +25,11 @@
 #include <cutils/sched_policy.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
+#include <meminfo/sysmeminfo.h>
 #include <processgroup/processgroup.h>
+
+#include <string>
+#include <vector>
 
 #include "core_jni_helpers.h"
 
@@ -39,9 +43,11 @@
 #include <inttypes.h>
 #include <pwd.h>
 #include <signal.h>
+#include <string.h>
 #include <sys/errno.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
+#include <sys/sysinfo.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -603,66 +609,34 @@ static int pid_compare(const void* v1, const void* v2)
     return *((const jint*)v1) - *((const jint*)v2);
 }
 
-static jlong getFreeMemoryImpl(const char* const sums[], const size_t sumsLen[], size_t num)
-{
-    int fd = open("/proc/meminfo", O_RDONLY | O_CLOEXEC);
-
-    if (fd < 0) {
-        ALOGW("Unable to open /proc/meminfo");
-        return -1;
-    }
-
-    char buffer[2048];
-    const int len = read(fd, buffer, sizeof(buffer)-1);
-    close(fd);
-
-    if (len < 0) {
-        ALOGW("Unable to read /proc/meminfo");
-        return -1;
-    }
-    buffer[len] = 0;
-
-    size_t numFound = 0;
-    jlong mem = 0;
-
-    char* p = buffer;
-    while (*p && numFound < num) {
-        int i = 0;
-        while (sums[i]) {
-            if (strncmp(p, sums[i], sumsLen[i]) == 0) {
-                p += sumsLen[i];
-                while (*p == ' ') p++;
-                char* num = p;
-                while (*p >= '0' && *p <= '9') p++;
-                if (*p != 0) {
-                    *p = 0;
-                    p++;
-                    if (*p == 0) p--;
-                }
-                mem += atoll(num) * 1024;
-                numFound++;
-                break;
-            }
-            i++;
-        }
-        p++;
-    }
-
-    return numFound > 0 ? mem : -1;
-}
-
 static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
 {
-    static const char* const sums[] = { "MemFree:", "Cached:", NULL };
-    static const size_t sumsLen[] = { strlen("MemFree:"), strlen("Cached:"), 0 };
-    return getFreeMemoryImpl(sums, sumsLen, 2);
+    static const std::vector<std::string> memFreeTags = {
+        ::android::meminfo::SysMemInfo::kMemFree,
+        ::android::meminfo::SysMemInfo::kMemCached,
+    };
+    std::vector<uint64_t> mem(memFreeTags.size());
+    ::android::meminfo::SysMemInfo smi;
+
+    if (!smi.ReadMemInfo(memFreeTags, &mem)) {
+        jniThrowRuntimeException(env, "SysMemInfo read failed to get Free Memory");
+        return -1L;
+    }
+
+    jlong sum = 0;
+    std::for_each(mem.begin(), mem.end(), [&](uint64_t val) { sum += val; });
+    return sum * 1024;
 }
 
 static jlong android_os_Process_getTotalMemory(JNIEnv* env, jobject clazz)
 {
-    static const char* const sums[] = { "MemTotal:", NULL };
-    static const size_t sumsLen[] = { strlen("MemTotal:"), 0 };
-    return getFreeMemoryImpl(sums, sumsLen, 1);
+    struct sysinfo si;
+    if (sysinfo(&si) == -1) {
+        ALOGE("sysinfo failed: %s", strerror(errno));
+        return -1;
+    }
+
+    return si.totalram;
 }
 
 void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileStr,

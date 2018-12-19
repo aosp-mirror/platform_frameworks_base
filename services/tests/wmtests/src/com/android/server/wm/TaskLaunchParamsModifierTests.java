@@ -47,7 +47,6 @@ import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.Gravity;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.LaunchParamsController.LaunchParams;
@@ -64,7 +63,6 @@ import java.util.Locale;
  *  atest WmTests:TaskLaunchParamsModifierTests
  */
 @SmallTest
-@FlakyTest(detail = "Confirm stable in post-submit before removing")
 @Presubmit
 public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 

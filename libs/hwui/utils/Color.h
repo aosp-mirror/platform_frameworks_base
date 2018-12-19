@@ -17,6 +17,7 @@
 #define COLOR_H
 
 #include <math.h>
+#include <cutils/compiler.h>
 #include <system/graphics.h>
 #include <ui/PixelFormat.h>
 
@@ -117,7 +118,7 @@ bool transferFunctionCloseToSRGB(const SkColorSpace* colorSpace);
 
 android::PixelFormat ColorTypeToPixelFormat(SkColorType colorType);
 
-sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace);
+ANDROID_API sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace);
 
 struct Lab {
     float L;

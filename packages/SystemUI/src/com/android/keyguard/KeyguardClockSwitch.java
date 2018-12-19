@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextClock;
 
 import androidx.annotation.VisibleForTesting;
@@ -22,7 +23,7 @@ import java.util.TimeZone;
 /**
  * Switch to show plugin clock when plugin is connected, otherwise it will show default clock.
  */
-public class KeyguardClockSwitch extends FrameLayout {
+public class KeyguardClockSwitch extends RelativeLayout {
     /**
      * Optional/alternative clock injected via plugin.
      */
@@ -31,6 +32,15 @@ public class KeyguardClockSwitch extends FrameLayout {
      * Default clock.
      */
     private TextClock mClockView;
+    /**
+     * Frame for default and custom clock.
+     */
+    private FrameLayout mClockFrame;
+    /**
+     * Status area (date and other stuff) shown below the clock. Plugin can decide whether
+     * or not to show it below the alternate clock.
+     */
+    private View mKeyguardStatusArea;
 
     private final PluginListener<ClockPlugin> mClockPluginListener =
             new PluginListener<ClockPlugin>() {
@@ -43,11 +53,14 @@ public class KeyguardClockSwitch extends FrameLayout {
                         // selected clock face. In the future, the user should be able to
                         // pick a clock face from the available plugins.
                         mClockPlugin = plugin;
-                        addView(view, -1,
+                        mClockFrame.addView(view, -1,
                                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                         ViewGroup.LayoutParams.WRAP_CONTENT));
                         initPluginParams();
                         mClockView.setVisibility(View.GONE);
+                        if (!plugin.shouldShowStatusArea()) {
+                            mKeyguardStatusArea.setVisibility(View.GONE);
+                        }
                     }
                 }
 
@@ -56,6 +69,7 @@ public class KeyguardClockSwitch extends FrameLayout {
                     if (Objects.equals(plugin, mClockPlugin)) {
                         disconnectPlugin();
                         mClockView.setVisibility(View.VISIBLE);
+                        mKeyguardStatusArea.setVisibility(View.VISIBLE);
                     }
                 }
             };
@@ -72,6 +86,8 @@ public class KeyguardClockSwitch extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mClockView = findViewById(R.id.default_clock_view);
+        mClockFrame = findViewById(R.id.clock_view);
+        mKeyguardStatusArea = findViewById(R.id.keyguard_status_area);
     }
 
     @Override
@@ -185,7 +201,7 @@ public class KeyguardClockSwitch extends FrameLayout {
         if (mClockPlugin != null) {
             View view = mClockPlugin.getView();
             if (view != null) {
-                removeView(view);
+                mClockFrame.removeView(view);
             }
             mClockPlugin = null;
         }

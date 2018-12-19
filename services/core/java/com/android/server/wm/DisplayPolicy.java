@@ -505,23 +505,6 @@ public class DisplayPolicy {
         // TODO: Make it can take screenshot on external display
         mScreenshotHelper = displayContent.isDefaultDisplay
                 ? new ScreenshotHelper(mContext) : null;
-    }
-
-    void systemReady() {
-        mSystemGestures.systemReady();
-    }
-
-    private int getDisplayId() {
-        return mDisplayContent.getDisplayId();
-    }
-
-    void onDisplayRemoved() {
-        mDisplayContent.unregisterPointerEventListener(mSystemGestures);
-    }
-
-    void configure(int width, int height, int shortSizeDp) {
-        // Allow the navigation bar to move on non-square small devices (phones).
-        mNavigationBarCanMove = width != height && shortSizeDp < 600;
 
         if (mDisplayContent.isDefaultDisplay) {
             mHasStatusBar = true;
@@ -539,6 +522,23 @@ public class DisplayPolicy {
             mHasStatusBar = false;
             mHasNavigationBar = mDisplayContent.getDisplay().supportsSystemDecorations();
         }
+    }
+
+    void systemReady() {
+        mSystemGestures.systemReady();
+    }
+
+    private int getDisplayId() {
+        return mDisplayContent.getDisplayId();
+    }
+
+    void onDisplayRemoved() {
+        mDisplayContent.unregisterPointerEventListener(mSystemGestures);
+    }
+
+    void configure(int width, int height, int shortSizeDp) {
+        // Allow the navigation bar to move on non-square small devices (phones).
+        mNavigationBarCanMove = width != height && shortSizeDp < 600;
     }
 
     void updateConfigurationDependentBehaviors() {

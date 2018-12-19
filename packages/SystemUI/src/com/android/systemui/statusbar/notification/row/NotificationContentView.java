@@ -1474,9 +1474,19 @@ public class NotificationContentView extends FrameLayout {
         if (mExpandedChild != null) {
             mExpandedSmartReplyView =
                     applySmartReplyView(mExpandedChild, smartRepliesAndActions, entry);
-            if (mExpandedSmartReplyView != null && smartRepliesAndActions.smartReplies != null) {
-                mSmartReplyController.smartRepliesAdded(
-                        entry, smartRepliesAndActions.smartReplies.choices.length);
+            if (mExpandedSmartReplyView != null) {
+                if (smartRepliesAndActions.smartReplies != null
+                        || smartRepliesAndActions.smartActions != null) {
+                    int numSmartReplies = smartRepliesAndActions.smartReplies == null
+                            ? 0 : smartRepliesAndActions.smartReplies.choices.length;
+                    int numSmartActions = smartRepliesAndActions.smartActions == null
+                            ? 0 : smartRepliesAndActions.smartActions.actions.size();
+                    boolean fromAssistant = smartRepliesAndActions.smartReplies == null
+                            ? smartRepliesAndActions.smartActions.fromAssistant
+                            : smartRepliesAndActions.smartReplies.fromAssistant;
+                    mSmartReplyController.smartSuggestionsAdded(entry, numSmartReplies,
+                            numSmartActions, fromAssistant);
+                }
             }
         }
         if (mHeadsUpChild != null) {

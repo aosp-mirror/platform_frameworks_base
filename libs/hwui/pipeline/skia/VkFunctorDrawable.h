@@ -18,9 +18,9 @@
 
 #include "FunctorDrawable.h"
 
-#include <utils/RefBase.h>
-#include <ui/GraphicBuffer.h>
 #include <SkImageInfo.h>
+#include <ui/GraphicBuffer.h>
+#include <utils/RefBase.h>
 
 namespace android {
 namespace uirenderer {
@@ -36,6 +36,7 @@ public:
     ~VkFunctorDrawHandler() override;
 
     void draw(const GrBackendDrawableInfo& info) override;
+
 private:
     typedef GpuDrawHandler INHERITED;
 
@@ -48,17 +49,15 @@ private:
  */
 class VkFunctorDrawable : public FunctorDrawable {
 public:
-    VkFunctorDrawable(Functor* functor, GlFunctorLifecycleListener* listener,
-            SkCanvas* canvas);
-    ~VkFunctorDrawable() override;
+    using FunctorDrawable::FunctorDrawable;
 
-    void syncFunctor() const override;
+    ~VkFunctorDrawable() override;
 
 protected:
     // SkDrawable functions:
     void onDraw(SkCanvas* canvas) override;
-    std::unique_ptr<FunctorDrawable::GpuDrawHandler> onSnapGpuDrawHandler(GrBackendApi backendApi,
-            const SkMatrix& matrix) override;
+    std::unique_ptr<FunctorDrawable::GpuDrawHandler> onSnapGpuDrawHandler(
+            GrBackendApi backendApi, const SkMatrix& matrix) override;
 };
 
 }  // namespace skiapipeline

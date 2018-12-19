@@ -54,27 +54,30 @@ typedef void (*FreeFunc)(void* addr, void* context);
 
 class ANDROID_API Bitmap : public SkPixelRef {
 public:
+    /* The allocate factories not only construct the Bitmap object but also allocate the
+     * backing store whose type is determined by the specific method that is called.
+     *
+     * The factories that accept SkBitmap* as a param will modify those params by
+     * installing the returned bitmap as their SkPixelRef.
+     *
+     * The factories that accept const SkBitmap& as a param will copy the contents of the
+     * provided bitmap into the newly allocated buffer.
+     */
+    static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap);
+    static sk_sp<Bitmap> allocateHardwareBitmap(const SkBitmap& bitmap);
     static sk_sp<Bitmap> allocateHeapBitmap(SkBitmap* bitmap);
     static sk_sp<Bitmap> allocateHeapBitmap(const SkImageInfo& info);
 
-    static sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& bitmap);
-
-    static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap);
-    static sk_sp<Bitmap> allocateAshmemBitmap(size_t allocSize, const SkImageInfo& info,
-                                              size_t rowBytes);
-
-    static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer);
+    /* The createFrom factories construct a new Bitmap object by wrapping the already allocated
+     * memory that is provided as an input param.
+     */
     static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer,
-                                    sk_sp<SkColorSpace> colorSpace);
-
+                                    sk_sp<SkColorSpace> colorSpace,
+                                    SkAlphaType alphaType = kPremul_SkAlphaType,
+                                    BitmapPalette palette = BitmapPalette::Unknown);
+    static sk_sp<Bitmap> createFrom(const SkImageInfo& info, size_t rowBytes, int fd, void* addr,
+                                    size_t size, bool readOnly);
     static sk_sp<Bitmap> createFrom(const SkImageInfo&, SkPixelRef&);
-
-    Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes);
-    Bitmap(void* address, void* context, FreeFunc freeFunc, const SkImageInfo& info,
-           size_t rowBytes);
-    Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes);
-    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info,
-           BitmapPalette palette = BitmapPalette::Unknown);
 
     int rowBytesAsPixels() const { return rowBytes() >> mInfo.shiftPerPixel(); }
 
@@ -123,6 +126,15 @@ public:
     }
 
 private:
+    static sk_sp<Bitmap> allocateAshmemBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
+    static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
+
+    Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes);
+    Bitmap(void* address, void* context, FreeFunc freeFunc, const SkImageInfo& info,
+           size_t rowBytes);
+    Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes);
+    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info, BitmapPalette palette);
+
     virtual ~Bitmap();
     void* getStorage() const;
 

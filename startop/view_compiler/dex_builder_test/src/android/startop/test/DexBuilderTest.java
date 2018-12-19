@@ -20,6 +20,7 @@ import com.google.common.io.ByteStreams;
 import dalvik.system.InMemoryDexClassLoader;
 import dalvik.system.PathClassLoader;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import org.junit.Assert;
@@ -150,5 +151,24 @@ public class DexBuilderTest {
     Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
     Method method = clazz.getMethod("invokeVirtualReturnObject", String.class, int.class);
     Assert.assertEquals("bc", method.invoke(null, "abc", 1));
+  }
+
+  @Test
+  public void castObjectToString() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("castObjectToString", Object.class);
+    Assert.assertEquals("abc", method.invoke(null, "abc"));
+    boolean castFailed = false;
+    try {
+      method.invoke(null, 5);
+    } catch (InvocationTargetException e) {
+      if (e.getCause() instanceof ClassCastException) {
+        castFailed = true;
+      } else {
+        throw e;
+      }
+    }
+    Assert.assertTrue(castFailed);
   }
 }

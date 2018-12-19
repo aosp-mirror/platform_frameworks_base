@@ -2978,6 +2978,11 @@
         <public name="config_mediaMetadataBitmapMaxSize" />
     </public-group>
 
+    <public-group type="color" first-id="0x0106001c">
+        <!-- @hide @SystemApi -->
+        <public name="system_notification_accent_color" />
+    </public-group>
+
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
 

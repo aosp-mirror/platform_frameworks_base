@@ -45,7 +45,12 @@ public interface NotificationDelegate {
     void onNotificationExpansionChanged(String key, boolean userAction, boolean expanded);
     void onNotificationDirectReplied(String key);
     void onNotificationSettingsViewed(String key);
-    void onNotificationSmartRepliesAdded(String key, int replyCount);
+
+    /**
+     * Notifies that smart replies and actions have been added to the UI.
+     */
+    void onNotificationSmartSuggestionsAdded(String key, int smartReplyCount, int smartActionCount,
+            boolean generatedByAssistant);
 
     /**
      * Notifies a smart reply is sent.

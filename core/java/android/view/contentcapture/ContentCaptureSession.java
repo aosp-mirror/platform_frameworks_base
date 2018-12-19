@@ -27,9 +27,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
@@ -45,6 +47,8 @@ import dalvik.system.CloseGuard;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -100,6 +104,13 @@ public final class ContentCaptureSession implements AutoCloseable {
     public static final int STATE_DISABLED = 3;
 
     /**
+     * Session is disabled because its id already existed on server.
+     *
+     * @hide
+     */
+    public static final int STATE_DISABLED_DUPLICATED_ID = 4;
+
+    /**
      * Handler message used to flush the buffer.
      */
     private static final int MSG_FLUSH = 1;
@@ -116,6 +127,13 @@ public final class ContentCaptureSession implements AutoCloseable {
     // TODO(b/121044064): use settings
     private static final int FLUSHING_FREQUENCY_MS = 5_000;
 
+
+    /**
+     * Name of the {@link IResultReceiver} extra used to pass the binder interface to the service.
+     * @hide
+     */
+    public static final String EXTRA_BINDER = "binder";
+
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
     @NonNull
@@ -127,8 +145,21 @@ public final class ContentCaptureSession implements AutoCloseable {
     @NonNull
     private final Handler mHandler;
 
+    /**
+     * Interface to the system_server binder object - it's only used to start the session (and
+     * notify when the session is finished).
+     */
     @Nullable
-    private final IContentCaptureManager mService;
+    private final IContentCaptureManager mSystemServerInterface;
+
+    /**
+     * Direct interface to the service binder object - it's used to send the events, including the
+     * last ones (when the session is finished)
+     */
+    @Nullable
+    private IContentCaptureDirectManager mDirectServiceInterface;
+    @Nullable
+    private DeathRecipient mDirectServiceVulture;
 
     @Nullable
     private final String mId = UUID.randomUUID().toString();
@@ -165,11 +196,11 @@ public final class ContentCaptureSession implements AutoCloseable {
 
     /** @hide */
     protected ContentCaptureSession(@NonNull Context context, @NonNull Handler handler,
-            @Nullable IContentCaptureManager service, @NonNull AtomicBoolean disabled,
+            @Nullable IContentCaptureManager systemServerInterface, @NonNull AtomicBoolean disabled,
             @Nullable ContentCaptureContext clientContext) {
         mContext = context;
         mHandler = handler;
-        mService = service;
+        mSystemServerInterface = systemServerInterface;
         mDisabled = disabled;
         mClientContext = clientContext;
         mCloseGuard.open("destroy");
@@ -227,6 +258,8 @@ public final class ContentCaptureSession implements AutoCloseable {
             Log.v(TAG, "destroy(): state=" + getStateAsString(mState) + ", mId=" + mId);
         }
 
+        flush();
+
         mHandler.sendMessage(obtainMessage(ContentCaptureSession::handleDestroySession, this));
         mCloseGuard.close();
     }
@@ -267,11 +300,20 @@ public final class ContentCaptureSession implements AutoCloseable {
         final int flags = 0; // TODO(b/111276913): get proper flags
 
         try {
-            mService.startSession(mContext.getUserId(), mApplicationToken, componentName,
-                    mId, mClientContext, flags, new IResultReceiver.Stub() {
+            mSystemServerInterface.startSession(mContext.getUserId(), mApplicationToken,
+                    componentName, mId, mClientContext, flags, new IResultReceiver.Stub() {
                         @Override
                         public void send(int resultCode, Bundle resultData) {
-                            handleSessionStarted(resultCode);
+                            IBinder binder = null;
+                            if (resultData != null) {
+                                binder = resultData.getBinder(EXTRA_BINDER);
+                                if (binder == null) {
+                                    Log.wtf(TAG, "No " + EXTRA_BINDER + " extra result");
+                                    handleResetState();
+                                    return;
+                                }
+                            }
+                            handleSessionStarted(resultCode, binder);
                         }
                     });
         } catch (RemoteException e) {
@@ -280,12 +322,38 @@ public final class ContentCaptureSession implements AutoCloseable {
         }
     }
 
-    private void handleSessionStarted(int resultCode) {
+    /**
+     * Callback from {@code system_server} after call to
+     * {@link IContentCaptureManager#startSession(int, IBinder, ComponentName, String,
+     * ContentCaptureContext, int, IResultReceiver)}.
+     *
+     * @param resultCode session state
+     * @param binder handle to {@link IContentCaptureDirectManager}
+     */
+    private void handleSessionStarted(int resultCode, @Nullable IBinder binder) {
         mState = resultCode;
-        mDisabled.set(mState == STATE_DISABLED);
+        if (binder != null) {
+            mDirectServiceInterface = IContentCaptureDirectManager.Stub.asInterface(binder);
+            mDirectServiceVulture = () -> {
+                Log.w(TAG, "Destroying session " + mId + " because service died");
+                destroy();
+            };
+            try {
+                binder.linkToDeath(mDirectServiceVulture, 0);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to link to death on " + binder + ": " + e);
+            }
+        }
+        if (resultCode == STATE_DISABLED || resultCode == STATE_DISABLED_DUPLICATED_ID) {
+            mDisabled.set(true);
+            handleResetSession(/* resetState= */ false);
+        } else {
+            mDisabled.set(false);
+        }
         if (VERBOSE) {
             Log.v(TAG, "handleSessionStarted() result: code=" + resultCode + ", id=" + mId
-                    + ", state=" + getStateAsString(mState) + ", disabled=" + mDisabled.get());
+                    + ", state=" + getStateAsString(mState) + ", disabled=" + mDisabled.get()
+                    + ", binder=" + binder);
         }
     }
 
@@ -307,7 +375,7 @@ public final class ContentCaptureSession implements AutoCloseable {
         final boolean bufferEvent = numberEvents < MAX_BUFFER_SIZE;
 
         if (bufferEvent && !forceFlush) {
-            handleScheduleFlush();
+            handleScheduleFlush(/* checkExisting= */ true);
             return;
         }
 
@@ -331,8 +399,8 @@ public final class ContentCaptureSession implements AutoCloseable {
         handleForceFlush();
     }
 
-    private void handleScheduleFlush() {
-        if (mHandler.hasMessages(MSG_FLUSH)) {
+    private void handleScheduleFlush(boolean checkExisting) {
+        if (checkExisting && mHandler.hasMessages(MSG_FLUSH)) {
             // "Renew" the flush message by removing the previous one
             mHandler.removeMessages(MSG_FLUSH);
         }
@@ -356,21 +424,41 @@ public final class ContentCaptureSession implements AutoCloseable {
     private void handleForceFlush() {
         if (mEvents == null) return;
 
+        if (mDirectServiceInterface == null) {
+            Log.w(TAG, "handleForceFlush(): client not available yet");
+            if (!mHandler.hasMessages(MSG_FLUSH)) {
+                handleScheduleFlush(/* checkExisting= */ false);
+            }
+            return;
+        }
+
         final int numberEvents = mEvents.size();
         try {
             if (DEBUG) {
                 Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getActivityDebugName());
             }
             mHandler.removeMessages(MSG_FLUSH);
-            mService.sendEvents(mContext.getUserId(), mId, mEvents);
-            // TODO(b/111276913): decide whether we should clear or set it to null, as each has
-            // its own advantages: clearing will save extra allocations while the session is
-            // active, while setting to null would save memory if there's no more event coming.
-            mEvents.clear();
+
+            final ParceledListSlice<ContentCaptureEvent> events = handleClearEvents();
+            mDirectServiceInterface.sendEvents(mId, events);
         } catch (RemoteException e) {
             Log.w(TAG, "Error sending " + numberEvents + " for " + getActivityDebugName()
                     + ": " + e);
         }
+    }
+
+    /**
+     * Resets the buffer and return a {@link ParceledListSlice} with the previous events.
+     */
+    @NonNull
+    private ParceledListSlice<ContentCaptureEvent> handleClearEvents() {
+        // NOTE: we must save a reference to the current mEvents and then set it to to null,
+        // otherwise clearing it would clear it in the receiving side if the service is also local.
+        final List<ContentCaptureEvent> events = mEvents == null
+                ? Collections.emptyList()
+                : mEvents;
+        mEvents = null;
+        return new ParceledListSlice<>(events);
     }
 
     private void handleDestroySession() {
@@ -378,30 +466,38 @@ public final class ContentCaptureSession implements AutoCloseable {
         // to system_server, so it's ok to call both in sequence here. But once we split
         // them so the events are sent directly to the service, we need to make sure they're
         // sent in order.
-        try {
-            if (DEBUG) {
-                Log.d(TAG, "Destroying session (ctx=" + mContext + ", id=" + mId + ") with "
-                        + (mEvents == null ? 0 : mEvents.size()) + " event(s) for "
-                        + getActivityDebugName());
-            }
-
-            mService.finishSession(mContext.getUserId(), mId, mEvents);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error destroying session " + mId + " for " + getActivityDebugName()
-                    + ": " + e);
-        } finally {
-            handleResetState();
+        if (DEBUG) {
+            Log.d(TAG, "Destroying session (ctx=" + mContext + ", id=" + mId + ") with "
+                    + (mEvents == null ? 0 : mEvents.size()) + " event(s) for "
+                    + getActivityDebugName());
         }
+
+        try {
+            mSystemServerInterface.finishSession(mContext.getUserId(), mId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error destroying system-service session " + mId + " for "
+                    + getActivityDebugName() + ": " + e);
+        }
+    }
+
+    private void handleResetState() {
+        handleResetSession(/* resetState= */ true);
     }
 
     // TODO(b/111276913): once we support multiple sessions, we might need to move some of these
     // clearings out.
-    private void handleResetState() {
-        mState = STATE_UNKNOWN;
+    private void handleResetSession(boolean resetState) {
+        if (resetState) {
+            mState = STATE_UNKNOWN;
+        }
         mContentCaptureSessionId = null;
         mApplicationToken = null;
         mComponentName = null;
         mEvents = null;
+        if (mDirectServiceInterface != null) {
+            mDirectServiceInterface.asBinder().unlinkToDeath(mDirectServiceVulture, 0);
+        }
+        mDirectServiceInterface = null;
         mHandler.removeMessages(MSG_FLUSH);
     }
 
@@ -492,15 +588,20 @@ public final class ContentCaptureSession implements AutoCloseable {
     }
 
     private boolean isContentCaptureEnabled() {
-        return mService != null && !mDisabled.get();
+        return mSystemServerInterface != null && !mDisabled.get();
     }
 
     void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
         pw.print(prefix); pw.print("id: "); pw.println(mId);
         pw.print(prefix); pw.print("mContext: "); pw.println(mContext);
         pw.print(prefix); pw.print("user: "); pw.println(mContext.getUserId());
-        if (mService != null) {
-            pw.print(prefix); pw.print("mService: "); pw.println(mService);
+        if (mSystemServerInterface != null) {
+            pw.print(prefix); pw.print("mSystemServerInterface: ");
+            pw.println(mSystemServerInterface);
+        }
+        if (mDirectServiceInterface != null) {
+            pw.print(prefix); pw.print("mDirectServiceInterface: ");
+            pw.println(mDirectServiceInterface);
         }
         if (mClientContext != null) {
             // NOTE: we don't dump clientContent because it could have PII
@@ -563,6 +664,8 @@ public final class ContentCaptureSession implements AutoCloseable {
                 return "ACTIVE";
             case STATE_DISABLED:
                 return "DISABLED";
+            case STATE_DISABLED_DUPLICATED_ID:
+                return "DISABLED_DUPLICATED_ID";
             default:
                 return "INVALID:" + state;
         }

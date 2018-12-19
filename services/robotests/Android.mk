@@ -41,7 +41,8 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := FrameworksServicesRoboTests
 
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
+LOCAL_SRC_FILES := $(call all-java-files-under, src) \
+    $(call all-java-files-under, backup/src)
 
 LOCAL_RESOURCE_DIR := \
     $(LOCAL_PATH)/res
@@ -81,4 +82,13 @@ LOCAL_JAVA_LIBRARIES := \
 
 LOCAL_TEST_PACKAGE := FrameworksServicesLib
 
+LOCAL_ROBOTEST_FILES := $(call find-files-in-subdirs,$(LOCAL_PATH)/src,*Test.java,.) \
+    $(call find-files-in-subdirs,$(LOCAL_PATH)/backup/src,*Test.java,.)
+
 include external/robolectric-shadows/run_robotests.mk
+
+###################################################################
+# include subdir Android.mk files
+###################################################################
+include $(CLEAR_VARS)
+include $(call all-makefiles-under,$(LOCAL_PATH))

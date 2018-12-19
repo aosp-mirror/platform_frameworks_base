@@ -52,7 +52,6 @@ import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.view.Surface;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.test.FakeSettingsProvider;
@@ -81,7 +80,6 @@ import java.util.concurrent.TimeUnit;
  */
 @SmallTest
 @Presubmit
-@FlakyTest(detail = "Confirm stable in post-submit before removing")
 public class DisplayRotationTests {
     private static final long UI_HANDLER_WAIT_TIMEOUT_MS = 50;
 

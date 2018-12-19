@@ -182,7 +182,7 @@ public class DozeLog {
      */
     public static void traceLockScreenWakeUp(boolean wake) {
         if (!ENABLED) return;
-        log("wakeLockScreenWakeUp " + wake);
+        log("wakeLockScreen " + wake);
     }
 
     /**
@@ -191,7 +191,7 @@ public class DozeLog {
      */
     public static void traceWakeDisplay(boolean wake) {
         if (!ENABLED) return;
-        log("wakeLockScreenWakeUp " + wake);
+        log("wakeDisplay " + wake);
     }
 
     public static void traceProximityResult(Context context, boolean near, long millis,

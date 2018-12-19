@@ -116,7 +116,7 @@ public class Trampoline extends IBackupManager.Stub {
         return SystemProperties.getBoolean(BACKUP_DISABLE_PROPERTY, false);
     }
 
-    protected boolean isMultiUserEnabled() {
+    private boolean isMultiUserEnabled() {
         return Settings.Global.getInt(
                 mContext.getContentResolver(),
                 Settings.Global.BACKUP_MULTI_USER_ENABLED,
@@ -143,6 +143,10 @@ public class Trampoline extends IBackupManager.Stub {
 
     protected BackupManagerService createBackupManagerService() {
         return new BackupManagerService(mContext, this, mHandlerThread);
+    }
+
+    protected void postToHandler(Runnable runnable) {
+        mHandler.post(runnable);
     }
 
     /**
@@ -174,14 +178,18 @@ public class Trampoline extends IBackupManager.Stub {
      * to initialize {@link BackupManagerService} and set backup state for the system user.
      */
     void initializeServiceAndUnlockSystemUser() {
-        mHandler.post(
+        postToHandler(
                 () -> {
+                    // Initialize the backup service.
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup init");
                     initializeService(UserHandle.USER_SYSTEM);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
+                    // Start the service for the system user.
                     BackupManagerService service = mService;
                     if (service != null) {
+                        Slog.i(TAG, "Starting service for system user");
+                        service.startServiceForUser(UserHandle.USER_SYSTEM);
                         Slog.i(TAG, "Unlocking system user");
                         service.unlockSystemUser();
                     }
@@ -195,20 +203,21 @@ public class Trampoline extends IBackupManager.Stub {
      */
     // TODO(b/120212806): Consolidate service start for system and non-system users when system
     // user-only logic is removed.
-    void startServiceForUser(int userId) {
+    void unlockUser(int userId) {
         if (!isMultiUserEnabled()) {
             Slog.i(TAG, "Multi-user disabled, cannot start service for user: " + userId);
             return;
         }
 
-        mHandler.post(
-                () -> {
-                    BackupManagerService service = mService;
-                    if (service != null) {
-                        Slog.i(TAG, "Starting service for user: " + userId);
-                        service.startServiceForUser(userId);
-                    }
-                });
+        postToHandler(() -> startServiceForUser(userId));
+    }
+
+    private void startServiceForUser(int userId) {
+        BackupManagerService service = mService;
+        if (service != null) {
+            Slog.i(TAG, "Starting service for user: " + userId);
+            service.startServiceForUser(userId);
+        }
     }
 
     /**
@@ -242,6 +251,7 @@ public class Trampoline extends IBackupManager.Stub {
             if (makeActive) {
                 mService = createBackupManagerService();
                 mSuppressFile.delete();
+                startServiceForUser(userId);
             } else {
                 mService = null;
                 try {

@@ -794,8 +794,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private void handleResizingWindows() {
         for (int i = mWmService.mResizingWindows.size() - 1; i >= 0; i--) {
             WindowState win = mWmService.mResizingWindows.get(i);
-            if (win.mAppFreezing) {
-                // Don't remove this window until rotation has completed.
+            if (win.mAppFreezing || win.getDisplayContent().mWaitingForConfig) {
+                // Don't remove this window until rotation has completed and is not waiting for the
+                // complete configuration.
                 continue;
             }
             win.reportResized();

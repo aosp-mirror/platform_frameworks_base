@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <utils/MathUtils.h>
 #include "LayerDrawable.h"
+#include <utils/MathUtils.h>
 
 #include "GrBackendSurface.h"
 #include "SkColorFilter.h"
@@ -44,10 +44,9 @@ static bool shouldFilter(const SkMatrix& matrix) {
     if (!matrix.isScaleTranslate()) return true;
 
     // We only care about meaningful scale here
-    bool noScale = MathUtils::isOne(matrix.getScaleX())
-            && MathUtils::isOne(matrix.getScaleY());
-    bool pixelAligned = SkScalarIsInt(matrix.getTranslateX())
-            && SkScalarIsInt(matrix.getTranslateY());
+    bool noScale = MathUtils::isOne(matrix.getScaleX()) && MathUtils::isOne(matrix.getScaleY());
+    bool pixelAligned =
+            SkScalarIsInt(matrix.getTranslateX()) && SkScalarIsInt(matrix.getTranslateY());
     return !(noScale && pixelAligned);
 }
 
@@ -120,11 +119,12 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
             // Integer translation is defined as when src rect and dst rect align fractionally.
             // Skia TextureOp has the above logic build-in, but not NonAAFillRectOp. TextureOp works
             // only for SrcOver blending and without color filter (readback uses Src blending).
-            bool isIntegerTranslate = isBasicallyTranslate(totalMatrix)
-                    && SkScalarFraction(skiaDestRect.fLeft + totalMatrix[SkMatrix::kMTransX])
-                    == SkScalarFraction(skiaSrcRect.fLeft)
-                    && SkScalarFraction(skiaDestRect.fTop + totalMatrix[SkMatrix::kMTransY])
-                    == SkScalarFraction(skiaSrcRect.fTop);
+            bool isIntegerTranslate =
+                    isBasicallyTranslate(totalMatrix) &&
+                    SkScalarFraction(skiaDestRect.fLeft + totalMatrix[SkMatrix::kMTransX]) ==
+                            SkScalarFraction(skiaSrcRect.fLeft) &&
+                    SkScalarFraction(skiaDestRect.fTop + totalMatrix[SkMatrix::kMTransY]) ==
+                            SkScalarFraction(skiaSrcRect.fTop);
             if (layer->getForceFilter() || !isIntegerTranslate) {
                 paint.setFilterQuality(kLow_SkFilterQuality);
             }

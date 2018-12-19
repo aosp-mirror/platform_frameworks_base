@@ -39,7 +39,6 @@ import android.annotation.Nullable;
 import android.net.MacAddress;
 import android.net.NetworkUtils;
 import android.net.TrafficStats;
-import android.net.util.InterfaceParams;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.Looper;
@@ -85,7 +84,7 @@ public class DhcpServer {
     @NonNull
     private final ServerHandler mHandler;
     @NonNull
-    private final InterfaceParams mIface;
+    private final String mIfName;
     @NonNull
     private final DhcpLeaseRepository mLeaseRepo;
     @NonNull
@@ -161,20 +160,20 @@ public class DhcpServer {
         }
     }
 
-    public DhcpServer(@NonNull Looper looper, @NonNull InterfaceParams iface,
+    public DhcpServer(@NonNull Looper looper, @NonNull String ifName,
             @NonNull DhcpServingParams params, @NonNull SharedLog log) {
-        this(looper, iface, params, log, null);
+        this(looper, ifName, params, log, null);
     }
 
     @VisibleForTesting
-    DhcpServer(@NonNull Looper looper, @NonNull InterfaceParams iface,
+    DhcpServer(@NonNull Looper looper, @NonNull String ifName,
             @NonNull DhcpServingParams params, @NonNull SharedLog log,
             @Nullable Dependencies deps) {
         if (deps == null) {
             deps = new DependenciesImpl();
         }
         mHandler = new ServerHandler(looper);
-        mIface = iface;
+        mIfName = ifName;
         mServingParams = params;
         mLog = log;
         mDeps = deps;
@@ -444,7 +443,7 @@ public class DhcpServer {
 
     private boolean addArpEntry(@NonNull MacAddress macAddr, @NonNull Inet4Address inetAddr) {
         try {
-            mDeps.addArpEntry(inetAddr, macAddr, mIface.name, mSocket);
+            mDeps.addArpEntry(inetAddr, macAddr, mIfName, mSocket);
             return true;
         } catch (IOException e) {
             mLog.e("Error adding client to ARP table", e);
@@ -526,7 +525,7 @@ public class DhcpServer {
                 // SO_BINDTODEVICE actually takes a string. This works because the first member
                 // of struct ifreq is a NULL-terminated interface name.
                 // TODO: add a setsockoptString()
-                Os.setsockoptIfreq(mSocket, SOL_SOCKET, SO_BINDTODEVICE, mIface.name);
+                Os.setsockoptIfreq(mSocket, SOL_SOCKET, SO_BINDTODEVICE, mIfName);
                 Os.setsockoptInt(mSocket, SOL_SOCKET, SO_BROADCAST, 1);
                 Os.bind(mSocket, Inet4Address.ANY, DHCP_SERVER);
                 NetworkUtils.protectFromVpn(mSocket);
