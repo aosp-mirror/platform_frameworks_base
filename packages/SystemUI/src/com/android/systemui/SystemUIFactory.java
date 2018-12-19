@@ -30,6 +30,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
@@ -215,5 +216,11 @@ public class SystemUIFactory {
     public interface SystemUIRootComponent {
         @Singleton
         Dependency.DependencyInjector createDependency();
+
+        /**
+         * FragmentCreator generates all Fragments that need injection.
+         */
+        @Singleton
+        FragmentService.FragmentCreator createFragmentCreator();
     }
 }

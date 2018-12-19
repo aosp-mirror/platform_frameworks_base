@@ -125,6 +125,28 @@ public class Dependency {
 }
 ```
 
+### Using injection with Fragments
+
+Fragments are created as part of the FragmentManager, so they need to be
+setup so the manager knows how to create them. To do that, add a method
+to com.android.systemui.fragments.FragmentService$FragmentCreator that
+returns your fragment class. Thats all thats required, once the method
+exists, FragmentService will automatically pick it up and use injection
+whenever your fragment needs to be created.
+
+```java
+public interface FragmentCreator {
++   NavigationBarFragment createNavigationBar();
+}
+```
+
+If you need to create your fragment (i.e. for the add or replace transaction),
+then the FragmentHostManager can do this for you.
+
+```java
+FragmentHostManager.get(view).create(NavigationBarFragment.class);
+```
+
 ## TODO List
 
  - Eliminate usages of Depndency#get

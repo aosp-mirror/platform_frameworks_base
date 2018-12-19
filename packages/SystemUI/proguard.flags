@@ -28,4 +28,7 @@
 -keep class com.android.systemui.plugins.** {
     *;
 }
+-keep class com.android.systemui.fragments.FragmentService$FragmentCreator {
+    *;
+}
 -keep class androidx.core.app.CoreComponentFactory
