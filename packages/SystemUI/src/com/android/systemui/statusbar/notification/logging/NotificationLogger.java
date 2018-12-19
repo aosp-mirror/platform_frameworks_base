@@ -40,10 +40,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Handles notification logging, in particular, logging which notifications are visible and which
  * are not.
  */
+@Singleton
 public class NotificationLogger implements StateListener {
     private static final String TAG = "NotificationLogger";
 
@@ -145,6 +149,7 @@ public class NotificationLogger implements StateListener {
         }
     };
 
+    @Inject
     public NotificationLogger() {
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));

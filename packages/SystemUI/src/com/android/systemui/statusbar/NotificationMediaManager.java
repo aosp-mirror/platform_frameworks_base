@@ -61,10 +61,14 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Handles tasks and state related to media notifications. For example, there is a 'current' media
  * notification, which this class keeps track of.
  */
+@Singleton
 public class NotificationMediaManager implements Dumpable {
     private static final String TAG = "NotificationMediaManager";
     public static final boolean DEBUG_MEDIA = false;
@@ -157,6 +161,7 @@ public class NotificationMediaManager implements Dumpable {
         return mEntryManager;
     }
 
+    @Inject
     public NotificationMediaManager(Context context) {
         mContext = context;
         mMediaSessionManager

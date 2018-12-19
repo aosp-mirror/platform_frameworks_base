@@ -35,9 +35,13 @@ import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Tracks and reports on {@link StatusBarState}.
  */
+@Singleton
 public class StatusBarStateController implements CallbackController<StateListener> {
     private static final String TAG = "SbStateController";
 
@@ -100,6 +104,10 @@ public class StatusBarStateController implements CallbackController<StateListene
     public static final int RANK_STATUS_BAR_WINDOW_CONTROLLER = 1;
     public static final int RANK_STACK_SCROLLER = 2;
     public static final int RANK_SHELF = 3;
+
+    @Inject
+    public StatusBarStateController() {
+    }
 
     public int getState() {
         return mState;

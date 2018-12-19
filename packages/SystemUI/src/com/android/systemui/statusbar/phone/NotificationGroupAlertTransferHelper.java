@@ -42,11 +42,15 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * A helper class dealing with the alert interactions between {@link NotificationGroupManager},
  * {@link HeadsUpManager}, {@link AmbientPulseManager}. In particular, this class deals with keeping
  * the correct notification in a group alerting based off the group suppression.
  */
+@Singleton
 public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedListener,
         OnAmbientChangedListener, StateListener {
 
@@ -73,6 +77,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
 
     private boolean mIsDozing;
 
+    @Inject
     public NotificationGroupAlertTransferHelper() {
         Dependency.get(StatusBarStateController.class).addCallback(this);
     }

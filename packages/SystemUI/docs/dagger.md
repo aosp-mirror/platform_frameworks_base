@@ -1,0 +1,136 @@
+# Dagger 2 in SystemUI
+*Dagger 2 is a dependency injection framework that compiles annotations to code
+to create dependencies without reflection*
+
+## Recommended reading
+
+Go read about Dagger 2.
+
+TODO: Add some links.
+
+## State of the world
+
+Dagger 2 has been turned on for SystemUI and a early first pass has been taken
+for converting everything in Dependency.java to use Dagger. Since a lot of
+SystemUI depends on Dependency, stubs have been added to Dependency to proxy
+any gets through to the instances provided by dagger, this will allow migration
+of SystemUI through a number of CLs.
+
+### How it works in SystemUI
+
+For the classes that we're using in Dependency and are switching to dagger, the
+equivalent dagger version is using @Singleton and only having one instance.
+To have the single instance span all of SystemUI and be easily accessible for
+other components, there is a single root Component that exists that generates
+these. The component lives in SystemUIFactory and is called SystemUIRootComponent.
+
+```java
+@Singleton
+@Component(modules = {SystemUIFactory.class, DependencyProvider.class, ContextHolder.class})
+public interface SystemUIRootComponent {
+    @Singleton
+    Dependency.DependencyInjector createDependency();
+}
+```
+
+The root modules are what provides the global singleton dependencies across
+SystemUI. ContextHolder is just a wrapper that provides a context.
+SystemUIFactory @Provide dependencies that need to be overridden by SystemUI
+variants (like other form factors). DependencyProvider provides or binds any
+remaining depedencies required.
+
+### Adding injection to a new SystemUI object
+
+Anything that depends on any @Singleton provider from SystemUIRootComponent
+should be declared as a Subcomponent of the root component, this requires
+declaring your own interface for generating your own modules or just the
+object you need injected. The subcomponent also needs to be added to
+SystemUIRootComponent in SystemUIFactory so it can be acquired.
+
+```java
+public interface SystemUIRootComponent {
++    @Singleton
++    Dependency.DependencyInjector createDependency();
+}
+
+public class Dependency extends SystemUI {
+  ...
++  @Subcomponent
++  public interface DependencyInjector {
++      Dependency createSystemUI();
++  }
+}
+```
+
+For objects that extend SystemUI and require injection, you can define an
+injector that creates the injected object for you. This other class should
+be referenced in @string/config_systemUIServiceComponents.
+
+```java
+public static class DependencyCreator implements Injector {
+    @Override
+    public SystemUI apply(Context context) {
+        return SystemUIFactory.getInstance().getRootComponent()
+                .createDependency()
+                .createSystemUI();
+    }
+}
+```
+
+### Adding a new injectable object
+
+First tag the constructor with @Inject. Also tag it with @Singleton if only one
+instance should be created.
+
+```java
+@Singleton
+public class SomethingController {
+  @Inject
+  public SomethingController(Context context,
+    @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
+      // context and mainHandler will be automatically populated.
+  }
+}
+```
+
+If you have an interface class and an implementation class, dagger needs to know
+how to map it. The simplest way to do this is to add a provides method to
+DependencyProvider.
+
+```java
+public class DependencyProvider {
+  ...
+  @Singleton
+  @Provide
+  public SomethingController provideSomethingController(Context context,
+      @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
+    return new SomethingControllerImpl(context, mainHandler);
+  }
+}
+```
+
+If you need to access this from Dependency#get, then add an adapter to Dependency
+that maps to the instance provided by Dagger. The changes should be similar
+to the following diff.
+
+```java
+public class Dependency {
+  ...
+  @Inject Lazy<SomethingController> mSomethingController;
+  ...
+  public void start() {
+    ...
+    mProviders.put(SomethingController.class, mSomethingController::get);
+  }
+}
+```
+
+## TODO List
+
+ - Eliminate usages of Depndency#get
+ - Add support for Fragments to handle injection automatically
+   - (this could be through dagger2-android or something custom)
+ - Reduce number of things with @Provide in DependencyProvider (many can be
+   @Inject instead)
+ - Migrate as many remaining DependencyProvider instances to @Bind
+ - Add links in above TODO

@@ -17,24 +17,41 @@
 package com.android.systemui;
 
 import android.content.Context;
-import android.util.ArrayMap;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.Dependency.DependencyProvider;
 import com.android.systemui.car.CarNotificationEntryManager;
 import com.android.systemui.statusbar.car.CarFacetButtonController;
 import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.car.hvac.HvacController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.volume.CarVolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
 
+import javax.inject.Singleton;
+
+import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
+
 /**
  * Class factory to provide car specific SystemUI components.
  */
 public class CarSystemUIFactory extends SystemUIFactory {
+
+    private CarDependencyComponent mCarDependencyComponent;
+
+    @Override
+    protected void init(Context context) {
+        super.init(context);
+        mCarDependencyComponent = DaggerCarSystemUIFactory_CarDependencyComponent.builder()
+                .contextHolder(new ContextHolder(context))
+                .build();
+    }
+
+    public CarDependencyComponent getCarDependencyComponent() {
+        return mCarDependencyComponent;
+    }
 
     public StatusBarKeyguardViewManager createStatusBarKeyguardViewManager(Context context,
         ViewMediatorCallback viewMediatorCallback, LockPatternUtils lockPatternUtils) {
@@ -46,12 +63,27 @@ public class CarSystemUIFactory extends SystemUIFactory {
     }
 
     @Override
-    public void injectDependencies(ArrayMap<Object, DependencyProvider> providers,
-        Context context) {
-        super.injectDependencies(providers, context);
-        providers.put(NotificationEntryManager.class,
-            () -> new CarNotificationEntryManager(context));
-        providers.put(CarFacetButtonController.class, () -> new CarFacetButtonController(context));
-        providers.put(HvacController.class, () -> new HvacController(context));
+    public NotificationEntryManager provideNotificationEntryManager(Context context) {
+        return new CarNotificationEntryManager(context);
+    }
+
+    @Module
+    protected static class ContextHolder {
+        private Context mContext;
+
+        public ContextHolder(Context context) {
+            mContext = context;
+        }
+
+        @Provides
+        public Context provideContext() {
+            return mContext;
+        }
+    }
+
+    @Singleton
+    @Component(modules = ContextHolder.class)
+    public interface CarDependencyComponent {
+        CarFacetButtonController getCarFacetButtonController();
     }
 }

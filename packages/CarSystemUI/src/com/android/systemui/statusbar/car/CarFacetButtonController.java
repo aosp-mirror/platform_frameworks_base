@@ -29,11 +29,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * CarFacetButtons placed on the nav bar are designed to have visual indication that the active
  * application on screen is associated with it. This is basically a similar concept to a radio
  * button group.
  */
+@Singleton
 public class CarFacetButtonController {
 
     protected HashMap<String, CarFacetButton> mButtonsByCategory = new HashMap<>();
@@ -42,6 +46,7 @@ public class CarFacetButtonController {
     protected CarFacetButton mSelectedFacetButton;
     protected Context mContext;
 
+    @Inject
     public CarFacetButtonController(Context context) {
         mContext = context;
     }
