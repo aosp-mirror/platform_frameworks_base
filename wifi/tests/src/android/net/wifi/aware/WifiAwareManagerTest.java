@@ -38,7 +38,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.test.TestLooper;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import libcore.util.HexEncoding;
 

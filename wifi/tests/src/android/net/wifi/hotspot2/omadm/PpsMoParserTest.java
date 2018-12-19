@@ -19,14 +19,13 @@ package android.net.wifi.hotspot2.omadm;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import android.net.wifi.hotspot2.omadm.PpsMoParser;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.hotspot2.pps.Policy;
 import android.net.wifi.hotspot2.pps.UpdateParameter;
-import android.support.test.filters.SmallTest;
-import android.text.TextUtils;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 

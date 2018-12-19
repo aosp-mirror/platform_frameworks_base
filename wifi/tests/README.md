@@ -37,7 +37,7 @@ runtests.sh -e class android.net.wifi.WifiScannerTest
 If you manually build and push the test APK to the device you can run tests using
 
 ```
-adb shell am instrument -w 'android.net.wifi.test/android.support.test.runner.AndroidJUnitRunner'
+adb shell am instrument -w 'android.net.wifi.test/androidx.test.runner.AndroidJUnitRunner'
 ```
 
 ## Adding Tests

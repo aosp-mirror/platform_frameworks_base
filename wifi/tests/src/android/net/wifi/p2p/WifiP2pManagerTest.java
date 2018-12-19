@@ -21,7 +21,8 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.os.test.TestLooper;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import libcore.junit.util.ResourceLeakageDetector;
 
