@@ -67,7 +67,9 @@ public final class BluetoothManager {
         }
         // Legacy api - getDefaultAdapter does not take in the context
         mAdapter = BluetoothAdapter.getDefaultAdapter();
-        mAdapter.setContext(context);
+        if (mAdapter != null) {
+            mAdapter.setContext(context);
+        }
     }
 
     /**
