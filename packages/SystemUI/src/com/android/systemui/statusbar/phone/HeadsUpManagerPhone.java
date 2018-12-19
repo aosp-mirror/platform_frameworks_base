@@ -264,6 +264,17 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         }
     }
 
+    /**
+     * Sets whether an entry's menu row is exposed and therefore it should stick in the heads up
+     * area if it's pinned until it's hidden again.
+     */
+    public void setMenuShown(@NonNull NotificationData.Entry entry, boolean menuShown) {
+        HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.key);
+        if (headsUpEntry instanceof HeadsUpEntryPhone && entry.isRowPinned()) {
+            ((HeadsUpEntryPhone) headsUpEntry).setMenuShownPinned(menuShown);
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //  HeadsUpManager public methods overrides:
 
@@ -469,6 +480,14 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     //  HeadsUpEntryPhone:
 
     protected class HeadsUpEntryPhone extends HeadsUpManager.HeadsUpEntry {
+
+        private boolean mMenuShownPinned;
+
+        @Override
+        protected boolean isSticky() {
+            return super.isSticky() || mMenuShownPinned;
+        }
+
         public void setEntry(@NonNull final NotificationData.Entry entry) {
            Runnable removeHeadsUpRunnable = () -> {
                 if (!mVisualStabilityManager.isReorderingAllowed()) {
@@ -509,6 +528,25 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             } else {
                 updateEntry(false /* updatePostTime */);
             }
+        }
+
+        public void setMenuShownPinned(boolean menuShownPinned) {
+            if (mMenuShownPinned == menuShownPinned) {
+                return;
+            }
+
+            mMenuShownPinned = menuShownPinned;
+            if (menuShownPinned) {
+                removeAutoRemovalCallbacks();
+            } else {
+                updateEntry(false /* updatePostTime */);
+            }
+        }
+
+        @Override
+        public void reset() {
+            super.reset();
+            mMenuShownPinned = false;
         }
     }
 
