@@ -210,6 +210,10 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                         throw new InvalidAlgorithmParameterException(
                             "HMAC key size must be at least 64 bits.");
                     }
+                    if (mKeySizeBits > 512 && spec.isStrongBoxBacked()) {
+                        throw new InvalidAlgorithmParameterException(
+                            "StrongBox HMAC key size must be smaller than 512 bits.");
+                    }
 
                     // JCA HMAC key algorithm implies a digest (e.g., HmacSHA256 key algorithm
                     // implies SHA-256 digest). Because keymaster HMAC key is authorized only for
