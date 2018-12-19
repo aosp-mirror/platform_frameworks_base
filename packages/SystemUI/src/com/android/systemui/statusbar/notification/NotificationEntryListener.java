@@ -15,6 +15,8 @@
  */
 package com.android.systemui.statusbar.notification;
 
+import android.service.notification.StatusBarNotification;
+
 /**
  * Listener interface for changes sent by NotificationEntryManager.
  */
@@ -27,6 +29,18 @@ public interface NotificationEntryListener {
     }
 
     /**
+     * Called when a new entry is created.
+     */
+    default void onNotificationAdded(NotificationData.Entry entry) {
+    }
+
+    /**
+     * Called when a notification was updated.
+     */
+    default void onNotificationUpdated(StatusBarNotification notification) {
+    }
+
+    /**
      * Called when an existing notification's views are reinflated (usually due to an update being
      * posted to that notification).
      */
@@ -36,7 +50,26 @@ public interface NotificationEntryListener {
     /**
      * Called when a notification has been removed (either because the user swiped it away or
      * because the developer retracted it).
+     *
+     * TODO: combine this with onNotificationRemoved().
      */
     default void onEntryRemoved(NotificationData.Entry entry) {
+    }
+
+    /**
+     * Called when a notification was removed.
+     *
+     * @param key key of notification that was removed
+     * @param old StatusBarNotification of the notification before it was removed
+     */
+    default void onNotificationRemoved(String key, StatusBarNotification old) {
+    }
+
+    /**
+     * Removes a notification immediately.
+     *
+     * TODO: combine this with onNotificationRemoved().
+     */
+    default void onPerformRemoveNotification(StatusBarNotification statusBarNotification) {
     }
 }

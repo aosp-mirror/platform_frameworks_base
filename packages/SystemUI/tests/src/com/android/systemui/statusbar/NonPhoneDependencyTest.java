@@ -26,6 +26,7 @@ import android.testing.TestableLooper;
 import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -55,7 +56,8 @@ import org.mockito.MockitoAnnotations;
 public class NonPhoneDependencyTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationListContainer mListContainer;
-    @Mock private NotificationEntryManager.Callback mEntryManagerCallback;
+    @Mock
+    private NotificationEntryListener mEntryManagerCallback;
     @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private RemoteInputController.Delegate mDelegate;
     @Mock private NotificationRemoteInputManager.Callback mRemoteInputManagerCallback;

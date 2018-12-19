@@ -92,6 +92,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
@@ -146,7 +147,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private NotificationPresenter mNotificationPresenter;
-    @Mock private NotificationEntryManager.Callback mCallback;
+    @Mock
+    private NotificationEntryListener mCallback;
     @Mock private BubbleController mBubbleController;
     @Mock
     private NotificationFilter mNotificationFilter;
@@ -745,7 +747,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         public void setUpForTest(NotificationPresenter presenter,
                 NotificationListContainer listContainer,
-                Callback callback,
+                NotificationEntryListener callback,
                 HeadsUpManagerPhone headsUpManager,
                 NotificationData notificationData) {
             super.setUpWithPresenter(presenter, listContainer, callback, headsUpManager);

@@ -103,7 +103,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private KeyguardEnvironment mEnvironment;
     @Mock private ExpandableNotificationRow mRow;
     @Mock private NotificationListContainer mListContainer;
-    @Mock private NotificationEntryManager.Callback mCallback;
+    @Mock
+    private NotificationEntryListener mCallback;
     @Mock
     private NotificationRowBinder.BindRowCallback mBindCallback;
     @Mock private HeadsUpManager mHeadsUpManager;

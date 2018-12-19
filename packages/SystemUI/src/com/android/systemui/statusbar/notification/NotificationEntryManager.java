@@ -117,7 +117,7 @@ public class NotificationEntryManager implements
 
     protected IStatusBarService mBarService;
     private NotificationPresenter mPresenter;
-    private Callback mCallback;
+    private NotificationEntryListener mCallback;
     protected PowerManager mPowerManager;
     private NotificationListenerService.RankingMap mLatestRankingMap;
     protected HeadsUpManager mHeadsUpManager;
@@ -208,7 +208,7 @@ public class NotificationEntryManager implements
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
-            NotificationListContainer listContainer, Callback callback,
+            NotificationListContainer listContainer, NotificationEntryListener callback,
             HeadsUpManager headsUpManager) {
         mPresenter = presenter;
         mUpdateNotificationViewsCallback = mPresenter::updateNotificationViews;
@@ -783,40 +783,5 @@ public class NotificationEntryManager implements
      */
     public Iterable<NotificationData.Entry> getPendingNotificationsIterator() {
         return mPendingNotifications.values();
-    }
-
-    /**
-     * Callback for NotificationEntryManager.
-     */
-    public interface Callback {
-
-        /**
-         * Called when a new entry is created.
-         *
-         * @param shadeEntry entry that was created
-         */
-        void onNotificationAdded(NotificationData.Entry shadeEntry);
-
-        /**
-         * Called when a notification was updated.
-         *
-         * @param notification notification that was updated
-         */
-        void onNotificationUpdated(StatusBarNotification notification);
-
-        /**
-         * Called when a notification was removed.
-         *
-         * @param key key of notification that was removed
-         * @param old StatusBarNotification of the notification before it was removed
-         */
-        void onNotificationRemoved(String key, StatusBarNotification old);
-
-        /**
-         * Removes a notification immediately.
-         *
-         * @param statusBarNotification notification that is being removed
-         */
-        void onPerformRemoveNotification(StatusBarNotification statusBarNotification);
     }
 }
