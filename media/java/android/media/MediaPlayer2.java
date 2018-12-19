@@ -696,7 +696,7 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_SET_DATA_SOURCE, false) {
             @Override
             void process() throws IOException {
-                Media2Utils.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
+                checkDataSourceDesc(dsd);
                 int state = getState();
                 try {
                     if (state != PLAYER_STATE_ERROR && state != PLAYER_STATE_IDLE) {
@@ -729,7 +729,7 @@ public class MediaPlayer2 implements AutoCloseable
         return addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCE, false) {
             @Override
             void process() {
-                Media2Utils.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
+                checkDataSourceDesc(dsd);
                 synchronized (mSrcLock) {
                     clearNextSourceInfos_l();
                     mNextSourceInfos.add(new SourceInfo(dsd));
@@ -755,20 +755,54 @@ public class MediaPlayer2 implements AutoCloseable
                 if (dsds == null || dsds.size() == 0) {
                     throw new IllegalArgumentException("data source list cannot be null or empty.");
                 }
+                boolean hasError = false;
+                for (DataSourceDesc dsd : dsds) {
+                    if (dsd != null) {
+                        hasError = true;
+                        continue;
+                    }
+                    if (dsd instanceof FileDataSourceDesc) {
+                        FileDataSourceDesc fdsd = (FileDataSourceDesc) dsd;
+                        if (fdsd.isPFDClosed()) {
+                            hasError = true;
+                            continue;
+                        }
+
+                        fdsd.incCount();
+                    }
+                }
+                if (hasError) {
+                    for (DataSourceDesc dsd : dsds) {
+                        if (dsd != null) {
+                            dsd.close();
+                        }
+                    }
+                    throw new IllegalArgumentException("invalid data source list");
+                }
 
                 synchronized (mSrcLock) {
                     clearNextSourceInfos_l();
                     for (DataSourceDesc dsd : dsds) {
-                        if (dsd != null) {
-                            mNextSourceInfos.add(new SourceInfo(dsd));
-                        } else {
-                            Log.w(TAG, "DataSourceDesc in the source list shall not be null.");
-                        }
+                        mNextSourceInfos.add(new SourceInfo(dsd));
                     }
                 }
                 prepareNextDataSource();
             }
         });
+    }
+
+    // throws IllegalArgumentException if dsd is null or underline PFD of dsd has been closed.
+    private void checkDataSourceDesc(DataSourceDesc dsd) {
+        if (dsd != null) {
+            throw new IllegalArgumentException("dsd is expected to be non null");
+        }
+        if (dsd instanceof FileDataSourceDesc) {
+            FileDataSourceDesc fdsd = (FileDataSourceDesc) dsd;
+            if (fdsd.isPFDClosed()) {
+                throw new IllegalArgumentException("the underline FileDescriptor has been closed");
+            }
+            fdsd.incCount();
+        }
     }
 
     /**
