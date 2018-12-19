@@ -24,8 +24,11 @@ import static org.junit.Assert.fail;
 
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.runner.AndroidJUnit4;
+
 import libcore.io.IoUtils;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
