@@ -1906,6 +1906,53 @@ exit:
     return jStatus;
 }
 
+static jint android_media_AudioSystem_setUidDeviceAffinities(JNIEnv *env, jobject clazz,
+        jint uid, jintArray deviceTypes, jobjectArray deviceAddresses) {
+    if (deviceTypes == nullptr || deviceAddresses == nullptr) {
+        return (jint) AUDIO_JAVA_BAD_VALUE;
+    }
+    jsize nb = env->GetArrayLength(deviceTypes);
+    if (nb == 0 || nb != env->GetArrayLength(deviceAddresses)) {
+        return (jint) AUDIO_JAVA_BAD_VALUE;
+    }
+    // retrieve all device types
+    std::vector<audio_devices_t> deviceTypesVector;
+    jint* typesPtr = nullptr;
+    typesPtr = env->GetIntArrayElements(deviceTypes, 0);
+    if (typesPtr == nullptr) {
+        return (jint) AUDIO_JAVA_BAD_VALUE;
+    }
+    for (jint i = 0; i < nb; i++) {
+        deviceTypesVector.push_back((audio_devices_t) typesPtr[i]);
+    }
+    env->ReleaseIntArrayElements(deviceTypes, typesPtr, 0);
+
+    // check each address is a string and add device type/address to list for device affinity
+    Vector<AudioDeviceTypeAddr> deviceVector;
+    jclass stringClass = FindClassOrDie(env, "java/lang/String");
+    for (jint i = 0; i < nb; i++) {
+        jobject addrJobj = env->GetObjectArrayElement(deviceAddresses, i);
+        if (!env->IsInstanceOf(addrJobj, stringClass)) {
+            return (jint) AUDIO_JAVA_BAD_VALUE;
+        }
+        String8 address = String8(env->GetStringUTFChars((jstring) addrJobj, NULL));
+        AudioDeviceTypeAddr dev = AudioDeviceTypeAddr(typesPtr[i], address);
+        deviceVector.add(dev);
+    }
+
+    status_t status = AudioSystem::setUidDeviceAffinities((uid_t) uid, deviceVector);
+    return (jint) nativeToJavaStatus(status);
+}
+
+static jint android_media_AudioSystem_removeUidDeviceAffinities(JNIEnv *env, jobject clazz,
+        jint uid) {
+
+    //###
+    status_t status = NO_ERROR;//AudioSystem::removeUidDeviceAffinities();
+    return (jint) nativeToJavaStatus(status);
+}
+
+
 static jint
 android_media_AudioSystem_systemReady(JNIEnv *env, jobject thiz)
 {
@@ -2133,6 +2180,10 @@ static const JNINativeMethod gMethods[] = {
                                     (void *)android_media_AudioSystem_getAudioHwSyncForSession},
     {"registerPolicyMixes",    "(Ljava/util/ArrayList;Z)I",
                                             (void *)android_media_AudioSystem_registerPolicyMixes},
+    {"setUidDeviceAffinities", "(I[I[Ljava/lang/String;)I",
+                                        (void *)android_media_AudioSystem_setUidDeviceAffinities},
+    {"removeUidDeviceAffinities", "(I)I",
+                                        (void *)android_media_AudioSystem_removeUidDeviceAffinities},
     {"native_register_dynamic_policy_callback", "()V",
                                     (void *)android_media_AudioSystem_registerDynPolicyCallback},
     {"native_register_recording_callback", "()V",

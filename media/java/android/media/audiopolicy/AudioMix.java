@@ -165,6 +165,20 @@ public class AudioMix {
     }
 
     /** @hide */
+    public boolean isRoutedToDevice(int deviceType, @NonNull String deviceAddress) {
+        if ((mRouteFlags & ROUTE_FLAG_RENDER) != ROUTE_FLAG_RENDER) {
+            return false;
+        }
+        if (deviceType != mDeviceSystemType) {
+            return false;
+        }
+        if (!deviceAddress.equals(mDeviceAddress)) {
+            return false;
+        }
+        return true;
+    }
+
+    /** @hide */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

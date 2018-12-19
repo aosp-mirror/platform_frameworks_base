@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
+import android.media.AudioDeviceInfo;
 import android.media.AudioFocusInfo;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -318,6 +319,80 @@ public class AudioPolicy {
                 return status;
             } catch (RemoteException e) {
                 Log.e(TAG, "Dead object in detachMixes", e);
+                return AudioManager.ERROR;
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * Configures the audio framework so that all audio stream originating from the given UID
+     * can only come from a set of audio devices.
+     * For this routing to be operational, a number of {@link AudioMix} instances must have been
+     * previously registered on this policy, and routed to a super-set of the given audio devices
+     * with {@link AudioMix.Builder#setDevice(android.media.AudioDeviceInfo)}. Note that having
+     * multiple devices in the list doesn't imply the signals will be duplicated on the different
+     * audio devices, final routing will depend on the {@link AudioAttributes} of the sounds being
+     * played.
+     * @param uid UID of the application to affect.
+     * @param devices list of devices to which the audio stream of the application may be routed.
+     * @return {@link AudioManager#SUCCESS} if the change was successful, {@link AudioManager#ERROR}
+     *          otherwise.
+     */
+    @SystemApi
+    public int setUidDeviceAffinity(int uid, @NonNull List<AudioDeviceInfo> devices) {
+        if (devices == null) {
+            throw new IllegalArgumentException("Illegal null list of audio devices");
+        }
+        synchronized (mLock) {
+            if (mStatus != POLICY_STATUS_REGISTERED) {
+                throw new IllegalStateException("Cannot use unregistered AudioPolicy");
+            }
+            final int[] deviceTypes = new int[devices.size()];
+            final String[] deviceAdresses = new String[devices.size()];
+            int i = 0;
+            for (AudioDeviceInfo device : devices) {
+                if (device == null) {
+                    throw new IllegalArgumentException(
+                            "Illegal null AudioDeviceInfo in setUidDeviceAffinity");
+                }
+                deviceTypes[i] =
+                        AudioDeviceInfo.convertDeviceTypeToInternalDevice(device.getType());
+                deviceAdresses[i] = device.getAddress();
+                i++;
+            }
+            final IAudioService service = getService();
+            try {
+                final int status = service.setUidDeviceAffinity(this.cb(),
+                        uid, deviceTypes, deviceAdresses);
+                return status;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Dead object in setUidDeviceAffinity", e);
+                return AudioManager.ERROR;
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * Removes audio device affinity previously set by
+     * {@link #setUidDeviceAffinity(int, java.util.List)}.
+     * @param uid UID of the application affected.
+     * @return {@link AudioManager#SUCCESS} if the change was successful, {@link AudioManager#ERROR}
+     *          otherwise.
+     */
+    @SystemApi
+    public int removeUidDeviceAffinity(int uid) {
+        synchronized (mLock) {
+            if (mStatus != POLICY_STATUS_REGISTERED) {
+                throw new IllegalStateException("Cannot use unregistered AudioPolicy");
+            }
+            final IAudioService service = getService();
+            try {
+                final int status = service.removeUidDeviceAffinity(this.cb(), uid);
+                return status;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Dead object in removeUidDeviceAffinity", e);
                 return AudioManager.ERROR;
             }
         }

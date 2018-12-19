@@ -3001,6 +3001,7 @@ package android.media {
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
     field public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 2; // 0x2
     field public static final int FLAG_FROM_KEY = 65536; // 0x10000
+    field public static final int SUCCESS = 0; // 0x0
   }
 
   public static abstract class AudioManager.AudioServerStateCallback {
@@ -3117,8 +3118,10 @@ package android.media.audiopolicy {
     method public int detachMixes(java.util.List<android.media.audiopolicy.AudioMix>);
     method public int getFocusDuckingBehavior();
     method public int getStatus();
+    method public int removeUidDeviceAffinity(int);
     method public int setFocusDuckingBehavior(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setRegistration(java.lang.String);
+    method public int setUidDeviceAffinity(int, java.util.List<android.media.AudioDeviceInfo>);
     method public java.lang.String toLogFriendlyString();
     field public static final int FOCUS_POLICY_DUCKING_DEFAULT = 0; // 0x0
     field public static final int FOCUS_POLICY_DUCKING_IN_APP = 0; // 0x0
