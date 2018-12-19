@@ -142,17 +142,18 @@ class Instruction {
   // The operation performed by this instruction. These are virtual instructions that do not
   // correspond exactly to DEX instructions.
   enum class Op {
-    kReturn,
-    kReturnObject,
-    kMove,
-    kInvokeVirtual,
-    kInvokeDirect,
-    kInvokeStatic,
-    kInvokeInterface,
     kBindLabel,
     kBranchEqz,
     kBranchNEqz,
-    kNew
+    kCheckCast,
+    kInvokeDirect,
+    kInvokeInterface,
+    kInvokeStatic,
+    kInvokeVirtual,
+    kMove,
+    kNew,
+    kReturn,
+    kReturnObject,
   };
 
   ////////////////////////
@@ -168,6 +169,13 @@ class Instruction {
   static inline Instruction OpWithArgs(Op opcode, std::optional<const Value> dest, T... args) {
     return Instruction{opcode, /*method_id=*/0, /*result_is_object=*/false, dest, args...};
   }
+
+  // A cast instruction. Basically, `(type)val`
+  static inline Instruction Cast(Value val, Value type) {
+    DCHECK(type.is_type());
+    return OpWithArgs(Op::kCheckCast, val, type);
+  }
+
   // For method calls.
   template <typename... T>
   static inline Instruction InvokeVirtual(size_t method_id, std::optional<const Value> dest,
@@ -302,6 +310,7 @@ class MethodBuilder {
   void EncodeInvoke(const Instruction& instruction, ::art::Instruction::Code opcode);
   void EncodeBranch(art::Instruction::Code op, const Instruction& instruction);
   void EncodeNew(const Instruction& instruction);
+  void EncodeCast(const Instruction& instruction);
 
   // Low-level instruction format encoding. See
   // https://source.android.com/devices/tech/dalvik/instruction-formats for documentation of
