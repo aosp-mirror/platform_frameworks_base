@@ -143,6 +143,13 @@ public final class DefaultPermissionGrantPolicy {
         LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_COARSE_LOCATION);
     }
 
+    private static final Set<String> ALWAYS_LOCATION_PERMISSIONS = new ArraySet<>();
+    static {
+        ALWAYS_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        ALWAYS_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+        ALWAYS_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+    }
+
     private static final Set<String> ACTIVITY_RECOGNITION_PERMISSIONS = new ArraySet<>();
     static {
         ACTIVITY_RECOGNITION_PERMISSIONS.add(Manifest.permission.ACTIVITY_RECOGNITION);
@@ -690,7 +697,7 @@ public final class DefaultPermissionGrantPolicy {
         // Companion devices
         grantSystemFixedPermissionsToSystemPackage(
                 CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME, userId,
-                LOCATION_PERMISSIONS);
+                ALWAYS_LOCATION_PERMISSIONS);
 
         // Ringtone Picker
         grantSystemFixedPermissionsToSystemPackage(
