@@ -1167,6 +1167,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onOverlayChanged();
         }
+        // We need the new R.id.keyguard_indication_area before recreating
+        // mKeyguardIndicationController
+        mNotificationPanel.onThemeChanged();
+        onThemeChanged();
     }
 
     @Override

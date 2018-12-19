@@ -325,6 +325,17 @@ public class BatteryMeterView extends LinearLayout implements
                 .inflate(R.layout.battery_percentage_view, null);
     }
 
+    /**
+     * Updates percent view by removing old one and reinflating if necessary
+     */
+    public void updatePercentView() {
+        if (mBatteryPercentView != null) {
+            removeView(mBatteryPercentView);
+            mBatteryPercentView = null;
+        }
+        updateShowPercent();
+    }
+
     private void updatePercentText() {
         if (mBatteryPercentView != null) {
             mBatteryPercentView.setText(
