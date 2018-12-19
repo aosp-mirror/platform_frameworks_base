@@ -3507,6 +3507,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testAppOverlay() throws Exception {
+        mBinderService.setAppOverlaysAllowed(PKG, mUid, false);
+        assertFalse(mBinderService.areAppOverlaysAllowedForPackage(PKG, mUid));
+    }
+
+    @Test
     public void testIsCallerInstantApp_primaryUser() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
