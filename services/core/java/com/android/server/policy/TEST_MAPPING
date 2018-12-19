@@ -10,7 +10,7 @@
           "include-annotation": "android.platform.test.annotations.Presubmit"
         },
         {
-          "exclude-annotation": "android.support.test.filters.FlakyTest"
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
     },
