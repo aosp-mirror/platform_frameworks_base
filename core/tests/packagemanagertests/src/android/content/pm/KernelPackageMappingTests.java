@@ -22,9 +22,10 @@ import android.content.Context;
 import android.os.FileUtils;
 import android.os.ServiceManager;
 import android.os.UserManager;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Test;
