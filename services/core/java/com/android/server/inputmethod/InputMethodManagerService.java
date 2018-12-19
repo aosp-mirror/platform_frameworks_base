@@ -1685,6 +1685,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return getInputMethodList(false /* isVrOnly */);
     }
 
+    @Override
     public List<InputMethodInfo> getVrInputMethodList() {
         return getInputMethodList(true /* isVrOnly */);
     }
