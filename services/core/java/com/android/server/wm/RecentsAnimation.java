@@ -134,10 +134,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
         mWindowManager.deferSurfaceLayout();
         try {
-            final int userId = mService.getCurrentUserId();
-
             // Kick off the assist data request in the background before showing the target activity
-            requestAssistData(recentsComponent, recentsUid, assistDataReceiver, userId);
+            requestAssistData(recentsComponent, recentsUid, assistDataReceiver);
 
             if (hasExistingActivity) {
                 // Move the recents activity into place for the animation if it is not top most
@@ -164,7 +162,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         .setCallingUid(recentsUid)
                         .setCallingPackage(recentsComponent.getPackageName())
                         .setActivityOptions(SafeActivityOptions.fromBundle(options.toBundle()))
-                        .setMayWait(userId)
+                        .setMayWait(mService.getCurrentUserId())
                         .execute();
 
                 // Move the recents activity into place for the animation
@@ -221,7 +219,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
      * Requests assist data for the top visible activities.
      */
     private void requestAssistData(ComponentName recentsComponent, int recentsUid,
-            @Deprecated IAssistDataReceiver assistDataReceiver, int userId) {
+            @Deprecated IAssistDataReceiver assistDataReceiver) {
         final AppOpsManager appOpsManager = (AppOpsManager)
                 mService.mContext.getSystemService(Context.APP_OPS_SERVICE);
         final List<IBinder> topActivities =
@@ -237,8 +235,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     final ContentCaptureManagerInternal imService =
                             LocalServices.getService(ContentCaptureManagerInternal.class);
                     final IBinder activityToken = topActivities.get(activityIndex);
-                    if (imService == null
-                            || !imService.sendActivityAssistData(userId, activityToken, data)) {
+                    final ActivityRecord r = ActivityRecord.forTokenLocked(activityToken);
+                    if (r != null && (imService == null
+                            || !imService.sendActivityAssistData(r.mUserId, activityToken, data))) {
                         // Otherwise, use the provided assist data receiver
                         super.onAssistDataReceivedLocked(data, activityIndex, activityCount);
                     }
@@ -263,7 +262,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         int activityCount) {
                     // Try to notify the intelligence service
                     final IBinder activityToken = topActivities.get(activityIndex);
-                    imService.sendActivityAssistData(userId, activityToken, data);
+                    final ActivityRecord r = ActivityRecord.forTokenLocked(activityToken);
+                    if (r != null) {
+                        imService.sendActivityAssistData(r.mUserId, activityToken, data);
+                    }
                 }
             };
         }
