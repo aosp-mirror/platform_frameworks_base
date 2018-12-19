@@ -151,7 +151,6 @@ public final class NotificationRecord {
 
     private int mSuppressedVisualEffects = 0;
     private String mUserExplanation;
-    private String mPeopleExplanation;
     private boolean mPreChannelsNotification = true;
     private Uri mSound;
     private long[] mVibration;
@@ -1188,6 +1187,13 @@ public final class NotificationRecord {
 
     public ArrayList<CharSequence> getSmartReplies() {
         return mSmartReplies;
+    }
+
+    /**
+     * Returns whether this notification was posted by a secondary app
+     */
+    public boolean isProxied() {
+        return !Objects.equals(sbn.getPackageName(), sbn.getOpPkg());
     }
 
     /**
