@@ -247,7 +247,7 @@ public class Bmgr {
         }
 
         try {
-            mBmgr.dataChanged(pkg);
+            mBmgr.dataChangedForUser(userId, pkg);
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(BMGR_NOT_RUNNING_ERR);
@@ -264,7 +264,8 @@ public class Bmgr {
         }
         if (allPkgs.size() > 0) {
             try {
-                mBmgr.fullTransportBackup(allPkgs.toArray(new String[allPkgs.size()]));
+                mBmgr.fullTransportBackupForUser(
+                        userId, allPkgs.toArray(new String[allPkgs.size()]));
             } catch (RemoteException e) {
                 System.err.println(e.toString());
                 System.err.println(BMGR_NOT_RUNNING_ERR);
@@ -393,7 +394,7 @@ public class Bmgr {
                     installedPackages.stream().map(p -> p.packageName).toArray(String[]::new);
             String[] filteredPackages = {};
             try {
-                filteredPackages = mBmgr.filterAppsEligibleForBackup(packages);
+                filteredPackages = mBmgr.filterAppsEligibleForBackupForUser(userId, packages);
             } catch (RemoteException e) {
                 System.err.println(e.toString());
                 System.err.println(BMGR_NOT_RUNNING_ERR);
@@ -498,11 +499,11 @@ public class Bmgr {
             }
 
             if ("-c".equals(which)) {
-                doTransportByComponent();
+                doTransportByComponent(userId);
                 return;
             }
 
-            String old = mBmgr.selectBackupTransport(which);
+            String old = mBmgr.selectBackupTransportForUser(userId, which);
             if (old == null) {
                 System.out.println("Unknown transport '" + which
                         + "' specified; no changes made.");
@@ -516,7 +517,7 @@ public class Bmgr {
         }
     }
 
-    private void doTransportByComponent() {
+    private void doTransportByComponent(@UserIdInt int userId) {
         String which = nextArg();
         if (which == null) {
             showUsage();
@@ -526,7 +527,9 @@ public class Bmgr {
         final CountDownLatch latch = new CountDownLatch(1);
 
         try {
-            mBmgr.selectBackupTransportAsync(ComponentName.unflattenFromString(which),
+            mBmgr.selectBackupTransportAsyncForUser(
+                    userId,
+                    ComponentName.unflattenFromString(which),
                     new ISelectBackupTransportCallback.Stub() {
                         @Override
                         public void onSuccess(String transportName) {
@@ -567,7 +570,7 @@ public class Bmgr {
         }
 
         try {
-            mBmgr.clearBackupData(transport, pkg);
+            mBmgr.clearBackupDataForUser(userId, transport, pkg);
             System.out.println("Wiped backup data for " + pkg + " on " + transport);
         } catch (RemoteException e) {
             System.err.println(e.toString());
@@ -599,7 +602,8 @@ public class Bmgr {
         InitObserver observer = new InitObserver();
         try {
             System.out.println("Initializing transports: " + transports);
-            mBmgr.initializeTransports(transports.toArray(new String[transports.size()]), observer);
+            mBmgr.initializeTransportsForUser(
+                    userId, transports.toArray(new String[transports.size()]), observer);
             observer.waitForCompletion(30*1000L);
             System.out.println("Initialization result: " + observer.result);
         } catch (RemoteException e) {
@@ -611,13 +615,13 @@ public class Bmgr {
     private void doList(@UserIdInt int userId) {
         String arg = nextArg();     // sets, transports, packages set#
         if ("transports".equals(arg)) {
-            doListTransports();
+            doListTransports(userId);
             return;
         }
 
         // The rest of the 'list' options work with a restore session on the current transport
         try {
-            mRestore = mBmgr.beginRestoreSession(null, null);
+            mRestore = mBmgr.beginRestoreSessionForUser(userId, null, null);
             if (mRestore == null) {
                 System.err.println(BMGR_NOT_RUNNING_ERR);
                 return;
@@ -634,19 +638,19 @@ public class Bmgr {
         }
     }
 
-    private void doListTransports() {
+    private void doListTransports(@UserIdInt int userId) {
         String arg = nextArg();
 
         try {
             if ("-c".equals(arg)) {
-                for (ComponentName transport : mBmgr.listAllTransportComponents()) {
+                for (ComponentName transport : mBmgr.listAllTransportComponentsForUser(userId)) {
                     System.out.println(transport.flattenToShortString());
                 }
                 return;
             }
 
-            String current = mBmgr.getCurrentTransport();
-            String[] transports = mBmgr.listAllTransports();
+            String current = mBmgr.getCurrentTransportForUser(userId);
+            String[] transports = mBmgr.listAllTransportsForUser(userId);
             if (transports == null || transports.length == 0) {
                 System.out.println("No transports available.");
                 return;
@@ -756,7 +760,7 @@ public class Bmgr {
                     filter.add(arg);
                 }
 
-                doRestoreAll(token, filter);
+                doRestoreAll(userId, token, filter);
             } catch (NumberFormatException e) {
                 showUsage();
                 return;
@@ -769,12 +773,12 @@ public class Bmgr {
         System.err.println("'restore <token> <package>'.");
     }
 
-    private void doRestoreAll(long token, HashSet<String> filter) {
+    private void doRestoreAll(@UserIdInt int userId, long token, HashSet<String> filter) {
         RestoreObserver observer = new RestoreObserver();
 
         try {
             boolean didRestore = false;
-            mRestore = mBmgr.beginRestoreSession(null, null);
+            mRestore = mBmgr.beginRestoreSessionForUser(userId, null, null);
             if (mRestore == null) {
                 System.err.println(BMGR_NOT_RUNNING_ERR);
                 return;
