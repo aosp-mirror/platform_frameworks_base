@@ -28,7 +28,7 @@ import androidx.annotation.IdRes;
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.plugins.DarkIconDispatcher;
 
 /**
  * A view that forms the header of the notification panel. This view will ensure that any

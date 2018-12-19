@@ -16,11 +16,11 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.plugins.DarkIconDispatcher.getTint;
+import static com.android.systemui.plugins.DarkIconDispatcher.isInArea;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_DOT;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
-import static com.android.systemui.statusbar.policy.DarkIconDispatcher.getTint;
-import static com.android.systemui.statusbar.policy.DarkIconDispatcher.isInArea;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -37,8 +37,8 @@ import android.widget.LinearLayout;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
+import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 
 /**
  * Start small: StatusBarWifiView will be able to layout from a WifiIconState

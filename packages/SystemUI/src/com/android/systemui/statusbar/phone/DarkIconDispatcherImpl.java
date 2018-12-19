@@ -14,7 +14,8 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.policy.DarkIconDispatcher.getTint;
+import static com.android.systemui.plugins.DarkIconDispatcher.DEFAULT_ICON_TINT;
+import static com.android.systemui.plugins.DarkIconDispatcher.getTint;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
@@ -24,7 +25,7 @@ import android.util.ArrayMap;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -35,7 +36,7 @@ import javax.inject.Singleton;
 /**
  */
 @Singleton
-public class DarkIconDispatcherImpl implements DarkIconDispatcher {
+public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher {
 
     private final LightBarTransitionsController mTransitionsController;
     private final Rect mTintArea = new Rect();

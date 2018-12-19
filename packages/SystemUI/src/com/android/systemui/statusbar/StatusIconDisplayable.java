@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar;
 
-import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 
 public interface StatusIconDisplayable extends DarkReceiver {
     String getSlot();
