@@ -164,6 +164,7 @@ public class WindowManagerServiceRule implements TestRule {
             }
 
             private void tearDown() {
+                cancelAllPendingAnimations();
                 waitUntilWindowManagerHandlersIdle();
                 destroyAllSurfaceTransactions();
                 destroyAllSurfaceControls();
@@ -176,6 +177,15 @@ public class WindowManagerServiceRule implements TestRule {
 
     WindowManagerService getWindowManagerService() {
         return mService;
+    }
+
+    private void cancelAllPendingAnimations() {
+        for (final WeakReference<SurfaceControl> reference : mSurfaceControls) {
+            final SurfaceControl sc = reference.get();
+            if (sc != null) {
+                mService.mSurfaceAnimationRunner.onAnimationCancelled(sc);
+            }
+        }
     }
 
     void waitUntilWindowManagerHandlersIdle() {
