@@ -1838,12 +1838,17 @@ public class NotificationManager {
      * Recover a list of active notifications: ones that have been posted by the calling app that
      * have not yet been dismissed by the user or {@link #cancel(String, int)}ed by the app.
      *
-     * Each notification is embedded in a {@link StatusBarNotification} object, including the
+     * <p><Each notification is embedded in a {@link StatusBarNotification} object, including the
      * original <code>tag</code> and <code>id</code> supplied to
      * {@link #notify(String, int, Notification) notify()}
      * (via {@link StatusBarNotification#getTag() getTag()} and
      * {@link StatusBarNotification#getId() getId()}) as well as a copy of the original
      * {@link Notification} object (via {@link StatusBarNotification#getNotification()}).
+     * </p>
+     * <p>From {@link Build.VERSION_CODES#Q}, will also return notifications you've posted as an
+     * app's notification delegate via
+     * {@link NotificationManager#notifyAsPackage(String, String, int, Notification)}.
+     * </p>
      *
      * @return An array of {@link StatusBarNotification}.
      */
