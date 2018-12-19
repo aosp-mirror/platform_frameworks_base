@@ -905,16 +905,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             return;
         }
         if (supportsMultiDisplay(systemConnection)
-                && fallbackConnection.getConnectedEngineSize() != 0) {
-            fallbackConnection.forEachDisplayConnector(
-                    WallpaperConnection.DisplayConnector::disconnectLocked);
+                && fallbackConnection.mDisplayConnector.size() != 0) {
+            fallbackConnection.forEachDisplayConnector(connector -> {
+                if (connector.mEngine != null) {
+                    connector.disconnectLocked();
+                }
+            });
             fallbackConnection.mDisplayConnector.clear();
         } else {
-            // TODO(b/121181553) Handle wallpaper service disconnect case.
-            if (fallbackConnection.mService == null) {
-                Slog.w(TAG, "There is no fallback wallpaper service");
-                return;
-            }
             fallbackConnection.appendConnectorWithCondition(display ->
                     fallbackConnection.isUsableDisplay(display)
                             && display.getDisplayId() != DEFAULT_DISPLAY
@@ -965,6 +963,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
 
             void connectLocked(WallpaperConnection connection, WallpaperData wallpaper) {
+                if (connection.mService == null) {
+                    Slog.w(TAG, "WallpaperService is not connected yet");
+                    return;
+                }
                 if (DEBUG) Slog.v(TAG, "Adding window token: " + mToken);
                 try {
                     mIWindowManager.addWindowToken(mToken, TYPE_WALLPAPER, mDisplayId);
@@ -980,7 +982,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             wpdData.mPadding, mDisplayId);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed attaching wallpaper on display", e);
-                    if (mLastWallpaper != null && !mLastWallpaper.wallpaperUpdating
+                    if (wallpaper != null && !wallpaper.wallpaperUpdating
                             && connection.getConnectedEngineSize() == 0) {
                         bindWallpaperComponentLocked(null /* componentName */, false /* force */,
                                 false /* fromUser */, wallpaper, null /* reply */);
@@ -1067,8 +1069,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             for (Display display : displays) {
                 if (tester.test(display)) {
                     final int displayId = display.getDisplayId();
-                    mDisplayConnector.append(displayId,
-                            new DisplayConnector(displayId));
+                    final DisplayConnector connector = mDisplayConnector.get(displayId);
+                    if (connector == null) {
+                        mDisplayConnector.append(displayId,
+                                new DisplayConnector(displayId));
+                    }
                 }
             }
         }
