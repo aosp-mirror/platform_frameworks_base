@@ -87,6 +87,8 @@ public class TileQueryHelper {
         if (current != null) {
             // The setting QS_TILES is not populated immediately upon Factory Reset
             possibleTiles.addAll(Arrays.asList(current.split(",")));
+        } else {
+            current = "";
         }
         String[] stockSplit =  stock.split(",");
         for (String spec : stockSplit) {
