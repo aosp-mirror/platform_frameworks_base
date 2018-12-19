@@ -31,8 +31,6 @@
 #include <gui/BufferQueue.h>
 #include <gui/Surface.h>
 
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
 #include <private/EGL/cache.h>
 
 #include <utils/Looper.h>
@@ -58,6 +56,7 @@
 #include <renderthread/RenderTask.h>
 #include <renderthread/RenderThread.h>
 #include <pipeline/skia/ShaderCache.h>
+#include <utils/Color.h>
 
 namespace android {
 
@@ -1011,10 +1010,9 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
                 buffer->getWidth(), buffer->getHeight(), width, height);
         // Continue I guess?
     }
-    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer);
-    // Bitmap::createFrom currently can only attach to a GraphicBuffer with PIXEL_FORMAT_RGBA_8888
-    // format and SRGB color space.
-    // To support any color space, we could extract it from BufferItem and pass it to Bitmap.
+
+    sk_sp<SkColorSpace> cs = uirenderer::DataSpaceToColorSpace(bufferItem.mDataSpace);
+    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, cs);
     return bitmap::createBitmap(env, bitmap.release(),
             android::bitmap::kBitmapCreateFlag_Premultiplied);
 }

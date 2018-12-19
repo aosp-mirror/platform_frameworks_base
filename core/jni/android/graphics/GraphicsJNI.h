@@ -85,9 +85,6 @@ public:
 
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
-    static android::Bitmap* mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
-            int fd, void* addr, size_t size, bool readOnly);
-
     /**
      * Given a bitmap we natively allocate a memory block to store the contents
      * of that bitmap.  The memory is then attached to the bitmap via an

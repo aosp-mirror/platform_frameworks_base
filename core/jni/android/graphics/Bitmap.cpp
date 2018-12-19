@@ -725,9 +725,10 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
             return NULL;
         }
 
-        // Map the pixels in place and take ownership of the ashmem region.
-        nativeBitmap = sk_sp<Bitmap>(GraphicsJNI::mapAshmemBitmap(env, bitmap.get(),
-                dupFd, const_cast<void*>(blob.data()), size, !isMutable));
+        // Map the pixels in place and take ownership of the ashmem region. We must also respect the
+        // rowBytes value already set on the bitmap instead of attempting to compute our own.
+        nativeBitmap = Bitmap::createFrom(bitmap->info(), bitmap->rowBytes(), dupFd,
+                                          const_cast<void*>(blob.data()), size, !isMutable);
         if (!nativeBitmap) {
             close(dupFd);
             blob.release();
@@ -1097,21 +1098,20 @@ static jobject Bitmap_copyPreserveInternalConfig(JNIEnv* env, jobject, jlong bit
     SkBitmap src;
     hwuiBitmap.getSkBitmap(&src);
 
-    SkBitmap result;
-    HeapAllocator allocator;
-    if (!bitmapCopyTo(&result, hwuiBitmap.info().colorType(), src, &allocator)) {
+    if (src.pixelRef() == nullptr) {
         doThrowRE(env, "Could not copy a hardware bitmap.");
         return NULL;
     }
-    return createBitmap(env, allocator.getStorageObjAndReset(), getPremulBitmapCreateFlags(false));
+
+    sk_sp<Bitmap> bitmap = Bitmap::createFrom(src.info(), *src.pixelRef());
+    return createBitmap(env, bitmap.release(), getPremulBitmapCreateFlags(false));
 }
 
 static jobject Bitmap_createHardwareBitmap(JNIEnv* env, jobject, jobject graphicBuffer) {
     sp<GraphicBuffer> buffer(graphicBufferForJavaObject(env, graphicBuffer));
-    // Bitmap::createFrom currently assumes SRGB color space for RGBA images.
     // To support any color space, we need to pass an additional ColorSpace argument to
     // java Bitmap.createHardwareBitmap.
-    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer);
+    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, SkColorSpace::MakeSRGB());
     if (!bitmap.get()) {
         ALOGW("failed to create hardware bitmap from graphic buffer");
         return NULL;
