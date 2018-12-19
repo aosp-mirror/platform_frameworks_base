@@ -25,8 +25,8 @@ import android.service.contentcapture.SnapshotData;
 import android.text.format.DateUtils;
 import android.view.contentcapture.ContentCaptureContext;
 
+import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
 import com.android.internal.os.IResultReceiver;
-import com.android.server.infra.AbstractMultiplePendingRequestsRemoteService;
 
 final class RemoteContentCaptureService
         extends AbstractMultiplePendingRequestsRemoteService<RemoteContentCaptureService,

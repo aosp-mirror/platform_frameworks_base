@@ -18,6 +18,8 @@ package com.android.server.infra;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import com.android.internal.infra.AbstractRemoteService;
+
 import java.io.PrintWriter;
 
 /**
