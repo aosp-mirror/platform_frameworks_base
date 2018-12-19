@@ -105,6 +105,7 @@ public class NotificationData {
         public NotificationChannel channel;
         public long lastAudiblyAlertedMs;
         public boolean noisy;
+        public boolean ambient;
         public int importance;
         public StatusBarIconView icon;
         public StatusBarIconView expandedIcon;
@@ -174,6 +175,7 @@ public class NotificationData {
             channel = ranking.getChannel();
             lastAudiblyAlertedMs = ranking.getLastAudiblyAlertedMillis();
             importance = ranking.getImportance();
+            ambient = ranking.isAmbient();
             snoozeCriteria = ranking.getSnoozeCriteria();
             userSentiment = ranking.getUserSentiment();
             systemGeneratedSmartActions = ranking.getSmartActions() == null

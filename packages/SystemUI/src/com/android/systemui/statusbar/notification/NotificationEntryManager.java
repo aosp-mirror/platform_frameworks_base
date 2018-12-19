@@ -15,9 +15,7 @@
  */
 package com.android.systemui.statusbar.notification;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.bubbles.BubbleController.DEBUG_DEMOTE_TO_NOTIF;
-import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_AMBIENT;
@@ -28,10 +26,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.database.ContentObserver;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -49,25 +44,21 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
-import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.ForegroundServiceController;
-import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -79,11 +70,9 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
-import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.leak.LeakDetector;
@@ -100,9 +89,12 @@ import java.util.concurrent.TimeUnit;
  * It also handles tasks such as their inflation and their interaction with other
  * Notification.*Manager objects.
  */
-public class NotificationEntryManager implements Dumpable, NotificationInflater.InflationCallback,
-        ExpandableNotificationRow.ExpansionLogger, NotificationUpdateHandler,
-        VisualStabilityManager.Callback, BubbleController.BubbleDismissListener {
+public class NotificationEntryManager implements
+        Dumpable,
+        NotificationInflater.InflationCallback,
+        NotificationUpdateHandler,
+        VisualStabilityManager.Callback,
+        BubbleController.BubbleDismissListener {
     private static final String TAG = "NotificationEntryMgr";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean ENABLE_HEADS_UP = true;
@@ -110,7 +102,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
     public static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
 
-    private final NotificationMessagingUtil mMessagingUtil;
     protected final Context mContext;
     protected final HashMap<String, NotificationData.Entry> mPendingNotifications = new HashMap<>();
 
@@ -123,7 +114,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             Dependency.get(DeviceProvisionedController.class);
     private final VisualStabilityManager mVisualStabilityManager =
             Dependency.get(VisualStabilityManager.class);
-    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
     private final ForegroundServiceController mForegroundServiceController =
             Dependency.get(ForegroundServiceController.class);
     private final AmbientPulseManager mAmbientPulseManager =
@@ -135,6 +125,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     private NotificationMediaManager mMediaManager;
     private NotificationListener mNotificationListener;
     private ShadeController mShadeController;
+    private NotificationRowBinder mNotificationRowBinder;
 
     private final Handler mDeferredNotificationViewUpdateHandler;
     private Runnable mUpdateNotificationViewsCallback;
@@ -154,10 +145,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     @VisibleForTesting
     final ArrayList<NotificationLifetimeExtender> mNotificationLifetimeExtenders
             = new ArrayList<>();
-    private ExpandableNotificationRow.OnAppOpsClickListener mOnAppOpsClickListener;
     private NotificationViewHierarchyManager.StatusBarStateListener mStatusBarStateListener;
     @Nullable private AlertTransferListener mAlertTransferListener;
-    @Nullable private NotificationClicker mNotificationClicker;
 
     private final DeviceProvisionedController.DeviceProvisionedListener
             mDeviceProvisionedListener =
@@ -199,7 +188,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
-        mMessagingUtil = new NotificationMessagingUtil(context);
         mBubbleController.setDismissListener(this /* bubbleEventListener */);
         mNotificationData = new NotificationData();
         mDeferredNotificationViewUpdateHandler = new Handler();
@@ -207,10 +195,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
     public void setAlertTransferListener(AlertTransferListener listener) {
         mAlertTransferListener = listener;
-    }
-
-    public void setNotificationClicker(NotificationClicker clicker) {
-        mNotificationClicker = clicker;
     }
 
     /**
@@ -242,6 +226,13 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             mShadeController = Dependency.get(ShadeController.class);
         }
         return mShadeController;
+    }
+
+    private NotificationRowBinder getRowBinder() {
+        if (mNotificationRowBinder == null) {
+            mNotificationRowBinder = Dependency.get(NotificationRowBinder.class);
+        }
+        return mNotificationRowBinder;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -296,7 +287,18 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
 
         mHeadsUpObserver.onChange(true); // set up
-        mOnAppOpsClickListener = mGutsManager::openGuts;
+
+        getRowBinder().setInterruptionStateProvider(new InterruptionStateProvider() {
+            @Override
+            public boolean shouldHeadsUp(NotificationData.Entry entry) {
+                return NotificationEntryManager.this.shouldHeadsUp(entry);
+            }
+
+            @Override
+            public boolean shouldPulse(NotificationData.Entry entry) {
+                return NotificationEntryManager.this.shouldPulse(entry);
+            }
+        });
     }
 
     public NotificationData getNotificationData() {
@@ -312,18 +314,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     }
 
     public ExpandableNotificationRow.LongPressListener getNotificationLongClicker() {
-        return mGutsManager::openGuts;
-    }
-
-    @Override
-    public void logNotificationExpansion(String key, boolean userAction, boolean expanded) {
-        mUiOffloadThread.submit(() -> {
-            try {
-                mBarService.onNotificationExpansionChanged(key, userAction, expanded);
-            } catch (RemoteException e) {
-                // Ignore.
-            }
-        });
+        return getRowBinder().getNotificationLongClicker();
     }
 
     @Override
@@ -337,64 +328,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         }
 
         return mNotificationData.shouldSuppressFullScreenIntent(entry);
-    }
-
-    private void inflateViews(NotificationData.Entry entry, ViewGroup parent) {
-        PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
-                entry.notification.getUser().getIdentifier());
-
-        final StatusBarNotification sbn = entry.notification;
-        if (entry.rowExists()) {
-            entry.reset();
-            updateNotification(entry, pmUser, sbn, entry.getRow());
-        } else {
-            new RowInflaterTask().inflate(mContext, parent, entry,
-                    row -> {
-                        bindRow(entry, pmUser, sbn, row);
-                        updateNotification(entry, pmUser, sbn, row);
-                    });
-        }
-    }
-
-    private void bindRow(NotificationData.Entry entry, PackageManager pmUser,
-            StatusBarNotification sbn, ExpandableNotificationRow row) {
-        row.setExpansionLogger(this, entry.notification.getKey());
-        row.setGroupManager(mGroupManager);
-        row.setHeadsUpManager(mHeadsUpManager);
-        row.setOnExpandClickListener(mPresenter);
-        row.setInflationCallback(this);
-        row.setLongPressListener(getNotificationLongClicker());
-        mListContainer.bindRow(row);
-        getRemoteInputManager().bindRow(row);
-
-        // Get the app name.
-        // Note that Notification.Builder#bindHeaderAppName has similar logic
-        // but since this field is used in the guts, it must be accurate.
-        // Therefore we will only show the application label, or, failing that, the
-        // package name. No substitutions.
-        final String pkg = sbn.getPackageName();
-        String appname = pkg;
-        try {
-            final ApplicationInfo info = pmUser.getApplicationInfo(pkg,
-                    PackageManager.MATCH_UNINSTALLED_PACKAGES
-                            | PackageManager.MATCH_DISABLED_COMPONENTS);
-            if (info != null) {
-                appname = String.valueOf(pmUser.getApplicationLabel(info));
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            // Do nothing
-        }
-        row.setAppName(appname);
-        row.setOnDismissRunnable(() ->
-                performRemoveNotification(row.getStatusBarNotification()));
-        row.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-        if (ENABLE_REMOTE_INPUT) {
-            row.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
-        }
-
-        row.setAppOpsOnClickListener(mOnAppOpsClickListener);
-
-        mCallback.onBindRow(entry, pmUser, sbn, row);
     }
 
     public void performRemoveNotification(StatusBarNotification n) {
@@ -687,56 +620,11 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         }
     }
 
-    //TODO: This method associates a row with an entry, but eventually needs to not do that
-    protected void updateNotification(NotificationData.Entry entry, PackageManager pmUser,
-            StatusBarNotification sbn, ExpandableNotificationRow row) {
-        boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
-        boolean isUpdate = mNotificationData.get(entry.key) != null;
-        boolean wasLowPriority = row.isLowPriority();
-        row.setIsLowPriority(isLowPriority);
-        row.setLowPriorityStateUpdated(isUpdate && (wasLowPriority != isLowPriority));
-        // bind the click event to the content area
-        checkNotNull(mNotificationClicker).register(row, sbn);
-
-        // Extract target SDK version.
-        try {
-            ApplicationInfo info = pmUser.getApplicationInfo(sbn.getPackageName(), 0);
-            entry.targetSdk = info.targetSdkVersion;
-        } catch (PackageManager.NameNotFoundException ex) {
-            Log.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
-        }
-        row.setLegacy(entry.targetSdk >= Build.VERSION_CODES.GINGERBREAD
-                && entry.targetSdk < Build.VERSION_CODES.LOLLIPOP);
-        entry.setIconTag(R.id.icon_is_pre_L, entry.targetSdk < Build.VERSION_CODES.LOLLIPOP);
-        entry.autoRedacted = entry.notification.getNotification().publicVersion == null;
-
-        entry.setRow(row);
-        row.setOnActivatedListener(mPresenter);
-
-        boolean useIncreasedCollapsedHeight = mMessagingUtil.isImportantMessaging(sbn,
-                mNotificationData.getImportance(sbn.getKey()));
-        boolean useIncreasedHeadsUp = useIncreasedCollapsedHeight
-                && !mPresenter.isPresenterFullyCollapsed();
-        row.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
-        row.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
-        row.setEntry(entry);
-
-        if (shouldHeadsUp(entry)) {
-            row.updateInflationFlag(FLAG_CONTENT_VIEW_HEADS_UP, true /* shouldInflate */);
-        }
-        if (shouldPulse(entry)) {
-            row.updateInflationFlag(FLAG_CONTENT_VIEW_AMBIENT, true /* shouldInflate */);
-        }
-        row.setNeedsRedaction(
-                Dependency.get(NotificationLockscreenUserManager.class).needsRedaction(entry));
-        row.inflateViews();
-    }
-
-    private NotificationData.Entry createNotificationViews(
+    private NotificationData.Entry createNotificationEntry(
             StatusBarNotification sbn, NotificationListenerService.Ranking ranking)
             throws InflationException {
         if (DEBUG) {
-            Log.d(TAG, "createNotificationViews(notification=" + sbn + " " + ranking);
+            Log.d(TAG, "createNotificationEntry(notification=" + sbn + " " + ranking);
         }
 
         NotificationData.Entry entry = new NotificationData.Entry(sbn, ranking);
@@ -747,7 +635,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         Dependency.get(LeakDetector.class).trackInstance(entry);
         entry.createIcons(mContext, sbn);
         // Construct the expanded view.
-        inflateViews(entry, mListContainer.getViewParentForNotification(entry));
+        getRowBinder().inflateViews(entry, () -> performRemoveNotification(sbn),
+                mNotificationData.get(entry.key) != null);
         return entry;
     }
 
@@ -761,7 +650,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mNotificationData.updateRanking(rankingMap);
         NotificationListenerService.Ranking ranking = new NotificationListenerService.Ranking();
         rankingMap.getRanking(key, ranking);
-        NotificationData.Entry shadeEntry = createNotificationViews(notification, ranking);
+        NotificationData.Entry shadeEntry = createNotificationEntry(notification, ranking);
         boolean isHeadsUped = shouldHeadsUp(shadeEntry);
         if (!isHeadsUped && notification.getNotification().fullScreenIntent != null) {
             if (shouldSuppressFullScreenIntent(shadeEntry)) {
@@ -870,7 +759,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mGroupManager.onEntryUpdated(entry, oldNotification);
 
         entry.updateIcons(mContext, notification);
-        inflateViews(entry, mListContainer.getViewParentForNotification(entry));
+        getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
+                mNotificationData.get(entry.key) != null);
 
         mForegroundServiceController.updateNotification(notification,
                 mNotificationData.getImportance(key));
@@ -938,26 +828,12 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
         // By comparing the old and new UI adjustments, reinflate the view accordingly.
         for (NotificationData.Entry entry : entries) {
-            NotificationUiAdjustment newAdjustment =
-                    NotificationUiAdjustment.extractFromNotificationEntry(entry);
-
-            if (NotificationUiAdjustment.needReinflate(
-                    oldAdjustments.get(entry.key), newAdjustment)) {
-                if (entry.rowExists()) {
-                    entry.reset();
-                    PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
-                            entry.notification.getUser().getIdentifier());
-                    updateNotification(entry, pmUser, entry.notification, entry.getRow());
-                } else {
-                    // Once the RowInflaterTask is done, it will pick up the updated entry, so
-                    // no-op here.
-                }
-            } else if (oldImportances.containsKey(entry.key)
-                    && entry.importance != oldImportances.get(entry.key)) {
-                if (entry.rowExists()) {
-                    entry.getRow().onNotificationRankingUpdated();
-                }
-            }
+            mNotificationRowBinder.onNotificationRankingUpdated(
+                    entry,
+                    oldImportances.get(entry.key),
+                    oldAdjustments.get(entry.key),
+                    NotificationUiAdjustment.extractFromNotificationEntry(entry),
+                    mNotificationData.get(entry.key) != null);
         }
 
         updateNotifications();
@@ -1202,6 +1078,22 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     }
 
     /**
+     * Interface for retrieving heads-up and pulsing state for an entry.
+     */
+    public interface InterruptionStateProvider {
+        /**
+         * Whether the provided entry should be marked as heads-up when inflated.
+         */
+        boolean shouldHeadsUp(NotificationData.Entry entry);
+
+        /**
+         * Whether the provided entry should be marked as pulsing (displayed in ambient) when
+         * inflated.
+         */
+        boolean shouldPulse(NotificationData.Entry entry);
+    }
+
+    /**
      * Callback for NotificationEntryManager.
      */
     public interface Callback {
@@ -1227,17 +1119,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
          * @param old StatusBarNotification of the notification before it was removed
          */
         void onNotificationRemoved(String key, StatusBarNotification old);
-
-        /**
-         * Called when a new notification and row is created.
-         *
-         * @param entry entry for the notification
-         * @param pmUser package manager for user
-         * @param sbn notification
-         * @param row row for the notification
-         */
-        void onBindRow(NotificationData.Entry entry, PackageManager pmUser,
-                StatusBarNotification sbn, ExpandableNotificationRow row);
 
         /**
          * Removes a notification immediately.
