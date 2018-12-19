@@ -969,7 +969,7 @@ public class ApnSetting implements Parcelable {
      */
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("[ApnSettingV5] ")
+        sb.append("[ApnSettingV6] ")
                 .append(mEntryName)
                 .append(", ").append(mId)
                 .append(", ").append(mOperatorNumeric)
@@ -996,6 +996,7 @@ public class ApnSetting implements Parcelable {
         sb.append(", ").append(mPermanentFailed);
         sb.append(", ").append(mNetworkTypeBitmask);
         sb.append(", ").append(mApnSetId);
+        sb.append(", ").append(mCarrierId);
         return sb.toString();
     }
 
