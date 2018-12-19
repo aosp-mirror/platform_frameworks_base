@@ -7652,18 +7652,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             // Shutting down backup manager service permanently.
-            long ident = mInjector.binderClearCallingIdentity();
-            try {
-                if (mInjector.getIBackupManager() != null) {
-                    mInjector.getIBackupManager()
-                            .setBackupServiceActive(UserHandle.USER_SYSTEM, false);
-                }
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Failed deactivating backup service.", e);
-            } finally {
-                mInjector.binderRestoreCallingIdentity(ident);
-            }
-
+            toggleBackupServiceActive(UserHandle.USER_SYSTEM, /* makeActive= */ false);
             if (isAdb()) {
                 // Log device owner provisioning was started using adb.
                 MetricsLogger.action(mContext, PROVISIONING_ENTRY_POINT_ADB, LOG_TAG_DEVICE_OWNER);
@@ -7691,7 +7680,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 saveUserRestrictionsLocked(userId);
             }
 
-            ident = mInjector.binderClearCallingIdentity();
+            long ident = mInjector.binderClearCallingIdentity();
             try {
                 // TODO Send to system too?
                 sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED, userId);
@@ -7948,6 +7937,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .write();
             }
 
+            // Shutting down backup manager service permanently.
+            toggleBackupServiceActive(userHandle, /* makeActive= */ false);
+
             mOwners.setProfileOwner(who, ownerName, userHandle);
             mOwners.writeProfileOwner(userHandle);
             Slog.i(LOG_TAG, "Profile owner set: " + who + " on user " + userHandle);
@@ -7969,6 +7961,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     who.getPackageName(), userHandle, "set-profile-owner");
             return true;
         }
+    }
+
+
+    private void toggleBackupServiceActive(int userId, boolean makeActive) {
+        // Shutting down backup manager service permanently.
+        enforceUserUnlocked(userId);
+        long ident = mInjector.binderClearCallingIdentity();
+        try {
+            if (mInjector.getIBackupManager() != null) {
+                mInjector.getIBackupManager()
+                        .setBackupServiceActive(userId, makeActive);
+            }
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Failed deactivating backup service.", e);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
+
     }
 
     @Override
@@ -12704,22 +12714,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Preconditions.checkNotNull(admin);
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
-
-        final long ident = mInjector.binderClearCallingIdentity();
-        try {
-            IBackupManager ibm = mInjector.getIBackupManager();
-            if (ibm != null) {
-                ibm.setBackupServiceActive(UserHandle.USER_SYSTEM, enabled);
-            }
-        } catch (RemoteException e) {
-            throw new IllegalStateException(
-                "Failed " + (enabled ? "" : "de") + "activating backup service.", e);
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
-        }
+        enforceProfileOrDeviceOwner(admin);
+        int userId = mInjector.userHandleGetCallingUserId();
+        toggleBackupServiceActive(userId, enabled);
     }
 
     @Override
@@ -12728,11 +12725,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return true;
         }
+
+        enforceProfileOrDeviceOwner(admin);
         synchronized (getLockObject()) {
             try {
-                getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
                 IBackupManager ibm = mInjector.getIBackupManager();
-                return ibm != null && ibm.isBackupServiceActive(UserHandle.USER_SYSTEM);
+                return ibm != null && ibm.isBackupServiceActive(
+                    mInjector.userHandleGetCallingUserId());
             } catch (RemoteException e) {
                 throw new IllegalStateException("Failed requesting backup service state.", e);
             }
