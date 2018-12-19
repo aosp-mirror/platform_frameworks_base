@@ -2583,8 +2583,7 @@ public class SubscriptionManager {
         if (availableList == null) {
             return null;
         } else {
-            return getAvailableSubscriptionInfoList().stream()
-                    .filter(subInfo -> !shouldHideSubscription(subInfo))
+            return availableList.stream().filter(subInfo -> !shouldHideSubscription(subInfo))
                     .collect(Collectors.toList());
         }
     }
