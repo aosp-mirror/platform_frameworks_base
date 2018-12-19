@@ -149,12 +149,11 @@ public class DisplayManagerServiceTest {
         verify(mMockInputManagerInternal).setDisplayViewports(viewportCaptor.capture());
         List<DisplayViewport> viewports = viewportCaptor.getValue();
 
-        // Expect to receive 3 viewports: internal, external, and virtual
-        assertEquals(3, viewports.size());
+        // Expect to receive 2 viewports: internal, and virtual
+        assertEquals(2, viewports.size());
 
         DisplayViewport virtualViewport = null;
         DisplayViewport internalViewport = null;
-        DisplayViewport externalViewport = null;
         for (int i = 0; i < viewports.size(); i++) {
             DisplayViewport v = viewports.get(i);
             switch (v.type) {
@@ -163,7 +162,7 @@ public class DisplayManagerServiceTest {
                     break;
                 }
                 case DisplayViewport.VIEWPORT_EXTERNAL: {
-                    externalViewport = v;
+                    fail("EXTERNAL viewport should not exist.");
                     break;
                 }
                 case DisplayViewport.VIEWPORT_VIRTUAL: {
@@ -172,14 +171,12 @@ public class DisplayManagerServiceTest {
                 }
             }
         }
-        // INTERNAL and EXTERNAL viewports get created upon access
+        // INTERNAL viewport gets created upon access.
         assertNotNull(internalViewport);
-        assertNotNull(externalViewport);
         assertNotNull(virtualViewport);
 
-        // INTERNAL and EXTERNAL
+        // INTERNAL
         assertTrue(internalViewport.valid);
-        assertTrue(externalViewport.valid);
 
         // VIRTUAL
         assertEquals(height, virtualViewport.deviceHeight);
@@ -216,39 +213,16 @@ public class DisplayManagerServiceTest {
         verify(mMockInputManagerInternal).setDisplayViewports(viewportCaptor.capture());
         List<DisplayViewport> viewports = viewportCaptor.getValue();
 
-        // Expect to receive 2 viewports: 1 internal, 1 external
-        assertEquals(2, viewports.size());
+        // Expect to receive actual viewports: 1 internal
+        assertEquals(1, viewports.size());
 
-        DisplayViewport internalViewport = null;
-        DisplayViewport externalViewport = null;
-        for (int i = 0; i < viewports.size(); i++) {
-            DisplayViewport v = viewports.get(i);
-            switch (v.type) {
-                case DisplayViewport.VIEWPORT_INTERNAL: {
-                    internalViewport = v;
-                    break;
-                }
-                case DisplayViewport.VIEWPORT_EXTERNAL: {
-                    externalViewport = v;
-                    break;
-                }
-                default: {
-                    fail("Unexpected viewport type: " + DisplayViewport.typeToString(v.type));
-                    break;
-                }
-            }
-        }
-        // INTERNAL and EXTERNAL viewports get created upon access
+        DisplayViewport internalViewport = viewports.get(0);
+
+        // INTERNAL is the only one actual display.
         assertNotNull(internalViewport);
-        assertNotNull(externalViewport);
+        assertEquals(DisplayViewport.VIEWPORT_INTERNAL, internalViewport.type);
         assertTrue(internalViewport.valid);
         assertEquals(displayId, internalViewport.displayId);
-
-        // To simplify comparison, override the type for external Viewport
-        // TODO (b/116850516) remove this
-        externalViewport.type = internalViewport.type;
-        assertEquals(internalViewport, externalViewport);
-        externalViewport.type = DisplayViewport.VIEWPORT_EXTERNAL; // undo the changes above
     }
 
     @Test

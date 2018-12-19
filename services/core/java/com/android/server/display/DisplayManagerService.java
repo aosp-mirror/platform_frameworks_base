@@ -1296,58 +1296,21 @@ public final class DisplayManagerService extends SystemService {
             return;
         }
         display.configureDisplayLocked(t, device, info.state == Display.STATE_OFF);
-
+        final int viewportType;
         // Update the corresponding viewport.
-        DisplayViewport internalViewport = getInternalViewportLocked();
         if ((info.flags & DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY) != 0) {
-            populateViewportLocked(internalViewport, display, device);
-        }
-        DisplayViewport externalViewport = getExternalViewportLocked();
-        if (info.touch == DisplayDeviceInfo.TOUCH_EXTERNAL) {
-            populateViewportLocked(externalViewport, display, device);
-        } else if (!externalViewport.valid) {
-            // TODO (b/116850516) move this logic into InputReader
-            externalViewport.copyFrom(internalViewport);
-            externalViewport.type = DisplayViewport.VIEWPORT_EXTERNAL;
-        }
-
-        if (info.touch == DisplayDeviceInfo.TOUCH_VIRTUAL && !TextUtils.isEmpty(info.uniqueId)) {
-            final DisplayViewport viewport = getVirtualViewportLocked(info.uniqueId);
-            populateViewportLocked(viewport, display, device);
-        }
-    }
-
-    /** Get the virtual device viewport that has the specified uniqueId.
-     * If such viewport does not exist, create it. */
-    private DisplayViewport getVirtualViewportLocked(@NonNull String uniqueId) {
-        DisplayViewport viewport;
-        final int count = mViewports.size();
-        for (int i = 0; i < count; i++) {
-            viewport = mViewports.get(i);
-            if (uniqueId.equals(viewport.uniqueId)) {
-                if (viewport.type != VIEWPORT_VIRTUAL) {
-                    Slog.wtf(TAG, "Found a viewport with uniqueId '"  + uniqueId
-                            + "' but it has type " + DisplayViewport.typeToString(viewport.type)
-                            + " (expected VIRTUAL)");
-                    continue;
-                }
-                return viewport;
-            }
+            viewportType = VIEWPORT_INTERNAL;
+        } else if (info.touch == DisplayDeviceInfo.TOUCH_EXTERNAL) {
+            viewportType = VIEWPORT_EXTERNAL;
+        } else if (info.touch == DisplayDeviceInfo.TOUCH_VIRTUAL
+                && !TextUtils.isEmpty(info.uniqueId)) {
+            viewportType = VIEWPORT_VIRTUAL;
+        } else {
+            Slog.wtf(TAG, "Unable to populate viewport for display device: " + info);
+            return;
         }
 
-        viewport = new DisplayViewport();
-        viewport.uniqueId = uniqueId;
-        viewport.type = VIEWPORT_VIRTUAL;
-        mViewports.add(viewport);
-        return viewport;
-    }
-
-    private DisplayViewport getInternalViewportLocked() {
-        return getViewportByTypeLocked(VIEWPORT_INTERNAL);
-    }
-
-    private DisplayViewport getExternalViewportLocked() {
-        return getViewportByTypeLocked(VIEWPORT_EXTERNAL);
+        populateViewportLocked(viewportType, display.getDisplayIdLocked(), device, info.uniqueId);
     }
 
     /**
@@ -1355,35 +1318,44 @@ public final class DisplayManagerService extends SystemService {
      * @param viewportType - either INTERNAL or EXTERNAL
      * @return the viewport with the requested type
      */
-    private DisplayViewport getViewportByTypeLocked(int viewportType) {
-        // Only allow a single INTERNAL or EXTERNAL viewport, which makes this function possible.
-        // TODO (b/116824030) allow multiple EXTERNAL viewports and remove this function.
-        // Creates the viewport if none exists.
-        if (viewportType != VIEWPORT_INTERNAL && viewportType != VIEWPORT_EXTERNAL) {
+    private DisplayViewport getViewportLocked(int viewportType, String uniqueId) {
+        if (viewportType != VIEWPORT_INTERNAL && viewportType != VIEWPORT_EXTERNAL
+                && viewportType != VIEWPORT_VIRTUAL) {
             Slog.wtf(TAG, "Cannot call getViewportByTypeLocked for type "
                     + DisplayViewport.typeToString(viewportType));
             return null;
         }
+
+        // Only allow a single INTERNAL or EXTERNAL viewport by forcing their uniqueIds
+        // to be identical (in particular, empty).
+        // TODO (b/116824030) allow multiple EXTERNAL viewports and remove this function.
+        if (viewportType != VIEWPORT_VIRTUAL) {
+            uniqueId = "";
+        }
+
         DisplayViewport viewport;
         final int count = mViewports.size();
         for (int i = 0; i < count; i++) {
             viewport = mViewports.get(i);
-            if (viewport.type == viewportType) {
+            if (viewport.type == viewportType && uniqueId.equals(viewport.uniqueId)) {
                 return viewport;
             }
         }
 
+        // Creates the viewport if none exists.
         viewport = new DisplayViewport();
         viewport.type = viewportType;
+        viewport.uniqueId = uniqueId;
         mViewports.add(viewport);
         return viewport;
     }
 
-    private static void populateViewportLocked(DisplayViewport viewport,
-            LogicalDisplay display, DisplayDevice device) {
-        viewport.valid = true;
-        viewport.displayId = display.getDisplayIdLocked();
+    private void populateViewportLocked(int viewportType,
+            int displayId, DisplayDevice device, String uniqueId) {
+        final DisplayViewport viewport = getViewportLocked(viewportType, uniqueId);
         device.populateViewportLocked(viewport);
+        viewport.valid = true;
+        viewport.displayId = displayId;
     }
 
     private LogicalDisplay findLogicalDisplayForDeviceLocked(DisplayDevice device) {
