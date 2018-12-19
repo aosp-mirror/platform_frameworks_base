@@ -38,8 +38,8 @@ import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 
+import com.android.internal.infra.AbstractSinglePendingRequestRemoteService;
 import com.android.internal.os.IResultReceiver;
-import com.android.server.infra.AbstractSinglePendingRequestRemoteService;
 
 final class RemoteAugmentedAutofillService
         extends AbstractSinglePendingRequestRemoteService<RemoteAugmentedAutofillService,

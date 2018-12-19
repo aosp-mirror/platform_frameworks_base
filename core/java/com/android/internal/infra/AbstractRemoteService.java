@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.infra;
+package com.android.internal.infra;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -27,13 +27,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.IInterface;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.FgThread;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -109,7 +109,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         mComponentName = componentName;
         mIntent = new Intent(serviceInterface).setComponent(mComponentName);
         mUserId = userId;
-        mHandler = new Handler(FgThread.getHandler().getLooper());
+        mHandler = new Handler(Looper.getMainLooper());
         mBindInstantServiceAllowed = bindInstantServiceAllowed;
     }
 

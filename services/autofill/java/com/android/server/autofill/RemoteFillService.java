@@ -39,7 +39,7 @@ import android.service.autofill.SaveRequest;
 import android.text.format.DateUtils;
 import android.util.Slog;
 
-import com.android.server.infra.AbstractSinglePendingRequestRemoteService;
+import com.android.internal.infra.AbstractSinglePendingRequestRemoteService;
 
 final class RemoteFillService
         extends AbstractSinglePendingRequestRemoteService<RemoteFillService, IAutoFillService> {
