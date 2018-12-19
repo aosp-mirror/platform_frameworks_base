@@ -77,7 +77,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Unit tests for {@link android.net.wifi.WifiManager}.
@@ -1274,14 +1276,20 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
     }
 
     /**
-     * Check the call to getAllMatchingWifiConfigs calls getAllMatchingWifiConfigs of WifiService
-     * with the provided a list of ScanResult.
+     * Check the call to getAllMatchingWifiConfigs calls getAllMatchingFqdnsForScanResults and
+     * getWifiConfigsForPasspointProfiles of WifiService in order.
      */
     @Test
     public void testGetAllMatchingWifiConfigs() throws Exception {
+        Map<String, List<ScanResult>> fqdns = new HashMap<>();
+        fqdns.put("www.test.com", new ArrayList<>());
+        when(mWifiService.getAllMatchingFqdnsForScanResults(any(List.class))).thenReturn(fqdns);
+        InOrder inOrder = inOrder(mWifiService);
+
         mWifiManager.getAllMatchingWifiConfigs(new ArrayList<>());
 
-        verify(mWifiService).getAllMatchingWifiConfigs(any(List.class));
+        inOrder.verify(mWifiService).getAllMatchingFqdnsForScanResults(any(List.class));
+        inOrder.verify(mWifiService).getWifiConfigsForPasspointProfiles(any(List.class));
     }
 
     /**
