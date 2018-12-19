@@ -67,6 +67,7 @@ public class BarView extends LinearLayout {
      * Updates the view with a {@link BarViewInfo}.
      */
     void updateView(BarViewInfo barViewInfo) {
+        setOnClickListener(barViewInfo.getClickListener());
         //Set height of bar view
         mBarView.getLayoutParams().height = barViewInfo.getNormalizedHeight();
         mIcon.setImageDrawable(barViewInfo.getIcon());
@@ -91,9 +92,9 @@ public class BarView extends LinearLayout {
         setGravity(Gravity.CENTER);
 
         mBarView = findViewById(R.id.bar_view);
-        mIcon = (ImageView) findViewById(R.id.icon_view);
-        mBarTitle = (TextView) findViewById(R.id.bar_title);
-        mBarSummary = (TextView) findViewById(R.id.bar_summary);
+        mIcon = findViewById(R.id.icon_view);
+        mBarTitle = findViewById(R.id.bar_title);
+        mBarSummary = findViewById(R.id.bar_summary);
     }
 
     private void setOnClickListner(View.OnClickListener listener) {

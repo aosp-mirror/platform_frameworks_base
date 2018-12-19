@@ -31,7 +31,7 @@ import java.util.Comparator;
 public class BarViewInfo implements Comparable<BarViewInfo> {
 
     private final Drawable mIcon;
-    private View.OnClickListener mListener;
+    private View.OnClickListener mClickListener;
     @StringRes
     private int mSummary;
     // A number indicates this bar's height. The larger number shows a higher bar view.
@@ -52,6 +52,13 @@ public class BarViewInfo implements Comparable<BarViewInfo> {
         mSummary = summary;
     }
 
+    /**
+     * Set a click listener for bar view.
+     */
+    public void setClickListener(@Nullable View.OnClickListener listener) {
+        mClickListener = listener;
+    }
+
     @Override
     public int compareTo(BarViewInfo other) {
         // Descending order
@@ -67,10 +74,6 @@ public class BarViewInfo implements Comparable<BarViewInfo> {
         mSummary = resId;
     }
 
-    void setClickListener(@Nullable View.OnClickListener listener) {
-        mListener = listener;
-    }
-
     Drawable getIcon() {
         return mIcon;
     }
@@ -80,7 +83,7 @@ public class BarViewInfo implements Comparable<BarViewInfo> {
     }
 
     View.OnClickListener getClickListener() {
-        return mListener;
+        return mClickListener;
     }
 
     @StringRes
