@@ -379,6 +379,14 @@ public class SubscriptionManager {
     public static final int SIM_PROVISIONED = 0;
 
     /**
+     * TelephonyProvider column name for subscription carrier id.
+     * @see TelephonyManager#getSimCarrierId()
+     * <p>Type: INTEGER (int) </p>
+     * @hide
+     */
+    public static final String CARRIER_ID = "carrier_id";
+
+    /**
      * TelephonyProvider column name for the MCC associated with a SIM, stored as a string.
      * <P>Type: TEXT (String)</P>
      * @hide
