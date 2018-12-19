@@ -1628,17 +1628,6 @@ public final class ImageDecoder implements AutoCloseable {
         if (mPostProcessor != null && mUnpremultipliedRequired) {
             throw new IllegalStateException("Cannot draw to unpremultiplied pixels!");
         }
-
-        if (mDesiredColorSpace != null) {
-            if (!(mDesiredColorSpace instanceof ColorSpace.Rgb)) {
-                throw new IllegalArgumentException("The target color space must use the "
-                            + "RGB color model - provided: " + mDesiredColorSpace);
-            }
-            if (((ColorSpace.Rgb) mDesiredColorSpace).getTransferParameters() == null) {
-                throw new IllegalArgumentException("The target color space must use an "
-                            + "ICC parametric transfer function - provided: " + mDesiredColorSpace);
-            }
-        }
     }
 
     private static void checkSubset(int width, int height, Rect r) {
@@ -1655,10 +1644,12 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     private Bitmap decodeBitmapInternal() throws IOException {
         checkState();
+        long colorSpacePtr = mDesiredColorSpace == null ? 0 :
+                mDesiredColorSpace.getNativeInstance();
         return nDecodeBitmap(mNativePtr, this, mPostProcessor != null,
                 mDesiredWidth, mDesiredHeight, mCropRect,
                 mMutable, mAllocator, mUnpremultipliedRequired,
-                mConserveMemory, mDecodeAsAlphaMask, mDesiredColorSpace);
+                mConserveMemory, mDecodeAsAlphaMask, colorSpacePtr);
     }
 
     private void callHeaderDecoded(@Nullable OnHeaderDecodedListener listener,
@@ -1946,7 +1937,7 @@ public final class ImageDecoder implements AutoCloseable {
             @Nullable Rect cropRect, boolean mutable,
             int allocator, boolean unpremulRequired,
             boolean conserveMemory, boolean decodeAsAlphaMask,
-            @Nullable ColorSpace desiredColorSpace)
+            long desiredColorSpace)
         throws IOException;
     private static native Size nGetSampledSize(long nativePtr,
                                                int sampleSize);
