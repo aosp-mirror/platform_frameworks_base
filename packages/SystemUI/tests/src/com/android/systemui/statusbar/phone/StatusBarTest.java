@@ -176,6 +176,7 @@ public class StatusBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mDependency.injectTestDependency(NotificationLogger.class, mNotificationLogger);
         mNotificationLogger = new NotificationLogger();
+        DozeLog.traceDozing(mContext, false /* dozing */);
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
         mPowerManager = new PowerManager(mContext, powerManagerService,
