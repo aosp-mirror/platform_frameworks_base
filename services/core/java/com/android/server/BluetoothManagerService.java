@@ -76,6 +76,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -1279,7 +1280,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             if (mService == null) {
                 return;
             }
-            mService.unlinkToDeath(this, 0);
+            try {
+                mService.unlinkToDeath(this, 0);
+            } catch (NoSuchElementException e) {
+                Log.e(TAG, "error unlinking to death", e);
+            }
             mService = null;
             mClassName = null;
 
