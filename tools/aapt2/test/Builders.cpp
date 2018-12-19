@@ -136,7 +136,7 @@ ResourceTableBuilder& ResourceTableBuilder::SetSymbolState(const StringPiece& na
 }
 
 ResourceTableBuilder& ResourceTableBuilder::SetOverlayable(const StringPiece& name,
-                                                           const Overlayable& overlayable) {
+                                                           const OverlayableItem& overlayable) {
 
   ResourceName res_name = ParseNameOrDie(name);
   CHECK(table_->SetOverlayable(res_name, overlayable, GetDiagnostics()));

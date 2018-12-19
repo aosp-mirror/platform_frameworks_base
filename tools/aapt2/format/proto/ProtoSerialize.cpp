@@ -272,9 +272,57 @@ void SerializeConfig(const ConfigDescription& config, pb::Configuration* out_pb_
   out_pb_config->set_sdk_version(config.sdkVersion);
 }
 
+static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item,
+                                         std::vector<Overlayable*>& serialized_overlayables,
+                                         StringPool* source_pool, pb::Entry* pb_entry,
+                                         pb::ResourceTable* pb_table) {
+  // Retrieve the index of the overlayable in the list of groups that have already been serialized.
+  size_t i;
+  for (i = 0 ; i < serialized_overlayables.size(); i++) {
+    if (overlayable_item.overlayable.get() == serialized_overlayables[i]) {
+      break;
+    }
+  }
+
+  // Serialize the overlayable if it has not been serialized already.
+  if (i == serialized_overlayables.size()) {
+    serialized_overlayables.push_back(overlayable_item.overlayable.get());
+    pb::Overlayable* pb_overlayable = pb_table->add_overlayable();
+    pb_overlayable->set_name(overlayable_item.overlayable->name);
+    pb_overlayable->set_actor(overlayable_item.overlayable->actor);
+    SerializeSourceToPb(overlayable_item.overlayable->source, source_pool,
+                        pb_overlayable->mutable_source());
+  }
+
+  pb::OverlayableItem* pb_overlayable_item = pb_entry->mutable_overlayable_item();
+  pb_overlayable_item->set_overlayable_idx(i);
+
+  if (overlayable_item.policies & OverlayableItem::Policy::kPublic) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::PUBLIC);
+  }
+  if (overlayable_item.policies & OverlayableItem::Policy::kProduct) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::PRODUCT);
+  }
+  if (overlayable_item.policies & OverlayableItem::Policy::kProductServices) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::PRODUCT_SERVICES);
+  }
+  if (overlayable_item.policies & OverlayableItem::Policy::kSystem) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::SYSTEM);
+  }
+  if (overlayable_item.policies & OverlayableItem::Policy::kVendor) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::VENDOR);
+  }
+
+  SerializeSourceToPb(overlayable_item.source, source_pool,
+                      pb_overlayable_item->mutable_source());
+  pb_overlayable_item->set_comment(overlayable_item.comment);
+}
+
 void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table,
                         IDiagnostics* diag) {
   StringPool source_pool;
+
+  std::vector<Overlayable*> overlayables;
   for (const std::unique_ptr<ResourceTablePackage>& package : table.packages) {
     pb::Package* pb_package = out_table->add_package();
     if (package->id) {
@@ -310,29 +358,9 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
           pb_allow_new->set_comment(entry->allow_new.value().comment);
         }
 
-        if (entry->overlayable) {
-          pb::Overlayable* pb_overlayable = pb_entry->mutable_overlayable();
-
-          Overlayable overlayable = entry->overlayable.value();
-          if (overlayable.policies & Overlayable::Policy::kPublic) {
-            pb_overlayable->add_policy(pb::Overlayable::PUBLIC);
-          }
-          if (overlayable.policies & Overlayable::Policy::kProduct) {
-            pb_overlayable->add_policy(pb::Overlayable::PRODUCT);
-          }
-          if (overlayable.policies & Overlayable::Policy::kProductServices) {
-            pb_overlayable->add_policy(pb::Overlayable::PRODUCT_SERVICES);
-          }
-          if (overlayable.policies & Overlayable::Policy::kSystem) {
-            pb_overlayable->add_policy(pb::Overlayable::SYSTEM);
-          }
-          if (overlayable.policies & Overlayable::Policy::kVendor) {
-            pb_overlayable->add_policy(pb::Overlayable::VENDOR);
-          }
-
-          SerializeSourceToPb(overlayable.source, &source_pool,
-                              pb_overlayable->mutable_source());
-          pb_overlayable->set_comment(overlayable.comment);
+        if (entry->overlayable_item) {
+          SerializeOverlayableItemToPb(entry->overlayable_item.value(), overlayables, &source_pool,
+                                       pb_entry, out_table);
         }
 
         for (const std::unique_ptr<ResourceConfigValue>& config_value : entry->values) {
