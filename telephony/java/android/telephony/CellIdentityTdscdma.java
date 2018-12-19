@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
 
@@ -116,6 +117,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
     /**
      * @return a 5 or 6 character string (MCC+MNC), null if any field is unknown
      */
+    @Nullable
     public String getMobileNetworkOperator() {
         return (mMccStr == null || mMncStr == null) ? null : mMccStr + mMncStr;
     }
