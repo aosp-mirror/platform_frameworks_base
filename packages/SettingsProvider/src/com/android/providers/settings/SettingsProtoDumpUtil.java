@@ -698,6 +698,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GLOBAL_SETTINGS_ANGLE_WHITELIST,
                 GlobalSettingsProto.Gpu.ANGLE_WHITELIST);
         dumpSetting(s, p,
+                Settings.Global.GLOBAL_SETTINGS_SHOW_ANGLE_IN_USE_DIALOG_BOX,
+                GlobalSettingsProto.Gpu.SHOW_ANGLE_IN_USE_DIALOG);
+        dumpSetting(s, p,
                 Settings.Global.GPU_DEBUG_LAYER_APP,
                 GlobalSettingsProto.Gpu.DEBUG_LAYER_APP);
         dumpSetting(s, p,

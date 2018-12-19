@@ -12318,6 +12318,14 @@ public final class Settings {
                 "angle_whitelist";
 
         /**
+         * Show the "ANGLE In Use" dialog box to the user when ANGLE is the OpenGL driver.
+         * The value is a boolean (1 or 0).
+         * @hide
+         */
+        public static final String GLOBAL_SETTINGS_SHOW_ANGLE_IN_USE_DIALOG_BOX =
+                "show_angle_in_use_dialog_box";
+
+        /**
          * Game Driver global preference for all Apps.
          * 0 = Default
          * 1 = All Apps use Game Driver

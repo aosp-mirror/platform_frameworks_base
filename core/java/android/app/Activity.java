@@ -65,6 +65,7 @@ import android.net.Uri;
 import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.GraphicsEnvironment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -7707,6 +7708,8 @@ public class Activity extends ContextThemeWrapper
                 }
             }
         }
+
+        GraphicsEnvironment.getInstance().showAngleInUseDialogBox(this);
 
         mActivityTransitionState.enterReady(this);
         dispatchActivityPostStarted();
