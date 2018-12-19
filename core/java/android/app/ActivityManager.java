@@ -3529,9 +3529,29 @@ public class ActivityManager {
 
     /**
      * Returns "true" if device is running in a test harness.
+     *
+     * @deprecated this method is false for all user builds. Users looking to check if their device
+     * is running in a device farm should see {@link #isRunningInUserTestHarness()}.
      */
+    @Deprecated
     public static boolean isRunningInTestHarness() {
         return SystemProperties.getBoolean("ro.test_harness", false);
+    }
+
+    /**
+     * Returns "true" if the device is running in Test Harness Mode.
+     *
+     * <p>Test Harness Mode is a feature that allows devices to run without human interaction in a
+     * device farm/testing harness (such as Firebase Test Lab). You should check this method if you
+     * want your app to behave differently when running in a test harness to skip setup screens that
+     * would impede UI testing. e.g. a keyboard application that has a full screen setup page for
+     * the first time it is launched.
+     *
+     * <p>Note that you should <em>not</em> use this to determine whether or not your app is running
+     * an instrumentation test, as it is not set for a standard device running a test.
+     */
+    public static boolean isRunningInUserTestHarness() {
+        return SystemProperties.getBoolean("persist.sys.test_harness", false);
     }
 
     /**

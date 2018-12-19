@@ -136,6 +136,7 @@ import com.android.server.stats.StatsCompanionService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.telecom.TelecomLoaderService;
+import com.android.server.testharness.TestHarnessModeService;
 import com.android.server.textclassifier.TextClassificationManagerService;
 import com.android.server.textservices.TextServicesManagerService;
 import com.android.server.trust.TrustManagerService;
@@ -1146,6 +1147,10 @@ public final class SystemServer {
             if (hasPdb) {
                 traceBeginAndSlog("StartPersistentDataBlock");
                 mSystemServiceManager.startService(PersistentDataBlockService.class);
+                traceEnd();
+
+                traceBeginAndSlog("StartTestHarnessMode");
+                mSystemServiceManager.startService(TestHarnessModeService.class);
                 traceEnd();
             }
 
